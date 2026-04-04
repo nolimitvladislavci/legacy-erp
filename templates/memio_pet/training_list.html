@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Dresura pasa — Kinolozi" %}{% endblock %}
+{% block page_title %}{% trans "Dresura pasa" %}{% endblock %}
+{% block extra_css %}
+<style>
+.trainer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+.trainer-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:12px;padding:1.5rem;transition:all .2s}
+.trainer-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.trainer-name{font-size:1.1rem;font-weight:700;color:var(--text)}
+.trainer-city{font-size:.82rem;color:var(--muted);margin-bottom:.75rem}
+.trainer-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+.trainer-badge{font-size:.68rem;padding:.2rem .5rem;border-radius:4px;font-weight:600;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.trainer-trust{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--muted);margin-bottom:.75rem}
+.trust-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.trust-fill{height:100%;background:var(--gold);border-radius:2px}
+.trainer-cta{display:inline-block;padding:.5rem 1.25rem;background:var(--gold);color:#0f172a;border-radius:6px;font-size:.82rem;font-weight:700;text-decoration:none}
+.trainer-cta:hover{background:var(--gold2,#e8c96a)}
+.types-grid{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:2rem}
+.type-chip{padding:.4rem 1rem;border:1px solid var(--border);border-radius:20px;font-size:.82rem;color:var(--muted);cursor:default}
+</style>
+{% endblock %}
+{% block content %}
+<div style="text-align:center;margin-bottom:2rem">
+  <div style="font-size:3rem;margin-bottom:.5rem">&#128054;</div>
+  <p style="color:var(--muted);font-size:.95rem">{% trans "Certificirani kinolozi na jednom mjestu. Od osnovne poslušnosti do agilitya." %}</p>
+</div>
+
+<!-- Tipovi treninga -->
+<div class="types-grid" style="justify-content:center">
+  {% for code, label in training_types %}
+  <span class="type-chip">{{ label }}</span>
+  {% endfor %}
+</div>
+
+{% if trainers %}
+<div class="trainer-grid">
+  {% for t in trainers %}
+  <div class="trainer-card">
+    <div class="trainer-name">
+      {{ t.name }}
+      {% if t.is_cro_validated %}<span style="color:var(--gold);margin-left:.25rem" title="{% trans 'Verificiran' %}">&#10003;</span>{% endif %}
+    </div>
+    <div class="trainer-city">
+      {% if t.city %}{{ t.city }}{% endif %}
+      {% if t.country and t.country != 'HR' %} ({{ t.country }}){% endif %}
+    </div>
+
+    <div class="trainer-trust">
+      <span>Trust: {{ t.trust_score }}%</span>
+      <div class="trust-bar"><div class="trust-fill" style="width:{{ t.trust_score }}%"></div></div>
+    </div>
+
+    {% if t.phone %}
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem">
+      <i class="fas fa-phone" style="margin-right:.3rem;color:var(--gold)"></i> {{ t.phone }}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'memio_pet:breeder_profile' t.pk %}" class="trainer-cta">{% trans "Profil" %} &rarr;</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:4rem 2rem;color:var(--muted)">
+  <div style="font-size:3rem;margin-bottom:1rem">&#128566;</div>
+  <h3 style="color:var(--text)">{% trans "Još nema registriranih kinologa" %}</h3>
+  <p>{% trans "Jeste li kinolog?" %} <a href="/pocni/?plan=starter" style="color:var(--gold)">{% trans "Registrirajte se besplatno" %} &rarr;</a></p>
+</div>
+{% endif %}
+{% endblock %}

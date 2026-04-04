@@ -1091,6 +1091,9 @@ def agent_dashboard(request):
         f"14 dana besplatno: {invite_url}"
     )
 
+    # Ambassador detection
+    is_ambassador = leads.filter(is_disability_ambassador=True).exists() or                     SalesLead.objects.filter(agent=request.user, is_disability_ambassador=True).exists()
+
     return render(request, 'registration/agent_dashboard_v2.html', {
         'leads': leads[:30],
         'ghost_companies': ghost_companies,
@@ -1099,6 +1102,7 @@ def agent_dashboard(request):
         'invite_url': invite_url,
         'qr_b64': qr_b64,
         'bulk_msg': bulk_msg,
+        'is_ambassador': is_ambassador,
         'page_title': 'Moji klijenti',
     })
 

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Pet Hotel — {% trans "Rezervacija" %}{% endblock %}
+{% block page_title %}Pet Hotel{% endblock %}
+{% block extra_css %}
+<style>
+.hotel-hero{text-align:center;padding:2rem 0 1.5rem}
+.hotel-hero h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--text);margin-bottom:.3rem}
+.hotel-hero p{color:var(--muted);font-size:.95rem}
+.booking-card{max-width:640px;margin:0 auto;background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:14px;padding:2rem}
+.booking-step{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-bottom:.5rem}
+.booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.bf{margin-bottom:1rem}
+.bf label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+.bf input,.bf select,.bf textarea{width:100%;background:var(--dark,#111214);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.6rem .75rem;font-size:.88rem;font-family:inherit}
+.bf input:focus,.bf select:focus,.bf textarea:focus{outline:none;border-color:var(--gold)}
+.room-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.25rem}
+.room-opt{cursor:pointer;text-align:center;padding:.75rem;border:1.5px solid var(--border);border-radius:8px;transition:all .2s}
+.room-opt:has(input:checked){border-color:var(--gold);background:rgba(201,168,76,.06)}
+.room-opt input{display:none}
+.room-icon{font-size:1.5rem;margin-bottom:.25rem}
+.room-name{font-size:.82rem;font-weight:600;color:var(--text)}
+.room-price{font-size:.72rem;color:var(--gold)}
+.hotel-trust{max-width:640px;margin:1.5rem auto 0;font-size:.78rem;color:var(--muted);text-align:center}
+@media(max-width:600px){.booking-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="hotel-hero">
+  <div style="font-size:3rem">&#128054;</div>
+  <h1>{% trans "Rezervirajte smještaj za ljubimca" %}</h1>
+  <p>{% trans "3 koraka — 2 minute — potvrda odmah" %}</p>
+</div>
+
+<div class="booking-card">
+  <form method="post" id="bookingForm">
+  {% csrf_token %}
+
+  <!-- KORAK 1: Ljubimac -->
+  <div class="booking-step">{% trans "Korak 1 — Vaš ljubimac" %}</div>
+  <div class="booking-grid">
+    <div class="bf">
+      <label>{% trans "Ime ljubimca" %} *</label>
+      <input type="text" name="pet_name" required placeholder="Reks" autofocus>
+    </div>
+    <div class="bf">
+      <label>{% trans "Vrsta" %}</label>
+      <select name="vrsta">
+        <option value="pas">{% trans "Pas" %}</option>
+        <option value="macka">{% trans "Mačka" %}</option>
+        <option value="zec">{% trans "Zec" %}</option>
+        <option value="ostalo_ljubimac">{% trans "Ostalo" %}</option>
+      </select>
+    </div>
+  </div>
+  <div class="bf">
+    <label>{% trans "Broj mikročipa" %} ({% trans "opcionalno" %})</label>
+    <input type="text" name="chip_number" placeholder="191000000012345" maxlength="20">
+  </div>
+
+  <!-- KORAK 2: Datumi + soba -->
+  <div class="booking-step" style="margin-top:1.5rem">{% trans "Korak 2 — Datumi i soba" %}</div>
+  <div class="booking-grid">
+    <div class="bf">
+      <label>{% trans "Prijava" %} *</label>
+      <input type="date" name="check_in" required id="checkIn">
+    </div>
+    <div class="bf">
+      <label>{% trans "Odjava" %} *</label>
+      <input type="date" name="check_out" required id="checkOut">
+    </div>
+  </div>
+
+  <label style="font-size:.78rem;color:var(--muted);font-weight:600;display:block;margin-bottom:.5rem">{% trans "Tip sobe" %}</label>
+  <div class="room-grid">
+    <label class="room-opt">
+      <input type="radio" name="room_type" value="standard" checked>
+      <div class="room-icon">&#128716;</div>
+      <div class="room-name">Standard</div>
+      <div class="room-price">60 EUR/{% trans "noć" %}</div>
+    </label>
+    <label class="room-opt">
+      <input type="radio" name="room_type" value="premium">
+      <div class="room-icon">&#11088;</div>
+      <div class="room-name">Premium</div>
+      <div class="room-price">90 EUR/{% trans "noć" %}</div>
+    </label>
+    <label class="room-opt">
+      <input type="radio" name="room_type" value="suite">
+      <div class="room-icon">&#128081;</div>
+      <div class="room-name">Suite VIP</div>
+      <div class="room-price">120 EUR/{% trans "noć" %}</div>
+    </label>
+    <label class="room-opt">
+      <input type="radio" name="room_type" value="outdoor">
+      <div class="room-icon">&#127795;</div>
+      <div class="room-name">{% trans "Vanjski" %}</div>
+      <div class="room-price">45 EUR/{% trans "noć" %}</div>
+    </label>
+  </div>
+
+  <!-- Ukupna cijena -->
+  <div id="pricePreview" style="display:none;text-align:center;padding:.75rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;margin-bottom:1.25rem">
+    <span style="color:var(--muted);font-size:.82rem">{% trans "Ukupno" %}:</span>
+    <strong id="totalPrice" style="color:var(--gold);font-size:1.3rem;margin-left:.5rem"></strong>
+  </div>
+
+  {% if hotels %}
+  <div class="bf">
+    <label>{% trans "Hotel" %}</label>
+    <select name="hotel_id" required>
+      {% for h in hotels %}<option value="{{ h.pk }}">{{ h.name }}{% if h.city %} — {{ h.city }}{% endif %}</option>{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <!-- KORAK 3: Vaši podaci -->
+  <div class="booking-step" style="margin-top:1.5rem">{% trans "Korak 3 — Vaši podaci" %}</div>
+  <div class="booking-grid">
+    <div class="bf">
+      <label>{% trans "Vaše ime" %} *</label>
+      <input type="text" name="owner_name" required placeholder="Ivan Horvat">
+    </div>
+    <div class="bf">
+      <label>{% trans "Telefon" %} *</label>
+      <input type="tel" name="owner_phone" required placeholder="+385 91 123 4567">
+    </div>
+  </div>
+  <div class="bf">
+    <label>Email</label>
+    <input type="email" name="owner_email" placeholder="ivan@email.com">
+  </div>
+  <div class="bf">
+    <label>{% trans "Posebna prehrana" %}</label>
+    <textarea name="special_diet" rows="2" placeholder="{% trans 'BARF, alergije, dijeta...' %}"></textarea>
+  </div>
+  <div class="bf">
+    <label>{% trans "Zdravstvene napomene" %}</label>
+    <textarea name="medical_notes" rows="2" placeholder="{% trans 'Lijekovi, kronične bolesti...' %}"></textarea>
+  </div>
+  <div class="bf">
+    <label>{% trans "Hitni kontakt" %}</label>
+    <input type="text" name="emergency_contact" placeholder="{% trans 'Ime + telefon' %}">
+  </div>
+
+  <button type="submit" style="width:100%;padding:.85rem;background:var(--gold);color:#0f172a;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.5rem">
+    {% trans "Rezerviraj" %} &rarr;
+  </button>
+  </form>
+</div>
+
+<div class="hotel-trust">
+  &#128274; {% trans "Vaši podaci su sigurni. Koristimo ih isključivo za rezervaciju." %}
+  <br>{% trans "Powered by" %} <a href="https://memio.pet" style="color:var(--gold)">memio.pet</a> + <a href="https://limit-connect.com" style="color:var(--gold)">LIMIT Connect</a>
+</div>
+
+<script>
+// Price calculator
+var prices = {standard: 60, premium: 90, suite: 120, outdoor: 45};
+function calcPrice() {
+  var ci = document.getElementById('checkIn').value;
+  var co = document.getElementById('checkOut').value;
+  var room = document.querySelector('input[name="room_type"]:checked');
+  if (!ci || !co || !room) { document.getElementById('pricePreview').style.display='none'; return; }
+  var nights = Math.max(1, Math.round((new Date(co) - new Date(ci)) / 86400000));
+  var total = nights * (prices[room.value] || 60);
+  document.getElementById('totalPrice').textContent = total + ' EUR (' + nights + ' ' + (nights === 1 ? 'noć' : 'noći') + ')';
+  document.getElementById('pricePreview').style.display = 'block';
+}
+document.getElementById('checkIn').addEventListener('change', calcPrice);
+document.getElementById('checkOut').addEventListener('change', calcPrice);
+document.querySelectorAll('input[name="room_type"]').forEach(function(r) { r.addEventListener('change', calcPrice); });
+
+// Set min date to today
+var today = new Date().toISOString().split('T')[0];
+document.getElementById('checkIn').setAttribute('min', today);
+document.getElementById('checkOut').setAttribute('min', today);
+document.getElementById('checkIn').addEventListener('change', function() {
+  document.getElementById('checkOut').setAttribute('min', this.value);
+});
+</script>
+{% endblock %}

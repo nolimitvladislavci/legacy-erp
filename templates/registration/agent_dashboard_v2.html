@@ -32,6 +32,25 @@
     </div>
   </div>
 
+
+  <!-- ═══ AMBASSADOR BADGE (NO LIMIT Inkluzija) ═══ -->
+  {% if is_ambassador %}
+  <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(16,185,129,.08));border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div style="font-size:2.5rem">&#9829;</div>
+    <div style="flex:1;min-width:200px">
+      <div style="font-weight:800;color:var(--gold,#c9a84c);font-size:.95rem">NO LIMIT Ambasador</div>
+      <div style="font-size:.82rem;color:var(--text-secondary,#94a3b8)">
+        Vaš rad stvara razliku. Svaka pretplata koju dovedete donosi 15% komisije — trajno.
+        <br>Podrška: <a href="mailto:info@limit-connect.com" style="color:var(--gold)">info@limit-connect.com</a> | Fenix AI 24/7
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:1.5rem;font-weight:800;color:var(--gold,#c9a84c)">{{ stats.monthly_commission|floatformat:0 }} EUR</div>
+      <div style="font-size:.7rem;color:var(--text-secondary,#94a3b8);text-transform:uppercase;letter-spacing:.05em">ovaj mjesec</div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="ad-invite-box">
     <div class="ad-invite-left">
       <h3>Vaš invite link</h3>

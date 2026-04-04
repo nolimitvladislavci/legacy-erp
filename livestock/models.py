@@ -18,6 +18,23 @@ class Livestock(models.Model):
         ('tele', 'Tele'),
         ('bik', 'Bik'),
         ('vo', 'Vo (tov)'),
+        # Ovce i koze
+        ('ovca', 'Ovca'),
+        ('janje', 'Janje'),
+        ('ovan', 'Ovan'),
+        ('koza', 'Koza'),
+        ('kozle', 'Kozle'),
+        ('jarac', 'Jarac'),
+        # Svinje
+        ('svinja', 'Svinja'),
+        ('prasac', 'Prasac'),
+        ('krmaca', 'Krmača'),
+        ('nerast', 'Nerast'),
+        # Perad
+        ('kokoska', 'Kokoška / Peradar'),
+        ('purica', 'Purica'),
+        ('patka', 'Patka'),
+        ('guska', 'Guska'),
         # Kućni ljubimci / uzgajivači
         ('pas', 'Pas'),
         ('macka', 'Mačka'),

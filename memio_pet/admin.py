@@ -412,3 +412,18 @@ class RawFoodOrderAdmin(admin.ModelAdmin):
     list_display = ('batch_id', 'listing', 'quantity_kg', 'status', 'created_at')
     list_filter = ('status',)
     search_fields = ('batch_id',)
+
+
+from memio_pet.models import DogTrainingSession, PetBoardingReservation
+
+@admin.register(DogTrainingSession)
+class DogTrainingSessionAdmin(admin.ModelAdmin):
+    list_display = ('animal', 'training_type', 'datum', 'trainer', 'status', 'cijena_eur')
+    list_filter = ('training_type', 'status')
+    search_fields = ('animal__name', 'trainer__name')
+
+@admin.register(PetBoardingReservation)
+class PetBoardingReservationAdmin(admin.ModelAdmin):
+    list_display = ('animal', 'hotel', 'check_in', 'check_out', 'room_type', 'status', 'total_price')
+    list_filter = ('status', 'room_type')
+    search_fields = ('animal__name', 'owner_name', 'hotel__name')

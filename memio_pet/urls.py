@@ -14,4 +14,7 @@ urlpatterns = [
     # BARF + Badge (Sprint BARF)
     path("badge/<uuid:breeder_id>/", views.njuskalo_badge, name="njuskalo_badge"),
     path("barf/", views.barf_listings, name="barf_listings"),
+    path("barf/nova/", views.barf_create, name="barf_create"),
+    path("hotel/", views.pet_hotel_booking, name="pet_hotel_booking"),
+    path("dresura/", views.training_list, name="training_list"),
 ]

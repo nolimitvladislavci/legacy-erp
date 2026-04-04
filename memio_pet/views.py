@@ -9,7 +9,8 @@ Endpointi:
 import io
 import qrcode
 from django.http import HttpResponse, Http404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.views.decorators.cache import cache_page, never_cache
@@ -220,4 +221,105 @@ def barf_listings(request):
     return render(request, 'memio_pet/barf_listings.html', {
         'listings': listings,
         'page_title': 'BARF Marketplace',
+    })
+
+
+@login_required
+def barf_create(request):
+    """OPG vlasnik kreira BARF ponudu."""
+    from memio_pet.models import RawFoodListing
+    from core.company_utils import get_user_company
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    if request.method == 'POST':
+        try:
+            listing = RawFoodListing.objects.create(
+                company=company,
+                product_type=request.POST.get('product_type', 'ostalo'),
+                quantity_kg=request.POST.get('quantity_kg', 0),
+                price_eur_kg=request.POST.get('price_eur_kg', 0),
+                available_from=request.POST.get('available_from'),
+                expires_at=request.POST.get('expires_at'),
+                k3_cert_number=request.POST.get('k3_cert_number', ''),
+                is_antibiotic_free='is_antibiotic_free' in request.POST,
+                is_free_range='is_free_range' in request.POST,
+                description=request.POST.get('description', ''),
+            )
+            messages.success(request, f'BARF ponuda kreirana: {listing}')
+            return redirect('memio_pet:barf_listings')
+        except Exception as e:
+            messages.error(request, f'Greška: {e}')
+
+    return render(request, 'memio_pet/barf_create.html', {
+        'company': company,
+        'product_types': RawFoodListing.PRODUCT_CHOICES,
+        'page_title': 'Nova BARF ponuda',
+    })
+
+
+def pet_hotel_booking(request):
+    """Javna stranica za rezervaciju pet hotela."""
+    from memio_pet.models import BreederProfile, PetBoardingReservation
+
+    hotels = BreederProfile.objects.filter(account_type='hotel').order_by('name')
+
+    if request.method == 'POST':
+        try:
+            hotel = BreederProfile.objects.get(pk=request.POST.get('hotel_id'))
+            reservation = PetBoardingReservation(
+                hotel=hotel,
+                owner_name=request.POST.get('owner_name', ''),
+                owner_phone=request.POST.get('owner_phone', ''),
+                owner_email=request.POST.get('owner_email', ''),
+                check_in=request.POST.get('check_in'),
+                check_out=request.POST.get('check_out'),
+                room_type=request.POST.get('room_type', 'standard'),
+                special_diet=request.POST.get('special_diet', ''),
+                medical_notes=request.POST.get('medical_notes', ''),
+                emergency_contact=request.POST.get('emergency_contact', ''),
+            )
+            # Find or create animal
+            chip = request.POST.get('chip_number', '').strip()
+            pet_name = request.POST.get('pet_name', '').strip()
+            from memio_pet.models import AnimalProfile
+            animal = None
+            if chip:
+                animal = AnimalProfile.objects.filter(chip_number=chip).first()
+            if not animal and pet_name:
+                animal = AnimalProfile.objects.create(
+                    name=pet_name,
+                    vrsta=request.POST.get('vrsta', 'pas'),
+                    chip_number=chip,
+                    breeder_name_snapshot=request.POST.get('owner_name', ''),
+                )
+            if animal:
+                reservation.animal = animal
+                reservation.save()
+                messages.success(request, f'Rezervacija potvrđena za {animal.name}! Kontaktirat ćemo vas uskoro.')
+                return redirect('memio_pet:pet_hotel_booking')
+            else:
+                messages.error(request, 'Unesite ime ljubimca ili broj mikročipa.')
+        except Exception as e:
+            messages.error(request, f'Greška: {e}')
+
+    return render(request, 'memio_pet/pet_hotel_booking.html', {
+        'hotels': hotels,
+        'room_types': PetBoardingReservation.ROOM_TYPES,
+        'page_title': 'Pet Hotel — Rezervacija',
+    })
+
+
+def training_list(request):
+    """Javni popis kinologa / trenera."""
+    from memio_pet.models import BreederProfile, DogTrainingSession
+
+    trainers = BreederProfile.objects.filter(account_type='trainer').order_by('name')
+
+    return render(request, 'memio_pet/training_list.html', {
+        'trainers': trainers,
+        'training_types': DogTrainingSession.TRAINING_TYPES,
+        'page_title': 'Dresura pasa — Kinolozi',
     })

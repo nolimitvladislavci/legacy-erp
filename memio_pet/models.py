@@ -20,9 +20,15 @@ class BreederProfile(models.Model):
     Svaki breeder ima API ključ za autorizaciju pusha.
     """
     ACCOUNT_TYPE_CHOICES = [
-        ('breeder', 'Uzgajivač'),
-        ('shelter', 'Azil / Sklonište'),
-        ('owner',   'Vlasnik ljubimca'),
+        ('breeder',      'Uzgajivač'),
+        ('shelter',      'Azil / Sklonište'),
+        ('owner',        'Vlasnik ljubimca'),
+        ('trainer',      'Kinolog / Dresura pasa'),
+        ('hotel',        'Pet Hotel / Pansion'),
+        ('sheep_farmer', 'Uzgajivač ovaca i koza'),
+        ('pig_farmer',   'Uzgajivač svinja'),
+        ('poultry',      'Peradarstvo'),
+        ('horse',        'Konjički sport / Uzgoj konja'),
     ]
 
     id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -87,6 +93,10 @@ class AnimalProfile(models.Model):
         ('macka',          'Mačka'),
         ('konj',           'Konj'),
         ('zec',            'Zec'),
+        ('ovca',           'Ovca'),
+        ('koza',           'Koza'),
+        ('svinja',         'Svinja / Prasac'),
+        ('ptica',          'Ptica / Peradar'),
         ('ostalo_ljubimac','Ostalo'),
     ]
     STATUS_CHOICES = [
@@ -479,3 +489,122 @@ class RawFoodOrder(models.Model):
             seq = RawFoodOrder.objects.filter(created_at__year=datetime.date.today().year).count() + 1
             self.batch_id = f"RF-{datetime.date.today().year}-{seq:04d}"
         super().save(*args, **kwargs)
+
+
+class DogTrainingSession(models.Model):
+    """Evidencija dresure / treninga psa."""
+
+    TRAINING_TYPES = [
+        ('osnovna',        'Osnovna poslušnost'),
+        ('napredna',       'Napredna poslušnost'),
+        ('agility',        'Agility / Prepreke'),
+        ('zastita',        'Zaštitarska dresura'),
+        ('terapijski',     'Terapijski rad'),
+        ('socijalizacija', 'Socijalizacija'),
+        ('modificiranje',  'Modifikacija ponašanja'),
+        ('ostalo',         'Ostalo'),
+    ]
+    STATUS_CHOICES = [
+        ('zakazano',   'Zakazano'),
+        ('u_tijeku',   'U tijeku'),
+        ('zavrseno',   'Završeno'),
+        ('otkazano',   'Otkazano'),
+    ]
+
+    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    animal      = models.ForeignKey(AnimalProfile, on_delete=models.CASCADE, related_name='training_sessions')
+    trainer     = models.ForeignKey(BreederProfile, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name='training_sessions', limit_choices_to={'account_type': 'trainer'})
+
+    training_type = models.CharField(max_length=20, choices=TRAINING_TYPES, default='osnovna')
+    datum         = models.DateField()
+    vrijeme_od    = models.TimeField(null=True, blank=True)
+    vrijeme_do    = models.TimeField(null=True, blank=True)
+    trajanje_min  = models.PositiveIntegerField(default=60, verbose_name='Trajanje (min)')
+
+    lokacija      = models.CharField(max_length=200, blank=True, verbose_name='Lokacija treninga')
+    biljeske      = models.TextField(blank=True, verbose_name='Bilješke trenera')
+    ocjena        = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Ocjena (1-10)',
+                                                      help_text='Napredak psa na sesiji')
+
+    cijena_eur    = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    status        = models.CharField(max_length=15, choices=STATUS_CHOICES, default='zakazano')
+
+    created_at    = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'memio_pet'
+        ordering = ['-datum', '-vrijeme_od']
+        verbose_name = 'Trening sesija'
+        verbose_name_plural = 'Trening sesije'
+
+    def __str__(self):
+        return f"{self.get_training_type_display()} — {self.animal.name or self.animal.ear_tag} ({self.datum})"
+
+
+class PetBoardingReservation(models.Model):
+    """Rezervacija u pet hotelu / pansionu."""
+
+    STATUS_CHOICES = [
+        ('pending',    'Na čekanju'),
+        ('confirmed',  'Potvrđeno'),
+        ('checked_in', 'Prijavljen'),
+        ('checked_out','Odjavljen'),
+        ('cancelled',  'Otkazano'),
+    ]
+    ROOM_TYPES = [
+        ('standard',  'Standardna soba'),
+        ('premium',   'Premium soba'),
+        ('suite',     'Suite (VIP)'),
+        ('outdoor',   'Vanjski prostor'),
+        ('shared',    'Zajednički prostor'),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    animal          = models.ForeignKey(AnimalProfile, on_delete=models.CASCADE, related_name='boarding_reservations')
+    hotel           = models.ForeignKey(BreederProfile, on_delete=models.CASCADE,
+                                        related_name='boarding_reservations', limit_choices_to={'account_type': 'hotel'})
+
+    # Vlasnik kontakt (denormalizirano za brz pristup)
+    owner_name      = models.CharField(max_length=200)
+    owner_phone     = models.CharField(max_length=30)
+    owner_email     = models.EmailField(blank=True)
+
+    # Datumi
+    check_in        = models.DateField(verbose_name='Prijava')
+    check_out       = models.DateField(verbose_name='Odjava')
+    room_type       = models.CharField(max_length=15, choices=ROOM_TYPES, default='standard')
+
+    # Posebne potrebe
+    special_diet    = models.TextField(blank=True, verbose_name='Posebna prehrana')
+    medical_notes   = models.TextField(blank=True, verbose_name='Zdravstvene napomene')
+    emergency_contact = models.CharField(max_length=100, blank=True, verbose_name='Hitni kontakt')
+
+    # Cijena
+    price_per_night = models.DecimalField(max_digits=8, decimal_places=2, default=60)
+    total_price     = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+
+    status          = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    notes           = models.TextField(blank=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'memio_pet'
+        ordering = ['-check_in']
+        verbose_name = 'Rezervacija (Pet Hotel)'
+        verbose_name_plural = 'Rezervacije (Pet Hotel)'
+
+    def __str__(self):
+        return f"{self.animal.name or self.animal.ear_tag} @ {self.hotel.name} ({self.check_in} → {self.check_out})"
+
+    def save(self, *args, **kwargs):
+        if self.check_in and self.check_out:
+            nights = (self.check_out - self.check_in).days
+            self.total_price = self.price_per_night * max(nights, 1)
+        super().save(*args, **kwargs)
+
+    @property
+    def nights(self):
+        if self.check_in and self.check_out:
+            return (self.check_out - self.check_in).days
+        return 0

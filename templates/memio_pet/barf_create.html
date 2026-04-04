@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Nova BARF ponuda" %}{% endblock %}
+{% block page_title %}{% trans "Nova BARF ponuda" %}{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto">
+  <p style="color:var(--muted);margin-bottom:1.5rem">{% trans "Objavite svježu sirovinu za BARF prehranu kućnih ljubimaca." %}</p>
+
+  <form method="post" style="display:flex;flex-direction:column;gap:1rem">
+    {% csrf_token %}
+
+    <div class="wiz-field">
+      <label>{% trans "Vrsta proizvoda" %} *</label>
+      <select name="product_type" class="reg-input" required>
+        {% for val, label in product_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>{% trans "Količina (kg)" %} *</label>
+        <input type="number" name="quantity_kg" step="0.01" min="0.1" required class="reg-input" placeholder="10.00">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Cijena (EUR/kg)" %} *</label>
+        <input type="number" name="price_eur_kg" step="0.01" min="0.01" required class="reg-input" placeholder="3.50">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>{% trans "Dostupno od" %} *</label>
+        <input type="date" name="available_from" required class="reg-input">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Rok trajanja" %} *</label>
+        <input type="date" name="expires_at" required class="reg-input">
+      </div>
+    </div>
+
+    <div class="wiz-field">
+      <label>{% trans "K3 veterinarska potvrda" %}</label>
+      <input type="text" name="k3_cert_number" class="reg-input" placeholder="K3-2026-001">
+    </div>
+
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text)">
+        <input type="checkbox" name="is_free_range"> {% trans "Slobodan uzgoj" %}
+      </label>
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text)">
+        <input type="checkbox" name="is_antibiotic_free"> {% trans "Bez antibiotika" %}
+      </label>
+    </div>
+
+    <div class="wiz-field">
+      <label>{% trans "Opis" %}</label>
+      <textarea name="description" rows="3" class="reg-input" placeholder="{% trans 'Kratki opis proizvoda...' %}"></textarea>
+    </div>
+
+    <div style="display:flex;gap:1rem;margin-top:.5rem">
+      <a href="{% url 'memio_pet:barf_listings' %}" class="wiz-btn wiz-btn-ghost">&larr; {% trans "Natrag" %}</a>
+      <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Objavi ponudu" %} &rarr;</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
