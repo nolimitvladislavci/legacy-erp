@@ -3,7 +3,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
   --ink: #0a0f1e; --gold: var(--gold); --accent: var(--gold);
-  --border: #2a2f45; --muted: #64748b; --surface: #111827;
+  --border: #2a2f45; --muted: var(--muted2); --surface: #111827;
 }
 body {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;

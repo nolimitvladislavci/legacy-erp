@@ -7,9 +7,9 @@
 .fcw-wizard {
   --fcw-gold: var(--gold);
   --fcw-gold-hover: #d4b85c;
-  --fcw-green: #22c55e;
-  --fcw-red: #ef4444;
-  --fcw-blue: #3b82f6;
+  --fcw-green: var(--green);
+  --fcw-red: var(--red);
+  --fcw-blue: var(--blue);
   --fcw-radius: 10px;
   --fcw-transition: 0.25s ease;
   max-width: 960px;
@@ -18,13 +18,13 @@
 
 /* ── DARK THEME (default) ── */
 .fcw-theme-dark {
-  --fcw-bg: #0f172a;
-  --fcw-surface: #1e293b;
-  --fcw-border: #334155;
-  --fcw-text: #e2e8f0;
-  --fcw-text-muted: #94a3b8;
-  --fcw-input-bg: #1e293b;
-  --fcw-input-border: #334155;
+  --fcw-bg: var(--surface-deep);
+  --fcw-surface: var(--surface2);
+  --fcw-border: var(--border2);
+  --fcw-text: var(--text);
+  --fcw-text-muted: var(--text-dim);
+  --fcw-input-bg: var(--surface2);
+  --fcw-input-border: var(--border2);
   --fcw-input-focus: var(--gold);
   --fcw-label: var(--gold);
 }
@@ -81,7 +81,7 @@
 .fcw-step-active .fcw-step-circle {
   border-color: var(--fcw-gold);
   background: var(--fcw-gold);
-  color: #0f172a;
+  color: var(--surface-deep);
   box-shadow: 0 0 16px rgba(201,168,76,0.35);
 }
 .fcw-step-completed .fcw-step-circle {
@@ -164,7 +164,7 @@
 }
 .fcw-btn-next {
   background: var(--fcw-gold);
-  color: #0f172a;
+  color: var(--surface-deep);
 }
 .fcw-btn-next:hover {
   background: var(--fcw-gold-hover);
@@ -416,7 +416,7 @@
 .fcw-total-row .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--fcw-text); }
 .fcw-total-grand {
   background: var(--fcw-gold);
-  color: #0f172a;
+  color: var(--surface-deep);
   padding: 12px 16px;
   border-radius: 8px;
   display: flex;
@@ -585,7 +585,7 @@
   transition: all 0.15s;
 }
 .fcw-import-tab:hover { border-color: var(--fcw-gold); color: var(--fcw-gold); }
-.fcw-import-tab.active { background: var(--fcw-gold); color: #0f172a; border-color: var(--fcw-gold); }
+.fcw-import-tab.active { background: var(--fcw-gold); color: var(--surface-deep); border-color: var(--fcw-gold); }
 .fcw-import-list {
   max-height: 200px;
   overflow-y: auto;
@@ -634,7 +634,7 @@
   font-weight: 700;
   cursor: pointer;
   background: var(--fcw-gold);
-  color: #0f172a;
+  color: var(--surface-deep);
   transition: all 0.15s;
   margin-top: 16px;
 }

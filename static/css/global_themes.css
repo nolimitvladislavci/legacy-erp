@@ -37,6 +37,33 @@
     --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.15);
     --shadow-elevation-3: 0 8px 16px rgba(0, 0, 0, 0.2);
 
+
+    /* ═══ FENIX DESIGN SYSTEM TOKENS (DRON3) ═══ */
+    --gold: #c9a84c;
+    --gold2: #e8c96a;
+    --gold-dim: rgba(201,168,76,0.12);
+    --gold-border: rgba(201,168,76,0.28);
+    --black: #0a0a0a;
+    --white: #f0ede8;
+    --dark: #111214;
+    --surface: #181a1d;
+    --surface2: #1e293b;
+    --surface3: #22222c;
+    --surface-deep: #0f172a;
+    --card: #1e293b;
+    --border: #252830;
+    --border2: #334155;
+    --border-light: rgba(255,255,255,0.08);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #94a3b8;
+    --muted: #4a5060;
+    --muted2: #64748b;
+    --green: #10b981;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+
     /* 1.2 DARK THEME - Dopune (Sprint 1.2) */
     /* UI ELEMENTS */
     --ui-background: #1e1e1e;

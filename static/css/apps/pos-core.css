@@ -78,7 +78,7 @@
 @media(max-width:600px){.prod-sku{display:none}}
 .prod-qty-badge{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.62rem;font-weight:800;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center}
 .prod-qty-badge.show{display:flex}
-.prod-stock{position:absolute;bottom:3px;left:3px;font-size:.55rem;font-weight:700;color:#94a3b8;background:rgba(0,0,0,.5);padding:1px 5px;border-radius:4px;line-height:1.2}
+.prod-stock{position:absolute;bottom:3px;left:3px;font-size:.55rem;font-weight:700;color:var(--text-dim);background:rgba(0,0,0,.5);padding:1px 5px;border-radius:4px;line-height:1.2}
 .prod-stock.low{color:#facc15;background:rgba(234,179,8,.15)}
 .prod-stock.out{color:#f87171;background:rgba(239,68,68,.15)}
 @keyframes ripple{to{transform:scale(4);opacity:0}}
@@ -133,7 +133,7 @@
 .pay-card:hover{background:#1d4ed8}
 .pay-cash:disabled,.pay-card:disabled{opacity:.4;cursor:not-allowed}
 .pay-bon:disabled{opacity:.4;cursor:not-allowed}
-.cashier-required-hint{display:none;text-align:center;font-size:.72rem;color:#f59e0b;padding:.3rem;border:1px dashed #f59e0b;border-radius:6px;margin-bottom:.4rem}
+.cashier-required-hint{display:none;text-align:center;font-size:.72rem;color:var(--amber);padding:.3rem;border:1px dashed var(--amber);border-radius:6px;margin-bottom:.4rem}
 .cashier-required-hint.show{display:block}
 .pay-bon{border:2px solid var(--gold);border-radius:8px;padding:.7rem .4rem;font-size:.82rem;font-weight:800;cursor:pointer;min-height:56px;font-family:inherit;background:rgba(201,168,76,.1);color:var(--gold);transition:all .15s}
 .pay-bon:hover{background:rgba(201,168,76,.25)}

@@ -30,11 +30,11 @@
 }
 /* ═══ LIGHT THEME ═══ */
 [data-theme="light"]{
-  --black:#ffffff;--dark:#f8fafc;--card:#ffffff;--border:#e2e8f0;
-  --text:#0f172a;--muted:#64748b;
-  --topbar-bg:#ffffff;--topbar-border:#e2e8f0;--topbar-text:#0f172a;
-  --body-bg:#f1f5f9;--input-bg:#ffffff;--input-border:#e2e8f0;
-  --nav-hover:rgba(201,168,76,.08);--nav-active-text:#0f172a;
+  --black:#ffffff;--dark:#f8fafc;--card:#ffffff;--border:var(--text);
+  --text:var(--surface-deep);--muted:var(--muted2);
+  --topbar-bg:#ffffff;--topbar-border:var(--text);--topbar-text:var(--surface-deep);
+  --body-bg:#f1f5f9;--input-bg:#ffffff;--input-border:var(--text);
+  --nav-hover:rgba(201,168,76,.08);--nav-active-text:var(--surface-deep);
   --green:#16a34a;--red:#dc2626;
 }
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
