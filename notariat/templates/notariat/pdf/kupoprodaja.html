@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head><meta charset="utf-8">
+<style>
+@page { size: A4; margin: 2.5cm; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 11pt; line-height: 1.6; color: #1a1a2e; }
+h1 { text-align: center; font-size: 15pt; margin-bottom: 0.5cm; border-bottom: 2px solid #c9a84c; padding-bottom: 0.3cm; }
+.header { text-align: center; margin-bottom: 1cm; }
+.header .logo { font-size: 10pt; color: #c9a84c; letter-spacing: 2px; text-transform: uppercase; }
+.article { margin-bottom: 0.8cm; }
+.article-title { font-weight: bold; margin-bottom: 0.2cm; }
+.field { border-bottom: 1px dotted #999; min-width: 150px; display: inline-block; padding: 2px 4px; }
+.signature-block { margin-top: 2cm; display: flex; justify-content: space-between; }
+.sig-line { width: 30%; text-align: center; border-top: 1px solid #333; padding-top: 0.3cm; font-size: 9pt; }
+.footer { margin-top: 2cm; font-size: 8pt; color: #666; text-align: center; border-top: 1px solid #ddd; padding-top: 0.5cm; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">{{ company.name }}</div>
+  <h1>UGOVOR O KUPOPRODAJI NEKRETNINE</h1>
+  <p style="font-size:9pt;color:#666">Temeljem čl. 376.-388. Zakona o obveznim odnosima (NN 35/05 - 126/21)</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 1. — Ugovorne strane</div>
+  <p><strong>PRODAVATELJ:</strong> <span class="field">{{ prodavatelj|default:"_________________________" }}</span></p>
+  <p><strong>KUPAC:</strong> <span class="field">{{ kupac|default:"_________________________" }}</span></p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 2. — Predmet ugovora</div>
+  <p>Predmet kupoprodaje je nekretnina:</p>
+  <p><span class="field">{{ nekretnina|default:"_________________________" }}</span></p>
+  <p>Katastarska čestica: <span class="field">{{ kat_cestica|default:"__________" }}</span></p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 3. — Kupoprodajna cijena</div>
+  <p>Kupoprodajna cijena iznosi: <strong><span class="field">{{ cijena|default:"__________" }} EUR</span></strong></p>
+  <p>Kupac se obvezuje platiti navedenu cijenu u roku od 30 dana od potpisa ovog ugovora na IBAN prodavatelja.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 4. — Predaja u posjed</div>
+  <p>Prodavatelj se obvezuje predati nekretninu u posjed kupcu najkasnije u roku od 60 dana od isplate kupoprodajne cijene u cijelosti.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 5. — Clausula intabulandi</div>
+  <p>Prodavatelj daje kupcu izričitu i bezuvjetnu suglasnost da na temelju ovog ugovora zatraži i bez ikakvih daljnjih upita i pitanja upiše pravo vlasništva na gore navedenom zemljištu u svoju korist u zemljišnim knjigama.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 6. — Porez na promet nekretnina</div>
+  <p>Porez na promet nekretnina plaća kupac sukladno Zakonu o porezu na promet nekretnina.</p>
+</div>
+
+<p style="margin-top:1cm">U <span class="field">{{ company.city|default:"__________" }}</span>, dana <span class="field">{{ datum|default:"__________" }}</span></p>
+
+<div class="signature-block">
+  <div class="sig-line">Prodavatelj</div>
+  <div class="sig-line">Kupac</div>
+  <div class="sig-line">Bilježnik</div>
+</div>
+
+<div class="footer">
+  Dokument generiran u sustavu LIMIT CONNECT | {{ company.name }}<br>
+  Ovaj dokument nema pravnu snagu bez ovjere javnog bilježnika.
+</div>
+</body>
+</html>

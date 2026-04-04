@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head><meta charset="utf-8">
+<style>
+@page { size: A4; margin: 2.5cm; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 11pt; line-height: 1.6; color: #1a1a2e; }
+h1 { text-align: center; font-size: 16pt; margin-bottom: 0.5cm; border-bottom: 2px solid #c9a84c; padding-bottom: 0.3cm; }
+h2 { font-size: 12pt; margin-top: 1cm; color: #c9a84c; }
+.header { text-align: center; margin-bottom: 1cm; }
+.header .logo { font-size: 10pt; color: #c9a84c; letter-spacing: 2px; text-transform: uppercase; }
+.article { margin-bottom: 0.8cm; }
+.article-title { font-weight: bold; margin-bottom: 0.2cm; }
+.field { border-bottom: 1px dotted #999; min-width: 200px; display: inline-block; padding: 2px 4px; }
+.signature-block { margin-top: 2cm; display: flex; justify-content: space-between; }
+.sig-line { width: 40%; text-align: center; border-top: 1px solid #333; padding-top: 0.3cm; font-size: 9pt; }
+.footer { margin-top: 2cm; font-size: 8pt; color: #666; text-align: center; border-top: 1px solid #ddd; padding-top: 0.5cm; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">{{ company.name }}</div>
+  <h1>OSNIVAČKI AKT<br>jednostavnog društva s ograničenom odgovornošću (j.d.o.o.)</h1>
+  <p style="font-size:9pt;color:#666">Temeljem čl. 387.a - 390. Zakona o trgovačkim društvima (NN 111/93 - 130/23)</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 1. — Osnivač</div>
+  <p>Osnivač društva je: <span class="field">{{ osnivac|default:"_________________________" }}</span></p>
+  <p>OIB: <span class="field">{{ osnivac_oib|default:"___________" }}</span></p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 2. — Tvrtka i sjedište</div>
+  <p>Tvrtka društva glasi: <span class="field">{{ naziv_tvrtke|default:"_________________________ j.d.o.o." }}</span></p>
+  <p>Sjedište društva je u: <span class="field">{{ sjediste|default:"_________________________" }}</span></p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 3. — Djelatnost</div>
+  <p>Pretežita djelatnost društva je:</p>
+  <p>NKD <span class="field">{{ nkd_kod|default:"____" }}</span> — <span class="field">{{ djelatnost|default:"_________________________" }}</span></p>
+  <p style="font-size:9pt;color:#666">Društvo može obavljati i sve druge zakonom dopuštene djelatnosti.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 4. — Temeljni kapital</div>
+  <p>Temeljni kapital društva iznosi: <span class="field">{{ temeljni_kapital|default:"10,00" }} EUR</span></p>
+  <p>Temeljni kapital uplaćuje osnivač u cijelosti prije upisa u sudski registar.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 5. — Upravljanje</div>
+  <p>Društvom upravlja osnivač kao jedini član uprave (direktor).</p>
+  <p>Direktor zastupa društvo samostalno i neograničeno.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 6. — Trajanje</div>
+  <p>Društvo se osniva na neodređeno vrijeme.</p>
+</div>
+
+<div class="article">
+  <div class="article-title">Članak 7. — Zakonska četvrtina</div>
+  <p>Društvo je dužno najmanje četvrtinu dobiti koristiti za stvaranje rezervi kapitala dok temeljni kapital ne dosegne iznos od 2.500,00 EUR (čl. 390.a ZTD).</p>
+</div>
+
+<div class="signature-block">
+  <div class="sig-line">Osnivač<br>{{ osnivac|default:"" }}</div>
+  <div class="sig-line">Bilježnik<br>{{ company.name }}</div>
+</div>
+
+<div class="footer">
+  Dokument generiran u sustavu LIMIT CONNECT | {{ company.name }}<br>
+  Ovaj dokument nema pravnu snagu bez ovjere javnog bilježnika.
+</div>
+</body>
+</html>

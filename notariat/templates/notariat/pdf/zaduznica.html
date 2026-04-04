@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head><meta charset="utf-8">
+<style>
+@page { size: A4; margin: 2.5cm; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 11pt; line-height: 1.6; color: #1a1a2e; }
+h1 { text-align: center; font-size: 16pt; margin-bottom: 0.3cm; }
+h2 { text-align: center; font-size: 11pt; color: #666; margin-bottom: 1cm; }
+.header { text-align: center; margin-bottom: 1cm; border-bottom: 2px solid #c9a84c; padding-bottom: 0.5cm; }
+.header .logo { font-size: 10pt; color: #c9a84c; letter-spacing: 2px; text-transform: uppercase; }
+.field { border-bottom: 1px dotted #999; min-width: 150px; display: inline-block; padding: 2px 4px; }
+.amount-box { background: #f8f7f4; border: 2px solid #c9a84c; border-radius: 8px; padding: 1cm; text-align: center; margin: 1cm 0; }
+.amount-box .label { font-size: 9pt; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+.amount-box .value { font-size: 20pt; font-weight: bold; color: #c9a84c; margin-top: 0.3cm; }
+.signature-block { margin-top: 2cm; display: flex; justify-content: space-between; }
+.sig-line { width: 30%; text-align: center; border-top: 1px solid #333; padding-top: 0.3cm; font-size: 9pt; }
+.footer { margin-top: 2cm; font-size: 8pt; color: #666; text-align: center; border-top: 1px solid #ddd; padding-top: 0.5cm; }
+.legal { font-size: 9pt; color: #666; margin-top: 0.5cm; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">{{ company.name }}</div>
+  <h1>ZADUŽNICA</h1>
+  <h2>(solemnizirana isprava)</h2>
+</div>
+
+<p><strong>DUŽNIK:</strong> <span class="field">{{ duznik|default:"_________________________" }}</span></p>
+<p>OIB: <span class="field">{{ duznik_oib|default:"___________" }}</span></p>
+
+<p style="margin-top:0.8cm"><strong>VJEROVNIK:</strong> <span class="field">{{ vjerovnik|default:"_________________________" }}</span></p>
+
+<div class="amount-box">
+  <div class="label">Iznos zadužnice</div>
+  <div class="value">{{ iznos|default:"__________" }} EUR</div>
+</div>
+
+<p>Dužnik se ovom zadužnicom obvezuje platiti vjerovniku gore navedeni iznos na IBAN:</p>
+<p><strong>IBAN:</strong> <span class="field">{{ iban|default:"HR__________________" }}</span></p>
+
+<p class="legal">
+  Temeljem čl. 214. Ovršnog zakona (NN 112/12 — 114/22), ova zadužnica ima snagu ovršne isprave.
+  Vjerovnik može na temelju ove isprave izravno zatražiti ovrhu na svim računima i sredstvima
+  dužnika pri FINA-i, bez potrebe za prethodnim sudskim postupkom.
+</p>
+
+<p class="legal">
+  Dužnik pristaje da se na temelju ove isprave može provesti prisilna naplata pljenidbom svih
+  primanja koja ostvaruje po bilo kojoj osnovi kod bilo kojeg isplatitelja u Republici Hrvatskoj,
+  uključujući i sredstva na računima u bankama.
+</p>
+
+<p style="margin-top:1cm">U <span class="field">{{ company.city|default:"__________" }}</span>, dana <span class="field">{{ datum|default:"__________" }}</span></p>
+
+<div class="signature-block">
+  <div class="sig-line">Dužnik</div>
+  <div class="sig-line">Vjerovnik</div>
+  <div class="sig-line">Javni bilježnik<br>{{ company.name }}</div>
+</div>
+
+<div class="footer">
+  Dokument generiran u sustavu LIMIT CONNECT | {{ company.name }}<br>
+  Ova isprava ima pravnu snagu samo uz solemnizaciju javnog bilježnika.<br>
+  Evidencijski broj: _____ / {{ company.name }}
+</div>
+</body>
+</html>
