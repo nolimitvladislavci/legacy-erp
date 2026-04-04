@@ -1,5 +1,6 @@
 {% extends 'registration/base_reg.html' %}
 {% load i18n %}
+{% load static %}
 {% block title %}{% trans "Registracija" %} – LIMIT Connect{% endblock %}
 {% block content %}
 <!-- Step indicator — 3 koraka -->
@@ -343,4 +344,11 @@ document.getElementById('details-section').style.display='block';
 document.getElementById('details-fields').style.display='block';
 {% endif %}
 </script>
+{% endblock %}
+
+{% block extra_scripts %}
+{% include "includes/_doc_scan_modal.html" %}
+<script src="{% static 'js/fenix-camera.js' %}"></script>
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+<script src="{% static 'js/fenix-scan.js' %}"></script>
 {% endblock %}

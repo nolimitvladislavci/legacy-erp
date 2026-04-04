@@ -106,13 +106,9 @@ function switchLang(code) {
     {% endif %}
     {% block content %}{% endblock %}
   </div>
-{% include "includes/_doc_scan_modal.html" %}
 </main>
 <script src="{% static 'js/fenix-ui.js' %}"></script>
-<script src="{% static 'js/fenix-camera.js' %}"></script>
-<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
-<script src="{% static 'js/fenix-scan.js' %}"></script>
-<script src="{% static 'js/fenix-permissions.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
 <script>
 /* ═══ Theme Toggle (shared with portal) ═══ */
 function toggleTheme(){

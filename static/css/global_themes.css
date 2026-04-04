@@ -157,3 +157,63 @@
     --breakpoint-lg: 992px;
     --breakpoint-xl: 1200px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FENIX LIGHT THEME — data-theme="light" (JS toggle target)
+   Redefiniše sve FENIX tokene za svijetlu temu.
+   JS koristi: document.documentElement.setAttribute('data-theme','light')
+   ═══════════════════════════════════════════════════════════════ */
+html[data-theme="light"] {
+    /* Pozadine */
+    --black:        #f8fafc;
+    --dark:         #f1f5f9;
+    --surface:      #ffffff;
+    --surface2:     #f8fafc;
+    --surface3:     #f1f5f9;
+    --surface-deep: #e2e8f0;
+    --card:         #ffffff;
+
+    /* Borderi */
+    --border:       #e2e8f0;
+    --border2:      #cbd5e1;
+    --border-light: rgba(0,0,0,0.08);
+
+    /* Tekst */
+    --text:         #0f172a;
+    --text-dim:     #475569;
+    --text-muted:   #64748b;
+    --muted:        #94a3b8;
+    --muted2:       #64748b;
+    --white:        #0f172a;
+
+    /* Gold — tamniji za kontrast na bijeloj pozadini */
+    --gold:         #92650a;
+    --gold2:        #b8860b;
+    --gold-dim:     rgba(146,101,10,0.10);
+    --gold-border:  rgba(146,101,10,0.25);
+
+    /* Semantički */
+    --green:        #059669;
+    --red:          #dc2626;
+    --amber:        #d97706;
+    --blue:         #2563eb;
+
+    /* UI elementi */
+    --ui-background:     #f8f9fa;
+    --ui-surface:        #ffffff;
+    --ui-border:         #e9ecef;
+    --ui-text-primary:   #212529;
+    --ui-text-secondary: #6c757d;
+
+    /* Inputs */
+    --input-bg:              #ffffff;
+    --input-border:          #ced4da;
+    --input-text:            #212529;
+    --input-placeholder:     #adb5bd;
+
+    /* Shadows */
+    --shadow-small:  0 1px 3px rgba(0,0,0,0.10);
+    --shadow-medium: 0 3px 6px rgba(0,0,0,0.15);
+    --shadow-large:  0 10px 20px rgba(0,0,0,0.18);
+    --overlay-bg:    rgba(0,0,0,0.45);
+}
