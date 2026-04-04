@@ -755,3 +755,122 @@
   window.shiftFinish = function() {
     window.location.href = API_BASE + '/pos/';
   };
+
+
+  // ═══ SPLIT PAYMENT ═══
+  var SPLIT_METHODS = [
+    {v:'CASH',l:'💵 Gotovina'},{v:'CARD',l:'💳 Kartica'},
+    {v:'REVOLUT',l:'📱 Revolut'},{v:'AIRCASH',l:'🟡 Aircash'},
+    {v:'MOBILE',l:'📱 mPOS'},{v:'VOUCHER',l:'🎫 Bon'},
+    {v:'ACCOUNT',l:'📄 Na račun'},
+  ];
+  var splitData = [];
+
+  window.toggleSplit = function() {
+    var w = document.getElementById('splitWidget');
+    if (!w) return;
+    var show = w.style.display === 'none';
+    w.style.display = show ? 'block' : 'none';
+    if (show && splitData.length === 0) {
+      addSplitLine('CARD');
+      addSplitLine('CASH');
+    }
+  };
+
+  window.addSplitLine = function(def) {
+    var total = parseFloat(window._total) || 0;
+    var rem = Math.max(0, total - splitData.reduce(function(s,l){return s+l.a;},0));
+    splitData.push({m: def||'CASH', a: parseFloat(rem.toFixed(2))});
+    renderSplit();
+  };
+
+  function renderSplit() {
+    var c = document.getElementById('splitLines');
+    if (!c) return;
+    c.innerHTML = '';
+    splitData.forEach(function(line,i) {
+      var opts = SPLIT_METHODS.map(function(m){
+        return '<option value="'+m.v+'"'+(m.v===line.m?' selected':'')+'>'+m.l+'</option>';
+      }).join('');
+      c.innerHTML += '<div style="display:flex;gap:4px;align-items:center;">' +
+        '<select onchange="splitData['+i+'].m=this.value;updateSplitRem()" ' +
+        'style="flex:1.5;background:var(--surface-elevated,#1e2024);border:1px solid var(--border,#333);' +
+        'border-radius:6px;padding:6px;color:var(--text,#eee);font-size:.8rem;">' + opts + '</select>' +
+        '<input type="number" step="0.01" min="0" value="' + line.a.toFixed(2) + '" ' +
+        'onchange="splitData['+i+'].a=parseFloat(this.value)||0;updateSplitRem()" ' +
+        'style="flex:1;background:var(--surface-elevated,#1e2024);border:1px solid var(--border,#333);' +
+        'border-radius:6px;padding:6px;color:var(--text,#eee);font-size:.8rem;text-align:right;">' +
+        '<span style="font-size:.78rem;color:var(--muted,#888)">€</span>' +
+        (splitData.length > 1 ? '<button type="button" onclick="splitData.splice('+i+',1);renderSplit()" ' +
+        'style="background:rgba(231,76,60,.1);border:none;border-radius:5px;padding:4px 8px;' +
+        'color:#e74c3c;cursor:pointer;font-size:.8rem;min-height:36px;">×</button>' : '') +
+        '</div>';
+    });
+    updateSplitRem();
+  }
+
+  window.updateSplitRem = function() {
+    var total = parseFloat(window._total) || 0;
+    var paid = splitData.reduce(function(s,l){return s+(parseFloat(l.a)||0);},0);
+    var rem = total - paid;
+    var el = document.getElementById('splitRem');
+    if (el) { el.textContent = rem.toFixed(2) + ' EUR'; el.style.color = rem <= 0.01 ? '#10b981' : 'var(--gold,#c9a84c)'; }
+  };
+
+  window.paySplit = function() {
+    if (navigator.vibrate) navigator.vibrate(10);
+    if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
+    var ids = Object.keys(basket);
+    if (!ids.length) return;
+
+    var total = parseFloat(window._total) || 0;
+    var paid = splitData.reduce(function(s,l){return s+l.a;},0);
+    if (paid < total - 0.01) {
+      fenixToast('Suma (' + paid.toFixed(2) + '€) < iznos (' + total.toFixed(2) + '€)', 'warning');
+      return;
+    }
+
+    var btn = document.getElementById('paySplitBtn');
+    if (btn.dataset.submitting === '1') return;
+    btn.dataset.submitting = '1'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    var items = buildItemsPayload();
+    var payments = splitData.map(function(l){ return {method:l.m, amount:l.a}; });
+    // Primary method for fallback
+    var primaryMethod = splitData.length > 0 ? splitData[0].m : 'CASH';
+
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({
+        items: items,
+        method: primaryMethod,
+        payment_method: primaryMethod,
+        payments: payments,
+        amount_paid: paid,
+        tip_amount: window._tip || 0,
+        cashier: window._currentCashier || '',
+        cashier_id: window._currentCashierId || '',
+      }),
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        lastReceiptUrl = data.print_url || ''; lastReceiptId = data.receipt_id || null;
+        window.lastReceiptId = lastReceiptId;
+        var nonCash = payments.filter(function(p){return p.method!=='CASH';}).reduce(function(s,p){return s+p.amount;},0);
+        var cashPaid = payments.filter(function(p){return p.method==='CASH';}).reduce(function(s,p){return s+p.amount;},0);
+        var change = Math.max(0, cashPaid - (total - nonCash));
+        showSuccess(data.receipt_number, data.total, change);
+        clearBasket();
+        splitData = [];
+        var w = document.getElementById('splitWidget');
+        if (w) w.style.display = 'none';
+      } else {
+        fenixToast(data.error || 'Greška', 'warning');
+      }
+    })
+    .catch(function(e) { fenixToast('Greška: ' + e.message, 'warning'); })
+    .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = '⚡ Naplati split'; });
+  };

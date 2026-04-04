@@ -150,7 +150,7 @@ td      { padding: 2px 0; vertical-align: top; }
 
   {% for line in payment_lines %}
   <div class="pay-ln">
-    <span>{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</span>
+    <span>{{ line.get_method_display }}{% if line.card_reference %} <small style="color:#777">({{ line.card_reference|truncatechars:20 }})</small>{% endif %}:</span>
     <span>&euro;{{ line.amount|floatformat:2 }}</span>
   </div>
   {% if line.change_given %}

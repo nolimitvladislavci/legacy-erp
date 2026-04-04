@@ -103,7 +103,7 @@
 
 {% for line in payment_lines %}
 <div class="payment-row">
-  <span>{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</span>
+  <span>{{ line.get_method_display }}{% if line.card_reference %} <small style="color:#555">({{ line.card_reference|truncatechars:20 }})</small>{% endif %}:</span>
   <span>{{ line.amount|floatformat:2 }} €</span>
 </div>
 {% if line.change_given %}

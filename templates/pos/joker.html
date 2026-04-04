@@ -502,6 +502,32 @@
           <div class="change-val" id="changeVal">€0.00</div>
         </div>
       </div>
+      <!-- SPLIT PAYMENT WIDGET -->
+      <div id="splitToggle" style="margin-bottom:6px">
+        <button type="button" onclick="toggleSplit()"
+          style="width:100%;padding:8px;background:rgba(201,168,76,.08);border:1px dashed rgba(201,168,76,.35);
+          border-radius:8px;color:var(--gold,#c9a84c);font-size:.82rem;font-weight:600;cursor:pointer;min-height:44px">
+          ⚡ {% trans "Podijeli plaćanje" %}
+        </button>
+      </div>
+      <div id="splitWidget" style="display:none;margin-bottom:8px">
+        <div id="splitLines" style="display:flex;flex-direction:column;gap:4px"></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 10px;background:rgba(201,168,76,.05);border-radius:6px;margin:6px 0;font-size:.82rem">
+          <span style="color:var(--muted)">{% trans "Preostalo" %}:</span>
+          <strong id="splitRem" style="color:var(--gold)">0.00 EUR</strong>
+        </div>
+        <button type="button" onclick="addSplitLine()"
+          style="width:100%;padding:6px;background:transparent;border:1px solid var(--border,#333);
+          border-radius:6px;color:var(--muted);font-size:.78rem;cursor:pointer;min-height:40px">
+          + {% trans "Dodaj način" %}
+        </button>
+        <button type="button" onclick="paySplit()" id="paySplitBtn"
+          style="width:100%;padding:10px;margin-top:8px;background:var(--gold,#c9a84c);color:#0f172a;
+          border:none;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:48px">
+          ⚡ {% trans "Naplati split" %}
+        </button>
+      </div>
+
       <div class="pay-btns-3" style="grid-template-columns:1fr 1fr">
         <button class="pay-cash" id="payCash" onclick="pay('CASH')" disabled>
           💵 GOTOVINA
