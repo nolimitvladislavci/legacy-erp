@@ -24,6 +24,22 @@
   <p style="color:var(--muted);font-size:.95rem">{% trans "Fiskalizacija u džepu. Bez kreditne kartice." %}</p>
 </div>
 
+<!-- ═══ AI BORG ADVISOR WIDGET ═══ -->
+<div id="advisorBox" style="display:none;max-width:600px;margin:0 auto 1.5rem;
+  background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);
+  border-radius:12px;padding:1.25rem 1.5rem;animation:fadeSlideIn .4s ease">
+  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+    <span style="font-size:1.5rem">&#129302;</span>
+    <strong style="color:var(--gold);font-size:.95rem">Fenix {% trans "preporučuje" %}</strong>
+  </div>
+  <p id="advisorReason" style="color:var(--text,#eee);font-size:.9rem;margin:0 0 .75rem"></p>
+  <button type="button" id="advisorBtn" onclick="applyAdvisorPlan()"
+    style="background:var(--gold);color:#0f172a;border:none;padding:.5rem 1.25rem;
+    border-radius:6px;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s">
+    {% trans "Prihvati preporuku" %} &rarr;
+  </button>
+</div>
+
 <!-- ═══ PLAN SELECTED BANNER (skriveno, animira se) ═══ -->
 <div id="planBanner" style="display:none;max-width:500px;margin:0 auto 1.5rem;padding:12px 20px;
   background:rgba(201,168,76,.1);border:1px solid var(--gold);border-radius:10px;
@@ -43,7 +59,7 @@
   <label style="cursor:pointer;display:block">
     <input type="radio" name="plan" value="{{ plan.slug }}" {% if plan.is_popular %}checked{% elif forloop.first %}checked{% endif %} style="display:none" class="plan-radio-input"
            data-plan-name="{{ plan.name }}" data-plan-price="{{ plan.price_monthly|floatformat:0 }}">
-    <div class="plan-card" style="background:var(--card);border:2px solid {% if plan.is_popular %}var(--gold){% else %}var(--border){% endif %};border-radius:12px;padding:2rem 1.5rem;text-align:center;transition:all .2s;position:relative">
+    <div class="plan-card" data-plan="{{ plan.slug }}" style="background:var(--card);border:2px solid {% if plan.is_popular %}var(--gold){% else %}var(--border){% endif %};border-radius:12px;padding:2rem 1.5rem;text-align:center;transition:all .2s;position:relative">
       {% if plan.is_popular %}
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:.7rem;font-weight:700;padding:3px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">{% trans "Popularno" %}</div>
       {% endif %}
@@ -96,11 +112,56 @@
 </div>
 
 <div style="text-align:center;margin-top:2rem" id="submitArea">
-  <button type="submit" class="reg-btn" id="btnContinue">{% trans "Nastavi" %} →</button>
+  <button type="submit" class="reg-btn" id="btnContinue">{% trans "Nastavi" %} &rarr;</button>
 </div>
 </form>
 
+<!-- OTVORENE KARTE -->
+{% include "registration/otvorene_karte.html" %}
+
 <script>
+// ═══ BORG ADVISOR — AI plan preporuka ═══
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var name = params.get('company') || sessionStorage.getItem('reg_company_name') || '';
+  var nkd  = params.get('nkd') || '';
+  if (!name || name.length < 3) return;
+
+  fetch('/register/api/plan-suggest/?name=' + encodeURIComponent(name) + '&nkd=' + encodeURIComponent(nkd))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.plan && data.reason) {
+        document.getElementById('advisorReason').textContent = data.reason;
+        document.getElementById('advisorBox').dataset.plan = data.plan;
+        document.getElementById('advisorBox').style.display = 'block';
+        // Highlight preporučeni plan
+        document.querySelectorAll('.plan-card').forEach(function(card) {
+          if (card.dataset.plan === data.plan && !card.querySelector('.ai-badge')) {
+            var badge = document.createElement('div');
+            badge.className = 'ai-badge';
+            badge.innerHTML = '&#129302; {% trans "Preporučeno" %}';
+            badge.style.cssText = 'position:absolute;top:-10px;right:12px;background:var(--gold);color:#000;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;';
+            card.appendChild(badge);
+            card.style.borderColor = 'var(--gold)';
+            card.style.boxShadow = '0 0 0 3px rgba(201,168,76,.15)';
+          }
+        });
+      }
+    })
+    .catch(function() {});
+})();
+
+function applyAdvisorPlan() {
+  var plan = document.getElementById('advisorBox').dataset.plan;
+  if (!plan) return;
+  document.querySelectorAll('.plan-radio-input').forEach(function(radio) {
+    if (radio.value === plan) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
 // ═══ PLAN CLICK FEEDBACK — animacija + banner + auto-scroll ═══
 document.querySelectorAll('.plan-radio-input').forEach(function(radio) {
   radio.addEventListener('change', function() {
@@ -149,6 +210,5 @@ if (prefilled) checkPromoCode();
 .plan-radio-input:checked + .plan-card { border-color: var(--gold) !important; background: rgba(201,168,76,.06) !important; }
 .plan-card:hover { border-color: var(--gold); transform: translateY(-2px); }
 @keyframes fadeSlideIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-
 </style>
 {% endblock %}

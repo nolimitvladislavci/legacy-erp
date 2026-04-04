@@ -21,6 +21,7 @@ urlpatterns = [
     path('superadmin/registrations/<uuid:pk>/reject/', views.admin_reject_registration, name='admin_reject'),
     path('api/check-promo/', views.api_check_promo, name='api_check_promo'),
     path('api/oib-lookup/', views.api_oib_lookup, name='api_oib_lookup'),
+    path('api/plan-suggest/', views.api_plan_suggest, name='api_plan_suggest'),
     path('umbrella/invites/', views.umbrella_invite_manage, name='umbrella_invites'),
 
     # Propter SaaS

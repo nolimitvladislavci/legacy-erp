@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Postavljanje profila{% endblock %}
-{% block page_title %}Postavljanje profila{% endblock %}
+{% block title %}{% trans "Postavljanje profila" %}{% endblock %}
+{% block page_title %}{% trans "Postavljanje profila" %}{% endblock %}
 {% block extra_css %}
 <style>
 .wiz-progress{height:6px;background:var(--border,#252830);border-radius:3px;margin-bottom:2rem;overflow:hidden}
-.wiz-bar{height:100%;background:var(--gold,#c9a84c);border-radius:3px;transition:width .5s}
+.wiz-bar{height:100%;background:var(--gold,#c9a84c);border-radius:3px;transition:width .8s ease}
 .wiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem}
 .wiz-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:10px;padding:1.25rem;transition:all .2s}
 .wiz-card:hover{border-color:var(--gold,#c9a84c)}
@@ -28,18 +28,51 @@
 .wiz-field input:focus,.wiz-field select:focus{outline:none;border-color:var(--gold)}
 .wiz-skip{font-size:.75rem;color:var(--muted);text-decoration:none;margin-left:.5rem}
 .wiz-skip:hover{color:var(--gold)}
+.ai-tip{font-size:.78rem;color:var(--gold,#c9a84c);margin-bottom:.75rem;padding:.4rem .75rem;background:rgba(201,168,76,.06);border-radius:6px;display:none}
+@keyframes progressPulse { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 12px rgba(201,168,76,.3)} }
 </style>
 {% endblock %}
 
 {% block content %}
 <div style="max-width:800px;margin:0 auto">
 
-<!-- Progress -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-  <span style="font-size:.82rem;color:var(--muted)">Profil {{ completion }}% popunjen</span>
-  {% if completion >= 80 %}<span style="font-size:.78rem;color:var(--green)">Skoro gotovo!</span>{% endif %}
+<!-- ═══ HERO WELCOME ═══ -->
+<div style="text-align:center;padding:1.5rem 0 1rem">
+  <div style="font-size:3rem;margin-bottom:.5rem">
+    {% if completion == 100 %}&#127881;{% elif completion > 60 %}&#128640;{% else %}&#128075;{% endif %}
+  </div>
+  <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.25rem;color:var(--text,#eee)">
+    {% if completion == 100 %}
+      {% trans "Sve je postavljeno! Dobrodošli u LIMIT Connect." %}
+    {% elif completion > 60 %}
+      {% trans "Odlično napredujete" %}{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!
+    {% else %}
+      {% trans "Postavimo vaš profil za 5 minuta." %}
+    {% endif %}
+  </h2>
+  <p style="color:var(--muted,#94a3b8);font-size:.88rem">
+    {{ completion }}% {% trans "postavljeno" %}
+    {% if completion < 100 %}&mdash; {% trans "još malo do potpunog otključavanja" %}{% endif %}
+  </p>
 </div>
-<div class="wiz-progress"><div class="wiz-bar" style="width:{{ completion }}%"></div></div>
+
+<!-- ═══ PROGRESS BAR ANIMATED ═══ -->
+<div class="wiz-progress" {% if completion < 100 %}style="animation:progressPulse 2s infinite"{% endif %}>
+  <div class="wiz-bar" style="width:{{ completion }}%" id="progressBar"></div>
+</div>
+
+<!-- ═══ MODULE UNLOCK HINT ═══ -->
+{% if completion < 80 %}
+<div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);
+  border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:.82rem;
+  display:flex;align-items:center;gap:.75rem">
+  <span style="font-size:1.2rem">&#128275;</span>
+  <span style="color:var(--muted,#94a3b8)">
+    {% trans "Dovršite postavljanje i otključajte:" %}
+    <strong style="color:var(--gold,#c9a84c)">{% trans "POS blagajnu, AI asistenta i WhatsApp upozorenja" %}</strong>
+  </span>
+</div>
+{% endif %}
 
 <!-- Cards Grid -->
 <div class="wiz-grid">
@@ -48,24 +81,25 @@
   <div class="wiz-card {% if sections.company %}done{% endif %}">
     <div class="wiz-card-head">
       <div class="wiz-icon {% if sections.company %}done{% else %}pending{% endif %}">{% if sections.company %}&#10003;{% else %}&#127970;{% endif %}</div>
-      <div class="wiz-title">Podaci tvrtke</div>
+      <div class="wiz-title">{% trans "Podaci tvrtke" %}</div>
     </div>
-    <div class="wiz-desc">Naziv, OIB, adresa — potrebno za fakturiranje</div>
+    <div class="ai-tip" data-section="company"></div>
+    <div class="wiz-desc">{% trans "Naziv, OIB, adresa — potrebno za fakturiranje" %}</div>
     {% if edit_section == 'company' or not sections.company %}
     <form method="post" action="{% url 'companies:setup_wizard_company' %}" class="wiz-form">{% csrf_token %}
-      <div class="wiz-field"><label>Naziv tvrtke *</label><input name="name" value="{{ company.name }}" required placeholder="Tvrtka d.o.o."></div>
+      <div class="wiz-field"><label>{% trans "Naziv tvrtke" %} *</label><input name="name" value="{{ company.name }}" required placeholder="Tvrtka d.o.o."></div>
       <div class="wiz-field"><label>OIB *</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" required placeholder="12345678901" maxlength="11"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
-        <div class="wiz-field"><label>Grad</label><input name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb"></div>
-        <div class="wiz-field"><label>Poštanski broj</label><input name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000"></div>
+        <div class="wiz-field"><label>{% trans "Grad" %}</label><input name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb"></div>
+        <div class="wiz-field"><label>{% trans "Poštanski broj" %}</label><input name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000"></div>
       </div>
-      <div class="wiz-field"><label>Adresa</label><input name="address" value="{{ company.address|default:'' }}" placeholder="Ulica i broj"></div>
-      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
-      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči za sada</a>
+      <div class="wiz-field"><label>{% trans "Adresa" %}</label><input name="address" value="{{ company.address|default:'' }}" placeholder="{% trans 'Ulica i broj' %}"></div>
+      <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Spremi" %}</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči za sada" %}</a>
     </form>
     {% else %}
     <div style="font-size:.82rem;color:var(--green);margin-bottom:.5rem">{{ company.name }} | {{ company.oib }}</div>
-    <a href="{% url 'companies:setup_wizard_company' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    <a href="{% url 'companies:setup_wizard_company' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
 
@@ -73,20 +107,21 @@
   <div class="wiz-card {% if sections.contact %}done{% endif %}">
     <div class="wiz-card-head">
       <div class="wiz-icon {% if sections.contact %}done{% else %}pending{% endif %}">{% if sections.contact %}&#10003;{% else %}&#128222;{% endif %}</div>
-      <div class="wiz-title">Kontakt podaci</div>
+      <div class="wiz-title">{% trans "Kontakt podaci" %}</div>
     </div>
-    <div class="wiz-desc">Telefon, email za fakture, web stranica</div>
+    <div class="ai-tip" data-section="contact"></div>
+    <div class="wiz-desc">{% trans "Telefon, email za fakture, web stranica" %}</div>
     {% if edit_section == 'contact' or not sections.contact %}
     <form method="post" action="{% url 'companies:setup_wizard_contact' %}" class="wiz-form">{% csrf_token %}
-      <div class="wiz-field"><label>Telefon</label><input name="phone" value="{{ company.phone|default:'' }}" placeholder="+385 91 234 5678"></div>
-      <div class="wiz-field"><label>Email za fakture</label><input name="email" type="email" value="{{ company.email|default:'' }}" placeholder="racuni@tvrtka.hr"></div>
-      <div class="wiz-field"><label>Web stranica</label><input name="website" value="{{ company.website|default:'' }}" placeholder="https://tvrtka.hr"></div>
-      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
-      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči</a>
+      <div class="wiz-field"><label>{% trans "Telefon" %}</label><input name="phone" value="{{ company.phone|default:'' }}" placeholder="+385 91 234 5678"></div>
+      <div class="wiz-field"><label>{% trans "Email za fakture" %}</label><input name="email" type="email" value="{{ company.email|default:'' }}" placeholder="racuni@tvrtka.hr"></div>
+      <div class="wiz-field"><label>{% trans "Web stranica" %}</label><input name="website" value="{{ company.website|default:'' }}" placeholder="https://tvrtka.hr"></div>
+      <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Spremi" %}</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči" %}</a>
     </form>
     {% else %}
     <div style="font-size:.82rem;color:var(--green)">{{ company.phone|default:company.email }}</div>
-    <a href="{% url 'companies:setup_wizard_contact' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    <a href="{% url 'companies:setup_wizard_contact' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
 
@@ -94,40 +129,43 @@
   <div class="wiz-card {% if sections.fiscal %}done{% endif %}">
     <div class="wiz-card-head">
       <div class="wiz-icon {% if sections.fiscal %}done{% else %}pending{% endif %}">{% if sections.fiscal %}&#10003;{% else %}&#128179;{% endif %}</div>
-      <div class="wiz-title">IBAN + Fiskalizacija</div>
+      <div class="wiz-title">{% trans "IBAN + Fiskalizacija" %}</div>
     </div>
-    <div class="wiz-desc">OIB validacija i bankovni račun za fakture</div>
+    <div class="ai-tip" data-section="fiscal"></div>
+    <div class="wiz-desc">{% trans "OIB validacija i bankovni račun za fakture" %}</div>
     {% if edit_section == 'fiscal' or not sections.fiscal %}
     <form method="post" action="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-form">{% csrf_token %}
-      <div class="wiz-field"><label>OIB (11 znamenki)</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" placeholder="12345678901" maxlength="11"></div>
+      <div class="wiz-field"><label>OIB (11 {% trans "znamenki" %})</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" placeholder="12345678901" maxlength="11"></div>
       <div class="wiz-field"><label>IBAN</label><input name="iban" value="{{ company.iban|default:'' }}" placeholder="HR1210010051863000160" maxlength="21"></div>
-      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
-      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči</a>
+      <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Spremi" %}</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči" %}</a>
     </form>
     {% else %}
     <div style="font-size:.82rem;color:var(--green)">OIB: {{ company.oib }}</div>
-    <a href="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    <a href="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
 
-  <!-- D: Logo (placeholder) -->
+  <!-- D: Logo -->
   <div class="wiz-card {% if sections.logo %}done{% endif %}">
     <div class="wiz-card-head">
       <div class="wiz-icon pending">&#127912;</div>
-      <div class="wiz-title">Logo i branding</div>
+      <div class="wiz-title">{% trans "Logo i branding" %}</div>
     </div>
-    <div class="wiz-desc">Logo se pojavljuje na fakturama i dokumentima</div>
-    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">Postavi u postavkama</a>
+    <div class="ai-tip" data-section="logo"></div>
+    <div class="wiz-desc">{% trans "Logo se pojavljuje na fakturama i dokumentima" %}</div>
+    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">{% trans "Postavi u postavkama" %}</a>
   </div>
 
   <!-- E: Tim -->
   <div class="wiz-card {% if sections.team %}done{% endif %}">
     <div class="wiz-card-head">
       <div class="wiz-icon pending">&#128101;</div>
-      <div class="wiz-title">Pozovi tim</div>
+      <div class="wiz-title">{% trans "Pozovi tim" %}</div>
     </div>
-    <div class="wiz-desc">Dodajte kolege koji će koristiti sustav</div>
-    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">Dodaj u postavkama</a>
+    <div class="ai-tip" data-section="team"></div>
+    <div class="wiz-desc">{% trans "Dodajte kolege koji će koristiti sustav" %}</div>
+    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">{% trans "Dodaj u postavkama" %}</a>
   </div>
 
 </div>
@@ -135,9 +173,29 @@
 <!-- CTA -->
 <div style="text-align:center;margin-top:2rem">
   <a href="/hr/dashboard/" class="wiz-btn wiz-btn-gold" style="font-size:1rem;padding:.75rem 2rem">
-    {% if completion >= 60 %}Idi na Dashboard →{% else %}Preskoči i idi na Dashboard →{% endif %}
+    {% if completion >= 60 %}{% trans "Idi na Dashboard" %} &rarr;{% else %}{% trans "Preskoči i idi na Dashboard" %} &rarr;{% endif %}
   </a>
 </div>
 
 </div>
+
+<!-- ═══ AI TIPS — lazy load per section ═══ -->
+<script>
+(function(){
+  var tips = {
+    company: '{% trans "Ispravni OIB i naziv firme potrebni su za fiskalizaciju — FINA to provjerava pri svakom računu." %}',
+    fiscal:  '{% trans "Bez fiskalizacijskih podataka ne možete ispisivati R1 račune ni koristiti POS." %}',
+    contact: '{% trans "Kupci koji prime e-Račun vide vaš email i telefon — unesite poslovne kontakte." %}',
+    logo:    '{% trans "Tvrtke s logom imaju 3x više povjerenja kod klijenata. Uploadajte logo u sekundi." %}',
+    team:    '{% trans "Dodajte djelatnika i odmah mu dodijelite pristup POS-u ili arhivi." %}',
+  };
+  document.querySelectorAll('.ai-tip').forEach(function(el){
+    var section = el.dataset.section;
+    if(tips[section] && !el.closest('.wiz-card').classList.contains('done')){
+      el.innerHTML = '&#128161; ' + tips[section];
+      el.style.display = 'block';
+    }
+  });
+})();
+</script>
 {% endblock %}

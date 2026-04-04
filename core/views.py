@@ -1245,6 +1245,22 @@ def company_dashboard(request):
     except Exception:
         context['wizard_funnel'] = None
 
+    # ── Welcome Card (first login detection) ────────────────────────────
+    first_login = not request.session.get('welcomed', False)
+    if first_login:
+        request.session['welcomed'] = True
+    setup_completion = 0
+    if company:
+        _checks = [
+            bool(company.name and not getattr(company, 'is_draft', False)),
+            bool(company.oib and len(str(company.oib)) == 11),
+            bool(getattr(company, 'phone', '') or getattr(company, 'email', '')),
+            bool(getattr(company, 'logo', None)),
+        ]
+        setup_completion = int(sum(_checks) / max(len(_checks), 1) * 100)
+    context['first_login'] = first_login
+    context['setup_completion'] = setup_completion
+
     return render(request, 'dashboards/company_admin.html', context)
 
 

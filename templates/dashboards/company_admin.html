@@ -3,6 +3,59 @@
 {% block title %}Admin dashboard – LIMIT Connect{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="/static/css/apps/dashboard.css">{% endblock %}
 {% block content %}
+<!-- ═══ WELCOME CARD (first login) ═══ -->
+{% if first_login %}
+<div class="welcome-card" id="welcomeCard" style="
+  background:linear-gradient(135deg,rgba(201,168,76,.08) 0%,var(--card,#1e293b) 100%);
+  border:1px solid rgba(201,168,76,.3);border-radius:16px;
+  padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden">
+
+  <button onclick="document.getElementById('welcomeCard').remove()"
+    style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;
+    color:var(--muted,#94a3b8);font-size:1.2rem;cursor:pointer">&times;</button>
+
+  <div style="display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
+    <div style="font-size:3.5rem">&#127919;</div>
+    <div style="flex:1;min-width:280px">
+      <h2 style="font-size:1.35rem;font-weight:800;margin-bottom:.4rem;color:var(--text,#eee)">
+        {% trans "Dobrodošli u LIMIT Connect" %}{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!
+      </h2>
+      <p style="color:var(--muted,#94a3b8);margin-bottom:1rem;font-size:.9rem">
+        {% trans "Vaš profil je" %} {{ setup_completion }}% {% trans "postavljen. Evo sljedećih koraka:" %}
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem">
+        {% if setup_completion < 100 %}
+        <a href="{% url 'companies:setup_wizard' %}" class="welcome-action">
+          <span>&#9881;</span> {% trans "Dovršite postavljanje profila" %}
+          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'invoicing:create' %}" class="welcome-action">
+          <span>&#129534;</span> {% trans "Kreirajte prvu fakturu" %}
+          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+        </a>
+        <a href="{% url 'pos:index' %}" class="welcome-action">
+          <span>&#128722;</span> {% trans "Otvorite POS blagajnu" %}
+          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+        </a>
+      </div>
+
+      <div style="font-size:.78rem;color:var(--muted,#94a3b8)">
+        &#128161; {% trans "Trebate pomoć? Napišite nam na" %}
+        <a href="mailto:info@limit-connect.com" style="color:var(--gold,#c9a84c)">info@limit-connect.com</a>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.welcome-action{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;
+  background:var(--card,#1e293b);border:1px solid var(--border,#252830);border-radius:8px;
+  color:var(--text,#eee);text-decoration:none;font-size:.88rem;font-weight:500;transition:border-color .2s}
+.welcome-action:hover{border-color:var(--gold,#c9a84c)}
+</style>
+{% endif %}
+
 {% if onboarding %}
 <div id="onboarding-widget" class="onboarding-widget">
   <a href="{% url 'onboarding_wizard' %}" class="onboarding-guide-btn">Vodic</a>

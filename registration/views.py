@@ -1651,3 +1651,22 @@ def register_quick(request):
     return render(request, "registration/step2_quick.html", {
         "step": 2, "errors": {},
     })
+
+
+@require_GET
+def api_plan_suggest(request):
+    """
+    GET /registration/api/plan-suggest/?name=OPG+Kruljac&nkd=01.1
+    Vraca: {"plan": "starter", "reason": "...", "confidence": "ai|keyword"}
+    """
+    from django.http import JsonResponse
+    from registration.borg_advisor import recommend_plan_by_keyword
+
+    name = request.GET.get('name', '').strip()
+    nkd = request.GET.get('nkd', '').strip()
+
+    if not name:
+        return JsonResponse({'plan': 'professional', 'reason': '', 'confidence': 'default'})
+
+    result = recommend_plan_by_keyword(name, nkd)
+    return JsonResponse(result)
