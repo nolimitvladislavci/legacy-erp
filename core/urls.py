@@ -66,7 +66,7 @@ urlpatterns = [
     path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
     path('lib/<slug:slug>/', include('library.public_urls')),
     path('validator/', TemplateView.as_view(template_name='website/brosura_croxmlverify.html'), name='brochure_croxmlverify'),
-    path('no-limit/', TemplateView.as_view(template_name='website/no_limit.html'), name='no_limit_web'),
+    path('no-limit/', include('no_limit.urls')),
     path('gov_export/', include('gov_export.urls')),
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 

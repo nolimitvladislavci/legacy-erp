@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+@page {
+  size: A4;
+  margin: 0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #2d2d2d;
+  line-height: 1.6;
+  font-size: 12pt;
+}
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 25mm 20mm;
+  page-break-after: always;
+  position: relative;
+}
+.page:last-child { page-break-after: auto; }
+
+/* Boje */
+:root {
+  --purple: #7B2D8B;
+  --orange: #FF6B35;
+  --light-purple: #f3e8f6;
+  --light-orange: #fff4ef;
+  --dark: #1a1a2e;
+}
+
+/* Naslovna */
+.cover {
+  background: linear-gradient(135deg, #7B2D8B 0%, #5a1a6e 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.cover h1 {
+  font-size: 28pt;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  max-width: 450px;
+}
+.cover .subtitle {
+  font-size: 13pt;
+  opacity: 0.9;
+  max-width: 400px;
+  margin-bottom: 32px;
+  font-style: italic;
+}
+.cover .logo-text {
+  font-size: 11pt;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-top: 24px;
+}
+.cover .mascot-img {
+  width: 280px;
+  height: auto;
+  border-radius: 16px;
+  margin: 24px 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.cover .url {
+  font-size: 18pt;
+  font-weight: bold;
+  color: #FF6B35;
+  margin-top: 16px;
+}
+
+/* Sekcije */
+.section-title {
+  font-size: 22pt;
+  color: #7B2D8B;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+.section-subtitle {
+  font-size: 11pt;
+  color: #FF6B35;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+p { margin-bottom: 12px; }
+.highlight-box {
+  background: #f3e8f6;
+  border-left: 4px solid #7B2D8B;
+  padding: 16px 20px;
+  margin: 16px 0;
+  border-radius: 0 8px 8px 0;
+}
+.orange-box {
+  background: #fff4ef;
+  border-left: 4px solid #FF6B35;
+  padding: 16px 20px;
+  margin: 16px 0;
+  border-radius: 0 8px 8px 0;
+}
+.quote {
+  font-style: italic;
+  font-size: 13pt;
+  color: #7B2D8B;
+  border-left: 3px solid #FF6B35;
+  padding-left: 16px;
+  margin: 20px 0;
+}
+
+/* Feature liste */
+.feature-list { list-style: none; }
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  background: #7B2D8B;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16pt;
+  flex-shrink: 0;
+}
+.feature-text h3 {
+  font-size: 12pt;
+  color: #7B2D8B;
+  margin-bottom: 2px;
+}
+.feature-text p {
+  font-size: 10pt;
+  color: #555;
+  margin: 0;
+}
+
+/* Koraci */
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.step-num {
+  width: 36px;
+  height: 36px;
+  background: #FF6B35;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16pt;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.step-content h3 {
+  font-size: 12pt;
+  color: #2d2d2d;
+  margin-bottom: 4px;
+}
+.step-content p {
+  font-size: 10pt;
+  color: #555;
+  margin: 0;
+}
+
+/* Foto */
+.photo-frame {
+  width: 100%;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+.photo-placeholder {
+  width: 100%;
+  height: 180px;
+  background: #eee;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 11pt;
+  margin: 16px 0;
+}
+
+/* QR placeholder */
+.qr-box {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #7B2D8B;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7B2D8B;
+  font-size: 9pt;
+  text-align: center;
+}
+
+/* Footer */
+.page-footer {
+  position: absolute;
+  bottom: 15mm;
+  left: 20mm;
+  right: 20mm;
+  font-size: 8pt;
+  color: #999;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Contact grid */
+.contact-grid {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+}
+.contact-item {
+  flex: 1;
+  text-align: center;
+}
+.contact-item strong {
+  display: block;
+  color: #7B2D8B;
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ STRANICA 1 — Naslovna ═══ -->
+<div class="page cover">
+  <div class="section-subtitle" style="color:#FF6B35;opacity:0.9;">memio.pet | NO LIMIT udruga</div>
+  <h1>Tvoj ljubimac zasluzuje vise od kartona u ladici</h1>
+  <p class="subtitle">Besplatan digitalni putovni list za svakog ljubimca u Hrvatskoj</p>
+  <img src="{{ MEDIA_URL }}no_limit/maskota/Avis.jpeg" class="mascot-img" alt="Avis — maskota memio.pet">
+  <p class="url">memio.pet</p>
+  <p class="logo-text">LIMIT Connect &middot; NO LIMIT udruga &middot; 2026</p>
+</div>
+
+<!-- ═══ STRANICA 2 — Problem ═══ -->
+<div class="page">
+  <div class="section-subtitle">Problem</div>
+  <h2 class="section-title">Sto se dogodi kad nestane putovnica?</h2>
+
+  <p>Svake godine tisuce ljubimaca u Hrvatskoj mijenja vlasnika — prodajom, udomljavanjem, ili gubitkom. Vecina dokumentacije postoji samo na papiru: u ladici veterinara, u fasciklu uzgajivaca, ili nigdje.</p>
+
+  <p>Kad se pas izgubi, kad vlasnik umre, kad azil primi nepoznatu zivotinju — nitko ne moze rekonstruirati povijest. Cijepljenja? Izgubljena. Vlasnistvo? Nepoznato. Mikrocip postoji, ali baza podataka je fragmentirana i nedostupna obicnom covjeku.</p>
+
+  <div class="highlight-box">
+    <strong>Prica iz stvarnog zivota:</strong><br>
+    Pas Rudi iz Osijeka prosao je kroz 3 azila u 18 mjeseci. Niti jedan nije znao da je Rudi cipiran, da je bio cijepljen, niti tko mu je bio vlasnik. Svaki put — ispocetka. Novi pregled, nova cijepljenja, novi trosak. Rudi je na kraju udomljen — ali tek nakon sto je protratio 14 mjeseci u sustavu koji ga nije prepoznao.
+  </div>
+
+  <p>Ovo nije iznimka. Ovo je pravilo. I ovo se moze promijeniti.</p>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>2 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 3 — Rjesenje ═══ -->
+<div class="page">
+  <div class="section-subtitle">Rjesenje</div>
+  <h2 class="section-title">memio.pet — digitalni putovni list za zivotni vijek</h2>
+
+  <p>Memio.pet je besplatna platforma koja svakom ljubimcu daje jedinstven digitalni profil — dostupan svima, zauvijek. Jednom kreiran, profil prati zivotinju kroz cijeli zivot.</p>
+
+  <ul class="feature-list">
+    <li>
+      <div class="feature-icon">&#x1f4cb;</div>
+      <div class="feature-text">
+        <h3>Medicinski karton dozivotno</h3>
+        <p>Cijepljenja, pregledi, operacije — sve na jednom mjestu, verificirano od veterinara.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">&#x1f3e0;</div>
+      <div class="feature-text">
+        <h3>Lanac vlasnistva</h3>
+        <p>Tko je imao zivotinju, kada i zasto — transparentno i nepromjenjivo.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">&#x1f50d;</div>
+      <div class="feature-text">
+        <h3>Identitet koji se ne gubi</h3>
+        <p>Mikrocip + QR kod = instant pristup profilu. Skeniraj i saznaj sve.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">&#x1f512;</div>
+      <div class="feature-text">
+        <h3>SHA-256 verifikacija</h3>
+        <p>Svaki zapis je kriptografski potpisan. Nemoguce krivotvoriti rodovnicu ili zdravstveni karton.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">&#x1f4f1;</div>
+      <div class="feature-text">
+        <h3>QR kod na markici</h3>
+        <p>Naruci fizicku markicu za ogrlicu. Tko god nadje psa — skenira i vidi profil.</p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>3 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 4 — Prica Ljubete ═══ -->
+<div class="page">
+  <div class="section-subtitle">Prica iz prakse</div>
+  <h2 class="section-title">Ljubeta i njeni psi — kako je sve pocelo</h2>
+
+  <img src="{{ MEDIA_URL }}no_limit/maskota/Avis2.jpeg" class="photo-frame" style="height:200px;object-fit:cover;" alt="Avis — veseli pas">
+
+  <p>Ljubeta vodi malu uzgajivacnicu njemackih ovcara vec 12 godina. Svako stene ima rodovnicu, cijepnu knjizicu, ugovor o kupoprodaji. Sve uredno — u fasciklima, u ladici, u podrumu.</p>
+
+  <p>Prosle godine, jedan kupac se javio: "Moj Rex je bolestan, trebam povijest cijepljenja." Ljubeta je pretrazila 3 ladice, 2 kutije i stari racunalo. Nasla je — ali tek nakon 4 sata.</p>
+
+  <div class="quote">
+    "Kad sam to dozivjela, rekla sam: nikad vise. Moram imati sve digitalno, na jednom mjestu, dostupno u 10 sekundi."
+  </div>
+
+  <p>Danas, svaki Ljubetin pas ima Memio.pet profil. Kupac dobiva QR kod uz ugovor. Veterinar azurira karton direktno u sustav. A Ljubeta? Spava mirno.</p>
+
+  <div class="orange-box">
+    <strong>Trust Score: 95/100</strong><br>
+    Ljubetina uzgajivacnica ima verificiran OIB, sve pse s mikrocipom, zdravstvene kartone od verificiranog veterinara, i 2 recenzije kupaca. Transparentnost koja se mjeri.
+  </div>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>4 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 5 — Kako radi ═══ -->
+<div class="page">
+  <div class="section-subtitle">Vodic</div>
+  <h2 class="section-title">Registracija u 5 minuta</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>Idi na memio.pet i registriraj uzgajaliste</h3>
+      <p>Unesi naziv, OIB, grad. Sustav automatski verificira tvoj identitet kroz CroValidator.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Dodaj prvog ljubimca</h3>
+      <p>Ime, vrsta, pasmina, datum rodenja, broj mikrocipa. Fotografija je obavezna za puni Trust Score.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h3>Unesi medicinski karton</h3>
+      <p>Cijepljenja, pregledi, operacije. Ako tvoj veterinar koristi sustav — zapisuje direktno.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h3>Naruci QR markicu (opcionalno, 5 EUR)</h3>
+      <p>Fizicka markica za ogrlicu. Tko god skenira — vidi profil tvog ljubimca.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <h3>Dijeli profil s kupcem</h3>
+      <p>Kad prodas ili udomiš ljubimca, kupac preuzima digitalni profil. Lanac vlasnistva se automatski azurira.</p>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>Besplatno za sve.</strong> Osnovna registracija i profili su besplatni — zauvijek. Premium funkcije (QR markice, PDF rodovnice, bulk import) dostupne su uz LIMIT Connect Pro pretplatu.
+  </div>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>5 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 6 — Za azile ═══ -->
+<div class="page">
+  <div class="section-subtitle">Za azile i skloništa</div>
+  <h2 class="section-title">Potpuno besplatno. Bez skrivenih troskova.</h2>
+
+  <p>NO LIMIT udruga vjeruje da svaka zivotinja zasluzuje digitalni identitet — bez obzira ima li vlasnika ili ne. Zato je Memio.pet za azile i skloništa <strong>potpuno besplatan</strong>.</p>
+
+  <p><strong>Sto azil dobiva:</strong></p>
+  <ul class="feature-list">
+    <li>
+      <div class="feature-icon" style="background:#FF6B35;">&#x1f4ca;</div>
+      <div class="feature-text">
+        <h3>Digitalna evidencija svih zivotinja</h3>
+        <p>Svaki pas i macka u azilu ima profil s fotografijom, zdravstvenim kartonom i statusom.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon" style="background:#FF6B35;">&#x1f4e6;</div>
+      <div class="feature-text">
+        <h3>Pracenje udomljavanja</h3>
+        <p>Kad zivotinja napusti azil, lanac vlasnistva se automatski prenosi na novog vlasnika.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon" style="background:#FF6B35;">&#x1f4c4;</div>
+      <div class="feature-text">
+        <h3>Izvjestaji za grad i zupaniju</h3>
+        <p>Automatski generirani izvjestaji o broju zivotinja, udomljavanjima, troskovima — za osnivace.</p>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon" style="background:#FF6B35;">&#x23f0;</div>
+      <div class="feature-text">
+        <h3>80% manje administracije</h3>
+        <p>Nema vise rucnog prepisivanja podataka. Sve se unosi jednom i dijeli automatski.</p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="quote">
+    "Konacno ne trazimo papire po ladicama. Kad netko dodje po psa, pokažemo QR i sve je tu."<br>
+    <span style="font-size:10pt;color:#999;">— djelatnica azila, Slavonski Brod</span>
+  </div>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>6 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 7 — Javni poziv ═══ -->
+<div class="page">
+  <div class="section-subtitle">Javni poziv</div>
+  <h2 class="section-title">Pozovite vas azil da se pridruzi</h2>
+
+  <p>Pozivamo sve azile, skloništa, udruge za zastitu zivotinja, gradove i zupanije u Hrvatskoj da se prijave za besplatno koristenje Memio.pet platforme.</p>
+
+  <div class="highlight-box">
+    <strong>Tko se moze prijaviti?</strong><br>
+    &bull; Azili i skloništa za zivotinje (javni i privatni)<br>
+    &bull; Udruge za zastitu zivotinja<br>
+    &bull; Gradski i zupanijski uredi za komunalne poslove<br>
+    &bull; Veterinarske ambulante koje rade s azilima
+  </div>
+
+  <p><strong>Sto trebate za prijavu:</strong></p>
+  <p>1. Naziv organizacije<br>
+  2. Email kontakt osobe<br>
+  3. Grad/lokacija<br>
+  4. Kratki opis (koliko zivotinja, koji tip)</p>
+
+  <div class="orange-box">
+    <strong>Prijavite se online:</strong><br>
+    <span style="font-size:14pt;color:#FF6B35;">no-limit.world/vodic/</span><br><br>
+    Ili posaljite email na:<br>
+    <span style="font-size:12pt;">fina.connect.online@gmail.com</span><br><br>
+    Rok: <strong>Trajno otvoreno</strong> — prijave se obraduju unutar 48 sati.
+  </div>
+
+  <p style="text-align:center;margin-top:24px;">
+    <span class="qr-box" style="display:inline-flex;">QR kod<br>no-limit.world/vodic/</span>
+  </p>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>7 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 8 — Tko stoji iza ═══ -->
+<div class="page">
+  <div class="section-subtitle">O nama</div>
+  <h2 class="section-title">Tko stoji iza projekta</h2>
+
+  <p><strong>NO LIMIT udruga</strong> je osnovana s misijom da tehnologiju ucini dostupnom onima koji je najvise trebaju. Vjerujemo da digitalna transformacija ne smije biti privilegija — vec pravo.</p>
+
+  <p>U partnerstvu s <strong>LIMIT Connect</strong> platformom, gradimo alate koji pomazu malim poduzetnicima, udrugama i javnim ustanovama da rade pametnije, brze i transparentnije.</p>
+
+  <div class="highlight-box">
+    <strong>LIMIT Connect</strong> je ERP platforma koja vec podrzava 78 firmi u Hrvatskoj — od racunovodstva do fiskalizacije. Memio.pet je prirodno prosirenje te infrastrukture na svijet ljubimaca i azila.
+  </div>
+
+  <p><strong>Nase vrijednosti:</strong></p>
+  <p>&bull; <strong>Transparentnost</strong> — svaki podatak je vidljiv i provjerljiv<br>
+  &bull; <strong>Sigurnost</strong> — AES enkripcija, SHA-256 potpisi, GDPR compliance<br>
+  &bull; <strong>Dostupnost</strong> — besplatno za azile, pristupacno za uzgajivace<br>
+  &bull; <strong>Domacinstvo</strong> — serveri u EU, podrska na hrvatskom</p>
+
+  <p>Projekt je podrzalo Konjik d.o.o. (Cepin) — racunovodstvena firma s 30+ godina iskustva u financijskom sektoru.</p>
+
+  <div class="page-footer">
+    <span>memio.pet — Digitalna zastita zivotinja</span>
+    <span>8 / 9</span>
+  </div>
+</div>
+
+<!-- ═══ STRANICA 9 — Kontakt i zahvala ═══ -->
+<div class="page" style="display:flex;flex-direction:column;justify-content:center;">
+  <div style="text-align:center;">
+    <img src="{{ MEDIA_URL }}no_limit/maskota/Avis3.jpeg" style="width:200px;height:auto;border-radius:50%;margin:0 auto 24px;display:block;object-fit:cover;" alt="Avis spava">
+
+    <h2 class="section-title" style="text-align:center;">Hvala sto ste dio promjene.</h2>
+
+    <p style="text-align:center;font-size:13pt;color:#555;margin-bottom:32px;">
+      Svaki ljubimac zasluzuje identitet.<br>Svaki vlasnik zasluzuje transparentnost.<br>Svaki azil zasluzuje podrsku.
+    </p>
+
+    <div class="contact-grid" style="justify-content:center;gap:48px;">
+      <div class="contact-item">
+        <div class="qr-box" style="margin:0 auto 8px;">QR kod<br>memio.pet</div>
+        <strong>memio.pet</strong>
+        <span style="font-size:9pt;color:#999;">Digitalni profili ljubimaca</span>
+      </div>
+      <div class="contact-item">
+        <div class="qr-box" style="margin:0 auto 8px;">QR kod<br>no-limit.world</div>
+        <strong>no-limit.world</strong>
+        <span style="font-size:9pt;color:#999;">NO LIMIT udruga</span>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;font-size:10pt;color:#999;">
+      <p>Email: fina.connect.online@gmail.com</p>
+      <p>Adresa: Cepin, Osjecko-baranjska zupanija, Hrvatska</p>
+      <p style="margin-top:16px;">&copy; 2026 Konjik d.o.o. &amp; NO LIMIT udruga</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

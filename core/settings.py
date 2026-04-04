@@ -144,7 +144,8 @@ INSTALLED_APPS = [
     "tech_radar",
     "udruge",
     "livestock",
-    "memio_pet",  # Memio.pet — zasebna baza
+    "memio_pet",  # Memio.pet
+    "no_limit",  # NO LIMIT udruga
     "intelligence",
     "einvoice",
     "limit_connect_ai",
