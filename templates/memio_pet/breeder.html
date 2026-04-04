@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ breeder.name }} — Memio.pet</title>
+<meta name="description" content="Verificirani profil uzgajivaca {{ breeder.name }} na Memio.pet. Trust Score: {{ trust_score }}/100">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top-bar{background:var(--ink);color:#f8f6f0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.top-bar a{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.2rem;font-weight:700}
+.top-bar a span{color:#f8f6f0}
+.container{max-width:680px;margin:0 auto;padding:32px 20px}
+
+.breeder-hero{background:#fff;border-radius:12px;padding:32px 28px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px;text-align:center}
+.breeder-big-avatar{width:80px;height:80px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:2.2rem;font-weight:700;margin:0 auto 16px}
+.breeder-hero h1{font-family:var(--serif);font-size:1.8rem;margin-bottom:4px}
+.breeder-hero .meta{color:var(--dim);font-size:.9rem}
+.breeder-hero .type-badge{display:inline-block;font-size:.72rem;padding:4px 12px;border-radius:20px;background:rgba(201,168,76,.12);color:var(--gold);font-weight:600;margin-top:8px}
+
+.trust-card{background:#fff;border-radius:12px;padding:20px 28px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.trust-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.trust-title{font-family:var(--serif);font-size:1.1rem;font-weight:700}
+.trust-score-big{font-family:var(--serif);font-size:1.8rem;font-weight:700}
+.trust-bar{width:100%;height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.trust-bar-fill{height:100%;border-radius:4px}
+.trust-label{font-size:.78rem;color:var(--dim)}
+
+.animals-section{background:#fff;border-radius:12px;padding:24px 28px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.animals-section h2{font-family:var(--serif);font-size:1.15rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.animal-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:background .15s}
+.animal-row:last-child{border-bottom:none}
+.animal-row:hover{background:rgba(201,168,76,.04);margin:0 -8px;padding:12px 8px;border-radius:6px}
+.animal-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover}
+.animal-thumb-placeholder{width:48px;height:48px;border-radius:8px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.animal-info{flex:1}
+.animal-name{font-weight:500;font-size:.95rem}
+.animal-meta{font-size:.8rem;color:var(--dim)}
+.animal-status{font-size:.7rem;padding:3px 8px;border-radius:12px;background:rgba(40,167,69,.1);color:var(--green);font-weight:600}
+
+.page-footer{text-align:center;padding:32px 20px;font-size:.78rem;color:var(--dim)}
+.page-footer a{color:var(--gold);text-decoration:none}
+.empty{text-align:center;padding:24px;color:var(--dim);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="https://memio.pet">Memio<span>.pet</span></a>
+  {% if breeder.verified_badge %}
+    <span style="font-size:.7rem;background:rgba(40,167,69,.15);color:#28a745;padding:4px 10px;border-radius:20px;font-weight:600;">VERIFICIRAN</span>
+  {% endif %}
+</div>
+
+<div class="container">
+
+  <div class="breeder-hero">
+    <div class="breeder-big-avatar">{{ breeder.name.0 }}</div>
+    <h1>{{ breeder.name }}</h1>
+    <div class="meta">
+      {{ breeder.city }}{% if breeder.city and breeder.country %}, {% endif %}{{ breeder.country }}
+    </div>
+    <div class="type-badge">{{ breeder.get_account_type_display }}</div>
+  </div>
+
+  <div class="trust-card">
+    <div class="trust-header">
+      <span class="trust-title">Trust Score</span>
+      <span class="trust-score-big" style="color:{{ trust_color }}">{{ trust_score }}/100</span>
+    </div>
+    <div class="trust-bar">
+      <div class="trust-bar-fill" style="width:{{ trust_score }}%; background:{{ trust_color }}"></div>
+    </div>
+    <span class="trust-label">{{ trust_label }}</span>
+  </div>
+
+  <div class="animals-section">
+    <h2>Ljubimci ({{ animals|length }})</h2>
+    {% if animals %}
+      {% for animal in animals %}
+      <a href="{% url 'memio_pet:pet_profile' animal.chip_number|default:animal.ear_tag %}" class="animal-row">
+        {% if animal.photo %}
+          <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" class="animal-thumb">
+        {% else %}
+          <div class="animal-thumb-placeholder">
+            {% if animal.vrsta == 'pas' %}&#x1f43e;{% elif animal.vrsta == 'macka' %}&#x1f431;{% else %}&#x1f43e;{% endif %}
+          </div>
+        {% endif %}
+        <div class="animal-info">
+          <div class="animal-name">{{ animal.name|default:animal.ear_tag }}</div>
+          <div class="animal-meta">{{ animal.breed|default:"Nepoznata pasmina" }} · {{ animal.get_spol_display }}</div>
+        </div>
+        <span class="animal-status">{{ animal.get_status_display }}</span>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div class="empty">Nema unesenih ljubimaca.</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
+  &copy; 2026 Konjik d.o.o. &amp; NO LIMIT udruga
+</div>
+
+</body>
+</html>

@@ -251,6 +251,18 @@ class Company(models.Model):
         verbose_name='Umbrella mj. naknada (EUR)',
     )
 
+    # ── Memio.pet / Shelter ──────────────────────────────────────────────────
+    is_shelter = models.BooleanField(
+        default=False,
+        verbose_name='Azil / Sklonište za životinje',
+        help_text='Označava azil koji prima besplatnu Memio.pet licencu sponzoriranu od strane Udruge No Limit.',
+    )
+    shelter_sponsor = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name='Sponzor azila',
+        help_text='Npr. "Udruga No Limit" — prikazuje se na javnom profilu ljubimca.',
+    )
+
     # ── GDPR / T&C privola (čl. 6b) ─────────────────────────────────────────
     # SIGURNOST: bez has_signed_tc_consent=True sustav ne smije agregirati
     # institucijske podatke ove firme (FINA, Porezna uprava, Knowledge Graph).

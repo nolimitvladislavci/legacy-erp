@@ -390,6 +390,14 @@ from synesis import export as synesis_export
 urlpatterns += [
     # synesis + smart-import moved to i18n_patterns
     path('helpdesk/portal/', include('helpdesk.portal_urls')),
+    # ── Memio.pet public API (bez i18n) ──────────────────────────────
+    path("api/memio/waitlist/", __import__("core.views_memio", fromlist=["memio_waitlist"]).memio_waitlist, name="memio_waitlist"),
+    path("api/memio/pet/<str:chip_id>/", __import__("core.views_memio", fromlist=["memio_pet_profile"]).memio_pet_profile, name="memio_pet_profile"),
+    path("api/memio/stats/", __import__("core.views_memio", fromlist=["memio_stats"]).memio_stats, name="memio_stats"),
+    path("api/memio/push/", __import__("core.views_memio", fromlist=["memio_push"]).memio_push, name="memio_push"),
+
+    # ── Memio.pet public views (HTML profili + QR) ──────────────
+    path("", include("memio_pet.urls")),
     path("api/synesis/import/", synesis_views.synesis_import_api, name="synesis_import_api"),
     path("api/synesis/script/<str:token>/", synesis_views.download_script_public, name="synesis_script_public"),
     path("api/synesis/export/<str:token>/", synesis_export.synesis_export_api, name="synesis_export_api"),
@@ -423,4 +431,16 @@ from core.views_scan import fenix_scan
 urlpatterns += [
     path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
     path('api/csrf-token/', __import__('core.csrf_handler', fromlist=['csrf_token_view']).csrf_token_view, name='csrf_token'),
+]
+
+# ── CroValidator API — OIB + IBAN + MBS ───────────────────────────────────────
+from core.views_validate import api_validate
+urlpatterns += [
+    path('api/v1/validate/', api_validate, name='api_validate'),
+]
+
+# ── Notariat — Bilježnik + Odvjetnik + Dimnjačar ─────────────────────────────
+from django.urls import include
+urlpatterns += [
+    path('notariat/', include('notariat.urls')),
 ]

@@ -1,0 +1,48 @@
+# memio.world — Nginx konfiguracija
+# Aktivirati: ln -s /etc/nginx/sites-available/memio-world /etc/nginx/sites-enabled/
+# SSL certifikat: certbot --nginx -d memio.world -d www.memio.world
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    listen [::]:80;
+    server_name memio.world www.memio.world;
+    return 301 https://memio.world$request_uri;
+}
+
+# WWW → non-www redirect
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.memio.world;
+
+    ssl_certificate     /etc/letsencrypt/live/memio.world/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/memio.world/privkey.pem;
+
+    return 301 https://memio.world$request_uri;
+}
+
+# Glavni server blok
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name memio.world;
+
+    ssl_certificate     /etc/letsencrypt/live/memio.world/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/memio.world/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL_MEMIO:10m;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    # Za sada: redirect na LIMIT Connect landing
+    # Kad bude gotova Memio Django app — zamijeniti s proxy_pass
+    location / {
+        return 302 https://limit-connect.com/no-limit/;
+    }
+}

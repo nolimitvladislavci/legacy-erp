@@ -63,12 +63,12 @@ document.addEventListener('DOMContentLoaded',function(){
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button type="button" class="btn btn-sm" id="oibScanBtn"
                   style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);flex:1;min-width:100px"
-                  onclick="fenixOpenCamera()">
+                  onclick="DocScan.open({fields:{oib:'coOib',address:'address',city:'city',zip_code:'zip_code'}})">
             <i class="fas fa-camera"></i> {% trans "Kamera" %}
           </button>
           <button type="button" class="btn btn-sm"
                   style="background:#1e293b;color:#94a3b8;border:1px solid #334155;flex:1;min-width:100px"
-                  onclick="document.getElementById('oibFileInput').click()">
+                  onclick="DocScan.open({fields:{oib:'coOib',address:'address',city:'city',zip_code:'zip_code'}});setTimeout(function(){DocScan._switchTab('upload')},50)">
             <i class="fas fa-folder-open"></i> {% trans "Učitaj sliku" %}
           </button>
           <input type="file" id="oibFileInput" accept="image/*"

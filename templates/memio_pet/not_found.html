@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ljubimac nije pronadjen — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+.icon{font-size:4rem;margin-bottom:24px;opacity:.5}
+h1{font-family:var(--serif);font-size:2rem;margin-bottom:12px}
+p{color:#666;font-size:.95rem;margin-bottom:24px;max-width:400px;line-height:1.6}
+a{color:var(--gold);text-decoration:none;font-weight:500}
+a:hover{text-decoration:underline}
+.code{font-size:.8rem;color:#999;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="icon">&#x1f43e;</div>
+<h1>Ljubimac nije pronadjen</h1>
+<p>Trazili smo "{{ chip_or_tag }}" u nasoj bazi, ali nismo ga pronasli. Moguce je da profil jos nije kreiran ili da je identifikator netacan.</p>
+<a href="https://memio.pet">&#8592; Natrag na Memio.pet</a>
+<div class="code">Ako mislite da je ovo greska, kontaktirajte uzgajivaca ili nas na info@memio.pet</div>
+</body>
+</html>

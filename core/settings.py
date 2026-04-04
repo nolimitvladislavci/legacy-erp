@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "limit-connect.com", "www.limit-connect.com",
     "viskovic-group.de", "www.viskovic-group.de",
-    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver",
+    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver", "no-limit.world", "www.no-limit.world", "memio.world", "www.memio.world", "memio.pet", "www.memio.pet",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -35,6 +35,12 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.viskovic-group.de",
     "https://fina-connect.online",
     "https://www.fina-connect.online",
+    "https://no-limit.world",
+    "https://www.no-limit.world",
+    "https://memio.world",
+    "https://www.memio.world",
+    "https://memio.pet",
+    "https://www.memio.pet",
 ]
 
 # ── Security (production only) ────────────────────────────────
@@ -108,6 +114,7 @@ INSTALLED_APPS = [
     "gov_export",
     "knjiznica",
     "seasonal",
+    "notariat",
     "kindergarten",
     "eldercare",
     "push_notifications",
@@ -137,6 +144,7 @@ INSTALLED_APPS = [
     "tech_radar",
     "udruge",
     "livestock",
+    "memio_pet",  # Memio.pet — zasebna baza
     "intelligence",
     "einvoice",
     "limit_connect_ai",
@@ -225,8 +233,22 @@ DATABASES = {
         "TEST": {"NAME": "test_fina_connect"},
         "PORT": os.environ.get("DB_PORT", "5432"),
         "CONN_MAX_AGE": 0,  # PgBouncer transaction pooling requires 0
-    }
+    },
+    # ── Memio.pet — zasebna baza, potpuna izolacija od ERP-a ──────────────
+    # Direktno na PostgreSQL 5432 (ne kroz PgBouncer), poseban korisnik
+    "memio_pets": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("MEMIO_PETS_DB_NAME", "memio_pets"),
+        "USER": os.environ.get("MEMIO_PETS_DB_USER", "memio_pets_user"),
+        "PASSWORD": os.environ.get("MEMIO_PETS_DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "TEST": {"NAME": "test_memio_pets"},
+        "PORT": "5432",  # Direktno, ne PgBouncer (6432)
+        "CONN_MAX_AGE": 60,
+    },
 }
+
+DATABASE_ROUTERS = ["core.db_routers.MemioPetsRouter"]
 
 # ── Cache (Redis) ─────────────────────────────────────────────
 _redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")

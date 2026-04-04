@@ -53,7 +53,13 @@
       </div>
       <div class="col-md-6">
         <label class="form-label fw-bold">{% trans "OIB *" %}</label>
-        <input type="text" name="oib" class="form-control" value="{{ company.oib|default:'' }}" required maxlength="11">
+        <div class="input-group">
+          <input type="text" name="oib" id="coOibForm" class="form-control" value="{{ company.oib|default:'' }}" required maxlength="11">
+          <button type="button" class="dsm-scan-btn" title="Skeniraj dokument"
+            onclick="DocScan.open({fields:{oib:'coOibForm',name:'name',address:'address',city:'city',zip_code:'zip_code'}})">
+            <i class="fas fa-camera"></i>
+          </button>
+        </div>
       </div>
       <div class="col-md-6">
         <label class="form-label fw-bold">{% trans "IBAN" %}</label>

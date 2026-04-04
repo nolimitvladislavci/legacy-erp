@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ animal.name|default:animal.ear_tag }} — Memio.pet</title>
+<meta name="description" content="Verificirani digitalni profil ljubimca {{ animal.name|default:animal.ear_tag }} na Memio.pet">
+<meta property="og:title" content="{{ animal.name|default:animal.ear_tag }} — Memio.pet">
+<meta property="og:description" content="{{ animal.get_vrsta_display }} · {{ animal.breed }} · Verificirani profil">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="{{ profile_url }}">
+{% if animal.photo %}<meta property="og:image" content="{{ animal.photo.url }}">{% endif %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--ink:#1a1a2e;--ink2:#3d3d52;
+  --gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;
+  --green:#28a745;--red:#dc3545;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top-bar{background:var(--ink);color:#f8f6f0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.top-bar a{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.2rem;font-weight:700}
+.top-bar a span{color:#f8f6f0}
+.verified-tag{font-size:.7rem;background:rgba(40,167,69,.15);color:var(--green);padding:4px 10px;border-radius:20px;font-weight:600;letter-spacing:.06em}
+.unverified-tag{font-size:.7rem;background:rgba(220,53,69,.1);color:var(--red);padding:4px 10px;border-radius:20px;font-weight:600}
+
+.container{max-width:680px;margin:0 auto;padding:32px 20px}
+
+/* Hero */
+.hero-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.hero-photo{width:100%;height:280px;object-fit:cover;display:block}
+.hero-photo-placeholder{width:100%;height:160px;background:linear-gradient(135deg,var(--ink) 0%,#2a2a4a 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--gold)}
+.hero-body{padding:24px 28px}
+.hero-name{font-family:var(--serif);font-size:2rem;font-weight:700;margin-bottom:4px}
+.hero-sub{color:var(--ink2);font-size:.95rem;font-weight:300;margin-bottom:16px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.badge{font-size:.72rem;padding:5px 12px;border-radius:20px;font-weight:600;letter-spacing:.04em}
+.badge-breed{background:rgba(201,168,76,.12);color:var(--gold)}
+.badge-status{background:rgba(40,167,69,.1);color:var(--green)}
+.badge-chip{background:rgba(0,0,0,.06);color:var(--ink2)}
+
+/* Trust Score */
+.trust-card{background:#fff;border-radius:12px;padding:20px 28px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.trust-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.trust-title{font-family:var(--serif);font-size:1.1rem;font-weight:700}
+.trust-score-big{font-family:var(--serif);font-size:1.8rem;font-weight:700}
+.trust-bar{width:100%;height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.trust-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.trust-label{font-size:.78rem;color:var(--dim)}
+
+/* Info Grid */
+.info-section{background:#fff;border-radius:12px;padding:24px 28px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.info-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-item label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:2px}
+.info-item span{font-size:.95rem;font-weight:400}
+.info-item.full{grid-column:1/-1}
+
+/* Health Timeline */
+.timeline{list-style:none;position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.timeline li{position:relative;margin-bottom:16px;padding-left:20px}
+.timeline li::before{content:'';position:absolute;left:-20px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--bg)}
+.timeline .t-date{font-size:.78rem;color:var(--dim);margin-bottom:2px}
+.timeline .t-type{font-weight:600;font-size:.88rem}
+.timeline .t-desc{font-size:.85rem;color:var(--ink2);font-weight:300}
+.timeline .t-vet{font-size:.78rem;color:var(--green);margin-top:2px}
+.timeline .t-vet-unv{font-size:.78rem;color:var(--dim);margin-top:2px}
+
+/* Ownership */
+.chain{list-style:none}
+.chain li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.chain li:last-child{border-bottom:none}
+.chain-icon{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.chain-info{flex:1}
+.chain-type{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.chain-name{font-weight:500;font-size:.95rem}
+.chain-date{font-size:.8rem;color:var(--dim)}
+
+/* QR Section */
+.qr-section{text-align:center;padding:32px;background:#fff;border-radius:12px;box-shadow:0 2px 20px rgba(0,0,0,.06);margin-bottom:24px}
+.qr-section img{width:180px;height:180px;margin:0 auto 16px;display:block}
+.qr-url{font-size:.78rem;color:var(--dim);word-break:break-all}
+
+/* Breeder Card */
+.breeder-card{display:flex;align-items:center;gap:16px;padding:16px 0}
+.breeder-avatar{width:48px;height:48px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.2rem;font-weight:700;flex-shrink:0}
+.breeder-info{flex:1}
+.breeder-name{font-weight:500;font-size:.95rem}
+.breeder-meta{font-size:.8rem;color:var(--dim)}
+
+/* Footer */
+.page-footer{text-align:center;padding:32px 20px;font-size:.78rem;color:var(--dim)}
+.page-footer a{color:var(--gold);text-decoration:none}
+
+/* Responsive */
+@media(max-width:600px){
+  .info-grid{grid-template-columns:1fr}
+  .hero-photo{height:200px}
+  .hero-name{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="https://memio.pet">Memio<span>.pet</span></a>
+  {% if verified %}
+    <span class="verified-tag">VERIFICIRAN</span>
+  {% else %}
+    <span class="unverified-tag">NEVERIFICIRAN</span>
+  {% endif %}
+</div>
+
+<div class="container">
+
+  <!-- Hero Card -->
+  <div class="hero-card">
+    {% if animal.photo %}
+      <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" class="hero-photo">
+    {% else %}
+      <div class="hero-photo-placeholder">
+        {% if animal.vrsta == 'pas' %}&#x1f43e;{% elif animal.vrsta == 'macka' %}&#x1f431;{% elif animal.vrsta == 'konj' %}&#x1f40e;{% else %}&#x1f43e;{% endif %}
+      </div>
+    {% endif %}
+    <div class="hero-body">
+      <h1 class="hero-name">{{ animal.name|default:"Bez imena" }}</h1>
+      <p class="hero-sub">{{ animal.get_vrsta_display }} · {{ animal.breed|default:"Nepoznata pasmina" }}</p>
+      <div class="hero-badges">
+        {% if animal.breed %}<span class="badge badge-breed">{{ animal.breed }}</span>{% endif %}
+        <span class="badge badge-status">{{ animal.get_status_display }}</span>
+        {% if animal.chip_number %}<span class="badge badge-chip">Chip: {{ animal.chip_number }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust Score -->
+  {% if breeder %}
+  <div class="trust-card">
+    <div class="trust-header">
+      <span class="trust-title">Trust Score uzgajivaca</span>
+      <span class="trust-score-big" style="color:{{ trust_color }}">{{ trust_score }}/100</span>
+    </div>
+    <div class="trust-bar">
+      <div class="trust-bar-fill" style="width:{{ trust_score }}%; background:{{ trust_color }}"></div>
+    </div>
+    <span class="trust-label">{{ trust_label }} · <a href="{% url 'memio_pet:breeder_profile' breeder.pk %}" style="color:var(--gold);text-decoration:none;">Vidi profil uzgajivaca</a></span>
+  </div>
+  {% endif %}
+
+  <!-- Osnovni podaci -->
+  <div class="info-section">
+    <h2 class="info-title">Osnovni podaci</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Vrsta</label>
+        <span>{{ animal.get_vrsta_display }}</span>
+      </div>
+      <div class="info-item">
+        <label>Spol</label>
+        <span>{{ animal.get_spol_display }}</span>
+      </div>
+      {% if animal.date_of_birth %}
+      <div class="info-item">
+        <label>Datum rodenja</label>
+        <span>{{ animal.date_of_birth|date:"d.m.Y." }}</span>
+      </div>
+      {% endif %}
+      {% if animal.weight_kg %}
+      <div class="info-item">
+        <label>Tezina</label>
+        <span>{{ animal.weight_kg }} kg</span>
+      </div>
+      {% endif %}
+      {% if animal.color_description %}
+      <div class="info-item">
+        <label>Boja / Sara</label>
+        <span>{{ animal.color_description }}</span>
+      </div>
+      {% endif %}
+      {% if animal.pedigree_number %}
+      <div class="info-item">
+        <label>Rodovnica</label>
+        <span>{{ animal.pedigree_number }}</span>
+      </div>
+      {% endif %}
+      {% if animal.ear_tag %}
+      <div class="info-item">
+        <label>Oznaka</label>
+        <span>{{ animal.ear_tag }}</span>
+      </div>
+      {% endif %}
+      {% if animal.chip_number %}
+      <div class="info-item">
+        <label>Mikrocip</label>
+        <span>{{ animal.chip_number }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Roditelji -->
+  {% if animal.father_name or animal.mother_name %}
+  <div class="info-section">
+    <h2 class="info-title">Rodovnica</h2>
+    <div class="info-grid">
+      {% if animal.father_name %}
+      <div class="info-item">
+        <label>Otac</label>
+        <span>{{ animal.father_name }}</span>
+      </div>
+      {% endif %}
+      {% if animal.mother_name %}
+      <div class="info-item">
+        <label>Majka</label>
+        <span>{{ animal.mother_name }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Uzgajivac -->
+  {% if breeder %}
+  <div class="info-section">
+    <h2 class="info-title">Uzgajivac</h2>
+    <div class="breeder-card">
+      <div class="breeder-avatar">{{ breeder.name.0 }}</div>
+      <div class="breeder-info">
+        <div class="breeder-name">
+          {{ breeder.name }}
+          {% if breeder.verified_badge %} <span style="color:var(--green);">&#10003;</span>{% endif %}
+        </div>
+        <div class="breeder-meta">
+          {{ breeder.city }}{% if breeder.city and breeder.country %}, {% endif %}{{ breeder.country }}
+          · {{ breeder.get_account_type_display }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Zdravstveni kartoni -->
+  {% if health_records %}
+  <div class="info-section">
+    <h2 class="info-title">Zdravstveni karton</h2>
+    <ul class="timeline">
+      {% for rec in health_records %}
+      <li>
+        <div class="t-date">{{ rec.datum|date:"d.m.Y." }}</div>
+        <div class="t-type">{{ rec.get_tip_display }}</div>
+        {% if rec.opis %}<div class="t-desc">{{ rec.opis }}</div>{% endif %}
+        {% if rec.lijek %}<div class="t-desc">Lijek: {{ rec.lijek }}</div>{% endif %}
+        {% if rec.vet_profile and rec.vet_profile.is_verified %}
+          <div class="t-vet">&#10003; dr. {{ rec.vet_profile.name }} (verificiran)</div>
+        {% elif rec.veterinar %}
+          <div class="t-vet-unv">dr. {{ rec.veterinar }}</div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Lanac vlasnistva -->
+  {% if ownership_chain %}
+  <div class="info-section">
+    <h2 class="info-title">Lanac vlasnistva</h2>
+    <ul class="chain">
+      {% for own in ownership_chain %}
+      <li>
+        <div class="chain-icon">{{ forloop.counter }}</div>
+        <div class="chain-info">
+          <div class="chain-type">{{ own.get_transfer_type_display }}</div>
+          <div class="chain-name">{{ own.owner_name }}{% if own.owner_city %}, {{ own.owner_city }}{% endif %}</div>
+          <div class="chain-date">
+            {{ own.acquired_at|date:"d.m.Y." }}
+            {% if own.released_at %} — {{ own.released_at|date:"d.m.Y." }}{% endif %}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- QR Code -->
+  <div class="qr-section">
+    <h2 style="font-family:var(--serif);font-size:1.15rem;margin-bottom:16px;">Dijeli ovaj profil</h2>
+    <img src="{{ qr_url }}" alt="QR kod za {{ animal.name|default:animal.ear_tag }}">
+    <p class="qr-url">{{ profile_url }}</p>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
+  Verificirano putem <a href="https://limit-connect.com">LIMIT Connect</a> · SHA-256 zastiteni podaci<br>
+  &copy; 2026 Konjik d.o.o. &amp; NO LIMIT udruga
+</div>
+
+</body>
+</html>

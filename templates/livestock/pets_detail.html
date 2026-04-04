@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ pet.name|default:pet.ear_tag }} – LIMIT Connect{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-4" style="max-width:900px">
+
+  <!-- Breadcrumb -->
+  <a href="{% url 'livestock:pet_list' %}" class="text-muted text-decoration-none small">← Uzgajalište</a>
+
+  <div class="row g-4 mt-1">
+
+    <!-- Lijevo: foto + osnovno -->
+    <div class="col-md-4">
+      <div class="card bg-dark border-secondary">
+        {% if pet.photo %}
+        <img src="{{ pet.photo.url }}" class="card-img-top" style="height:240px;object-fit:cover;border-radius:8px 8px 0 0">
+        {% else %}
+        <div style="height:180px;background:#111;display:flex;align-items:center;justify-content:center;font-size:5rem;border-radius:8px 8px 0 0">
+          {% if pet.vrsta == 'pas' %}🐶{% elif pet.vrsta == 'macka' %}🐱{% elif pet.vrsta == 'konj' %}🐴{% else %}🐾{% endif %}
+        </div>
+        {% endif %}
+        <div class="card-body">
+          <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold,#c9a84c);font-size:1.6rem;margin:0 0 .25rem">
+            {{ pet.name|default:"Bez imena" }}
+          </h2>
+          <div class="text-muted mb-3">{{ pet.get_vrsta_display }} · {{ pet.breed|default:"Pasmina nepoznata" }}</div>
+
+          <table class="table table-dark table-sm table-borderless mb-0" style="font-size:.85rem">
+            {% if pet.spol != 'N' %}
+            <tr><td class="text-muted">Spol</td><td>{{ pet.get_spol_display }}</td></tr>
+            {% endif %}
+            {% if pet.date_of_birth %}
+            <tr><td class="text-muted">Rođen/a</td><td>{{ pet.date_of_birth|date:"d.m.Y." }}</td></tr>
+            {% endif %}
+            {% if pet.weight_kg %}
+            <tr><td class="text-muted">Težina</td><td>{{ pet.weight_kg }} kg</td></tr>
+            {% endif %}
+            {% if pet.color_description %}
+            <tr><td class="text-muted">Boja</td><td>{{ pet.color_description }}</td></tr>
+            {% endif %}
+            {% if pet.chip_number %}
+            <tr><td class="text-muted">Čip</td><td style="font-family:monospace;font-size:.8rem">{{ pet.chip_number }}</td></tr>
+            {% endif %}
+            {% if pet.pedigree_number %}
+            <tr><td class="text-muted">Rodovnica</td><td>{{ pet.pedigree_number }}</td></tr>
+            {% endif %}
+            {% if pet.father_name %}
+            <tr><td class="text-muted">Otac</td><td>{{ pet.father_name }}</td></tr>
+            {% endif %}
+            {% if pet.mother_name %}
+            <tr><td class="text-muted">Majka</td><td>{{ pet.mother_name }}</td></tr>
+            {% endif %}
+          </table>
+
+          {% if pet.notes %}
+          <div class="mt-2 text-muted small border-top pt-2">{{ pet.notes }}</div>
+          {% endif %}
+
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <a href="{% url 'livestock:pet_edit' pet.pk %}" class="btn btn-sm btn-outline-warning flex-grow-1">
+              <i class="fas fa-edit me-1"></i>Uredi
+            </a>
+            <a href="{% url 'livestock:pet_pedigree_pdf' pet.pk %}" target="_blank"
+               class="btn btn-sm btn-outline-secondary flex-grow-1">
+              <i class="fas fa-file-pdf me-1"></i>Rodovnica PDF
+            </a>
+            <a href="{% url 'livestock:pet_qr_code' pet.pk %}?format=pdf" target="_blank"
+               class="btn btn-sm btn-outline-info flex-grow-1">
+              <i class="fas fa-qrcode me-1"></i>QR Ogrlica
+            </a>
+            <button type="button" id="btnMemioPush" onclick="pushToMemio()"
+               class="btn btn-sm btn-outline-success flex-grow-1">
+              <i class="fas fa-paw me-1"></i>Objavi na Memio.pet
+            </button>
+          </div>
+          <div id="memioPushResult" style="display:none;margin-top:8px;font-size:.82rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desno: zdravstvena kartoteka -->
+    <div class="col-md-8">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0 text-light">📋 Zdravstvena kartoteka</h5>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="collapse" data-bs-target="#addHealthForm">
+          <i class="fas fa-plus me-1"></i>Dodaj zapis
+        </button>
+      </div>
+
+      <!-- Add health record form -->
+      <div class="collapse mb-3" id="addHealthForm">
+        <div class="card bg-dark border-warning" style="border-color:rgba(201,168,76,.3)!important">
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_health">
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <label class="form-label text-light small">Datum *</label>
+                  <input type="date" name="datum" class="form-control form-control-sm bg-dark text-light border-secondary"
+                         value="{% now 'Y-m-d' %}">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-light small">Vrsta</label>
+                  <select name="tip" class="form-select form-select-sm bg-dark text-light border-secondary">
+                    {% for val, lbl in tip_choices %}
+                    <option value="{{ val }}">{{ lbl }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-light small">Trošak (EUR)</label>
+                  <input type="number" name="trosak_eur" step="0.01" class="form-control form-control-sm bg-dark text-light border-secondary">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-light small">Opis *</label>
+                  <input type="text" name="opis" class="form-control form-control-sm bg-dark text-light border-secondary"
+                         placeholder="npr. Bivalent DHPPi" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label text-light small">Veterinar</label>
+                  <input type="text" name="veterinar" class="form-control form-control-sm bg-dark text-light border-secondary">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label text-light small">Preparat</label>
+                  <input type="text" name="lijek" class="form-control form-control-sm bg-dark text-light border-secondary">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-sm btn-warning mt-2">Spremi</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Records list -->
+      {% if records %}
+      <div class="list-group list-group-flush">
+        {% for rec in records %}
+        <div class="list-group-item bg-dark border-secondary text-light d-flex align-items-start gap-3 py-3">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.1);
+               border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;
+               font-size:1rem;flex-shrink:0">
+            {% if rec.tip == 'cijepljenje' %}💉{% elif rec.tip == 'pregled' %}🔍{% elif rec.tip == 'tretman' %}💊{% else %}📋{% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <span class="fw-semibold">{{ rec.opis }}</span>
+                {% if rec.lijek %}
+                <span class="badge bg-secondary ms-1" style="font-size:.7rem">{{ rec.lijek }}</span>
+                {% endif %}
+              </div>
+              {% if rec.trosak_eur %}
+              <span class="text-muted small">{{ rec.trosak_eur }} EUR</span>
+              {% endif %}
+            </div>
+            <div class="text-muted small mt-1">
+              {{ rec.datum|date:"d.m.Y." }}
+              {% if rec.veterinar %} · Dr. {{ rec.veterinar }}{% endif %}
+              · <span class="badge bg-dark border-secondary">{{ rec.get_tip_display }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="fas fa-syringe fa-2x mb-2 d-block opacity-25"></i>
+        Još nema zdravstvenih zapisa.<br>
+        <small>Dodajte cijepljenja, preglede, tretmane.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+function pushToMemio(){
+  var btn = document.getElementById('btnMemioPush');
+  var res = document.getElementById('memioPushResult');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sinkroniziram...';
+  fetch('/api/memio/push/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ?
+                     document.querySelector('[name=csrfmiddlewaretoken]').value :
+                     document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+    },
+    body: JSON.stringify({livestock_id: {{ pet.pk }}})
+  })
+  .then(r => r.json())
+  .then(d => {
+    btn.innerHTML = '<i class="fas fa-check me-1"></i>Objavljeno';
+    btn.classList.replace('btn-outline-success', 'btn-success');
+    if(d.ok && d.public_url){
+      res.style.display = 'block';
+      res.innerHTML = '<span class="text-success"><i class="fas fa-paw me-1"></i>' +
+        'Profil živi na: <a href="' + d.public_url + '" target="_blank" style="color:#22c55e">' +
+        d.public_url + '</a></span>';
+    }
+  })
+  .catch(e => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paw me-1"></i>Objavi na Memio.pet';
+    res.style.display = 'block';
+    res.innerHTML = '<span class="text-danger">Greška: ' + e.message + '</span>';
+  });
+}
+</script>
+{% endblock %}

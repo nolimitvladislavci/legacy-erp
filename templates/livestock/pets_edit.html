@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Uredi: {{ pet.name|default:pet.ear_tag }} – LIMIT Connect{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:680px">
+
+  <div class="mb-4">
+    <a href="{% url 'livestock:pet_detail' pet.pk %}" class="text-muted text-decoration-none small">
+      ← {{ pet.name|default:pet.ear_tag }}
+    </a>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold,#c9a84c);margin-top:.5rem">
+      Uredi ljubimca
+    </h1>
+  </div>
+
+  <!-- ═══ FORMA ═══ -->
+  <form method="post" enctype="multipart/form-data" id="petEditForm">
+    {% csrf_token %}
+
+    <div class="row g-3">
+      <div class="col-6">
+        <label class="form-label fw-semibold text-light">Vrsta *</label>
+        <select name="vrsta" class="form-select bg-dark text-light border-secondary">
+          {% for val, lbl in pet_vrste %}
+          <option value="{{ val }}" {% if pet.vrsta == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold text-light">Spol</label>
+        <select name="spol" class="form-select bg-dark text-light border-secondary">
+          {% for val, lbl in spol_choices %}
+          <option value="{{ val }}" {% if pet.spol == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Ime</label>
+        <input type="text" name="name" value="{{ pet.name }}"
+               class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. Rex, Luna, Max">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Pasmina</label>
+        <input type="text" name="breed" value="{{ pet.breed|default:'' }}"
+               class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. Njemački ovčar">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Datum rođenja</label>
+        <input type="date" name="date_of_birth"
+               value="{{ pet.date_of_birth|date:'Y-m-d'|default:'' }}"
+               class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Broj mikročipa</label>
+        <input type="text" name="chip_number" value="{{ pet.chip_number|default:'' }}"
+               class="form-control bg-dark text-light border-secondary"
+               placeholder="15 znamenki" maxlength="20">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Broj rodovnice</label>
+        <input type="text" name="pedigree_number" value="{{ pet.pedigree_number|default:'' }}"
+               class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. HR-12345-2024">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Opis boje / šare</label>
+        <input type="text" name="color_description" value="{{ pet.color_description|default:'' }}"
+               class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. crno-smeđi s bijelim prsištem">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Otac (ime / rod. br.)</label>
+        <input type="text" name="father_name" value="{{ pet.father_name|default:'' }}"
+               class="form-control bg-dark text-light border-secondary">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Majka (ime / rod. br.)</label>
+        <input type="text" name="mother_name" value="{{ pet.mother_name|default:'' }}"
+               class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold text-light">Težina (kg)</label>
+        <input type="number" name="weight_kg" step="0.1"
+               value="{{ pet.weight_kg|default:'' }}"
+               class="form-control bg-dark text-light border-secondary">
+      </div>
+      <div class="col-md-8">
+        <label class="form-label fw-semibold text-light">Status</label>
+        <select name="status" class="form-select bg-dark text-light border-secondary">
+          {% for val, lbl in status_choices %}
+          <option value="{{ val }}" {% if pet.status == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Trenutna fotografija -->
+      {% if pet.photo %}
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Trenutna fotografija</label>
+        <div class="mb-2">
+          <img src="{{ pet.photo.url }}" alt="{{ pet.name }}"
+               style="max-height:160px;border-radius:8px;border:1px solid #334155">
+        </div>
+        <label style="color:#94a3b8;font-size:.85rem">
+          <input type="checkbox" name="photo_clear" value="1"> Ukloni fotografiju
+        </label>
+      </div>
+      {% endif %}
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Nova fotografija (opcionalno)</label>
+        <input type="file" name="photo" accept="image/*"
+               class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Napomene</label>
+        <textarea name="notes" rows="3"
+                  class="form-control bg-dark text-light border-secondary"
+                  placeholder="Posebnosti, alergije, karakter...">{{ pet.notes|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <a href="{% url 'livestock:pet_detail' pet.pk %}" class="btn btn-outline-secondary">← Odustani</a>
+      <button type="submit" class="btn btn-warning fw-bold flex-grow-1">
+        <i class="fas fa-save me-2"></i>Spremi izmjene
+      </button>
+    </div>
+  </form>
+
+  <!-- Opasna zona -->
+  <div class="mt-5 p-3 border border-danger rounded" style="border-color:rgba(239,68,68,.3)!important">
+    <div class="text-danger fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Opasna zona</div>
+    <p class="text-muted small mb-3">Brisanje ljubimca trajno briše sve zdravstvene zapise. Ova radnja se ne može poništiti.</p>
+    <form method="post" action="{% url 'livestock:pet_detail' pet.pk %}"
+          onsubmit="return confirm('Obrisati {{ pet.name|default:pet.ear_tag }}? Ova radnja je trajna.')">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        <i class="fas fa-trash me-1"></i>Obriši ljubimca
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

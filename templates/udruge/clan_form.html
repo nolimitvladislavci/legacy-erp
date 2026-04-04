@@ -33,6 +33,10 @@
     <div>
       <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">OIB</label>
       <input type="text" name="oib" maxlength="11" pattern="\d{11}" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+<button type="button" class="dsm-scan-btn" title="Skeniraj dokument"
+  onclick="DocScan.open({fields:{ oib:'oib',first_name:'first_name',last_name:'last_name' }})">
+  <i class="fas fa-camera"></i>
+</button>
     </div>
     <div>
       <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Telefon</label>

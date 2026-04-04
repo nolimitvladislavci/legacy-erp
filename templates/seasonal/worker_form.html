@@ -24,6 +24,10 @@
             <input type="text" name="oib" value="{{ form_data.oib|default:'' }}"
                    class="form-control bg-dark border-secondary text-white font-monospace"
                    maxlength="11" pattern="\d{11}" required>
+<button type="button" class="dsm-scan-btn" title="Skeniraj dokument"
+  onclick="DocScan.open({fields:{ oib:'oib',first_name:'first_name',last_name:'last_name' }})">
+  <i class="fas fa-camera"></i>
+</button>
           </div>
           <div class="col-md-6">
             <label class="form-label text-muted small">Državljanstvo</label>

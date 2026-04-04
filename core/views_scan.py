@@ -127,6 +127,16 @@ Odgovori ISKLJUCIVO JSON:
 }}
 Polja koja ne mozes procijeniti postavi na null.""",
 
+
+"pas": """\
+Prikazano je {n} fotografij{suffix} psa.
+Procijeni pasminu, boju, spol i dob. Budi konkretan.
+spol: "M" za muzjaka, "F" za zenku, "N" ako nije vidljivo.
+boja_kod: jedan od: crn|bijel|siv|smed|zlatni|sareno|crvenkast|krem|ostalo
+Odgovori ISKLJUCIVO JSON:
+{"pasmina":"Njemacki ovcar","boja_opis":"crno-smedi sa standardnim sarama","boja_kod":"sareno","spol":"M","dob_procjena":"2-3 godine","ime_prijedlog":"Rex","confidence":0.88}
+Polja koja ne mozes procijeniti postavi na null.""",
+
 "general": """\
 Prikazano je {n} fotografij{suffix} dokumenta ili predmeta.
 Izvuci sve relevantne tekstualne i vizualne informacije.

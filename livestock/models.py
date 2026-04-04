@@ -18,7 +18,15 @@ class Livestock(models.Model):
         ('tele', 'Tele'),
         ('bik', 'Bik'),
         ('vo', 'Vo (tov)'),
+        # Kućni ljubimci / uzgajivači
+        ('pas', 'Pas'),
+        ('macka', 'Mačka'),
+        ('konj', 'Konj'),
+        ('zec', 'Zec'),
+        ('ostalo_ljubimac', 'Ostalo (ljubimac)'),
     ]
+    PET_VRSTE = ('pas', 'macka', 'konj', 'zec', 'ostalo_ljubimac')
+    SPOL_CHOICES = [('M', 'Mužjak'), ('F', 'Ženka'), ('N', 'Nepoznato')]
     STATUS_CHOICES = [
         ('aktivno', 'Aktivno'),
         ('gravidno', 'Gravidno'),
@@ -27,7 +35,14 @@ class Livestock(models.Model):
         ('prodano', 'Prodano'),
         ('uginulo', 'Uginulo'),
         ('izluceno', 'Izluceno'),
+        # Azilski statusi
+        ('u_azilu', 'U azilu'),
+        ('karantena', 'Karantena'),
+        ('rezerviran', 'Rezerviran'),
+        ('udomljen', 'Udomljen'),
+        ('eutanaziran', 'Eutanaziran'),
     ]
+    SHELTER_STATUSES = ('u_azilu', 'karantena', 'rezerviran', 'udomljen', 'eutanaziran')
 
     company = models.ForeignKey(
         'companies.Company', on_delete=models.CASCADE,
@@ -52,6 +67,20 @@ class Livestock(models.Model):
     is_organic = models.BooleanField(default=False, verbose_name='Ekoloski uzgoj')
     organic_since = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
+    # ── Polja za kućne ljubimce / uzgajivače ──────────────────────────
+    chip_number = models.CharField(max_length=20, blank=True,
+                                   verbose_name='Broj mikročipa',
+                                   help_text='15-znamenkasti ISO 11784/85 chip')
+    pedigree_number = models.CharField(max_length=50, blank=True,
+                                       verbose_name='Broj rodovnice')
+    spol = models.CharField(max_length=1, choices=[('M','Mužjak'),('F','Ženka'),('N','Nepoznato')],
+                            default='N', blank=True)
+    color_description = models.CharField(max_length=120, blank=True,
+                                         verbose_name='Opis boje/šare')
+    father_name = models.CharField(max_length=80, blank=True, verbose_name='Otac (ime)')
+    mother_name = models.CharField(max_length=80, blank=True, verbose_name='Majka (ime)')
+    photo = models.ImageField(upload_to='livestock/pets/%Y/', blank=True,
+                              verbose_name='Fotografija')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()
@@ -65,6 +94,14 @@ class Livestock(models.Model):
 
     def __str__(self):
         return f'{self.ear_tag} -- {self.get_vrsta_display()} ({self.get_status_display()})'
+
+    @property
+    def get_spol_display(self):
+        return {'M':'Mužjak','F':'Ženka','N':'Nepoznato'}.get(self.spol,'Nepoznato')
+
+    @property
+    def is_pet(self):
+        return self.vrsta in self.PET_VRSTE
 
     @property
     def age_months(self):

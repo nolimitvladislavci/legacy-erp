@@ -109,3 +109,34 @@ class InspectionToken(models.Model):
         if ip:
             self.access_ip = ip
         self.save(update_fields=['view_count', 'last_accessed', 'access_ip'])
+
+
+class MemioPetWaitlist(models.Model):
+    """Waiting lista za memio.pet — javna prijava s landing pagea."""
+    PET_TYPE_CHOICES = [
+        ('pas', 'Pas'), ('macka', 'Mačka'), ('konj', 'Konj'), ('ostalo', 'Ostalo'),
+    ]
+    USER_TYPE_CHOICES = [
+        ('vlasnik', 'Vlasnik ljubimca'), ('uzgajivac', 'Uzgajivač / Kennel'),
+    ]
+    name       = models.CharField(max_length=120)
+    email      = models.EmailField(unique=True)
+    pet_type   = models.CharField(max_length=20, choices=PET_TYPE_CHOICES, blank=True)
+    user_type  = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, blank=True)
+    source     = models.CharField(max_length=50, default='memio.pet')
+    ip         = models.GenericIPAddressField(null=True, blank=True)
+    # ── CroValidator / OIB verifikacija (samo za pravne osobe) ──
+    oib             = models.CharField(max_length=11, blank=True, default='')
+    is_cro_validated = models.BooleanField(default=False)
+    validated_name  = models.CharField(max_length=200, blank=True, default='')
+    validated_city  = models.CharField(max_length=100, blank=True, default='')
+    validated_at    = models.DateTimeField(null=True, blank=True)
+    notified   = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Memio.pet waiting lista'
+
+    def __str__(self):
+        return f"{self.name} <{self.email}>"

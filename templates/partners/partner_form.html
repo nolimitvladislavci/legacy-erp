@@ -71,6 +71,10 @@
               <button type="button" class="btn btn-outline-primary" id="oibInputBtn">
                 <i class="fas fa-search" id="oibInputIcon"></i>
               </button>
+              <button type="button" class="dsm-scan-btn" title="Skeniraj dokument"
+                onclick="DocScan.open({fields:{oib:'oibInput',name:'name',address:'address',city:'city',zip_code:'zip_code'}})">
+                <i class="fas fa-camera"></i>
+              </button>
             </div>
             <div id="oibInputFeedback" class="mt-1" style="font-size:.78rem;min-height:1.2em"></div>
           </div>

@@ -1,0 +1,571 @@
+{% load i18n %}
+{# ═══════════════════════════════════════════════════════════════════════
+   LIMIT Connect — Globalni Document Scan Modal
+   Koristi se na svim formama s OIB/poreznim brojem poljem.
+
+   POZIV:
+     <button type="button" onclick="DocScan.open({
+       fields: { oib:'field-id', name:'name-id', first_name:'fn-id',
+                 last_name:'ln-id', address:'addr-id', city:'city-id', zip_code:'zip-id' },
+       country: 'HR',
+       onApply: function(data) { ... }   // opcionalno
+     })">
+       <i class="fas fa-camera"></i>
+     </button>
+
+   Podržani dokumenti: Obrtnica · Osobna iskaznica · Domovnica · Izvod iz registra
+═══════════════════════════════════════════════════════════════════════ #}
+
+<div id="docScanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#0d1117;border:1px solid #c9a84c;border-radius:16px;width:100%;max-width:520px;overflow:hidden;position:relative;max-height:90vh;overflow-y:auto">
+
+    <!-- Header -->
+    <div style="padding:20px 24px 16px;border-bottom:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0d1117;z-index:1">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#c9a84c;font-weight:600">
+          <i class="fas fa-id-card" style="margin-right:8px"></i>{% trans "Skeniraj dokument" %}
+        </div>
+        <div style="font-size:.8rem;color:#555;margin-top:2px">{% trans "Obrtnica · Osobna · Domovnica · Izvod iz registra" %}</div>
+      </div>
+      <button onclick="DocScan.close()" style="background:none;border:none;color:#555;font-size:1.4rem;cursor:pointer;padding:4px;line-height:1;transition:color .15s" onmouseover="this.style.color='#ccc'" onmouseout="this.style.color='#555'">&times;</button>
+    </div>
+
+    <!-- Tab switcher -->
+    <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.06)">
+      <button id="dsmTabCamera" onclick="DocScan._switchTab('camera')"
+        style="flex:1;padding:12px;background:rgba(201,168,76,.1);border:none;border-bottom:2px solid #c9a84c;
+               color:#c9a84c;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s">
+        <i class="fas fa-camera" style="margin-right:6px"></i>{% trans "Kamera" %}
+      </button>
+      <button id="dsmTabUpload" onclick="DocScan._switchTab('upload')"
+        style="flex:1;padding:12px;background:none;border:none;border-bottom:2px solid transparent;
+               color:#666;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s">
+        <i class="fas fa-upload" style="margin-right:6px"></i>{% trans "Učitaj sliku" %}
+      </button>
+    </div>
+
+    <!-- Camera panel -->
+    <div id="dsmPanelCamera" style="padding:20px">
+      <div style="position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3;margin-bottom:12px">
+        <video id="dsmVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>
+        <canvas id="dsmCanvas" style="display:none;width:100%;height:100%;object-fit:cover"></canvas>
+        <!-- Okvir za dokument -->
+        <div style="position:absolute;inset:0;pointer-events:none">
+          <div style="position:absolute;inset:10%;border:2px dashed rgba(201,168,76,.5);border-radius:8px"></div>
+          <div id="dsmCamHint" style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:.75rem;color:rgba(255,255,255,.6)">
+            {% trans "Postavite dokument unutar okvira" %}
+          </div>
+        </div>
+        <!-- OCR progress overlay -->
+        <div id="dsmOcrOverlayCam" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.8);
+             flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px">
+          <div style="width:40px;height:40px;border:3px solid #333;border-top-color:#c9a84c;border-radius:50%;animation:dsmSpin 1s linear infinite"></div>
+          <div id="dsmOcrTxtCam" style="color:#ccc;font-size:.85rem">{% trans "Čitam dokument..." %}</div>
+          <div style="width:200px;height:4px;background:#222;border-radius:2px">
+            <div id="dsmBarCam" style="height:100%;width:0;background:#c9a84c;border-radius:2px;transition:width .3s"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Camera buttons -->
+      <div style="display:flex;gap:8px">
+        <button id="dsmBtnStartCam" onclick="DocScan._startCamera()" type="button"
+          style="flex:1;padding:12px;background:rgba(201,168,76,.1);border:1.5px solid #c9a84c;
+                 border-radius:10px;color:#c9a84c;font-weight:600;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="fas fa-video"></i>{% trans "Uključi kameru" %}
+        </button>
+        <button id="dsmBtnSnap" onclick="DocScan._snap()" type="button" style="display:none;flex:1;padding:12px;
+          background:#c9a84c;border:none;border-radius:10px;color:#000;font-weight:700;
+          cursor:pointer;font-size:.9rem;display:none;align-items:center;justify-content:center;gap:6px">
+          <i class="fas fa-circle"></i>{% trans "Snimi" %}
+        </button>
+        <button id="dsmBtnRetake" onclick="DocScan._retake()" type="button" style="display:none;padding:12px 16px;
+          background:rgba(255,255,255,.06);border:1px solid #444;border-radius:10px;color:#ccc;cursor:pointer">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload panel -->
+    <div id="dsmPanelUpload" style="display:none;padding:20px">
+      <label id="dsmDropZone" for="dsmFileInput"
+        style="display:block;border:2px dashed rgba(201,168,76,.3);border-radius:12px;
+               padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(201,168,76,.03)"
+        ondragover="event.preventDefault();this.style.borderColor='#c9a84c';this.style.background='rgba(201,168,76,.08)'"
+        ondragleave="this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(201,168,76,.03)'"
+        ondrop="DocScan._fileDrop(event)">
+        <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:rgba(201,168,76,.4);margin-bottom:12px;display:block"></i>
+        <div style="color:#ccc;font-size:.95rem;margin-bottom:6px">{% trans "Povucite sliku ovdje" %}</div>
+        <div style="color:#555;font-size:.8rem">{% trans "ili kliknite za odabir" %} · JPG, PNG, HEIC</div>
+        <input type="file" id="dsmFileInput" accept="image/*" style="display:none" onchange="DocScan._fileSelect(this)">
+      </label>
+      <div id="dsmUploadPreview" style="display:none;margin-top:12px;text-align:center">
+        <img id="dsmPreviewImg" style="max-width:100%;max-height:240px;border-radius:8px;border:1px solid #333">
+        <div style="margin-top:8px;display:flex;gap:8px;justify-content:center">
+          <button onclick="DocScan._runOcr('upload')" type="button"
+            style="padding:10px 20px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-weight:700;cursor:pointer">
+            <i class="fas fa-magic" style="margin-right:6px"></i>{% trans "Izvuci podatke" %}
+          </button>
+          <button onclick="DocScan._clearUpload()" type="button"
+            style="padding:10px 16px;background:rgba(255,255,255,.06);border:1px solid #444;border-radius:8px;color:#ccc;cursor:pointer">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <!-- OCR overlay upload -->
+      <div id="dsmOcrOverlayUp" style="display:none;text-align:center;padding:20px">
+        <div style="width:40px;height:40px;border:3px solid #333;border-top-color:#c9a84c;
+             border-radius:50%;animation:dsmSpin 1s linear infinite;margin:0 auto 12px"></div>
+        <div id="dsmOcrTxtUp" style="color:#ccc;font-size:.85rem">{% trans "Čitam dokument..." %}</div>
+        <div style="width:200px;height:4px;background:#222;border-radius:2px;margin:8px auto 0">
+          <div id="dsmBarUp" style="height:100%;width:0;background:#c9a84c;border-radius:2px;transition:width .3s"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result panel -->
+    <div id="dsmResultPanel" style="display:none;padding:16px 20px 20px;border-top:1px solid rgba(201,168,76,.15)">
+      <div style="font-size:.8rem;color:#c9a84c;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">
+        <i class="fas fa-check-circle" style="margin-right:6px"></i>{% trans "Pronađeni podaci" %}
+      </div>
+      <div id="dsmResultChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+      <button onclick="DocScan._apply()" type="button"
+        style="width:100%;padding:13px;background:#c9a84c;border:none;border-radius:10px;
+               color:#000;font-weight:700;cursor:pointer;font-size:.95rem">
+        <i class="fas fa-arrow-right" style="margin-right:8px"></i>{% trans "Primijeni i zatvori" %}
+      </button>
+    </div>
+
+    <!-- No-result panel -->
+    <div id="dsmNoResult" style="display:none;padding:16px 20px 20px;border-top:1px solid rgba(255,255,255,.06);text-align:center">
+      <i class="fas fa-exclamation-circle" style="font-size:2rem;color:#f59e0b;margin-bottom:8px;display:block"></i>
+      <div style="color:#ccc;font-size:.9rem;margin-bottom:4px">{% trans "Nije pronađen OIB" %}</div>
+      <div style="color:#555;font-size:.8rem;margin-bottom:14px">{% trans "Pokušajte bolju sliku ili unesite ručno" %}</div>
+      <button onclick="DocScan._reset()" type="button"
+        style="padding:10px 20px;background:rgba(201,168,76,.1);border:1.5px solid #c9a84c;
+               border-radius:8px;color:#c9a84c;font-weight:600;cursor:pointer">
+        <i class="fas fa-redo" style="margin-right:6px"></i>{% trans "Pokušaj ponovo" %}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes dsmSpin{to{transform:rotate(360deg)}}
+@keyframes dsmFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#docScanModal.dsm-open{display:flex!important;animation:dsmFadeIn .22s ease}
+/* Scan gumb — standardni izgled za cijeli portal */
+.dsm-scan-btn{
+  padding:0 12px;
+  background:rgba(201,168,76,.08);
+  border:1.5px solid rgba(201,168,76,.5);
+  border-radius:8px;
+  color:#c9a84c;
+  cursor:pointer;
+  font-size:1rem;
+  transition:all .2s;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.dsm-scan-btn:hover{background:rgba(201,168,76,.18);border-color:#c9a84c}
+.dsm-scan-btn .dsm-lbl{font-size:.75rem;font-weight:600;display:none}
+@media(min-width:420px){.dsm-scan-btn .dsm-lbl{display:inline}}
+.dsm-result-chip{
+  display:inline-flex;align-items:flex-start;gap:6px;
+  background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);
+  border-radius:8px;padding:6px 12px;font-size:.85rem;color:#ccc;
+}
+.dsm-result-chip strong{color:#22c55e;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;display:block;line-height:1.2}
+</style>
+
+<script>
+/**
+ * DocScan — Globalni API za skeniranje dokumenata
+ *
+ * DocScan.open({
+ *   fields: {
+ *     oib:        'element-id',      // jedino obavezno
+ *     name:       'name-id',
+ *     first_name: 'fn-id',
+ *     last_name:  'ln-id',
+ *     address:    'addr-id',
+ *     city:       'city-id',
+ *     zip_code:   'zip-id',
+ *   },
+ *   country:   'HR',                 // HR (default) | DE | AT | SI
+ *   onApply:   function(data) {}     // opcionalni callback
+ * })
+ */
+window.DocScan = (function() {
+  'use strict';
+
+  var _opts = {};
+  var _extracted = {};
+  var _stream = null;
+  var _snapUrl = null;
+  var _activePanel = 'camera';
+
+  // ── Otvori modal ─────────────────────────────────────────
+  function open(opts) {
+    _opts = opts || {};
+    _extracted = {};
+    _snapUrl = null;
+    var modal = document.getElementById('docScanModal');
+    modal.style.display = 'flex';
+    modal.classList.add('dsm-open');
+    document.body.style.overflow = 'hidden';
+    _reset();
+    _switchTab('camera');
+  }
+
+  function close() {
+    var modal = document.getElementById('docScanModal');
+    modal.style.display = 'none';
+    modal.classList.remove('dsm-open');
+    document.body.style.overflow = '';
+    _stopCamera();
+  }
+
+  // Backdrop + ESC
+  document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('docScanModal');
+    if (!modal) return;
+    modal.addEventListener('click', function(e) { if(e.target === this) close(); });
+    document.addEventListener('keydown', function(e) { if(e.key==='Escape' && modal.style.display!=='none') close(); });
+  });
+
+  // ── Tab switcher ──────────────────────────────────────────
+  function _switchTab(tab) {
+    _activePanel = tab;
+    var isCamera = (tab === 'camera');
+    document.getElementById('dsmPanelCamera').style.display = isCamera ? 'block' : 'none';
+    document.getElementById('dsmPanelUpload').style.display = isCamera ? 'none' : 'block';
+    var tCam = document.getElementById('dsmTabCamera');
+    var tUp  = document.getElementById('dsmTabUpload');
+    if (tCam && tUp) {
+      if (isCamera) {
+        tCam.style.background='rgba(201,168,76,.1)'; tCam.style.color='#c9a84c'; tCam.style.borderBottom='2px solid #c9a84c';
+        tUp.style.background='none'; tUp.style.color='#666'; tUp.style.borderBottom='2px solid transparent';
+        _startCamera();
+      } else {
+        tUp.style.background='rgba(201,168,76,.1)'; tUp.style.color='#c9a84c'; tUp.style.borderBottom='2px solid #c9a84c';
+        tCam.style.background='none'; tCam.style.color='#666'; tCam.style.borderBottom='2px solid transparent';
+        _stopCamera();
+      }
+    }
+  }
+
+  // ── Kamera ────────────────────────────────────────────────
+  function _startCamera() {
+    var video = document.getElementById('dsmVideo');
+    var btnStart = document.getElementById('dsmBtnStartCam');
+    var btnSnap = document.getElementById('dsmBtnSnap');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      _switchTab('upload'); return;
+    }
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: {ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080} }
+    }).then(function(stream) {
+      _stream = stream;
+      video.srcObject = stream;
+      video.style.display = 'block';
+      document.getElementById('dsmCanvas').style.display = 'none';
+      if (btnStart) btnStart.style.display = 'none';
+      if (btnSnap) { btnSnap.style.display = 'flex'; }
+      document.getElementById('dsmCamHint').textContent = '{% trans "Postavite dokument unutar okvira" %}';
+    }).catch(function() { _switchTab('upload'); });
+  }
+
+  function _stopCamera() {
+    if (_stream) { _stream.getTracks().forEach(function(t) { t.stop(); }); _stream = null; }
+    var video = document.getElementById('dsmVideo');
+    if (video) { video.srcObject = null; }
+    var btnStart = document.getElementById('dsmBtnStartCam');
+    var btnSnap  = document.getElementById('dsmBtnSnap');
+    var btnRetake = document.getElementById('dsmBtnRetake');
+    if (btnStart)  btnStart.style.display = 'flex';
+    if (btnSnap)   btnSnap.style.display = 'none';
+    if (btnRetake) btnRetake.style.display = 'none';
+  }
+
+  function _snap() {
+    var video = document.getElementById('dsmVideo');
+    var canvas = document.getElementById('dsmCanvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    _snapUrl = canvas.toDataURL('image/jpeg', 0.92);
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    _stopCamera();
+    var btnSnap = document.getElementById('dsmBtnSnap');
+    var btnRetake = document.getElementById('dsmBtnRetake');
+    if (btnSnap) btnSnap.style.display = 'none';
+    if (btnRetake) btnRetake.style.display = 'flex';
+    document.getElementById('dsmCamHint').textContent = '{% trans "Analiziram sliku..." %}';
+    _runOcr('camera');
+  }
+
+  function _retake() {
+    _snapUrl = null;
+    document.getElementById('dsmCanvas').style.display = 'none';
+    document.getElementById('dsmVideo').style.display = 'block';
+    document.getElementById('dsmBtnRetake').style.display = 'none';
+    document.getElementById('dsmResultPanel').style.display = 'none';
+    document.getElementById('dsmNoResult').style.display = 'none';
+    _hideOcrOverlay('camera');
+    _startCamera();
+  }
+
+  // ── File upload ───────────────────────────────────────────
+  function _fileDrop(e) {
+    e.preventDefault();
+    var file = e.dataTransfer.files[0];
+    if (file) _loadFile(file);
+    var dz = document.getElementById('dsmDropZone');
+    dz.style.borderColor = 'rgba(201,168,76,.3)'; dz.style.background = 'rgba(201,168,76,.03)';
+  }
+  function _fileSelect(input) {
+    if (input.files && input.files[0]) _loadFile(input.files[0]);
+  }
+  function _loadFile(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      _snapUrl = ev.target.result;
+      document.getElementById('dsmPreviewImg').src = _snapUrl;
+      document.getElementById('dsmUploadPreview').style.display = 'block';
+      document.getElementById('dsmDropZone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+  function _clearUpload() {
+    _snapUrl = null;
+    document.getElementById('dsmUploadPreview').style.display = 'none';
+    document.getElementById('dsmDropZone').style.display = 'block';
+    document.getElementById('dsmFileInput').value = '';
+    document.getElementById('dsmResultPanel').style.display = 'none';
+    document.getElementById('dsmNoResult').style.display = 'none';
+    _hideOcrOverlay('upload');
+  }
+
+  // ── OCR overlay helpers ───────────────────────────────────
+  function _showOcrOverlay(panel, pct, text) {
+    if (panel === 'camera') {
+      var ov = document.getElementById('dsmOcrOverlayCam');
+      ov.style.display = 'flex';
+      document.getElementById('dsmBarCam').style.width = (pct*100) + '%';
+      if (text) document.getElementById('dsmOcrTxtCam').textContent = text;
+    } else {
+      document.getElementById('dsmOcrOverlayUp').style.display = 'block';
+      document.getElementById('dsmBarUp').style.width = (pct*100) + '%';
+      if (text) document.getElementById('dsmOcrTxtUp').textContent = text;
+      document.getElementById('dsmUploadPreview').style.display = 'none';
+    }
+  }
+  function _hideOcrOverlay(panel) {
+    if (panel === 'camera') {
+      document.getElementById('dsmOcrOverlayCam').style.display = 'none';
+    } else {
+      document.getElementById('dsmOcrOverlayUp').style.display = 'none';
+      if (_snapUrl) document.getElementById('dsmUploadPreview').style.display = 'block';
+    }
+  }
+
+  // ── Tesseract.js loader + OCR ─────────────────────────────
+  function _loadTesseract(cb) {
+    if (window.Tesseract) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = cb;
+    s.onerror = function() {
+      alert('{% trans "OCR biblioteka nije učitana. Provjerite internet vezu." %}');
+    };
+    document.head.appendChild(s);
+  }
+
+  function _runOcr(panel) {
+    if (!_snapUrl) return;
+    _showOcrOverlay(panel, 0.05, '{% trans "Učitavam OCR engine..." %}');
+    _loadTesseract(function() {
+      _showOcrOverlay(panel, 0.15, '{% trans "Inicijaliziram..." %}');
+      var country = _opts.country || 'HR';
+      var langs = (country === 'DE' || country === 'AT') ? ['deu', 'eng'] : ['hrv', 'eng'];
+      Tesseract.createWorker(langs, 1, {
+        workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+        corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js',
+        logger: function(m) {
+          if (m.status === 'recognizing text') {
+            var pct = 0.3 + m.progress * 0.6;
+            _showOcrOverlay(panel, pct, '{% trans "Čitam dokument..." %} ' + Math.round(pct*100) + '%');
+          } else if (m.status === 'loading language traineddata') {
+            _showOcrOverlay(panel, 0.2, '{% trans "Preuzimam jezični paket..." %}');
+          }
+        }
+      }).then(function(worker) {
+        return worker.recognize(_snapUrl).then(function(result) {
+          worker.terminate();
+          _showOcrOverlay(panel, 1.0, '{% trans "Gotovo!" %}');
+          setTimeout(function() {
+            _hideOcrOverlay(panel);
+            _processText(result.data.text);
+          }, 350);
+        });
+      }).catch(function(err) {
+        console.error('DocScan OCR error:', err);
+        _hideOcrOverlay(panel);
+        document.getElementById('dsmNoResult').style.display = 'block';
+      });
+    });
+  }
+
+  // ── Ekstrakcija podataka iz OCR teksta ────────────────────
+  function _processText(text) {
+    _extracted = {};
+    var results = [];
+    var country = _opts.country || 'HR';
+
+    // OIB — HR: točno 11 znamenki; DE: 9-11 znamenki za Steuernummer
+    if (country === 'HR' || country === 'SI') {
+      var oibAll = text.match(/\b(\d{11})\b/g);
+      if (oibAll && oibAll.length) {
+        _extracted.oib = oibAll[0];
+        results.push({ label:'OIB', value:oibAll[0], icon:'fas fa-fingerprint' });
+        if (oibAll.length > 1) _extracted.oib_person = oibAll[1];
+      }
+    } else {
+      // DE/AT: Steuernummer pattern
+      var stNr = text.match(/\b(\d[\d\/]{9,13})\b/);
+      if (stNr) {
+        _extracted.oib = stNr[1].replace(/\//g, '');
+        results.push({ label:'Steuernummer', value:stNr[1], icon:'fas fa-fingerprint' });
+      }
+    }
+
+    // Naziv tvrtke
+    var namePatterns = [
+      /(?:NAZIV|Naziv|naziv|TVRTKA|Tvrtka|Poslovni naziv|POSLOVNI NAZIV)[:\s]+([^\n\r]{3,80})/i,
+      /([A-ZČĆŽŠĐ][A-Za-zČĆŽŠĐčćžšđ\s]+(?:d\.o\.o\.|j\.d\.o\.o\.|d\.d\.|o\.j\.s\.|obrt|OBRT)[^\n\r]{0,20})/,
+      /([A-ZČĆŽŠĐ][A-Za-zČĆŽŠĐčćžšđ0-9\s&\-,\.]+(?:GmbH|GbR|UG|AG|KG|OG|e\.U\.))/,
+    ];
+    for (var i=0; i<namePatterns.length; i++) {
+      var nm = text.match(namePatterns[i]);
+      if (nm && nm[1] && nm[1].trim().length > 2) {
+        _extracted.name = nm[1].trim().replace(/\s+/g,' ');
+        results.push({ label:'{% trans "Naziv" %}', value:_extracted.name, icon:'fas fa-building' });
+        break;
+      }
+    }
+
+    // Ime i prezime
+    var personP = /(?:IME I PREZIME|Ime i prezime|Ime:|PREZIME:)[:\s]+([A-ZČĆŽŠĐ][a-zčćžšđA-ZČĆŽŠĐ]+\s+[A-ZČĆŽŠĐ][a-zčćžšđA-ZČĆŽŠĐ]+)/i;
+    var person = text.match(personP);
+    if (person && person[1]) {
+      var parts = person[1].trim().split(/\s+/);
+      _extracted.first_name = parts[0];
+      _extracted.last_name  = parts.slice(1).join(' ');
+      results.push({ label:'{% trans "Ime" %}', value:person[1].trim(), icon:'fas fa-user' });
+    }
+
+    // Adresa
+    var addrP = /(?:ADRESA|Adresa|SJEDIŠTE|Sjedište|Boravište|BORAVIŠTE)[:\s]+([^\n\r]{5,80})/i;
+    var addr = text.match(addrP);
+    if (addr && addr[1]) {
+      _extracted.address = addr[1].trim().replace(/\s+/g,' ');
+      results.push({ label:'{% trans "Adresa" %}', value:_extracted.address, icon:'fas fa-map-marker-alt' });
+    }
+
+    // Grad + poštanski
+    var zipCity = text.match(/\b(\d{5})\s+([A-ZČĆŽŠĐ][a-zčćžšđA-ZČĆŽŠĐ\s\-]{2,30})/);
+    if (zipCity) {
+      _extracted.zip_code = zipCity[1];
+      _extracted.city = zipCity[2].trim();
+      results.push({ label:'{% trans "Grad" %}', value:zipCity[1]+' '+zipCity[2].trim(), icon:'fas fa-city' });
+    }
+
+    if (results.length === 0) {
+      document.getElementById('dsmNoResult').style.display = 'block';
+      return;
+    }
+
+    var html = results.map(function(r) {
+      return '<div class="dsm-result-chip">'
+        + '<i class="'+r.icon+'" style="color:#c9a84c;margin-top:2px"></i>'
+        + '<div><strong>'+r.label+'</strong>'+r.value+'</div></div>';
+    }).join('');
+    document.getElementById('dsmResultChips').innerHTML = html;
+    document.getElementById('dsmResultPanel').style.display = 'block';
+  }
+
+  // ── Primijeni podatke na forma polja ─────────────────────
+  function _apply() {
+    var fields = _opts.fields || {};
+
+    function fill(fieldKey, value) {
+      var id = fields[fieldKey];
+      if (!id || !value) return;
+      var el = document.getElementById(id);
+      if (!el) el = document.querySelector('[name="'+id+'"]');
+      if (el) {
+        el.value = value;
+        // Triggeri input event da AJAX lookup zna
+        el.dispatchEvent(new Event('input', {bubbles:true}));
+        el.dispatchEvent(new Event('change', {bubbles:true}));
+      }
+    }
+
+    fill('oib',        _extracted.oib);
+    fill('name',       _extracted.name);
+    fill('first_name', _extracted.first_name);
+    fill('last_name',  _extracted.last_name);
+    fill('address',    _extracted.address);
+    fill('city',       _extracted.city);
+    fill('zip_code',   _extracted.zip_code);
+
+    if (typeof _opts.onApply === 'function') _opts.onApply(_extracted);
+
+    close();
+  }
+
+  // ── Reset ─────────────────────────────────────────────────
+  function _reset() {
+    _extracted = {};
+    _snapUrl = null;
+    document.getElementById('dsmResultPanel').style.display = 'none';
+    document.getElementById('dsmNoResult').style.display = 'none';
+    document.getElementById('dsmOcrOverlayCam').style.display = 'none';
+    document.getElementById('dsmOcrOverlayUp').style.display = 'none';
+    document.getElementById('dsmResultChips').innerHTML = '';
+    document.getElementById('dsmUploadPreview').style.display = 'none';
+    document.getElementById('dsmDropZone').style.display = 'block';
+    document.getElementById('dsmFileInput').value = '';
+    document.getElementById('dsmCanvas').style.display = 'none';
+    document.getElementById('dsmVideo').style.display = 'block';
+    var btnStart = document.getElementById('dsmBtnStartCam');
+    var btnSnap  = document.getElementById('dsmBtnSnap');
+    var btnRetake = document.getElementById('dsmBtnRetake');
+    if (btnStart) btnStart.style.display = 'flex';
+    if (btnSnap) btnSnap.style.display = 'none';
+    if (btnRetake) btnRetake.style.display = 'none';
+  }
+
+  // ── Public API ────────────────────────────────────────────
+  return {
+    open:        open,
+    close:       close,
+    _switchTab:  _switchTab,
+    _startCamera:_startCamera,
+    _snap:       _snap,
+    _retake:     _retake,
+    _fileDrop:   _fileDrop,
+    _fileSelect: _fileSelect,
+    _clearUpload:_clearUpload,
+    _runOcr:     _runOcr,
+    _apply:      _apply,
+    _reset:      _reset,
+  };
+})();
+</script>

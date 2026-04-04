@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Novi ljubimac – LIMIT Connect{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:680px">
+
+  <div class="mb-4">
+    <a href="{% url 'livestock:pet_list' %}" class="text-muted text-decoration-none small">
+      ← Uzgajalište
+    </a>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold,#c9a84c);margin-top:.5rem">
+      Novi ljubimac
+    </h1>
+  </div>
+
+  <!-- ═══ AI KAMERA SEKCIJA ═══ -->
+  <div class="card bg-dark border-warning mb-4" style="border-color:rgba(201,168,76,.4)!important">
+    <div class="card-body p-3">
+      <div class="fw-bold text-warning mb-2">
+        <i class="fas fa-camera-retro me-2"></i>Fotografiraj psa — AI popuni polja
+      </div>
+      <div class="text-muted small mb-3">Snimi ili učitaj foto. Claude AI prepoznaje pasminu, boju i spol.</div>
+
+      <!-- Camera preview -->
+      <div id="camBox" style="position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3;margin-bottom:10px;display:none">
+        <video id="petVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
+        <canvas id="petCanvas" style="display:none;width:100%;height:100%;object-fit:cover"></canvas>
+        <div id="aiOverlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.8);
+             flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center">
+          <div style="width:36px;height:36px;border:3px solid #333;border-top-color:#c9a84c;
+               border-radius:50%;animation:dsmSpin 1s linear infinite"></div>
+          <div style="color:#ccc;font-size:.85rem">Claude analizira psa...</div>
+        </div>
+      </div>
+
+      <!-- Preview img za upload -->
+      <div id="uploadPreview" style="display:none;margin-bottom:10px;text-align:center">
+        <img id="uploadPreviewImg" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #333">
+      </div>
+
+      <!-- AI result -->
+      <div id="aiResult" style="display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);
+           border-radius:8px;padding:12px;margin-bottom:10px;font-size:.88rem">
+        <div class="text-success fw-bold mb-1"><i class="fas fa-check-circle me-1"></i>Prepoznato:</div>
+        <div id="aiResultText" style="color:#ccc;line-height:1.7"></div>
+        <button type="button" onclick="applyAiFields()" class="btn btn-sm btn-warning mt-2 fw-bold">
+          <i class="fas fa-arrow-down me-1"></i>Primijeni u formu
+        </button>
+      </div>
+      <div id="aiError" style="display:none;color:#f87171;font-size:.83rem;margin-bottom:8px"></div>
+
+      <!-- Gumbi -->
+      <div class="d-flex gap-2 flex-wrap">
+        <button type="button" id="btnCamStart" onclick="startPetCam()"
+          style="padding:9px 16px;background:rgba(201,168,76,.1);border:1.5px solid #c9a84c;
+                 border-radius:8px;color:#c9a84c;font-weight:600;cursor:pointer;font-size:.88rem">
+          <i class="fas fa-video me-1"></i>Kamera
+        </button>
+        <button type="button" id="btnSnap" onclick="snapPet()" style="display:none;
+          padding:9px 16px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-weight:700;cursor:pointer">
+          <i class="fas fa-circle me-1"></i>Snimi
+        </button>
+        <label style="padding:9px 16px;background:#1e293b;border:1px solid #334155;border-radius:8px;
+                color:#94a3b8;cursor:pointer;font-size:.88rem;margin:0">
+          <i class="fas fa-image me-1"></i>Učitaj foto
+          <input type="file" id="petFileInput" accept="image/*" style="display:none" onchange="handlePetFile(this)">
+        </label>
+        <button type="button" id="btnRetake" onclick="retakePet()" style="display:none;
+          padding:9px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#94a3b8;cursor:pointer">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FORMA ═══ -->
+  <form method="post" enctype="multipart/form-data" id="petForm">
+    {% csrf_token %}
+
+    <div class="row g-3">
+      <div class="col-6">
+        <label class="form-label fw-semibold text-light">Vrsta *</label>
+        <select name="vrsta" id="fVrsta" class="form-select bg-dark text-light border-secondary">
+          {% for val, lbl in pet_vrste %}
+          <option value="{{ val }}" {% if val == 'pas' %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold text-light">Spol</label>
+        <select name="spol" id="fSpol" class="form-select bg-dark text-light border-secondary">
+          {% for val, lbl in spol_choices %}
+          <option value="{{ val }}">{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Ime</label>
+        <input type="text" name="name" id="fName" class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. Rex, Luna, Max">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Pasmina</label>
+        <input type="text" name="breed" id="fBreed" class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. Njemački ovčar">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Datum rođenja</label>
+        <input type="date" name="date_of_birth" class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Broj mikročipa</label>
+        <input type="text" name="chip_number" id="fChip" class="form-control bg-dark text-light border-secondary"
+               placeholder="15 znamenki" maxlength="20">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Broj rodovnice</label>
+        <input type="text" name="pedigree_number" class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. HR-12345-2024">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Opis boje / šare</label>
+        <input type="text" name="color_description" id="fColor" class="form-control bg-dark text-light border-secondary"
+               placeholder="npr. crno-smeđi s bijelim prsištem">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Otac (ime / rod. br.)</label>
+        <input type="text" name="father_name" class="form-control bg-dark text-light border-secondary">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold text-light">Majka (ime / rod. br.)</label>
+        <input type="text" name="mother_name" class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold text-light">Težina (kg)</label>
+        <input type="number" name="weight_kg" step="0.1" class="form-control bg-dark text-light border-secondary">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Fotografija (opcionalno)</label>
+        <input type="file" name="photo" accept="image/*" class="form-control bg-dark text-light border-secondary">
+        <div class="form-text">Ako ste već snimili kamerom gore, ovo ostavite prazno.</div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold text-light">Napomene</label>
+        <textarea name="notes" rows="3" class="form-control bg-dark text-light border-secondary"
+                  placeholder="Posebnosti, alergije, karakter..."></textarea>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <a href="{% url 'livestock:pet_list' %}" class="btn btn-outline-secondary">← Odustani</a>
+      <button type="submit" class="btn btn-warning fw-bold flex-grow-1">
+        <i class="fas fa-save me-2"></i>Spremi ljubimca
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+var _petStream = null;
+var _snapDataUrl = null;
+var _aiData = {};
+
+function startPetCam(){
+  document.getElementById('camBox').style.display='block';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert('Kamera nije dostupna.'); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}})
+    .then(function(s){
+      _petStream=s;
+      var v=document.getElementById('petVideo');
+      v.srcObject=s; v.style.display='block';
+      document.getElementById('petCanvas').style.display='none';
+      document.getElementById('btnCamStart').style.display='none';
+      document.getElementById('btnSnap').style.display='inline-block';
+    }).catch(function(){ document.getElementById('petFileInput').click(); });
+}
+
+function snapPet(){
+  var v=document.getElementById('petVideo');
+  var c=document.getElementById('petCanvas');
+  var ctx=c.getContext('2d');
+  c.width=v.videoWidth||1280; c.height=v.videoHeight||720;
+  ctx.drawImage(v,0,0,c.width,c.height);
+  _snapDataUrl=c.toDataURL('image/jpeg',0.85);
+  v.style.display='none'; c.style.display='block';
+  if(_petStream){_petStream.getTracks().forEach(function(t){t.stop()});_petStream=null;}
+  document.getElementById('btnSnap').style.display='none';
+  document.getElementById('btnRetake').style.display='inline-block';
+  runAiScan(_snapDataUrl);
+}
+
+function retakePet(){
+  _snapDataUrl=null; _aiData={};
+  document.getElementById('petCanvas').style.display='none';
+  document.getElementById('petVideo').style.display='block';
+  document.getElementById('btnRetake').style.display='none';
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('aiError').style.display='none';
+  startPetCam();
+}
+
+function handlePetFile(input){
+  if(!input.files||!input.files[0]) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    _snapDataUrl=ev.target.result;
+    document.getElementById('uploadPreviewImg').src=_snapDataUrl;
+    document.getElementById('uploadPreview').style.display='block';
+    document.getElementById('camBox').style.display='none';
+    runAiScan(_snapDataUrl);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function runAiScan(dataUrl){
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('aiError').style.display='none';
+  document.getElementById('aiOverlay').style.display='flex';
+
+  // Resize na max 1024px za brzinu
+  var img=new Image();
+  img.onload=function(){
+    var canvas=document.createElement('canvas');
+    var maxDim=1024;
+    var ratio=Math.min(maxDim/img.width,maxDim/img.height,1);
+    canvas.width=img.width*ratio; canvas.height=img.height*ratio;
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    var b64=canvas.toDataURL('image/jpeg',0.82).split(',')[1];
+
+    fetch('/livestock/pets/api/scan-photo/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]').value},
+      body:JSON.stringify({image:b64})
+    })
+    .then(function(r){return r.json()})
+    .then(function(d){
+      document.getElementById('aiOverlay').style.display='none';
+      if(d.ok && d.fields){
+        _aiData=d.fields;
+        var conf=Math.round((d.confidence||0.5)*100);
+        var lines=[];
+        if(d.fields.pasmina) lines.push('🐕 <b>Pasmina:</b> '+d.fields.pasmina);
+        if(d.fields.boja_opis) lines.push('🎨 <b>Boja:</b> '+d.fields.boja_opis);
+        if(d.fields.spol) lines.push('⚥ <b>Spol:</b> '+(d.fields.spol==='M'?'Mužjak':d.fields.spol==='F'?'Ženka':'Nepoznato'));
+        if(d.fields.dob_procjena) lines.push('📅 <b>Dob:</b> '+d.fields.dob_procjena);
+        if(d.fields.ime_prijedlog) lines.push('💡 <b>Prijedlog imena:</b> '+d.fields.ime_prijedlog);
+        lines.push('<span style="color:#94a3b8;font-size:.78rem">Točnost: '+conf+'%</span>');
+        document.getElementById('aiResultText').innerHTML=lines.join('<br>');
+        document.getElementById('aiResult').style.display='block';
+      } else {
+        document.getElementById('aiError').textContent='Nije prepoznat pas na slici. Pokušajte boljom fotografijom.';
+        document.getElementById('aiError').style.display='block';
+      }
+    })
+    .catch(function(e){
+      document.getElementById('aiOverlay').style.display='none';
+      document.getElementById('aiError').textContent='Greška pri analizi: '+e.message;
+      document.getElementById('aiError').style.display='block';
+    });
+  };
+  img.src=dataUrl;
+}
+
+function applyAiFields(){
+  if(_aiData.pasmina) document.getElementById('fBreed').value=_aiData.pasmina;
+  if(_aiData.boja_opis) document.getElementById('fColor').value=_aiData.boja_opis;
+  if(_aiData.spol){
+    var s=document.getElementById('fSpol');
+    for(var i=0;i<s.options.length;i++){
+      if(s.options[i].value===_aiData.spol){s.selectedIndex=i;break;}
+    }
+  }
+  if(_aiData.ime_prijedlog && !document.getElementById('fName').value){
+    document.getElementById('fName').value=_aiData.ime_prijedlog;
+  }
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('fBreed').focus();
+}
+</script>
+{% endblock %}

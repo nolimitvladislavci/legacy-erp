@@ -396,6 +396,17 @@ MODULES = [
         'auto_for': ['opg'],
     },
     {
+        'id': 'pets',
+        'name': 'Uzgajalište ljubimaca',
+        'icon': 'fa-paw',
+        'url': '/livestock/pets/',
+        'url_name': 'livestock:pet_list',
+        'category': 'vertikale',
+        'tier': TIER_VERTICAL,
+        'description': 'Psi, mačke, konji — rodovnice, zdravstveni kartoni, AI prepoznavanje.',
+        'price_addon': 5,
+    },
+    {
         'id': 'fitness',
         'name': 'Fitness & Wellness',
         'icon': 'fa-dumbbell',

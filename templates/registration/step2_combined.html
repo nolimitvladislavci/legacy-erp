@@ -18,7 +18,7 @@
   <form method="post" autocomplete="on" id="regForm">
   {% csrf_token %}
 
-  <!-- ═══ DRŽAVA (inline radio) ═══ -->
+  <!-- ═══ DRŽAVA ═══ -->
   <div class="reg-field" style="margin-bottom:20px">
     <div style="display:flex;gap:1rem;flex-wrap:wrap">
       <label class="country-opt">
@@ -36,10 +36,22 @@
     </div>
   </div>
 
-  <!-- ═══ POLJE 1: OIB ═══ -->
+  <!-- ═══ POLJE 1: OIB + SCAN ═══ -->
   <div class="reg-field primary-field">
     <label id="oibLabel"><i class="fas fa-fingerprint" style="color:var(--gold);margin-right:6px"></i> OIB *</label>
-    <input type="text" name="oib" id="oib-input" value="{{ company.oib }}" class="reg-input reg-input-lg" placeholder="12345678901" required autofocus>
+    <div style="display:flex;gap:8px;align-items:stretch">
+      <input type="text" name="oib" id="oib-input" value="{{ company.oib }}" class="reg-input reg-input-lg" style="flex:1"
+             placeholder="12345678901" required autofocus>
+      <button type="button" class="dsm-scan-btn" title="{% trans 'Skeniraj dokument' %}"
+        onclick="DocScan.open({
+          fields:{oib:'oib-input',name:'nameInput',first_name:'firstNameInput',last_name:'lastNameInput',address:'addressInput',city:'cityInput',zip_code:'zipInput'},
+          country: document.querySelector('input[name=country]:checked')?.value||'HR',
+          onApply: function(d){ if(d.oib){ document.getElementById('oib-input').dispatchEvent(new Event('input')); } }
+        })">
+        <i class="fas fa-camera"></i>
+        <span class="dsm-lbl">{% trans "Skeniraj" %}</span>
+      </button>
+    </div>
     <div id="oib-status" style="font-size:0.85rem;margin-top:4px;display:none"></div>
     {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
   </div>
@@ -54,7 +66,8 @@
   <!-- ═══ POLJE 3: LOZINKA ═══ -->
   <div class="reg-field primary-field">
     <label><i class="fas fa-lock" style="color:var(--gold);margin-right:6px"></i> {% trans "Lozinka" %} *</label>
-    <input type="password" name="password1" id="pw1" class="reg-input reg-input-lg" minlength="8" required autocomplete="new-password" placeholder="{% trans 'Min. 8 znakova, 1 veliko slovo, 1 broj' %}">
+    <input type="password" name="password1" id="pw1" class="reg-input reg-input-lg" minlength="8" required autocomplete="new-password"
+           placeholder="{% trans 'Min. 8 znakova, 1 veliko slovo, 1 broj' %}">
     {% if errors.password1 %}<div class="error-msg">{{ errors.password1 }}</div>{% endif %}
     <div id="pw-strength" style="height:4px;border-radius:2px;margin-top:4px;background:var(--border,#333);overflow:hidden">
       <div id="pw-bar" style="height:100%;width:0;transition:all .3s;border-radius:2px"></div>
@@ -62,11 +75,12 @@
   </div>
 
   <div class="reg-field">
-    <input type="password" name="password2" id="pw2" class="reg-input" minlength="8" required autocomplete="new-password" placeholder="{% trans 'Potvrdite lozinku' %}">
+    <input type="password" name="password2" id="pw2" class="reg-input" minlength="8" required autocomplete="new-password"
+           placeholder="{% trans 'Potvrdite lozinku' %}">
     {% if errors.password2 %}<div class="error-msg">{{ errors.password2 }}</div>{% endif %}
   </div>
 
-  <!-- ═══ AUTO-FILLED DETALJI (sklopivo) ═══ -->
+  <!-- ═══ AUTO-FILLED DETALJI ═══ -->
   <div id="details-section" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(201,168,76,.15)">
     <div class="details-header" onclick="toggleDetails()" style="cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <i class="fas fa-chevron-down" id="details-chevron" style="color:var(--gold,#c9a84c);font-size:.75rem;transition:transform .2s"></i>
@@ -77,13 +91,15 @@
     <div id="details-fields" style="display:none">
       <div class="reg-field">
         <label>{% trans "Naziv tvrtke" %} *</label>
-        <input type="text" name="name" id="nameInput" value="{{ company.name }}" class="reg-input" placeholder="{% trans 'Primjer d.o.o.' %}" required autocomplete="organization">
+        <input type="text" name="name" id="nameInput" value="{{ company.name }}" class="reg-input"
+               placeholder="{% trans 'Primjer d.o.o.' %}" required autocomplete="organization">
         {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
       </div>
 
       <div class="reg-field">
         <label>{% trans "Adresa" %}</label>
-        <input type="text" name="address" id="addressInput" value="{{ company.address }}" class="reg-input" placeholder="{% trans 'Ulica i kućni broj' %}">
+        <input type="text" name="address" id="addressInput" value="{{ company.address }}" class="reg-input"
+               placeholder="{% trans 'Ulica i kućni broj' %}">
       </div>
 
       <div class="reg-form-row">
@@ -107,12 +123,14 @@
       <div class="reg-form-row">
         <div class="reg-field">
           <label>{% trans "Ime" %} *</label>
-          <input type="text" name="first_name" id="firstNameInput" value="{{ user.first_name }}" class="reg-input" required autocomplete="given-name">
+          <input type="text" name="first_name" id="firstNameInput" value="{{ user.first_name }}" class="reg-input"
+                 required autocomplete="given-name">
           {% if errors.first_name %}<div class="error-msg">{{ errors.first_name }}</div>{% endif %}
         </div>
         <div class="reg-field">
           <label>{% trans "Prezime" %}</label>
-          <input type="text" name="last_name" value="{{ user.last_name }}" class="reg-input" autocomplete="family-name">
+          <input type="text" name="last_name" id="lastNameInput" value="{{ user.last_name }}" class="reg-input"
+                 autocomplete="family-name">
         </div>
       </div>
 
@@ -122,14 +140,10 @@
       </div>
     </div>
 
-    <!-- Sažetak kad je zatvoreno -->
     <div id="details-summary" class="auto-fill-summary">
       <div id="summary-content" style="display:flex;flex-wrap:wrap;gap:8px"></div>
     </div>
   </div>
-
-  <!-- Skriveni fallback za name ako korisnik ne otvori detalje -->
-  <input type="hidden" name="name" id="nameHidden" value="" disabled>
 
   <div class="reg-actions" style="margin-top:24px">
     <a href="{% url 'registration:register_step1' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
@@ -150,7 +164,7 @@
 </style>
 
 <script>
-// ═══ OIB AUTO-FILL ═══
+// ── OIB auto-fill iz registra ──
 (function(){
   var oibInput = document.getElementById('oib-input');
   var statusEl = document.getElementById('oib-status');
@@ -167,12 +181,9 @@
     var oib = this.value.trim();
     var country = (document.querySelector('input[name="country"]:checked') || {}).value || 'HR';
     var minLen = country === 'HR' ? 11 : 8;
-
     if(oib.length < minLen){ statusEl.style.display='none'; detailsSection.style.display='none'; return; }
-
     statusEl.style.display='block';
     statusEl.innerHTML='<span style="color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> {% trans "Tražim..." %}</span>';
-
     timer = setTimeout(function(){
       fetch('/register/api/oib-lookup/?oib='+encodeURIComponent(oib)+'&country='+country)
         .then(function(r){return r.json()})
@@ -183,7 +194,6 @@
             if(d.address) addressInput.value=d.address;
             if(d.city) cityInput.value=d.city;
             if(d.zip_code) zipInput.value=d.zip_code;
-            // Show details section with summary
             detailsSection.style.display='block';
             updateSummary(d);
           } else if(d.found && d.existing){
@@ -194,8 +204,7 @@
             document.getElementById('details-fields').style.display='block';
             document.getElementById('details-summary').style.display='none';
           }
-        })
-        .catch(function(){
+        }).catch(function(){
           statusEl.innerHTML='<span style="color:#94a3b8">{% trans "Pretraga nedostupna — unesite ručno" %}</span>';
           detailsSection.style.display='block';
           document.getElementById('details-fields').style.display='block';
@@ -205,75 +214,62 @@
   });
 
   function updateSummary(d){
-    var chips = [];
+    var chips=[];
     if(d.name) chips.push('<span class="auto-fill-chip"><i class="fas fa-building" style="margin-right:4px"></i>'+d.name+'</span>');
     if(d.address) chips.push('<span class="auto-fill-chip"><i class="fas fa-map-marker-alt" style="margin-right:4px"></i>'+d.address+'</span>');
     if(d.city) chips.push('<span class="auto-fill-chip">'+((d.zip_code||'')+' '+d.city).trim()+'</span>');
-    summaryContent.innerHTML = chips.join('');
-    document.getElementById('details-summary').style.display = chips.length ? 'block' : 'none';
-    document.getElementById('details-fields').style.display = 'none';
+    summaryContent.innerHTML=chips.join('');
+    document.getElementById('details-summary').style.display=chips.length?'block':'none';
+    document.getElementById('details-fields').style.display='none';
   }
-  window.updateSummary = updateSummary;
+  window.updateSummary=updateSummary;
 })();
 
 function toggleDetails(){
-  var fields = document.getElementById('details-fields');
-  var summary = document.getElementById('details-summary');
-  var chevron = document.getElementById('details-chevron');
-  if(fields.style.display === 'none'){
-    fields.style.display = 'block';
-    summary.style.display = 'none';
-    chevron.style.transform = 'rotate(180deg)';
+  var fields=document.getElementById('details-fields');
+  var summary=document.getElementById('details-summary');
+  var chevron=document.getElementById('details-chevron');
+  if(fields.style.display==='none'){
+    fields.style.display='block'; summary.style.display='none'; chevron.style.transform='rotate(180deg)';
   } else {
-    fields.style.display = 'none';
-    summary.style.display = 'block';
-    chevron.style.transform = '';
+    fields.style.display='none'; summary.style.display='block'; chevron.style.transform='';
   }
 }
 
-// ═══ FORM SUBMIT: ensure name is populated ═══
 document.getElementById('regForm').addEventListener('submit', function(e){
-  var nameInput = document.getElementById('nameInput');
+  var nameInput=document.getElementById('nameInput');
   if(!nameInput.value.trim()){
-    // Open details and focus name
     document.getElementById('details-section').style.display='block';
     document.getElementById('details-fields').style.display='block';
-    nameInput.focus();
-    e.preventDefault();
-    return false;
+    nameInput.focus(); e.preventDefault(); return false;
   }
-  // Auto-fill first_name from email if empty
-  var fn = document.getElementById('firstNameInput');
+  var fn=document.getElementById('firstNameInput');
   if(!fn.value.trim() && document.querySelector('input[name="email"]').value){
-    fn.value = document.querySelector('input[name="email"]').value.split('@')[0];
+    fn.value=document.querySelector('input[name="email"]').value.split('@')[0];
   }
 });
 
-// ═══ PASSWORD STRENGTH ═══
 document.getElementById('pw1').addEventListener('input', function(){
-  var pw=this.value, score=0;
-  if(pw.length>=8) score++;
-  if(pw.length>=12) score++;
-  if(/[A-Z]/.test(pw)) score++;
-  if(/[0-9]/.test(pw)) score++;
-  if(/[^A-Za-z0-9]/.test(pw)) score++;
-  var bar=document.getElementById('pw-bar');
-  var pct=Math.min(score*20,100);
-  bar.style.width=pct+'%';
-  bar.style.background=pct<40?'#ef4444':pct<70?'#f59e0b':'#22c55e';
+  var pw=this.value,score=0;
+  if(pw.length>=8) score++; if(pw.length>=12) score++;
+  if(/[A-Z]/.test(pw)) score++; if(/[0-9]/.test(pw)) score++; if(/[^A-Za-z0-9]/.test(pw)) score++;
+  var bar=document.getElementById('pw-bar'), pct=Math.min(score*20,100);
+  bar.style.width=pct+'%'; bar.style.background=pct<40?'#ef4444':pct<70?'#f59e0b':'#22c55e';
 });
 
-// ═══ COUNTRY LABEL ═══
 document.querySelectorAll('input[name="country"]').forEach(function(r){
   r.addEventListener('change', function(){
-    var lbl=document.getElementById('oibLabel');
-    var inp=document.getElementById('oib-input');
-    if(this.value==='DE'||this.value==='AT'){lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> Steuernummer / USt-IdNr *';inp.placeholder='DE123456789';}
-    else{lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> OIB *';inp.placeholder='12345678901';}
+    var lbl=document.getElementById('oibLabel'), inp=document.getElementById('oib-input');
+    if(this.value==='DE'||this.value==='AT'){
+      lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> Steuernummer / USt-IdNr *';
+      inp.placeholder='DE123456789';
+    } else {
+      lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> OIB *';
+      inp.placeholder='12345678901';
+    }
   });
 });
 
-// ═══ ERRORS: auto-open details if backend errors on hidden fields ═══
 {% if errors.name or errors.first_name %}
 document.getElementById('details-section').style.display='block';
 document.getElementById('details-fields').style.display='block';

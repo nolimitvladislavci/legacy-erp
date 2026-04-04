@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_pets
 
 app_name = "livestock"
 
@@ -26,4 +27,15 @@ urlpatterns = [
     path('inspect/<str:scope>/<str:token>/', views.inspector_live_view, name='inspector_live_view'),
     path('inspekcija/', views.inspector_panic_button, name='panic_button'),
     path('inspekcija/pdf/', views.generate_inspection_pdf, name='inspection_pdf'),
+
+    # ── Kućni ljubimci / uzgajalište ──────────────────────────────────
+    path('pets/', views_pets.pet_list, name='pet_list'),
+    path('pets/create/', views_pets.pet_create, name='pet_create'),
+    path('pets/<int:pk>/', views_pets.pet_detail, name='pet_detail'),
+    path('pets/<int:pk>/edit/', views_pets.pet_edit, name='pet_edit'),
+    path('pets/<int:pk>/pdf/', views_pets.pet_pedigree_pdf, name='pet_pedigree_pdf'),
+    path('pets/api/scan-photo/', views_pets.pet_scan_photo, name='pet_scan_photo'),
+    path('pets/<int:pk>/qr/', views_pets.pet_qr_code, name='pet_qr_code'),
+    path('pets/<int:pk>/adopt/', views_pets.pet_adopt, name='pet_adopt'),
+    path('pets/<int:pk>/contract/', views_pets.pet_adoption_contract, name='pet_adoption_contract'),
 ]

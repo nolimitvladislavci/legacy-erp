@@ -95,3 +95,36 @@ def strip_vat_prefix(vat_id: str, country: str = 'HR') -> str:
     if vat_id.startswith(prefix):
         return vat_id[len(prefix):]
     return vat_id
+
+
+# ── IBAN + MBS validacija (dodano 03.04.2026.) ─────────────────────────────
+
+def validate_iban(iban: str) -> bool:
+    """ISO 13616 MOD 97 IBAN validacija."""
+    iban = iban.strip().replace(' ', '').upper()
+    if len(iban) < 15 or len(iban) > 34:
+        return False
+    rearranged = iban[4:] + iban[:4]
+    numeric = ''
+    for ch in rearranged:
+        if ch.isdigit():
+            numeric += ch
+        elif ch.isalpha():
+            numeric += str(ord(ch) - ord('A') + 10)
+        else:
+            return False
+    return int(numeric) % 97 == 1
+
+
+def validate_hr_iban(iban: str) -> bool:
+    """HR IBAN: HR + 2 kontrolne + 7 bankovnih + 10 računa = 21 znak."""
+    iban = iban.strip().replace(' ', '').upper()
+    if not iban.startswith('HR') or len(iban) != 21:
+        return False
+    return validate_iban(iban)
+
+
+def validate_mbs(mbs: str) -> bool:
+    """MBS: točno 8 znamenki."""
+    mbs = mbs.strip()
+    return bool(mbs and len(mbs) == 8 and mbs.isdigit())
