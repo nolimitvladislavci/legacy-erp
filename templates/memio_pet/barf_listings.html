@@ -1,52 +1,167 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}BARF Marketplace{% endblock %}
+{% block title %}BARF Marketplace — {% trans "Sirova hrana za ljubimce" %}{% endblock %}
 {% block page_title %}BARF Marketplace{% endblock %}
 {% block extra_css %}
 <style>
-.barf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
-.barf-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:10px;padding:1.25rem;transition:all .2s}
+.barf-hero{text-align:center;padding:2rem 0 1.5rem}
+.barf-hero h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--text);margin-bottom:.3rem}
+.barf-hero p{color:var(--muted);font-size:.95rem;max-width:500px;margin:0 auto}
+.barf-nav{display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+.barf-nav a{padding:.5rem 1.25rem;border:1px solid var(--border,#252830);border-radius:20px;color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:600;transition:all .2s}
+.barf-nav a:hover,.barf-nav a.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06)}
+.barf-stats{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;flex-wrap:wrap}
+.barf-stat{text-align:center}
+.barf-stat-val{font-size:1.5rem;font-weight:800;color:var(--gold,#c9a84c)}
+.barf-stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.barf-filters{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.barf-filter{padding:.35rem .75rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-size:.78rem;cursor:pointer;transition:all .15s}
+.barf-filter:hover,.barf-filter.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06)}
+.barf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+.barf-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:12px;padding:1.5rem;transition:all .2s;position:relative}
 .barf-card:hover{border-color:var(--gold,#c9a84c);transform:translateY(-2px)}
 .barf-type{font-size:1.1rem;font-weight:700;color:var(--text,#e2e8f0);margin-bottom:.3rem}
 .barf-meta{font-size:.8rem;color:var(--muted,#64748b);margin-bottom:.5rem}
-.barf-price{font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)}
+.barf-price{font-size:1.4rem;font-weight:800;color:var(--gold,#c9a84c)}
 .barf-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .barf-badge{font-size:.68rem;padding:.2rem .5rem;border-radius:4px;font-weight:600}
 .barf-badge.green{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3)}
 .barf-badge.blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
 .barf-badge.amber{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
-.barf-opg{font-size:.82rem;color:var(--text-dim,#94a3b8);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
-.barf-cta{display:inline-block;margin-top:.75rem;padding:.5rem 1rem;background:var(--gold);color:#0f172a;border-radius:6px;font-size:.82rem;font-weight:700;text-decoration:none;min-height:40px}
-.barf-cta:hover{background:var(--gold2,#e8c96a)}
+.barf-opg{font-size:.82rem;color:var(--text-dim,#94a3b8);margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.barf-contact{padding:.35rem .75rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:6px;color:var(--gold);font-size:.75rem;font-weight:600;text-decoration:none;white-space:nowrap;transition:all .15s}
+.barf-contact:hover{background:var(--gold);color:#0f172a}
 .barf-empty{text-align:center;padding:4rem 2rem;color:var(--muted)}
+.barf-cta-bar{display:flex;justify-content:center;gap:1rem;margin-top:2rem;flex-wrap:wrap}
+.barf-cta{display:inline-block;padding:.65rem 1.5rem;border-radius:8px;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .15s}
+.barf-cta-gold{background:var(--gold);color:#0f172a}
+.barf-cta-gold:hover{background:var(--gold2,#e8c96a)}
+.barf-cta-ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+.barf-cta-ghost:hover{border-color:var(--gold);color:var(--gold)}
+@media(max-width:600px){.barf-grid{grid-template-columns:1fr}.barf-stats{gap:1.5rem}}
 </style>
 {% endblock %}
 {% block content %}
-<p style="color:var(--muted);margin-bottom:1.5rem">Svježa sirova hrana za ljubimce — direktno od hrvatskih OPG-ova. K3 certificirano.</p>
+
+<!-- HERO -->
+<div class="barf-hero">
+  <div style="font-size:3rem;margin-bottom:.5rem">&#129367;</div>
+  <h1>BARF Marketplace</h1>
+  <p>{% trans "Svježa sirova hrana za ljubimce — direktno od hrvatskih OPG-ova. K3 certificirano." %}</p>
+</div>
+
+<!-- NAV -->
+<div class="barf-nav">
+  <a href="{% url 'memio_pet:barf_listings' %}" class="active">&#129367; BARF</a>
+  <a href="{% url 'memio_pet:pet_hotel_booking' %}">&#128054; Pet Hotel</a>
+  <a href="{% url 'memio_pet:training_list' %}">&#128021; {% trans "Dresura" %}</a>
+  {% if request.user.is_authenticated %}
+  <a href="{% url 'memio_pet:barf_create' %}">+ {% trans "Nova ponuda" %}</a>
+  {% endif %}
+</div>
+
+<!-- STATS -->
+<div class="barf-stats">
+  <div class="barf-stat">
+    <div class="barf-stat-val">{{ listings|length }}</div>
+    <div class="barf-stat-lbl">{% trans "Aktivnih ponuda" %}</div>
+  </div>
+  <div class="barf-stat">
+    <div class="barf-stat-val" id="totalKg">0</div>
+    <div class="barf-stat-lbl">{% trans "Ukupno kg" %}</div>
+  </div>
+  <div class="barf-stat">
+    <div class="barf-stat-val" id="avgPrice">0</div>
+    <div class="barf-stat-lbl">{% trans "Prosj. EUR/kg" %}</div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="barf-filters" id="filters">
+  <button class="barf-filter on" data-filter="all" onclick="filterCards('all',this)">{% trans "Sve" %}</button>
+  <button class="barf-filter" data-filter="free_range" onclick="filterCards('free_range',this)">&#127793; {% trans "Slobodan uzgoj" %}</button>
+  <button class="barf-filter" data-filter="antibiotic_free" onclick="filterCards('antibiotic_free',this)">&#128138; {% trans "Bez antibiotika" %}</button>
+  <button class="barf-filter" data-filter="k3" onclick="filterCards('k3',this)">&#128203; K3</button>
+</div>
 
 {% if listings %}
-<div class="barf-grid">
+<div class="barf-grid" id="barfGrid">
 {% for l in listings %}
-<div class="barf-card">
+<div class="barf-card"
+     data-free-range="{% if l.is_free_range %}1{% endif %}"
+     data-antibiotic-free="{% if l.is_antibiotic_free %}1{% endif %}"
+     data-k3="{% if l.k3_cert_number %}1{% endif %}"
+     data-kg="{{ l.quantity_kg }}"
+     data-price="{{ l.price_eur_kg }}">
   <div class="barf-type">{{ l.get_product_type_display }}</div>
-  <div class="barf-meta">{{ l.quantity_kg }} kg | dostupno od {{ l.available_from|date:"d.m.Y" }}</div>
+  <div class="barf-meta">{{ l.quantity_kg }} kg | {% trans "dostupno od" %} {{ l.available_from|date:"d.m.Y" }}</div>
   <div class="barf-price">{{ l.price_eur_kg }} EUR/kg</div>
   <div class="barf-badges">
-    {% if l.is_free_range %}<span class="barf-badge green">Slobodan uzgoj</span>{% endif %}
-    {% if l.is_antibiotic_free %}<span class="barf-badge blue">Bez antibiotika</span>{% endif %}
+    {% if l.is_free_range %}<span class="barf-badge green">{% trans "Slobodan uzgoj" %}</span>{% endif %}
+    {% if l.is_antibiotic_free %}<span class="barf-badge blue">{% trans "Bez antibiotika" %}</span>{% endif %}
     {% if l.k3_cert_number %}<span class="barf-badge amber">K3: {{ l.k3_cert_number|truncatechars:15 }}</span>{% endif %}
   </div>
-  {% if l.description %}<div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">{{ l.description|truncatechars:80 }}</div>{% endif %}
-  <div class="barf-opg">{{ l.company.name }} {% if l.company.city %}| {{ l.company.city }}{% endif %}</div>
-  <div style="font-size:.72rem;color:var(--muted)">Rok: {{ l.expires_at|date:"d.m.Y" }}</div>
+  {% if l.description %}<div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">{{ l.description|truncatechars:100 }}</div>{% endif %}
+  <div class="barf-opg">
+    <span>{{ l.company.name }}{% if l.company.city %} | {{ l.company.city }}{% endif %}</span>
+    {% if l.company.phone %}
+    <a href="tel:{{ l.company.phone }}" class="barf-contact"><i class="fas fa-phone" style="margin-right:.3rem"></i>{% trans "Kontakt" %}</a>
+    {% elif l.company.email %}
+    <a href="mailto:{{ l.company.email }}" class="barf-contact"><i class="fas fa-envelope" style="margin-right:.3rem"></i>{% trans "Kontakt" %}</a>
+    {% endif %}
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">{% trans "Rok" %}: {{ l.expires_at|date:"d.m.Y" }}</div>
 </div>
 {% endfor %}
 </div>
+
+<!-- CTA BAR -->
+<div class="barf-cta-bar">
+  {% if request.user.is_authenticated %}
+  <a href="{% url 'memio_pet:barf_create' %}" class="barf-cta barf-cta-gold">+ {% trans "Objavi ponudu" %}</a>
+  {% else %}
+  <a href="/pocni/?plan=starter" class="barf-cta barf-cta-gold">{% trans "Registriraj OPG" %} &rarr;</a>
+  {% endif %}
+  <a href="{% url 'memio_pet:pet_hotel_booking' %}" class="barf-cta barf-cta-ghost">&#128054; Pet Hotel</a>
+</div>
+
 {% else %}
 <div class="barf-empty">
   <div style="font-size:3rem;margin-bottom:1rem">&#129367;</div>
-  <h3 style="color:var(--text)">Trenutno nema ponuda</h3>
-  <p>OPG-ovi dodaju ponude kad imaju svježu sirovinu. Provjerite ponovo uskoro.</p>
+  <h3 style="color:var(--text)">{% trans "Trenutno nema ponuda" %}</h3>
+  <p>{% trans "OPG-ovi dodaju ponude kad imaju svježu sirovinu." %}</p>
+  {% if request.user.is_authenticated %}
+  <a href="{% url 'memio_pet:barf_create' %}" class="barf-cta barf-cta-gold" style="margin-top:1rem">+ {% trans "Budi prvi — objavi ponudu" %}</a>
+  {% else %}
+  <a href="/pocni/?plan=starter" class="barf-cta barf-cta-gold" style="margin-top:1rem">{% trans "Registriraj OPG" %} &rarr;</a>
+  {% endif %}
 </div>
 {% endif %}
+
+<script>
+// Stats calculation
+(function(){
+  var cards = document.querySelectorAll('.barf-card');
+  var totalKg = 0, totalPrice = 0, count = 0;
+  cards.forEach(function(c){
+    var kg = parseFloat(c.dataset.kg) || 0;
+    var price = parseFloat(c.dataset.price) || 0;
+    totalKg += kg;
+    if(price > 0){ totalPrice += price; count++; }
+  });
+  document.getElementById('totalKg').textContent = totalKg.toFixed(0);
+  document.getElementById('avgPrice').textContent = count ? (totalPrice / count).toFixed(1) : '—';
+})();
+
+// Filter
+function filterCards(filter, btn) {
+  document.querySelectorAll('.barf-filter').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.querySelectorAll('.barf-card').forEach(function(card){
+    if(filter === 'all') { card.style.display = ''; return; }
+    var map = {free_range:'freeRange', antibiotic_free:'antibioticFree', k3:'k3'};
+    card.style.display = card.dataset[map[filter]] === '1' ? '' : 'none';
+  });
+}
+</script>
 {% endblock %}

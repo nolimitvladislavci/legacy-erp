@@ -101,3 +101,57 @@ def nightly_data_quality(self):
         ))
 
     return report
+
+
+@shared_task(name='companies.check_license_tokens', bind=True, max_retries=0, soft_time_limit=60)
+def check_license_tokens(self):
+    """
+    Svakih 6h provjerava LicenseToken status.
+    - Istekao valid_until → prebaci u grace (14 dana)
+    - Istekao grace_until → prebaci u suspended
+    - Suspended → označi WhiteLabel kao neaktivan
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    from companies.models import LicenseToken
+
+    now = timezone.now()
+    results = {'checked': 0, 'to_grace': 0, 'to_suspended': 0}
+
+    for token in LicenseToken.objects.exclude(status__in=('cancelled',)):
+        results['checked'] += 1
+
+        if token.status == 'active' and now > token.valid_until:
+            # Active → Grace (14 dana)
+            token.status = 'grace'
+            token.grace_until = now + timedelta(days=14)
+            token.save(update_fields=['status', 'grace_until', 'updated_at'])
+            results['to_grace'] += 1
+            logger.warning('License %s → GRACE (14d). Brand: %s',
+                          token.pk, token.white_label.brand_name)
+
+        elif token.status == 'grace' and token.grace_until and now > token.grace_until:
+            # Grace → Suspended
+            token.status = 'suspended'
+            token.save(update_fields=['status', 'updated_at'])
+            results['to_suspended'] += 1
+            logger.warning('License %s → SUSPENDED. Brand: %s',
+                          token.pk, token.white_label.brand_name)
+
+            # Označi WL kao neaktivan
+            wl = token.white_label
+            if hasattr(wl, 'is_active'):
+                wl.is_active = False
+                wl.save(update_fields=['is_active'])
+
+    if results['to_grace'] or results['to_suspended']:
+        from core.notify import notify
+        notify('WARN', (
+            f"⚠️ *License Check*\n"
+            f"Provjereno: {results['checked']}\n"
+            f"→ Grace: {results['to_grace']}\n"
+            f"→ Suspended: {results['to_suspended']}"
+        ))
+
+    logger.info('License check: %s', results)
+    return results

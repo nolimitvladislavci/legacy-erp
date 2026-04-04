@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Novi odstrjel" %}{% endblock %}
+{% block page_title %}{% trans "Novi odstrjel" %}{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto">
+
+  <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:1rem">
+    {% csrf_token %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>{% trans "Lovište" %} *</label>
+        <select name="ground" class="reg-input" required>
+          {% for g in grounds %}<option value="{{ g.pk }}">{{ g.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Vrsta divljači" %} *</label>
+        <select name="species" class="reg-input" required>
+          {% for s in species %}<option value="{{ s.pk }}">{{ s.name }}{% if s.is_cites %} [CITES]{% endif %}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>{% trans "Datum odstrjela" %} *</label>
+        <input type="date" name="datum" required class="reg-input">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Spol" %}</label>
+        <select name="spol" class="reg-input">
+          <option value="N">{% trans "Nepoznato" %}</option>
+          <option value="M">{% trans "Mužjak" %}</option>
+          <option value="F">{% trans "Ženka" %}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="wiz-field">
+      <label>{% trans "Lokacija" %}</label>
+      <input type="text" name="lokacija" class="reg-input" placeholder="{% trans 'Opis lokacije odstrjela' %}">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>{% trans "Težina (kg)" %}</label>
+        <input type="number" name="weight_kg" step="0.1" class="reg-input" placeholder="85.0">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Starost (god)" %}</label>
+        <input type="number" name="age_years" class="reg-input" placeholder="3">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "CIC bodovi" %}</label>
+        <input type="number" name="trophy_points" step="0.01" class="reg-input" placeholder="120.50">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="wiz-field">
+        <label>CITES {% trans "broj" %}</label>
+        <input type="text" name="cites_number" class="reg-input" placeholder="HR-CITES-2026-001">
+      </div>
+      <div class="wiz-field">
+        <label>{% trans "Dostupno mesa (kg)" %}</label>
+        <input type="number" name="meat_available_kg" step="0.1" class="reg-input" placeholder="40.0">
+      </div>
+    </div>
+
+    <div class="wiz-field">
+      <label>{% trans "Bilješke" %}</label>
+      <textarea name="notes" rows="3" class="reg-input" placeholder="{% trans 'Dodatne napomene...' %}"></textarea>
+    </div>
+
+    <div style="display:flex;gap:1rem;margin-top:.5rem">
+      <a href="{% url 'lovacki:dashboard' %}" class="wiz-btn wiz-btn-ghost">&larr; {% trans "Natrag" %}</a>
+      <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Evidentiraj odstrjel" %} &rarr;</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

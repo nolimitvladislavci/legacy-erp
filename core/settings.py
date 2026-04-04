@@ -144,6 +144,7 @@ INSTALLED_APPS = [
     "tech_radar",
     "udruge",
     "livestock",
+    "lovacki",
     "memio_pet",  # Memio.pet
     "no_limit",  # NO LIMIT udruga
     "intelligence",
@@ -1163,5 +1164,13 @@ CELERY_BEAT_SCHEDULE.update({
     'warm-cache-hourly': {
         'task': 'core.management.commands.warm_cache',
         'schedule': 3600,
+    },
+})
+
+# ── License Token Check (6h) ──────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'license-token-check-6h': {
+        'task': 'companies.check_license_tokens',
+        'schedule': 21600,  # 6h
     },
 })

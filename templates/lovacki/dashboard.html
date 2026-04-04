@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Lovački modul" %}{% endblock %}
+{% block page_title %}{% trans "Lovački modul" %}{% endblock %}
+{% block extra_css %}
+<style>
+.hunt-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.hunt-kpi-card{background:var(--card,#1e293b);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center}
+.hunt-kpi-val{font-size:1.8rem;font-weight:800;color:var(--gold)}
+.hunt-kpi-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.25rem}
+.hunt-section{margin-bottom:2rem}
+.hunt-section h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.quota-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+.quota-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem}
+.quota-name{font-weight:700;color:var(--text);margin-bottom:.25rem}
+.quota-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:.5rem 0}
+.quota-fill{height:100%;border-radius:3px;transition:width .5s}
+.quota-nums{font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between}
+.hunt-table{width:100%;border-collapse:collapse}
+.hunt-table th{text-align:left;font-size:.72rem;text-transform:uppercase;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.hunt-table td{padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem;color:var(--text)}
+.hunt-table tr:hover td{background:rgba(201,168,76,.03)}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- KPI -->
+<div class="hunt-kpi">
+  <div class="hunt-kpi-card">
+    <div class="hunt-kpi-val">{{ stats.total_records }}</div>
+    <div class="hunt-kpi-lbl">{% trans "Odstrjela" %} {{ year }}</div>
+  </div>
+  <div class="hunt-kpi-card">
+    <div class="hunt-kpi-val">{{ stats.total_grounds }}</div>
+    <div class="hunt-kpi-lbl">{% trans "Lovišta" %}</div>
+  </div>
+  <div class="hunt-kpi-card">
+    <div class="hunt-kpi-val">{{ stats.total_species }}</div>
+    <div class="hunt-kpi-lbl">{% trans "Vrsta" %}</div>
+  </div>
+  <div class="hunt-kpi-card">
+    <div class="hunt-kpi-val">{{ stats.total_weight|floatformat:0 }} kg</div>
+    <div class="hunt-kpi-lbl">{% trans "Ukupna težina" %}</div>
+  </div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem">
+  <a href="{% url 'lovacki:record_create' %}" style="background:var(--gold);color:#0f172a;padding:.55rem 1.25rem;border-radius:6px;font-weight:700;font-size:.88rem;text-decoration:none">
+    + {% trans "Novi odstrjel" %}
+  </a>
+</div>
+
+<!-- KVOTE -->
+{% if quotas %}
+<div class="hunt-section">
+  <h3>&#128202; {% trans "Lovne kvote" %} {{ year }}</h3>
+  <div class="quota-grid">
+    {% for q in quotas %}
+    <div class="quota-card">
+      <div class="quota-name">{{ q.species.name }}</div>
+      <div style="font-size:.75rem;color:var(--muted)">{{ q.ground.name }}</div>
+      <div class="quota-bar">
+        <div class="quota-fill" style="width:{{ q.utilization_pct }}%;background:{% if q.utilization_pct > 90 %}#ef4444{% elif q.utilization_pct > 70 %}#f59e0b{% else %}var(--gold){% endif %}"></div>
+      </div>
+      <div class="quota-nums">
+        <span>{{ q.realized_count }} / {{ q.planned_count }}</span>
+        <span>{{ q.utilization_pct }}%</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ZADNJI ODSTRJELI -->
+{% if records %}
+<div class="hunt-section">
+  <h3>&#127919; {% trans "Zadnji odstrjeli" %}</h3>
+  <div style="overflow-x:auto">
+    <table class="hunt-table">
+      <thead>
+        <tr>
+          <th>{% trans "Datum" %}</th>
+          <th>{% trans "Vrsta" %}</th>
+          <th>{% trans "Lovište" %}</th>
+          <th>{% trans "Spol" %}</th>
+          <th>{% trans "Težina" %}</th>
+          <th>{% trans "Lovac" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ r.datum|date:"d.m.Y" }}</td>
+          <td>{{ r.species.name }}{% if r.species.is_cites %} <span style="color:#ef4444;font-size:.7rem">[CITES]</span>{% endif %}</td>
+          <td>{{ r.ground.name }}</td>
+          <td>{{ r.get_spol_display }}</td>
+          <td>{% if r.weight_kg %}{{ r.weight_kg }} kg{% else %}—{% endif %}</td>
+          <td>{% if r.hunter %}{{ r.hunter.get_full_name|default:r.hunter.username }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if not quotas and not records %}
+<div style="text-align:center;padding:4rem 2rem;color:var(--muted)">
+  <div style="font-size:3rem;margin-bottom:1rem">&#127795;</div>
+  <h3 style="color:var(--text)">{% trans "Dobrodošli u lovački modul" %}</h3>
+  <p>{% trans "Dodajte lovište i počnite evidentirati odstrjele." %}</p>
+</div>
+{% endif %}
+
+{% endblock %}

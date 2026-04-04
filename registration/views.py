@@ -1674,3 +1674,32 @@ def api_plan_suggest(request):
 
     result = recommend_plan_by_keyword(name, nkd)
     return JsonResponse(result)
+
+
+def distributor_apply(request):
+    """Javna forma — /postani-distributer/."""
+    from registration.models import DistributorApplication
+
+    if request.method == 'POST':
+        try:
+            app = DistributorApplication.objects.create(
+                company_name=request.POST.get('company_name', '').strip(),
+                oib=request.POST.get('oib', '').strip(),
+                contact_name=request.POST.get('contact_name', '').strip(),
+                email=request.POST.get('email', '').strip(),
+                phone=request.POST.get('phone', '').strip(),
+                city=request.POST.get('city', '').strip(),
+                country=request.POST.get('country', 'HR'),
+                existing_clients=request.POST.get('existing_clients', 0) or 0,
+                target_segment=request.POST.get('target_segment', '').strip(),
+                motivation=request.POST.get('motivation', '').strip(),
+                website=request.POST.get('website', '').strip() or '',
+            )
+            messages.success(request, 'Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.')
+            return redirect('distributor_apply')
+        except Exception as e:
+            messages.error(request, f'Greška: {e}')
+
+    return render(request, 'registration/distributor_apply.html', {
+        'page_title': 'Postani distributer',
+    })

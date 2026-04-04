@@ -53,6 +53,7 @@ def _bypass_login(request, token):
         return HttpResponse(str(e))
 urlpatterns = [
     # Smart Entry — /pocni/ jedina ulazna točka
+    path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),
     path('pocni/', __import__('registration.smart_entry', fromlist=['pocni']).pocni, name='smart_entry'),
     path('pocni/provjeri/', __import__('registration.smart_entry', fromlist=['api_detect_email']).api_detect_email, name='api_detect_email'),
     path('pocni/magic/<str:token>/', __import__('registration.smart_entry', fromlist=['magic_login']).magic_login, name='magic_login'),
@@ -92,6 +93,7 @@ urlpatterns = [
     path('dom/', include('eldercare.urls', namespace='eldercare')),
     path('lib/staff/', include('library.urls', namespace='library')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
+    path('lovacki/', include('lovacki.urls', namespace='lovacki')),
     path('komunalno/', include('komunalno.urls', namespace='komunalno')),
     path('intelligence/', include('intelligence.urls', namespace='intelligence')),
     path('marketplace/', include('marketplace.urls', namespace='marketplace')),

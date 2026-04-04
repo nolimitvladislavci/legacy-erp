@@ -659,3 +659,51 @@ class CompanyClaimRequest(models.Model):
             self.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'created_user'])
 
         return user, temp_password
+
+
+class DistributorApplication(models.Model):
+    """Prijava za distributer/reseller partnera — /postani-distributer/."""
+    STATUS_CHOICES = [
+        ('pending', 'Na čekanju'),
+        ('approved', 'Odobreno'),
+        ('rejected', 'Odbijeno'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company_name = models.CharField(max_length=200, verbose_name='Naziv tvrtke')
+    oib = models.CharField(max_length=20, blank=True, verbose_name='OIB')
+    contact_name = models.CharField(max_length=200, verbose_name='Kontakt osoba')
+    email = models.EmailField(verbose_name='Email')
+    phone = models.CharField(max_length=50, verbose_name='Telefon')
+    city = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=5, default='HR')
+
+    # Poslovni detalji
+    existing_clients = models.PositiveIntegerField(default=0,
+        verbose_name='Koliko klijenata trenutno imate?')
+    target_segment = models.CharField(max_length=200, blank=True,
+        verbose_name='Ciljni segment (obrti, ugostiteljstvo, udruge...)')
+    motivation = models.TextField(blank=True,
+        verbose_name='Zašto želite postati distributer?')
+    website = models.URLField(blank=True)
+
+    # Status
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
+                                     null=True, blank=True, related_name='+')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
+
+    # Auto WL setup after approval
+    whitelabel_subdomain = models.CharField(max_length=50, blank=True,
+        verbose_name='WhiteLabel subdomena (automatski)')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Distributer prijava'
+        verbose_name_plural = 'Distributer prijave'
+
+    def __str__(self):
+        return f"{self.company_name} ({self.status})"
