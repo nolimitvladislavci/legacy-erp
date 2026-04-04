@@ -63,7 +63,9 @@ def book_invoice(invoice, user=None):
         return None  # Already booked
 
     country = getattr(invoice, 'country', 'HR')
-    is_outgoing = invoice.doctype in ('R', 'P', 'A')  # Racun, Ponuda, Avansni
+    is_storno = invoice.doctype == 'S'
+    is_avansni = invoice.doctype == 'A'
+    is_outgoing = invoice.doctype in ('R', 'P', 'A', 'FA', 'RN', 'GS')  # Izdani računi
 
     # Calculate totals
     subtotal = Decimal(str(invoice.subtotal or 0))
@@ -72,6 +74,16 @@ def book_invoice(invoice, user=None):
 
     if total <= 0:
         return None  # Nothing to book
+
+    # FIX4: Validate total = subtotal + tax (tolerance 0.05 EUR)
+    expected_total = subtotal + tax_amount
+    if abs(total - expected_total) > Decimal('0.05'):
+        import logging
+        logging.getLogger('konto').warning(
+            'Invoice %s total mismatch: total=%s but subtotal(%s)+tax(%s)=%s. Using calculated.',
+            invoice.number, total, subtotal, tax_amount, expected_total
+        )
+        total = expected_total
 
     # Resolve konto accounts based on country
     if country == 'DE':
@@ -100,7 +112,83 @@ def book_invoice(invoice, user=None):
         created_by=user,
     )
 
-    if is_outgoing:
+    if is_storno:
+        # STORNO račun — reversal izdanog računa
+        # D: Prihodi 7000 (storniramo prihod) + D: PDV 2400 (storniramo PDV)
+        # P: Potraživanja 1200 (smanjujemo potraživanje)
+        try:
+            rev_acct = _get_or_fail(company, revenue_code)
+        except ValueError:
+            rev_acct = KontoAccount.objects.create(
+                company=company, code=revenue_code,
+                name='Prihodi od prodaje', account_type='income')
+        LedgerLine.objects.create(
+            journal_entry=je, account=rev_acct,
+            side='debit', amount=subtotal,
+            description=f"STORNO prihod {invoice.number}")
+
+        if tax_amount > 0:
+            try:
+                vat_acct = _get_or_fail(company, vat_out_code)
+            except ValueError:
+                vat_acct = KontoAccount.objects.create(
+                    company=company, code=vat_out_code,
+                    name='Obveze za PDV', account_type='liability')
+            LedgerLine.objects.create(
+                journal_entry=je, account=vat_acct,
+                side='debit', amount=tax_amount,
+                description=f"STORNO PDV {invoice.number}")
+
+        try:
+            recv_acct = _get_or_fail(company, receivable_code)
+        except ValueError:
+            recv_acct = KontoAccount.objects.create(
+                company=company, code=receivable_code,
+                name='Potraživanja od kupaca', account_type='asset')
+        LedgerLine.objects.create(
+            journal_entry=je, account=recv_acct,
+            side='credit', amount=total,
+            description=f"STORNO potraživanje {invoice.number}")
+
+    elif is_avansni:
+        # AVANSNI RAČUN — D:1200 potraživanja / P:2900 primljeni avansi + P:2400 PDV
+        # Zakon o PDV-u čl. 78, st. 3 — avansni PDV u momentu naplate
+        try:
+            recv_acct = _get_or_fail(company, receivable_code)
+        except ValueError:
+            recv_acct = KontoAccount.objects.create(
+                company=company, code=receivable_code,
+                name='Potraživanja od kupaca', account_type='asset')
+        LedgerLine.objects.create(
+            journal_entry=je, account=recv_acct,
+            side='debit', amount=total,
+            description=f"Avans kupac: {invoice.client_name}")
+
+        # P: Primljeni avansi (konto 2900)
+        avans_code = '2900' if country != 'DE' else '1718'
+        avans_name = 'Primljeni avansi' if country != 'DE' else 'Erhaltene Anzahlungen'
+        avans_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code=avans_code,
+            defaults={'name': avans_name, 'account_type': 'liability'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=avans_acct,
+            side='credit', amount=subtotal,
+            description=f"Avans {invoice.number}")
+
+        # P: PDV na avans
+        if tax_amount > 0:
+            try:
+                vat_acct = _get_or_fail(company, vat_out_code)
+            except ValueError:
+                vat_acct = KontoAccount.objects.create(
+                    company=company, code=vat_out_code,
+                    name='Obveze za PDV', account_type='liability')
+            LedgerLine.objects.create(
+                journal_entry=je, account=vat_acct,
+                side='credit', amount=tax_amount,
+                description=f"PDV avans {invoice.number}")
+
+    elif is_outgoing:
         # Izdani račun
         # D: Potraživanja od kupaca (total with VAT)
         try:
@@ -237,6 +325,11 @@ def book_bank_transactions(transactions_qs, user=None):
                     journal_entry=je, account=recv_konto,
                     side='credit', amount=txn.amount,
                     description=f"Zatvaranje: {txn.matched_invoice.number}")
+                # FIX3: Mark matched invoice as PAID
+                inv = txn.matched_invoice
+                if inv.status in ('SENT', 'UNPAID', 'OVERDUE', 'CONFIRMED', 'FISCALIZED'):
+                    inv.status = 'PAID'
+                    inv.save(update_fields=['status'])
             else:
                 # Neparirana uplata → ostali prihodi
                 other_konto, _ = KontoAccount.objects.get_or_create(
@@ -256,6 +349,11 @@ def book_bank_transactions(transactions_qs, user=None):
                     journal_entry=je, account=pay_konto,
                     side='debit', amount=txn.amount,
                     description=f"Plaćanje: {txn.matched_invoice.number}")
+                # FIX3: Mark matched supplier invoice as PAID
+                inv = txn.matched_invoice
+                if inv.status in ('SENT', 'UNPAID', 'OVERDUE', 'CONFIRMED'):
+                    inv.status = 'PAID'
+                    inv.save(update_fields=['status'])
             else:
                 exp_konto, _ = KontoAccount.objects.get_or_create(
                     company=company, code='4400',
@@ -1288,8 +1386,8 @@ def book_pos_session(session, user=None):
         (r.consumption_tax_amount or Decimal('0')) for r in receipts
     )
     if total_consumption_tax > 0:
-        ct_code = '2390' if country != 'DE' else '1776'
-        ct_name = 'Obveza poreza na potrošnju' if country != 'DE' else 'Verbrauchsteuer'
+        ct_code = '2393' if country != 'DE' else '1776'
+        ct_name = 'Obveza poreza na potrošnju (JLS)' if country != 'DE' else 'Verbrauchsteuer'
         ct_acct, _ = KontoAccount.objects.get_or_create(
             company=company, code=ct_code,
             defaults={'name': ct_name, 'account_type': 'liability'})
