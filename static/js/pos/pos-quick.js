@@ -874,3 +874,146 @@
     .catch(function(e) { fenixToast('Greška: ' + e.message, 'warning'); })
     .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = '⚡ Naplati split'; });
   };
+
+
+  // ═══ STOCK ALERT BADGE ═══
+  window.renderStockBadge = function(card, qty, minQty) {
+    if (!card) return;
+    var existing = card.querySelector('.stock-badge');
+    if (existing) existing.remove();
+    minQty = minQty || 5;
+    if (qty <= 0) {
+      card.insertAdjacentHTML('afterbegin',
+        '<span class="stock-badge" style="position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:5">0</span>');
+      card.style.opacity = '0.5';
+    } else if (qty <= minQty) {
+      card.insertAdjacentHTML('afterbegin',
+        '<span class="stock-badge" style="position:absolute;top:4px;right:4px;background:#f59e0b;color:#fff;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:5">' + qty + '</span>');
+    }
+  };
+
+  // Apply stock badges on load
+  document.querySelectorAll('.item-btn').forEach(function(btn) {
+    var qty = parseInt(btn.dataset.qty || '999');
+    var minQty = parseInt(btn.dataset.minQty || '5');
+    if (qty <= minQty) {
+      btn.style.position = 'relative';
+      renderStockBadge(btn, qty, minQty);
+    }
+  });
+
+  // ═══ AI UPSELL ENGINE ═══
+  var _upsellTimer = null;
+  window.triggerUpsell = function() {
+    clearTimeout(_upsellTimer);
+    _upsellTimer = setTimeout(function() {
+      var ids = Object.keys(basket).map(Number).filter(Boolean);
+      if (ids.length === 0 || ids.length > 10) {
+        document.getElementById('aiUpsell').innerHTML = '';
+        return;
+      }
+      fetch(API_BASE + '/pos/api/ai-upsell/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ items: ids }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var panel = document.getElementById('aiUpsell');
+        if (!data.suggestions || !data.suggestions.length) { panel.innerHTML = ''; return; }
+        panel.innerHTML = data.suggestions.map(function(s) {
+          return '<div class="upsell-card" data-sku="' + s.sku_id + '" onclick="addUpsell(' + s.sku_id + ',this)" ' +
+            'style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));' +
+            'border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:10px;cursor:pointer;' +
+            'transition:all .2s;min-width:140px" role="button" tabindex="0" ' +
+            'aria-label="Dodaj ' + s.name + ' za ' + s.price + ' eura">' +
+            '<div style="font-size:.78rem;font-weight:700;color:var(--text,#eee);margin-bottom:2px">' + s.name + '</div>' +
+            '<div style="font-size:.7rem;color:var(--gold,#c9a84c);margin-bottom:4px">' + s.price + ' EUR</div>' +
+            '<div style="font-size:.65rem;color:var(--muted,#888)">&#10024; ' + s.reason + '</div>' +
+            '</div>';
+        }).join('');
+        panel.style.display = 'flex';
+      })
+      .catch(function() {});
+    }, 2000); // 2s debounce
+  };
+
+  window.addUpsell = function(skuId, el) {
+    if (el) { el.style.transform = 'translateX(200px)'; el.style.opacity = '0'; }
+    var btn = document.querySelector('.item-btn[data-id="' + skuId + '"]');
+    if (btn) btn.click();
+    else if (window.addItemById) window.addItemById(skuId);
+    setTimeout(function() { if (el) el.remove(); }, 300);
+  };
+
+  // Hook into cart changes
+  var _origAddItem2 = window.addItem;
+  if (_origAddItem2) {
+    window.addItem = function() {
+      _origAddItem2.apply(this, arguments);
+      triggerUpsell();
+    };
+  }
+
+  // ═══ OFFLINE MODE BANNER ═══
+  (function() {
+    var banner = document.getElementById('offlineBanner');
+    if (!banner) return;
+
+    function updateOffline() {
+      var queue = JSON.parse(localStorage.getItem('pos_offline_queue') || '[]');
+      if (!navigator.onLine) {
+        document.getElementById('offlineCount').textContent = queue.length;
+        banner.style.display = 'block';
+        banner.style.transform = 'translateY(0)';
+      } else if (queue.length > 0) {
+        banner.style.background = '#f59e0b';
+        document.getElementById('offlineText').innerHTML = '&#128260; Sinkronizacija ' + queue.length + ' transakcija...';
+        banner.style.display = 'block';
+        banner.style.transform = 'translateY(0)';
+      } else {
+        banner.style.transform = 'translateY(-100%)';
+        setTimeout(function() { banner.style.display = 'none'; }, 300);
+      }
+    }
+
+    window.addEventListener('online', function() {
+      updateOffline();
+      if (window.showToast) showToast('\u2713 Online — sinkronizacija...', 'success');
+    });
+    window.addEventListener('offline', function() {
+      updateOffline();
+      if (window.showToast) showToast('\u26a0 Offline mode', 'warning');
+    });
+
+    // Check on load
+    updateOffline();
+    setInterval(updateOffline, 10000);
+  })();
+
+  // ═══ KEYBOARD SHORTCUTS ═══
+  document.addEventListener('keydown', function(e) {
+    // F2 = Quick CASH
+    if (e.key === 'F2' && !e.ctrlKey) { e.preventDefault(); if (window.pay) pay('CASH'); }
+    // F3 = Quick CARD
+    if (e.key === 'F3' && !e.ctrlKey) { e.preventDefault(); if (window.pay) pay('CARD'); }
+    // F4 = Split payment
+    if (e.key === 'F4' && !e.ctrlKey) { e.preventDefault(); if (window.toggleSplit) toggleSplit(); }
+    // Ctrl+F = Focus search
+    if (e.ctrlKey && e.key === 'f') {
+      e.preventDefault();
+      var search = document.getElementById('barcode-input') || document.getElementById('search-input');
+      if (search) search.focus();
+    }
+    // Escape = Close modals
+    if (e.key === 'Escape') {
+      document.querySelectorAll('[style*="display:flex"][style*="position:fixed"]').forEach(function(m) {
+        if (m.id !== 'offlineBanner' && m.id !== 'aiUpsell') m.style.display = 'none';
+      });
+    }
+    // Enter on upsell card
+    if (e.key === 'Enter' && document.activeElement.classList.contains('upsell-card')) {
+      var sku = document.activeElement.dataset.sku;
+      if (sku) addUpsell(parseInt(sku), document.activeElement);
+    }
+  });

@@ -753,4 +753,20 @@ class CheckoutService:
         except Exception:
             pass
 
+        # Loyalty points earn (non-blocking)
+        try:
+            from pos.models import LoyaltyProgram, GuestLoyalty
+            loyalty = LoyaltyProgram.objects.filter(company=company, is_active=True).first()
+            if loyalty and receipt.member_clan_id:
+                points = int(float(receipt.total) * float(loyalty.points_per_euro or 1))
+                if points > 0:
+                    GuestLoyalty.objects.create(
+                        program=loyalty,
+                        guest_name=receipt.buyer_name or str(receipt.member_clan_id),
+                        points_balance=points,
+                    )
+                    result['loyalty_earned'] = points
+        except Exception:
+            pass
+
         return result

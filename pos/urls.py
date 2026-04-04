@@ -210,4 +210,5 @@ urlpatterns = [
     path('api/update-cashier-oib/',  views.update_cashier_oib,  name='update_cashier_oib'),
     # Item Search API — pretraži cijelu bazu (ne samo DOM-300)
     path('api/item-search/',         views.api_item_search,      name='api_item_search'),
+    path('api/ai-upsell/',          views.api_ai_upsell,        name='api_ai_upsell'),
 ]

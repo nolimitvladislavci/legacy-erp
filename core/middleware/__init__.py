@@ -598,16 +598,12 @@ class GracefulErrorMiddleware:
 
     def _notify_team(self, request, exception, category, traceback_str):
         try:
-            from core.tasks import notify_error_to_team
-            notify_error_to_team.delay(
-                user=request.user.username if request.user.is_authenticated else 'anonymous',
-                path=request.path,
-                method=request.method,
-                exc_class=type(exception).__name__,
-                exc_message=str(exception)[:500],
-                category=category,
-                traceback=traceback_str[-2000:],
-                ip=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip(),
+            user = request.user.username if request.user.is_authenticated else 'anonymous'
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip()
+            logger.error(
+                'Error [%s] %s %s by %s from %s: %s',
+                category, request.method, request.path, user, ip,
+                str(exception)[:200]
             )
         except Exception as e:
             logger.warning('Failed to dispatch error notification: %s', e)

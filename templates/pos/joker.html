@@ -412,7 +412,11 @@
                 data-weighable="{% if item.is_weighable %}1{% else %}0{% endif %}"
                 data-unit="{{ item.unit }}"
                 data-sku="{{ item.sku|default:'' }}"
-                title="{{ item.name }} – {{ item.unit_price }} €">
+                data-qty="{{ item.quantity|default:'999' }}"
+                data-min-qty="{{ item.min_quantity|default:'5' }}"
+                title="{{ item.name }} – {{ item.unit_price }} €"
+                role="button" tabindex="0"
+                aria-label="{{ item.name }}, {{ item.unit_price }} eura{% if item.quantity <= item.min_quantity %}, niska zaliha{% endif %}">
           <div class="prod-name">{{ item.name }}</div>
           <div class="prod-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
           {% if item.sku %}<div class="prod-sku">{{ item.sku }}</div>{% endif %}
@@ -480,7 +484,7 @@
       <button class="tip-clear" onclick="clearTip()" title="Ukloni">✕</button>
     </div>
 
-    <div class="pay-zone" id="payZone">
+    <div class="pay-zone" id="payZone" role="region" aria-label="Zona plaćanja">
       <button onclick="togglePayExpand()" class="qp-action-btn" style="float:right;margin-bottom:4px;font-size:.7rem;display:none" id="payExpandBtn" title="Proširi">⛶</button>
       <div class="cashier-required-hint" id="cashierHint">⚠️ Odaberite blagajnika prije naplate</div>
       <!-- Cash amount input (visible only for CASH) -->

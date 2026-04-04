@@ -42,8 +42,8 @@ class POSTerminal(models.Model):
         verbose_name='Podružnica',
     )
     pos_type      = models.CharField(
-        max_length=10,
-        choices=[('quick', 'Brza blagajna'), ('retail', 'Maloprodaja'), ('restaurant', 'Restoran'), ('field', 'Terenska prodaja'), ('service', 'Usluge'), ('reception', 'Recepcija')],
+        max_length=15,
+        choices=[('quick', 'Brza blagajna'), ('retail', 'Maloprodaja'), ('restaurant', 'Restoran'), ('field', 'Terenska prodaja'), ('service', 'Usluge'), ('reception', 'Recepcija'), ('gym', 'Fitness / Gym'), ('appointment', 'Termini / Salon')],
         default='retail',
         verbose_name=_('Tip POS sučelja'),
     )
@@ -120,7 +120,7 @@ class POSSession(models.Model):
     closing_cash  = models.DecimalField(max_digits=10, decimal_places=2, default=0,
                                          verbose_name=_('Prebrojana gotovina pri zatvaranju (€)'))
 
-    status        = models.CharField(max_length=10, choices=Status.choices,
+    status        = models.CharField(max_length=15, choices=Status.choices,
                                       default=Status.OPEN, verbose_name=_('Status'))
     z_report_number = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('Broj Z-izvješća'))
     notes         = models.TextField(blank=True, verbose_name=_('Napomene'))
@@ -218,7 +218,7 @@ class POSReceipt(models.Model):
         verbose_name=_('Porez na potrošnju'),
         help_text=_('Lokalni porez na ugostiteljske usluge (čl.20 ZLP). Osnovica = prihod bez PDV-a.'))
 
-    status     = models.CharField(max_length=10, choices=Status.choices,
+    status     = models.CharField(max_length=15, choices=Status.choices,
                                    default=Status.OPEN, verbose_name=_('Status'))
     table_number = models.CharField(max_length=20, blank=True, verbose_name=_('Stol / Zona'),
                                      help_text=_('Za ugostiteljstvo: broj stola'))
@@ -259,7 +259,7 @@ class POSReceipt(models.Model):
 
     # B-14: Kanal narudzbe
     order_source   = models.CharField(
-        max_length=10, blank=True, default='pos',
+        max_length=15, blank=True, default='pos',
         choices=[('pos','POS blagajna'), ('qr','QR narudzba'), ('web','Webshop'), ('api','API')],
         verbose_name=_('Kanal narudzbe'),
     )
@@ -675,7 +675,7 @@ class Table(models.Model):
     )
     name = models.CharField(max_length=50, verbose_name=_('Naziv'))
     table_type = models.CharField(
-        max_length=10, choices=TABLE_TYPES, default='table',
+        max_length=15, choices=TABLE_TYPES, default='table',
         verbose_name=_('Tip'),
     )
     capacity = models.PositiveIntegerField(default=4, verbose_name=_('Kapacitet'))
@@ -816,7 +816,7 @@ class LoyaltyProgram(models.Model):
     )
     objects = CompanyManager()
     name = models.CharField(max_length=100, verbose_name=_('Naziv'))
-    program_type = models.CharField(max_length=10, choices=PROGRAM_TYPES, default='stamp')
+    program_type = models.CharField(max_length=15, choices=PROGRAM_TYPES, default='stamp')
     stamps_required = models.IntegerField(default=5, verbose_name=_('Potrebno pecata'))
     reward_description = models.CharField(max_length=200, blank=True, verbose_name=_('Opis nagrade'))
     applicable_category = models.CharField(max_length=20, blank=True, verbose_name=_('Kategorija'))
@@ -981,7 +981,7 @@ class Voucher(models.Model):
         ('single', 'Jednonamjenski (Einzweck) — s PDV pri prodaji'),
     ]
     voucher_type = models.CharField(
-        max_length=10, choices=VOUCHER_TYPE_CHOICES, default='multi',
+        max_length=15, choices=VOUCHER_TYPE_CHOICES, default='multi',
         verbose_name=_('Tip vaucera'),
         help_text=_('Visenamjenski = obveza pri prodaji (bez PDV). Jednonamjenski = prihod s PDV.'),
     )
@@ -1039,7 +1039,7 @@ class CashDeposit(models.Model):
         related_name='cash_deposits', verbose_name=_('Operater'),
     )
     deposit_type = models.CharField(
-        max_length=10, choices=DEPOSIT_TYPES, default='deposit',
+        max_length=15, choices=DEPOSIT_TYPES, default='deposit',
         verbose_name=_('Vrsta'),
     )
     amount      = models.DecimalField(
@@ -1701,7 +1701,7 @@ class POSPulseEvent(models.Model):
         related_name='pulse_events', null=True, blank=True,
     )
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES, verbose_name=_('Tip'))
-    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default='info')
+    severity = models.CharField(max_length=15, choices=SEVERITY_CHOICES, default='info')
     title = models.CharField(max_length=200, verbose_name=_('Naslov'))
     detail = models.TextField(blank=True, verbose_name=_('Detalji'))
     metadata = models.JSONField(null=True, blank=True)
@@ -1794,6 +1794,24 @@ def get_default_quick_actions(pos_type, business_type='doo'):
     }
 
     actions = defaults.get(pos_type, defaults['retail'])
+
+    # Gym override
+    if pos_type == 'gym':
+        actions = [
+            {'icon': 'fa-id-card', 'label': 'Check-in', 'action': 'membership_scan', 'color': '#22c55e'},
+            {'icon': 'fa-sync', 'label': 'Članarina', 'action': 'membership_renew', 'color': '#3b82f6'},
+            {'icon': 'fa-dumbbell', 'label': 'Trening', 'action': 'add_item', 'item_sku': 'TRENING', 'color': '#8b5cf6'},
+            {'icon': 'fa-flask', 'label': 'Suplementi', 'action': 'scan_barcode', 'color': '#f59e0b'},
+        ]
+
+    # Appointment override
+    if pos_type == 'appointment':
+        actions = [
+            {'icon': 'fa-calendar-check', 'label': 'Danas', 'action': 'open_url', 'url': '/appointments/today/', 'color': '#22c55e'},
+            {'icon': 'fa-user-clock', 'label': 'Check-in', 'action': 'membership_scan', 'color': '#3b82f6'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+            {'icon': 'fa-whatsapp', 'label': 'WhatsApp', 'action': 'whatsapp_receipt', 'color': '#25D366'},
+        ]
 
     # Udruga override — dodaj membership tipke
     if business_type in ('udruga', 'zadruga', 'ustanova'):
