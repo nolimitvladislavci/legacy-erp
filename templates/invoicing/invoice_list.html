@@ -71,6 +71,8 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
 {% endblock %}
 {% block extra_css %}
 <style>
+.pos-badge{display:inline-flex;align-items:center;background:rgba(201,168,76,.1);border:1px solid var(--gold,#c9a84c);color:var(--gold,#c9a84c);border-radius:4px;padding:.15rem .45rem;font-size:.72rem;font-weight:600;text-decoration:none;margin-left:.4rem;transition:background .15s}
+.pos-badge:hover{background:rgba(201,168,76,.22);color:var(--gold,#c9a84c)}
 @media(max-width:768px){
   .container-fluid{padding-left:.5rem;padding-right:.5rem}
   .table-responsive{font-size:.78rem}
@@ -87,6 +89,10 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
   .btn{font-size:.75rem}
   .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
 }
+.unified-today{border-left:3px solid var(--green,#22c55e);background:var(--card,#1e293b)}
+.unified-breakdown{margin:.5rem 0}
+.ub-row{display:flex;justify-content:space-between;font-size:.78rem;padding:.2rem 0;color:var(--muted,#64748b)}
+.ub-val{font-weight:600;color:var(--text,#e2e8f0)}
 </style>
 {% endblock %}
 {% block content %}
@@ -137,6 +143,18 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
     <div class="label">{% trans "Nacrti" %}</div><div class="value text-muted">{{ draft_count }}</div>
   </div></div>
 </div>
+
+{% if combined_today %}
+<div class="stat-card fenix-card unified-today mb-3" style="padding:16px 20px">
+  <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted,#64748b);margin-bottom:.5rem;font-weight:700">&#128176; {% trans "Ukupno danas" %}</div>
+  <div class="unified-breakdown">
+    <div class="ub-row"><span>&#128196; {% trans "Fakturirano" %}</span><span class="ub-val">{{ inv_total_today|floatformat:2 }} EUR</span></div>
+    <div class="ub-row"><span>&#127978; {% trans "POS blagajna" %}</span><span class="ub-val">{{ pos_total_today|floatformat:2 }} EUR</span></div>
+  </div>
+  <div style="font-size:1.4rem;font-weight:800;color:var(--green,#22c55e);margin-top:.4rem">{{ combined_today|floatformat:2 }} EUR</div>
+  <div style="font-size:.72rem;color:var(--muted,#64748b);margin-top:.2rem">{{ pos_count_today }} POS bona + {{ inv_count_today }} {% trans "racuna" %}</div>
+</div>
+{% endif %}
 
 <div class="stat-card fenix-card mb-3">
   <form method="get" class="row g-2"
@@ -208,7 +226,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       <tbody>
         {% for inv in invoices %}
         <tr>
-          <td><a href="{% url "invoicing:invoice_edit" inv.pk %}" class="fw-bold text-decoration-none">{{ inv.number }}</a>{% if inv.is_locked %} <i class="fas fa-lock text-warning" title="Synesis arhiva {{ inv.synesis_year }}"></i>{% endif %}</td>
+          <td><a href="{% url "invoicing:invoice_edit" inv.pk %}" class="fw-bold text-decoration-none">{{ inv.number }}</a>{% if inv.is_locked %} <i class="fas fa-lock text-warning" title="Synesis arhiva {{ inv.synesis_year }}"></i>{% endif %}{% if inv.pos_receipt %}<a href="/pos/receipt/{{ inv.pos_receipt.pk }}/" class="pos-badge" title="POS bon #{{ inv.pos_receipt.receipt_number }}">&#127978; #{{ inv.pos_receipt.receipt_number }}</a>{% endif %}</td>
           <td>
             <div class="fw-semibold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inv.client_name }}</div>
             <small class="text-muted">{{ inv.country }}</small>

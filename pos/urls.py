@@ -24,6 +24,7 @@ urlpatterns = [
     path('receipt/<int:receipt_id>/remove-item/<int:item_id>/', views.remove_item, name='remove_item'),
     path('receipt/<int:receipt_id>/pay/', views.process_payment, name='process_payment'),
     path('receipt/<int:receipt_id>/cancel/', views.cancel_receipt, name='cancel_receipt'),
+    path('receipt/<int:receipt_id>/update-buyer/', views.receipt_update_buyer, name='receipt_update_buyer'),
     path('api/barcode/', views.barcode_lookup, name='barcode_lookup'),
     path('api/ai-barcode/', views.ai_barcode_lookup, name='ai_barcode_lookup'),
     path('api/quick-add-item/', views.api_quick_add_item, name='api_quick_add_item'),

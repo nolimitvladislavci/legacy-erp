@@ -55,7 +55,7 @@ def index(request):
         status__in=['SENT', 'UNPAID'],
         date_due__lt=today
     ).update(status='OVERDUE')
-    invoices = Invoice.objects.filter(company=company).select_related().prefetch_related('items').order_by('-date_issued') if company else Invoice.objects.none()
+    invoices = Invoice.objects.filter(company=company).select_related('pos_receipt').prefetch_related('items').order_by('-date_issued') if company else Invoice.objects.none()
     status_filter  = request.GET.get('status', '')
     country_filter = request.GET.get('country', '')
     doctype_filter = request.GET.get('doctype', '')
@@ -109,6 +109,22 @@ def index(request):
         company=company, synesis_year__isnull=False
     ).values_list('synesis_year', flat=True).distinct().order_by('-synesis_year')
 
+    # ── POS daily aggregate (Simbioza Sprint 1) ──
+    from pos.models import POSReceipt as _PR
+    from django.db.models import Sum as _Sum, Count as _Count
+    _pos_today = _PR.objects.filter(
+        session__terminal__company=company,
+        session__opened_at__date=today,
+        status='paid'
+    ).aggregate(total=_Sum('total'), count=_Count('id'))
+    pos_total_today = _pos_today['total'] or 0
+    pos_count_today = _pos_today['count'] or 0
+    # Invoice today
+    inv_today_agg = all_inv.filter(date_issued=today).aggregate(total=_Sum('total'), count=_Count('id'))
+    inv_total_today = inv_today_agg['total'] or 0
+    inv_count_today = inv_today_agg['count'] or 0
+    combined_today = float(pos_total_today) + float(inv_total_today)
+
     return render(request, 'invoicing/invoice_list.html', {
         'invoices': invoices[:200],
         'totals': totals, 'today': today,
@@ -123,6 +139,11 @@ def index(request):
         'year_filter': year_filter_int,
         'status_choices': Invoice.STATUS_CHOICES,
         'doctype_choices': Invoice.DOCTYPE_CHOICES,
+        'pos_total_today': pos_total_today,
+        'pos_count_today': pos_count_today,
+        'inv_total_today': inv_total_today,
+        'inv_count_today': inv_count_today,
+        'combined_today': combined_today,
     })
 
 
@@ -449,6 +470,18 @@ def invoice_wizard(request):
         last = Invoice.objects.order_by("-id").first()
         next_num = f"KNJ-{now.year}-{(last.id + 1 if last else 1):04d}"
 
+    # ── from_receipt pre-fill (Simbioza Sprint 1) ──
+    from_receipt_id = request.GET.get('from_receipt', '')
+    prefill_receipt = None
+    if from_receipt_id:
+        try:
+            from pos.models import POSReceipt
+            prefill_receipt = POSReceipt.objects.select_related('session__terminal__company').get(
+                pk=int(from_receipt_id), session__terminal__company=_co
+            )
+        except Exception:
+            prefill_receipt = None
+
     ctx = {
         "title": "Novi dokument - Wizard",
         "invoice": None,
@@ -464,6 +497,7 @@ def invoice_wizard(request):
         "profiles": profiles,
         "default_profile": default_profile,
         "doctype": request.GET.get("doctype", "R"),
+        "prefill_receipt": prefill_receipt,
     }
     # Onboarding: check if company has inventory items
     from inventory.models import InventoryItem
@@ -1459,6 +1493,62 @@ def api_oib_lookup(request):
     from core.business_lookup import lookup_business
     result = lookup_business(oib, country, company=company)
     return JsonResponse(result.to_dict())
+
+
+@login_required
+def api_partner_hint(request):
+    """
+    AI Partner Assistant — bez Geminija, cisti ORM.
+    Vraca povijest suradnje s partnerom za pametno popunjavanje fakture.
+    """
+    oib = request.GET.get('oib', '').strip()
+    if not oib:
+        return JsonResponse({'hint': None})
+
+    company = get_user_company(request)
+    from django.db.models import Avg, Count, Sum
+
+    qs = Invoice.objects.filter(company=company, client_oib=oib)
+
+    if not qs.exists():
+        return JsonResponse({'hint': None, 'msg': 'Novi partner — nema povijesti'})
+
+    total_count = qs.count()
+    unpaid_count = qs.filter(status__in=['UNPAID', 'OVERDUE']).count()
+
+    # Top artikli ovog partnera
+    from invoicing.models import InvoiceItem
+    top_items = list(
+        InvoiceItem.objects
+        .filter(invoice__company=company, invoice__client_oib=oib)
+        .values('description')
+        .annotate(cnt=Count('id'), avg_price=Avg('unit_price'))
+        .order_by('-cnt')[:3]
+    )
+    # Serialize Decimal to float
+    for item in top_items:
+        item['avg_price'] = float(item['avg_price'] or 0)
+
+    last_inv = qs.order_by('-created_at').first()
+
+    warning = None
+    if unpaid_count >= 3:
+        warning = f'{unpaid_count} neplacenih racuna!'
+    elif unpaid_count >= 1:
+        warning = f'{unpaid_count} neplacen racun'
+
+    return JsonResponse({
+        'hint': {
+            'total_invoices': total_count,
+            'unpaid_count': unpaid_count,
+            'warning': warning,
+            'last_doctype': last_inv.doctype if last_inv else 'R',
+            'last_currency': last_inv.currency if last_inv else 'EUR',
+            'last_payment_method': getattr(last_inv, 'payment_method', 'TRANSAKCIJSKI') if last_inv else 'TRANSAKCIJSKI',
+            'top_items': top_items,
+            'partner_name': last_inv.client_name if last_inv else '',
+        }
+    })
 
 
 @login_required

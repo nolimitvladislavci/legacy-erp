@@ -62,6 +62,27 @@
 /* ── Disabled state ── */
 button[disabled]{opacity:.5;cursor:not-allowed}
 
+
+/* ── Invoice Symbiosis Bar ── */
+.inv-bar{margin:.75rem 1.25rem;padding:.75rem 1rem;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.inv-bar.ok{background:rgba(76,175,125,.12);border:1px solid var(--green)}
+.inv-bar.warn{background:rgba(234,179,8,.1);border:1px solid #ca8a04}
+.inv-bar-info{font-size:.85rem;font-weight:600}
+.inv-bar-meta{font-size:.75rem;color:var(--muted)}
+.inv-bar-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* ── R1 Buyer Collapsible ── */
+.r1-panel{margin:.5rem 1.25rem;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.r1-toggle{width:100%;background:rgba(201,168,76,.06);border:none;color:var(--text);padding:.6rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit}
+.r1-toggle:hover{background:rgba(201,168,76,.12)}
+.r1-body{padding:.875rem 1rem;display:none;background:var(--card)}
+.r1-body.open{display:block}
+.r1-field{margin-bottom:.5rem}
+.r1-field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.2rem}
+.r1-field input{width:100%;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.45rem .6rem;font-size:.82rem;font-family:inherit}
+.r1-field input:focus{outline:none;border-color:var(--gold)}
+.r1-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:end}
+
 /* Mobile responsive */
 @media (max-width: 700px) {
   .rl{grid-template-columns:1fr;height:auto;min-height:100vh}
@@ -115,6 +136,32 @@ button[disabled]{opacity:.5;cursor:not-allowed}
     {% else %}<div class="ni">{% trans "Nema stavki. Dodajte artikle ispod." %}</div>{% endif %}
 
     {% if receipt.status == "open" %}
+    {# ── R1 Buyer Data (collapsible) ── #}
+    {% if not receipt.buyer_oib %}
+    <div class="r1-panel">
+      <button type="button" class="r1-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.r1-arrow').textContent=this.nextElementSibling.classList.contains('open')?'&#9650;':'&#9660;'">
+        <span>&#128196; R1 racun (firma)</span><span class="r1-arrow">&#9660;</span>
+      </button>
+      <div class="r1-body" id="r1Body">
+        <div class="r1-field">
+          <label>OIB kupca</label>
+          <div class="r1-row">
+            <input type="text" id="r1Oib" placeholder="12345678901" maxlength="13" inputmode="numeric">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="r1Lookup()" style="min-height:44px">Lookup</button>
+          </div>
+        </div>
+        <div class="r1-field"><label>Naziv kupca</label><input type="text" id="r1Name" placeholder="Tvrtka d.o.o."></div>
+        <div class="r1-field"><label>Adresa kupca</label><input type="text" id="r1Addr" placeholder="Ulica i broj, Grad"></div>
+        <button type="button" class="btn btn-gold" onclick="r1SaveBuyer()" style="width:100%;margin-top:.5rem;min-height:44px">&#10003; Spremi R1 podatke</button>
+        <div id="r1Status" style="font-size:.78rem;margin-top:.4rem;text-align:center;display:none"></div>
+      </div>
+    </div>
+    {% else %}
+    <div class="inv-bar ok" style="margin:.5rem 1.25rem">
+      <div class="inv-bar-info">&#128196; R1: {{ receipt.buyer_name }} ({{ receipt.buyer_oib }})</div>
+    </div>
+    {% endif %}
+
     <div class="ai">
       <div class="ai-title">{% trans "Dodaj stavku" %}</div>
 
@@ -271,6 +318,29 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <div style="font-weight:800;color:var(--green);margin-bottom:.5rem;font-size:1.1rem">{% trans "PLAĆENO" %}</div>
       <div style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem">{{ receipt.paid_at|date:"d.m.Y H:i" }}</div>
       {% if receipt.jir %}<div style="font-size:.7rem;color:var(--muted);margin-bottom:1.25rem">JIR: {{ receipt.jir }}</div>{% endif %}
+
+      {# ── Invoice Symbiosis Bar ── #}
+      {% if receipt.invoice %}
+      <div class="inv-bar ok">
+        <div>
+          <div class="inv-bar-info">&#128196; Fiskalni racun: {{ receipt.invoice.number }}</div>
+          <div class="inv-bar-meta">{{ receipt.invoice.get_status_display }} | {{ receipt.invoice.date_issued|date:"d.m.Y" }}</div>
+        </div>
+        <div class="inv-bar-actions">
+          <a href="/invoicing/{{ receipt.invoice.pk }}/" class="btn btn-ghost btn-sm" target="_blank">&#128196; Pregledaj R1</a>
+          {% if receipt.invoice.status != "SENT" and receipt.invoice.status != "PAID" %}
+          <a href="/invoicing/{{ receipt.invoice.pk }}/email/" class="btn btn-gold btn-sm" onclick="return confirm('Poslati R1 email?')">&#128228; Posalji R1</a>
+          {% endif %}
+        </div>
+      </div>
+      {% elif not receipt.invoice %}
+      <div class="inv-bar warn">
+        <div class="inv-bar-info">&#9888;&#65039; Fiskalni racun jos nije kreiran</div>
+        <div class="inv-bar-actions">
+          <a href="/invoicing/wizard/?from_receipt={{ receipt.pk }}" class="btn btn-gold btn-sm" style="min-height:44px;display:flex;align-items:center">Kreiraj R1</a>
+        </div>
+      </div>
+      {% endif %}
       <a href="{% url 'pos:receipt_pdf' receipt.id %}?format=thermal" class="btn btn-gold"
          style="width:100%;justify-content:center;margin-bottom:.5rem;min-height:52px;font-size:.9rem"
          target="_blank">{% trans "&#128424; Ispisi (Thermal 80mm)" %}</a>
@@ -293,6 +363,45 @@ button[disabled]{opacity:.5;cursor:not-allowed}
 }</script>
 <script src="/static/js/pos/pos-receipt.js"></script>
 <script src="/static/js/pos/pos-pfand.js"></script>
+
+<script>
+/* ── R1 Buyer Lookup & Save ── */
+function r1Lookup(){
+  var oib=document.getElementById('r1Oib');if(!oib)return;
+  var v=oib.value.trim();
+  if(v.length<11){fenixToast&&fenixToast('OIB mora imati 11 znamenki','error');return;}
+  // Mod11 check
+  if(!/^\d{11}$/.test(v)){fenixToast&&fenixToast('OIB mora biti 11 znamenki','error');return;}
+  var a=10;for(var i=0;i<10;i++){a=(a+parseInt(v[i]))%10;if(a===0)a=10;a=(a*2)%11;}
+  var ctrl=(11-a)%10;
+  if(ctrl!==parseInt(v[10])){fenixToast&&fenixToast('Neispravan OIB (kontrolna znamenka)','error');return;}
+  fetch('/invoicing/api/oib-lookup/?oib='+encodeURIComponent(v))
+    .then(r=>r.json()).then(d=>{
+      if(d.name)document.getElementById('r1Name').value=d.name;
+      if(d.address)document.getElementById('r1Addr').value=d.address+(d.city?' '+d.city:'');
+      fenixToast&&fenixToast('Partner pronaden','success');
+    }).catch(()=>{fenixToast&&fenixToast('Lookup neuspjesan — unesite rucno','error');});
+}
+function r1SaveBuyer(){
+  var oib=document.getElementById('r1Oib')?.value.trim()||'';
+  var name=document.getElementById('r1Name')?.value.trim()||'';
+  var addr=document.getElementById('r1Addr')?.value.trim()||'';
+  if(!oib&&!name){fenixToast&&fenixToast('Unesite OIB ili naziv','error');return;}
+  var csrf=document.querySelector('[name=csrfmiddlewaretoken]')?.value||'';
+  var fd=new FormData();fd.append('buyer_oib',oib);fd.append('buyer_name',name);fd.append('buyer_address',addr);
+  var st=document.getElementById('r1Status');if(st){st.style.display='block';st.textContent='Spremam...';st.style.color='var(--muted)';}
+  fetch('/pos/receipt/{{ receipt.pk }}/update-buyer/',{method:'POST',body:fd,headers:{'X-CSRFToken':csrf}})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){
+        if(st){st.textContent='Spremljeno!';st.style.color='var(--green)';}
+        fenixToast&&fenixToast('R1 podaci spremljeni','success');
+        setTimeout(()=>location.reload(),800);
+      }else{
+        if(st){st.textContent=d.error||'Greska';st.style.color='var(--red)';}
+      }
+    }).catch(()=>{if(st){st.textContent='Mrezna greska';st.style.color='var(--red)';}});
+}
+</script>
 
 <!-- Pfand return modal -->
 <div id="pfandModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem">

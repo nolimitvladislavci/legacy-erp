@@ -33,6 +33,7 @@ urlpatterns = [
     # API rute
     path('api/profiles/', views.api_invoice_profiles, name='api_profiles'),
     path('api/oib-lookup/', views.api_oib_lookup, name='api_oib_lookup'),
+    path('api/partner-hint/', views.api_partner_hint, name='api_partner_hint'),
     path('api/nkd-search/', views.api_nkd_search, name='api_nkd_search'),
     path('api/partners/', views.api_partners, name='api_partners'),
     path('api/articles/', views.api_articles, name='api_articles'),

@@ -491,6 +491,41 @@ def cancel_receipt(request, receipt_id):
     return redirect('pos:session_detail', session_id=receipt.session_id)
 
 
+@require_POST
+@login_required
+def receipt_update_buyer(request, receipt_id):
+    """Sprema R1 kupac podatke na bon (OIB, naziv, adresa)."""
+    receipt = get_object_or_404(POSReceipt, pk=receipt_id)
+    company, err = _check_tenant(request, receipt)
+    if err:
+        return err
+
+    buyer_oib = request.POST.get('buyer_oib', '').strip()[:13]
+    buyer_name = request.POST.get('buyer_name', '').strip()[:200]
+    buyer_address = request.POST.get('buyer_address', '').strip()[:300]
+
+    # OIB mod11 validation (if provided and looks like HR OIB)
+    if buyer_oib and len(buyer_oib) == 11 and buyer_oib.isdigit():
+        a = 10
+        for ch in buyer_oib[:10]:
+            a = (a + int(ch)) % 10
+            if a == 0:
+                a = 10
+            a = (a * 2) % 11
+        ctrl = (11 - a) % 10
+        if ctrl != int(buyer_oib[10]):
+            return JsonResponse({'error': 'Neispravan OIB (kontrolna znamenka)'}, status=400)
+
+    receipt.buyer_oib = buyer_oib
+    receipt.buyer_name = buyer_name
+    receipt.buyer_address = buyer_address
+    if buyer_oib:
+        receipt.is_r1 = True
+    receipt.save(update_fields=['buyer_oib', 'buyer_name', 'buyer_address', 'is_r1'])
+
+    return JsonResponse({'ok': True, 'buyer_oib': receipt.buyer_oib, 'is_r1': receipt.is_r1})
+
+
 @csrf_exempt
 def ai_barcode_lookup(request):
     """AI Vision za prepoznavanje barkoda i proizvoda sa slike."""

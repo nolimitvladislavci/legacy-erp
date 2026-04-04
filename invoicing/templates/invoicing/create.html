@@ -294,6 +294,16 @@ body { background: var(--paper); }
 .item-row.saving { opacity: 0.7; }
 .item-row.saved td input, .item-row.saved td select { border-color: #166534 !important; }
 
+.partner-hint{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.875rem 1rem;margin-top:.5rem;font-size:.82rem}
+.ph-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;font-weight:700}
+.ph-icon{font-size:1.1rem}
+.ph-warning{margin-left:auto;font-weight:600;font-size:.8rem}
+.ph-row{display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.ph-label{color:var(--muted)}
+.ph-val{font-weight:600}
+.ph-item-row{display:flex;justify-content:space-between;padding:.2rem 0;color:var(--muted);font-size:.78rem}
+.ph-item-price{color:var(--gold);font-weight:600}
+.ph-actions{margin-top:.75rem}
 </style>
 {% endblock %}
 
@@ -436,6 +446,24 @@ body { background: var(--paper); }
 DE/EU: USt-IdNr format (npr. DE123456789).
 Sustav automatski provjerava ispravnost.">{% trans "OIB / USt-IdNr" %}</label>
               <input type="text" name="client_oib" value="{{ invoice.client_oib|default:'' }}" class="mono" placeholder="12345678901" maxlength="30" id="clientOib">
+              <div id="partner-hint-panel" class="partner-hint" style="display:none">
+                <div class="ph-header">
+                  <span class="ph-icon">&#129504;</span>
+                  <span class="ph-title">Poznati partner</span>
+                  <span id="ph-warning" class="ph-warning"></span>
+                </div>
+                <div class="ph-body">
+                  <div class="ph-row"><span class="ph-label">Ukupno racuna</span><span id="ph-total" class="ph-val"></span></div>
+                  <div class="ph-row"><span class="ph-label">Zadnji tip</span><span id="ph-doctype" class="ph-val"></span></div>
+                  <div class="ph-row"><span class="ph-label">Valuta</span><span id="ph-currency" class="ph-val"></span></div>
+                  <div id="ph-items" class="ph-items"></div>
+                </div>
+                <div class="ph-actions">
+                  <button type="button" onclick="applyPartnerHint()" class="inv-btn" style="font-size:.78rem;padding:6px 14px;background:var(--gold);color:var(--ink);border:none;border-radius:6px;cursor:pointer;font-weight:700">
+                    &#10003; Primijeni prethodne stavke
+                  </button>
+                </div>
+              </div>
             </div>
             <div class="field">
               <label data-lc-help="Na ovu adresu šalje se PDF račun klikom na 📧 Pošalji email. Nije obavezno polje.">{% trans "Email" %}</label>
@@ -1287,5 +1315,51 @@ async function copyInvoiceItems(id){
 document.addEventListener('click',function(e){if(!e.target.closest('.copy-wrap-pos')){document.getElementById('copyDropdown').classList.remove('open');_co=false;}});
 document.addEventListener('DOMContentLoaded',function(){loadQuickButtons();});
 
+</script>
+
+<script>
+/* ── AI Partner Hint (Simbioza Sprint 1) ── */
+let _partnerHintData=null;
+async function fetchPartnerHint(oib){
+  if(!oib||oib.length<11)return;
+  const panel=document.getElementById('partner-hint-panel');
+  if(!panel)return;
+  try{
+    const r=await fetch('/invoicing/api/partner-hint/?oib='+encodeURIComponent(oib));
+    const data=await r.json();
+    if(data.hint){_partnerHintData=data.hint;showPartnerHint(data.hint);}
+    else{panel.style.display='none';}
+  }catch(e){panel.style.display='none';}
+}
+function showPartnerHint(h){
+  const panel=document.getElementById('partner-hint-panel');if(!panel)return;
+  document.getElementById('ph-total').textContent=h.total_invoices+' racuna';
+  document.getElementById('ph-doctype').textContent=h.last_doctype||'R';
+  document.getElementById('ph-currency').textContent=h.last_currency||'EUR';
+  const warn=document.getElementById('ph-warning');
+  warn.textContent=h.warning||'';
+  warn.style.color=h.unpaid_count>=3?'#ef4444':'#ca8a04';
+  if(h.top_items&&h.top_items.length){
+    let html='<div class="ph-label" style="margin-top:.5rem;font-weight:600">Ceste stavke:</div>';
+    h.top_items.forEach(it=>{html+='<div class="ph-item-row"><span>'+it.description+'</span><span class="ph-item-price">'+parseFloat(it.avg_price).toFixed(2)+' EUR</span></div>';});
+    document.getElementById('ph-items').innerHTML=html;
+  }
+  panel.style.display='block';
+}
+function applyPartnerHint(){
+  if(!_partnerHintData)return;
+  var curr=document.querySelector('[name="currency"]');if(curr)curr.value=_partnerHintData.last_currency||'EUR';
+  var pay=document.querySelector('[name="payment_method"]');if(pay)pay.value=_partnerHintData.last_payment_method||'TRANSAKCIJSKI';
+  if(typeof fenixToast==='function')fenixToast('Primijenjeno iz povijesti','success');
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var oibInput=document.getElementById('clientOib');
+  if(oibInput){
+    oibInput.addEventListener('blur',function(){fetchPartnerHint(this.value.trim());});
+    // Also trigger after OIB lookup auto-fill
+    var observer=new MutationObserver(function(){fetchPartnerHint(oibInput.value.trim());});
+    observer.observe(oibInput,{attributes:true,attributeFilter:['value']});
+  }
+});
 </script>
 {% endblock %}
