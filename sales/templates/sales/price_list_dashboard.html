@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Cjenici — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.price-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 12px;
+  transition: transform .2s, box-shadow .2s;
+  overflow: hidden;
+}
+.price-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201,168,76,.12);
+}
+.price-card .card-header-gold {
+  background: linear-gradient(135deg, rgba(201,168,76,.08), rgba(201,168,76,.02));
+  border-bottom: 1px solid rgba(201,168,76,.1);
+  padding: 1rem 1.25rem;
+}
+.partner-badge {
+  display: inline-block;
+  background: rgba(201,168,76,.1);
+  color: var(--gold, #c9a84c);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: .75rem;
+  margin: 2px;
+}
+.ai-suggestion-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.3);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(201,168,76,.06);
+  position: relative;
+  overflow: hidden;
+}
+.ai-suggestion-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), transparent);
+}
+.ai-badge {
+  background: linear-gradient(135deg, var(--gold, #c9a84c), #e6c558);
+  color: #000;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.stat-mini {
+  font-size: .8rem;
+  color: var(--text-muted, #999);
+}
+.stat-mini strong {
+  color: var(--gold, #c9a84c);
+  font-size: 1.1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="cjenici" %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1"><i class="fas fa-tags text-gold me-2"></i>Posebni cjenici</h4>
+    <p class="text-muted mb-0 small">Upravljanje cjenicima po partnerima, grupama i kategorijama</p>
+  </div>
+  <a href="{% url 'sales:price_list_create' %}" class="btn btn-gold">
+    <i class="fas fa-plus me-1"></i> Novi cjenik
+  </a>
+</div>
+
+{# Stats row #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="price-card p-3 text-center">
+      <div class="stat-mini">Ukupno cjenika</div>
+      <div class="stat-mini"><strong>{{ total_count|default:"0" }}</strong></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="price-card p-3 text-center">
+      <div class="stat-mini">Aktivni</div>
+      <div class="stat-mini"><strong class="text-success">{{ active_count|default:"0" }}</strong></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="price-card p-3 text-center">
+      <div class="stat-mini">Partnera pokriveno</div>
+      <div class="stat-mini"><strong>{{ partner_count|default:"0" }}</strong></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="price-card p-3 text-center">
+      <div class="stat-mini">Artikala u cjenicima</div>
+      <div class="stat-mini"><strong>{{ item_count|default:"0" }}</strong></div>
+    </div>
+  </div>
+</div>
+
+{# AI Suggestions #}
+{% if ai_suggestions %}
+<div class="ai-suggestion-card p-3 mb-4">
+  <div class="d-flex align-items-center mb-3">
+    <span class="ai-badge me-2"><i class="fas fa-robot me-1"></i>AI</span>
+    <strong class="small">Prijedlozi za optimizaciju cjenika</strong>
+  </div>
+  <div class="row g-2">
+    {% for sug in ai_suggestions %}
+    <div class="col-md-4">
+      <div class="p-2 rounded" style="background:rgba(201,168,76,.04)">
+        <div class="fw-bold small">{{ sug.title }}</div>
+        <div class="text-muted" style="font-size:.75rem">{{ sug.description }}</div>
+        {% if sug.action_url %}
+        <a href="{{ sug.action_url }}" class="btn btn-sm btn-outline-gold mt-1">Primijeni</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# Price list grid #}
+<div class="row g-3">
+  {% for pl in price_lists %}
+  <div class="col-md-6 col-lg-4">
+    <div class="price-card h-100">
+      <div class="card-header-gold d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">{{ pl.name }}</h6>
+          <span class="badge bg-{{ pl.is_active|yesno:'success,secondary' }} small">
+            {{ pl.is_active|yesno:'Aktivan,Neaktivan' }}
+          </span>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-link text-muted p-0" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'sales:price_list_detail' pl.pk %}"><i class="fas fa-eye me-2"></i>Detalji</a></li>
+            <li><a class="dropdown-item" href="{% url 'sales:price_list_edit' pl.pk %}"><i class="fas fa-edit me-2"></i>Uredi</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'sales:price_list_delete' pl.pk %}"><i class="fas fa-trash me-2"></i>Obriši</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-body p-3">
+        <div class="text-muted small mb-2">
+          <i class="fas fa-list me-1"></i> {{ pl.line_count|default:"0" }} stavki
+          {% if pl.valid_from %} &middot; od {{ pl.valid_from|date:"d.m.Y" }}{% endif %}
+          {% if pl.valid_to %} do {{ pl.valid_to|date:"d.m.Y" }}{% endif %}
+        </div>
+        <div class="mb-2">
+          {% for p in pl.partners.all|slice:":5" %}
+          <span class="partner-badge">{{ p.name|truncatechars:20 }}</span>
+          {% endfor %}
+          {% if pl.partners.count > 5 %}
+          <span class="partner-badge">+{{ pl.partners.count|add:"-5" }}</span>
+          {% endif %}
+        </div>
+        {% if pl.description %}
+        <p class="text-muted small mb-0">{{ pl.description|truncatechars:80 }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12 text-center py-5">
+    <i class="fas fa-tags fa-3x text-muted mb-3 d-block"></i>
+    <p class="text-muted">Nema cjenika. Kreirajte prvi posebni cjenik.</p>
+    <a href="{% url 'sales:price_list_create' %}" class="btn btn-gold"><i class="fas fa-plus me-1"></i>Novi cjenik</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

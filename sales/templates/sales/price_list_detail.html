@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Cjenik: {{ price_list.name }} — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.pl-header {
+  background: linear-gradient(135deg, rgba(201,168,76,.06), rgba(201,168,76,.02));
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.discount-badge-pct { background: rgba(25,135,84,.12); color: #198754; }
+.discount-badge-fixed { background: rgba(13,110,253,.12); color: #0d6efd; }
+.discount-badge-price { background: rgba(201,168,76,.12); color: var(--gold, #c9a84c); }
+.discount-badge-pct, .discount-badge-fixed, .discount-badge-price {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.lines-table th {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted, #999);
+  border-bottom: 1px solid rgba(201,168,76,.1);
+}
+.lines-table td {
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="cjenici" breadcrumbs=breadcrumbs %}
+
+{# Header card #}
+<div class="pl-header mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <div class="d-flex align-items-center mb-2">
+        <h4 class="mb-0 me-3">{{ price_list.name }}</h4>
+        <span class="badge bg-{{ price_list.is_active|yesno:'success,secondary' }}">
+          {{ price_list.is_active|yesno:'Aktivan,Neaktivan' }}
+        </span>
+      </div>
+      {% if price_list.description %}
+      <p class="text-muted mb-2">{{ price_list.description }}</p>
+      {% endif %}
+      <div class="small text-muted">
+        {% if price_list.valid_from %}
+        <i class="fas fa-calendar me-1"></i> {{ price_list.valid_from|date:"d.m.Y" }}
+        {% if price_list.valid_to %} — {{ price_list.valid_to|date:"d.m.Y" }}{% endif %}
+        &middot;
+        {% endif %}
+        <i class="fas fa-users me-1"></i> {{ price_list.partners.count }} partnera
+        &middot;
+        <i class="fas fa-list me-1"></i> {{ lines.count }} stavki
+      </div>
+      {% if price_list.partners.exists %}
+      <div class="mt-2">
+        {% for p in price_list.partners.all|slice:":10" %}
+        <span class="badge rounded-pill" style="background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)">
+          {{ p.name|truncatechars:25 }}
+        </span>
+        {% endfor %}
+        {% if price_list.partners.count > 10 %}
+        <span class="badge rounded-pill bg-secondary">+{{ price_list.partners.count|add:"-10" }}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+      <a href="{% url 'sales:price_list_edit' price_list.pk %}" class="btn btn-gold me-1">
+        <i class="fas fa-edit me-1"></i> Uredi
+      </a>
+      <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        <i class="fas fa-trash me-1"></i> Obriši
+      </button>
+    </div>
+  </div>
+</div>
+
+{# Lines table #}
+<div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover lines-table mb-0">
+        <thead>
+          <tr>
+            <th class="ps-3">#</th>
+            <th>Artikl</th>
+            <th>Šifra</th>
+            <th>Tip popusta</th>
+            <th class="text-end">Vrijednost</th>
+            <th class="text-end pe-3">Min. količina</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in lines %}
+          <tr>
+            <td class="ps-3 text-muted">{{ forloop.counter }}</td>
+            <td class="fw-medium">{{ line.item.name|default:"—" }}</td>
+            <td class="text-muted">{{ line.item.code|default:"—" }}</td>
+            <td>
+              {% if line.discount_type == 'percent' %}
+              <span class="discount-badge-pct"><i class="fas fa-percent me-1"></i>Postotak</span>
+              {% elif line.discount_type == 'fixed' %}
+              <span class="discount-badge-fixed"><i class="fas fa-minus-circle me-1"></i>Fiksni popust</span>
+              {% elif line.discount_type == 'price' %}
+              <span class="discount-badge-price"><i class="fas fa-tag me-1"></i>Posebna cijena</span>
+              {% else %}
+              <span class="text-muted">{{ line.discount_type }}</span>
+              {% endif %}
+            </td>
+            <td class="text-end fw-bold">
+              {% if line.discount_type == 'percent' %}
+              {{ line.discount_value|floatformat:2 }}%
+              {% else %}
+              {{ line.discount_value|floatformat:2 }} EUR
+              {% endif %}
+            </td>
+            <td class="text-end pe-3">{{ line.min_quantity|default:"1" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+              Nema stavki u cjeniku
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# Delete modal #}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e)">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Potvrda brisanja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Jeste li sigurni da želite obrisati cjenik <strong>{{ price_list.name }}</strong>?
+        Ova radnja se ne može poništiti.
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+        <form method="post" action="{% url 'sales:price_list_delete' price_list.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Obriši</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

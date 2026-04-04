@@ -241,6 +241,41 @@ MODULES = [
         'price_addon': 0,
     },
     {
+        'id': 'sales',
+        'name': 'Prodaja',
+        'icon': 'fa-handshake',
+        'url': '/prodaja/',
+        'url_name': 'sales:order_dashboard',
+        'category': 'poslovanje',
+        'tier': TIER_STARTER,
+        'description': 'Cjenici, narudžbe kupaca, saldakonti, IOS obrasci. AI pricing.',
+        'price_addon': 0,
+        'children': [
+            {
+                'id': 'sales_cjenici',
+                'name': 'Cjenici',
+                'icon': 'fa-tags',
+                'url': '/prodaja/cjenici/',
+                'url_name': 'sales:price_list_dashboard',
+            },
+            {
+                'id': 'sales_narudzbe',
+                'name': 'Narudžbe',
+                'icon': 'fa-clipboard-list',
+                'url': '/prodaja/narudzbe/',
+                'url_name': 'sales:order_dashboard',
+            },
+            {
+                'id': 'sales_saldakonti',
+                'name': 'Saldakonti',
+                'icon': 'fa-balance-scale',
+                'url': '/prodaja/saldakonti/',
+                'url_name': 'sales:saldakonti_dashboard',
+            },
+        ],
+    },
+
+    {
         'id': 'marketplace',
         'name': 'Grossmarkt',
         'icon': 'fa-store',

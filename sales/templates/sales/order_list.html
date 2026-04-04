@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Narudžbe — Lista — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-draft { background: rgba(108,117,125,.15); color: #adb5bd; }
+.status-confirmed { background: rgba(13,110,253,.15); color: #6ea8fe; }
+.status-processing { background: rgba(201,168,76,.15); color: var(--gold, #c9a84c); }
+.status-shipped { background: rgba(111,66,193,.15); color: #a78bfa; }
+.status-invoiced { background: rgba(25,135,84,.15); color: #75b798; }
+.status-draft, .status-confirmed, .status-processing, .status-shipped, .status-invoiced {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.priority-high { background: #dc3545; }
+.priority-normal { background: #6c757d; }
+.priority-low { background: #198754; }
+.filter-bar {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="narudzbe" %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0"><i class="fas fa-shopping-cart text-gold me-2"></i>Narudžbe</h4>
+  <div>
+    <a href="{% url 'sales:order_dashboard' %}" class="btn btn-outline-secondary btn-sm me-1">
+      <i class="fas fa-columns me-1"></i> Kanban
+    </a>
+    <a href="{% url 'sales:order_create' %}" class="btn btn-gold btn-sm">
+      <i class="fas fa-plus me-1"></i> Nova narudžba
+    </a>
+  </div>
+</div>
+
+{# Filter bar #}
+<form method="get" class="filter-bar mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small">Pretraži</label>
+      <input type="text" name="q" value="{{ request.GET.q }}" class="form-control form-control-sm"
+             placeholder="Broj, partner...">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Status</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">Svi</option>
+        <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Nacrt</option>
+        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Potvrđena</option>
+        <option value="processing" {% if request.GET.status == 'processing' %}selected{% endif %}>U obradi</option>
+        <option value="shipped" {% if request.GET.status == 'shipped' %}selected{% endif %}>Isporučeno</option>
+        <option value="invoiced" {% if request.GET.status == 'invoiced' %}selected{% endif %}>Fakturirano</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Partner</label>
+      <select name="partner" class="form-select form-select-sm">
+        <option value="">Svi</option>
+        {% for p in partners %}
+        <option value="{{ p.pk }}" {% if request.GET.partner == p.pk|slugify %}selected{% endif %}>{{ p.name|truncatechars:30 }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Od datuma</label>
+      <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Do datuma</label>
+      <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-gold btn-sm w-100">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+  </div>
+</form>
+
+{# Table #}
+<div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th class="ps-3" style="width:30px"></th>
+          <th>Broj</th>
+          <th>Partner</th>
+          <th>Datum</th>
+          <th>Rok isporuke</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Ukupno</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr class="cursor-pointer" onclick="location.href='{% url 'sales:order_detail' order.pk %}'">
+          <td class="ps-3">
+            <span class="priority-dot priority-{{ order.priority|default:'normal' }}"
+                  title="{{ order.get_priority_display|default:'Normalan' }}"></span>
+          </td>
+          <td class="fw-medium">{{ order.number }}</td>
+          <td>{{ order.partner.name|truncatechars:35 }}</td>
+          <td>{{ order.date|date:"d.m.Y" }}</td>
+          <td>
+            {% if order.delivery_date %}
+            {{ order.delivery_date|date:"d.m.Y" }}
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="status-{{ order.status }}">
+              {{ order.get_status_display }}
+            </span>
+          </td>
+          <td class="text-end pe-3 fw-bold">{{ order.total|floatformat:2 }} EUR</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="fas fa-inbox fa-3x mb-2 d-block"></i>
+            Nema narudžbi za prikaz
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# Pagination #}
+{% if orders.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if orders.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}&{{ filter_params }}">&laquo;</a></li>
+    {% endif %}
+    {% for num in orders.paginator.page_range %}
+      {% if orders.number == num %}
+      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% elif num > orders.number|add:"-3" and num < orders.number|add:"3" %}
+      <li class="page-item"><a class="page-link" href="?page={{ num }}&{{ filter_params }}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if orders.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}&{{ filter_params }}">&raquo;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

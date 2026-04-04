@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Uredi narudžbu{% else %}Nova narudžba{% endif %} — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.item-line {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: .75rem;
+  margin-bottom: .5rem;
+}
+.item-line:hover { border-color: rgba(201,168,76,.2); }
+.item-line .remove-item { cursor: pointer; color: var(--text-muted); transition: color .2s; }
+.item-line .remove-item:hover { color: #dc3545; }
+.ai-panel {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.3);
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(201,168,76,.06);
+  position: relative;
+  overflow: hidden;
+}
+.ai-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), transparent);
+}
+.ai-badge {
+  background: linear-gradient(135deg, var(--gold), #e6c558);
+  color: #000;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+.ai-item-row {
+  background: rgba(201,168,76,.04);
+  border: 1px solid rgba(201,168,76,.12);
+  border-radius: 6px;
+  padding: .5rem .75rem;
+  margin-bottom: .25rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.ai-item-row:hover {
+  background: rgba(201,168,76,.08);
+  border-color: rgba(201,168,76,.25);
+}
+.partner-autocomplete {
+  position: relative;
+}
+.partner-autocomplete .autocomplete-results {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+}
+.partner-autocomplete .autocomplete-results.show { display: block; }
+.autocomplete-results .ac-item {
+  padding: .5rem .75rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-size: .85rem;
+}
+.autocomplete-results .ac-item:hover {
+  background: rgba(201,168,76,.08);
+}
+.order-totals {
+  background: rgba(201,168,76,.04);
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 8px;
+  padding: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="narudzbe" breadcrumbs=breadcrumbs %}
+
+<form method="post" id="orderForm">
+{% csrf_token %}
+<div class="row g-4">
+  {# Main form #}
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+      <div class="card-header border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+        <h5 class="mb-0">
+          <i class="fas fa-shopping-cart text-gold me-2"></i>
+          {% if form.instance.pk %}Uredi narudžbu {{ form.instance.number }}{% else %}Nova narudžba{% endif %}
+        </h5>
+      </div>
+      <div class="card-body">
+        {# Header fields #}
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Partner <span class="text-danger">*</span></label>
+            <div class="partner-autocomplete">
+              <input type="text" id="partnerSearch" class="form-control"
+                     placeholder="Pretraži partnera..."
+                     hx-get="{% url 'sales:partner_autocomplete' %}"
+                     hx-trigger="keyup changed delay:300ms"
+                     hx-target="#partnerResults"
+                     hx-swap="innerHTML"
+                     name="_partner_search"
+                     autocomplete="off"
+                     value="{{ form.instance.partner.name|default:'' }}">
+              <div id="partnerResults" class="autocomplete-results"></div>
+              <input type="hidden" name="partner" id="partnerId" value="{{ form.instance.partner_id|default:'' }}">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Datum narudžbe <span class="text-danger">*</span></label>
+            {{ form.date }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Rok isporuke</label>
+            {{ form.delivery_date }}
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <label class="form-label">Skladište</label>
+            {{ form.warehouse }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Prioritet</label>
+            {{ form.priority }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Referenca</label>
+            {{ form.reference }}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Napomena</label>
+          {{ form.notes }}
+        </div>
+
+        {# Order lines #}
+        <hr class="my-4" style="border-color:rgba(201,168,76,.1)">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0"><i class="fas fa-list me-2"></i>Stavke narudžbe</h6>
+          <button type="button" class="btn btn-sm btn-outline-gold" id="addItem">
+            <i class="fas fa-plus me-1"></i> Dodaj stavku
+          </button>
+        </div>
+
+        {{ line_formset.management_form }}
+        <div id="itemsContainer">
+          {% for lf in line_formset %}
+          <div class="item-line" data-index="{{ forloop.counter0 }}">
+            <div class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label small">Artikl</label>
+                {{ lf.item }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">Količina</label>
+                {{ lf.quantity }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">Cijena</label>
+                {{ lf.unit_price }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">Popust %</label>
+                {{ lf.discount }}
+              </div>
+              <div class="col-md-2 text-end">
+                <span class="remove-item" title="Ukloni"><i class="fas fa-times-circle fa-lg"></i></span>
+                {{ lf.DELETE }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {# Totals #}
+        <div class="order-totals mt-3">
+          <div class="row">
+            <div class="col-md-6 offset-md-6">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>Osnovica:</span>
+                <span id="subtotal">0,00 EUR</span>
+              </div>
+              <div class="d-flex justify-content-between small mb-1">
+                <span>PDV (25%):</span>
+                <span id="taxTotal">0,00 EUR</span>
+              </div>
+              <hr class="my-1" style="border-color:rgba(201,168,76,.2)">
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Ukupno:</span>
+                <span id="grandTotal" class="text-gold">0,00 EUR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" name="action" value="save" class="btn btn-gold">
+            <i class="fas fa-save me-1"></i> Spremi
+          </button>
+          <button type="submit" name="action" value="confirm" class="btn btn-outline-gold">
+            <i class="fas fa-check me-1"></i> Spremi i potvrdi
+          </button>
+          <a href="{% url 'sales:order_list' %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# AI Sidebar #}
+  <div class="col-lg-4">
+    <div class="ai-panel p-3">
+      <div class="d-flex align-items-center mb-3">
+        <span class="ai-badge me-2"><i class="fas fa-robot me-1"></i>AI</span>
+        <strong class="small">Preporučeni artikli</strong>
+      </div>
+      <div id="aiOrderSuggestions"
+           hx-get="{% url 'sales:ai_order_suggestions' %}"
+           hx-trigger="load"
+           hx-vals='{"partner_id": ""}'
+           hx-swap="innerHTML">
+        <div class="text-center py-3">
+          <i class="fas fa-spinner fa-spin text-gold"></i>
+          <div class="small text-muted mt-2">Odaberite partnera za prijedloge...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  // Partner autocomplete
+  const search = document.getElementById('partnerSearch');
+  const results = document.getElementById('partnerResults');
+  const hiddenId = document.getElementById('partnerId');
+
+  if (results) {
+    results.addEventListener('click', function(e) {
+      const item = e.target.closest('.ac-item');
+      if (!item) return;
+      search.value = item.dataset.name;
+      hiddenId.value = item.dataset.id;
+      results.classList.remove('show');
+      // Refresh AI suggestions for selected partner
+      var aiPanel = document.getElementById('aiOrderSuggestions');
+      if (aiPanel) {
+        aiPanel.setAttribute('hx-vals', JSON.stringify({partner_id: item.dataset.id}));
+        htmx.trigger(aiPanel, 'load');
+      }
+    });
+  }
+  document.body.addEventListener('htmx:afterSwap', function(e){
+    if (e.detail.target === results && results.innerHTML.trim()) {
+      results.classList.add('show');
+    }
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.partner-autocomplete')) results.classList.remove('show');
+  });
+
+  // Add/remove items
+  const container = document.getElementById('itemsContainer');
+  const addBtn = document.getElementById('addItem');
+  const totalForms = document.getElementById('id_lines-TOTAL_FORMS');
+
+  function newItemRow(idx) {
+    return `<div class="item-line" data-index="${idx}">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small">Artikl</label>
+          <select name="lines-${idx}-item" class="form-select form-select-sm item-select"></select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Količina</label>
+          <input type="number" name="lines-${idx}-quantity" class="form-control form-control-sm qty-input" min="1" value="1" step="0.01">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Cijena</label>
+          <input type="number" name="lines-${idx}-unit_price" class="form-control form-control-sm price-input" min="0" step="0.01">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Popust %</label>
+          <input type="number" name="lines-${idx}-discount" class="form-control form-control-sm disc-input" min="0" max="100" value="0" step="0.01">
+        </div>
+        <div class="col-md-2 text-end">
+          <span class="remove-item" title="Ukloni"><i class="fas fa-times-circle fa-lg"></i></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (addBtn) addBtn.addEventListener('click', function(){
+    var idx = parseInt(totalForms.value);
+    container.insertAdjacentHTML('beforeend', newItemRow(idx));
+    totalForms.value = idx + 1;
+  });
+
+  if (container) container.addEventListener('click', function(e){
+    var rm = e.target.closest('.remove-item');
+    if (!rm) return;
+    var row = rm.closest('.item-line');
+    var del = row.querySelector('[name$="-DELETE"]');
+    if (del) { del.checked = true; row.style.display = 'none'; }
+    else { row.remove(); totalForms.value = parseInt(totalForms.value) - 1; }
+    calcTotals();
+  });
+
+  // Totals
+  function calcTotals() {
+    var sub = 0;
+    container.querySelectorAll('.item-line:not([style*="display: none"])').forEach(function(row){
+      var q = parseFloat(row.querySelector('.qty-input,.form-control[name$="-quantity"]')?.value) || 0;
+      var p = parseFloat(row.querySelector('.price-input,.form-control[name$="-unit_price"]')?.value) || 0;
+      var d = parseFloat(row.querySelector('.disc-input,.form-control[name$="-discount"]')?.value) || 0;
+      sub += q * p * (1 - d/100);
+    });
+    var tax = sub * 0.25;
+    document.getElementById('subtotal').textContent = sub.toFixed(2).replace('.',',') + ' EUR';
+    document.getElementById('taxTotal').textContent = tax.toFixed(2).replace('.',',') + ' EUR';
+    document.getElementById('grandTotal').textContent = (sub+tax).toFixed(2).replace('.',',') + ' EUR';
+  }
+  if (container) container.addEventListener('input', calcTotals);
+  calcTotals();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{# Order Card — Kanban card partial #}
+{# Context: order = {pk, number, partner, total, date, priority, status, item_count} #}
+{% load i18n humanize %}
+
+<div class="order-card mb-2" data-order-id="{{ order.pk }}" draggable="true">
+  <div class="d-flex justify-content-between align-items-start mb-2">
+    <a href="{% url 'sales:order_detail' order.pk %}" class="fw-bold small text-decoration-none order-card-num">
+      {{ order.number }}
+    </a>
+    <span class="priority-dot priority-{{ order.priority|default:'normal' }}"
+          title="{{ order.get_priority_display|default:'Normalan' }}"></span>
+  </div>
+  <div class="order-card-partner mb-1">{{ order.partner.name|truncatechars:30 }}</div>
+  <div class="d-flex justify-content-between align-items-end">
+    <span class="order-card-date">{{ order.date|date:"d.m.Y" }}</span>
+    <span class="order-card-total">{{ order.total|floatformat:2 }} EUR</span>
+  </div>
+  {% if order.item_count %}
+  <div class="order-card-items">{{ order.item_count }} stavki</div>
+  {% endif %}
+</div>
+
+<style>
+.order-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: .65rem .75rem;
+  cursor: grab;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.order-card:hover {
+  border-color: rgba(201,168,76,.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.order-card:active {
+  cursor: grabbing;
+  transform: rotate(1deg);
+}
+.order-card-num {
+  color: var(--gold, #c9a84c);
+  font-size: .8rem;
+}
+.order-card-num:hover { text-decoration: underline !important; }
+.order-card-partner {
+  font-size: .8rem;
+  color: var(--text-primary, #e0e0e0);
+}
+.order-card-date {
+  font-size: .7rem;
+  color: var(--text-muted, #999);
+}
+.order-card-total {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--gold, #c9a84c);
+}
+.order-card-items {
+  font-size: .65rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.priority-high { background: #dc3545; }
+.priority-normal { background: #6c757d; }
+.priority-low { background: #198754; }
+</style>

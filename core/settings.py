@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "livestock",
     "lovacki",
     "production",  # Proizvodnja (MRP) — 3 razine
+    "sales",  # Posebni cjenici + Narudžbe + Saldakonti
     "utilities",
     "memio_pet",  # Memio.pet
     "memio_world",  # Memio.world — digitalna baština

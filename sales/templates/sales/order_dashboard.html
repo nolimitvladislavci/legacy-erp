@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Narudžbe — Kanban — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.kanban-board {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-height: 70vh;
+}
+.kanban-column {
+  min-width: 260px;
+  flex: 1;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+}
+.kanban-col-header {
+  padding: .75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  font-weight: 600;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-col-header .count-badge {
+  background: rgba(255,255,255,.08);
+  color: var(--text-muted);
+  font-size: .7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.kanban-col-body {
+  padding: .5rem;
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(70vh - 60px);
+}
+.kanban-col-body.sortable-ghost-class .order-card {
+  opacity: .4;
+}
+.col-draft .kanban-col-header { border-top: 3px solid #6c757d; }
+.col-confirmed .kanban-col-header { border-top: 3px solid #0d6efd; }
+.col-processing .kanban-col-header { border-top: 3px solid var(--gold, #c9a84c); }
+.col-shipped .kanban-col-header { border-top: 3px solid #6f42c1; }
+.col-invoiced .kanban-col-header { border-top: 3px solid #198754; }
+
+.drag-hint {
+  text-align: center;
+  color: var(--text-muted, #999);
+  font-size: .75rem;
+  padding: 2rem 1rem;
+  border: 2px dashed rgba(255,255,255,.06);
+  border-radius: 8px;
+  display: none;
+}
+.kanban-col-body:empty .drag-hint,
+.kanban-col-body .drag-hint:only-child {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .kanban-board { flex-direction: column; }
+  .kanban-column { min-width: 100%; }
+  .kanban-col-body { max-height: 40vh; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="narudzbe" %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1"><i class="fas fa-shopping-cart text-gold me-2"></i>Narudžbe</h4>
+    <p class="text-muted mb-0 small">Kanban pregled — povucite narudžbe između stupaca</p>
+  </div>
+  <div>
+    <a href="{% url 'sales:order_list' %}" class="btn btn-outline-secondary btn-sm me-1">
+      <i class="fas fa-list me-1"></i> Lista
+    </a>
+    <a href="{% url 'sales:order_create' %}" class="btn btn-gold btn-sm">
+      <i class="fas fa-plus me-1"></i> Nova narudžba
+    </a>
+  </div>
+</div>
+
+<div class="kanban-board">
+  {% for col in kanban_columns %}
+  <div class="kanban-column col-{{ col.key }}">
+    <div class="kanban-col-header">
+      <span><i class="fas fa-{{ col.icon }} me-2"></i>{{ col.label }}</span>
+      <span class="count-badge">{{ col.orders|length }}</span>
+    </div>
+    <div class="kanban-col-body" id="col-{{ col.key }}" data-status="{{ col.key }}">
+      {% for order in col.orders %}
+        {% include "sales/_order_card.html" with order=order %}
+      {% empty %}
+        <div class="drag-hint">
+          <i class="fas fa-arrows-alt mb-1 d-block"></i>
+          Povucite narudžbu ovdje
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.kanban-col-body').forEach(function(el){
+    new Sortable(el, {
+      group: 'orders',
+      animation: 150,
+      ghostClass: 'sortable-ghost-class',
+      onEnd: function(evt){
+        var orderId = evt.item.dataset.orderId;
+        var newStatus = evt.to.dataset.status;
+        if (!orderId || !newStatus) return;
+        fetch("{% url 'sales:order_update_status' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+              || document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+          },
+          body: JSON.stringify({ order_id: orderId, status: newStatus })
+        }).then(function(r){
+          if (r.ok) borgToast('Status ažuriran', 'success');
+          else borgToast('Greška pri ažuriranju', 'error');
+          // Update count badges
+          document.querySelectorAll('.kanban-col-body').forEach(function(col){
+            var cnt = col.querySelectorAll('.order-card').length;
+            col.parentElement.querySelector('.count-badge').textContent = cnt;
+          });
+        });
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

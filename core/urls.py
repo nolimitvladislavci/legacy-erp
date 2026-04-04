@@ -295,6 +295,7 @@ urlpatterns += i18n_patterns(
     path('maintenance/', include('maintenance.urls')),
     path('propter/', include('propter.urls')),
     path('procurement/', include('procurement.urls')),
+    path('prodaja/', include('sales.urls')),
     path('proizvodnja/', include('production.urls')),
     path('fiscal/', include('fiscal.urls')),
     path('tracking/', include('tracking.urls')),

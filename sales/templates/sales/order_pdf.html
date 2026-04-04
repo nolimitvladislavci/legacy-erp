@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Narudžba {{ order.number }}</title>
+<style>
+  @page { size: A4; margin: 15mm 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Barlow', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.4; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #c9a84c; }
+  .company-info { max-width: 55%; }
+  .company-name { font-size: 16pt; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+  .company-details { font-size: 8pt; color: #555; line-height: 1.5; }
+  .doc-title-box { text-align: right; }
+  .doc-title { font-size: 18pt; font-weight: 700; color: #c9a84c; text-transform: uppercase; }
+  .doc-number { font-size: 11pt; color: #333; margin-top: 4px; }
+  .doc-date { font-size: 9pt; color: #666; }
+
+  .parties { display: flex; gap: 30px; margin-bottom: 25px; }
+  .party-box { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+  .party-box.partner { border-color: #c9a84c; }
+  .party-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 4px; }
+  .party-name { font-size: 11pt; font-weight: 700; margin-bottom: 3px; }
+  .party-detail { font-size: 8pt; color: #555; }
+
+  .meta-row { display: flex; gap: 20px; margin-bottom: 20px; }
+  .meta-item { font-size: 8pt; }
+  .meta-item .label { color: #999; text-transform: uppercase; font-size: 7pt; letter-spacing: .5px; }
+  .meta-item .value { font-weight: 600; }
+
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  table.items thead th { background: #1a1a2e; color: #fff; padding: 8px 10px; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; }
+  table.items thead th:first-child { border-radius: 4px 0 0 0; }
+  table.items thead th:last-child { border-radius: 0 4px 0 0; }
+  table.items tbody td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 9pt; }
+  table.items tbody tr:nth-child(even) td { background: #fafafa; }
+  table.items .text-end { text-align: right; }
+  table.items tfoot td { padding: 6px 10px; font-size: 9pt; }
+  table.items tfoot .total-row td { border-top: 2px solid #c9a84c; font-size: 11pt; font-weight: 700; }
+
+  .delivery-info { background: #f8f8f4; border: 1px solid #e8e4d8; border-radius: 6px; padding: 12px; margin-bottom: 25px; font-size: 8pt; }
+  .delivery-info .title { font-weight: 700; font-size: 9pt; margin-bottom: 6px; }
+
+  .signatures { display: flex; justify-content: space-between; margin-top: 50px; padding-top: 15px; }
+  .sig-box { width: 200px; text-align: center; }
+  .sig-line { border-top: 1px solid #999; margin-top: 50px; padding-top: 5px; font-size: 8pt; color: #666; }
+
+  .footer { margin-top: 30px; text-align: center; font-size: 7pt; color: #999; border-top: 1px solid #ddd; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+{# Header #}
+<div class="header">
+  <div class="company-info">
+    <div class="company-name">{{ company.name }}</div>
+    <div class="company-details">
+      {{ company.address }}<br>
+      OIB: {{ company.oib }}<br>
+      {% if company.phone %}Tel: {{ company.phone }}<br>{% endif %}
+      {% if company.email %}E-mail: {{ company.email }}<br>{% endif %}
+      {% if company.iban %}IBAN: {{ company.iban }}{% endif %}
+    </div>
+  </div>
+  <div class="doc-title-box">
+    <div class="doc-title">Narudžba</div>
+    <div class="doc-number">{{ order.number }}</div>
+    <div class="doc-date">{{ order.date|date:"d.m.Y." }}</div>
+  </div>
+</div>
+
+{# Parties #}
+<div class="parties">
+  <div class="party-box">
+    <div class="party-label">Naručitelj</div>
+    <div class="party-name">{{ company.name }}</div>
+    <div class="party-detail">{{ company.address }}</div>
+    <div class="party-detail">OIB: {{ company.oib }}</div>
+  </div>
+  <div class="party-box partner">
+    <div class="party-label">Dobavljač / Kupac</div>
+    <div class="party-name">{{ order.partner.name }}</div>
+    <div class="party-detail">{{ order.partner.address|default:"" }}</div>
+    {% if order.partner.oib %}<div class="party-detail">OIB: {{ order.partner.oib }}</div>{% endif %}
+    {% if order.partner.email %}<div class="party-detail">E-mail: {{ order.partner.email }}</div>{% endif %}
+  </div>
+</div>
+
+{# Meta #}
+<div class="meta-row">
+  <div class="meta-item">
+    <div class="label">Datum narudžbe</div>
+    <div class="value">{{ order.date|date:"d.m.Y." }}</div>
+  </div>
+  {% if order.delivery_date %}
+  <div class="meta-item">
+    <div class="label">Rok isporuke</div>
+    <div class="value">{{ order.delivery_date|date:"d.m.Y." }}</div>
+  </div>
+  {% endif %}
+  {% if order.reference %}
+  <div class="meta-item">
+    <div class="label">Referenca</div>
+    <div class="value">{{ order.reference }}</div>
+  </div>
+  {% endif %}
+  {% if order.warehouse %}
+  <div class="meta-item">
+    <div class="label">Skladište</div>
+    <div class="value">{{ order.warehouse }}</div>
+  </div>
+  {% endif %}
+</div>
+
+{# Items #}
+<table class="items">
+  <thead>
+    <tr>
+      <th style="width:30px">R.br.</th>
+      <th>Artikl</th>
+      <th style="width:60px">Šifra</th>
+      <th class="text-end" style="width:60px">Kol.</th>
+      <th class="text-end" style="width:50px">JM</th>
+      <th class="text-end" style="width:80px">Cijena</th>
+      <th class="text-end" style="width:50px">Popust</th>
+      <th class="text-end" style="width:90px">Ukupno</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in lines %}
+    <tr>
+      <td>{{ forloop.counter }}.</td>
+      <td>{{ line.item.name }}</td>
+      <td>{{ line.item.code|default:"" }}</td>
+      <td class="text-end">{{ line.quantity|floatformat:2 }}</td>
+      <td class="text-end">{{ line.item.unit|default:"kom" }}</td>
+      <td class="text-end">{{ line.unit_price|floatformat:2 }}</td>
+      <td class="text-end">{% if line.discount %}{{ line.discount|floatformat:2 }}%{% endif %}</td>
+      <td class="text-end">{{ line.total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="7" class="text-end"><strong>Osnovica:</strong></td>
+      <td class="text-end">{{ order.subtotal|floatformat:2 }} EUR</td>
+    </tr>
+    <tr>
+      <td colspan="7" class="text-end">PDV (25%):</td>
+      <td class="text-end">{{ order.tax_amount|floatformat:2 }} EUR</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="7" class="text-end"><strong>UKUPNO:</strong></td>
+      <td class="text-end"><strong>{{ order.total|floatformat:2 }} EUR</strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+{# Delivery info #}
+{% if order.delivery_date or order.notes %}
+<div class="delivery-info">
+  <div class="title">Napomene za isporuku</div>
+  {% if order.delivery_date %}
+  <div>Traženi rok isporuke: {{ order.delivery_date|date:"d.m.Y." }}</div>
+  {% endif %}
+  {% if order.notes %}
+  <div style="margin-top:4px">{{ order.notes }}</div>
+  {% endif %}
+</div>
+{% endif %}
+
+{# Signatures #}
+<div class="signatures">
+  <div class="sig-box">
+    <div class="sig-line">Naručitelj</div>
+  </div>
+  <div class="sig-box">
+    <div class="sig-line">Odobrio/la</div>
+  </div>
+  <div class="sig-box">
+    <div class="sig-line">Dobavljač</div>
+  </div>
+</div>
+
+<div class="footer">
+  {{ company.name }} &middot; {{ company.address }} &middot; OIB: {{ company.oib }}
+  {% if company.iban %} &middot; IBAN: {{ company.iban }}{% endif %}
+</div>
+
+</body>
+</html>

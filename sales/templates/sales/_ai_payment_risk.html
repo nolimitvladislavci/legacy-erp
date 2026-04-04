@@ -1,0 +1,78 @@
+{# AI Payment Risk — partial #}
+{# Context: risk = {score, predicted_days, level, history_summary, avg_days, trend} #}
+{% load i18n %}
+
+{% if risk %}
+<div class="ai-risk-card p-2 rounded" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15)">
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <span style="background:linear-gradient(135deg,var(--gold),#e6c558);color:#000;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:8px;text-transform:uppercase">
+      <i class="fas fa-robot me-1"></i>AI Rizik
+    </span>
+    {# Risk level badge #}
+    {% if risk.level == 'low' %}
+    <span class="badge bg-success" style="font-size:.65rem">Nizak</span>
+    {% elif risk.level == 'medium' %}
+    <span class="badge" style="background:var(--gold);color:#000;font-size:.65rem">Srednji</span>
+    {% elif risk.level == 'high' %}
+    <span class="badge bg-warning text-dark" style="font-size:.65rem">Visok</span>
+    {% elif risk.level == 'critical' %}
+    <span class="badge bg-danger" style="font-size:.65rem">Kritičan</span>
+    {% endif %}
+  </div>
+
+  {# Risk score gauge #}
+  <div class="mb-2">
+    <div class="d-flex justify-content-between align-items-end mb-1">
+      <span class="text-muted" style="font-size:.7rem">Ocjena rizika</span>
+      <span class="fw-bold" style="font-size:1.1rem;{% if risk.score > 75 %}color:#dc3545{% elif risk.score > 50 %}color:#fd7e14{% elif risk.score > 25 %}color:var(--gold){% else %}color:#198754{% endif %}">
+        {{ risk.score }}<span style="font-size:.7rem;opacity:.6">/100</span>
+      </span>
+    </div>
+    {# Gauge bar #}
+    <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;position:relative">
+      {# Background segments #}
+      <div style="position:absolute;top:0;left:0;width:25%;height:100%;background:rgba(25,135,84,.2)"></div>
+      <div style="position:absolute;top:0;left:25%;width:25%;height:100%;background:rgba(201,168,76,.2)"></div>
+      <div style="position:absolute;top:0;left:50%;width:25%;height:100%;background:rgba(253,126,20,.2)"></div>
+      <div style="position:absolute;top:0;left:75%;width:25%;height:100%;background:rgba(220,53,69,.2)"></div>
+      {# Pointer #}
+      <div style="position:absolute;top:-2px;left:calc({{ risk.score }}% - 4px);width:8px;height:12px;background:{% if risk.score > 75 %}#dc3545{% elif risk.score > 50 %}#fd7e14{% elif risk.score > 25 %}var(--gold){% else %}#198754{% endif %};border-radius:2px;transition:left .3s"></div>
+    </div>
+  </div>
+
+  {# Predicted days #}
+  {% if risk.predicted_days %}
+  <div class="d-flex align-items-center gap-2 mb-1" style="font-size:.75rem">
+    <i class="fas fa-clock text-muted"></i>
+    <span class="text-muted">Predviđeno plaćanje:</span>
+    <span class="fw-bold">~{{ risk.predicted_days }} dana</span>
+  </div>
+  {% endif %}
+
+  {# Payment history #}
+  {% if risk.avg_days %}
+  <div class="d-flex align-items-center gap-2 mb-1" style="font-size:.75rem">
+    <i class="fas fa-history text-muted"></i>
+    <span class="text-muted">Prosječno kašnjenje:</span>
+    <span class="fw-bold">{{ risk.avg_days }} dana</span>
+    {% if risk.trend == 'improving' %}
+    <i class="fas fa-arrow-down text-success" title="Poboljšanje"></i>
+    {% elif risk.trend == 'worsening' %}
+    <i class="fas fa-arrow-up text-danger" title="Pogoršanje"></i>
+    {% else %}
+    <i class="fas fa-minus text-muted" title="Stabilno"></i>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if risk.history_summary %}
+  <div class="text-muted mt-1" style="font-size:.65rem;font-style:italic">
+    {{ risk.history_summary }}
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div class="text-muted small text-center py-2">
+  <i class="fas fa-shield-alt me-1"></i> Nema podataka o riziku
+</div>
+{% endif %}

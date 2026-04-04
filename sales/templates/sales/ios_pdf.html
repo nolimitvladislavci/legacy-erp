@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>IOS — {{ partner.name }}</title>
+<style>
+  @page { size: A4; margin: 15mm 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Barlow', Arial, sans-serif; font-size: 9pt; color: #1a1a1a; line-height: 1.4; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #c9a84c; }
+  .company-info { max-width: 55%; }
+  .company-name { font-size: 15pt; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+  .company-details { font-size: 8pt; color: #555; line-height: 1.5; }
+  .doc-title-box { text-align: right; }
+  .doc-title { font-size: 16pt; font-weight: 700; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; }
+  .doc-subtitle { font-size: 9pt; color: #666; margin-top: 2px; }
+  .doc-date { font-size: 8pt; color: #999; margin-top: 4px; }
+
+  .parties { display: flex; gap: 25px; margin-bottom: 20px; }
+  .party-box { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+  .party-box.partner { border-color: #c9a84c; border-width: 2px; }
+  .party-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 4px; }
+  .party-name { font-size: 11pt; font-weight: 700; margin-bottom: 2px; }
+  .party-detail { font-size: 8pt; color: #555; }
+
+  .period-box { background: #f8f8f4; border: 1px solid #e8e4d8; border-radius: 6px; padding: 10px 14px; margin-bottom: 18px; font-size: 8pt; }
+  .period-box strong { font-size: 9pt; }
+
+  table.ios { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+  table.ios thead th {
+    background: #1a1a2e; color: #fff; padding: 7px 10px;
+    font-size: 7.5pt; text-transform: uppercase; letter-spacing: .5px;
+  }
+  table.ios thead th:first-child { border-radius: 4px 0 0 0; }
+  table.ios thead th:last-child { border-radius: 0 4px 0 0; }
+  table.ios tbody td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 8.5pt; }
+  table.ios tbody tr:nth-child(even) td { background: #fafafa; }
+  table.ios .text-end { text-align: right; }
+  table.ios tfoot td { padding: 8px 10px; font-weight: 700; }
+  table.ios tfoot .total-row { border-top: 2px solid #c9a84c; }
+  table.ios tfoot .total-row td { font-size: 10pt; }
+
+  .saldo-box { display: flex; justify-content: flex-end; gap: 30px; margin-bottom: 25px; padding: 12px 16px; background: #f0ede4; border-radius: 6px; }
+  .saldo-item .label { font-size: 7pt; text-transform: uppercase; color: #777; letter-spacing: .5px; }
+  .saldo-item .value { font-size: 12pt; font-weight: 700; }
+  .saldo-item .value.debit { color: #dc3545; }
+  .saldo-item .value.credit { color: #198754; }
+  .saldo-item .value.total { color: #c9a84c; }
+
+  .signatures { display: flex; justify-content: space-between; margin-top: 40px; }
+  .sig-box { width: 180px; text-align: center; }
+  .sig-line { border-top: 1px solid #999; margin-top: 45px; padding-top: 5px; font-size: 8pt; color: #666; }
+  .stamp-area { width: 80px; height: 80px; border: 1px dashed #ccc; border-radius: 50%; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 7pt; }
+
+  .legal-text { margin-top: 25px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 7pt; color: #888; line-height: 1.5; text-align: justify; }
+
+  .footer { margin-top: 15px; text-align: center; font-size: 7pt; color: #999; border-top: 1px solid #ddd; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+{# Header #}
+<div class="header">
+  <div class="company-info">
+    <div class="company-name">{{ company.name }}</div>
+    <div class="company-details">
+      {{ company.address }}<br>
+      OIB: {{ company.oib }}<br>
+      {% if company.phone %}Tel: {{ company.phone }}<br>{% endif %}
+      {% if company.email %}E-mail: {{ company.email }}<br>{% endif %}
+      {% if company.iban %}IBAN: {{ company.iban }}{% endif %}
+    </div>
+  </div>
+  <div class="doc-title-box">
+    <div class="doc-title">IOS</div>
+    <div class="doc-subtitle">Izvod otvorenih stavki</div>
+    <div class="doc-date">Datum: {{ ios_date|date:"d.m.Y." }}</div>
+  </div>
+</div>
+
+{# Parties #}
+<div class="parties">
+  <div class="party-box">
+    <div class="party-label">Izdavatelj</div>
+    <div class="party-name">{{ company.name }}</div>
+    <div class="party-detail">{{ company.address }}</div>
+    <div class="party-detail">OIB: {{ company.oib }}</div>
+  </div>
+  <div class="party-box partner">
+    <div class="party-label">Partner</div>
+    <div class="party-name">{{ partner.name }}</div>
+    <div class="party-detail">{{ partner.address|default:"" }}</div>
+    {% if partner.oib %}<div class="party-detail">OIB: {{ partner.oib }}</div>{% endif %}
+  </div>
+</div>
+
+{# Period #}
+<div class="period-box">
+  <strong>Razdoblje:</strong> {{ period_from|date:"d.m.Y." }} — {{ period_to|date:"d.m.Y." }}
+  {% if cutoff_date %} &middot; <strong>Stanje na dan:</strong> {{ cutoff_date|date:"d.m.Y." }}{% endif %}
+</div>
+
+{# Items table #}
+<table class="ios">
+  <thead>
+    <tr>
+      <th style="width:25px">R.br.</th>
+      <th>Datum</th>
+      <th>Dokument</th>
+      <th>Opis</th>
+      <th class="text-end">Duguje</th>
+      <th class="text-end">Potražuje</th>
+      <th class="text-end">Saldo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ forloop.counter }}.</td>
+      <td>{{ item.date|date:"d.m.Y." }}</td>
+      <td>{{ item.document_number }}</td>
+      <td>{{ item.description|default:"" }}</td>
+      <td class="text-end">{% if item.debit %}{{ item.debit|floatformat:2 }}{% endif %}</td>
+      <td class="text-end">{% if item.credit %}{{ item.credit|floatformat:2 }}{% endif %}</td>
+      <td class="text-end">{{ item.running_balance|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="total-row">
+      <td colspan="4"><strong>UKUPNO:</strong></td>
+      <td class="text-end">{{ total_debit|floatformat:2 }} EUR</td>
+      <td class="text-end">{{ total_credit|floatformat:2 }} EUR</td>
+      <td class="text-end"><strong>{{ balance|floatformat:2 }} EUR</strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+{# Saldo summary #}
+<div class="saldo-box">
+  <div class="saldo-item">
+    <div class="label">Ukupno duguje</div>
+    <div class="value debit">{{ total_debit|floatformat:2 }} EUR</div>
+  </div>
+  <div class="saldo-item">
+    <div class="label">Ukupno potražuje</div>
+    <div class="value credit">{{ total_credit|floatformat:2 }} EUR</div>
+  </div>
+  <div class="saldo-item">
+    <div class="label">Saldo</div>
+    <div class="value total">{{ balance|floatformat:2 }} EUR</div>
+  </div>
+</div>
+
+{# Signatures #}
+<div class="signatures">
+  <div class="sig-box">
+    <div class="stamp-area">M.P.</div>
+    <div class="sig-line">Izdavatelj — potpis i pečat</div>
+  </div>
+  <div class="sig-box" style="text-align:center">
+    <div style="font-size:8pt;color:#666;margin-top:20px">
+      Datum usklađivanja:<br>
+      ___________________
+    </div>
+  </div>
+  <div class="sig-box">
+    <div class="stamp-area">M.P.</div>
+    <div class="sig-line">Partner — potpis i pečat</div>
+  </div>
+</div>
+
+{# Legal text #}
+<div class="legal-text">
+  Sukladno čl. 22. Zakona o računovodstvu (NN 78/15, 134/15, 120/16, 116/18, 42/20, 47/20, 114/22),
+  poduzetnik je dužan usklađivati stanja potraživanja i obveza s dužnicima i vjerovnicima.
+  Molimo vas da ovaj izvod otvorenih stavki provjerite, potpišete i vratite u roku od 8 dana.
+  Ukoliko u navedenom roku ne primimo odgovor, smatrat ćemo da su podaci suglasni s vašom evidencijom.
+  <br><br>
+  U slučaju neslaganja, molimo vas da nas obavijestite s detaljima razlika kako bismo mogli izvršiti usklađivanje.
+</div>
+
+<div class="footer">
+  {{ company.name }} &middot; {{ company.address }} &middot; OIB: {{ company.oib }}
+  {% if company.iban %} &middot; IBAN: {{ company.iban }}{% endif %}
+</div>
+
+</body>
+</html>

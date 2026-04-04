@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Saldakonti — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.aging-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: transform .2s, box-shadow .2s;
+  position: relative;
+  overflow: hidden;
+}
+.aging-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+}
+.aging-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.aging-0-30::before { background: #198754; }
+.aging-31-60::before { background: var(--gold, #c9a84c); }
+.aging-61-90::before { background: #fd7e14; }
+.aging-90-plus::before { background: #dc3545; }
+.aging-card .aging-label {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted, #999);
+  margin-bottom: .5rem;
+}
+.aging-card .aging-amount {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.aging-0-30 .aging-amount { color: #198754; }
+.aging-31-60 .aging-amount { color: var(--gold, #c9a84c); }
+.aging-61-90 .aging-amount { color: #fd7e14; }
+.aging-90-plus .aging-amount { color: #dc3545; }
+.aging-card .aging-count {
+  font-size: .75rem;
+  color: var(--text-muted);
+}
+
+.receivable-bar, .payable-bar {
+  height: 28px;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.receivable-bar { background: rgba(25,135,84,.15); }
+.payable-bar { background: rgba(220,53,69,.15); }
+.receivable-bar .bar-fill { background: #198754; height: 100%; border-radius: 6px; transition: width .5s; }
+.payable-bar .bar-fill { background: #dc3545; height: 100%; border-radius: 6px; transition: width .5s; }
+.bar-label {
+  position: absolute;
+  top: 50%; left: 12px;
+  transform: translateY(-50%);
+  font-size: .75rem;
+  font-weight: 600;
+  color: #fff;
+  z-index: 1;
+}
+.bar-amount {
+  position: absolute;
+  top: 50%; right: 12px;
+  transform: translateY(-50%);
+  font-size: .8rem;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.risk-heatmap {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.25);
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(201,168,76,.06);
+  overflow: hidden;
+  position: relative;
+}
+.risk-heatmap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), transparent);
+}
+.risk-heatmap .ai-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(201,168,76,.1);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ai-badge {
+  background: linear-gradient(135deg, var(--gold), #e6c558);
+  color: #000;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+.risk-row {
+  display: flex;
+  align-items: center;
+  padding: .5rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  font-size: .85rem;
+  transition: background .2s;
+}
+.risk-row:hover { background: rgba(201,168,76,.04); }
+.risk-row:last-child { border-bottom: none; }
+.risk-indicator {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.risk-low { background: #198754; }
+.risk-medium { background: var(--gold, #c9a84c); }
+.risk-high { background: #fd7e14; }
+.risk-critical { background: #dc3545; }
+.risk-score-bar {
+  width: 60px;
+  height: 6px;
+  background: rgba(255,255,255,.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.risk-score-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="saldakonti" %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1"><i class="fas fa-balance-scale text-gold me-2"></i>Saldakonti</h4>
+    <p class="text-muted mb-0 small">Pregled potraživanja, obveza i starosti dugovanja</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'sales:ios_generate' %}" class="btn btn-outline-gold btn-sm">
+      <i class="fas fa-file-alt me-1"></i> Generiraj IOS
+    </a>
+    <a href="{% url 'sales:payment_create' %}" class="btn btn-gold btn-sm">
+      <i class="fas fa-money-bill-wave me-1"></i> Evidentiraj uplatu
+    </a>
+  </div>
+</div>
+
+{# Aging buckets #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="aging-card aging-0-30">
+      <div class="aging-label">0 — 30 dana</div>
+      <div class="aging-amount">{{ aging.bucket_0_30|floatformat:2|default:"0,00" }}</div>
+      <div class="aging-count">{{ aging.count_0_30|default:"0" }} stavki</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="aging-card aging-31-60">
+      <div class="aging-label">31 — 60 dana</div>
+      <div class="aging-amount">{{ aging.bucket_31_60|floatformat:2|default:"0,00" }}</div>
+      <div class="aging-count">{{ aging.count_31_60|default:"0" }} stavki</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="aging-card aging-61-90">
+      <div class="aging-label">61 — 90 dana</div>
+      <div class="aging-amount">{{ aging.bucket_61_90|floatformat:2|default:"0,00" }}</div>
+      <div class="aging-count">{{ aging.count_61_90|default:"0" }} stavki</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="aging-card aging-90-plus">
+      <div class="aging-label">90+ dana</div>
+      <div class="aging-amount">{{ aging.bucket_90_plus|floatformat:2|default:"0,00" }}</div>
+      <div class="aging-count">{{ aging.count_90_plus|default:"0" }} stavki</div>
+    </div>
+  </div>
+</div>
+
+{# Receivable vs Payable bars #}
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="small text-muted mb-1"><i class="fas fa-arrow-down text-success me-1"></i>Ukupna potraživanja</div>
+    <div class="receivable-bar" style="position:relative">
+      <div class="bar-fill" style="width:{{ receivable_pct|default:50 }}%"></div>
+      <span class="bar-label">Potraživanja</span>
+      <span class="bar-amount text-success">{{ total_receivable|floatformat:2|default:"0,00" }} EUR</span>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="small text-muted mb-1"><i class="fas fa-arrow-up text-danger me-1"></i>Ukupne obveze</div>
+    <div class="payable-bar" style="position:relative">
+      <div class="bar-fill" style="width:{{ payable_pct|default:30 }}%"></div>
+      <span class="bar-label">Obveze</span>
+      <span class="bar-amount text-danger">{{ total_payable|floatformat:2|default:"0,00" }} EUR</span>
+    </div>
+  </div>
+</div>
+
+{# Aging chart #}
+{% include "sales/_aging_chart.html" %}
+
+{# AI Risk heatmap #}
+<div class="risk-heatmap mb-4">
+  <div class="ai-header">
+    <span class="ai-badge"><i class="fas fa-robot me-1"></i>AI</span>
+    <strong class="small">Rizik naplate — toplinska karta</strong>
+    <span class="text-muted small ms-auto">Sortirano po riziku</span>
+  </div>
+  <div id="riskHeatmap"
+       hx-get="{% url 'sales:ai_payment_risk_list' %}"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    {% for item in risk_items %}
+    <div class="risk-row">
+      <span class="risk-indicator risk-{{ item.risk_level }} me-2"></span>
+      <span class="flex-grow-1">
+        <a href="{% url 'sales:partner_open_items' item.partner_id %}" class="text-decoration-none">
+          {{ item.partner_name }}
+        </a>
+      </span>
+      <span class="text-muted small me-3">{{ item.open_amount|floatformat:2 }} EUR</span>
+      <div class="risk-score-bar me-2">
+        <div class="fill" style="width:{{ item.risk_score }}%;background:{% if item.risk_score > 75 %}#dc3545{% elif item.risk_score > 50 %}#fd7e14{% elif item.risk_score > 25 %}#c9a84c{% else %}#198754{% endif %}"></div>
+      </div>
+      <span class="fw-bold small" style="width:30px;text-align:right">{{ item.risk_score }}</span>
+    </div>
+    {% empty %}
+    <div class="text-center py-4 text-muted small">
+      <i class="fas fa-shield-alt fa-2x mb-2 d-block"></i>
+      Nema otvorenih stavki za analizu rizika
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

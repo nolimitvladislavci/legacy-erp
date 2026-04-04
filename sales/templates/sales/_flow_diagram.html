@@ -1,0 +1,151 @@
+{# P1/P7 Flow Diagram — partial #}
+{# Context: current_status = 'draft'|'confirmed'|'processing'|'shipped'|'invoiced' #}
+{% load i18n %}
+
+{% with steps="draft,confirmed,processing,shipped,invoiced" %}
+<div class="flow-diagram mb-4">
+  <div class="flow-steps">
+    {% for step_key in "draft,confirmed,processing,shipped,invoiced"|make_list %}{% endfor %}
+
+    {# Step: Narudžba (draft) #}
+    <div class="flow-step {% if current_status == 'draft' %}active{% elif current_status == 'confirmed' or current_status == 'processing' or current_status == 'shipped' or current_status == 'invoiced' %}completed{% else %}pending{% endif %}">
+      <div class="flow-dot">
+        {% if current_status != 'draft' and current_status %}
+        <i class="fas fa-check"></i>
+        {% else %}
+        <i class="fas fa-file-alt"></i>
+        {% endif %}
+      </div>
+      <div class="flow-label">Narudžba</div>
+    </div>
+
+    <div class="flow-connector {% if current_status == 'confirmed' or current_status == 'processing' or current_status == 'shipped' or current_status == 'invoiced' %}completed{% endif %}"></div>
+
+    {# Step: Potvrda (confirmed) #}
+    <div class="flow-step {% if current_status == 'confirmed' %}active{% elif current_status == 'processing' or current_status == 'shipped' or current_status == 'invoiced' %}completed{% else %}pending{% endif %}">
+      <div class="flow-dot">
+        {% if current_status == 'processing' or current_status == 'shipped' or current_status == 'invoiced' %}
+        <i class="fas fa-check"></i>
+        {% else %}
+        <i class="fas fa-check-circle"></i>
+        {% endif %}
+      </div>
+      <div class="flow-label">Potvrda</div>
+    </div>
+
+    <div class="flow-connector {% if current_status == 'processing' or current_status == 'shipped' or current_status == 'invoiced' %}completed{% endif %}"></div>
+
+    {# Step: Otpremnica (shipped) #}
+    <div class="flow-step {% if current_status == 'processing' %}active{% elif current_status == 'shipped' or current_status == 'invoiced' %}completed{% else %}pending{% endif %}">
+      <div class="flow-dot">
+        {% if current_status == 'shipped' or current_status == 'invoiced' %}
+        <i class="fas fa-check"></i>
+        {% else %}
+        <i class="fas fa-truck"></i>
+        {% endif %}
+      </div>
+      <div class="flow-label">Otpremnica</div>
+    </div>
+
+    <div class="flow-connector {% if current_status == 'shipped' or current_status == 'invoiced' %}completed{% endif %}"></div>
+
+    {# Step: Faktura (invoiced) #}
+    <div class="flow-step {% if current_status == 'invoiced' %}active completed{% else %}pending{% endif %}">
+      <div class="flow-dot">
+        {% if current_status == 'invoiced' %}
+        <i class="fas fa-check"></i>
+        {% else %}
+        <i class="fas fa-file-invoice-dollar"></i>
+        {% endif %}
+      </div>
+      <div class="flow-label">Faktura</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.flow-diagram {
+  padding: 1rem;
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+}
+.flow-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 80px;
+}
+.flow-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  transition: all .3s;
+  border: 2px solid transparent;
+}
+.flow-step.pending .flow-dot {
+  background: rgba(255,255,255,.06);
+  color: var(--text-muted, #666);
+  border-color: rgba(255,255,255,.1);
+}
+.flow-step.active .flow-dot {
+  background: rgba(201,168,76,.15);
+  color: var(--gold, #c9a84c);
+  border-color: var(--gold, #c9a84c);
+  box-shadow: 0 0 16px rgba(201,168,76,.25);
+  animation: pulse-gold 2s infinite;
+}
+.flow-step.completed .flow-dot {
+  background: rgba(25,135,84,.15);
+  color: #198754;
+  border-color: #198754;
+}
+.flow-label {
+  font-size: .7rem;
+  margin-top: .5rem;
+  font-weight: 500;
+  text-align: center;
+}
+.flow-step.pending .flow-label { color: var(--text-muted, #666); }
+.flow-step.active .flow-label { color: var(--gold, #c9a84c); font-weight: 700; }
+.flow-step.completed .flow-label { color: #198754; }
+
+.flow-connector {
+  height: 2px;
+  flex: 1;
+  max-width: 80px;
+  min-width: 30px;
+  margin: 0 4px;
+  margin-bottom: 20px;
+  background: rgba(255,255,255,.1);
+  border-radius: 1px;
+  transition: background .3s;
+}
+.flow-connector.completed {
+  background: #198754;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 16px rgba(201,168,76,.25); }
+  50% { box-shadow: 0 0 24px rgba(201,168,76,.4); }
+}
+
+@media (max-width: 576px) {
+  .flow-step { min-width: 60px; }
+  .flow-dot { width: 32px; height: 32px; font-size: .7rem; }
+  .flow-label { font-size: .6rem; }
+  .flow-connector { max-width: 40px; }
+}
+</style>
+{% endwith %}

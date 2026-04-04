@@ -1,0 +1,80 @@
+{# AI Order Suggestions — partial (HTMX loaded) #}
+{# Context: suggestions = list of {item_name, item_id, confidence, reason, last_ordered, avg_qty} #}
+{% load i18n %}
+
+{% if suggestions %}
+<div class="mb-2">
+  <div class="text-muted small mb-2">
+    Na temelju povijesti narudžbi za ovog partnera:
+  </div>
+
+  {% for s in suggestions %}
+  <div class="ai-item-row d-flex align-items-center gap-2" data-item-id="{{ s.item_id }}" data-item-name="{{ s.item_name }}" data-avg-qty="{{ s.avg_qty }}">
+    <div class="flex-grow-1">
+      <div class="fw-medium small">{{ s.item_name }}</div>
+      <div style="font-size:.65rem;color:var(--text-muted)">
+        {{ s.reason|default:"Često naručivan artikl" }}
+        {% if s.last_ordered %} &middot; Zadnje: {{ s.last_ordered|date:"d.m.Y" }}{% endif %}
+      </div>
+    </div>
+    <div class="text-end" style="min-width:50px">
+      {# Confidence indicator #}
+      <div class="fw-bold small" style="color:var(--gold)">{{ s.confidence }}%</div>
+      <div style="height:3px;width:40px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:{{ s.confidence }}%;background:var(--gold,#c9a84c);border-radius:2px"></div>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-gold ai-add-item" title="Dodaj u narudžbu"
+            style="padding:2px 8px;font-size:.75rem"
+            onclick="addAiItem(this)">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+  {% endfor %}
+
+  <button type="button" class="btn btn-sm btn-gold w-100 mt-3" id="addAllAiItems"
+          onclick="addAllAiItems()">
+    <i class="fas fa-magic me-1"></i> Dodaj sve ({{ suggestions|length }})
+  </button>
+</div>
+
+<script>
+function addAiItem(btn) {
+  var row = btn.closest('.ai-item-row');
+  var itemId = row.dataset.itemId;
+  var avgQty = row.dataset.avgQty || '1';
+  // Trigger add item on the main form
+  var addBtn = document.getElementById('addItem');
+  if (addBtn) addBtn.click();
+  // Fill last added row
+  setTimeout(function(){
+    var lines = document.querySelectorAll('#itemsContainer .item-line');
+    var last = lines[lines.length - 1];
+    if (last) {
+      var sel = last.querySelector('select[name$="-item"]');
+      if (sel) { var opt = sel.querySelector('option[value="'+itemId+'"]'); if(opt) opt.selected = true; }
+      var qty = last.querySelector('input[name$="-quantity"]');
+      if (qty) qty.value = avgQty;
+    }
+  }, 50);
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-check"></i>';
+  borgToast('Artikl dodan: ' + row.dataset.itemName, 'success');
+}
+function addAllAiItems() {
+  document.querySelectorAll('.ai-item-row .ai-add-item:not(:disabled)').forEach(function(btn){
+    addAiItem(btn);
+  });
+}
+</script>
+{% else %}
+<div class="text-center py-3 text-muted small">
+  {% if partner_id %}
+  <i class="fas fa-robot fa-2x mb-2 d-block" style="color:var(--gold);opacity:.3"></i>
+  Nema dovoljno podataka za prijedloge
+  {% else %}
+  <i class="fas fa-user-plus fa-2x mb-2 d-block" style="opacity:.3"></i>
+  Odaberite partnera za AI prijedloge
+  {% endif %}
+</div>
+{% endif %}

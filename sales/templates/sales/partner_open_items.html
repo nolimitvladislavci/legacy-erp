@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Otvorene stavke — {{ partner.name }} — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.aging-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+.aging-green { background: rgba(25,135,84,.15); color: #75b798; }
+.aging-yellow { background: rgba(201,168,76,.15); color: var(--gold, #c9a84c); }
+.aging-orange { background: rgba(253,126,20,.15); color: #fd7e14; }
+.aging-red { background: rgba(220,53,69,.15); color: #e35d6a; }
+.partner-header {
+  background: linear-gradient(135deg, rgba(201,168,76,.06), rgba(201,168,76,.02));
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.ai-prediction {
+  background: rgba(201,168,76,.04);
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: .75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ai-prediction .ai-icon {
+  color: var(--gold, #c9a84c);
+  font-size: .65rem;
+}
+.open-items-table th {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted, #999);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="saldakonti" breadcrumbs=breadcrumbs %}
+
+{# Partner header #}
+<div class="partner-header mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-7">
+      <h4 class="mb-1">{{ partner.name }}</h4>
+      <div class="small text-muted">
+        {% if partner.oib %}OIB: {{ partner.oib }} &middot;{% endif %}
+        {{ partner.address|default:"" }}
+        {% if partner.email %} &middot; {{ partner.email }}{% endif %}
+      </div>
+    </div>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+      <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+        <a href="{% url 'sales:ios_generate' %}?partner={{ partner.pk }}" class="btn btn-outline-gold btn-sm">
+          <i class="fas fa-file-alt me-1"></i> Generiraj IOS
+        </a>
+        <a href="{% url 'sales:payment_create' %}?partner={{ partner.pk }}" class="btn btn-gold btn-sm">
+          <i class="fas fa-money-bill-wave me-1"></i> Evidentiraj uplatu
+        </a>
+      </div>
+      <div class="mt-2">
+        {% include "sales/_ai_payment_risk.html" with risk=partner_risk %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Summary #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 p-3 text-center" style="background:var(--card-bg,#1a1a2e)">
+      <div class="text-muted small">Otvoreno</div>
+      <div class="fw-bold text-gold fs-5">{{ total_open|floatformat:2|default:"0,00" }} EUR</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 p-3 text-center" style="background:var(--card-bg,#1a1a2e)">
+      <div class="text-muted small">Dospjelo</div>
+      <div class="fw-bold text-danger fs-5">{{ total_overdue|floatformat:2|default:"0,00" }} EUR</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 p-3 text-center" style="background:var(--card-bg,#1a1a2e)">
+      <div class="text-muted small">Broj stavki</div>
+      <div class="fw-bold fs-5">{{ items|length|default:"0" }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 p-3 text-center" style="background:var(--card-bg,#1a1a2e)">
+      <div class="text-muted small">Prosj. kašnjenje</div>
+      <div class="fw-bold fs-5">{{ avg_overdue_days|default:"0" }} dana</div>
+    </div>
+  </div>
+</div>
+
+{# Open items table #}
+<div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+  <div class="table-responsive">
+    <table class="table table-hover open-items-table mb-0">
+      <thead>
+        <tr>
+          <th class="ps-3">Dokument</th>
+          <th>Datum</th>
+          <th>Dospijeće</th>
+          <th>Starost</th>
+          <th class="text-end">Iznos</th>
+          <th class="text-end">Plaćeno</th>
+          <th class="text-end">Ostatak</th>
+          <th class="text-center">
+            <span class="ai-prediction"><span class="ai-icon"><i class="fas fa-robot"></i></span>Predikcija</span>
+          </th>
+          <th class="text-end pe-3">Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td class="ps-3">
+            <div class="fw-medium">{{ item.document_number }}</div>
+            <div class="text-muted" style="font-size:.7rem">{{ item.document_type }}</div>
+          </td>
+          <td>{{ item.date|date:"d.m.Y" }}</td>
+          <td>{{ item.due_date|date:"d.m.Y" }}</td>
+          <td>
+            {% if item.days_overdue <= 30 %}
+            <span class="aging-badge aging-green">{{ item.days_overdue }} d</span>
+            {% elif item.days_overdue <= 60 %}
+            <span class="aging-badge aging-yellow">{{ item.days_overdue }} d</span>
+            {% elif item.days_overdue <= 90 %}
+            <span class="aging-badge aging-orange">{{ item.days_overdue }} d</span>
+            {% else %}
+            <span class="aging-badge aging-red">{{ item.days_overdue }} d</span>
+            {% endif %}
+          </td>
+          <td class="text-end">{{ item.amount|floatformat:2 }} EUR</td>
+          <td class="text-end">{{ item.paid_amount|floatformat:2 }} EUR</td>
+          <td class="text-end fw-bold">{{ item.remaining|floatformat:2 }} EUR</td>
+          <td class="text-center">
+            {% if item.ai_predicted_days %}
+            <span class="ai-prediction" title="AI predikcija plaćanja">
+              <span class="ai-icon"><i class="fas fa-robot"></i></span>
+              ~{{ item.ai_predicted_days }}d
+              <span class="ms-1" style="font-size:.6rem;opacity:.7">{{ item.ai_confidence }}%</span>
+            </span>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td class="text-end pe-3">
+            <a href="{% url 'sales:payment_create' %}?item={{ item.pk }}" class="btn btn-sm btn-outline-gold"
+               title="Evidentiraj uplatu">
+              <i class="fas fa-money-bill-wave"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center py-5 text-muted">
+            <i class="fas fa-check-circle fa-3x text-success mb-2 d-block"></i>
+            Nema otvorenih stavki — sve je plaćeno!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

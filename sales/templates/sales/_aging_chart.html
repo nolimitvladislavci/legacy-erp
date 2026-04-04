@@ -1,0 +1,97 @@
+{# Aging Chart — horizontal stacked bar (pure CSS) #}
+{# Context: aging = {pct_0_30, pct_31_60, pct_61_90, pct_90_plus, bucket_0_30, bucket_31_60, bucket_61_90, bucket_90_plus, total} #}
+{% load i18n %}
+
+<div class="aging-chart-wrapper mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="small fw-bold">Raspodjela starosti dugovanja</span>
+    <span class="text-muted small">Ukupno: {{ aging.total|floatformat:2|default:"0,00" }} EUR</span>
+  </div>
+
+  {# Stacked bar #}
+  <div class="aging-stacked-bar">
+    {% if aging.pct_0_30 %}
+    <div class="aging-segment seg-green" style="width:{{ aging.pct_0_30 }}%" title="0-30 dana: {{ aging.bucket_0_30|floatformat:2 }} EUR">
+      {% if aging.pct_0_30 > 10 %}<span class="seg-label">{{ aging.pct_0_30|floatformat:0 }}%</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if aging.pct_31_60 %}
+    <div class="aging-segment seg-gold" style="width:{{ aging.pct_31_60 }}%" title="31-60 dana: {{ aging.bucket_31_60|floatformat:2 }} EUR">
+      {% if aging.pct_31_60 > 10 %}<span class="seg-label">{{ aging.pct_31_60|floatformat:0 }}%</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if aging.pct_61_90 %}
+    <div class="aging-segment seg-orange" style="width:{{ aging.pct_61_90 }}%" title="61-90 dana: {{ aging.bucket_61_90|floatformat:2 }} EUR">
+      {% if aging.pct_61_90 > 10 %}<span class="seg-label">{{ aging.pct_61_90|floatformat:0 }}%</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if aging.pct_90_plus %}
+    <div class="aging-segment seg-red" style="width:{{ aging.pct_90_plus }}%" title="90+ dana: {{ aging.bucket_90_plus|floatformat:2 }} EUR">
+      {% if aging.pct_90_plus > 10 %}<span class="seg-label">{{ aging.pct_90_plus|floatformat:0 }}%</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# Legend #}
+  <div class="d-flex flex-wrap gap-3 mt-2">
+    <div class="aging-legend-item">
+      <span class="aging-legend-dot" style="background:#198754"></span>
+      <span class="text-muted">0-30 d</span>
+      <span class="fw-bold small ms-1">{{ aging.bucket_0_30|floatformat:2|default:"0,00" }}</span>
+    </div>
+    <div class="aging-legend-item">
+      <span class="aging-legend-dot" style="background:var(--gold,#c9a84c)"></span>
+      <span class="text-muted">31-60 d</span>
+      <span class="fw-bold small ms-1">{{ aging.bucket_31_60|floatformat:2|default:"0,00" }}</span>
+    </div>
+    <div class="aging-legend-item">
+      <span class="aging-legend-dot" style="background:#fd7e14"></span>
+      <span class="text-muted">61-90 d</span>
+      <span class="fw-bold small ms-1">{{ aging.bucket_61_90|floatformat:2|default:"0,00" }}</span>
+    </div>
+    <div class="aging-legend-item">
+      <span class="aging-legend-dot" style="background:#dc3545"></span>
+      <span class="text-muted">90+ d</span>
+      <span class="fw-bold small ms-1">{{ aging.bucket_90_plus|floatformat:2|default:"0,00" }}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.aging-stacked-bar {
+  display: flex;
+  height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,.04);
+}
+.aging-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width .5s ease;
+  min-width: 2px;
+}
+.seg-green { background: #198754; }
+.seg-gold { background: var(--gold, #c9a84c); }
+.seg-orange { background: #fd7e14; }
+.seg-red { background: #dc3545; }
+.seg-label {
+  font-size: .7rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+.aging-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .75rem;
+}
+.aging-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+</style>

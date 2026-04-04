@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Narudžba {{ order.number }} — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-header {
+  background: linear-gradient(135deg, rgba(201,168,76,.06), rgba(201,168,76,.02));
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.status-draft { background: rgba(108,117,125,.15); color: #adb5bd; }
+.status-confirmed { background: rgba(13,110,253,.15); color: #6ea8fe; }
+.status-processing { background: rgba(201,168,76,.15); color: var(--gold, #c9a84c); }
+.status-shipped { background: rgba(111,66,193,.15); color: #a78bfa; }
+.status-invoiced { background: rgba(25,135,84,.15); color: #75b798; }
+.status-draft, .status-confirmed, .status-processing, .status-shipped, .status-invoiced {
+  display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: .8rem; font-weight: 600;
+}
+.delivery-bar {
+  height: 6px;
+  background: rgba(255,255,255,.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.delivery-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .3s;
+}
+.delivery-bar-fill.full { background: #198754; }
+.delivery-bar-fill.partial { background: var(--gold, #c9a84c); }
+.delivery-bar-fill.none { background: rgba(255,255,255,.1); width: 0; }
+.action-btn-group .btn {
+  border-radius: 8px;
+  font-size: .85rem;
+  padding: .5rem 1rem;
+}
+.linked-doc {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  margin-bottom: .25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .85rem;
+}
+.linked-doc:hover { border-color: rgba(201,168,76,.2); }
+.notes-box {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: .85rem;
+  white-space: pre-wrap;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="narudzbe" breadcrumbs=breadcrumbs %}
+
+{# Header #}
+<div class="order-header mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-7">
+      <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+        <h4 class="mb-0 me-2">{{ order.number }}</h4>
+        <span class="status-{{ order.status }}">{{ order.get_status_display }}</span>
+        {% if order.priority == 'high' %}
+        <span class="badge bg-danger"><i class="fas fa-arrow-up me-1"></i>Visoki prioritet</span>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <i class="fas fa-building me-1 text-muted"></i>
+        <strong>{{ order.partner.name }}</strong>
+        {% if order.partner.oib %}<span class="text-muted ms-2">OIB: {{ order.partner.oib }}</span>{% endif %}
+      </div>
+      <div class="small text-muted">
+        <i class="fas fa-calendar me-1"></i> Datum: {{ order.date|date:"d.m.Y" }}
+        {% if order.delivery_date %}
+        &middot; <i class="fas fa-truck me-1"></i> Rok: {{ order.delivery_date|date:"d.m.Y" }}
+        {% endif %}
+        {% if order.warehouse %}
+        &middot; <i class="fas fa-warehouse me-1"></i> {{ order.warehouse }}
+        {% endif %}
+        {% if order.reference %}
+        &middot; Ref: {{ order.reference }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+      <div class="action-btn-group d-flex flex-wrap gap-2 justify-content-md-end">
+        {% if order.status == 'draft' %}
+        <form method="post" action="{% url 'sales:order_action' order.pk %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="confirm">
+          <button class="btn btn-primary"><i class="fas fa-check me-1"></i>Potvrdi</button>
+        </form>
+        {% endif %}
+        {% if order.status == 'confirmed' or order.status == 'processing' %}
+        <form method="post" action="{% url 'sales:order_action' order.pk %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="ship">
+          <button class="btn btn-purple" style="background:#6f42c1;border-color:#6f42c1;color:#fff">
+            <i class="fas fa-truck me-1"></i>Isporuči
+          </button>
+        </form>
+        {% endif %}
+        {% if order.status == 'shipped' %}
+        <form method="post" action="{% url 'sales:order_action' order.pk %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="invoice">
+          <button class="btn btn-success"><i class="fas fa-file-invoice me-1"></i>Fakturiraj</button>
+        </form>
+        {% endif %}
+        <a href="{% url 'sales:order_edit' order.pk %}" class="btn btn-outline-gold">
+          <i class="fas fa-edit me-1"></i>Uredi
+        </a>
+        <a href="{% url 'sales:order_pdf' order.pk %}" class="btn btn-outline-secondary" target="_blank">
+          <i class="fas fa-file-pdf me-1"></i>PDF
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Flow diagram #}
+{% include "sales/_flow_diagram.html" with current_status=order.status %}
+
+{# Items table #}
+<div class="card border-0 shadow-sm mb-4" style="background:var(--card-bg,#1a1a2e)">
+  <div class="card-header border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+    <h6 class="mb-0"><i class="fas fa-list me-2 text-gold"></i>Stavke narudžbe</h6>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th class="ps-3">#</th>
+          <th>Artikl</th>
+          <th class="text-end">Količina</th>
+          <th class="text-end">Isporučeno</th>
+          <th>Isporuka</th>
+          <th class="text-end">Cijena</th>
+          <th class="text-end">Popust</th>
+          <th class="text-end pe-3">Ukupno</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in lines %}
+        <tr>
+          <td class="ps-3 text-muted">{{ forloop.counter }}</td>
+          <td>
+            <div class="fw-medium">{{ line.item.name }}</div>
+            {% if line.item.code %}<div class="text-muted small">{{ line.item.code }}</div>{% endif %}
+          </td>
+          <td class="text-end">{{ line.quantity|floatformat:2 }}</td>
+          <td class="text-end">{{ line.delivered_qty|floatformat:2|default:"0,00" }}</td>
+          <td style="width:120px">
+            {% with pct=line.delivery_percent|default:0 %}
+            <div class="delivery-bar">
+              <div class="delivery-bar-fill {% if pct >= 100 %}full{% elif pct > 0 %}partial{% else %}none{% endif %}"
+                   style="width:{{ pct }}%"></div>
+            </div>
+            <div class="text-muted text-end" style="font-size:.65rem">{{ pct|floatformat:0 }}%</div>
+            {% endwith %}
+          </td>
+          <td class="text-end">{{ line.unit_price|floatformat:2 }}</td>
+          <td class="text-end">{% if line.discount %}{{ line.discount|floatformat:2 }}%{% else %}—{% endif %}</td>
+          <td class="text-end pe-3 fw-bold">{{ line.total|floatformat:2 }} EUR</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7" class="text-end fw-bold pe-2">Osnovica:</td>
+          <td class="text-end pe-3">{{ order.subtotal|floatformat:2 }} EUR</td>
+        </tr>
+        <tr>
+          <td colspan="7" class="text-end pe-2">PDV:</td>
+          <td class="text-end pe-3">{{ order.tax_amount|floatformat:2 }} EUR</td>
+        </tr>
+        <tr style="border-top:2px solid rgba(201,168,76,.2)">
+          <td colspan="7" class="text-end fw-bold pe-2 text-gold">Ukupno:</td>
+          <td class="text-end pe-3 fw-bold text-gold fs-5">{{ order.total|floatformat:2 }} EUR</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="row g-4">
+  {# Linked documents #}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+      <div class="card-header border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+        <h6 class="mb-0"><i class="fas fa-link me-2 text-gold"></i>Povezani dokumenti</h6>
+      </div>
+      <div class="card-body">
+        {% for doc in linked_documents %}
+        <a href="{{ doc.url }}" class="linked-doc text-decoration-none">
+          <i class="fas fa-{{ doc.icon }} text-muted"></i>
+          <span>{{ doc.type_display }}</span>
+          <span class="fw-medium">{{ doc.number }}</span>
+          <span class="text-muted ms-auto small">{{ doc.date|date:"d.m.Y" }}</span>
+        </a>
+        {% empty %}
+        <div class="text-muted text-center small py-3">
+          <i class="fas fa-unlink mb-1 d-block"></i> Nema povezanih dokumenata
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# Notes #}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+      <div class="card-header border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+        <h6 class="mb-0"><i class="fas fa-sticky-note me-2 text-gold"></i>Napomene</h6>
+      </div>
+      <div class="card-body">
+        {% if order.notes %}
+        <div class="notes-box">{{ order.notes }}</div>
+        {% else %}
+        <div class="text-muted text-center small py-3">Nema napomena</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

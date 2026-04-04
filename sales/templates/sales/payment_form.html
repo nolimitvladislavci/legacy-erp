@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Evidencija uplate — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.payment-card {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 12px;
+}
+.open-item-select {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: .75rem;
+  margin-bottom: .5rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.open-item-select:hover,
+.open-item-select.selected {
+  border-color: rgba(201,168,76,.3);
+  background: rgba(201,168,76,.04);
+}
+.open-item-select.selected {
+  box-shadow: 0 0 0 2px rgba(201,168,76,.2);
+}
+.amount-input-group {
+  position: relative;
+}
+.amount-input-group .currency-label {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: .85rem;
+  pointer-events: none;
+}
+.partial-full-toggle .btn-check:checked + .btn {
+  background: var(--gold, #c9a84c);
+  color: #000;
+  border-color: var(--gold, #c9a84c);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="saldakonti" breadcrumbs=breadcrumbs %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="payment-card">
+      <div class="card-header p-3 border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+        <h5 class="mb-0">
+          <i class="fas fa-money-bill-wave text-gold me-2"></i>Evidencija uplate
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" id="paymentForm">
+          {% csrf_token %}
+
+          {# Partner #}
+          <div class="mb-4">
+            <label class="form-label">Partner <span class="text-danger">*</span></label>
+            <select name="partner" id="partnerSelect" class="form-select" required
+                    hx-get="{% url 'sales:partner_open_items_json' %}"
+                    hx-trigger="change"
+                    hx-target="#openItemsList"
+                    hx-swap="innerHTML"
+                    hx-include="[name=partner]">
+              <option value="">— Odaberite partnera —</option>
+              {% for p in partners %}
+              <option value="{{ p.pk }}" {% if selected_partner == p.pk %}selected{% endif %}>
+                {{ p.name }}{% if p.oib %} ({{ p.oib }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {# Open items selection #}
+          <div class="mb-4">
+            <label class="form-label">Otvorena stavka</label>
+            <div id="openItemsList">
+              {% if open_items %}
+              {% for oi in open_items %}
+              <label class="open-item-select d-flex align-items-center gap-3 {% if selected_item == oi.pk %}selected{% endif %}">
+                <input type="radio" name="open_item" value="{{ oi.pk }}" class="form-check-input"
+                       {% if selected_item == oi.pk %}checked{% endif %}
+                       data-amount="{{ oi.remaining }}">
+                <div class="flex-grow-1">
+                  <div class="fw-medium small">{{ oi.document_number }}</div>
+                  <div class="text-muted" style="font-size:.7rem">{{ oi.date|date:"d.m.Y" }} — Dospijeće: {{ oi.due_date|date:"d.m.Y" }}</div>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold small">{{ oi.remaining|floatformat:2 }} EUR</div>
+                  <div class="text-muted" style="font-size:.65rem">od {{ oi.amount|floatformat:2 }}</div>
+                </div>
+              </label>
+              {% endfor %}
+              {% else %}
+              <div class="text-muted text-center small py-3">
+                Odaberite partnera za prikaz otvorenih stavki
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          {# Payment type toggle #}
+          <div class="mb-3">
+            <label class="form-label">Vrsta uplate</label>
+            <div class="partial-full-toggle d-flex gap-2">
+              <input type="radio" class="btn-check" name="payment_type" id="payFull" value="full" checked>
+              <label class="btn btn-sm btn-outline-secondary" for="payFull">
+                <i class="fas fa-check-double me-1"></i> Puni iznos
+              </label>
+              <input type="radio" class="btn-check" name="payment_type" id="payPartial" value="partial">
+              <label class="btn btn-sm btn-outline-secondary" for="payPartial">
+                <i class="fas fa-divide me-1"></i> Djelomična uplata
+              </label>
+            </div>
+          </div>
+
+          {# Amount #}
+          <div class="mb-4">
+            <label class="form-label">Iznos <span class="text-danger">*</span></label>
+            <div class="amount-input-group">
+              <input type="number" name="amount" id="paymentAmount" class="form-control"
+                     step="0.01" min="0.01" required
+                     placeholder="0,00"
+                     value="{{ prefill_amount|default:'' }}">
+              <span class="currency-label">EUR</span>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label class="form-label">Datum uplate <span class="text-danger">*</span></label>
+              <input type="date" name="payment_date" class="form-control"
+                     value="{{ today|date:'Y-m-d' }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Poziv na broj</label>
+              <input type="text" name="reference" class="form-control"
+                     placeholder="npr. HR00 12345">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Račun banke</label>
+              <select name="bank_account" class="form-select">
+                <option value="">— Odaberite —</option>
+                {% for ba in bank_accounts %}
+                <option value="{{ ba.pk }}">{{ ba.name }} ({{ ba.iban|truncatechars:20 }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Napomena</label>
+            <textarea name="note" class="form-control" rows="2" placeholder="Opcionalna napomena..."></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-gold">
+              <i class="fas fa-save me-1"></i> Evidentiraj uplatu
+            </button>
+            <a href="{% url 'sales:saldakonti_dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  var amountInput = document.getElementById('paymentAmount');
+  var fullRadio = document.getElementById('payFull');
+  var partialRadio = document.getElementById('payPartial');
+
+  function updateAmount(){
+    var checked = document.querySelector('[name=open_item]:checked');
+    if (!checked) return;
+    if (fullRadio.checked) {
+      amountInput.value = checked.dataset.amount;
+      amountInput.readOnly = true;
+    } else {
+      amountInput.readOnly = false;
+      amountInput.max = checked.dataset.amount;
+    }
+  }
+
+  document.addEventListener('change', function(e){
+    if (e.target.name === 'open_item' || e.target.name === 'payment_type') {
+      // Highlight selected
+      document.querySelectorAll('.open-item-select').forEach(function(el){ el.classList.remove('selected'); });
+      var checked = document.querySelector('[name=open_item]:checked');
+      if (checked) checked.closest('.open-item-select').classList.add('selected');
+      updateAmount();
+    }
+  });
+
+  updateAmount();
+})();
+</script>
+{% endblock %}

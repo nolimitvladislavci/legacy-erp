@@ -1,0 +1,49 @@
+{# Discount Badge — inline partial #}
+{# Context: discount_type = 'percent'|'fixed'|'price', discount_value = numeric #}
+
+{% if discount_type == 'percent' %}
+<span class="discount-badge discount-pct" title="Postotni popust">
+  <i class="fas fa-percent"></i> {{ discount_value|floatformat:1 }}%
+</span>
+{% elif discount_type == 'fixed' %}
+<span class="discount-badge discount-fixed" title="Fiksni popust">
+  <i class="fas fa-minus-circle"></i> {{ discount_value|floatformat:2 }} EUR
+</span>
+{% elif discount_type == 'price' %}
+<span class="discount-badge discount-price" title="Posebna cijena">
+  <i class="fas fa-tag"></i> {{ discount_value|floatformat:2 }} EUR
+</span>
+{% endif %}
+
+<style>
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: .75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.discount-badge i { font-size: .6rem; }
+.discount-pct {
+  background: rgba(25,135,84,.12);
+  color: #198754;
+  border: 1px solid rgba(25,135,84,.2);
+}
+.discount-fixed {
+  background: rgba(13,110,253,.12);
+  color: #0d6efd;
+  border: 1px solid rgba(13,110,253,.2);
+}
+.discount-price {
+  background: rgba(201,168,76,.12);
+  color: var(--gold, #c9a84c);
+  border: 1px solid rgba(201,168,76,.2);
+}
+
+[data-theme="dark"] .discount-pct { background: rgba(25,135,84,.15); color: #75b798; }
+[data-theme="dark"] .discount-fixed { background: rgba(13,110,253,.15); color: #6ea8fe; }
+[data-theme="dark"] .discount-price { background: rgba(201,168,76,.15); }
+</style>

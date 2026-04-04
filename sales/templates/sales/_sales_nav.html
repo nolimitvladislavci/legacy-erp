@@ -1,0 +1,55 @@
+{% load i18n %}
+{# Sales navigation — breadcrumb + tab bar partial #}
+<nav aria-label="breadcrumb" class="mb-2">
+  <ol class="breadcrumb mb-0 small">
+    <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
+    <li class="breadcrumb-item"><a href="{% url 'sales:dashboard' %}">Prodaja</a></li>
+    {% for crumb in breadcrumbs %}
+    <li class="breadcrumb-item {% if forloop.last %}active{% endif %}"
+        {% if forloop.last %}aria-current="page"{% endif %}>
+      {% if forloop.last %}{{ crumb.label }}{% else %}<a href="{{ crumb.url }}">{{ crumb.label }}</a>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</nav>
+
+<ul class="nav nav-tabs sales-tabs mb-4" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if active_tab == 'cjenici' %}active{% endif %}"
+       href="{% url 'sales:price_list_dashboard' %}">
+      <i class="fas fa-tags me-1"></i> Cjenici
+    </a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if active_tab == 'narudzbe' %}active{% endif %}"
+       href="{% url 'sales:order_dashboard' %}">
+      <i class="fas fa-shopping-cart me-1"></i> Narudžbe
+    </a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if active_tab == 'saldakonti' %}active{% endif %}"
+       href="{% url 'sales:saldakonti_dashboard' %}">
+      <i class="fas fa-balance-scale me-1"></i> Saldakonti
+    </a>
+  </li>
+</ul>
+
+<style>
+.sales-tabs .nav-link {
+  color: var(--text-muted, #999);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: .6rem 1.2rem;
+  font-weight: 500;
+  transition: all .2s;
+}
+.sales-tabs .nav-link:hover {
+  color: var(--gold, #c9a84c);
+  border-bottom-color: rgba(201,168,76,.3);
+}
+.sales-tabs .nav-link.active {
+  color: var(--gold, #c9a84c);
+  border-bottom-color: var(--gold, #c9a84c);
+  background: transparent;
+}
+</style>

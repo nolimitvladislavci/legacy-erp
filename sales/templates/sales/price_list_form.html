@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Uredi cjenik{% else %}Novi cjenik{% endif %} — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.line-row {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: .75rem;
+  margin-bottom: .5rem;
+  transition: border-color .2s;
+}
+.line-row:hover {
+  border-color: rgba(201,168,76,.2);
+}
+.line-row .remove-line {
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color .2s;
+}
+.line-row .remove-line:hover {
+  color: #dc3545;
+}
+.discount-type-selector .btn-check:checked + .btn {
+  background: var(--gold, #c9a84c);
+  color: #000;
+  border-color: var(--gold, #c9a84c);
+}
+.ai-sidebar {
+  background: var(--card-bg, #1a1a2e);
+  border: 1px solid rgba(201,168,76,.25);
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(201,168,76,.06);
+  position: relative;
+  overflow: hidden;
+}
+.ai-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), transparent);
+}
+.ai-sidebar .ai-badge {
+  background: linear-gradient(135deg, var(--gold), #e6c558);
+  color: #000;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "sales/_sales_nav.html" with active_tab="cjenici" breadcrumbs=breadcrumbs %}
+
+<div class="row g-4">
+  {# Main form #}
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm" style="background:var(--card-bg,#1a1a2e)">
+      <div class="card-header border-bottom" style="border-color:rgba(201,168,76,.1)!important">
+        <h5 class="mb-0">
+          <i class="fas fa-tags text-gold me-2"></i>
+          {% if form.instance.pk %}Uredi cjenik{% else %}Novi cjenik{% endif %}
+        </h5>
+      </div>
+      <div class="card-body">
+        <form method="post" id="priceListForm">
+          {% csrf_token %}
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Naziv cjenika <span class="text-danger">*</span></label>
+              {{ form.name }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Vrijedi od</label>
+              {{ form.valid_from }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Vrijedi do</label>
+              {{ form.valid_to }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Partneri</label>
+            {{ form.partners }}
+            <div class="form-text">Odaberite partnere na koje se cjenik primjenjuje</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Opis</label>
+            {{ form.description }}
+          </div>
+
+          <div class="form-check form-switch mb-4">
+            {{ form.is_active }}
+            <label class="form-check-label" for="id_is_active">Aktivan</label>
+          </div>
+
+          {# Dynamic lines #}
+          <hr class="my-4" style="border-color:rgba(201,168,76,.1)">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0"><i class="fas fa-list me-2"></i>Stavke cjenika</h6>
+            <button type="button" class="btn btn-sm btn-outline-gold" id="addLine">
+              <i class="fas fa-plus me-1"></i> Dodaj stavku
+            </button>
+          </div>
+
+          {{ formset.management_form }}
+          <div id="linesContainer">
+            {% for line_form in formset %}
+            <div class="line-row" data-index="{{ forloop.counter0 }}">
+              <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label small">Artikl</label>
+                  {{ line_form.item }}
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small">Tip popusta</label>
+                  <div class="discount-type-selector">
+                    {{ line_form.discount_type }}
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small">Vrijednost</label>
+                  {{ line_form.discount_value }}
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small">Min. količina</label>
+                  {{ line_form.min_quantity }}
+                </div>
+                <div class="col-md-2 text-end">
+                  <span class="remove-line" title="Ukloni stavku"><i class="fas fa-times-circle fa-lg"></i></span>
+                  {{ line_form.DELETE }}
+                </div>
+              </div>
+              {% if line_form.errors %}
+              <div class="text-danger small mt-1">{{ line_form.errors }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-gold">
+              <i class="fas fa-save me-1"></i> Spremi
+            </button>
+            <a href="{% url 'sales:price_list_dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# AI Sidebar #}
+  <div class="col-lg-4">
+    <div class="ai-sidebar p-3">
+      <div class="d-flex align-items-center mb-3">
+        <span class="ai-badge me-2"><i class="fas fa-robot me-1"></i>AI</span>
+        <strong class="small">Prijedlozi cijena</strong>
+      </div>
+      <div id="aiSuggestions"
+           hx-get="{% url 'sales:ai_price_suggestions' %}"
+           hx-trigger="load"
+           hx-swap="innerHTML">
+        <div class="text-center py-4">
+          <i class="fas fa-spinner fa-spin text-gold"></i>
+          <div class="small text-muted mt-2">Analiziram podatke...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const container = document.getElementById('linesContainer');
+  const addBtn = document.getElementById('addLine');
+  const totalForms = document.getElementById('id_lines-TOTAL_FORMS');
+
+  // Template for new line
+  function getEmptyRow(idx) {
+    return `
+    <div class="line-row" data-index="${idx}">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small">Artikl</label>
+          <select name="lines-${idx}-item" class="form-select form-select-sm" required></select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Tip popusta</label>
+          <select name="lines-${idx}-discount_type" class="form-select form-select-sm">
+            <option value="percent">%</option>
+            <option value="fixed">Fiksno</option>
+            <option value="price">Cijena</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Vrijednost</label>
+          <input type="number" name="lines-${idx}-discount_value" class="form-control form-control-sm" step="0.01" min="0">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Min. količina</label>
+          <input type="number" name="lines-${idx}-min_quantity" class="form-control form-control-sm" min="1" value="1">
+        </div>
+        <div class="col-md-2 text-end">
+          <span class="remove-line" title="Ukloni stavku"><i class="fas fa-times-circle fa-lg"></i></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  addBtn.addEventListener('click', function(){
+    const idx = parseInt(totalForms.value);
+    container.insertAdjacentHTML('beforeend', getEmptyRow(idx));
+    totalForms.value = idx + 1;
+  });
+
+  container.addEventListener('click', function(e){
+    const rm = e.target.closest('.remove-line');
+    if (!rm) return;
+    const row = rm.closest('.line-row');
+    const delInput = row.querySelector('[name$="-DELETE"]');
+    if (delInput) {
+      delInput.checked = true;
+      row.style.display = 'none';
+    } else {
+      row.remove();
+      totalForms.value = parseInt(totalForms.value) - 1;
+    }
+  });
+})();
+</script>
+{% endblock %}

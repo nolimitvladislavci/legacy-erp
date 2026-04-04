@@ -1,0 +1,74 @@
+{# AI Price Suggestion Card — partial #}
+{# Context: suggestion object with fields: tier, discount, confidence, revenue_impact, reasoning #}
+{% load i18n %}
+
+<div class="ai-price-card mb-2 p-2 rounded" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.12)">
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center gap-2">
+      {% if suggestion.tier == 'gold' %}
+      <span class="badge" style="background:linear-gradient(135deg,#c9a84c,#e6c558);color:#000;font-size:.65rem">
+        <i class="fas fa-crown me-1"></i>GOLD
+      </span>
+      {% elif suggestion.tier == 'silver' %}
+      <span class="badge" style="background:linear-gradient(135deg,#a8a8a8,#d4d4d4);color:#000;font-size:.65rem">
+        <i class="fas fa-medal me-1"></i>SILVER
+      </span>
+      {% elif suggestion.tier == 'bronze' %}
+      <span class="badge" style="background:linear-gradient(135deg,#cd7f32,#e8a85c);color:#000;font-size:.65rem">
+        <i class="fas fa-award me-1"></i>BRONZE
+      </span>
+      {% else %}
+      <span class="badge bg-secondary" style="font-size:.65rem">
+        <i class="fas fa-tag me-1"></i>STANDARD
+      </span>
+      {% endif %}
+      <span class="fw-bold small">{{ suggestion.item_name|default:"Artikl" }}</span>
+    </div>
+  </div>
+
+  {# Suggested discount #}
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <span class="text-muted small">Preporučeni popust:</span>
+    <span class="fw-bold" style="color:var(--gold,#c9a84c)">{{ suggestion.discount|floatformat:1 }}%</span>
+  </div>
+
+  {# Confidence bar #}
+  <div class="mb-2">
+    <div class="d-flex justify-content-between" style="font-size:.7rem">
+      <span class="text-muted">Pouzdanost</span>
+      <span style="color:var(--gold)">{{ suggestion.confidence|floatformat:0 }}%</span>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+      <div style="height:100%;width:{{ suggestion.confidence }}%;background:var(--gold,#c9a84c);border-radius:2px;transition:width .3s"></div>
+    </div>
+  </div>
+
+  {# Revenue stats #}
+  {% if suggestion.revenue_impact %}
+  <div class="d-flex gap-3" style="font-size:.7rem">
+    <div>
+      <span class="text-muted">Prihod (6mj):</span>
+      <span class="fw-bold">{{ suggestion.revenue_6m|floatformat:0 }} EUR</span>
+    </div>
+    <div>
+      <span class="text-muted">Utjecaj:</span>
+      <span class="fw-bold {% if suggestion.revenue_impact > 0 %}text-success{% else %}text-danger{% endif %}">
+        {{ suggestion.revenue_impact|floatformat:1 }}%
+      </span>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if suggestion.reasoning %}
+  <div class="mt-1 text-muted" style="font-size:.65rem;font-style:italic">
+    {{ suggestion.reasoning|truncatechars:100 }}
+  </div>
+  {% endif %}
+
+  {% if suggestion.action_url %}
+  <button class="btn btn-sm btn-outline-gold mt-2 w-100"
+          onclick="applyAiSuggestion('{{ suggestion.item_id }}', '{{ suggestion.discount }}')">
+    <i class="fas fa-magic me-1"></i> Primijeni
+  </button>
+  {% endif %}
+</div>
