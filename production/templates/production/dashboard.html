@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Proizvodnja — Nadzorna ploča{% endblock %}
+
+{% block extra_css %}
+<style>
+.kpi-card {
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: transform 0.15s;
+}
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-card .kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold, #c9a84c);
+}
+.kpi-card .kpi-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.kpi-card .kpi-icon {
+  font-size: 1.5rem;
+  color: var(--gold, #c9a84c);
+  margin-bottom: 0.5rem;
+}
+.status-col { min-width: 180px; }
+.status-col .card { border: 1px solid rgba(201,168,76,0.15); border-radius: 10px; }
+.status-col .card-header {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.order-mini { padding: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 0.85rem; }
+.order-mini:last-child { border-bottom: none; }
+[data-theme="dark"] .kpi-card { background: rgba(255,255,255,0.03); border-color: rgba(201,168,76,0.2); }
+[data-theme="dark"] .order-mini { border-color: rgba(255,255,255,0.08); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="dashboard" %}
+
+  <h4 class="mb-4"><i class="fas fa-industry me-2" style="color:var(--gold)"></i>Proizvodnja — Nadzorna ploča</h4>
+
+  {# KPI Cards #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div class="kpi-value">{{ active_orders|default:"0" }}</div>
+        <div class="kpi-label">Aktivni nalozi</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-box-check"></i></div>
+        <div class="kpi-value">{{ produced_today|default:"0" }}</div>
+        <div class="kpi-label">Proizvedeno danas</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+        <div class="kpi-value">{{ yield_avg|default:"0" }}%</div>
+        <div class="kpi-label">Prosječni prinos</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-cogs"></i></div>
+        <div class="kpi-value">{{ ws_utilization|default:"0" }}%</div>
+        <div class="kpi-label">Iskorištenost stanica</div>
+      </div>
+    </div>
+  </div>
+
+  {# Order Status Board — 4 Columns #}
+  <h5 class="mb-3"><i class="fas fa-columns me-2"></i>Status naloga</h5>
+  <div class="row g-3 mb-4">
+    {% for col in status_columns %}
+    <div class="col-md-3 status-col">
+      <div class="card h-100">
+        <div class="card-header text-center" style="background: {{ col.color }}20; color: {{ col.color }};">
+          <i class="{{ col.icon }} me-1"></i> {{ col.label }}
+          <span class="badge rounded-pill" style="background:{{ col.color }}">{{ col.orders|length }}</span>
+        </div>
+        <div class="card-body p-0" style="max-height:350px;overflow-y:auto;">
+          {% for order in col.orders %}
+          <div class="order-mini">
+            <a href="{% url 'production:order_detail' order.pk %}" class="text-decoration-none">
+              <strong>{{ order.order_number }}</strong>
+            </a>
+            <br><small class="text-muted">{{ order.bom.output_item.name|truncatechars:30 }}</small>
+            {% if order.priority >= 3 %}
+              <span class="badge bg-danger ms-1" style="font-size:0.65rem">
+                <i class="fas fa-bolt"></i> {% if order.priority == 4 %}Hitno{% else %}Visoko{% endif %}
+              </span>
+            {% endif %}
+          </div>
+          {% empty %}
+          <div class="text-center text-muted py-3"><small>Nema naloga</small></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Recent Logs Table #}
+  <h5 class="mb-3"><i class="fas fa-history me-2"></i>Nedavne aktivnosti</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Vrijeme</th>
+          <th>Nalog</th>
+          <th>Akcija</th>
+          <th>Opis</th>
+          <th>Korisnik</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td><small>{{ log.created_at|date:"d.m.Y H:i" }}</small></td>
+          <td>
+            <a href="{% url 'production:order_detail' log.order.pk %}">{{ log.order.order_number }}</a>
+          </td>
+          <td>
+            <span class="badge bg-secondary">{{ log.get_action_display }}</span>
+          </td>
+          <td><small>{{ log.description|truncatechars:60 }}</small></td>
+          <td><small>{{ log.user.get_short_name|default:log.user.username }}</small></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Nema zapisa</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

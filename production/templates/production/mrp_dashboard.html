@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}MRP — Planiranje{% endblock %}
+{% block content %}
+{% include "production/_production_nav.html" with active="mrp" %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4><i class="fas fa-brain me-2" style="color:var(--gold)"></i>MRP — Planiranje materijala</h4>
+  <form method="post" action="{% url 'production:mrp_run' %}">
+    {% csrf_token %}
+    <div class="input-group" style="max-width:300px">
+      <input type="number" name="horizon_days" value="30" min="7" max="90" class="form-control form-control-sm" placeholder="Dana unaprijed">
+      <button class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700" type="submit"><i class="fas fa-play me-1"></i>Pokreni MRP</button>
+    </div>
+  </form>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0" style="background:rgba(201,168,76,.08)">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;font-weight:800;color:var(--gold)">{{ produce_plans.count }}</div>
+        <div class="text-muted small">Za proizvesti</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0" style="background:rgba(59,130,246,.08)">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;font-weight:800;color:#3b82f6">{{ purchase_plans.count }}</div>
+        <div class="text-muted small">Za nabaviti</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0" style="background:rgba(34,197,94,.08)">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;font-weight:800;color:#22c55e">{{ purchase_data.total_items }}</div>
+        <div class="text-muted small">Stavki za narudžbu</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0" style="background:rgba(239,68,68,.08)">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;font-weight:800;color:#ef4444">{{ purchase_data.total_cost|floatformat:0 }} €</div>
+        <div class="text-muted small">Procjena nabave</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if produce_plans %}
+<h5 class="mb-3"><i class="fas fa-industry me-2"></i>Planirani proizvodni nalozi</h5>
+<div class="table-responsive mb-4">
+  <table class="table table-sm table-hover">
+    <thead><tr><th>Artikl</th><th>Količina</th><th>BOM</th><th>Potrebno do</th><th>Datum narudžbe</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for po in produce_plans %}
+    <tr>
+      <td><strong>{{ po.item.name }}</strong></td>
+      <td>{{ po.quantity }}</td>
+      <td>{% if po.bom %}{{ po.bom.name }}{% else %}—{% endif %}</td>
+      <td>{{ po.needed_by }}</td>
+      <td>{{ po.order_date }}</td>
+      <td><span class="badge bg-warning text-dark">{{ po.get_status_display }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if purchase_data.by_supplier %}
+<h5 class="mb-3"><i class="fas fa-truck me-2"></i>Prijedlozi za nabavu (po dobavljaču)</h5>
+{% for supplier, items in purchase_data.by_supplier.items %}
+<div class="card mb-3 border-0" style="border-left:3px solid #3b82f6!important">
+  <div class="card-header d-flex justify-content-between"><strong>{{ supplier }}</strong><span class="text-muted">{{ items|length }} stavki</span></div>
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Artikl</th><th>SKU</th><th>Količina</th><th>Potrebno do</th><th>Procjena (€)</th></tr></thead>
+      <tbody>
+      {% for s in items %}
+      <tr>
+        <td>{{ s.item_name }}</td><td><code>{{ s.item_sku }}</code></td>
+        <td>{{ s.quantity }}</td><td>{{ s.needed_by }}</td>
+        <td class="text-end">{{ s.estimated_cost|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if capacity %}
+<h5 class="mb-3"><i class="fas fa-gears me-2"></i>Opterećenje radnih stanica (14 dana)</h5>
+<div class="row g-3">
+{% for ws in capacity %}
+<div class="col-md-4">
+  <div class="card border-0">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-2">
+        <strong>{{ ws.workstation.name }}</strong>
+        <span class="badge {% if ws.status == 'overloaded' %}bg-danger{% elif ws.status == 'high' %}bg-warning text-dark{% elif ws.status == 'normal' %}bg-success{% else %}bg-secondary{% endif %}">{{ ws.utilization_percent }}%</span>
+      </div>
+      <div class="progress" style="height:8px">
+        <div class="progress-bar {% if ws.status == 'overloaded' %}bg-danger{% elif ws.status == 'high' %}bg-warning{% else %}bg-success{% endif %}" style="width:{{ ws.utilization_percent|floatformat:0 }}%"></div>
+      </div>
+      <div class="d-flex justify-content-between mt-1 small text-muted">
+        <span>{{ ws.planned_hours }}h planirano</span><span>{{ ws.available_hours }}h dostupno</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

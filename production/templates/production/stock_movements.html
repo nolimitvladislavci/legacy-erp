@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kretanja zaliha — Proizvodnja{% endblock %}
+{% block content %}
+{% include "production/_production_nav.html" with active="movements" %}
+
+<h4 class="mb-4"><i class="fas fa-exchange-alt me-2" style="color:var(--gold)"></i>Kretanja zaliha (Proizvodnja)</h4>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover">
+    <thead><tr><th>Datum</th><th>Artikl</th><th>Tip</th><th>Količina</th><th>Stock prije</th><th>Stock poslije</th><th>Radni nalog</th><th>Šarža</th></tr></thead>
+    <tbody>
+    {% for m in movements %}
+    <tr>
+      <td>{{ m.created_at|date:"d.m.Y H:i" }}</td>
+      <td><strong>{{ m.item.name }}</strong></td>
+      <td>
+        {% if m.movement_type == 'consumption' %}<span class="badge bg-danger">Utrošak</span>
+        {% elif m.movement_type == 'production' %}<span class="badge bg-success">Proizvedeno</span>
+        {% elif m.movement_type == 'scrap' %}<span class="badge bg-warning text-dark">Škart</span>
+        {% else %}<span class="badge bg-secondary">{{ m.get_movement_type_display }}</span>{% endif %}
+      </td>
+      <td class="{% if m.quantity < 0 %}text-danger{% else %}text-success{% endif %} fw-bold">
+        {% if m.quantity > 0 %}+{% endif %}{{ m.quantity }}
+      </td>
+      <td>{{ m.stock_before|default_if_none:"—" }}</td>
+      <td>{{ m.stock_after|default_if_none:"—" }}</td>
+      <td>{% if m.production_order %}<a href="{% url 'production:order_detail' m.production_order.pk %}">{{ m.production_order.order_number }}</a>{% else %}—{% endif %}</td>
+      <td><code>{{ m.batch_number|default:"—" }}</code></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

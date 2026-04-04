@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8">
+  <title>Radni nalog {{ order.order_number }}</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.4; }
+    h1 { font-size: 18px; border-bottom: 2px solid #c9a84c; padding-bottom: 5px; margin-bottom: 10px; }
+    h2 { font-size: 13px; color: #c9a84c; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+    th { background: #f5f0e0; font-weight: 600; font-size: 10px; text-transform: uppercase; }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .info-item { font-size: 10px; }
+    .info-item strong { display: block; color: #666; font-size: 9px; text-transform: uppercase; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .badge { padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-primary { background: #cce5ff; color: #004085; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .checklist-item { padding: 3px 0; border-bottom: 1px dotted #ddd; }
+    .check-box { display: inline-block; width: 12px; height: 12px; border: 1px solid #999; margin-right: 6px; vertical-align: middle; }
+    .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 30px; }
+    .sig-line { border-top: 1px solid #333; padding-top: 4px; text-align: center; font-size: 10px; color: #666; margin-top: 40px; }
+    .footer { margin-top: 20px; font-size: 9px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 5px; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <h1>
+    RADNI NALOG — {{ order.order_number }}
+    {% if order.priority >= 3 %}
+      <span class="badge badge-danger" style="font-size:11px">
+        {% if order.priority == 4 %}HITNO{% else %}VISOKI PRIORITET{% endif %}
+      </span>
+    {% endif %}
+  </h1>
+
+  <div class="info-grid">
+    <div class="info-item"><strong>Proizvod</strong>{{ order.bom.output_item.name }}</div>
+    <div class="info-item"><strong>Sastavnica</strong>{{ order.bom.name }} v{{ order.bom.version }}</div>
+    <div class="info-item"><strong>Planirana količina</strong>{{ order.planned_quantity|floatformat:2 }} {{ order.bom.output_unit }}</div>
+    <div class="info-item"><strong>Status</strong>{{ order.get_status_display }}</div>
+    <div class="info-item"><strong>Radna stanica</strong>{{ order.workstation.name|default:"-" }}</div>
+    <div class="info-item"><strong>Prioritet</strong>{{ order.get_priority_display }}</div>
+    <div class="info-item"><strong>Planirani početak</strong>{{ order.planned_start|date:"d.m.Y H:i"|default:"-" }}</div>
+    <div class="info-item"><strong>Planirani kraj</strong>{{ order.planned_end|date:"d.m.Y H:i"|default:"-" }}</div>
+    <div class="info-item"><strong>Šarža / Lot</strong>{{ order.batch_number|default:"-" }} / {{ order.lot_number|default:"-" }}</div>
+    <div class="info-item"><strong>Rok trajanja</strong>{{ order.expiry_date|date:"d.m.Y"|default:"-" }}</div>
+    <div class="info-item"><strong>Kreirao</strong>{{ order.created_by.get_full_name|default:order.created_by.username }}</div>
+    <div class="info-item"><strong>Datum kreiranja</strong>{{ order.created_at|date:"d.m.Y H:i" }}</div>
+  </div>
+
+  {# BOM Lines #}
+  <h2>Sastavnica — potrebni materijali</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Materijal</th>
+        <th class="text-right">Količina / serija</th>
+        <th class="text-center">Jed.</th>
+        <th class="text-right">Rasip (%)</th>
+        <th class="text-right">Efekt. kol.</th>
+        <th class="text-right">Za nalog</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in material_requirements %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ req.item.name }}</td>
+        <td class="text-right">{{ req.base_qty|floatformat:4|default:"-" }}</td>
+        <td class="text-center">{{ req.unit }}</td>
+        <td class="text-right">{{ req.waste|default:"-" }}</td>
+        <td class="text-right">{{ req.effective|default:"-" }}</td>
+        <td class="text-right"><strong>{{ req.required|floatformat:4 }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Steps Checklist #}
+  {% if steps %}
+  <h2>Koraci proizvodnje — checklist</h2>
+  {% for step in steps %}
+  <div class="checklist-item">
+    <span class="check-box"></span>
+    <strong>{{ step.step_number }}.</strong> {{ step.name }}
+    {% if step.estimated_minutes %}(proc. {{ step.estimated_minutes }} min){% endif %}
+    {% if step.workstation %} — {{ step.workstation.name }}{% endif %}
+    {% if step.description %}<br><small style="color:#666;margin-left:24px">{{ step.description }}</small>{% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {# QC Section #}
+  <h2>Kontrola kvalitete</h2>
+  {% if qc_checks %}
+  <table>
+    <thead>
+      <tr><th>Provjera</th><th>Parametar</th><th>Očekivano</th><th>Stvarno</th><th>Tolerancija</th><th>Rezultat</th></tr>
+    </thead>
+    <tbody>
+      {% for qc in qc_checks %}
+      <tr>
+        <td>{{ qc.check_name }}</td>
+        <td>{{ qc.parameter|default:"-" }}</td>
+        <td>{{ qc.expected_value|default:"-" }}</td>
+        <td>{{ qc.actual_value|default:"-" }}</td>
+        <td>{{ qc.tolerance|default:"-" }}</td>
+        <td>
+          {% if qc.result == 'pass' %}<span class="badge badge-success">PROLAZI</span>
+          {% elif qc.result == 'fail' %}<span class="badge badge-danger">NE PROLAZI</span>
+          {% else %}<span class="badge badge-warning">UVJETNO</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <table>
+    <thead><tr><th>Provjera</th><th>Parametar</th><th>Očekivano</th><th>Stvarno</th><th>Rezultat</th></tr></thead>
+    <tbody>
+      <tr><td colspan="5" style="height:25px"></td></tr>
+      <tr><td colspan="5" style="height:25px"></td></tr>
+      <tr><td colspan="5" style="height:25px"></td></tr>
+    </tbody>
+  </table>
+  {% endif %}
+
+  {# Cost Summary #}
+  <h2>Troškovi</h2>
+  <table>
+    <tr><td>Trošak materijala</td><td class="text-right">{{ order.material_cost|floatformat:2 }} EUR</td></tr>
+    <tr><td>Trošak rada</td><td class="text-right">{{ order.labor_cost|floatformat:2 }} EUR</td></tr>
+    <tr><td>Režijski troškovi</td><td class="text-right">{{ order.overhead_cost|floatformat:2 }} EUR</td></tr>
+    <tr style="font-weight:bold;background:#f5f0e0"><td>UKUPNO</td><td class="text-right">{{ order.total_cost|floatformat:2 }} EUR</td></tr>
+  </table>
+
+  {% if order.notes %}
+  <h2>Napomene</h2>
+  <p>{{ order.notes }}</p>
+  {% endif %}
+
+  {# Signatures #}
+  <div class="signatures">
+    <div>
+      <div class="sig-line">Izdao (ime i potpis)</div>
+    </div>
+    <div>
+      <div class="sig-line">Voditelj proizvodnje</div>
+    </div>
+    <div>
+      <div class="sig-line">QC kontrolor</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    LIMIT Connect — Proizvodni modul | Ispis: {% now "d.m.Y H:i" %} | {{ order.order_number }}
+  </div>
+</body>
+</html>

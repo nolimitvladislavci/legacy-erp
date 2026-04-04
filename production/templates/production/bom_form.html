@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Uredi sastavnicu{% else %}Nova sastavnica{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.bom-line-row { transition: background 0.15s; }
+.bom-line-row:hover { background: rgba(201,168,76,0.05); }
+.btn-remove-line { color: #dc3545; cursor: pointer; }
+.btn-remove-line:hover { color: #a71d2a; }
+#bomLinesBody .form-control, #bomLinesBody .form-select { font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="boms" %}
+
+  <h4 class="mb-4">
+    <i class="fas fa-sitemap me-2" style="color:var(--gold)"></i>
+    {% if form.instance.pk %}Uredi sastavnicu — {{ form.instance.name }}{% else %}Nova sastavnica{% endif %}
+  </h4>
+
+  <form method="post" id="bomForm">
+    {% csrf_token %}
+
+    {# BOM Header #}
+    <div class="card mb-4">
+      <div class="card-header"><i class="fas fa-info-circle me-1"></i> Osnovni podaci</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label">Naziv recepture <span class="text-danger">*</span></label>
+            {{ form.name }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Šifra</label>
+            {{ form.code }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Gotov proizvod <span class="text-danger">*</span></label>
+            {{ form.output_item }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Status</label>
+            {{ form.status }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Količina outputa</label>
+            {{ form.output_quantity }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Jedinica</label>
+            {{ form.output_unit }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Verzija</label>
+            {{ form.version }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Zadana radna stanica</label>
+            {{ form.default_workstation }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Procijenjeno trajanje (min)</label>
+            {{ form.estimated_duration_minutes }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Napomene</label>
+            {{ form.notes }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# BOM Lines — Dynamic Inline #}
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list-ol me-1"></i> Stavke sastavnice</span>
+        <button type="button" class="btn btn-sm btn-gold" onclick="addBomLine()">
+          <i class="fas fa-plus me-1"></i>Dodaj stavku
+        </button>
+      </div>
+      <div class="card-body p-0">
+        {{ line_formset.management_form }}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:30%">Materijal</th>
+                <th style="width:12%">Količina</th>
+                <th style="width:10%">Jedinica</th>
+                <th style="width:10%">Rasip (%)</th>
+                <th style="width:8%">Redoslijed</th>
+                <th style="width:22%">Napomena</th>
+                <th style="width:5%"></th>
+              </tr>
+            </thead>
+            <tbody id="bomLinesBody">
+              {% for lf in line_formset %}
+              <tr class="bom-line-row" id="line-{{ forloop.counter0 }}">
+                <td>{{ lf.item }}{{ lf.id }}{{ lf.DELETE }}</td>
+                <td>{{ lf.quantity }}</td>
+                <td>{{ lf.unit }}</td>
+                <td>{{ lf.waste_percent }}</td>
+                <td>{{ lf.sort_order }}</td>
+                <td>{{ lf.notes }}</td>
+                <td class="text-center">
+                  <span class="btn-remove-line" onclick="removeBomLine(this)" title="Ukloni">
+                    <i class="fas fa-trash-alt"></i>
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {% if form.errors or line_formset.errors %}
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-1"></i>
+      Ispravite greške u obrascu.
+      {{ form.errors }}
+      {% for err in line_formset.errors %}{{ err }}{% endfor %}
+      {{ line_formset.non_form_errors }}
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi
+      </button>
+      <a href="{% url 'production:bom_list' %}" class="btn btn-outline-secondary">Odustani</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addBomLine() {
+  const body = document.getElementById('bomLinesBody');
+  const totalForms = document.getElementById('id_lines-TOTAL_FORMS');
+  const idx = parseInt(totalForms.value);
+  const emptyRow = document.querySelector('.bom-line-row').cloneNode(true);
+
+  // Clear values and update indices
+  emptyRow.id = 'line-' + idx;
+  emptyRow.querySelectorAll('input, select, textarea').forEach(el => {
+    const name = el.name;
+    if (name) {
+      el.name = name.replace(/-\d+-/, '-' + idx + '-');
+      el.id = el.id.replace(/-\d+-/, '-' + idx + '-');
+    }
+    if (el.type === 'hidden' && el.name.includes('-id')) {
+      el.value = '';
+    } else if (el.type !== 'hidden') {
+      el.value = '';
+    }
+    if (el.name.includes('-DELETE')) {
+      el.checked = false;
+    }
+  });
+
+  body.appendChild(emptyRow);
+  totalForms.value = idx + 1;
+}
+
+function removeBomLine(btn) {
+  const row = btn.closest('tr');
+  const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+  if (deleteCheckbox) {
+    deleteCheckbox.checked = true;
+    row.style.display = 'none';
+  } else {
+    row.remove();
+    const totalForms = document.getElementById('id_lines-TOTAL_FORMS');
+    totalForms.value = parseInt(totalForms.value) - 1;
+  }
+}
+
+// Add form-control class to all formset inputs
+document.querySelectorAll('#bomLinesBody input:not([type=hidden]):not([type=checkbox]), #bomLinesBody select, #bomLinesBody textarea').forEach(el => {
+  if (!el.classList.contains('form-control') && !el.classList.contains('form-select')) {
+    el.classList.add(el.tagName === 'SELECT' ? 'form-select' : 'form-control');
+    el.classList.add('form-control-sm');
+  }
+});
+</script>
+{% endblock %}

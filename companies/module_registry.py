@@ -540,6 +540,46 @@ MODULES = [
         'price_addon': 4,
     },
 
+
+    # ══════════════════════════════════════════════════════════════════════
+    #  PROIZVODNJA (MRP)
+    # ══════════════════════════════════════════════════════════════════════
+    {
+        'id': 'production',
+        'name': 'Proizvodnja',
+        'name_de': 'Produktion',
+        'icon': 'fa-industry',
+        'url': '/proizvodnja/',
+        'url_name': 'production:dashboard',
+        'category': 'vertikale',
+        'tier': TIER_PROFESSIONAL,
+        'description': 'BOM recepture, radni nalozi, QC, troškovi.',
+        'price_addon': 14,
+        'children': [
+            {
+                'id': 'production_bom',
+                'name': 'Sastavnice (BOM)',
+                'icon': 'fa-list-check',
+                'url': '/proizvodnja/bom/',
+                'url_name': 'production:bom_list',
+            },
+            {
+                'id': 'production_orders',
+                'name': 'Radni nalozi',
+                'icon': 'fa-clipboard-list',
+                'url': '/proizvodnja/nalozi/',
+                'url_name': 'production:order_list',
+            },
+            {
+                'id': 'production_workstations',
+                'name': 'Radne stanice',
+                'icon': 'fa-gears',
+                'url': '/proizvodnja/stanice/',
+                'url_name': 'production:workstation_list',
+            },
+        ],
+    },
+
     # ══════════════════════════════════════════════════════════════════════
     #  INTEGRACIJE
     # ══════════════════════════════════════════════════════════════════════

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Radni nalog — {{ order.order_number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.step-progress .step-item {
+  flex: 1; text-align: center; position: relative; padding: 0.5rem 0.25rem;
+}
+.step-progress .step-item::after {
+  content: ''; position: absolute; top: 22px; left: 50%; width: 100%; height: 3px;
+  background: #dee2e6; z-index: 0;
+}
+.step-progress .step-item:last-child::after { display: none; }
+.step-progress .step-item.done::after { background: var(--gold, #c9a84c); }
+.step-progress .step-circle {
+  width: 32px; height: 32px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 0.8rem;
+  background: #dee2e6; color: #666; position: relative; z-index: 1;
+}
+.step-progress .step-item.done .step-circle { background: var(--gold, #c9a84c); color: #000; }
+.step-progress .step-item.active .step-circle { background: #0d6efd; color: #fff; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(13,110,253,0.4); } 50% { box-shadow: 0 0 0 8px rgba(13,110,253,0); } }
+.timeline-item { position: relative; padding-left: 2rem; padding-bottom: 1rem; border-left: 2px solid rgba(201,168,76,0.3); }
+.timeline-item:last-child { border-left: none; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -5px; top: 4px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--gold, #c9a84c);
+}
+[data-theme="dark"] .step-progress .step-item::after { background: #444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="orders" %}
+
+  {# Header #}
+  <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="mb-1">
+        <i class="fas fa-clipboard-list me-2" style="color:var(--gold)"></i>
+        {{ order.order_number }}
+        {% if order.priority >= 3 %}
+          <span class="badge bg-danger ms-2">
+            <i class="fas fa-bolt"></i> {% if order.priority == 4 %}Hitno{% else %}Visoki prioritet{% endif %}
+          </span>
+        {% endif %}
+      </h4>
+      <p class="text-muted mb-0">
+        {{ order.bom.output_item.name }} &middot;
+        Sastavnica: <a href="{% url 'production:bom_detail' order.bom.pk %}">{{ order.bom.name }}</a> &middot;
+        {% if order.batch_number %}Šarža: <code>{{ order.batch_number }}</code> &middot;{% endif %}
+        Kreirao: {{ order.created_by.get_short_name|default:"-" }}
+      </p>
+    </div>
+    <div>
+      {% if order.status == 'done' %}
+        <span class="badge bg-success fs-6">Završen</span>
+      {% elif order.status == 'in_progress' %}
+        <span class="badge bg-primary fs-6">U tijeku</span>
+      {% elif order.status == 'confirmed' %}
+        <span class="badge bg-info text-dark fs-6">Potvrđen</span>
+      {% elif order.status == 'cancelled' %}
+        <span class="badge bg-danger fs-6">Otkazan</span>
+      {% else %}
+        <span class="badge bg-secondary fs-6">Nacrt</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# KPI Row #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Planirano</div>
+        <div class="fw-bold">{{ order.planned_quantity|floatformat:2 }} {{ order.bom.output_unit }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Proizvedeno</div>
+        <div class="fw-bold" style="color:var(--gold)">{{ order.produced_quantity|floatformat:2 }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Škart</div>
+        <div class="fw-bold text-danger">{{ order.scrap_quantity|floatformat:2 }} ({{ order.scrap_percent }}%)</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Prinos</div>
+        <div class="fw-bold {% if order.yield_percent >= 90 %}text-success{% elif order.yield_percent >= 70 %}text-warning{% else %}text-danger{% endif %}">
+          {{ order.yield_percent }}%
+        </div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Ukupni trošak</div>
+        <div class="fw-bold">{{ order.total_cost|floatformat:2 }} EUR</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center h-100"><div class="card-body py-2">
+        <div class="text-muted small">Trošak / jed.</div>
+        <div class="fw-bold">{{ order.unit_production_cost|floatformat:2 }} EUR</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+
+      {# Material Requirements #}
+      <h5 class="mb-3"><i class="fas fa-boxes me-2"></i>Potrebni materijali</h5>
+      <div id="materialAvailability">
+        {% include "production/availability_widget.html" %}
+      </div>
+
+      {# Steps Progress #}
+      {% if steps %}
+      <h5 class="mb-3 mt-4"><i class="fas fa-tasks me-2"></i>Koraci proizvodnje</h5>
+      <div class="d-flex step-progress mb-3 flex-wrap">
+        {% for step in steps %}
+        <div class="step-item {% if step.status == 'done' %}done{% elif step.status == 'in_progress' %}active{% endif %}">
+          <div class="step-circle">{{ step.step_number }}</div>
+          <div class="small mt-1">{{ step.name|truncatechars:15 }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="table-responsive mb-4">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>#</th><th>Korak</th><th>Stanica</th><th class="text-center">Proc. (min)</th>
+              <th class="text-center">Stv. (min)</th><th class="text-center">Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="stepsBody">
+            {% for step in steps %}
+            <tr id="step-row-{{ step.pk }}">
+              {% include "production/step_row.html" with step=step %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {# QC Results #}
+      <h5 class="mb-3 mt-4"><i class="fas fa-clipboard-check me-2"></i>Kontrola kvalitete</h5>
+      {% if qc_checks %}
+      <div class="table-responsive mb-3">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Provjera</th><th>Parametar</th><th>Očekivano</th>
+              <th>Stvarno</th><th>Tolerancija</th><th class="text-center">Rezultat</th><th>Kontrolor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for qc in qc_checks %}
+            <tr>
+              <td class="fw-semibold">{{ qc.check_name }}</td>
+              <td>{{ qc.parameter|default:"-" }}</td>
+              <td>{{ qc.expected_value|default:"-" }}</td>
+              <td>{{ qc.actual_value|default:"-" }}</td>
+              <td>{{ qc.tolerance|default:"-" }}</td>
+              <td class="text-center">
+                {% if qc.result == 'pass' %}
+                  <span class="badge bg-success"><i class="fas fa-check"></i> Prolazi</span>
+                {% elif qc.result == 'fail' %}
+                  <span class="badge bg-danger"><i class="fas fa-times"></i> Ne prolazi</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark"><i class="fas fa-exclamation"></i> Uvjetno</span>
+                {% endif %}
+              </td>
+              <td><small>{{ qc.checked_by.get_short_name|default:"-" }}</small></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted small">Nema QC zapisa.</p>
+      {% endif %}
+
+      {# Inline QC form via HTMX #}
+      {% if order.status == 'in_progress' or order.status == 'confirmed' %}
+      <div id="qcFormContainer"
+           hx-get="{% url 'production:qc_create' order.pk %}"
+           hx-trigger="load"
+           hx-swap="innerHTML">
+      </div>
+      {% endif %}
+
+      {# Cost Breakdown #}
+      <h5 class="mb-3 mt-4"><i class="fas fa-coins me-2"></i>Raščlamba troškova</h5>
+      {% include "production/cost_breakdown.html" %}
+
+    </div>
+
+    <div class="col-lg-4">
+      {# Action Buttons #}
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-play-circle me-1"></i> Akcije</div>
+        <div class="card-body d-grid gap-2">
+          {% if order.status == 'draft' %}
+            <form method="post" action="{% url 'production:order_action' order.pk 'confirm' %}">
+              {% csrf_token %}
+              <button class="btn btn-info w-100"><i class="fas fa-check-circle me-1"></i>Potvrdi nalog</button>
+            </form>
+          {% endif %}
+          {% if order.status == 'confirmed' %}
+            <form method="post" action="{% url 'production:order_action' order.pk 'start' %}">
+              {% csrf_token %}
+              <button class="btn btn-primary w-100"><i class="fas fa-play me-1"></i>Pokreni proizvodnju</button>
+            </form>
+          {% endif %}
+          {% if order.status == 'in_progress' %}
+            <form method="post" action="{% url 'production:order_action' order.pk 'complete' %}">
+              {% csrf_token %}
+              <button class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Završi nalog</button>
+            </form>
+          {% endif %}
+          {% if order.status != 'done' and order.status != 'cancelled' %}
+            <form method="post" action="{% url 'production:order_action' order.pk 'cancel' %}"
+                  onsubmit="return confirm('Jeste li sigurni da želite otkazati nalog?')">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger w-100"><i class="fas fa-times me-1"></i>Otkaži</button>
+            </form>
+          {% endif %}
+          <a href="{% url 'production:order_pdf' order.pk %}" class="btn btn-outline-secondary" target="_blank">
+            <i class="fas fa-file-pdf me-1"></i>PDF ispis
+          </a>
+          <a href="{% url 'production:order_edit' order.pk %}" class="btn btn-outline-warning">
+            <i class="fas fa-edit me-1"></i>Uredi nalog
+          </a>
+        </div>
+      </div>
+
+      {# Order Info #}
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-info-circle me-1"></i> Detalji naloga</div>
+        <div class="card-body small">
+          <dl class="row mb-0">
+            <dt class="col-5">Radna stanica:</dt>
+            <dd class="col-7">{{ order.workstation.name|default:"-" }}</dd>
+            <dt class="col-5">Šarža:</dt>
+            <dd class="col-7">{{ order.batch_number|default:"-" }}</dd>
+            <dt class="col-5">Lot:</dt>
+            <dd class="col-7">{{ order.lot_number|default:"-" }}</dd>
+            <dt class="col-5">Rok trajanja:</dt>
+            <dd class="col-7">{{ order.expiry_date|date:"d.m.Y"|default:"-" }}</dd>
+            <dt class="col-5">Plan. početak:</dt>
+            <dd class="col-7">{{ order.planned_start|date:"d.m.Y H:i"|default:"-" }}</dd>
+            <dt class="col-5">Plan. kraj:</dt>
+            <dd class="col-7">{{ order.planned_end|date:"d.m.Y H:i"|default:"-" }}</dd>
+            <dt class="col-5">Stvarni poč.:</dt>
+            <dd class="col-7">{{ order.actual_start|date:"d.m.Y H:i"|default:"-" }}</dd>
+            <dt class="col-5">Stvarni kraj:</dt>
+            <dd class="col-7">{{ order.actual_end|date:"d.m.Y H:i"|default:"-" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      {% if order.notes %}
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-sticky-note me-1"></i> Napomene</div>
+        <div class="card-body small">{{ order.notes|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+
+      {# Logs Timeline #}
+      <div class="card">
+        <div class="card-header"><i class="fas fa-history me-1"></i> Dnevnik promjena</div>
+        <div class="card-body" style="max-height:400px;overflow-y:auto;">
+          {% for log in logs %}
+          <div class="timeline-item">
+            <div class="fw-semibold small">{{ log.get_action_display }}</div>
+            <div class="text-muted" style="font-size:0.75rem">
+              {{ log.created_at|date:"d.m.Y H:i" }} — {{ log.user.get_short_name|default:"Sustav" }}
+            </div>
+            {% if log.description %}<div class="small">{{ log.description }}</div>{% endif %}
+          </div>
+          {% empty %}
+          <p class="text-muted small mb-0">Nema zapisa</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

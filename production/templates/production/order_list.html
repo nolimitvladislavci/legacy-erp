@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Radni nalozi{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="orders" %}
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h4 class="mb-0"><i class="fas fa-clipboard-list me-2" style="color:var(--gold)"></i>Radni nalozi</h4>
+    <a href="{% url 'production:order_create' %}" class="btn btn-gold">
+      <i class="fas fa-plus me-1"></i> Novi radni nalog
+    </a>
+  </div>
+
+  {# Filters #}
+  <form method="get" class="row g-2 mb-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small">Pretraga</label>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input type="text" name="q" class="form-control" value="{{ request.GET.q }}" placeholder="Broj naloga, proizvod...">
+      </div>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Status</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">Svi</option>
+        <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Nacrt</option>
+        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Potvrđen</option>
+        <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>U tijeku</option>
+        <option value="done" {% if request.GET.status == 'done' %}selected{% endif %}>Završen</option>
+        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Otkazan</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Od</label>
+      <input type="date" name="date_from" class="form-control form-control-sm" value="{{ request.GET.date_from }}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Do</label>
+      <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request.GET.date_to }}">
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
+        <i class="fas fa-filter"></i> Filtriraj
+      </button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Broj naloga</th>
+          <th>Proizvod</th>
+          <th class="text-center">Prioritet</th>
+          <th class="text-center">Status</th>
+          <th class="text-end">Planirano</th>
+          <th class="text-end">Proizvedeno</th>
+          <th class="text-end">Prinos</th>
+          <th>Radna stanica</th>
+          <th>Plan. početak</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>
+            <a href="{% url 'production:order_detail' order.pk %}" class="fw-semibold text-decoration-none">
+              {{ order.order_number }}
+            </a>
+          </td>
+          <td>{{ order.bom.output_item.name|truncatechars:35 }}</td>
+          <td class="text-center">
+            {% if order.priority == 4 %}
+              <span class="badge bg-danger"><i class="fas fa-bolt"></i> Hitna</span>
+            {% elif order.priority == 3 %}
+              <span class="badge bg-warning text-dark"><i class="fas fa-arrow-up"></i> Visoka</span>
+            {% elif order.priority == 1 %}
+              <span class="badge bg-secondary"><i class="fas fa-arrow-down"></i> Niska</span>
+            {% else %}
+              <span class="badge bg-info text-dark">Normalna</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            {% if order.status == 'done' %}
+              <span class="badge bg-success"><i class="fas fa-check"></i> Završen</span>
+            {% elif order.status == 'in_progress' %}
+              <span class="badge bg-primary"><i class="fas fa-spinner fa-spin"></i> U tijeku</span>
+            {% elif order.status == 'confirmed' %}
+              <span class="badge bg-info text-dark"><i class="fas fa-check-circle"></i> Potvrđen</span>
+            {% elif order.status == 'cancelled' %}
+              <span class="badge bg-danger"><i class="fas fa-times"></i> Otkazan</span>
+            {% else %}
+              <span class="badge bg-secondary"><i class="fas fa-pencil-alt"></i> Nacrt</span>
+            {% endif %}
+          </td>
+          <td class="text-end">{{ order.planned_quantity|floatformat:2 }}</td>
+          <td class="text-end">{{ order.produced_quantity|floatformat:2 }}</td>
+          <td class="text-end">
+            {% if order.yield_percent %}
+              <span class="{% if order.yield_percent >= 90 %}text-success{% elif order.yield_percent >= 70 %}text-warning{% else %}text-danger{% endif %}">
+                {{ order.yield_percent }}%
+              </span>
+            {% else %}-{% endif %}
+          </td>
+          <td>{{ order.workstation.name|default:"-" }}</td>
+          <td>{{ order.planned_start|date:"d.m.Y"|default:"-" }}</td>
+          <td>
+            <a href="{% url 'production:order_detail' order.pk %}" class="btn btn-sm btn-outline-secondary" title="Detalji">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10" class="text-center text-muted py-4">Nema radnih naloga. Kreirajte prvi!</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <nav>
+    <ul class="pagination pagination-sm justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

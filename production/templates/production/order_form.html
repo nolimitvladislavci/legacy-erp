@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Uredi radni nalog{% else %}Novi radni nalog{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="orders" %}
+
+  <h4 class="mb-4">
+    <i class="fas fa-clipboard-list me-2" style="color:var(--gold)"></i>
+    {% if form.instance.pk %}Uredi radni nalog — {{ form.instance.order_number }}{% else %}Novi radni nalog{% endif %}
+  </h4>
+
+  <form method="post" id="orderForm">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-1"></i> Ispravite greške u obrascu.
+      {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header"><i class="fas fa-info-circle me-1"></i> Osnovni podaci</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Broj naloga <span class="text-danger">*</span></label>
+            {{ form.order_number }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Sastavnica (BOM) <span class="text-danger">*</span></label>
+            {{ form.bom }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Planirana količina <span class="text-danger">*</span></label>
+            {{ form.planned_quantity }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Prioritet</label>
+            {{ form.priority }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><i class="fas fa-calendar-alt me-1"></i> Raspored i stanica</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Radna stanica</label>
+            {{ form.workstation }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Planirani početak</label>
+            {{ form.planned_start }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Planirani kraj</label>
+            {{ form.planned_end }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            {{ form.status }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><i class="fas fa-barcode me-1"></i> Šarža / Lot (opcionalno)</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Broj šarže</label>
+            {{ form.batch_number }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Lot</label>
+            {{ form.lot_number }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Rok trajanja</label>
+            {{ form.expiry_date }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <label class="form-label">Napomene</label>
+        {{ form.notes }}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi
+      </button>
+      <a href="{% url 'production:order_list' %}" class="btn btn-outline-secondary">Odustani</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-populate workstation from BOM default
+document.addEventListener('DOMContentLoaded', function() {
+  const bomSelect = document.querySelector('[name="bom"]');
+  if (bomSelect) {
+    bomSelect.addEventListener('change', function() {
+      // Could use HTMX to fetch BOM details and auto-fill workstation
+    });
+  }
+
+  // Add form-control class to all form widgets
+  document.querySelectorAll('#orderForm input:not([type=hidden]):not([type=checkbox]), #orderForm select, #orderForm textarea').forEach(el => {
+    if (!el.classList.contains('form-control') && !el.classList.contains('form-select')) {
+      el.classList.add(el.tagName === 'SELECT' ? 'form-select' : 'form-control');
+    }
+  });
+});
+</script>
+{% endblock %}

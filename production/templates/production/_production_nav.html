@@ -1,0 +1,50 @@
+{% load i18n %}
+{# Sidebar / breadcrumb partial for production section #}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+    <li class="breadcrumb-item"><a href="{% url 'production:dashboard' %}">Proizvodnja</a></li>
+    {% block breadcrumb_items %}{% endblock %}
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap gap-2 mb-4 production-nav">
+  <a href="{% url 'production:dashboard' %}"
+     class="btn btn-sm {% if active_nav == 'dashboard' %}btn-gold{% else %}btn-outline-secondary{% endif %}">
+    <i class="fas fa-chart-line me-1"></i> Nadzorna ploča
+  </a>
+  <a href="{% url 'production:order_list' %}"
+     class="btn btn-sm {% if active_nav == 'orders' %}btn-gold{% else %}btn-outline-secondary{% endif %}">
+    <i class="fas fa-clipboard-list me-1"></i> Radni nalozi
+  </a>
+  <a href="{% url 'production:bom_list' %}"
+     class="btn btn-sm {% if active_nav == 'boms' %}btn-gold{% else %}btn-outline-secondary{% endif %}">
+    <i class="fas fa-sitemap me-1"></i> Sastavnice
+  </a>
+  <a href="{% url 'production:workstation_list' %}"
+     class="btn btn-sm {% if active_nav == 'workstations' %}btn-gold{% else %}btn-outline-secondary{% endif %}">
+    <i class="fas fa-industry me-1"></i> Radne stanice
+  </a>
+</div>
+
+<style>
+.production-nav .btn-gold {
+  background: var(--gold, #c9a84c);
+  color: #000;
+  border-color: var(--gold, #c9a84c);
+  font-weight: 600;
+}
+.production-nav .btn-gold:hover {
+  background: #b8993f;
+  border-color: #b8993f;
+}
+[data-theme="dark"] .production-nav .btn-outline-secondary {
+  color: #ccc;
+  border-color: #555;
+}
+[data-theme="dark"] .production-nav .btn-outline-secondary:hover {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: var(--gold, #c9a84c);
+  color: var(--gold, #c9a84c);
+}
+</style>

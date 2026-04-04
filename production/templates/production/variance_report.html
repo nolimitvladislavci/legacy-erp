@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Cost Variance Report{% endblock %}
+{% block content %}
+{% include "production/_production_nav.html" with active="variance" %}
+
+<h4 class="mb-4"><i class="fas fa-chart-bar me-2" style="color:var(--gold)"></i>Varijanca troškova — Planirano vs Stvarno</h4>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0" style="background:rgba(201,168,76,.08)">
+      <div class="card-body text-center">
+        <div class="text-muted small">Planirano</div>
+        <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">{{ total_planned|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0" style="background:rgba(59,130,246,.08)">
+      <div class="card-body text-center">
+        <div class="text-muted small">Stvarno</div>
+        <div style="font-size:1.8rem;font-weight:800;color:#3b82f6">{{ total_actual|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0" style="background:{% if total_variance > 0 %}rgba(239,68,68,.08){% else %}rgba(34,197,94,.08){% endif %}">
+      <div class="card-body text-center">
+        <div class="text-muted small">Varijanca ({{ variance_percent }}%)</div>
+        <div style="font-size:1.8rem;font-weight:800;color:{% if total_variance > 0 %}#ef4444{% else %}#22c55e{% endif %}">
+          {% if total_variance > 0 %}+{% endif %}{{ total_variance|floatformat:2 }} €
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover">
+    <thead><tr><th>Nalog</th><th>Proizvod</th><th>Kol.</th><th>Plan. trošak</th><th>Stvarni trošak</th><th>Varijanca</th><th>%</th><th>Datum</th></tr></thead>
+    <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="{% url 'production:order_detail' o.pk %}">{{ o.order_number }}</a></td>
+      <td>{{ o.bom.output_item.name }}</td>
+      <td>{{ o.produced_quantity }}</td>
+      <td class="text-end">{{ o.planned_total_cost|floatformat:2 }}</td>
+      <td class="text-end">{{ o.total_cost|floatformat:2 }}</td>
+      <td class="text-end {% if o.cost_variance > 0 %}text-danger{% else %}text-success{% endif %}">
+        {% if o.cost_variance > 0 %}+{% endif %}{{ o.cost_variance|floatformat:2 }}
+      </td>
+      <td class="{% if o.cost_variance_percent > 5 %}text-danger{% elif o.cost_variance_percent < -5 %}text-success{% endif %}">{{ o.cost_variance_percent }}%</td>
+      <td>{{ o.actual_end|date:"d.m.Y" }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load i18n %}
+{# Single step row — included in order_detail steps table #}
+<td>{{ step.step_number }}</td>
+<td class="fw-semibold">{{ step.name }}</td>
+<td>{{ step.workstation.name|default:"-" }}</td>
+<td class="text-center">{{ step.estimated_minutes }}</td>
+<td class="text-center">{{ step.actual_minutes|default:"-" }}</td>
+<td class="text-center">
+  {% if step.status == 'done' %}
+    <span class="badge bg-success"><i class="fas fa-check"></i> Završen</span>
+  {% elif step.status == 'in_progress' %}
+    <span class="badge bg-primary"><i class="fas fa-spinner fa-spin"></i> U tijeku</span>
+  {% elif step.status == 'skipped' %}
+    <span class="badge bg-secondary">Preskočen</span>
+  {% else %}
+    <span class="badge bg-light text-dark">Čeka</span>
+  {% endif %}
+</td>
+<td>
+  {% if step.status == 'pending' %}
+    <form method="post" action="{% url 'production:step_update' step.pk %}" class="d-inline">
+      {% csrf_token %}
+      <input type="hidden" name="status" value="in_progress">
+      <button class="btn btn-sm btn-outline-primary" title="Pokreni">
+        <i class="fas fa-play"></i>
+      </button>
+    </form>
+  {% elif step.status == 'in_progress' %}
+    <form method="post" action="{% url 'production:step_update' step.pk %}" class="d-inline">
+      {% csrf_token %}
+      <input type="hidden" name="status" value="done">
+      <button class="btn btn-sm btn-outline-success" title="Završi">
+        <i class="fas fa-check"></i>
+      </button>
+    </form>
+  {% elif step.status == 'done' %}
+    <small class="text-muted">
+      {% if step.completed_by %}{{ step.completed_by.get_short_name }}{% endif %}
+      {% if step.completed_at %}{{ step.completed_at|date:"d.m. H:i" }}{% endif %}
+    </small>
+  {% endif %}
+</td>

@@ -145,6 +145,7 @@ INSTALLED_APPS = [
     "udruge",
     "livestock",
     "lovacki",
+    "production",  # Proizvodnja (MRP) — 3 razine
     "utilities",
     "memio_pet",  # Memio.pet
     "memio_world",  # Memio.world — digitalna baština

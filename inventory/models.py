@@ -338,6 +338,9 @@ class StockMovement(models.Model):
         ('return',       _('Povrat dobavljaču')),
         ('donation_in',  _('Ulaz (materijalna donacija)')),
         ('writeoff',     _('Otpis / Kalo')),
+        ('consumption',  _('Utrošak (proizvodnja)')),
+        ('production',   _('Proizvedeno')),
+        ('scrap',        _('Škart (proizvodnja)')),
     ]
 
     item          = models.ForeignKey(InventoryItem, on_delete=models.CASCADE,
@@ -354,6 +357,17 @@ class StockMovement(models.Model):
         related_name='stock_movements',
         verbose_name=_('Vezani račun'),
     )
+
+    # Veza na proizvodni nalog
+    production_order = models.ForeignKey(
+        'production.ProductionOrder', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='stock_movements',
+        verbose_name=_('Radni nalog'),
+    )
+    batch_number = models.CharField(max_length=50, blank=True, verbose_name=_('Broj šarže'))
+    stock_before = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
+    stock_after = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
 
     reason        = models.CharField(max_length=255, blank=True, verbose_name=_('Razlog / Napomena'))
     performed_by  = models.ForeignKey(User, on_delete=models.SET_NULL,

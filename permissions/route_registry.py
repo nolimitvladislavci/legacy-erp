@@ -189,6 +189,25 @@ ROUTE_REGISTRY: dict = {
     'company_site_public':         AccessLevel.PUBLIC,
     'company_site_contact_public': AccessLevel.PUBLIC,
     'public_booking_by_slug':      AccessLevel.PUBLIC,
+
+    # ── Proizvodnja (MRP) ──────────────────────────────────────
+    'production:dashboard': 1,
+    'production:bom_list': 1,
+    'production:bom_detail': 1,
+    'production:bom_create': 2,
+    'production:order_list': 1,
+    'production:order_detail': 1,
+    'production:order_create': 2,
+    'production:order_start': 3,
+    'production:order_produce': 2,
+    'production:order_complete': 3,
+    'production:order_cancel': 3,
+    'production:step_update': 2,
+    'production:qc_create': 2,
+    'production:workstation_list': 1,
+    'production:workstation_create': 2,
+    'production:order_pdf': 1,
+    'production:api_availability': 1,
 }
 
 

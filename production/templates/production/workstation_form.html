@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if ws %}Uredi radnu stanicu{% else %}Nova radna stanica{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="workstations" %}
+
+  <h4 class="mb-4">
+    <i class="fas fa-industry me-2" style="color:var(--gold)"></i>
+    {% if ws %}Uredi radnu stanicu — {{ ws.name }}{% else %}Nova radna stanica{% endif %}
+  </h4>
+
+  <form method="post" id="wsForm">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-1"></i> Ispravite greške u obrascu.
+      {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header"><i class="fas fa-info-circle me-1"></i> Podaci o radnoj stanici</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Naziv <span class="text-danger">*</span></label>
+            {{ form.name }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Šifra</label>
+            {{ form.code }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Tip</label>
+            {{ form.ws_type }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            {{ form.status }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Kapacitet / sat</label>
+            {{ form.capacity_per_hour }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Cijena / sat (EUR)</label>
+            {{ form.hourly_cost }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Lokacija</label>
+            {{ form.location }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Napomene</label>
+            {{ form.notes }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi
+      </button>
+      <a href="{% url 'production:workstation_list' %}" class="btn btn-outline-secondary">Odustani</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

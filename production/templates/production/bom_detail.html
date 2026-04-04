@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Sastavnica — {{ bom.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="boms" %}
+
+  <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="mb-1">
+        <i class="fas fa-sitemap me-2" style="color:var(--gold)"></i>{{ bom.name }}
+        <small class="text-muted">v{{ bom.version }}</small>
+      </h4>
+      <p class="text-muted mb-0">
+        {% if bom.code %}Šifra: <code>{{ bom.code }}</code> &middot;{% endif %}
+        Kreirao: {{ bom.created_by.get_short_name|default:"-" }} &middot;
+        {{ bom.created_at|date:"d.m.Y" }}
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if bom.status == 'active' %}
+        <span class="badge bg-success fs-6 align-self-center">Aktivna</span>
+      {% elif bom.status == 'draft' %}
+        <span class="badge bg-warning text-dark fs-6 align-self-center">Nacrt</span>
+      {% else %}
+        <span class="badge bg-secondary fs-6 align-self-center">Arhivirana</span>
+      {% endif %}
+      <a href="{% url 'production:bom_edit' bom.pk %}" class="btn btn-outline-warning btn-sm">
+        <i class="fas fa-edit me-1"></i>Uredi
+      </a>
+    </div>
+  </div>
+
+  {# BOM Header Info #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small">Gotov proizvod</div>
+          <div class="fw-bold mt-1">{{ bom.output_item.name }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small">Količina / serija</div>
+          <div class="fw-bold mt-1">{{ bom.output_quantity|floatformat:2 }} {{ bom.output_unit }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small">Trajanje</div>
+          <div class="fw-bold mt-1">{{ bom.estimated_duration_minutes }} min</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small">Ukupni trošak</div>
+          <div class="fw-bold mt-1" style="color:var(--gold)">{{ bom.total_material_cost|floatformat:2 }} EUR</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small">Trošak / jedinica</div>
+          <div class="fw-bold mt-1">{{ bom.unit_cost|floatformat:2 }} EUR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# BOM Lines Table #}
+  <h5 class="mb-3"><i class="fas fa-list-ol me-2"></i>Stavke sastavnice</h5>
+  <div class="table-responsive mb-4">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Materijal / sirovina</th>
+          <th class="text-end">Količina</th>
+          <th class="text-center">Jedinica</th>
+          <th class="text-end">Rasip (%)</th>
+          <th class="text-end">Efektivna kol.</th>
+          <th class="text-end">Cijena / jed.</th>
+          <th class="text-end">Ukupno</th>
+          <th>Napomena</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in bom.lines.all %}
+        <tr>
+          <td>{{ line.sort_order|default:forloop.counter }}</td>
+          <td class="fw-semibold">{{ line.item.name }}</td>
+          <td class="text-end">{{ line.quantity|floatformat:4 }}</td>
+          <td class="text-center">{{ line.unit }}</td>
+          <td class="text-end">{{ line.waste_percent|floatformat:2 }}%</td>
+          <td class="text-end">{{ line.effective_quantity|floatformat:4 }}</td>
+          <td class="text-end">{{ line.item.purchase_price|default:line.item.unit_price|floatformat:2 }}</td>
+          <td class="text-end fw-bold">{{ line.line_cost|floatformat:2 }} EUR</td>
+          <td><small class="text-muted">{{ line.notes }}</small></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted">Nema stavki u sastavnici</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="fw-bold">
+          <td colspan="7" class="text-end">UKUPNO:</td>
+          <td class="text-end" style="color:var(--gold)">{{ bom.total_material_cost|floatformat:2 }} EUR</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  {# Production Orders using this BOM #}
+  <h5 class="mb-3"><i class="fas fa-clipboard-list me-2"></i>Radni nalozi s ovom sastavnicom</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Broj naloga</th>
+          <th class="text-center">Status</th>
+          <th class="text-end">Planirana kol.</th>
+          <th class="text-end">Proizvedena kol.</th>
+          <th>Datum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in bom.production_orders.all %}
+        <tr>
+          <td>
+            <a href="{% url 'production:order_detail' order.pk %}">{{ order.order_number }}</a>
+          </td>
+          <td class="text-center">
+            {% if order.status == 'done' %}
+              <span class="badge bg-success">Završen</span>
+            {% elif order.status == 'in_progress' %}
+              <span class="badge bg-primary">U tijeku</span>
+            {% elif order.status == 'confirmed' %}
+              <span class="badge bg-info text-dark">Potvrđen</span>
+            {% elif order.status == 'cancelled' %}
+              <span class="badge bg-danger">Otkazan</span>
+            {% else %}
+              <span class="badge bg-secondary">Nacrt</span>
+            {% endif %}
+          </td>
+          <td class="text-end">{{ order.planned_quantity|floatformat:2 }}</td>
+          <td class="text-end">{{ order.produced_quantity|floatformat:2 }}</td>
+          <td>{{ order.created_at|date:"d.m.Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Nema naloga za ovu sastavnicu</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if bom.notes %}
+  <div class="card mt-3">
+    <div class="card-body">
+      <h6><i class="fas fa-sticky-note me-1"></i>Napomene</h6>
+      <p class="mb-0">{{ bom.notes|linebreaksbr }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

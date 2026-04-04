@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block title %}Radne stanice{% endblock %}
+
+{% block extra_css %}
+<style>
+.ws-card {
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 12px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  height: 100%;
+}
+.ws-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.ws-status-dot {
+  width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+}
+.ws-status-active { background: #28a745; }
+.ws-status-maintenance { background: #ffc107; }
+.ws-status-inactive { background: #6c757d; }
+.ws-type-icon { font-size: 2rem; color: var(--gold, #c9a84c); margin-bottom: 0.5rem; }
+[data-theme="dark"] .ws-card { background: rgba(255,255,255,0.03); border-color: rgba(201,168,76,0.15); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  {% include "production/_production_nav.html" with active_nav="workstations" %}
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h4 class="mb-0"><i class="fas fa-industry me-2" style="color:var(--gold)"></i>Radne stanice</h4>
+    <a href="{% url 'production:workstation_create' %}" class="btn btn-gold">
+      <i class="fas fa-plus me-1"></i> Nova radna stanica
+    </a>
+  </div>
+
+  <div class="row g-3">
+    {% for ws in workstations %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="card ws-card">
+        <div class="card-body text-center">
+          <div class="ws-type-icon">
+            {% if ws.ws_type == 'machine' %}<i class="fas fa-cog"></i>
+            {% elif ws.ws_type == 'line' %}<i class="fas fa-stream"></i>
+            {% elif ws.ws_type == 'oven' %}<i class="fas fa-fire"></i>
+            {% elif ws.ws_type == 'mixing' %}<i class="fas fa-blender"></i>
+            {% elif ws.ws_type == 'packaging' %}<i class="fas fa-box"></i>
+            {% elif ws.ws_type == 'manual' %}<i class="fas fa-hand-paper"></i>
+            {% else %}<i class="fas fa-tools"></i>{% endif %}
+          </div>
+          <h6 class="fw-bold mb-1">{{ ws.name }}</h6>
+          {% if ws.code %}<code class="small">{{ ws.code }}</code><br>{% endif %}
+          <div class="mt-2 mb-2">
+            <span class="ws-status-dot ws-status-{{ ws.status }}"></span>
+            <span class="small ms-1">
+              {% if ws.status == 'active' %}Aktivna
+              {% elif ws.status == 'maintenance' %}Održavanje
+              {% else %}Neaktivna{% endif %}
+            </span>
+          </div>
+          <div class="small text-muted mb-1">
+            <i class="fas fa-tachometer-alt me-1"></i>{{ ws.capacity_per_hour }} jed./sat
+          </div>
+          <div class="small text-muted mb-2">
+            <i class="fas fa-euro-sign me-1"></i>{{ ws.hourly_cost|floatformat:2 }} EUR/sat
+          </div>
+          {% if ws.location %}
+            <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ ws.location }}</div>
+          {% endif %}
+          <div class="mt-3">
+            <a href="{% url 'production:workstation_edit' ws.pk %}" class="btn btn-sm btn-outline-warning">
+              <i class="fas fa-edit"></i> Uredi
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="fas fa-industry fa-3x mb-3" style="opacity:0.3"></i>
+      <p>Nema radnih stanica. Dodajte prvu!</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
