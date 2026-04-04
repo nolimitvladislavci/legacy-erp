@@ -196,6 +196,8 @@ class JournalEntry(models.Model):
         ('pos', _('POS promet')),
         ('correction', _('Ispravak')),
         ('depreciation', _('Amortizacija')),
+        ('membership', _('Članarina')),
+        ('donation', _('Donacija')),
     ]
     source_type = models.CharField(max_length=30, blank=True, choices=SOURCE_TYPES)
     source_invoice = models.ForeignKey('invoicing.Invoice', on_delete=models.SET_NULL,

@@ -1146,3 +1146,11 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': 1800,
     },
 })
+
+# Tax deadline notifier (Sprint Udruge-Konto)
+CELERY_BEAT_SCHEDULE.update({
+    'tax-deadline-notifier': {
+        'task': 'konto.tax_deadline_notifier',
+        'schedule': 86400,
+    },
+})

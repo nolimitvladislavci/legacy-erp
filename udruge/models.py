@@ -202,6 +202,13 @@ class Clanarina(models.Model):
         self.paid_at = timezone.now()
         self.payment_method = method
         self.save(update_fields=['status', 'paid_at', 'payment_method', 'updated_at'])
+        # Auto dvojno knjiženje
+        try:
+            from konto.booking_engine import auto_knjizi_clanarina
+            auto_knjizi_clanarina(self)
+        except Exception as _e:
+            import logging
+            logging.getLogger('udruge').warning('mark_paid auto_knjizi: %s', _e)
 
 
 class Donacija(models.Model):

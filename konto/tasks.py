@@ -93,3 +93,40 @@ def generate_saft_export(self, company_id, period_from_str, period_to_str):
     except Exception as e:
         logger.error('SAF-T export failed for %s: %s', company.name, e)
         return {'status': 'failed', 'error': str(e)}
+
+
+@shared_task(name='konto.tax_deadline_notifier')
+def tax_deadline_notifier():
+    """Upozorenje Mariji za rokove poreznih prijava. Dnevno u 08:00."""
+    import os
+    from django.utils import timezone
+    from konto.models import TaxPeriod
+
+    marija = os.environ.get('MARIJA_WHATSAPP', '')
+    if not marija:
+        return
+
+    today = timezone.now().date()
+    from datetime import timedelta
+    alert_dates = [today, today + timedelta(days=1), today + timedelta(days=3)]
+
+    periods = (TaxPeriod.objects.filter(filing_deadline__in=alert_dates, is_filed=False)
+               .select_related('company')
+               .order_by('filing_deadline'))
+
+    if not periods.exists():
+        return
+
+    lines = ['POREZNI ROKOVI:']
+    for p in periods:
+        days_left = (p.filing_deadline - today).days
+        urgency = 'DANAS' if days_left == 0 else ('SUTRA' if days_left == 1 else f'za {days_left} dana')
+        lines.append(f'{urgency}: {p.company.name} — {p.period_label} ({p.vat_payable:.0f} EUR PDV)')
+    lines.append('limit-connect.com/konto/porez/')
+
+    try:
+        from core.whatsapp import send_whatsapp
+        send_whatsapp(marija, chr(10).join(lines))
+    except Exception as e:
+        import logging
+        logging.getLogger('konto').warning('tax_deadline_notifier WA: %s', e)

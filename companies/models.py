@@ -252,6 +252,13 @@ class Company(models.Model):
     )
 
     # ── Memio.pet / Shelter ──────────────────────────────────────────────────
+    uses_double_entry = models.BooleanField(
+        default=False,
+        verbose_name='Dvojno knjigovodstvo',
+        help_text='Članarina i Donacija auto-kreiraju JournalEntry. '
+                  'Obvezno za udruge s prihodima > 30.000 EUR.',
+    )
+
     is_shelter = models.BooleanField(
         default=False,
         verbose_name='Azil / Sklonište za životinje',

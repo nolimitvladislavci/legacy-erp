@@ -20,3 +20,5 @@ class UdrugeConfig(AppConfig):
 
         post_save.connect(auto_setup_nonprofit, sender=Company,
                          dispatch_uid='udruge_auto_nonprofit_setup')
+
+        import udruge.signals  # noqa: F401 — KnjigaPrimitaka + Donacija archival

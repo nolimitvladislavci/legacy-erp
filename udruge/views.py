@@ -49,10 +49,39 @@ def clan_list(request):
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
 
+    # ── KPI Widget (Sprint Udruge-Konto) ──
+    from .models import Clanarina, Donacija
+    from django.db.models import Sum, Count
+    month_start = today.replace(day=1)
+    year_start = today.replace(month=1, day=1)
+
+    mrr_clanarina = (Clanarina.objects
+                     .filter(company=company, status='placena', paid_at__date__gte=month_start)
+                     .aggregate(s=Sum('amount'))['s'] or 0)
+
+    donacije_ytd = (Donacija.objects
+                    .filter(company=company, date__gte=year_start)
+                    .aggregate(s=Sum('amount'), n=Count('id')))
+
+    dospjele_clanarine = Clanarina.objects.filter(
+        company=company, status__in=['ceka', 'kasni'],
+        period_end__lt=today
+    ).count()
+
+    kpi = {
+        'aktivni_clanovi': stats['aktivni'],
+        'mrr_clanarina': mrr_clanarina,
+        'donacije_ytd_eur': donacije_ytd['s'] or 0,
+        'donacije_ytd_n': donacije_ytd['n'] or 0,
+        'dospjele_clanarine': dospjele_clanarine,
+        'uses_double_entry': getattr(company, 'uses_double_entry', False),
+    }
+
     return render(request, 'udruge/clan_list.html', {
         'page_obj': page, 'stats': stats, 'q': q, 'status_f': status,
         'membership_choices': Clan.MEMBERSHIP_CHOICES,
         'status_choices': Clan.STATUS_CHOICES,
+        'kpi': kpi,
     })
 
 
@@ -374,6 +403,14 @@ def donacija_create(request):
             iznos=donacija.amount,
             donacija=donacija,
         )
+
+        # Auto dvojno knjiženje
+        try:
+            from konto.booking_engine import auto_knjizi_donacija
+            auto_knjizi_donacija(donacija)
+        except Exception as _dke:
+            import logging
+            logging.getLogger('udruge').warning('donacija auto_knjizi: %s', _dke)
 
         # AML Guard provjera
         try:
