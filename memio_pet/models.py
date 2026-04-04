@@ -421,8 +421,8 @@ class RawFoodListing(models.Model):
         ('expired',   'Isteklo'),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
-                                 related_name='raw_food_listings')
+    company_id   = models.IntegerField(db_index=True, help_text='LIMIT Connect Company.id (bez FK)')
+    company_name = models.CharField(max_length=200, blank=True)
     product_type = models.CharField(max_length=30, choices=PRODUCT_CHOICES)
     quantity_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Količina (kg)')
     price_eur_kg = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Cijena EUR/kg')
@@ -443,16 +443,13 @@ class RawFoodListing(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.get_product_type_display()} — {self.quantity_kg}kg | {self.company.name}"
+        return f"{self.get_product_type_display()} — {self.quantity_kg}kg | {self.company_name}"
 
     @property
     def total_eur(self):
         return self.quantity_kg * self.price_eur_kg
 
     def save(self, *args, **kwargs):
-        if not self.latitude and self.company:
-            self.latitude = getattr(self.company, 'latitude', None)
-            self.longitude = getattr(self.company, 'longitude', None)
         super().save(*args, **kwargs)
 
 
@@ -467,8 +464,8 @@ class RawFoodOrder(models.Model):
     listing = models.ForeignKey(RawFoodListing, on_delete=models.CASCADE, related_name='orders')
     breeder = models.ForeignKey('BreederProfile', on_delete=models.SET_NULL,
                                  null=True, blank=True, related_name='barf_orders')
-    buyer_company = models.ForeignKey('companies.Company', on_delete=models.SET_NULL,
-                                       null=True, blank=True)
+    buyer_company_id   = models.IntegerField(null=True, blank=True, help_text='LIMIT Connect Company.id')
+    buyer_company_name = models.CharField(max_length=200, blank=True)
     quantity_kg = models.DecimalField(max_digits=8, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     batch_id = models.CharField(max_length=50, blank=True,

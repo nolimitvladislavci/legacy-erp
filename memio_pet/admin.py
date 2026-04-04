@@ -403,9 +403,9 @@ from memio_pet.models import RawFoodListing, RawFoodOrder
 
 @admin.register(RawFoodListing)
 class RawFoodListingAdmin(admin.ModelAdmin):
-    list_display = ('company', 'product_type', 'quantity_kg', 'price_eur_kg', 'status', 'is_free_range')
+    list_display = ('company_name', 'product_type', 'quantity_kg', 'price_eur_kg', 'status', 'is_free_range')
     list_filter = ('product_type', 'status', 'is_antibiotic_free', 'is_free_range')
-    search_fields = ('company__name', 'k3_cert_number')
+    search_fields = ('company_name', 'k3_cert_number')
 
 @admin.register(RawFoodOrder)
 class RawFoodOrderAdmin(admin.ModelAdmin):
