@@ -1154,3 +1154,11 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': 86400,
     },
 })
+
+# Cache warming after restart (Sprint Synesis-B)
+CELERY_BEAT_SCHEDULE.update({
+    'warm-cache-hourly': {
+        'task': 'core.management.commands.warm_cache',
+        'schedule': 3600,
+    },
+})
