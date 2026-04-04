@@ -81,7 +81,8 @@ class EmployeeProfile(models.Model):
     employee_id = models.CharField(max_length=20, blank=True)
     tax_id = models.CharField('OIB', max_length=11, blank=True)
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('20.00'))
-    overtime_rate = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('30.00'))
+    overtime_rate = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('50.00'),
+                                         help_text='ZOR čl.94 st.2: minimum 50%% za prekovremeni rad')
     phone = models.CharField(max_length=30, blank=True)
     address = models.TextField(blank=True)
     bank_account = models.CharField('IBAN', max_length=34, blank=True)
@@ -236,7 +237,7 @@ class TimeEntry(models.Model):
             emp = self.user.employeeprofile
             daily_limit = emp.daily_hours or Decimal('8')
             base_rate = emp.hourly_rate or Decimal('20')
-            ot_rate = emp.overtime_rate or Decimal('30')
+            ot_rate = emp.overtime_rate or Decimal('50')  # ZOR čl.94 st.2: min 50%
         except Exception:
             daily_limit = Decimal('8')
             base_rate = Decimal('20')
