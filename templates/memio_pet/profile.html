@@ -288,6 +288,26 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
   {% endif %}
 
+  <!-- Recenzije -->
+  {% if reviews %}
+  <div class="info-section">
+    <h2 class="info-title">Recenzije kupaca</h2>
+    {% for rev in reviews %}
+    <div style="padding:12px 0;border-bottom:1px solid var(--line);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:500;">{{ rev.reviewer_name }}</span>
+        <span style="color:var(--gold);font-size:1.1rem;">{% for i in "12345" %}{% if forloop.counter <= rev.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span>
+      </div>
+      {% if rev.comment %}<p style="font-size:.88rem;color:var(--ink2);font-weight:300;line-height:1.6;">{{ rev.comment }}</p>{% endif %}
+      <div style="font-size:.72rem;color:var(--dim);margin-top:4px;">
+        {{ rev.created_at|date:"d.m.Y." }}
+        {% if rev.is_verified_purchase %}<span style="color:var(--green);"> &#10003; Verificirana kupnja</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <!-- QR Code -->
   <div class="qr-section">
     <h2 style="font-family:var(--serif);font-size:1.15rem;margin-bottom:16px;">Dijeli ovaj profil</h2>

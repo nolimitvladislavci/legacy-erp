@@ -347,3 +347,36 @@ class VerificationLog(models.Model):
 
     def __str__(self):
         return f'{self.get_verification_type_display()} -- {self.timestamp}'
+
+
+class BreederReview(models.Model):
+    """
+    Recenzija kupca — zatvara Trust Score petlju.
+    Kupac koji je kupio/udomio zivotinju moze ocijeniti uzgajivaca.
+    """
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    breeder         = models.ForeignKey(BreederProfile, on_delete=models.CASCADE, related_name="reviews")
+    animal          = models.ForeignKey(AnimalProfile, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name="reviews")
+    reviewer_name   = models.CharField(max_length=120, verbose_name="Ime kupca")
+    reviewer_email  = MemioEncryptedField(blank=True, verbose_name="Email kupca")
+    rating          = models.IntegerField(choices=RATING_CHOICES, verbose_name="Ocjena (1-5)")
+    comment         = models.TextField(blank=True, verbose_name="Komentar", validators=[validate_free_text])
+    is_verified_purchase = models.BooleanField(default=False,
+                                                verbose_name="Verificirana kupnja",
+                                                help_text="Potvrdjeno da je kupac zaista kupio/udomio zivotinju")
+    is_published    = models.BooleanField(default=False, verbose_name="Objavljeno")
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_pet"
+        ordering  = ["-created_at"]
+        verbose_name = "Recenzija kupca"
+        verbose_name_plural = "Recenzije kupaca"
+        unique_together = [("breeder", "reviewer_name")]
+
+    def __str__(self):
+        stars = "★" * self.rating + "☆" * (5 - self.rating)
+        return f"{stars} {self.reviewer_name} -> {self.breeder.name}"

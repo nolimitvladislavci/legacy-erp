@@ -157,6 +157,35 @@ def calculate_trust_score(breeder):
     act_score = min(act_score, 15)
     breakdown["aktivnost"] = {"score": act_score, "max": 15, "notes": act_notes}
 
+    # ── 7. RECENZIJE KUPACA (max 15 iz aktivnost) ──────────────
+    # Preraspodjela: aktivnost 10 + review 5 (kad bude vise reviewsa, povecaj)
+    rev_score = 0
+    rev_notes = []
+    from memio_pet.models import BreederReview
+    reviews = BreederReview.objects.using(db).filter(breeder=breeder, is_published=True)
+    rev_count = reviews.count()
+    if rev_count > 0:
+        from django.db.models import Avg
+        avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"] or 0
+        verified_count = reviews.filter(is_verified_purchase=True).count()
+        # Score: do 5 za kolicinu, do 5 za kvalitetu, do 5 za verificirane
+        qty_pts = min(rev_count, 5)  # 1 bod po reviewu, max 5
+        qual_pts = int(avg_rating)  # 1-5 bodova za prosjecnu ocjenu
+        ver_pts = min(verified_count * 2, 5)  # 2 boda po verificiranom, max 5
+        rev_score = min(qty_pts + qual_pts + ver_pts, 15)
+        rev_notes.append(f"{rev_count} recenzija, prosjek {avg_rating:.1f}/5 (+{rev_score})")
+        if verified_count:
+            rev_notes.append(f"{verified_count} verificiranih kupnji")
+    else:
+        rev_notes.append("Nema recenzija (0/15) — potaknite kupce da ostave ocjenu")
+    breakdown["recenzije"] = {"score": rev_score, "max": 15, "notes": rev_notes}
+
+    # Smanjujemo aktivnost na max 10 (ukupno ostaje 100)
+    if "aktivnost" in breakdown:
+        act = breakdown["aktivnost"]
+        act["max"] = 10
+        act["score"] = min(act["score"], 10)
+
     # ── TOTAL ───────────────────────────────────────────────────
     total = sum(cat["score"] for cat in breakdown.values())
     total = min(total, 100)

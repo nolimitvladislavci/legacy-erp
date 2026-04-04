@@ -1128,3 +1128,12 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=3, minute=0),
     },
 })
+
+# ── Memio.pet Trust Score refresh (svaka 24h) ──────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "memio-trust-score-refresh": {
+        "task": "memio_pet.trust_score_refresh",
+        "schedule": 86400,  # 24h
+        "options": {"queue": "default"},
+    },
+})

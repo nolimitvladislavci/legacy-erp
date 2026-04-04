@@ -10,9 +10,10 @@ import io
 import qrcode
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
-from django.views.decorators.cache import cache_page
-from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership
+from django.views.decorators.cache import cache_page, never_cache
+from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
 
 
 def _find_animal(chip_or_tag):
@@ -68,11 +69,21 @@ def pet_profile_page(request, chip_or_tag):
     qr_url = f"https://memio.pet/pas/{identifier}/qr/"
     profile_url = f"https://memio.pet/pas/{identifier}/"
 
+    # Reviews
+    reviews = []
+    if breeder:
+        reviews = list(
+            BreederReview.objects.using(db)
+            .filter(breeder=breeder, is_published=True)
+            .order_by("-created_at")[:10]
+        )
+
     context = {
         "animal": animal,
         "breeder": breeder,
         "health_records": health_records,
         "ownership_chain": ownership_chain,
+        "reviews": reviews,
         "trust_score": trust_score,
         "trust_color": trust_color,
         "trust_label": trust_label,
@@ -90,7 +101,7 @@ def pet_qr_code(request, chip_or_tag):
     """Generira QR kod PNG sliku za ljubimca."""
     animal = _find_animal(chip_or_tag)
     if not animal:
-        raise Http404("Ljubimac nije pronadjen.")
+        return HttpResponse("Ljubimac nije pronadjen.", status=404, content_type="text/plain")
 
     identifier = animal.chip_number or animal.ear_tag
     url = f"https://memio.pet/pas/{identifier}/"
@@ -131,6 +142,11 @@ def breeder_profile_page(request, breeder_id):
         .filter(breeder=breeder)
         .order_by("-created_at")
     )
+    reviews = list(
+        BreederReview.objects.using(db)
+        .filter(breeder=breeder, is_published=True)
+        .order_by("-created_at")[:20]
+    )
 
     trust_score = breeder.trust_score
     if trust_score >= 80:
@@ -146,6 +162,7 @@ def breeder_profile_page(request, breeder_id):
     context = {
         "breeder": breeder,
         "animals": animals,
+        "reviews": reviews,
         "trust_score": trust_score,
         "trust_color": trust_color,
         "trust_label": trust_label,

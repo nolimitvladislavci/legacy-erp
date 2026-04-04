@@ -14,6 +14,7 @@ import hmac
 import logging
 import time
 from functools import wraps
+from django.contrib.auth.decorators import login_required  # BUG-1 fix
 from django.http import JsonResponse
 from django.core.cache import cache
 

@@ -18,7 +18,7 @@ from .models import Livestock, HealthRecord
 
 logger = logging.getLogger(__name__)
 
-PET_VRSTE = Livestock.PET_VRSTE
+PET_VRSTE = getattr(Livestock, 'PET_VRSTE', ('pas', 'macka', 'konj', 'zec', 'ostalo_ljubimac'))
 
 
 @login_required

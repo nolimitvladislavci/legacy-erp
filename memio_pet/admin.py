@@ -4,11 +4,12 @@ Ljubeta unosi podatke ovdje. Inline pomoc na svakom koraku.
 """
 from django.contrib import admin
 from django.utils.html import format_html, mark_safe
+from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from memio_pet.models import (
     BreederProfile, AnimalProfile, PetHealthRecord,
-    PetOwnership, WaitlistEntry, VeterinarProfile, VerificationLog,
+    PetOwnership, WaitlistEntry, VeterinarProfile, VerificationLog, BreederReview,
 )
 
 
@@ -88,13 +89,22 @@ class VerificationInline(admin.TabularInline):
     verbose_name_plural = "Verifikacijski zapisi (dokazi)"
 
 
+class ReviewInline(admin.TabularInline):
+    model = BreederReview
+    extra = 0
+    fields = ("reviewer_name", "rating", "comment", "is_verified_purchase", "is_published", "created_at")
+    readonly_fields = ("created_at",)
+    verbose_name = "Recenzija"
+    verbose_name_plural = "Recenzije kupaca"
+
+
 @admin.register(BreederProfile)
 class BreederProfileAdmin(admin.ModelAdmin):
     list_display = ("name", "account_type", "city", "country", "trust_badge", "is_cro_validated", "animal_count", "created_at")
     list_filter = ("account_type", "is_cro_validated", "country", "is_no_limit_partner")
     search_fields = ("name", "city")
     readonly_fields = ("id", "api_key", "created_at", "updated_at", "trust_updated", "trust_score_display", "help_text")
-    inlines = [AnimalInline]
+    inlines = [AnimalInline, ReviewInline]
     list_per_page = 25
 
     fieldsets = (
@@ -348,3 +358,42 @@ class VerificationLogAdmin(admin.ModelAdmin):
             return f"{obj.sha256_hash[:12]}..."
         return "—"
     hash_short.short_description = "SHA-256"
+
+
+
+@admin.register(BreederReview)
+class BreederReviewAdmin(admin.ModelAdmin):
+    list_display = ("breeder", "reviewer_name", "stars", "is_verified_purchase", "is_published", "created_at")
+    list_filter = ("rating", "is_verified_purchase", "is_published")
+    search_fields = ("reviewer_name", "comment", "breeder__name")
+    readonly_fields = ("id", "created_at")
+    list_editable = ("is_published",)
+    list_per_page = 25
+    actions = ["publish_reviews", "verify_purchases"]
+
+    def stars(self, obj):
+        return "★" * obj.rating + "☆" * (5 - obj.rating)
+    stars.short_description = "Ocjena"
+
+    def publish_reviews(self, request, queryset):
+        count = queryset.update(is_published=True)
+        messages.success(request, f"{count} recenzija objavljeno.")
+    publish_reviews.short_description = "Objavi odabrane recenzije"
+
+    def verify_purchases(self, request, queryset):
+        count = queryset.update(is_verified_purchase=True)
+        messages.success(request, f"{count} kupnji verificirano.")
+    verify_purchases.short_description = "Verificiraj kupnje"
+
+    def save_model(self, request, obj, form, change):
+        try:
+            super().save_model(request, obj, form, change)
+        except IntegrityError:
+            messages.error(request, f"Recenzija od {obj.reviewer_name} za ovog uzgajivaca vec postoji.")
+        # Auto-update trust score
+        if obj.breeder:
+            try:
+                from memio_pet.trust_score import update_trust_score
+                update_trust_score(obj.breeder)
+            except Exception:
+                pass

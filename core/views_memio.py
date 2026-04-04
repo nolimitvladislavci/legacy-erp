@@ -257,7 +257,7 @@ def memio_push(request):
         if not pet:
             return JsonResponse({'error': 'Ljubimac nije pronađen.'}, status=404)
 
-        if pet.vrsta not in Livestock.PET_VRSTE:
+        if pet.vrsta not in getattr(Livestock, 'PET_VRSTE', ('pas', 'macka', 'konj', 'zec', 'ostalo_ljubimac')):
             return JsonResponse({'error': 'Nije ljubimac (vrsta).'}, status=400)
 
         profile = push_animal_profile(pet)
