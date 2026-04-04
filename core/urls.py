@@ -94,6 +94,7 @@ urlpatterns = [
     path('lib/staff/', include('library.urls', namespace='library')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
     path('lovacki/', include('lovacki.urls', namespace='lovacki')),
+    path('utilities/', include('utilities.urls', namespace='utilities')),
     path('komunalno/', include('komunalno.urls', namespace='komunalno')),
     path('intelligence/', include('intelligence.urls', namespace='intelligence')),
     path('marketplace/', include('marketplace.urls', namespace='marketplace')),

@@ -145,6 +145,7 @@ INSTALLED_APPS = [
     "udruge",
     "livestock",
     "lovacki",
+    "utilities",
     "memio_pet",  # Memio.pet
     "no_limit",  # NO LIMIT udruga
     "intelligence",
