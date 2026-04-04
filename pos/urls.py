@@ -211,4 +211,5 @@ urlpatterns = [
     # Item Search API — pretraži cijelu bazu (ne samo DOM-300)
     path('api/item-search/',         views.api_item_search,      name='api_item_search'),
     path('api/ai-upsell/',          views.api_ai_upsell,        name='api_ai_upsell'),
+    path('api/fenix-camera/',       views.api_fenix_camera,     name='api_fenix_camera'),
 ]

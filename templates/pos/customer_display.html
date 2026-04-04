@@ -106,6 +106,7 @@
 <body>
 
 <div class="header">
+  {% if company.logo %}<img src="{{ company.logo.url }}" alt="{{ company.name }}" style="max-height:50px;margin-bottom:8px">{% endif %}
   <h1>{{ company.name }}</h1>
   <div class="terminal">{{ terminal.name }}</div>
 </div>
@@ -149,6 +150,7 @@ function render(data) {
       <div class="state-paid">
         <div class="check">✓</div>
         <div class="thanks">Hvala na kupnji!</div>
+        <div style="margin-top:20px;font-size:14px;color:#666">Skenirajte za loyalty bodove</div>
         ${parseFloat(data.change) > 0 ? '<div class="change">Povrat: ' + parseFloat(data.change).toFixed(2) + ' €</div>' : ''}
       </div>`;
     lastState = 'paid';

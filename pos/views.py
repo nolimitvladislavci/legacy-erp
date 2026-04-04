@@ -5667,3 +5667,67 @@ def api_ai_upsell(request):
 
     suggestions = get_upsell_suggestions(company, item_ids)
     return JsonResponse({'suggestions': suggestions})
+
+
+@login_required
+@require_POST
+def api_fenix_camera(request):
+    """FenixCamera OCR — photo → Haiku Vision → barcode/product name → SKU lookup."""
+    import base64
+    from django.conf import settings as _settings
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'sku': None, 'error': 'No company'})
+
+    image = request.FILES.get('image')
+    if not image:
+        return JsonResponse({'sku': None, 'error': 'No image'})
+
+    api_key = getattr(_settings, 'ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return JsonResponse({'sku': None, 'error': 'AI not configured'})
+
+    try:
+        import anthropic
+        image_b64 = base64.b64encode(image.read()).decode()
+
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=150,
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': image_b64}},
+                    {'type': 'text', 'text': (
+                        'Slika prikazuje proizvod ili barcode. '
+                        'Ako vidiš barcode → pročitaj brojeve. '
+                        'Ako vidiš naziv proizvoda → izvuci naziv. '
+                        'Odgovori SAMO JSON: {"type":"barcode","value":"123"} ili {"type":"name","value":"Coca Cola"}'
+                    )},
+                ],
+            }],
+        )
+
+        raw = msg.content[0].text.strip()
+        data = json.loads(raw)
+
+        from inventory.models import InventoryItem
+        sku = None
+        if data.get('type') == 'barcode' and data.get('value'):
+            sku = InventoryItem.objects.filter(company=company, barcode=data['value'], is_active=True).first()
+            if not sku:
+                sku = InventoryItem.objects.filter(company=company, sku=data['value'], is_active=True).first()
+        elif data.get('type') == 'name' and data.get('value'):
+            sku = InventoryItem.objects.filter(company=company, name__icontains=data['value'], is_active=True).first()
+
+        if sku:
+            return JsonResponse({
+                'sku': {'id': sku.pk, 'name': sku.name, 'price': str(sku.unit_price), 'sku': sku.sku or ''},
+                'ocr': data,
+            })
+        return JsonResponse({'sku': None, 'ocr': data})
+
+    except Exception as e:
+        return JsonResponse({'sku': None, 'error': str(e)[:100]})

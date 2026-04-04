@@ -1748,6 +1748,7 @@ QUICK_ACTION_REGISTRY = {
     # Field
     'whatsapp_receipt': {'label': 'WhatsApp racun',  'requires': []},
     'gps_location':   {'label': 'GPS lokacija',      'requires': []},
+    'fenix_camera':   {'label': 'FenixCamera OCR',    'requires': []},
 }
 
 

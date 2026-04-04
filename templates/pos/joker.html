@@ -357,6 +357,7 @@
         membership_renew: () => { const sku='CLANARINA'; const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();} else {_openMembershipRenewPrompt();} },
         donation: () => { const amt=prompt('Iznos donacije (EUR):'); if(amt){addManualAmount(parseFloat(amt),'Donacija');} },
         whatsapp_receipt: () => { window._sendWhatsAppAfterPay=true; },
+        fenix_camera: () => { if(window.openFenixCamera) openFenixCamera(); },
         gps_location: () => { if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{document.getElementById('gps-info')&&(document.getElementById('gps-info').textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4));});} },
       };
       
@@ -485,6 +486,11 @@
     </div>
 
     <div class="pay-zone" id="payZone" role="region" aria-label="Zona plaćanja">
+      <!-- DARK/LIGHT TOGGLE -->
+      <button id="themeToggle" onclick="toggleTheme()" title="Tamni/Svijetli mod"
+        style="position:fixed;top:8px;right:8px;z-index:300;background:var(--card,#1e293b);
+        border:1px solid var(--border,#333);border-radius:6px;padding:4px 8px;cursor:pointer;
+        color:var(--muted,#888);font-size:.75rem">&#9788;/&#9790;</button>
       <button onclick="togglePayExpand()" class="qp-action-btn" style="float:right;margin-bottom:4px;font-size:.7rem;display:none" id="payExpandBtn" title="Proširi">⛶</button>
       <div class="cashier-required-hint" id="cashierHint">⚠️ Odaberite blagajnika prije naplate</div>
       <!-- Cash amount input (visible only for CASH) -->

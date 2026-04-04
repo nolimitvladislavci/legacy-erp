@@ -1017,3 +1017,104 @@
       if (sku) addUpsell(parseInt(sku), document.activeElement);
     }
   });
+
+
+  // ═══ DARK/LIGHT TOGGLE ═══
+  window.toggleTheme = function() {
+    var root = document.documentElement;
+    var isDark = root.getAttribute('data-theme') !== 'light';
+    if (isDark) {
+      root.setAttribute('data-theme', 'light');
+      root.style.setProperty('--black', '#ffffff');
+      root.style.setProperty('--dark', '#f8f9fa');
+      root.style.setProperty('--card', '#ffffff');
+      root.style.setProperty('--border', '#dee2e6');
+      root.style.setProperty('--text', '#212529');
+      root.style.setProperty('--muted', '#6c757d');
+      document.body.style.background = '#f8f9fa';
+      document.body.style.color = '#212529';
+      localStorage.setItem('pos_theme', 'light');
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      root.style.removeProperty('--black');
+      root.style.removeProperty('--dark');
+      root.style.removeProperty('--card');
+      root.style.removeProperty('--border');
+      root.style.removeProperty('--text');
+      root.style.removeProperty('--muted');
+      document.body.style.background = '';
+      document.body.style.color = '';
+      localStorage.setItem('pos_theme', 'dark');
+    }
+  };
+  // Auto-apply saved theme
+  (function() {
+    if (localStorage.getItem('pos_theme') === 'light') toggleTheme();
+  })();
+
+  // ═══ FENIX CAMERA OCR (MVP) ═══
+  window.openFenixCamera = function() {
+    var modal = document.createElement('div');
+    modal.id = 'fenixCameraModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;flex-direction:column';
+    modal.innerHTML = '<div style="text-align:center;color:#fff;max-width:400px;width:90%">' +
+      '<h3 style="color:var(--gold,#c9a84c);margin-bottom:1rem">&#128247; FenixCamera</h3>' +
+      '<video id="fcVideo" autoplay playsinline style="width:100%;border-radius:12px;margin-bottom:1rem;max-height:50vh"></video>' +
+      '<canvas id="fcCanvas" style="display:none" width="640" height="480"></canvas>' +
+      '<div style="display:flex;gap:1rem;justify-content:center">' +
+      '<button onclick="fenixCapture()" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;min-height:48px">&#128248; Slikaj</button>' +
+      '<button onclick="closeFenixCamera()" style="background:#333;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;min-height:48px">Zatvori</button>' +
+      '</div>' +
+      '<div id="fcResult" style="margin-top:1rem;font-size:.88rem"></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(function(stream) {
+        window._fcStream = stream;
+        document.getElementById('fcVideo').srcObject = stream;
+      })
+      .catch(function() {
+        document.getElementById('fcResult').textContent = 'Kamera nedostupna';
+      });
+  };
+
+  window.fenixCapture = function() {
+    var video = document.getElementById('fcVideo');
+    var canvas = document.getElementById('fcCanvas');
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    document.getElementById('fcResult').innerHTML = '<span style="color:var(--gold)">Analiziram...</span>';
+
+    canvas.toBlob(function(blob) {
+      var fd = new FormData();
+      fd.append('image', blob, 'capture.jpg');
+      fetch(API_BASE + '/pos/api/fenix-camera/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': CSRF },
+        body: fd,
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.sku) {
+          document.getElementById('fcResult').innerHTML =
+            '<span style="color:#22c55e">&#10003; ' + data.sku.name + ' (' + data.sku.price + ' EUR)</span>';
+          if (window.addItemById) addItemById(data.sku.id);
+          else { var btn = document.querySelector('[data-id="'+data.sku.id+'"]'); if(btn) btn.click(); }
+          setTimeout(closeFenixCamera, 1500);
+        } else {
+          document.getElementById('fcResult').innerHTML =
+            '<span style="color:#f59e0b">Nije prepoznato. Pokušajte ponovo.</span>';
+        }
+      })
+      .catch(function() {
+        document.getElementById('fcResult').innerHTML = '<span style="color:#ef4444">Greška</span>';
+      });
+    }, 'image/jpeg', 0.8);
+  };
+
+  window.closeFenixCamera = function() {
+    if (window._fcStream) window._fcStream.getTracks().forEach(function(t) { t.stop(); });
+    var m = document.getElementById('fenixCameraModal');
+    if (m) m.remove();
+  };
