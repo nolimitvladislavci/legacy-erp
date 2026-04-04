@@ -694,6 +694,38 @@ function renderDrawer(d){
         if(d.extra.status) h+='<div class="drawer-row"><span class="dl">Status</span><span class="dv">'+d.extra.status+'</span></div>';
     }
     h+='<div class="drawer-row"><span class="dl">Arhivirano</span><span class="dv doc-date-sm">'+d.archived_at+'</span></div>';
+
+    // ── Email Status Badge (Sprint 2A) ──
+    if(d.source_type==='invoice_out'){
+        h+='<div class="drawer-row"><span class="dl">Email</span><span class="dv">';
+        if(d.email_sent_at){
+            if(d.email_opened_at){
+                h+='<span class="email-badge email-opened"><i class="fas fa-envelope-open"></i> Otvoreno '+d.email_opened_at+' ('+d.email_open_count+'x)</span>';
+            } else {
+                h+='<span class="email-badge email-sent"><i class="fas fa-check"></i> Poslano '+d.email_sent_at+'</span>';
+                h+='<span class="email-badge email-pending"><i class="fas fa-clock"></i> Nije otvoreno</span>';
+            }
+        } else {
+            h+='<span class="email-badge email-not-sent"><i class="fas fa-minus-circle"></i> Nije poslano</span>';
+        }
+        h+='</span></div>';
+    }
+    h+='</div>';
+
+    // ── Deep Links (Sprint 2C) ──
+    h+='<div class="deep-links">';
+    if(d.source_type==='invoice_out' && d.source_id){
+        var sid=d.source_id.replace('invoice:','');
+        h+='<a href="/invoicing/'+sid+'/" class="deep-link" target="_blank"><i class="fas fa-file-invoice-dollar"></i> Faktura</a>';
+        h+='<a href="/invoicing/'+sid+'/pdf/" class="deep-link" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>';
+    } else if(d.source_type==='pos_receipt' && d.source_id){
+        h+='<a href="/pos/receipt/'+d.source_id+'/" class="deep-link" target="_blank"><i class="fas fa-cash-register"></i> POS bon</a>';
+    } else if(d.source_type==='eracun' && d.source_id){
+        h+='<a href="/einvoice/message/'+d.source_id+'/" class="deep-link" target="_blank"><i class="fas fa-file-code"></i> e-Racun</a>';
+    }
+    if(d.module_url){
+        h+='<a href="'+d.module_url+'" class="deep-link" target="_blank"><i class="fas fa-external-link-alt"></i> Otvori u modulu</a>';
+    }
     h+='</div>';
     if(d.items && d.items.length>0){
         h+='<div class="drawer-section"><h4>Stavke ('+d.items.length+')</h4>';
@@ -704,7 +736,32 @@ function renderDrawer(d){
         }
         h+='</tbody></table></div>';
     }
-    // ── Barcode sekcija ──
+    // ── AI Bookkeeper Panel (Sprint 2C) ──
+    if(d.is_booked){
+        h+='<div class="drawer-section"><div class="ai-bookkeeper-panel" style="border-color:rgba(34,197,94,.5)"><h5><i class="fas fa-check-circle"></i> Proknjizeno</h5></div></div>';
+    } else if(d.ai_proposal && typeof d.ai_proposal === 'object'){
+        var p=d.ai_proposal;
+        var conf=Math.round((p.confidence||0)*100);
+        var confColor=conf>=80?'#22c55e':conf>=50?'#eab308':'#ef4444';
+        h+='<div class="drawer-section"><div class="ai-bookkeeper-panel">';
+        h+='<h5><i class="fas fa-brain"></i> Prijedlog knjizenja <span style="margin-left:auto;font-size:.72rem;color:'+confColor+'">'+conf+'% pouzdanost</span></h5>';
+        h+='<div class="confidence-bar"><div class="confidence-fill" style="width:'+conf+'%;background:'+confColor+'"></div></div>';
+        if(p.debit){for(var i=0;i<p.debit.length;i++){var l=p.debit[i];h+='<div class="ai-booking-line"><span class="abl-code">'+l.account+'</span><span>'+(l.description||'')+'</span><span class="abl-d">'+parseFloat(l.amount).toFixed(2)+' D</span><span></span></div>';}}
+        if(p.credit){for(var i=0;i<p.credit.length;i++){var l=p.credit[i];h+='<div class="ai-booking-line"><span class="abl-code">'+l.account+'</span><span>'+(l.description||'')+'</span><span></span><span class="abl-c">'+parseFloat(l.amount).toFixed(2)+' C</span></div>';}}
+        if(p.reasoning){h+='<div style="font-size:.72rem;color:var(--muted);margin-top:6px;font-style:italic">'+p.reasoning+'</div>';}
+        h+='<div style="display:flex;gap:6px;margin-top:10px">';
+        h+='<button onclick="doProknjizi('+d.id+')" class="btn-gold" style="flex:1;font-size:.8rem;padding:8px;border-radius:6px;font-weight:700;border:none;cursor:pointer;min-height:44px;background:#c9a84c;color:#0f172a"><i class="fas fa-book"></i> Proknjizi</button>';
+        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-ghost" style="flex:1;font-size:.8rem;padding:8px;border-radius:6px;font-weight:600;cursor:pointer;min-height:44px"><i class="fas fa-sync"></i> Osvjezi prijedlog</button>';
+        h+='</div></div></div>';
+    } else if(!d.is_booked && d.amount && parseFloat(d.amount)>0){
+        h+='<div class="drawer-section"><div class="ai-bookkeeper-panel" style="border-color:rgba(201,168,76,.3)">';
+        h+='<h5 style="color:#c9a84c"><i class="fas fa-brain"></i> AI Bookkeeper</h5>';
+        h+='<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">Nema prijedloga. Kliknite za AI analizu.</div>';
+        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-gold" style="width:100%;font-size:.8rem;padding:8px;border-radius:6px;font-weight:700;border:none;cursor:pointer;min-height:44px;background:#c9a84c;color:#0f172a"><i class="fas fa-brain"></i> Generiraj prijedlog</button>';
+        h+='</div></div>';
+    }
+
+        // ── Barcode sekcija ──
     if(d.barcode){
         h+='<div class="drawer-section"><h4>Barcode</h4>';
         h+='<div class="drawer-row barcode-row">';
@@ -751,6 +808,31 @@ document.addEventListener('keydown',function(e){
         if(e.key==='ArrowRight'){ e.preventDefault(); navigateDrawer(1); }
     }
 });
+
+// ═══ PROKNJIZI (Sprint 2C) ═══
+function doProknjizi(entryId, dryRun){
+    var csrf=getCsrf();
+    var fd=new FormData();
+    if(dryRun) fd.append('dry_run','1');
+    fetch('/hr/documents/arhiva/'+entryId+'/proknjizi/',{method:'POST',body:fd,headers:{'X-CSRFToken':csrf}})
+        .then(function(r){return r.json()})
+        .then(function(d){
+            if(d.ok){
+                if(d.dry_run){
+                    showToast('Prijedlog generiran — osvjezujem...','success');
+                } else if(d.status==='booked'){
+                    showToast('Proknjizeno! Temeljnica: '+d.journal_entry_id,'success');
+                } else if(d.status==='pending_review'){
+                    showToast(d.message||'Prijedlog spremljen za pregled','info');
+                }
+                // Refresh drawer
+                openDrawer(entryId);
+            } else {
+                showToast(d.error||'Greska pri knjizenju','danger');
+            }
+        })
+        .catch(function(e){showToast('Mrezna greska: '+e.message,'danger');});
+}
 
 // ═══ SORT ═══
 function doSort(field){

@@ -818,3 +818,35 @@ def auto_book_high_confidence(self):
     )
 
     return {'booked': booked, 'journal_entries': je_created, 'errors': errors}
+
+
+@shared_task(bind=True, soft_time_limit=120)
+def gmail_ura_import(self):
+    """
+    Gmail URA auto-import — čita ulazne račune iz email-a.
+    
+    PREDUVJET: Ivan mora postaviti Gmail OAuth2 na console.cloud.google.com
+    Scope: https://www.googleapis.com/auth/gmail.modify
+    .env: GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_IMPORT_EMAIL
+    
+    Status: pending_review (ne odmah WhatsApp — Marija ne treba alarm za kataloge)
+    Batch: 10 emailova = 1 zbirna WhatsApp poruka
+    """
+    import os
+    
+    client_id = os.environ.get('GMAIL_CLIENT_ID', '')
+    client_secret = os.environ.get('GMAIL_CLIENT_SECRET', '')
+    refresh_token = os.environ.get('GMAIL_REFRESH_TOKEN', '')
+    
+    if not all([client_id, client_secret, refresh_token]):
+        logger.info('Gmail credentials nisu konfigurirani — preskačem. Ivan treba postaviti OAuth2.')
+        return {'status': 'skipped', 'reason': 'missing_credentials'}
+    
+    # TODO: Implementirati kad Ivan postavi OAuth
+    # 1. OAuth2 refresh token flow
+    # 2. Fetch unread emails s attachment-ima (PDF/XML)
+    # 3. Za svaki: ArhivaEntry(source_type='email_in', status='pending_review')
+    # 4. AI ekstrakcija iznosa, partnera, datuma
+    # 5. Batch WhatsApp digest: "10 novih URA importirano, pregledaj na /documents/ai-inbox/"
+    logger.info('Gmail OAuth configured but import not yet implemented.')
+    return {'status': 'pending_setup'}

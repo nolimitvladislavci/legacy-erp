@@ -57,6 +57,7 @@ urlpatterns = [
     path("arhiva/<int:pk>/preview-info/", views.arhiva_preview_info, name="arhiva_preview_info"),
     path("arhiva/<int:pk>/barcode.png", views.arhiva_barcode_png, name="arhiva_barcode"),
     path("arhiva/<int:pk>/bookmark/", views.arhiva_toggle_bookmark, name="arhiva_toggle_bookmark"),
+    path("arhiva/<int:pk>/proknjizi/", views.arhiva_proknjizi, name="arhiva_proknjizi"),
     path("arhiva/file/<path:file_path>/", views.arhiva_file_serve, name="arhiva_file_serve"),
     path("blob/<uuid:blob_id>/", views.blob_serve, name="blob_serve"),
     path("<int:pk>/", views.document_detail, name="detail"),

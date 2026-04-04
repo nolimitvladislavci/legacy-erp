@@ -249,6 +249,7 @@ class ArhivaEntry(models.Model):
         ('otkupni_blok',  _('Otkupni blok')),
         ('cmr',           _('CMR')),
         ('pos_receipt',   _('POS račun')),
+        ('email_in',      _('Ulazni email (URA auto-import)')),
     ]
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE, verbose_name=_('Tvrtka'))
@@ -283,6 +284,12 @@ class ArhivaEntry(models.Model):
     # Integritet i zaštita
     integrity_hash = models.CharField(max_length=64, blank=True, db_index=True, verbose_name=_('Integritet hash'))
     deletion_protected_until = models.DateField(null=True, blank=True, verbose_name=_('Zaštićeno do'))
+
+    # Email Tracking (Sprint 2A)
+    email_sent_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Email poslan'))
+    email_sent_to = models.CharField(max_length=255, blank=True, default='', verbose_name=_('Email primatelj'))
+    email_opened_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Email otvoren'))
+    email_open_count = models.PositiveSmallIntegerField(default=0, verbose_name=_('Broj otvaranja'))
 
     # AI Bookkeeper
     is_booked = models.BooleanField(default=False, verbose_name=_("Proknjiženo"))

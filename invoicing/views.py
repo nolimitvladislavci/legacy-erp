@@ -1551,6 +1551,40 @@ def api_partner_hint(request):
     })
 
 
+def email_tracking_pixel(request, token):
+    """1x1 transparent GIF tracking pixel with HMAC verification."""
+    import hashlib, hmac
+    GIF = bytes.fromhex('47494638396101000100800000ffffff00000021f90400000000002c00000000010001000002024401003b')
+    resp = HttpResponse(GIF, content_type='image/gif')
+    resp['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp['Pragma'] = 'no-cache'
+    resp['Expires'] = '0'
+    try:
+        # Token format: {pk}.{hmac_hex[:16]}
+        parts = token.rsplit('.', 1)
+        if len(parts) != 2:
+            return resp
+        pk_str, sig = parts
+        expected = hmac.new(
+            settings.SECRET_KEY[:32].encode(), pk_str.encode(), hashlib.sha256
+        ).hexdigest()[:16]
+        if not hmac.compare_digest(sig, expected):
+            return resp
+        pk = int(pk_str)
+        from documents.models import ArhivaEntry
+        from django.utils import timezone
+        ArhivaEntry.objects.filter(pk=pk).update(
+            email_opened_at=models.Case(
+                models.When(email_opened_at__isnull=True, then=models.Value(timezone.now())),
+                default=models.F('email_opened_at'),
+            ),
+            email_open_count=models.F('email_open_count') + 1,
+        )
+    except Exception:
+        pass
+    return resp
+
+
 @login_required
 def api_nkd_search(request):
     """

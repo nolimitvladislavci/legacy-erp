@@ -744,6 +744,27 @@ def arhiva_detail_ajax(request, pk):
     except Exception as e:
         result['items_error'] = str(e)
 
+    # Email tracking (Sprint 2A)
+    result['email_sent_at'] = entry.email_sent_at.strftime('%d.%m.%Y %H:%M') if entry.email_sent_at else None
+    result['email_sent_to'] = entry.email_sent_to or ''
+    result['email_opened_at'] = entry.email_opened_at.strftime('%d.%m.%Y %H:%M') if entry.email_opened_at else None
+    result['email_open_count'] = entry.email_open_count or 0
+    result['source_id'] = entry.source_id or ''
+
+    # AI Bookkeeper proposal
+    result['ai_proposal'] = entry.ai_proposal
+    result['is_booked'] = entry.is_booked
+
+    # Deep links (Sprint 2C)
+    if not result['module_url']:
+        sid = (entry.source_id or '').replace('invoice:', '')
+        if entry.source_type == 'invoice_out' and sid:
+            result['module_url'] = f'/invoicing/{sid}/'
+        elif entry.source_type == 'pos_receipt' and sid:
+            result['module_url'] = f'/pos/receipt/{sid}/'
+        elif entry.source_type == 'eracun' and sid:
+            result['module_url'] = f'/einvoice/message/{sid}/'
+
     # Bookmark status
     result['bookmarked'] = ArhivaBookmark.objects.filter(user=request.user, entry=entry).exists()
 
@@ -1251,6 +1272,69 @@ def arhiva_list_json(request):
             'is_booked': e.is_booked,
             'zki': e.zki or '',
             'jir': e.jir or '',
+            'email_sent_at': e.email_sent_at.strftime('%d.%m.%Y %H:%M') if e.email_sent_at else None,
+            'email_opened_at': e.email_opened_at.strftime('%d.%m.%Y %H:%M') if e.email_opened_at else None,
+            'source_id': e.source_id or '',
+            'ai_proposal': bool(e.ai_proposal),
         })
 
     return JsonResponse({'entries': data, 'has_next': has_next, 'page': page})
+
+
+# ════════════════════════════════════════════════════════════
+# AI Bookkeeper — Proknjizi endpoint (Sprint 2C)
+# ════════════════════════════════════════════════════════════
+
+@require_POST
+@login_required
+def arhiva_proknjizi(request, pk):
+    """Proknjiži ArhivaEntry koristeći AI bookkeeper. Podržava dry_run."""
+    from documents.models import ArhivaEntry
+    company = get_user_company(request)
+
+    try:
+        entry = ArhivaEntry.objects.get(pk=pk, company=company)
+    except ArhivaEntry.DoesNotExist:
+        return JsonResponse({'error': 'Zapis nije pronađen'}, status=404)
+
+    if entry.is_booked:
+        return JsonResponse({'error': 'Već proknjiženo'}, status=409)
+
+    # dry_run mode — return proposal without committing
+    import json
+    dry_run = request.POST.get('dry_run', '0') == '1'
+
+    from konto.ai_bookkeeper import process_archive_entry
+
+    if dry_run:
+        # Just generate/return proposal without booking
+        from konto.ai_bookkeeper import propose_booking
+        proposal = propose_booking(entry)
+        return JsonResponse({'ok': True, 'dry_run': True, 'proposal': proposal})
+
+    result = process_archive_entry(pk, auto_commit=True)
+
+    if result.get('status') == 'auto_booked':
+        # Log audit
+        from documents.models import log_arhiva_action, ArhivaAuditLog
+        log_arhiva_action(entry, ArhivaAuditLog.Action.BOOKED, user=request.user, request=request)
+
+        return JsonResponse({
+            'ok': True,
+            'status': 'booked',
+            'journal_entry_id': result.get('journal_entry_id'),
+            'proposal': result.get('proposal'),
+        })
+    elif result.get('status') == 'pending_review':
+        return JsonResponse({
+            'ok': True,
+            'status': 'pending_review',
+            'proposal': result.get('proposal'),
+            'message': 'Pouzdanost preniska za auto-knjiženje. Prijedlog spremljen za pregled.',
+        })
+    elif result.get('status') == 'already_booked':
+        return JsonResponse({'error': 'Već proknjiženo'}, status=409)
+    else:
+        return JsonResponse({
+            'error': f"Knjiženje neuspješno: {result.get('status', 'unknown')}",
+        }, status=400)
