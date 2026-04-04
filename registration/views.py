@@ -1524,3 +1524,94 @@ def send_company_invite(request, company_id):
         'invite_url': invite_url,
         'claim_id': str(claim.id),
     })
+
+
+# ════════════════════════════════════════════════════════════
+# DRON2: Quick Registration — 3 polja, odmah u platformu
+# ════════════════════════════════════════════════════════════
+
+def register_quick(request):
+    """Step 2 (DRON2): Samo ime, email, lozinka. Company = draft placeholder."""
+    if not request.session.get("reg_plan"):
+        return redirect("registration:register_step1")
+
+    if request.method == "POST":
+        import uuid
+        from django.contrib.auth import login
+        from django.db import transaction
+        from accounts.models import UserProfile
+        from companies.models import Company
+
+        first_name = request.POST.get("first_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        password1 = request.POST.get("password1", "")
+        password2 = request.POST.get("password2", "")
+
+        errors = {}
+        if not first_name:
+            errors["first_name"] = "Unesite ime."
+        if not email:
+            errors["email"] = "Email je obavezan."
+        elif User.objects.filter(email=email).exists():
+            errors["email"] = (
+                'Već imate račun. '
+                '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">Prijavite se →</a>'
+            )
+        if len(password1) < 8:
+            errors["password1"] = "Lozinka mora imati min. 8 znakova."
+        if password1 != password2:
+            errors["password2"] = "Lozinke se ne podudaraju."
+
+        if errors:
+            return render(request, "registration/step2_quick.html", {
+                "step": 2, "errors": errors,
+                "first_name": first_name, "email": email,
+            })
+
+        plan_slug = request.session.get("reg_plan", "starter")
+
+        with transaction.atomic():
+            username = email.split("@")[0].replace(".", "_")[:20] + uuid.uuid4().hex[:4]
+            user = User.objects.create_user(
+                username=username, email=email, password=password1,
+                first_name=first_name,
+            )
+            # Draft company — nepotpuna, popunjava se u wizardu
+            draft_oib = f"DRAFT{uuid.uuid4().hex[:5].upper()}"[:11]
+            company = Company.objects.create(
+                name=f"Firma korisnika {first_name}",
+                oib=draft_oib,
+                country="HR",
+                is_draft=True,
+            )
+            UserProfile.objects.create(
+                user=user, company=company, role="company_admin",
+                totp_enabled=False,
+            )
+            # Subscription
+            try:
+                from registration.models import PricingPlan
+                plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
+                if plan:
+                    from companies.models import Subscription
+                    from django.utils import timezone as _tz
+                    from datetime import timedelta
+                    Subscription.objects.create(
+                        company=company, plan=plan,
+                        started_at=_tz.now(),
+                        expires_at=_tz.now() + timedelta(days=plan.trial_days or 14),
+                        is_active=True,
+                    )
+            except Exception:
+                pass
+
+        login(request, user)
+        # Clear registration session
+        for key in list(request.session.keys()):
+            if key.startswith("reg_"):
+                del request.session[key]
+        return redirect("companies:setup_wizard")
+
+    return render(request, "registration/step2_quick.html", {
+        "step": 2, "errors": {},
+    })

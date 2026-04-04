@@ -252,6 +252,8 @@ class Company(models.Model):
     )
 
     # ── Memio.pet / Shelter ──────────────────────────────────────────────────
+    is_draft = models.BooleanField(default=False, verbose_name="Draft (nepotpuna registracija)")
+
     uses_double_entry = models.BooleanField(
         default=False,
         verbose_name='Dvojno knjigovodstvo',

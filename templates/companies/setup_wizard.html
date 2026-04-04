@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Postavljanje profila{% endblock %}
+{% block page_title %}Postavljanje profila{% endblock %}
+{% block extra_css %}
+<style>
+.wiz-progress{height:6px;background:var(--border,#252830);border-radius:3px;margin-bottom:2rem;overflow:hidden}
+.wiz-bar{height:100%;background:var(--gold,#c9a84c);border-radius:3px;transition:width .5s}
+.wiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem}
+.wiz-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:10px;padding:1.25rem;transition:all .2s}
+.wiz-card:hover{border-color:var(--gold,#c9a84c)}
+.wiz-card.done{border-color:var(--green,#10b981);opacity:.85}
+.wiz-card-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+.wiz-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.wiz-icon.pending{background:rgba(201,168,76,.1);color:var(--gold)}
+.wiz-icon.done{background:rgba(16,185,129,.1);color:var(--green)}
+.wiz-title{font-weight:700;font-size:.9rem}
+.wiz-desc{font-size:.78rem;color:var(--muted,#64748b);margin-bottom:.75rem}
+.wiz-btn{display:inline-block;padding:.5rem 1.25rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .15s;min-height:40px;border:none;cursor:pointer;font-family:inherit}
+.wiz-btn-gold{background:var(--gold);color:#0f172a}
+.wiz-btn-gold:hover{background:var(--gold2,#e8c96a)}
+.wiz-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.wiz-btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.wiz-form{margin-top:.75rem}
+.wiz-field{margin-bottom:.75rem}
+.wiz-field label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.25rem}
+.wiz-field input,.wiz-field select{width:100%;background:var(--dark,#111214);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.55rem .75rem;font-size:.85rem;font-family:inherit}
+.wiz-field input:focus,.wiz-field select:focus{outline:none;border-color:var(--gold)}
+.wiz-skip{font-size:.75rem;color:var(--muted);text-decoration:none;margin-left:.5rem}
+.wiz-skip:hover{color:var(--gold)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;margin:0 auto">
+
+<!-- Progress -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+  <span style="font-size:.82rem;color:var(--muted)">Profil {{ completion }}% popunjen</span>
+  {% if completion >= 80 %}<span style="font-size:.78rem;color:var(--green)">Skoro gotovo!</span>{% endif %}
+</div>
+<div class="wiz-progress"><div class="wiz-bar" style="width:{{ completion }}%"></div></div>
+
+<!-- Cards Grid -->
+<div class="wiz-grid">
+
+  <!-- A: Podaci tvrtke -->
+  <div class="wiz-card {% if sections.company %}done{% endif %}">
+    <div class="wiz-card-head">
+      <div class="wiz-icon {% if sections.company %}done{% else %}pending{% endif %}">{% if sections.company %}&#10003;{% else %}&#127970;{% endif %}</div>
+      <div class="wiz-title">Podaci tvrtke</div>
+    </div>
+    <div class="wiz-desc">Naziv, OIB, adresa — potrebno za fakturiranje</div>
+    {% if edit_section == 'company' or not sections.company %}
+    <form method="post" action="{% url 'companies:setup_wizard_company' %}" class="wiz-form">{% csrf_token %}
+      <div class="wiz-field"><label>Naziv tvrtke *</label><input name="name" value="{{ company.name }}" required placeholder="Tvrtka d.o.o."></div>
+      <div class="wiz-field"><label>OIB *</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" required placeholder="12345678901" maxlength="11"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <div class="wiz-field"><label>Grad</label><input name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb"></div>
+        <div class="wiz-field"><label>Poštanski broj</label><input name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000"></div>
+      </div>
+      <div class="wiz-field"><label>Adresa</label><input name="address" value="{{ company.address|default:'' }}" placeholder="Ulica i broj"></div>
+      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči za sada</a>
+    </form>
+    {% else %}
+    <div style="font-size:.82rem;color:var(--green);margin-bottom:.5rem">{{ company.name }} | {{ company.oib }}</div>
+    <a href="{% url 'companies:setup_wizard_company' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    {% endif %}
+  </div>
+
+  <!-- B: Kontakt -->
+  <div class="wiz-card {% if sections.contact %}done{% endif %}">
+    <div class="wiz-card-head">
+      <div class="wiz-icon {% if sections.contact %}done{% else %}pending{% endif %}">{% if sections.contact %}&#10003;{% else %}&#128222;{% endif %}</div>
+      <div class="wiz-title">Kontakt podaci</div>
+    </div>
+    <div class="wiz-desc">Telefon, email za fakture, web stranica</div>
+    {% if edit_section == 'contact' or not sections.contact %}
+    <form method="post" action="{% url 'companies:setup_wizard_contact' %}" class="wiz-form">{% csrf_token %}
+      <div class="wiz-field"><label>Telefon</label><input name="phone" value="{{ company.phone|default:'' }}" placeholder="+385 91 234 5678"></div>
+      <div class="wiz-field"><label>Email za fakture</label><input name="email" type="email" value="{{ company.email|default:'' }}" placeholder="racuni@tvrtka.hr"></div>
+      <div class="wiz-field"><label>Web stranica</label><input name="website" value="{{ company.website|default:'' }}" placeholder="https://tvrtka.hr"></div>
+      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči</a>
+    </form>
+    {% else %}
+    <div style="font-size:.82rem;color:var(--green)">{{ company.phone|default:company.email }}</div>
+    <a href="{% url 'companies:setup_wizard_contact' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    {% endif %}
+  </div>
+
+  <!-- C: Fiskalizacija -->
+  <div class="wiz-card {% if sections.fiscal %}done{% endif %}">
+    <div class="wiz-card-head">
+      <div class="wiz-icon {% if sections.fiscal %}done{% else %}pending{% endif %}">{% if sections.fiscal %}&#10003;{% else %}&#128179;{% endif %}</div>
+      <div class="wiz-title">IBAN + Fiskalizacija</div>
+    </div>
+    <div class="wiz-desc">OIB validacija i bankovni račun za fakture</div>
+    {% if edit_section == 'fiscal' or not sections.fiscal %}
+    <form method="post" action="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-form">{% csrf_token %}
+      <div class="wiz-field"><label>OIB (11 znamenki)</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" placeholder="12345678901" maxlength="11"></div>
+      <div class="wiz-field"><label>IBAN</label><input name="iban" value="{{ company.iban|default:'' }}" placeholder="HR1210010051863000160" maxlength="21"></div>
+      <button type="submit" class="wiz-btn wiz-btn-gold">Spremi</button>
+      <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">Preskoči</a>
+    </form>
+    {% else %}
+    <div style="font-size:.82rem;color:var(--green)">OIB: {{ company.oib }}</div>
+    <a href="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-btn wiz-btn-ghost">Uredi</a>
+    {% endif %}
+  </div>
+
+  <!-- D: Logo (placeholder) -->
+  <div class="wiz-card {% if sections.logo %}done{% endif %}">
+    <div class="wiz-card-head">
+      <div class="wiz-icon pending">&#127912;</div>
+      <div class="wiz-title">Logo i branding</div>
+    </div>
+    <div class="wiz-desc">Logo se pojavljuje na fakturama i dokumentima</div>
+    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">Postavi u postavkama</a>
+  </div>
+
+  <!-- E: Tim -->
+  <div class="wiz-card {% if sections.team %}done{% endif %}">
+    <div class="wiz-card-head">
+      <div class="wiz-icon pending">&#128101;</div>
+      <div class="wiz-title">Pozovi tim</div>
+    </div>
+    <div class="wiz-desc">Dodajte kolege koji će koristiti sustav</div>
+    <a href="{% url 'companies:settings' %}" class="wiz-btn wiz-btn-ghost">Dodaj u postavkama</a>
+  </div>
+
+</div>
+
+<!-- CTA -->
+<div style="text-align:center;margin-top:2rem">
+  <a href="/hr/dashboard/" class="wiz-btn wiz-btn-gold" style="font-size:1rem;padding:.75rem 2rem">
+    {% if completion >= 60 %}Idi na Dashboard →{% else %}Preskoči i idi na Dashboard →{% endif %}
+  </a>
+</div>
+
+</div>
+{% endblock %}

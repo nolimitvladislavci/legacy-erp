@@ -658,3 +658,105 @@ def tc_consent_view(request):
     return render(request, 'companies/tc_consent_document.html', {
         'company': company,
     })
+
+
+# ════════════════════════════════════════════════════════════
+# DRON2: Setup Wizard — async profil completiranje
+# ════════════════════════════════════════════════════════════
+
+@login_required
+def setup_wizard(request):
+    """Setup wizard — 5 sekcija, svaka neovisna."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    sections = {
+        'company': bool(company.name and not company.is_draft),
+        'fiscal': bool(company.oib and len(company.oib) == 11 and not company.oib.startswith('DRAFT')),
+        'contact': bool(company.phone or company.email),
+        'logo': bool(company.logo) if hasattr(company, 'logo') else False,
+        'team': company.users.count() > 1 if hasattr(company, 'users') else False,
+    }
+    completion = int(sum(sections.values()) / max(len(sections), 1) * 100)
+
+    return render(request, 'companies/setup_wizard.html', {
+        'sections': sections,
+        'completion': completion,
+        'company': company,
+        'page_title': 'Postavljanje profila',
+    })
+
+
+@login_required
+def setup_wizard_company(request):
+    """Sekcija A: Podaci tvrtke (naziv, OIB, adresa)."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    if request.method == 'POST':
+        company.name = request.POST.get('name', company.name).strip()
+        oib = request.POST.get('oib', '').strip()
+        if oib and not oib.startswith('DRAFT'):
+            company.oib = oib
+        company.address = request.POST.get('address', '').strip()
+        company.city = request.POST.get('city', '').strip()
+        company.zip_code = request.POST.get('zip_code', '').strip()
+        company.country = request.POST.get('country', 'HR')
+        company.industry = request.POST.get('industry', 'other')
+        company.is_draft = False
+        company.save()
+        messages.success(request, 'Podaci tvrtke spremljeni.')
+        return redirect('companies:setup_wizard')
+
+    return render(request, 'companies/setup_wizard.html', {
+        'edit_section': 'company', 'company': company,
+        'page_title': 'Podaci tvrtke',
+    })
+
+
+@login_required
+def setup_wizard_contact(request):
+    """Sekcija B: Kontakt podaci."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    if request.method == 'POST':
+        company.phone = request.POST.get('phone', '').strip()
+        company.email = request.POST.get('email', '').strip()
+        company.website = request.POST.get('website', '').strip()
+        company.save(update_fields=['phone', 'email', 'website'])
+        messages.success(request, 'Kontakt podaci spremljeni.')
+        return redirect('companies:setup_wizard')
+
+    return render(request, 'companies/setup_wizard.html', {
+        'edit_section': 'contact', 'company': company,
+        'page_title': 'Kontakt',
+    })
+
+
+@login_required
+def setup_wizard_fiscal(request):
+    """Sekcija C: IBAN + Fiskalizacija."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    if request.method == 'POST':
+        oib = request.POST.get('oib', '').strip()
+        if oib and len(oib) >= 9:
+            company.oib = oib
+        iban = request.POST.get('iban', '').strip()
+        if iban:
+            company.iban = iban
+        company.is_draft = False
+        company.save()
+        messages.success(request, 'Fiskalni podaci spremljeni.')
+        return redirect('companies:setup_wizard')
+
+    return render(request, 'companies/setup_wizard.html', {
+        'edit_section': 'fiscal', 'company': company,
+        'page_title': 'Fiskalizacija',
+    })

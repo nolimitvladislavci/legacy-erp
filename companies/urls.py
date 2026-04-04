@@ -14,6 +14,11 @@ urlpatterns = [
     path("new/", views.company_create, name="create"),
     path("<str:pk>/edit/", views.company_edit, name="edit"),
     # Company Settings
+    # Setup Wizard (DRON2)
+    path("setup/", views.setup_wizard, name="setup_wizard"),
+    path("setup/company/", views.setup_wizard_company, name="setup_wizard_company"),
+    path("setup/contact/", views.setup_wizard_contact, name="setup_wizard_contact"),
+    path("setup/fiscal/", views.setup_wizard_fiscal, name="setup_wizard_fiscal"),
     path("settings/", views.company_settings, name="settings"),
     path("settings/employee/create/", views.employee_create, name="employee_create"),
     path("settings/employee/<int:pk>/edit/", views.employee_edit, name="employee_edit"),
