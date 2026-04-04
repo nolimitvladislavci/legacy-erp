@@ -1583,6 +1583,9 @@ def register_quick(request):
                 oib=draft_oib,
                 country="HR",
                 is_draft=True,
+                has_signed_tc_consent=True,
+                tc_consent_version="v1.0-2026",
+                tc_consent_signed_at=__import__("django.utils.timezone", fromlist=["timezone"]).now(),
             )
             UserProfile.objects.create(
                 user=user, company=company, role="company_admin",
