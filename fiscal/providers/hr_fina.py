@@ -158,7 +158,7 @@ class HRFinaProvider(BaseFiscalProvider):
                         "\n                </tns:Porez>"
                     ).format(rate=tax['rate'], base=tax['base'], amount=tax['amount'])
 
-            payment_code = self._payment_code(data.get('payment_method', 'cash'))
+            payment_code = self._payment_code(data.get('payments') or data.get('payment_method', 'cash'))
             operator_oib = data.get('operator_oib', self.config.oib)
 
             ns = "http://www.apis-it.hr/fin/2012/types/f73"
@@ -254,13 +254,28 @@ class HRFinaProvider(BaseFiscalProvider):
             return FiscalResult(success=False, zki=zki, error_message=str(e))
 
     @staticmethod
-    def _payment_code(method):
-        mapping = {
-            'cash': 'G', 'gotovina': 'G',
+    def _payment_code(method_or_list):
+        """
+        FINA NacinPlac: G=Gotovina, K=Kartica, T=Transakcijski, O=Ostalo.
+        Pravilo: ako ima CASH → uvijek G (čl. 9 Zakona o fiskalizaciji).
+        """
+        single = {
+            'cash': 'G', 'gotovina': 'G', 'voucher': 'G',
             'card': 'K', 'kartica': 'K',
-            'transfer': 'T', 'transakcijski': 'T', 'virman': 'T',
+            'transfer': 'T', 'transakcijski': 'T', 'virman': 'T', 'account': 'T',
+            'mobile': 'O', 'revolut': 'O', 'aircash': 'O', 'crypto': 'O',
         }
-        return mapping.get(method.lower(), 'O')
+        if isinstance(method_or_list, list):
+            methods = {str(p.get('method', p) if isinstance(p, dict) else p).lower()
+                       for p in method_or_list}
+            if methods & {'cash', 'gotovina', 'voucher'}:
+                return 'G'
+            if methods <= {'card', 'kartica'}:
+                return 'K'
+            if methods <= {'transfer', 'transakcijski', 'virman', 'account'}:
+                return 'T'
+            return 'O'
+        return single.get(str(method_or_list).lower(), 'O')
 
     @staticmethod
     def _sign_xml(xml_string, cert_path, cert_password):

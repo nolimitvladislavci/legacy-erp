@@ -175,6 +175,42 @@ def close_session(request, session_id):
     except Exception:
         pass
     messages.success(request, f'Session #{session.session_number} closed.')
+
+    # Auto Otpremnica per bon → Propter
+    try:
+        from propter.models import Otpremnica, BillingPeriod
+        from django.utils import timezone as _tz
+
+        period = BillingPeriod.get_or_create_current(company)
+        paid_receipts = session.receipts.filter(status=POSReceipt.Status.PAID)
+        existing_ids = set(
+            Otpremnica.objects.filter(
+                company=company,
+                pos_receipt_id__in=[str(r.pk) for r in paid_receipts],
+            ).values_list('pos_receipt_id', flat=True)
+        )
+        for receipt in paid_receipts:
+            rid = str(receipt.pk)
+            if rid in existing_ids:
+                continue
+            Otpremnica.objects.create(
+                company=company,
+                billing_period=period,
+                pos_receipt_id=rid,
+                source='pos',
+                number=f'OTP-POS/{receipt.receipt_number}',
+                issue_date=receipt.paid_at.date() if receipt.paid_at else _tz.now().date(),
+                recipient_name=receipt.buyer_name or 'Maloprodajni kupac',
+                recipient_oib=receipt.buyer_oib or '',
+                status='issued',
+                total=receipt.total,
+                subtotal=receipt.subtotal,
+                tax_amount=receipt.tax_amount,
+            )
+    except Exception as _oe:
+        import logging
+        logging.getLogger('pos').warning(f'Propter Otpremnica auto: {_oe}')
+
     # POS Pulse — analyze session close
     try:
         from pos.pulse import analyze_session_close

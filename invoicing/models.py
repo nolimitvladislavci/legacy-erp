@@ -104,6 +104,14 @@ class Invoice(models.Model):
     # Dodatno
     note          = models.TextField(blank=True, verbose_name=_('Napomena / Anmerkung'))
     internal_note = models.TextField(blank=True, verbose_name=_('Interna napomena'))
+
+    # R1 polja (POS → Invoice automatski)
+    buyer_name    = models.CharField(max_length=200, blank=True, verbose_name=_('Naziv kupca (R1)'))
+    buyer_oib     = models.CharField(max_length=20, blank=True, verbose_name=_('OIB kupca (R1)'))
+    buyer_address = models.CharField(max_length=255, blank=True, verbose_name=_('Adresa kupca (R1)'))
+    is_r1         = models.BooleanField(default=False, verbose_name=_('R1 račun'))
+    fiscal_jir    = models.CharField(max_length=40, blank=True, verbose_name=_('JIR (fiskalizacija)'))
+    fiscal_zki    = models.CharField(max_length=80, blank=True, verbose_name=_('ZKI (fiskalizacija)'))
     qr_code_base64 = models.TextField(null=True, blank=True)
     status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT', verbose_name=_('Status'))
     storno_of     = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL,

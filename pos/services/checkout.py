@@ -293,6 +293,25 @@ class CheckoutService:
         except (InvalidOperation, ValueError):
             voucher_amount = Decimal('0')
 
+        # SPLIT PAYMENT PARSING
+        raw_payments = payload.get('payments', [])
+        if raw_payments and isinstance(raw_payments, list):
+            split_payments = []
+            for p in raw_payments:
+                m = str(p.get('method', 'CASH')).upper()
+                try:
+                    a = Decimal(str(p.get('amount', 0) or 0))
+                except (InvalidOperation, ValueError):
+                    a = Decimal('0')
+                if a > 0:
+                    split_payments.append({
+                        'method': m,
+                        'amount': a,
+                        'card_ref': str(p.get('card_reference', '') or '')[:100],
+                    })
+        else:
+            split_payments = None  # Legacy mode
+
         # ── 1b. DE 250 EUR KLEINBETRAGSRECHNUNG LIMIT ──
         # §33 UStDV: Bon > 250 EUR bruto MORA imati podatke kupca
         if (company.country in ('DE', 'AT')
@@ -618,7 +637,26 @@ class CheckoutService:
                 raise CheckoutValidationError('VOUCHER_NOT_FOUND', 'Vaucer nije pronaden')
             except Exception as e:
                 raise CheckoutValidationError('VOUCHER_ERROR', 'Greska vaucera: %s' % str(e)[:80])
+        elif split_payments:
+            # SPLIT PAYMENT — multiple methods
+            total = receipt.total
+            sum_in = sum(p['amount'] for p in split_payments)
+            if sum_in < total - Decimal('0.01'):
+                raise CheckoutValidationError(
+                    'SPLIT_UNDERPAID',
+                    f'Suma plaćanja ({sum_in:.2f}) < iznos ({total:.2f})'
+                )
+            non_cash = sum(p['amount'] for p in split_payments if p['method'] != 'CASH')
+            cash_paid = sum(p['amount'] for p in split_payments if p['method'] == 'CASH')
+            change = max(Decimal('0'), cash_paid - (total - non_cash))
+            for p in split_payments:
+                POSPaymentLine.objects.create(
+                    receipt=receipt, method=p['method'], amount=p['amount'],
+                    change_given=change if p['method'] == 'CASH' else Decimal('0'),
+                    card_reference=p.get('card_ref', ''),
+                )
         else:
+            # LEGACY — single payment
             if payment_method != 'CASH':
                 amount_paid = receipt.total
             amount_paid = max(amount_paid, receipt.total)
@@ -646,6 +684,14 @@ class CheckoutService:
         except Exception as e:
             zki, jir, fiscal_error = '', '', str(e)[:100]
 
+        # ── 9b. R1 AUTO INVOICE ──
+        r1_invoice = None
+        if receipt.is_r1 and receipt.buyer_oib:
+            try:
+                r1_invoice = cls._create_r1_invoice(receipt, company, user)
+            except Exception as _ie:
+                logger.warning(f'R1 auto-invoice error: {_ie}')
+
         # ── 10. RESULT ──
         terminal_pk = session.terminal.pk
         result = {
@@ -660,6 +706,8 @@ class CheckoutService:
             'pdf_url': '/pos/receipt/%d/pdf/' % receipt.pk,
             'print_url': '/pos/receipt/%d/pdf/?format=thermal' % receipt.pk,
             'items_count': len(items_data),
+            'r1_invoice_id': str(r1_invoice.pk) if r1_invoice else None,
+            'r1_invoice_number': r1_invoice.number if r1_invoice else None,
             'consumption_tax': str(receipt.consumption_tax_amount) if receipt.consumption_tax_amount else '0',
         }
         if fiscal_error:
