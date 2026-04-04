@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Počnite — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div class="smart-entry-hero">
+
+  {% if pet %}
+  <div class="pet-greeting">
+    <span class="pet-icon">🐾</span>
+    <p>Zdravo! Vaš {{ pet }} čeka na memio.pet</p>
+  </div>
+  {% endif %}
+
+  <div class="se-hero-text">
+    <h1>ERP za male firme.<br><span class="gold">Bez komplikacija.</span></h1>
+    <p class="se-subtitle">Fiskalizacija · Računi · Radni sati · POS · Arhiva</p>
+    <p class="se-price">Od <strong>9 EUR/mj</strong> — prva 2 tjedna besplatno</p>
+  </div>
+
+  <div class="se-email-box" id="emailBox">
+    <div class="se-input-row">
+      <input type="email" id="seEmail" placeholder="vasa@firma.hr"
+             autocomplete="email" inputmode="email"
+             class="se-input {% if error %}se-error{% endif %}" />
+      <button id="seBtn" class="se-btn-gold" onclick="detectEmail()">Počnite →</button>
+    </div>
+    {% if error %}
+    <p class="se-error-msg">{{ error }}</p>
+    {% endif %}
+    <p class="se-micro">Bez kreditne kartice. Bez ugovora.</p>
+  </div>
+
+  <div id="seStatus" class="se-status" style="display:none;"></div>
+
+  <div class="se-proof">
+    <span>✓ 96 firmi</span>
+    <span>✓ HR + DE fiskalizacija</span>
+    <span>✓ AI u svakom modulu</span>
+  </div>
+</div>
+
+<style>
+.smart-entry-hero{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem 1rem;text-align:center}
+.pet-greeting{background:var(--surface-elevated,#1e2024);border:1px solid var(--border,rgba(255,255,255,.08));border-radius:12px;padding:.75rem 1.5rem;font-size:.95rem}
+.se-hero-text h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.15;color:var(--text-primary,#f1f5f9);margin-bottom:.5rem}
+.gold{color:var(--gold,#c9a84c)}
+.se-subtitle{color:var(--text-secondary,#94a3b8);font-size:1.1rem;margin-bottom:.25rem}
+.se-price{color:var(--text-primary,#f1f5f9);font-size:1rem}
+.se-email-box{width:100%;max-width:520px;background:var(--surface,#181a1d);border:1px solid var(--border,rgba(255,255,255,.08));border-radius:16px;padding:2rem;box-shadow:0 4px 24px rgba(0,0,0,.15)}
+.se-input-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+.se-input{flex:1;padding:.875rem 1rem;border:1.5px solid var(--border,rgba(255,255,255,.08));border-radius:10px;background:var(--surface-elevated,#1e2024);color:var(--text-primary,#f1f5f9);font-size:1rem;outline:none;transition:border-color .2s}
+.se-input:focus{border-color:var(--gold,#c9a84c)}
+.se-input.se-error{border-color:#e74c3c}
+.se-error-msg{color:#e74c3c;font-size:.85rem;margin:.5rem 0 0}
+.se-btn-gold{padding:.875rem 1.5rem;background:var(--gold,#c9a84c);color:#000;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-size:1rem;white-space:nowrap;transition:opacity .2s}
+.se-btn-gold:hover{opacity:.88}
+.se-micro{color:var(--text-muted,#888);font-size:.8rem;margin:0}
+.se-status{max-width:520px;width:100%;padding:1rem 1.5rem;border-radius:12px;font-size:.95rem;text-align:center}
+.se-status.success{background:rgba(39,174,96,.15);color:#27ae60;border:1px solid rgba(39,174,96,.3)}
+.se-status.info{background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);border:1px solid rgba(201,168,76,.3)}
+.se-status.error{background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.3)}
+.se-proof{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;color:var(--text-secondary,#94a3b8);font-size:.85rem}
+@media(max-width:480px){.se-input-row{flex-direction:column}.se-btn-gold{width:100%}}
+</style>
+
+<script>
+async function detectEmail(){
+  const email=document.getElementById('seEmail').value.trim();
+  const btn=document.getElementById('seBtn');
+  if(!email||!email.includes('@')){showStatus('Unesite valjanu email adresu.','error');return}
+  btn.disabled=true;btn.textContent='...';
+  try{
+    const res=await fetch('/pocni/provjeri/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({email})});
+    const data=await res.json();
+    if(data.status==='new'){showStatus('Dobrodošli! Preusmjeravamo...','success');setTimeout(()=>{window.location.href=data.redirect},800)}
+    else if(data.status==='existing'){showStatus('Poslali smo vam link na email. Provjerite inbox.','info')}
+    else if(data.status==='rate_limit'){showStatus(data.msg,'error')}
+    else{showStatus(data.msg||'Greška.','error')}
+  }catch(e){showStatus('Greška veze. Pokušajte ponovo.','error')}
+  finally{btn.disabled=false;btn.textContent='Počnite →'}
+}
+function showStatus(msg,type){const el=document.getElementById('seStatus');el.textContent=msg;el.className='se-status '+type;el.style.display='block'}
+function getCookie(n){return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith(n+'='))?.split('=')[1]||''}
+document.getElementById('seEmail').addEventListener('keydown',e=>{if(e.key==='Enter')detectEmail()});
+</script>
+{% endblock %}

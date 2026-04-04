@@ -119,3 +119,18 @@ class ServiceTemplateAdmin(admin.ModelAdmin):
     list_editable = ('default_price', 'is_active')
     search_fields = ('name', 'description')
     ordering      = ('profile_type', 'sort_order', 'name')
+
+from .models import WhiteLabelConfig
+
+@admin.register(WhiteLabelConfig)
+class WhiteLabelConfigAdmin(admin.ModelAdmin):
+    list_display = ('brand_name', 'subdomain', 'fiscal_system', 'is_active', 'created_at')
+    list_filter = ('fiscal_system', 'is_active')
+
+from .models import LicenseToken
+
+@admin.register(LicenseToken)
+class LicenseTokenAdmin(admin.ModelAdmin):
+    list_display = ('white_label', 'status', 'valid_until', 'monthly_amount_eur', 'last_heartbeat')
+    list_filter = ('status',)
+    raw_id_fields = ('white_label',)

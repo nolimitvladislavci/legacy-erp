@@ -52,6 +52,14 @@ def _bypass_login(request, token):
     except Exception as e:
         return HttpResponse(str(e))
 urlpatterns = [
+    # Smart Entry — /pocni/ jedina ulazna točka
+    path('pocni/', __import__('registration.smart_entry', fromlist=['pocni']).pocni, name='smart_entry'),
+    path('pocni/provjeri/', __import__('registration.smart_entry', fromlist=['api_detect_email']).api_detect_email, name='api_detect_email'),
+    path('pocni/magic/<str:token>/', __import__('registration.smart_entry', fromlist=['magic_login']).magic_login, name='magic_login'),
+
+    # Landing 2026 — root homepage
+    path('', __import__('website.views', fromlist=['homepage']).homepage, name='landing_root'),
+
 
     # Claim Your Business — public URLs
     path('firma/preuzmi/<uuid:company_id>/', __import__('registration.views', fromlist=['claim_company_form']).claim_company_form, name='claim_company'),
@@ -110,6 +118,9 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
 
     # Claim Your Business — authenticated
+    # Agent dashboard alias
+    path('moji-klijenti/', __import__('registration.views', fromlist=['agent_dashboard']).agent_dashboard, name='moji_klijenti'),
+
     path('firma/odobri/<uuid:claim_id>/', __import__('registration.views', fromlist=['approve_claim']).approve_claim, name='approve_claim'),
     path('firma/zahtjevi/', __import__('registration.views', fromlist=['pending_claims']).pending_claims, name='pending_claims'),
     path('posrednik/invite/<uuid:company_id>/', __import__('registration.views', fromlist=['send_company_invite']).send_company_invite, name='send_company_invite'),

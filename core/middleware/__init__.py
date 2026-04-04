@@ -636,3 +636,55 @@ class GracefulErrorMiddleware:
     @staticmethod
     def _is_api(request):
         return '/api/' in request.path or request.path.startswith('/_dev/')
+
+
+class WhiteLabelMiddleware:
+    """
+    Detektira WhiteLabel konfiguraciju iz HTTP_HOST.
+    Sprema u request.white_label (None ako nije WL request).
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from companies.models import WhiteLabelConfig
+        from django.core.cache import cache
+
+        host = request.META.get('HTTP_HOST', '').split(':')[0].lower()
+        cache_key = f'wl_config:{host}'
+
+        wl = cache.get(cache_key, '__NOT_SET__')
+        if wl == '__NOT_SET__':
+            wl = WhiteLabelConfig.get_for_request(request)
+            cache.set(cache_key, wl, timeout=3600)
+
+        request.white_label = wl
+        return self.get_response(request)
+
+
+class LicenseCheckMiddleware:
+    """Blokira pristup za suspendirane distributere. GDPR export uvijek dostupan."""
+    BYPASS_PATHS = ('/admin/', '/static/', '/media/', '/pocni/', '/hr/gdpr/',
+                    '/hr/export/', '/mcp/', '/api/')
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        wl = getattr(request, 'white_label', None)
+        if wl:
+            try:
+                token = wl.license_token
+                path = request.path
+                if not any(path.startswith(p) for p in self.BYPASS_PATHS):
+                    if not token.is_usable():
+                        from django.shortcuts import render
+                        return render(request, 'license/suspended.html', {
+                            'wl': wl, 'token': token, 'status': token.status,
+                        }, status=402)
+                    elif token.days_until_expiry() < 7:
+                        request.license_warning = True
+                        request.license_days = token.days_until_expiry()
+            except Exception:
+                pass
+        return self.get_response(request)

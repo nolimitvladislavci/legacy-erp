@@ -10,8 +10,11 @@ from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
 
 
 def homepage(request):
-    """Javna web stranica (viskovic_group_index.html)"""
-    return render(request, "viskovic_group_index.html")
+    """Landing page 2026 — konverzijska stranica za limit-connect.com."""
+    from companies.models import Company
+    return render(request, "website/landing_2026.html", {
+        'firm_count': Company.objects.count(),
+    })
 
 
 def hitna_intervencija(request):

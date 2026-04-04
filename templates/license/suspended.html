@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Licenca istekla — {{ wl.brand_name }}{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem">
+  <div>
+    <div style="font-size:4rem;margin-bottom:1rem">🔒</div>
+    <h1 style="font-size:2rem;font-weight:800;margin-bottom:.75rem">Licenca je istekla</h1>
+    {% if token.status == 'grace' %}
+    <p style="color:var(--text-secondary,#94a3b8);max-width:440px;margin:0 auto 2rem">
+      Vaša licenca je u grace periodu. Pristup prestaje <strong>{{ token.grace_until|date:"d.m.Y." }}</strong>.
+      Obnovite licencu da nastavite rad.
+    </p>
+    {% else %}
+    <p style="color:var(--text-secondary,#94a3b8);max-width:440px;margin:0 auto 2rem">
+      Vaša licenca je suspendirana. Kontaktirajte LIMIT Connect za obnovu.
+    </p>
+    {% endif %}
+    <p style="margin-bottom:.5rem"><strong>Vaši podaci su sigurni.</strong> Export je uvijek dostupan.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
+      <a href="/hr/gdpr/export/" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none">Izvezi podatke</a>
+      <a href="mailto:info@limit-connect.com?subject=Obnova licence {{ wl.brand_name }}"
+         style="border:1px solid var(--border,rgba(255,255,255,.08));color:var(--text-primary,#f1f5f9);padding:.75rem 1.5rem;border-radius:8px;text-decoration:none">Kontaktiraj podršku</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

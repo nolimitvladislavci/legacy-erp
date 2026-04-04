@@ -171,6 +171,8 @@ CHANNEL_LAYERS = {
 MIDDLEWARE = [
     "core.middleware.GracefulErrorMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.WhiteLabelMiddleware",
+    "core.middleware.LicenseCheckMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -217,6 +219,7 @@ TEMPLATES = [{
                 "core.context_processors.company_switcher",
                 "core.context_processors.module_context",
                 "core.context_processors.pending_claims_badge",
+                "core.context_processors.white_label_context",
         ],
     },
 }]

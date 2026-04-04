@@ -1,0 +1,491 @@
+# CC_TASK: LIMIT-CONNECT.COM — Nova Landing Page 2026
+# Datum: 04.04.2026. | Rok: 05.04.2026. | Prioritet: P0
+# BLOKIRA: GTM, konverziju hladnih posjetitelja
+
+PRAVILO: READ models.py PRIJE svakog WRITE.
+PRAVILO: base.html, .env NE DIRAS.
+PRAVILO: Nema inline hardcoded boja — isključivo CSS var() iz global_themes.css
+
+---
+
+## CILJ
+
+Hladni posjetitelj dolazi na limit-connect.com →
+vidi modernu, konverzijsku landing stranicu →
+klikne "Besplatno 14 dana" → ide na /pocni/
+
+Trenutni problem: homepage.html je na DE jeziku, 177 linija, zastario.
+
+---
+
+## KORAK 1: Provjeri
+
+```bash
+cat templates/website/homepage.html | head -30
+grep -n "homepage\|landing\|index" website/views.py | head -10
+grep -n "''" core/urls.py | head -5
+# Koliko statistike možemo vuci iz baze
+python venv/bin/python -c "
+import django, os
+os.environ['DJANGO_SETTINGS_MODULE']='config.settings'
+django.setup()
+from companies.models import Company
+from invoicing.models import Invoice
+print('Firme:', Company.objects.count())
+print('Fakture:', Invoice.objects.count())
+" 2>/dev/null
+```
+
+## KORAK 2: View update
+
+READ: `website/views.py` — pronađi homepage/index view
+
+Ažuriraj (ili kreiraj) homepage view da vuče live statistiku:
+
+```python
+def homepage(request):
+    from companies.models import Company
+    from invoicing.models import Invoice
+    # Provjeri koji model postoji — ne pretpostavljaj
+    context = {
+        'firm_count': Company.objects.filter(is_active=True).count(),
+        # invoice_count: provjeri postoji li Invoice model, inače stavi hardcode 15000
+        'page_title': 'LIMIT Connect — ERP za male firme',
+    }
+    return render(request, 'website/landing_2026.html', context)
+```
+
+## KORAK 3: Template — templates/website/landing_2026.html
+
+STANDALONE (ne extends base.html — landing ima vlastiti <html>).
+Design: Space Grotesk font, dark (#0d0f11) + gold (#c9a84c) + bijela.
+Mobile first. Sve CTA vode na /pocni/.
+
+```html
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIMIT Connect — ERP za male firme | Fiskalizacija | AI</title>
+  <meta name="description" content="Sve što treba vašoj firmi. Fiskalizacija, fakture, POS, radni sati, arhiva. HR + DE. Od 9 EUR/mj.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dark: #0d0f11;
+      --surface: #181a1d;
+      --surface-2: #1e2024;
+      --gold: #c9a84c;
+      --gold-light: #e2c36d;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(255,255,255,.08);
+      --radius: 12px;
+    }
+    body { font-family: 'Space Grotesk', sans-serif; background: var(--dark); color: var(--text); line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(13,15,17,.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo { font-weight: 800; font-size: 1.1rem; color: var(--gold); }
+    .nav-logo span { color: var(--text); }
+    .nav-cta {
+      padding: .6rem 1.25rem;
+      background: var(--gold);
+      color: #000;
+      font-weight: 700;
+      border-radius: 8px;
+      font-size: .9rem;
+      transition: opacity .2s;
+    }
+    .nav-cta:hover { opacity: .88; }
+
+    /* HERO */
+    .hero {
+      min-height: 90vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(201,168,76,.12) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .4rem 1rem;
+      background: rgba(201,168,76,.1);
+      border: 1px solid rgba(201,168,76,.3);
+      border-radius: 99px;
+      font-size: .8rem; color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 .gold { color: var(--gold); }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+    }
+    .hero-cta-row {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 3rem;
+    }
+    .btn-primary {
+      padding: .9rem 2rem;
+      background: var(--gold);
+      color: #000; font-weight: 700; font-size: 1.05rem;
+      border-radius: 10px;
+      transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .88; }
+    .btn-ghost {
+      padding: .9rem 2rem;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted); font-size: 1rem;
+      border-radius: 10px;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--text); }
+    .hero-stats {
+      display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center;
+    }
+    .hero-stat strong { display: block; font-size: 1.75rem; font-weight: 800; color: var(--gold); }
+    .hero-stat span { font-size: .8rem; color: var(--text-muted); }
+
+    /* MODULES GRID */
+    section { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); margin-bottom: .75rem; }
+    .section-title { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; margin-bottom: 1rem; }
+    .section-sub { color: var(--text-muted); max-width: 560px; margin-bottom: 3rem; }
+    .modules-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    .module-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .module-card:hover { border-color: rgba(201,168,76,.4); transform: translateY(-2px); }
+    .module-icon { font-size: 2rem; margin-bottom: .75rem; }
+    .module-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
+    .module-card p { font-size: .88rem; color: var(--text-muted); }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem; align-items: start;
+    }
+    .price-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+    }
+    .price-card.featured {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, var(--surface) 60%);
+    }
+    .price-tag strong { font-size: 2.25rem; font-weight: 800; color: var(--gold); }
+    .price-tag span { color: var(--text-muted); font-size: .9rem; }
+    .price-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .25rem; margin-top: .75rem; }
+    .price-card p { font-size: .85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .price-features { list-style: none; font-size: .88rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .price-features li { padding: .3rem 0; }
+    .price-features li::before { content: "✓ "; color: var(--gold); }
+    .btn-plan {
+      display: block; text-align: center;
+      padding: .75rem; border-radius: 8px;
+      font-weight: 700; font-size: .95rem;
+      background: var(--gold); color: #000;
+      transition: opacity .2s;
+    }
+    .btn-plan:hover { opacity: .88; }
+    .btn-plan.outline {
+      background: transparent; color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-plan.outline:hover { border-color: var(--gold); }
+
+    /* TESTIMONIALS */
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .testimonial {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+    }
+    .testimonial blockquote { font-size: .95rem; color: var(--text-muted); margin-bottom: 1rem; font-style: italic; }
+    .testimonial cite { font-size: .85rem; font-weight: 600; color: var(--gold); }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: .75rem; }
+    details {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    }
+    details summary {
+      cursor: pointer; font-weight: 600; font-size: .95rem;
+      list-style: none; display: flex; justify-content: space-between;
+    }
+    details summary::after { content: "+"; color: var(--gold); transition: transform .2s; }
+    details[open] summary::after { content: "−"; }
+    details p { margin-top: .75rem; color: var(--text-muted); font-size: .9rem; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+      text-align: center; color: var(--text-muted); font-size: .85rem;
+    }
+    footer .footer-logo { font-weight: 800; color: var(--gold); margin-bottom: .5rem; font-size: 1rem; }
+
+    @media (max-width: 640px) {
+      nav { padding: .875rem 1rem; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">LIMIT<span> Connect</span></div>
+  <a href="/pocni/" class="nav-cta">Besplatno 14 dana →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🇭🇷 Made in Croatia · HR + DE fiskalizacija · AI</div>
+  <h1>ERP za male firme.<br><span class="gold">Bez komplikacija.</span></h1>
+  <p class="hero-sub">Fiskalizacija, fakture, POS, radni sati, arhiva — sve na jednom mjestu. Radi odmah. Jeftino.</p>
+  <div class="hero-cta-row">
+    <a href="/pocni/" class="btn-primary">Besplatno 14 dana →</a>
+    <a href="#moduli" class="btn-ghost">Vidi module</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <strong>{{ firm_count }}+</strong>
+      <span>aktivnih firmi</span>
+    </div>
+    <div class="hero-stat">
+      <strong>58</strong>
+      <span>modula</span>
+    </div>
+    <div class="hero-stat">
+      <strong>HR+DE</strong>
+      <span>fiskalizacija</span>
+    </div>
+    <div class="hero-stat">
+      <strong>29 EUR</strong>
+      <span>Pro plan/mj</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODULI -->
+<section id="moduli">
+  <div class="section-label">Sve u jednom</div>
+  <h2 class="section-title">58 modula. Jedan login.</h2>
+  <p class="section-sub">Sve što trebaš — od blagajne do arhive — bez instaliranja ičega.</p>
+  <div class="modules-grid">
+    <div class="module-card">
+      <div class="module-icon">🧾</div>
+      <h3>Fiskalizacija + Računi</h3>
+      <p>HR fiskalizacija (FINA), R1/R2 računi, e-Račun. Radi offline 48h.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🛒</div>
+      <h3>POS Blagajna</h3>
+      <p>Brza blagajna na mobitelu ili tabletu. QR plaćanje, čip skeniranje.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">⏰</div>
+      <h3>Radni sati</h3>
+      <p>Evidencija radnog vremena, prekovremeni, SLA alarmi. Izvještaji u sekundi.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">📁</div>
+      <h3>Digitalna arhiva</h3>
+      <p>Skeniranje, AI proknjižavanje, ZOR usklađenost. E-mail primitak faktura.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🤖</div>
+      <h3>AI asistent</h3>
+      <p>Fenix Inbox, AI proknjižava, detektira anomalije, šalje WhatsApp upozorenja.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🏛️</div>
+      <h3>Udruge + Notariat</h3>
+      <p>DVD, KUD, lovci, pčelari, ribari — dvojno knjiženje, porezni rokovi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="cijene" style="background: var(--surface-2); max-width: 100%; padding: 5rem 1.5rem;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="section-label">Transparentne cijene</div>
+    <h2 class="section-title">Bez skrivenih naknada.</h2>
+    <p class="section-sub">Cijena ne raste s brojem korisnika. Jedna firme, jedan iznos.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tag"><strong>9 EUR</strong><span>/mj</span></div>
+        <h3>Starter</h3>
+        <p>Savršen za obrtnike i OPG.</p>
+        <ul class="price-features">
+          <li>Fiskalizacija + POS</li>
+          <li>R1/R2 računi</li>
+          <li>Digitalna arhiva</li>
+          <li>1 korisnik</li>
+        </ul>
+        <a href="/pocni/?plan=starter" class="btn-plan outline">Počnite gratis</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tag"><strong>29 EUR</strong><span>/mj</span></div>
+        <h3>Professional ⭐</h3>
+        <p>Za tvrtke s timom i klijentima.</p>
+        <ul class="price-features">
+          <li>Sve iz Starter</li>
+          <li>Radni sati + Payroll</li>
+          <li>AI modul (Fenix)</li>
+          <li>5 korisnika</li>
+          <li>WhatsApp upozorenja</li>
+        </ul>
+        <a href="/pocni/?plan=professional" class="btn-plan">Počnite gratis</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tag"><strong>79 EUR</strong><span>/mj</span></div>
+        <h3>Enterprise</h3>
+        <p>Komunalna, udruge, multi-firma.</p>
+        <ul class="price-features">
+          <li>Sve iz Professional</li>
+          <li>Neograničeni korisnici</li>
+          <li>White-label opcija</li>
+          <li>SLA + podrška</li>
+          <li>HR + DE + EU</li>
+        </ul>
+        <a href="/pocni/?plan=enterprise" class="btn-plan outline">Kontaktirajte nas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-label">Što kažu korisnici</div>
+  <h2 class="section-title">Stvarne firme. Stvarni rezultati.</h2>
+  <div class="testimonials-grid">
+    <div class="testimonial">
+      <blockquote>"Prešao sam s Synesis-a. Sve moje fakture su unutra, radim brže nego ikad."</blockquote>
+      <cite>— Kruljac Ivica, OPG Slavonije</cite>
+    </div>
+    <div class="testimonial">
+      <blockquote>"Konačno imam kontrolu nad firmom. AI mi proknjižava fakture dok spavam."</blockquote>
+      <cite>— Marija B., računovodstvo</cite>
+    </div>
+    <div class="testimonial">
+      <blockquote>"HR i DE fiskalizacija u jednom. Za moju firmu u Stuttgartu — savršeno."</blockquote>
+      <cite>— Zlatan I., Viskovic Bau DE</cite>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background: var(--surface-2); max-width:100%; padding:5rem 1.5rem;">
+  <div style="max-width:800px; margin:0 auto;">
+    <div class="section-label">Česta pitanja</div>
+    <h2 class="section-title">Sve što vas zanima.</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Je li fiskalizacija stvarno uključena?</summary>
+        <p>Da. HR fiskalizacija (FINA certifikat) je uključena u sve planove. DE KassenSichV (TSE) dostupna je uz Enterprise plan. Podrška za SI (FURS) i AT (RKSV) dolazi uskoro.</p>
+      </details>
+      <details>
+        <summary>Mogu li uvesti podatke iz Synesis-a?</summary>
+        <p>Da — imamo Synesis import wizard. Partneri, fakture, knjiženja — sve se uveze automatski. Migracija traje manje od dana.</p>
+      </details>
+      <details>
+        <summary>Što ako nemam internet na terenu?</summary>
+        <p>POS radi offline 48 sati. Fiskalizacija se automatski pošalje kad se veza uspostavi — u skladu s hrvatskim zakonom.</p>
+      </details>
+      <details>
+        <summary>Je li sigurno? Gdje su podaci?</summary>
+        <p>Podaci su na Hetzner serverima u EU. GDPR usklađeno. TLS enkripcija, dnevni backup, 7-dnevna rotacija. Konjik d.o.o. je odgovorna strana za obradu podataka.</p>
+      </details>
+      <details>
+        <summary>Mogu li otkazati kada god želim?</summary>
+        <p>Da. Bez ugovora, bez kazne. Otkazujete jednim klikom. Podatke možete izvesti u standardnim formatima (PDF, CSV, XML) u bilo kojem trenutku.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section style="text-align:center; padding:6rem 1.5rem;">
+  <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:800;margin-bottom:1rem;">
+    Počnite danas.<br><span style="color:var(--gold)">14 dana besplatno.</span>
+  </h2>
+  <p style="color:var(--text-muted);margin-bottom:2rem;font-size:1.1rem;">Bez kreditne kartice. Bez ugovora. Otkazujete kada god hoćete.</p>
+  <a href="/pocni/" class="btn-primary" style="font-size:1.15rem;padding:1rem 2.5rem;">Kreirajte račun →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">LIMIT Connect</div>
+  <p>Konjik d.o.o. · Čepin, Hrvatska · <a href="mailto:info@limit-connect.com">info@limit-connect.com</a></p>
+  <p style="margin-top:.5rem;">
+    <a href="/hr/gdpr/" style="color:var(--text-muted);margin:0 .75rem;">GDPR</a>
+    <a href="/hr/tos/" style="color:var(--text-muted);margin:0 .75rem;">Uvjeti</a>
+    <a href="/hr/pricing/" style="color:var(--text-muted);margin:0 .75rem;">Cijene</a>
+  </p>
+  <p style="margin-top:.75rem; font-size:.75rem; color: #4a5568;">© 2026 Konjik d.o.o. Sva prava pridržana.</p>
+</footer>
+
+</body>
+</html>
+```
+
+## KORAK 4: URL update
+
+READ: `core/urls.py` — pronađi gdje se servira homepage (path('') ili path('', ...))
+READ: `website/views.py` — pronađi homepage view
+
+Ažuriraj da shows `landing_2026.html` umjesto starog.
+
+Ako postoji `path('', homepage_view)` — preusmjeri ga na novi template.
+Ako rade template_direktno — zamijeni ime templata.
+
+## KORAK 5: Verifikacija
+
+```bash
+cd /var/www/fina-connect
+python venv/bin/python manage.py check 2>&1 | tail -3
+systemctl restart gunicorn-fina
+curl -s http://localhost:8000/ | grep -c "LIMIT Connect"
+# Očekivano: 2+ (nav + footer)
+curl -s http://localhost:8000/ | grep "firm_count\|{{ " 
+# Mora biti PRAZAN — template je renderen, varijable substituirane
+```
+
+## DONE kriteriji:
+- [ ] / prikazuje novu landing stranicu (ne redirecta na /hr/)
+- [ ] Hero statistika je live iz baze (firm_count)
+- [ ] 6 module kartica prikazane
+- [ ] 3 pricing opcije s linkovima na /pocni/?plan=X
+- [ ] FAQ accordion radi
+- [ ] Mobile: sve čitljivo na 375px
+- [ ] Page title: "LIMIT Connect — ERP za male firme | Fiskalizacija | AI"

@@ -844,3 +844,119 @@ class KomitentEvent(models.Model):
 # NKD kodovi za vatrogasce — dodati u import ako nedostaju
 # 84.25 — Djelatnosti vatrogasnih postrojbi
 # 94.99 — Ostale čl. organizacije (DVD koriste ovaj kod)
+
+
+class WhiteLabelConfig(models.Model):
+    """Distributer branding — jedan per agent/distributer."""
+
+    FISCAL_CHOICES = [
+        ('HR', 'Hrvatska (FINA)'),
+        ('DE', 'Njemačka (KassenSichV)'),
+        ('AT', 'Austrija (RKSV)'),
+        ('SI', 'Slovenija (FURS)'),
+    ]
+
+    owner = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='white_label_config',
+    )
+    brand_name = models.CharField(max_length=80, help_text='Npr. Konjik d.o.o.')
+    subdomain = models.SlugField(max_length=50, unique=True,
+                                  help_text='Npr. konjik → konjik.limit-connect.com')
+    logo_url = models.URLField(blank=True, help_text='URL logotipa')
+    primary_color = models.CharField(max_length=7, default='#c9a84c',
+                                      help_text='Hex boja npr. #3b82f6')
+    tagline = models.CharField(max_length=120, blank=True)
+    fiscal_system = models.CharField(max_length=2, choices=FISCAL_CHOICES, default='HR')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('WhiteLabel konfiguracija')
+        verbose_name_plural = _('WhiteLabel konfiguracije')
+
+    def __str__(self):
+        return f'{self.brand_name} ({self.subdomain})'
+
+    @property
+    def full_domain(self):
+        return f'{self.subdomain}.limit-connect.com'
+
+    @classmethod
+    def get_for_request(cls, request):
+        host = request.META.get('HTTP_HOST', '').split(':')[0].lower()
+        parts = host.split('.')
+        if len(parts) >= 3:
+            subdomain = parts[0]
+            try:
+                return cls.objects.select_related('owner').get(
+                    subdomain=subdomain, is_active=True)
+            except cls.DoesNotExist:
+                pass
+        return None
+
+
+class LicenseToken(models.Model):
+    """Licenca za distributer/WhiteLabel — heartbeat + grace period."""
+    STATUS_CHOICES = [
+        ('active',    'Aktivna'),
+        ('grace',     'Grace period'),
+        ('suspended', 'Suspendirano'),
+        ('cancelled', 'Otkazano'),
+    ]
+
+    white_label = models.OneToOneField(
+        'WhiteLabelConfig',
+        on_delete=models.CASCADE,
+        related_name='license_token',
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    valid_until = models.DateTimeField()
+    grace_until = models.DateTimeField(null=True, blank=True)
+    last_heartbeat = models.DateTimeField(auto_now=True)
+    monthly_amount_eur = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Licencni token')
+        verbose_name_plural = _('Licencni tokeni')
+
+    def __str__(self):
+        return f'{self.white_label.brand_name} — {self.status} (do {self.valid_until.date()})'
+
+    def is_usable(self):
+        from django.utils import timezone
+        now = timezone.now()
+        if self.status == 'active' and now <= self.valid_until:
+            return True
+        if self.status == 'grace' and self.grace_until and now <= self.grace_until:
+            return True
+        return False
+
+    def days_until_expiry(self):
+        from django.utils import timezone
+        delta = self.valid_until - timezone.now()
+        return max(0, delta.days)
+
+    def enter_grace(self):
+        from django.utils import timezone
+        import datetime
+        self.status = 'grace'
+        self.grace_until = timezone.now() + datetime.timedelta(days=7)
+        self.save(update_fields=['status', 'grace_until', 'updated_at'])
+
+    def suspend(self):
+        self.status = 'suspended'
+        self.save(update_fields=['status', 'updated_at'])
+
+    def renew(self, months=1):
+        from django.utils import timezone
+        import datetime
+        base = max(self.valid_until, timezone.now())
+        self.valid_until = base + datetime.timedelta(days=30 * months)
+        self.status = 'active'
+        self.grace_until = None
+        self.save(update_fields=['status', 'valid_until', 'grace_until', 'updated_at'])

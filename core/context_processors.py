@@ -165,3 +165,26 @@ def pending_claims_badge(request):
         return {'pending_claims_count': count}
     except Exception:
         return {'pending_claims_count': 0}
+
+
+def white_label_context(request):
+    """Injektira WL varijable u sve templateove."""
+    wl = getattr(request, 'white_label', None)
+    if wl:
+        return {
+            'WL_ACTIVE': True,
+            'WL_NAME': wl.brand_name,
+            'WL_SUBDOMAIN': wl.subdomain,
+            'WL_LOGO': wl.logo_url or '',
+            'WL_COLOR': wl.primary_color,
+            'WL_TAGLINE': wl.tagline,
+            'WL_FISCAL': wl.fiscal_system,
+        }
+    return {
+        'WL_ACTIVE': False,
+        'WL_NAME': 'LIMIT Connect',
+        'WL_LOGO': '',
+        'WL_COLOR': '#c9a84c',
+        'WL_TAGLINE': '',
+        'WL_FISCAL': 'HR',
+    }

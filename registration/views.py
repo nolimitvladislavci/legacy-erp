@@ -1043,36 +1043,63 @@ def sales_wizard_submit(request):
 
 @login_required
 def agent_dashboard(request):
-    """Agent referral dashboard with QR code and commission stats."""
+    """Agent referral dashboard 10/10 — KPI, QR, ghost firme, komisija."""
     from registration.models import SalesLead
+    from companies.models import Company
     from decimal import Decimal
+    import qrcode, io, base64
 
-    leads = SalesLead.objects.filter(agent=request.user).order_by('-created_at')
+    leads = SalesLead.objects.filter(agent=request.user).select_related('company').order_by('-created_at')
 
-    active = leads.filter(status='active').count()
-    signed = leads.filter(status='signed').count()
-    draft = leads.filter(status='draft').count()
-    total = leads.count()
+    # Ghost firme (Company bez korisnika)
+    ghost_companies = Company.objects.filter(
+        users__isnull=True,
+    ).order_by('name')[:50]
 
-    # Commission calculation
+    # Komisija
     plan_prices = {'micro': 8, 'starter': 18, 'professional': 58, 'enterprise': 158}
-    monthly_revenue = sum(
-        plan_prices.get(l.plan, 0) for l in leads.filter(status='active')
-    )
+    active_leads = leads.filter(status='active')
+    monthly_revenue = sum(plan_prices.get(l.plan, 29) for l in active_leads)
     commission_rate = Decimal('0.15')
     monthly_commission = Decimal(str(monthly_revenue)) * commission_rate
 
-    # Generate unique ref code for this agent
-    ref_code = 'REF-%s' % request.user.username.upper()[:8]
-    wizard_url = request.build_absolute_uri('/hr/register/sales-wizard/?ref=%s' % ref_code)
+    # Ref kod i invite URL
+    ref_code = f'REF-{request.user.username.upper()[:8]}'
+    invite_url = request.build_absolute_uri(f'/pocni/?ref={ref_code}')
 
-    return render(request, 'registration/agent_dashboard.html', {
-        'leads': leads[:20],
-        'active': active, 'signed': signed, 'draft': draft, 'total': total,
+    # QR kod (base64 PNG)
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(invite_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill='black', back_color='white')
+    buffer = io.BytesIO()
+    qr_img.save(buffer, format='PNG')
+    qr_b64 = base64.b64encode(buffer.getvalue()).decode()
+
+    stats = {
+        'total': leads.count(),
+        'active': active_leads.count(),
+        'ghost': ghost_companies.count(),
+        'signed': leads.filter(status='signed').count(),
         'monthly_revenue': monthly_revenue,
-        'monthly_commission': monthly_commission,
+        'monthly_commission': float(monthly_commission),
+        'yearly_commission': float(monthly_commission * 12),
+    }
+
+    bulk_msg = (
+        f"Pozivam vas na LIMIT Connect — ERP za upravljanje poslovanjem. "
+        f"14 dana besplatno: {invite_url}"
+    )
+
+    return render(request, 'registration/agent_dashboard_v2.html', {
+        'leads': leads[:30],
+        'ghost_companies': ghost_companies,
+        'stats': stats,
         'ref_code': ref_code,
-        'wizard_url': wizard_url,
+        'invite_url': invite_url,
+        'qr_b64': qr_b64,
+        'bulk_msg': bulk_msg,
+        'page_title': 'Moji klijenti',
     })
 
 

@@ -2653,6 +2653,70 @@ def cross_company_dashboard(request):
         'pending': Partner.objects.filter(vies_valid__isnull=True, is_vat_registered=True).count(),
     }
 
+    # Aging buckets
+    from django.utils import timezone
+    import datetime
+    now = timezone.now().date()
+    for d in debtors:
+        d['aging_0_30'] = 0
+        d['aging_31_60'] = 0
+        d['aging_61_90'] = 0
+        d['aging_90_plus'] = 0
+
+    aging_data = Invoice.objects.filter(
+        doctype='R',
+        status__in=('SENT', 'DRAFT', 'UNPAID', 'OVERDUE', 'ACCEPTED'),
+    ).exclude(client_oib='').values('client_oib', 'date_issued', 'total')
+
+    oib_aging = {}
+    for inv in aging_data:
+        oib = inv['client_oib'].strip()
+        if not oib or oib not in oib_map:
+            continue
+        days = (now - inv['date_issued']).days if inv['date_issued'] else 0
+        amt = float(inv['total'] or 0)
+        if oib not in oib_aging:
+            oib_aging[oib] = {'a0': 0, 'a31': 0, 'a61': 0, 'a90': 0}
+        if days <= 30:
+            oib_aging[oib]['a0'] += amt
+        elif days <= 60:
+            oib_aging[oib]['a31'] += amt
+        elif days <= 90:
+            oib_aging[oib]['a61'] += amt
+        else:
+            oib_aging[oib]['a90'] += amt
+
+    for d in debtors:
+        ag = oib_aging.get(d['oib'], {})
+        d['aging_0_30'] = ag.get('a0', 0)
+        d['aging_31_60'] = ag.get('a31', 0)
+        d['aging_61_90'] = ag.get('a61', 0)
+        d['aging_90_plus'] = ag.get('a90', 0)
+
+    # CSV export
+    if request.GET.get('export') == 'csv':
+        import csv
+        from django.http import HttpResponse as HR
+        response = HR(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="cross_company_debt.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['OIB', 'Naziv', 'Ukupno EUR', 'Br. faktura', 'Br. firmi', '0-30d', '31-60d', '61-90d', '90d+', 'Firme'])
+        for d in debtors:
+            writer.writerow([d['oib'], d['name'], f"{d['total_debt']:.2f}", d['invoice_count'],
+                             d['company_count'], f"{d['aging_0_30']:.2f}", f"{d['aging_31_60']:.2f}",
+                             f"{d['aging_61_90']:.2f}", f"{d['aging_90_plus']:.2f}",
+                             ' | '.join(d['companies'])])
+        return response
+
+    # Filter by min debt
+    min_debt = float(request.GET.get('min_debt', 0))
+    if min_debt > 0:
+        debtors = [d for d in debtors if d['total_debt'] >= min_debt]
+
+    # Filter multi-company only
+    if request.GET.get('multi_only'):
+        debtors = [d for d in debtors if d['company_count'] > 1]
+
     return render(request, 'superadmin/cross_company_dashboard.html', {
         'debtors': debtors[:200],
         'total_outstanding': total_outstanding,
@@ -2660,6 +2724,8 @@ def cross_company_dashboard(request):
         'multi_company': multi_company[:50],
         'multi_company_count': len(multi_company),
         'vies_stats': vies_stats,
+        'min_debt': min_debt,
+        'multi_only': request.GET.get('multi_only', ''),
     })
 
 
