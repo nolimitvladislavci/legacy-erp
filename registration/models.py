@@ -500,6 +500,7 @@ class SalesLead(models.Model):
     notes = models.TextField(blank=True)
     ref_code = models.CharField(max_length=50, blank=True, verbose_name='Referral kod')
     commission_percent = models.DecimalField(max_digits=5, decimal_places=2, default=15, verbose_name='Provizija %')
+    is_disability_ambassador = models.BooleanField(default=False, verbose_name='NO LIMIT Ambasador')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
