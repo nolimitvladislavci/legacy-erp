@@ -58,3 +58,15 @@ class ProblemReportAdmin(admin.ModelAdmin):
     def mark_resolved(self, request, queryset):
         queryset.update(resolved=True)
     mark_resolved.short_description = "Oznaci kao rijeseno"
+
+
+from smart_import.models import FenixInboxItem
+
+@admin.register(FenixInboxItem)
+class FenixInboxItemAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'izvor', 'tip', 'partner_naziv', 'iznos', 'valuta', 'status', 'usmjereno_na')
+    list_filter = ('izvor', 'tip', 'status')
+    search_fields = ('partner_naziv', 'doc_broj', 'ai_summary')
+    readonly_fields = ('created_at', 'updated_at', 'ai_summary', 'ai_prijedlog', 'ai_tip_confidence')
+    date_hierarchy = 'created_at'
+    list_per_page = 50

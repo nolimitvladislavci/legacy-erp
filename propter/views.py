@@ -512,3 +512,94 @@ def propter_soba(request):
         "eko": eko,
         "page_title": "Propter Soba",
     })
+
+
+# ════════════════════════════════════════════════════════════
+# Fenix Inbox — Centralni dokumentni router (Sprint Fenix)
+# ════════════════════════════════════════════════════════════
+
+@login_required
+def fenix_inbox(request):
+    company = _company(request)
+    if not company:
+        from django.contrib import messages as _msg
+        _msg.error(request, 'Nema tvrtke.')
+        return redirect('/dashboard/')
+
+    from smart_import.models import FenixInboxItem
+    from django.core.paginator import Paginator
+    from django.db.models import Sum
+
+    status_f = request.GET.get('status', '')
+    tip_f = request.GET.get('tip', '')
+    izvor_f = request.GET.get('izvor', '')
+
+    qs = FenixInboxItem.objects.filter(company=company).order_by('-created_at')
+    if status_f:
+        qs = qs.filter(status=status_f)
+    if tip_f:
+        qs = qs.filter(tip=tip_f)
+    if izvor_f:
+        qs = qs.filter(izvor=izvor_f)
+
+    ukupno = FenixInboxItem.objects.filter(company=company).count()
+    ceka = FenixInboxItem.objects.filter(company=company, status__in=['ceka', 'novo']).count()
+    arhiv = FenixInboxItem.objects.filter(company=company, status='arhivirano').count()
+    ura_eur = (FenixInboxItem.objects.filter(company=company, tip='ura', iznos__isnull=False)
+               .aggregate(s=Sum('iznos'))['s'] or 0)
+
+    paginator = Paginator(qs, 25)
+    page = paginator.get_page(request.GET.get('page', 1))
+
+    return render(request, 'propter/inbox.html', {
+        'items': page, 'ukupno': ukupno, 'ceka': ceka,
+        'arhiv': arhiv, 'ura_eur': ura_eur,
+        'status_filter': status_f, 'tip_filter': tip_f, 'izvor_filter': izvor_f,
+        'status_choices': FenixInboxItem.STATUS_CHOICES,
+        'tip_choices': FenixInboxItem.TIP_CHOICES,
+        'izvor_choices': FenixInboxItem.IZVOR_CHOICES,
+        'page_title': 'Fenix Inbox',
+    })
+
+
+@login_required
+def fenix_inbox_action(request, item_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+    company = _company(request)
+    from smart_import.models import FenixInboxItem
+    try:
+        item = FenixInboxItem.objects.get(pk=item_id, company=company)
+    except FenixInboxItem.DoesNotExist:
+        return JsonResponse({'error': 'Nije pronadjeno'}, status=404)
+
+    action = request.POST.get('action', '')
+
+    if action == 'arhiviraj':
+        item.status = 'arhivirano'
+        item.obradjeno_by = request.user
+        item.save(update_fields=['status', 'obradjeno_by', 'updated_at'])
+        return JsonResponse({'ok': True})
+
+    if action == 'set_tip':
+        novi = request.POST.get('tip', '')
+        valid_tips = [c[0] for c in FenixInboxItem.TIP_CHOICES]
+        if novi in valid_tips:
+            item.tip = novi
+            item.status = 'ceka'
+            item.obradjeno_by = request.user
+            item.save(update_fields=['tip', 'status', 'obradjeno_by', 'updated_at'])
+            return JsonResponse({'ok': True, 'tip': novi})
+
+    if action == 'usmjeri':
+        dest = request.POST.get('odrediste', '')
+        if dest in ('inventory', 'konto', 'arhiva', 'propter'):
+            from django.utils import timezone as tz
+            item.status = 'usmjereno'
+            item.usmjereno_na = dest
+            item.usmjereno_at = tz.now()
+            item.obradjeno_by = request.user
+            item.save(update_fields=['status', 'usmjereno_na', 'usmjereno_at', 'obradjeno_by', 'updated_at'])
+            return JsonResponse({'ok': True})
+
+    return JsonResponse({'error': 'Nepoznata akcija'}, status=400)

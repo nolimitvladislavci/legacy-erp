@@ -650,3 +650,103 @@ def process_staging_batch(self, staging_batch_id):
 
     logger.info('Staging batch %s done: %d/%d ok', staging_batch_id, ok, staging.total_files)
     return 'Done: {}/{}'.format(ok, staging.total_files)
+
+
+# ════════════════════════════════════════════════════════════
+# Fenix Inbox — Haiku Classifier + Batch Digest
+# ════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, name='smart_import.classify_inbox_item', max_retries=2)
+def classify_inbox_item(self, item_id):
+    """AI klasifikacija dokumenta koristeci Claude Haiku."""
+    from smart_import.models import FenixInboxItem
+    try:
+        item = FenixInboxItem.objects.get(pk=item_id)
+    except FenixInboxItem.DoesNotExist:
+        return
+    if item.status == 'arhivirano':
+        return
+
+    item.status = 'klasificira'
+    item.save(update_fields=['status'])
+
+    ctx = ' '.join(filter(None, [
+        item.partner_naziv, item.doc_broj,
+        str(item.iznos or ''), item.ai_summary,
+    ]))
+    if not ctx.strip():
+        item.status = 'ceka'
+        item.tip = 'nepoznato'
+        item.save(update_fields=['status', 'tip'])
+        return
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        msg = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=10,
+            messages=[{'role': 'user', 'content': (
+                'Klasificiraj dokument u jednu kategoriju: ura ira interna nepoznato\n'
+                'ura=ulazni racun primamo od dobavljaca\n'
+                'ira=izlazni racun saljemo klijentu\n'
+                'interna=otpremnica primka CMR interni\n'
+                'nepoznato=sve ostalo\n'
+                f'Podaci: {ctx}\n'
+                'Odgovori SAMO jednom od: ura ira interna nepoznato'
+            )}]
+        )
+        tip_raw = msg.content[0].text.strip().lower()
+        tip = tip_raw if tip_raw in {'ura', 'ira', 'interna', 'nepoznato'} else 'nepoznato'
+        item.tip = tip
+        item.ai_tip_confidence = 0.9 if tip != 'nepoznato' else 0.4
+        item.status = 'ceka' if tip in ('ura', 'nepoznato') else 'arhivirano'
+        item.save(update_fields=['tip', 'ai_tip_confidence', 'status'])
+    except Exception as exc:
+        logger.error('classify_inbox_item %s: %s', item_id, exc)
+        item.status = 'ceka'
+        item.tip = 'nepoznato'
+        item.save(update_fields=['status', 'tip'])
+
+
+@shared_task(name='smart_import.fenix_inbox_digest')
+def fenix_inbox_digest():
+    """Batch WhatsApp digest — N URA = 1 poruka, ne spam."""
+    from smart_import.models import FenixInboxItem
+    from django.utils import timezone
+    import os
+
+    marija = os.environ.get('MARIJA_WHATSAPP', '')
+    if not marija:
+        logger.info('fenix_inbox_digest: MARIJA_WHATSAPP nije u .env')
+        return
+
+    since = timezone.now() - timezone.timedelta(minutes=30)
+    nove = list(
+        FenixInboxItem.objects
+        .filter(status__in=['ceka', 'novo'], created_at__gte=since)
+        .select_related('company')
+    )
+    if not nove:
+        return
+
+    by_company = {}
+    for item in nove:
+        k = item.company.name
+        by_company.setdefault(k, []).append(item)
+
+    for co_name, items in by_company.items():
+        ura_n = sum(1 for i in items if i.tip == 'ura')
+        unk_n = sum(1 for i in items if i.tip in ('nepoznato', ''))
+        eur = sum(float(i.iznos or 0) for i in items)
+        lines = [f'FENIX INBOX - {co_name}']
+        if ura_n:
+            lines.append(f'{ura_n} nova URA (~{eur:.0f} EUR)')
+        if unk_n:
+            lines.append(f'{unk_n} nepoznatih - provjeri')
+        lines.append('limit-connect.com/propter/inbox/')
+        try:
+            from core.whatsapp import send_whatsapp
+            send_whatsapp(marija, '\n'.join(lines))
+        except Exception as wa_e:
+            logger.warning('fenix_inbox_digest WA: %s', wa_e)

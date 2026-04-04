@@ -40,4 +40,7 @@ urlpatterns = [
     # API (za Synesis + vanjski pozivi)
     path("api/otpremnica/", views.api_create_otpremnica, name="api_create_otpremnica"),
     path("api/period/status/<int:pk>/", views.api_period_status, name="api_period_status"),
+    # Fenix Inbox
+    path("inbox/", views.fenix_inbox, name="fenix_inbox"),
+    path("inbox/<int:item_id>/action/", views.fenix_inbox_action, name="fenix_inbox_action"),
 ]

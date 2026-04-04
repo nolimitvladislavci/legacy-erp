@@ -386,3 +386,86 @@ class StagingFileHeader(models.Model):
             return p
         except Partner.DoesNotExist:
             return None
+
+
+# ════════════════════════════════════════════════════════════
+# FenixInboxItem — Centralni dokumentni router
+# ════════════════════════════════════════════════════════════
+
+class FenixInboxItem(models.Model):
+    """Svaki dokument koji uđe u sustav prolazi kroz Fenix Inbox."""
+    TIP_CHOICES = [
+        ('ura', 'Ulazni račun URA'),
+        ('ira', 'Izlazni račun IRA'),
+        ('interna', 'Interna isprava'),
+        ('nepoznato', 'Nepoznato - pregled'),
+    ]
+    IZVOR_CHOICES = [
+        ('email', 'Email import'),
+        ('scan', 'FenixScan upload'),
+        ('upload', 'Ručni upload'),
+        ('pos', 'POS bon auto'),
+        ('invoice', 'Račun auto'),
+        ('staging', 'Staging batch'),
+    ]
+    STATUS_CHOICES = [
+        ('novo', 'Novo'),
+        ('klasificira', 'AI klasificira'),
+        ('ceka', 'Čeka Mariju'),
+        ('usmjereno', 'Usmjereno'),
+        ('arhivirano', 'Arhivirano'),
+        ('greska', 'Greška'),
+    ]
+
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                related_name='fenix_inbox', verbose_name='Tvrtka')
+    objects = CompanyManager()
+    izvor = models.CharField(max_length=20, choices=IZVOR_CHOICES)
+    tip = models.CharField(max_length=20, choices=TIP_CHOICES, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='novo')
+
+    arhiva_entry_id = models.IntegerField(null=True, blank=True)
+    staging_file_id = models.IntegerField(null=True, blank=True)
+    import_batch_id = models.IntegerField(null=True, blank=True)
+    invoice_id = models.IntegerField(null=True, blank=True)
+    pos_receipt_id = models.IntegerField(null=True, blank=True)
+
+    doc_broj = models.CharField(max_length=200, blank=True)
+    partner_naziv = models.CharField(max_length=200, blank=True)
+    iznos = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    valuta = models.CharField(max_length=5, default='EUR', blank=True)
+    datum_dokumenta = models.DateField(null=True, blank=True)
+
+    ai_tip_confidence = models.FloatField(default=0.0)
+    ai_summary = models.TextField(blank=True)
+    ai_prijedlog = models.JSONField(null=True, blank=True)
+
+    usmjereno_na = models.CharField(max_length=50, blank=True,
+                                     help_text='inventory / konto / arhiva / propter')
+    usmjereno_at = models.DateTimeField(null=True, blank=True)
+    obradjeno_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
+                                      null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Fenix Inbox stavka'
+        verbose_name_plural = 'Fenix Inbox'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['company', 'status'], name='fenix_inbox_co_status_idx'),
+            models.Index(fields=['company', 'created_at'], name='fenix_inbox_co_date_idx'),
+        ]
+
+    def __str__(self):
+        return f"[{self.izvor}] {self.partner_naziv or 'Nepoznato'} {self.iznos or ''}"
+
+    @property
+    def izvor_url(self):
+        if self.invoice_id:
+            return f'/invoicing/{self.invoice_id}/'
+        if self.pos_receipt_id:
+            return f'/pos/receipt/{self.pos_receipt_id}/'
+        if self.arhiva_entry_id:
+            return f'/documents/arhiva/?entry={self.arhiva_entry_id}'
+        return ''

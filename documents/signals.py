@@ -75,6 +75,26 @@ def _archive_invoice_inner(instance):
         except Exception as pdf_err:
             logger.warning('PDF arhiva greska za Invoice %s: %s', instance.pk, pdf_err)
 
+
+        # ── Fenix Inbox infusion (Sprint Fenix) ──
+        try:
+            from smart_import.models import FenixInboxItem
+            _tip_dok = 'ura' if getattr(instance, 'doctype', '') == 'URA' else 'ira'
+            FenixInboxItem.objects.create(
+                company=instance.company,
+                izvor='invoice', tip=_tip_dok, status='arhivirano',
+                invoice_id=instance.pk,
+                arhiva_entry_id=entry.pk if entry and entry.pk else None,
+                doc_broj=instance.number or '',
+                partner_naziv=(getattr(instance, 'client_name', '') or '')[:200],
+                iznos=instance.total,
+                valuta=getattr(instance, 'currency', 'EUR') or 'EUR',
+                ai_tip_confidence=1.0,
+                ai_summary=f'Auto: {instance.number}',
+            )
+        except Exception as _fie:
+            logger.warning('FenixInbox invoice signal: %s', _fie)
+
         _trigger_ai_proposal(entry)
 
     except Exception as e:
@@ -164,6 +184,26 @@ def _archive_pos_receipt_inner(instance):
         else:
             entry = ArhivaEntry(source_type=source_type, source_id=source_id, **vals)
             entry.save()
+
+        # ── Fenix Inbox POS infusion ──
+        try:
+            from smart_import.models import FenixInboxItem
+            _pos_co = instance.session.terminal.company if hasattr(instance, 'session') else None
+            if _pos_co:
+                FenixInboxItem.objects.create(
+                    company=_pos_co,
+                    izvor='pos', tip='ira', status='arhivirano',
+                    pos_receipt_id=instance.pk,
+                    arhiva_entry_id=entry.pk if entry and entry.pk else None,
+                    doc_broj=f'BON-{instance.receipt_number}',
+                    partner_naziv=(getattr(instance, 'buyer_name', '') or 'Gotovinski kupac')[:200],
+                    iznos=instance.total, valuta='EUR',
+                    ai_tip_confidence=1.0,
+                    ai_summary=f'POS bon #{instance.receipt_number}',
+                )
+        except Exception as _fpe:
+            logger.warning('FenixInbox pos signal: %s', _fpe)
+
     except Exception as e:
         logger.error('ArhivaEntry signal failed for POSReceipt %s: %s', instance.pk, e)
 

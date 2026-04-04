@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Fenix Inbox{% endblock %}
+{% block page_title %}Fenix Inbox{% endblock %}
+{% block extra_css %}
+<style>
+.inbox-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem}
+.inbox-stat{background:var(--card,#1e293b);border:1px solid var(--border,#334155);border-radius:10px;padding:1.25rem;text-align:center}
+.inbox-stat .val{font-size:2rem;font-weight:800;line-height:1}
+.inbox-stat .lbl{font-size:.72rem;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.5px;margin-top:.3rem}
+.inbox-filter{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.inbox-filter select,.inbox-filter button,.inbox-filter a{font-size:.8rem;padding:.4rem .8rem;border-radius:6px;font-family:inherit}
+.inbox-filter select{background:var(--card,#1e293b);border:1px solid var(--border);color:var(--text);appearance:auto}
+.inbox-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.inbox-tbl th{padding:.6rem .8rem;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border)}
+.inbox-tbl td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.inbox-tbl tr:hover td{background:rgba(255,255,255,.02)}
+.bi{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.72rem;font-weight:600}
+.bi-email{background:rgba(33,150,243,.15);color:#2196f3}
+.bi-pos{background:rgba(76,175,125,.15);color:#4caf7d}
+.bi-invoice{background:rgba(100,100,100,.15);color:#888}
+.bi-staging{background:rgba(156,39,176,.15);color:#9c27b0}
+.bi-scan{background:rgba(201,168,76,.15);color:#c9a84c}
+.bi-upload{background:rgba(255,255,255,.08);color:#aaa}
+.bi-ura{background:rgba(255,152,0,.15);color:#ff9800}
+.bi-ira{background:rgba(76,175,125,.15);color:#4caf7d}
+.bi-interna{background:rgba(100,116,139,.15);color:#94a3b8}
+.bi-nepoznato{background:rgba(244,67,54,.15);color:#f44336}
+.bi-ceka{background:rgba(255,193,7,.15);color:#ffc107;border:1px solid rgba(202,138,4,.3)}
+.bi-arhivirano{background:rgba(76,175,125,.1);color:#4caf7d}
+.bi-novo{background:rgba(33,150,243,.1);color:#2196f3}
+.bi-usmjereno{background:rgba(156,39,176,.1);color:#9c27b0}
+.bi-klasificira{background:rgba(201,168,76,.1);color:#c9a84c}
+.bi-greska{background:rgba(244,67,54,.1);color:#f44336}
+.inbox-actions{display:flex;gap:.3rem;flex-wrap:wrap}
+.inbox-actions button,.inbox-actions a{font-size:.7rem;padding:.25rem .5rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;text-decoration:none;font-weight:600;font-family:inherit;min-height:32px;display:inline-flex;align-items:center}
+.inbox-actions button:hover,.inbox-actions a:hover{border-color:var(--gold,#c9a84c);color:var(--gold)}
+.inbox-amt{color:var(--gold,#c9a84c);font-weight:700;font-size:.78rem}
+.inbox-pag{display:flex;gap:.5rem;justify-content:center;margin-top:1rem}
+.inbox-pag a,.inbox-pag span{padding:.4rem .8rem;border-radius:4px;font-size:.8rem;text-decoration:none;border:1px solid var(--border);color:var(--muted)}
+.inbox-pag a:hover{border-color:var(--gold);color:var(--gold)}
+.inbox-pag .current{background:var(--gold);color:#0f172a;border-color:var(--gold);font-weight:700}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="inbox-grid">
+  <div class="inbox-stat" style="border-left:3px solid #c9a84c"><div class="val" style="color:#c9a84c">{{ ceka }}</div><div class="lbl">Čeka Mariju</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #3b82f6"><div class="val" style="color:#3b82f6">{{ ukupno }}</div><div class="lbl">Svi dokumenti</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #22c55e"><div class="val" style="color:#22c55e">{{ arhiv }}</div><div class="lbl">Obrađeno</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #ff9800"><div class="val" style="color:#ff9800">{{ ura_eur|floatformat:2 }} €</div><div class="lbl">URA ulaznih</div></div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="inbox-filter">
+  <select name="status"><option value="">Svi statusi</option>{% for val, lbl in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}</select>
+  <select name="tip"><option value="">Svi tipovi</option>{% for val, lbl in tip_choices %}<option value="{{ val }}" {% if tip_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}</select>
+  <select name="izvor"><option value="">Svi izvori</option>{% for val, lbl in izvor_choices %}<option value="{{ val }}" {% if izvor_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}</select>
+  <button type="submit" class="btn btn-gold btn-sm">Filtriraj</button>
+  <a href="{% url 'propter:fenix_inbox' %}" style="color:var(--muted);font-size:.78rem">Resetiraj</a>
+</form>
+
+<!-- Table -->
+<div class="stat-card fenix-card" style="padding:0;overflow-x:auto">
+<table class="inbox-tbl">
+  <thead><tr><th>Datum</th><th>Izvor</th><th>Tip</th><th>Partner / Iznos</th><th>Status</th><th>Akcije</th></tr></thead>
+  <tbody>
+  {% for item in items %}
+  <tr>
+    <td style="white-space:nowrap;font-size:.78rem;color:var(--muted)">{{ item.created_at|date:"d.m.Y H:i" }}</td>
+    <td><span class="bi bi-{{ item.izvor }}">{{ item.get_izvor_display }}</span></td>
+    <td>
+      <span class="bi bi-{{ item.tip }}">{{ item.get_tip_display }}</span>
+      {% if item.ai_tip_confidence > 0 %}<small style="color:var(--muted);margin-left:2px">({{ item.ai_tip_confidence|floatformat:0 }}%)</small>{% endif %}
+    </td>
+    <td>
+      <div>{{ item.partner_naziv|default:"-" }}</div>
+      {% if item.iznos %}<div class="inbox-amt">{{ item.iznos|floatformat:2 }} {{ item.valuta }}</div>{% endif %}
+      {% if item.doc_broj %}<div style="font-size:.7rem;color:var(--muted)">{{ item.doc_broj }}</div>{% endif %}
+    </td>
+    <td><span class="bi bi-{{ item.status }}">{{ item.get_status_display }}</span></td>
+    <td>
+      <div class="inbox-actions">
+        {% if item.status != 'arhivirano' %}
+        <button onclick="inboxAction({{ item.pk }},'arhiviraj')" title="Arhiviraj">✓</button>
+        <button onclick="inboxAction({{ item.pk }},'set_tip','ura')" title="Označi URA">URA</button>
+        <button onclick="inboxAction({{ item.pk }},'set_tip','ira')" title="Označi IRA">IRA</button>
+        {% endif %}
+        {% if item.izvor_url %}<a href="{{ item.izvor_url }}" target="_blank" title="Otvori dokument">↗</a>{% endif %}
+      </div>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--muted)">
+    Fenix Inbox je prazan. Dokumenti se automatski pojavljuju kad stignu.
+  </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<!-- Pagination -->
+{% if items.has_other_pages %}
+<div class="inbox-pag">
+  {% if items.has_previous %}<a href="?page={{ items.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tip_filter %}&tip={{ tip_filter }}{% endif %}{% if izvor_filter %}&izvor={{ izvor_filter }}{% endif %}">‹</a>{% endif %}
+  {% for num in items.paginator.page_range %}
+    {% if items.number == num %}<span class="current">{{ num }}</span>
+    {% elif num > items.number|add:"-3" and num < items.number|add:"3" %}<a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tip_filter %}&tip={{ tip_filter }}{% endif %}{% if izvor_filter %}&izvor={{ izvor_filter }}{% endif %}">{{ num }}</a>{% endif %}
+  {% endfor %}
+  {% if items.has_next %}<a href="?page={{ items.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tip_filter %}&tip={{ tip_filter }}{% endif %}{% if izvor_filter %}&izvor={{ izvor_filter }}{% endif %}">›</a>{% endif %}
+</div>
+{% endif %}
+
+<script>
+function inboxAction(id, action, extra) {
+    var fd = new FormData();
+    fd.append('action', action);
+    if (extra) fd.append('tip', extra);
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrf) csrf = {value: (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||''};
+    fetch('/propter/inbox/' + id + '/action/', {
+        method: 'POST', body: fd,
+        headers: {'X-CSRFToken': csrf.value}
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.ok) location.reload(); else alert(d.error || 'Greška');
+    }).catch(function(e){ alert('Mrežna greška'); });
+}
+</script>
+{% endblock %}

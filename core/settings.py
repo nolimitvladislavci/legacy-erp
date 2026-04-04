@@ -1138,3 +1138,11 @@ CELERY_BEAT_SCHEDULE.update({
         "options": {"queue": "default"},
     },
 })
+
+# Fenix Inbox digest (Sprint Fenix)
+CELERY_BEAT_SCHEDULE.update({
+    'fenix-inbox-digest': {
+        'task': 'smart_import.fenix_inbox_digest',
+        'schedule': 1800,
+    },
+})
