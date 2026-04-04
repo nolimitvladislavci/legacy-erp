@@ -324,7 +324,13 @@ def register_step1(request):
     source = request.GET.get("source", "")
     if source:
         request.session["reg_source"] = source
-    return render(request, "registration/step1.html", {"step": 1, "plans": plans})
+    pet_name = request.GET.get('pet', '') or request.session.get('memio_pet', '')
+    if pet_name:
+        request.session['memio_pet'] = pet_name
+    source = request.GET.get("source", "") or request.session.get("reg_source", "")
+    return render(request, "registration/step1.html", {
+        "step": 1, "plans": plans, "pet_name": pet_name, "source": source,
+    })
 
 
 def register_step2(request):

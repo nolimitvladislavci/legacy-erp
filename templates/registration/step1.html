@@ -6,12 +6,18 @@
 <div class="step-indicator">
   <div class="step-item"><div class="step-circle active">1</div><div class="step-label active">Plan</div></div>
   <div class="step-line"></div>
-  <div class="step-item"><div class="step-circle">2</div><div class="step-label">{% trans "Tvrtka" %}</div></div>
-  <div class="step-line"></div>
-  <div class="step-item"><div class="step-circle">3</div><div class="step-label">{% trans "Račun" %}</div></div>
-  <div class="step-line"></div>
-  <div class="step-item"><div class="step-circle">4</div><div class="step-label">{% trans "Potvrda" %}</div></div>
+  <div class="step-item"><div class="step-circle">2</div><div class="step-label">{% trans "Postavljanje" %}</div></div>
 </div>
+
+{% if pet_name %}
+<div style="display:flex;align-items:center;gap:16px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:16px 20px;margin-bottom:24px">
+  <span style="font-size:2rem">&#128062;</span>
+  <div>
+    <strong style="color:var(--gold)">{{ pet_name }}</strong> {% trans "zaslužuje digitalni identitet." %}
+    <span style="display:block;font-size:.78rem;color:var(--muted);margin-top:2px">{% trans "Kreiraj profil — besplatno, za 30 sekundi." %}</span>
+  </div>
+</div>
+{% endif %}
 
 <div style="text-align:center;margin-bottom:2rem">
   <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--text);margin-bottom:.5rem">{% trans "Odaberite plan" %}</h1>

@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="hr">
 <head>
@@ -8,12 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_themes.css' %}">
+<link rel="stylesheet" href="{% static 'css/fenix-ui.css' %}">
+<script>(function(){var t=localStorage.getItem('fina-theme');if(t)document.documentElement.setAttribute('data-theme',t);})()</script>
 <style>
-  :root {
-    --black: #0a0a0a; --dark: #111111; --card: #1a1a1a; --border: #2a2a2a;
-    --gold: #c9a84c; --gold-light: #e8c96a; --text: #e8e8e8; --muted: #888;
-    --error: #e05c5c; --success: #4caf7d;
-  }
+  /* Design tokens from global_themes.css — aliases for compat */
+  :root { --gold-light: var(--gold2, #e8c96a); --error: var(--red, #e05c5c); --success: var(--green, #4caf7d); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
   .reg-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -63,14 +65,18 @@
 </head>
 <body>
 <header class="reg-header">
-  <a href="{% url 'dashboard' %}" class="reg-logo">{% trans "FINA" %}<span>{% trans "-Connect" %}</span></a>
+  <a href="{% url 'dashboard' %}" class="reg-logo">LIMIT<span> Connect</span></a>
   <div style="display:flex;align-items:center;gap:12px">
     <div style="display:flex;gap:4px">
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'hr' %}active{% endif %}" onclick="switchLang('hr')" title="Hrvatski">🇭🇷 HR</button>
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'de' %}active{% endif %}" onclick="switchLang('de')" title="Deutsch">🇩🇪 DE</button>
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}" onclick="switchLang('en')" title="English">🇬🇧 EN</button>
     </div>
-    <a href="{% url 'dashboard' %}" class="reg-back">{% trans "← Natrag na stranicu" %}</a>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Tamna/Svijetla tema"
+            style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--gold);font-size:.85rem;display:flex;align-items:center">
+      <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+    <a href="{% url 'dashboard' %}" class="reg-back">{% trans "← Natrag" %}</a>
   </div>
 </header>
 <script>
@@ -102,5 +108,27 @@ function switchLang(code) {
   </div>
 {% include "includes/_doc_scan_modal.html" %}
 </main>
+<script src="{% static 'js/fenix-ui.js' %}"></script>
+<script src="{% static 'js/fenix-camera.js' %}"></script>
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+<script src="{% static 'js/fenix-scan.js' %}"></script>
+<script src="{% static 'js/fenix-permissions.js' %}"></script>
+<script>
+/* ═══ Theme Toggle (shared with portal) ═══ */
+function toggleTheme(){
+  var cur=document.documentElement.getAttribute('data-theme')||'dark';
+  var next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('fina-theme',next);
+  var icon=document.getElementById('theme-icon');
+  if(icon)icon.className=next==='dark'?'fas fa-moon':'fas fa-sun';
+}
+(function(){
+  var t=localStorage.getItem('fina-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  var icon=document.getElementById('theme-icon');
+  if(icon)icon.className=t==='dark'?'fas fa-moon':'fas fa-sun';
+})();
+</script>
 </body>
 </html>

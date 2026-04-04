@@ -5,9 +5,7 @@
 <div class="step-indicator">
   <div class="step-item"><div class="step-circle done">1</div><div class="step-label">Plan</div></div>
   <div class="step-line done"></div>
-  <div class="step-item"><div class="step-circle active">2</div><div class="step-label">Račun</div></div>
-  <div class="step-line"></div>
-  <div class="step-item"><div class="step-circle">3</div><div class="step-label">Postavi</div></div>
+  <div class="step-item"><div class="step-circle active">2</div><div class="step-label">Postavljanje</div></div>
 </div>
 
 <div class="reg-card">
@@ -19,10 +17,16 @@
 
     <div class="field-group" style="margin-bottom:1.2rem">
       <label style="display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">Vaše ime *</label>
-      <input type="text" name="first_name" value="{{ first_name|default:'' }}" required
-             placeholder="Ivan" autofocus
+      <div style="display:flex;gap:8px">
+      <input type="text" name="first_name" id="nameInput" value="{{ first_name|default:'' }}" required
+             placeholder="Ivan" autofocus style="flex:1"
              style="width:100%;background:var(--dark);border:1.5px solid {% if errors.first_name %}var(--error){% else %}var(--border){% endif %};border-radius:8px;padding:.75rem 1rem;color:var(--text);font-size:1rem;font-family:inherit"
              aria-describedby="err-name">
+      <button type="button" id="micBtn" onclick="startVoice()" title="Izgovorite ime"
+              style="background:var(--card,#1a1a1a);border:1.5px solid var(--border,#2a2a2a);border-radius:8px;padding:0 1rem;cursor:pointer;color:var(--muted);font-size:1.1rem;min-height:48px;min-width:48px;transition:all .2s">
+        <i class="fas fa-microphone" id="micIcon"></i>
+      </button>
+      </div>
       {% if errors.first_name %}<span id="err-name" class="f-error-msg" role="alert" style="color:var(--error);font-size:.8rem;margin-top:.3rem;display:block">{{ errors.first_name }}</span>{% endif %}
     </div>
 
@@ -71,6 +75,49 @@
 document.addEventListener('DOMContentLoaded', function(){
   var err = document.querySelector('.f-error-msg');
   if(err) err.scrollIntoView({behavior:'smooth', block:'center'});
+  // Email prefill from memio
+  try {
+    var savedEmail = sessionStorage.getItem('memio_email') || '';
+    var emailInp = document.querySelector('[name=email]');
+    if (emailInp && !emailInp.value && savedEmail) {
+      emailInp.value = savedEmail;
+      sessionStorage.removeItem('memio_email');
+    }
+  } catch(e){}
+  // Mic button visibility — hide if no SpeechRecognition
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    var mb = document.getElementById('micBtn');
+    if (mb) mb.style.display = 'none';
+  }
 });
+
+/* ═══ Web Speech API — voice input for name ═══ */
+var _recog = null;
+function startVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var btn = document.getElementById('micBtn');
+  var icon = document.getElementById('micIcon');
+  if (!SR) return;
+  if (_recog) { _recog.stop(); _recog = null; icon.className = 'fas fa-microphone'; btn.style.borderColor = ''; return; }
+  _recog = new SR();
+  _recog.lang = 'hr-HR';
+  _recog.maxAlternatives = 1;
+  icon.className = 'fas fa-circle'; icon.style.color = '#ef4444';
+  btn.style.borderColor = '#ef4444';
+  _recog.onresult = function(e) {
+    var said = e.results[0][0].transcript.trim();
+    // Capitalize first letter
+    said = said.charAt(0).toUpperCase() + said.slice(1);
+    var inp = document.getElementById('nameInput');
+    if (inp) { inp.value = said; inp.focus(); }
+    icon.className = 'fas fa-microphone'; icon.style.color = ''; btn.style.borderColor = '';
+    _recog = null;
+  };
+  _recog.onerror = _recog.onend = function() {
+    icon.className = 'fas fa-microphone'; icon.style.color = ''; btn.style.borderColor = ''; _recog = null;
+  };
+  _recog.start();
+}
 </script>
 {% endblock %}
