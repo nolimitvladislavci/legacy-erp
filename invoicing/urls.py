@@ -73,4 +73,5 @@ urlpatterns = [
     path('dunning/', views.dunning_dashboard, name='dunning_dashboard'),
     path('api/invoice/<int:pk>/timeline/', views.api_invoice_timeline, name='api_invoice_timeline'),
     path('api/invoice/<int:pk>/morph/', views.api_invoice_morph, name='api_invoice_morph'),
+    path('ira-ura/', views.ira_ura_dashboard, name='ira_ura_dashboard'),
 ]

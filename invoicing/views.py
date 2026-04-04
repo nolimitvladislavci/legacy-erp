@@ -2239,3 +2239,82 @@ def dunning_dashboard(request):
         "history": history,
         "rules": rules,
     })
+
+
+@login_required
+def ira_ura_dashboard(request):
+    """GAP7: Unified IRA/URA dashboard — all invoices in one place."""
+    from django.db.models import Sum, Count, Q
+    from django.utils import timezone
+    from invoicing.models import Invoice
+    from core.company_utils import get_user_company
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    today = timezone.now().date()
+    year = int(request.GET.get('year', today.year))
+    month = int(request.GET.get('month', today.month))
+
+    base_qs = Invoice.objects.filter(company=company)
+
+    # IRA (izdani računi) — doctype R, FA, RN, A
+    ira_qs = base_qs.filter(doctype__in=('R', 'FA', 'RN', 'A'))
+    ira_month = ira_qs.filter(issue_date__year=year, issue_date__month=month)
+    ira_stats = {
+        'count': ira_month.count(),
+        'total': ira_month.aggregate(s=Sum('total'))['s'] or 0,
+        'paid': ira_month.filter(status='PAID').aggregate(s=Sum('total'))['s'] or 0,
+        'unpaid': ira_month.filter(status__in=('UNPAID', 'OVERDUE', 'SENT')).aggregate(s=Sum('total'))['s'] or 0,
+        'overdue': ira_month.filter(status='OVERDUE').count(),
+    }
+
+    # URA (ulazni računi) — doctype URA
+    ura_qs = base_qs.filter(doctype='URA')
+    ura_month = ura_qs.filter(issue_date__year=year, issue_date__month=month)
+    ura_stats = {
+        'count': ura_month.count(),
+        'total': ura_month.aggregate(s=Sum('total'))['s'] or 0,
+        'paid': ura_month.filter(status='PAID').aggregate(s=Sum('total'))['s'] or 0,
+        'unpaid': ura_month.filter(status__in=('UNPAID', 'OVERDUE', 'SENT')).aggregate(s=Sum('total'))['s'] or 0,
+    }
+
+    # POS prihod (non-R1)
+    pos_total = 0
+    pos_count = 0
+    try:
+        from pos.models import POSReceipt
+        pos_qs = POSReceipt.objects.filter(
+            session__terminal__company=company,
+            status='paid',
+            paid_at__year=year,
+            paid_at__month=month,
+        )
+        pos_total = pos_qs.aggregate(s=Sum('total'))['s'] or 0
+        pos_count = pos_qs.count()
+    except Exception:
+        pass
+
+    # PDV bilanca
+    pdv_out = ira_month.aggregate(s=Sum('tax_amount'))['s'] or 0  # Izlazni PDV
+    pdv_in = ura_month.aggregate(s=Sum('tax_amount'))['s'] or 0   # Ulazni PDV (pretporez)
+    pdv_balance = pdv_out - pdv_in  # Pozitivno = plaćamo, negativno = povrat
+
+    recent_ira = ira_qs.order_by('-issue_date')[:10]
+    recent_ura = ura_qs.order_by('-issue_date')[:10]
+
+    return render(request, 'invoicing/ira_ura_dashboard.html', {
+        'ira_stats': ira_stats,
+        'ura_stats': ura_stats,
+        'pos_total': pos_total,
+        'pos_count': pos_count,
+        'pdv_out': pdv_out,
+        'pdv_in': pdv_in,
+        'pdv_balance': pdv_balance,
+        'recent_ira': recent_ira,
+        'recent_ura': recent_ura,
+        'year': year,
+        'month': month,
+        'page_title': f'IRA/URA Pregled — {month:02d}/{year}',
+    })

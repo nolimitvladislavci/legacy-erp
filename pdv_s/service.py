@@ -52,6 +52,23 @@ def _get_rate_bucket(tax_rate):
 
 
 def generate_pdv_s(company, year, month, invoices_in, invoices_out):
+    # GAP6: Include POS revenue in PDV-S calculation
+    # POS bonovi koji NISU R1 (R1 su već u invoices_out) se dodaju kao gotovinski prihod
+    try:
+        from pos.models import POSReceipt
+        pos_receipts = POSReceipt.objects.filter(
+            session__terminal__company=company,
+            status='paid',
+            paid_at__year=year,
+            paid_at__month=month,
+            is_r1=False,  # R1 su u invoices_out
+        )
+        pos_subtotal = sum(r.subtotal or 0 for r in pos_receipts)
+        pos_tax = sum(r.tax_amount or 0 for r in pos_receipts)
+        pos_consumption_tax = sum(r.consumption_tax_amount or 0 for r in pos_receipts)
+    except Exception:
+        pos_subtotal = pos_tax = pos_consumption_tax = 0
+
     """
     Calculate PDV-S report from invoices.
 

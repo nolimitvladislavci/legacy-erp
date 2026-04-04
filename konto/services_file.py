@@ -1283,6 +1283,30 @@ def book_pos_session(session, user=None):
             side='credit', amount=round(total_tax, 2),
             description=f"PDV POS smjena #{session.session_number}")
 
+    # CREDIT: Porez na potrošnju → konto 2390 (GAP1 fix)
+    total_consumption_tax = sum(
+        (r.consumption_tax_amount or Decimal('0')) for r in receipts
+    )
+    if total_consumption_tax > 0:
+        ct_code = '2390' if country != 'DE' else '1776'
+        ct_name = 'Obveza poreza na potrošnju' if country != 'DE' else 'Verbrauchsteuer'
+        ct_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code=ct_code,
+            defaults={'name': ct_name, 'account_type': 'liability'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=ct_acct,
+            side='credit', amount=round(total_consumption_tax, 2),
+            description=f"Porez na potrošnju POS smjena #{session.session_number}")
+        # Adjust revenue — consumption tax reduces net revenue
+        # Revenue line already credited; add debit to consumption tax expense
+        ct_exp_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code='4790',
+            defaults={'name': 'Trošak poreza na potrošnju', 'account_type': 'expense'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=ct_exp_acct,
+            side='debit', amount=round(total_consumption_tax, 2),
+            description=f"Porez na potrošnju POS smjena #{session.session_number}")
+
     # Verify balance
     if not je.is_balanced:
         import logging
