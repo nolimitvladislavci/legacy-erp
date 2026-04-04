@@ -3,7 +3,7 @@
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#c9a84c">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +18,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-layout.css">
     <link rel="stylesheet" href="/static/css/fenix-ui.css">
+    <link rel="stylesheet" href="/static/css/wcag-a11y.css">
     {% block extra_css %}{% endblock %}
     <!-- BORG Faza 2: HTMX + Sortable.js -->
     <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
@@ -81,6 +82,64 @@
     </script>
 </head>
 <body>
+<!-- WCAG 2.4.1: Skip navigation link -->
+<a href="#main-content" class="wcag-skip-link">Preskoči na sadržaj</a>
+
+<style>
+/* ── WCAG 2.1 AA Accessibility ─────────────────────────────── */
+/* Skip link — visible only on focus (keyboard users) */
+.wcag-skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #c9a84c;
+    color: #0a0a0a;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    z-index: 99999;
+    border-radius: 0 0 8px 8px;
+    transition: top 0.2s;
+}
+.wcag-skip-link:focus {
+    top: 0;
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* Focus indicators — WCAG 2.4.7 */
+*:focus-visible {
+    outline: 3px solid #c9a84c !important;
+    outline-offset: 2px !important;
+}
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid #c9a84c !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 6px rgba(201, 168, 76, 0.25) !important;
+}
+
+/* Reduced motion — WCAG 2.3.3 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Minimum touch target — WCAG 2.5.8 (44x44px) */
+@media (pointer: coarse) {
+    button, a.btn, [role="button"], input[type="submit"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+</style>
+
     <!-- Offline indikator -->
     <div id="offlineBar" style="display:none;background:#dc2626;color:#fff;text-align:center;padding:6px 16px;font-weight:700;font-size:.85rem;position:fixed;top:0;left:0;right:0;z-index:9999">
       <i class="fas fa-wifi" style="margin-right:6px;opacity:.7"></i>
@@ -306,7 +365,7 @@
               </form>
             </div>
             {% endif %}
-            {% block content %}{% endblock %}
+            <main id="main-content" role="main">{% block content %}{% endblock %}</main>
         </div>
     </div>
 </div>

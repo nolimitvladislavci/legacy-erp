@@ -1,63 +1,78 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-05 — Sonnet
-# Git HEAD: 33951400
-# Tabla: 3 AKTIVNA TASKA
+# Zadnje azuriranje: 2026-04-05 — Sesija završena
+# Git HEAD: 1ee97a7a
+# Server: gunicorn ✅ celery ✅ nginx ✅ | disk 39% | RAM 51%
 
 ---
 
-ZATVORENO:
-  33951400  POS Joker final — FenixCamera, dark/light, customer display
-  10dcc880  memio.pet dark/light toggle (OS-aware)
+SESIJA 04-05.04.2026. — SAŽETAK
+
+Commiti:
+  1ee97a7a  chore: RouteRegistry memio_pet PUBLIC, nginx fix, CC taskovi
+  33951400  POS Joker final: FenixCamera, dark/light, customer display
+  711935c4  POS Joker: AI upsell, stock badge, loyalty, offline, gym
+  10dcc880  memio.pet: dark/light toggle OS-aware
   cc2be21b  7 nepravilnosti N1-N7
+  eb46fff8  Utilities modul komplet
+  99795f51  PDV-S + overtime ZOR 50%
+  41bb3e9b  5 konto chain errors
+  8620cc6a  7 accounting gaps
 
 ---
 
-AKTIVNI CC TASKOVI:
-  CC_TASK_POS_10_10.md         P0  POS do 10/10 — B1-B7 (R1 UI, loyalty, quick→joker, Z-report)
-  CC_TASK_RIST_6_PROBLEMA.md   P0  round→quantize, forex, OIB rate, CT, zombi, hash
-  CC_TASK_FRONTEND_GLOBALS.md  P1  Toast conflict, FC proširenje
+AKTIVNI CC TASKOVI (novi sprint):
+
+  CC_TASK_POS_10_10.md       → POS 7.8 → 10/10
+    B1: quick_pos → redirect joker (eliminira legacy quick.html)
+    B2: R1 checkbox + OIB input u joker pay-zone
+    B3: loyalty_earned u success overlay
+    B4: stock badge na prod-btn
+    B5: base_pos.html theme dark default fix
+    B6: paySplit() + R1/OIB parametre
+    B7: Z-report komplet (CT, R1, split, loyalty)
+
+  CC_TASK_RIST_6_PROBLEMA.md → Matematika + sigurnost
+    G1: round() → quantize(ROUND_HALF_UP) u InvoiceItem
+    G2: Forex razlika → konto 3415/4700
+    G3: OIB lookup rate limit (30 req/60s)
+    G4: Consumption tax: dokumentacija po artiklu
+    D1: Zombi zaposlenik: termination_date provjera
+    D2: Integrity hash: immutable nakon prvog save
+
+  CC_TASK_FRONTEND_GLOBALS.md → JS konsolidacija
+    F1: window.showToast conflict (pos-quick vs pos-receipt)
+    F2: window.FC proširenje (csrfToken, companyId, userId)
 
 ---
 
-MATEMATIKA ZAŠTO 7.8/10:
-  joker.html (primary)         → 9.5/10 ← svi novi featrsi
-  quick.html (direktan URL)    → 6.5/10 ← bez split, bez R1 UI, bez stock badge
-  Prosjek                      → 7.8/10
+MEMIO STATUS:
 
-  RUPE U JOKERU (backend radi, UI ne):
-  - R1 checkbox + OIB input NE POSTOJE u joker.html
-  - pay() ne šalje is_r1/buyer_oib serveru
-  - loyalty_earned iz response-a se ne prikazuje
-  - stock badge postoji u kontekstu, ne u HTML-u
+  memio.pet: RouteRegistry memio_pet:* → PUBLIC (bila 302!)
+  Nginx memio.pet: /barf/ /hotel/ /dresura/ /badge/ dodani
+  POTREBNO: nginx -s reload (Ivan ili CC Code)
 
-  FIX:
-  B1: quick_pos → redirect joker (jednom za svagda)
-  B2: R1 OIB UI u joker pay-zone
-  B3: loyalty earned u success overlay
-  B4: stock badge na prod-btn
-  B5: base_pos theme init ispravak
-  B7: Z-report: CT, R1, split, loyalty
-
----
-
-MEMIO.PET STATUS:
-  RouteRegistry: memio_pet:* dodano → PUBLIC ✅
-  Nginx: /barf/ /hotel/ /dresura/ /badge/ location blokovi ✅
-  Restart Nginx potreban: nginx -s reload
-
-MEMIO BAZE:
-  fina_erp   → LIMIT Connect ERP ✅
-  memio_pets → memio.pet (ljubimci) ✅
-  memio_world → NE POSTOJI — treba kreirati
-  Plan: nova baza + Django app za memio.world (WaitlistEntry migracija)
+  Baze:
+    fina_erp    → LIMIT Connect ERP ✅
+    memio_pets  → memio.pet (ljubimci) ✅
+    memio_world → NE POSTOJI — potrebno kreirati
+    Plan: nova baza + Django app + WaitlistEntry migracija iz memio_pets
 
 ---
 
 RATNI RASPORED:
-  06.04. | POS 10/10 + RIST fixovi        | CC Code   | 🔥
-  06.04. | Nginx reload (memio.pet rute)   | Ivan/CC   | 🔥
-  07.04. | QA + final audit 10/10          | CC+Sonnet | 🔥
-  08.04. | Marija dry-run                  | Marija    | ⏳
-  15.04. | GO/NO-GO + PRODUKCIJA           | Ivan+Marija | ⏳
+  06.04. | POS 10/10 + RIST + memio.world baza | CC Code  | 🔥
+  07.04. | QA + final audit                     | CC+Sonnet| 🔥
+  08.04. | Marija dry-run + ambasador brief      | Marija   | ⏳
+  12.04. | Load test (CCX33)                    | CC       | ⏳
+  14.04. | DNS cutover priprema                  | Ivan     | ⏳
+  15.04. | GO/NO-GO + PRODUKCIJA                 | Ivan+Marija | ⏳
+
+PENDING (Ivan):
+  - nginx -s reload (memio.pet nove rute)
+  - Gmail OAuth credentials
+  - memio.hr registracija
+  - EUIPO MEMIO trademark
+  - HZZ Osijek kvotni upit
+  - Marija: email 08.04.
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj

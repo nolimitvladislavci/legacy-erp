@@ -61,8 +61,16 @@
   </style>
 </head>
 <body>
+<!-- WCAG 2.4.1 Skip link -->
+<a href="#main-content" class="wcag-skip-link" style="position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:#c9a84c;color:#0a0a0a;padding:12px 24px;font-size:16px;font-weight:700;text-decoration:none;z-index:99999;border-radius:0 0 8px 8px;transition:top 0.2s;">Preskoči na sadržaj</a>
+<style>
+.wcag-skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px;}
+*:focus-visible{outline:3px solid #c9a84c!important;outline-offset:2px!important;}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
 
-<nav>
+
+<nav role="navigation" aria-label="Glavna navigacija">
   <div class="nav-logo">LIMIT<span> Connect</span></div>
   <a href="/pocni/" class="nav-cta">Besplatno 14 dana →</a>
 </nav>
@@ -83,7 +91,7 @@
   </div>
 </div>
 
-<section id="moduli">
+<main id="main-content" role="main"><section id="moduli">
   <div class="section-label">Sve u jednom</div>
   <h2 class="section-title">58 modula. Jedan login.</h2>
   <p class="section-sub">Sve što trebaš — od blagajne do arhive — bez instaliranja ičega.</p>
@@ -162,5 +170,6 @@
   <p style="margin-top:.75rem;font-size:.75rem;color:#4a5568">© 2026 Konjik d.o.o. Sva prava pridržana.</p>
 </footer>
 
+</main>
 </body>
 </html>

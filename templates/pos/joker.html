@@ -179,7 +179,7 @@
 
 {% endblock %}
 
-{% block content %}
+{% block content %}<div id="main-content" role="main">
 {% include "pos/includes/module_nav.html" %}
 <div class="qp">
 
@@ -212,8 +212,8 @@
           <a href="/hr/pos/receipts/" title="Svi računi" class="qp-action-btn" style="font-weight:900;color:var(--gold);">R</a>
           <a href="/hr/pos/settings/" title="Postavke" class="qp-action-btn">⚙️</a>
           <a href="{{ session_report_url }}" title="Izvještaj smjene" class="qp-action-btn" target="_blank">📊</a>
-          <button onclick="togglePosTheme()" title="Tema" class="qp-action-btn">&#9790;</button>
-          <button onclick="openShiftModal()" title="Z ispis / Zaključak smjene" class="qp-action-btn" id="btnShiftClose" style="border-color:var(--gold);color:var(--gold)">Z</button>
+          <button onclick="togglePosTheme()" title="Tema" aria-label="Prebaci temu (tamno/svijetlo)" class="qp-action-btn">&#9790;</button>
+          <button onclick="openShiftModal()" title="Z ispis / Zaključak smjene" aria-label="Z ispis — zaključak smjene" class="qp-action-btn" id="btnShiftClose" style="border-color:var(--gold);color:var(--gold)">Z</button>
         </div>
       </div>
       <!-- Red 2: blagajnici (horizontalni scroll) -->
@@ -313,7 +313,7 @@
 
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
-      <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1" id="prodSearch">
+      <input type="search" id="prodSearch" aria-label="Pretraga proizvoda" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1" id="prodSearch">
       <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Glasovni unos">
         <i class="fas fa-microphone"></i>

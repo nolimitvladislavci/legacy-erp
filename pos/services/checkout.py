@@ -720,6 +720,26 @@ class CheckoutService:
             except Exception as _ie:
                 logger.warning(f'R1 auto-invoice error: {_ie}')
 
+        # ── 9c. B2B AUTO E-RECHNUNG (DE) ──
+        eracun_id = None
+        if receipt.is_r1 and receipt.buyer_oib and getattr(company, 'country', 'HR') == 'DE':
+            try:
+                from eracun.models import ERacun
+                eracun_obj = ERacun.objects.create(
+                    company=company,
+                    invoice=r1_invoice,
+                    direction='outgoing',
+                    document_type='xrechnung',
+                    buyer_oib=receipt.buyer_oib,
+                    buyer_name=receipt.buyer_name or '',
+                    status='draft',
+                    created_by=user,
+                )
+                eracun_id = str(eracun_obj.pk)
+                logger.info(f'B2B auto eRechnung created: {eracun_id} for receipt {receipt.pk}')
+            except Exception as _ee:
+                logger.warning(f'B2B auto eRechnung error: {_ee}')
+
         # ── 10. RESULT ──
         terminal_pk = session.terminal.pk
         result = {
@@ -737,6 +757,7 @@ class CheckoutService:
             'r1_invoice_id': str(r1_invoice.pk) if r1_invoice else None,
             'r1_invoice_number': r1_invoice.number if r1_invoice else None,
             'consumption_tax': str(receipt.consumption_tax_amount) if receipt.consumption_tax_amount else '0',
+            'eracun_id': eracun_id,
         }
         if fiscal_error:
             result['fiscal_warning'] = fiscal_error

@@ -410,6 +410,9 @@ urlpatterns += [
     path("api/memio/stats/", __import__("core.views_memio", fromlist=["memio_stats"]).memio_stats, name="memio_stats"),
     path("api/memio/push/", __import__("core.views_memio", fromlist=["memio_push"]).memio_push, name="memio_push"),
 
+    # ── Memio.world API (zasebna baza) ──────────────────────────
+    path("api/memio-world/", include("memio_world.urls")),
+
     # ── Memio.pet public views (HTML profili + QR) ──────────────
     path("", include("memio_pet.urls")),
     path("api/synesis/import/", synesis_views.synesis_import_api, name="synesis_import_api"),

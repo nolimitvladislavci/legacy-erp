@@ -213,10 +213,10 @@ def memio_stats(request):
 
     total_pets     = AnimalProfile.objects.using('memio_pets').count()
     total_waitlist = WaitlistEntry.objects.using('memio_pets').count()
-    # Fallback: dodaj i stari waitlist iz core baze dok traje migracija
+    # Dodaj memio_world waitlist
     try:
-        from core.models import MemioPetWaitlist
-        total_waitlist += MemioPetWaitlist.objects.count()
+        from memio_world.models import WaitlistEntry as MW_WL
+        total_waitlist += MW_WL.objects.using('memio_world').count()
     except Exception:
         pass
 

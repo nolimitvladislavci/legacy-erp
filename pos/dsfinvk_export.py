@@ -8,6 +8,8 @@ Generiert ZIP mit CSV-Dateien gemaess DSFinV-K v2.3:
 - businesscases.csv (Geschaeftsvorfaelle)
 - stamm_kassen.csv (Kassenstammdaten)
 - stamm_orte.csv   (Betriebsstaetten)
+- stamm_agenturen.csv  (Agenturdaten)
+- stamm_umsatzsteuer.csv (USt-Saetze)
 
 Usage:
     from pos.dsfinvk_export import generate_dsfinvk_export
@@ -229,6 +231,24 @@ def generate_dsfinvk_export(company, date_from, date_to):
         zf.writestr('businesscases.csv', bc.getvalue())
         zf.writestr('stamm_kassen.csv', sk.getvalue())
         zf.writestr('stamm_orte.csv', so.getvalue())
+
+        # ── stamm_agenturen.csv (Agenturdaten — optional) ────────
+        sa = io.StringIO()
+        sa_w = csv.writer(sa, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+        sa_w.writerow(['AGENTUR_ID', 'AGENTUR_NAME', 'AGENTUR_STNR', 'AGENTUR_USTID'])
+        # Keine Agenturen in Standard-Setup
+        zf.writestr('stamm_agenturen.csv', sa.getvalue())
+
+        # ── stamm_umsatzsteuer.csv (USt-Saetze) ─────────────────
+        su = io.StringIO()
+        su_w = csv.writer(su, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+        su_w.writerow(['UST_SCHLUESSEL', 'UST_BESCHR', 'UST_SATZ'])
+        su_w.writerow(['1', 'Allgemeiner Steuersatz', '19.00'])
+        su_w.writerow(['2', 'Ermaessigter Steuersatz', '7.00'])
+        su_w.writerow(['3', 'Durchschnittssatz (Land)', '10.70'])
+        su_w.writerow(['4', 'Durchschnittssatz (Forst)', '5.50'])
+        su_w.writerow(['5', 'Null', '0.00'])
+        zf.writestr('stamm_umsatzsteuer.csv', su.getvalue())
 
         # ── index.json (Metadata) ────────────────────────────────
         import json

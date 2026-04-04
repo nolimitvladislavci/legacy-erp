@@ -512,6 +512,19 @@ class SalesLead(models.Model):
         return f'{self.company_name} ({self.status})'
 
 
+@receiver(post_save, sender=SalesLead, dispatch_uid='ambassador_onboarding_email')
+def _on_ambassador_flag_set(sender, instance, created, **kwargs):
+    """Kad se is_disability_ambassador uključi → šalji onboarding mail."""
+    if not instance.is_disability_ambassador or not instance.contact_email:
+        return
+    # Šalji samo kad se flag upravo uključio (novi lead ili update)
+    update_fields = kwargs.get('update_fields')
+    if not created and update_fields and 'is_disability_ambassador' not in update_fields:
+        return
+    from registration.tasks import send_ambassador_onboarding_email
+    send_ambassador_onboarding_email.apply_async(args=[instance.pk], countdown=5)
+
+
 # ════════════════════════════════════════════════════════════════════
 # Claim Your Business — 71 ghost firma dobiva pristup
 # ════════════════════════════════════════════════════════════════════

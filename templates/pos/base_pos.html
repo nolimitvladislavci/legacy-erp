@@ -18,12 +18,22 @@ if ('serviceWorker' in navigator) {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>(function(){var t=localStorage.getItem('fina-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
 <title>{% block title %}POS{% endblock %} -- LIMIT Connect</title>
+<style>
+/* WCAG 2.1 AA */
+.wcag-skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:#c9a84c;color:#0a0a0a;padding:12px 24px;font-size:16px;font-weight:700;text-decoration:none;z-index:99999;border-radius:0 0 8px 8px;transition:top .2s;}
+.wcag-skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px;}
+*:focus-visible{outline:3px solid #c9a84c!important;outline-offset:2px!important;}
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{box-shadow:0 0 0 6px rgba(201,168,76,.25)!important;}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="/static/css/pos-base.css">
 {% block extra_css %}{% endblock %}
 </head>
 <body>
+<a href="#main-content" class="wcag-skip-link">Preskoči na sadržaj</a>
+
 <div class="topbar">
   <a href="{% url 'dashboard' %}" class="topbar-brand" style="text-decoration:none">LIMIT<span> POS</span></a>
   {% block topbar_nav %}<nav class="topbar-nav">

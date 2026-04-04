@@ -181,7 +181,7 @@ def njuskalo_badge(request, breeder_id):
     from django.http import HttpResponse
 
     try:
-        breeder = BreederProfile.objects.get(pk=breeder_id)
+        breeder = BreederProfile.objects.using('memio_pets').get(pk=breeder_id)
     except BreederProfile.DoesNotExist:
         return HttpResponse('Not Found', status=404)
 
@@ -214,8 +214,7 @@ def barf_listings(request):
     from django.utils import timezone
 
     today = timezone.now().date()
-    listings = (RawFoodListing.objects.filter(status='available', expires_at__gte=today)
-                .select_related('company')
+    listings = (RawFoodListing.objects.using('memio_pets').filter(status='available', expires_at__gte=today)
                 .order_by('-created_at')[:50])
 
     return render(request, 'memio_pet/barf_listings.html', {
@@ -236,7 +235,7 @@ def barf_create(request):
 
     if request.method == 'POST':
         try:
-            listing = RawFoodListing.objects.create(
+            listing = RawFoodListing.objects.using('memio_pets').create(
                 company=company,
                 product_type=request.POST.get('product_type', 'ostalo'),
                 quantity_kg=request.POST.get('quantity_kg', 0),
@@ -264,11 +263,12 @@ def pet_hotel_booking(request):
     """Javna stranica za rezervaciju pet hotela."""
     from memio_pet.models import BreederProfile, PetBoardingReservation
 
-    hotels = BreederProfile.objects.filter(account_type='hotel').order_by('name')
+    db = 'memio_pets'
+    hotels = BreederProfile.objects.using(db).filter(account_type='hotel').order_by('name')
 
     if request.method == 'POST':
         try:
-            hotel = BreederProfile.objects.get(pk=request.POST.get('hotel_id'))
+            hotel = BreederProfile.objects.using(db).get(pk=request.POST.get('hotel_id'))
             reservation = PetBoardingReservation(
                 hotel=hotel,
                 owner_name=request.POST.get('owner_name', ''),
@@ -287,9 +287,9 @@ def pet_hotel_booking(request):
             from memio_pet.models import AnimalProfile
             animal = None
             if chip:
-                animal = AnimalProfile.objects.filter(chip_number=chip).first()
+                animal = AnimalProfile.objects.using(db).filter(chip_number=chip).first()
             if not animal and pet_name:
-                animal = AnimalProfile.objects.create(
+                animal = AnimalProfile.objects.using(db).create(
                     name=pet_name,
                     vrsta=request.POST.get('vrsta', 'pas'),
                     chip_number=chip,
@@ -316,7 +316,7 @@ def training_list(request):
     """Javni popis kinologa / trenera."""
     from memio_pet.models import BreederProfile, DogTrainingSession
 
-    trainers = BreederProfile.objects.filter(account_type='trainer').order_by('name')
+    trainers = BreederProfile.objects.using('memio_pets').filter(account_type='trainer').order_by('name')
 
     return render(request, 'memio_pet/training_list.html', {
         'trainers': trainers,

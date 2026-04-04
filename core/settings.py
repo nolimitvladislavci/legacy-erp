@@ -147,6 +147,7 @@ INSTALLED_APPS = [
     "lovacki",
     "utilities",
     "memio_pet",  # Memio.pet
+    "memio_world",  # Memio.world — digitalna baština
     "no_limit",  # NO LIMIT udruga
     "intelligence",
     "einvoice",
@@ -252,9 +253,20 @@ DATABASES = {
         "PORT": "5432",  # Direktno, ne PgBouncer (6432)
         "CONN_MAX_AGE": 60,
     },
+    # ── Memio.world — zasebna baza, digitalna baština ──────────────
+    "memio_world": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("MEMIO_WORLD_DB_NAME", "memio_world"),
+        "USER": os.environ.get("MEMIO_WORLD_DB_USER", "memio_world_user"),
+        "PASSWORD": os.environ.get("MEMIO_WORLD_DB_PASSWORD", "mw_2026_L1m1t!"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "TEST": {"NAME": "test_memio_world"},
+        "PORT": "5432",
+        "CONN_MAX_AGE": 60,
+    },
 }
 
-DATABASE_ROUTERS = ["core.db_routers.MemioPetsRouter"]
+DATABASE_ROUTERS = ["core.db_routers.MultiDbRouter"]
 
 # ── Cache (Redis) ─────────────────────────────────────────────
 _redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
