@@ -447,3 +447,54 @@ class BorgInsightAlert(models.Model):
 
     def __str__(self):
         return f'Alert: {self.signal} (threshold={self.threshold_reached}, notified={self.companies_notified})'
+
+
+class DomainRegistry(models.Model):
+    """
+    Registar svih domena u LIMIT Connect ekosustavu.
+    Fenix prati isteke i šalje upozorenja 30/14/7 dana prije.
+    """
+    REGISTRAR_CHOICES = [
+        ('namecheap', 'Namecheap'),
+        ('hetzner', 'Hetzner'),
+        ('other', 'Ostalo'),
+    ]
+    PURPOSE_CHOICES = [
+        ('erp', 'ERP platforma'),
+        ('pet', 'Memio.pet'),
+        ('world', 'Memio.world'),
+        ('corp', 'Korporativna'),
+        ('brand', 'Brand / marketing'),
+        ('other', 'Ostalo'),
+    ]
+
+    domain = models.CharField(max_length=253, unique=True)
+    registrar = models.CharField(max_length=30, choices=REGISTRAR_CHOICES, default='namecheap')
+    expires_at = models.DateField(help_text='Datum isteka domene')
+    auto_renew = models.BooleanField(default=True)
+    privacy_protection = models.BooleanField(default=True)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default='erp')
+    dns_provider = models.CharField(max_length=50, default='namecheap', help_text='Tko upravlja DNS-om')
+    ssl_provider = models.CharField(max_length=50, default='letsencrypt', help_text='SSL cert izdavač')
+    ssl_expires_at = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'borg_domain_registry'
+        ordering = ['expires_at']
+        verbose_name = 'Domena'
+        verbose_name_plural = 'Domene'
+
+    def __str__(self):
+        return f'{self.domain} (→ {self.expires_at})'
+
+    @property
+    def days_until_expiry(self):
+        from datetime import date
+        return (self.expires_at - date.today()).days
+
+    @property
+    def is_expiring_soon(self):
+        return self.days_until_expiry <= 30

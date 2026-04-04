@@ -1187,3 +1187,11 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': 21600,  # 6h
     },
 })
+
+CELERY_BEAT_SCHEDULE.update({
+    "fenix-domain-expiry-check": {
+        "task": "borg_ops.tasks.check_domain_expiry",
+        "schedule": 86400,  # Jednom dnevno (24h u sekundama)
+    },
+})
+

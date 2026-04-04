@@ -486,3 +486,41 @@ def _notify_collab_insight(alert, region):
             pass
 
     return notified
+
+
+@shared_task
+def check_domain_expiry():
+    """
+    Provjeri isteke domena — šalje upozorenje 30/14/7 dana prije.
+    Celery beat: jednom dnevno.
+    """
+    import logging
+    from datetime import date
+    from borg_ops.models import DomainRegistry
+    from django.core.mail import send_mail
+
+    logger = logging.getLogger('borg_ops.domain_check')
+    today = date.today()
+    warnings = []
+
+    for d in DomainRegistry.objects.all():
+        days = d.days_until_expiry
+        if days in (30, 14, 7, 3, 1):
+            warnings.append(f'⚠️ {d.domain} istječe za {days} dana ({d.expires_at}) — registrar: {d.registrar}')
+            logger.warning(f'Domain expiry alert: {d.domain} in {days} days')
+
+    if warnings:
+        body = 'LIMIT Connect — Domain Expiry Alert\n\n' + '\n'.join(warnings)
+        body += '\n\nProvjeri Namecheap dashboard i obnovi domene.'
+        try:
+            send_mail(
+                subject=f'[LIMIT] {len(warnings)} domena istječe uskoro!',
+                message=body,
+                from_email=None,
+                recipient_list=['niksa.viskovic@limit-connect.com'],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    return f'Checked {DomainRegistry.objects.count()} domains, {len(warnings)} alerts'

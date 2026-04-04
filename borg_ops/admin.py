@@ -35,3 +35,23 @@ class StatusTimestampAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+from .models import DomainRegistry
+
+@admin.register(DomainRegistry)
+class DomainRegistryAdmin(admin.ModelAdmin):
+    list_display = ('domain', 'registrar', 'purpose', 'expires_at', 'days_until_expiry',
+                    'auto_renew', 'privacy_protection', 'ssl_expires_at')
+    list_filter = ('registrar', 'purpose', 'auto_renew')
+    search_fields = ('domain', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def days_until_expiry(self, obj):
+        d = obj.days_until_expiry
+        if d <= 7:
+            return f'⚠️ {d} dana!'
+        elif d <= 30:
+            return f'⏰ {d} dana'
+        return f'{d} dana'
+    days_until_expiry.short_description = 'Do isteka'
