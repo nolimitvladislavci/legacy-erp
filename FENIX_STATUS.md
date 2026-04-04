@@ -1,107 +1,63 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-04 — Sonnet (verifikacija CC analize)
-# Git HEAD: 2d0d4e5d
-# Tabla: CISTA
+# Zadnje azuriranje: 2026-04-05 — Sonnet
+# Git HEAD: 33951400
+# Tabla: 3 AKTIVNA TASKA
 
 ---
 
-VIKEND SPRINT — ZATVOREN (04.04.2026.)
-13 commitova | 77+ fajlova | ~4.100+ linija | 9 migracija | 0 errora
-
-DONE:
-  Commit 1-5  | +2253 lin | Simbioza, Arhiva, Synesis, Fenix Inbox, Udruge-Konto
-  Commit 6    | 5f2fbfc   | Synesis B finalizacija (warm_cache, 35 cache keys)
-  Commit 7    | 9da52b9   | DRON3 CSS kirurgija (26 design tokens, 159 hex→var())
-  Commit 8    | 9ca77b8   | Notariat PDF (WeasyPrint, SHA-256, tarifa)
-  Commit 9    | fb72a80   | DRON2 Onboarding wizard (3-field quick reg, wizard 5 sekcija)
-  Commit 10   | 1720fe8   | DRON2 tc_consent fix
-  Commit 11   | 39c339a   | REG redizajn 10/10 (theme, mikrofon, pet, FenixCamera/Scan/QR)
-  Commit 12   | 2d0d4e5   | BARF Marketplace + Njuškalo Trust Badge SVG ✅
+ZATVORENO:
+  33951400  POS Joker final — FenixCamera, dark/light, customer display
+  10dcc880  memio.pet dark/light toggle (OS-aware)
+  cc2be21b  7 nepravilnosti N1-N7
 
 ---
 
-CC ANALIZA — VERIFICIRANA 04.04.2026. (Sonnet):
-
-  ✅ Smart Entry /pocni/   — POTVRĐENO: ne postoji, treba kreirati
-  ✅ Landing 2026          — POTVRĐENO: ne postoji, treba kreirati
-  ✅ WhiteLabel Engine     — POTVRĐENO: ne postoji, treba kreirati
-  ✅ Agent Dashboard       — POTVRĐENO: stari view (1045: def agent_dashboard), treba v2
-  ✅ LicenseToken          — POTVRĐENO: ne postoji, treba kreirati
-  ✅ BARF Badge            — POTVRĐENO: modeli postoje (RawFoodListing, RawFoodOrder,
-                             barf_partner bool), views i templates nedostaju
-  ✅ Cross-Company Dash    — POTVRĐENO: postoji (SUPERADMIN level), radi
-  ✅ Client Portal UX      — POTVRĐENO: portal_upload + portal_pdv_approve u partners/
-  ✅ FINA Posrednik        — POTVRĐENO: CIUS-HR UBL pipeline, čeka sandbox test
-
-  BAZA STANJE (verificirano):
-    33.299 partnera | 15.327 faktura | 10.732 journal entries
-    9 SynesisConfig firmi (meta prazna — uvoz bio direktan u bazu) ← važno za Synesis+
+AKTIVNI CC TASKOVI:
+  CC_TASK_POS_10_10.md         P0  POS do 10/10 — B1-B7 (R1 UI, loyalty, quick→joker, Z-report)
+  CC_TASK_RIST_6_PROBLEMA.md   P0  round→quantize, forex, OIB rate, CT, zombi, hash
+  CC_TASK_FRONTEND_GLOBALS.md  P1  Toast conflict, FC proširenje
 
 ---
 
-AKTIVNI CC TASKOVI (pokrenuti 04.04.):
-  CC_TASK_SMART_ENTRY.md          → P0 — /pocni/ + magic link + email detect
-  CC_TASK_LANDING_2026.md         → P0 — nova landing page (HR, konverzijska)
-  CC_TASK_AGENT_DASHBOARD_10.md   → P0 — /moji-klijenti/ v2 (QR, komisija, ghost)
-  CC_TASK_WHITELABEL_ENGINE.md    → P0 — WhiteLabelConfig + middleware + CSS
-  CC_TASK_LICENSE_TOKEN.md        → P1 — LicenseToken + heartbeat + suspended.html
-  CC_TASK_BARF_BADGE.md           → P2 — views + templates (modeli postoje)
+MATEMATIKA ZAŠTO 7.8/10:
+  joker.html (primary)         → 9.5/10 ← svi novi featrsi
+  quick.html (direktan URL)    → 6.5/10 ← bez split, bez R1 UI, bez stock badge
+  Prosjek                      → 7.8/10
 
-AKTIVNI GEMINI TASKOVI:
-  GEMINI_TASK_SYNESIS_PLUS.md     → Analiza Synesis+ asimilacije (kreirati)
+  RUPE U JOKERU (backend radi, UI ne):
+  - R1 checkbox + OIB input NE POSTOJE u joker.html
+  - pay() ne šalje is_r1/buyer_oib serveru
+  - loyalty_earned iz response-a se ne prikazuje
+  - stock badge postoji u kontekstu, ne u HTML-u
+
+  FIX:
+  B1: quick_pos → redirect joker (jednom za svagda)
+  B2: R1 OIB UI u joker pay-zone
+  B3: loyalty earned u success overlay
+  B4: stock badge na prod-btn
+  B5: base_pos theme init ispravak
+  B7: Z-report: CT, R1, split, loyalty
+
+---
+
+MEMIO.PET STATUS:
+  RouteRegistry: memio_pet:* dodano → PUBLIC ✅
+  Nginx: /barf/ /hotel/ /dresura/ /badge/ location blokovi ✅
+  Restart Nginx potreban: nginx -s reload
+
+MEMIO BAZE:
+  fina_erp   → LIMIT Connect ERP ✅
+  memio_pets → memio.pet (ljubimci) ✅
+  memio_world → NE POSTOJI — treba kreirati
+  Plan: nova baza + Django app za memio.world (WaitlistEntry migracija)
 
 ---
 
 RATNI RASPORED:
-
-  05.04. | SmartEntry + Landing live         | CC Code   | 🔥
-  05.04. | Agent Dashboard v2                | CC Code   | 🔥
-  06.04. | WhiteLabel Engine live            | CC Code   | 🔥
-  06.04. | LicenseToken + Heartbeat          | CC Code   | 🔥
-  07.04. | BARF views + templates            | CC Code   | ⏳
-  07.04. | Distributer onboarding form       | CC Code   | ⏳
-  08.04. | Marija: JournalEntry --dry-run    | Marija    | ⏳
-  12.04. | Load test (CCX33)                 | Sonnet+CC | ⏳
-  14.04. | DNS cutover priprema              | Sonnet    | ⏳
-  15.04. | GO/NO-GO                          | Ivan+Marija | ⏳
-  15.04. | PRODUKCIJA 0-downtime             | Sonnet+CC | ⏳
-
----
-
-SERVER PLAN:
-
-  Server 1: 85.9.201.204 (stari UpCloud) → dev/staging
-  Server 2: 37.27.248.86 (Hetzner) → produkcija #1 (sad)
-  Server 3+4: 2x CCX33 → u narudžbi (po planu)
-  setup_new_server.sh + warm_cache + prod_monitor.sh: spreman ✅
-
----
-
-SYNESIS+ ANALIZA — vidi GEMINI_TASK_SYNESIS_PLUS.md
-
----
-
-BORG FENIX (04.04.2026.):
-  Invoicing, POS, Konto, Worktime, Rental, Tax Wizard,
-  Udruge (9 segmenata + dvojno knjizenje), Arhiva,
-  Transport, BORG Ops, Seasonal, Notariat, memio.pet,
-  Fenix Inbox, AI, Registracija, BARF Marketplace — SVI ASIMILIRANI
-
-SIMBIOZA TROKUT: zatvoren ✅
-SYNESIS: 92.3% ✅ | Faza B (JournalEntry) ceka Mariju ⏳ 08.04.
-GMAIL OAUTH: ceka Ivan ⏳
-MARIJA_WHATSAPP: privremeno iskljucen ⏳
-
----
-
-IVAN — HITNE AKCIJE:
-  1. 2x Hetzner CCX33 — u narudžbi (po planu) ✅
-  2. Gmail OAuth credentials              → ovaj tjedan
-  3. memio.hr registracija                → odmah
-  4. Marija: JournalEntry dry-run pregled → 08.04.
-  5. MEMIO konzorcij — Marija Cacic       → ovaj tjedan
-  6. EUIPO TMview — MEMIO trademark       → ovaj tjedan
-
----
+  06.04. | POS 10/10 + RIST fixovi        | CC Code   | 🔥
+  06.04. | Nginx reload (memio.pet rute)   | Ivan/CC   | 🔥
+  07.04. | QA + final audit 10/10          | CC+Sonnet | 🔥
+  08.04. | Marija dry-run                  | Marija    | ⏳
+  15.04. | GO/NO-GO + PRODUKCIJA           | Ivan+Marija | ⏳
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
