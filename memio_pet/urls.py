@@ -10,4 +10,8 @@ urlpatterns = [
     path("pas/<str:chip_or_tag>/", views.pet_profile_page, name="pet_profile"),
     path("pas/<str:chip_or_tag>/qr/", views.pet_qr_code, name="pet_qr"),
     path("uzgajivac/<uuid:breeder_id>/", views.breeder_profile_page, name="breeder_profile"),
+
+    # BARF + Badge (Sprint BARF)
+    path("badge/<uuid:breeder_id>/", views.njuskalo_badge, name="njuskalo_badge"),
+    path("barf/", views.barf_listings, name="barf_listings"),
 ]

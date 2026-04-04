@@ -168,3 +168,56 @@ def breeder_profile_page(request, breeder_id):
         "trust_label": trust_label,
     }
     return render(request, "memio_pet/breeder.html", context)
+
+
+# ════════════════════════════════════════════════════════════
+# BARF Marketplace + Njuškalo Badge (Sprint BARF)
+# ════════════════════════════════════════════════════════════
+
+def njuskalo_badge(request, breeder_id):
+    """Trust Badge SVG — javno, za embed u Njuškalo oglase."""
+    from memio_pet.models import BreederProfile
+    from django.http import HttpResponse
+
+    try:
+        breeder = BreederProfile.objects.get(pk=breeder_id)
+    except BreederProfile.DoesNotExist:
+        return HttpResponse('Not Found', status=404)
+
+    trust = breeder.trust_score or 0
+    name = (breeder.name or 'Uzgajivač')[:20]
+    verified = breeder.is_cro_validated
+    colour = '#4caf7d' if trust >= 80 else '#c9a84c' if trust >= 50 else '#888'
+    check = '&#10003;' if verified else '?'
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="340" height="90" viewBox="0 0 340 90">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#2d2d4a"/>
+  </linearGradient></defs>
+  <rect width="340" height="90" rx="10" fill="url(#bg)"/>
+  <rect x="0" y="0" width="6" height="90" rx="3" fill="{colour}"/>
+  <text x="24" y="28" font-family="Arial,sans-serif" font-size="11" fill="#888" letter-spacing="2">MEMIO.PET VERIFICIRANO</text>
+  <text x="24" y="54" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#e8e8e8">{check} {name}</text>
+  <text x="24" y="75" font-family="Arial,sans-serif" font-size="12" fill="{colour}" font-weight="600">TRUST SCORE {trust}/100</text>
+  <text x="320" y="75" font-family="Arial,sans-serif" font-size="9" fill="#555" text-anchor="end">memio.pet</text>
+</svg>"""
+
+    response = HttpResponse(svg, content_type='image/svg+xml')
+    response['Cache-Control'] = 'public, max-age=3600'
+    return response
+
+
+def barf_listings(request):
+    """Javni popis BARF ponuda — bez prijave."""
+    from memio_pet.models import RawFoodListing
+    from django.utils import timezone
+
+    today = timezone.now().date()
+    listings = (RawFoodListing.objects.filter(status='available', expires_at__gte=today)
+                .select_related('company')
+                .order_by('-created_at')[:50])
+
+    return render(request, 'memio_pet/barf_listings.html', {
+        'listings': listings,
+        'page_title': 'BARF Marketplace',
+    })

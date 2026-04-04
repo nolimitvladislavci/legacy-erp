@@ -53,6 +53,13 @@ class BreederProfile(models.Model):
     trust_breakdown = models.JSONField(default=dict, blank=True)
     trust_updated   = models.DateTimeField(null=True, blank=True)
 
+    # BARF + Njuškalo (Sprint BARF)
+    njuskalo_ad_url = models.URLField(blank=True, verbose_name='Njuškalo oglas URL')
+    barf_partner = models.BooleanField(default=False, verbose_name='BARF partner')
+    barf_radius_km = models.PositiveIntegerField(default=50, verbose_name='BARF radius (km)')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
@@ -380,3 +387,95 @@ class BreederReview(models.Model):
     def __str__(self):
         stars = "★" * self.rating + "☆" * (5 - self.rating)
         return f"{stars} {self.reviewer_name} -> {self.breeder.name}"
+
+
+# ════════════════════════════════════════════════════════════
+# BARF Marketplace — circular economy OPG ↔ uzgajivač
+# ════════════════════════════════════════════════════════════
+
+class RawFoodListing(models.Model):
+    PRODUCT_CHOICES = [
+        ('vrat_pileci',   'Pileći vrat'),
+        ('nogice_pilece', 'Pileće nogice'),
+        ('jetra',         'Jetra (piletina/svinjetina)'),
+        ('srce',          'Srce'),
+        ('bubrezi',       'Bubrezi'),
+        ('kosti',         'Kosti za grickanje'),
+        ('mijesano',      'Mješoviti paket'),
+        ('ostalo',        'Ostalo'),
+    ]
+    STATUS_CHOICES = [
+        ('available', 'Dostupno'),
+        ('reserved',  'Rezervirano'),
+        ('sold',      'Prodano'),
+        ('expired',   'Isteklo'),
+    ]
+
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                 related_name='raw_food_listings')
+    product_type = models.CharField(max_length=30, choices=PRODUCT_CHOICES)
+    quantity_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Količina (kg)')
+    price_eur_kg = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Cijena EUR/kg')
+    available_from = models.DateField(verbose_name='Dostupno od')
+    expires_at = models.DateField(verbose_name='Rok (sirovina)')
+    k3_cert_number = models.CharField(max_length=100, blank=True, verbose_name='K3 veterinarska potvrda')
+    is_antibiotic_free = models.BooleanField(default=False, verbose_name='Bez antibiotika')
+    is_free_range = models.BooleanField(default=False, verbose_name='Slobodan uzgoj')
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'BARF ponuda'
+        verbose_name_plural = 'BARF ponude'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_product_type_display()} — {self.quantity_kg}kg | {self.company.name}"
+
+    @property
+    def total_eur(self):
+        return self.quantity_kg * self.price_eur_kg
+
+    def save(self, *args, **kwargs):
+        if not self.latitude and self.company:
+            self.latitude = getattr(self.company, 'latitude', None)
+            self.longitude = getattr(self.company, 'longitude', None)
+        super().save(*args, **kwargs)
+
+
+class RawFoodOrder(models.Model):
+    STATUS_CHOICES = [
+        ('pending',   'Čeka potvrdu'),
+        ('confirmed', 'Potvrđeno'),
+        ('picked_up', 'Preuzeto'),
+        ('cancelled', 'Otkazano'),
+    ]
+
+    listing = models.ForeignKey(RawFoodListing, on_delete=models.CASCADE, related_name='orders')
+    breeder = models.ForeignKey('BreederProfile', on_delete=models.SET_NULL,
+                                 null=True, blank=True, related_name='barf_orders')
+    buyer_company = models.ForeignKey('companies.Company', on_delete=models.SET_NULL,
+                                       null=True, blank=True)
+    quantity_kg = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    batch_id = models.CharField(max_length=50, blank=True,
+                                 help_text='RF-YYYY-NNNN — sljedivost od OPG do zdjelice')
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'BARF narudžba'
+        verbose_name_plural = 'BARF narudžbe'
+
+    def __str__(self):
+        return f"{self.batch_id or self.pk} — {self.quantity_kg}kg | {self.status}"
+
+    def save(self, *args, **kwargs):
+        if not self.batch_id:
+            import datetime
+            seq = RawFoodOrder.objects.filter(created_at__year=datetime.date.today().year).count() + 1
+            self.batch_id = f"RF-{datetime.date.today().year}-{seq:04d}"
+        super().save(*args, **kwargs)

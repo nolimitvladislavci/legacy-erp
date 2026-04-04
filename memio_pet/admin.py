@@ -397,3 +397,18 @@ class BreederReviewAdmin(admin.ModelAdmin):
                 update_trust_score(obj.breeder)
             except Exception:
                 pass
+
+
+from memio_pet.models import RawFoodListing, RawFoodOrder
+
+@admin.register(RawFoodListing)
+class RawFoodListingAdmin(admin.ModelAdmin):
+    list_display = ('company', 'product_type', 'quantity_kg', 'price_eur_kg', 'status', 'is_free_range')
+    list_filter = ('product_type', 'status', 'is_antibiotic_free', 'is_free_range')
+    search_fields = ('company__name', 'k3_cert_number')
+
+@admin.register(RawFoodOrder)
+class RawFoodOrderAdmin(admin.ModelAdmin):
+    list_display = ('batch_id', 'listing', 'quantity_kg', 'status', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('batch_id',)

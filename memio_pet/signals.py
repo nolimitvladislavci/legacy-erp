@@ -119,3 +119,15 @@ def on_animal_chip_registered(sender, instance, created, **kwargs):
             },
             verified_by="System (auto)",
         )
+
+
+@receiver(post_save, sender='memio_pet.RawFoodListing')
+def on_barf_listing_created(sender, instance, created, **kwargs):
+    """Nova BARF ponuda → notificiraj uzgajivače u radijusu."""
+    if created and instance.status == 'available':
+        try:
+            from memio_pet.tasks import notify_barf_breeders
+            notify_barf_breeders.delay(instance.pk)
+        except Exception as e:
+            import logging
+            logging.getLogger('memio_pet').warning('BARF signal: %s', e)

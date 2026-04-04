@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}BARF Marketplace{% endblock %}
+{% block page_title %}BARF Marketplace{% endblock %}
+{% block extra_css %}
+<style>
+.barf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.barf-card{background:var(--card,#1e293b);border:1.5px solid var(--border,#252830);border-radius:10px;padding:1.25rem;transition:all .2s}
+.barf-card:hover{border-color:var(--gold,#c9a84c);transform:translateY(-2px)}
+.barf-type{font-size:1.1rem;font-weight:700;color:var(--text,#e2e8f0);margin-bottom:.3rem}
+.barf-meta{font-size:.8rem;color:var(--muted,#64748b);margin-bottom:.5rem}
+.barf-price{font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)}
+.barf-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.barf-badge{font-size:.68rem;padding:.2rem .5rem;border-radius:4px;font-weight:600}
+.barf-badge.green{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.barf-badge.blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.barf-badge.amber{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.barf-opg{font-size:.82rem;color:var(--text-dim,#94a3b8);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.barf-cta{display:inline-block;margin-top:.75rem;padding:.5rem 1rem;background:var(--gold);color:#0f172a;border-radius:6px;font-size:.82rem;font-weight:700;text-decoration:none;min-height:40px}
+.barf-cta:hover{background:var(--gold2,#e8c96a)}
+.barf-empty{text-align:center;padding:4rem 2rem;color:var(--muted)}
+</style>
+{% endblock %}
+{% block content %}
+<p style="color:var(--muted);margin-bottom:1.5rem">Svježa sirova hrana za ljubimce — direktno od hrvatskih OPG-ova. K3 certificirano.</p>
+
+{% if listings %}
+<div class="barf-grid">
+{% for l in listings %}
+<div class="barf-card">
+  <div class="barf-type">{{ l.get_product_type_display }}</div>
+  <div class="barf-meta">{{ l.quantity_kg }} kg | dostupno od {{ l.available_from|date:"d.m.Y" }}</div>
+  <div class="barf-price">{{ l.price_eur_kg }} EUR/kg</div>
+  <div class="barf-badges">
+    {% if l.is_free_range %}<span class="barf-badge green">Slobodan uzgoj</span>{% endif %}
+    {% if l.is_antibiotic_free %}<span class="barf-badge blue">Bez antibiotika</span>{% endif %}
+    {% if l.k3_cert_number %}<span class="barf-badge amber">K3: {{ l.k3_cert_number|truncatechars:15 }}</span>{% endif %}
+  </div>
+  {% if l.description %}<div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">{{ l.description|truncatechars:80 }}</div>{% endif %}
+  <div class="barf-opg">{{ l.company.name }} {% if l.company.city %}| {{ l.company.city }}{% endif %}</div>
+  <div style="font-size:.72rem;color:var(--muted)">Rok: {{ l.expires_at|date:"d.m.Y" }}</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="barf-empty">
+  <div style="font-size:3rem;margin-bottom:1rem">&#129367;</div>
+  <h3 style="color:var(--text)">Trenutno nema ponuda</h3>
+  <p>OPG-ovi dodaju ponude kad imaju svježu sirovinu. Provjerite ponovo uskoro.</p>
+</div>
+{% endif %}
+{% endblock %}
