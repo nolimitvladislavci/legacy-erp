@@ -29,7 +29,7 @@ def check_availability(order):
     all_ok = True
     for req in requirements:
         item = req['item']
-        available = Decimal(str(getattr(item, 'stock_quantity', 0)))
+        available = Decimal(str(getattr(item, 'quantity', 0)))
         required = req['required']
         sufficient = available >= required
         if not sufficient:
@@ -66,15 +66,15 @@ def consume_materials(order, user=None):
 
         # Lock the item row
         item = InventoryItem.objects.select_for_update().get(pk=line.item_id)
-        old_stock = item.stock_quantity
+        old_stock = item.quantity
 
-        if item.stock_quantity < qty_needed:
+        if item.quantity < qty_needed:
             raise ValueError(
-                f'Nedovoljno {item.name}: potrebno {qty_needed}, dostupno {item.stock_quantity}'
+                f'Nedovoljno {item.name}: potrebno {qty_needed}, dostupno {item.quantity}'
             )
 
-        item.stock_quantity -= qty_needed
-        item.save(update_fields=['stock_quantity'])
+        item.quantity -= qty_needed
+        item.save(update_fields=['quantity'])
 
         # Create StockMovement transaction
         from inventory.models import StockMovement
@@ -85,7 +85,7 @@ def consume_materials(order, user=None):
             quantity=-qty_needed,
             unit=line.unit,
             stock_before=old_stock,
-            stock_after=item.stock_quantity,
+            stock_after=item.quantity,
             production_order=order,
             batch_number=order.batch_number,
             reference=f'Utrošak za RN {order.order_number}',
@@ -97,7 +97,7 @@ def consume_materials(order, user=None):
             'item_name': item.name,
             'quantity': float(qty_needed),
             'old_stock': float(old_stock),
-            'new_stock': float(item.stock_quantity),
+            'new_stock': float(item.quantity),
         })
 
     # Log
@@ -123,9 +123,9 @@ def produce_output(order, quantity, user=None):
     output_item = InventoryItem.objects.select_for_update().get(
         pk=order.bom.output_item_id
     )
-    old_stock = output_item.stock_quantity
-    output_item.stock_quantity += quantity
-    output_item.save(update_fields=['stock_quantity'])
+    old_stock = output_item.quantity
+    output_item.quantity += quantity
+    output_item.save(update_fields=['quantity'])
 
     # Create StockMovement transaction
     from inventory.models import StockMovement
@@ -136,7 +136,7 @@ def produce_output(order, quantity, user=None):
         quantity=quantity,
         unit=order.bom.output_unit,
         stock_before=old_stock,
-        stock_after=output_item.stock_quantity,
+        stock_after=output_item.quantity,
         production_order=order,
         batch_number=order.batch_number,
         reason=f'Proizvedeno iz RN {order.order_number}',
@@ -153,11 +153,11 @@ def produce_output(order, quantity, user=None):
         order=order,
         action='produced',
         quantity=quantity,
-        description=f'+{quantity} {order.bom.output_unit} {output_item.name} (stock: {old_stock}→{output_item.stock_quantity})',
+        description=f'+{quantity} {order.bom.output_unit} {output_item.name} (stock: {old_stock}→{output_item.quantity})',
         metadata={
             'item_id': str(output_item.pk),
             'old_stock': float(old_stock),
-            'new_stock': float(output_item.stock_quantity),
+            'new_stock': float(output_item.quantity),
         },
         user=user,
     )

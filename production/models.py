@@ -387,7 +387,7 @@ class ProductionOrder(models.Model):
                 'item': line.item,
                 'required': line.effective_quantity * multiplier,
                 'unit': line.unit,
-                'available': getattr(line.item, 'stock_quantity', 0),
+                'available': getattr(line.item, 'quantity', 0),
             })
         return requirements
 

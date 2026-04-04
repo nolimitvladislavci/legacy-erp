@@ -44,7 +44,7 @@ class Command(BaseCommand):
             obj, _ = InventoryItem.objects.get_or_create(
                 company=company, sku=sku,
                 defaults={'name': name, 'unit_price': price,
-                          'stock_quantity': stock, 'is_active': True})
+                          'quantity': stock, 'is_active': True})
             return obj
 
         brasno = _item('Brašno T-550 (kg)', 'SIR-001', Decimal('0.80'), 1000)

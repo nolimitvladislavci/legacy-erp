@@ -77,7 +77,7 @@ def mrp_run(company, horizon_days=30, user=None):
         item = items.get(item_id)
         if not item:
             continue
-        on_hand = getattr(item, 'stock_quantity', Decimal('0'))
+        on_hand = getattr(item, 'quantity', Decimal('0'))
         # Oduzmi i već planirane (nepotvrđene) naloge
         already_planned = MRPPlannedOrder.objects.filter(
             company=company, item=item, status='planned',
