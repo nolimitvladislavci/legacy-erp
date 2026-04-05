@@ -318,27 +318,9 @@ urlpatterns += i18n_patterns(
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
     
-    # Boxgram Web Routes (public pages)
-    path('ljubimac/<slug:slug>/', __import__('boxgram.views', fromlist=['public_profile']).public_profile, name='public_profile'),
-    path('feed/', __import__('boxgram.views', fromlist=['public_feed']).public_feed, name='public_feed'),
-    path('takmicenje/<uuid:competition_id>/', __import__('boxgram.views', fromlist=['competition_detail']).competition_detail, name='competition_detail'),
-    path('takmicenje/<uuid:competition_id>/vote/', __import__('boxgram.views', fromlist=['competition_vote_web']).competition_vote_web, name='competition_vote_web'),
-    path('ljubimac/<slug:slug>/', __import__('boxgram.views', fromlist=['public_profile']).public_profile, name='public_profile'),
+    # Boxgram Web Routes (public) — prefiks boxgram/ za memio.pet nginx proxy
+    path('boxgram/', include('boxgram.urls', namespace='boxgram')),
 
-    
-    path('feed/', __import__('boxgram.views', fromlist=['public_feed']).public_feed, name='public_feed'),
-
-    
-    path('takmicenje/<uuid:competition_id>/', __import__('boxgram.views', fromlist=['competition_detail']).competition_detail, name='competition_detail'),
-
-    
-    path('takmicenje/<uuid:competition_id>/vote/', __import__('boxgram.views', fromlist=['competition_vote_web']).competition_vote_web, name='competition_vote_web'),
-
-    
-    
-
-    
-    path('api/boxgram/', include('boxgram.urls', namespace='boxgram')),
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     path('honorari/', include('honorari.urls')),
