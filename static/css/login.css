@@ -89,3 +89,14 @@ body {
 .pwd-wrap input{width:100%;padding-right:40px;box-sizing:border-box}
 .pwd-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);
 background:none;border:none;cursor:pointer;color:var(--gold,var(--gold));font-size:18px;padding:0}
+
+/* F1 Audit: Login mobile fixes */
+@media(max-width:480px){
+  .card{padding:24px 20px;border-radius:12px}
+  .login-tabs{flex-wrap:wrap}
+  .login-tab{flex:1 1 48%;font-size:.65rem;padding:8px 6px}
+  .logo h1{font-size:1.5rem}
+  .field input{padding:14px;font-size:1rem}
+  .btn-primary{padding:14px;font-size:.9rem}
+  .role-badges{display:none}
+}
