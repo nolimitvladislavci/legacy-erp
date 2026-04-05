@@ -1069,3 +1069,74 @@ body,
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem var(--primary-color-faded);
 }
+/* ═══════════════════════════════════════════════════════════════
+   F1 AUDIT: Form validation visibility + required markers
+   ═══════════════════════════════════════════════════════════════ */
+.form-label.required::after,
+label.required::after {
+    content: " *";
+    color: var(--danger-color, #dc3545);
+    font-weight: 700;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid,
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+    border-color: var(--danger-color, #dc3545) !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+.invalid-feedback,
+.errorlist {
+    color: var(--danger-color, #dc3545);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0 0;
+}
+
+.errorlist li {
+    padding: 2px 0;
+}
+
+/* Success feedback */
+.valid-feedback {
+    color: var(--success-color, #16a34a);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Toast notification improvements — ensure visibility */
+.toast-msg {
+    animation: slideInRight 0.3s ease;
+}
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Breadcrumb block styling */
+.page-breadcrumb {
+    padding: 8px 0;
+    font-size: 0.78rem;
+    color: var(--text-color-muted, #94a3b8);
+}
+.page-breadcrumb a {
+    color: var(--text-color-muted, #94a3b8);
+    text-decoration: none;
+}
+.page-breadcrumb a:hover {
+    color: var(--primary-color, #c9a84c);
+}
+.page-breadcrumb .separator {
+    margin: 0 6px;
+    opacity: 0.5;
+}

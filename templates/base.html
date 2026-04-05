@@ -365,6 +365,7 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
               </form>
             </div>
             {% endif %}
+            {% block breadcrumb %}{% endblock %}
             <main id="main-content" role="main">{% block content %}{% endblock %}</main>
         </div>
     </div>
