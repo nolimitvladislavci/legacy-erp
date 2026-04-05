@@ -357,3 +357,15 @@
     .borg-toast.error{background:var(--red)}
     .borg-toast.warning{background:#d97706}
     @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* ═══ F1 AUDIT: Sidebar light mode fix ═══ */
+:root .sidebar { color: var(--text-dim, #475569); }
+:root .sidebar-brand { color: var(--text, #0f172a); }
+:root .sidebar a { color: var(--text-dim, #475569); }
+:root .sidebar a:hover, :root .sidebar a.active { color: var(--text, #0f172a); }
+:root .sidebar-section { color: var(--muted2, #64748b); }
+:root .sidebar-group-toggle { color: var(--text-dim, #475569); }
+[data-theme="dark"] .sidebar { color: #cbd5e1; }
+[data-theme="dark"] .sidebar-brand { color: white; }
+[data-theme="dark"] .sidebar a { color: var(--text-dim, #94a3b8); }
+[data-theme="dark"] .sidebar a:hover, [data-theme="dark"] .sidebar a.active { color: white; }
