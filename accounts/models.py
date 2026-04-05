@@ -307,3 +307,9 @@ class DeviceToken(models.Model):
             company = self.company.name if self.company_id else ''
             self.label = '%s — %s' % (name, company)
         super().save(*args, **kwargs)
+
+
+# ════════════════════════════════════════════════════════════════
+# TriKey — 3 ključa za 1 bravu
+# ════════════════════════════════════════════════════════════════
+from accounts.trikey import TriKeyProfile  # noqa: E402

@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from . import trikey_views
 from . import deactivation
 from . import data_export
 
@@ -20,4 +21,14 @@ urlpatterns = [
     path('deactivate/cancel/', deactivation.cancel_deactivation, name='cancel_deactivation'),
     # GDPR data export
     path('export/', data_export.export_company_data, name='export_company_data'),
+
+    # ── TriKey Authentication ──────────────────────────────────
+    path('trikey/login/', trikey_views.trikey_login, name='trikey_login'),
+    path('trikey/pin/setup/', trikey_views.pin_setup, name='pin_setup'),
+    path('trikey/pin/recovery/', trikey_views.pin_recovery, name='pin_recovery'),
+    path('trikey/passkey/options/', trikey_views.passkey_register_options, name='passkey_options'),
+    path('trikey/passkey/complete/', trikey_views.passkey_register_complete, name='passkey_complete'),
+    path('trikey/business-key/', trikey_views.business_key_register, name='business_key_register'),
+    path('trikey/status/', trikey_views.trikey_status, name='trikey_status'),
+    path('api/oib-lookup/', trikey_views.api_oib_lookup, name='api_oib_lookup'),
 ]
