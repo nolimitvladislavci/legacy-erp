@@ -54,3 +54,8 @@ def prijava_azila(request):
                 pass
             return redirect("/no-limit/?prijava=ok")
     return redirect("/no-limit/")
+
+
+def azil_landing(request):
+    """Landing page za azil program — /no-limit/."""
+    return render(request, "no_limit/azil_landing.html")
