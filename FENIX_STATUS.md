@@ -1,97 +1,115 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-05 — MCP fix
-# Git HEAD: 403be822
-# Server: gunicorn ✅ nginx ✅ mcp-fina ✅ | disk 39%
+# Zadnje azuriranje: 2026-04-06 00:10 — Sonnet koordinacija
+# Git HEAD: 95f0a6f9
+# Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 39% | RAM 3.8/7.6GB
 
 ---
 
-SESIJA 05-06.04.2026. — SAŽETAK
+## SESIJA 06.04.2026. (nastavak) — RATNA SOBA AKTIVNA
 
-Commiti (Sonnet + CC):
-  403be822  feat(mega-7): TriKey + CostCenter + Honorari + FINA parser + Pricing + Registration
-  c8735f93  docs(fenix): TriKey konfiguracija + cjenik + OIB
-  da7c397f  feat(auth): TriKey — 3 ključa za 1 bravu
-  d7ac9388  docs(strategy): Konkurencija 2026 — tržišna analiza
-  8e4f68b3  feat(sales): 3 Pupilla rupe zatvorene (cjenici, narudžbe, saldakonti)
-  232e3dc8  feat(production): MRP 10/10 — Pupillina prednost zatvorena
-  a3624e06  fix: register page — 409KB skripti maknuto, light theme CSS
-  3a55e598  fix: nginx static cache immutable→must-revalidate (1h)
-  eb57d0c8  fix: memio_pet views .using('memio_pets') — 302→200
+### Novi commiti ove sesije:
+  95f0a6f9  fix(pdf): CSS var() → inline values — xhtml2pdf crash fix (22 templates)
+  fb5703b2  fix(boxgram): signals correct field names + video_downloader.py
+  (+ svi prethodni iz CC sesije — boxgram, memio_world, no_limit, docs)
 
 ---
 
-NOVO U OVOJ SESIJI:
+## STANJE FRONTOVA (06.04. 00:10)
 
-  memio.pet:
-    - 12/12 HTTP audit ✅
-    - .using('memio_pets') fix na svim views
-    - 3 test firme obrisane (Tonka, Dado, Firma d.o.o.)
+### ✅ IZGRAĐENO (CC + Sonnet ova sesija):
 
-  Register stranica:
-    - 409KB JS maknuto (html5-qrcode, fenix-scan, fenix-camera, fenix-permissions)
-    - Light/dark toggle fix (data-theme atribut → CSS var match)
-    - CSS cache: immutable→must-revalidate 1h
+  BOXGRAM (memio.pet socijalni sloj):
+    - PetProfile, LifeEvent, EventMedia, SocialImport, Competition, PetFollower, EventHeart
+    - Views: feed, public_profile, competition, add_event, social import flow
+    - Services: social_import.py, video_downloader.py, ai_enrichment.py, memio_bridge.py
+    - Templates: feed.html, public_profile.html, competition_detail.html, import_wizard.html
+    - Bridge: AnimalProfile signal → auto Boxgram PetProfile + LifeEvent
+    - LIVE: memio.pet/boxgram/ljubimac/rex-pas-232d99f5/ ✅ 200
+    - LIVE: memio.pet/boxgram/ljubimac/bella-pas-c94b0fa2/ ✅ 200
+    - LIVE: memio.pet/boxgram/feed/ ✅ 200
+    - Migration: 0001_initial ✅
 
-  Production MRP (CC — 35 fajlova, ~5.829 linija):
-    - 7 modela: BOM, BOMLine, WorkCenter, ProductionOrder...
-    - FSM 7 stanja, BOMCostEngine, MRPPlanner
-    - Konto knjiženje (6000/6100/6200/1300)
-    - 53 testa zeleno
-    - URL: /hr/proizvodnja/
+  MEMIO_WORLD (digitalizacija djetinjstva):
+    - Modeli: WaitlistEntry, TimeCapsule, MemoryVault, FamilyStory
+    - API: /api/memio-world/waitlist/ (POST) ✅
+    - Migration: 0001_initial ✅
+    - Čeka: Marija Čačić (knjižničar) za pokretanje
 
-  Mega-7 sprint (CC — 45 fajlova, 5.430 linija):
-    - honorari/ — 4 modela, HR porezni obračun, JOPPD
-    - konto/parsers.py — camt.053 XML + CSV + MT940
-    - konto/cost_center — profitni centri + budget tracking
-    - accounts/trikey — login + status templates
-    - registration/trikey — OIB auto-fill flow
-    - landing pricing — 5 kartica (0/9/19/49/149€)
+  NO_LIMIT (udruga + azil):
+    - Model: AzilPrijava
+    - Views: preuzmi_vodic (PDF), vodic_online, prijava_azila
+    - Templates: vodic_online.html, PDF vodič
+    - Azil dashboard, forme (intervencija, terenska, udomljavanje, životinja)
+    - LIVE: /no-limit/vodic/ ✅ 200
+    - LIVE: /no-limit/azili/prijava/ → login ✅
 
-  Pricing strategija:
-    - Pupilla analiza završena (57 modula, 7.844€ vs LIMIT Connect)
-    - Pricing plan kreiran (18 planova, 5 segmenata)
-    - MRR čišćenje: ghost MRR -846€ (3 test firme)
-    - Realni MRR: 1.534€/mj
-    - Konjik Scenarij A (639€) — razgovor pending (Ivan)
-
----
-
-LIVE AUDIT REZULTATI (06.04.):
-  ✅ memio.pet: 16/16
-  ✅ Production: /hr/proizvodnja/ radi (302→login)
-  ✅ Honorari: /hr/honorari/ radi (302→login)
-  ✅ Konto cost-centers + bank upload: radi
-  ✅ TriKey login: 200 OK
-  ✅ Pricing + Landing: 200 OK
-  ⚠️  Django check: 0 errors (6 warnings — stare, nema novih)
-  ✅ Migracije: sve aplicirane [X]
-
-  NOTE: /radna-mjesta/ ne postoji — CC koristio /stanice/
-        /honorari/nova/ ne postoji — CC koristio /novi/
-        → funkcionalni ekvivalent, drugačiji URL-ovi
+  PDF FIX (Sonnet — direktno):
+    - 22 PDF template fajla popravljena: var() → inline boje
+    - xhtml2pdf crash eliminiran (bio: ValueError: Invalid color value var(--gold))
+    - Commit: 95f0a6f9
 
 ---
 
-RATNI RASPORED:
-  07.04. | QA + final audit                     | CC+Sonnet| 🔥
-  08.04. | Marija dry-run + ambasador brief      | Marija   | ⏳
-  12.04. | Load test (CCX33)                    | CC       | ⏳
-  14.04. | DNS cutover priprema                  | Ivan     | ⏳
-  15.04. | GO/NO-GO + PRODUKCIJA                 | Ivan+Marija | ⏳
+## TASK FAJLOVI NA SERVERU (CC čita redom):
 
-PENDING (Ivan):
+  CC_TASK_F1_UI_AUDIT.md        — LIMIT Connect UI/UX audit (POS + interni moduli)
+  CC_TASK_F2_MEMIO_PET_ONBOARDING.md — memio.pet landing + registracija uzgajivača
+  CC_TASK_F3_MEMIO_WORLD.md     — memio.world landing + ChildProfile modeli
+  CC_TASK_F5_NO_LIMIT_AZIL.md   — azil mobile POS skin + public landing
+  GEMINI_TASK_F6_QA_AUDIT.md    — full QA audit za 07.04.
+  MARIJA_BRIEF_08_04.md         — brief za Marija dry-run (Ivan šalje)
+
+---
+
+## LIVE HTTP AUDIT (06.04. 00:05):
+  ✅ memio.pet/boxgram/ljubimac/rex-*     — 200
+  ✅ memio.pet/boxgram/ljubimac/bella-*   — 200
+  ✅ memio.pet/boxgram/feed/              — 200
+  ✅ memio.pet/barf/                      — 200
+  ✅ limit-connect.com/no-limit/vodic/    — 200
+  ✅ limit-connect.com/hr/               — 302 → login
+  ✅ Django check: 0 errors, 0 new warnings
+  ✅ Migracije: sve aplicirane
+
+  BUGS RIJEŠENI:
+  ✅ PDF xhtml2pdf CSS var() crash — FIXED 95f0a6f9
+  ✅ fenix-mcp inactive — FIXED (restartan)
+
+  PENDING (LOW):
+  ⚠️  FenixScan OCR fallback — graceful handling kad Haiku odbija sliku
+
+---
+
+## RATNI RASPORED:
+  07.04. | QA audit (Gemini F6) + UI popravci (CC F1)    | CC+Gemini | 🔥
+  07.04. | memio.pet onboarding + memio.world landing     | CC F2+F3  | 🔥
+  08.04. | Marija dry-run                                  | Marija    | ⏳
+  12.04. | Load test (CCX33)                               | CC        | ⏳
+  14.04. | DNS cutover priprema                            | Ivan      | ⏳
+  15.04. | GO/NO-GO + PRODUKCIJA                           | Ivan+Marija | ⏳
+
+## PENDING (Ivan):
   - Konjik razgovor: Scenarij A (639€/mj umjesto 359€)
+  - Marija: email brief — MARIJA_BRIEF_08_04.md je spreman, Ivan šalje
   - Gmail OAuth credentials
-  - memio.hr registracija
-  - EUIPO MEMIO trademark
+  - memio.hr registracija domene
+  - EUIPO MEMIO trademark prijava
   - HZZ Osijek kvotni upit (10 ambasadora)
-  - Marija: email brief 08.04.
 
-PRICING (dogovoriti finalno):
+## PRICING (finalizirati):
   - Micro: 9€ ili 10€?
   - Starter: 19€ ili 22€?
   - Professional: 49€ ili 69€?
   - Komunalni jednokratni: 990€/1.990€ OK?
   - Računovođa: odvojen plan ili Professional?
+
+## OCJENE STANJA (06.04. 00:10):
+  LIMIT Connect backend:    8.5/10
+  LIMIT Connect UI/UX:      6.5/10 ← F1 task aktivan
+  Boxgram:                  7.5/10 ← feed + profili živi, treba onboarding
+  memio.pet:                7/10  ← infrastruktura OK, nema landing/registracija
+  memio.world:              4/10  ← modeli OK, nema sučelje
+  NO LIMIT / azil:          5/10  ← backend OK, nema public landing + mobile skin
+  Server stabilnost:        9.5/10
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
