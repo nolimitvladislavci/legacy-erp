@@ -44,6 +44,7 @@
       <button class="login-tab active" onclick="showTab('password', this)">{% trans "🔑 Lozinka" %}</button>
       <button class="login-tab" onclick="showTab('magic', this)">{% trans "✉ Magic link" %}</button>
       <button class="login-tab" onclick="showTab('device', this)">{% trans "📱 Mobitel" %}</button>
+      <button class="login-tab" onclick="showTab('trikey', this)">{% trans "🔐 PIN" %}</button>
     </div>
 
     <!-- PASSWORD LOGIN -->
@@ -125,6 +126,28 @@
       </div>
     </div>
 
+
+    <!-- TRIKEY PIN LOGIN -->
+    <div class="form-section" id="tab-trikey">
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+        {% trans "Brza prijava PIN-om — kao mBanking. 6 znamenki." %}
+      </p>
+      <form method="post" action="{% url 'trikey_login' %}">
+        {% csrf_token %}
+        <div class="field">
+          <label>{% trans "Email" %}</label>
+          <input type="email" name="email" placeholder="{% trans 'email@tvrtka.hr' %}" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label>{% trans "PIN (6 znamenki)" %}</label>
+          <input type="password" name="pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" required autocomplete="off" style="letter-spacing:.3em;text-align:center;font-size:1.2rem">
+        </div>
+        <button type="submit" class="btn-primary">{% trans "Prijava PIN-om →" %}</button>
+      </form>
+      <div class="link-row" style="margin-top:16px">
+        <a href="{% url 'pin_setup' %}">{% trans "Postavi PIN →" %}</a>
+      </div>
+    </div>
   </div><!-- /card -->
 
   <div class="footer-note">
