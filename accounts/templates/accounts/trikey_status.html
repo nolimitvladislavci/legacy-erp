@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}TriKey Status{% endblock %}
+{% block page_title %}TriKey — 3 ključa za 1 bravu{% endblock %}
+{% block content %}
+<style>
+.trikey-wrap{max-width:700px;margin:0 auto}
+.key-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.key-box{background:#1e293b;border:2px solid #334155;border-radius:16px;padding:24px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.key-box.armed{border-color:#22c55e;background:linear-gradient(135deg,rgba(34,197,94,.05),rgba(34,197,94,.02))}
+.key-box.armed::after{content:'';position:absolute;top:0;right:0;width:24px;height:24px;background:#22c55e;clip-path:polygon(100% 0,0 0,100% 100%)}
+.key-box .icon{font-size:2rem;margin-bottom:8px;display:block}
+.key-box .name{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin-bottom:4px}
+.key-box .status{font-size:.82rem;font-weight:700}
+.key-box .status.on{color:#22c55e}
+.key-box .status.off{color:#ef4444}
+.key-box .meta{font-size:.72rem;color:#475569;margin-top:6px}
+.armed-bar{background:linear-gradient(90deg,#22c55e,#c9a84c);height:6px;border-radius:3px;margin-bottom:20px}
+.armed-bar-bg{background:#1e293b;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.auth-level{text-align:center;margin-bottom:24px}
+.auth-level .level{font-size:2.2rem;font-weight:900;color:#c9a84c}
+.auth-level .label{font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.action-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:12px}
+.action-card h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:0 0 12px}
+.btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;transition:all .3s;font-size:.85rem}
+.btn-gold:hover{background:#e8c96a;transform:translateY(-1px);color:#0f172a}
+.btn-outline{border:1.5px solid #334155;background:none;color:#94a3b8;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;transition:all .2s;font-size:.85rem}
+.btn-outline:hover{border-color:#c9a84c;color:#c9a84c}
+</style>
+
+<div class="trikey-wrap">
+    <!-- Auth Level -->
+    <div class="auth-level">
+        <div class="level">{{ key_count }}/3</div>
+        <div class="label">
+            {% if is_fully_armed %}Potpuno zaštićen — sva 3 ključa aktivna
+            {% elif key_count == 2 %}Visoka zaštita — još 1 ključ do maksimuma
+            {% elif key_count == 1 %}Osnovna zaštita — dodajte još ključeva
+            {% else %}Bez zaštite — postavite barem PIN
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="armed-bar-bg">
+        <div class="armed-bar" style="width:{{ key_count|divisibleby:3|yesno:'100,0' }}{% if key_count == 1 %}33{% elif key_count == 2 %}66{% elif key_count == 3 %}100{% else %}0{% endif %}%"></div>
+    </div>
+
+    <!-- 3 Key boxes -->
+    <div class="key-overview">
+        <div class="key-box {% if 'PIN' in keys %}armed{% endif %}">
+            <span class="icon">🔢</span>
+            <div class="name">Ključ 1 — PIN</div>
+            <div class="status {% if 'PIN' in keys %}on{% else %}off{% endif %}">
+                {% if 'PIN' in keys %}Aktivan{% else %}Nije postavljen{% endif %}
+            </div>
+            {% if trikey.pin_set_at %}
+            <div class="meta">Postavljen: {{ trikey.pin_set_at|date:"d.m.Y" }}</div>
+            {% endif %}
+        </div>
+        <div class="key-box {% if 'Passkey' in keys %}armed{% endif %}">
+            <span class="icon">👆</span>
+            <div class="name">Ključ 2 — Passkey</div>
+            <div class="status {% if 'Passkey' in keys %}on{% else %}off{% endif %}">
+                {% if 'Passkey' in keys %}Aktivan{% else %}Nije registriran{% endif %}
+            </div>
+            {% if trikey.passkey_device_name %}
+            <div class="meta">{{ trikey.passkey_device_name|truncatechars:25 }}</div>
+            {% endif %}
+        </div>
+        <div class="key-box {% if 'BusinessKey' in keys %}armed{% endif %}">
+            <span class="icon">🏛️</span>
+            <div class="name">Ključ 3 — Business</div>
+            <div class="status {% if 'BusinessKey' in keys %}on{% else %}off{% endif %}">
+                {% if 'BusinessKey' in keys %}Aktivan{% else %}Nije postavljen{% endif %}
+            </div>
+            {% if trikey.fina_cert_expires %}
+            <div class="meta">FINA cert do: {{ trikey.fina_cert_expires|date:"d.m.Y" }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Actions -->
+    {% if 'PIN' not in keys %}
+    <div class="action-card">
+        <h4><i class="fas fa-hashtag me-2" style="color:#c9a84c"></i> Postavi PIN</h4>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:12px">6-znamenkasti PIN za brzi svakodnevni pristup — kao mBanking.</p>
+        <a href="{% url 'accounts:pin_setup' %}" class="btn-gold"><i class="fas fa-plus me-1"></i> Postavi PIN</a>
+    </div>
+    {% else %}
+    <div class="action-card">
+        <h4><i class="fas fa-hashtag me-2" style="color:#22c55e"></i> PIN — Aktivan</h4>
+        <a href="{% url 'accounts:pin_setup' %}" class="btn-outline"><i class="fas fa-edit me-1"></i> Promijeni PIN</a>
+    </div>
+    {% endif %}
+
+    {% if 'Passkey' not in keys %}
+    <div class="action-card">
+        <h4><i class="fas fa-fingerprint me-2" style="color:#c9a84c"></i> Registriraj Passkey</h4>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:12px">Biometrijska prijava — otisak prsta ili Face ID. Nemoguće phishing-irati.</p>
+        <button onclick="registerPasskey()" class="btn-gold" id="passkeyBtn"><i class="fas fa-fingerprint me-1"></i> Registriraj Passkey</button>
+    </div>
+    {% else %}
+    <div class="action-card">
+        <h4><i class="fas fa-fingerprint me-2" style="color:#22c55e"></i> Passkey — Aktivan</h4>
+        <p style="color:#64748b;font-size:.82rem">{{ trikey.passkey_device_name|default:"Registriran" }}</p>
+    </div>
+    {% endif %}
+
+    {% if 'BusinessKey' not in keys %}
+    <div class="action-card">
+        <h4><i class="fas fa-certificate me-2" style="color:#c9a84c"></i> Postavi Business Key</h4>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:12px">FINA certifikat ili ePosrednik API ključ — za osjetljive operacije.</p>
+        <form method="post" action="{% url 'accounts:business_key_register' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                <div>
+                    <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">FINA .p12 certifikat</label>
+                    <input type="file" name="fina_cert" accept=".p12,.pfx" style="font-size:.82rem;color:#94a3b8">
+                </div>
+                <div>
+                    <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">ePosrednik API ključ</label>
+                    <input type="text" name="eposrednik_api_key" class="form-control" style="padding:8px 12px;font-size:.85rem;background:rgba(15,23,42,.6);border:1px solid #334155;color:#fff;border-radius:6px" placeholder="API-xxxxx">
+                </div>
+            </div>
+            <button type="submit" class="btn-gold"><i class="fas fa-upload me-1"></i> Registriraj</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="action-card">
+        <h4><i class="fas fa-certificate me-2" style="color:#22c55e"></i> Business Key — Aktivan</h4>
+        <p style="color:#64748b;font-size:.82rem">
+            {% if trikey.fina_cert_fingerprint %}FINA cert: {{ trikey.fina_cert_fingerprint|truncatechars:16 }}{% endif %}
+            {% if trikey.eposrednik_api_key_hash %}ePosrednik: verificiran{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+async function registerPasskey(){
+    const btn=document.getElementById('passkeyBtn');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i> Čekam...';
+    try{
+        const optResp=await fetch('{% url "accounts:passkey_options" %}');
+        const opts=await optResp.json();
+        opts.challenge=Uint8Array.from(atob(opts.challenge.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+        opts.user.id=Uint8Array.from(atob(opts.user.id.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+        const cred=await navigator.credentials.create({publicKey:opts});
+        const resp=await fetch('{% url "accounts:passkey_complete" %}',{
+            method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+            body:JSON.stringify({id:btoa(String.fromCharCode(...new Uint8Array(cred.rawId))),response:{publicKey:btoa(String.fromCharCode(...new Uint8Array(cred.response.getPublicKey?cred.response.getPublicKey():[])))},deviceName:navigator.userAgent.slice(0,100)})
+        });
+        const r=await resp.json();
+        if(r.ok)location.reload();else alert(r.error||'Greška');
+    }catch(e){alert('Passkey registracija nije uspjela: '+e.message);}
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-fingerprint me-1"></i> Registriraj Passkey';
+}
+</script>
+{% endblock %}

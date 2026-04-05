@@ -1,0 +1,105 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriKey Login — LIMIT CONNECT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body{background:linear-gradient(135deg,#0f172a 0%,#020617 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif;margin:0}
+        .trikey-card{background:rgba(30,41,59,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;width:100%;max-width:440px;box-shadow:0 25px 50px -12px rgba(0,0,0,.5)}
+        .logo-text{color:#fff;font-weight:800;font-size:1.8rem;text-align:center;margin-bottom:8px;letter-spacing:1px}
+        .logo-text span{color:#c9a84c}
+        .subtitle{text-align:center;color:#64748b;font-size:.82rem;margin-bottom:28px}
+        .key-icons{display:flex;justify-content:center;gap:16px;margin-bottom:24px}
+        .key-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid #334155;color:#64748b;transition:all .3s}
+        .key-icon.active{border-color:#c9a84c;color:#c9a84c;background:rgba(201,168,76,.1)}
+        .form-control{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px 15px;border-radius:8px}
+        .form-control:focus{background:rgba(15,23,42,.8);border-color:#c9a84c;box-shadow:0 0 0 .25rem rgba(201,168,76,.25);color:#fff}
+        .form-label{color:#94a3b8;font-size:.9rem;margin-bottom:5px}
+        .btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:12px;border-radius:8px;letter-spacing:.5px;transition:all .3s;width:100%}
+        .btn-gold:hover{background:#e8c96a;transform:translateY(-2px);color:#0f172a}
+        .pin-input{display:flex;gap:8px;justify-content:center;margin:16px 0}
+        .pin-input input{width:48px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:rgba(15,23,42,.6);border:2px solid #334155;border-radius:10px;color:#c9a84c;outline:none;transition:border-color .2s}
+        .pin-input input:focus{border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+        .link-row{text-align:center;margin-top:16px}
+        .link-row a{color:#64748b;font-size:.82rem;text-decoration:none;transition:color .2s}
+        .link-row a:hover{color:#c9a84c}
+        .alert-trikey{background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.3);color:#f87171;border-radius:10px;padding:10px 14px;font-size:.85rem;margin-bottom:16px}
+    </style>
+</head>
+<body>
+    <div class="trikey-card">
+        <div class="logo-text">LIMIT <span>CONNECT</span></div>
+        <div class="subtitle">3 ključa za 1 bravu — TriKey Auth</div>
+        <div class="key-icons">
+            <div class="key-icon active" title="PIN"><i class="fas fa-hashtag"></i></div>
+            <div class="key-icon" title="Passkey"><i class="fas fa-fingerprint"></i></div>
+            <div class="key-icon" title="Business Key"><i class="fas fa-certificate"></i></div>
+        </div>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="alert-trikey"><i class="fas fa-exclamation-circle me-1"></i> {{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'accounts:trikey_login' %}" id="pinForm">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            <div class="mb-3">
+                <label class="form-label"><i class="fas fa-envelope me-1"></i> Email</label>
+                <input type="email" name="email" class="form-control" value="{{ email|default:'' }}" required autofocus placeholder="vas@email.com">
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><i class="fas fa-hashtag me-1"></i> PIN (6 znamenki)</label>
+                <div class="pin-input">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="0" autocomplete="off">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="1" autocomplete="off">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="2" autocomplete="off">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="3" autocomplete="off">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="4" autocomplete="off">
+                    <input type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="5" autocomplete="off">
+                </div>
+                <input type="hidden" name="pin" id="pinHidden">
+            </div>
+            <button type="submit" class="btn-gold"><i class="fas fa-sign-in-alt me-2"></i> Prijava s PIN-om</button>
+        </form>
+
+        <div class="link-row">
+            <a href="{% url 'accounts:pin_recovery' %}"><i class="fas fa-key me-1"></i> Zaboravili ste PIN?</a>
+            <span style="color:#334155;margin:0 8px">|</span>
+            <a href="{% url 'login' %}"><i class="fas fa-lock me-1"></i> Klasična prijava</a>
+        </div>
+    </div>
+
+<script>
+(function(){
+    const pins=document.querySelectorAll('.pin-input input');
+    const hidden=document.getElementById('pinHidden');
+    const form=document.getElementById('pinForm');
+    pins.forEach((inp,i)=>{
+        inp.addEventListener('input',e=>{
+            inp.value=inp.value.replace(/\D/g,'');
+            if(inp.value&&i<5)pins[i+1].focus();
+            collectPin();
+        });
+        inp.addEventListener('keydown',e=>{
+            if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}
+            if(e.key==='Enter'){collectPin();form.submit();}
+        });
+        inp.addEventListener('paste',e=>{
+            e.preventDefault();
+            const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+            d.split('').forEach((c,j)=>{if(pins[j])pins[j].value=c;});
+            if(pins[Math.min(d.length,5)])pins[Math.min(d.length,5)].focus();
+            collectPin();
+        });
+    });
+    function collectPin(){hidden.value=Array.from(pins).map(p=>p.value).join('');}
+})();
+</script>
+</body>
+</html>

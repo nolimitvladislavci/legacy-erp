@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Honorari — LIMIT CONNECT{% endblock %}
+{% block page_title %}Honorari i ugovori o djelu{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}
+.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(59,130,246,.05)}
+.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-table .right{text-align:right}
+.k-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;display:inline-block}
+.k-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;background:#c9a84c;color:#0f172a;border:none;cursor:pointer;transition:all .15s}
+.k-btn:hover{background:#d4b85c}
+.k-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.k-filters select,.k-filters input{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:6px 12px;border-radius:8px;font-size:.82rem}
+</style>
+
+<!-- Stats -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+  <div class="k-stat">
+    <div><div class="num" style="color:#c9a84c">{{ total_count }}</div><div class="lbl">Ukupno ugovora</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="num" style="color:#22c55e">{{ active_count }}</div><div class="lbl">Aktivnih</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="num" style="color:#3b82f6">{{ total_gross|floatformat:2 }} &euro;</div><div class="lbl">Ukupno bruto</div></div>
+  </div>
+</div>
+
+<!-- Nav -->
+<div class="k-nav">
+  <a href="{% url 'honorari:contract_list' %}" class="active"><i class="fas fa-file-contract"></i> Ugovori</a>
+  <a href="{% url 'honorari:joppd_preview' %}"><i class="fas fa-file-alt"></i> JOPPD</a>
+  <a href="{% url 'honorari:contract_create' %}" class="k-btn"><i class="fas fa-plus"></i> Novi ugovor</a>
+</div>
+
+<!-- Filters -->
+<div class="k-filters">
+  <form method="get" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">-- Status --</option>
+      {% for val, label in status_choices %}
+      <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="type" onchange="this.form.submit()">
+      <option value="">-- Vrsta --</option>
+      {% for val, label in type_choices %}
+      <option value="{{ val }}" {% if current_type == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" value="{{ search_q }}" placeholder="Pretraga...">
+    <button type="submit" class="k-btn" style="padding:6px 12px"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<!-- Table -->
+<div class="k-card">
+  <table class="k-table">
+    <thead>
+      <tr>
+        <th>Broj</th>
+        <th>Vrsta</th>
+        <th>Izvršitelj</th>
+        <th class="right">Bruto</th>
+        <th>Početak</th>
+        <th>Kraj</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contracts %}
+      <tr onclick="window.location='{% url 'honorari:contract_detail' pk=c.pk %}'" style="cursor:pointer">
+        <td class="mono">{{ c.contract_number }}</td>
+        <td>{{ c.get_contract_type_display }}</td>
+        <td>{{ c.contractor.name|default:"-" }}</td>
+        <td class="right mono" style="font-weight:700">{{ c.gross_amount|floatformat:2 }} &euro;</td>
+        <td>{{ c.start_date|date:"d.m.Y" }}</td>
+        <td>{{ c.end_date|date:"d.m.Y" }}</td>
+        <td>
+          {% if c.status == 'active' %}
+            <span class="k-badge" style="background:#22c55e;color:#fff">Aktivan</span>
+          {% elif c.status == 'draft' %}
+            <span class="k-badge" style="background:#64748b;color:#fff">Nacrt</span>
+          {% elif c.status == 'completed' %}
+            <span class="k-badge" style="background:#3b82f6;color:#fff">Završen</span>
+          {% elif c.status == 'cancelled' %}
+            <span class="k-badge" style="background:#ef4444;color:#fff">Poništen</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b">
+        Nema ugovora. <a href="{% url 'honorari:contract_create' %}" style="color:#c9a84c">Kreirajte prvi ugovor.</a>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

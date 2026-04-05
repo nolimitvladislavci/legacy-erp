@@ -158,6 +158,7 @@ INSTALLED_APPS = [
     "borg_ops",
     "komunalno",
     'vault',
+    'honorari',
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────

@@ -1580,3 +1580,73 @@ def saft_export_view(request):
         return response
 
     return render(request, 'konto/saft_export.html')
+
+
+# ═══════════════════════════════════════════════════
+#  PROFITNI CENTRI (Cost Centers)
+# ══════���════════════════════════════════════════════
+@login_required
+def cost_centers(request):
+    """Lista profitnih centara s budžetom i troškovima."""
+    company = _get_company(request)
+    from .models import CostCenter
+    centers = CostCenter.objects.filter(company=company)
+    data = []
+    for cc in centers:
+        data.append({
+            'obj': cc,
+            'expenses': cc.total_expenses,
+            'income': cc.total_income,
+            'remaining': cc.budget_remaining,
+            'pct': (float(cc.total_expenses) / float(cc.budget_annual) * 100) if cc.budget_annual else 0,
+        })
+    return render(request, 'konto/cost_centers.html', {
+        'centers': data,
+        'company': company,
+    })
+
+
+@login_required
+def cost_center_detail(request, pk):
+    """Detalj profitnog centra — knjiženja po centru."""
+    company = _get_company(request)
+    from .models import CostCenter
+    cc = get_object_or_404(CostCenter, pk=pk, company=company)
+    lines = cc.ledger_lines.select_related(
+        'journal_entry', 'account'
+    ).order_by('-journal_entry__date')[:200]
+    return render(request, 'konto/cost_center_detail.html', {
+        'cc': cc,
+        'lines': lines,
+        'expenses': cc.total_expenses,
+        'income': cc.total_income,
+        'remaining': cc.budget_remaining,
+    })
+
+
+@login_required
+def cost_center_save(request):
+    """Create or update cost center."""
+    if request.method != 'POST':
+        return redirect('konto:cost_centers')
+    company = _get_company(request)
+    if not company:
+        return redirect('dashboard')
+    from .models import CostCenter
+    pk = request.POST.get('pk')
+    if pk:
+        cc = get_object_or_404(CostCenter, pk=pk, company=company)
+    else:
+        cc = CostCenter(company=company)
+    cc.code = request.POST.get('code', '').strip()
+    cc.name = request.POST.get('name', '').strip()
+    cc.description = request.POST.get('description', '')
+    cc.is_active = request.POST.get('is_active') == 'on'
+    try:
+        cc.budget_annual = Decimal(request.POST.get('budget_annual', '0').replace(',', '.'))
+    except (InvalidOperation, ValueError):
+        cc.budget_annual = Decimal('0')
+    parent_id = request.POST.get('parent')
+    cc.parent = CostCenter.objects.filter(pk=parent_id, company=company).first() if parent_id else None
+    cc.save()
+    return redirect('konto:cost_centers')

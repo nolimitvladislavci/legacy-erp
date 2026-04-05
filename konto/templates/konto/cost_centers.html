@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Profitni centri{% endblock %}
+{% block page_title %}Profitni centri{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}
+.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(59,130,246,.05)}
+.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-table .right{text-align:right}
+.budget-bar{height:6px;background:#334155;border-radius:3px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle}
+.budget-bar .fill{height:100%;border-radius:3px;transition:width .3s}
+.btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:8px 16px;border-radius:6px;font-size:.82rem;cursor:pointer}
+</style>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+    <div class="k-stat">
+        <div><div class="num" style="color:#c9a84c">{{ centers|length }}</div><div class="lbl">Centara</div></div>
+    </div>
+</div>
+
+<div class="k-card">
+    <div class="k-card-head">
+        <h3>Profitni centri</h3>
+        <button onclick="document.getElementById('addModal').style.display='flex'" class="btn-gold"><i class="fas fa-plus me-1"></i> Novi</button>
+    </div>
+    <table class="k-table">
+        <thead><tr><th>Šifra</th><th>Naziv</th><th class="right">Budžet</th><th class="right">Utrošeno</th><th>Iskorišteno</th><th class="right">Preostalo</th></tr></thead>
+        <tbody>
+        {% for c in centers %}
+        <tr>
+            <td class="mono"><a href="{% url 'konto:cost_center_detail' c.obj.pk %}" style="color:#c9a84c;text-decoration:none;font-weight:600">{{ c.obj.code }}</a></td>
+            <td>{{ c.obj.name }}</td>
+            <td class="right mono">{{ c.obj.budget_annual|floatformat:2 }} €</td>
+            <td class="right mono" style="color:#ef4444">{{ c.expenses|floatformat:2 }} €</td>
+            <td>
+                <div class="budget-bar">
+                    <div class="fill" style="width:{% if c.pct > 100 %}100{% else %}{{ c.pct|floatformat:0 }}{% endif %}%;background:{% if c.pct > 90 %}#ef4444{% elif c.pct > 70 %}#f59e0b{% else %}#22c55e{% endif %}"></div>
+                </div>
+                <span style="font-size:.72rem;color:#64748b;margin-left:4px">{{ c.pct|floatformat:0 }}%</span>
+            </td>
+            <td class="right mono" style="font-weight:700;color:{% if c.remaining >= 0 %}#22c55e{% else %}#ef4444{% endif %}">{{ c.remaining|floatformat:2 }} €</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;color:#64748b;padding:24px">Nema profitnih centara. Kliknite "Novi" za dodavanje.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;width:100%;max-width:480px">
+        <h3 style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:0 0 16px">Novi profitni centar</h3>
+        <form method="post" action="{% url 'konto:cost_center_save' %}">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px">
+                <div>
+                    <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">Šifra</label>
+                    <input name="code" required style="width:100%;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff" placeholder="PC-01">
+                </div>
+                <div>
+                    <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">Naziv</label>
+                    <input name="name" required style="width:100%;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff" placeholder="Prodaja Zagreb">
+                </div>
+            </div>
+            <div style="margin-bottom:12px">
+                <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">Godišnji budžet (€)</label>
+                <input name="budget_annual" type="number" step="0.01" value="0" style="width:100%;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff">
+            </div>
+            <div style="margin-bottom:16px">
+                <label style="color:#94a3b8;font-size:.78rem;display:block;margin-bottom:4px">Opis</label>
+                <textarea name="description" rows="2" style="width:100%;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" style="padding:8px 16px;background:none;border:1px solid #334155;color:#94a3b8;border-radius:6px;cursor:pointer">Odustani</button>
+                <button type="submit" class="btn-gold">Spremi</button>
+            </div>
+            <input type="hidden" name="is_active" value="on">
+        </form>
+    </div>
+</div>
+{% endblock %}

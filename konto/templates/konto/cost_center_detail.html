@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ cc.code }} — {{ cc.name }}{% endblock %}
+{% block page_title %}{{ cc.code }} — {{ cc.name }}{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}
+.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(59,130,246,.05)}
+.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-table .right{text-align:right}
+</style>
+
+<div style="margin-bottom:12px"><a href="{% url 'konto:cost_centers' %}" style="color:#64748b;text-decoration:none;font-size:.82rem"><i class="fas fa-arrow-left me-1"></i> Svi centri</a></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+    <div class="k-stat">
+        <div><div class="num" style="color:#c9a84c">{{ cc.budget_annual|floatformat:2 }} €</div><div class="lbl">Budžet</div></div>
+    </div>
+    <div class="k-stat">
+        <div><div class="num" style="color:#ef4444">{{ expenses|floatformat:2 }} €</div><div class="lbl">Utrošeno</div></div>
+    </div>
+    <div class="k-stat">
+        <div><div class="num" style="color:#22c55e">{{ income|floatformat:2 }} €</div><div class="lbl">Prihodi</div></div>
+    </div>
+    <div class="k-stat">
+        <div><div class="num" style="color:{% if remaining >= 0 %}#22c55e{% else %}#ef4444{% endif %}">{{ remaining|floatformat:2 }} €</div><div class="lbl">Preostalo</div></div>
+    </div>
+</div>
+
+{% if cc.description %}
+<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#94a3b8;font-size:.85rem">{{ cc.description }}</div>
+{% endif %}
+
+<div class="k-card">
+    <div class="k-card-head"><h3>Knjiženja na ovom centru</h3></div>
+    <table class="k-table">
+        <thead><tr><th>Datum</th><th>Temeljnica</th><th>Konto</th><th>Opis</th><th class="right">Duguje</th><th class="right">Potražuje</th></tr></thead>
+        <tbody>
+        {% for line in lines %}
+        <tr>
+            <td style="color:#94a3b8;font-size:.78rem">{{ line.journal_entry.date|date:"d.m.Y" }}</td>
+            <td><a href="{% url 'konto:journal_entry_detail' line.journal_entry.pk %}" style="color:#c9a84c;text-decoration:none">{{ line.journal_entry.entry_number }}</a></td>
+            <td class="mono">{{ line.account.code }}</td>
+            <td>{{ line.description|default:line.journal_entry.description|truncatechars:40 }}</td>
+            <td class="right mono">{% if line.side == 'debit' %}{{ line.amount|floatformat:2 }}{% endif %}</td>
+            <td class="right mono">{% if line.side == 'credit' %}{{ line.amount|floatformat:2 }}{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;color:#64748b;padding:20px">Nema knjiženja na ovom centru.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -272,6 +272,9 @@ class LedgerLine(models.Model):
     integrity_hash = models.CharField(max_length=64, blank=True, default='',
         verbose_name=_('Integrity Hash'), help_text='SHA-256 chain za GoBD audit')
     description = models.CharField(max_length=200, blank=True)
+    cost_center = models.ForeignKey('CostCenter', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='ledger_lines',
+        verbose_name=_('Profitni centar'))
 
     class Meta:
         verbose_name = _('Stavka knjiženja')
@@ -419,3 +422,51 @@ class AccountingPeriod(models.Model):
             return period.is_locked
         except cls.DoesNotExist:
             return False
+
+
+# ───────────────���─────────────────────────────
+# 6. PROFITNI CENTRI (Cost Centers)
+# ─────────────────────────────────────────────
+class CostCenter(models.Model):
+    """Profitni centar / mjesto troška za analitiku po segmentima."""
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                related_name='cost_centers')
+    code = models.CharField(max_length=20, verbose_name=_('Šifra'))
+    name = models.CharField(max_length=200, verbose_name=_('Naziv'))
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='children', verbose_name=_('Nadređeni centar'))
+    manager = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+                                verbose_name=_('Odgovorna osoba'))
+    budget_annual = models.DecimalField(max_digits=14, decimal_places=2, default=0,
+                                         verbose_name=_('Godišnji budžet'))
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
+
+    class Meta:
+        ordering = ['code']
+        unique_together = ['company', 'code']
+        verbose_name = _('Profitni centar')
+        verbose_name_plural = _('Profitni centri')
+
+    def __str__(self):
+        return f"{self.code} — {self.name}"
+
+    @property
+    def total_expenses(self):
+        """Ukupni rashodi knjiženi na ovaj centar."""
+        from django.db.models import Sum
+        return self.ledger_lines.filter(side='debit').aggregate(
+            t=Sum('amount'))['t'] or Decimal('0')
+
+    @property
+    def total_income(self):
+        """Ukupni prihodi knjiženi na ovaj centar."""
+        from django.db.models import Sum
+        return self.ledger_lines.filter(side='credit').aggregate(
+            t=Sum('amount'))['t'] or Decimal('0')
+
+    @property
+    def budget_remaining(self):
+        return self.budget_annual - self.total_expenses

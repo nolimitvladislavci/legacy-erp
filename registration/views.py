@@ -1703,3 +1703,131 @@ def distributor_apply(request):
     return render(request, 'registration/distributor_apply.html', {
         'page_title': 'Postani distributer',
     })
+
+
+def register_trikey(request):
+    """TriKey registracija — OIB → Sudski registar auto-fill → email → PIN setup → dashboard.
+    Alternativni flow koji zamjenjuje step2+step3 u jedan ekran."""
+    if not request.session.get("reg_plan"):
+        return redirect("registration:register_step1")
+
+    if request.method == "POST":
+        import uuid
+        from datetime import timedelta
+        from django.contrib.auth import login as auth_login
+        from django.db import transaction as db_transaction
+        from accounts.models import UserProfile
+        from accounts.trikey import TriKeyProfile, generate_pin
+        from companies.models import Company
+        from .models import PricingPlan, CompanySubscription
+
+        oib = request.POST.get("oib", "").strip()
+        company_name = request.POST.get("company_name", "").strip()
+        address = request.POST.get("address", "").strip()
+        city = request.POST.get("city", "").strip()
+        zip_code = request.POST.get("zip_code", "").strip()
+        country = request.POST.get("country", "HR")
+        email = request.POST.get("email", "").strip()
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        pin = request.POST.get("pin", "").strip()
+        password1 = request.POST.get("password1", "")
+
+        errors = {}
+        if not oib:
+            errors["oib"] = "OIB je obavezan."
+        elif country == "HR" and (len(oib) != 11 or not oib.isdigit()):
+            errors["oib"] = "Hrvatski OIB mora imati 11 znamenki."
+        if not company_name:
+            errors["company_name"] = "Naziv firme je obavezan."
+        if not email:
+            errors["email"] = "Email je obavezan."
+        elif User.objects.filter(email=email).exists():
+            errors["email"] = 'Već imate račun. <a href="/hr/login/" style="color:#c9a84c">Prijavite se →</a>'
+        if len(password1) < 8:
+            errors["password1"] = "Lozinka mora imati min. 8 znakova."
+        if pin and (len(pin) != 6 or not pin.isdigit()):
+            errors["pin"] = "PIN mora biti točno 6 znamenki."
+
+        if errors:
+            return render(request, "registration/trikey_register.html", {
+                "step": 2, "errors": errors,
+                "oib": oib, "company_name": company_name, "address": address,
+                "city": city, "zip_code": zip_code, "country": country,
+                "email": email, "first_name": first_name, "last_name": last_name,
+            })
+
+        plan_slug = request.session.get("reg_plan", "starter")
+        plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
+
+        try:
+            with db_transaction.atomic():
+                # Create user
+                base_un = email.split("@")[0].lower().replace(".", "_")[:30]
+                username = base_un
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_un}{counter}"
+                    counter += 1
+                user = User.objects.create_user(
+                    username=username, email=email, password=password1,
+                    first_name=first_name or email.split("@")[0].title(),
+                    last_name=last_name,
+                )
+
+                # Create company
+                company_fields = [f.name for f in Company._meta.get_fields()]
+                kw = {"name": company_name, "oib": oib}
+                if "country" in company_fields: kw["country"] = country
+                if "address" in company_fields: kw["address"] = f"{address}, {zip_code} {city}".strip(", ")
+                if "business_type" in company_fields: kw["business_type"] = "doo"
+                company = Company.objects.create(**kw)
+
+                # Profile
+                UserProfile.objects.create(user=user, company=company, role="company_admin")
+
+                # TriKey — set PIN
+                trikey = TriKeyProfile.objects.create(user=user)
+                if not pin:
+                    pin = generate_pin()
+                trikey.set_pin(pin)
+
+                # Subscription
+                trial_end = now().date() + timedelta(days=14)
+                if plan:
+                    CompanySubscription.objects.create(
+                        company=company, plan=plan_slug, pricing_plan=plan,
+                        valid_from=now().date(), trial_ends=trial_end,
+                        billing_cycle="monthly", monthly_fee=plan.price_monthly, is_active=True,
+                    )
+
+                # Seed demo data
+                _seed_demo_data(company, user)
+                _auto_create_website(company)
+
+                # Login
+                auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+                # Send PIN via email
+                from django.core.mail import send_mail
+                send_mail(
+                    subject="LIMIT Connect — Vaš TriKey PIN",
+                    message=f"Dobrodošli u LIMIT Connect!\n\nVaš PIN za brzu prijavu: {pin}\n\nPromijenite ga u Postavke → TriKey.\n\nhttps://limit-connect.com",
+                    from_email=None, recipient_list=[email], fail_silently=True,
+                )
+
+                # Clean session
+                for key in ["reg_plan", "reg_company", "reg_user", "reg_password",
+                            "reg_promo_code", "reg_source", "reg_profile"]:
+                    request.session.pop(key, None)
+
+                messages.success(request, f"Dobrodošli! Vaš PIN: {pin} — zapišite ga ili provjerite email.")
+                return redirect("dashboard")
+        except Exception as e:
+            logger.exception("TriKey registration error")
+            messages.error(request, f"Greška: {e}")
+
+    return render(request, "registration/trikey_register.html", {
+        "step": 2, "errors": {},
+        "country": "HR",
+    })

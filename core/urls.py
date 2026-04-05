@@ -320,6 +320,7 @@ urlpatterns += i18n_patterns(
     path('experiences/', include('experiences.urls', namespace='experiences')),
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
+    path('honorari/', include('honorari.urls')),
     
     path('website/', include('website.urls')),
     path('site/', include('website.site_urls')),

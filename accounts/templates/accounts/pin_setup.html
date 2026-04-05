@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}PIN Setup — TriKey{% endblock %}
+{% block page_title %}Postavi PIN{% endblock %}
+{% block content %}
+<style>
+.trikey-setup{max-width:560px;margin:0 auto}
+.key-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;margin-bottom:20px}
+.key-card h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:0 0 16px}
+.pin-display{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.pin-display input{width:52px;height:60px;text-align:center;font-size:1.6rem;font-weight:800;background:rgba(15,23,42,.6);border:2px solid #334155;border-radius:12px;color:#c9a84c;outline:none}
+.pin-display input:focus{border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.suggested{background:rgba(201,168,76,.08);border:1px dashed #c9a84c;border-radius:10px;padding:12px 16px;text-align:center;margin:12px 0}
+.suggested .code{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:800;color:#c9a84c;letter-spacing:6px}
+.suggested .hint{font-size:.75rem;color:#64748b;margin-top:4px}
+.btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:12px 24px;border-radius:8px;width:100%;transition:all .3s}
+.btn-gold:hover{background:#e8c96a;transform:translateY(-2px)}
+.status-keys{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
+.sk{padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:700;border:2px solid #334155;color:#64748b}
+.sk.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08)}
+.sk.current{border-color:#c9a84c;color:#c9a84c;background:rgba(201,168,76,.08);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+</style>
+
+<div class="trikey-setup">
+    <div class="status-keys">
+        <div class="sk {% if trikey.pin_hash %}done{% else %}current{% endif %}"><i class="fas fa-hashtag me-1"></i> PIN</div>
+        <div class="sk {% if trikey.passkey_credential_id %}done{% endif %}"><i class="fas fa-fingerprint me-1"></i> Passkey</div>
+        <div class="sk {% if trikey.fina_cert_fingerprint or trikey.eposrednik_api_key_hash %}done{% endif %}"><i class="fas fa-certificate me-1"></i> Business Key</div>
+    </div>
+
+    <div class="key-card">
+        <h3><i class="fas fa-hashtag me-2" style="color:#c9a84c"></i> Postavi 6-znamenkasti PIN</h3>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div style="background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.3);color:#f87171;border-radius:8px;padding:8px 12px;font-size:.85rem;margin-bottom:12px">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="suggested">
+            <div class="hint">Predloženi PIN (možete promijeniti)</div>
+            <div class="code" id="suggestedPin">{{ suggested_pin }}</div>
+            <button type="button" onclick="useSuggested()" style="background:none;border:1px solid #c9a84c;color:#c9a84c;border-radius:6px;padding:4px 12px;font-size:.75rem;margin-top:6px;cursor:pointer">Koristi ovaj</button>
+        </div>
+
+        <form method="post" action="{% url 'accounts:pin_setup' %}" id="setupForm">
+            {% csrf_token %}
+            <label style="color:#94a3b8;font-size:.82rem;display:block;margin-bottom:4px">Unesite PIN:</label>
+            <div class="pin-display">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="0" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="1" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="2" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="3" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="4" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-p="5" autocomplete="off">
+            </div>
+            <input type="hidden" name="pin" id="pinVal">
+
+            <label style="color:#94a3b8;font-size:.82rem;display:block;margin:12px 0 4px">Potvrdite PIN:</label>
+            <div class="pin-display" id="confirmPins">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="0" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="1" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="2" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="3" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="4" autocomplete="off">
+                <input type="password" maxlength="1" inputmode="numeric" data-c="5" autocomplete="off">
+            </div>
+            <input type="hidden" name="pin_confirm" id="pinConfVal">
+
+            <button type="submit" class="btn-gold mt-3"><i class="fas fa-check me-2"></i> Spremi PIN</button>
+        </form>
+    </div>
+
+    <div style="text-align:center">
+        <a href="{% url 'accounts:trikey_status' %}" style="color:#64748b;font-size:.82rem;text-decoration:none"><i class="fas fa-arrow-left me-1"></i> Natrag na TriKey status</a>
+    </div>
+</div>
+
+<script>
+function setupPinInputs(selector, hiddenId){
+    const pins=document.querySelectorAll(selector);
+    const hidden=document.getElementById(hiddenId);
+    pins.forEach((inp,i)=>{
+        inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');if(inp.value&&i<5)pins[i+1].focus();collect();});
+        inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}});
+        inp.addEventListener('paste',e=>{e.preventDefault();const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);d.split('').forEach((c,j)=>{if(pins[j])pins[j].value=c;});collect();if(pins[Math.min(d.length,5)])pins[Math.min(d.length,5)].focus();});
+    });
+    function collect(){hidden.value=Array.from(pins).map(p=>p.value).join('');}
+}
+setupPinInputs('[data-p]','pinVal');
+setupPinInputs('[data-c]','pinConfVal');
+function useSuggested(){
+    const pin=document.getElementById('suggestedPin').textContent.trim();
+    document.querySelectorAll('[data-p]').forEach((inp,i)=>{inp.value=pin[i]||'';});
+    document.querySelectorAll('[data-c]').forEach((inp,i)=>{inp.value=pin[i]||'';});
+    document.getElementById('pinVal').value=pin;
+    document.getElementById('pinConfVal').value=pin;
+}
+</script>
+{% endblock %}

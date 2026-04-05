@@ -53,6 +53,11 @@ urlpatterns = [
     path('bank/upload/', views_bank.bank_upload, name='bank_upload'),
     path('bank/reconcile/<int:pk>/', views_bank.bank_reconcile, name='bank_reconcile'),
     path('bank/auto-reconcile/', views_bank.bank_auto_reconcile, name='bank_auto_reconcile'),
+    # Profitni centri
+    path('cost-centers/', views.cost_centers, name='cost_centers'),
+    path('cost-centers/<int:pk>/', views.cost_center_detail, name='cost_center_detail'),
+    path('cost-centers/save/', views.cost_center_save, name='cost_center_save'),
+
     # API
     path('api/auto-match/', views.api_auto_match, name='api_auto_match'),
     path('api/match/<int:pk>/', views.api_match_transaction, name='api_match_transaction'),

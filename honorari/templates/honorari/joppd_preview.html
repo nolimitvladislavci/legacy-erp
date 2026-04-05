@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}JOPPD Pregled — Honorari{% endblock %}
+{% block page_title %}JOPPD Pregled — Honorari{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}
+.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-table .right{text-align:right}
+.k-table tfoot td{border-top:2px solid #334155;font-weight:700;color:#c9a84c}
+.k-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;display:inline-block}
+.k-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.k-filters select{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:6px 12px;border-radius:8px;font-size:.82rem}
+.k-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;background:#c9a84c;color:#0f172a;border:none;cursor:pointer}
+</style>
+
+<!-- Nav -->
+<div class="k-nav">
+  <a href="{% url 'honorari:contract_list' %}"><i class="fas fa-file-contract"></i> Ugovori</a>
+  <a href="{% url 'honorari:joppd_preview' %}" class="active"><i class="fas fa-file-alt"></i> JOPPD</a>
+</div>
+
+<!-- Period filter -->
+<div class="k-filters">
+  <form method="get" style="display:flex;gap:8px;align-items:center">
+    <select name="month">
+      {% for val, label in months %}
+      <option value="{{ val }}" {% if month == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="year">
+      {% for y in years %}
+      <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="k-btn"><i class="fas fa-filter"></i> Prikaži</button>
+  </form>
+</div>
+
+<!-- Totals -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
+  <div class="k-stat">
+    <div><div class="num" style="color:#c9a84c">{{ items.count }}</div><div class="lbl">Stavki</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="num" style="color:#3b82f6">{{ totals.total_bruto|floatformat:2|default:"0.00" }} &euro;</div><div class="lbl">Bruto</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="num" style="color:#ef4444">{{ totals.total_porez|floatformat:2|default:"0.00" }} &euro;</div><div class="lbl">Porez</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="num" style="color:#22c55e">{{ totals.total_neto|floatformat:2|default:"0.00" }} &euro;</div><div class="lbl">Neto</div></div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="k-card">
+  <div class="k-card-head">
+    <h3>JOPPD stavke — {{ month|stringformat:"02d" }}/{{ year }}</h3>
+  </div>
+  <table class="k-table">
+    <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Oznaka</th>
+        <th>OIB</th>
+        <th>Izvršitelj</th>
+        <th class="right">Bruto</th>
+        <th class="right">Porez</th>
+        <th class="right">Prirez</th>
+        <th class="right">MIO I</th>
+        <th class="right">ZO</th>
+        <th class="right">Neto</th>
+        <th>Prijavljeno</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.joppd_date|date:"d.m.Y" }}</td>
+        <td class="mono">{{ item.joppd_oznaka }}</td>
+        <td class="mono">{{ item.oib_primatelja|default:"—" }}</td>
+        <td>{{ item.calculation.contract.contractor.name|default:"—" }}</td>
+        <td class="right mono">{{ item.bruto|floatformat:2 }}</td>
+        <td class="right mono">{{ item.porez|floatformat:2 }}</td>
+        <td class="right mono">{{ item.prirez|floatformat:2 }}</td>
+        <td class="right mono">{{ item.mio1|floatformat:2 }}</td>
+        <td class="right mono">{{ item.zo|floatformat:2 }}</td>
+        <td class="right mono" style="font-weight:700;color:#22c55e">{{ item.neto|floatformat:2 }}</td>
+        <td>
+          {% if item.is_reported %}
+            <span class="k-badge" style="background:#22c55e;color:#fff">Da</span>
+          {% else %}
+            <span class="k-badge" style="background:#f59e0b;color:#0f172a">Ne</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="11" style="text-align:center;padding:30px;color:#64748b">
+        Nema JOPPD stavki za {{ month|stringformat:"02d" }}/{{ year }}.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+    {% if items %}
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right">UKUPNO:</td>
+        <td class="right mono">{{ totals.total_bruto|floatformat:2|default:"0.00" }}</td>
+        <td class="right mono">{{ totals.total_porez|floatformat:2|default:"0.00" }}</td>
+        <td class="right mono">{{ totals.total_prirez|floatformat:2|default:"0.00" }}</td>
+        <td class="right mono">{{ totals.total_mio1|floatformat:2|default:"0.00" }}</td>
+        <td class="right mono">{{ totals.total_zo|floatformat:2|default:"0.00" }}</td>
+        <td class="right mono">{{ totals.total_neto|floatformat:2|default:"0.00" }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 """
 konto/views_bank.py
-Bank dashboard — account management, statement upload, reconciliation.
+Bank dashboard — account management, multi-format statement upload, reconciliation.
+Supported formats: camt.053 XML (SEPA), CSV (FINA/HR banke), MT940 (SWIFT).
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -82,7 +83,12 @@ def bank_account_create(request):
 
 @login_required
 def bank_upload(request):
-    """Upload camt.053 XML bank statement."""
+    """
+    Upload bank statement — auto-detect format:
+      .xml  → camt.053 (SEPA ISO 20022)
+      .csv  → FINA CSV (PBZ, ZABA, RBA)
+      .sta / .mt940 / .s940 → MT940 (SWIFT)
+    """
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
@@ -90,68 +96,115 @@ def bank_upload(request):
     from konto.models import BankAccount
 
     if request.method == 'POST':
-        xml_file = request.FILES.get('xml_file')
+        uploaded_file = request.FILES.get('statement_file') or request.FILES.get('xml_file')
         account_id = request.POST.get('account_id')
 
-        if not xml_file:
-            messages.error(request, 'Odaberite XML datoteku.')
+        if not uploaded_file:
+            messages.error(request, 'Odaberite datoteku bankovnog izvoda.')
             return redirect('konto:bank_upload')
 
+        # Resolve bank account
         account = None
         if account_id:
             account = BankAccount.objects.filter(pk=account_id, company=company).first()
 
+        # Read file content
         try:
-            xml_string = xml_file.read().decode('utf-8')
-        except UnicodeDecodeError:
-            xml_string = xml_file.read().decode('utf-8-sig', errors='replace')
+            raw = uploaded_file.read()
+            try:
+                content = raw.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    content = raw.decode('utf-8-sig')
+                except UnicodeDecodeError:
+                    content = raw.decode('cp1250', errors='replace')
+        except Exception as e:
+            messages.error(request, f'Greska pri citanju datoteke: {e}')
+            return redirect('konto:bank_upload')
 
-        from konto.services.bank_import import import_bank_statement, parse_camt053, import_any_statement
+        filename = uploaded_file.name.lower() if uploaded_file.name else ''
 
+        # Detect format and parse
         try:
-            # If no account selected, try to find by IBAN in XML
-            if not account:
-                data = parse_camt053(xml_string)
-                if data['iban']:
-                    account = BankAccount.objects.filter(
-                        company=company, iban=data['iban']
-                    ).first()
-                    if not account:
-                        # Auto-create account from XML
-                        from konto.models import KontoAccount
-                        konto, _ = KontoAccount.objects.get_or_create(
-                            company=company, code='1000',
-                            defaults={'name': 'Ziro racun', 'account_type': 'asset'}
-                        )
-                        account = BankAccount.objects.create(
-                            company=company,
-                            name=f'Racun {data["iban"][-8:]}',
-                            iban=data['iban'],
-                            bank_name='',
-                            konto_account=konto,
-                            current_balance=data.get('balance', 0),
-                        )
-                        messages.info(request, f'Automatski kreiran racun: {data["iban"]}')
+            from konto.parsers import parse_camt053, parse_csv_fina, parse_mt940
 
-            result = import_bank_statement(company, account, xml_string)
-            messages.success(request,
-                f'Uvezeno {result["created"]} transakcija, {result["skipped"]} preskoceno.')
+            fmt = _detect_format(filename, content)
 
-            # Auto-reconcile
-            from konto.services.bank_import import auto_reconcile
-            recon = auto_reconcile(company)
-            if recon['matched'] > 0:
-                messages.success(request, f'Automatski parirano: {recon["matched"]} transakcija!')
+            if fmt == 'camt053':
+                created = parse_camt053(content, account, company)
+                fmt_label = 'camt.053 XML'
+            elif fmt == 'csv':
+                created = parse_csv_fina(content, account, company)
+                fmt_label = 'CSV'
+            elif fmt == 'mt940':
+                created = parse_mt940(content, account, company)
+                fmt_label = 'MT940'
+            else:
+                messages.error(request, 'Nepoznat format datoteke. Podrzano: XML (camt.053), CSV, MT940.')
+                return redirect('konto:bank_upload')
+
+            # Count results
+            num_created = len(created)
+
+            # Get skipped count from batch — total parsed minus created
+            if num_created > 0:
+                messages.success(request,
+                    f'Uvezeno {num_created} transakcija iz {fmt_label} formata.')
+            else:
+                messages.info(request,
+                    'Nema novih transakcija za uvoz (sve vec postoje ili datoteka prazna).')
+
+            # Auto-reconcile after import
+            try:
+                from konto.services.bank_import import auto_reconcile
+                recon = auto_reconcile(company)
+                if recon['matched'] > 0:
+                    messages.success(request,
+                        f'Automatski parirano: {recon["matched"]} transakcija!')
+            except Exception as e:
+                pass  # Non-critical
+
+            # Recalculate all account balances
+            for acct in BankAccount.objects.filter(company=company):
+                acct.recalculate_balance()
 
         except ValueError as e:
-            messages.error(request, f'Greska u XML-u: {e}')
+            messages.error(request, f'Greska u formatu: {e}')
         except Exception as e:
-            messages.error(request, f'Greska: {e}')
+            messages.error(request, f'Greska pri uvozu: {e}')
 
         return redirect('konto:bank_dashboard')
 
+    # GET — show upload form
     accounts = BankAccount.objects.filter(company=company)
     return render(request, 'konto/bank_upload.html', {'accounts': accounts})
+
+
+def _detect_format(filename, content):
+    """Auto-detect bank statement format from filename extension and content."""
+    content_start = content.strip()[:500]
+
+    # By extension
+    if filename.endswith('.xml'):
+        return 'camt053'
+    if filename.endswith('.csv'):
+        return 'csv'
+    if filename.endswith(('.sta', '.mt940', '.s940', '.940')):
+        return 'mt940'
+
+    # By content sniffing
+    if content_start.startswith('<?xml') or content_start.startswith('<'):
+        return 'camt053'
+    if ':20:' in content_start and ':61:' in content_start:
+        return 'mt940'
+    if ';' in content_start or '\t' in content_start or ',' in content_start:
+        # Heuristic: if it has recognizable date patterns, treat as CSV
+        import re
+        if re.search(r'\d{2}\.\d{2}\.\d{4}', content_start) or \
+           re.search(r'\d{4}-\d{2}-\d{2}', content_start):
+            return 'csv'
+
+    return None
 
 
 @login_required

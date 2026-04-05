@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Uvoz bankovnog izvoda — LIMIT Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-zone {
+    border: 2px dashed var(--k-gold, #c9a84c);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--k-bg-card, #1a1a1a);
+    position: relative;
+}
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #e8c44a;
+    background: rgba(201, 168, 76, 0.08);
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.15);
+}
+.upload-zone i.fa-cloud-arrow-up {
+    font-size: 3rem;
+    color: var(--k-gold, #c9a84c);
+    margin-bottom: 1rem;
+}
+.upload-zone .file-name {
+    color: var(--k-gold, #c9a84c);
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+.format-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.format-badge.xml { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+.format-badge.csv { background: rgba(33, 150, 243, 0.15); color: #2196f3; }
+.format-badge.mt940 { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
+.format-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.format-card {
+    background: var(--k-bg-card, #1a1a1a);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+.format-card h6 { color: var(--k-gold, #c9a84c); margin-bottom: 0.5rem; }
+.format-card small { color: var(--k-text-muted, #888); }
+.detected-format {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+    font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1" style="color: var(--k-gold, #c9a84c);">
+                <i class="fas fa-file-import me-2"></i>Uvoz bankovnog izvoda
+            </h3>
+            <p class="text-muted mb-0">camt.053 XML, CSV (FINA), MT940 (SWIFT)</p>
+        </div>
+        <a href="{% url 'konto:bank_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Upload Form -->
+        <div class="col-lg-8">
+            <div class="k-card p-4">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <!-- Bank Account Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-university me-1"></i>Ziro racun (opcionalno)
+                        </label>
+                        <select name="account_id" class="form-select">
+                            <option value="">-- Automatski detektiraj iz datoteke --</option>
+                            {% for acct in accounts %}
+                            <option value="{{ acct.pk }}">{{ acct.name }} ({{ acct.iban }})</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Ako ne odaberete, sustav ce pokusati pronaci racun po IBAN-u iz datoteke.</small>
+                    </div>
+
+                    <!-- Drag & Drop Zone -->
+                    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-arrow-up d-block"></i>
+                        <h5>Povucite datoteku ovdje ili kliknite za odabir</h5>
+                        <p class="text-muted mb-2">
+                            Podrzani formati: XML (camt.053), CSV, MT940 (.sta)
+                        </p>
+                        <div class="file-name" id="fileName" style="display:none;"></div>
+                        <input type="file" name="statement_file" id="fileInput"
+                               accept=".xml,.csv,.sta,.mt940,.s940,.940,.txt"
+                               style="display:none;" required>
+                    </div>
+
+                    <!-- Detected Format -->
+                    <div class="detected-format" id="detectedFormat">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="formatText"></span>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-lg px-5"
+                                style="background: var(--k-gold, #c9a84c); color: #000; font-weight: 600;"
+                                id="submitBtn" disabled>
+                            <i class="fas fa-upload me-2"></i>Uvezi izvod
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Format Info Sidebar -->
+        <div class="col-lg-4">
+            <div class="k-card p-4">
+                <h5 class="mb-3" style="color: var(--k-gold, #c9a84c);">
+                    <i class="fas fa-info-circle me-2"></i>Podrzani formati
+                </h5>
+
+                <div class="format-card mb-3">
+                    <span class="format-badge xml">XML</span>
+                    <h6 class="mt-2">camt.053 (SEPA)</h6>
+                    <small>
+                        ISO 20022 standard. Sve EU banke ga podrzavaju.
+                        Verzije .001.02 i .001.08.
+                    </small>
+                </div>
+
+                <div class="format-card mb-3">
+                    <span class="format-badge csv">CSV</span>
+                    <h6 class="mt-2">FINA CSV</h6>
+                    <small>
+                        Export iz PBZ, ZABA, RBA i drugih HR banaka.
+                        Podrzava tocku-zarez i tab delimiter.
+                    </small>
+                </div>
+
+                <div class="format-card mb-3">
+                    <span class="format-badge mt940">MT940</span>
+                    <h6 class="mt-2">SWIFT MT940</h6>
+                    <small>
+                        Stariji SWIFT format (.sta, .mt940).
+                        Neke banke ga jos koriste.
+                    </small>
+                </div>
+
+                <hr style="border-color: rgba(201,168,76,0.2);">
+
+                <div class="small text-muted">
+                    <p class="mb-2"><i class="fas fa-shield-halved me-1 text-success"></i>
+                        <strong>Dedup zastita:</strong> Duplikati se automatski preskacu.</p>
+                    <p class="mb-2"><i class="fas fa-magic me-1 text-warning"></i>
+                        <strong>Auto-pariranje:</strong> Nakon uvoza sustav automatski pokusava parirati transakcije s otvorenim racunima.</p>
+                    <p class="mb-0"><i class="fas fa-calculator me-1 text-info"></i>
+                        <strong>Saldo:</strong> Automatski se preracunava nakon svakog uvoza.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileName  = document.getElementById('fileName');
+    const detected  = document.getElementById('detectedFormat');
+    const formatTxt = document.getElementById('formatText');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Format detection by extension
+    function detectFormat(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        const map = {
+            'xml': ['camt.053 XML (SEPA)', 'xml'],
+            'csv': ['CSV (FINA)', 'csv'],
+            'sta': ['MT940 (SWIFT)', 'mt940'],
+            'mt940': ['MT940 (SWIFT)', 'mt940'],
+            's940': ['MT940 (SWIFT)', 'mt940'],
+            '940': ['MT940 (SWIFT)', 'mt940'],
+            'txt': ['Tekst — automatska detekcija', ''],
+        };
+        return map[ext] || ['Nepoznat format', ''];
+    }
+
+    function onFileSelected(file) {
+        if (!file) return;
+        fileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+        fileName.style.display = 'block';
+
+        const [label, cls] = detectFormat(file.name);
+        formatTxt.textContent = 'Detektirani format: ' + label;
+        detected.style.display = 'block';
+
+        submitBtn.disabled = false;
+    }
+
+    fileInput.addEventListener('change', function() {
+        onFileSelected(this.files[0]);
+    });
+
+    // Drag & drop
+    ['dragenter', 'dragover'].forEach(ev => {
+        dropZone.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(ev => {
+        dropZone.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+        });
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            onFileSelected(files[0]);
+        }
+    });
+
+    // Submit loading state
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uvoz u tijeku...';
+    });
+})();
+</script>
+{% endblock %}
