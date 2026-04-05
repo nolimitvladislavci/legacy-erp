@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
   }
 }
 </script>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script>(function(){var t=localStorage.getItem('fina-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
 <title>{% block title %}POS{% endblock %} -- LIMIT Connect</title>
 <style>
@@ -29,6 +29,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="/static/css/pos-base.css">
+<link rel="stylesheet" href="/static/css/apps/pos-mobile-fix.css">
 {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -36,7 +37,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 
 <div class="topbar">
   <a href="{% url 'dashboard' %}" class="topbar-brand" style="text-decoration:none">LIMIT<span> POS</span></a>
-  {% block topbar_nav %}<nav class="topbar-nav">
+  <!-- Hamburger toggle for mobile -->
+  <button class="pos-hamburger" id="posHamburger" onclick="document.getElementById('posNavMenu').classList.toggle('open')" aria-label="Otvori navigaciju">
+    <span></span><span></span><span></span>
+  </button>
+  {% block topbar_nav %}<nav class="topbar-nav" id="posNavMenu">
     <a href="{% url 'pos:dashboard' %}" {% if request.path == '/pos/' or '/terminal/' in request.path or '/session/' in request.path %}class="active"{% endif %}>
       <i class=""></i>{% trans "Terminali" %}</a>
     <a href="{% url 'pos:gastro_dashboard' %}" {% if '/gastro/' in request.path and '/kitchen/' not in request.path and '/kds/' not in request.path and '/qr/' not in request.path %}class="active"{% endif %}>
