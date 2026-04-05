@@ -132,7 +132,7 @@ urlpatterns += i18n_patterns(
     path('admin/login/', lambda request: redirect('/worktime/') if request.user.is_authenticated and not request.user.is_staff else admin.site.login(request), name='admin_login_redirect'),
     path('j3wkuxuwuuc9/', admin.site.urls),
     # Stara /admin/ URL → 404 silent (ne otkrivamo da smo premjestili)
-    path('admin/', lambda r: __import__('django.http', fromlist=['Http404']).Http404()),
+    path('admin/', lambda r: __import__('django.http', fromlist=['HttpResponseNotFound']).HttpResponseNotFound('Not Found')),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
 
