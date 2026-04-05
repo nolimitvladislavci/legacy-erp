@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kreiraj profil — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
+  --dim:#7a7a8c;--green:#4caf7d;--red:#e05252;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.top-bar{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.badge-free{font-size:.72rem;background:rgba(76,175,125,.12);color:var(--green);padding:4px 12px;border-radius:20px;font-weight:600;letter-spacing:.05em;border:1px solid rgba(76,175,125,.3)}
+.card{width:100%;max-width:480px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px}
+.card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:6px}
+.card-sub{color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.5}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.type-btn{padding:12px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-family:var(--sans);font-size:.82rem;cursor:pointer;text-align:center;transition:all .2s;color:var(--ink)}
+.type-btn:hover,.type-btn.active{border-color:var(--gold);background:rgba(201,168,76,.06);color:var(--ink)}
+.type-btn input{display:none}
+.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s;margin-top:8px}
+.btn-submit:hover{background:#b8942a}
+.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px}
+.footer-note{margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6}
+@media(max-width:520px){.card{padding:28px 20px}.type-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  <span class="badge-free">✓ BESPLATNO ZAUVIJEK</span>
+</div>
+
+<div class="card">
+  <h1 class="card-title">Kreiraj profil</h1>
+  <p class="card-sub">Digitalni dom za tvog ljubimca — rodovnica, cijepljenja, sjećanja. Bez kartice, bez pretplate.</p>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/registracija/">
+    {% csrf_token %}
+    {% if chip %}<input type="hidden" name="chip_hint" value="{{ chip }}">{% endif %}
+
+    <div class="field">
+      <label>Tvoje ime ili naziv</label>
+      <input type="text" name="ime" placeholder="npr. Marija Horvat ili Uzgajivačnica Novak" required autocomplete="name">
+    </div>
+
+    <div class="field">
+      <label>Email adresa</label>
+      <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label>Grad</label>
+      <input type="text" name="grad" placeholder="npr. Zagreb, Osijek, Split..." autocomplete="address-level2">
+    </div>
+
+    <div class="field">
+      <label>Tip profila</label>
+    </div>
+    <div class="type-grid">
+      {% for value, label in account_types %}
+      <label class="type-btn">
+        <input type="radio" name="account_type" value="{{ value }}" {% if value == 'owner' %}checked{% endif %} onchange="this.closest('.type-grid').querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));this.closest('.type-btn').classList.add('active')">
+        {{ label }}
+      </label>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn-submit">Kreiraj profil →</button>
+  </form>
+
+  <p class="footer-note">
+    Nema lozinke, nema kartice, nema pretplate.<br>
+    Profil je tvoj. Podaci su sigurni. Zauvijek besplatno.<br><br>
+    Već imaš profil? <a href="https://memio.pet/barf/" style="color:var(--gold)">BARF Marketplace</a> · <a href="https://memio.pet/hotel/" style="color:var(--gold)">Pet Hotel</a>
+  </p>
+</div>
+
+<script>
+// Označi prvi tip kao aktivan na startu
+document.querySelector('.type-btn').classList.add('active');
+</script>
+</body>
+</html>

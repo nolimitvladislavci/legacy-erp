@@ -149,3 +149,122 @@ class FamilyStory(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ════════════════════════════════════════════════════════════════
+# CHILD PROFILE + MEMORY ENTRY + MILESTONE (F3 task)
+# ════════════════════════════════════════════════════════════════
+
+class ChildProfile(models.Model):
+    """Svako dijete = jedan digitalni pasoš."""
+    VISIBILITY_CHOICES = [
+        ('private', 'Samo obitelj'),
+        ('family', 'Šira obitelj'),
+        ('public', 'Javno'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    date_of_birth = models.DateField()
+    birth_city = models.CharField(max_length=100, blank=True)
+    birth_country = models.CharField(max_length=2, default='HR')
+    photo = models.ImageField(upload_to='children/', null=True, blank=True)
+    guardian_emails = models.JSONField(
+        default=list, blank=True,
+        help_text='Email adrese roditelja/skrbnika (cross-db, bez FK)',
+    )
+    visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='private')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'memio_world'
+        db_table = 'mw_child_profile'
+        verbose_name = _('Profil djeteta')
+        verbose_name_plural = _('Profili djece')
+        ordering = ['name']
+
+    def __str__(self):
+        return f'{self.name} ({self.date_of_birth})'
+
+    @property
+    def age(self):
+        from datetime import date
+        today = date.today()
+        return today.year - self.date_of_birth.year - (
+            (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+        )
+
+
+class MemoryEntry(models.Model):
+    """Jedan zapis u knjizi sjećanja."""
+    ENTRY_TYPES = [
+        ('photo', 'Fotografija'),
+        ('video', 'Video'),
+        ('text', 'Priča/tekst'),
+        ('milestone', 'Postignuće'),
+        ('document', 'Dokument'),
+        ('drawing', 'Crtež'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='memories')
+    entry_type = models.CharField(max_length=20, choices=ENTRY_TYPES)
+    title = models.CharField(max_length=200)
+    content = models.TextField(blank=True)
+    media_file = models.FileField(upload_to='memories/', null=True, blank=True)
+    entry_date = models.DateField(help_text='Datum sjećanja')
+    age_at_entry = models.PositiveSmallIntegerField(null=True, blank=True)
+    created_by_email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(default=False)
+    tags = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        app_label = 'memio_world'
+        db_table = 'mw_memory_entry'
+        ordering = ['entry_date']
+        verbose_name = _('Sjećanje')
+        verbose_name_plural = _('Sjećanja')
+
+    def __str__(self):
+        return f'{self.title} ({self.entry_date})'
+
+    def save(self, *args, **kwargs):
+        if self.child and self.entry_date and not self.age_at_entry:
+            delta = self.entry_date - self.child.date_of_birth
+            self.age_at_entry = delta.days // 365
+        super().save(*args, **kwargs)
+
+
+class Milestone(models.Model):
+    """Prekretnice — 1. korak, 1. riječ, 1. dan škole..."""
+    MILESTONE_TYPES = [
+        ('first_word', 'Prva riječ'),
+        ('first_step', 'Prvi korak'),
+        ('first_tooth', 'Prvi zubić'),
+        ('school_start', 'Polazak u školu'),
+        ('graduation', 'Završetak obrazovanja'),
+        ('sport', 'Sportski uspjeh'),
+        ('art', 'Umjetnički uspjeh'),
+        ('other', 'Ostalo'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='milestones')
+    milestone_type = models.CharField(max_length=30, choices=MILESTONE_TYPES)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    achieved_date = models.DateField()
+    photo = models.ImageField(upload_to='milestones/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'memio_world'
+        db_table = 'mw_milestone'
+        ordering = ['achieved_date']
+        verbose_name = _('Prekretnica')
+        verbose_name_plural = _('Prekretnice')
+
+    def __str__(self):
+        return f'{self.title} ({self.achieved_date})'
