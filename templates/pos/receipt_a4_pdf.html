@@ -17,10 +17,10 @@ td   { padding: 3px 5px; vertical-align: top; }
 /* Header */
 .hdr-name  { font-size: 16pt; font-weight: bold; color: #0a0a0a; }
 .hdr-sub   { font-size: 8.5pt; color: #555; }
-.bon-title { font-size: 14pt; font-weight: bold; color: var(--gold,#c9a84c); text-align: right; }
+.bon-title { font-size: 14pt; font-weight: bold; color: #c9a84c; text-align: right; }
 .bon-meta  { font-size: 8.5pt; color: #444; text-align: right; }
 .bon-paid  { font-size: 8.5pt; font-weight: bold; color: #16a34a; text-align: right; }
-.sep-line  { border-bottom: 2px solid var(--gold,#c9a84c); }
+.sep-line  { border-bottom: 2px solid #c9a84c; }
 
 /* Info grid — ALL cells have explicit % widths */
 .info-lbl  { font-size: 9pt; color: #666; width: 15%; }
@@ -28,7 +28,7 @@ td   { padding: 3px 5px; vertical-align: top; }
 
 /* Items table */
 .items-hdr { background: #0a0a0a; }
-.items-hdr td { color: var(--gold,#c9a84c); font-size: 8pt; text-transform: uppercase;
+.items-hdr td { color: #c9a84c; font-size: 8pt; text-transform: uppercase;
                 letter-spacing: .04em; padding: 5px 5px; font-weight: bold; }
 .items-row td { font-size: 9pt; padding: 5px 5px; border-bottom: 1px solid #eee; }
 .r { text-align: right; }
@@ -56,12 +56,12 @@ td   { padding: 3px 5px; vertical-align: top; }
 <!-- ── HEADER ── -->
 <table style="margin-bottom:12px">
   <tr class="sep-line">
-    <td style="width:65%;border-bottom:2px solid var(--gold,#c9a84c);padding-bottom:10px">
+    <td style="width:65%;border-bottom:2px solid #c9a84c;padding-bottom:10px">
       <div class="hdr-name">{{ company.name }}</div>
       {% if company.address %}<div class="hdr-sub">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
       {% if company.oib %}<div class="hdr-sub">OIB/UID: {{ company.oib }}</div>{% endif %}
     </td>
-    <td style="width:35%;border-bottom:2px solid var(--gold,#c9a84c);padding-bottom:10px">
+    <td style="width:35%;border-bottom:2px solid #c9a84c;padding-bottom:10px">
       {% if receipt.status == "cancelled" %}
       <div class="bon-title" style="color:#c00">STORNIRANO</div>
       {% else %}
@@ -77,7 +77,7 @@ td   { padding: 3px 5px; vertical-align: top; }
 
 <!-- ── R1 RAČUN (podaci kupca) ── -->
 {% if receipt.is_r1 and receipt.buyer_oib %}
-<table style="margin-bottom:12px;border:1px solid var(--gold,#c9a84c);border-radius:4px">
+<table style="margin-bottom:12px;border:1px solid #c9a84c;border-radius:4px">
   <tr>
     <td style="padding:8px;background:#fafaf5">
       <div style="font-size:7pt;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% if company.country == 'DE' %}RECHNUNGSEMPFÄNGER (R1){% else %}KUPAC / R1 RAČUN{% endif %}</div>
@@ -203,7 +203,7 @@ td   { padding: 3px 5px; vertical-align: top; }
 <!-- ── R1/R2 OZNAKA ── -->
 <div style="font-size:7pt;color:#888;text-align:right;margin-bottom:8px">
 {% if receipt.is_r1 %}
-<strong style="color:var(--gold,#c9a84c)">R1</strong> — {% if company.country == 'DE' %}Rechnung mit Empfängerdaten{% else %}Račun s podacima kupca{% endif %}
+<strong style="color:#c9a84c">R1</strong> — {% if company.country == 'DE' %}Rechnung mit Empfängerdaten{% else %}Račun s podacima kupca{% endif %}
 {% else %}
 <strong>R2</strong> — {% if company.country == 'DE' %}Kassenbon{% else %}Gotovinski račun{% endif %}
 {% endif %}

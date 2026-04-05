@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ competition.title }} — memio.pet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'boxgram/css/boxgram.css' %}">
+<style>
+  .competition-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+  
+  .countdown {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .countdown-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  
+  .entry-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .entry-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-color: #667eea;
+  }
+  
+  .entry-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid #667eea;
+  }
+  
+  .entry-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .entry-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+  
+  .entry-votes {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e74c3c;
+    margin: 12px 0;
+  }
+  
+  .vote-btn {
+    width: 100%;
+    padding: 10px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .vote-btn:hover {
+    background: #764ba2;
+    transform: translateY(-2px);
+  }
+  
+  .vote-btn.voted {
+    background: #999;
+    cursor: not-allowed;
+  }
+  
+  .leaderboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .leaderboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .winner-banner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #000;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .winner-banner h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  .status-active {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .status-closed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+</style>
+{% endblock %}
+
+{% block page_title %}{{ competition.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Header -->
+  <div class="competition-header">
+    <div class="status-badge {% if competition.status == 'active' %}status-active{% else %}status-closed{% endif %}">
+      {% if competition.status == 'active' %}
+        <i class="fas fa-circle-notch fa-spin"></i> AKTIVNA
+      {% else %}
+        <i class="fas fa-check-circle"></i> ZATVORENA
+      {% endif %}
+    </div>
+    
+    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px;">{{ competition.title }}</h1>
+    
+    {% if competition.status == 'active' %}
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="countdown-label">Preostalo vrijeme</div>
+        <div class="countdown" id="countdown">--:--:--</div>
+      </div>
+      <div class="col-md-6">
+        <div class="countdown-label">Ukupno glasova</div>
+        <div class="countdown" id="total-votes">{{ entries|length }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Winner Banner (if closed and has winner) -->
+  {% if competition.status == 'closed' and competition.winner %}
+  <div class="winner-banner">
+    <div style="font-size: 3rem; margin-bottom: 15px;">
+      <i class="fas fa-trophy"></i>
+    </div>
+    <h2>{{ competition.winner.name }} je pobjednica!</h2>
+    <p style="margin: 0; opacity: 0.9;">Čestitamo na izvanrednoj pobjedi!</p>
+  </div>
+  {% endif %}
+
+  <!-- Entries Grid -->
+  <div>
+    <h2 class="mb-4" style="font-size: 1.8rem; font-weight: 700;">Prijavljeni ljubimci</h2>
+    
+    <div class="leaderboard-grid">
+      {% for entry in entries %}
+      <div class="entry-card">
+        <!-- Rank Badge -->
+        {% if forloop.counter <= 3 %}
+        <div style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;
+          {% if forloop.counter == 1 %}background: #fbbf24; color: #000;{% elif forloop.counter == 2 %}background: #d1d5db; color: #000;{% else %}background: #cd7f32; color: white;{% endif %}">
+          #{{ forloop.counter }}
+        </div>
+        {% endif %}
+        
+        <!-- Avatar -->
+        <div class="entry-avatar">
+          {% if entry.pet.avatar %}
+            <img src="{{ entry.pet.avatar.url }}" alt="{{ entry.pet.name }}">
+          {% else %}
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+              <i class="fas fa-paw"></i>
+            </div>
+          {% endif %}
+        </div>
+        
+        <!-- Info -->
+        <div class="entry-name">{{ entry.pet.name }}</div>
+        <div style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">{{ entry.pet.get_species_display }}</div>
+        
+        <!-- Votes -->
+        <div class="entry-votes" id="votes-{{ entry.id }}">{{ entry.votes }}</div>
+        <div style="font-size: 0.8rem; color: #999; margin-bottom: 15px;">
+          glasova
+        </div>
+        
+        <!-- Vote Button -->
+        {% if competition.status == 'active' %}
+        <button class="vote-btn" data-entry-id="{{ entry.id }}" onclick="voteForEntry(this, '{{ entry.id }}')">
+          <i class="fas fa-heart"></i> Glasaj
+        </button>
+        {% else %}
+        <button class="vote-btn" disabled style="background: #ccc; cursor: not-allowed;">
+          Glasanje zaključeno
+        </button>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="alert alert-info col-12">
+        <i class="fas fa-info-circle"></i> Nema prijavljenih ljubimaca.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Vote Logic -->
+<script>
+const competitionId = '{{ competition.id }}';
+const votedEntries = JSON.parse(localStorage.getItem('voted_' + competitionId) || '[]');
+
+// Mark already voted entries
+document.querySelectorAll('.vote-btn').forEach(btn => {
+  const entryId = btn.dataset.entryId;
+  if (votedEntries.includes(entryId)) {
+    btn.classList.add('voted');
+    btn.textContent = 'Ste već glasali';
+    btn.disabled = true;
+  }
+});
+
+function voteForEntry(btn, entryId) {
+  if (btn.disabled) return;
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Slanje glasa...';
+  
+  fetch('/boxgram/takmicenje/{{ competition.id }}/vote/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || 
+                      getCookie('csrftoken')
+    },
+    body: JSON.stringify({ entry_id: entryId })
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('votes-' + entryId).textContent = data.votes;
+        btn.classList.add('voted');
+        btn.textContent = 'Ste već glasali';
+        votedEntries.push(entryId);
+        localStorage.setItem('voted_' + competitionId, JSON.stringify(votedEntries));
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-heart"></i> Glasaj';
+        alert('Greška: ' + data.error);
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-heart"></i> Glasaj';
+      alert('Mrežna greška!');
+    });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Live update - refresh leaderboard every 10 seconds
+{% if competition.status == 'active' %}
+setInterval(() => {
+  fetch('/api/boxgram/competitions/{{ competition.id }}/')
+    .then(r => r.json())
+    .then(data => {
+      if (data.entries) {
+        data.entries.forEach(entry => {
+          const elem = document.getElementById('votes-' + entry.id);
+          if (elem) elem.textContent = entry.votes;
+        });
+      }
+    })
+    .catch(err => console.log('Refresh error:', err));
+}, 10000);
+
+// Countdown timer
+function updateCountdown() {
+  const endDate = new Date('{{ competition.end_date|date:"c" }}').getTime();
+  const now = new Date().getTime();
+  const diff = endDate - now;
+  
+  if (diff <= 0) {
+    document.getElementById('countdown').textContent = 'ZAVRŠENO';
+    return;
+  }
+  
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  document.getElementById('countdown').textContent = 
+    String(hours).padStart(2, '0') + ':' + 
+    String(minutes).padStart(2, '0') + ':' + 
+    String(seconds).padStart(2, '0');
+}
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+{% endif %}
+</script>
+
+{% endblock %}

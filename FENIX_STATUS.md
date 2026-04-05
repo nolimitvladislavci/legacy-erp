@@ -1,7 +1,7 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-06 — Sesija završena
+# Zadnje azuriranje: 2026-04-05 — MCP fix
 # Git HEAD: 403be822
-# Server: gunicorn ✅ nginx ✅ | disk 39% | RAM 51%
+# Server: gunicorn ✅ nginx ✅ mcp-fina ✅ | disk 39%
 
 ---
 

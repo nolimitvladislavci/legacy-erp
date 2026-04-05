@@ -10,6 +10,9 @@ from django.dispatch import receiver
 
 logger = logging.getLogger('documents.signals')
 
+# Cache invalidation
+from documents.cache import invalidate_arhiva_cache
+
 
 def _trigger_ai_proposal(entry):
     '''Async AI proposal for new ArhivaEntry.'''
@@ -96,6 +99,7 @@ def _archive_invoice_inner(instance):
             logger.warning('FenixInbox invoice signal: %s', _fie)
 
         _trigger_ai_proposal(entry)
+        invalidate_arhiva_cache(instance.company_id)
 
     except Exception as e:
         logger.error('ArhivaEntry signal failed for Invoice %s: %s', instance.pk, e)
@@ -135,6 +139,7 @@ def _archive_eracun_inner(instance):
             entry = ArhivaEntry(source_type=source_type, source_id=source_id, **vals)
             entry.save()
         _trigger_ai_proposal(entry)
+        invalidate_arhiva_cache(instance.company_id)
     except Exception as e:
         logger.error('ArhivaEntry signal failed for ERacun %s: %s', instance.pk, e)
 

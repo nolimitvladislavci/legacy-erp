@@ -301,3 +301,135 @@ def connect_signals():
         logger.info('Boxgram: svi signali registrirani')
     except Exception as e:
         logger.error(f'Boxgram connect_signals error: {e}')
+
+
+# ══════════════════════════════════════════════════════
+# AI ENRICHMENT — Haiku auto-opisi
+# ══════════════════════════════════════════════════════
+
+def auto_enrich_life_event(sender, instance, created, **kwargs):
+    """
+    AI Faza 1: Auto-enrich LifeEvent ako je kreirano bez opisa.
+    Poziva enrich_life_event_ai task s countdown=2 sekunde.
+    """
+    if not created:
+        return  # Samo za nove događaje
+
+    if instance.description and instance.description.strip():
+        return  # Ako već ima opisa, ne radim ništa
+
+    try:
+        from .tasks import enrich_life_event_ai
+
+        enrich_life_event_ai.apply_async(
+            args=[str(instance.id)],
+            countdown=2  # Delayed start za 2 sekunde
+        )
+        logger.info(f'auto_enrich_life_event: Zakazan task za event {instance.id}')
+    except Exception as e:
+        logger.error(f'auto_enrich_life_event: {str(e)}')
+
+
+# ══════════════════════════════════════════════════════
+# REGISTRACIJA SIGNALA — AŽURIRANA
+# ══════════════════════════════════════════════════════
+
+def connect_signals():
+    """
+    Poziva se iz BoxgramConfig.ready().
+    Koristi string-based sender za lazy import — izbjegava circular imports.
+    """
+    try:
+        from django.apps import apps
+
+        # AI Enrichment — LifeEvent signal
+        try:
+            LifeEvent = apps.get_model('boxgram', 'LifeEvent')
+            post_save.connect(auto_enrich_life_event, sender=LifeEvent,
+                              dispatch_uid='boxgram_auto_enrich_life_event')
+            logger.info('Boxgram signal: LifeEvent AI enrichment connected')
+        except LookupError:
+            pass
+
+        if apps.is_installed('livestock'):
+            try:
+                HoneyHarvest = apps.get_model('livestock', 'HoneyHarvest')
+                post_save.connect(on_honey_harvest_saved, sender=HoneyHarvest,
+                                  dispatch_uid='boxgram_honey_harvest')
+                logger.info('Boxgram signal: HoneyHarvest connected')
+            except LookupError:
+                pass
+
+            try:
+                HiveInspection = apps.get_model('livestock', 'HiveInspection')
+                post_save.connect(on_hive_inspection_saved, sender=HiveInspection,
+                                  dispatch_uid='boxgram_hive_inspection')
+            except LookupError:
+                pass
+
+            try:
+                EPPDojava = apps.get_model('livestock', 'EPPDojava')
+                post_save.connect(on_epp_dojava_saved, sender=EPPDojava,
+                                  dispatch_uid='boxgram_epp_dojava')
+            except LookupError:
+                pass
+
+            try:
+                Animal = apps.get_model('livestock', 'Animal')
+                post_save.connect(on_animal_saved, sender=Animal,
+                                  dispatch_uid='boxgram_animal')
+            except LookupError:
+                pass
+
+        if apps.is_installed('invoicing'):
+            try:
+                Invoice = apps.get_model('invoicing', 'Invoice')
+                post_save.connect(on_invoice_saved, sender=Invoice,
+                                  dispatch_uid='boxgram_invoice')
+            except LookupError:
+                pass
+
+        # memio_pet bridge
+        if apps.is_installed('memio_pet'):
+            try:
+                AnimalProfile = apps.get_model('memio_pet', 'AnimalProfile')
+                post_save.connect(on_animal_profile_saved, sender=AnimalProfile,
+                                  dispatch_uid='boxgram_animal_profile_bridge')
+                logger.info('Boxgram signal: memio_pet AnimalProfile bridge connected')
+            except LookupError:
+                pass
+            try:
+                PetHealthRecord = apps.get_model('memio_pet', 'PetHealthRecord')
+                post_save.connect(on_health_record_saved, sender=PetHealthRecord,
+                                  dispatch_uid='boxgram_health_record_bridge')
+                logger.info('Boxgram signal: memio_pet PetHealthRecord bridge connected')
+            except LookupError:
+                pass
+
+        logger.info('Boxgram: svi signali registrirani')
+    except Exception as e:
+        logger.error(f'Boxgram connect_signals error: {e}')
+
+
+# ══════════════════════════════════════════════════════
+# MEMIO.PET BRIDGE — AnimalProfile + PetHealthRecord → Boxgram
+# ══════════════════════════════════════════════════════
+
+def on_animal_profile_saved(sender, instance, created, **kwargs):
+    """memio_pet.AnimalProfile → boxgram.PetProfile auto-sync."""
+    try:
+        from boxgram.services.memio_bridge import sync_animal_to_boxgram
+        sync_animal_to_boxgram(instance)
+    except Exception as e:
+        logger.warning(f'Boxgram bridge skip (AnimalProfile {getattr(instance, "pk", "?")}): {e}')
+
+
+def on_health_record_saved(sender, instance, created, **kwargs):
+    """memio_pet.PetHealthRecord → boxgram.LifeEvent auto-sync."""
+    if not created:
+        return
+    try:
+        from boxgram.services.memio_bridge import sync_health_record_to_boxgram
+        sync_health_record_to_boxgram(instance)
+    except Exception as e:
+        logger.warning(f'Boxgram bridge skip (PetHealthRecord {getattr(instance, "pk", "?")}): {e}')

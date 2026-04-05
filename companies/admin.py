@@ -3,6 +3,17 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import Company, NKDCode, TaxRate, CompanyPartnership
 
+try:
+    from boxgram.models import PetProfile
+    class PetProfileInline(admin.TabularInline):
+        fk_name = 'company'
+        model = PetProfile
+        extra = 0
+        fields = ['name', 'owner', 'species', 'is_public', 'is_memorial']
+    HAS_BOXGRAM = True
+except ImportError:
+    HAS_BOXGRAM = False
+
 
 @admin.register(NKDCode)
 class NKDCodeAdmin(admin.ModelAdmin):
@@ -16,6 +27,7 @@ class NKDCodeAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
+    inlines = [PetProfileInline] if HAS_BOXGRAM else []
     list_display  = ('name', 'oib', 'country', 'business_type', 'pdv_status', 'nkd_code',
                       'currency', 'fiscal_system', 'is_vat_registered', 'is_platform_owner', 'grosmarkt_partner', 'city', 'created_at')
     search_fields = ('name', 'oib', 'tax_number', 'vat_id')

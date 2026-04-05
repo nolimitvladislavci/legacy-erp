@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}memio.pet — Feed{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'boxgram/css/boxgram.css' %}">
+<style>
+  .feed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .feed-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .pet-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: #667eea;
+  }
+  
+  .pet-card-header {
+    height: 180px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pet-card-avatar {
+    position: absolute;
+    bottom: -25px;
+    left: 15px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: #f0f0f0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .pet-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .pet-card-body {
+    padding: 50px 15px 15px 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pet-card-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  
+  .pet-card-species {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  
+  .pet-card-event {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  
+  .pet-card-footer {
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #e74c3c;
+  }
+  
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-tab {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+  
+  .filter-tab:hover,
+  .filter-tab.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+  }
+</style>
+{% endblock %}
+
+{% block page_title %}memio.pet — Javni Feed{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="mb-5">
+    <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 8px;">memio.pet Feed</h1>
+    <p class="text-muted" style="font-size: 1rem;">Odkrijte ljubimce iz čitavog svijeta i pratite njihove životne priče</p>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <a href="?species=" class="filter-tab {% if not species %}active{% endif %}">Svi</a>
+    {% for value, label in species_choices %}
+    <a href="?species={{ value }}&page=1" class="filter-tab {% if species == value %}active{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Pet Cards Grid -->
+  <div class="feed-grid">
+    {% for pet in page_obj %}
+    <a href="{% url 'boxgram:public_profile' pet.slug %}" class="pet-card">
+      <div class="pet-card-header"></div>
+      
+      <div class="pet-card-avatar">
+        {% if pet.avatar %}
+          <img src="{{ pet.avatar.url }}" alt="{{ pet.name }}">
+        {% else %}
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+            <i class="fas fa-paw"></i>
+          </div>
+        {% endif %}
+      </div>
+      
+      <div class="pet-card-body">
+        <div class="pet-card-name">{{ pet.name }}</div>
+        <div class="pet-card-species">{{ pet.get_species_display }}</div>
+        
+        {% with latest_event=pet.life_events.filter|first %}
+        {% if latest_event %}
+          <div class="pet-card-event">{{ latest_event.title }}</div>
+        {% endif %}
+        {% endwith %}
+        
+        <div class="pet-card-footer">
+          <i class="fas fa-heart" style="color: #e74c3c;"></i>
+          <span>{{ pet.hearts_count }}</span>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="alert alert-info col-12">
+      <i class="fas fa-info-circle"></i> Nema dostupnih ljubimaca za prikaz.
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav aria-label="Paginacija" class="mt-5">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1{% if species %}&species={{ species }}{% endif %}">Prva</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if species %}&species={{ species }}{% endif %}">Prethodna</a>
+        </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if species %}&species={{ species }}{% endif %}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if species %}&species={{ species }}{% endif %}">Sljedeća</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if species %}&species={{ species }}{% endif %}">Posljednja</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

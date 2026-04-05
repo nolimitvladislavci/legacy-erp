@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ pet.name }} — memio.pet{% endblock %}
+
+{% block extra_css %}
+<meta property="og:title" content="{{ pet.name }} — memio.pet">
+<meta property="og:description" content="{% if pet.bio %}{{ pet.bio|truncatewords:20 }}{% else %}Pet profile: {{ pet.name }}{% endif %}">
+{% if pet.avatar %}<meta property="og:image" content="{{ pet.avatar.url }}">{% endif %}
+<meta property="og:url" content="https://memio.pet/ljubimac/{{ pet.slug }}/">
+<meta property="og:type" content="profile">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="{% static 'boxgram/css/boxgram.css' %}">
+<style>
+  :root {
+    --primary: #667eea;
+    --secondary: #764ba2;
+  }
+</style>
+{% endblock %}
+
+{% block page_title %}{{ pet.name }} — memio.pet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  
+  <!-- Memorial Mode -->
+  {% if pet.is_memorial %}
+  <div class="alert alert-dark text-light mb-4" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-left: 4px solid #e8c96a;">
+    <h3 class="mb-2" style="color: #e8c96a; font-weight: 700;">
+      <i class="fas fa-dove"></i> {{ pet.name }} živi u našim srcima
+    </h3>
+    <p class="mb-0">{{ pet.birth_date|date:"Y" }}{% if pet.death_date %} — {{ pet.death_date|date:"Y" }}{% endif %}</p>
+  </div>
+  {% endif %}
+
+  <!-- Cover Photo & Avatar -->
+  <div class="position-relative mb-4">
+    <!-- Cover -->
+    <div class="profile-cover" style="
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      {% if pet.cover_photo %}background-image: url('{{ pet.cover_photo.url }}'); background-size: cover; background-position: center;{% endif %}
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    "></div>
+
+    <!-- Avatar (overlapping) -->
+    <div class="position-absolute" style="
+      bottom: -60px;
+      left: 30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid white;
+      overflow: hidden;
+      background: #f0f0f0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    ">
+      {% if pet.avatar %}
+        <img src="{{ pet.avatar.url }}" alt="{{ pet.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+      {% else %}
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 2rem; color: white;">
+          <i class="fas fa-paw"></i>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="margin-top: 80px; padding: 0 30px;">
+    
+    <!-- Header Info -->
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+      <div>
+        <h1 class="mb-1" style="font-size: 2.2rem; font-weight: 700;">{{ pet.name }}</h1>
+        <p class="mb-2" style="color: #666; font-size: 1rem;">
+          <strong>{{ pet.get_species_display }}</strong>
+          {% if pet.breed %}<span class="ms-2">• {{ pet.breed }}</span>{% endif %}
+        </p>
+        
+        <!-- Badges -->
+        <div class="d-flex gap-2 mt-3 flex-wrap">
+          {% if pet.is_vet_verified %}
+          <span class="badge bg-success" style="font-size: 0.85rem; padding: 6px 12px;">
+            <i class="fas fa-check-circle"></i> Vet Verificiran
+          </span>
+          {% endif %}
+          {% if pet.is_verified_breeder %}
+          <span class="badge bg-info" style="font-size: 0.85rem; padding: 6px 12px;">
+            <i class="fas fa-certificate"></i> Certificirani Uzgajivač
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-primary btn-sm" onclick="shareProfile()" title="Podijeli profil">
+          <i class="fas fa-share-alt"></i> Podijeli
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="showQRCode()" title="Prikaži QR kod">
+          <i class="fas fa-qrcode"></i> QR kod
+        </button>
+      </div>
+    </div>
+
+    <!-- Bio -->
+    {% if pet.bio %}
+    <div class="mb-4 p-3" style="background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;">
+      <p style="margin: 0; color: #333; line-height: 1.6;">{{ pet.bio }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Statistics -->
+    <div class="row mb-4" style="gap: 1rem;">
+      <div class="col-auto">
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; min-width: 120px;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #667eea;">{{ pet.followers_count }}</div>
+          <div style="font-size: 0.85rem; color: #666;">Pratitelja</div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; min-width: 120px;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #e74c3c;">{{ pet.hearts_count }}</div>
+          <div style="font-size: 0.85rem; color: #666;">Srca</div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; min-width: 120px;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #764ba2;">{{ events|length }}</div>
+          <div style="font-size: 0.85rem; color: #666;">Događaja</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Timeline -->
+  <div style="padding: 30px;">
+    <h2 class="mb-4" style="font-size: 1.5rem; font-weight: 700;">Vremenski pregled</h2>
+    
+    <div style="position: relative; padding-left: 30px;">
+      <!-- Vertical Line -->
+      <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); opacity: 0.3;"></div>
+
+      <!-- Events -->
+      {% for event in events %}
+      <div class="timeline-item mb-4">
+        <!-- Dot -->
+        <div style="position: absolute; left: -18px; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: white; border: 3px solid #667eea; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #667eea;">
+          {% if event.event_type == 'rodenje' %}
+            <i class="fas fa-egg"></i>
+          {% elif event.event_type == 'vet' or event.event_type == 'cijepljenje' %}
+            <i class="fas fa-heartbeat"></i>
+          {% elif event.event_type == 'natjecanje' %}
+            <i class="fas fa-trophy"></i>
+          {% elif event.event_type == 'nagrada' %}
+            <i class="fas fa-star"></i>
+          {% elif event.event_type == 'memorijal' or event.event_type == 'smrt' %}
+            <i class="fas fa-dove"></i>
+          {% else %}
+            <i class="fas fa-circle"></i>
+          {% endif %}
+        </div>
+
+        <!-- Content -->
+        <div class="card" style="border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+          <div class="card-header" style="background: #f8f9fa; padding: 12px 16px; border-bottom: 1px solid #e0e0e0;">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="mb-1" style="font-weight: 700;">{{ event.title }}</h5>
+                <small class="text-muted">
+                  <i class="fas fa-calendar"></i> {{ event.date|date:"d. M Y." }}
+                  {% if event.location %}• <i class="fas fa-map-marker-alt"></i> {{ event.location }}{% endif %}
+                </small>
+              </div>
+              <span class="badge" style="background: #667eea; color: white; font-size: 0.7rem;">
+                {{ event.get_event_type_display|upper }}
+              </span>
+            </div>
+          </div>
+          {% if event.description or event.media.exists %}
+          <div class="card-body">
+            {% if event.description %}
+            <p class="mb-3" style="color: #555; line-height: 1.6;">{{ event.description }}</p>
+            {% endif %}
+            
+            <!-- Media Thumbnails -->
+            {% if event.media.exists %}
+            <div class="row g-2">
+              {% for media in event.media.all|slice:":4" %}
+              <div class="col-6 col-md-4">
+                {% if 'image' in media.file_type or media.thumbnail_url %}
+                <img src="{% if media.thumbnail_url %}{{ media.thumbnail_url }}{% else %}{{ media.file.url }}{% endif %}" 
+                     alt="Media" style="width: 100%; border-radius: 8px; object-fit: cover; height: 120px;">
+                {% else %}
+                <div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-file-video" style="font-size: 2rem; color: #667eea;"></i>
+                </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle"></i> Nema događaja za prikaz.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+
+<!-- FAB: Dodaj događaj (samo vlasnik) -->
+{% if is_owner %}
+<button class="btn btn-warning shadow-lg" onclick="document.getElementById('addEventModal').classList.add('show'); document.getElementById('addEventModal').style.display='block';"
+  style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;font-size:1.5rem;z-index:1050;display:flex;align-items:center;justify-content:center;">
+  <i class="fas fa-plus"></i>
+</button>
+
+<!-- Modal: Dodaj događaj -->
+<div class="modal fade" id="addEventModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+        <h5 class="modal-title"><i class="fas fa-paw"></i> Novi događaj za {{ pet.name }}</h5>
+        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('addEventModal').classList.remove('show');document.getElementById('addEventModal').style.display='none';"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addEventForm" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-bold">Naslov</label>
+            <input type="text" name="title" class="form-control" required placeholder="Npr. Rudi na plaži">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Tip</label>
+            <select name="event_type" class="form-select">
+              <option value="milestone">Prekretnica</option>
+              <option value="rodenje">Rođenje</option>
+              <option value="vet">Vet posjet</option>
+              <option value="cijepljenje">Cijepljenje</option>
+              <option value="natjecanje">Natjecanje</option>
+              <option value="nagrada">Nagrada</option>
+              <option value="leglo">Leglo / Rojenje</option>
+              <option value="ostalo">Ostalo</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Datum</label>
+            <input type="date" name="date" class="form-control" value="">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Opis <span class="text-muted fw-normal">(opcionalno — AI će napisati ako ostaviš prazno)</span></label>
+            <textarea name="description" class="form-control" rows="2"></textarea>
+          </div>
+
+          <!-- FenixCamera: slika/video -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Slika ili video</label>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-primary flex-grow-1" onclick="fenixCaptureForEvent()">
+                <i class="fas fa-camera"></i> Kamera / Galerija
+              </button>
+            </div>
+            <input type="file" name="media" id="eventMediaInput" accept="image/*,video/*" multiple style="display:none;">
+            <div id="mediaPreview" class="mt-2 d-flex gap-2 flex-wrap"></div>
+          </div>
+
+          <button type="submit" class="btn btn-warning w-100 fw-bold">
+            <i class="fas fa-check"></i> Spremi događaj
+          </button>
+        </form>
+        <div id="addEventSuccess" class="d-none text-center py-4">
+          <div style="font-size:3rem">🐾</div>
+          <h5>Spremljeno!</h5>
+          <p class="text-muted small">AI upravo piše opis...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">QR kod za {{ pet.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="qrContainer" style="padding: 20px;">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ── FenixCamera integracija za event upload ──
+function fenixCaptureForEvent() {
+  if (typeof FenixCamera !== 'undefined') {
+    FenixCamera.pick({
+      onCapture: function(r) {
+        addMediaPreview(r.dataUrl, r.filename);
+        // Dodaj file u hidden input
+        var dt = new DataTransfer();
+        var existing = document.getElementById('eventMediaInput').files;
+        for (var i = 0; i < existing.length; i++) dt.items.add(existing[i]);
+        dt.items.add(new File([r.blob], r.filename, {type: 'image/jpeg'}));
+        document.getElementById('eventMediaInput').files = dt.files;
+      }
+    });
+  } else {
+    // Fallback: otvori file picker
+    document.getElementById('eventMediaInput').click();
+  }
+}
+
+document.getElementById('eventMediaInput').addEventListener('change', function(e) {
+  for (var i = 0; i < e.target.files.length; i++) {
+    var reader = new FileReader();
+    reader.onload = function(ev) { addMediaPreview(ev.target.result, 'upload'); };
+    reader.readAsDataURL(e.target.files[i]);
+  }
+});
+
+function addMediaPreview(dataUrl, name) {
+  var div = document.getElementById('mediaPreview');
+  var img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #667eea;';
+  div.appendChild(img);
+}
+
+// Set today's date
+document.querySelector('#addEventForm input[name="date"]').value = new Date().toISOString().split('T')[0];
+
+// Submit form
+document.getElementById('addEventForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = e.target;
+  var fd = new FormData(form);
+  var btn = form.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spremam...';
+
+  fetch('/boxgram/ljubimac/{{ pet.slug }}/dodaj/', {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken') }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      form.classList.add('d-none');
+      document.getElementById('addEventSuccess').classList.remove('d-none');
+      setTimeout(function() { location.reload(); }, 2000);
+    } else {
+      alert(data.error || 'Greška');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Spremi događaj';
+    }
+  })
+  .catch(function() {
+    alert('Greška veze');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Spremi događaj';
+  });
+});
+
+function shareProfile() {
+  const url = window.location.href;
+  const title = '{{ pet.name }} — memio.pet';
+  
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      url: url
+    }).catch(err => console.log('Share error:', err));
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link je kopiran u međuspremnik!');
+    });
+  }
+}
+
+function showQRCode() {
+  const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+  const qrContainer = document.getElementById('qrContainer');
+  
+  // Fetch QR code
+  fetch('/api/boxgram/pets/{{ pet.slug }}/qr/')
+    .then(r => r.json())
+    .then(data => {
+      if (data.qr_url) {
+        qrContainer.innerHTML = '<img src="' + data.qr_url + '" alt="QR kod" style="max-width: 200px;">';
+      } else if (data.generating) {
+        qrContainer.innerHTML = '<p class="text-muted">QR kod se generiše...</p>';
+        setTimeout(showQRCode, 2000);
+      }
+    })
+    .catch(err => {
+      qrContainer.innerHTML = '<p class="text-danger">Greška pri učitavanju QR koda</p>';
+    });
+  
+  modal.show();
+}
+</script>
+{% endblock %}

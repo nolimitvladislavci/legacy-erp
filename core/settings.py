@@ -159,6 +159,7 @@ INSTALLED_APPS = [
     "komunalno",
     'vault',
     'honorari',
+    'boxgram',  # Pet social network
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────
@@ -348,6 +349,20 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "PAGE_SIZE": 50,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/hour",
+        "user": "1000/hour",
+        "vote": "5/hour",
+        "import": "20/hour",
+    },
+    "DEFAULT_FILTER_BACKENDS": [
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
 }
 
 # ── Email ─────────────────────────────────────────────────────
@@ -460,6 +475,7 @@ CELERY_TASK_ROUTES = {
     'udruge.tasks.generate_trosarina_report': {'queue': 'heavy'},
     'einvoice.tasks.outbound_tasks.send_einvoice': {'queue': 'heavy'},
     'einvoice.tasks.outbound_tasks.process_retry_queue': {'queue': 'heavy'},
+    'boxgram.tasks.*': {'queue': 'heavy'},
 }
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 
@@ -1198,3 +1214,6 @@ CELERY_BEAT_SCHEDULE.update({
     },
 })
 
+
+# ── Boxgram Social Import ───────────────────────────────────────
+INSTAGRAM_OEMBED_TOKEN = os.environ.get('INSTAGRAM_OEMBED_TOKEN', '')

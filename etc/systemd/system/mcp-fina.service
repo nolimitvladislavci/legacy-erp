@@ -1,0 +1,22 @@
+[Unit]
+Description=LIMIT Connect MCP SSE Server (standalone FastMCP)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/fina-connect
+EnvironmentFile=/var/www/fina-connect/.env
+ExecStartPre=/bin/bash -c 'fuser -k 8765/tcp 2>/dev/null || true'
+ExecStartPre=/bin/sleep 1
+ExecStart=/var/www/fina-connect/venv/bin/python /var/www/fina-connect/mcp_server.py
+Restart=always
+RestartSec=5
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
