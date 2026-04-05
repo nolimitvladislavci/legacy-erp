@@ -1,6 +1,6 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-06 00:30
-# Git HEAD: a9737466
+# Zadnje azuriranje: 2026-04-05 (CC sesija)
+# Git HEAD: d62f170c
 # Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 39%
 
 ═══════════════════════════════════════════════════════════════
@@ -24,8 +24,8 @@
 
 ## AKTIVNI TASKOVI (po prioritetu):
 
-  1. CC_TASK_WAKE.md            ← KRENI OVDJE (TriKey + login template)
-  2. CC_TASK_F1_UI_AUDIT.md     ← UI/UX audit LIMIT Connect
+  1. ✅ CC_TASK_WAKE.md            ← GOTOVO (TriKey + login template)
+  2. 🔄 CC_TASK_F1_UI_AUDIT.md     ← U TIJEKU — 6 commitova gotovo
   3. CC_TASK_F2_MEMIO_PET_ONBOARDING.md  ← memio.pet registracija
   4. CC_TASK_F3_MEMIO_WORLD.md  ← memio.world landing
   5. CC_TASK_F5_NO_LIMIT_AZIL.md ← azil mobile POS
@@ -34,31 +34,39 @@
 
 ---
 
-## STANJE SUSTAVA (06.04. 00:30)
+## STANJE SUSTAVA (05.04. CC sesija)
 
 ### Servisi: sve ✅
-### Git HEAD: a9737466
+### Git HEAD: d62f170c
 ### Django: 0 errors
 
 ### Novi commiti ove sesije:
-  a9737466  docs(status): FENIX_STATUS.md ažuriran
-  95f0a6f9  fix(pdf): CSS var() → inline (22 templates, xhtml2pdf crash fix)
-  fb5703b2  fix(boxgram): signals + video_downloader
+  d62f170c  fix(ui): login page mobile — tab wrapping, larger inputs
+  248323f5  fix(ui): add TriKey PIN tab to main login page
+  75d58c6c  fix(ui): breadcrumb block + form validation visibility
+  fa85895d  fix(ui): dashboard mobile responsive — KPI, workers, AI insights
+  2ecf5a81  fix(ui): POS mobile touch targets + hamburger menu
+  b373dff6  feat(trikey): init_trikey_profiles command + login template
 
 ### Izgrađeno (CC ova sesija):
+  ✅ TriKey:        — 350 profila kreirano, login template, PIN tab na login stranici
+  ✅ POS mobile:    — touch targets ≥44px, hamburger nav, responsive payment
+  ✅ Dashboard:     — KPI grid mobile, workers 1-col, AI insights wrap
+  ✅ Login:         — 4 taba (Lozinka/Magic/Mobitel/PIN), mobile-first
+  ✅ Forms:         — validation visibility, error styling, required markers
+  ✅ Base layout:   — breadcrumb block, toast animations
+
+### Prethodno izgrađeno:
   ✅ boxgram/       — PetProfile, Feed, Competition, SocialImport, bridge
   ✅ memio_world/   — WaitlistEntry, TimeCapsule, MemoryVault, FamilyStory
   ✅ no_limit/      — AzilPrijava, PDF vodič, azil prijava, dashboard
 
 ### Live HTTP:
-  ✅ memio.pet/boxgram/ljubimac/rex-pas-232d99f5/   — 200
-  ✅ memio.pet/boxgram/ljubimac/bella-pas-c94b0fa2/ — 200
-  ✅ memio.pet/boxgram/feed/                        — 200
-  ✅ limit-connect.com/no-limit/vodic/              — 200
-  ✅ limit-connect.com/hr/                          — 302→login
+  ✅ limit-connect.com/hr/                          — 200
+  ✅ limit-connect.com/accounts/trikey/login/       — 302 (OK, redirect to template)
 
 ### Poznati bugovi:
-  ⚠️  TriKey: 0 profila — nitko nema PIN (CC_TASK_WAKE.md)
+  ✅  TriKey: 350 profila kreirano — RIJEŠEN (b373dff6)
   ⚠️  FenixScan OCR: graceful fallback nedostaje (LOW)
   ✅  PDF xhtml2pdf crash: RIJEŠEN (95f0a6f9)
 
@@ -78,7 +86,7 @@
 
 ## OCJENE:
   LIMIT Connect backend:  8.5/10
-  LIMIT Connect UI/UX:    6.5/10 ← F1 task
+  LIMIT Connect UI/UX:    7.5/10 ← F1 audit u tijeku (bilo 6.5)
   Boxgram/memio.pet:      7.5/10
   memio.world:            4/10
   NO LIMIT/azil:          5/10
