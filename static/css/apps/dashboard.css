@@ -182,3 +182,30 @@
   .kpi-grid{grid-template-columns:1fr 1fr}
   .cd-wrap{padding:14px}
 }
+
+/* ── F1 Audit: Dashboard Mobile Fixes (07.04.2026) ── */
+@media(max-width:500px){
+  .kpi{padding:12px 14px}
+  .kpi-val{font-size:1.3rem}
+  .kpi-lbl{font-size:.62rem}
+  .kpi-sub{font-size:.65rem}
+  .workers-grid{grid-template-columns:1fr}
+  .worker-card{padding:12px}
+  .worker-name{font-size:.85rem}
+  .compliance-badge{flex-direction:column;text-align:center;gap:6px;padding:12px}
+  .ai-insights-widget{padding:12px 14px}
+  .ai-insight-row{padding:8px 10px;flex-wrap:wrap}
+  .ai-insight-title{font-size:.8rem}
+  .ai-insight-action{margin-top:4px;font-size:.75rem}
+  .onboarding-grid{grid-template-columns:1fr 1fr}
+  .onboarding-step{padding:8px;gap:8px}
+  .getting-started-actions{flex-direction:column;align-items:stretch}
+  .getting-started-card{max-width:none}
+  .t-row{flex-wrap:wrap;gap:4px;padding:8px 12px}
+  .t-main{flex:1 1 100%;order:1}
+  .t-sub{order:3;font-size:.7rem}
+  .t-val{order:2;margin-left:auto}
+  .t-badge{order:4}
+  .approve-row{flex-wrap:wrap;gap:6px}
+  .lang-switcher{justify-content:center}
+}
