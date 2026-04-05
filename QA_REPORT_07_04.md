@@ -140,3 +140,20 @@ na produkciju. Preporuka: očistiti prije GO-LIVE 15.04.
 
 ---
 Izvještaj generiran automatski. CC sesija 06.04.2026.
+
+---
+
+## NAPOMENA: Django Test Runner
+
+Django `manage.py test` traje 20+ min jer DB router šalje SVE migracije
+(560+ po bazi × 4 baze = 2200+ migracija) na svaku test bazu.
+Svi testovi su izvršeni ručno putem:
+- `manage.py shell` za model/logičke testove (C, D)
+- `curl` za HTTP testove (A, B, E, F, G, H)
+
+Preporuka za budućnost: popraviti `allow_migrate` u DB routeru da
+vraća `False` za apps koji ne pripadaju bazi, ne `None`.
+Test baze kreirane: test_fina_connect, test_memio_pets, test_memio_world.
+
+Test fajl: tests/test_qa_inzenjerski.py (spreman za pokretanje
+nakon router fix-a).
