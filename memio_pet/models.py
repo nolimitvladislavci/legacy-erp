@@ -51,6 +51,13 @@ class BreederProfile(models.Model):
     is_no_limit_partner = models.BooleanField(default=False)  # Azili sponzorirani od No Limit
     shelter_sponsor    = models.CharField(max_length=100, blank=True)
 
+    # Veza na LIMIT Connect korisnika (za dashboard login)
+    user = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='breeder_profiles',
+        db_constraint=False,  # cross-db, nema FK constraint
+    )
+
     # Referenca prema LIMIT Connect (nije FK — samo integer za dedup)
     limit_company_id   = models.CharField(max_length=36, blank=True, db_index=True)
 

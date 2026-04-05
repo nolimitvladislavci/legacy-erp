@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moj profil — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--surface:#ffffff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;--red:#dc3545;--top-bar:#1a1a2e;--top-text:#f8f6f0;--shadow:rgba(0,0,0,.06);--serif:'Cormorant Garamond',Georgia,serif;--sans:'Space Grotesk',system-ui,sans-serif}
+[data-theme="dark"]{--bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;--gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--green:#34d058;--red:#f87171;--top-bar:#09090b;--top-text:#edeae2;--shadow:rgba(0,0,0,.35)}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s}
+.top-bar{background:var(--top-bar);color:var(--top-text);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-bar-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.25rem;font-weight:700}
+.top-bar-logo span{color:var(--top-text)}
+.top-bar-right{display:flex;align-items:center;gap:10px}
+.top-bar-right a{color:var(--top-text);text-decoration:none;font-size:.82rem;font-weight:500;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:20px;transition:all .2s}
+.top-bar-right a:hover{border-color:var(--gold);color:var(--gold)}
+.theme-toggle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:5px 11px;cursor:pointer;font-size:.95rem;color:var(--top-text);line-height:1;display:flex;align-items:center}
+.container{max-width:800px;margin:0 auto;padding:28px 16px}
+.card{background:var(--surface);border-radius:14px;box-shadow:0 2px 16px var(--shadow);margin-bottom:20px;overflow:hidden;transition:background .25s,box-shadow .25s}
+.card-body{padding:22px 24px}
+.section-title{font-family:var(--serif);font-size:1.12rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.trust-bar{width:100%;height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0}
+.trust-bar-fill{height:100%;border-radius:4px;transition:width .6s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .2s;font-family:var(--sans)}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{opacity:.85}
+.btn-outline{background:none;border:1px solid var(--line);color:var(--ink)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.animal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.animal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:all .2s;text-decoration:none;color:var(--ink)}
+.animal-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}
+.animal-photo{width:100%;height:140px;object-fit:cover;display:block}
+.animal-photo-placeholder{width:100%;height:100px;background:linear-gradient(135deg,var(--top-bar),#2a2a4a);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--gold)}
+.animal-info{padding:12px 14px}
+.animal-name{font-family:var(--serif);font-size:1rem;font-weight:700;margin-bottom:2px}
+.animal-meta{font-size:.78rem;color:var(--dim)}
+.badge{font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:600;display:inline-block}
+.badge-gold{background:rgba(201,168,76,.14);color:var(--gold)}
+.badge-green{background:rgba(40,167,69,.12);color:var(--green)}
+.rev-row{padding:12px 0;border-bottom:1px solid var(--line)}
+.rev-row:last-child{border-bottom:none}
+.rev-stars{color:var(--gold);font-size:1rem}
+.rev-comment{font-size:.86rem;color:var(--ink2);font-weight:300;line-height:1.6}
+.rev-meta{font-size:.7rem;color:var(--dim);margin-top:4px}
+.msg{padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:10px}
+.msg.success{background:rgba(40,167,69,.12);border:1px solid rgba(40,167,69,.3);color:var(--green)}
+.msg.error{background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.3);color:var(--red)}
+.msg.info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#3b82f6}
+.qr-link{font-size:.72rem;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
+.page-footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){
+  .container{padding:20px 12px}
+  .animal-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .animal-grid{grid-template-columns:1fr}
+}
+</style>
+<script>
+(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));})();
+</script>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/" class="top-bar-logo">Memio<span>.pet</span></a>
+  <div class="top-bar-right">
+    <a href="{% url 'memio_pet:add_animal' %}">+ Dodaj ljubimca</a>
+    <a href="/logout/">Odjava</a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </div>
+</div>
+
+<div class="container">
+
+  {% if messages %}
+  <div style="margin-bottom:16px">
+    {% for msg in messages %}
+    <div class="msg {{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- BREEDER INFO -->
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+        <div>
+          <h1 style="font-family:var(--serif);font-size:1.6rem;font-weight:700;margin-bottom:2px">
+            {{ breeder.name }}
+            {% if breeder.is_cro_validated %}<span style="color:var(--green)"> ✓</span>{% endif %}
+          </h1>
+          <div style="font-size:.85rem;color:var(--dim)">{{ breeder.get_account_type_display }} · {{ breeder.city }}</div>
+        </div>
+        <a href="{% url 'memio_pet:breeder_profile' breeder.pk %}" class="btn btn-outline" target="_blank">Javni profil</a>
+      </div>
+
+      <!-- Trust Score -->
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.82rem;font-weight:600">Trust Score</span>
+        <span style="font-family:var(--serif);font-size:1.3rem;font-weight:700;color:{{ trust_color }}">{{ trust_score }}/100</span>
+      </div>
+      <div class="trust-bar">
+        <div class="trust-bar-fill" style="width:{{ trust_score }}%;background:{{ trust_color }}"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOJI LJUBIMCI -->
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h2 class="section-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none">Moji ljubimci ({{ animals|length }})</h2>
+        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold">+ Dodaj</a>
+      </div>
+
+      {% if animals %}
+      <div class="animal-grid">
+        {% for a in animals %}
+        <a href="{% url 'memio_pet:pet_profile' a.chip_number|default:a.ear_tag %}" class="animal-card">
+          {% if a.photo %}
+          <img src="{{ a.photo.url }}" alt="{{ a.name }}" class="animal-photo">
+          {% else %}
+          <div class="animal-photo-placeholder">
+            {% if a.vrsta == 'pas' %}🐾{% elif a.vrsta == 'macka' %}🐱{% elif a.vrsta == 'konj' %}🐴{% else %}🐾{% endif %}
+          </div>
+          {% endif %}
+          <div class="animal-info">
+            <div class="animal-name">{{ a.name|default:"Bez imena" }}</div>
+            <div class="animal-meta">{{ a.get_vrsta_display }} · {{ a.breed|default:"" }}</div>
+            <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+              <span class="badge badge-gold">{{ a.get_status_display }}</span>
+              {% if a.chip_number %}<span class="badge badge-green">Čip</span>{% endif %}
+            </div>
+            <div class="qr-link" style="margin-top:6px">📱 QR profil</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:24px;color:var(--dim)">
+        <div style="font-size:2.5rem;margin-bottom:8px">🐾</div>
+        <p>Nemate još niti jednog ljubimca.</p>
+        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold" style="margin-top:12px">Dodaj prvog ljubimca</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RECENZIJE -->
+  {% if reviews %}
+  <div class="card">
+    <div class="card-body">
+      <h2 class="section-title">Recenzije ({{ reviews|length }})</h2>
+      {% for rev in reviews %}
+      <div class="rev-row">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-weight:500;font-size:.9rem">{{ rev.reviewer_name }}</span>
+          <span class="rev-stars">{% for i in "12345" %}{% if forloop.counter <= rev.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+        </div>
+        {% if rev.comment %}<p class="rev-comment">{{ rev.comment }}</p>{% endif %}
+        <div class="rev-meta">{{ rev.created_at|date:"d.m.Y." }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="page-footer">
+  <a href="/">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
+  © 2026 Konjik d.o.o. & NO LIMIT udruga
+</div>
+
+<script>
+(function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('themeBtn');if(btn)btn.textContent=t==='dark'?'☀️':'🌙';})();
+function toggleTheme(){var h=document.documentElement;var c=h.getAttribute('data-theme')||'light';var n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('memio-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'☀️':'🌙';}
+</script>
+</body>
+</html>

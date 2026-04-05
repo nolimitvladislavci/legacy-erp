@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memio.pet — Digitalni identitet vašeg ljubimca</title>
+<meta name="description" content="Besplatni digitalni profil za vašeg ljubimca. Zdravstveni karton, QR kod, lanac vlasništva — sve na jednom mjestu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--surface:#ffffff;--ink:#1a1a2e;--ink2:#3d3d52;
+  --gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;
+  --top-bar:#1a1a2e;--top-text:#f8f6f0;--shadow:rgba(0,0,0,.06);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;
+  --gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--green:#34d058;
+  --top-bar:#09090b;--top-text:#edeae2;--shadow:rgba(0,0,0,.35);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s}
+
+.top-bar{background:var(--top-bar);color:var(--top-text);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-bar-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.25rem;font-weight:700}
+.top-bar-logo span{color:var(--top-text)}
+.top-bar-right{display:flex;align-items:center;gap:10px}
+.top-bar-right a{color:var(--top-text);text-decoration:none;font-size:.82rem;font-weight:500;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:20px;transition:all .2s}
+.top-bar-right a:hover{border-color:var(--gold);color:var(--gold)}
+.theme-toggle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:5px 11px;cursor:pointer;font-size:.95rem;color:var(--top-text);line-height:1;display:flex;align-items:center}
+
+.hero{text-align:center;padding:60px 20px 40px;max-width:700px;margin:0 auto}
+.hero-emoji{font-size:4rem;margin-bottom:16px}
+.hero h1{font-family:var(--serif);font-size:2.4rem;font-weight:700;margin-bottom:12px;line-height:1.15}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:1.05rem;color:var(--ink2);font-weight:300;line-height:1.6;margin-bottom:32px}
+
+.cta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:800px;margin:0 auto 48px;padding:0 20px}
+.cta-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 20px;text-align:center;text-decoration:none;color:var(--ink);transition:all .2s;box-shadow:0 2px 12px var(--shadow)}
+.cta-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow)}
+.cta-icon{font-size:2.2rem;margin-bottom:12px}
+.cta-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.cta-desc{font-size:.82rem;color:var(--dim);font-weight:300;line-height:1.5}
+
+.features{max-width:800px;margin:0 auto 48px;padding:0 20px}
+.features h2{font-family:var(--serif);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:28px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 1px 8px var(--shadow)}
+.feat-icon{font-size:1.5rem;margin-bottom:8px}
+.feat h3{font-size:.92rem;font-weight:600;margin-bottom:4px}
+.feat p{font-size:.82rem;color:var(--dim);font-weight:300;line-height:1.5}
+
+.trust-section{text-align:center;padding:40px 20px;background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:40px}
+.trust-section h2{font-family:var(--serif);font-size:1.4rem;margin-bottom:8px}
+.trust-section p{color:var(--dim);font-size:.9rem;max-width:500px;margin:0 auto}
+
+.page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
+.page-footer a{color:var(--gold);text-decoration:none}
+
+@media(max-width:600px){
+  .hero h1{font-size:1.8rem}
+  .hero{padding:40px 16px 28px}
+  .cta-grid{grid-template-columns:1fr;gap:12px;padding:0 16px}
+  .feat-grid{grid-template-columns:1fr}
+  .features{padding:0 16px}
+}
+</style>
+<script>
+(function(){
+  var s=localStorage.getItem('memio-theme');
+  var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+})();
+</script>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/" class="top-bar-logo">Memio<span>.pet</span></a>
+  <div class="top-bar-right">
+    <a href="/registracija/">Registracija</a>
+    <a href="/barf/">BARF</a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-emoji">🐾</div>
+  <h1>Digitalni identitet <span>vašeg ljubimca</span></h1>
+  <p>Besplatni QR profil, zdravstveni karton, lanac vlasništva i Trust Score — sve verificirano, sve na jednom mjestu.</p>
+</div>
+
+<div class="cta-grid">
+  <a href="/registracija/" class="cta-card">
+    <div class="cta-icon">🏆</div>
+    <div class="cta-title">Registriraj uzgajivača</div>
+    <div class="cta-desc">Kreiraj verificirani profil i upravljaj ljubimcima besplatno.</div>
+  </a>
+  <a href="/barf/" class="cta-card">
+    <div class="cta-icon">🥩</div>
+    <div class="cta-title">BARF Marketplace</div>
+    <div class="cta-desc">Lokalna sirova hrana za ljubimce — od OPG-a do zdjelice.</div>
+  </a>
+  <a href="/hotel/" class="cta-card">
+    <div class="cta-icon">🏨</div>
+    <div class="cta-title">Pet Hotel</div>
+    <div class="cta-desc">Rezerviraj smještaj za ljubimca kod provjerenih partnera.</div>
+  </a>
+</div>
+
+<div class="features">
+  <h2>Zašto Memio.pet?</h2>
+  <div class="feat-grid">
+    <div class="feat">
+      <div class="feat-icon">📱</div>
+      <h3>QR profil</h3>
+      <p>Svaki ljubimac dobiva jedinstveni QR kod — skeniraj i vidi sve podatke trenutno.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">💉</div>
+      <h3>Zdravstveni karton</h3>
+      <p>Cijepljenja, pregledi, terapije — sve na jednom mjestu, verificirano od veterinara.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔗</div>
+      <h3>Lanac vlasništva</h3>
+      <p>Transparentan trag — tko je odgojio, tko je kupio, tko je vlasnik.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⭐</div>
+      <h3>Trust Score</h3>
+      <p>0-100 bodova: OIB verifikacija, veterinar, zdravstveni zapisi, recenzije kupaca.</p>
+    </div>
+  </div>
+</div>
+
+<div class="trust-section">
+  <h2>Verificirano putem LIMIT Connect</h2>
+  <p>Memio.pet koristi istu infrastrukturu koju koriste hrvatski poduzetnici za fiskalizaciju i digitalno poslovanje.</p>
+</div>
+
+<div class="page-footer">
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
+  © 2026 Konjik d.o.o. & NO LIMIT udruga
+</div>
+
+<script>
+(function(){
+  var t=document.documentElement.getAttribute('data-theme')||'light';
+  var btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=t==='dark'?'☀️':'🌙';
+})();
+function toggleTheme(){
+  var html=document.documentElement;
+  var c=html.getAttribute('data-theme')||'light';
+  var n=c==='dark'?'light':'dark';
+  html.setAttribute('data-theme',n);
+  localStorage.setItem('memio-theme',n);
+  document.getElementById('themeBtn').textContent=n==='dark'?'☀️':'🌙';
+}
+</script>
+</body>
+</html>
