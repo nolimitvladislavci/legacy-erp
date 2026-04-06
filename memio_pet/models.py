@@ -6,6 +6,7 @@ Sve veze prema ERP-u su API pozivi, ne ORM JOIN-ovi.
 Baza: memio_pets (PostgreSQL, odvojena od fina_erp)
 """
 import uuid
+import secrets as _sec
 from django.db import models
 from memio_pet.encrypted_fields import MemioEncryptedField
 from memio_pet.validators import (
@@ -612,3 +613,54 @@ class PetBoardingReservation(models.Model):
         if self.check_in and self.check_out:
             return (self.check_out - self.check_in).days
         return 0
+
+
+# ════════════════════════════════════════════════════════════
+def _generate_add_animal_token():
+    import secrets
+    return secrets.token_urlsafe(32)
+
+
+# MAGIC TOKEN — sigurna autorizacija za dodavanje ljubimca
+# ════════════════════════════════════════════════════════════
+
+class AddAnimalToken(models.Model):
+    """
+    Jednokratni token za dodavanje ljubimca bez logina.
+    Breeder zatraži token → email s magic linkom → token se konzumira.
+    Istječe nakon 30 minuta. Jednokratan.
+    """
+    token       = models.CharField(max_length=64, unique=True, db_index=True,
+                                    default=_generate_add_animal_token)
+    breeder     = models.ForeignKey(BreederProfile, on_delete=models.CASCADE,
+                                     related_name='add_tokens')
+    email       = models.EmailField()
+    created_at  = models.DateTimeField(auto_now_add=True)
+    used_at     = models.DateTimeField(null=True, blank=True)
+    expires_at  = models.DateTimeField()
+    ip          = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        app_label = 'memio_pet'
+        db_table = 'mp_add_animal_token'
+
+    @classmethod
+    def create(cls, breeder, email, ip=None):
+        from django.utils import timezone
+        import datetime
+        return cls.objects.using('memio_pets').create(
+            breeder=breeder, email=email, ip=ip,
+            expires_at=timezone.now() + datetime.timedelta(minutes=30))
+
+    @property
+    def is_valid(self):
+        from django.utils import timezone
+        return not self.used_at and timezone.now() < self.expires_at
+
+    def consume(self):
+        from django.utils import timezone
+        self.used_at = timezone.now()
+        self.save(using='memio_pets', update_fields=['used_at'])
+
+    def __str__(self):
+        return f"Token {self.token[:8]}... → {self.breeder.name}"

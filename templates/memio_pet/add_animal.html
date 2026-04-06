@@ -42,6 +42,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .btn-submit:hover{background:#b8942a}
 .error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px}
 .success-msg{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);border-radius:8px;padding:10px 14px;color:var(--green);font-size:.85rem;margin-bottom:16px}
+.token-badge{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;padding:4px 10px;border-radius:20px;background:rgba(76,175,125,.1);color:var(--green);font-weight:600;margin-bottom:12px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:520px){.card{padding:24px 18px}.row-2{grid-template-columns:1fr}}
 </style>
@@ -60,7 +61,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   {% if breeder %}
   <div class="breeder-tag">Za: {{ breeder.name }}</div>
   {% endif %}
-  <p class="card-sub">Upiši podatke o ljubimcu. Jedino ime je obavezno — ostalo možeš dodati kasnije.</p>
+  {% if token %}
+  <div class="token-badge">🔐 Sigurni link — verificirano</div>
+  {% endif %}
+  <p class="card-sub">Upisi podatke o ljubimcu. Jedino ime je obavezno — ostalo mozes dodati kasnije.</p>
 
   {% if error %}
   <div class="error">{{ error }}</div>
@@ -72,7 +76,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   {% endfor %}
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" action="/ljubimac/novi/">
+  <form method="post" enctype="multipart/form-data" action="{% if token %}/ljubimac/token/{{ token }}/{% else %}/ljubimac/novi/{% endif %}">
     {% csrf_token %}
     <input type="hidden" name="breeder_id" value="{{ breeder_id }}">
 
@@ -92,19 +96,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
     <div class="field">
       <label>Pasmina</label>
-      <input type="text" name="breed" placeholder="npr. Labrador, Perzijska mačka...">
+      <input type="text" name="breed" placeholder="npr. Labrador, Perzijska macka...">
     </div>
 
     <div class="row-2">
       <div class="field">
-        <label>Broj mikročipa</label>
-        <input type="text" name="chip_number" placeholder="opcijsko — ako ga nema, preskočite" maxlength="20">
+        <label>Broj mikrocipa</label>
+        <input type="text" name="chip_number" placeholder="opcijsko" maxlength="20">
         <div class="field-hint">15-znamenkasti ISO broj</div>
       </div>
       <div class="field">
-        <label>Ušna markica</label>
+        <label>Usna markica</label>
         <input type="text" name="ear_tag" placeholder="opcijsko" maxlength="30">
-        <div class="field-hint">Ako ne unesete, generirat će se automatski</div>
+        <div class="field-hint">Ako ne unesete, generirat ce se automatski</div>
       </div>
     </div>
 
@@ -121,7 +125,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </div>
 
     <div class="field">
-      <label>Datum rođenja</label>
+      <label>Datum rodjenja</label>
       <input type="date" name="date_of_birth">
     </div>
 

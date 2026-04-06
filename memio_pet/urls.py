@@ -25,5 +25,8 @@ urlpatterns = [
 
     # Add animal — journey flow
     path("ljubimac/novi/", views.add_animal, name="add_animal"),
-    path("ljubimac/zatrazi/", views.add_animal_auth, name="add_animal_zatrazi"),
+    path("ljubimac/zatrazi/", views.add_animal_request, name="add_animal_zatrazi"),
+
+    # Magic token — sigurna autorizacija
+    path("ljubimac/token/<str:token>/", views.add_animal_with_token, name="add_animal_token"),
 ]

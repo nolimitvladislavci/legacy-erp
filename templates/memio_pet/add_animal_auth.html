@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tko si ti? — Memio.pet</title>
+<title>{{ page_title|default:"Tko si ti?" }} — Memio.pet</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -28,9 +28,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s}
 .btn-submit:hover{background:#b8942a}
 .error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px;text-align:left}
+.success-box{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);border-radius:12px;padding:20px;margin-bottom:20px}
+.success-box h2{font-family:var(--serif);font-size:1.4rem;color:var(--green);margin-bottom:8px}
+.success-box p{font-size:.88rem;color:var(--ink);line-height:1.5}
+.success-box .email-highlight{display:inline-block;background:rgba(201,168,76,.12);padding:4px 12px;border-radius:6px;font-weight:600;color:var(--gold);margin-top:8px}
 .register-link{display:inline-block;margin-top:20px;padding:10px 20px;border:1.5px solid var(--gold);border-radius:8px;color:var(--gold);text-decoration:none;font-size:.88rem;font-weight:600;transition:all .2s}
 .register-link:hover{background:var(--gold);color:var(--ink)}
 .footer-note{margin-top:24px;font-size:.75rem;color:var(--dim);line-height:1.6}
+.alt-action{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font-size:.85rem;color:var(--dim)}
+.alt-action a{color:var(--gold);text-decoration:none;font-weight:600}
 @media(max-width:520px){.card{padding:28px 20px}}
 </style>
 </head>
@@ -41,30 +47,45 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 </div>
 
 <div class="card">
-  <div class="card-icon">🐾</div>
-  <h1 class="card-title">Tko si ti?</h1>
-  <p class="card-sub">Upiši email koji si koristio pri registraciji da te povežemo s tvojim profilom.</p>
-
-  {% if error %}
-  <div class="error">{{ error }}</div>
-  {% endif %}
-
-  <form method="post" action="/ljubimac/zatrazi/">
-    {% csrf_token %}
-    <div class="field">
-      <label>Email adresa</label>
-      <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email" autofocus>
+  {% if success %}
+    <div class="card-icon">📧</div>
+    <div class="success-box">
+      <h2>Provjerite email!</h2>
+      <p>Poslali smo vam sigurni link za dodavanje ljubimca.</p>
+      <span class="email-highlight">{{ email_sent }}</span>
+      <p style="margin-top:12px;font-size:.8rem;color:var(--dim)">Link vrijedi 30 minuta. Provjerite i spam folder.</p>
     </div>
-    <button type="submit" class="btn-submit">Pronađi moj profil</button>
-  </form>
+    {% if breeder %}
+    <div class="alt-action">
+      Ili <a href="/ljubimac/novi/">dodaj ljubimca odmah</a> (session aktivan)
+    </div>
+    {% endif %}
+  {% else %}
+    <div class="card-icon">🐾</div>
+    <h1 class="card-title">Tko si ti?</h1>
+    <p class="card-sub">Upiši email koji si koristio pri registraciji. Poslat ćemo ti sigurni link za dodavanje ljubimca.</p>
 
-  {% if show_register %}
-  <a href="/registracija/" class="register-link">Kreiraj novi profil — besplatno</a>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/ljubimac/zatrazi/">
+      {% csrf_token %}
+      <div class="field">
+        <label>Email adresa</label>
+        <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email" autofocus>
+      </div>
+      <button type="submit" class="btn-submit">Pošalji mi link 🔗</button>
+    </form>
+
+    {% if show_register %}
+    <a href="/registracija/" class="register-link">Kreiraj novi profil — besplatno</a>
+    {% endif %}
+
+    <p class="footer-note">
+      Nemaš profil? <a href="/registracija/" style="color:var(--gold)">Kreiraj ga besplatno</a> za 30 sekundi.
+    </p>
   {% endif %}
-
-  <p class="footer-note">
-    Nemaš profil? <a href="/registracija/" style="color:var(--gold)">Kreiraj ga besplatno</a> za 30 sekundi.
-  </p>
 </div>
 
 </body>
