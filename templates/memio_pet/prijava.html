@@ -92,10 +92,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
 
   <!-- QR scanner -->
-  <div class="qr-scanner" id="qrScanner">
-    <video id="qrVideo" autoplay playsinline></video>
-    <p class="qr-scanner-hint">Usmjeri kameru na QR kod ljubimca</p>
-    <button class="alt-btn" onclick="stopQrScan()" style="margin-top:10px">Zatvori kameru</button>
+  <div id="qrScanner" style="display:none;margin-top:16px">
+    <div id="qrReader" style="width:100%;max-width:400px;margin:0 auto"></div>
+    <button class="alt-btn" onclick="stopQrScan()" style="margin-top:10px;display:block;margin-left:auto;margin-right:auto">Zatvori kameru</button>
   </div>
 
   <a href="/registracija/" class="btn-register">Kreiraj novi profil →</a>
@@ -106,7 +105,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 function toggleChip(){
   var el=document.getElementById('chipInput');
@@ -121,95 +120,42 @@ function goToChip(){
 }
 
 // ═══════════════════════════════════════
-// QR Scanner — jsQR (radi na SVIM browserima)
+// QR Scanner — html5-qrcode (ZXing engine, isto što Google koristi)
 // ═══════════════════════════════════════
-var qrStream=null;
-var scanInterval=null;
+var html5QrCode=null;
 
 function startQrScan(){
-  var scanner=document.getElementById('qrScanner');
-  var video=document.getElementById('qrVideo');
-  var hint=document.querySelector('.qr-scanner-hint');
-  scanner.style.display='block';
-  hint.textContent='Pokrećem kameru...';
+  document.getElementById('qrScanner').style.display='block';
 
-  navigator.mediaDevices.getUserMedia({
-    video:{facingMode:{ideal:'environment'},width:{min:300,ideal:1280},height:{min:300,ideal:720}}
-  })
-  .then(function(stream){
-    qrStream=stream;
-    video.srcObject=stream;
-    video.setAttribute('playsinline','true');
-    video.play();
+  html5QrCode=new Html5Qrcode('qrReader');
+  html5QrCode.start(
+    {facingMode:'environment'},
+    {fps:10,qrbox:{width:250,height:250},aspectRatio:1.0},
+    function onScanSuccess(decodedText){
+      // Nađeno!
+      html5QrCode.stop().then(function(){html5QrCode.clear();}).catch(function(){});
+      html5QrCode=null;
 
-    var canvas=document.createElement('canvas');
-    var ctx=canvas.getContext('2d',{willReadFrequently:true});
-    var frameCount=0;
-
-    // Čekaj da se video dimenzije postave
-    video.addEventListener('loadedmetadata',function(){
-      hint.textContent='Usmjeri kameru na QR kod — drži mirno';
-      canvas.width=video.videoWidth;
-      canvas.height=video.videoHeight;
-    });
-
-    // Skeniraj 4x u sekundi
-    scanInterval=setInterval(function(){
-      if(!qrStream)return;
-      if(video.videoWidth===0||video.videoHeight===0)return;
-      if(video.readyState<video.HAVE_ENOUGH_DATA)return;
-
-      // Osiguraj canvas dimenzije
-      if(canvas.width!==video.videoWidth){
-        canvas.width=video.videoWidth;
-        canvas.height=video.videoHeight;
+      if(decodedText.indexOf('memio.pet/')!==-1){
+        window.location.href=decodedText;
+      } else {
+        window.location.href='/pas/'+encodeURIComponent(decodedText)+'/';
       }
-
-      ctx.drawImage(video,0,0);
-      var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-      frameCount++;
-
-      // Pokažimo da radi
-      if(frameCount%8===0){
-        hint.textContent='Skeniram... ('+canvas.width+'x'+canvas.height+') — drži QR u kadru';
-      }
-
-      // jsQR — attemptBoth za sve varijante QR-a
-      var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
-
-      if(code && code.data){
-        // NAĐENO! Zeleni flash
-        video.style.borderColor='#4caf7d';
-        video.style.boxShadow='0 0 20px rgba(76,175,125,.5)';
-        hint.textContent='✅ QR očitan!';
-        hint.style.color='#4caf7d';
-        hint.style.fontWeight='700';
-
-        stopQrScan();
-
-        var url=code.data;
-        // Kratka pauza za vizualni feedback pa redirect
-        setTimeout(function(){
-          if(url.indexOf('memio.pet/')!==-1){
-            window.location.href=url;
-          } else {
-            // Možda je chip number ili drugi URL
-            window.location.href='/pas/'+encodeURIComponent(url)+'/';
-          }
-        },400);
-      }
-    },200);
-  })
-  .catch(function(err){
-    hint.textContent='';
-    scanner.innerHTML='<p style="color:var(--red);font-size:.85rem;padding:20px">Kamera nije dostupna: '+err.message+'<br><br>Na iOS-u: koristi Safari. Na Androidu: dozvoli pristup kameri.</p>'+
-      '<button class="alt-btn" onclick="document.getElementById(\'qrScanner\').style.display=\'none\'" style="margin:10px auto;display:block">Zatvori</button>';
+    },
+    function onScanFailure(){/* tiho — čeka QR */}
+  ).catch(function(err){
+    document.getElementById('qrReader').innerHTML=
+      '<p style="color:#e05252;font-size:.85rem;padding:20px;text-align:center">'+
+      'Kamera: '+err+'<br><br>iOS: koristi Safari. Android: dozvoli kameru.</p>';
   });
 }
 
 function stopQrScan(){
-  if(scanInterval){clearInterval(scanInterval);scanInterval=null;}
-  if(qrStream){qrStream.getTracks().forEach(function(t){t.stop()});qrStream=null;}
+  if(html5QrCode){
+    html5QrCode.stop().then(function(){html5QrCode.clear();}).catch(function(){});
+    html5QrCode=null;
+  }
+  document.getElementById('qrScanner').style.display='none';
 }
 </script>
 </body>
