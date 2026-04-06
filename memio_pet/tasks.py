@@ -71,3 +71,40 @@ def notify_barf_breeders(listing_id):
             pass
 
     logger.info('notify_barf_breeders: %s notifikacija za listing %s', notified, listing_id)
+
+
+@shared_task(name="memio_pet.send_odjava_reminder")
+def send_odjava_reminder(animal_pk):
+    """Šalje podsjetnik za zakonsku odjavu — 10 dana nakon uginuća."""
+    try:
+        from memio_pet.models import AnimalProfile
+        animal = AnimalProfile.objects.using('memio_pets').get(pk=animal_pk)
+        if animal.status != 'uginulo':
+            return 'skip: status changed'
+
+        breeder = animal.breeder
+        if not breeder or not breeder.email:
+            return 'skip: no breeder email'
+
+        from django.core.mail import send_mail
+        identifier = animal.chip_number or animal.ear_tag
+        send_mail(
+            subject=f'Podsjetnik — odjava {animal.name} iz Upisnika',
+            message=(
+                f'Dragi {breeder.name},\n\n'
+                f'Podsjećamo da ste zakonski obvezni odjaviti {animal.name} '
+                f'iz Upisnika kućnih ljubimaca u roku 14 dana od uginuća.\n\n'
+                f'Odjava: https://e-uprava.gov.hr\n\n'
+                f'Memorijal {animal.name}: '
+                f'https://memio.pet/pas/{identifier}/\n\n'
+                f'S poštovanjem,\nMemio.pet tim'
+            ),
+            from_email='noreply@memio.pet',
+            recipient_list=[breeder.email],
+            fail_silently=True,
+        )
+        logger.info("Odjava reminder sent for %s to %s", animal.name, breeder.email)
+        return f'sent to {breeder.email}'
+    except Exception as e:
+        logger.error("Odjava reminder error: %s", e)
+        return f'error: {e}'

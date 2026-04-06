@@ -100,6 +100,7 @@
     {% if l.is_free_range %}<span class="barf-badge green">{% trans "Slobodan uzgoj" %}</span>{% endif %}
     {% if l.is_antibiotic_free %}<span class="barf-badge blue">{% trans "Bez antibiotika" %}</span>{% endif %}
     {% if l.k3_cert_number %}<span class="barf-badge amber">K3: {{ l.k3_cert_number|truncatechars:15 }}</span>{% endif %}
+    {% if l.donates_to_shelters %}<span class="barf-badge" style="background:rgba(76,175,125,.15);color:#28a745">🐾 Donira azilima</span>{% endif %}
   </div>
   {% if l.description %}<div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">{{ l.description|truncatechars:100 }}</div>{% endif %}
   <div class="barf-opg">

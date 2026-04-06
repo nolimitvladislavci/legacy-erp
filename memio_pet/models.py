@@ -457,6 +457,13 @@ class RawFoodListing(models.Model):
     is_free_range = models.BooleanField(default=False, verbose_name='Slobodan uzgoj')
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    donates_to_shelters = models.BooleanField(
+        default=False, verbose_name='Donira azilima',
+        help_text='Ponuđač donira azilima po povlaštenoj cijeni ili besplatno',
+    )
+    shelter_radius_km = models.PositiveIntegerField(
+        default=50, verbose_name='Radius isporuke za azile (km)',
+    )
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

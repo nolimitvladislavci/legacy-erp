@@ -918,3 +918,65 @@ def hoteli_lista(request):
         'grad_filter': grad,
         'page_title': 'Pet Hoteli — Memio.pet',
     })
+
+
+def social_import_wizard(request):
+    """Wizard za uvoz objava s društvenih mreža na profil ljubimca."""
+    db = 'memio_pets'
+    chip = request.GET.get('animal') or request.POST.get('animal')
+    animal = _find_animal(chip) if chip else None
+    if not animal:
+        return redirect('memio_pet:landing')
+
+    preview_data = None
+    error = None
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'preview')
+        url = request.POST.get('url', '').strip()
+
+        if not url:
+            error = 'Upiši link na objavu.'
+        elif action == 'preview':
+            # Korak 1 → preview
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            from boxgram.services.social_import import fetch_oembed
+            preview = fetch_oembed(url)
+            if preview.success:
+                preview_data = {
+                    'platform': preview.platform,
+                    'thumbnail': preview.thumbnail_url,
+                    'caption': preview.caption or '',
+                    'author': preview.author_name or '',
+                    'url': url,
+                }
+            else:
+                error = preview.error or 'Nije moguće učitati objavu. Provjeri link.'
+
+        elif action == 'confirm':
+            # Korak 2 → spremi kao LifeMilestone
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            title = request.POST.get('title', '').strip()
+            if not title:
+                title = f'Objava s društvene mreže'
+            from memio_pet.models import LifeMilestone
+            from django.utils import timezone
+            LifeMilestone.objects.using(db).create(
+                animal=animal,
+                type='custom',
+                title=title,
+                date=timezone.now().date(),
+                note=f'Uvezeno s: {url}',
+            )
+            identifier = animal.chip_number or animal.ear_tag
+            messages.success(request, 'Objava dodana na životni trak!')
+            return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    return render(request, 'memio_pet/social_import.html', {
+        'animal': animal,
+        'chip': chip,
+        'preview': preview_data,
+        'error': error,
+    })
