@@ -24,7 +24,10 @@ def sidebar_modules(request):
 
         config = CompanyModuleConfig.objects.filter(company=company).first()
 
-        if config and config.enabled_modules:
+        # Superadmin vidi SVE module, bez ograničenja
+        if request.user.is_superuser:
+            enabled = [m['id'] for m in MODULES]
+        elif config and config.enabled_modules:
             enabled = config.enabled_modules
         else:
             # Default: show all modules
