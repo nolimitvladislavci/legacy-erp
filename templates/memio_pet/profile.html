@@ -679,19 +679,6 @@ function toggleTheme(){
   if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
-function paliSvjecicu(){
-  var btn=document.getElementById('candle-btn');
-  if(!btn)return;
-  btn.disabled=true;btn.style.opacity='.5';
-  fetch('/api/memorial/{{ identifier }}/candle/',{
-    method:'POST',
-    headers:{'X-CSRFToken':getCookie('csrftoken')}
-  }).then(function(r){return r.json()}).then(function(d){
-    btn.innerHTML='🕯️ Svjećica upaljena ('+d.total+')';
-    btn.style.opacity='1';
-    spawnParticles();
-  }).catch(function(){btn.style.opacity='1';btn.disabled=false;});
-}
 function spawnParticles(){
   var p=document.getElementById('particles');if(!p)return;
   for(var i=0;i<8;i++){
@@ -737,18 +724,16 @@ function copyLink(){
 {% if is_memorial %}
 function paliSvjecicu(){
   var btn=document.getElementById('candle-btn');
+  if(!btn)return;
   btn.disabled=true;btn.style.opacity='.5';
   fetch('/api/memorial/{{ identifier }}/candle/',{
-    method:'POST',
-    headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]')?.value||''}
+    method:'POST'
   }).then(function(r){return r.json()}).then(function(d){
-    btn.innerHTML='🕯️ Svjećica upaljena ('+d.total+')';
+    if(d.total){
+      btn.innerHTML='🕯️ Svjećica upaljena ('+d.total+')';
+    }
     btn.style.opacity='1';
-    // Čestice
-    var p=document.getElementById('particles');
-    if(p){for(var i=0;i<5;i++){var c=document.createElement('div');
-      c.style.cssText='position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(232,196,106,'+(Math.random()*.8+.2)+');left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation:float-up '+(Math.random()*3+2)+'s ease-out forwards';
-      p.appendChild(c);setTimeout(function(){c.remove()},5000);}}
+    spawnParticles();
   }).catch(function(){btn.disabled=false;btn.style.opacity='1';});
 }
 {% endif %}

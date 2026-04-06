@@ -15,6 +15,7 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import cache_page, never_cache
 from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
@@ -655,9 +656,10 @@ def add_animal_with_token(request, token):
     })
 
 
+@csrf_exempt
 @require_POST
 def memorial_candle_api(request, chip_or_tag):
-    """API: upali svjećicu na memorijalu."""
+    """API: upali svjećicu na memorijalu (javna anonimna akcija)."""
     db = 'memio_pets'
     animal = _find_animal(chip_or_tag)
     if not animal or animal.status != 'uginulo':
@@ -797,26 +799,6 @@ def dugini_most(request, chip_or_tag):
 
 
 # DUGINI MOST — memorial views
-
-def memorial_candle_api(request, chip_or_tag):
-    """API: upali svjecicu na memorijalu."""
-    from django.views.decorators.csrf import csrf_exempt
-    from django.http import JsonResponse
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
-    db = 'memio_pets'
-    animal = _find_animal(chip_or_tag)
-    if not animal or animal.status != 'uginulo':
-        return JsonResponse({'error': 'not found'}, status=404)
-    from memio_pet.models import MemorialProfile
-    try:
-        memorial = MemorialProfile.objects.using(db).get(animal=animal)
-        memorial.candle_count += 1
-        memorial.save(using=db, update_fields=['candle_count'])
-        return JsonResponse({'total': memorial.candle_count})
-    except MemorialProfile.DoesNotExist:
-        return JsonResponse({'error': 'no memorial'}, status=404)
-
 
 def memorial_edit(request, chip_or_tag):
     """Uredi memorijalni profil — session auth (vlasnik)."""
@@ -990,24 +972,6 @@ def knjiga_sjecanja_pdf(request, chip_or_tag):
 # URL: /api/memorial/<chip>/candle/  (POST)
 # ════════════════════════════════════════════════════════════════
 
-from django.views.decorators.http import require_POST as _require_post
-from django.http import JsonResponse as _JsonResponse
-
-@_require_post
-def memorial_candle_api(request, chip_or_tag):
-    """Poveća broj svjećica na memorijalu."""
-    db = 'memio_pets'
-    animal = _find_animal(chip_or_tag)
-    if not animal or animal.status != 'uginulo':
-        return _JsonResponse({'error': 'not found'}, status=404)
-    try:
-        from memio_pet.models import MemorialProfile
-        memorial = MemorialProfile.objects.using(db).get(animal=animal)
-        memorial.candle_count += 1
-        memorial.save(using=db, update_fields=['candle_count'])
-        return _JsonResponse({'total': memorial.candle_count, 'ok': True})
-    except Exception:
-        return _JsonResponse({'error': 'no memorial'}, status=404)
 
 
 # ════════════════════════════════════════════════════════════════
