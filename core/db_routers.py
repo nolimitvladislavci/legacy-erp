@@ -17,6 +17,7 @@ MEMIO_WORLD_APPS = {'memio_world'}
 _ROUTED_APPS = {
     'memio_pet': 'memio_pets',
     'memio_world': 'memio_world',
+    'memio_farm': 'memio_farm',
 }
 
 
@@ -49,7 +50,7 @@ class MultiDbRouter:
         if target_db:
             return db == target_db
         # Non-routed apps samo u default
-        if db in ('memio_pets', 'memio_world'):
+        if db in ('memio_pets', 'memio_world', 'memio_farm'):
             return False
         return None
 

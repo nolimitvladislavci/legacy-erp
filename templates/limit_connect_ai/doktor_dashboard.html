@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Claude Doktor" %} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-heart-pulse"></i> {% trans "Claude Doktor" %}</h2>
+        <div>
+            <span class="badge bg-secondary">{{ company.name }}</span>
+            <a href="{% url 'limit_connect_ai:ai_cockpit' %}" class="btn btn-outline-secondary btn-sm ms-2">
+                <i class="bi bi-arrow-left"></i> {% trans "Cockpit" %}
+            </a>
+        </div>
+    </div>
+
+    {% if report and report.status == "done" %}
+    <!-- Score Card -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">{% trans "Ukupna ocjena" %}</h6>
+                    <div class="display-3 fw-bold {% if report.overall_score >= 80 %}text-success{% elif report.overall_score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                        {{ report.overall_score }}<small class="fs-5">/100</small>
+                    </div>
+                    {% if report.score_delta != 0 %}
+                    <span class="badge {% if report.score_delta > 0 %}bg-success{% else %}bg-danger{% endif %} mt-2">
+                        {% if report.score_delta > 0 %}+{% endif %}{{ report.score_delta }} {% trans "od juce" %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2"><i class="bi bi-clipboard2-pulse"></i> {% trans "AI Dijagnoza" %}</h6>
+                    <p class="mb-0">{{ report.ai_summary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Scores -->
+    <div class="row g-3 mb-4">
+        {% for name, score in report.category_scores.items %}
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body py-3">
+                    <small class="text-muted d-block mb-1">{{ name }}</small>
+                    <h4 class="mb-0 {% if score >= 80 %}text-success{% elif score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                        {{ score }}
+                    </h4>
+                    <div class="progress mt-2" style="height:4px;">
+                        <div class="progress-bar {% if score >= 80 %}bg-success{% elif score >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                             style="width:{{ score }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recommendations -->
+    {% if report.recommendations %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h6 class="mb-0"><i class="bi bi-prescription2"></i> {% trans "Preporuke" %}</h6>
+        </div>
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                {% for rec in report.recommendations %}
+                <li class="list-group-item d-flex align-items-start">
+                    <span class="badge {% if rec.priority == 'red' %}bg-danger{% elif rec.priority == 'yellow' %}bg-warning text-dark{% else %}bg-success{% endif %} me-3 mt-1">
+                        {% if rec.priority == "red" %}{% trans "HITNO" %}{% elif rec.priority == "yellow" %}{% trans "VAZNO" %}{% else %}{% trans "OK" %}{% endif %}
+                    </span>
+                    <div>
+                        <strong>{{ rec.title }}</strong>
+                        <br><small class="text-muted">{{ rec.detail }}</small>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- History Chart -->
+    {% if history %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0"><i class="bi bi-graph-up"></i> {% trans "Trend (7 dana)" %}</h6>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-end" style="height:120px;gap:8px;">
+                {% for h in history %}
+                <div class="text-center flex-fill">
+                    <div class="bg-{% if h.overall_score >= 80 %}success{% elif h.overall_score >= 60 %}warning{% else %}danger{% endif %} rounded-top mx-auto"
+                         style="width:30px;height:{{ h.overall_score }}px;opacity:0.7;"></div>
+                    <small class="d-block text-muted mt-1">{{ h.overall_score }}</small>
+                    <small class="d-block text-muted">{{ h.report_date|date:"d.m." }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif report and report.status == "pending" %}
+    <div class="alert alert-info">
+        <i class="bi bi-hourglass-split"></i> {% trans "Dijagnostika je u tijeku... Osvjezite stranicu za par minuta." %}
+    </div>
+
+    {% elif report and report.status == "error" %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> {% trans "Greska prilikom dijagnostike" %}: {{ report.error_message }}
+    </div>
+
+    {% else %}
+    <div class="alert alert-secondary">
+        <i class="bi bi-info-circle"></i> {% trans "Danas jos nema dijagnoze za ovu firmu." %}
+        {% if request.user.is_staff %}
+        <a href="{% url 'limit_connect_ai:doktor_trigger' company.id %}" class="btn btn-sm btn-primary ms-2">
+            {% trans "Pokreni sada" %}
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

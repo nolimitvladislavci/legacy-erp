@@ -1,4 +1,5 @@
 {% extends "emails/base_email.html" %}
+{% load i18n %}
 {% block title %}{% if is_hr %}Dospjeli račun{% else %}Überfällige Rechnung{% endif %}{% endblock %}
 {% block content %}
 <h2 style="margin:0 0 16px;color:#c0392b;font-family:'Cormorant Garamond',Georgia,serif;">

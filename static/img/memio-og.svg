@@ -1,0 +1,8 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#f8f6f0"/>
+  <rect x="0" y="0" width="1200" height="4" fill="#c9a84c"/>
+  <text x="600" y="260" text-anchor="middle" font-family="Georgia,serif" font-size="72" font-weight="700" fill="#1a1a2e">Memio.pet</text>
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui,sans-serif" font-size="28" fill="#7a7a8c">Digitalni dom za tvog ljubimca</text>
+  <text x="600" y="400" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" fill="#c9a84c">Rodovnica · Zdravlje · Sjećanja · Besplatno</text>
+  <text x="600" y="560" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#7a7a8c">memio.pet — Projekt NO LIMIT udruge</text>
+</svg>

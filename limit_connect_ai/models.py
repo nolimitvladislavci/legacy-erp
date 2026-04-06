@@ -262,3 +262,5 @@ from limit_connect_ai.models_knowledge_graph import (  # noqa: E402, F401
     ClientOpportunityMatch,
 )
 from limit_connect_ai.models_ai_action import AIAction  # noqa: F401
+
+from limit_connect_ai.models_doktor import DiagnosisReport  # noqa: E402, F401

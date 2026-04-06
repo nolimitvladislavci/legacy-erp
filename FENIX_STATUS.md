@@ -1,6 +1,6 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-06 (CC sesija — Opus 4.6)
-# Git HEAD: 979944bc
+# Zadnje azuriranje: 2026-04-06 (Sonnet — Claude Doktor ploča obrisana)
+# Git HEAD: d2d2fc19
 # Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 39%
 
 ═══════════════════════════════════════════════════════════════
@@ -24,69 +24,79 @@
 
 ## AKTIVNI TASKOVI (po prioritetu):
 
-  1. ✅ CC_TASK_WAKE.md            ← GOTOVO
-  2. ✅ CC_TASK_F1_UI_AUDIT.md     ← GOTOVO — UI 6.5→8/10
-  3. ✅ CC_TASK_F2_MEMIO_PET_ONBOARDING.md  ← GOTOVO — landing+dashboard+add
-  4. ✅ CC_TASK_F3_MEMIO_WORLD.md  ← GOTOVO — modeli+registracija+o-projektu
-  5. ✅ CC_TASK_F5_NO_LIMIT_AZIL.md ← GOTOVO — landing+POS skin
+  1. ✅ CC_TASK_WAKE.md
+  2. ✅ CC_TASK_F1_UI_AUDIT.md         — UI 6.5→8/10
+  3. ✅ CC_TASK_F2_MEMIO_PET_ONBOARDING.md
+  4. ✅ CC_TASK_F3_MEMIO_WORLD.md
+  5. ✅ CC_TASK_F5_NO_LIMIT_AZIL.md
+  6. ✅ CLAUDE_DOKTOR — sve napravljeno (9 zadataka, test 97/100)
+
+  ⚠️  PENDING: zamijeni +385XXXXXXX s pravim brojem Marije u .env (MARIJA_PHONE)
 
 ---
 
 ## STANJE SUSTAVA (06.04.)
 
 ### Servisi: sve ✅
-### Git HEAD: 979944bc
+### Git HEAD: d2d2fc19
 ### Django: 0 errors
 
-### Novi commiti ove sesije (3 nova + 13 prethodnih):
-  979944bc  feat(fenix-input): univerzalni ulazni modul — glas, SMS, BT, AI
-  ae49bb11  fix(memio-pet): chip validacija + Dugini Most životni ciklus
-  c0bbf982  fix(memio-pet): email_hash lookup za BreederProfile registraciju/prijavu
+### Zadnji commiti:
+  d2d2fc19  fix(memio-pet): svjećica — csrf_exempt + brisanje 3 duplikata
+  2502d264  feat(memio-pet): GDPR consent kompletni flow
+  31a0d1e1  feat(memio-pet): Web Share API — native dijeljenje profila
+
+### CLAUDE DOKTOR — DONE (06.04.)
+  ✅ grand_total fix — overdue_30_amount koristi Sum('total')
+  ✅ DiagnosisReport import u models.py
+  ✅ Migration 0009_add_diagnosis_report primijenjena
+  ✅ URL-ovi: /doktor/, /doktor/<id>/, /superadmin/doktor/, /doktor/<id>/trigger/
+  ✅ Templates: doktor_dashboard.html + doktor_superadmin.html
+  ✅ MARIJA_PHONE dodan u .env i settings.py (placeholder — zamijeniti!)
+  ✅ Celery beat: claude-doktor-nightly (svaka 3h)
+  ✅ celery.py autodiscover limit_connect_ai.tasks_doktor
+  ✅ gunicorn + celery restartani
+  📊 Test: Konjik d.o.o. — 97/100, AI summary na HR, status done
 
 ### NOVOST: FenixInput modul (fenix_input/)
-  GLOBALNI ulazni kanal za cijeli LIMIT Connect sustav:
-  - VOICE: Web Speech API → AI interpretacija (Claude Haiku)
-  - SMS:   IoT webhook → regex/AI → strukturirani podaci (pčelarske vage)
-  - BT:    Web Bluetooth API za čip čitače (ISO 11784/11785)
-  - EMAIL: (pripremljeno, faza 2)
-  - JS WIDGET: fenix-input.js — <div data-fenix-input></div>
+  GLOBALNI ulazni kanal: VOICE, SMS, BT, EMAIL (faza 2)
+  - JS widget: fenix-input.js — <div data-fenix-input></div>
   - API: /api/fenix-input/voice|sms|confirm|history|bluetooth/config
   - Modeli: InputMessage, SMSDevice
-  - AI Interpreter: parsira prirodni jezik → intent + fields + target_module
 
-### Riješeni bugovi ove sesije:
-  ✅ memio.pet registracija/prijava — email_hash lookup za AES encrypted polje
-  ✅ Chip number validacija — samo znamenke 9-15 (ISO 11784)
-  ✅ Dugini Most flow — UI za označavanje uginulog ljubimca + memorial auto-create
-  ✅ Duplikati Ivan Gušće — očišćeno 3→1
+### Riješeni bugovi:
+  ✅ memio.pet registracija/prijava — email_hash lookup
+  ✅ Chip number validacija — ISO 11784 (9-15 znamenki)
+  ✅ Dugini Most — memorial auto-create + UI
+  ✅ svjećica endpoint — csrf_exempt fix
+  ✅ GDPR consent flow komplet
 
-### Live HTTP (sve testirano):
+### Live HTTP:
   ✅ limit-connect.com/hr/                          — 200
-  ✅ limit-connect.com/api/fenix-input/bluetooth/config/ — 200 (NOVO)
+  ✅ limit-connect.com/api/fenix-input/bluetooth/config/ — 200
   ✅ memio.pet/                                     — 200
-  ✅ memio.pet/registracija/                        — 200 (FIX: email_hash)
-  ✅ memio.pet/prijava/                             — 200 (FIX: email_hash)
   ✅ memio.world/                                   — 200
 
 ### Poznati bugovi:
   ⚠️  FenixScan OCR: graceful fallback nedostaje (LOW)
-  ✅  Ostalo: RIJEŠENO
+  ⚠️  MARIJA_PHONE: zamijeniti placeholder u .env
 
 ---
 
 ## RATNI RASPORED:
-  07.04. | QA audit + UI popravci + TriKey onboarding  | ✅ CC gotov
+  07.04. | QA audit + UI popravci + TriKey onboarding  | CC        | ✅ gotov
   08.04. | Marija dry-run                               | Marija    | ⏳
   12.04. | Load test CCX33                              | CC        | ⏳
   15.04. | GO/NO-GO + PRODUKCIJA                        | Ivan      | ⏳
 
 ## OCJENE:
   LIMIT Connect backend:  8.5/10
-  LIMIT Connect UI/UX:    8/10   (bilo 6.5)
-  Boxgram/memio.pet:      8.5/10 (bilo 7.5) — fix registracija + Dugini Most
-  memio.world:            6.5/10 (bilo 4)
-  NO LIMIT/azil:          7/10   (bilo 5)
-  FenixInput:             7/10   (NOVO — faza 1 complete)
+  LIMIT Connect UI/UX:    8/10
+  Claude Doktor:          9/10   (NOVO — 97/100 test)
+  Boxgram/memio.pet:      8.5/10
+  memio.world:            6.5/10
+  NO LIMIT/azil:          7/10
+  FenixInput:             7/10
   Server:                 9.5/10
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj

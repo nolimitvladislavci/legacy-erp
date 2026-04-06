@@ -36,3 +36,4 @@ except Exception:
     pass
 app.autodiscover_tasks(['marketplace'])
 app.autodiscover_tasks(['experiences'])
+app.autodiscover_tasks(['limit_connect_ai.tasks_doktor'])

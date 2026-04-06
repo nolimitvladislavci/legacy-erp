@@ -349,6 +349,9 @@ document.addEventListener('DOMContentLoaded',function(){
         <option value="ag"{% if company.business_type == "ag" %} selected{% endif %}>AG (Aktiengesellschaft)</option>
         <option value="einzelunternehmen"{% if company.business_type == "einzelunternehmen" %} selected{% endif %}>Einzelunternehmen</option>
         <option value="other"{% if company.business_type == "other" %} selected{% endif %}>Ostalo</option>
+        <option value="odvjetnik"{% if company.business_type == "odvjetnik" %} selected{% endif %}>Odvjetnički ured</option>
+        <option value="biljeznik"{% if company.business_type == "biljeznik" %} selected{% endif %}>Javni bilježnik</option>
+        <option value="dimnjacari"{% if company.business_type == "dimnjacari" %} selected{% endif %}>Dimnjačarska služba</option>
       </select>
     </div>
     <div class="col-md-3">

@@ -243,7 +243,7 @@ def new_receipt(request, session_id):
 @login_required
 def receipt_detail(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
-    items = receipt.items.select_related('inventory_item', 'tax_rate_obj').all()
+    items = receipt.items.select_related('inventory_item').all()
     company = receipt.session.terminal.company  # Fix: koristi company iz terminala
     inventory_items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')[:300] if company else InventoryItem.objects.none()
 
@@ -306,7 +306,6 @@ def add_item(request, receipt_id):
             if not barcode: kwargs['barcode'] = inv.barcode or ''
             if unit_price == 0: kwargs['unit_price'] = inv.unit_price or Decimal('0')
             if inv.tax_rate_id:
-                kwargs['tax_rate_obj_id'] = inv.tax_rate_id
                 try: kwargs['tax_rate'] = inv.tax_rate.rate
                 except Exception: pass
 
@@ -1655,7 +1654,7 @@ def pos_settings(request):
         from inventory.models import InventoryItem
         inv_items = list(
             InventoryItem.objects.filter(company=company, is_active=True)
-            .select_related('tax_rate_obj')
+            .select_related('tax_rate')
             .order_by('name')[:200]
         )
         cat_choices = InventoryItem.CATEGORY_CHOICES
@@ -1898,7 +1897,7 @@ def inventory_item_save(request):
     tax_rate_id = request.POST.get('tax_rate_id')
     if tax_rate_id:
         try:
-            item.tax_rate_obj_id = int(tax_rate_id)
+            item.tax_rate_id = int(tax_rate_id)
         except (ValueError, TypeError):
             pass
     item.is_active = True
@@ -1974,7 +1973,7 @@ def inventory_csv_import(request):
                 tax_pct = _dec(['tax_rate', 'pdv', 'PDV'], '25')
                 tax_obj = TaxRate.objects.filter(rate=tax_pct).first()
                 if tax_obj:
-                    item.tax_rate_obj = tax_obj
+                    item.tax_rate = tax_obj
                 item.is_active = True
                 item.save()
                 if new:

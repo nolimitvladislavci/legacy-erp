@@ -1,3 +1,4 @@
+{% load i18n %}
 <!-- Patrol Widget for Dashboard -->
 {% if latest_patrol %}
 <div class="card" style="border-left: 4px solid {% if latest_patrol.critical_count > 0 %}#ef4444{% elif latest_patrol.finding_count > 0 %}#f59e0b{% else %}#22c55e{% endif %}">

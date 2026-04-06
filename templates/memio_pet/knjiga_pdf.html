@@ -1,0 +1,392 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+/* ── GLOBALNO ── */
+@page {
+  size: A4;
+  margin: 0;
+}
+@page naslovna {
+  margin: 0;
+}
+@page sadrzaj {
+  margin: 2.5cm 2cm 2.5cm 2cm;
+  @bottom-center {
+    content: "memio.pet — " string(animal-name);
+    font-family: Georgia, serif;
+    font-size: 9pt;
+    color: #7a6a50;
+    border-top: 0.5pt solid #ddd;
+    padding-top: 6pt;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, 'Times New Roman', serif; color: #1a1a2e; }
+
+/* ── NASLOVNA STRANICA ── */
+.naslovna {
+  page: naslovna;
+  width: 100%;
+  height: 297mm;
+  background: #0f0e0c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 40px;
+  page-break-after: always;
+}
+.naslovna-foto {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #c9a84c;
+  margin-bottom: 40px;
+}
+.naslovna-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #2a2520;
+  border: 4px solid #c9a84c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  margin-bottom: 40px;
+}
+.naslovna-naslov {
+  font-size: 42pt;
+  font-weight: bold;
+  color: #e8e0d0;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.naslovna-podtekst {
+  font-size: 14pt;
+  color: #c9a84c;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.naslovna-godine {
+  font-size: 12pt;
+  color: #7a6a50;
+  margin-bottom: 60px;
+}
+.naslovna-linija {
+  width: 80px;
+  height: 1px;
+  background: #c9a84c;
+  margin: 0 auto 60px;
+}
+.naslovna-footer {
+  font-size: 10pt;
+  color: #4a4040;
+  font-style: italic;
+}
+
+/* ── STRANICA SADRŽAJA ── */
+.stranica { page: sadrzaj; page-break-before: always; }
+.section-title {
+  font-size: 20pt;
+  font-weight: bold;
+  color: #1a1a2e;
+  border-bottom: 2pt solid #c9a84c;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  string-set: animal-name content();
+}
+
+/* ── OSNOVNI PODACI ── */
+.podaci-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.podatak {
+  padding: 14px 16px;
+  background: #f8f6f0;
+  border-left: 3px solid #c9a84c;
+  border-radius: 0 6px 6px 0;
+}
+.podatak-label {
+  font-size: 8pt;
+  color: #7a6a50;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.podatak-vrijednost {
+  font-size: 13pt;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+/* ── TIMELINE ── */
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 0.5pt solid #e8e0d0;
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-datum {
+  min-width: 90px;
+  font-size: 9pt;
+  color: #7a6a50;
+  padding-top: 2px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.timeline-icon {
+  font-size: 16pt;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+.timeline-sadrzaj { flex: 1; }
+.timeline-naslov {
+  font-size: 12pt;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-bottom: 3px;
+}
+.timeline-napomena {
+  font-size: 10pt;
+  color: #5a5060;
+  font-style: italic;
+  line-height: 1.5;
+}
+.timeline-foto {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-top: 8px;
+  border: 0.5pt solid #e8e0d0;
+}
+
+/* ── EPITAF ── */
+.epitaf-box {
+  background: #f0ede5;
+  border: 1pt solid #ddd9cc;
+  border-radius: 8px;
+  padding: 28px 32px;
+  margin: 24px 0;
+  text-align: center;
+}
+.epitaf-tekst {
+  font-size: 15pt;
+  font-style: italic;
+  color: #3a3030;
+  line-height: 1.8;
+}
+.epitaf-potpis {
+  font-size: 10pt;
+  color: #9a8a7a;
+  margin-top: 12px;
+}
+
+/* ── GALERIJA ── */
+.galerija {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.galerija-foto {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 0.5pt solid #e8e0d0;
+}
+
+/* ── GENERIRAN ── */
+.generated-note {
+  text-align: center;
+  font-size: 9pt;
+  color: #b0a090;
+  padding: 16px;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NASLOVNA STRANICA ═══ -->
+<div class="naslovna">
+  {% if animal.photo %}
+  <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" class="naslovna-foto">
+  {% else %}
+  <div class="naslovna-placeholder">🐾</div>
+  {% endif %}
+
+  <h1 class="naslovna-naslov">{{ animal.name|default:"Moj Ljubimac" }}</h1>
+
+  <p class="naslovna-podtekst">{{ animal.get_vrsta_display }} · {{ animal.breed|default:"" }}</p>
+
+  <p class="naslovna-godine">
+    {% if animal.date_of_birth %}{{ animal.date_of_birth|date:"d. M. Y." }}{% endif %}
+    {% if memorial and memorial.date_of_death %} — {{ memorial.date_of_death|date:"d. M. Y." }}{% endif %}
+  </p>
+
+  <div class="naslovna-linija"></div>
+
+  {% if memorial and memorial.epitaph %}
+  <p style="color:#a09080;font-style:italic;font-size:13pt;max-width:400px;line-height:1.7;margin-bottom:40px">
+    "{{ memorial.epitaph|truncatechars:200 }}"
+  </p>
+  {% endif %}
+
+  <p class="naslovna-footer">Knjiga sjećanja · memio.pet · {{ generated_at|date:"d.m.Y." }}</p>
+</div>
+
+<!-- ═══ ŽIVOTNI PODACI ═══ -->
+<div class="stranica">
+  <h2 class="section-title">Osobni podaci</h2>
+
+  <div class="podaci-grid">
+    <div class="podatak">
+      <div class="podatak-label">Ime</div>
+      <div class="podatak-vrijednost">{{ animal.name|default:"—" }}</div>
+    </div>
+    <div class="podatak">
+      <div class="podatak-label">Vrsta</div>
+      <div class="podatak-vrijednost">{{ animal.get_vrsta_display }}</div>
+    </div>
+    <div class="podatak">
+      <div class="podatak-label">Pasmina</div>
+      <div class="podatak-vrijednost">{{ animal.breed|default:"Mješanac" }}</div>
+    </div>
+    <div class="podatak">
+      <div class="podatak-label">Spol</div>
+      <div class="podatak-vrijednost">{{ animal.get_spol_display }}</div>
+    </div>
+    {% if animal.date_of_birth %}
+    <div class="podatak">
+      <div class="podatak-label">Datum rođenja</div>
+      <div class="podatak-vrijednost">{{ animal.date_of_birth|date:"d. M. Y." }}</div>
+    </div>
+    {% endif %}
+    {% if animal.chip_number %}
+    <div class="podatak">
+      <div class="podatak-label">Broj čipa</div>
+      <div class="podatak-vrijednost" style="font-size:10pt;font-family:monospace">{{ animal.chip_number }}</div>
+    </div>
+    {% endif %}
+    {% if animal.weight_kg %}
+    <div class="podatak">
+      <div class="podatak-label">Težina</div>
+      <div class="podatak-vrijednost">{{ animal.weight_kg }} kg</div>
+    </div>
+    {% endif %}
+    {% if animal.color_description %}
+    <div class="podatak">
+      <div class="podatak-label">Boja / opis</div>
+      <div class="podatak-vrijednost">{{ animal.color_description }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if animal.notes %}
+  <div style="padding:16px;background:#f8f6f0;border-radius:6px;border-left:3px solid #c9a84c">
+    <div class="podatak-label" style="margin-bottom:6px">Napomena</div>
+    <p style="font-size:11pt;line-height:1.6;color:#3a3030">{{ animal.notes }}</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ ŽIVOTNI TRAK ═══ -->
+{% if timeline %}
+<div class="stranica">
+  <h2 class="section-title">Životni trak</h2>
+
+  {% for event in timeline %}
+  <div class="timeline-item">
+    <div class="timeline-datum">{{ event.date|date:"d.m.Y." }}</div>
+    <div class="timeline-icon">{{ event.icon }}</div>
+    <div class="timeline-sadrzaj">
+      <div class="timeline-naslov">{{ event.title }}</div>
+      {% if event.note %}<div class="timeline-napomena">{{ event.note }}</div>{% endif %}
+      {% if event.photo %}<img src="{{ event.photo }}" class="timeline-foto" alt="">{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══ ZDRAVSTVENI KARTON ═══ -->
+{% if health_records %}
+<div class="stranica">
+  <h2 class="section-title">Zdravstveni karton</h2>
+
+  {% for h in health_records %}
+  <div class="timeline-item">
+    <div class="timeline-datum">{{ h.datum|date:"d.m.Y." }}</div>
+    <div class="timeline-icon">💉</div>
+    <div class="timeline-sadrzaj">
+      <div class="timeline-naslov">{{ h.get_tip_display }} {% if h.veterinar %}— {{ h.veterinar }}{% endif %}</div>
+      {% if h.opis %}<div class="timeline-napomena">{{ h.opis }}</div>{% endif %}
+      {% if h.lijek %}<div class="timeline-napomena">Lijek: {{ h.lijek }}</div>{% endif %}
+      {% if h.trosak_eur %}<div class="timeline-napomena">Trošak: {{ h.trosak_eur }} EUR</div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══ MEMORIJAL (ako postoji) ═══ -->
+{% if memorial %}
+<div class="stranica">
+  <h2 class="section-title">Dugini Most 🌈</h2>
+
+  {% if memorial.epitaph %}
+  <div class="epitaf-box">
+    <p class="epitaf-tekst">"{{ memorial.epitaph }}"</p>
+    {% if animal.breeder %}<p class="epitaf-potpis">— {{ animal.breeder.name }}</p>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if memorial.candle_count > 0 %}
+  <p style="text-align:center;font-size:12pt;color:#7a6a50;margin:20px 0">
+    🕯️ {{ memorial.candle_count }} prijatelja upalilo je svjećicu
+  </p>
+  {% endif %}
+
+  <p style="text-align:center;font-size:11pt;color:#9a8a7a;font-style:italic;margin-top:32px;line-height:1.8">
+    Profil sjećanja ostaje zauvijek dostupan na:<br>
+    <span style="color:#c9a84c">memio.pet/pas/{{ animal.chip_number|default:animal.ear_tag }}/</span>
+  </p>
+</div>
+{% endif %}
+
+<!-- ═══ ZAVRŠNA STRANICA ═══ -->
+<div class="stranica">
+  <div style="text-align:center;padding:60px 40px">
+    <div style="font-size:48pt;margin-bottom:24px">🐾</div>
+    <h2 style="font-size:24pt;color:#1a1a2e;margin-bottom:16px;font-style:italic">
+      Zahvaljujemo na ljubavi<br>koju si podijelio/la s nama.
+    </h2>
+    <div style="width:60px;height:2pt;background:#c9a84c;margin:24px auto"></div>
+    <p style="font-size:11pt;color:#7a6a50;line-height:1.8;max-width:380px;margin:0 auto">
+      Ova knjiga sjećanja sadrži sve što smo zajedno zabilježili.<br>
+      Svaki trenutak, svako cijepljenje, svaka šetnja —<br>
+      sve je tu, sačuvano zauvijek.
+    </p>
+    <p style="margin-top:40px;font-size:9pt;color:#b0a090;font-style:italic">
+      Generirano {{ generated_at|date:"d.m.Y." }} · memio.pet
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

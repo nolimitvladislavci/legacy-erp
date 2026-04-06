@@ -1,0 +1,98 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ page_title }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--surface:#fff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top-bar{background:var(--ink);color:#f8f6f0;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.logo span{color:#f8f6f0}
+.container{max-width:720px;margin:0 auto;padding:32px 16px}
+.page-hero{text-align:center;padding:40px 0 32px}
+.page-hero h1{font-family:var(--serif);font-size:2.2rem;font-weight:700;margin-bottom:10px}
+.page-hero p{color:var(--ink2);font-size:.95rem;line-height:1.7;max-width:480px;margin:0 auto 24px}
+.filter-form{display:flex;gap:10px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.filter-form input{padding:10px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.9rem;color:var(--ink);background:#fff;outline:none;min-width:200px}
+.filter-form input:focus{border-color:var(--gold)}
+.filter-form button{padding:10px 20px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-weight:700;cursor:pointer;color:var(--ink);font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:16px;display:flex;gap:20px;align-items:flex-start;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.card-avatar{width:56px;height:56px;border-radius:12px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.card-body{flex:1}
+.card-name{font-family:var(--serif);font-size:1.2rem;font-weight:700;margin-bottom:4px}
+.card-meta{font-size:.82rem;color:var(--dim);margin-bottom:10px}
+.card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.badge{font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:600}
+.badge-gold{background:rgba(201,168,76,.15);color:#8a6820}
+.badge-book{background:rgba(29,158,117,.1);color:#0f6e56}
+.card-contact{display:flex;gap:10px;flex-wrap:wrap}
+.contact-btn{padding:7px 16px;border:1.5px solid var(--line);border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;color:var(--ink);transition:all .15s}
+.contact-btn:hover{border-color:var(--gold);color:var(--gold)}
+.book-btn{padding:7px 16px;background:var(--gold);border:none;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;color:var(--ink);cursor:pointer;transition:background .15s}
+.book-btn:hover{background:#b8942a}
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty h2{font-family:var(--serif);font-size:1.5rem;margin-bottom:8px;color:var(--ink2)}
+footer{text-align:center;padding:32px 16px;font-size:.76rem;color:var(--dim)}
+footer a{color:var(--gold);text-decoration:none}
+</style>
+<script>(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'))})();</script>
+</head>
+<body>
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  <a href="/hotel/" style="color:rgba(248,246,240,.6);font-size:.82rem;text-decoration:none">📅 Rezervacija</a>
+</div>
+
+<div class="container">
+  <div class="page-hero">
+    <div style="font-size:2.5rem;margin-bottom:16px">🏨</div>
+    <h1>Pet Hoteli</h1>
+    <p>Pronađite savršen dom za vašeg ljubimca dok ste na putu. Verificirani pet hoteli diljem Hrvatske.</p>
+  </div>
+
+  <form class="filter-form" method="get">
+    <input type="text" name="grad" placeholder="Grad ili regija..." value="{{ grad_filter }}">
+    <button type="submit">Pretraži</button>
+  </form>
+
+  {% if hoteli %}
+    {% for h in hoteli %}
+    <div class="card">
+      <div class="card-avatar">🏠</div>
+      <div class="card-body">
+        <div class="card-name">{{ h.name }}</div>
+        <div class="card-meta">📍 {{ h.city }}{% if h.country %}, {{ h.country }}{% endif %}</div>
+        <div class="card-badges">
+          <span class="badge badge-gold">Verificiran</span>
+          <span class="badge badge-book">Rezervacija online</span>
+          {% if h.is_no_limit_partner %}<span class="badge" style="background:rgba(40,167,69,.12);color:#1a6b30">🐾 Prihvaća azilske pse</span>{% endif %}
+        </div>
+        <div class="card-contact">
+          <a href="/hotel/?hotel={{ h.pk }}" class="book-btn">📅 Rezerviraj</a>
+          {% if h.phone %}<a href="tel:{{ h.phone }}" class="contact-btn">📞 Nazovi</a>{% endif %}
+          {% if h.website %}<a href="{{ h.website }}" target="_blank" class="contact-btn">🌐 Web</a>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <h2>Upisujemo pet hotele</h2>
+      <p>Imate pet hotel? Listing je besplatan — pridružite se platformi.</p>
+      <a href="/registracija/?account_type=hotel" style="display:inline-block;margin-top:16px;padding:10px 24px;background:var(--gold);border-radius:8px;font-weight:700;text-decoration:none;color:var(--ink)">Registrirajte hotel</a>
+    </div>
+  {% endif %}
+</div>
+
+<footer>
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca ·
+  Projekt <a href="https://limit-connect.com/no-limit/">NO LIMIT udruge</a>
+</footer>
+</body>
+</html>

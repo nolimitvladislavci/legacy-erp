@@ -19,3 +19,12 @@ urlpatterns += [
     path("actions/<int:action_id>/review/", views_ai_actions.review_action, name="review_ai_action"),
     path("actions/", views_ai_actions.ai_actions_list, name="ai_actions_list"),
 ]
+
+# Claude Doktor
+from . import views_doktor  # noqa: E402
+urlpatterns += [
+    path("doktor/", views_doktor.doktor_dashboard, name="doktor_dashboard"),
+    path("doktor/<int:company_id>/", views_doktor.doktor_dashboard, name="doktor_dashboard_company"),
+    path("superadmin/doktor/", views_doktor.doktor_superadmin, name="doktor_superadmin"),
+    path("doktor/<int:company_id>/trigger/", views_doktor.doktor_trigger, name="doktor_trigger"),
+]

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Claude Doktor" %} - {% trans "Superadmin" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-heart-pulse"></i> {% trans "Claude Doktor" %} &mdash; {% trans "Sve firme" %}</h2>
+        <span class="text-muted">{{ today|date:"d.m.Y." }}</span>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">{% trans "Ukupno" %}</h6>
+                    <h3>{{ summary.total }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center border-start border-danger border-3">
+                <div class="card-body">
+                    <h6 class="text-muted">{% trans "Kriticno" %} (&lt;50)</h6>
+                    <h3 class="text-danger">{{ summary.critical }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center border-start border-warning border-3">
+                <div class="card-body">
+                    <h6 class="text-muted">{% trans "Umjereno" %} (50-79)</h6>
+                    <h3 class="text-warning">{{ summary.moderate }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center border-start border-success border-3">
+                <div class="card-body">
+                    <h6 class="text-muted">{% trans "Dobro" %} (80+)</h6>
+                    <h3 class="text-success">{{ summary.good }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between">
+            <h6 class="mb-0"><i class="bi bi-table"></i> {% trans "Dijagnoze danas" %}</h6>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Firma" %}</th>
+                        <th class="text-center">{% trans "Ocjena" %}</th>
+                        <th class="text-center">{% trans "Delta" %}</th>
+                        <th>{% trans "Fisk." %}</th>
+                        <th>{% trans "PDV" %}</th>
+                        <th>{% trans "Cash" %}</th>
+                        <th>{% trans "Zaposl." %}</th>
+                        <th>{% trans "Podaci" %}</th>
+                        <th>{% trans "GDPR" %}</th>
+                        <th>{% trans "Hitne preporuke" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reports %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'limit_connect_ai:doktor_dashboard_company' r.company.id %}">
+                                {{ r.company.name|truncatechars:30 }}
+                            </a>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge {% if r.overall_score >= 80 %}bg-success{% elif r.overall_score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
+                                {{ r.overall_score }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if r.score_delta > 0 %}<span class="text-success">+{{ r.score_delta }}</span>
+                            {% elif r.score_delta < 0 %}<span class="text-danger">{{ r.score_delta }}</span>
+                            {% else %}<span class="text-muted">0</span>{% endif %}
+                        </td>
+                        <td class="{% if r.score_fiskalizacija < 60 %}text-danger fw-bold{% endif %}">{{ r.score_fiskalizacija }}</td>
+                        <td class="{% if r.score_pdv < 60 %}text-danger fw-bold{% endif %}">{{ r.score_pdv }}</td>
+                        <td class="{% if r.score_cashflow < 60 %}text-danger fw-bold{% endif %}">{{ r.score_cashflow }}</td>
+                        <td class="{% if r.score_zaposlenici < 60 %}text-danger fw-bold{% endif %}">{{ r.score_zaposlenici }}</td>
+                        <td class="{% if r.score_podaci < 60 %}text-danger fw-bold{% endif %}">{{ r.score_podaci }}</td>
+                        <td class="{% if r.score_gdpr < 60 %}text-danger fw-bold{% endif %}">{{ r.score_gdpr }}</td>
+                        <td>
+                            {% for rec in r.red_recommendations %}
+                            <span class="badge bg-danger">{{ rec.title|truncatechars:25 }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a href="{% url 'limit_connect_ai:doktor_dashboard_company' r.company.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="11" class="text-center text-muted py-3">{% trans "Nema dijagnoza za danas." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Missing Companies -->
+    {% if missing %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0"><i class="bi bi-question-circle"></i> {% trans "Firme bez dijagnoze" %} ({{ summary.missing }})</h6>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for c in missing %}
+                <a href="{% url 'limit_connect_ai:doktor_trigger' c.id %}"
+                   class="btn btn-sm btn-outline-secondary">
+                    {{ c.name|truncatechars:20 }} <i class="bi bi-play-fill"></i>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

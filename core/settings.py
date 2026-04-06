@@ -736,6 +736,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "marketplace.tasks.expiry_gastro_bridge_check",
         "schedule": 7200,  # svakih 2 sata
     },
+    # Claude Doktor -- nocni AI scan svih firmi u 03:00
+    "claude-doktor-nightly": {
+        "task": "limit_connect_ai.tasks_doktor.run_clinic_diagnostics_all",
+        "schedule": 10800,
+    },
 
 
 }
@@ -751,6 +756,9 @@ WAHA_API_URL = os.environ.get('WAHA_API_URL', 'http://127.0.0.1:3000')
 WAHA_SESSION_NAME = os.environ.get('WAHA_SESSION_NAME', 'default')
 WAHA_ENABLED = os.environ.get('WAHA_ENABLED', 'True').lower() in ('true', '1', 'yes')
 WAHA_API_KEY = os.environ.get('WAHA_API_KEY', '')
+
+# ── Claude Doktor ──────────────────────────────────────────────
+MARIJA_PHONE = os.environ.get('MARIJA_PHONE', '')
 
 # ── Error Notification Phones ──────────────────────────────────
 # WhatsApp brojevi koji primaju 500 error notifikacije
