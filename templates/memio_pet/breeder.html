@@ -88,7 +88,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       <div class="breeder-meta">{{ breeder.city }}{% if breeder.city %}, {% endif %}HR</div>
       <div class="breeder-type">{{ breeder.get_account_type_display }}</div>
       <div class="action-row">
-        <a href="/ljubimac/novi/?breeder={{ breeder.pk }}" class="btn-gold">+ Dodaj ljubimca</a>
+        <a href="/ljubimac/zatrazi/?breeder={{ breeder.pk }}" class="btn-gold">+ Dodaj ljubimca</a>
         <a href="/registracija/" class="btn-outline">Kreiraj novi profil</a>
       </div>
       <div class="share-row" style="margin-top:16px">
@@ -117,7 +117,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <div class="card-body">
       <div class="section-header">
         <h2 class="section-title">Ljubimci ({{ animals|length }})</h2>
-        <a href="/ljubimac/novi/?breeder={{ breeder.pk }}" class="btn-gold" style="padding:7px 14px;font-size:.8rem">+ Dodaj</a>
+        <a href="/ljubimac/zatrazi/?breeder={{ breeder.pk }}" class="btn-gold" style="padding:7px 14px;font-size:.8rem">+ Dodaj</a>
       </div>
       {% if animals %}
         {% for animal in animals %}
@@ -137,7 +137,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       {% else %}
         <div class="empty">
           Još nema ljubimaca.<br>
-          <a href="/ljubimac/novi/?breeder={{ breeder.pk }}" class="btn-gold" style="display:inline-block;margin-top:14px">+ Dodaj prvog ljubimca</a>
+          <a href="/ljubimac/zatrazi/?breeder={{ breeder.pk }}" class="btn-gold" style="display:inline-block;margin-top:14px">+ Dodaj prvog ljubimca</a>
         </div>
       {% endif %}
     </div>
@@ -166,7 +166,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="page-footer">
   <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
   Projekt <a href="https://limit-connect.com/no-limit/">NO LIMIT udruge</a> · Sponzor digitalizacije azila<br>
-  © 2026 Konjik d.o.o.
+  © 2026 <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">Konjik d.o.o.</a>
 </div>
 
 <script>

@@ -22,5 +22,6 @@ urlpatterns = [
 
     # Dashboard (login required)
     path("moj-profil/", views.breeder_dashboard, name="breeder_dashboard"),
-    path("ljubimac/novi/", views.add_animal, name="add_animal"),
+    # SIGURNOST: /ljubimac/novi/ je uklonjen — koristi /ljubimac/zatrazi/ (magic token)
+    # path("ljubimac/novi/", views.add_animal, name="add_animal"),  # DISABLED
 ]
