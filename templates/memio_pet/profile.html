@@ -637,6 +637,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         <button class="share-btn" id="copyLinkBtn" onclick="copyLink()">🔗 Kopiraj link</button>
         <a class="share-btn wa" href="https://wa.me/?text={{ animal.name|urlencode }}%20—%20Memio.pet%20profil%20{{ profile_url|urlencode }}" target="_blank" rel="noopener">💬 WhatsApp</a>
         <a class="share-btn" href="/uvezi/?animal={{ identifier }}" style="text-decoration:none">📱 Uvezi s mreža</a>
+        <a class="share-btn" href="/pas/{{ identifier }}/knjiga/" target="_blank" style="text-decoration:none">📖 Knjiga sjećanja</a>
         {% if qr_url %}
         <a class="share-btn" href="{{ qr_url }}" download="qr-{{ animal.name|default:animal.ear_tag }}.png">📷 Preuzmi QR</a>
         {% endif %}
