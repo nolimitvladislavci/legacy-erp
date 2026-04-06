@@ -1,0 +1,410 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% trans "Postavi PIN" %} — LIMIT CONNECT</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/login.css">
+<style>
+  .pin-input {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .pin-input input {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    background: var(--ink, #1a1a2e);
+    border: 1px solid var(--border, #334155);
+    border-radius: 8px;
+    color: #fff;
+    caret-color: var(--gold, #c9a84c);
+    transition: border-color 0.2s;
+  }
+  .pin-input input:focus {
+    outline: none;
+    border-color: var(--gold, #c9a84c);
+    box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.25);
+  }
+  .suggested-pin {
+    text-align: center;
+    font-size: .78rem;
+    color: var(--muted, #94a3b8);
+    margin: 8px 0 16px;
+  }
+  .suggested-pin code {
+    background: rgba(201,168,76,.1);
+    border: 1px solid rgba(201,168,76,.3);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: .9rem;
+    color: var(--gold, #c9a84c);
+    cursor: pointer;
+    letter-spacing: 3px;
+    font-weight: 700;
+  }
+  .suggested-pin code:hover {
+    background: rgba(201,168,76,.2);
+  }
+  #pin-hidden, #pin-confirm-hidden { position: absolute; opacity: 0; pointer-events: none; }
+  .section-label {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted, #94a3b8);
+    margin-bottom: 6px;
+  }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes petbounce{0%{transform:scale(1) rotate(0)}35%{transform:scale(1.15) rotate(-6deg)}65%{transform:scale(.94) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+  @keyframes petshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-8deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}}
+  @keyframes petnod{0%,100%{transform:translateY(0)}35%{transform:translateY(-7px)}65%{transform:translateY(2px)}}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="logo">
+    <h1>LIMIT<span>·</span>CONNECT</h1>
+    <div class="sub">TriKey — Postavi PIN</div>
+  </div>
+
+  <div class="card">
+    {% if messages %}
+    <div style="margin-bottom:16px">
+      {% for msg in messages %}
+      <div style="padding:10px 14px;border-radius:10px;font-size:.84rem;margin-bottom:6px;
+        {% if msg.tags == 'error' %}background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5{% elif msg.tags == 'success' %}background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86efac{% else %}background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:#c9a84c{% endif %}">
+        {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" id="pin-form">
+      {% csrf_token %}
+
+      <div class="section-label">{% trans "Novi PIN (6 znamenki)" %}</div>
+      <div class="pin-input" id="pin-boxes">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="0" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="2" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="3" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="4" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-idx="5" autocomplete="off">
+      </div>
+      <input type="hidden" name="pin" id="pin-hidden">
+
+      <!-- LJUBIMAC GOVORI — VAU feature -->
+      <div id="pet-speaks" style="margin:16px 0;display:flex;flex-direction:column;align-items:center;gap:12px">
+
+        <!-- Foto ili SVG fallback -->
+        <div id="pet-avatar" style="position:relative;width:80px;height:80px">
+          {% if pet_photo %}
+          <img id="pet-img"
+               src="{{ pet_photo }}"
+               alt="{{ pet_name }}"
+               style="width:80px;height:80px;border-radius:50%;object-fit:cover;
+                      border:3px solid #1a1a2e;box-shadow:3px 3px 0 #1a1a2e;
+                      transition:transform .3s cubic-bezier(.34,1.56,.64,1)">
+          {% else %}
+          <!-- SVG pas (fallback) -->
+          <svg id="pet-img" viewBox="0 0 80 80" width="80" height="80"
+               style="filter:drop-shadow(3px 3px 0 #1a1a2e);
+                      transition:transform .3s cubic-bezier(.34,1.56,.64,1)">
+            <ellipse cx="40" cy="52" rx="22" ry="18" fill="#c9a84c"/>
+            <ellipse cx="18" cy="24" rx="8" ry="11" fill="#a07830" transform="rotate(-15 18 24)"/>
+            <ellipse cx="62" cy="24" rx="8" ry="11" fill="#a07830" transform="rotate(15 62 24)"/>
+            <circle cx="40" cy="30" r="18" fill="#c9a84c"/>
+            <ellipse cx="40" cy="36" rx="8" ry="6" fill="#e8c46a"/>
+            <ellipse id="svgNose" cx="40" cy="33" rx="4" ry="2.8" fill="#3d2b1a"/>
+            <circle cx="32" cy="26" r="4" fill="white"/>
+            <circle cx="48" cy="26" r="4" fill="white"/>
+            <circle id="svgPL" cx="33" cy="26" r="2.5" fill="#2d1a0a"/>
+            <circle id="svgPR" cx="49" cy="26" r="2.5" fill="#2d1a0a"/>
+            <circle cx="34" cy="25" r="1" fill="white"/>
+            <circle cx="50" cy="25" r="1" fill="white"/>
+            <path id="svgMouth" d="M36 40 Q40 45 44 40" stroke="#3d2b1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path id="svgTail" d="M62 52 Q72 40 68 33" stroke="#a07830" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>
+          {% endif %}
+          <div id="pet-emote" style="position:absolute;top:-4px;right:-4px;width:26px;height:26px;
+               border-radius:50%;background:white;border:2px solid #1a1a2e;
+               display:flex;align-items:center;justify-content:center;font-size:13px;
+               transform:scale(0);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)">
+          </div>
+        </div>
+
+        <!-- Speech bubble -->
+        <div id="pet-bubble" style="position:relative;background:white;
+             border:2.5px solid #1a1a2e;border-radius:18px;padding:11px 15px;
+             max-width:260px;min-height:44px;
+             box-shadow:3px 3px 0 #1a1a2e;
+             opacity:0;transform:scale(.8) translateY(6px);
+             transform-origin:top center;
+             transition:opacity .2s,transform .28s cubic-bezier(.34,1.56,.64,1)">
+          <div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+               width:0;height:0;border-left:9px solid transparent;
+               border-right:9px solid transparent;border-bottom:13px solid #1a1a2e"></div>
+          <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+               width:0;height:0;border-left:7px solid transparent;
+               border-right:7px solid transparent;border-bottom:9px solid white"></div>
+          <span id="pet-bubble-text" style="font-size:13px;line-height:1.55;color:#1a1a2e;font-family:system-ui,sans-serif"></span>
+          <span id="pet-cursor" style="display:inline-block;width:2px;height:1em;
+                background:#1a1a2e;margin-left:2px;vertical-align:middle;
+                animation:blink .8s step-end infinite"></span>
+        </div>
+
+        <!-- Strength bar -->
+        <div style="width:100%;max-width:260px">
+          <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden">
+            <div id="pet-bar" style="height:100%;border-radius:3px;width:0;transition:width .4s,background .3s"></div>
+          </div>
+          <div id="pet-bar-label" style="font-size:11px;text-align:right;margin-top:4px;min-height:16px;font-family:system-ui,sans-serif"></div>
+        </div>
+
+        <!-- Sound toggle -->
+        <button type="button" id="pet-sound-btn"
+                style="background:none;border:1px solid rgba(255,255,255,.2);border-radius:20px;
+                       padding:5px 14px;font-size:11px;cursor:pointer;color:rgba(255,255,255,.5);
+                       font-family:system-ui,sans-serif;transition:all .15s"
+                onclick="petToggleSound()">🔇 Zvuk</button>
+      </div>
+
+      <div class="section-label" style="margin-top:20px">{% trans "Potvrdi PIN" %}</div>
+      <div class="pin-input" id="pin-confirm-boxes">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="0" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="2" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="3" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="4" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" data-cidx="5" autocomplete="off">
+      </div>
+      <input type="hidden" name="pin_confirm" id="pin-confirm-hidden">
+
+      {% if suggested_pin %}
+      <div class="suggested-pin">
+        {% trans "Prijedlog:" %} <code id="suggested" onclick="fillSuggested()">{{ suggested_pin }}</code>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-primary" style="margin-top:8px">
+        {% trans "Postavi PIN" %} 🔑
+      </button>
+    </form>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="{% url 'accounts:trikey_status' %}" style="font-size:.82rem;color:var(--muted,#94a3b8);text-decoration:none">
+        {% trans "← Natrag na TriKey status" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <a href="https://viskovic-group.de">viskovic-group.de</a>
+    · LIMIT CONNECT &copy; 2026 Viskovic Group
+  </div>
+</div>
+
+<script>
+(function(){
+/* ── PIN box logic ── */
+function setupPinBoxes(containerId, hiddenId) {
+  var boxes = document.querySelectorAll('#'+containerId+' input');
+  var hidden = document.getElementById(hiddenId);
+  function collect(){
+    var pin='';
+    boxes.forEach(function(b){pin+=b.value;});
+    hidden.value=pin;
+    return pin;
+  }
+  boxes.forEach(function(box,i){
+    box.addEventListener('input',function(){
+      this.value=this.value.replace(/\D/g,'').slice(0,1);
+      collect();
+      if(this.value && i<5) boxes[i+1].focus();
+    });
+    box.addEventListener('keydown',function(e){
+      if(e.key==='Backspace'&&!this.value&&i>0){
+        boxes[i-1].focus(); boxes[i-1].value=''; collect();
+      }
+    });
+    box.addEventListener('paste',function(e){
+      e.preventDefault();
+      var paste=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      for(var j=0;j<paste.length&&j<6;j++) boxes[j].value=paste[j];
+      collect();
+      var next=Math.min(paste.length,5);
+      boxes[next].focus();
+    });
+  });
+  return {boxes:boxes, hidden:hidden, collect:collect};
+}
+
+var pinSetup = setupPinBoxes('pin-boxes','pin-hidden');
+var pinConfirm = setupPinBoxes('pin-confirm-boxes','pin-confirm-hidden');
+
+/* ── Fill suggested PIN ── */
+window.fillSuggested = function(){
+  var code = document.getElementById('suggested');
+  if(!code) return;
+  var pin = code.textContent.trim();
+  pin.split('').forEach(function(c,i){
+    if(pinSetup.boxes[i]) pinSetup.boxes[i].value=c;
+    if(pinConfirm.boxes[i]) pinConfirm.boxes[i].value=c;
+  });
+  pinSetup.collect();
+  pinConfirm.collect();
+  evaluate(pin);
+};
+
+/* ── LJUBIMAC GOVORI — PIN evaluacija ── */
+var PET_NAME = "{{ pet_name|escapejs }}";
+var BANNED = new Set(['123456','654321','111111','222222','333333','444444',
+  '555555','666666','777777','888888','999999','000000','112233','998877',
+  '121212','147258','258369','010101','131313','123123','321321',
+  '234567','345678','456789','567890','987654','876543','765432',
+  '159753','102030','192837','142536']);
+
+var soundOn=false, typeTimer=null;
+var synth=window.speechSynthesis;
+var img=document.getElementById('pet-img');
+var bubble=document.getElementById('pet-bubble');
+var bubbleText=document.getElementById('pet-bubble-text');
+var cursor=document.getElementById('pet-cursor');
+var emote=document.getElementById('pet-emote');
+var bar=document.getElementById('pet-bar');
+var barLabel=document.getElementById('pet-bar-label');
+
+var msgs = {
+  idle:  ['Hej! Ja sam '+PET_NAME+'! Upiši PIN koji samo ti i ja znamo! 🐾'],
+  typing:['Slušam... 👂', 'Upisuješ...', 'Čekam...'],
+  banned:['Hej! 😤 Ovo PIN znaju čak i mačke iz susjedstva!',
+          'Ma daj! Ovo svi koriste — smisli nešto samo naše!',
+          'Ovaj PIN je kao "sjedni" — svak ga zna. Probaj drugačije!'],
+  seq:   ['Ozbiljno? 1-2-3? 😂 Moje buve znaju bolje kombinacije!',
+          'Trag u snijegu — svak može slijediti. Smisli nešto originalnije!'],
+  simple:['Hmmm... 🤔 Premalo različitih znamenki. Čak štene zna više!',
+          'Probaj kombinirati različite brojeve — ja čuvam samo jake PIN-ove!'],
+  ok:    ['Već bolje! 👍 Još malo i nitko nas ne nanjuši!',
+          'To mi se sviđa! Još korak do savršenog PIN-a!'],
+  great: ['Savršeno! 🏆 Ni pas tragač s diplomom ne bi ga nanjušio!',
+          'Odlično! Samo ti i ja znamo ovu tajnu. Tako se čuva '+PET_NAME+'!',
+          'Wow! 🎉 Ti si šef sigurnosti! Čuvamo zajedno!']
+};
+var emotes={idle:'😊',typing:'👂',banned:'😤',seq:'😂',simple:'🤔',ok:'👍',great:'🏆'};
+var colors={idle:'',typing:'#888',banned:'#E24B4A',seq:'#E24B4A',simple:'#EF9F27',ok:'#EF9F27',great:'#1D9E75'};
+var strengths={idle:0,typing:10,banned:4,seq:7,simple:20,ok:55,great:100};
+var anims={idle:'petbounce',typing:'petnod',banned:'petshake',seq:'petshake',simple:'petnod',ok:'petbounce',great:'petbounce'};
+var labels={idle:'',typing:'',banned:'Jako slab PIN — svi ga znaju',seq:'Prepoznatljiv uzorak',simple:'Slab PIN',ok:'Srednji PIN',great:'Odličan PIN!'};
+
+function rnd(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function show(state){
+  var msg=rnd(msgs[state]||msgs.idle);
+  var emo=emotes[state]||'😊';
+  var col=colors[state]||'';
+  var str=strengths[state]||0;
+  var anim=anims[state]||'petbounce';
+  var lbl=labels[state]||'';
+
+  emote.textContent=emo;
+  emote.style.transform='scale(1)'; emote.style.opacity='1';
+
+  if(img){
+    img.style.animation='';
+    void img.offsetWidth;
+    img.style.animation=anim+' .5s cubic-bezier(.34,1.56,.64,1)';
+  }
+
+  var svgMouth=document.getElementById('svgMouth');
+  var svgTail=document.getElementById('svgTail');
+  if(svgMouth){
+    if(state==='great'||state==='ok'||state==='idle')
+      svgMouth.setAttribute('d','M35 40 Q40 46 45 40');
+    else if(state==='banned'||state==='seq')
+      svgMouth.setAttribute('d','M36 42 Q40 38 44 42');
+    else svgMouth.setAttribute('d','M36 40 Q40 44 44 40');
+  }
+  if(svgTail){
+    if(state==='great') svgTail.setAttribute('d','M62 50 Q76 36 72 27');
+    else if(state==='banned'||state==='seq') svgTail.setAttribute('d','M62 55 Q68 64 65 70');
+    else svgTail.setAttribute('d','M62 52 Q73 40 69 33');
+  }
+
+  if(typeTimer) clearInterval(typeTimer);
+  bubbleText.textContent='';
+  bubble.style.opacity='1';
+  bubble.style.transform='scale(1) translateY(0)';
+  cursor.style.display='inline-block';
+
+  var i=0;
+  typeTimer=setInterval(function(){
+    if(i<msg.length){ bubbleText.textContent+=msg[i]; i++; }
+    else{
+      clearInterval(typeTimer);
+      cursor.style.display='none';
+      if(soundOn && synth && state!=='typing' && state!=='idle'){
+        var u=new SpeechSynthesisUtterance(msg.replace(/[🐾👂😤😂🤔👍🏆🎉]/g,''));
+        u.lang='hr-HR'; u.rate=1.1; u.pitch=1.3;
+        var vs=synth.getVoices();
+        var hr=vs.find(function(v){return v.lang.startsWith('hr');});
+        if(hr) u.voice=hr;
+        synth.cancel(); synth.speak(u);
+      }
+    }
+  }, 24);
+
+  bar.style.width=str+'%';
+  bar.style.background=col||'transparent';
+  barLabel.style.color=col;
+  barLabel.textContent=lbl;
+}
+
+function evaluate(pin){
+  if(!pin||pin.length===0){show('idle');return;}
+  if(pin.length<6){show('typing');return;}
+  var u=new Set(pin).size;
+  var seqs=['012345','123456','234567','345678','456789','567890',
+             '987654','876543','765432','654321','543210'];
+  if(BANNED.has(pin)||u===1){show('banned');return;}
+  if(seqs.indexOf(pin)!==-1){show('seq');return;}
+  if(u<3){show('simple');return;}
+  if(u>=5){show('great');return;}
+  show('ok');
+}
+
+/* Hook PIN inputs */
+pinSetup.boxes.forEach(function(b){
+  b.addEventListener('input',function(){
+    var val=pinSetup.collect();
+    evaluate(val);
+  });
+});
+
+window.petToggleSound=function(){
+  soundOn=!soundOn;
+  var btn=document.getElementById('pet-sound-btn');
+  if(btn){btn.textContent=soundOn?'🔊 Zvuk':'🔇 Zvuk';
+          btn.style.color=soundOn?'#c9a84c':'rgba(255,255,255,.5)';
+          btn.style.borderColor=soundOn?'#c9a84c':'rgba(255,255,255,.2)';}
+  if(soundOn&&synth) synth.getVoices();
+};
+
+/* Submit validation */
+document.getElementById('pin-form').addEventListener('submit',function(e){
+  pinSetup.collect();
+  pinConfirm.collect();
+});
+
+setTimeout(function(){show('idle');},600);
+})();
+</script>
+</body>
+</html>

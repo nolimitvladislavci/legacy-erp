@@ -127,9 +127,28 @@ def pin_setup(request):
                 messages.error(request, str(e))
 
     suggested_pin = generate_pin()
+
+    # Dohvati ljubimca za VAU widget
+    pet_photo = None
+    pet_name = 'tvoj ljubimac'
+    try:
+        from memio_pet.models import AnimalProfile
+        animal = AnimalProfile.objects.using('memio_pets').filter(
+            breeder__email=request.user.email
+        ).order_by('-created_at').first()
+        if animal and animal.photo:
+            pet_photo = animal.photo.url
+            pet_name = animal.name or 'tvoj ljubimac'
+        elif animal:
+            pet_name = animal.name or 'tvoj ljubimac'
+    except Exception:
+        pass
+
     return render(request, 'accounts/pin_setup.html', {
         'trikey': trikey,
         'suggested_pin': suggested_pin,
+        'pet_photo': pet_photo,
+        'pet_name': pet_name,
     })
 
 
