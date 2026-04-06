@@ -5,6 +5,7 @@ Pravilo: NULA Django FK prema LIMIT Connect modelima.
 Sve veze prema ERP-u su API pozivi, ne ORM JOIN-ovi.
 Baza: memio_pets (PostgreSQL, odvojena od fina_erp)
 """
+import hashlib
 import uuid
 import secrets as _sec
 from django.db import models
@@ -42,6 +43,7 @@ class BreederProfile(models.Model):
     city            = models.CharField(max_length=100, blank=True)
     country         = models.CharField(max_length=5, default='HR')
     email           = MemioEncryptedField(blank=True)  # AES encrypted
+    email_hash      = models.CharField(max_length=64, unique=True, db_index=True, blank=True, null=True)  # SHA-256 za dedup
     phone           = models.CharField(max_length=30, blank=True)
     website         = models.URLField(blank=True)
 
@@ -89,6 +91,19 @@ class BreederProfile(models.Model):
     @property
     def verified_badge(self):
         return self.is_cro_validated or self.is_no_limit_partner
+
+    def save(self, *args, **kwargs):
+        if self.email:
+            self.email_hash = hashlib.sha256(
+                self.email.strip().lower().encode()
+            ).hexdigest()
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def find_by_email(cls, email, db='memio_pets'):
+        """Lookup po SHA-256 hash-u emaila (jer je email AES enkriptiran)."""
+        h = hashlib.sha256(email.strip().lower().encode()).hexdigest()
+        return cls.objects.using(db).filter(email_hash=h).first()
 
 
 class AnimalProfile(models.Model):
