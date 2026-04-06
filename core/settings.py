@@ -150,6 +150,7 @@ INSTALLED_APPS = [
     "utilities",
     "memio_pet",  # Memio.pet
     "memio_world",  # Memio.world — digitalna baština
+    "memio_farm",   # Memio.farm — farmske životinje
     "no_limit",  # NO LIMIT udruga
     "intelligence",
     "einvoice",
@@ -160,6 +161,7 @@ INSTALLED_APPS = [
     'vault',
     'honorari',
     'boxgram',  # Pet social network
+    'fenix_input',  # Univerzalni ulaz: glas, SMS, BT, email → AI → modul
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────
@@ -258,6 +260,15 @@ DATABASES = {
         "CONN_MAX_AGE": 60,
     },
     # ── Memio.world — zasebna baza, digitalna baština ──────────────
+        "memio_farm": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("MEMIO_FARM_DB_NAME", "memio_farm"),
+        "USER": os.environ.get("MEMIO_FARM_DB_USER", "memio_farm_user"),
+        "PASSWORD": os.environ.get("MEMIO_FARM_DB_PASSWORD", os.environ.get("DB_PASSWORD", "")),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
+        "TEST": {"NAME": "test_memio_farm"},
+    },
     "memio_world": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("MEMIO_WORLD_DB_NAME", "memio_world"),

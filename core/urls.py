@@ -116,6 +116,7 @@ urlpatterns = [
     # Device token scan API (izvan i18n — koristi ga POS scanner direktno)
     path('api/device-login/', __import__('accounts.auth_views', fromlist=['device_token_login']).device_token_login, name='device_token_login_api'),
     path('api/ai-agent/', __import__('superadmin_ai.views', fromlist=['agent_gateway']).agent_gateway, name='ai_agent_gateway'),
+    path('api/fenix-input/', include('fenix_input.urls', namespace='fenix_input')),
 ]
 
 urlpatterns += i18n_patterns(
