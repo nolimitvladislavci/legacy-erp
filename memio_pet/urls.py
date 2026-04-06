@@ -19,6 +19,7 @@ urlpatterns = [
     path("hotel/", views.pet_hotel_booking, name="pet_hotel_booking"),
     path("registracija/", views.registracija, name="registracija"),
     path("pristanak/<str:token>/", views.parental_consent, name="parental_consent"),
+    path("pristanak-ponovo/", views.resend_consent, name="resend_consent"),
     path("prijava/", views.prijava, name="prijava"),
     path("dresura/", views.training_list, name="training_list"),
 

@@ -95,6 +95,7 @@ def pet_profile_page(request, chip_or_tag):
         "identifier": identifier, "verified": animal.is_verified,
         "is_memorial": is_memorial, "memorial": memorial,
         "timeline": timeline, "milestones": milestones,
+        "needs_parental_consent": breeder.needs_parental_consent if breeder else False,
     })
 
 
@@ -333,18 +334,35 @@ def _send_parental_consent_email(bp, parent_email):
     try:
         from django.core.mail import send_mail
         consent_url = f"https://memio.pet/pristanak/{bp.consent_token}/"
+        dob_str = bp.date_of_birth.strftime('%d.%m.%Y.') if bp.date_of_birth else 'nije upisano'
         send_mail(
-            subject=f'Memio.pet — Pristanak za profil djeteta ({bp.name})',
+            subject=f'Memio.pet — Vaše dijete ({bp.name}) traži pristanak',
             message=(
                 f'Poštovani,\n\n'
-                f'{bp.name} želi kreirati profil na Memio.pet — '
-                f'besplatnoj platformi za digitalne profile kućnih ljubimaca.\n\n'
-                f'Prema EU GDPR uredbi (čl. 8) i hrvatskom zakonu (čl. 19 ZoPOUOZP), '
-                f'djeca mlađa od 16 godina trebaju pristanak roditelja.\n\n'
-                f'Kliknite link za odobrenje:\n{consent_url}\n\n'
-                f'Ako niste upoznati s ovim zahtjevom, slobodno ga ignorirajte.\n\n'
-                f'— Memio.pet tim\n'
-                f'Projekt NO LIMIT udruge · memio.pet'
+                f'Vaše dijete {bp.name} (rođ. {dob_str}) želi koristiti Memio.pet — '
+                f'besplatnu platformu za digitalne profile kućnih ljubimaca.\n\n'
+                f'ŠTO JE MEMIO.PET?\n'
+                f'Platforma gdje vlasnici kreiraju digitalne profile za svoje ljubimce '
+                f'(pas, mačka, konj...). Sadrži zdravstveni karton, fotografije i '
+                f'QR kod za identifikaciju. Besplatno, bez oglasa.\n\n'
+                f'KOJI PODACI SE PRIKUPLJAJU?\n'
+                f'- Ime djeteta, email, grad\n'
+                f'- Podaci o ljubimcu (ime, pasmina, čip broj)\n'
+                f'- Svi osobni podaci su enkriptirani (AES-256)\n'
+                f'- Nema plaćanja, nema oglasa, nema prodaje podataka\n\n'
+                f'ZAŠTO TREBAMO VAŠ PRISTANAK?\n'
+                f'EU GDPR (čl. 8) i hrvatski zakon (čl. 19 ZoPOUOZP) zahtijevaju '
+                f'pristanak roditelja za obradu osobnih podataka djece mlađe od 16 godina.\n\n'
+                f'ODOBRI ILI ODBIJ:\n'
+                f'{consent_url}\n\n'
+                f'Na ovom linku možete:\n'
+                f'  ✅ Odobriti — dijete koristi Memio.pet normalno\n'
+                f'  ❌ Odbiti — profil i svi podaci se brišu\n\n'
+                f'Ako niste upoznati s ovim zahtjevom ili vaše dijete nije '
+                f'zatražilo ovo, slobodno ignorirajte ovaj email.\n\n'
+                f'S poštovanjem,\n'
+                f'Memio.pet tim\n'
+                f'Projekt NO LIMIT udruge · memio.pet · Konjik d.o.o.'
             ),
             from_email=None,
             recipient_list=[parent_email],
@@ -355,7 +373,7 @@ def _send_parental_consent_email(bp, parent_email):
 
 
 def parental_consent(request, token):
-    """Roditelj klikne link iz emaila → odobri profil djeteta."""
+    """Roditelj klikne link iz emaila → odobri ili odbij profil djeteta."""
     db = 'memio_pets'
     bp = BreederProfile.objects.using(db).filter(consent_token=token).first()
     if not bp:
@@ -368,8 +386,24 @@ def parental_consent(request, token):
             'breeder': bp,
         })
 
+    # Dohvati ljubimce djeteta za prikaz roditelju
+    animals = list(AnimalProfile.objects.using(db).filter(breeder=bp).values_list('name', flat=True))
+
     if request.method == 'POST':
         from django.utils import timezone
+        action = request.POST.get('action', 'approve')
+
+        if action == 'reject':
+            # Roditelj odbija → briši profil i sve životinje
+            AnimalProfile.objects.using(db).filter(breeder=bp).delete()
+            bp.delete(using=db)
+            return render(request, 'memio_pet/consent_result.html', {
+                'success': True,
+                'message': 'Profil je obrisan. Dijete će morati zatražiti vaš pristanak ponovo.',
+                'rejected': True,
+            })
+
+        # Odobri
         bp.parental_consent = True
         bp.consent_given_at = timezone.now()
         bp.consent_token = ''  # jednokratni
@@ -380,7 +414,42 @@ def parental_consent(request, token):
             'breeder': bp,
         })
 
-    return render(request, 'memio_pet/consent_form.html', {'breeder': bp, 'token': token})
+    return render(request, 'memio_pet/consent_form.html', {
+        'breeder': bp, 'token': token, 'animals': animals,
+    })
+
+
+def resend_consent(request):
+    """Dijete traži ponovo slanje consent emaila roditelju."""
+    db = 'memio_pets'
+    breeder_pk = request.session.get('memio_breeder_pk')
+    if not breeder_pk:
+        return redirect('memio_pet:registracija')
+    try:
+        import uuid as _u
+        bp = BreederProfile.objects.using(db).get(pk=_u.UUID(str(breeder_pk)))
+    except Exception:
+        return redirect('memio_pet:registracija')
+
+    if bp.parental_consent:
+        messages.info(request, 'Pristanak roditelja je već potvrđen.')
+        return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
+
+    if not bp.parent_email:
+        messages.error(request, 'Nema upisanog emaila roditelja.')
+        return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
+
+    # Generiraj novi token ako je stari prazan
+    if not bp.consent_token:
+        import secrets as _s
+        bp.consent_token = _s.token_urlsafe(32)
+
+    from django.utils import timezone
+    bp.consent_sent_at = timezone.now()
+    bp.save(using=db, update_fields=['consent_token', 'consent_sent_at'])
+    _send_parental_consent_email(bp, bp.parent_email)
+    messages.success(request, f'Email ponovo poslan roditelju. Provjeri s njim/njom.')
+    return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
 
 
 def landing_page(request):

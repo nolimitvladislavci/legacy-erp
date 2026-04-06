@@ -81,6 +81,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <div class="container">
 
+  {% if breeder.needs_parental_consent %}
+  <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:16px 20px;margin-bottom:16px;text-align:center;font-size:.85rem;color:#2563eb;line-height:1.6">
+    🔒 <strong>Pristanak roditelja u tijeku</strong> — poslali smo email tvom roditelju/skrbniku. Profil radi normalno, ali po GDPR-u (čl. 8) roditelj treba potvrditi.<br>
+    <a href="/pristanak-ponovo/" style="color:#1d4ed8;font-weight:700;display:inline-block;margin-top:6px;padding:6px 16px;border:1.5px solid rgba(29,78,216,.3);border-radius:6px">📧 Pošalji email ponovo</a>
+  </div>
+  {% endif %}
+
   <div class="card">
     <div class="breeder-hero">
       <div class="breeder-avatar-big">{{ breeder.name.0 }}</div>

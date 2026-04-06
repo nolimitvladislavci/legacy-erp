@@ -278,6 +278,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
 </div>
 
+{% if needs_parental_consent %}
+<div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:0 0 12px 12px;padding:14px 20px;text-align:center;font-size:.85rem;color:#2563eb;line-height:1.5">
+  🔒 <strong>Čeka pristanak roditelja</strong> — profil je aktivan, ali po GDPR-u roditelj treba potvrditi korištenje.
+  <a href="/pristanak-ponovo/" style="color:#1d4ed8;font-weight:700;margin-left:6px">Pošalji email ponovo</a>
+</div>
+{% endif %}
+
 {% if is_memorial %}
 <div class="memorial-header">
   <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
