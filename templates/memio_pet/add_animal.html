@@ -1,156 +1,154 @@
 <!DOCTYPE html>
-<html lang="hr" data-theme="light">
+<html lang="hr">
 <head>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dodaj ljubimca — Memio.pet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>{{ page_title|default:"Dodaj ljubimca — Memio.pet" }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f8f6f0;--surface:#ffffff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;--red:#dc3545;--top-bar:#1a1a2e;--top-text:#f8f6f0;--shadow:rgba(0,0,0,.06);--serif:'Cormorant Garamond',Georgia,serif;--sans:'Space Grotesk',system-ui,sans-serif}
-[data-theme="dark"]{--bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;--gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--green:#34d058;--red:#f87171;--top-bar:#09090b;--top-text:#edeae2;--shadow:rgba(0,0,0,.35)}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s}
-.top-bar{background:var(--top-bar);color:var(--top-text);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.top-bar-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.25rem;font-weight:700}
-.top-bar-logo span{color:var(--top-text)}
-.theme-toggle{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:5px 11px;cursor:pointer;font-size:.95rem;color:var(--top-text);line-height:1;display:flex;align-items:center}
-.container{max-width:600px;margin:0 auto;padding:28px 16px}
-.card{background:var(--surface);border-radius:14px;box-shadow:0 2px 16px var(--shadow);margin-bottom:20px;overflow:hidden}
-.card-body{padding:22px 24px}
-.section-title{font-family:var(--serif);font-size:1.3rem;font-weight:700;margin-bottom:20px}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:5px}
-.field input,.field select,.field textarea{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-size:.9rem;font-family:var(--sans);transition:border-color .2s;outline:none}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:8px;font-size:.88rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .2s;font-family:var(--sans)}
-.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{opacity:.85}
-.btn-outline{background:none;border:1px solid var(--line);color:var(--ink)}.btn-outline:hover{border-color:var(--gold)}
-.msg{padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:10px}
-.msg.error{background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.3);color:var(--red)}
-.msg.success{background:rgba(40,167,69,.12);border:1px solid rgba(40,167,69,.3);color:var(--green)}
-.photo-preview{width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:8px;display:none}
-.page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
-.page-footer a{color:var(--gold);text-decoration:none}
-@media(max-width:500px){
-  .field-row{grid-template-columns:1fr}
-  .container{padding:20px 12px}
+:root{
+  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
+  --dim:#7a7a8c;--green:#4caf7d;--red:#e05252;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
 }
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+.top-bar{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.back-link{font-size:.85rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:4px}
+.back-link:hover{text-decoration:underline}
+.card{width:100%;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:36px 32px}
+.card-title{font-family:var(--serif);font-size:1.7rem;font-weight:700;margin-bottom:4px}
+.card-sub{color:var(--dim);font-size:.86rem;margin-bottom:24px;line-height:1.5}
+.breeder-tag{display:inline-block;font-size:.75rem;padding:4px 12px;border-radius:20px;background:rgba(201,168,76,.12);color:var(--gold);font-weight:600;margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:80px}
+.field-hint{font-size:.72rem;color:var(--dim);margin-top:4px}
+.radio-group{display:flex;gap:10px;flex-wrap:wrap}
+.radio-label{padding:9px 16px;border:1.5px solid var(--line);border-radius:8px;font-size:.85rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.radio-label:hover,.radio-label:has(input:checked){border-color:var(--gold);background:rgba(201,168,76,.06)}
+.radio-label input{display:none}
+.photo-upload{border:2px dashed var(--line);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.photo-upload:hover{border-color:var(--gold)}
+.photo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-upload-text{font-size:.85rem;color:var(--dim)}
+.photo-upload-icon{font-size:2rem;margin-bottom:8px}
+.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s;margin-top:12px}
+.btn-submit:hover{background:#b8942a}
+.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px}
+.success-msg{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);border-radius:8px;padding:10px 14px;color:var(--green);font-size:.85rem;margin-bottom:16px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.card{padding:24px 18px}.row-2{grid-template-columns:1fr}}
 </style>
-<script>
-(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));})();
-</script>
 </head>
 <body>
 
 <div class="top-bar">
-  <a href="{% url 'memio_pet:breeder_dashboard' %}" class="top-bar-logo">Memio<span>.pet</span></a>
-  <div style="display:flex;align-items:center;gap:10px">
-    <a href="{% url 'memio_pet:breeder_dashboard' %}" style="color:var(--top-text);text-decoration:none;font-size:.82rem">← Natrag</a>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-  </div>
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  {% if breeder %}
+  <a href="/uzgajivac/{{ breeder.pk }}/" class="back-link">&larr; Profil {{ breeder.name }}</a>
+  {% endif %}
 </div>
 
-<div class="container">
+<div class="card">
+  <h1 class="card-title">Dodaj ljubimca</h1>
+  {% if breeder %}
+  <div class="breeder-tag">Za: {{ breeder.name }}</div>
+  {% endif %}
+  <p class="card-sub">Upiši podatke o ljubimcu. Jedino ime je obavezno — ostalo možeš dodati kasnije.</p>
 
-  {% if messages %}
-  <div style="margin-bottom:16px">
-    {% for msg in messages %}
-    <div class="msg {{ msg.tags }}">{{ msg }}</div>
-    {% endfor %}
-  </div>
+  {% if error %}
+  <div class="error">{{ error }}</div>
   {% endif %}
 
-  <div class="card">
-    <div class="card-body">
-      <h1 class="section-title">🐾 Dodaj ljubimca</h1>
+  {% if messages %}
+  {% for message in messages %}
+  <div class="{% if message.tags == 'error' %}error{% else %}success-msg{% endif %}">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
 
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+  <form method="post" enctype="multipart/form-data" action="/ljubimac/novi/">
+    {% csrf_token %}
+    <input type="hidden" name="breeder_id" value="{{ breeder_id }}">
 
-        <div class="field">
-          <label>Ime ljubimca</label>
-          <input type="text" name="name" placeholder="Rex, Bella, Luna..." required autofocus>
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>Vrsta</label>
-            <select name="vrsta">
-              {% for val, label in vrsta_choices %}
-              <option value="{{ val }}">{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="field">
-            <label>Spol</label>
-            <select name="spol">
-              {% for val, label in spol_choices %}
-              <option value="{{ val }}">{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Pasmina</label>
-          <input type="text" name="breed" placeholder="Njemački ovčar, Labrador...">
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>Mikročip broj</label>
-            <input type="text" name="chip_number" placeholder="191000000123456" inputmode="numeric">
-          </div>
-          <div class="field">
-            <label>Datum rođenja</label>
-            <input type="date" name="date_of_birth">
-          </div>
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>Težina (kg)</label>
-            <input type="number" name="weight_kg" step="0.1" min="0" placeholder="25.5">
-          </div>
-          <div class="field">
-            <label>Boja / šara</label>
-            <input type="text" name="color_description" placeholder="Crno-smeđa">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Fotografija</label>
-          <input type="file" name="photo" accept="image/*" onchange="previewPhoto(this)">
-          <img id="photoPreview" class="photo-preview">
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button type="submit" class="btn btn-gold">Spremi ljubimca</button>
-          <a href="{% url 'memio_pet:breeder_dashboard' %}" class="btn btn-outline">Odustani</a>
-        </div>
-      </form>
+    <div class="field">
+      <label>Ime ljubimca *</label>
+      <input type="text" name="name" placeholder="npr. Rex, Luna, Bella..." required autocomplete="off">
     </div>
-  </div>
-</div>
 
-<div class="page-footer">
-  <a href="/">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
-  © 2026 <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">Konjik d.o.o.</a> & NO LIMIT udruga
+    <div class="field">
+      <label>Vrsta</label>
+      <select name="vrsta">
+        {% for val, label in vrsta_choices %}
+        <option value="{{ val }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Pasmina</label>
+      <input type="text" name="breed" placeholder="npr. Labrador, Perzijska mačka...">
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label>Broj mikročipa</label>
+        <input type="text" name="chip_number" placeholder="opcijsko — ako ga nema, preskočite" maxlength="20">
+        <div class="field-hint">15-znamenkasti ISO broj</div>
+      </div>
+      <div class="field">
+        <label>Ušna markica</label>
+        <input type="text" name="ear_tag" placeholder="opcijsko" maxlength="30">
+        <div class="field-hint">Ako ne unesete, generirat će se automatski</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Spol</label>
+      <div class="radio-group">
+        {% for val, label in spol_choices %}
+        <label class="radio-label">
+          <input type="radio" name="spol" value="{{ val }}" {% if val == 'N' %}checked{% endif %}>
+          {{ label }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Datum rođenja</label>
+      <input type="date" name="date_of_birth">
+    </div>
+
+    <div class="field">
+      <label>Fotografija</label>
+      <div class="photo-upload" id="photoUpload">
+        <input type="file" name="photo" accept="image/*" id="photoInput">
+        <div class="photo-upload-icon">📷</div>
+        <div class="photo-upload-text" id="photoText">Klikni ili dovuci fotografiju</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Napomene</label>
+      <textarea name="notes" placeholder="Posebne karakteristike, temperament, alergije..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit">Dodaj ljubimca 🐾</button>
+  </form>
 </div>
 
 <script>
-function previewPhoto(input){
-  var img=document.getElementById('photoPreview');
-  if(input.files&&input.files[0]){
-    var reader=new FileReader();
-    reader.onload=function(e){img.src=e.target.result;img.style.display='block';};
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-(function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('themeBtn');if(btn)btn.textContent=t==='dark'?'☀️':'🌙';})();
-function toggleTheme(){var h=document.documentElement;var c=h.getAttribute('data-theme')||'light';var n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('memio-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'☀️':'🌙';}
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  var name = e.target.files[0] ? e.target.files[0].name : 'Klikni ili dovuci fotografiju';
+  document.getElementById('photoText').textContent = name;
+  document.getElementById('photoUpload').style.borderColor = e.target.files[0] ? '#c9a84c' : '';
+});
 </script>
 </body>
 </html>

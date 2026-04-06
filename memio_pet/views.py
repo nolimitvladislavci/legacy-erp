@@ -5,6 +5,8 @@ Endpointi:
   GET /pas/<chip_or_tag>/     -- Javni profil ljubimca (HTML stranica za QR)
   GET /pas/<chip_or_tag>/qr/  -- QR kod slika (PNG)
   GET /uzgajivac/<uuid>/      -- Javni profil uzgajivaca
+  GET/POST /ljubimac/novi/    -- Dodaj ljubimca (session auth)
+  GET/POST /ljubimac/zatrazi/ -- Auth stranica (email lookup)
 """
 import io
 import qrcode
@@ -333,6 +335,7 @@ def training_list(request):
 def registracija(request):
     """
     Korak 1: tip profila + email → kreira BreederProfile
+    Sprema breeder PK i email u session za add_animal flow.
     Redirect na /uzgajivac/UUID/ nakon uspjeha
     """
     db = 'memio_pets'
@@ -349,8 +352,11 @@ def registracija(request):
         if not ime or not email:
             error = 'Ime i email su obavezni.'
         elif BreederProfile.objects.using(db).filter(email=email).exists():
-            # Već postoji — pošalji ih na profil
+            # Već postoji — spremi session i pošalji na profil
             bp = BreederProfile.objects.using(db).get(email=email)
+            request.session['memio_breeder_pk'] = str(bp.pk)
+            request.session['memio_breeder_email'] = bp.email
+            request.session.set_expiry(86400 * 7)
             return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
         else:
             try:
@@ -364,6 +370,10 @@ def registracija(request):
                     trust_score=40,
                     is_no_limit_partner=False,
                 )
+                # Spremi u session za journey continuity
+                request.session['memio_breeder_pk'] = str(bp.pk)
+                request.session['memio_breeder_email'] = bp.email
+                request.session.set_expiry(86400 * 7)
                 return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
             except Exception as e:
                 error = f'Greška: {e}'
@@ -449,71 +459,110 @@ def breeder_dashboard(request):
 
 
 # ════════════════════════════════════════════════════════════════
-# ADD ANIMAL (login required)
+# ADD ANIMAL — session auth, bez @login_required
 # ════════════════════════════════════════════════════════════════
 
 def add_animal(request):
-    """Dodaj novog ljubimca — javno, bez logina.
-    breeder se identificira po ?breeder=UUID ili po session emailu.
+    """Dodaj novog ljubimca — session auth, bez Django logina.
+    Breeder se identificira po:
+      1. session['memio_breeder_pk'] (postavljeno u registracija/auth)
+      2. ?breeder=UUID GET param (link s profila)
+      3. POST breeder_id (hidden field)
+    Ako ništa → redirect na add_animal_auth (email lookup).
     """
     db = 'memio_pets'
-    breeder = None
 
-    # 1. breeder UUID iz GET parametra (link s profila)
-    breeder_pk = request.GET.get('breeder') or request.POST.get('breeder_id')
-    if breeder_pk:
-        try:
-            import uuid as _uuid_mod
-            breeder = BreederProfile.objects.using(db).get(pk=_uuid_mod.UUID(str(breeder_pk)))
-        except Exception:
-            pass
+    # Pronađi breedera po session, GET param ili POST
+    breeder_pk = (request.session.get('memio_breeder_pk') or
+                  request.GET.get('breeder') or
+                  request.POST.get('breeder_id'))
 
-    # 2. Ako je ulogiran na LIMIT Connect — nađi po useru
-    if not breeder and request.user.is_authenticated:
-        breeder = BreederProfile.objects.using(db).filter(user_id=request.user.pk).first()
-        if not breeder:
-            breeder = BreederProfile.objects.using(db).filter(email=request.user.email).first()
+    if not breeder_pk:
+        return render(request, 'memio_pet/add_animal_auth.html', {
+            'page_title': 'Tko si ti?',
+        })
 
-    if not breeder:
-        messages.error(request, 'Nije pronađen profil. Kreirajte ga prvo.')
+    try:
+        import uuid as _u
+        breeder = BreederProfile.objects.using(db).get(pk=_u.UUID(str(breeder_pk)))
+    except Exception:
         return redirect('memio_pet:registracija')
 
     if request.method == 'POST':
-        try:
-            animal = AnimalProfile(
-                name=request.POST.get('name', '').strip(),
-                vrsta=request.POST.get('vrsta', 'pas'),
-                breed=request.POST.get('breed', '').strip(),
-                spol=request.POST.get('spol', 'N'),
-                chip_number=request.POST.get('chip_number', '').strip(),
-                date_of_birth=request.POST.get('date_of_birth') or None,
-                weight_kg=request.POST.get('weight_kg') or None,
-                color_description=request.POST.get('color_description', '').strip(),
-                breeder=breeder,
-                breeder_name_snapshot=breeder.name,
-                status='aktivno',
-            )
+        name = request.POST.get('name', '').strip()
+        vrsta = request.POST.get('vrsta', 'pas')
+        breed = request.POST.get('breed', '').strip()
+        chip = request.POST.get('chip_number', '').strip()
+        ear_tag = request.POST.get('ear_tag', '').strip()
+        spol = request.POST.get('spol', 'N')
+        dob = request.POST.get('date_of_birth') or None
+        notes = request.POST.get('notes', '').strip()
 
-            # Generiraj ear_tag ako nije unesen
-            ear_tag = request.POST.get('ear_tag', '').strip()
-            if not ear_tag:
-                import uuid as _uuid
-                ear_tag = f"{animal.name or 'pet'}-{animal.vrsta}-{_uuid.uuid4().hex[:8]}"
-            animal.ear_tag = ear_tag
+        if not name:
+            return render(request, 'memio_pet/add_animal.html', {
+                'breeder': breeder, 'breeder_id': str(breeder.pk),
+                'error': 'Ime ljubimca je obavezno.',
+                'vrsta_choices': AnimalProfile.VRSTA_CHOICES,
+                'spol_choices': AnimalProfile.SPOL_CHOICES,
+            })
 
-            # Foto
-            if 'photo' in request.FILES:
-                animal.photo = request.FILES['photo']
+        import uuid as _u2
+        if not chip and not ear_tag:
+            ear_tag = f"{vrsta}-{_u2.uuid4().hex[:8]}"
 
-            animal.save(using=db)
-            identifier = animal.chip_number or animal.ear_tag
-            messages.success(request, f'Ljubimac {animal.name} dodan!')
-            return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
-        except Exception as e:
-            messages.error(request, f'Greška: {e}')
+        animal = AnimalProfile(
+            name=name, vrsta=vrsta, breed=breed,
+            chip_number=chip, ear_tag=ear_tag or f"{vrsta}-{_u2.uuid4().hex[:8]}",
+            spol=spol, date_of_birth=dob, notes=notes,
+            breeder=breeder, breeder_name_snapshot=breeder.name,
+            status='aktivno',
+        )
+        if 'photo' in request.FILES:
+            animal.photo = request.FILES['photo']
+        animal.save(using=db)
+
+        # Osiguraj session za nastavak
+        request.session['memio_breeder_pk'] = str(breeder.pk)
+        identifier = animal.chip_number or animal.ear_tag
+        messages.success(request, f'{name} je dodan!')
+        return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
     return render(request, 'memio_pet/add_animal.html', {
         'breeder': breeder,
+        'breeder_id': str(breeder.pk),
+        'page_title': f'Dodaj ljubimca — {breeder.name}',
         'vrsta_choices': AnimalProfile.VRSTA_CHOICES,
         'spol_choices': AnimalProfile.SPOL_CHOICES,
+    })
+
+
+def add_animal_auth(request):
+    """Email lookup za add_animal — kad nema sessiona.
+    Korisnik upiše email, nađemo BreederProfile, spremimo u session.
+    """
+    db = 'memio_pets'
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        if not email:
+            return render(request, 'memio_pet/add_animal_auth.html', {
+                'error': 'Upiši email adresu.',
+                'page_title': 'Tko si ti?',
+            })
+
+        bp = BreederProfile.objects.using(db).filter(email=email).first()
+        if bp:
+            request.session['memio_breeder_pk'] = str(bp.pk)
+            request.session['memio_breeder_email'] = bp.email
+            request.session.set_expiry(86400 * 7)
+            return redirect('memio_pet:add_animal')
+        else:
+            return render(request, 'memio_pet/add_animal_auth.html', {
+                'error': 'Nismo pronašli profil s tim emailom. Kreiraj novi profil.',
+                'show_register': True,
+                'page_title': 'Tko si ti?',
+            })
+
+    return render(request, 'memio_pet/add_animal_auth.html', {
+        'page_title': 'Tko si ti?',
     })
