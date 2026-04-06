@@ -18,6 +18,7 @@ urlpatterns = [
     path("barf/nova/", views.barf_create, name="barf_create"),
     path("hotel/", views.pet_hotel_booking, name="pet_hotel_booking"),
     path("registracija/", views.registracija, name="registracija"),
+    path("prijava/", views.prijava, name="prijava"),
     path("dresura/", views.training_list, name="training_list"),
 
     # Dashboard (login required)

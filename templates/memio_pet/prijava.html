@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prijava — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
+  --dim:#7a7a8c;--green:#4caf7d;--red:#e05252;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.top-bar{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.card{width:100%;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px}
+.card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:6px}
+.card-sub{color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.6}
+.field{margin-bottom:20px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.field input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:1rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--gold)}
+.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s}
+.btn-submit:hover{background:#b8942a}
+.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:12px 16px;color:var(--red);font-size:.85rem;margin-bottom:16px;line-height:1.6}
+.error a{color:var(--gold);font-weight:600;text-decoration:none}
+.error a:hover{text-decoration:underline}
+.divider{display:flex;align-items:center;gap:14px;margin:28px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
+.divider span{font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+.btn-register{display:block;width:100%;padding:13px;background:transparent;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.92rem;font-weight:600;color:var(--ink);text-align:center;text-decoration:none;transition:all .2s}
+.btn-register:hover{border-color:var(--gold);color:var(--gold)}
+.footer-note{margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6}
+@media(max-width:520px){.card{padding:28px 20px}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+</div>
+
+<div class="card">
+  <h1 class="card-title">Prijava</h1>
+  <p class="card-sub">Upiši email koji si koristio pri registraciji i vratit ćemo te na tvoj profil.</p>
+
+  {% if error %}
+  <div class="error">
+    {{ error }}
+    {% if 'nije pronađen' in error %}
+    <br><a href="/registracija/">Kreiraj novi profil →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label>Email adresa</label>
+      <input type="email" name="email" value="{{ email_value|default:'' }}"
+             placeholder="tvoj@email.com" required autofocus autocomplete="email">
+    </div>
+    <button type="submit" class="btn-submit">Prijavi se →</button>
+  </form>
+
+  <div class="divider"><span>ili</span></div>
+
+  <a href="/registracija/" class="btn-register">Kreiraj novi profil</a>
+
+  <p class="footer-note">
+    Nema lozinke — samo email koji si koristio.<br>
+    Tvoj profil je uvijek dostupan.
+  </p>
+</div>
+
+</body>
+</html>

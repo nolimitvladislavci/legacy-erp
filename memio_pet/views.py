@@ -229,10 +229,18 @@ def registracija(request):
             request.session.set_expiry(86400 * 7)
             return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
         else:
+            oib = request.POST.get('oib', '').strip()
+            website = request.POST.get('website', '').strip()
+            # Izračunaj početni trust score — OIB daje +20
+            initial_trust = 40
+            if oib and len(oib) == 11 and oib.isdigit():
+                initial_trust += 20
             try:
                 bp = BreederProfile.objects.using(db).create(
                     name=ime, email=email, phone=telefon, city=grad,
-                    account_type=account_type, country='HR', trust_score=40, is_no_limit_partner=False,
+                    account_type=account_type, country='HR',
+                    trust_score=initial_trust, is_no_limit_partner=False,
+                    oib=oib, website=website,
                 )
                 request.session['memio_breeder_pk'] = str(bp.pk)
                 request.session['memio_breeder_email'] = bp.email
@@ -430,4 +438,31 @@ def add_animal_with_token(request, token):
         'page_title': f'Dodaj ljubimca — {breeder.name}',
         'vrsta_choices': AnimalProfile.VRSTA_CHOICES, 'spol_choices': AnimalProfile.SPOL_CHOICES,
         'token': token,
+    })
+
+
+def prijava(request):
+    """Prijava postojećeg korisnika — email lookup → session."""
+    db = 'memio_pets'
+    error = None
+    email_value = ''
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        email_value = email
+        if not email or '@' not in email:
+            error = 'Upiši ispravnu email adresu.'
+        else:
+            bp = BreederProfile.objects.using(db).filter(email=email).first()
+            if bp:
+                request.session['memio_breeder_pk'] = str(bp.pk)
+                request.session['memio_breeder_email'] = bp.email
+                request.session.set_expiry(86400 * 7)
+                return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
+            else:
+                error = 'Email nije pronađen. Želiš li kreirati novi profil?'
+
+    return render(request, 'memio_pet/prijava.html', {
+        'error': error,
+        'email_value': email_value,
     })

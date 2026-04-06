@@ -82,19 +82,57 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       {% endfor %}
     </div>
 
+    <!-- Polja za profesionalne korisnike (vet, azil, uzgajivač) -->
+    <div id="pro-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px">
+      <p style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">Profesionalni podaci</p>
+      <div class="field">
+        <label>OIB (opcijsko — za verifikaciju)</label>
+        <input type="text" name="oib" placeholder="12345678901" maxlength="11" pattern="[0-9]{11}" inputmode="numeric">
+      </div>
+      <div class="field" id="field-telefon">
+        <label>Telefon</label>
+        <input type="tel" name="telefon" placeholder="+385 91 234 5678" autocomplete="tel">
+      </div>
+      <div class="field" id="field-website" style="display:none">
+        <label>Web stranica</label>
+        <input type="url" name="website" placeholder="https://...">
+      </div>
+      <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">
+        OIB služi za verifikaciju profila. Verificirani profili dobivaju ✓ oznaku i viši Trust Score.<br>
+        Azili putem NO LIMIT programa automatski dobivaju verifikaciju.
+      </p>
+    </div>
+
     <button type="submit" class="btn-submit">Kreiraj profil →</button>
   </form>
 
   <p class="footer-note">
     Nema lozinke, nema kartice, nema pretplate.<br>
     Profil je tvoj. Podaci su sigurni. Zauvijek besplatno.<br><br>
-    Već imaš profil? <a href="https://memio.pet/barf/" style="color:var(--gold)">BARF Marketplace</a> · <a href="https://memio.pet/hotel/" style="color:var(--gold)">Pet Hotel</a>
+    Već imaš profil? <a href="/prijava/" style="color:var(--gold);font-weight:600">Prijavi se →</a>
   </p>
 </div>
 
 <script>
 // Označi prvi tip kao aktivan na startu
 document.querySelector('.type-btn').classList.add('active');
+
+// Prikaži profesionalna polja za vet/azil/uzgajivač
+var proTypes = new Set(['vet','shelter','breeder','horse','hotel','trainer','sheep_farmer','pig_farmer','poultry']);
+var websiteTypes = new Set(['vet','hotel','breeder','horse']);
+var proFields = document.getElementById('pro-fields');
+var websiteField = document.getElementById('field-website');
+
+document.querySelectorAll('input[name="account_type"]').forEach(function(radio){
+  radio.addEventListener('change', function(){
+    if(proTypes.has(this.value)){
+      proFields.style.display = 'block';
+      websiteField.style.display = websiteTypes.has(this.value) ? 'block' : 'none';
+    } else {
+      proFields.style.display = 'none';
+    }
+  });
+});
 </script>
 </body>
 </html>
