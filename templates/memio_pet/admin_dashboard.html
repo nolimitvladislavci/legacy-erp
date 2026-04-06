@@ -1,0 +1,297 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memio Admin — Superadmin Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1012;--surface:#18191d;--surface2:#1e2025;--ink:#edeae2;--ink2:#a09890;--gold:#c9a84c;--green:#4caf7d;--red:#e05252;--blue:#3b82f6;--line:#2a2b30;--sans:'Space Grotesk',system-ui,sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top h1{font-size:1rem;font-weight:700;color:var(--gold)}
+.top-links a{color:var(--ink2);font-size:.8rem;text-decoration:none;margin-left:16px}
+.top-links a:hover{color:var(--gold)}
+.container{max-width:1200px;margin:0 auto;padding:24px 16px}
+
+/* Stats row */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center}
+.stat-num{font-size:1.8rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.72rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* Section */
+.section{margin-bottom:32px}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink2);margin-bottom:12px;padding-left:4px;display:flex;align-items:center;gap:8px}
+.section-title span{background:var(--gold);color:#000;padding:2px 8px;border-radius:4px;font-size:.65rem}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{text-align:left;padding:8px 10px;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);border-bottom:1px solid var(--line);position:sticky;top:48px;background:var(--bg)}
+.tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.tbl tr:hover td{background:rgba(201,168,76,.04)}
+
+/* Badges */
+.badge{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:4px;font-weight:600}
+.badge-green{background:rgba(76,175,125,.15);color:var(--green)}
+.badge-red{background:rgba(224,82,82,.15);color:var(--red)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold)}
+.badge-dim{background:rgba(160,152,144,.15);color:var(--ink2)}
+
+/* Action buttons */
+.act{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;font-size:.7rem;font-weight:600;color:var(--ink2);background:none;cursor:pointer;text-decoration:none;transition:all .15s}
+.act:hover{border-color:var(--gold);color:var(--gold)}
+.act-red:hover{border-color:var(--red);color:var(--red)}
+.act-green{border-color:rgba(76,175,125,.3);color:var(--green)}
+.actions-row{display:flex;gap:4px;flex-wrap:wrap}
+
+/* Inline form */
+select.act-select{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:6px;font-size:.7rem;padding:4px 6px;font-family:var(--sans)}
+
+/* Consent warning */
+.consent-warn{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:.85rem;color:var(--blue)}
+.consent-warn strong{color:var(--ink)}
+
+/* Farm section */
+.farm-empty{text-align:center;padding:32px;color:var(--ink2);font-size:.88rem;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.farm-empty strong{color:var(--gold)}
+
+@media(max-width:768px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .tbl{display:block;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>🐾 Memio Admin</h1>
+  <div class="top-links">
+    <a href="https://memio.pet">memio.pet</a>
+    <a href="/hr/superadmin/">LIMIT Connect</a>
+    <a href="/hr/superadmin/ivan/">Ivan Cockpit</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">{{ profiles|length }}</div>
+      <div class="stat-label">Profili</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ animal_stats.total }}</div>
+      <div class="stat-label">Životinje</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--green)">{{ animal_stats.aktivno }}</div>
+      <div class="stat-label">Aktivno</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--ink2)">{{ animal_stats.uginulo }}</div>
+      <div class="stat-label">Memorial</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ waitlist_count }}</div>
+      <div class="stat-label">Waitlist</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ health_count }}</div>
+      <div class="stat-label">Zdravlje zapisi</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--blue)">{{ farm_stats.farms }}</div>
+      <div class="stat-label">Farme</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--gold)">{{ farm_stats.beehives }}</div>
+      <div class="stat-label">Košnice</div>
+    </div>
+  </div>
+
+  <!-- GDPR CONSENT PENDING -->
+  {% if pending_consent %}
+  <div class="consent-warn">
+    🔒 <div><strong>{{ pending_consent|length }} profil(a)</strong> čeka pristanak roditelja (GDPR čl. 8)</div>
+  </div>
+  {% endif %}
+
+  <!-- PROFILI -->
+  <div class="section">
+    <div class="section-title">Profili <span>{{ profiles|length }}</span></div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Ime</th>
+          <th>Tip</th>
+          <th>Grad</th>
+          <th>Životinje</th>
+          <th>Trust</th>
+          <th>Status</th>
+          <th>Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in profiles %}
+        <tr>
+          <td><strong>{{ p.name }}</strong></td>
+          <td>{{ p.get_account_type_display }}</td>
+          <td>{{ p.city }}</td>
+          <td>{{ p.animals.count }}</td>
+          <td>{{ p.trust_score }}/100</td>
+          <td>
+            {% if p.is_cro_validated %}<span class="badge badge-green">✓ Verificiran</span>{% endif %}
+            {% if p.needs_parental_consent %}<span class="badge badge-blue">🔒 GDPR</span>{% endif %}
+            {% if not p.is_cro_validated and not p.needs_parental_consent %}<span class="badge badge-dim">—</span>{% endif %}
+          </td>
+          <td>
+            <div class="actions-row">
+              {% if not p.is_cro_validated %}
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify">
+                <button class="act act-green" type="submit">✓ Verificiraj</button>
+              </form>
+              {% endif %}
+              {% if p.needs_parental_consent %}
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="grant_consent">
+                <button class="act" type="submit">🔓 Odobri GDPR</button>
+              </form>
+              {% endif %}
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline" onsubmit="return confirm('Obrisati profil {{ p.name }} i sve životinje?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button class="act act-red" type="submit">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ŽIVOTINJE -->
+  <div class="section">
+    <div class="section-title">Životinje <span>{{ animal_stats.total }}</span></div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Ime</th>
+          <th>Vrsta</th>
+          <th>ID</th>
+          <th>Vlasnik</th>
+          <th>Status</th>
+          <th>Kreirano</th>
+          <th>Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in animals %}
+        <tr>
+          <td>
+            <a href="https://memio.pet/pas/{{ a.chip_number|default:a.ear_tag }}/" style="color:var(--gold);text-decoration:none;font-weight:600">{{ a.name|default:"—" }}</a>
+          </td>
+          <td>{{ a.get_vrsta_display }}</td>
+          <td style="font-family:monospace;font-size:.72rem">{{ a.chip_number|default:a.ear_tag }}</td>
+          <td>{{ a.breeder.name|default:"—" }}</td>
+          <td>
+            {% if a.status == 'aktivno' or a.status == 'active' %}<span class="badge badge-green">{{ a.status }}</span>
+            {% elif a.status == 'uginulo' %}<span class="badge badge-dim">🌈 memorial</span>
+            {% elif a.status == 'u_azilu' %}<span class="badge badge-blue">azil</span>
+            {% else %}<span class="badge badge-dim">{{ a.status }}</span>{% endif %}
+          </td>
+          <td style="font-size:.75rem;color:var(--ink2)">{{ a.created_at|date:"d.m.Y. H:i" }}</td>
+          <td>
+            <div class="actions-row">
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_status">
+                <select name="new_status" class="act-select" onchange="this.form.submit()">
+                  <option value="">Status...</option>
+                  <option value="aktivno">Aktivno</option>
+                  <option value="u_azilu">U azilu</option>
+                  <option value="udomljen">Udomljen</option>
+                  <option value="prodano">Prodano</option>
+                  <option value="uginulo">🌈 Uginulo</option>
+                </select>
+              </form>
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="transfer">
+                <select name="new_breeder_id" class="act-select" onchange="this.form.submit()">
+                  <option value="">Transfer...</option>
+                  {% for p in profiles %}
+                  {% if p.account_type != 'krematorij' %}
+                  <option value="{{ p.pk }}">{{ p.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </form>
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline" onsubmit="return confirm('Obrisati {{ a.name }}?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button class="act act-red" type="submit">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MEMIO.FARM -->
+  <div class="section">
+    <div class="section-title">memio.farm <span>{{ farm_stats.farms }} farmi · {{ farm_stats.animals }} životinja · {{ farm_stats.beehives }} košnica</span></div>
+    {% if farm_stats.farm_list %}
+    <table class="tbl">
+      <thead>
+        <tr><th>Farma</th><th>Tip</th><th>Grad</th><th>MIBPG</th><th>Trust</th></tr>
+      </thead>
+      <tbody>
+        {% for f in farm_stats.farm_list %}
+        <tr>
+          <td><strong>{{ f.name }}</strong></td>
+          <td>{{ f.get_farm_type_display }}</td>
+          <td>{{ f.city }}</td>
+          <td style="font-family:monospace;font-size:.72rem">{{ f.mibpg|default:"—" }}</td>
+          <td>{{ f.trust_score }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="farm-empty">
+      Nema farmi u bazi. <strong>memio.farm</strong> je spreman — čeka prvi OPG.<br>
+      {% if farm_stats.error %}<span style="color:var(--red);font-size:.78rem">{{ farm_stats.error }}</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- TIPOVI PROFILA -->
+  <div class="section">
+    <div class="section-title">Profili po tipu</div>
+    <div class="stats">
+      {% for type, count in profile_types.items %}
+      <div class="stat">
+        <div class="stat-num">{{ count }}</div>
+        <div class="stat-label">{{ type }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;padding:24px;font-size:.72rem;color:var(--ink2)">
+  Memio Admin — LIMIT Connect · {{ now|date:"d.m.Y. H:i" }}
+</div>
+</body>
+</html>

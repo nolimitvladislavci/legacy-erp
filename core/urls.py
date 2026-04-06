@@ -117,6 +117,10 @@ urlpatterns = [
     path('api/device-login/', __import__('accounts.auth_views', fromlist=['device_token_login']).device_token_login, name='device_token_login_api'),
     path('api/ai-agent/', __import__('superadmin_ai.views', fromlist=['agent_gateway']).agent_gateway, name='ai_agent_gateway'),
     path('api/fenix-input/', include('fenix_input.urls', namespace='fenix_input')),
+    # Memio superadmin
+    path('memio-admin/', __import__('memio_pet.views_admin', fromlist=['memio_dashboard']).memio_dashboard, name='memio_admin_dashboard'),
+    path('memio-admin/animal/<uuid:animal_id>/', __import__('memio_pet.views_admin', fromlist=['admin_animal_action']).admin_animal_action, name='memio_admin_animal_action'),
+    path('memio-admin/profile/<uuid:profile_id>/', __import__('memio_pet.views_admin', fromlist=['admin_profile_action']).admin_profile_action, name='memio_admin_profile_action'),
 ]
 
 urlpatterns += i18n_patterns(
