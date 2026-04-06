@@ -134,29 +134,48 @@ function startQrScan(){
   hint.textContent='Pokrećem kameru...';
 
   navigator.mediaDevices.getUserMedia({
-    video:{facingMode:'environment',width:{ideal:640},height:{ideal:480}}
+    video:{facingMode:{ideal:'environment'},width:{min:300,ideal:1280},height:{min:300,ideal:720}}
   })
   .then(function(stream){
     qrStream=stream;
     video.srcObject=stream;
     video.setAttribute('playsinline','true');
     video.play();
-    hint.textContent='Usmjeri kameru na QR kod ljubimca';
 
     var canvas=document.createElement('canvas');
     var ctx=canvas.getContext('2d',{willReadFrequently:true});
+    var frameCount=0;
 
-    // Skeniraj 5x u sekundi (ne treba svaki frame)
-    scanInterval=setInterval(function(){
-      if(!qrStream||video.readyState<video.HAVE_ENOUGH_DATA)return;
-
+    // Čekaj da se video dimenzije postave
+    video.addEventListener('loadedmetadata',function(){
+      hint.textContent='Usmjeri kameru na QR kod — drži mirno';
       canvas.width=video.videoWidth;
       canvas.height=video.videoHeight;
-      ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    });
 
-      // jsQR — radi svugdje (iOS, Android, desktop)
-      var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
+    // Skeniraj 4x u sekundi
+    scanInterval=setInterval(function(){
+      if(!qrStream)return;
+      if(video.videoWidth===0||video.videoHeight===0)return;
+      if(video.readyState<video.HAVE_ENOUGH_DATA)return;
+
+      // Osiguraj canvas dimenzije
+      if(canvas.width!==video.videoWidth){
+        canvas.width=video.videoWidth;
+        canvas.height=video.videoHeight;
+      }
+
+      ctx.drawImage(video,0,0);
+      var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      frameCount++;
+
+      // Pokažimo da radi
+      if(frameCount%8===0){
+        hint.textContent='Skeniram... ('+canvas.width+'x'+canvas.height+') — drži QR u kadru';
+      }
+
+      // jsQR — attemptBoth za sve varijante QR-a
+      var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
 
       if(code && code.data){
         // NAĐENO! Zeleni flash
