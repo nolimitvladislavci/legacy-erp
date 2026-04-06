@@ -82,6 +82,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       {% endfor %}
     </div>
 
+    <div class="field">
+      <label>Datum rodjenja (opcijsko)</label>
+      <input type="date" name="date_of_birth" id="dobInput" max="{{ today }}">
+      <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">Za GDPR provjeru — djeca do 16 godina trebaju pristanak roditelja.</p>
+    </div>
+
+    <!-- Parent email — prikazuje se samo za maloljetnike -->
+    <div id="parent-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.2);border-radius:10px">
+      <p style="font-size:.78rem;color:#3b82f6;font-weight:600;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase">Pristanak roditelja (GDPR)</p>
+      <p style="font-size:.78rem;color:var(--dim);margin-bottom:12px;line-height:1.5">Imaš manje od 16 godina — po zakonu trebamo pristanak roditelja. Profil se kreira odmah, a roditelj potvrdi putem emaila.</p>
+      <div class="field">
+        <label>Email roditelja ili skrbnika</label>
+        <input type="email" name="parent_email" placeholder="roditelj@email.com" autocomplete="email">
+      </div>
+    </div>
+
     <!-- Polja za profesionalne korisnike (vet, azil, uzgajivač) -->
     <div id="pro-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px">
       <p style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">Profesionalni podaci</p>
@@ -132,6 +148,18 @@ document.querySelectorAll('input[name="account_type"]').forEach(function(radio){
       proFields.style.display = 'none';
     }
   });
+});
+
+// GDPR: prikaži parent polja ako je korisnik < 16
+var dobInput = document.getElementById('dobInput');
+var parentFields = document.getElementById('parent-fields');
+dobInput.addEventListener('change', function(){
+  var dob = new Date(this.value);
+  var today = new Date();
+  var age = today.getFullYear() - dob.getFullYear();
+  var m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  parentFields.style.display = (age < 16 && age >= 0) ? 'block' : 'none';
 });
 </script>
 </body>

@@ -77,6 +77,14 @@ class BreederProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
+    # GDPR maloljetnici (HR: 16 godina, GDPR čl. 8 + ZoPOUOZP čl. 19)
+    date_of_birth   = models.DateField(null=True, blank=True, verbose_name='Datum rođenja korisnika')
+    parent_email    = MemioEncryptedField(blank=True, verbose_name='Email roditelja/skrbnika')
+    parental_consent = models.BooleanField(default=False, verbose_name='Pristanak roditelja')
+    consent_token   = models.CharField(max_length=64, blank=True, db_index=True)
+    consent_sent_at = models.DateTimeField(null=True, blank=True)
+    consent_given_at = models.DateTimeField(null=True, blank=True)
+
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
@@ -88,6 +96,23 @@ class BreederProfile(models.Model):
     def __str__(self):
         verified = ' ✓' if self.is_cro_validated else ''
         return f"{self.name}{verified} ({self.get_account_type_display()})"
+
+    @property
+    def is_minor(self):
+        """Je li korisnik mlađi od 16 (HR GDPR granica)."""
+        if not self.date_of_birth:
+            return None  # nepoznato
+        from datetime import date
+        today = date.today()
+        age = today.year - self.date_of_birth.year - (
+            (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+        )
+        return age < 16
+
+    @property
+    def needs_parental_consent(self):
+        """Treba li pristanak roditelja (maloljetnik bez pristanka)."""
+        return self.is_minor is True and not self.parental_consent
 
     @property
     def verified_badge(self):

@@ -254,6 +254,9 @@ def registracija(request):
         grad = request.POST.get('grad', '').strip()
         account_type = request.POST.get('account_type', 'owner')
         telefon = request.POST.get('telefon', '').strip()
+        dob_str = request.POST.get('date_of_birth', '').strip()
+        parent_email = request.POST.get('parent_email', '').strip().lower()
+
         if not ime or not email:
             error = 'Ime i email su obavezni.'
         elif (bp := BreederProfile.find_by_email(email)):
@@ -262,25 +265,59 @@ def registracija(request):
             request.session.set_expiry(86400 * 7)
             return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
         else:
-            oib = request.POST.get('oib', '').strip()
-            website = request.POST.get('website', '').strip()
-            # Izračunaj početni trust score — OIB daje +20
-            initial_trust = 40
-            if oib and len(oib) == 11 and oib.isdigit():
-                initial_trust += 20
-            try:
-                bp = BreederProfile.objects.using(db).create(
-                    name=ime, email=email, phone=telefon, city=grad,
-                    account_type=account_type, country='HR',
-                    trust_score=initial_trust, is_no_limit_partner=False,
-                    oib=oib, website=website,
-                )
-                request.session['memio_breeder_pk'] = str(bp.pk)
-                request.session['memio_breeder_email'] = bp.email
-                request.session.set_expiry(86400 * 7)
-                return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
-            except Exception as e:
-                error = f'Greska: {e}'
+            # GDPR dob provjera (HR: 16 godina, čl. 19 ZoPOUOZP)
+            dob = None
+            is_minor = False
+            if dob_str:
+                try:
+                    from datetime import date, datetime
+                    dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                    today = date.today()
+                    age = today.year - dob.year - (
+                        (today.month, today.day) < (dob.month, dob.day)
+                    )
+                    is_minor = age < 16
+                    if age < 13:
+                        error = 'Moraš imati najmanje 13 godina. Zamoli roditelja da kreira profil za tebe.'
+                    elif is_minor and not parent_email:
+                        error = 'Imaš manje od 16 godina — upiši email roditelja ili skrbnika za pristanak (GDPR).'
+                    elif is_minor and '@' not in parent_email:
+                        error = 'Email roditelja nije ispravan.'
+                except ValueError:
+                    pass  # nevaljan datum, preskočimo
+
+            if not error:
+                oib = request.POST.get('oib', '').strip()
+                website = request.POST.get('website', '').strip()
+                initial_trust = 40
+                if oib and len(oib) == 11 and oib.isdigit():
+                    initial_trust += 20
+                try:
+                    import secrets as _s
+                    consent_token = _s.token_urlsafe(32) if is_minor else ''
+                    bp = BreederProfile.objects.using(db).create(
+                        name=ime, email=email, phone=telefon, city=grad,
+                        account_type=account_type, country='HR',
+                        trust_score=initial_trust, is_no_limit_partner=False,
+                        oib=oib, website=website,
+                        date_of_birth=dob,
+                        parent_email=parent_email if is_minor else '',
+                        parental_consent=not is_minor,  # punoljetni = automatski OK
+                        consent_token=consent_token,
+                    )
+                    # Pošalji consent email roditelju (async, ne blokira)
+                    if is_minor and parent_email:
+                        from django.utils import timezone
+                        bp.consent_sent_at = timezone.now()
+                        bp.save(using=db, update_fields=['consent_sent_at'])
+                        _send_parental_consent_email(bp, parent_email)
+
+                    request.session['memio_breeder_pk'] = str(bp.pk)
+                    request.session['memio_breeder_email'] = bp.email
+                    request.session.set_expiry(86400 * 7)
+                    return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
+                except Exception as e:
+                    error = f'Greska: {e}'
     return render(request, 'memio_pet/registracija.html', {
         'error': error, 'chip': request.GET.get('chip', ''), 'source': request.GET.get('source', ''),
         'page_title': 'Kreiraj profil', 'account_types': [
@@ -289,6 +326,61 @@ def registracija(request):
             ('hotel', '🏨 Pet Hotel'), ('trainer', '🎯 Kinolog / Trener'), ('shelter', '🏠 Azil'),
         ],
     })
+
+
+def _send_parental_consent_email(bp, parent_email):
+    """Šalje email roditelju s linkom za pristanak. Ne blokira registraciju."""
+    try:
+        from django.core.mail import send_mail
+        consent_url = f"https://memio.pet/pristanak/{bp.consent_token}/"
+        send_mail(
+            subject=f'Memio.pet — Pristanak za profil djeteta ({bp.name})',
+            message=(
+                f'Poštovani,\n\n'
+                f'{bp.name} želi kreirati profil na Memio.pet — '
+                f'besplatnoj platformi za digitalne profile kućnih ljubimaca.\n\n'
+                f'Prema EU GDPR uredbi (čl. 8) i hrvatskom zakonu (čl. 19 ZoPOUOZP), '
+                f'djeca mlađa od 16 godina trebaju pristanak roditelja.\n\n'
+                f'Kliknite link za odobrenje:\n{consent_url}\n\n'
+                f'Ako niste upoznati s ovim zahtjevom, slobodno ga ignorirajte.\n\n'
+                f'— Memio.pet tim\n'
+                f'Projekt NO LIMIT udruge · memio.pet'
+            ),
+            from_email=None,
+            recipient_list=[parent_email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass  # ne prekidaj registraciju ako email ne prođe
+
+
+def parental_consent(request, token):
+    """Roditelj klikne link iz emaila → odobri profil djeteta."""
+    db = 'memio_pets'
+    bp = BreederProfile.objects.using(db).filter(consent_token=token).first()
+    if not bp:
+        return render(request, 'memio_pet/consent_result.html', {
+            'success': False, 'message': 'Link nije valjan ili je istekao.',
+        })
+    if bp.parental_consent:
+        return render(request, 'memio_pet/consent_result.html', {
+            'success': True, 'message': f'Pristanak za {bp.name} je već potvrđen.',
+            'breeder': bp,
+        })
+
+    if request.method == 'POST':
+        from django.utils import timezone
+        bp.parental_consent = True
+        bp.consent_given_at = timezone.now()
+        bp.consent_token = ''  # jednokratni
+        bp.save(using=db, update_fields=['parental_consent', 'consent_given_at', 'consent_token'])
+        return render(request, 'memio_pet/consent_result.html', {
+            'success': True,
+            'message': f'Pristanak za {bp.name} je odobren. Profil je sada potpuno aktivan.',
+            'breeder': bp,
+        })
+
+    return render(request, 'memio_pet/consent_form.html', {'breeder': bp, 'token': token})
 
 
 def landing_page(request):
