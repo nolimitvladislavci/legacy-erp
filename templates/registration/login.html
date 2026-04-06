@@ -125,10 +125,13 @@
     </div>
 
     {% get_current_language as CUR_LANG %}
-    <div class="lang-bar">
-        <button class="lang-btn {% if CUR_LANG == 'hr' %}active{% endif %}" onclick="switchLang('hr')">HR</button>
-        <button class="lang-btn {% if CUR_LANG == 'de' %}active{% endif %}" onclick="switchLang('de')">DE</button>
-        <button class="lang-btn {% if CUR_LANG == 'en' %}active{% endif %}" onclick="switchLang('en')">EN</button>
+    <div class="lang-bar" style="display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap">
+        {% for lang_code, lang_name in LANGUAGES %}
+        <button class="lang-btn {% if CUR_LANG == lang_code %}active{% endif %}" onclick="switchLang('{{ lang_code }}')">
+            <span style="font-size:1.1rem">{% if lang_code == 'hr' %}&#127469;&#127479;{% elif lang_code == 'de' %}&#127465;&#127466;{% elif lang_code == 'en' %}&#127468;&#127463;{% elif lang_code == 'tr' %}&#127481;&#127479;{% elif lang_code == 'el' %}&#127468;&#127479;{% endif %}</span>
+            {{ lang_code|upper }}
+        </button>
+        {% endfor %}
     </div>
 </div>
 

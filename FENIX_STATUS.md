@@ -1,6 +1,6 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-06 (Sonnet — Claude Doktor ploča obrisana)
-# Git HEAD: d2d2fc19
+# Zadnje azuriranje: 2026-04-06 (Sonnet — POS bugovi fiksirani)
+# Git HEAD: 9cf2a8df
 # Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 39%
 
 ═══════════════════════════════════════════════════════════════
@@ -38,7 +38,7 @@
 ## STANJE SUSTAVA (06.04.)
 
 ### Servisi: sve ✅
-### Git HEAD: d2d2fc19
+### Git HEAD: 9cf2a8df
 ### Django: 0 errors
 
 ### Zadnji commiti:

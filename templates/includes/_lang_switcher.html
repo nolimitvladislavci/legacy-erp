@@ -1,0 +1,58 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+{# Language switcher with flag icons — all 5 languages #}
+<div class="lang-switcher-flags" style="position:relative;display:inline-flex;align-items:center">
+    <button type="button" onclick="this.nextElementSibling.classList.toggle('show')"
+            class="lang-current-btn"
+            style="background:none;border:1px solid var(--border,#334155);border-radius:6px;
+                   padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;
+                   font-size:.75rem;font-weight:600;color:var(--text-secondary,#94a3b8);
+                   transition:all .2s">
+        <span class="lang-flag">
+            {% if CURRENT_LANG == 'hr' %}&#127469;&#127479;{% elif CURRENT_LANG == 'de' %}&#127465;&#127466;{% elif CURRENT_LANG == 'en' %}&#127468;&#127463;{% elif CURRENT_LANG == 'tr' %}&#127481;&#127479;{% elif CURRENT_LANG == 'el' %}&#127468;&#127479;{% endif %}
+        </span>
+        {{ CURRENT_LANG|upper }}
+        <i class="fas fa-chevron-down" style="font-size:.5rem;opacity:.6;transition:transform .2s"></i>
+    </button>
+    <div class="lang-dropdown"
+         style="display:none;position:absolute;top:100%;right:0;margin-top:4px;
+                background:var(--bg-card,#1e293b);border:1px solid var(--border,#334155);
+                border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+                min-width:160px;z-index:9999;overflow:hidden">
+        {% for lang_code, lang_name in LANGUAGES %}
+        <form action="/i18n/setlang/" method="post" style="margin:0">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="{{ lang_code }}">
+            <button type="submit"
+                    style="width:100%;text-align:left;background:{% if lang_code == CURRENT_LANG %}rgba(201,168,76,.1){% else %}transparent{% endif %};
+                           border:none;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                           font-size:.8rem;color:var(--text-primary,#e2e8f0);
+                           transition:background .15s"
+                    onmouseover="this.style.background='rgba(201,168,76,.08)'"
+                    onmouseout="this.style.background='{% if lang_code == CURRENT_LANG %}rgba(201,168,76,.1){% else %}transparent{% endif %}'">
+                <span style="font-size:1.1rem">
+                    {% if lang_code == 'hr' %}&#127469;&#127479;{% elif lang_code == 'de' %}&#127465;&#127466;{% elif lang_code == 'en' %}&#127468;&#127463;{% elif lang_code == 'tr' %}&#127481;&#127479;{% elif lang_code == 'el' %}&#127468;&#127479;{% endif %}
+                </span>
+                <span>{{ lang_name }}</span>
+                {% if lang_code == CURRENT_LANG %}
+                <i class="fas fa-check" style="margin-left:auto;color:var(--gold,#c9a84c);font-size:.65rem"></i>
+                {% endif %}
+            </button>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+<style>
+.lang-dropdown.show { display:block !important; animation: langFadeIn .15s ease; }
+@keyframes langFadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.lang-current-btn:hover { border-color: var(--gold,#c9a84c) !important; color: var(--gold,#c9a84c) !important; }
+</style>
+<script>
+// Close dropdown when clicking outside
+document.addEventListener('click',function(e){
+    document.querySelectorAll('.lang-dropdown.show').forEach(function(d){
+        if(!d.parentElement.contains(e.target)) d.classList.remove('show');
+    });
+});
+</script>

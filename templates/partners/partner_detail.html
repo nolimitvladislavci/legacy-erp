@@ -59,9 +59,9 @@ function copyPortalLink(){
     <input name="next" type="hidden" value="{{ request.get_full_path }}">
     <input name="language" type="hidden" value="{{ lang_code }}">
     {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
     {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
     {% endif %}
   </form>
   {% endfor %}
