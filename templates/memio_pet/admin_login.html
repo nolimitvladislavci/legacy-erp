@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memio Admin — Prijava</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:#0f1012;color:#edeae2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{max-width:400px;width:100%;background:#18191d;border:1px solid #2a2b30;border-radius:16px;padding:40px 32px;text-align:center}
+.logo{font-size:1.4rem;font-weight:700;color:#c9a84c;margin-bottom:24px}
+.logo span{color:#edeae2}
+h1{font-size:1.2rem;font-weight:600;margin-bottom:8px}
+p{color:#a09890;font-size:.85rem;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field input{width:100%;padding:14px 16px;background:#1e2025;border:1.5px solid #2a2b30;border-radius:8px;color:#edeae2;font-size:1rem;font-family:inherit;outline:none;transition:border-color .2s}
+.field input:focus{border-color:#c9a84c}
+.btn{width:100%;padding:14px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn:hover{opacity:.85}
+.error{background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:#e05252;font-size:.85rem;margin-bottom:16px}
+.back{display:block;margin-top:16px;color:#a09890;font-size:.82rem;text-decoration:none}
+.back:hover{color:#c9a84c}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🐾 Memio<span>Admin</span></div>
+  <h1>Superadmin pristup</h1>
+  <p>Samo za administratore memio.pet i memio.farm platforme.</p>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <input type="email" name="admin_email" placeholder="Admin email" required autofocus autocomplete="email">
+    </div>
+    <button type="submit" class="btn">Prijavi se</button>
+  </form>
+
+  <a href="https://memio.pet" class="back">← Natrag na memio.pet</a>
+</div>
+</body>
+</html>

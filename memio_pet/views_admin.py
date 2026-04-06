@@ -1,15 +1,12 @@
 """
 memio_pet/views_admin.py — Superadmin dashboard za memio.pet + memio.farm
 
-Samo za staff korisnike. Centralno upravljanje:
-- Profili (korisnici, krematoriji, azili)
-- Životinje (CRUD, status, transfer)
-- GDPR consent pregled
-- memio.farm farme + košnice
-- Statistike + brze akcije
+Auth: memio session (email whitelist) ILI Django staff.
+Nema redirect na Django admin — vlastiti login screen.
 """
+import hashlib
+import functools
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -20,8 +17,50 @@ from memio_pet.models import (
     BreederReview, WaitlistEntry, AddAnimalToken,
 )
 
+# Admin email whitelist (SHA-256 hashevi)
+_ADMIN_EMAILS = {
+    hashlib.sha256(b'ivan@limit-connect.com').hexdigest(),
+    hashlib.sha256(b'ivan.brtan@hotmail.com').hexdigest(),
+}
 
-@staff_member_required
+
+def _is_memio_admin(request):
+    """Provjeri je li korisnik memio admin (session ili Django staff)."""
+    if request.user.is_authenticated and request.user.is_staff:
+        return True
+    breeder_email = request.session.get('memio_breeder_email', '')
+    if breeder_email:
+        h = hashlib.sha256(breeder_email.strip().lower().encode()).hexdigest()
+        if h in _ADMIN_EMAILS:
+            return True
+    return False
+
+
+def memio_admin_required(view_func):
+    """Dekorator: memio admin auth — vlastiti login, ne Django admin."""
+    @functools.wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if _is_memio_admin(request):
+            return view_func(request, *args, **kwargs)
+        # Nije admin — prikaži login
+        if request.method == 'POST' and 'admin_email' in request.POST:
+            email = request.POST.get('admin_email', '').strip().lower()
+            h = hashlib.sha256(email.encode()).hexdigest()
+            if h in _ADMIN_EMAILS:
+                bp = BreederProfile.find_by_email(email)
+                if bp:
+                    request.session['memio_breeder_pk'] = str(bp.pk)
+                    request.session['memio_breeder_email'] = email
+                    request.session.set_expiry(86400 * 7)
+                    return redirect(request.path)
+            return render(request, 'memio_pet/admin_login.html', {
+                'error': 'Nemaš pristup. Samo admin emailovi.',
+            })
+        return render(request, 'memio_pet/admin_login.html')
+    return wrapper
+
+
+@memio_admin_required
 def memio_dashboard(request):
     """Glavni superadmin dashboard — pregled svega."""
     db = 'memio_pets'
@@ -67,7 +106,7 @@ def memio_dashboard(request):
     })
 
 
-@staff_member_required
+@memio_admin_required
 @require_POST
 def admin_animal_action(request, animal_id):
     """Brze akcije na životinjama: promijeni status, transfer, obriši."""
@@ -111,7 +150,7 @@ def admin_animal_action(request, animal_id):
     return redirect('memio_admin_dashboard')
 
 
-@staff_member_required
+@memio_admin_required
 @require_POST
 def admin_profile_action(request, profile_id):
     """Brze akcije na profilima: verificiraj, obriši, grant consent."""
