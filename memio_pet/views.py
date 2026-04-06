@@ -1189,3 +1189,8 @@ def analytics_hit(request):
                 request.META.get('HTTP_X_REAL_IP', request.META.get('REMOTE_ADDR', '')),
                 request.META.get('HTTP_USER_AGENT', '')[:100])
     return JsonResponse({'ok': True})
+
+
+def uvjeti(request):
+    """Uvjeti korištenja stranica."""
+    return render(request, 'memio_pet/uvjeti.html')

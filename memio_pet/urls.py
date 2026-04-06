@@ -46,4 +46,12 @@ urlpatterns = [
     # Direktoriji
     path("krematoriji/", views.krematoriji_lista, name="krematoriji_lista"),
     path("hoteli/", views.hoteli_lista, name="hoteli_lista"),
+
+    # Legal + SEO
+    path("privatnost/", views.privatnost, name="privatnost"),
+    path("uvjeti/", views.uvjeti, name="uvjeti"),
+    path("sitemap.xml", views.sitemap_xml, name="sitemap"),
+    path("uvezi/", views.social_import_wizard, name="social_import"),
+    path("feed/", lambda r: __import__("django.shortcuts", fromlist=["redirect"]).redirect("/boxgram/feed/"), name="feed"),
+    path("api/hit/", views.analytics_hit, name="analytics_hit"),
 ]

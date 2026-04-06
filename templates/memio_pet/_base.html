@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="hr" data-theme="{% if is_memorial %}memorial{% else %}light{% endif %}">
 <head>
@@ -7,6 +8,8 @@
 {% block meta %}
 <meta name="description" content="Memio.pet — Digitalni dom za tvog ljubimca">
 {% endblock %}
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c9a84c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/memio-pet.css">
