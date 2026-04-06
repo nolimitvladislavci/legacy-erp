@@ -249,6 +249,9 @@
     document.querySelectorAll('.qk-badge').forEach(function(b){ b.textContent='0'; b.classList.remove('show'); });
     basket = {};
     renderBasket();
+    // Auto-collapse drawer na mobilnom nakon naplate
+    var drawer = document.querySelector('.qp-right');
+    if (drawer) { drawer.classList.remove('peek', 'full'); }
   };
 
   window.setExact = function() { document.getElementById('cashAmt').value = (window._total || 0).toFixed(2); calcChange(); };
