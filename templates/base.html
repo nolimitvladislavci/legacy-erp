@@ -737,31 +737,7 @@ window.FC = {
     })();
     </script>
 <!-- Signal gumb — Prijavi gresku gumb -->
-<div id="borg-signal-fab" style="position:fixed;bottom:140px;right:16px;z-index:9998">
-  <button onclick="document.getElementById('borg-signal-modal').style.display='flex'" style="width:44px;height:44px;border-radius:50%;background:var(--gold,#c9a84c);border:none;color:#000;font-size:1.1rem;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center" title="Prijavi problem"><i class="fas fa-flag"></i></button>
-</div>
-<div id="borg-signal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10001;align-items:center;justify-content:center;padding:16px">
-  <div style="background:var(--bg-card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:20px;max-width:400px;width:100%">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong style="color:var(--gold,#c9a84c)"><i class="fas fa-flag"></i> Prijavi problem</strong><button onclick="document.getElementById('borg-signal-modal').style.display='none'" style="background:none;border:none;color:var(--text,#e8e8e8);font-size:1.2rem;cursor:pointer">&times;</button></div>
-    <select id="borg-sig-type" style="width:100%;padding:8px;margin-bottom:8px;background:var(--input-bg,#0a0a0a);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#e8e8e8)"><option value="bug">Greska / Bug</option><option value="confusion">Nejasno / Zbunjujuce</option><option value="suggestion">Prijedlog</option><option value="ai_bad">AI los odgovor</option><option value="urgent">Hitno</option></select>
-    <textarea id="borg-sig-msg" rows="3" style="width:100%;padding:8px;background:var(--input-bg,#0a0a0a);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#e8e8e8);resize:vertical" placeholder="Opisi problem..."></textarea>
-    <button onclick="sendReport()" style="margin-top:8px;width:100%;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer">Pošalji prijavu</button>
-    <div id="borg-sig-result" style="margin-top:8px;font-size:.8rem;text-align:center"></div>
-  </div>
-</div>
-<script>
-function sendReport(){
-  var msg=document.getElementById("borg-sig-msg").value.trim();
-  if(!msg){document.getElementById("borg-sig-result").textContent="Poruka je obavezna";return;}
-  var btn=event.target;btn.disabled=true;btn.textContent="Saljem...";
-  fetch("/hr/ai-cockpit/api/signal/",{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":document.querySelector("[name=csrfmiddlewaretoken]")?.value||""},body:JSON.stringify({type:document.getElementById("borg-sig-type").value,message:msg,page_url:location.href,screen_width:screen.width,context:{viewport:innerWidth+"x"+innerHeight,theme:document.documentElement.getAttribute("data-theme")||"dark",pos_cart:window._posCart||null,ts:new Date().toISOString()}})})
-  .then(r=>r.json()).then(d=>{
-    document.getElementById("borg-sig-result").innerHTML=d.ok?"<span style=color:#4caf7d>"+d.message+"</span>":"<span style=color:#e05c5c>"+(d.error||"Greska")+"</span>";
-    if(d.ok){document.getElementById("borg-sig-msg").value="";setTimeout(()=>{document.getElementById("borg-signal-modal").style.display="none";btn.disabled=false;btn.textContent="Pošalji prijavu"},2000);}
-    else{btn.disabled=false;btn.textContent="Pošalji prijavu";}
-  }).catch(()=>{document.getElementById("borg-sig-result").textContent="Greska mreze";btn.disabled=false;btn.textContent="Pošalji prijavu";});
-}
-</script>
+{% include "includes/_borg_signal.html" %}
 
 <script>
 /* ── FENIX CSRF AUTO-REFRESH ─────────────────────────────────────
