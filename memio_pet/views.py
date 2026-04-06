@@ -111,7 +111,7 @@ def pet_qr_code(request, chip_or_tag):
     qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=4)
     qr.add_data(url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="#1a1a2e", back_color="#f8f6f0")
+    img = qr.make_image(fill_color="#000000", back_color="#ffffff")
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     buffer.seek(0)
