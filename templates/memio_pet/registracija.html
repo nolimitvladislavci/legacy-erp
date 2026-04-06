@@ -40,7 +40,7 @@
         </div>
         <div class="mp-field">
           <label>Email adresa</label>
-          <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email">
+          <input type="email" name="email" id="regEmail" placeholder="tvoj@email.com" required autocomplete="email">
         </div>
         <div class="mp-field">
           <label>Grad</label>
@@ -92,6 +92,15 @@
 {% endblock %}
 
 {% block extra_js %}
+(function(){
+  var saved = localStorage.getItem('memio_email');
+  var el = document.getElementById('regEmail');
+  if(saved && el && !el.value) el.value = saved;
+  var form = el ? el.closest('form') : null;
+  if(form) form.addEventListener('submit', function(){
+    if(el.value) localStorage.setItem('memio_email', el.value.trim());
+  });
+})();
 var proTypes = new Set(['vet','shelter','breeder','horse','hotel','trainer','sheep_farmer','pig_farmer','poultry','krematorij']);
 var websiteTypes = new Set(['vet','hotel','breeder','horse']);
 function togglePro(val){

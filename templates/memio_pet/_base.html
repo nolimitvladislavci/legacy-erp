@@ -83,5 +83,26 @@ function toggleTheme(){
 <!-- Umami Analytics (cookie-free, GDPR safe, self-hosted) -->
 <script defer src="/mp.js" data-website-id="e3f6dc56-5ded-4c65-9897-b65da607ae26"></script>
 {% include "includes/_borg_signal.html" %}
+
+<!-- Email autofill za sve email inpute -->
+<script id="memio_email_autofill">
+(function(){
+  var saved = localStorage.getItem('memio_email');
+  if(!saved) return;
+  // Predpopuni sve prazne email inpute
+  document.querySelectorAll('input[type=email]').forEach(function(el){
+    if(!el.value) el.value = saved;
+  });
+  // Spremi email pri svakom form submitu koji ima email polje
+  document.querySelectorAll('form').forEach(function(f){
+    f.addEventListener('submit', function(){
+      var emailInput = f.querySelector('input[type=email]');
+      if(emailInput && emailInput.value) {
+        localStorage.setItem('memio_email', emailInput.value.trim());
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>

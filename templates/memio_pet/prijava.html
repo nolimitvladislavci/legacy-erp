@@ -1,6 +1,18 @@
 {% extends "memio_pet/_base.html" %}
 {% load i18n %}
-{% block title %}Prijava — Memio.pet{% endblock %}
+{% block title %}Prijava — Memio.pet
+{% block extra_js %}
+(function(){
+  var saved = localStorage.getItem('memio_email');
+  var el = document.getElementById('loginEmail');
+  if(saved && el && !el.value) el.value = saved;
+  // Spremi email nakon submita
+  var form = el ? el.closest('form') : null;
+  if(form) form.addEventListener('submit', function(){
+    if(el.value) localStorage.setItem('memio_email', el.value.trim());
+  });
+})();
+{% endblock %}
 
 {% block content %}
 <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
@@ -26,7 +38,7 @@
         {% csrf_token %}
         <div class="mp-field">
           <label>Email adresa</label>
-          <input type="email" name="email" value="{{ email_value|default:'' }}"
+          <input type="email" name="email" value="{{ email_value|default:'' }}" id="loginEmail"
                  placeholder="tvoj@email.com" required autofocus autocomplete="email">
         </div>
         <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Prijavi se →</button>
