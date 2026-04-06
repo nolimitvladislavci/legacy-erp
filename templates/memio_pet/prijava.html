@@ -106,6 +106,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 function toggleChip(){
   var el=document.getElementById('chipInput');
@@ -119,59 +120,77 @@ function goToChip(){
   return false;
 }
 
-// QR Scanner — koristi browser kameru
+// ═══════════════════════════════════════
+// QR Scanner — jsQR (radi na SVIM browserima)
+// ═══════════════════════════════════════
 var qrStream=null;
+var scanInterval=null;
+
 function startQrScan(){
   var scanner=document.getElementById('qrScanner');
   var video=document.getElementById('qrVideo');
+  var hint=document.querySelector('.qr-scanner-hint');
   scanner.style.display='block';
+  hint.textContent='Pokrećem kameru...';
 
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+  navigator.mediaDevices.getUserMedia({
+    video:{facingMode:'environment',width:{ideal:640},height:{ideal:480}}
+  })
   .then(function(stream){
     qrStream=stream;
     video.srcObject=stream;
-    // Scan loop
-    var canvas=document.createElement('canvas');
-    var ctx=canvas.getContext('2d');
-    var scanning=true;
+    video.setAttribute('playsinline','true');
+    video.play();
+    hint.textContent='Usmjeri kameru na QR kod ljubimca';
 
-    function scan(){
-      if(!scanning||!qrStream)return;
-      if(video.readyState===video.HAVE_ENOUGH_DATA){
-        canvas.width=video.videoWidth;
-        canvas.height=video.videoHeight;
-        ctx.drawImage(video,0,0);
-        // Koristi BarcodeDetector API (Chrome 83+, Safari 17.2+)
-        if(window.BarcodeDetector){
-          var detector=new BarcodeDetector({formats:['qr_code']});
-          detector.detect(canvas).then(function(barcodes){
-            if(barcodes.length>0){
-              scanning=false;
-              var url=barcodes[0].rawValue;
-              stopQrScan();
-              // Ako je memio.pet URL — idi direktno
-              if(url.indexOf('memio.pet/pas/')!==-1){
-                window.location.href=url;
-              } else {
-                // Možda je samo chip number
-                window.location.href='/pas/'+encodeURIComponent(url)+'/';
-              }
-            }
-          }).catch(function(){});
-        }
+    var canvas=document.createElement('canvas');
+    var ctx=canvas.getContext('2d',{willReadFrequently:true});
+
+    // Skeniraj 5x u sekundi (ne treba svaki frame)
+    scanInterval=setInterval(function(){
+      if(!qrStream||video.readyState<video.HAVE_ENOUGH_DATA)return;
+
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+
+      // jsQR — radi svugdje (iOS, Android, desktop)
+      var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
+
+      if(code && code.data){
+        // NAĐENO! Zeleni flash
+        video.style.borderColor='#4caf7d';
+        video.style.boxShadow='0 0 20px rgba(76,175,125,.5)';
+        hint.textContent='✅ QR očitan!';
+        hint.style.color='#4caf7d';
+        hint.style.fontWeight='700';
+
+        stopQrScan();
+
+        var url=code.data;
+        // Kratka pauza za vizualni feedback pa redirect
+        setTimeout(function(){
+          if(url.indexOf('memio.pet/')!==-1){
+            window.location.href=url;
+          } else {
+            // Možda je chip number ili drugi URL
+            window.location.href='/pas/'+encodeURIComponent(url)+'/';
+          }
+        },400);
       }
-      requestAnimationFrame(scan);
-    }
-    scan();
+    },200);
   })
   .catch(function(err){
-    scanner.innerHTML='<p style="color:var(--red);font-size:.85rem">Kamera nije dostupna: '+err.message+'</p>';
+    hint.textContent='';
+    scanner.innerHTML='<p style="color:var(--red);font-size:.85rem;padding:20px">Kamera nije dostupna: '+err.message+'<br><br>Na iOS-u: koristi Safari. Na Androidu: dozvoli pristup kameri.</p>'+
+      '<button class="alt-btn" onclick="document.getElementById(\'qrScanner\').style.display=\'none\'" style="margin:10px auto;display:block">Zatvori</button>';
   });
 }
 
 function stopQrScan(){
+  if(scanInterval){clearInterval(scanInterval);scanInterval=null;}
   if(qrStream){qrStream.getTracks().forEach(function(t){t.stop()});qrStream=null;}
-  document.getElementById('qrScanner').style.display='none';
 }
 </script>
 </body>
