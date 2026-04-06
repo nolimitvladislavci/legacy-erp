@@ -92,6 +92,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <div class="hero-emoji">🐾</div>
   <h1>Digitalni identitet <span>vašeg ljubimca</span></h1>
   <p>Besplatni QR profil, zdravstveni karton, lanac vlasništva i Trust Score — sve verificirano, sve na jednom mjestu.</p>
+
+  <!-- SKENIRAJ QR — prominentno dugme -->
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+    <button onclick="document.getElementById('qrSection').style.display='block';startLandingQr()" style="padding:14px 28px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-family:var(--sans);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">📷 Skeniraj QR kod</button>
+    <label style="padding:14px 28px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;font-family:var(--sans);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">
+      📸 Uslikaj QR
+      <input type="file" accept="image/*" capture="environment" onchange="scanLandingPhoto(this)" style="display:none">
+    </label>
+  </div>
+
+  <!-- QR scanner area (skriveno dok se ne klikne) -->
+  <div id="qrSection" style="display:none;margin-top:20px">
+    <div id="landingQrReader" style="width:100%;max-width:350px;margin:0 auto;border-radius:12px;overflow:hidden"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button onclick="stopLandingQr()" style="padding:8px 20px;background:transparent;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.85rem;cursor:pointer;color:var(--dim)">Zatvori</button>
+    </div>
+    <p id="landingQrStatus" style="display:none;text-align:center;margin-top:8px;font-size:.85rem"></p>
+  </div>
 </div>
 
 <div class="cta-grid">
@@ -161,6 +179,60 @@ function toggleTheme(){
   html.setAttribute('data-theme',n);
   localStorage.setItem('memio-theme',n);
   document.getElementById('themeBtn').textContent=n==='dark'?'☀️':'🌙';
+}
+</script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+var landingQr=null;
+
+function handleQrResult(text){
+  if(text.indexOf('memio.pet/')!==-1) window.location.href=text;
+  else window.location.href='/pas/'+encodeURIComponent(text)+'/';
+}
+
+function startLandingQr(){
+  landingQr=new Html5Qrcode('landingQrReader');
+  landingQr.start(
+    {facingMode:'environment'},
+    {fps:10,qrbox:{width:250,height:250},aspectRatio:1.0},
+    function(text){
+      landingQr.stop().catch(function(){});landingQr=null;
+      handleQrResult(text);
+    },
+    function(){}
+  ).catch(function(err){
+    document.getElementById('landingQrReader').innerHTML=
+      '<p style="color:#e05252;font-size:.85rem;padding:20px;text-align:center">Kamera: '+err+'</p>';
+  });
+}
+
+function stopLandingQr(){
+  if(landingQr){landingQr.stop().then(function(){landingQr.clear();}).catch(function(){});landingQr=null;}
+  document.getElementById('qrSection').style.display='none';
+}
+
+function scanLandingPhoto(input){
+  if(!input.files||!input.files[0])return;
+  var sec=document.getElementById('qrSection');
+  var status=document.getElementById('landingQrStatus');
+  sec.style.display='block';
+  status.style.display='block';
+  status.style.color='#3b82f6';
+  status.textContent='Analiziram sliku...';
+
+  var scanner=new Html5Qrcode('landingQrReader');
+  scanner.scanFile(input.files[0],true)
+    .then(function(text){
+      status.style.color='#4caf7d';
+      status.textContent='✅ QR očitan!';
+      setTimeout(function(){handleQrResult(text);},500);
+    })
+    .catch(function(){
+      status.style.color='#e05252';
+      status.textContent='QR nije pronađen na slici. Pokušaj ponovo.';
+      setTimeout(function(){status.style.display='none';},4000);
+    });
+  input.value='';
 }
 </script>
 </body>
