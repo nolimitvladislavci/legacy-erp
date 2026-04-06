@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boxgram — Digitalni život tvog ljubimca</title>
+<meta name="description" content="Boxgram je javni profil tvog ljubimca. Dijeli priče, fotografije i uspomene s cijelim svijetom.">
+<meta property="og:title" content="Boxgram — Digitalni život tvog ljubimca">
+<meta property="og:description" content="Dijeli priče, fotografije i uspomene svog ljubimca.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--surface:#ffffff;--ink:#1a1a2e;--ink2:#3d3d52;
+  --gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;
+  --shadow:rgba(0,0,0,.06);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;
+  --gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--green:#34d058;
+  --shadow:rgba(0,0,0,.35);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s}
+
+/* NAV */
+.nav{background:var(--ink);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.nav-logo span{color:#fff}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{color:var(--dim);text-decoration:none;font-size:.82rem;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--gold);color:var(--ink);padding:8px 20px;border-radius:6px;font-weight:600;font-size:.82rem;text-decoration:none;transition:opacity .2s}
+.nav-cta:hover{opacity:.85}
+
+/* HERO */
+.hero{text-align:center;padding:80px 24px 60px;max-width:700px;margin:0 auto}
+.hero-icon{font-size:4rem;margin-bottom:16px}
+.hero h1{font-family:var(--serif);font-size:2.4rem;font-weight:700;margin-bottom:12px;line-height:1.15}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero p{font-size:1rem;color:var(--ink2);line-height:1.7;margin-bottom:32px;font-weight:300}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--ink);color:#fff;padding:14px 32px;border-radius:6px;font-size:.9rem;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--gold);color:var(--ink)}
+.btn-outline{background:none;border:1px solid var(--line);color:var(--ink);padding:14px 32px;border-radius:6px;font-size:.9rem;text-decoration:none;transition:all .2s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* FEATURES */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:800px;margin:0 auto 60px;padding:0 24px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px 22px;text-align:center;transition:border-color .2s,box-shadow .2s}
+.feat:hover{border-color:var(--gold);box-shadow:0 8px 24px var(--shadow)}
+.feat-icon{font-size:2rem;margin-bottom:12px}
+.feat h3{font-family:var(--serif);font-size:1rem;font-weight:700;margin-bottom:6px}
+.feat p{font-size:.82rem;color:var(--dim);line-height:1.6;font-weight:300}
+
+/* PET GRID */
+.section{max-width:900px;margin:0 auto;padding:0 24px 60px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.section-title{font-family:var(--serif);font-size:1.5rem;font-weight:700}
+.section-link{color:var(--gold);text-decoration:none;font-size:.85rem;font-weight:500}
+.section-link:hover{text-decoration:underline}
+.pet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pet-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink);transition:all .2s}
+.pet-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:var(--gold)}
+.pet-card-img{width:100%;height:160px;object-fit:cover;display:block;background:linear-gradient(135deg,var(--ink) 0%,#2a2a4a 100%)}
+.pet-card-placeholder{width:100%;height:160px;background:linear-gradient(135deg,var(--ink) 0%,#2a2a4a 100%);display:flex;align-items:center;justify-content:center;font-size:3rem}
+.pet-card-body{padding:14px 16px}
+.pet-card-name{font-weight:700;font-size:.95rem;margin-bottom:2px}
+.pet-card-meta{font-size:.78rem;color:var(--dim)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 24px;color:var(--dim)}
+.empty-state p{font-size:.95rem;margin-bottom:16px}
+
+/* FOOTER */
+.footer{text-align:center;padding:32px 24px;font-size:.75rem;color:var(--dim);border-top:1px solid var(--line)}
+.footer a{color:var(--gold);text-decoration:none}
+
+@media(max-width:700px){
+  .hero h1{font-size:1.8rem}
+  .features{grid-template-columns:1fr}
+  .pet-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:450px){
+  .pet-grid{grid-template-columns:1fr}
+}
+</style>
+<script>
+(function(){
+  var s=localStorage.getItem('memio-theme');
+  var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+})();
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/boxgram/home/" class="nav-logo">Box<span>gram</span></a>
+  <div class="nav-links">
+    <a href="/boxgram/feed/">Feed</a>
+    <a href="https://memio.pet">Memio.pet</a>
+    <a href="https://memio.pet/registracija/" class="nav-cta">Poveži ljubimca</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-icon">🐾</div>
+  <h1>Digitalni život tvog <em>ljubimca</em></h1>
+  <p>
+    Boxgram je javni profil tvog ljubimca — mjesto gdje dijeliš priče,
+    fotografije i uspomene s cijelim svijetom. Svaki trenutak zaslužuje biti zabilježen.
+  </p>
+  <div class="hero-actions">
+    <a href="https://memio.pet/registracija/" class="btn-primary">Poveži svog ljubimca</a>
+    <a href="/boxgram/feed/" class="btn-outline">Pregledaj feed</a>
+  </div>
+</section>
+
+<div class="features">
+  <div class="feat">
+    <div class="feat-icon">📸</div>
+    <h3>Priče i fotografije</h3>
+    <p>Dijeli svaki trenutak — od prvog šetanja do titule na natjecanju.</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">🏆</div>
+    <h3>Natjecanja</h3>
+    <p>Prijavi ljubimca na zajedničke izazove i osvoji titulu mjeseca.</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">🔗</div>
+    <h3>Dijeli svugdje</h3>
+    <p>QR kod, WhatsApp, direktni link — tvoj ljubimac na dohvat ruke.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">Najnoviji profili</h2>
+    <a href="/boxgram/feed/" class="section-link">Vidi sve →</a>
+  </div>
+
+  {% if recent_pets %}
+  <div class="pet-grid">
+    {% for pet in recent_pets %}
+    <a href="{% url 'boxgram:public_profile' pet.slug %}" class="pet-card">
+      {% if pet.avatar %}
+        <img src="{{ pet.avatar.url }}" alt="{{ pet.name }}" class="pet-card-img">
+      {% else %}
+        <div class="pet-card-placeholder">
+          {% if pet.species == 'dog' %}🐕{% elif pet.species == 'cat' %}🐱{% elif pet.species == 'horse' %}🐴{% elif pet.species == 'bird' %}🐦{% else %}🐾{% endif %}
+        </div>
+      {% endif %}
+      <div class="pet-card-body">
+        <div class="pet-card-name">{{ pet.name }}</div>
+        <div class="pet-card-meta">{{ pet.get_species_display }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Još nema javnih profila. Budi prvi!</p>
+    <a href="https://memio.pet/registracija/" class="btn-primary">Registriraj ljubimca</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="footer">
+  <a href="/boxgram/home/">Boxgram</a> — dio <a href="https://memio.pet">Memio.pet</a> ekosustava<br>
+  Projekt udruge <a href="https://no-limit.world">NO LIMIT</a> · © 2026
+</div>
+
+</body>
+</html>

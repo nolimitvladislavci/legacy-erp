@@ -166,6 +166,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .rev-comment{font-size:.86rem;color:var(--ink2);font-weight:300;line-height:1.6}
 .rev-meta{font-size:.7rem;color:var(--dim);margin-top:4px}
 
+
+/* ── SHARE ROW ── */
+.share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.share-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);transition:all .2s;font-family:var(--sans)}
+.share-btn:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow)}
+.share-btn.wa{background:#25D366;color:#fff;border-color:#25D366}
+.share-btn.wa:hover{background:#1da851;border-color:#1da851;color:#fff}
+.share-btn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+
 /* ── FOOTER ── */
 .page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
 .page-footer a{color:var(--gold);text-decoration:none}
@@ -412,16 +421,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
   {% endif %}
 
-  <!-- QR KOD -->
-  {% if qr_url %}
+  <!-- DIJELI PROFIL -->
   <div class="card">
-    <div class="qr-section">
-      <h2 style="font-family:var(--serif);font-size:1.1rem;margin-bottom:14px;color:var(--ink)">Dijeli ovaj profil</h2>
-      <img src="{{ qr_url }}" alt="QR kod za {{ animal.name|default:animal.ear_tag }}">
-      <p class="qr-url">{{ profile_url }}</p>
+    <div class="card-body" style="text-align:center">
+      <h2 class="section-title" style="border:none;text-align:center">Dijeli ovaj profil</h2>
+      {% if qr_url %}
+      <img src="{{ qr_url }}" alt="QR kod za {{ animal.name|default:animal.ear_tag }}" style="width:140px;height:140px;margin:0 auto 10px;display:block">
+      {% endif %}
+      <p class="qr-url" style="margin-bottom:16px">{{ profile_url }}</p>
+      <div class="share-row">
+        <button class="share-btn" id="copyLinkBtn" onclick="copyLink()">🔗 Kopiraj link</button>
+        <a class="share-btn wa" href="https://wa.me/?text={{ animal.name|urlencode }}%20—%20Memio.pet%20profil%20{{ profile_url|urlencode }}" target="_blank" rel="noopener">💬 WhatsApp</a>
+        {% if qr_url %}
+        <a class="share-btn" href="{{ qr_url }}" download="qr-{{ animal.name|default:animal.ear_tag }}.png">📷 Preuzmi QR</a>
+        {% endif %}
+      </div>
     </div>
   </div>
-  {% endif %}
 
 </div>
 
@@ -447,6 +463,26 @@ function toggleTheme(){
   localStorage.setItem('memio-theme', next);
   var btn = document.getElementById('themeBtn');
   if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
+function copyLink(){
+  var url = '{{ profile_url }}';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      var btn=document.getElementById('copyLinkBtn');
+      btn.classList.add('copied');
+      btn.innerHTML='✓ Kopirano!';
+      setTimeout(function(){btn.classList.remove('copied');btn.innerHTML='🔗 Kopiraj link';},2000);
+    });
+  } else {
+    var t=document.createElement('textarea');
+    t.value=url;document.body.appendChild(t);t.select();
+    document.execCommand('copy');document.body.removeChild(t);
+    var btn=document.getElementById('copyLinkBtn');
+    btn.classList.add('copied');
+    btn.innerHTML='✓ Kopirano!';
+    setTimeout(function(){btn.classList.remove('copied');btn.innerHTML='🔗 Kopiraj link';},2000);
+  }
 }
 </script>
 </body>

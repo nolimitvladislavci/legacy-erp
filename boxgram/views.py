@@ -318,3 +318,14 @@ def add_event_web(request, slug):
         'event_id': str(event.id),
         'redirect': f'/boxgram/ljubimac/{pet.slug}/',
     })
+
+
+def boxgram_landing(request):
+    """Boxgram landing page — digitalni život tvog ljubimca."""
+    recent_pets = PetProfile.objects.filter(is_public=True).order_by('-updated_at')[:6]
+    total_pets = PetProfile.objects.filter(is_public=True).count()
+    context = {
+        'recent_pets': recent_pets,
+        'total_pets': total_pets,
+    }
+    return render(request, 'boxgram/landing.html', context)

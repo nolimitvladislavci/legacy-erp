@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     PetProfileViewSet, LifeEventViewSet, CompetitionViewSet, SocialImportViewSet,
     public_profile, public_feed, competition_detail, competition_vote_web,
-    add_event_web,
+    add_event_web, boxgram_landing,
 )
 from .views_social import (
     import_url_preview, import_url_confirm, import_inbox, import_reject
@@ -23,6 +23,7 @@ urlpatterns = [
     # Web routes
     path('ljubimac/<slug:slug>/', public_profile, name='public_profile'),
     path('ljubimac/<slug:slug>/dodaj/', add_event_web, name='add_event_web'),
+    path('home/', boxgram_landing, name='landing'),
     path('feed/', public_feed, name='public_feed'),
     path('takmicenje/<uuid:competition_id>/', competition_detail, name='competition_detail'),
     path('takmicenje/<uuid:competition_id>/vote/', competition_vote_web, name='competition_vote_web'),
