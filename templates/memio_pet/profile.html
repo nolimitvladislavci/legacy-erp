@@ -267,7 +267,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <!-- TOP BAR -->
 <div class="top-bar">
-  <a href="https://memio.pet" class="top-bar-logo">Memio<span>.pet</span></a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="javascript:history.back()" style="color:var(--gold);text-decoration:none;font-size:1.1rem;line-height:1" title="Natrag">←</a>
+    <a href="https://memio.pet" class="top-bar-logo">Memio<span>.pet</span></a>
+  </div>
   <div class="top-bar-right">
     {% if verified %}
       <span class="verified-tag">✓ VERIFICIRAN</span>
@@ -629,6 +632,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <div class="card-body" style="text-align:center;padding:20px 16px">
       <p style="color:var(--dim);font-size:.85rem;margin-bottom:10px">Ako je {{ animal.name }} preminuo/la:</p>
       <a href="/pas/{{ identifier }}/dugini-most/" class="share-btn" style="text-decoration:none;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:10px 20px;border-radius:8px;display:inline-block">🌈 Dugini Most — Kreiraj memorijal</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- BOXGRAM — socijalni profil -->
+  {% if not is_memorial %}
+  <div class="card" style="border-color:rgba(201,168,76,.2)">
+    <div class="card-body" style="text-align:center;padding:20px 16px">
+      <h2 class="section-title" style="border:none;text-align:center;font-size:.9rem">📸 Boxgram</h2>
+      <p style="color:var(--dim);font-size:.85rem;margin-bottom:12px;line-height:1.5">Fotografije, natjecanja, događaji — socijalni profil za {{ animal.name|default:"ljubimca" }}.</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <a href="/boxgram/ljubimac/{{ animal.name|slugify|default:identifier }}/" style="text-decoration:none;padding:10px 20px;background:var(--gold);color:#fff;border-radius:8px;font-weight:700;font-size:.88rem">Otvori Boxgram profil</a>
+        <a href="/boxgram/feed/" style="text-decoration:none;padding:10px 20px;border:1.5px solid var(--line);border-radius:8px;font-weight:600;font-size:.88rem;color:var(--ink)">Feed</a>
+      </div>
     </div>
   </div>
   {% endif %}
