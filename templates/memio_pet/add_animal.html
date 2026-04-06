@@ -102,8 +102,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <div class="row-2">
       <div class="field">
         <label>Broj mikrocipa</label>
-        <input type="text" name="chip_number" placeholder="opcijsko" maxlength="20">
-        <div class="field-hint">15-znamenkasti ISO broj</div>
+        <input type="text" name="chip_number" placeholder="npr. 191031000312345" maxlength="15" inputmode="numeric" pattern="\d{9,15}" title="Samo znamenke, 9-15 znakova">
+        <div class="field-hint">Samo znamenke (9-15). Ako nema cipa, ostavi prazno.</div>
       </div>
       <div class="field">
         <label>Usna markica</label>
@@ -141,6 +141,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <div class="field">
       <label>Napomene</label>
       <textarea name="notes" placeholder="Posebne karakteristike, temperament, alergije..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <select name="status" id="statusSelect">
+        <option value="aktivno" selected>Aktivno — ziv i zdrav</option>
+        <option value="uginulo">🌈 Uginulo — Dugini Most</option>
+      </select>
+      <div class="field-hint">Ako je ljubimac vec preminuo, oznaci ga ovdje. Kreirat cemo memorijalni profil.</div>
     </div>
 
     <button type="submit" class="btn-submit">Dodaj ljubimca 🐾</button>

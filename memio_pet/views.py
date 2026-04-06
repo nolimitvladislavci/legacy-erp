@@ -340,11 +340,19 @@ def add_animal(request):
         spol = request.POST.get('spol', 'N')
         dob = request.POST.get('date_of_birth') or None
         notes = request.POST.get('notes', '').strip()
+        status = request.POST.get('status', 'aktivno')
+        _ctx = {
+            'breeder': breeder, 'breeder_id': str(breeder.pk),
+            'vrsta_choices': AnimalProfile.VRSTA_CHOICES, 'spol_choices': AnimalProfile.SPOL_CHOICES,
+        }
         if not name:
+            return render(request, 'memio_pet/add_animal.html', {**_ctx, 'error': 'Ime ljubimca je obavezno.'})
+        import re
+        if chip and not re.match(r'^\d{9,15}$', chip):
             return render(request, 'memio_pet/add_animal.html', {
-                'breeder': breeder, 'breeder_id': str(breeder.pk), 'error': 'Ime ljubimca je obavezno.',
-                'vrsta_choices': AnimalProfile.VRSTA_CHOICES, 'spol_choices': AnimalProfile.SPOL_CHOICES,
-            })
+                **_ctx, 'error': 'Broj mikročipa mora sadržavati samo znamenke (9-15 znamenki). Ako nemaš čip, ostavi prazno.'})
+        if status not in dict(AnimalProfile.STATUS_CHOICES):
+            status = 'aktivno'
         import uuid as _u2
         if not chip and not ear_tag:
             ear_tag = f"{vrsta}-{_u2.uuid4().hex[:8]}"
@@ -352,11 +360,15 @@ def add_animal(request):
             name=name, vrsta=vrsta, breed=breed, chip_number=chip,
             ear_tag=ear_tag or f"{vrsta}-{_u2.uuid4().hex[:8]}",
             spol=spol, date_of_birth=dob, notes=notes,
-            breeder=breeder, breeder_name_snapshot=breeder.name, status='aktivno',
+            breeder=breeder, breeder_name_snapshot=breeder.name, status=status,
         )
         if 'photo' in request.FILES:
             animal.photo = request.FILES['photo']
         animal.save(using=db)
+        # Ako je status uginulo, kreiraj memorial automatski
+        if status == 'uginulo':
+            from memio_pet.models import MemorialProfile
+            MemorialProfile.objects.using(db).get_or_create(animal=animal)
         request.session['memio_breeder_pk'] = str(breeder.pk)
         identifier = animal.chip_number or animal.ear_tag
         messages.success(request, f'{name} je dodan!')
@@ -442,12 +454,20 @@ def add_animal_with_token(request, token):
         spol = request.POST.get('spol', 'N')
         dob = request.POST.get('date_of_birth') or None
         notes = request.POST.get('notes', '').strip()
+        status = request.POST.get('status', 'aktivno')
+        _ctx = {
+            'breeder': breeder, 'breeder_id': str(breeder.pk),
+            'vrsta_choices': AnimalProfile.VRSTA_CHOICES, 'spol_choices': AnimalProfile.SPOL_CHOICES,
+            'token': token,
+        }
         if not name:
+            return render(request, 'memio_pet/add_animal.html', {**_ctx, 'error': 'Ime ljubimca je obavezno.'})
+        import re
+        if chip and not re.match(r'^\d{9,15}$', chip):
             return render(request, 'memio_pet/add_animal.html', {
-                'breeder': breeder, 'breeder_id': str(breeder.pk), 'error': 'Ime ljubimca je obavezno.',
-                'vrsta_choices': AnimalProfile.VRSTA_CHOICES, 'spol_choices': AnimalProfile.SPOL_CHOICES,
-                'token': token,
-            })
+                **_ctx, 'error': 'Broj mikročipa mora sadržavati samo znamenke (9-15 znamenki). Ako nemaš čip, ostavi prazno.'})
+        if status not in dict(AnimalProfile.STATUS_CHOICES):
+            status = 'aktivno'
         import uuid as _u2
         if not chip and not ear_tag:
             ear_tag = f"{vrsta}-{_u2.uuid4().hex[:8]}"
@@ -455,7 +475,7 @@ def add_animal_with_token(request, token):
             name=name, vrsta=vrsta, breed=breed, chip_number=chip,
             ear_tag=ear_tag or f"{vrsta}-{_u2.uuid4().hex[:8]}",
             spol=spol, date_of_birth=dob, notes=notes,
-            breeder=breeder, breeder_name_snapshot=breeder.name, status='aktivno',
+            breeder=breeder, breeder_name_snapshot=breeder.name, status=status,
         )
         if 'photo' in request.FILES:
             animal.photo = request.FILES['photo']
@@ -572,6 +592,47 @@ def add_milestone(request):
         'milestone_types': LM.TYPES,
     })
 
+
+
+def dugini_most(request, chip_or_tag):
+    """Označi ljubimca kao uginulog — Dugini Most flow."""
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+    if not animal:
+        return redirect('memio_pet:landing')
+
+    # Session auth
+    breeder_pk = request.session.get('memio_breeder_pk')
+    if not breeder_pk or (animal.breeder and str(animal.breeder.pk) != breeder_pk):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            messages.error(request, 'Nemate pristup za ovu akciju.')
+            identifier = animal.chip_number or animal.ear_tag
+            return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    if animal.status == 'uginulo':
+        identifier = animal.chip_number or animal.ear_tag
+        return redirect('memio_pet:memorial_edit', chip_or_tag=identifier)
+
+    if request.method == 'POST':
+        animal.status = 'uginulo'
+        animal.save(using=db, update_fields=['status', 'updated_at'])
+        from memio_pet.models import MemorialProfile
+        memorial, _ = MemorialProfile.objects.using(db).get_or_create(animal=animal)
+        date_of_death = request.POST.get('date_of_death', '')
+        epitaph = request.POST.get('epitaph', '').strip()
+        if date_of_death:
+            memorial.date_of_death = date_of_death
+        if epitaph:
+            memorial.epitaph = epitaph[:500]
+        memorial.save(using=db)
+        identifier = animal.chip_number or animal.ear_tag
+        messages.success(request, f'{animal.name} je sada na Duginom Mostu. Uspomene ostaju zauvijek.')
+        return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    return render(request, 'memio_pet/dugini_most.html', {
+        'animal': animal,
+        'identifier': animal.chip_number or animal.ear_tag,
+    })
 
 
 # DUGINI MOST — memorial views

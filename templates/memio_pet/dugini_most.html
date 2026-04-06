@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dugini Most — {{ animal.name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
+  --dim:#7a7a8c;--red:#e05252;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+.top-bar{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.back-link{font-size:.85rem;color:var(--gold);text-decoration:none}
+.card{width:100%;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px;text-align:center}
+.rainbow{font-size:3rem;margin-bottom:16px}
+.card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:8px}
+.card-sub{color:var(--dim);font-size:.9rem;margin-bottom:28px;line-height:1.6}
+.pet-name{color:var(--gold);font-family:var(--serif);font-size:1.3rem;font-weight:700;margin-bottom:24px;display:block}
+.field{margin-bottom:16px;text-align:left}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.field input:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:80px}
+.field-hint{font-size:.72rem;color:var(--dim);margin-top:4px}
+.warning{background:rgba(224,82,82,.06);border:1px solid rgba(224,82,82,.2);border-radius:10px;padding:16px;margin-bottom:24px;font-size:.85rem;color:var(--red);line-height:1.5;text-align:left}
+.btn-confirm{width:100%;padding:14px;background:#2d2d4a;border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:#e8e8e8;cursor:pointer;transition:background .2s;margin-top:12px}
+.btn-confirm:hover{background:#1a1a2e}
+.btn-cancel{display:block;width:100%;padding:12px;background:none;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.9rem;color:var(--dim);cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
+.btn-cancel:hover{border-color:var(--gold);color:var(--ink)}
+@media(max-width:520px){.card{padding:28px 20px}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  <a href="/pas/{{ identifier }}/" class="back-link">&larr; Natrag na profil</a>
+</div>
+
+<div class="card">
+  <div class="rainbow">🌈</div>
+  <h1 class="card-title">Dugini Most</h1>
+  <span class="pet-name">{{ animal.name }}</span>
+  <p class="card-sub">Tvoj ljubimac zauvijek ostaje u sjećanjima. Ovaj korak kreira memorijalni profil — digitalni spomenik koji čuva sve uspomene.</p>
+
+  <div class="warning">
+    Ova akcija je nepovratna. Status ljubimca će se promijeniti u "Uginulo" i aktivirat će se memorijalni profil s Duginim Mostom.
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label>Datum odlaska</label>
+      <input type="date" name="date_of_death" {% if animal.date_of_birth %}max="{{ animal.date_of_birth|date:'Y-m-d' }}"{% endif %}>
+      <div class="field-hint">Ako ne znaš točan datum, ostavi prazno</div>
+    </div>
+
+    <div class="field">
+      <label>Epitaf — poruka za {{ animal.name }}</label>
+      <textarea name="epitaph" placeholder="Npr. Zauvijek u našim srcima. Najvjerniji prijatelj..." maxlength="500"></textarea>
+    </div>
+
+    <button type="submit" class="btn-confirm">🌈 Potvrdi — Dugini Most</button>
+    <a href="/pas/{{ identifier }}/" class="btn-cancel">Odustani</a>
+  </form>
+</div>
+</body>
+</html>

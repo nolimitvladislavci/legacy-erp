@@ -23,8 +23,8 @@ _OIB_RE = re.compile(r"^\d{11}$")
 # Email: standardni format
 _EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
-# Čip broj: alfanumerički + crtice, max 20
-_CHIP_RE = re.compile(r"^[A-Z0-9\-]{0,20}$", re.IGNORECASE)
+# Čip broj: ISO 11784/11785 — samo znamenke, 9-15 znakova
+_CHIP_RE = re.compile(r"^\d{9,15}$")
 
 # Ear tag: alfanumerički + crtice, max 30
 _EAR_RE = re.compile(r"^[A-Z0-9\-_]{1,30}$", re.IGNORECASE)
@@ -114,11 +114,11 @@ def validate_oib_format(value: str):
 
 
 def validate_chip_number(value: str):
-    """Čip broj: alfanumerički, max 20 znakova."""
+    """Čip broj: ISO 11784/11785 — samo znamenke, 9-15 znakova."""
     if not value:
         return
     if not _CHIP_RE.match(value):
-        raise ValidationError("Broj mikročipa smije sadržavati samo slova, brojeve i crtice.")
+        raise ValidationError("Broj mikročipa mora sadržavati samo znamenke (9-15). Ako nema čipa, ostavi prazno.")
 
 
 def validate_name_field(value: str):

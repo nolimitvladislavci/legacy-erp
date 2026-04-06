@@ -34,6 +34,7 @@ urlpatterns = [
     path("udomljavanje/", views.udomljavanje_lista, name="udomljavanje"),
 
     # Dugini Most — memorial
+    path("pas/<str:chip_or_tag>/dugini-most/", views.dugini_most, name="dugini_most"),
     path("api/memorial/<str:chip_or_tag>/candle/", views.memorial_candle_api, name="memorial_candle"),
     path("memorijal/<str:chip_or_tag>/uredi/", views.memorial_edit, name="memorial_edit"),
 
