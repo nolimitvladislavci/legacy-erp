@@ -202,7 +202,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
           <td style="font-family:monospace;font-size:.72rem">{{ a.chip_number|default:a.ear_tag }}</td>
           <td>{{ a.breeder.name|default:"—" }}</td>
           <td>
-            {% if a.status == 'aktivno' or a.status == 'active' %}<span class="badge badge-green">{{ a.status }}</span>
+            {% if a.status == 'aktivno' %}<span class="badge badge-green">{{ a.status }}</span>
             {% elif a.status == 'uginulo' %}<span class="badge badge-dim">🌈 memorial</span>
             {% elif a.status == 'u_azilu' %}<span class="badge badge-blue">azil</span>
             {% else %}<span class="badge badge-dim">{{ a.status }}</span>{% endif %}

@@ -64,5 +64,17 @@ function toggleTheme(){
 }
 {% block extra_js %}{% endblock %}
 </script>
+
+<!-- Cookie banner (minimalni, samo tehničke) -->
+<div id="cookie-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
+  background:var(--ink);color:var(--top-text);padding:14px 24px;
+  font-size:.82rem;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+  <span>Koristimo samo tehničke kolačiće nužne za rad stranice. <a href="/privatnost/" style="color:var(--gold)">Saznaj više</a></span>
+  <button onclick="document.getElementById('cookie-bar').style.display='none';localStorage.setItem('mp-cookies','1')"
+    style="background:var(--gold);color:var(--ink);border:none;padding:8px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:var(--sans);white-space:nowrap">
+    U redu
+  </button>
+</div>
+<script>if(!localStorage.getItem('mp-cookies')){document.getElementById('cookie-bar').style.display='flex'}</script>
 </body>
 </html>

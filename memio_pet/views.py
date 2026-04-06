@@ -1105,3 +1105,43 @@ def social_import_wizard(request):
         'preview': preview_data,
         'error': error,
     })
+
+
+def sitemap_xml(request):
+    """Dinamički sitemap.xml za memio.pet."""
+    db = 'memio_pets'
+    from django.http import HttpResponse
+    from django.utils import timezone
+
+    animals = AnimalProfile.objects.using(db).filter(
+        status__in=['aktivno', 'u_azilu', 'udomljen', 'uginulo']
+    ).order_by('-updated_at')[:5000]
+
+    breeders = BreederProfile.objects.using(db).all().order_by('-updated_at')[:1000]
+
+    urls = []
+    # Static pages
+    for path in ['/', '/feed/', '/udomljavanje/', '/registracija/', '/prijava/',
+                 '/hoteli/', '/krematoriji/', '/barf/']:
+        urls.append(f'  <url><loc>https://memio.pet{path}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
+
+    # Animal profiles
+    for a in animals:
+        identifier = a.chip_number or a.ear_tag
+        urls.append(f'  <url><loc>https://memio.pet/pas/{identifier}/</loc><lastmod>{a.updated_at.strftime("%Y-%m-%d")}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>')
+
+    # Breeder profiles
+    for b in breeders:
+        urls.append(f'  <url><loc>https://memio.pet/uzgajivac/{b.pk}/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>')
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += '\n'.join(urls)
+    xml += '\n</urlset>'
+
+    return HttpResponse(xml, content_type='application/xml')
+
+
+def privatnost(request):
+    """Privacy policy stranica."""
+    return render(request, 'memio_pet/privatnost.html')
