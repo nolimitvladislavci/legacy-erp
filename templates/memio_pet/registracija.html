@@ -18,6 +18,14 @@
         Digitalni dom za tvog ljubimca — rodovnica, cijepljenja, sjećanja. Bez kartice, bez pretplate.
       </p>
 
+      {% if pet_name %}
+      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">
+        <span style="font-size:1.3rem">🐾</span>
+        <p style="font-family:var(--serif);font-size:1.1rem;font-weight:700;margin:4px 0 2px">Kreiramo profil za <em style="color:var(--gold)">{{ pet_name }}</em></p>
+        <p style="font-size:.78rem;color:var(--dim)">Samo upiši ime i email — {{ pet_name }} dobiva digitalni dom!</p>
+      </div>
+      {% endif %}
+
       {% if error %}
       <div class="mp-error">{{ error }}</div>
       {% endif %}

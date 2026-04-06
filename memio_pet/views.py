@@ -346,6 +346,7 @@ def registracija(request):
                     error = f'Greska: {e}'
     return render(request, 'memio_pet/registracija.html', {
         'error': error, 'chip': request.GET.get('chip', ''), 'source': request.GET.get('source', ''),
+        'pet_name': request.GET.get('pet', ''),
         'page_title': 'Kreiraj profil', 'account_types': [
             ('owner', '🐾 Vlasnik ljubimca'), ('breeder', '🏆 Uzgajivac'),
             ('opg', '🌿 OPG / Pcelar'), ('vet', '💉 Veterinar'),
