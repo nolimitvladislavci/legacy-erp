@@ -452,16 +452,30 @@ def breeder_dashboard(request):
 # ADD ANIMAL (login required)
 # ════════════════════════════════════════════════════════════════
 
-@login_required
 def add_animal(request):
-    """Dodaj novog ljubimca."""
+    """Dodaj novog ljubimca — javno, bez logina.
+    breeder se identificira po ?breeder=UUID ili po session emailu.
+    """
     db = 'memio_pets'
+    breeder = None
 
-    breeder = BreederProfile.objects.using(db).filter(user_id=request.user.pk).first()
+    # 1. breeder UUID iz GET parametra (link s profila)
+    breeder_pk = request.GET.get('breeder') or request.POST.get('breeder_id')
+    if breeder_pk:
+        try:
+            import uuid as _uuid_mod
+            breeder = BreederProfile.objects.using(db).get(pk=_uuid_mod.UUID(str(breeder_pk)))
+        except Exception:
+            pass
+
+    # 2. Ako je ulogiran na LIMIT Connect — nađi po useru
+    if not breeder and request.user.is_authenticated:
+        breeder = BreederProfile.objects.using(db).filter(user_id=request.user.pk).first()
+        if not breeder:
+            breeder = BreederProfile.objects.using(db).filter(email=request.user.email).first()
+
     if not breeder:
-        breeder = BreederProfile.objects.using(db).filter(email=request.user.email).first()
-    if not breeder:
-        messages.error(request, 'Nemate uzgajivački profil.')
+        messages.error(request, 'Nije pronađen profil. Kreirajte ga prvo.')
         return redirect('memio_pet:registracija')
 
     if request.method == 'POST':
