@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uredi memorijal — {{ animal.name }} — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0e0c;--surface:#1a1814;--ink:#e8e0d0;--ink2:#a09080;--gold:#e8c46a;--line:#2a2520;--dim:#6a6058;--green:#4caf7d;--red:#e05252;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Space Grotesk',system-ui,sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+.top-bar{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.back-link{font-size:.85rem;color:var(--gold);text-decoration:none}
+.card{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:36px 32px}
+.card-title{font-family:var(--serif);font-size:1.7rem;font-weight:700;margin-bottom:4px;text-align:center}
+.card-sub{color:var(--dim);font-size:.86rem;margin-bottom:24px;line-height:1.5;text-align:center}
+.memorial-icon{font-size:2.5rem;text-align:center;margin-bottom:12px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:var(--bg);outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:100px}
+.field-hint{font-size:.72rem;color:var(--dim);margin-top:4px}
+.checkbox-label{display:flex;align-items:center;gap:10px;font-size:.9rem;cursor:pointer;padding:10px 0}
+.checkbox-label input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold)}
+.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:#1a1a2e;cursor:pointer;transition:background .2s;margin-top:12px}
+.btn-submit:hover{background:#d4b04a}
+.success-msg{background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:8px;padding:10px 14px;color:var(--green);font-size:.85rem;margin-bottom:16px}
+@media(max-width:520px){.card{padding:24px 18px}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  <a href="/pas/{{ identifier }}/" class="back-link">&larr; Natrag na profil</a>
+</div>
+
+<div class="card">
+  <div class="memorial-icon">🌈</div>
+  <h1 class="card-title">Uredi memorijal</h1>
+  <p class="card-sub">Stranica sjecanja za {{ animal.name }}</p>
+
+  {% if messages %}
+  {% for message in messages %}
+  <div class="success-msg">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="field">
+      <label>Posmrtna poruka (epitaf)</label>
+      <textarea name="epitaph" placeholder="Zauvijek u nasim srcima..." maxlength="500">{{ memorial.epitaph }}</textarea>
+      <div class="field-hint">Maks. 500 znakova — vidljivo svima na memorijalu</div>
+    </div>
+
+    <div class="field">
+      <label>Datum smrti</label>
+      <input type="date" name="date_of_death" value="{{ memorial.date_of_death|date:'Y-m-d' }}">
+    </div>
+
+    <div class="field">
+      <label>Privatna biljeska (nije javno)</label>
+      <input type="text" name="cause_note" value="{{ memorial.cause_note }}" placeholder="npr. starost, bolest..." maxlength="200">
+    </div>
+
+    <label class="checkbox-label">
+      <input type="checkbox" name="cremated" {% if memorial.cremated %}checked{% endif %}>
+      Kremiran/a
+    </label>
+
+    {% if memorial.cremated %}
+    <div class="field">
+      <label>Opis urne</label>
+      <input type="text" name="urn_description" value="{{ memorial.urn_description }}" placeholder="npr. Drvena urna s gravurom" maxlength="200">
+    </div>
+    {% endif %}
+
+    <div class="field">
+      <label>Donacije u ime {{ animal.name }} — odaberi azil</label>
+      <select name="donation_target">
+        <option value="">— Bez donacija —</option>
+        {% for shelter in shelters %}
+        <option value="{{ shelter.pk }}" {% if memorial.donation_target_id == shelter.pk %}selected{% endif %}>
+          {{ shelter.name }}{% if shelter.city %} ({{ shelter.city }}){% endif %}
+        </option>
+        {% endfor %}
+      </select>
+      <div class="field-hint">Posjetitelji memorijala mogu donirati odabranom azilu</div>
+    </div>
+
+    <button type="submit" class="btn-submit">Spremi memorijal 🕯️</button>
+  </form>
+</div>
+</body>
+</html>

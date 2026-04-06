@@ -256,8 +256,7 @@ def registracija(request):
         telefon = request.POST.get('telefon', '').strip()
         if not ime or not email:
             error = 'Ime i email su obavezni.'
-        elif BreederProfile.objects.using(db).filter(email=email).exists():
-            bp = BreederProfile.objects.using(db).get(email=email)
+        elif (bp := BreederProfile.find_by_email(email)):
             request.session['memio_breeder_pk'] = str(bp.pk)
             request.session['memio_breeder_email'] = bp.email
             request.session.set_expiry(86400 * 7)
@@ -381,7 +380,7 @@ def add_animal_request(request):
             return render(request, 'memio_pet/add_animal_auth.html', {
                 'error': 'Upisi email adresu.', 'page_title': 'Tko si ti?',
             })
-        bp = BreederProfile.objects.using(db).filter(email=email).first()
+        bp = BreederProfile.find_by_email(email)
         if bp:
             from memio_pet.models import AddAnimalToken
             ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
@@ -504,7 +503,7 @@ def prijava(request):
         if not email or '@' not in email:
             error = 'Upiši ispravnu email adresu.'
         else:
-            bp = BreederProfile.objects.using(db).filter(email=email).first()
+            bp = BreederProfile.find_by_email(email)
             if bp:
                 request.session['memio_breeder_pk'] = str(bp.pk)
                 request.session['memio_breeder_email'] = bp.email
