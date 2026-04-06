@@ -168,6 +168,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
   {% endif %}
 
+
+  <!-- PODIJELI / POZOVI -->
+  <div class="card">
+    <div class="card-body" style="text-align:center">
+      <h2 class="section-title" style="border:none;text-align:center">Podijeli svoj profil</h2>
+      <p style="font-size:.85rem;color:var(--dim);margin-bottom:16px">Pozovi prijatelje na Memio.pet ili podijeli svoj profil uzgajivača</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="copyMyLink()" id="copyBtn" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;transition:all .2s">🔗 Kopiraj link profila</button>
+        <a href="https://wa.me/?text=Pogledaj%20moj%20profil%20na%20Memio.pet%3A%20https%3A%2F%2Fmemio.pet%2Fuzgajivac%2F{{ breeder.pk }}%2F" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;background:#25D366;color:#fff;border:1px solid #25D366">💬 WhatsApp</a>
+        <a href="https://wa.me/?text=Hej!%20Kreiraj%20besplatni%20digitalni%20profil%20za%20svog%20ljubimca%20na%20memio.pet%20🐾" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid var(--gold);color:var(--gold);background:transparent">🐾 Pozovi prijatelja</a>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="page-footer">
@@ -178,6 +192,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <script>
 (function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('themeBtn');if(btn)btn.textContent=t==='dark'?'☀️':'🌙';})();
 function toggleTheme(){var h=document.documentElement;var c=h.getAttribute('data-theme')||'light';var n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('memio-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'☀️':'🌙';}
+
+function copyMyLink(){
+  var url='https://memio.pet/uzgajivac/{{ breeder.pk }}/';
+  navigator.clipboard.writeText(url).then(function(){
+    var btn=document.getElementById('copyBtn');
+    btn.innerHTML='✓ Kopirano!';
+    setTimeout(function(){btn.innerHTML='🔗 Kopiraj link profila';},2000);
+  });
+}
 </script>
 </body>
 </html>

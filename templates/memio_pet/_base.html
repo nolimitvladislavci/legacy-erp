@@ -76,5 +76,10 @@ function toggleTheme(){
   </button>
 </div>
 <script>if(!localStorage.getItem('mp-cookies')){document.getElementById('cookie-bar').style.display='flex'}</script>
+
+<!-- Analytics (cookie-free, GDPR safe) -->
+<script>
+(function(){try{fetch('/api/hit/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p:location.pathname})});}catch(e){}})();
+</script>
 </body>
 </html>

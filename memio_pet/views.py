@@ -317,6 +317,30 @@ def registracija(request):
                     request.session['memio_breeder_pk'] = str(bp.pk)
                     request.session['memio_breeder_email'] = bp.email
                     request.session.set_expiry(86400 * 7)
+
+                    # Welcome email
+                    try:
+                        from django.core.mail import send_mail
+                        send_mail(
+                            subject=f'Dobrodošli na Memio.pet, {ime}!',
+                            message=(
+                                f'Pozdrav {ime},\n\n'
+                                f'Vaš profil na Memio.pet je kreiran!\n\n'
+                                f'Što možete napraviti:\n'
+                                f'  - Dodajte ljubimca: https://memio.pet/ljubimac/novi/\n'
+                                f'  - Vaš profil: https://memio.pet/uzgajivac/{bp.pk}/\n'
+                                f'  - Prijava: https://memio.pet/prijava/\n\n'
+                                f'Za prijavu koristite ovaj email — bez lozinke.\n\n'
+                                f'Lijep pozdrav,\n'
+                                f'Memio.pet tim'
+                            ),
+                            from_email='noreply@memio.pet',
+                            recipient_list=[email],
+                            fail_silently=True,
+                        )
+                    except Exception:
+                        pass
+
                     return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
                 except Exception as e:
                     error = f'Greska: {e}'
@@ -1145,3 +1169,23 @@ def sitemap_xml(request):
 def privatnost(request):
     """Privacy policy stranica."""
     return render(request, 'memio_pet/privatnost.html')
+
+
+@require_POST
+def analytics_hit(request):
+    """Minimalni analytics — broji pageviews bez cookieja. GDPR safe."""
+    import json
+    db = 'memio_pets'
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        data = {}
+    path = (data.get('p') or request.META.get('HTTP_REFERER', ''))[:200]
+    # Spremi u jednostavan log
+    import logging
+    logger = logging.getLogger('memio_pet.analytics')
+    logger.info("HIT %s | %s | %s",
+                path,
+                request.META.get('HTTP_X_REAL_IP', request.META.get('REMOTE_ADDR', '')),
+                request.META.get('HTTP_USER_AGENT', '')[:100])
+    return JsonResponse({'ok': True})
