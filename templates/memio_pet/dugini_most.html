@@ -58,7 +58,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     {% csrf_token %}
     <div class="field">
       <label>Datum odlaska</label>
-      <input type="date" name="date_of_death" {% if animal.date_of_birth %}max="{{ animal.date_of_birth|date:'Y-m-d' }}"{% endif %}>
+      <input type="date" name="date_of_death" {% if animal.date_of_birth %}min="{{ animal.date_of_birth|date:'Y-m-d' }}"{% endif %}>
       <div class="field-hint">Ako ne znaš točan datum, ostavi prazno</div>
     </div>
 
