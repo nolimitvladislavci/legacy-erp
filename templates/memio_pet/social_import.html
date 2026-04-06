@@ -1,108 +1,76 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uvezi objavu — {{ animal.name }} — Memio.pet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#4caf7d;--red:#e05252;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
-.top-bar{width:100%;max-width:500px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.logo{font-family:var(--serif);font-size:1.3rem;font-weight:700;color:var(--ink);text-decoration:none}
-.logo span{color:var(--gold)}
-.card{width:100%;max-width:500px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:36px 32px}
-h1{font-family:var(--serif);font-size:1.6rem;font-weight:700;margin-bottom:4px}
-.sub{color:var(--dim);font-size:.85rem;margin-bottom:24px;line-height:1.5}
-.platforms{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
-.platform-icon{font-size:1.8rem;opacity:.5}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:.75rem;font-weight:500;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
-.field input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.92rem;color:var(--ink);outline:none}
-.field input:focus{border-color:var(--gold)}
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-family:var(--sans);font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s}
-.btn-primary{background:var(--gold);color:var(--ink)}
-.btn-primary:hover{background:#b8942a}
-.btn-green{background:var(--green);color:#fff}
-.btn-green:hover{background:#3a9a68}
-.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px}
-.preview-card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:20px}
-.preview-platform{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px}
-.preview-thumb{width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px}
-.preview-caption{font-size:.88rem;color:var(--ink2);line-height:1.6}
-.preview-author{font-size:.78rem;color:var(--dim);margin-top:6px}
-.back{display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--dim);text-decoration:none}
-.back:hover{color:var(--gold)}
-</style>
-</head>
-<body>
-<div class="top-bar">
-  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
-</div>
+{% extends "memio_pet/_base.html" %}
 
-<div class="card">
-  <h1>Uvezi objavu</h1>
-  <p class="sub">Dodaj objavu s društvenih mreža na životni trak za {{ animal.name }}</p>
+{% block title %}Uvezi objavu — {{ animal.name }} — Memio.pet{% endblock %}
 
-  <div class="platforms">
-    <span class="platform-icon" title="Facebook">📘</span>
-    <span class="platform-icon" title="Instagram">📷</span>
-    <span class="platform-icon" title="TikTok">🎵</span>
-    <span class="platform-icon" title="YouTube">▶️</span>
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
+<div style="width:100%;max-width:500px">
+
+  <div class="mp-card">
+    <div class="mp-card-body">
+      <h1 style="font-size:1.6rem;margin-bottom:4px">Uvezi objavu</h1>
+      <p style="color:var(--dim);font-size:.85rem;margin-bottom:20px">
+        Dodaj objavu s društvenih mreža na životni trak za {{ animal.name }}
+      </p>
+
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px">
+        <span style="font-size:1.8rem;opacity:.5" title="Facebook">📘</span>
+        <span style="font-size:1.8rem;opacity:.5" title="Instagram">📷</span>
+        <span style="font-size:1.8rem;opacity:.5" title="TikTok">🎵</span>
+        <span style="font-size:1.8rem;opacity:.5" title="YouTube">▶️</span>
+      </div>
+
+      {% if error %}
+      <div class="mp-error">{{ error }}</div>
+      {% endif %}
+
+      {% if preview %}
+      <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px">{{ preview.platform }}</div>
+        {% if preview.thumbnail %}
+        <img src="{{ preview.thumbnail }}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px" alt="Preview">
+        {% endif %}
+        {% if preview.caption %}
+        <div style="font-size:.88rem;color:var(--ink2);line-height:1.6">{{ preview.caption|truncatechars:200 }}</div>
+        {% endif %}
+        {% if preview.author %}
+        <div style="font-size:.78rem;color:var(--dim);margin-top:6px">— {{ preview.author }}</div>
+        {% endif %}
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="confirm">
+        <input type="hidden" name="url" value="{{ preview.url }}">
+        <input type="hidden" name="animal" value="{{ chip }}">
+        <div class="mp-field">
+          <label>Naslov na životnom traku</label>
+          <input type="text" name="title" value="{{ preview.caption|truncatechars:80 }}">
+        </div>
+        <button type="submit" class="mp-btn mp-btn-green mp-btn-full">Dodaj na životni trak</button>
+      </form>
+      <form method="get" style="margin-top:10px">
+        <input type="hidden" name="animal" value="{{ chip }}">
+        <button type="submit" class="mp-btn mp-btn-outline mp-btn-full">← Drugi link</button>
+      </form>
+
+      {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="preview">
+        <input type="hidden" name="animal" value="{{ chip }}">
+        <div class="mp-field">
+          <label>Link na objavu</label>
+          <input type="url" name="url" placeholder="https://www.instagram.com/p/..." required autofocus>
+        </div>
+        <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Pregledaj objavu</button>
+      </form>
+      {% endif %}
+
+      <a href="/pas/{{ chip }}/" style="display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--dim)">← Natrag na profil {{ animal.name }}</a>
+    </div>
   </div>
 
-  {% if error %}
-  <div class="error">{{ error }}</div>
-  {% endif %}
-
-  {% if preview %}
-  <!-- KORAK 2: Potvrdi import -->
-  <div class="preview-card">
-    <div class="preview-platform">{{ preview.platform }}</div>
-    {% if preview.thumbnail %}
-    <img src="{{ preview.thumbnail }}" class="preview-thumb" alt="Preview">
-    {% endif %}
-    {% if preview.caption %}
-    <div class="preview-caption">{{ preview.caption|truncatechars:200 }}</div>
-    {% endif %}
-    {% if preview.author %}
-    <div class="preview-author">— {{ preview.author }}</div>
-    {% endif %}
-  </div>
-
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="confirm">
-    <input type="hidden" name="url" value="{{ preview.url }}">
-    <input type="hidden" name="animal" value="{{ chip }}">
-    <div class="field">
-      <label>Naslov na životnom traku</label>
-      <input type="text" name="title" value="{{ preview.caption|truncatechars:80 }}" placeholder="npr. Luna na plaži">
-    </div>
-    <button type="submit" class="btn btn-green">Dodaj na životni trak</button>
-  </form>
-
-  <form method="get" style="margin-top:10px">
-    <input type="hidden" name="animal" value="{{ chip }}">
-    <button type="submit" class="btn" style="background:transparent;border:1.5px solid var(--line);color:var(--ink)">← Drugi link</button>
-  </form>
-
-  {% else %}
-  <!-- KORAK 1: Upiši link -->
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="preview">
-    <input type="hidden" name="animal" value="{{ chip }}">
-    <div class="field">
-      <label>Link na objavu</label>
-      <input type="url" name="url" placeholder="https://www.instagram.com/p/..." required autofocus>
-    </div>
-    <button type="submit" class="btn btn-primary">Pregledaj objavu</button>
-  </form>
-  {% endif %}
-
-  <a href="/pas/{{ chip }}/" class="back">← Natrag na profil {{ animal.name }}</a>
 </div>
-</body>
-</html>
+</div>
+{% endblock %}

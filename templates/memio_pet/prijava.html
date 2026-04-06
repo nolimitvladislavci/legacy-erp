@@ -1,201 +1,52 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prijava — Memio.pet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
-  --dim:#7a7a8c;--green:#4caf7d;--red:#e05252;
-  --serif:'Cormorant Garamond',Georgia,serif;
-  --sans:'Space Grotesk',system-ui,sans-serif;
-}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
-.top-bar{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
-.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
-.logo span{color:var(--gold)}
-.card{width:100%;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px}
-.card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:6px}
-.card-sub{color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.6}
-.field{margin-bottom:20px}
-.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.field input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:1rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--gold)}
-.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:#fff;cursor:pointer;transition:background .2s}
-.btn-submit:hover{background:#b8942a}
-.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:12px 16px;color:var(--red);font-size:.85rem;margin-bottom:16px;line-height:1.6}
-.error a{color:var(--gold);font-weight:600;text-decoration:none}
-.divider{display:flex;align-items:center;gap:14px;margin:24px 0}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
-.divider span{font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
-.alt-methods{display:flex;gap:10px}
-.alt-btn{flex:1;padding:12px 10px;background:transparent;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:600;color:var(--ink);text-align:center;text-decoration:none;cursor:pointer;transition:all .2s}
-.alt-btn:hover{border-color:var(--gold);color:var(--gold)}
-.btn-register{display:block;width:100%;padding:13px;background:transparent;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.92rem;font-weight:600;color:var(--ink);text-align:center;text-decoration:none;transition:all .2s;margin-top:16px}
-.btn-register:hover{border-color:var(--gold);color:var(--gold)}
-.footer-note{margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6}
-.qr-scanner{display:none;margin-top:16px;text-align:center}
-.qr-scanner video{width:100%;max-width:300px;border-radius:12px;border:2px solid var(--gold)}
-.qr-scanner-hint{font-size:.82rem;color:var(--dim);margin-top:8px}
-#chipInput{display:none;margin-top:16px}
-@media(max-width:520px){.card{padding:28px 20px}.alt-methods{flex-direction:column}}
-</style>
-</head>
-<body>
+{% extends "memio_pet/_base.html" %}
 
-<div class="top-bar">
-  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
-</div>
+{% block title %}Prijava — Memio.pet{% endblock %}
 
-<div class="card">
-  <h1 class="card-title">Prijava</h1>
-  <p class="card-sub">Upiši email, skeniraj QR ili unesi broj čipa — odvedemo te na profil.</p>
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
+<div style="width:100%;max-width:440px">
 
-  {% if error %}
-  <div class="error">
-    {{ error }}
-    {% if 'nije pronađen' in error or 'Želiš' in error %}
-    <br><a href="/registracija/">Kreiraj novi profil →</a>
-    {% endif %}
-  </div>
-  {% endif %}
+  <div class="mp-card">
+    <div class="mp-card-body">
+      <h1 style="margin-bottom:6px">Prijava</h1>
+      <p style="color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.6">
+        Upiši email koji si koristio pri registraciji i vratit ćemo te na tvoj profil.
+      </p>
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="field">
-      <label>Email adresa</label>
-      <input type="email" name="email" value="{{ email_value|default:'' }}"
-             placeholder="tvoj@email.com" required autofocus autocomplete="email">
-    </div>
-    <button type="submit" class="btn-submit">Prijavi se</button>
-  </form>
-
-  <div class="divider"><span>ili</span></div>
-
-  <div class="alt-methods">
-    <button class="alt-btn" onclick="toggleChip()">🔢 Broj čipa</button>
-    <button class="alt-btn" id="scanQrBtn" onclick="startQrScan()">📷 Skeniraj QR</button>
-  </div>
-
-  <!-- Chip input -->
-  <div id="chipInput">
-    <form method="get" action="/prijava/" onsubmit="return goToChip()">
-      <div class="field">
-        <label>Broj mikročipa ili markice</label>
-        <input type="text" id="chipField" placeholder="npr. 191031000312345" inputmode="numeric">
+      {% if error %}
+      <div class="mp-error">
+        {{ error }}
+        {% if 'nije pronađen' in error %}
+        <br><a href="/registracija/">Kreiraj novi profil →</a>
+        {% endif %}
       </div>
-      <button type="submit" class="btn-submit" style="background:var(--ink)">Otvori profil</button>
-    </form>
-  </div>
+      {% endif %}
 
-  <!-- QR scanner -->
-  <div id="qrScanner" style="display:none;margin-top:16px">
-    <div id="qrReader" style="width:100%;max-width:400px;margin:0 auto"></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
-      <button class="alt-btn" onclick="stopQrScan()">Zatvori kameru</button>
-      <label class="alt-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px">
-        📸 Uslikaj
-        <input type="file" accept="image/*" capture="environment" onchange="scanFromPhoto(this)" style="display:none">
-      </label>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mp-field">
+          <label>Email adresa</label>
+          <input type="email" name="email" value="{{ email_value|default:'' }}"
+                 placeholder="tvoj@email.com" required autofocus autocomplete="email">
+        </div>
+        <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Prijavi se →</button>
+      </form>
+
+      <div style="display:flex;align-items:center;gap:14px;margin:28px 0">
+        <div style="flex:1;height:1px;background:var(--line)"></div>
+        <span style="font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">ili</span>
+        <div style="flex:1;height:1px;background:var(--line)"></div>
+      </div>
+
+      <a href="/registracija/" class="mp-btn mp-btn-outline mp-btn-full" style="text-align:center">Kreiraj novi profil</a>
+
+      <p style="margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6">
+        Nema lozinke — samo email koji si koristio.<br>
+        Tvoj profil je uvijek dostupan.
+      </p>
     </div>
-    <p id="photoStatus" style="display:none;text-align:center;margin-top:8px;font-size:.82rem"></p>
   </div>
 
-  <a href="/registracija/" class="btn-register">Kreiraj novi profil →</a>
-
-  <p class="footer-note">
-    Nema lozinke — samo email ili QR kod.<br>
-    Tvoj profil je uvijek dostupan.
-  </p>
 </div>
-
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script>
-function toggleChip(){
-  var el=document.getElementById('chipInput');
-  el.style.display=el.style.display==='block'?'none':'block';
-  if(el.style.display==='block') document.getElementById('chipField').focus();
-}
-
-function goToChip(){
-  var v=document.getElementById('chipField').value.trim();
-  if(v){window.location.href='/pas/'+encodeURIComponent(v)+'/';return false;}
-  return false;
-}
-
-// ═══════════════════════════════════════
-// QR Scanner — html5-qrcode (ZXing engine, isto što Google koristi)
-// ═══════════════════════════════════════
-var html5QrCode=null;
-
-function startQrScan(){
-  document.getElementById('qrScanner').style.display='block';
-
-  html5QrCode=new Html5Qrcode('qrReader');
-  html5QrCode.start(
-    {facingMode:'environment'},
-    {fps:10,qrbox:{width:250,height:250},aspectRatio:1.0},
-    function onScanSuccess(decodedText){
-      // Nađeno!
-      html5QrCode.stop().then(function(){html5QrCode.clear();}).catch(function(){});
-      html5QrCode=null;
-
-      if(decodedText.indexOf('memio.pet/')!==-1){
-        window.location.href=decodedText;
-      } else {
-        window.location.href='/pas/'+encodeURIComponent(decodedText)+'/';
-      }
-    },
-    function onScanFailure(){/* tiho — čeka QR */}
-  ).catch(function(err){
-    document.getElementById('qrReader').innerHTML=
-      '<p style="color:#e05252;font-size:.85rem;padding:20px;text-align:center">'+
-      'Kamera: '+err+'<br><br>iOS: koristi Safari. Android: dozvoli kameru.</p>';
-  });
-}
-
-function scanFromPhoto(input){
-  if(!input.files||!input.files[0])return;
-  var status=document.getElementById('photoStatus');
-  status.style.display='block';
-  status.style.color='#3b82f6';
-  status.textContent='Analiziram sliku...';
-
-  // Zaustavi live kameru ako radi
-  if(html5QrCode){
-    html5QrCode.stop().catch(function(){});
-  }
-
-  var scanner=new Html5Qrcode('qrReader');
-  scanner.scanFile(input.files[0],true)
-    .then(function(decodedText){
-      status.style.color='#4caf7d';
-      status.textContent='✅ Nađeno: '+decodedText.substring(0,40)+'...';
-      setTimeout(function(){
-        if(decodedText.indexOf('memio.pet/')!==-1){
-          window.location.href=decodedText;
-        } else {
-          window.location.href='/pas/'+encodeURIComponent(decodedText)+'/';
-        }
-      },500);
-    })
-    .catch(function(){
-      status.style.color='#e05252';
-      status.textContent='QR kod nije pronađen na slici. Pokušaj ponovo s boljim fokusom.';
-      setTimeout(function(){status.style.display='none';},4000);
-    });
-}
-
-function stopQrScan(){
-  if(html5QrCode){
-    html5QrCode.stop().then(function(){html5QrCode.clear();}).catch(function(){});
-    html5QrCode=null;
-  }
-  document.getElementById('qrScanner').style.display='none';
-}
-</script>
-</body>
-</html>
+</div>
+{% endblock %}

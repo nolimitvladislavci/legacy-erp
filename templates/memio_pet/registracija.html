@@ -1,166 +1,95 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kreiraj profil — Memio.pet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;
-  --dim:#7a7a8c;--green:#4caf7d;--red:#e05252;
-  --serif:'Cormorant Garamond',Georgia,serif;
-  --sans:'Space Grotesk',system-ui,sans-serif;
-}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
-.top-bar{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
-.logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
-.logo span{color:var(--gold)}
-.badge-free{font-size:.72rem;background:rgba(76,175,125,.12);color:var(--green);padding:4px 12px;border-radius:20px;font-weight:600;letter-spacing:.05em;border:1px solid rgba(76,175,125,.3)}
-.card{width:100%;max-width:480px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px}
-.card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:6px}
-.card-sub{color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.5}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
-.field input:focus,.field select:focus{border-color:var(--gold)}
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
-.type-btn{padding:12px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-family:var(--sans);font-size:.82rem;cursor:pointer;text-align:center;transition:all .2s;color:var(--ink)}
-.type-btn:hover,.type-btn.active{border-color:var(--gold);background:rgba(201,168,76,.06);color:var(--ink)}
-.type-btn input{display:none}
-.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s;margin-top:8px}
-.btn-submit:hover{background:#b8942a}
-.error{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.25);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.85rem;margin-bottom:16px}
-.footer-note{margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6}
-@media(max-width:520px){.card{padding:28px 20px}.type-grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
+{% extends "memio_pet/_base.html" %}
 
-<div class="top-bar">
-  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
-  <span class="badge-free">✓ BESPLATNO ZAUVIJEK</span>
-</div>
+{% block title %}Kreiraj profil — Memio.pet{% endblock %}
 
-<div class="card">
-  <h1 class="card-title">Kreiraj profil</h1>
-  <p class="card-sub">Digitalni dom za tvog ljubimca — rodovnica, cijepljenja, sjećanja. Bez kartice, bez pretplate.</p>
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
+<div style="width:100%;max-width:480px">
 
-  {% if error %}
-  <div class="error">{{ error }}</div>
-  {% endif %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <span></span>
+    <span class="mp-badge mp-badge-green">✓ BESPLATNO ZAUVIJEK</span>
+  </div>
 
-  <form method="post" action="/registracija/">
-    {% csrf_token %}
-    {% if chip %}<input type="hidden" name="chip_hint" value="{{ chip }}">{% endif %}
+  <div class="mp-card">
+    <div class="mp-card-body">
+      <h1 style="margin-bottom:6px">Kreiraj profil</h1>
+      <p style="color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.5">
+        Digitalni dom za tvog ljubimca — rodovnica, cijepljenja, sjećanja. Bez kartice, bez pretplate.
+      </p>
 
-    <div class="field">
-      <label>Tvoje ime ili naziv</label>
-      <input type="text" name="ime" placeholder="npr. Marija Horvat ili Uzgajivačnica Novak" required autocomplete="name">
-    </div>
+      {% if error %}
+      <div class="mp-error">{{ error }}</div>
+      {% endif %}
 
-    <div class="field">
-      <label>Email adresa</label>
-      <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email">
-    </div>
+      <form method="post" action="/registracija/">
+        {% csrf_token %}
+        {% if chip %}<input type="hidden" name="chip_hint" value="{{ chip }}">{% endif %}
 
-    <div class="field">
-      <label>Grad</label>
-      <input type="text" name="grad" placeholder="npr. Zagreb, Osijek, Split..." autocomplete="address-level2">
-    </div>
+        <div class="mp-field">
+          <label>Tvoje ime ili naziv</label>
+          <input type="text" name="ime" placeholder="npr. Marija Horvat ili Uzgajivačnica Novak" required autocomplete="name">
+        </div>
+        <div class="mp-field">
+          <label>Email adresa</label>
+          <input type="email" name="email" placeholder="tvoj@email.com" required autocomplete="email">
+        </div>
+        <div class="mp-field">
+          <label>Grad</label>
+          <input type="text" name="grad" placeholder="npr. Zagreb, Osijek, Split..." autocomplete="address-level2">
+        </div>
 
-    <div class="field">
-      <label>Tip profila</label>
-    </div>
-    <div class="type-grid">
-      {% for value, label in account_types %}
-      <label class="type-btn">
-        <input type="radio" name="account_type" value="{{ value }}" {% if value == 'owner' %}checked{% endif %} onchange="this.closest('.type-grid').querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));this.closest('.type-btn').classList.add('active')">
-        {{ label }}
-      </label>
-      {% endfor %}
-    </div>
+        <div class="mp-field"><label>Tip profila</label></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px" id="type-grid">
+          {% for value, label in account_types %}
+          <label style="padding:12px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);font-size:.82rem;cursor:pointer;text-align:center;transition:all .2s{% if value == 'owner' %};border-color:var(--gold);background:rgba(201,168,76,.06){% endif %}">
+            <input type="radio" name="account_type" value="{{ value }}" {% if value == 'owner' %}checked{% endif %} style="display:none"
+              onchange="document.querySelectorAll('#type-grid label').forEach(function(b){b.style.borderColor='var(--line)';b.style.background='var(--surface)'});this.closest('label').style.borderColor='var(--gold)';this.closest('label').style.background='rgba(201,168,76,.06)';togglePro(this.value)">
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
 
-    <div class="field">
-      <label>Datum rodjenja (opcijsko)</label>
-      <input type="date" name="date_of_birth" id="dobInput" max="{{ today }}">
-      <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">Za GDPR provjeru — djeca do 16 godina trebaju pristanak roditelja.</p>
-    </div>
+        <!-- Polja za profesionalne korisnike -->
+        <div id="pro-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px">
+          <p style="font-size:.72rem;color:var(--gold);font-weight:600;margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">Profesionalni podaci</p>
+          <div class="mp-field">
+            <label>OIB (opcijsko — za verifikaciju)</label>
+            <input type="text" name="oib" placeholder="12345678901" maxlength="11" pattern="[0-9]{11}" inputmode="numeric">
+          </div>
+          <div class="mp-field">
+            <label>Telefon</label>
+            <input type="tel" name="telefon" placeholder="+385 91 234 5678" autocomplete="tel">
+          </div>
+          <div class="mp-field" id="field-website" style="display:none">
+            <label>Web stranica</label>
+            <input type="url" name="website" placeholder="https://...">
+          </div>
+          <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">
+            OIB služi za verifikaciju. Verificirani profili dobivaju ✓ oznaku i viši Trust Score.
+          </p>
+        </div>
 
-    <!-- Parent email — prikazuje se samo za maloljetnike -->
-    <div id="parent-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.2);border-radius:10px">
-      <p style="font-size:.78rem;color:#3b82f6;font-weight:600;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase">Pristanak roditelja (GDPR)</p>
-      <p style="font-size:.78rem;color:var(--dim);margin-bottom:12px;line-height:1.5">Imaš manje od 16 godina — po zakonu trebamo pristanak roditelja. Profil se kreira odmah, a roditelj potvrdi putem emaila.</p>
-      <div class="field">
-        <label>Email roditelja ili skrbnika</label>
-        <input type="email" name="parent_email" placeholder="roditelj@email.com" autocomplete="email">
-      </div>
-    </div>
+        <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Kreiraj profil →</button>
+      </form>
 
-    <!-- Polja za profesionalne korisnike (vet, azil, uzgajivač) -->
-    <div id="pro-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px">
-      <p style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">Profesionalni podaci</p>
-      <div class="field">
-        <label>OIB (opcijsko — za verifikaciju)</label>
-        <input type="text" name="oib" placeholder="12345678901" maxlength="11" pattern="[0-9]{11}" inputmode="numeric">
-      </div>
-      <div class="field" id="field-telefon">
-        <label>Telefon</label>
-        <input type="tel" name="telefon" placeholder="+385 91 234 5678" autocomplete="tel">
-      </div>
-      <div class="field" id="field-website" style="display:none">
-        <label>Web stranica</label>
-        <input type="url" name="website" placeholder="https://...">
-      </div>
-      <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">
-        OIB služi za verifikaciju profila. Verificirani profili dobivaju ✓ oznaku i viši Trust Score.<br>
-        Azili putem NO LIMIT programa automatski dobivaju verifikaciju.
+      <p style="margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6">
+        Već imaš profil? <a href="/prijava/" style="font-weight:600">Prijavi se →</a>
       </p>
     </div>
+  </div>
 
-    <button type="submit" class="btn-submit">Kreiraj profil →</button>
-  </form>
-
-  <p class="footer-note">
-    Nema lozinke, nema kartice, nema pretplate.<br>
-    Profil je tvoj. Podaci su sigurni. Zauvijek besplatno.<br><br>
-    Već imaš profil? <a href="/prijava/" style="color:var(--gold);font-weight:600">Prijavi se →</a>
-  </p>
 </div>
+</div>
+{% endblock %}
 
-<script>
-// Označi prvi tip kao aktivan na startu
-document.querySelector('.type-btn').classList.add('active');
-
-// Prikaži profesionalna polja za vet/azil/uzgajivač
-var proTypes = new Set(['vet','shelter','breeder','horse','hotel','trainer','sheep_farmer','pig_farmer','poultry']);
+{% block extra_js %}
+var proTypes = new Set(['vet','shelter','breeder','horse','hotel','trainer','sheep_farmer','pig_farmer','poultry','krematorij']);
 var websiteTypes = new Set(['vet','hotel','breeder','horse']);
-var proFields = document.getElementById('pro-fields');
-var websiteField = document.getElementById('field-website');
-
-document.querySelectorAll('input[name="account_type"]').forEach(function(radio){
-  radio.addEventListener('change', function(){
-    if(proTypes.has(this.value)){
-      proFields.style.display = 'block';
-      websiteField.style.display = websiteTypes.has(this.value) ? 'block' : 'none';
-    } else {
-      proFields.style.display = 'none';
-    }
-  });
-});
-
-// GDPR: prikaži parent polja ako je korisnik < 16
-var dobInput = document.getElementById('dobInput');
-var parentFields = document.getElementById('parent-fields');
-dobInput.addEventListener('change', function(){
-  var dob = new Date(this.value);
-  var today = new Date();
-  var age = today.getFullYear() - dob.getFullYear();
-  var m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-  parentFields.style.display = (age < 16 && age >= 0) ? 'block' : 'none';
-});
-</script>
-</body>
-</html>
+function togglePro(val){
+  var pf = document.getElementById('pro-fields');
+  var wf = document.getElementById('field-website');
+  pf.style.display = proTypes.has(val) ? 'block' : 'none';
+  if(wf) wf.style.display = websiteTypes.has(val) ? 'block' : 'none';
+}
+{% endblock %}

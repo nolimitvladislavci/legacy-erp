@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="{% if is_memorial %}memorial{% else %}light{% endif %}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Memio.pet{% endblock %}</title>
+{% block meta %}
+<meta name="description" content="Memio.pet — Digitalni dom za tvog ljubimca">
+{% endblock %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/memio-pet.css">
+{% block extra_css %}{% endblock %}
+<script>
+(function(){
+  var s=localStorage.getItem('memio-theme');
+  var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  var theme = s || (d ? 'dark' : 'light');
+  {% if is_memorial %}theme = 'memorial';{% endif %}
+  document.documentElement.setAttribute('data-theme', theme);
+})();
+</script>
+</head>
+<body>
+
+{% block nav %}
+<nav class="mp-nav">
+  <a href="https://memio.pet" class="mp-nav-logo">Memio<span>.pet</span></a>
+  <div class="mp-nav-links">
+    <a href="/feed/" {% if request.path == '/feed/' or '/boxgram/' in request.path %}class="active"{% endif %}>Feed</a>
+    <a href="/udomljavanje/" {% if request.path == '/udomljavanje/' %}class="active"{% endif %}>Udomljavanje</a>
+    <a href="/prijava/">Prijava</a>
+    <a href="/registracija/" class="mp-nav-cta">Kreiraj profil</a>
+    <button class="mp-theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+<div class="mp-footer">
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
+  <a href="/feed/">Feed</a> · <a href="/udomljavanje/">Udomljavanje</a> · <a href="/hoteli/">Hoteli</a> · <a href="/krematoriji/">Krematoriji</a> · <a href="https://limit-connect.com/no-limit/">Za azile</a><br>
+  Projekt <a href="https://limit-connect.com/no-limit/">NO LIMIT udruge</a> · © 2026 <a href="https://limit-connect.com">Konjik d.o.o.</a>
+</div>
+{% endblock %}
+
+<script>
+(function(){
+  var t=document.documentElement.getAttribute('data-theme')||'light';
+  var btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent = t==='dark' ? '☀️' : t==='memorial' ? '🕯️' : '🌙';
+})();
+function toggleTheme(){
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'light';
+  if(c==='memorial') return; // ne mijenjaj memorial temu
+  var n=c==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('memio-theme',n);
+  var btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=n==='dark'?'☀️':'🌙';
+}
+{% block extra_js %}{% endblock %}
+</script>
+</body>
+</html>

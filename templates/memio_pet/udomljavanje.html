@@ -1,101 +1,61 @@
-<!DOCTYPE html>
-<html lang="hr" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Udomljavanje — Memio.pet</title>
-<meta name="description" content="Životinje iz azila koje čekaju dom. Pronađi svog novog prijatelja.">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f8f6f0;--surface:#fff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif;--shadow:rgba(0,0,0,.06)}
-[data-theme="dark"]{--bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;--gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--green:#34d058;--shadow:rgba(0,0,0,.35)}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
-.nav{background:var(--ink);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.3rem;font-weight:700}
-.nav-logo span{color:#fff}
-.nav a.link{color:var(--dim);text-decoration:none;font-size:.82rem}
-.hero{text-align:center;padding:48px 24px 32px;max-width:600px;margin:0 auto}
-.hero h1{font-family:var(--serif);font-size:2.2rem;font-weight:700;margin-bottom:8px}
-.hero h1 em{color:var(--gold);font-style:italic}
-.hero p{color:var(--ink2);font-size:.95rem;line-height:1.6;font-weight:300}
-.filters{max-width:700px;margin:0 auto 32px;padding:0 24px;display:flex;gap:12px;flex-wrap:wrap}
-.filters select,.filters input{padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.88rem;background:var(--surface);color:var(--ink);flex:1;min-width:120px}
-.filters button{padding:10px 20px;background:var(--gold);border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--ink)}
-.grid{max-width:900px;margin:0 auto;padding:0 24px 48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:all .2s;text-decoration:none;color:var(--ink)}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:var(--gold)}
-.card-img{width:100%;height:180px;object-fit:cover;display:block}
-.card-placeholder{width:100%;height:180px;background:linear-gradient(135deg,var(--ink) 0%,#2a2a4a 100%);display:flex;align-items:center;justify-content:center;font-size:3.5rem}
-.card-body{padding:14px 16px}
-.card-name{font-weight:700;font-size:1rem;margin-bottom:3px}
-.card-meta{font-size:.8rem;color:var(--dim);margin-bottom:6px}
-.card-azil{font-size:.75rem;color:var(--green);font-weight:500}
-.empty{text-align:center;padding:60px 24px;color:var(--dim);font-size:.95rem;grid-column:1/-1}
-.counter{text-align:center;margin-bottom:24px;font-size:.85rem;color:var(--dim)}
-.counter strong{color:var(--gold)}
-.footer{text-align:center;padding:32px;font-size:.75rem;color:var(--dim);border-top:1px solid var(--line)}
-.footer a{color:var(--gold);text-decoration:none}
-@media(max-width:500px){.grid{grid-template-columns:1fr}.hero h1{font-size:1.7rem}}
-</style>
-<script>(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));})();</script>
-</head>
-<body>
-<nav class="nav">
-  <a href="https://memio.pet" class="nav-logo">Memio<span>.pet</span></a>
-  <a href="https://limit-connect.com/no-limit/" class="link" style="color:var(--gold);text-decoration:none;font-size:.82rem">Za azile</a>
-</nav>
+{% extends "memio_pet/_base.html" %}
 
-<div class="hero">
-  <h1>Svaki ljubimac zaslužuje <em>dom</em></h1>
-  <p>Životinje iz azila diljem Hrvatske koje čekaju svoju obitelj. Pronađi svog novog prijatelja.</p>
+{% block title %}Udomljavanje — Memio.pet{% endblock %}
+{% block meta %}<meta name="description" content="Životinje iz azila koje čekaju dom. Pronađi svog novog prijatelja.">{% endblock %}
+
+{% block content %}
+<div style="text-align:center;padding:48px 24px 32px;max-width:600px;margin:0 auto">
+  <h1>Svaki ljubimac zaslužuje <em style="color:var(--gold);font-style:italic">dom</em></h1>
+  <p style="color:var(--ink2);font-size:.95rem;line-height:1.6;margin-top:8px">
+    Životinje iz azila diljem Hrvatske koje čekaju svoju obitelj.
+  </p>
 </div>
 
-<form class="filters" method="get">
-  <select name="vrsta">
+<form style="max-width:700px;margin:0 auto 24px;padding:0 24px;display:flex;gap:12px;flex-wrap:wrap" method="get">
+  <select name="vrsta" class="mp-field" style="flex:1;min-width:120px;margin:0;padding:10px 14px">
     <option value="">Sve vrste</option>
     {% for val, label in vrsta_choices %}
     <option value="{{ val }}" {% if vrsta_filter == val %}selected{% endif %}>{{ label }}</option>
     {% endfor %}
   </select>
-  <input type="text" name="grad" value="{{ grad_filter }}" placeholder="Grad...">
-  <button type="submit">Filtriraj</button>
+  <input type="text" name="grad" value="{{ grad_filter }}" placeholder="Grad..." style="flex:1;min-width:120px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-family:var(--sans);background:var(--surface);color:var(--ink)">
+  <button type="submit" class="mp-btn mp-btn-gold" style="padding:10px 20px">Filtriraj</button>
 </form>
 
-<div class="counter"><strong>{{ total }}</strong> životinja čeka dom</div>
+<div style="text-align:center;margin-bottom:24px;font-size:.85rem;color:var(--dim)">
+  <strong style="color:var(--gold)">{{ total }}</strong> životinja čeka dom
+</div>
 
-<div class="grid">
-  {% for animal in animals %}
-  <a href="{% url 'memio_pet:pet_profile' animal.chip_number|default:animal.ear_tag %}" class="card">
-    {% if animal.photo %}
-      <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" class="card-img">
-    {% else %}
-      <div class="card-placeholder">
-        {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐱{% else %}🐾{% endif %}
-      </div>
-    {% endif %}
-    <div class="card-body">
-      <div class="card-name">{{ animal.name|default:"Bez imena" }}</div>
-      <div class="card-meta">
-        {{ animal.get_vrsta_display }} · {{ animal.breed|default:"Mješanac" }}
-        {% if animal.spol != 'N' %} · {{ animal.get_spol_display }}{% endif %}
-      </div>
-      {% if animal.breeder %}
-      <div class="card-azil">🏠 {{ animal.breeder.name }}{% if animal.breeder.city %}, {{ animal.breeder.city }}{% endif %}</div>
+<div class="mp-container-wide">
+  <div class="mp-grid">
+    {% for animal in animals %}
+    <a href="{% url 'memio_pet:pet_profile' animal.chip_number|default:animal.ear_tag %}" class="mp-pet-card">
+      {% if animal.photo %}
+        <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" class="mp-pet-card-img">
+      {% else %}
+        <div class="mp-pet-card-placeholder">
+          {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐱{% else %}🐾{% endif %}
+        </div>
       {% endif %}
+      <div class="mp-pet-card-body">
+        <div class="mp-pet-card-name">{{ animal.name|default:"Bez imena" }}</div>
+        <div class="mp-pet-card-meta">
+          {{ animal.get_vrsta_display }} · {{ animal.breed|default:"Mješanac" }}
+          {% if animal.spol != 'N' %} · {{ animal.get_spol_display }}{% endif %}
+        </div>
+        {% if animal.breeder %}
+        <div style="font-size:.75rem;color:var(--green);font-weight:500;margin-top:4px">
+          🏠 {{ animal.breeder.name }}{% if animal.breeder.city %}, {{ animal.breeder.city }}{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% empty %}
+    <div style="text-align:center;padding:60px 24px;color:var(--dim);grid-column:1/-1">
+      Trenutno nema životinja za udomljavanje.<br>
+      Provjerite ponovno uskoro ili kontaktirajte lokalni azil.
     </div>
-  </a>
-  {% empty %}
-  <div class="empty">
-    Trenutno nema životinja za udomljavanje.<br>
-    Provjerite ponovno uskoro ili kontaktirajte lokalni azil.
+    {% endfor %}
   </div>
-  {% endfor %}
 </div>
-
-<div class="footer">
-  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
-  Projekt udruge <a href="https://limit-connect.com/no-limit/">NO LIMIT</a> · Besplatno za sve azile
-</div>
-</body>
-</html>
+{% endblock %}
