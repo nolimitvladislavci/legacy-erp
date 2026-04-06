@@ -27,6 +27,7 @@ class BreederProfile(models.Model):
         ('owner',        'Vlasnik ljubimca'),
         ('trainer',      'Kinolog / Dresura pasa'),
         ('hotel',        'Pet Hotel / Pansion'),
+        ('krematorij',   'Krematorij za kućne ljubimce'),
         ('sheep_farmer', 'Uzgajivač ovaca i koza'),
         ('pig_farmer',   'Uzgajivač svinja'),
         ('poultry',      'Peradarstvo'),

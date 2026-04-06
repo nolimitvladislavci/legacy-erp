@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ page_title }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--surface:#fff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top-bar{background:var(--ink);color:#f8f6f0;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.logo span{color:#f8f6f0}
+.nav-link{color:rgba(248,246,240,.6);font-size:.82rem;text-decoration:none}
+.container{max-width:720px;margin:0 auto;padding:32px 16px}
+.page-hero{text-align:center;padding:40px 0 24px}
+.page-hero h1{font-family:var(--serif);font-size:2.2rem;font-weight:700;margin-bottom:10px}
+.page-hero p{color:var(--ink2);font-size:.92rem;line-height:1.7;max-width:500px;margin:0 auto}
+.urgent-box{background:#fff;border:2px solid var(--gold);border-radius:14px;padding:24px;margin:24px 0 32px;text-align:center}
+.urgent-box h2{font-family:var(--serif);font-size:1.3rem;margin-bottom:8px;color:var(--ink)}
+.urgent-box p{font-size:.88rem;color:var(--ink2);line-height:1.6;margin-bottom:16px}
+.urgent-phones{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.urgent-phone{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--gold);color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;transition:opacity .15s}
+.urgent-phone:hover{opacity:.85}
+.urgent-phone-alt{background:var(--ink)}
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:32px 0 14px;padding-left:4px}
+.filter-form{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.filter-form input{flex:1;min-width:180px;padding:10px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.9rem;color:var(--ink);background:#fff;outline:none}
+.filter-form input:focus{border-color:var(--gold)}
+.filter-form button{padding:10px 20px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-weight:700;cursor:pointer;color:#fff;font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:14px;display:flex;gap:20px;align-items:flex-start;transition:border-color .15s}
+.card:hover{border-color:var(--gold)}
+.card-avatar{width:52px;height:52px;border-radius:12px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.card-body{flex:1;min-width:0}
+.card-name{font-family:var(--serif);font-size:1.15rem;font-weight:700;margin-bottom:2px}
+.card-meta{font-size:.82rem;color:var(--dim);margin-bottom:8px}
+.card-note{font-size:.82rem;color:var(--ink2);margin-bottom:10px;line-height:1.5}
+.card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.badge{font-size:.68rem;padding:3px 10px;border-radius:20px;font-weight:600}
+.badge-verified{background:rgba(40,167,69,.1);color:#1a6b30}
+.badge-nationwide{background:rgba(59,130,246,.1);color:#2563eb}
+.badge-gold{background:rgba(201,168,76,.15);color:#8a6820}
+.card-contact{display:flex;gap:8px;flex-wrap:wrap}
+.contact-btn{padding:7px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;color:var(--ink);transition:all .15s}
+.contact-btn:hover{border-color:var(--gold);color:var(--gold)}
+.contact-btn-primary{background:var(--gold);color:#fff;border-color:var(--gold)}
+.contact-btn-primary:hover{opacity:.85;color:#fff}
+.info-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:14px}
+.info-card h3{font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:12px}
+.info-card ul{list-style:none;padding:0}
+.info-card li{padding:8px 0;font-size:.88rem;line-height:1.6;border-bottom:1px solid rgba(0,0,0,.04)}
+.info-card li:last-child{border:none}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;font-size:.7rem;font-weight:700;margin-right:8px;flex-shrink:0}
+.no-results{text-align:center;padding:24px 20px}
+.no-results h3{font-family:var(--serif);font-size:1.2rem;margin-bottom:8px;color:var(--ink2)}
+.no-results p{font-size:.88rem;color:var(--dim);margin-bottom:4px}
+.legal-note{background:#f0ede5;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:16px 20px;margin:24px 0;font-size:.82rem;color:var(--ink2);line-height:1.7}
+footer{text-align:center;padding:32px 16px;font-size:.76rem;color:var(--dim)}
+footer a{color:var(--gold);text-decoration:none}
+@media(max-width:520px){.card{flex-direction:column;gap:12px}.urgent-phones{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+  <a href="/udomljavanje/" class="nav-link">Udomljavanje</a>
+</div>
+
+<div class="container">
+  <div class="page-hero">
+    <div style="font-size:2.5rem;margin-bottom:16px">🌈</div>
+    <h1>Krematoriji za kucne ljubimce</h1>
+    <p>Verificirani pružatelji usluge kremacije u Hrvatskoj. Dostojanstven ispraćaj — jer zaslužuju više od zaborava.</p>
+  </div>
+
+  <!-- HITNO — što napraviti ODMAH -->
+  <div class="urgent-box">
+    <h2>Trebate pomoc sada?</h2>
+    <p>Ovi pružatelji pokrivaju <strong>cijelu Hrvatsku</strong> — dolaze po ljubimca na vašu adresu ili kod veterinara, 0-24.</p>
+    <div class="urgent-phones">
+      <a href="tel:+385976556556" class="urgent-phone">Pet 4ever — 097 655 6556</a>
+      <a href="tel:+38515101635" class="urgent-phone urgent-phone-alt">Pet Memo — 01 5101 635</a>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <form class="filter-form" method="get">
+    <input type="text" name="grad" placeholder="Upiši grad..." value="{{ grad_filter }}" autocomplete="address-level2">
+    <button type="submit">Traži</button>
+  </form>
+
+  {% if grad_filter and not krematoriji %}
+  <div class="no-results">
+    <h3>U gradu "{{ grad_filter }}" nema krematorija</h3>
+    <p>Ali ne brinite — sljedeći pružatelji pokrivaju cijelu Hrvatsku s preuzimanjem na adresi.</p>
+  </div>
+  {% endif %}
+
+  <!-- POPIS KREMATORIJA -->
+  <div class="section-label">{% if grad_filter and not krematoriji %}Dostupni krematoriji s dostavom{% elif krematoriji %}Krematoriji{% if grad_filter %} — {{ grad_filter }}{% endif %}{% else %}Svi krematoriji u Hrvatskoj{% endif %} ({{ total }})</div>
+
+  {% for k in display_list %}
+  <div class="card">
+    <div class="card-avatar">⚱️</div>
+    <div class="card-body">
+      <div class="card-name">{{ k.name }}</div>
+      <div class="card-meta">📍 {{ k.city }}, {{ k.country }}</div>
+      {% if k.nationwide %}
+      <div class="card-note">🚐 Preuzimanje na adresi diljem cijele Hrvatske. Dostupno 0-24.</div>
+      {% endif %}
+      <div class="card-badges">
+        {% if k.is_cro_validated %}<span class="badge badge-verified">✓ Verificiran</span>{% endif %}
+        {% if k.nationwide %}<span class="badge badge-nationwide">Cijela HR</span>{% endif %}
+        {% if k.is_no_limit_partner %}<span class="badge badge-gold">NO LIMIT partner</span>{% endif %}
+      </div>
+      <div class="card-contact">
+        {% if k.phone %}<a href="tel:{{ k.phone }}" class="contact-btn contact-btn-primary">📞 {{ k.phone }}</a>{% endif %}
+        {% if k.email %}<a href="mailto:{{ k.email }}" class="contact-btn">✉️ Email</a>{% endif %}
+        {% if k.website %}<a href="{{ k.website }}" target="_blank" rel="noopener" class="contact-btn">🌐 Web</a>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- ŠTO NAPRAVITI — korak po korak -->
+  <div class="section-label">Što napraviti kad ljubimac ugine</div>
+  <div class="info-card">
+    <h3>Koraci — mirno, bez žurbe</h3>
+    <ul>
+      <li><span class="step-num">1</span> <strong>Kontaktirajte veterinara</strong> — potvrda uginuća i savjet. Ako je noć/vikend, zvati dežurnu vet ambulantu.</li>
+      <li><span class="step-num">2</span> <strong>Odaberite krematorij</strong> — nazovite i dogovorite preuzimanje. Većina dolazi na adresu. Tijelo držite na hladnom mjestu.</li>
+      <li><span class="step-num">3</span> <strong>Individualna ili skupna kremacija</strong> — individualna: dobijete pepeo svog ljubimca natrag u urni. Skupna: povoljnija, bez pepela.</li>
+      <li><span class="step-num">4</span> <strong>Odjava iz Upisnika</strong> — u roku <strong>14 dana</strong> odjaviti ljubimca iz Upisnika kućnih ljubimaca (ordinacija koja je čipirala ili HAPIH).</li>
+      <li><span class="step-num">5</span> <strong>Sjećanje</strong> — kreirajte <a href="https://memio.pet" style="color:var(--gold);font-weight:600">memorijalni profil na Memio.pet</a> — digitalni spomenik koji čuva uspomene zauvijek.</li>
+    </ul>
+  </div>
+
+  <!-- ZAKON -->
+  <div class="legal-note">
+    📋 <strong>Zakon:</strong> Tijelo kućnog ljubimca je nusproizvod Kategorije 1 (EU Uredba 1069/2009). <strong>Pokop u vrtu nije dozvoljen.</strong> Opcije: kremacija u ovlaštenom objektu ili zbrinjavanje putem vet stanice. Pepeo možete zadržati uz certifikat.
+  </div>
+
+  <!-- PRIJAVA -->
+  <div class="info-card" style="text-align:center;border-color:rgba(201,168,76,.3)">
+    <p style="color:var(--dim);font-size:.88rem;margin-bottom:12px">Ste li ovlašteni krematorij koji nedostaje na popisu?</p>
+    <a href="mailto:ivan@limit-connect.com?subject=Prijava krematorija — Memio.pet" style="display:inline-block;padding:10px 24px;background:var(--gold);border-radius:8px;font-weight:700;text-decoration:none;color:#fff;font-size:.88rem">Prijavite se — besplatno</a>
+  </div>
+</div>
+
+<footer>
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca ·
+  Projekt <a href="https://limit-connect.com/no-limit/">NO LIMIT udruge</a><br>
+  Podaci: javni izvori, verificirano 04/2026.
+</footer>
+</body>
+</html>

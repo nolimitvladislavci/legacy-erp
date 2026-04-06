@@ -860,15 +860,36 @@ def krematoriji_lista(request):
     db = 'memio_pets'
     grad = request.GET.get('grad', '').strip()
 
-    qs = BreederProfile.objects.using(db).filter(
+    all_qs = BreederProfile.objects.using(db).filter(
         account_type='krematorij'
     ).order_by('city', 'name')
 
+    # Krematoriji koji pokrivaju cijelu HR (poznati po preuzimanju na adresi)
+    NATIONWIDE_NAMES = {'Pet 4ever', 'Pet Memo'}
+
     if grad:
-        qs = qs.filter(city__icontains=grad)
+        city_qs = all_qs.filter(city__icontains=grad)
+        krematoriji = list(city_qs)
+    else:
+        krematoriji = list(all_qs)
+
+    # Ako nema rezultata za grad — prikaži SVE s napomenom
+    if grad and not krematoriji:
+        display_list = list(all_qs)
+    else:
+        display_list = krematoriji
+
+    # Označi koji pokrivaju cijelu HR
+    for k in display_list:
+        k.nationwide = k.name in NATIONWIDE_NAMES
+
+    # Nationwide na vrh
+    display_list.sort(key=lambda x: (not x.nationwide, x.city))
 
     return render(request, 'memio_pet/krematoriji.html', {
-        'krematoriji': list(qs),
+        'krematoriji': krematoriji,
+        'display_list': display_list,
+        'total': all_qs.count(),
         'grad_filter': grad,
         'page_title': 'Krematoriji za kućne ljubimce — Memio.pet',
     })
