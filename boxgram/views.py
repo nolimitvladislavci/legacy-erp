@@ -222,7 +222,13 @@ def public_feed(request):
         'species': species,
         'species_choices': species_choices,
     }
-    return render(request, 'boxgram/feed.html', context)
+    # Standalone template za memio.pet, LIMIT Connect base za ostalo
+    host = request.get_host()
+    if 'memio.pet' in host:
+        template = 'boxgram/feed_standalone.html'
+    else:
+        template = 'boxgram/feed.html'
+    return render(request, template, context)
 
 
 def competition_detail(request, competition_id):
