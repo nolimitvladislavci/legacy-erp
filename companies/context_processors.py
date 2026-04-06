@@ -62,3 +62,16 @@ def sidebar_modules(request):
 
     except Exception:
         return {}
+
+
+def memio_lang_choices(request):
+    """Available languages for memio.pet lang switcher."""
+    return {
+        'lang_choices': [
+            ('hr', '🇭🇷', 'Hrvatski'),
+            ('de', '🇩🇪', 'Deutsch'),
+            ('en', '🇬🇧', 'English'),
+            ('tr', '🇹🇷', 'Türkçe'),
+            ('el', '🇬🇷', 'Ελληνικά'),
+        ]
+    }

@@ -1,0 +1,44 @@
+{% load i18n %}
+{% get_current_language as LANG %}
+{# Memio.pet language switcher — compact, inline, 5 jezika #}
+<div style="position:relative;display:inline-flex;align-items:center" id="mpLangWrap">
+  <button type="button" onclick="this.nextElementSibling.classList.toggle('show')"
+    style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.72rem;font-weight:600;
+    color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px;transition:all .15s">
+    {% if LANG == 'hr' %}🇭🇷{% elif LANG == 'de' %}🇩🇪{% elif LANG == 'en' %}🇬🇧{% elif LANG == 'tr' %}🇹🇷{% elif LANG == 'el' %}🇬🇷{% endif %}
+    {{ LANG|upper }}
+  </button>
+  <div class="mp-lang-dd" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;
+    background:#0d1117;border:1px solid rgba(201,168,76,.3);border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:150px;z-index:200;overflow:hidden">
+    {% for code, flag, name in lang_choices %}
+    <form method="post" action="/i18n/setlang/" style="margin:0">
+      {% csrf_token %}
+      <input type="hidden" name="language" value="{{ code }}">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" style="width:100%;padding:10px 14px;background:none;border:none;
+        color:{% if LANG == code %}#c9a84c{% else %}#94a3b8{% endif %};font-size:.82rem;cursor:pointer;
+        display:flex;align-items:center;gap:8px;font-family:inherit;transition:background .15s;
+        {% if LANG == code %}font-weight:700{% endif %}"
+        onmouseenter="this.style.background='rgba(201,168,76,.1)'"
+        onmouseleave="this.style.background='none'">
+        <span>{{ flag }}</span> {{ name }}
+        {% if LANG == code %}<span style="margin-left:auto;font-size:.7rem">✓</span>{% endif %}
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+<style>
+.mp-lang-dd.show{display:block!important}
+</style>
+<script>
+document.addEventListener('click',function(e){
+  var w=document.getElementById('mpLangWrap');
+  if(w && !w.contains(e.target)){
+    var dd=w.querySelector('.mp-lang-dd');
+    if(dd) dd.classList.remove('show');
+  }
+});
+</script>

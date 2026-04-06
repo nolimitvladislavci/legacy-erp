@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Memio.pet{% endblock %}</title>
 {% block meta %}
-<meta name="description" content="Memio.pet — Digitalni dom za tvog ljubimca">
+<meta name="description" content="Memio.pet — {% trans 'Digitalni dom za tvog ljubimca' %}">
 {% endblock %}
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#c9a84c">
@@ -32,9 +32,10 @@
   <a href="https://memio.pet" class="mp-nav-logo">Memio<span>.pet</span></a>
   <div class="mp-nav-links">
     <a href="/feed/" {% if request.path == '/feed/' or '/boxgram/' in request.path %}class="active"{% endif %}>Feed</a>
-    <a href="/udomljavanje/" {% if request.path == '/udomljavanje/' %}class="active"{% endif %}>Udomljavanje</a>
-    <a href="/prijava/">Prijava</a>
-    <a href="/registracija/" class="mp-nav-cta">Kreiraj profil</a>
+    <a href="/udomljavanje/" {% if request.path == '/udomljavanje/' %}class="active"{% endif %}>{% trans "Udomljavanje" %}</a>
+    <a href="/prijava/">{% trans "Prijava" %}</a>
+    <a href="/registracija/" class="mp-nav-cta">{% trans "Kreiraj profil" %}</a>
+    {% include "memio_pet/_lang_switcher.html" %}
     <button class="mp-theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </div>
 </nav>
@@ -73,7 +74,7 @@ function toggleTheme(){
 <div id="cookie-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
   background:var(--ink);color:var(--top-text);padding:14px 24px;
   font-size:.82rem;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-  <span>Koristimo samo tehničke kolačiće nužne za rad stranice. <a href="/privatnost/" style="color:var(--gold)">Saznaj više</a></span>
+  <span>{% trans "Koristimo samo tehničke kolačiće nužne za rad stranice." %} <a href="/privatnost/" style="color:var(--gold)">{% trans "Saznaj više" %}</a></span>
   <button onclick="document.getElementById('cookie-bar').style.display='none';localStorage.setItem('mp-cookies','1')"
     style="background:var(--gold);color:var(--ink);border:none;padding:8px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:var(--sans);white-space:nowrap">
     U redu

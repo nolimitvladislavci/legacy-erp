@@ -222,6 +222,7 @@ TEMPLATES = [{
             "django.contrib.messages.context_processors.messages",
                     "core.context_processors.failed_imports_badge",
             "companies.context_processors.sidebar_modules",
+            "companies.context_processors.memio_lang_choices",
             "permissions.context_processors.permissions_context",
             "permissions.context_processors.subscription_context",
             "core.context_processors.booking_globals",
