@@ -56,6 +56,11 @@
         .lang-bar { display:flex;gap:4px;justify-content:center;margin-top:16px; }
         .lang-btn { padding:3px 10px;font-size:.7rem;font-weight:700;border-radius:5px;border:1px solid rgba(255,255,255,.1);color:#64748b;background:none;cursor:pointer;letter-spacing:.5px; }
         .lang-btn.active { background:var(--gold,#c9a84c);color:#0f172a;border-color:var(--gold,#c9a84c); }
+        /* Password strength */
+        .pwd-strength { margin-top:8px; }
+        .pwd-strength-bar { height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px; }
+        .pwd-strength-fill { height:100%;border-radius:2px;width:0;transition:width .3s,background .3s; }
+        .pwd-strength-msg { font-size:.75rem;min-height:18px;transition:color .3s;display:flex;align-items:center;gap:6px; }
     </style>
 </head>
 <body>
@@ -91,6 +96,13 @@
                 <button type="button" class="pwd-eye" onclick="var f=document.getElementById('pwd');f.type=f.type==='password'?'text':'password'">
                     <i class="fas fa-eye"></i>
                 </button>
+            </div>
+            <!-- Password strength indicator -->
+            <div class="pwd-strength" id="pwd-strength" style="display:none">
+                <div class="pwd-strength-bar">
+                    <div class="pwd-strength-fill" id="pwd-bar"></div>
+                </div>
+                <div class="pwd-strength-msg" id="pwd-msg"></div>
             </div>
         </div>
 
@@ -136,6 +148,64 @@ function switchLang(code) {
     document.body.appendChild(form);
     form.submit();
 }
+
+/* ── Password Strength Widget ── */
+(function(){
+  var BANNED = new Set([
+    'password','lozinka','123456','qwerty','admin','hrvatska',
+    'zagreb','limit','connect','welcome','letmein','monkey',
+    '111111','abc123','iloveyou','sunshine','master','dragon',
+    'admin123','pass123','test123','demo123','user123'
+  ]);
+
+  var pwdInput = document.getElementById('pwd');
+  var wrap = document.getElementById('pwd-strength');
+  var bar = document.getElementById('pwd-bar');
+  var msg = document.getElementById('pwd-msg');
+
+  var levels = [
+    {min:0, color:'#ef4444', label:'Ovu lozinku svi znaju. Dodaj velika slova i brojeve!'},
+    {min:2, color:'#ef4444', label:'Slaba lozinka. Dodaj specijalne znakove!'},
+    {min:3, color:'#f59e0b', label:'Srednje jaka. Još malo i bit ćemo sigurni!'},
+    {min:4, color:'#f59e0b', label:'Dobra lozinka! Skoro savršeno!'},
+    {min:5, color:'#22c55e', label:'Odlična lozinka!'},
+    {min:6, color:'#22c55e', label:'Savršena zaštita!'},
+    {min:7, color:'#10b981', label:'Neprobojna! Čak i moji preci vučjaci bi se sklonili!'}
+  ];
+
+  function check(pw){
+    if(!pw || pw.length < 3){
+      wrap.style.display='none';
+      return;
+    }
+    wrap.style.display='block';
+
+    var score = [
+      pw.length >= 8,
+      /[A-Z]/.test(pw),
+      /[a-z]/.test(pw),
+      /[0-9]/.test(pw),
+      /[^A-Za-z0-9]/.test(pw),
+      !BANNED.has(pw.toLowerCase()),
+      pw.length >= 12
+    ].filter(Boolean).length;
+
+    var lvl = levels[0];
+    for(var i=levels.length-1;i>=0;i--){
+      if(score>=levels[i].min){lvl=levels[i];break;}
+    }
+
+    var pct = Math.round((score/7)*100);
+    bar.style.width = pct+'%';
+    bar.style.background = lvl.color;
+    msg.style.color = lvl.color;
+    msg.textContent = lvl.label;
+  }
+
+  if(pwdInput){
+    pwdInput.addEventListener('input',function(){ check(this.value); });
+  }
+})();
 </script>
 </body>
 </html>
