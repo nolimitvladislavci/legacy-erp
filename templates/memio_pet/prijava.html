@@ -94,7 +94,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <!-- QR scanner -->
   <div id="qrScanner" style="display:none;margin-top:16px">
     <div id="qrReader" style="width:100%;max-width:400px;margin:0 auto"></div>
-    <button class="alt-btn" onclick="stopQrScan()" style="margin-top:10px;display:block;margin-left:auto;margin-right:auto">Zatvori kameru</button>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+      <button class="alt-btn" onclick="stopQrScan()">Zatvori kameru</button>
+      <label class="alt-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+        📸 Uslikaj
+        <input type="file" accept="image/*" capture="environment" onchange="scanFromPhoto(this)" style="display:none">
+      </label>
+    </div>
+    <p id="photoStatus" style="display:none;text-align:center;margin-top:8px;font-size:.82rem"></p>
   </div>
 
   <a href="/registracija/" class="btn-register">Kreiraj novi profil →</a>
@@ -148,6 +155,38 @@ function startQrScan(){
       '<p style="color:#e05252;font-size:.85rem;padding:20px;text-align:center">'+
       'Kamera: '+err+'<br><br>iOS: koristi Safari. Android: dozvoli kameru.</p>';
   });
+}
+
+function scanFromPhoto(input){
+  if(!input.files||!input.files[0])return;
+  var status=document.getElementById('photoStatus');
+  status.style.display='block';
+  status.style.color='#3b82f6';
+  status.textContent='Analiziram sliku...';
+
+  // Zaustavi live kameru ako radi
+  if(html5QrCode){
+    html5QrCode.stop().catch(function(){});
+  }
+
+  var scanner=new Html5Qrcode('qrReader');
+  scanner.scanFile(input.files[0],true)
+    .then(function(decodedText){
+      status.style.color='#4caf7d';
+      status.textContent='✅ Nađeno: '+decodedText.substring(0,40)+'...';
+      setTimeout(function(){
+        if(decodedText.indexOf('memio.pet/')!==-1){
+          window.location.href=decodedText;
+        } else {
+          window.location.href='/pas/'+encodeURIComponent(decodedText)+'/';
+        }
+      },500);
+    })
+    .catch(function(){
+      status.style.color='#e05252';
+      status.textContent='QR kod nije pronađen na slici. Pokušaj ponovo s boljim fokusom.';
+      setTimeout(function(){status.style.display='none';},4000);
+    });
 }
 
 function stopQrScan(){
