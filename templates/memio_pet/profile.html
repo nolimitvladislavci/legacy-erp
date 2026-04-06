@@ -635,7 +635,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       <p class="qr-url" style="margin-bottom:16px">{{ profile_url }}</p>
       <div class="share-row">
         <button class="share-btn" id="copyLinkBtn" onclick="copyLink()">🔗 Kopiraj link</button>
-        <a class="share-btn wa" href="https://api.whatsapp.com/send?text={{ animal.name|urlencode }}%20—%20Memio.pet%20profil%20{{ profile_url|urlencode }}" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <button class="share-btn" id="nativeShareBtn" onclick="nativeShare()" style="display:none">📤 Podijeli</button>
+        <a class="share-btn wa" id="waShareBtn" href="https://api.whatsapp.com/send?text={{ animal.name|urlencode }}%20—%20Memio.pet%20profil%20{{ profile_url|urlencode }}" target="_blank" rel="noopener">💬 WhatsApp</a>
         <a class="share-btn" href="/uvezi/?animal={{ identifier }}" style="text-decoration:none">📱 Uvezi s mreža</a>
         <a class="share-btn" href="/pas/{{ identifier }}/knjiga/" target="_blank" style="text-decoration:none">📖 Knjiga sjećanja</a>
         {% if qr_url %}
@@ -693,6 +694,18 @@ function spawnParticles(){
   }
 }
 function getCookie(n){var v=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return v?v.pop():'';}
+
+// Web Share API — radi sa svim aplikacijama (WA, Viber, Telegram, email...)
+if(navigator.share){
+  document.getElementById('nativeShareBtn').style.display='inline-flex';
+}
+function nativeShare(){
+  navigator.share({
+    title:'{{ animal.name|default:animal.ear_tag }} — Memio.pet',
+    text:'{{ animal.name|default:animal.ear_tag }} — profil ljubimca na Memio.pet',
+    url:'{{ profile_url }}'
+  }).catch(function(){});
+}
 
 function copyLink(){
   var url = '{{ profile_url }}';
