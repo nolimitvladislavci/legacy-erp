@@ -12,7 +12,7 @@ urlpatterns = [
     path("pas/<str:chip_or_tag>/qr/", views.pet_qr_code, name="pet_qr"),
     path("uzgajivac/<uuid:breeder_id>/", views.breeder_profile_page, name="breeder_profile"),
 
-    # BARF + Badge (Sprint BARF)
+    # BARF + Badge
     path("badge/<uuid:breeder_id>/", views.njuskalo_badge, name="njuskalo_badge"),
     path("barf/", views.barf_listings, name="barf_listings"),
     path("barf/nova/", views.barf_create, name="barf_create"),
@@ -21,13 +21,26 @@ urlpatterns = [
     path("prijava/", views.prijava, name="prijava"),
     path("dresura/", views.training_list, name="training_list"),
 
-    # Dashboard (login required)
+    # Dashboard
     path("moj-profil/", views.breeder_dashboard, name="breeder_dashboard"),
 
     # Add animal — journey flow
     path("ljubimac/novi/", views.add_animal, name="add_animal"),
     path("ljubimac/zatrazi/", views.add_animal_request, name="add_animal_zatrazi"),
-
-    # Magic token — sigurna autorizacija
     path("ljubimac/token/<str:token>/", views.add_animal_with_token, name="add_animal_token"),
+    path("ljubimac/milestone/novi/", views.add_milestone, name="add_milestone"),
+
+    # Udomljavanje
+    path("udomljavanje/", views.udomljavanje_lista, name="udomljavanje"),
+
+    # Dugini Most — memorial
+    path("api/memorial/<str:chip_or_tag>/candle/", views.memorial_candle_api, name="memorial_candle"),
+    path("memorijal/<str:chip_or_tag>/uredi/", views.memorial_edit, name="memorial_edit"),
+
+    # Knjiga sjecanja PDF
+    path("pas/<str:chip_or_tag>/knjiga/", views.knjiga_sjecanja_pdf, name="knjiga_sjecanja"),
+
+    # Direktoriji
+    path("krematoriji/", views.krematoriji_lista, name="krematoriji_lista"),
+    path("hoteli/", views.hoteli_lista, name="hoteli_lista"),
 ]

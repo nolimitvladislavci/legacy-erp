@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dodaj prekretnicu — {{ animal.name }} — Memio.pet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--ink:#1a1a2e;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--serif:'Cormorant Garamond',serif;--sans:'Space Grotesk',sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.top-bar{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.logo{font-family:var(--serif);font-size:1.3rem;font-weight:700;color:var(--ink);text-decoration:none}
+.logo span{color:var(--gold)}
+.card{width:100%;max-width:480px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:36px 32px}
+h1{font-family:var(--serif);font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.sub{color:var(--dim);font-size:.85rem;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.75rem;font-weight:500;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.92rem;color:var(--ink);outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{min-height:80px;resize:vertical}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.type-btn{padding:10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:.8rem;cursor:pointer;text-align:center;transition:all .2s}
+.type-btn:hover,.type-btn.active{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.type-btn input{display:none}
+.btn{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer}
+.btn:hover{background:#b8942a}
+.back{display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--dim);text-decoration:none}
+.back:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="https://memio.pet" class="logo">Memio<span>.pet</span></a>
+</div>
+
+<div class="card">
+  <h1>Dodaj prekretnicu</h1>
+  <p class="sub">{{ animal.name }} — nova uspomena u životnom traku</p>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="chip" value="{{ chip }}">
+
+    <div class="field"><label>Tip prekretnice</label></div>
+    <div class="type-grid">
+      {% for val, label in milestone_types %}
+      <label class="type-btn{% if val == 'custom' %} active{% endif %}">
+        <input type="radio" name="type" value="{{ val }}" {% if val == 'custom' %}checked{% endif %}
+          onchange="this.closest('.type-grid').querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));this.closest('.type-btn').classList.add('active')">
+        {{ label }}
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="field">
+      <label>Naslov *</label>
+      <input type="text" name="title" placeholder="npr. Prva šetnja u parku" required>
+    </div>
+
+    <div class="field">
+      <label>Datum *</label>
+      <input type="date" name="date" required>
+    </div>
+
+    <div class="field">
+      <label>Bilješka (opcijsko)</label>
+      <textarea name="note" placeholder="Kako je bilo..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Fotografija (opcijsko)</label>
+      <input type="file" name="photo" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn">Dodaj prekretnicu</button>
+  </form>
+
+  <a href="/pas/{{ chip }}/" class="back">← Natrag na profil</a>
+</div>
+</body>
+</html>

@@ -11,11 +11,11 @@ Endpointi:
 """
 import io
 import qrcode
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import cache_page, never_cache
 from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
 
@@ -53,6 +53,38 @@ def pet_profile_page(request, chip_or_tag):
     if breeder:
         reviews = list(BreederReview.objects.using(db).filter(breeder=breeder, is_published=True).order_by("-created_at")[:10])
 
+    # Memorial context
+    from memio_pet.models import MemorialProfile, LifeMilestone
+    is_memorial = (animal.status == 'uginulo')
+    memorial = None
+    if is_memorial:
+        try:
+            memorial = MemorialProfile.objects.using(db).get(animal=animal)
+        except MemorialProfile.DoesNotExist:
+            pass
+
+    # Zivotni trak (timeline)
+    timeline = []
+    if animal.date_of_birth:
+        timeline.append({'date': animal.date_of_birth, 'type': 'rodenje', 'icon': '🐾',
+                         'title': f'Rođen/a {animal.name}', 'note': '', 'photo': None})
+    for own in ownership_chain:
+        timeline.append({'date': own.acquired_at, 'type': 'vlasnistvo', 'icon': '🏠',
+                         'title': f'Novi dom — {own.owner_name}', 'note': '', 'photo': None})
+    for hr in health_records:
+        timeline.append({'date': hr.datum, 'type': 'zdravlje', 'icon': '💉',
+                         'title': hr.get_tip_display(), 'note': hr.opis or '', 'photo': None})
+    milestones = list(LifeMilestone.objects.using(db).filter(animal=animal).order_by('date'))
+    for m in milestones:
+        icon = m.get_type_display().split(' ')[0] if m.get_type_display() else '⭐'
+        timeline.append({'date': m.date, 'type': m.type, 'icon': icon,
+                         'title': m.title, 'note': m.note,
+                         'photo': m.photo.url if m.photo else None})
+    if is_memorial and memorial and memorial.date_of_death:
+        timeline.append({'date': memorial.date_of_death, 'type': 'memorial', 'icon': '🌈',
+                         'title': 'Dugini Most', 'note': memorial.epitaph or '', 'photo': None})
+    timeline.sort(key=lambda x: x['date'])
+
     return render(request, "memio_pet/profile.html", {
         "animal": animal, "breeder": breeder,
         "health_records": health_records, "ownership_chain": ownership_chain,
@@ -61,6 +93,8 @@ def pet_profile_page(request, chip_or_tag):
         "qr_url": f"https://memio.pet/pas/{identifier}/qr/",
         "profile_url": f"https://memio.pet/pas/{identifier}/",
         "identifier": identifier, "verified": animal.is_verified,
+        "is_memorial": is_memorial, "memorial": memorial,
+        "timeline": timeline, "milestones": milestones,
     })
 
 
@@ -441,6 +475,23 @@ def add_animal_with_token(request, token):
     })
 
 
+@require_POST
+def memorial_candle_api(request, chip_or_tag):
+    """API: upali svjećicu na memorijalu."""
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+    if not animal or animal.status != 'uginulo':
+        return JsonResponse({'error': 'not found'}, status=404)
+    try:
+        from memio_pet.models import MemorialProfile
+        memorial = MemorialProfile.objects.using(db).get(animal=animal)
+        memorial.candle_count += 1
+        memorial.save(using=db, update_fields=['candle_count'])
+        return JsonResponse({'total': memorial.candle_count})
+    except MemorialProfile.DoesNotExist:
+        return JsonResponse({'error': 'no memorial'}, status=404)
+
+
 def prijava(request):
     """Prijava postojećeg korisnika — email lookup → session."""
     db = 'memio_pets'
@@ -465,4 +516,324 @@ def prijava(request):
     return render(request, 'memio_pet/prijava.html', {
         'error': error,
         'email_value': email_value,
+    })
+
+
+def udomljavanje_lista(request):
+    """Javna stranica — životinje iz azila koje čekaju dom."""
+    db = 'memio_pets'
+    vrsta_filter = request.GET.get('vrsta', '')
+    grad_filter = request.GET.get('grad', '')
+
+    qs = AnimalProfile.objects.using(db).filter(
+        status='u_azilu'
+    ).select_related('breeder').order_by('-created_at')
+
+    if vrsta_filter:
+        qs = qs.filter(vrsta=vrsta_filter)
+    if grad_filter:
+        qs = qs.filter(breeder__city__icontains=grad_filter)
+
+    return render(request, 'memio_pet/udomljavanje.html', {
+        'animals': list(qs[:50]),
+        'vrsta_filter': vrsta_filter,
+        'grad_filter': grad_filter,
+        'vrsta_choices': AnimalProfile.VRSTA_CHOICES,
+        'total': qs.count(),
+    })
+
+
+def add_milestone(request):
+    """Dodaj životnu prekretnicu na profil ljubimca."""
+    db = 'memio_pets'
+    chip = request.GET.get('animal') or request.POST.get('chip')
+    animal = _find_animal(chip) if chip else None
+    if not animal:
+        return redirect('memio_pet:landing')
+
+    if request.method == 'POST':
+        from memio_pet.models import LifeMilestone
+        m = LifeMilestone(
+            animal=animal,
+            type=request.POST.get('type', 'custom'),
+            title=request.POST.get('title', '').strip(),
+            date=request.POST.get('date'),
+            note=request.POST.get('note', '').strip(),
+        )
+        if 'photo' in request.FILES:
+            m.photo = request.FILES['photo']
+        m.save(using=db)
+        identifier = animal.chip_number or animal.ear_tag
+        messages.success(request, f'Prekretnica dodana!')
+        return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    from memio_pet.models import LifeMilestone as LM
+    return render(request, 'memio_pet/add_milestone.html', {
+        'animal': animal, 'chip': chip,
+        'milestone_types': LM.TYPES,
+    })
+
+
+
+# DUGINI MOST — memorial views
+
+def memorial_candle_api(request, chip_or_tag):
+    """API: upali svjecicu na memorijalu."""
+    from django.views.decorators.csrf import csrf_exempt
+    from django.http import JsonResponse
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+    if not animal or animal.status != 'uginulo':
+        return JsonResponse({'error': 'not found'}, status=404)
+    from memio_pet.models import MemorialProfile
+    try:
+        memorial = MemorialProfile.objects.using(db).get(animal=animal)
+        memorial.candle_count += 1
+        memorial.save(using=db, update_fields=['candle_count'])
+        return JsonResponse({'total': memorial.candle_count})
+    except MemorialProfile.DoesNotExist:
+        return JsonResponse({'error': 'no memorial'}, status=404)
+
+
+def memorial_edit(request, chip_or_tag):
+    """Uredi memorijalni profil — session auth (vlasnik)."""
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+    if not animal or animal.status != 'uginulo':
+        return redirect('memio_pet:landing')
+
+    from memio_pet.models import MemorialProfile
+    try:
+        memorial = MemorialProfile.objects.using(db).get(animal=animal)
+    except MemorialProfile.DoesNotExist:
+        memorial = MemorialProfile.objects.using(db).create(animal=animal)
+
+    # Session auth — provjeri da je vlasnik
+    breeder_pk = request.session.get('memio_breeder_pk')
+    if not breeder_pk or (animal.breeder and str(animal.breeder.pk) != breeder_pk):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            messages.error(request, 'Nemate pristup za uredjivanje ovog memorijala.')
+            identifier = animal.chip_number or animal.ear_tag
+            return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    if request.method == 'POST':
+        memorial.epitaph = request.POST.get('epitaph', '').strip()[:500]
+        memorial.date_of_death = request.POST.get('date_of_death') or memorial.date_of_death
+        memorial.cause_note = request.POST.get('cause_note', '').strip()[:200]
+        memorial.cremated = 'cremated' in request.POST
+        memorial.urn_description = request.POST.get('urn_description', '').strip()[:200]
+        # Donacije azilu
+        shelter_pk = request.POST.get('donation_target')
+        if shelter_pk:
+            try:
+                import uuid as _u
+                shelter = BreederProfile.objects.using(db).get(
+                    pk=_u.UUID(str(shelter_pk)), account_type='shelter')
+                memorial.donation_target = shelter
+            except Exception:
+                pass
+        memorial.save(using=db)
+        messages.success(request, 'Memorijal azuriran.')
+        identifier = animal.chip_number or animal.ear_tag
+        return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
+
+    shelters = list(BreederProfile.objects.using(db).filter(account_type='shelter').order_by('name'))
+    return render(request, 'memio_pet/memorial_edit.html', {
+        'animal': animal, 'memorial': memorial, 'shelters': shelters,
+        'identifier': animal.chip_number or animal.ear_tag,
+    })
+
+
+# ════════════════════════════════════════════════════════════════
+# KNJIGA SJEĆANJA — PDF generiranje (WeasyPrint)
+# URL: /pas/<chip>/knjiga/
+# ════════════════════════════════════════════════════════════════
+
+@require_GET
+def knjiga_sjecanja_pdf(request, chip_or_tag):
+    """Generira PDF 'Knjiga sjećanja' za ljubimca."""
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+
+    if not animal:
+        return HttpResponse('Ljubimac nije pronađen.', status=404, content_type='text/plain')
+
+    # Dohvati sve podatke
+    health_records = list(
+        PetHealthRecord.objects.using(db)
+        .filter(animal=animal)
+        .order_by('datum')
+    )
+    ownership_chain = list(
+        PetOwnership.objects.using(db)
+        .filter(animal=animal)
+        .order_by('acquired_at')
+    )
+    try:
+        from memio_pet.models import LifeMilestone, MemorialProfile
+        milestones = list(
+            LifeMilestone.objects.using(db)
+            .filter(animal=animal)
+            .order_by('date')
+        )
+        memorial = MemorialProfile.objects.using(db).filter(animal=animal).first()
+    except Exception:
+        milestones = []
+        memorial = None
+
+    # Agregacija životnog traka
+    from datetime import date as _date
+    timeline = []
+
+    if animal.date_of_birth:
+        timeline.append({
+            'date': animal.date_of_birth,
+            'icon': '🐾',
+            'title': f'Rodio/la se {animal.name}',
+            'note': animal.breed or '',
+            'photo': None,
+            'type': 'rodenje',
+        })
+
+    for own in ownership_chain:
+        timeline.append({
+            'date': own.acquired_at,
+            'icon': '🏠',
+            'title': f'Novi dom — {own.owner_name}',
+            'note': own.owner_city or '',
+            'photo': None,
+            'type': 'vlasnistvo',
+        })
+
+    for hr in health_records:
+        timeline.append({
+            'date': hr.datum,
+            'icon': '💊',
+            'title': f'{hr.get_tip_display()} — {hr.veterinar or ""}',
+            'note': hr.opis or '',
+            'photo': None,
+            'type': 'zdravlje',
+        })
+
+    for m in milestones:
+        timeline.append({
+            'date': m.date,
+            'icon': m.get_type_display().split(' ')[0],
+            'title': m.title,
+            'note': m.note,
+            'photo': m.photo.url if m.photo else None,
+            'type': m.type,
+        })
+
+    timeline.sort(key=lambda x: x['date'])
+
+    from django.utils import timezone as _tz
+    context = {
+        'animal': animal,
+        'health_records': health_records,
+        'ownership_chain': ownership_chain,
+        'milestones': milestones,
+        'memorial': memorial,
+        'timeline': timeline,
+        'generated_at': _tz.now(),
+        'request': request,
+    }
+
+    # WeasyPrint HTML→PDF
+    try:
+        import weasyprint
+        from django.template.loader import render_to_string
+        html_string = render_to_string('memio_pet/knjiga_pdf.html', context, request=request)
+        base_url = request.build_absolute_uri('/')
+        pdf_bytes = weasyprint.HTML(
+            string=html_string,
+            base_url=base_url
+        ).write_pdf()
+
+        ime = (animal.name or 'ljubimac').replace(' ', '_')
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="memio-knjiga-{ime}.pdf"'
+        response['Cache-Control'] = 'no-cache'
+        return response
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f'knjiga_sjecanja_pdf error: {e}')
+        return HttpResponse(f'Greška pri generiranju PDF-a: {e}', status=500, content_type='text/plain')
+
+
+# ════════════════════════════════════════════════════════════════
+# MEMORIAL CANDLE API
+# URL: /api/memorial/<chip>/candle/  (POST)
+# ════════════════════════════════════════════════════════════════
+
+from django.views.decorators.http import require_POST as _require_post
+from django.http import JsonResponse as _JsonResponse
+
+@_require_post
+def memorial_candle_api(request, chip_or_tag):
+    """Poveća broj svjećica na memorijalu."""
+    db = 'memio_pets'
+    animal = _find_animal(chip_or_tag)
+    if not animal or animal.status != 'uginulo':
+        return _JsonResponse({'error': 'not found'}, status=404)
+    try:
+        from memio_pet.models import MemorialProfile
+        memorial = MemorialProfile.objects.using(db).get(animal=animal)
+        memorial.candle_count += 1
+        memorial.save(using=db, update_fields=['candle_count'])
+        return _JsonResponse({'total': memorial.candle_count, 'ok': True})
+    except Exception:
+        return _JsonResponse({'error': 'no memorial'}, status=404)
+
+
+# ════════════════════════════════════════════════════════════════
+# KREMATORIJ DIREKTORIJ
+# URL: /krematoriji/
+# ════════════════════════════════════════════════════════════════
+
+@require_GET
+def krematoriji_lista(request):
+    """Javni direktorij krematorija za kućne ljubimce."""
+    db = 'memio_pets'
+    grad = request.GET.get('grad', '').strip()
+
+    qs = BreederProfile.objects.using(db).filter(
+        account_type='krematorij'
+    ).order_by('city', 'name')
+
+    if grad:
+        qs = qs.filter(city__icontains=grad)
+
+    return render(request, 'memio_pet/krematoriji.html', {
+        'krematoriji': list(qs),
+        'grad_filter': grad,
+        'page_title': 'Krematoriji za kućne ljubimce — Memio.pet',
+    })
+
+
+# ════════════════════════════════════════════════════════════════
+# PET HOTELI DIREKTORIJ
+# URL: /hoteli/
+# ════════════════════════════════════════════════════════════════
+
+@require_GET
+def hoteli_lista(request):
+    """Javni direktorij pet hotela."""
+    db = 'memio_pets'
+    grad = request.GET.get('grad', '').strip()
+
+    qs = BreederProfile.objects.using(db).filter(
+        account_type='hotel'
+    ).order_by('city', 'name')
+
+    if grad:
+        qs = qs.filter(city__icontains=grad)
+
+    return render(request, 'memio_pet/hoteli_lista.html', {
+        'hoteli': list(qs),
+        'grad_filter': grad,
+        'page_title': 'Pet Hoteli — Memio.pet',
     })

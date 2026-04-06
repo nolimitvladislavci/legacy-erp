@@ -664,3 +664,58 @@ class AddAnimalToken(models.Model):
 
     def __str__(self):
         return f"Token {self.token[:8]}... → {self.breeder.name}"
+
+
+class LifeMilestone(models.Model):
+    """Ručno dodane prekretnice vlasnika — prva šetnja, nagrada, putovanje..."""
+    TYPES = [
+        ('first_walk',   '🦮 Prva šetnja'),
+        ('first_swim',   '🌊 Prvo kupanje'),
+        ('first_friend', '🐾 Novi prijatelj'),
+        ('award',        '🏆 Nagrada / titula'),
+        ('travel',       '✈️ Putovanje'),
+        ('training',     '🎓 Dresura uspjeh'),
+        ('custom',       '⭐ Prilagođeno'),
+    ]
+    animal     = models.ForeignKey(AnimalProfile, on_delete=models.CASCADE, related_name='milestones')
+    type       = models.CharField(max_length=20, choices=TYPES, default='custom')
+    title      = models.CharField(max_length=200)
+    date       = models.DateField()
+    photo      = models.ImageField(upload_to='memio_pet/milestones/', null=True, blank=True)
+    note       = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'memio_pet'
+        db_table  = 'mp_life_milestone'
+        ordering  = ['-date']
+
+    def __str__(self):
+        return f'{self.animal.name} — {self.get_type_display()} ({self.date})'
+
+
+class MemorialProfile(models.Model):
+    """Dugini Most — aktivira se automatski kad status = uginulo."""
+    animal          = models.OneToOneField(AnimalProfile, on_delete=models.CASCADE, related_name='memorial')
+    epitaph         = models.TextField(blank=True, help_text='Posmrtna poruka vlasnika')
+    date_of_death   = models.DateField(null=True, blank=True)
+    cause_note      = models.CharField(max_length=200, blank=True)
+    cremated        = models.BooleanField(default=False)
+    urn_description = models.CharField(max_length=200, blank=True)
+    candle_count    = models.PositiveIntegerField(default=0)
+    donation_target = models.ForeignKey(
+        BreederProfile, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='memorial_donations',
+        limit_choices_to={'account_type': 'shelter'},
+    )
+    total_donated   = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    activated_at    = models.DateTimeField(auto_now_add=True)
+    anniversary_notified = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = 'memio_pet'
+        db_table  = 'mp_memorial_profile'
+
+    def __str__(self):
+        return f'Memorijal — {self.animal.name}'

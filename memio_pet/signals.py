@@ -131,3 +131,54 @@ def on_barf_listing_created(sender, instance, created, **kwargs):
         except Exception as e:
             import logging
             logging.getLogger('memio_pet').warning('BARF signal: %s', e)
+
+
+@receiver(post_save, sender='memio_pet.AnimalProfile')
+def on_animal_status_uginulo(sender, instance, **kwargs):
+    """Kad status = uginulo → kreiraj MemorialProfile automatski."""
+    if instance.status != 'uginulo':
+        return
+
+    from memio_pet.models import MemorialProfile
+    db = 'memio_pets'
+    memorial, created = MemorialProfile.objects.using(db).get_or_create(
+        animal=instance,
+        defaults={
+            'date_of_death': instance.updated_at.date()
+            if hasattr(instance, 'updated_at') and instance.updated_at
+            else None,
+        }
+    )
+    if created:
+        logger.info("MemorialProfile kreiran za %s (pk=%s)", instance.name, instance.pk)
+        # Email vlasniku
+        try:
+            from django.core.mail import send_mail
+            breeder = instance.breeder
+            if breeder and breeder.email:
+                identifier = instance.chip_number or instance.ear_tag
+                send_mail(
+                    subject=f'Memorijal za {instance.name} — Memio.pet',
+                    message=(
+                        f'Dragi {breeder.name},\n\n'
+                        f'Stranica sjećanja za {instance.name} je kreirana:\n'
+                        f'https://memio.pet/pas/{identifier}/\n\n'
+                        f'Možete dodati posmrtnu poruku i urediti memorijal.\n\n'
+                        f'Naše najdublje sućuti.\n'
+                        f'— Memio.pet tim'
+                    ),
+                    from_email='noreply@memio.pet',
+                    recipient_list=[breeder.email],
+                    fail_silently=True,
+                )
+        except Exception:
+            pass
+        # Celery podsjetnik za zakonsku odjavu (10 dana)
+        try:
+            from memio_pet.tasks import send_odjava_reminder
+            send_odjava_reminder.apply_async(
+                args=[str(instance.pk)],
+                countdown=10 * 24 * 3600,
+            )
+        except Exception:
+            pass  # Celery možda nije aktivan

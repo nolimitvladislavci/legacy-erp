@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hr" data-theme="light">
+<html lang="hr" data-theme="{% if is_memorial %}memorial{% else %}light{% endif %}">
 <head>
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light dark">
@@ -35,6 +35,8 @@
 }
 
 /* ── DARK MODE ── */
+
+[data-theme="memorial"]{--bg:#0f0e0c;--surface:#1a1814;--ink:#e8e0d0;--ink2:#a09080;--gold:#e8c46a;--line:#2a2520;--dim:#6a6058;--green:#34d058;--red:#f87171;--top-bar:#09090b;--top-text:#e8e0d0;--shadow:rgba(0,0,0,.4)}
 [data-theme="dark"]{
   --bg:#0f1012;
   --surface:#18191d;
@@ -49,6 +51,48 @@
   --top-text:#edeae2;
   --shadow:rgba(0,0,0,.35);
 }
+
+/* ── MEMORIAL MODE (Dugini Most) ── */
+[data-theme="memorial"]{
+  --bg:#0f0e0c;--surface:#1a1814;--ink:#e8e0d0;--ink2:#a09080;
+  --gold:#e8c46a;--line:#2a2520;--dim:#6a6058;--green:#4caf7d;
+  --red:#f87171;--top-bar:#0a0908;--top-text:#e8e0d0;
+  --shadow:rgba(0,0,0,.4);
+}
+[data-theme="memorial"] body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 20%,rgba(232,196,106,.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.memorial-header{text-align:center;padding:40px 20px 24px;position:relative}
+.memorial-header h1{font-family:var(--serif);font-size:2rem;font-weight:700;margin-bottom:6px}
+.memorial-epitaph{margin:20px auto 0;max-width:400px;font-family:var(--serif);font-size:1.05rem;
+  font-style:italic;color:var(--ink2);line-height:1.8;border-left:3px solid var(--gold);
+  padding-left:16px;text-align:left}
+.candle-btn{margin-top:20px;background:none;border:1px solid rgba(232,196,106,.4);
+  border-radius:20px;padding:10px 24px;color:var(--gold);cursor:pointer;
+  font-family:var(--sans);font-size:.9rem;transition:all .2s}
+.candle-btn:hover{background:rgba(232,196,106,.1);border-color:var(--gold)}
+.what-now-btn{display:block;padding:12px 16px;border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);text-decoration:none;font-size:.9rem;transition:all .2s}
+.what-now-btn:hover{border-color:var(--gold);background:rgba(232,196,106,.06)}
+@keyframes float-up{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0);opacity:0}}
+
+/* ── TIMELINE (zivotni trak) ── */
+.tl{position:relative;padding-left:32px}
+.tl::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--line)}
+.tl-item{position:relative;margin-bottom:20px;display:flex;gap:14px}
+.tl-dot{position:absolute;left:-32px;width:26px;height:26px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--line);display:flex;
+  align-items:center;justify-content:center;font-size:14px;flex-shrink:0;z-index:1}
+.tl-content{flex:1;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--line)}
+.tl-date{font-size:.72rem;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.tl-title{font-weight:500;font-size:.92rem;color:var(--ink)}
+.tl-note{font-size:.82rem;color:var(--ink2);margin-top:4px;line-height:1.5}
+.tl-photo{width:100%;max-width:200px;border-radius:8px;margin-top:8px;object-fit:cover;max-height:120px}
+.tl-rodenje .tl-dot{background:rgba(201,168,76,.15);border-color:var(--gold)}
+.tl-zdravlje .tl-dot{background:rgba(29,158,117,.1);border-color:var(--green)}
+.tl-memorial .tl-dot{background:rgba(232,196,106,.2);border-color:var(--gold)}
 
 html{scroll-behavior:smooth}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;transition:background .25s,color .25s}
@@ -167,6 +211,25 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .rev-meta{font-size:.7rem;color:var(--dim);margin-top:4px}
 
 
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:32px}
+.tl::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--line)}
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-32px;width:26px;height:26px;border-radius:50%;background:var(--surface);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;z-index:1}
+.tl-content{padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--line)}
+.tl-date{font-size:.72rem;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.tl-title{font-weight:500;font-size:.92rem}
+.tl-note{font-size:.82rem;color:var(--ink2);margin-top:4px;line-height:1.5}
+.tl-photo{width:100%;max-width:200px;border-radius:8px;margin-top:8px;object-fit:cover;max-height:120px}
+.tl-rodenje .tl-dot{background:rgba(201,168,76,.15);border-color:var(--gold)}
+.tl-zdravlje .tl-dot{background:rgba(40,167,69,.1);border-color:var(--green)}
+.tl-memorial .tl-dot{background:rgba(232,196,106,.2);border-color:var(--gold)}
+.tl-memorial .tl-content{background:rgba(232,196,106,.06);border-color:rgba(232,196,106,.3)}
+/* ── MEMORIAL HEADER ── */
+.memorial-header{text-align:center;padding:40px 20px 24px;position:relative}
+@keyframes float-up{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0);opacity:0}}
+
 /* ── SHARE ROW ── */
 .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 .share-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);transition:all .2s;font-family:var(--sans)}
@@ -191,9 +254,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <!-- Tema se primjenjuje ODMAH — prije renderinga, bez treptanja -->
 <script>
 (function(){
-  var s = localStorage.getItem('memio-theme');
-  var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
+  var isMemorial = document.documentElement.getAttribute('data-theme') === 'memorial';
+  if (!isMemorial) {
+    var s = localStorage.getItem('memio-theme');
+    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
+  }
 })();
 </script>
 </head>
@@ -211,6 +277,26 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Promijeni temu">🌙</button>
   </div>
 </div>
+
+{% if is_memorial %}
+<div class="memorial-header">
+  <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
+  <div style="font-size:2.5rem;margin-bottom:12px">🌈</div>
+  <h1 style="font-family:var(--serif);font-size:2rem;font-weight:700;margin-bottom:6px">U sjećanju</h1>
+  <p style="font-size:1.1rem;color:var(--gold);font-family:var(--serif);font-style:italic">
+    {{ animal.name }}
+    {% if animal.date_of_birth %}({{ animal.date_of_birth|date:"Y." }}–{% endif %}{% if memorial.date_of_death %}{{ memorial.date_of_death|date:"Y." }}){% endif %}
+  </p>
+  {% if memorial.epitaph %}
+  <blockquote style="margin:20px auto 0;max-width:400px;font-family:var(--serif);font-size:1.05rem;font-style:italic;color:var(--ink2);line-height:1.8;border-left:3px solid var(--gold);padding-left:16px;text-align:left">
+    "{{ memorial.epitaph }}"
+  </blockquote>
+  {% endif %}
+  <button id="candle-btn" onclick="paliSvjecicu()" style="margin-top:20px;background:none;border:1px solid rgba(232,196,106,.4);border-radius:20px;padding:10px 24px;color:var(--gold);cursor:pointer;font-family:var(--sans);font-size:.9rem;transition:all .2s">
+    🕯️ Upali svjećicu <span id="candle-count">({{ memorial.candle_count }})</span>
+  </button>
+</div>
+{% endif %}
 
 <div class="container">
 
@@ -233,6 +319,62 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       </div>
     </div>
   </div>
+
+  {% if is_memorial %}
+  <!-- MEMORIAL HEADER -->
+  <div class="card">
+    <div class="memorial-header">
+      <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
+      <div style="font-size:2.5rem;margin-bottom:12px">🌈</div>
+      <h1>U sjećanju</h1>
+      <p style="font-size:1.1rem;color:var(--gold);font-family:var(--serif);font-style:italic">
+        {{ animal.name }}
+        {% if animal.date_of_birth %}({{ animal.date_of_birth|date:"Y." }}–{% endif %}{% if memorial.date_of_death %}{{ memorial.date_of_death|date:"Y." }}){% elif animal.date_of_birth %}){% endif %}
+      </p>
+      {% if memorial.epitaph %}
+      <blockquote class="memorial-epitaph">"{{ memorial.epitaph }}"</blockquote>
+      {% endif %}
+      <button class="candle-btn" id="candle-btn" onclick="paliSvjecicu()">
+        🕯️ Upali svjećicu <span id="candle-count">({{ memorial.candle_count|default:0 }})</span>
+      </button>
+    </div>
+  </div>
+
+  {% if not memorial.cremated %}
+  <div class="card">
+    <div class="card-body">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:16px">Što sada?</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="/krematoriji/" class="what-now-btn">⚱️ Krematorij — pronađi u blizini</a>
+        <a href="https://e-uprava.gov.hr" target="_blank" class="what-now-btn">📋 Odjava iz Upisnika (zakonska obveza — 14 dana)</a>
+        <a href="/memorijal/{{ identifier }}/uredi/" class="what-now-btn">✏️ Uredi stranicu sjećanja</a>
+        <a href="/udomljavanje/" class="what-now-btn">🐾 Pomozi drugom ljubimcu</a>
+      </div>
+      <p style="font-size:.75rem;color:var(--dim);margin-top:12px;line-height:1.6">
+        Zakon o veterinarstvu (NN 82/13) — vlasnik je obvezan odjaviti
+        ljubimca iz Upisnika u roku 14 dana od uginuća.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if memorial.donation_target %}
+  <div class="card" style="border:1px solid rgba(76,175,125,.2)">
+    <div class="card-body" style="text-align:center">
+      <p style="font-size:.9rem;color:var(--ink2);margin-bottom:12px">
+        U ime {{ animal.name }}, vlasnik predlaže donaciju azilu
+        <strong>{{ memorial.donation_target.name }}</strong>
+      </p>
+      {% if memorial.donation_target.website %}
+      <a href="{{ memorial.donation_target.website }}" target="_blank"
+         class="share-btn" style="background:var(--green);color:#fff;border-color:var(--green)">
+        🐾 Doniraj azilu
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
 
   <!-- TRUST SCORE -->
   {% if breeder %}
@@ -421,6 +563,58 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   </div>
   {% endif %}
 
+  <!-- ŽIVOTNI TRAK -->
+  {% if timeline %}
+  <div class="card">
+    <div class="card-body">
+      <h2 class="section-title" style="margin-bottom:24px">🕰️ Životni trak</h2>
+      <div class="tl">
+        {% for event in timeline %}
+        <div class="tl-item tl-{{ event.type }}">
+          <div class="tl-dot">{{ event.icon }}</div>
+          <div class="tl-content">
+            <div class="tl-date">{{ event.date|date:"d.m.Y." }}</div>
+            <div class="tl-title">{{ event.title }}</div>
+            {% if event.note %}<div class="tl-note">{{ event.note }}</div>{% endif %}
+            {% if event.photo %}<img src="{{ event.photo }}" class="tl-photo" alt="{{ event.title }}">{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if not is_memorial %}
+      <div style="margin-top:20px;text-align:center">
+        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn" style="text-decoration:none">+ Dodaj prekretnicu</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+    <!-- ZIVOTNI TRAK -->
+  {% if timeline %}
+  <div class="card">
+    <div class="card-body">
+      <h2 class="section-title">🕰️ Životni trak</h2>
+      <div class="tl">
+        {% for event in timeline %}
+        <div class="tl-item tl-{{ event.type }}">
+          <div class="tl-dot">{{ event.icon }}</div>
+          <div class="tl-content">
+            <div class="tl-date">{{ event.date|date:"d.m.Y." }}</div>
+            <div class="tl-title">{{ event.title }}</div>
+            {% if event.note %}<div class="tl-note">{{ event.note }}</div>{% endif %}
+            {% if event.photo %}<img src="{{ event.photo }}" class="tl-photo" alt="{{ event.title }}">{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div style="margin-top:20px;text-align:center">
+        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn" style="font-size:.85rem">+ Dodaj prekretnicu</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- DIJELI PROFIL -->
   <div class="card">
     <div class="card-body" style="text-align:center">
@@ -465,6 +659,29 @@ function toggleTheme(){
   if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
+function paliSvjecicu(){
+  var btn=document.getElementById('candle-btn');
+  if(!btn)return;
+  btn.disabled=true;btn.style.opacity='.5';
+  fetch('/api/memorial/{{ identifier }}/candle/',{
+    method:'POST',
+    headers:{'X-CSRFToken':getCookie('csrftoken')}
+  }).then(function(r){return r.json()}).then(function(d){
+    btn.innerHTML='🕯️ Svjećica upaljena ('+d.total+')';
+    btn.style.opacity='1';
+    spawnParticles();
+  }).catch(function(){btn.style.opacity='1';btn.disabled=false;});
+}
+function spawnParticles(){
+  var p=document.getElementById('particles');if(!p)return;
+  for(var i=0;i<8;i++){
+    var c=document.createElement('div');
+    c.style.cssText='position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(232,196,106,'+(Math.random()*.8+.2)+');left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation:float-up '+(Math.random()*3+2)+'s ease-out forwards';
+    p.appendChild(c);setTimeout(function(){c.remove()},5000);
+  }
+}
+function getCookie(n){var v=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return v?v.pop():'';}
+
 function copyLink(){
   var url = '{{ profile_url }}';
   if(navigator.clipboard){
@@ -484,6 +701,25 @@ function copyLink(){
     setTimeout(function(){btn.classList.remove('copied');btn.innerHTML='🔗 Kopiraj link';},2000);
   }
 }
+
+{% if is_memorial %}
+function paliSvjecicu(){
+  var btn=document.getElementById('candle-btn');
+  btn.disabled=true;btn.style.opacity='.5';
+  fetch('/api/memorial/{{ identifier }}/candle/',{
+    method:'POST',
+    headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]')?.value||''}
+  }).then(function(r){return r.json()}).then(function(d){
+    btn.innerHTML='🕯️ Svjećica upaljena ('+d.total+')';
+    btn.style.opacity='1';
+    // Čestice
+    var p=document.getElementById('particles');
+    if(p){for(var i=0;i<5;i++){var c=document.createElement('div');
+      c.style.cssText='position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(232,196,106,'+(Math.random()*.8+.2)+');left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation:float-up '+(Math.random()*3+2)+'s ease-out forwards';
+      p.appendChild(c);setTimeout(function(){c.remove()},5000);}}
+  }).catch(function(){btn.disabled=false;btn.style.opacity='1';});
+}
+{% endif %}
 </script>
 </body>
 </html>
