@@ -1,18 +1,7 @@
 {% extends "memio_pet/_base.html" %}
 {% load i18n %}
-{% block title %}Prijava — Memio.pet
-{% block extra_js %}
-(function(){
-  var saved = localStorage.getItem('memio_email');
-  var el = document.getElementById('loginEmail');
-  if(saved && el && !el.value) el.value = saved;
-  // Spremi email nakon submita
-  var form = el ? el.closest('form') : null;
-  if(form) form.addEventListener('submit', function(){
-    if(el.value) localStorage.setItem('memio_email', el.value.trim());
-  });
-})();
-{% endblock %}
+
+{% block title %}{% trans "Prijava" %} — Memio.pet{% endblock %}
 
 {% block content %}
 <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
@@ -20,16 +9,16 @@
 
   <div class="mp-card">
     <div class="mp-card-body">
-      <h1 style="margin-bottom:6px">Prijava</h1>
+      <h1 style="margin-bottom:6px">{% trans "Prijava" %}</h1>
       <p style="color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.6">
-        Upiši email koji si koristio pri registraciji i vratit ćemo te na tvoj profil.
+        {% trans "Upiši email koji si koristio pri registraciji i vratit ćemo te na tvoj profil." %}
       </p>
 
       {% if error %}
       <div class="mp-error">
         {{ error }}
         {% if 'nije pronađen' in error %}
-        <br><a href="/registracija/">Kreiraj novi profil →</a>
+        <br><a href="/registracija/">{% trans "Kreiraj novi profil" %} →</a>
         {% endif %}
       </div>
       {% endif %}
@@ -37,28 +26,40 @@
       <form method="post">
         {% csrf_token %}
         <div class="mp-field">
-          <label>Email adresa</label>
+          <label>{% trans "Email adresa" %}</label>
           <input type="email" name="email" value="{{ email_value|default:'' }}" id="loginEmail"
                  placeholder="tvoj@email.com" required autofocus autocomplete="email">
         </div>
-        <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Prijavi se →</button>
+        <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">{% trans "Prijavi se" %} →</button>
       </form>
 
       <div style="display:flex;align-items:center;gap:14px;margin:28px 0">
         <div style="flex:1;height:1px;background:var(--line)"></div>
-        <span style="font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">ili</span>
+        <span style="font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">{% trans "ili" %}</span>
         <div style="flex:1;height:1px;background:var(--line)"></div>
       </div>
 
-      <a href="/registracija/" class="mp-btn mp-btn-outline mp-btn-full" style="text-align:center">Kreiraj novi profil</a>
+      <a href="/registracija/" class="mp-btn mp-btn-outline mp-btn-full" style="text-align:center">{% trans "Kreiraj novi profil" %}</a>
 
       <p style="margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6">
-        Nema lozinke — samo email koji si koristio.<br>
-        Tvoj profil je uvijek dostupan.
+        {% trans "Nema lozinke — samo email koji si koristio." %}<br>
+        {% trans "Tvoj profil je uvijek dostupan." %}
       </p>
     </div>
   </div>
 
 </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+(function(){
+  var saved = localStorage.getItem('memio_email');
+  var el = document.getElementById('loginEmail');
+  if(saved && el && !el.value) el.value = saved;
+  var form = el ? el.closest('form') : null;
+  if(form) form.addEventListener('submit', function(){
+    if(el.value) localStorage.setItem('memio_email', el.value.trim());
+  });
+})();
 {% endblock %}
