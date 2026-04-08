@@ -626,8 +626,39 @@
     <div class="drawer-body" id="drawerBody">
         <div class="drawer-loading"><i class="fas fa-spinner"></i><p>{% trans "Ucitavanje..." %}</p></div>
     </div>
-    <div class="drawer-footer" id="drawerFooter" style="display:none">
-        <a href="#" id="drawerModuleLink" class="btn-gold" target="_blank"><i class="fas fa-external-link-alt"></i> {% trans "Otvori u modulu" %}</a>
+    <div class="drawer-footer" id="drawerFooter" style="display:none;flex-direction:column;gap:8px">
+        <!-- Akcije za komitenta -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button onclick="sendKomitent('whatsapp')" class="btn-drawer" style="background:#25D366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;flex:1;min-width:120px">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button onclick="sendKomitent('email')" class="btn-drawer" style="background:#4A90D9;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;flex:1;min-width:120px">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <a href="#" id="drawerDownloadLink" class="btn-drawer" style="background:var(--gold,#c9a84c);color:#000;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;text-align:center;flex:1;min-width:120px">
+                <i class="fas fa-download"></i> {% trans "Spremi lokalno" %}
+            </a>
+            <a href="{% url 'documents:arhiva_upload' %}" class="btn-drawer" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;text-align:center;border:1px solid rgba(201,168,76,.3);flex:1;min-width:120px">
+                <i class="fas fa-cloud-upload-alt"></i> {% trans "Učitaj arhivu" %}
+            </a>
+        </div>
+        <a href="#" id="drawerModuleLink" class="btn-gold" target="_blank" style="text-align:center"><i class="fas fa-external-link-alt"></i> {% trans "Otvori u modulu" %}</a>
+    </div>
+
+    <!-- Modal za slanje komitentu -->
+    <div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001;justify-content:center;align-items:center">
+        <div style="background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:12px;padding:24px;max-width:400px;width:90%">
+            <h3 style="color:var(--gold,#c9a84c);margin:0 0 16px" id="sendModalTitle">Pošalji komitentu</h3>
+            <input type="text" id="sendRecipient" placeholder="Unesite broj ili email..."
+                style="width:100%;padding:10px 14px;border:1px solid var(--border,#333);border-radius:8px;background:var(--bg,#0a0a0a);color:var(--text,#e2e8f0);font-size:.9rem;box-sizing:border-box;margin-bottom:12px">
+            <div style="display:flex;gap:8px">
+                <button onclick="doSend()" style="flex:1;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Pošalji</button>
+                <button onclick="closeSendModal()" style="flex:1;padding:10px;background:transparent;color:var(--text-muted,#94a3b8);border:1px solid var(--border,#333);border-radius:8px;cursor:pointer">Odustani</button>
+            </div>
+            <div id="sendResult" style="margin-top:12px;font-size:.85rem;display:none"></div>
+        </div>
     </div>
 </div>
 
@@ -662,7 +693,7 @@ function openDrawer(id){
     document.getElementById('drawerFooter').style.display='none';
     fetch('/hr/documents/arhiva/'+id+'/detail/')
         .then(function(r){return r.json()})
-        .then(function(d){renderDrawer(d)})
+        .then(function(d){renderDrawer(d);if(typeof _hookDrawerData==='function')_hookDrawerData(d);})
         .catch(function(e){document.getElementById('drawerBody').innerHTML='<div class="arhiva-empty"><p>Greska: '+e.message+'</p></div>';});
 }
 function closeDrawer(){
@@ -1366,6 +1397,93 @@ function deleteEntry(pk, row) {
     document.getElementById("arhivaOnboarding").style.display = "none";
   };
 })();
+
+// ══════════════════════════════════════════════════════════════
+// POŠALJI KOMITENTU — WhatsApp / Email + Spremi lokalno
+// ══════════════════════════════════════════════════════════════
+var _sendChannel = "";
+var _currentEntryId = null;
+var _currentEntryPhone = "";
+var _currentEntryEmail = "";
+var _currentDownloadUrl = "";
+
+// Postavi podatke kad se drawer otvori (hookaj na postojeći AJAX)
+
+function _hookDrawerData(d) {
+    _currentEntryId = d.id;
+    _currentEntryPhone = d.company_phone || "";
+    _currentEntryEmail = d.company_email || "";
+    _currentDownloadUrl = d.download_url || "";
+    // Postavi download link
+    var dl = document.getElementById("drawerDownloadLink");
+    if (dl) dl.href = _currentDownloadUrl;
+}
+
+// Drawer data hook — poziva se iz openDrawer() fetch chain
+
+function sendKomitent(channel) {
+    _sendChannel = channel;
+    var modal = document.getElementById("sendModal");
+    var input = document.getElementById("sendRecipient");
+    var title = document.getElementById("sendModalTitle");
+    var result = document.getElementById("sendResult");
+    if (!modal || !input) return;
+    result.style.display = "none";
+    if (channel === "whatsapp") {
+        title.textContent = "Pošalji putem WhatsApp";
+        input.placeholder = "Broj telefona (npr. +385991234567)";
+        input.value = _currentEntryPhone;
+    } else {
+        title.textContent = "Pošalji putem Email";
+        input.placeholder = "Email adresa";
+        input.value = _currentEntryEmail;
+    }
+    modal.style.display = "flex";
+    input.focus();
+}
+
+function closeSendModal() {
+    var modal = document.getElementById("sendModal");
+    if (modal) modal.style.display = "none";
+}
+
+function doSend() {
+    var recipient = document.getElementById("sendRecipient").value.trim();
+    var result = document.getElementById("sendResult");
+    if (!recipient) { result.style.display = "block"; result.style.color = "#ef4444"; result.textContent = "Unesite primatelja."; return; }
+    if (!_currentEntryId) { result.style.display = "block"; result.style.color = "#ef4444"; result.textContent = "Odaberite dokument."; return; }
+    result.style.display = "block"; result.style.color = "var(--gold,#c9a84c)"; result.textContent = "Šaljem...";
+    fetch("/hr/documents/arhiva/" + _currentEntryId + "/send/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+        body: JSON.stringify({ channel: _sendChannel, recipient: recipient })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.ok) {
+            result.style.color = "#22c55e";
+            result.textContent = "✅ " + d.message;
+            setTimeout(closeSendModal, 2000);
+            showToast(d.message, "success");
+        } else {
+            result.style.color = "#ef4444";
+            result.textContent = "❌ " + (d.error || "Greška");
+        }
+    })
+    .catch(function(e) {
+        result.style.color = "#ef4444";
+        result.textContent = "❌ Mrežna greška: " + e.message;
+    });
+}
+
+// Zatvori modal na Escape
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeSendModal();
+});
+// Zatvori modal na klik van
+document.getElementById("sendModal").addEventListener("click", function(e) {
+    if (e.target === this) closeSendModal();
+});
 </script>
 
 {% endblock %}

@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from . import views_arhiva
 
 router = DefaultRouter()
 router.register(r"api", views.DocumentViewSet, basename="document")
@@ -45,6 +46,7 @@ urlpatterns = [
     path("arhiva/<int:pk>/download/", views.arhiva_download, name="arhiva_download"),
     path("arhiva/<int:pk>/pdf/", views.arhiva_download_pdf, name="arhiva_pdf"),
     path("arhiva/<int:pk>/xml/", views.arhiva_download_xml, name="arhiva_xml"),
+    path("arhiva/<int:pk>/send/", views_arhiva.arhiva_send_komitent, name="arhiva_send_komitent"),
     path("arhiva/convert/", views.arhiva_convert, name="arhiva_convert"),
     path("knjiga/", views.knjiga_ura_ira, name="knjiga_ura_ira"),
     path("pdv/", views.pdv_obrazac, name="pdv_obrazac"),

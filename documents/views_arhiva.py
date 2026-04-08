@@ -774,6 +774,13 @@ def arhiva_detail_ajax(request, pk):
         elif entry.source_type == 'eracun' and sid:
             result['module_url'] = f'/einvoice/message/{sid}/'
 
+    # Kontakt podaci komitenta (za slanje)
+    result['company_phone'] = entry.company.phone if entry.company else ''
+    result['company_email'] = entry.company.email if entry.company else ''
+
+    # Download URL
+    result['download_url'] = f'/hr/documents/arhiva/{entry.pk}/download/'
+
     # Bookmark status
     result['bookmarked'] = ArhivaBookmark.objects.filter(user=request.user, entry=entry).exists()
 
@@ -1545,3 +1552,90 @@ def moji_komitenti(request):
         'total_entries': total_entries,
         'pending_entries': pending_entries,
     })
+
+
+# ══════════════════════════════════════════════════════════════
+# POŠALJI KOMITENTU — ručno slanje (WhatsApp / Email)
+# ══════════════════════════════════════════════════════════════
+
+@login_required
+@require_POST
+def arhiva_send_komitent(request, pk):
+    """Ručno pošalji arhivski dokument komitentu putem WhatsApp ili Email."""
+    import json as _json
+
+    entry = get_object_or_404(ArhivaEntry.objects.unscoped(), pk=pk)
+    company = get_user_company(request)
+    if not request.user.is_superuser and entry.company != company:
+        return JsonResponse({'error': 'Nemate pristup.'}, status=403)
+
+    try:
+        data = _json.loads(request.body)
+    except (ValueError, _json.JSONDecodeError):
+        data = {}
+
+    channel = data.get('channel', 'email')  # 'email' ili 'whatsapp'
+    recipient = data.get('recipient', '').strip()
+    save_contact = data.get('save_contact', True)  # spremi u bazu po defaultu
+
+    if not recipient:
+        return JsonResponse({'error': 'Unesite primatelja.'}, status=400)
+
+    # Spremi kontakt podatak na firmu komitenta za buduće slanje
+    if save_contact and entry.company:
+        update_fields = []
+        if channel == 'whatsapp' and recipient != (entry.company.phone or ''):
+            entry.company.phone = recipient
+            update_fields.append('phone')
+        elif channel == 'email' and recipient != (entry.company.email or ''):
+            entry.company.email = recipient
+            update_fields.append('email')
+        if update_fields:
+            entry.company.save(update_fields=update_fields)
+
+    subject = f'Dokument {entry.doc_number} — {entry.company.name}'
+    body_lines = [
+        f'Poštovani,',
+        f'',
+        f'U prilogu je dokument iz vaše arhive:',
+        f'• Broj: {entry.doc_number}',
+        f'• Vrsta: {entry.get_source_type_display()}',
+        f'• Partner: {entry.partner_name or "—"}',
+        f'• Iznos: {entry.amount} {entry.currency}',
+        f'• Datum: {entry.doc_date.strftime("%d.%m.%Y") if entry.doc_date else "—"}',
+        f'',
+        f'Pozdrav,',
+        f'{request.user.get_full_name() or request.user.username}',
+        f'{entry.company.name}',
+    ]
+    body = '\n'.join(body_lines)
+
+    if channel == 'whatsapp':
+        from core.whatsapp import send_text
+        result = send_text(recipient, body)
+        if result.get('success'):
+            from django.utils import timezone
+            entry.email_sent_at = timezone.now()
+            entry.email_sent_to = f'WhatsApp: {recipient}'
+            entry.save(update_fields=['email_sent_at', 'email_sent_to'])
+            return JsonResponse({'ok': True, 'message': f'Poslano na WhatsApp: {recipient}'})
+        return JsonResponse({'error': result.get('error', 'Greška pri slanju.')}, status=500)
+
+    elif channel == 'email':
+        try:
+            from core.email_tasks import send_email_task
+            send_email_task.delay(
+                subject=subject,
+                message=body,
+                from_email=None,
+                recipient_list=[recipient],
+            )
+            from django.utils import timezone
+            entry.email_sent_at = timezone.now()
+            entry.email_sent_to = recipient
+            entry.save(update_fields=['email_sent_at', 'email_sent_to'])
+            return JsonResponse({'ok': True, 'message': f'Email poslan na: {recipient}'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)[:200]}, status=500)
+
+    return JsonResponse({'error': 'Nepoznat kanal. Koristite "email" ili "whatsapp".'}, status=400)
