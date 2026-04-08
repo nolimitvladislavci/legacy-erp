@@ -121,6 +121,31 @@ MODULES = [
         'quick_action': {'label': 'Upload dokumenta', 'url': '/hr/documents/arhiva/upload/', 'icon': 'fa-cloud-upload-alt', 'color': '#c9a84c'},
     },
 
+    # Stolovi (raspodjela komitenata) — sidebar shortcut
+    {
+        'id': 'stolovi',
+        'name': 'Stolovi',
+        'icon': 'fa-th-large',
+        'url': '/companies/stolovi/',
+        'url_name': 'companies:stolovi',
+        'category': 'dokumenti',
+        'tier': TIER_FREE,
+        'description': 'Raspodjela komitenata po radnicama.',
+        'price_addon': 0,
+    },
+    # Odabir komitenata — sidebar shortcut
+    {
+        'id': 'komitenti',
+        'name': 'Komitenti',
+        'icon': 'fa-users',
+        'url': '/accounts/odaberi-komitente/',
+        'url_name': 'accounts:odaberi_komitente',
+        'category': 'dokumenti',
+        'tier': TIER_FREE,
+        'description': 'Odaberite komitente koje vodite.',
+        'price_addon': 0,
+    },
+
     # ══════════════════════════════════════════════════════════════════════
     #  FINANCIJE
     # ══════════════════════════════════════════════════════════════════════
