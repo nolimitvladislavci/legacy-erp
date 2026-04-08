@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
+from django.views.decorators.cache import cache_page
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ def prijava_azila(request):
     return redirect("/no-limit/")
 
 
+@cache_page(300)
 def azil_landing(request):
     """Landing page za azil program — /no-limit/."""
     return render(request, "no_limit/azil_landing.html")

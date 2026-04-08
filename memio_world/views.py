@@ -51,6 +51,7 @@ def waitlist_count(request):
 
 
 from django.shortcuts import render, redirect
+from django.views.decorators.cache import cache_page
 from django.contrib import messages
 
 
@@ -83,6 +84,7 @@ def registracija_page(request):
     return render(request, 'memio_world/registracija.html', {'waitlist_count': count})
 
 
+@cache_page(300)
 def o_projektu_page(request):
     """O projektu memio.world — vizija i misija."""
     return render(request, 'memio_world/o_projektu.html')

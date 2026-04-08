@@ -478,6 +478,7 @@ def resend_consent(request):
     return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
 
 
+@cache_page(300)
 def landing_page(request):
     return render(request, 'memio_pet/landing.html')
 
