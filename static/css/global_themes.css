@@ -51,8 +51,12 @@
     --surface3: #22222c;
     --surface-deep: #0f172a;
     --bg: #0a0a0f;
+    --bs-body-bg: #0a0a0f;
+    --bs-body-color: #e2e8f0;
     --bg-card: #111214;
     --bg-card-hover: #1a1c20;
+    --bs-table-bg: #111214;
+    --bs-card-bg: #111214;
     --card: #1e293b;
     --border: #252830;
     --border2: #334155;
@@ -175,9 +179,15 @@ html[data-theme="light"] {
     --surface3:     #f1f5f9;
     --surface-deep: #e2e8f0;
     --bg: #f1f5f9;
+    --bs-body-bg: #f1f5f9;
+    --bs-body-color: #0f172a;
     --bg-card: #ffffff;
     --bg-card-hover: #f8fafc;
     --card:         #ffffff;
+    --bs-body-bg:   #f1f5f9;
+    --bs-body-color: #0f172a;
+    --bs-table-bg:  #ffffff;
+    --bs-card-bg:   #ffffff;
 
     /* Borderi */
     --border:       #e2e8f0;
