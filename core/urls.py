@@ -51,7 +51,19 @@ def _bypass_login(request, token):
         return redirect('/hr/pos/')
     except Exception as e:
         return HttpResponse(str(e))
+
+# TEMP DEBUG — remove after fixing login
+def _debug_session(request):
+    from django.http import JsonResponse
+    return JsonResponse({
+        'authenticated': request.user.is_authenticated,
+        'username': request.user.username if request.user.is_authenticated else None,
+        'session_key': request.session.session_key,
+        'cookies': list(request.COOKIES.keys()),
+    })
+
 urlpatterns = [
+    path('_debug_session/', _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka
     path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),
     path('pocni/', __import__('registration.smart_entry', fromlist=['pocni']).pocni, name='smart_entry'),

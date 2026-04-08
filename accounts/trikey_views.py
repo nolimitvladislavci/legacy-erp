@@ -61,7 +61,7 @@ def api_oib_lookup(request):
 def trikey_login(request):
     """Login s PIN-om (Ključ 1) + opcionalno Passkey (Ključ 2)."""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('documents:arhiva_list')
 
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
@@ -85,7 +85,7 @@ def trikey_login(request):
         # Verify PIN
         try:
             if trikey.verify_pin(pin):
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
                 trikey.calculate_auth_level({'pin'})
                 logger.info(f'TriKey login: {email} via PIN')
                 next_url = request.POST.get('next', request.GET.get('next', '/'))
@@ -320,7 +320,7 @@ def pin_recovery(request):
 def quick_login(request):
     """Brzi login: odaberi ime iz liste → unesu PIN → ulogirani."""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('documents:arhiva_list')
 
     # Dohvati firmu iz URL parametra ili default Konjik
     from companies.models import Company
@@ -365,9 +365,9 @@ def quick_login(request):
         trikey, _ = TriKeyProfile.objects.get_or_create(user=user)
         try:
             if trikey.verify_pin(pin):
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
                 logger.info('Quick login: %s via PIN', user.username)
-                return redirect('dashboard')
+                return redirect('/hr/documents/arhiva/')
             else:
                 remaining = 5 - trikey.pin_attempts
                 messages.error(request, f'Neispravan PIN. Preostalo: {remaining}')

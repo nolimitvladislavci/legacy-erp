@@ -8,20 +8,20 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:#0a0a0f;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.card{background:#111118;border:1px solid rgba(201,168,76,.2);border-radius:16px;
+  background:var(--bg,#0a0a0f);color:var(--text,#e2e8f0);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:var(--bg-card,#111118);border:1px solid rgba(201,168,76,.2);border-radius:16px;
   padding:2rem;width:92%;max-width:400px;text-align:center}
 .logo{font-size:1.8rem;font-weight:800;color:#c9a84c;margin-bottom:.5rem}
-.subtitle{color:#64748b;font-size:.85rem;margin-bottom:1.5rem}
+.subtitle{color:var(--text-muted,#64748b);font-size:.85rem;margin-bottom:1.5rem}
 .user-list{display:flex;flex-direction:column;gap:6px;margin-bottom:1.5rem;max-height:45vh;overflow-y:auto}
-.user-btn{padding:14px 16px;border:1px solid #333;border-radius:10px;background:#0a0a0f;
+.user-btn{padding:14px 16px;border:1px solid var(--border,#333);border-radius:10px;background:var(--bg,#0a0a0f);
   color:#e2e8f0;font-size:1rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}
 .user-btn:hover{border-color:#c9a84c;background:rgba(201,168,76,.05)}
 .user-btn.selected{border-color:#c9a84c;background:rgba(201,168,76,.1);color:#c9a84c}
 .pin-section{display:none;margin-top:1rem}
 .pin-section.show{display:block}
-.pin-label{color:#94a3b8;font-size:.85rem;margin-bottom:.5rem}
-.pin-input{width:100%;padding:14px;border:1px solid #333;border-radius:10px;background:#0a0a0f;
+.pin-label{color:var(--text-muted,#94a3b8);font-size:.85rem;margin-bottom:.5rem}
+.pin-input{width:100%;padding:14px;border:1px solid var(--border,#333);border-radius:10px;background:var(--bg,#0a0a0f);
   color:#c9a84c;font-size:1.5rem;text-align:center;letter-spacing:8px;font-weight:700;
   outline:none;-webkit-text-security:disc}
 .pin-input:focus{border-color:#c9a84c}
@@ -33,6 +33,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:1rem}
 .selected-name{color:#c9a84c;font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
 </style>
+<script>
+(function(){var t=localStorage.getItem('fina-theme');
+if(t==='light'){document.documentElement.setAttribute('data-theme','light');
+document.body.style.background='#f1f5f9';
+document.body.style.color='#1e293b';}})();
+</script>
+<link rel="stylesheet" href="/static/css/global_themes.css">
 </head>
 <body>
 <form method="post" class="card">
@@ -56,7 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
       {{ u.name }}
     </div>
     {% empty %}
-    <div style="color:#64748b;padding:2rem">Nema korisnika za ovu firmu.</div>
+    <div style="color:var(--text-muted,#64748b);padding:2rem">Nema korisnika za ovu firmu.</div>
     {% endfor %}
   </div>
 
