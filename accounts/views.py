@@ -276,7 +276,7 @@ def quick_register(request):
             except Exception:
                 pass
         request.session.flush()
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
 
         # Email verifikacija (async, ne blokira)
         try:

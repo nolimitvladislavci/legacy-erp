@@ -1401,7 +1401,7 @@ def activate_via_invite(request, token):
         user.save()
 
         from django.contrib.auth import login
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
         messages.success(request, f'Dobrodošli! Pristupili ste firmi {claim.company.name}.')
         return redirect('dashboard')
 

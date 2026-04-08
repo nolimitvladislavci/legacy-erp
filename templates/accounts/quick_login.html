@@ -1,112 +1,92 @@
+{% extends "base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Prijava — {{ company.name|default:"LIMIT Connect" }}</title>
+{% block title %}Prijava — {{ company.name|default:"LIMIT Connect" }}{% endblock %}
+
+{% block extra_css %}
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:var(--bg,#0a0a0f);color:var(--text,#e2e8f0);min-height:100vh;display:flex;align-items:center;justify-content:center}
-.card{background:var(--bg-card,#111118);border:1px solid rgba(201,168,76,.2);border-radius:16px;
-  padding:2rem;width:92%;max-width:400px;text-align:center}
-.logo{font-size:1.8rem;font-weight:800;color:#c9a84c;margin-bottom:.5rem}
-.subtitle{color:var(--text-muted,#64748b);font-size:.85rem;margin-bottom:1.5rem}
-.user-list{display:flex;flex-direction:column;gap:6px;margin-bottom:1.5rem;max-height:45vh;overflow-y:auto}
-.user-btn{padding:14px 16px;border:1px solid var(--border,#333);border-radius:10px;background:var(--bg,#0a0a0f);
-  color:#e2e8f0;font-size:1rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}
-.user-btn:hover{border-color:#c9a84c;background:rgba(201,168,76,.05)}
-.user-btn.selected{border-color:#c9a84c;background:rgba(201,168,76,.1);color:#c9a84c}
-.pin-section{display:none;margin-top:1rem}
-.pin-section.show{display:block}
-.pin-label{color:var(--text-muted,#94a3b8);font-size:.85rem;margin-bottom:.5rem}
-.pin-input{width:100%;padding:14px;border:1px solid var(--border,#333);border-radius:10px;background:var(--bg,#0a0a0f);
-  color:#c9a84c;font-size:1.5rem;text-align:center;letter-spacing:8px;font-weight:700;
-  outline:none;-webkit-text-security:disc}
-.pin-input:focus{border-color:#c9a84c}
-.btn-login{width:100%;padding:14px;background:#c9a84c;color:#000;border:none;border-radius:10px;
-  font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem;transition:filter .15s}
-.btn-login:hover{filter:brightness(1.1)}
-.btn-login:disabled{opacity:.5;cursor:not-allowed}
-.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;
-  padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:1rem}
-.selected-name{color:#c9a84c;font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+.ql-wrap{max-width:420px;margin:2rem auto;padding:0 1rem}
+.ql-title{color:var(--gold,#c9a84c);font-size:1.4rem;font-weight:800;text-align:center;margin-bottom:.3rem}
+.ql-sub{color:var(--text-muted,#94a3b8);font-size:.85rem;text-align:center;margin-bottom:1.5rem}
+.ql-list{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;margin-bottom:1.5rem}
+.ql-item{padding:14px 16px;border:1px solid var(--border,#333);border-radius:10px;
+  background:var(--bg-card,#111);color:var(--text,#e2e8f0);font-size:1rem;font-weight:600;
+  cursor:pointer;text-align:left;transition:all .15s}
+.ql-item:hover{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.05)}
+.ql-item.selected{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)}
+.ql-pin{display:none;margin-top:1rem}
+.ql-pin.show{display:block}
+.ql-pin-label{color:var(--text-muted,#94a3b8);font-size:.85rem;margin-bottom:.5rem;text-align:center}
+.ql-pin-input{width:100%;padding:14px;border:1px solid var(--border,#333);border-radius:10px;
+  background:var(--bg,#0a0a0f);color:var(--gold,#c9a84c);font-size:1.5rem;text-align:center;
+  letter-spacing:8px;font-weight:700;outline:none;-webkit-text-security:disc;box-sizing:border-box}
+.ql-pin-input:focus{border-color:var(--gold,#c9a84c)}
+.ql-btn{width:100%;padding:14px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:10px;
+  font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem}
+.ql-btn:disabled{opacity:.4;cursor:not-allowed}
+.ql-sel-name{color:var(--gold,#c9a84c);font-weight:700;font-size:1.1rem;text-align:center;margin-bottom:.5rem}
 </style>
-<script>
-(function(){var t=localStorage.getItem('fina-theme');
-if(t==='light'){document.documentElement.setAttribute('data-theme','light');
-document.body.style.background='#f1f5f9';
-document.body.style.color='#1e293b';}})();
-</script>
-<link rel="stylesheet" href="/static/css/global_themes.css">
-</head>
-<body>
-<form method="post" class="card">
-  {% csrf_token %}
-  <div class="logo">{{ company.name|default:"LIMIT Connect" }}</div>
-  <div class="subtitle">Odaberite svoje ime i unesite PIN</div>
+{% endblock %}
+
+{% block content %}
+<div class="ql-wrap">
+  <div class="ql-title">{{ company.name|default:"LIMIT Connect" }}</div>
+  <div class="ql-sub">Odaberite svoje ime i unesite PIN</div>
 
   {% if messages %}
   {% for msg in messages %}
-  <div class="error">{{ msg }}</div>
+  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:1rem">{{ msg }}</div>
   {% endfor %}
   {% endif %}
 
-  <input type="hidden" name="user_id" id="userId" value="{{ selected_id|default:'' }}">
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="user_id" id="userId" value="{{ selected_id|default:'' }}">
 
-  <div class="user-list" id="userList">
-    {% for u in users %}
-    <div class="user-btn{% if u.id == selected_id %} selected{% endif %}"
-         onclick="selectUser(this, '{{ u.id }}', '{{ u.name }}')"
-         data-id="{{ u.id }}">
-      {{ u.name }}
+    <div class="ql-list" id="userList">
+      {% for u in users %}
+      <div class="ql-item{% if u.id == selected_id %} selected{% endif %}"
+           onclick="qlSelect(this, '{{ u.id }}', '{{ u.name }}')" data-id="{{ u.id }}">
+        {{ u.name }}
+      </div>
+      {% empty %}
+      <div style="color:var(--text-muted);padding:2rem;text-align:center">Nema korisnika.</div>
+      {% endfor %}
     </div>
-    {% empty %}
-    <div style="color:var(--text-muted,#64748b);padding:2rem">Nema korisnika za ovu firmu.</div>
-    {% endfor %}
-  </div>
 
-  <div class="pin-section" id="pinSection">
-    <div class="selected-name" id="selectedName"></div>
-    <div class="pin-label">Unesite 6-znamenkasti PIN</div>
-    <input type="password" name="pin" id="pinInput" class="pin-input"
-           maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
-           oninput="checkPin()">
-    <button type="submit" class="btn-login" id="loginBtn" disabled>Prijava</button>
-  </div>
-</form>
+    <div class="ql-pin{% if selected_id %} show{% endif %}" id="pinSection">
+      <div class="ql-sel-name" id="selName"></div>
+      <div class="ql-pin-label">Unesite 6-znamenkasti PIN</div>
+      <input type="password" name="pin" id="pinInput" class="ql-pin-input"
+             maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+             oninput="qlCheck()">
+      <button type="submit" class="ql-btn" id="loginBtn" disabled>Prijava</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-function selectUser(el, id, name) {
-  document.querySelectorAll('.user-btn').forEach(function(b){b.classList.remove('selected')});
+function qlSelect(el, id, name) {
+  document.querySelectorAll('.ql-item').forEach(function(b){b.classList.remove('selected')});
   el.classList.add('selected');
   document.getElementById('userId').value = id;
-  document.getElementById('selectedName').textContent = name;
+  document.getElementById('selName').textContent = name;
   document.getElementById('pinSection').classList.add('show');
-  document.getElementById('pinInput').value = '';
-  document.getElementById('pinInput').focus();
+  var pi = document.getElementById('pinInput');
+  pi.value = '';
+  pi.focus();
   document.getElementById('loginBtn').disabled = true;
-  // Scroll user list to hide, focus on PIN
   document.getElementById('userList').style.maxHeight = '120px';
 }
-function checkPin() {
+function qlCheck() {
   var pin = document.getElementById('pinInput').value;
   document.getElementById('loginBtn').disabled = pin.length !== 6;
-  if (pin.length === 6) {
-    document.getElementById('loginBtn').focus();
-  }
 }
-// Auto-submit kad unesu 6 znamenki
 document.getElementById('pinInput').addEventListener('input', function() {
   if (this.value.length === 6 && document.getElementById('userId').value) {
     document.getElementById('loginBtn').click();
   }
 });
-{% if selected_id %}
-document.getElementById('pinSection').classList.add('show');
-document.getElementById('pinInput').focus();
-{% endif %}
 </script>
-</body>
-</html>
+{% endblock %}

@@ -96,7 +96,7 @@ def magic_login(request, token):
     try:
         data = loads(token, key=settings.SECRET_KEY, salt='magic-login', max_age=86400)
         user = User.objects.get(pk=data['user_id'])
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
         return redirect('/hr/dashboard/')
     except (BadSignature, SignatureExpired, User.DoesNotExist):
         return render(request, 'registration/smart_entry.html', {
