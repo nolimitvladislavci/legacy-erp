@@ -31,7 +31,7 @@ def mdb_count(mdb_path, table):
             return -1
         rows = list(csv.DictReader(io.StringIO(r.stdout)))
         return len(rows)
-    except:
+    except Exception:
         return -1
 
 def find_mdbs():

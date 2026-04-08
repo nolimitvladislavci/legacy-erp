@@ -111,8 +111,10 @@ def pet_create(request):
                 pet.date_of_birth = dob
             weight = request.POST.get('weight_kg')
             if weight:
-                try: pet.weight_kg = float(weight)
-                except: pass
+                try:
+                    pet.weight_kg = float(weight)
+                except (ValueError, TypeError):
+                    pass
             if 'photo' in request.FILES:
                 pet.photo = request.FILES['photo']
             pet.save()
@@ -148,8 +150,10 @@ def pet_edit(request, pk):
             if dob: pet.date_of_birth = dob
             weight = request.POST.get('weight_kg')
             if weight:
-                try: pet.weight_kg = float(weight)
-                except: pass
+                try:
+                    pet.weight_kg = float(weight)
+                except (ValueError, TypeError):
+                    pass
             if request.POST.get('photo_clear'):
                 if pet.photo:
                     pet.photo.delete(save=False)

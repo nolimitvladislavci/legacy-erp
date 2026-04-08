@@ -20,7 +20,7 @@ from django.db import transaction
 def safe_dec(v):
     try:
         return Decimal(str(round(float(v or 0), 2)))
-    except:
+    except Exception:
         return Decimal('0')
 
 
@@ -77,7 +77,7 @@ class Command(BaseCommand):
             try:
                 datum_serial = ws.cell_value(r, 0)
                 datum = xlrd.xldate_as_datetime(datum_serial, wb.datemode).date()
-            except:
+            except Exception:
                 continue
 
             entries.append({

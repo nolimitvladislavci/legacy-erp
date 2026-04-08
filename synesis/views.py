@@ -1581,7 +1581,8 @@ def _scan_synesis_knjige():
                 v = (row.get('ValueString') or '').strip().strip('"')
                 if k: d[k] = v
             return d
-        except: return {}
+        except Exception:
+            return {}
     def _name_from_dir(d):
         n = re.sub(r'\s*\d{4}.*$', '', d).strip()
         return n.title() if n == n.upper() else n
