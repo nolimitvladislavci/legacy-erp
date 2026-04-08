@@ -1,11 +1,11 @@
         :root {
-            --sidebar-bg:var(--surface-deep); --sidebar-hover:var(--surface2); --accent:var(--blue); --gold: var(--gold);
+            --sidebar-bg:#0f1219; --sidebar-hover:#1a1c20; --accent:#3b82f6; --gold:#c9a84c;
             /* Light theme (default) */
             --bg:#f1f5f9; --bg-card:#ffffff; --bg-card-hover:#f8fafc;
-            --text:var(--surface-deep); --text-secondary:#475569; --text-muted:var(--muted2);
-            --border:var(--text); --border-light:#f1f5f9;
-            --topbar-bg:#ffffff; --topbar-text:var(--surface-deep); --topbar-border:var(--text);
-            --input-bg:#ffffff; --input-border:var(--text);
+            --text:#1e293b; --text-secondary:#475569; --text-muted:#64748b;
+            --border:#e2e8f0; --border-light:#f1f5f9;
+            --topbar-bg:#ffffff; --topbar-text:#1e293b; --topbar-border:#e2e8f0;
+            --input-bg:#ffffff; --input-border:#e2e8f0;
             --table-header-bg:#f8fafc; --table-row-hover:#f1f5f9;
             --badge-bg:#f1f5f9; --shadow:rgba(0,0,0,0.05);
             --cmd-bg:#ffffff; --cmd-border:var(--text); --cmd-input-color:var(--surface-deep);
@@ -21,15 +21,15 @@
         :root .form-control, :root .form-select { background:#ffffff; color:var(--surface-deep); }
 
         [data-theme="dark"] {
-            --bg:#0a0a0a; --bg-card:var(--dark); --bg-card-hover:#1a1c20;
-            --text:#e8e8e8; --text-secondary:var(--text-dim); --text-muted:#6b7280;
-            --border:var(--border); --border-light:#1e2130;
-            --topbar-bg:var(--dark); --topbar-text:#e8e8e8; --topbar-border:var(--border);
+            --bg:#0a0a0a; --bg-card:#111214; --bg-card-hover:#1a1c20;
+            --text:#e8e8e8; --text-secondary:#94a3b8; --text-muted:#6b7280;
+            --border:#2a2d3a; --border-light:#1e2130;
+            --topbar-bg:#111214; --topbar-text:#e8e8e8; --topbar-border:#2a2d3a;
             --sidebar-bg:#0a0a0a; --sidebar-hover:#151720;
-            --input-bg:#0a0a0a; --input-border:var(--border);
+            --input-bg:#0a0a0a; --input-border:#2a2d3a;
             --table-header-bg:#0a0a0a; --table-row-hover:#1a1c20;
             --badge-bg:#1e2130; --shadow:rgba(0,0,0,0.3);
-            --cmd-bg:var(--dark); --cmd-border:var(--border); --cmd-input-color:#e8e8e8;
+            --cmd-bg:#111214; --cmd-border:#2a2d3a; --cmd-input-color:#e8e8e8;
             --cmd-item-hover:#1a1c20; --cmd-hint-bg:#1e2130;
         }
         * { box-sizing: border-box; }
