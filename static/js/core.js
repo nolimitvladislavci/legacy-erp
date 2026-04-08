@@ -544,7 +544,7 @@ function updateThemeIcon(theme){
 }
 // Apply saved theme icon
 (function(){
-  var saved = localStorage.getItem('fina-theme') || 'light';
+  var saved = localStorage.getItem('fina-theme') || 'dark';
   updateThemeIcon(saved);
 })();
 
