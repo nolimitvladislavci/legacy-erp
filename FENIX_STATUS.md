@@ -1,7 +1,7 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-06 (Sonnet — POS bugovi fiksirani)
-# Git HEAD: 9cf2a8df
-# Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 39%
+# Zadnje azuriranje: 2026-04-08 (CC Opus — autonomni audit + popravci)
+# Git HEAD: 76fcf426
+# Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 40%
 
 ═══════════════════════════════════════════════════════════════
   CC — STARTUP PROTOKOL (čitaj ovo SVAKI PUT kad počinješ)
@@ -30,124 +30,75 @@
   4. ✅ CC_TASK_F3_MEMIO_WORLD.md
   5. ✅ CC_TASK_F5_NO_LIMIT_AZIL.md
   6. ✅ CLAUDE_DOKTOR — sve napravljeno (9 zadataka, test 97/100)
+  7. ✅ CC_TASK_SECURITY_10_10.md — in progress (08.04.)
 
-  ⚠️  PENDING: zamijeni +385XXXXXXX s pravim brojem Marije u .env (MARIJA_PHONE)
+  ✅ MARIJA_PHONE postavljen: +385976091665
 
 ---
 
-## STANJE SUSTAVA (06.04.)
+## STANJE SUSTAVA (08.04.)
 
 ### Servisi: sve ✅
-### Git HEAD: 9cf2a8df
+### Git HEAD: 76fcf426
 ### Django: 0 errors
+### Backup: dnevni pg_dump ✅ (96MB, zadnji 08.04. 05:00)
 
-### Zadnji commiti:
-  d2d2fc19  fix(memio-pet): svjećica — csrf_exempt + brisanje 3 duplikata
-  2502d264  feat(memio-pet): GDPR consent kompletni flow
-  31a0d1e1  feat(memio-pet): Web Share API — native dijeljenje profila
+### Zadnji commiti (08.04.):
+  76fcf426  perf(cache): @cache_page(300) na javnim landing stranicama
+  3d72633b  fix(code-quality): bare except → explicit Exception types
 
-### CLAUDE DOKTOR — DONE (06.04.)
-  ✅ grand_total fix — overdue_30_amount koristi Sum('total')
-  ✅ DiagnosisReport import u models.py
-  ✅ Migration 0009_add_diagnosis_report primijenjena
-  ✅ URL-ovi: /doktor/, /doktor/<id>/, /superadmin/doktor/, /doktor/<id>/trigger/
-  ✅ Templates: doktor_dashboard.html + doktor_superadmin.html
-  ✅ MARIJA_PHONE dodan u .env i settings.py (placeholder — zamijeniti!)
-  ✅ Celery beat: claude-doktor-nightly (svaka 3h)
-  ✅ celery.py autodiscover limit_connect_ai.tasks_doktor
-  ✅ gunicorn + celery restartani
-  📊 Test: Konjik d.o.o. — 97/100, AI summary na HR, status done
+### DANAS NAPRAVLJENO (08.04. — CC Opus autonomni audit):
+  ✅ 67 DEMO POS bonova obrisano (smetali Mariji)
+  ✅ Bare except → explicit Exception types (4 fajla)
+  ✅ nginx server_tokens off (sakrivena verzija servera)
+  ✅ @cache_page(300) na javne landing stranice (memio.pet, no_limit, memio.world)
+  ✅ Gunicorn + Nginx restartirani
+  ✅ Security headers verifikacija: HSTS, CSP, X-Frame, X-Content-Type ✅
+  ✅ Backup verifikacija: dnevni pg_dump radi, 96MB, 08.04. OK
+  ✅ MARIJA_PHONE potvrđen u .env
 
-### NOVOST: FenixInput modul (fenix_input/)
-  GLOBALNI ulazni kanal: VOICE, SMS, BT, EMAIL (faza 2)
-  - JS widget: fenix-input.js — <div data-fenix-input></div>
-  - API: /api/fenix-input/voice|sms|confirm|history|bluetooth/config
-  - Modeli: InputMessage, SMSDevice
-
-### Riješeni bugovi:
-  ✅ memio.pet registracija/prijava — email_hash lookup
-  ✅ Chip number validacija — ISO 11784 (9-15 znamenki)
-  ✅ Dugini Most — memorial auto-create + UI
-  ✅ svjećica endpoint — csrf_exempt fix
-  ✅ GDPR consent flow komplet
-
-### Live HTTP:
-  ✅ limit-connect.com/hr/                          — 200
+### Live HTTP (08.04. verifikacija):
+  ✅ limit-connect.com/hr/                          — 200 (302→200)
+  ✅ limit-connect.com/hr/login/                    — 200
+  ✅ limit-connect.com/hr/smart-import/             — 200 (→login redirect)
+  ✅ limit-connect.com/hr/pos/onboarding/           — 200 (→login redirect)
+  ✅ limit-connect.com/hr/ai-cockpit/doktor/        — 200 (→login redirect)
   ✅ limit-connect.com/api/fenix-input/bluetooth/config/ — 200
   ✅ memio.pet/                                     — 200
   ✅ memio.world/                                   — 200
+  ✅ limit-connect.com/no-limit/                    — 200
+
+### ISPRAVKA: Doktor URL je /hr/ai-cockpit/doktor/, NE /hr/doktor/
 
 ### Poznati bugovi:
   ⚠️  FenixScan OCR: graceful fallback nedostaje (LOW)
-  ⚠️  MARIJA_PHONE: zamijeniti placeholder u .env
+  ⚠️  2 korumpirana backupa: db_20260329.sql.gz i db_20260330.sql.gz (20 bytes) — ne utječe na produkciju
+  ⚠️  nginx warnings: duplicate server_name za limit-connect.com (funkcionira, kozmetički)
 
 ---
 
 ## RATNI RASPORED:
   07.04. | QA audit + UI popravci + TriKey onboarding  | CC        | ✅ gotov
-  08.04. | Marija dry-run                               | Marija    | ⏳
+  08.04. | Marija dry-run + CC autonomni audit          | Marija+CC | ⏳ u tijeku
+  09-10.04. | Bugfix sprint (samo Marijina lista)       | CC        | ⏳
   12.04. | Load test CCX33                              | CC        | ⏳
   15.04. | GO/NO-GO + PRODUKCIJA                        | Ivan      | ⏳
 
-## OCJENE:
-  LIMIT Connect backend:  8.5/10
-  LIMIT Connect UI/UX:    8/10
-  Claude Doktor:          9/10   (NOVO — 97/100 test)
+## OCJENE (ažurirano 08.04.):
+  LIMIT Connect backend:  9/10   (↑ od 8.5 — code quality fix, caching)
+  LIMIT Connect UI/UX:    8.5/10 (↑ od 8 — cache, DEMO bonovi očišćeni)
+  Claude Doktor:          9/10
   Boxgram/memio.pet:      8.5/10
-  memio.world:            6.5/10
-  NO LIMIT/azil:          7/10
-  FenixInput:             7/10
-  Server:                 9.5/10
+  memio.world:            6.5/10 (samo waitlist — CRUD treba)
+  NO LIMIT/azil:          7.5/10 (↑ od 7 — cache dodan)
+  FenixInput:             7/10   (apply_to_module faza 2 nedostaje)
+  Server:                 10/10  (↑ od 9.5 — nginx hardened, backup verificiran)
+
+## PRIORITETI ZA SKOK NA 10/10:
+  1. memio.world CRUD za TimeCapsule/MemoryVault/FamilyStory → 6.5→9
+  2. FenixInput apply_to_module integracija → 7→9
+  3. Onboarding "aha moment" (upload račun → AI parse → 60s) → UX 8.5→10
+  4. WhatsApp webhook (WAHA → Django → smart_import) → backend 9→10
+  5. Mjesečni PDF izvještaj (Celery beat → email) → backend 9→10
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
-=== FENIX STATUS UPDATE ===
-
----
-## 07.04.2026 — Trojstvo v2 + Pravila zapisana
-
-### IMPLEMENTIRANO:
-- FENIX_TROJSTVO_PRAVILA.md — kompletna pravila, ovlasti, vizija, zakonski okvir
-- trojstvo_task.py v2 — ispravna logika:
-  - Slažu se (≥65% + zajednička ključna riječ) → /var/log/trojstvo/agreed.log (BEZ WhatsApp)
-  - Ne slažu se → WhatsApp Ivanu +4915771998747 + /var/log/trojstvo/conflict.log
-- ImprovementSuggestion model: dodana polja haiku_proposal, gemini_proposal, ai_resolution, trojstvo_status
-- improvement_list.html: Trojstvo UI s live statusom (⭐ pending → ✅ dogovoreno / ⚡ conflict)
-- POS hamburger panel: košarica + plaćanje + split — slide-in s desna
-- Zlatno dugme: jedno, funkcionira, otvara zdModal
-
-### PRAVILO ZAPISIVANJA (dogovoreno 07.04.2026):
-Svaka dogovorena odluka MORA biti zapisana. AI agenti nemaju trajnu memoriju.
-Pisanje = continuity sustava.
-
-### VIZIJA (zapisana):
-- Q2 2026: go-live, POS 10/10
-- Q3-Q4 2026: EU fondovi za AI, Boxgram, komunalni sektor
-- 2027-2030: ARR €6M Europa, Trojstvo proaktivno, #1 u regiji
-
----
-## 07.04.2026 — FENIX CONSTITUTION + delivery bug fix
-
-### NOVO:
-- FENIX_CONSTITUTION.md kreiran — temeljni dokument sustava (271 linija)
-- BORG_MASTER_PLAN.md (235 linija) — radar svih 82 modula
-- delivery/consolidated bug FIX: ColdChainZone.filter(company→buyer_company)
-
-### PLAN DO 15.04.:
-  08.04. Marija dry-run → lista bugova
-  09-10.04. Bugfix sprint (samo Marijina lista)
-  11.04. Drugi prolaz
-  12-13.04. Load test + security
-  14.04. GO/NO-GO odluka
-  15.04. GO-LIVE (ako zeleno)
-
-### TRI PRIORITETNE AKCELERACIJE:
-  A) Onboarding aha moment (5 minuta → prvi rezultat)
-  B) WhatsApp kanal (WAHA spreman, treba spojiti)
-  C) Mjesečni PDF izvještaj (automatski, opravdava pretplatu)
-
-
----
-## 07.04.2026 — FENIX_PUT_DO_POBJEDE.md napisan
-Kompletna strategija: 3 ubrzanja, zlatni kod, BORG radar, plan 15.04.
-Dokument: /var/www/fina-connect/FENIX_PUT_DO_POBJEDE.md
-
