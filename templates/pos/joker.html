@@ -463,7 +463,7 @@
 
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
-      <input type="search" id="prodSearch" aria-label="Pretraga proizvoda" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1" id="prodSearch">
+      <input type="search" id="prodSearch" aria-label="Pretraga proizvoda" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
       <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Glasovni unos">
         <i class="fas fa-microphone"></i>
@@ -1651,87 +1651,6 @@ function togglePayExpand() {
 {% include "pos/includes/compliance_monitor.html" %}
 {% endif %}{# end session check #}
 
-<div id="zlatnoDugmeModal" style="display:none;position:fixed;inset:0;z-index:19000;background:rgba(0,0,0,.75);align-items:center;justify-content:center">
-  <div style="background:#0d0d12;border:2px solid var(--gold,#c9a84c);border-radius:16px;padding:1.5rem;width:92%;max-width:420px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:1.1rem">⭐ Zlatno dugme</span>
-      <button onclick="closeZlatnoDugme()" style="background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer">✕</button>
-    </div>
-    <p style="color:#94a3b8;font-size:.85rem;margin-bottom:1rem">Prijavi problem, prijedlog ili grešku. Ivan prima obavijest odmah.</p>
-    <form id="zlatnoForm" onsubmit="submitZlatno(event)">
-      <div style="margin-bottom:.75rem">
-        <label style="font-size:.75rem;color:#94a3b8;display:block;margin-bottom:.3rem">Naslov *</label>
-        <input id="zlatnoTitle" type="text" required maxlength="120" placeholder="Kratki opis problema..." style="width:100%;background:#1a1a2e;border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;color:#e2e8f0;font-size:.9rem">
-      </div>
-      <div style="margin-bottom:.75rem">
-        <label style="font-size:.75rem;color:#94a3b8;display:block;margin-bottom:.3rem">Detalji *</label>
-        <textarea id="zlatnoDesc" required maxlength="1000" rows="4" placeholder="Što se dogodilo? Gdje?" style="width:100%;background:#1a1a2e;border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;color:#e2e8f0;font-size:.9rem;resize:vertical"></textarea>
-      </div>
-      <div style="margin-bottom:1rem">
-        <label style="font-size:.75rem;color:#94a3b8;display:block;margin-bottom:.3rem">Prioritet</label>
-        <select id="zlatnoPrio" style="width:100%;background:#1a1a2e;border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;color:#e2e8f0;font-size:.9rem">
-          <option value="1">🔴 Kritično — ne mogu raditi</option>
-          <option value="2">🟠 Visoko — otežava rad</option>
-          <option value="3" selected>🟡 Srednje — prijedlog</option>
-          <option value="5">⚪ Ideja — za razmisliti</option>
-        </select>
-      </div>
-      <button type="submit" id="zlatnoSubmitBtn" style="width:100%;padding:.9rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);border:none;border-radius:10px;font-weight:700;font-size:1rem;color:#000;cursor:pointer">
-        ⭐ Pošalji Ivanu
-      </button>
-    </form>
-    <div id="zlatnoSuccess" style="display:none;text-align:center;padding:1.5rem 0">
-      <div style="font-size:2.5rem;margin-bottom:.5rem">✅</div>
-      <div style="color:#22c55e;font-weight:700;font-size:1.1rem;margin-bottom:.5rem">Prijedlog poslan!</div>
-      <div style="color:#94a3b8;font-size:.85rem">Ivan prima WhatsApp obavijest odmah.</div>
-      <button onclick="closeZlatnoDugme()" style="margin-top:1rem;padding:.6rem 1.5rem;background:rgba(201,168,76,.2);border:1px solid var(--gold,#c9a84c);border-radius:8px;color:var(--gold,#c9a84c);cursor:pointer;font-size:.9rem">Zatvori</button>
-    </div>
-  </div>
-</div>
-
-<script>
-function openZlatnoDugme() {
-  var m = document.getElementById('zlatnoDugmeModal');
-  m.style.display = 'flex';
-  document.getElementById('zlatnoForm').style.display = '';
-  document.getElementById('zlatnoSuccess').style.display = 'none';
-  document.getElementById('zlatnoTitle').value = '';
-  document.getElementById('zlatnoDesc').value = '';
-  setTimeout(function(){ document.getElementById('zlatnoTitle').focus(); }, 100);
-}
-function closeZlatnoDugme() {
-  document.getElementById('zlatnoDugmeModal').style.display = 'none';
-}
-function submitZlatno(e) {
-  e.preventDefault();
-  var btn = document.getElementById('zlatnoSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Šaljem...';
-  var data = new FormData();
-  data.append('title', document.getElementById('zlatnoTitle').value);
-  data.append('description', document.getElementById('zlatnoDesc').value);
-  data.append('priority', document.getElementById('zlatnoPrio').value);
-  data.append('category', 'bug');
-  var _csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-  data.append('csrfmiddlewaretoken', _csrf);
-  fetch(window.location.origin + '/hr/pos/improvements/', { method: 'POST', credentials: 'same-origin', body: data })
-    .then(function(r) {
-      if (r.ok || r.redirected) {
-        document.getElementById('zlatnoForm').style.display = 'none';
-        document.getElementById('zlatnoSuccess').style.display = '';
-      } else {
-        btn.disabled = false; btn.textContent = '⭐ Pošalji Ivanu';
-        fenixToast('Greška pri slanju. Pokušaj ponovo.', 'error');
-      }
-    })
-    .catch(function() {
-      btn.disabled = false; btn.textContent = '⭐ Pošalji Ivanu';
-      fenixToast('Nema veze. Pokušaj ponovo.', 'error');
-    });
-}
-document.getElementById('zlatnoDugmeModal').addEventListener('click', function(e) {
-  if (e.target === this) closeZlatnoDugme();
-});
 </script>
 
 

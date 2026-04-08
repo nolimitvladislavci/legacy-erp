@@ -3,19 +3,14 @@
 <html lang="hr">
 <head>
 <script>
-// Force SW update on every load
+// Service Worker — register for offline POS capability
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(regs) {
-    regs.forEach(function(r) { r.unregister(); });
-  });
-  if (window.caches) {
-    caches.keys().then(function(names) {
-      names.forEach(function(n) { caches.delete(n); });
-    });
-  }
+  navigator.serviceWorker.register('/static/js/pos/pos-offline.js', {scope: '/hr/pos/'})
+    .then(function(reg) { console.log('POS SW registered:', reg.scope); })
+    .catch(function(err) { console.warn('POS SW registration failed:', err); });
 }
 </script>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>(function(){var t=localStorage.getItem('fina-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
 <title>{% block title %}POS{% endblock %} -- LIMIT Connect</title>
 <style>

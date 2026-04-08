@@ -307,7 +307,7 @@ def _send_to_fina(soap_xml: bytes, url: str, cert_pem: bytes, key_pem: bytes) ->
             url, data=soap_xml, headers=headers,
             cert=(cert_tmp, key_tmp),
             verify=_verify,
-            timeout=(1.5, 2),
+            timeout=(3, 8),
         )
         # Ne raise na 500 – FINA vraca SOAP error body u HTTP 500 responsu
     finally:
@@ -361,7 +361,7 @@ def ping_fina(cert_path: str, password: str, demo: bool = True) -> bool:
             _v = False if 'cistest' in url else True
             r = requests.post(url, data=envelope,
                               headers={'Content-Type': 'text/xml; charset=UTF-8'},
-                              cert=(ct, kt), verify=_v, timeout=(1.5, 2))
+                              cert=(ct, kt), verify=_v, timeout=(3, 8))
             return r.status_code in (200, 500) and b"Envelope" in r.content
         finally:
             os.unlink(ct); os.unlink(kt)

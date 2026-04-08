@@ -24,6 +24,7 @@ urlpatterns = [
 
     # ── TriKey Authentication ──────────────────────────────────
     path('trikey/login/', trikey_views.trikey_login, name='trikey_login'),
+    path('quick-login/', trikey_views.quick_login, name='quick_login'),
     path('trikey/pin/setup/', trikey_views.pin_setup, name='pin_setup'),
     path('trikey/pin/recovery/', trikey_views.pin_recovery, name='pin_recovery'),
     path('trikey/passkey/options/', trikey_views.passkey_register_options, name='passkey_options'),

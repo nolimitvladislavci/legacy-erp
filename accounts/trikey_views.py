@@ -310,3 +310,74 @@ def pin_recovery(request):
 
     messages.success(request, 'Novi PIN poslan na email. Provjerite inbox.')
     return redirect('accounts:trikey_login')
+
+
+# ════════════════════════════════════════════════════════════════
+# QUICK LOGIN — Odaberi ime + PIN (za prezentacije i brzi pristup)
+# ════════════════════════════════════════════════════════════════
+
+@ensure_csrf_cookie
+def quick_login(request):
+    """Brzi login: odaberi ime iz liste → unesu PIN → ulogirani."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    # Dohvati firmu iz URL parametra ili default Konjik
+    from companies.models import Company
+    company_id = request.GET.get('company', '')
+    if company_id:
+        company = Company.objects.filter(pk=company_id).first()
+    else:
+        company = Company.objects.filter(name__icontains='konjik').first()
+
+    users = []
+    if company:
+        from accounts.models import CompanyMembership
+        memberships = CompanyMembership.objects.filter(
+            company=company, is_active=True, user__is_active=True,
+        ).select_related('user').order_by('user__first_name')
+        for m in memberships:
+            u = m.user
+            name = u.get_full_name() or u.username
+            if name.strip() and not u.is_superuser:
+                users.append({'id': u.pk, 'name': name, 'email': u.email})
+
+    if request.method == 'POST':
+        import json
+        user_id = request.POST.get('user_id', '')
+        pin = request.POST.get('pin', '').strip()
+
+        if not user_id or not pin:
+            messages.error(request, 'Odaberite ime i unesite PIN.')
+            return render(request, 'accounts/quick_login.html', {
+                'users': users, 'company': company,
+            })
+
+        from django.contrib.auth.models import User
+        try:
+            user = User.objects.get(pk=user_id, is_active=True)
+        except User.DoesNotExist:
+            messages.error(request, 'Korisnik nije pronađen.')
+            return render(request, 'accounts/quick_login.html', {
+                'users': users, 'company': company,
+            })
+
+        trikey, _ = TriKeyProfile.objects.get_or_create(user=user)
+        try:
+            if trikey.verify_pin(pin):
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                logger.info('Quick login: %s via PIN', user.username)
+                return redirect('dashboard')
+            else:
+                remaining = 5 - trikey.pin_attempts
+                messages.error(request, f'Neispravan PIN. Preostalo: {remaining}')
+        except PermissionError as e:
+            messages.error(request, str(e))
+
+        return render(request, 'accounts/quick_login.html', {
+            'users': users, 'company': company, 'selected_id': int(user_id),
+        })
+
+    return render(request, 'accounts/quick_login.html', {
+        'users': users, 'company': company,
+    })

@@ -682,7 +682,7 @@ def barcode_lookup(request):
     if not barcode:
         return JsonResponse({'found': False})
     try:
-        item = InventoryItem.objects.get(barcode=barcode, is_active=True)
+        item = InventoryItem.objects.get(barcode=barcode, is_active=True, company=company)
         tax_rate_val = 25
         if item.tax_rate_id:
             try: tax_rate_val = float(item.tax_rate.rate)

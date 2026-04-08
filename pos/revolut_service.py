@@ -144,7 +144,8 @@ def check_payment_status(payment_id):
 def verify_webhook_signature(payload_body, signature_header):
     """Verificiraj Revolut webhook potpis."""
     if not REVOLUT_WEBHOOK_SECRET:
-        return True  # Skip verification ako nema secret
+        logger.warning('REVOLUT_WEBHOOK_SECRET not configured — rejecting webhook')
+        return False  # Reject unverified webhooks
     expected = hmac.new(
         REVOLUT_WEBHOOK_SECRET.encode(),
         payload_body,
