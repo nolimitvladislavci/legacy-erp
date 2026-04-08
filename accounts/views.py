@@ -494,7 +494,7 @@ def odaberi_komitente(request):
         'moje_count': len(moje),
         'slobodne_count': len(slobodne),
         'tudje_count': len(tudje_ids),
-        'recommended_ids': recommended_ids,
+        'recommended_ids': partner_ids - tudje_ids,
         'recommendation_source': recommendation_source,
     })
 
