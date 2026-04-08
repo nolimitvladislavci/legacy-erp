@@ -92,7 +92,7 @@ def _seed_demo_data(company, user):
         country = getattr(company, 'country', 'HR') or 'HR'
         if not TaxRate.objects.filter(country=country).exists():
             if country in ('DE', 'AT'):
-                for name, rate in [('Standard 19%', 19), ('Ermäßigt 7%', 7), ('Steuerfrei', 0)]:
+                for name, rate in [('PDV 19% (Standard)', 19), ('PDV 7% (Snižena)', 7), ('PDV 0% (Oslobođeno)', 0)]:
                     TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
             elif country == 'SI':
                 for name, rate in [('DDV 22%', 22), ('DDV 9.5%', 9.5), ('Oproščeno', 0)]:

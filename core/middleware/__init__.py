@@ -16,7 +16,7 @@ class CompanyMiddleware(MiddlewareMixin):
             request.company = None
             return None
 
-        # Multi-company switching for regular users
+        # Multi-company switching — session membership ima prioritet
         membership_id = request.session.get('active_membership_id')
         if membership_id:
             try:
@@ -24,12 +24,15 @@ class CompanyMiddleware(MiddlewareMixin):
                 mem = CompanyMembership.objects.select_related('company').get(
                     pk=membership_id, user=request.user, is_active=True
                 )
-                # In-memory override (NOT saved to DB)
+                # Postavi direktno — zaobiđi get_user_company koji gleda profile
                 try:
                     request.user.profile.company = mem.company
                     request.user.profile.role = mem.role
                 except Exception:
                     pass
+                set_current_company(mem.company)
+                request.company = mem.company
+                return None
             except Exception:
                 request.session.pop('active_membership_id', None)
 

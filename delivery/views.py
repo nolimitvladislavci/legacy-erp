@@ -102,7 +102,7 @@ def consolidated_list(request):
     ).count()
     # Count zones out of range
     alert_count = 0
-    for zone in ColdChainZone.objects.filter(company=company, is_active=True):
+    for zone in ColdChainZone.objects.filter(buyer_company=company, is_active=True):
         if zone.is_in_range is False:
             alert_count += 1
 
@@ -192,7 +192,7 @@ def consolidated_create(request):
     ).exclude(
         consolidated_deliveries__isnull=False
     ).select_related('buyer_company').order_by('-created_at')[:50]
-    zones = ColdChainZone.objects.filter(company=company, is_active=True)
+    zones = ColdChainZone.objects.filter(buyer_company=company, is_active=True)
     vehicles = Vehicle.objects.filter(company=company, is_active=True)
 
     return render(request, 'delivery/consolidated_form.html', {

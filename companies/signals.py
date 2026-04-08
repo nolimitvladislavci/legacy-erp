@@ -129,7 +129,7 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
             'DE': [
                 ('MwSt 19%', 19, True),
                 ('MwSt 7%', 7, False),
-                ('Steuerfrei', 0, False),
+                ('PDV 0% (Oslobođeno)', 0, False),
             ],
         }
         for name, rate, is_default in defaults.get(country, defaults['HR']):

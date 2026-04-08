@@ -1313,6 +1313,22 @@ class ImprovementSuggestion(models.Model):
         help_text=_('1=kriticno, 5=nice-to-have'))
     status = models.CharField(max_length=12, choices=Status.choices, default='new')
     admin_note = models.TextField(blank=True, verbose_name=_('Biljeska admina'))
+
+    # ── Trojstvo AI polja ──────────────────────────────────
+    haiku_proposal  = models.TextField(blank=True, verbose_name='Haiku prijedlog')
+    gemini_proposal = models.TextField(blank=True, verbose_name='Gemini prijedlog')
+    ai_resolution   = models.TextField(blank=True, verbose_name='Dogovoreno rješenje')
+    trojstvo_status = models.CharField(max_length=20, blank=True, default='',
+        choices=[
+            ('',         'Nije pokrenuto'),
+            ('pending',  'Analizira se...'),
+            ('agreed',   'Dogovoreno'),
+            ('conflict', 'Conflict — odlučuje Ivan'),
+            ('error',    'Greška'),
+        ],
+        verbose_name='Trojstvo status')
+    # ─────────────────────────────────────────────────────
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()

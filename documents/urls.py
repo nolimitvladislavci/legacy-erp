@@ -36,7 +36,10 @@ urlpatterns = [
 
     path("arhiva/upload/", views.arhiva_upload, name="arhiva_upload"),
     path("upload/", views.arhiva_upload, name="upload_shortcut"),  # alias
+    path("moji-komitenti/", views.moji_komitenti, name="moji_komitenti"),
     path("arhiva/export/", views.arhiva_export, name="arhiva_export"),
+    path("arhiva/spremi-na-disk/", views.arhiva_save_to_disk, name="arhiva_save_to_disk"),
+    path("arhiva/upute/koristenje/", views.arhiva_upute_koristenje, name="arhiva_upute_koristenje"),
     path("arhiva/bulk-download/", views.arhiva_bulk_download, name="arhiva_bulk_download"),
     path("arhiva/<int:pk>/delete/", views.arhiva_delete_entry, name="arhiva_delete_entry"),
     path("arhiva/<int:pk>/download/", views.arhiva_download, name="arhiva_download"),

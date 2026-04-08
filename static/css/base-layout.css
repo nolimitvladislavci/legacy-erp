@@ -40,19 +40,21 @@
 
         /* ═══ SIDEBAR ═══ */
         .sidebar {
-            width: 260px; background: var(--sidebar-bg); color: #cbd5e1; transition:background .3s;
+            width: 260px; background: #0f1219; color: #e2e8f0; transition:background .3s;
             display: flex; flex-direction: column; flex-shrink: 0;
             position: fixed; top: 0; left: 0; bottom: 0;
             overflow-y: auto; z-index: 1000;
             transition: transform 0.3s ease;
+            border-right: 1px solid rgba(201,168,76,0.15);
+            box-shadow: 2px 0 16px rgba(0,0,0,.4);
         }
         .sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid var(--surface2); font-size: 1.1rem; font-weight: 700; color: white; display: flex; justify-content: space-between; align-items: center; }
         .sidebar-brand span { color: var(--gold); }
         .sidebar-close { display: none; background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; }
         .sidebar-role { padding: 6px 16px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; background: var(--surface2); color: var(--gold); }
-        .sidebar-section { padding: 8px 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; margin-top: 6px; }
-        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--text-dim); text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.82rem; transition: all 0.15s; }
-        .sidebar a:hover, .sidebar a.active { background: var(--sidebar-hover); color: white; }
+        .sidebar-section { padding: 8px 12px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-top: 6px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(201,168,76,0.1); color: #fff; }
         .sidebar a i { width: 18px; text-align: center; font-size: 0.85rem; }
         .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--surface2); position: sticky; bottom: 0; background: var(--sidebar-bg, var(--surface-deep)); z-index: 10; }
 

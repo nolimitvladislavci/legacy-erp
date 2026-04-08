@@ -760,3 +760,145 @@ def setup_wizard_fiscal(request):
         'edit_section': 'fiscal', 'company': company,
         'page_title': 'Fiskalizacija',
     })
+
+
+# ══════════════════════════════════════════════════════════════
+# KONJIK STOLOVI — view i API
+# ══════════════════════════════════════════════════════════════
+
+@login_required
+def konjik_stolovi(request):
+    """Upravljanje stolovima Konjik ureda."""
+    from companies.models import KonjikStol, Company, CompanyPartnership
+
+    # Pronađi Konjik (firma u kojoj user radi ili je superadmin)
+    if request.user.is_superuser:
+        konjik = Company.objects.filter(name__icontains='konjik').first()
+    else:
+        konjik = None
+        from accounts.models import CompanyMembership
+        for m in CompanyMembership.objects.filter(user=request.user, is_active=True).select_related('company'):
+            if KonjikStol.objects.filter(ured=m.company).exists():
+                konjik = m.company
+                break
+
+    if not konjik:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Nemate pristup upravljanju stolovima.")
+
+    stolovi = KonjikStol.objects.filter(ured=konjik).prefetch_related('komitenti').select_related('referent')
+
+    # Komitenti koji nisu ni na jednom stolu
+    assigned_ids = set()
+    for s in stolovi:
+        assigned_ids.update(s.komitenti.values_list('id', flat=True))
+
+    partner_ids = set(CompanyPartnership.objects.filter(
+        partner_company=konjik, valid_until__isnull=True
+    ).values_list('managed_company_id', flat=True))
+
+    slobodni = Company.objects.filter(id__in=partner_ids - assigned_ids).order_by('name')
+
+    # Dostupni referenti (osim superadmina)
+    from accounts.models import CompanyMembership
+    referenti = [
+        m.user for m in CompanyMembership.objects.filter(
+            company=konjik, is_active=True
+        ).select_related('user').exclude(user__is_superuser=True)
+    ]
+
+    return render(request, 'companies/stolovi.html', {
+        'konjik': konjik,
+        'stolovi': stolovi,
+        'slobodni': slobodni,
+        'slobodni_count': slobodni.count(),
+        'referenti': referenti,
+        'ukupno_komitenata': len(partner_ids),
+        'boje': ['#c9a84c','#22c55e','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#ef4444','#84cc16','#64748b'],
+    })
+
+
+@login_required
+def konjik_stolovi_api(request):
+    """JSON API za CRUD operacije stolova."""
+    import json
+    from companies.models import KonjikStol, Company
+    from django.http import JsonResponse
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+
+    data = json.loads(request.body)
+    action = data.get('action')
+
+    if request.user.is_superuser:
+        konjik = Company.objects.filter(name__icontains='konjik').first()
+    else:
+        from accounts.models import CompanyMembership
+        konjik = None
+        for m in CompanyMembership.objects.filter(user=request.user, is_active=True).select_related('company'):
+            if KonjikStol.objects.filter(ured=m.company).exists():
+                konjik = m.company
+                break
+    if not konjik:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    # ── Dodaj stol ──
+    if action == 'add_stol':
+        next_broj = (KonjikStol.objects.filter(ured=konjik).order_by('-broj').values_list('broj', flat=True).first() or 0) + 1
+        boje = ['#c9a84c','#22c55e','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#ef4444','#84cc16','#64748b']
+        boja = boje[(next_broj - 1) % len(boje)]
+        stol = KonjikStol.objects.create(
+            ured=konjik, broj=next_broj,
+            naziv=f'Stol {next_broj}', boja=boja
+        )
+        return JsonResponse({'ok': True, 'stol_id': stol.id, 'broj': stol.broj, 'naziv': stol.naziv, 'boja': stol.boja})
+
+    # ── Promijeni naziv stola ──
+    if action == 'rename_stol':
+        stol = KonjikStol.objects.get(id=data['stol_id'], ured=konjik)
+        stol.naziv = data.get('naziv', stol.naziv)[:50]
+        stol.save(update_fields=['naziv', 'updated_at'])
+        return JsonResponse({'ok': True})
+
+    # ── Dodijeli referenta ──
+    if action == 'set_referent':
+        stol = KonjikStol.objects.get(id=data['stol_id'], ured=konjik)
+        uid = data.get('user_id')
+        if uid:
+            from django.contrib.auth.models import User
+            stol.referent = User.objects.get(id=uid)
+        else:
+            stol.referent = None
+        stol.save(update_fields=['referent', 'updated_at'])
+        return JsonResponse({'ok': True})
+
+    # ── Dodaj komitenta na stol ──
+    if action == 'add_komitent':
+        stol = KonjikStol.objects.get(id=data['stol_id'], ured=konjik)
+        company = Company.objects.get(id=data['company_id'])
+        stol.komitenti.add(company)
+        # Automatski kreiraj CompanyMembership za referenta
+        if stol.referent:
+            from accounts.models import CompanyMembership
+            CompanyMembership.objects.get_or_create(
+                user=stol.referent, company=company,
+                defaults={'role': 'company_admin', 'is_active': True}
+            )
+        return JsonResponse({'ok': True, 'komitenti_count': stol.komitenti_count})
+
+    # ── Makni komitenta sa stola ──
+    if action == 'remove_komitent':
+        stol = KonjikStol.objects.get(id=data['stol_id'], ured=konjik)
+        company = Company.objects.get(id=data['company_id'])
+        stol.komitenti.remove(company)
+        return JsonResponse({'ok': True, 'komitenti_count': stol.komitenti_count})
+
+    # ── Obriši stol ──
+    if action == 'delete_stol':
+        stol = KonjikStol.objects.get(id=data['stol_id'], ured=konjik)
+        stol.komitenti.clear()
+        stol.delete()
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'error': 'Nepoznata akcija'}, status=400)

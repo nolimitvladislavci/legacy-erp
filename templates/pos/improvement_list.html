@@ -1,77 +1,147 @@
 {% extends "pos/base_pos.html" %}
 {% load i18n %}
-{% block title %}Knjiga boljitaka{% endblock %}
+{% block title %}Knjiga boljitaka — Trojstvo{% endblock %}
 
 {% block extra_css %}
 <style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
+.ts-card { background:#0d1117; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1rem; }
+.ts-pending  { border-left:4px solid #f59e0b; }
+.ts-agreed   { border-left:4px solid #4ade80; }
+.ts-conflict { border-left:4px solid #f87171; }
+.ts-error    { border-left:4px solid #6b7280; }
+.ts-new      { border-left:4px solid #64748b; }
+.ts-badge {
+  display:inline-block; padding:.25rem .7rem;
+  border-radius:20px; font-size:.72rem; font-weight:700;
+  margin-bottom:.5rem;
 }
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
+.ts-pending-b  { background:#78350f; color:#fbbf24; }
+.ts-agreed-b   { background:#065f46; color:#4ade80; }
+.ts-conflict-b { background:#7f1d1d; color:#f87171; }
+.ts-new-b      { background:#1e293b; color:#94a3b8; }
+.ts-proposal { background:#111827; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; }
+.ts-proposal h5 { color:var(--gold,#c9a84c); font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; margin:0 0 .5rem; }
+.ts-resolution { background:#0f2218; border:1px solid #165534; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.88rem; color:#d1fae5; }
+.ts-conflict-box { background:#200d0d; border:1px solid #7f1d1d; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; color:#fecaca; }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid #f59e0b; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-right:6px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@media(max-width:600px) { .ts-card { padding:.75rem; } }
 </style>
 {% endblock %}
+
 {% block content %}
 <div style="max-width:900px;margin:0 auto;padding:1.5rem">
-  <h2 style="color:var(--gold,#c9a84c);margin-bottom:1rem">Knjiga boljitaka</h2>
+  <h2 style="color:var(--gold,#c9a84c);margin-bottom:.25rem">⭐ Knjiga boljitaka</h2>
+  <p style="color:#94a3b8;font-size:.85rem;margin-bottom:1.5rem">Prijavljeni problemi → Haiku + Gemini analiziraju → Ivan odlučuje</p>
 
-  <!-- Forma za novi prijedlog -->
-  <form method="post" style="background:#1a1a2e;border-radius:12px;padding:1.5rem;margin-bottom:2rem;border:1px solid #333">
+  <!-- Forma -->
+  <form method="post" style="background:#1a1a2e;border-radius:12px;padding:1.25rem;margin-bottom:2rem;border:1px solid rgba(201,168,76,.2)">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 120px 80px;gap:.75rem;margin-bottom:.75rem">
-      <input name="title" placeholder="Naslov prijedloga..." required
-             style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
-      <select name="category" style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
+    <div style="display:grid;grid-template-columns:1fr 130px 80px;gap:.75rem;margin-bottom:.75rem">
+      <input name="title" placeholder="Kratki naslov problema..." required
+             style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit;font-size:.9rem">
+      <select name="category" style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit">
         <option value="pos">POS</option>
-        <option value="inventory">Skladiste</option>
-        <option value="workflow">Workflow</option>
         <option value="ux">UX</option>
+        <option value="workflow">Workflow</option>
+        <option value="inventory">Skladište</option>
         <option value="other">Ostalo</option>
       </select>
-      <select name="priority" style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
-        <option value="1">P1</option>
-        <option value="2">P2</option>
-        <option value="3" selected>P3</option>
-        <option value="4">P4</option>
-        <option value="5">P5</option>
+      <select name="priority" style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit">
+        <option value="1">🔴 P1</option>
+        <option value="2">🟠 P2</option>
+        <option value="3" selected>🟡 P3</option>
+        <option value="5">⚪ P5</option>
       </select>
     </div>
-    <textarea name="description" placeholder="Opis poboljsanja..." rows="3" required
-              style="width:100%;padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff;margin-bottom:.75rem"></textarea>
-    <button type="submit" style="padding:.6rem 2rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Dodaj prijedlog</button>
+    <textarea name="description" placeholder="Detaljan opis — što se događa, kad, gdje..." rows="3" required
+              style="width:100%;box-sizing:border-box;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;margin-bottom:.75rem;font-family:inherit;font-size:.9rem;resize:vertical"></textarea>
+    <button type="submit" style="padding:.7rem 2rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">
+      ⭐ Prijavi → Trojstvo analizira
+    </button>
   </form>
 
-  <!-- Lista -->
-  {% for s in suggestions %}
-  <div style="background:#0d1117;border-radius:10px;padding:1rem;margin-bottom:.75rem;border-left:4px solid {% if s.status == done %}#4ade80{% elif s.status == accepted %}var(--gold,#c9a84c){% elif s.status == rejected %}#ef4444{% else %}#666{% endif %}">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <span style="color:#888;font-size:.8rem">P{{ s.priority }} | {{ s.get_category_display|default:s.category }}</span>
-        <h4 style="color:#fff;margin:.25rem 0">{{ s.title }}</h4>
-        <p style="color:#aaa;font-size:.9rem;margin:0">{{ s.description|truncatechars:200 }}</p>
-      </div>
-      <span style="padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;
-        background:{% if s.status == done %}#065f46{% elif s.status == accepted %}#78350f{% elif s.status == rejected %}#7f1d1d{% else %}#1e293b{% endif %};
-        color:{% if s.status == done %}#4ade80{% elif s.status == accepted %}#fbbf24{% elif s.status == rejected %}#f87171{% else %}#94a3b8{% endif %}">
-        {{ s.get_status_display }}
-      </span>
+  {% if messages %}
+    {% for msg in messages %}
+    <div style="background:rgba(74,222,128,.1);border:1px solid #4ade80;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;color:#4ade80;font-size:.9rem">
+      {{ msg }}
     </div>
-    {% if s.admin_note %}<p style="color:#fbbf24;font-size:.85rem;margin-top:.5rem">Admin: {{ s.admin_note }}</p>{% endif %}
-    <div style="color:#555;font-size:.75rem;margin-top:.5rem">{{ s.created_at|date:"d.m.Y H:i" }} | {{ s.author.get_full_name|default:s.get_source_display }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Lista prijedloga -->
+  {% for s in suggestions %}
+  <div class="ts-card ts-{{ s.trojstvo_status|default:'new' }}">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.25rem">
+          <span style="color:#64748b;font-size:.75rem">P{{ s.priority }} · {{ s.category|default:"pos"|upper }}</span>
+          {% if s.trojstvo_status == 'pending' %}
+            <span class="ts-badge ts-pending-b"><span class="spinner"></span>Trojstvo analizira...</span>
+          {% elif s.trojstvo_status == 'agreed' %}
+            <span class="ts-badge ts-agreed-b">✅ Dogovoreno</span>
+          {% elif s.trojstvo_status == 'conflict' %}
+            <span class="ts-badge ts-conflict-b">⚡ Conflict</span>
+          {% elif s.trojstvo_status == 'error' %}
+            <span class="ts-badge" style="background:#1f2937;color:#9ca3af;">⚠ Greška</span>
+          {% else %}
+            <span class="ts-badge ts-new-b">Novo</span>
+          {% endif %}
+        </div>
+        <h4 style="color:#fff;margin:0 0 .25rem;font-size:.95rem">{{ s.title }}</h4>
+        <p style="color:#94a3b8;font-size:.85rem;margin:0">{{ s.description|truncatechars:250 }}</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="color:#555;font-size:.72rem">{{ s.created_at|date:"d.m.Y" }}</div>
+        <div style="color:#555;font-size:.72rem">{{ s.author.get_full_name|default:"Anonimno" }}</div>
+      </div>
+    </div>
+
+    <!-- Trojstvo rezultat -->
+    {% if s.trojstvo_status == 'agreed' and s.ai_resolution %}
+    <div class="ts-resolution">
+      <strong style="display:block;color:#4ade80;margin-bottom:.4rem">🤝 Haiku + Gemini su se dogovorili:</strong>
+      {{ s.ai_resolution|linebreaksbr }}
+    </div>
+    {% endif %}
+
+    {% if s.trojstvo_status == 'conflict' and s.ai_resolution %}
+    <div class="ts-conflict-box">
+      <strong style="display:block;color:#f87171;margin-bottom:.4rem">⚡ Različiti prijedlozi — Ivan odlučuje:</strong>
+      {{ s.ai_resolution|linebreaksbr }}
+    </div>
+    {% endif %}
+
+    {% if s.haiku_proposal and s.gemini_proposal and request.user.is_staff %}
+    <details style="margin-top:.5rem">
+      <summary style="color:#64748b;font-size:.78rem;cursor:pointer;user-select:none">Prikaži individualne analize (admin)</summary>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.5rem">
+        <div class="ts-proposal">
+          <h5>🤖 Haiku</h5>
+          <div style="color:#cbd5e1;white-space:pre-wrap;line-height:1.5">{{ s.haiku_proposal|truncatechars:800 }}</div>
+        </div>
+        <div class="ts-proposal">
+          <h5>♊ Gemini</h5>
+          <div style="color:#cbd5e1;white-space:pre-wrap;line-height:1.5">{{ s.gemini_proposal|truncatechars:800 }}</div>
+        </div>
+      </div>
+    </details>
+    {% endif %}
+
+    {% if s.admin_note %}
+    <p style="color:#fbbf24;font-size:.85rem;margin-top:.5rem;padding:.5rem .75rem;background:rgba(251,191,36,.08);border-radius:6px">
+      💬 Ivan: {{ s.admin_note }}
+    </p>
+    {% endif %}
+
   </div>
   {% empty %}
-  <p style="color:#666;text-align:center;padding:2rem">Nema prijedloga. Budite prvi!</p>
+  <div style="text-align:center;padding:3rem;color:#64748b">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">⭐</div>
+    <div>Nema prijavljenih problema. Koristi zlatno dugme u POS-u.</div>
+  </div>
   {% endfor %}
 </div>
 {% endblock %}

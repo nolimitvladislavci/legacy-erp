@@ -4,6 +4,7 @@ from . import views
 app_name = "synesis"
 
 urlpatterns = [
+    path('knjige/', views.synesis_knjige, name='synesis_knjige'),
     path("", views.synesis_settings, name="settings"),
     path("regenerate-token/", views.regenerate_token, name="regenerate_token"),
     path("download-script/", views.download_script, name="download_script"),

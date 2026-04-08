@@ -1565,3 +1565,71 @@ def mdb_import_execute(request):
     }
 
     return JsonResponse({'status': 'success', 'results': results})
+
+
+SYNESIS_ARHIVA_BASE = '/var/www/fina-connect/synesis/KONJIK_ARHIVA/Synesis'
+SYNESIS_ACTIVE_BASE = '/var/www/fina-connect/synesis/KONJIK'
+
+def _scan_synesis_knjige():
+    import os, subprocess, csv, io, re
+    def _get_s(mdb):
+        try:
+            r = subprocess.run(['mdb-export', mdb, 'Settings'], capture_output=True, text=True, timeout=10)
+            d = {}
+            for row in csv.DictReader(io.StringIO(r.stdout)):
+                k = (row.get('Key') or '').strip().strip('"')
+                v = (row.get('ValueString') or '').strip().strip('"')
+                if k: d[k] = v
+            return d
+        except: return {}
+    def _name_from_dir(d):
+        n = re.sub(r'\s*\d{4}.*$', '', d).strip()
+        return n.title() if n == n.upper() else n
+    knjige = []
+    active = f"{SYNESIS_ACTIVE_BASE}/Storage.mdb"
+    if os.path.exists(active):
+        s = _get_s(active)
+        naz = s.get('eRacunUserName','Konjik d.o.o.')
+        if naz == naz.upper(): naz = naz.title()
+        knjige.append({'naziv': naz, 'oib': s.get('eRacunUserOIB','').strip(),
+                       'dir': 'KONJIK', 'godina': '2025', 'aktivna': True,
+                       'size_kb': round(os.path.getsize(active)/1024)})
+    if os.path.exists(SYNESIS_ARHIVA_BASE):
+        for d in sorted(os.listdir(SYNESIS_ARHIVA_BASE)):
+            mdb = f"{SYNESIS_ARHIVA_BASE}/{d}/Storage.mdb"
+            if not os.path.exists(mdb): continue
+            s = _get_s(mdb)
+            naz = (s.get('eRacunUserName') or '').strip() or _name_from_dir(d)
+            if naz == naz.upper(): naz = naz.title()
+            oib = (s.get('eRacunUserOIB') or s.get('RSOIB') or '').strip()
+            god = re.search(r'\d{4}', d)
+            knjige.append({'naziv': naz, 'oib': oib, 'dir': d,
+                           'godina': god.group() if god else '?', 'aktivna': False,
+                           'size_kb': round(os.path.getsize(mdb)/1024)})
+    return knjige
+
+
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def synesis_knjige(request):
+    """Popis svih Synesis knjiga (MDB fajlova) na serveru."""
+    from companies.models import Company
+    knjige = _scan_synesis_knjige()
+    # Označi koje firme već postoje u LIMIT Connect (prema OIB-u)
+    svi_oib = {
+        c.oib: c for c in Company.objects.exclude(oib='').only('name','oib','id')
+    }
+    for k in knjige:
+        c = svi_oib.get(k['oib'])
+        k['u_sustavu'] = bool(c)
+        k['limit_naziv'] = c.name if c else None
+        k['limit_id'] = str(c.id) if c else None
+    return render(request, 'synesis/knjige.html', {
+        'knjige': knjige,
+        'ukupno': len(knjige),
+        'u_sustavu': sum(1 for k in knjige if k['u_sustavu']),
+        'aktivnih': sum(1 for k in knjige if k['aktivna']),
+    })
+

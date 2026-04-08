@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Moji komitenti{% endblock %}
+{% block extra_css %}
+<style>
+.ok-wrap{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
+
+/* Header stats */
+.ok-stats-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.ok-stat{flex:1;min-width:100px;background:var(--bg-card,#111);border:1px solid var(--border,#333);
+  border-radius:10px;padding:10px 14px;text-align:center}
+.ok-stat-val{font-size:1.4rem;font-weight:700;display:block}
+.ok-stat-lbl{font-size:.7rem;color:var(--text-muted,#94a3b8);margin-top:2px}
+.ok-stat-mine .ok-stat-val{color:var(--gold,#c9a84c)}
+.ok-stat-free .ok-stat-val{color:#22c55e}
+.ok-stat-taken .ok-stat-val{color:#64748b}
+
+/* Pretraga */
+.ok-search{width:100%;padding:10px 14px;border:1px solid var(--border,#333);border-radius:8px;
+  background:var(--bg-card,#111);color:var(--text,#e2e8f0);font-size:.875rem;
+  margin-bottom:12px;box-sizing:border-box;outline:none}
+.ok-search:focus{border-color:var(--gold,#c9a84c)}
+
+/* Gumbi */
+.ok-toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.ok-btn-sm{padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--border,#333);background:transparent;
+  color:var(--text-muted,#94a3b8);transition:all .15s}
+.ok-btn-sm:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
+
+/* Sekcije */
+.ok-section{margin-bottom:20px}
+.ok-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1px;color:var(--text-muted,#94a3b8);margin-bottom:8px;
+  padding:6px 10px;background:var(--bg-card,#111);border-radius:6px;
+  display:flex;align-items:center;gap:8px}
+
+/* Lista firmi */
+.ok-list{display:flex;flex-direction:column;gap:4px;
+  max-height:45vh;overflow-y:auto;padding-right:4px}
+.ok-list::-webkit-scrollbar{width:4px}
+.ok-list::-webkit-scrollbar-track{background:transparent}
+.ok-list::-webkit-scrollbar-thumb{background:var(--border,#333);border-radius:2px}
+
+.ok-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border:1px solid var(--border,#333);border-radius:8px;cursor:pointer;
+  transition:all .15s;background:var(--bg-card,#111)}
+.ok-item:hover{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.04)}
+.ok-item.checked{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.08)}
+.ok-item.moja{border-left:3px solid var(--gold,#c9a84c)}
+.ok-item.slobodna{border-left:3px solid #22c55e}
+
+.ok-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold,#c9a84c);
+  cursor:pointer;flex-shrink:0}
+.ok-name{flex:1;font-weight:600;font-size:.85rem;color:var(--text,#e2e8f0)}
+.ok-oib{font-size:.68rem;color:var(--text-muted,#64748b);font-family:monospace}
+.ok-badge{font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px}
+.ok-badge-moja{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
+.ok-badge-free{background:rgba(34,197,94,.12);color:#4ade80}
+
+/* Sticky footer */
+.ok-footer{position:sticky;bottom:0;background:var(--bg,#0a0a0a);
+  padding:12px 0;margin-top:16px;display:flex;gap:10px;border-top:1px solid var(--border,#333)}
+.ok-save{flex:1;padding:12px;background:var(--gold,#c9a84c);color:#000;
+  border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer}
+.ok-save:hover{filter:brightness(1.1)}
+.ok-count{text-align:center;font-size:.78rem;color:var(--gold,#c9a84c);
+  font-weight:700;margin-top:6px}
+
+/* Privatnost banner */
+.ok-privacy{background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.2);
+  border-radius:8px;padding:10px 14px;margin-bottom:16px;
+  font-size:.78rem;color:var(--text-muted,#94a3b8);display:flex;gap:8px;align-items:flex-start}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ok-wrap">
+
+  <h2 style="color:var(--gold,#c9a84c);margin-bottom:4px">Moji komitenti</h2>
+  <p style="color:var(--text-muted,#94a3b8);font-size:.82rem;margin-bottom:16px">
+    Odaberite firme koje vi vodite. Svaka radnica vidi samo svoje i slobodne.
+  </p>
+
+  <!-- Privatnost info -->
+  <div class="ok-privacy">
+    <span style="font-size:1rem">🔒</span>
+    <span>Svaka radnica vidi samo <strong>svoje</strong> i <strong>slobodne</strong> komitente.
+    {% if tudje_count %}Trenutno je <strong>{{ tudje_count }}</strong> komitent(a) raspoređeno na druge radnice — one su skrivene.{% endif %}
+    </span>
+  </div>
+
+  <!-- Statistika -->
+  <div class="ok-stats-bar">
+    <div class="ok-stat ok-stat-mine">
+      <span class="ok-stat-val">{{ moje_count }}</span>
+      <span class="ok-stat-lbl">Moji komitenti</span>
+    </div>
+    <div class="ok-stat ok-stat-free">
+      <span class="ok-stat-val">{{ slobodne_count }}</span>
+      <span class="ok-stat-lbl">Slobodni</span>
+    </div>
+    {% if tudje_count %}
+    <div class="ok-stat ok-stat-taken">
+      <span class="ok-stat-val">{{ tudje_count }}</span>
+      <span class="ok-stat-lbl">Tuđi (skriveni)</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <input type="text" class="ok-search" id="okSearch"
+    placeholder="Pretraži po nazivu firme..." autocomplete="off"
+    oninput="okSearch()">
+
+  <form method="post" id="okForm">
+    {% csrf_token %}
+
+    <!-- MOJI KOMITENTI -->
+    {% if moje_count %}
+    <div class="ok-section" id="sec-moji">
+      <div class="ok-section-title">
+        ⭐ Moji komitenti ({{ moje_count }})
+        <span style="margin-left:auto">
+          <button type="button" class="ok-btn-sm" onclick="selectGroup('moja', true)">Sve ✓</button>
+          <button type="button" class="ok-btn-sm" onclick="selectGroup('moja', false)">Ništa</button>
+        </span>
+      </div>
+      <div class="ok-list">
+        {% for c in companies %}{% if c.id in my_ids %}
+        <label class="ok-item moja checked" data-name="{{ c.name|lower }}" data-group="moja">
+          <input type="checkbox" name="company_ids" value="{{ c.id }}" checked>
+          <div style="flex:1;min-width:0">
+            <div class="ok-name">{{ c.name }}</div>
+            {% if c.oib %}<div class="ok-oib">{{ c.oib }}</div>{% endif %}
+          </div>
+          <span class="ok-badge ok-badge-moja">MOJ</span>
+        </label>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- SLOBODNI KOMITENTI -->
+    {% if slobodne_count %}
+    <div class="ok-section" id="sec-slobodni">
+      <div class="ok-section-title">
+        🟢 Slobodni — možete preuzeti ({{ slobodne_count }})
+        <span style="margin-left:auto">
+          <button type="button" class="ok-btn-sm" onclick="selectGroup('slobodna', true)">Sve ✓</button>
+          <button type="button" class="ok-btn-sm" onclick="selectGroup('slobodna', false)">Ništa</button>
+        </span>
+      </div>
+      <div class="ok-list">
+        {% for c in companies %}{% if c.id not in my_ids %}
+        <label class="ok-item slobodna" data-name="{{ c.name|lower }}" data-group="slobodna">
+          <input type="checkbox" name="company_ids" value="{{ c.id }}">
+          <div style="flex:1;min-width:0">
+            <div class="ok-name">{{ c.name }}</div>
+            {% if c.oib %}<div class="ok-oib">{{ c.oib }}</div>{% endif %}
+          </div>
+          <span class="ok-badge ok-badge-free">SLOBODAN</span>
+        </label>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not moje_count and not slobodne_count %}
+    <div style="text-align:center;padding:3rem;color:var(--text-muted)">
+      <div style="font-size:2rem;margin-bottom:.5rem">📋</div>
+      <div>Nema komitenat za prikaz.</div>
+      <div style="font-size:.8rem;margin-top:.5rem">Obratite se administratoru.</div>
+    </div>
+    {% endif %}
+
+    <div class="ok-count" id="okCount"></div>
+
+    <div class="ok-footer">
+      <button type="submit" class="ok-save">💾 Spremi odabir</button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+(function() {
+  function updateCount() {
+    var n = document.querySelectorAll('#okForm input[type=checkbox]:checked').length;
+    var el = document.getElementById('okCount');
+    if (el) el.textContent = n > 0 ? n + ' komitenat(a) odabrano' : '';
+  }
+
+  document.querySelectorAll('.ok-item input[type=checkbox]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      this.closest('.ok-item').classList.toggle('checked', this.checked);
+      updateCount();
+    });
+  });
+
+  updateCount();
+})();
+
+function okSearch() {
+  var q = document.getElementById('okSearch').value.toLowerCase();
+  document.querySelectorAll('.ok-item').forEach(function(item) {
+    item.style.display = (!q || item.dataset.name.includes(q)) ? '' : 'none';
+  });
+}
+
+function selectGroup(group, state) {
+  document.querySelectorAll('.ok-item[data-group="' + group + '"]').forEach(function(item) {
+    if (item.style.display === 'none') return;
+    var cb = item.querySelector('input[type=checkbox]');
+    cb.checked = state;
+    item.classList.toggle('checked', state);
+  });
+  var n = document.querySelectorAll('#okForm input[type=checkbox]:checked').length;
+  var el = document.getElementById('okCount');
+  if (el) el.textContent = n > 0 ? n + ' komitenat(a) odabrano' : '';
+}
+</script>
+{% endblock %}

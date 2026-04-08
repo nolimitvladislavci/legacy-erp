@@ -10,6 +10,8 @@ router.register(r"api", views.CompanyViewSet)
 app_name = "companies"
 
 urlpatterns = [
+    path('stolovi/', views.konjik_stolovi, name='stolovi'),
+    path('stolovi/api/', views.konjik_stolovi_api, name='stolovi_api'),
     path("", views.company_list, name="list"),
     path("new/", views.company_create, name="create"),
     path("<str:pk>/edit/", views.company_edit, name="edit"),

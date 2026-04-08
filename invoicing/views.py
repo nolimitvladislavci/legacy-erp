@@ -792,8 +792,8 @@ def api_tax_rates(request):
         if country == "DE":
             return JsonResponse([
                 {"rate": 19, "name": "Regelsteuersatz", "is_default": True},
-                {"rate": 7, "name": "Ermäßigt", "is_default": False},
-                {"rate": 0, "name": "Steuerfrei", "is_default": False},
+                {"rate": 7, "name": "PDV 7% (Snižena)", "is_default": False},
+                {"rate": 0, "name": "PDV 0% (Oslobođeno)", "is_default": False},
             ], safe=False)
         return JsonResponse([
             {"rate": 25, "name": "Standardna", "is_default": True},

@@ -328,17 +328,24 @@ def switch_company(request):
             company = mem.company
             role_display = mem.get_role_display()
         elif company_id and request.user.is_superuser:
-            # Superadmin pristup — auto-create membership ili koristi company_id
+            # Superadmin pristup — filter first to avoid IntegrityError
             from companies.models import Company
             company = Company.objects.get(pk=company_id)
-            mem, created = CompanyMembership.objects.get_or_create(
-                user=request.user, company=company,
-                defaults={'role': 'owner', 'is_active': True}
-            )
+            mem = CompanyMembership.objects.filter(
+                user=request.user, company=company
+            ).first()
+            if mem:
+                if not mem.is_active:
+                    mem.is_active = True
+                    mem.save(update_fields=['is_active'])
+            else:
+                mem = CompanyMembership.objects.create(
+                    user=request.user, company=company,
+                    role='owner', is_active=True
+                )
+                messages.info(request, f'Pristup kreiran za: {company.name}')
             request.session['active_membership_id'] = mem.id
             role_display = 'Superadmin'
-            if created:
-                messages.info(request, f'Pristup kreiran za: {company.name}')
         elif company_id:
             # Umbrella admin pristup — auto-create membership za umbrella children
             from companies.models import Company
@@ -358,6 +365,8 @@ def switch_company(request):
             messages.error(request, 'Nemate pristup toj tvrtki.')
             return redirect('/')
 
+        # Postavi session za get_user_company
+        request.session['superadmin_as_company'] = str(company.pk)
         messages.success(request, f'Prebaceno na: {company.name} ({role_display})')
         # B-16: Audit log za company switch
         try:
@@ -370,4 +379,168 @@ def switch_company(request):
             pass
     except (CompanyMembership.DoesNotExist, Company.DoesNotExist):
         messages.error(request, 'Nemate pristup toj tvrtki.')
+    return redirect('/')
+
+
+# ════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
+# ODABERI KOMITENTE — s AI preporukama
+# ════════════════════════════════════════════════════════════
+
+@login_required
+def odaberi_komitente(request):
+    """
+    Svaka radnica vidi SAMO svoje komitente i slobodne (neraspoređene).
+    Tuđe komitente ne vidi — privatnost i izolacija po radnici.
+
+    Logika:
+      - MOJE: firme gdje JA imam aktivni membership → prikazane, mogu maknuti
+      - SLOBODNE: firme iz Konjik partnerstva koje nitko nema → mogu uzeti
+      - TUĐE: firme koje ima netko drugi → NEVIDLJIVE
+    """
+    import uuid as _uuid
+    from companies.models import Company, CompanyPartnership
+    from accounts.models import CompanyMembership
+
+    # Moje firme
+    my_memberships = set(
+        CompanyMembership.objects.filter(
+            user=request.user, is_active=True
+        ).values_list('company_id', flat=True)
+    )
+
+    # Pronađi Konjik-partnerstvo (firma u kojoj ova osoba radi)
+    partner_ids = set()
+    recommendation_source = ''
+    for mem in CompanyMembership.objects.filter(
+        user=request.user, is_active=True
+    ).select_related('company'):
+        managed = CompanyPartnership.objects.filter(
+            partner_company=mem.company,
+            valid_until__isnull=True,
+        ).values_list('managed_company_id', flat=True)
+        if managed:
+            partner_ids.update(managed)
+            recommendation_source = mem.company.name
+
+    # Sve firme koje NETKO DRUGI već ima (iz Konjik partnerstva)
+    tudje_ids = set(
+        CompanyMembership.objects.filter(
+            company_id__in=partner_ids,
+            is_active=True,
+        ).exclude(user=request.user).values_list('company_id', flat=True)
+    )
+
+    # Vidljive firme = moje + slobodne (iz Konjik partnerstva, bez tuđih)
+    vidljive_ids = (partner_ids - tudje_ids) | my_memberships
+
+    # Ako superadmin — vidi sve
+    if request.user.is_superuser:
+        vidljive_ids = set(Company.objects.values_list('id', flat=True))
+        partner_ids = vidljive_ids
+
+    firme = list(
+        Company.objects.filter(id__in=vidljive_ids).order_by('name')
+    )
+
+    # Sortiraj: moje na vrh, pa slobodne
+    moje = [c for c in firme if c.id in my_memberships]
+    slobodne = [c for c in firme if c.id not in my_memberships]
+
+    if request.method == 'POST':
+        selected_ids = set()
+        for cid in request.POST.getlist('company_ids'):
+            try:
+                selected_ids.add(_uuid.UUID(cid) if '-' in str(cid) else int(cid))
+            except (ValueError, TypeError):
+                selected_ids.add(cid)
+
+        # Sigurnosna provjera: ne može uzeti tuđe
+        selected_ids = selected_ids & vidljive_ids
+
+        added = 0
+        for cid in selected_ids - my_memberships:
+            company = Company.objects.filter(pk=cid).first()
+            if company:
+                CompanyMembership.objects.get_or_create(
+                    user=request.user,
+                    company=company,
+                    defaults={
+                        'role': 'company_admin',
+                        'is_active': True,
+                        'is_default': not my_memberships and added == 0,
+                    }
+                )
+                added += 1
+
+        removed = 0
+        for cid in my_memberships - selected_ids:
+            updated = CompanyMembership.objects.filter(
+                user=request.user, company_id=cid, is_active=True
+            ).update(is_active=False)
+            removed += updated
+
+        from django.contrib import messages
+        messages.success(request,
+            'Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi.' % (
+                added, removed, len(selected_ids)))
+        return redirect('accounts:odaberi_komitente')
+
+    return render(request, 'accounts/odaberi_komitente.html', {
+        'recommended': slobodne,          # slobodne = preporučene za uzimanje
+        'others': [],                      # nema "ostalih" — tuđe su skrivene
+        'companies': moje + slobodne,
+        'my_ids': my_memberships,
+        'moje_count': len(moje),
+        'slobodne_count': len(slobodne),
+        'tudje_count': len(tudje_ids),
+        'recommended_ids': recommended_ids,
+        'recommendation_source': recommendation_source,
+    })
+
+
+@login_required
+def switch_company_get(request, company_id):
+    """GET-based company switch — radi bez forme/CSRF. Za mobilne browsere."""
+    from accounts.models import CompanyMembership
+    from companies.models import Company
+
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        messages.error(request, 'Firma ne postoji.')
+        return redirect('/')
+
+    if not request.user.is_superuser:
+        mem = CompanyMembership.objects.filter(
+            user=request.user, company=company, is_active=True
+        ).first()
+        if not mem:
+            messages.error(request, 'Nemate pristup toj firmi.')
+            return redirect('/')
+
+    # Superadmin ili ima membership — switch
+    try:
+        mem = CompanyMembership.objects.filter(
+            user=request.user, company=company
+        ).first()
+        if mem:
+            if not mem.is_active:
+                mem.is_active = True
+                mem.save(update_fields=['is_active'])
+        else:
+            mem = CompanyMembership.objects.create(
+                user=request.user, company=company,
+                role='owner', is_active=True
+            )
+    except Exception:
+        mem = CompanyMembership.objects.filter(
+            user=request.user, company=company
+        ).first()
+        if not mem:
+            messages.error(request, 'Greska pri prebacivanju.')
+            return redirect('/')
+    request.session['active_membership_id'] = mem.id
+    request.session['superadmin_as_company'] = str(company.pk)
+    messages.success(request, 'Prebaceno na: %s' % company.name)
     return redirect('/')

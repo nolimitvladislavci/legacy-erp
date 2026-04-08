@@ -100,3 +100,54 @@
   Server:                 9.5/10
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
+=== FENIX STATUS UPDATE ===
+
+---
+## 07.04.2026 — Trojstvo v2 + Pravila zapisana
+
+### IMPLEMENTIRANO:
+- FENIX_TROJSTVO_PRAVILA.md — kompletna pravila, ovlasti, vizija, zakonski okvir
+- trojstvo_task.py v2 — ispravna logika:
+  - Slažu se (≥65% + zajednička ključna riječ) → /var/log/trojstvo/agreed.log (BEZ WhatsApp)
+  - Ne slažu se → WhatsApp Ivanu +4915771998747 + /var/log/trojstvo/conflict.log
+- ImprovementSuggestion model: dodana polja haiku_proposal, gemini_proposal, ai_resolution, trojstvo_status
+- improvement_list.html: Trojstvo UI s live statusom (⭐ pending → ✅ dogovoreno / ⚡ conflict)
+- POS hamburger panel: košarica + plaćanje + split — slide-in s desna
+- Zlatno dugme: jedno, funkcionira, otvara zdModal
+
+### PRAVILO ZAPISIVANJA (dogovoreno 07.04.2026):
+Svaka dogovorena odluka MORA biti zapisana. AI agenti nemaju trajnu memoriju.
+Pisanje = continuity sustava.
+
+### VIZIJA (zapisana):
+- Q2 2026: go-live, POS 10/10
+- Q3-Q4 2026: EU fondovi za AI, Boxgram, komunalni sektor
+- 2027-2030: ARR €6M Europa, Trojstvo proaktivno, #1 u regiji
+
+---
+## 07.04.2026 — FENIX CONSTITUTION + delivery bug fix
+
+### NOVO:
+- FENIX_CONSTITUTION.md kreiran — temeljni dokument sustava (271 linija)
+- BORG_MASTER_PLAN.md (235 linija) — radar svih 82 modula
+- delivery/consolidated bug FIX: ColdChainZone.filter(company→buyer_company)
+
+### PLAN DO 15.04.:
+  08.04. Marija dry-run → lista bugova
+  09-10.04. Bugfix sprint (samo Marijina lista)
+  11.04. Drugi prolaz
+  12-13.04. Load test + security
+  14.04. GO/NO-GO odluka
+  15.04. GO-LIVE (ako zeleno)
+
+### TRI PRIORITETNE AKCELERACIJE:
+  A) Onboarding aha moment (5 minuta → prvi rezultat)
+  B) WhatsApp kanal (WAHA spreman, treba spojiti)
+  C) Mjesečni PDF izvještaj (automatski, opravdava pretplatu)
+
+
+---
+## 07.04.2026 — FENIX_PUT_DO_POBJEDE.md napisan
+Kompletna strategija: 3 ubrzanja, zlatni kod, BORG radar, plan 15.04.
+Dokument: /var/www/fina-connect/FENIX_PUT_DO_POBJEDE.md
+

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Moji komitenti{% endblock %}
+{% block content %}
+<style>
+.mk{max-width:700px;margin:0 auto}
+.mk h1{font-size:1.2rem;font-weight:700;color:var(--gold,#c9a84c);margin-bottom:4px}
+.mk .sub{color:var(--text-muted);font-size:.82rem;margin-bottom:16px}
+.mk-search{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);color:var(--text);font-size:.85rem;margin-bottom:12px}
+.mk-search:focus{outline:none;border-color:var(--gold)}
+.mk-stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.mk-stat{background:var(--bg-card);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 16px;text-align:center;min-width:80px}
+.mk-stat b{display:block;font-size:1.3rem;color:var(--gold)}
+.mk-stat small{font-size:.68rem;color:var(--text-muted)}
+.mk-list{display:flex;flex-direction:column;gap:6px}
+.mk-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text);transition:all .15s}
+.mk-card:hover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.mk-card-icon{width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.mk-card-info{flex:1;min-width:0}
+.mk-card-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-card-meta{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.mk-card-actions{display:flex;gap:6px;flex-shrink:0}
+.mk-btn{padding:8px 14px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.mk-btn-gold{background:var(--gold);color:#0a0a0a}
+.mk-btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+.mk-btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.mk-empty{text-align:center;padding:40px;color:var(--text-muted);font-size:.9rem}
+</style>
+
+<div class="mk">
+  <h1>Moji komitenti</h1>
+  <div class="sub">{{ user.get_full_name }} &mdash; {{ stol_naziv|default:"Bez stola" }}</div>
+
+  <div class="mk-stats">
+    <div class="mk-stat"><b>{{ komitenti|length }}</b><small>Komitenata</small></div>
+    <div class="mk-stat"><b>{{ total_entries }}</b><small>Dokumenata</small></div>
+    <div class="mk-stat"><b>{{ pending_entries }}</b><small>Za knjizenje</small></div>
+  </div>
+
+  <input type="text" class="mk-search" id="search" placeholder="Pretrazi komitente..." autocomplete="off">
+
+  <div class="mk-list" id="list">
+    {% for k in komitenti %}
+    <div class="mk-card" data-name="{{ k.name|lower }}">
+      <div class="mk-card-icon">&#128196;</div>
+      <div class="mk-card-info">
+        <div class="mk-card-name">{{ k.name }}</div>
+        <div class="mk-card-meta">
+          {% if k.oib %}OIB: {{ k.oib }} &middot; {% endif %}
+          {{ k.entry_count }} dok.
+          {% if k.pending_count %} &middot; <span style="color:var(--gold)">{{ k.pending_count }} za knjizenje</span>{% endif %}
+        </div>
+      </div>
+      <div class="mk-card-actions">
+        <a href="/hr/documents/scan/batch/new/?company={{ k.id }}" class="mk-btn mk-btn-gold">
+          <i class="fas fa-camera"></i> Skeniraj
+        </a>
+        <a href="/hr/documents/arhiva/?company={{ k.id }}" class="mk-btn mk-btn-outline">
+          <i class="fas fa-archive"></i> Arhiva
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="mk-empty">Nemate dodijeljenih komitenata. Kontaktirajte administratora.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+document.getElementById('search').addEventListener('input', function(){
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('.mk-card').forEach(function(c){
+    c.style.display = (!q || c.dataset.name.includes(q)) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

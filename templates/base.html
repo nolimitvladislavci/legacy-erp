@@ -239,12 +239,12 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
             </div>
         </div>
         {% if has_multiple_companies %}
-        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid var(--gold,#c9a84c)44;border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
+        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid rgba(201,168,76,0.27);border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
             {% for mem in user_memberships %}
             <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
-                {% csrf_token %}
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                 {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">{% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
-                <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
+                <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s;margin-bottom:2px" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
                     {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:var(--gold,#c9a84c);font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
                     {{ mem.company.name }}
                     <span style="margin-left:auto;opacity:0.4;font-size:.5rem">{{ mem.get_role_display }}</span>
@@ -252,6 +252,7 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
             </form>
             {% endfor %}
         </div>
+
         {% endif %}
         {% endif %}
         {% endif %}

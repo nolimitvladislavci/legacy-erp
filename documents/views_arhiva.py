@@ -242,6 +242,15 @@ def arhiva_list(request):
         company = get_user_company(request)
         if not company:
             return render(request, 'documents/arhiva_list.html', {'entries': [], 'is_superadmin': False, 'labels': []})
+        # Radnica moze pregledati komitenta iz svog stola
+        override_id = request.GET.get('company', '')
+        if override_id:
+            from accounts.models import CompanyMembership
+            has_access = CompanyMembership.objects.filter(
+                user=request.user, company_id=override_id, is_active=True
+            ).exists()
+            if has_access:
+                company = Company.objects.filter(pk=override_id).first() or company
         qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0).order_by('-doc_date', '-archived_at')
         company_filter = ''
         companies = []
@@ -1338,3 +1347,201 @@ def arhiva_proknjizi(request, pk):
         return JsonResponse({
             'error': f"Knjiženje neuspješno: {result.get('status', 'unknown')}",
         }, status=400)
+
+
+# ════════════════════════════════════════════════════════════
+# SPREMI NA DISK — Strukturirani ZIP za lokalni/mrezni disk
+# Za korisnike koji koriste Synesis i trebaju samo arhivu
+# ════════════════════════════════════════════════════════════
+
+@login_required
+def arhiva_save_to_disk(request):
+    """
+    GET: Download SVE dokumente za firmu kao strukturirani ZIP.
+    Struktura: Firma/Godina/Mjesec/Partner/racun.ext
+    Plus CSV index kompatibilan s Exceom.
+    
+    Query params:
+      ?year=2026         — samo ta godina (default: tekuca)
+      ?month=3           — samo taj mjesec
+      ?source_type=...   — filter po tipu
+    """
+    company = get_user_company(request)
+    if not company:
+        return HttpResponse('Nema aktivne tvrtke', status=400)
+
+    year = request.GET.get('year', str(date.today().year))
+    month = request.GET.get('month', '')
+    source_type = request.GET.get('source_type', '')
+
+    qs = ArhivaEntry.objects.filter(company=company).order_by('doc_date', 'partner_name')
+
+    if year:
+        qs = qs.filter(doc_date__year=int(year))
+    if month:
+        qs = qs.filter(doc_date__month=int(month))
+    if source_type:
+        qs = qs.filter(source_type=source_type)
+
+    entries = list(qs[:2000])  # Limit za sigurnost
+
+    if not entries:
+        messages.warning(request, 'Nema dokumenata za odabrani period.')
+        return redirect('documents:arhiva_list')
+
+    buf = io.BytesIO()
+    company_safe = company.name.replace('/', '-').replace('\\', '-')[:40]
+
+    with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
+        # CSV INDEX (Excel-kompatibilan)
+        csv_buf = io.StringIO()
+        csv_buf.write('\ufeff')  # BOM za Excel
+        writer = csv.writer(csv_buf, delimiter=';')
+        writer.writerow([
+            'R.br.', 'Datum', 'Tip', 'Broj dokumenta', 'Partner',
+            'Iznos', 'Valuta', 'ZKI', 'JIR', 'Datoteka', 'Arhivski broj'
+        ])
+
+        added_files = 0
+        for idx, e in enumerate(entries, 1):
+            # Odredi putanju u ZIP-u
+            yr = e.doc_date.strftime('%Y') if e.doc_date else 'Nepoznato'
+            mo = e.doc_date.strftime('%m-%B') if e.doc_date else '00'
+            # Hrvatski nazivi mjeseci
+            mo_names = {
+                '01': '01-Sijecanj', '02': '02-Veljaca', '03': '03-Ozujak',
+                '04': '04-Travanj', '05': '05-Svibanj', '06': '06-Lipanj',
+                '07': '07-Srpanj', '08': '08-Kolovoz', '09': '09-Rujan',
+                '10': '10-Listopad', '11': '11-Studeni', '12': '12-Prosinac',
+            }
+            mo_key = e.doc_date.strftime('%m') if e.doc_date else '00'
+            mo = mo_names.get(mo_key, mo_key)
+
+            partner_safe = (e.partner_name or 'Nepoznat').replace('/', '-').replace('\\', '-')[:30]
+            type_safe = e.get_source_type_display().replace('/', '-')[:20]
+
+            # Putanja: Firma/2026/03-Ozujak/INA_d.d./racun_123.pdf
+            folder = '%s/%s/%s/%s' % (company_safe, yr, mo, partner_safe)
+
+            file_in_zip = None
+            if e.file_path:
+                full_path = os.path.join(settings.MEDIA_ROOT, e.file_path)
+                if os.path.isfile(full_path):
+                    ext = os.path.splitext(full_path)[1] or '.bin'
+                    safe_num = (e.doc_number or 'dok').replace('/', '-').replace('\\', '-')[:40]
+                    file_in_zip = '%s/%s_%s%s' % (folder, type_safe, safe_num, ext)
+                    zf.write(full_path, file_in_zip)
+                    added_files += 1
+
+            writer.writerow([
+                idx,
+                e.doc_date.strftime('%d.%m.%Y') if e.doc_date else '',
+                e.get_source_type_display(),
+                e.doc_number or '',
+                e.partner_name or '',
+                str(e.amount).replace('.', ','),
+                e.currency,
+                e.zki or '',
+                e.jir or '',
+                file_in_zip or '(nema datoteke)',
+                e.archive_number or '',
+            ])
+
+        # Spremi CSV index
+        zf.writestr(
+            '%s/INDEX_%s.csv' % (company_safe, year),
+            csv_buf.getvalue()
+        )
+
+        # README
+        zf.writestr('%s/PROCITAJ.txt' % company_safe,
+            'DIGITALNA ARHIVA RACUNA\n'
+            '=======================\n\n'
+            'Tvrtka: %s\n'
+            'OIB: %s\n'
+            'Period: %s\n'
+            'Dokumenata: %d\n'
+            'Datoteka: %d\n\n'
+            'Struktura mapa:\n'
+            '  Firma / Godina / Mjesec / Partner / racun.pdf\n\n'
+            'INDEX_%s.csv sadrzi popis svih dokumenata.\n'
+            'Otvorite ga u Excelu za pretragu.\n\n'
+            'Zakonska obaveza cuvanja: 11 godina\n'
+            '(Zakon o racunovodstvu, cl. 10)\n\n'
+            'Generirano: %s\n'
+            'Sustav: Digitalna Arhiva\n' % (
+                company.name,
+                getattr(company, 'oib', '') or '',
+                year,
+                len(entries),
+                added_files,
+                year,
+                date.today().strftime('%d.%m.%Y %H:%M'),
+            )
+        )
+
+    buf.seek(0)
+    filename = 'Arhiva_%s_%s.zip' % (company_safe, year)
+    response = HttpResponse(buf.getvalue(), content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response
+
+
+@login_required
+def arhiva_upute_koristenje(request):
+    """Printable upute za koristenje — jedna A4 stranica."""
+    return render(request, 'documents/arhiva_upute_koristenje.html')
+
+
+# ================================================================
+# MOJI KOMITENTI — radnica vidi svoje firme sa dugmetom Skeniraj/Arhiva
+# ================================================================
+
+@login_required
+def moji_komitenti(request):
+    """Radnica vidi listu svojih komitenata iz stola."""
+    from companies.models import Company, KonjikStol
+    from accounts.models import CompanyMembership
+    from documents.models import ArhivaEntry
+    from django.db.models import Count, Q
+
+    company = get_user_company(request)
+
+    # Pronadji stol radnice
+    stol = KonjikStol.objects.filter(
+        referent=request.user, ured=company, aktivan=True
+    ).first()
+
+    # Komitenti iz stola, ili iz membershipa ako nema stola
+    if stol:
+        komitenti_qs = stol.komitenti.all().order_by('name')
+        stol_naziv = stol.naziv or 'Stol %d' % stol.broj
+    else:
+        # Fallback: sve firme iz membershipa osim matice
+        mem_ids = CompanyMembership.objects.filter(
+            user=request.user, is_active=True
+        ).exclude(company=company).values_list('company_id', flat=True)
+        komitenti_qs = Company.objects.filter(id__in=mem_ids).order_by('name')
+        stol_naziv = 'Bez stola'
+
+    # Dodaj statistike po komitentu
+    komitenti = []
+    total_entries = 0
+    pending_entries = 0
+    for k in komitenti_qs:
+        stats = ArhivaEntry.objects.filter(company=k).aggregate(
+            entry_count=Count('id'),
+            pending_count=Count('id', filter=Q(is_booked=False) & ~Q(ai_proposal__isnull=True) & ~Q(ai_proposal={}))
+        )
+        k.entry_count = stats['entry_count'] or 0
+        k.pending_count = stats['pending_count'] or 0
+        total_entries += k.entry_count
+        pending_entries += k.pending_count
+        komitenti.append(k)
+
+    return render(request, 'documents/moji_komitenti.html', {
+        'komitenti': komitenti,
+        'stol_naziv': stol_naziv,
+        'total_entries': total_entries,
+        'pending_entries': pending_entries,
+    })

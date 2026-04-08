@@ -1,20 +1,5 @@
 {% load i18n %}
-{# ═══════════════════════════════════════════════════════════════════════
-   LIMIT Connect — Globalni Document Scan Modal
-   Koristi se na svim formama s OIB/poreznim brojem poljem.
-
-   POZIV:
-     <button type="button" onclick="DocScan.open({
-       fields: { oib:'field-id', name:'name-id', first_name:'fn-id',
-                 last_name:'ln-id', address:'addr-id', city:'city-id', zip_code:'zip-id' },
-       country: 'HR',
-       onApply: function(data) { ... }   // opcionalno
-     })">
-       <i class="fas fa-camera"></i>
-     </button>
-
-   Podržani dokumenti: Obrtnica · Osobna iskaznica · Domovnica · Izvod iz registra
-═══════════════════════════════════════════════════════════════════════ #}
+<!-- DocScan Modal -->
 
 <div id="docScanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;align-items:center;justify-content:center;padding:16px">
   <div style="background:#0d1117;border:1px solid #c9a84c;border-radius:16px;width:100%;max-width:520px;overflow:hidden;position:relative;max-height:90vh;overflow-y:auto">

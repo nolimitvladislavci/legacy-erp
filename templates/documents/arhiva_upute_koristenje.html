@@ -1,0 +1,211 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitalna Arhiva - Upute za koristenje</title>
+<style>
+@media print {
+  body { font-size: 13pt; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #fff; color: #1a1a1a; padding: 24px;
+  max-width: 800px; margin: 0 auto; line-height: 1.6;
+}
+h1 {
+  font-size: 28px; text-align: center; margin-bottom: 8px;
+  color: #1a1a1a; border-bottom: 3px solid #c9a84c; padding-bottom: 12px;
+}
+.subtitle { text-align: center; color: #666; font-size: 15px; margin-bottom: 32px; }
+h2 { font-size: 20px; color: #c9a84c; margin: 28px 0 12px; }
+.step {
+  display: flex; gap: 16px; margin-bottom: 24px;
+  padding: 16px; background: #f9f9f9; border-radius: 12px;
+  border-left: 4px solid #c9a84c;
+}
+.step-num {
+  width: 48px; height: 48px; flex-shrink: 0;
+  background: #c9a84c; color: #fff; border-radius: 50%;
+  font-size: 22px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-text { flex: 1; }
+.step-text h3 { font-size: 17px; margin-bottom: 4px; }
+.step-text p { font-size: 15px; color: #444; }
+.highlight {
+  background: #fff3cd; padding: 2px 6px; border-radius: 4px;
+  font-weight: 600;
+}
+.warning {
+  background: #fff3cd; border: 1px solid #ffc107;
+  border-radius: 8px; padding: 12px 16px; margin: 20px 0;
+  font-size: 14px;
+}
+.warning b { color: #856404; }
+.tip {
+  background: #d1ecf1; border: 1px solid #bee5eb;
+  border-radius: 8px; padding: 12px 16px; margin: 20px 0;
+  font-size: 14px;
+}
+.tip b { color: #0c5460; }
+.btn-print {
+  display: block; width: 200px; margin: 32px auto;
+  padding: 12px 24px; background: #c9a84c; color: #fff;
+  border: none; border-radius: 8px; font-size: 16px;
+  font-weight: 700; cursor: pointer; text-align: center;
+}
+.btn-print:hover { background: #b8943f; }
+.footer {
+  text-align: center; margin-top: 40px; padding-top: 16px;
+  border-top: 1px solid #ddd; color: #999; font-size: 12px;
+}
+.install-box {
+  background: #e8f5e9; border: 2px solid #4caf50;
+  border-radius: 12px; padding: 20px; margin: 24px 0;
+}
+.install-box h3 { color: #2e7d32; margin-bottom: 8px; }
+.install-box ol { padding-left: 20px; }
+.install-box li { margin-bottom: 8px; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<h1>Digitalna Arhiva</h1>
+<p class="subtitle">Upute za koristenje — jednostavno i brzo</p>
+
+<div class="warning">
+  <b>Zasto arhivirati digitalno?</b><br>
+  Zakon o racunovodstvu (cl. 10) nalaze cuvanje racuna <b>11 godina</b>.
+  Papir se gubi, blijedi, gori. Digitalna arhiva je sigurna, pretraziva i uvijek dostupna.
+</div>
+
+<h2>Kako koristiti — 3 koraka</h2>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-text">
+    <h3>Uslikajte racun</h3>
+    <p>Kliknite na <span class="highlight">Novi scan</span> ili <span class="highlight">Upload</span>.<br>
+    Mozete koristiti kameru na mobitelu ili odabrati datoteku s racunala.<br>
+    Podrzani formati: <b>JPG, PNG, PDF</b>.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-text">
+    <h3>AI automatski prepoznaje podatke</h3>
+    <p>Sustav sam cita racun i popunjava:<br>
+    — Dobavljac (tko je izdao racun)<br>
+    — Broj racuna<br>
+    — Datum i iznos<br>
+    — Tip dokumenta (gotovinski, ulazni, gorivo...)<br>
+    <b>Vi ne morate nista upisivati rucno.</b></p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-text">
+    <h3>Spremite u arhivu</h3>
+    <p>Kliknite <span class="highlight">Spremi u arhivu</span>.<br>
+    Racun je sada sigurno pohranjen i pretraziv.<br>
+    AI automatski priprema prijedlog knjizenja.</p>
+  </div>
+</div>
+
+<div class="tip">
+  <b>Savjet:</b> Mozete uslikati <b>vise racuna odjednom</b> (do 100). 
+  Sustav ih sam grupira po dobavljacu i datumu. Idealno za kraj mjeseca 
+  kad imate hrpu gotovinskih racuna.
+</div>
+
+<h2>Kako spremiti na lokalni disk</h2>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-text">
+    <h3>Preuzmite ZIP datoteku</h3>
+    <p>U arhivi kliknite <span class="highlight">Spremi na disk</span>.<br>
+    Sustav generira ZIP datoteku organiziranu po mapama:<br>
+    <b>Firma / Godina / Mjesec / Partner / racun.pdf</b><br>
+    Plus Excel-kompatibilni INDEX.csv s popisom svih dokumenata.<br>
+    Spremite ZIP na mrezni disk ili USB.</p>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<h2>Kako instalirati ikonu na radnu povrsinu</h2>
+
+<div class="install-box">
+  <h3>Google Chrome (preporuceno)</h3>
+  <ol>
+    <li>Otvorite Digitalnu Arhivu u Chrome pregledniku</li>
+    <li>Kliknite na <b>tri tocke</b> (&#8942;) u gornjem desnom kutu</li>
+    <li>Odaberite <b>"Instaliraj Digitalna Arhiva"</b></li>
+    <li>Potvrdite klikom na <b>"Instaliraj"</b></li>
+    <li>Ikona se pojavljuje na radnoj povrsini!</li>
+  </ol>
+</div>
+
+<div class="install-box">
+  <h3>Microsoft Edge</h3>
+  <ol>
+    <li>Otvorite Digitalnu Arhivu u Edge pregledniku</li>
+    <li>Kliknite na <b>tri tocke</b> (&middot;&middot;&middot;) u gornjem desnom kutu</li>
+    <li>Odaberite <b>"Aplikacije" &rarr; "Instaliraj ovu stranicu kao aplikaciju"</b></li>
+    <li>Potvrdite klikom na <b>"Instaliraj"</b></li>
+  </ol>
+</div>
+
+<div class="warning">
+  <b>Vazno:</b> Svaki komitent (firma) ima <b>svoj login</b>. 
+  Ne mijesajte racune razlicitih firmi! 
+  Svaka firma vidi samo svoje dokumente.
+</div>
+
+<h2>Cesta pitanja</h2>
+
+<div class="step">
+  <div class="step-num">?</div>
+  <div class="step-text">
+    <h3>Sto ako uslikam krivo?</h3>
+    <p>Obrisite zapis u arhivi i uslikajte ponovo. Nista se ne gubi.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">?</div>
+  <div class="step-text">
+    <h3>Koliko dugo se cuva?</h3>
+    <p>Svaki dokument je zasticen <b>11 godina</b> od datuma izdavanja, 
+    u skladu sa zakonom. Ne moze se slucajno obrisati.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">?</div>
+  <div class="step-text">
+    <h3>Mogu li koristiti na mobitelu?</h3>
+    <p><b>Da!</b> Otvorite u pregledniku na mobitelu. 
+    Mozete i instalirati kao aplikaciju (isti postupak kao gore).</p>
+  </div>
+</div>
+
+<button class="btn-print no-print" onclick="window.print()">
+  Isprintaj ove upute
+</button>
+
+<div class="footer">
+  Digitalna Arhiva &middot; Zakonski compliant &middot; AI automatizacija<br>
+  Tehnička podrska: kontaktirajte vase knjigovodstvo
+</div>
+
+</body>
+</html>

@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Synesis knjige — {{ ukupno }} firmi{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --syn-blue: #1a3a6b;
+  --syn-blue-light: #2651a0;
+  --syn-gold: #c9a84c;
+  --syn-green: #22c55e;
+  --syn-border: rgba(201,168,76,0.2);
+}
+.syn-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+/* Header — Synesis stil */
+.syn-header {
+  background: linear-gradient(135deg, var(--syn-blue) 0%, var(--syn-blue-light) 100%);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.syn-logo { font-size: 2rem; }
+.syn-header-title { color: #fff; font-size: 1.2rem; font-weight: 700; }
+.syn-header-sub { color: rgba(255,255,255,0.7); font-size: .8rem; margin-top: 2px; }
+.syn-header-stats { margin-left: auto; display: flex; gap: 1.5rem; text-align: center; }
+.syn-stat-val { color: var(--syn-gold); font-size: 1.4rem; font-weight: 700; display: block; }
+.syn-stat-lbl { color: rgba(255,255,255,0.6); font-size: .7rem; }
+
+/* Toolbar */
+.syn-toolbar {
+  display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
+}
+.syn-search {
+  flex: 1; min-width: 200px; padding: 9px 14px;
+  border: 1px solid var(--syn-border); border-radius: 8px;
+  background: var(--bg-card, #111); color: var(--text, #e2e8f0);
+  font-size: .875rem; outline: none;
+}
+.syn-search:focus { border-color: var(--syn-gold); }
+.syn-filter-btn {
+  padding: 8px 14px; border-radius: 8px; font-size: .8rem; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--syn-border); background: transparent;
+  color: var(--text-muted, #94a3b8); transition: all .15s;
+}
+.syn-filter-btn.active {
+  background: var(--syn-blue); color: #fff; border-color: var(--syn-blue);
+}
+
+/* Grid knjiga */
+.syn-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+/* Knjiga card */
+.syn-card {
+  background: var(--bg-card, #0d1117);
+  border: 1px solid var(--syn-border);
+  border-radius: 10px; padding: 1rem;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: all .15s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.syn-card:hover {
+  border-color: var(--syn-gold);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.1);
+  transform: translateY(-1px);
+}
+.syn-card.aktivna { border-left: 3px solid var(--syn-green); }
+
+/* Book icon */
+.syn-book-icon {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--syn-blue), var(--syn-blue-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.syn-card.aktivna .syn-book-icon {
+  background: linear-gradient(135deg, #065f46, #059669);
+}
+
+/* Card header */
+.syn-card-head { display: flex; gap: 10px; align-items: flex-start; }
+.syn-card-info { flex: 1; min-width: 0; }
+.syn-card-naziv {
+  font-weight: 700; font-size: .88rem; color: var(--text, #e2e8f0);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.syn-card-oib {
+  font-size: .7rem; color: var(--text-muted, #64748b);
+  font-family: monospace; letter-spacing: .03em;
+}
+
+/* Badges */
+.syn-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.syn-badge {
+  font-size: .58rem; font-weight: 700; padding: 2px 7px;
+  border-radius: 20px; display: inline-flex; align-items: center; gap: 3px;
+}
+.syn-badge-aktivan { background: rgba(34,197,94,.15); color: #4ade80; }
+.syn-badge-arhiva  { background: rgba(100,116,139,.15); color: #94a3b8; }
+.syn-badge-sustav  { background: rgba(201,168,76,.15); color: var(--syn-gold); }
+.syn-badge-god     { background: rgba(59,130,246,.12); color: #60a5fa; }
+
+/* Footer */
+.syn-card-foot {
+  border-top: 1px solid rgba(255,255,255,.05);
+  padding-top: 8px; display: flex; justify-content: space-between;
+  align-items: center;
+}
+.syn-card-size { font-size: .68rem; color: var(--text-muted, #64748b); }
+.syn-card-action {
+  font-size: .72rem; font-weight: 600; padding: 4px 10px;
+  border-radius: 6px; border: none; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.syn-card-action-open {
+  background: rgba(201,168,76,.12); color: var(--syn-gold);
+}
+.syn-card-action-open:hover { background: rgba(201,168,76,.22); }
+.syn-card-action-add {
+  background: rgba(34,197,94,.1); color: #4ade80;
+}
+.syn-card-action-add:hover { background: rgba(34,197,94,.2); }
+
+/* LIMIT Connect indikator */
+.syn-limit-tag {
+  font-size: .65rem; color: #94a3b8; margin-top: 2px;
+  display: flex; align-items: center; gap: 4px;
+}
+.syn-limit-tag .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--syn-green); flex-shrink: 0;
+}
+
+/* Empty state */
+.syn-empty { text-align: center; padding: 3rem; color: var(--text-muted, #64748b); }
+
+@media(max-width:600px) {
+  .syn-grid { grid-template-columns: 1fr; }
+  .syn-header-stats { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="syn-wrap">
+
+  <!-- Header -->
+  <div class="syn-header">
+    <div class="syn-logo">📚</div>
+    <div>
+      <div class="syn-header-title">Synesis knjige</div>
+      <div class="syn-header-sub">Popis svih firmi iz Synesis baze podataka · Konjik d.o.o.</div>
+    </div>
+    <div class="syn-header-stats">
+      <div>
+        <span class="syn-stat-val">{{ ukupno }}</span>
+        <span class="syn-stat-lbl">Ukupno knjiga</span>
+      </div>
+      <div>
+        <span class="syn-stat-val" style="color:#4ade80">{{ aktivnih }}</span>
+        <span class="syn-stat-lbl">Aktivnih</span>
+      </div>
+      <div>
+        <span class="syn-stat-val" style="color:var(--syn-gold)">{{ u_sustavu }}</span>
+        <span class="syn-stat-lbl">U LIMIT Connect</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="syn-toolbar">
+    <input type="text" class="syn-search" id="synSearch"
+           placeholder="Pretraži po nazivu ili OIB-u..."
+           autocomplete="off" oninput="synFilter()">
+    <button class="syn-filter-btn active" onclick="synToggleFilter(this,'sve')">Sve ({{ ukupno }})</button>
+    <button class="syn-filter-btn" onclick="synToggleFilter(this,'aktivna')">Aktivne ({{ aktivnih }})</button>
+    <button class="syn-filter-btn" onclick="synToggleFilter(this,'sustav')">U sustavu ({{ u_sustavu }})</button>
+    <button class="syn-filter-btn" onclick="synToggleFilter(this,'nije')">Nije uvezeno ({{ ukupno|add:u_sustavu|add:'-'|add:u_sustavu }})</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="syn-grid" id="synGrid">
+    {% for k in knjige %}
+    <div class="syn-card {% if k.aktivna %}aktivna{% endif %}"
+         data-naziv="{{ k.naziv|lower }}"
+         data-oib="{{ k.oib }}"
+         data-aktivna="{{ k.aktivna|yesno:'1,0' }}"
+         data-sustav="{{ k.u_sustavu|yesno:'1,0' }}">
+
+      <div class="syn-card-head">
+        <div class="syn-book-icon">{% if k.aktivna %}📗{% else %}📘{% endif %}</div>
+        <div class="syn-card-info">
+          <div class="syn-card-naziv" title="{{ k.naziv }}">{{ k.naziv }}</div>
+          <div class="syn-card-oib">{% if k.oib %}OIB: {{ k.oib }}{% else %}OIB: —{% endif %}</div>
+          {% if k.u_sustavu %}
+          <div class="syn-limit-tag">
+            <span class="dot"></span> {{ k.limit_naziv|default:k.naziv }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="syn-badges">
+        {% if k.aktivna %}
+          <span class="syn-badge syn-badge-aktivan">● Aktivna</span>
+        {% else %}
+          <span class="syn-badge syn-badge-arhiva">Arhiva</span>
+        {% endif %}
+        <span class="syn-badge syn-badge-god">{{ k.godina }}</span>
+        {% if k.u_sustavu %}
+          <span class="syn-badge syn-badge-sustav">⚡ LIMIT Connect</span>
+        {% endif %}
+      </div>
+
+      <div class="syn-card-foot">
+        <span class="syn-card-size">{{ k.size_kb }} KB</span>
+        <div style="display:flex;gap:6px">
+          {% if k.u_sustavu and k.limit_id %}
+            <a href="/hr/synesis/settings/?company={{ k.limit_id }}"
+               class="syn-card-action syn-card-action-open">
+              ⚡ Otvori
+            </a>
+          {% else %}
+            <a href="/hr/synesis/settings/"
+               class="syn-card-action syn-card-action-add">
+              + Dodaj
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="syn-empty" style="grid-column:1/-1">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">📚</div>
+      <div>Nema knjiga na serveru.</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="synEmpty" class="syn-empty" style="display:none">
+    <div style="font-size:2rem;margin-bottom:.5rem">🔍</div>
+    <div>Nema rezultata za vašu pretragu.</div>
+  </div>
+
+</div>
+
+<script>
+var _synFilter = 'sve';
+
+function synFilter() {
+  var q = document.getElementById('synSearch').value.toLowerCase();
+  var cards = document.querySelectorAll('#synGrid .syn-card');
+  var visible = 0;
+  cards.forEach(function(c) {
+    var matchQ = !q || c.dataset.naziv.includes(q) || c.dataset.oib.includes(q);
+    var matchF = _synFilter === 'sve' ||
+                 (_synFilter === 'aktivna' && c.dataset.aktivna === '1') ||
+                 (_synFilter === 'sustav'  && c.dataset.sustav  === '1') ||
+                 (_synFilter === 'nije'    && c.dataset.sustav  === '0');
+    var show = matchQ && matchF;
+    c.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('synEmpty').style.display = visible === 0 ? 'block' : 'none';
+}
+
+function synToggleFilter(btn, filter) {
+  document.querySelectorAll('.syn-filter-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  _synFilter = filter;
+  synFilter();
+}
+</script>
+{% endblock %}

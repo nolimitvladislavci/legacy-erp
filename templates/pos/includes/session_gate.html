@@ -1,0 +1,254 @@
+{% load i18n %}
+{# ═══ Session Gate — full-page inline flow ═══════════════════════════════ #}
+{# Prikazuje se kad nema aktivne smjene. 3 koraka:                         #}
+{#   1. Odabir blagajnika                                                  #}
+{#   2. PIN verifikacija                                                   #}
+{#   3. Početna gotovina → otvori smjenu                                   #}
+{# ════════════════════════════════════════════════════════════════════════ #}
+
+<style>
+.gate-page{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 50px);background:var(--dark,#0a0a0f);padding:1rem}
+.gate-card{background:#111214;border:2px solid rgba(201,168,76,.35);border-radius:20px;width:440px;max-width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.gate-logo{text-align:center;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid rgba(201,168,76,.15)}
+.gate-step{display:none;padding:1.5rem 1.5rem 1rem}
+.gate-step.active{display:block}
+.gate-step-num{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,.15);border:2px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem}
+.gate-title{text-align:center;color:#e2e8f0;font-size:1.15rem;font-weight:700;margin:0 0 .3rem}
+.gate-desc{text-align:center;color:#64748b;font-size:.82rem;margin:0 0 1.25rem}
+
+/* Cashier grid */
+.gate-cashier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem}
+.gate-cashier-btn{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;color:#e2e8f0;font-family:inherit}
+.gate-cashier-btn:hover{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.06)}
+.gate-cashier-btn.selected{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.1);box-shadow:0 0 20px rgba(201,168,76,.15)}
+.gate-cashier-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,.3),rgba(201,168,76,.1));display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)}
+.gate-cashier-name{font-size:.85rem;font-weight:600}
+.gate-cashier-lock{position:absolute;top:6px;right:6px;font-size:.65rem}
+
+/* PIN */
+.gate-pin-display{text-align:center;font-size:2.2rem;letter-spacing:.6em;color:var(--gold,#c9a84c);min-height:3.2rem;display:flex;align-items:center;justify-content:center;margin-bottom:.5rem}
+.gate-pin-error{text-align:center;color:#f87171;font-size:.8rem;min-height:1.2rem;margin-bottom:.5rem}
+.gate-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;max-width:260px;margin:0 auto 1rem}
+.gate-np-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;font-size:1.3rem;font-weight:700;border-radius:10px;min-height:56px;cursor:pointer;font-family:inherit;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.gate-np-btn:active{background:rgba(201,168,76,.15);transform:scale(.95)}
+.gate-np-back{color:#f87171;font-size:1.1rem}
+.gate-np-ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#4ade80}
+
+/* Cash */
+.gate-cash-input{width:100%;padding:16px;background:#0a0a0a;border:2px solid rgba(201,168,76,.3);border-radius:12px;color:var(--gold,#c9a84c);font-size:2rem;font-weight:800;text-align:center;font-family:inherit;box-sizing:border-box;margin-bottom:.75rem}
+.gate-cash-input:focus{outline:none;border-color:var(--gold,#c9a84c);box-shadow:0 0 20px rgba(201,168,76,.15)}
+.gate-cash-presets{display:flex;gap:.4rem;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap}
+.gate-cash-presets button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:.5rem .8rem;font-size:.85rem;cursor:pointer;font-weight:600;font-family:inherit;min-width:54px}
+.gate-cash-presets button:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
+.gate-open-btn{width:100%;padding:16px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:12px;font-size:1.15rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s}
+.gate-open-btn:hover{filter:brightness(1.1)}
+.gate-open-btn:active{transform:scale(.98)}
+
+/* Nav */
+.gate-back-btn{display:block;margin:.75rem auto 0;background:none;border:none;color:#64748b;font-size:.82rem;cursor:pointer;padding:.5rem 1rem;font-family:inherit}
+.gate-back-btn:hover{color:#e2e8f0}
+.gate-dots{display:flex;gap:8px;justify-content:center;padding:.75rem 0 1rem}
+.gate-dot{width:10px;height:10px;border-radius:50%;background:#252830;transition:all .2s}
+.gate-dot.active{background:var(--gold,#c9a84c)}
+
+@media(max-width:500px){
+  .gate-page{padding:.5rem;align-items:flex-start;padding-top:.5rem}
+  .gate-card{border-radius:14px}
+  .gate-cashier-grid{grid-template-columns:repeat(2,1fr)}
+  .gate-np-btn{min-height:50px;font-size:1.2rem}
+}
+</style>
+
+<div class="gate-page">
+  <div class="gate-card">
+    <div class="gate-logo">
+      {% if terminal.company.logo %}
+      <img src="{{ terminal.company.logo.url }}" alt="{{ terminal.company.name }}"
+           style="height:48px;max-width:160px;object-fit:contain">
+      {% else %}
+      <div style="font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)">{{ terminal.company.name }}</div>
+      {% endif %}
+      <div style="font-size:.78rem;color:#64748b;margin-top:4px">{{ terminal.name }}</div>
+    </div>
+
+    {# ── Korak 1: Odabir blagajnika ── #}
+    <div class="gate-step active" id="gateStep1">
+      <div class="gate-step-num">1</div>
+      <h2 class="gate-title">{% trans "Prijava blagajnika" %}</h2>
+      <p class="gate-desc">{% trans "Odaberite tko otvara smjenu" %}</p>
+
+      {% if cashiers %}
+      <div class="gate-cashier-grid" id="gateCashierGrid">
+        {% for c in cashiers %}
+        <button class="gate-cashier-btn" type="button"
+                data-id="{{ c.pk }}" data-name="{{ c.name|escapejs }}"
+                data-has-pin="{% if c.pin_hash %}1{% else %}0{% endif %}"
+                onclick="gateSelectCashier(this)">
+          <div class="gate-cashier-avatar">{{ c.name|make_list|first }}</div>
+          <div class="gate-cashier-name">{{ c.name }}</div>
+          {% if c.pin_hash %}<div class="gate-cashier-lock">&#128274;</div>{% endif %}
+        </button>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:2rem">
+        <p style="color:#94a3b8;margin-bottom:1rem">{% trans "Nema registriranih blagajnika." %}</p>
+        <a href="/pos/settings/#cashiers" class="btn btn-gold" style="display:inline-flex;padding:10px 20px;background:var(--gold,#c9a84c);color:#000;border-radius:8px;font-weight:700;text-decoration:none">{% trans "Dodaj blagajnika" %}</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── Korak 2: PIN ── #}
+    <div class="gate-step" id="gateStep2">
+      <div class="gate-step-num">2</div>
+      <h2 class="gate-title">{% trans "Unesite PIN" %}</h2>
+      <p class="gate-desc" id="gateStep2Desc"></p>
+
+      <div class="gate-pin-display" id="gatePinDots"></div>
+      <div class="gate-pin-error" id="gatePinError"></div>
+
+      <div class="gate-numpad">
+        <button type="button" class="gate-np-btn" onclick="gatePin('1')">1</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('2')">2</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('3')">3</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('4')">4</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('5')">5</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('6')">6</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('7')">7</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('8')">8</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('9')">9</button>
+        <button type="button" class="gate-np-btn gate-np-back" onclick="gatePin('back')">&#9003;</button>
+        <button type="button" class="gate-np-btn" onclick="gatePin('0')">0</button>
+        <button type="button" class="gate-np-btn gate-np-ok" onclick="gatePin('ok')">&#10003;</button>
+      </div>
+
+      <button type="button" class="gate-back-btn" onclick="gateGoStep(1)">&#8592; {% trans "Nazad" %}</button>
+    </div>
+
+    {# ── Korak 3: Početna gotovina ── #}
+    <div class="gate-step" id="gateStep3">
+      <div class="gate-step-num">3</div>
+      <h2 class="gate-title">{% trans "Početna gotovina" %}</h2>
+      <p class="gate-desc">{% trans "Koliko gotovine je u ladici?" %}</p>
+
+      <form method="post" action="{% url 'pos:open_session' terminal.id %}" id="gateOpenForm">
+        {% csrf_token %}
+        <input type="hidden" name="cashier_id" id="gateCashierId" value="">
+        <input type="number" name="opening_cash" id="gateOpeningCash" value="0" min="0" step="0.01"
+               class="gate-cash-input" onfocus="if(this.value==='0')this.select()">
+
+        <div class="gate-cash-presets">
+          <button type="button" onclick="document.getElementById('gateOpeningCash').value='0'">0 &euro;</button>
+          <button type="button" onclick="document.getElementById('gateOpeningCash').value='50'">50 &euro;</button>
+          <button type="button" onclick="document.getElementById('gateOpeningCash').value='100'">100 &euro;</button>
+          <button type="button" onclick="document.getElementById('gateOpeningCash').value='200'">200 &euro;</button>
+          <button type="button" onclick="document.getElementById('gateOpeningCash').value='500'">500 &euro;</button>
+        </div>
+
+        <button type="submit" class="gate-open-btn">
+          {% trans "Otvori blagajnu" %} &#8594;
+        </button>
+      </form>
+
+      <button type="button" class="gate-back-btn" onclick="gateGoStep(2)">&#8592; {% trans "Nazad" %}</button>
+    </div>
+
+    {# ── Progress dots ── #}
+    <div class="gate-dots">
+      <div class="gate-dot active" id="gateDot1"></div>
+      <div class="gate-dot" id="gateDot2"></div>
+      <div class="gate-dot" id="gateDot3"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var _gateCashierId = null;
+  var _gateCashierName = '';
+  var _gateHasPin = false;
+  var _gatePin = '';
+
+  window.gateSelectCashier = function(btn) {
+    document.querySelectorAll('.gate-cashier-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    _gateCashierId = btn.dataset.id;
+    _gateCashierName = btn.dataset.name;
+    _gateHasPin = btn.dataset.hasPin === '1';
+    document.getElementById('gateCashierId').value = _gateCashierId;
+
+    setTimeout(function(){
+      if (_gateHasPin) {
+        document.getElementById('gateStep2Desc').textContent = 'PIN za ' + _gateCashierName;
+        _gatePin = '';
+        _gateRenderPin();
+        document.getElementById('gatePinError').textContent = '';
+        gateGoStep(2);
+      } else {
+        gateGoStep(3);
+      }
+    }, 200);
+  };
+
+  window.gatePin = function(key) {
+    if (key === 'back') {
+      _gatePin = _gatePin.slice(0, -1);
+      _gateRenderPin();
+      return;
+    }
+    if (key === 'ok') {
+      if (_gatePin.length < 1) return;
+      var okBtn = document.querySelector('.gate-np-ok');
+      okBtn.textContent = '...';
+      fetch('/pos/api/verify-cashier-pin/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': _gateCSRF()},
+        body: JSON.stringify({cashier_id: _gateCashierId, pin: _gatePin})
+      }).then(function(r){ return r.json(); }).then(function(d){
+        okBtn.innerHTML = '&#10003;';
+        if (d.ok) {
+          gateGoStep(3);
+        } else {
+          document.getElementById('gatePinError').textContent = 'Neispravan PIN \u2014 pokušajte ponovo';
+          _gatePin = '';
+          _gateRenderPin();
+        }
+      }).catch(function(){
+        okBtn.innerHTML = '&#10003;';
+        gateGoStep(3);
+      });
+      return;
+    }
+    if (_gatePin.length < 6) {
+      _gatePin += key;
+      _gateRenderPin();
+    }
+  };
+
+  function _gateRenderPin() {
+    var dots = '';
+    for (var i = 0; i < _gatePin.length; i++) dots += '&#9679; ';
+    for (var j = _gatePin.length; j < 4; j++) dots += '&#9675; ';
+    document.getElementById('gatePinDots').innerHTML = dots;
+  }
+
+  window.gateGoStep = function(n) {
+    for (var i = 1; i <= 3; i++) {
+      var el = document.getElementById('gateStep' + i);
+      if (el) el.classList.toggle('active', i === n);
+      var dot = document.getElementById('gateDot' + i);
+      if (dot) dot.classList.toggle('active', i <= n);
+    }
+    if (n === 3) {
+      setTimeout(function(){ document.getElementById('gateOpeningCash').focus(); }, 200);
+    }
+  };
+
+  function _gateCSRF() {
+    var c = document.cookie.match(/csrftoken=([^;]+)/);
+    return c ? c[1] : (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || '';
+  }
+
+  _gateRenderPin();
+})();
+</script>

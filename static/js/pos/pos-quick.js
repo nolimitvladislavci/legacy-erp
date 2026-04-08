@@ -240,6 +240,10 @@
     document.getElementById('payBon').disabled = !en;
     try { document.getElementById('tipToggleBtn').disabled = !en; } catch(e){}
     try { document.getElementById('pfandBtn').disabled = !en; } catch(e){}
+    try {
+      var st = document.querySelector('#splitToggle button');
+      if (st) { st.disabled = !en; st.style.opacity = en ? '1' : '0.4'; }
+    } catch(e){}
     var hint = document.getElementById('cashierHint');
     if (hint) hint.classList.remove('show');
   }
@@ -272,6 +276,7 @@
 
   window.pay = function(method) {
     if (navigator.vibrate) navigator.vibrate(10);
+    try { if (window.event) window.event.stopPropagation(); } catch(e) {}
     if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
     var ids = Object.keys(basket);
     if (!ids.length) return;
