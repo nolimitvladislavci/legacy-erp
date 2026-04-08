@@ -490,6 +490,9 @@ def arhiva_upload(request):
             try:
                 from documents.tasks import generate_ai_proposal
                 if entry and (entry.has_pdf or entry.has_image):
+                    entry.ai_status = 'pending'
+                    entry.ai_status_message = 'Čekam AI analizu...'
+                    entry.save(update_fields=['ai_status', 'ai_status_message'])
                     generate_ai_proposal.apply_async(
                         args=[entry.pk],
                         countdown=3,
@@ -763,6 +766,8 @@ def arhiva_detail_ajax(request, pk):
     # AI Bookkeeper proposal
     result['ai_proposal'] = entry.ai_proposal
     result['is_booked'] = entry.is_booked
+    result['ai_status'] = entry.ai_status
+    result['ai_status_message'] = entry.ai_status_message or ''
 
     # Deep links (Sprint 2C)
     if not result['module_url']:

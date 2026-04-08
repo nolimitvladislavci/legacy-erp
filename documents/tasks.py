@@ -362,6 +362,11 @@ def generate_ai_proposal(self, entry_id):
     if entry.ai_proposal:
         return {'skipped': 'already has proposal'}
 
+    # Update status: processing
+    entry.ai_status = 'processing'
+    entry.ai_status_message = 'AI čita dokument...'
+    entry.save(update_fields=['ai_status', 'ai_status_message'])
+
     # Čitaj datoteku
     file_bytes = None
     content_type = None
@@ -434,7 +439,9 @@ def generate_ai_proposal(self, entry_id):
 
         # Spremi
         entry.ai_proposal = proposal
-        entry.save(update_fields=['ai_proposal'])
+        entry.ai_status = 'done'
+        entry.ai_status_message = 'AI analiza završena — prijedlog knjiženja spreman'
+        entry.save(update_fields=['ai_proposal', 'ai_status', 'ai_status_message'])
 
         # Notifikacija kompanijskom adminu
         try:
@@ -462,6 +469,12 @@ def generate_ai_proposal(self, entry_id):
 
     except Exception as e:
         logger.error('generate_ai_proposal failed for entry %s: %s', entry_id, e)
+        try:
+            entry.ai_status = 'error'
+            entry.ai_status_message = f'AI greška: {str(e)[:150]}'
+            entry.save(update_fields=['ai_status', 'ai_status_message'])
+        except Exception:
+            pass
         return {'error': str(e)}
 
 

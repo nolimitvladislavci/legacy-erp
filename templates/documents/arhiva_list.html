@@ -715,6 +715,16 @@ function renderDrawer(d){
     h+='<div class="drawer-row"><span class="dl">Tvrtka</span><span class="dv">'+d.company_name+'</span></div>';
     h+='<div class="drawer-row"><span class="dl">Partner</span><span class="dv">'+(d.partner_name||'-')+'</span></div>';
     h+='<div class="drawer-row"><span class="dl">Datum</span><span class="dv">'+d.doc_date+'</span></div>';
+    // AI Status Badge
+    if(d.ai_status && d.ai_status !== 'none'){
+        var statusColors = {pending:'#f59e0b',processing:'#3b82f6',done:'#22c55e',error:'#ef4444'};
+        var statusIcons = {pending:'fa-clock',processing:'fa-spinner fa-spin',done:'fa-check-circle',error:'fa-exclamation-triangle'};
+        var sc = statusColors[d.ai_status] || '#94a3b8';
+        var si = statusIcons[d.ai_status] || 'fa-circle';
+        h+='<div class="drawer-row"><span class="dl">AI Status</span><span class="dv">';
+        h+='<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:'+sc+'15;color:'+sc+';font-size:.8rem;font-weight:600">';
+        h+='<i class="fas '+si+'"></i> '+(d.ai_status_message||d.ai_status)+'</span></span></div>';
+    }
     h+='<div class="drawer-row"><span class="dl">Iznos</span><span class="dv" style="color:var(--gold);font-weight:700">'+d.amount+' '+d.currency+'</span></div>';
     if(d.zki) h+='<div class="drawer-row"><span class="dl">ZKI</span><span class="dv" style="font-family:monospace;font-size:0.75rem">'+d.zki+'</span></div>';
     if(d.jir) h+='<div class="drawer-row"><span class="dl">JIR</span><span class="dv" style="font-family:monospace;font-size:0.75rem">'+d.jir+'</span></div>';

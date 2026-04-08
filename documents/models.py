@@ -305,6 +305,19 @@ class ArhivaEntry(models.Model):
                                 null=True, blank=True, related_name='arhiva_entries',
                                 verbose_name=_('Partner (veza)'))
 
+    # Sprint 4: AI processing status
+    AI_STATUS_CHOICES = [
+        ('none', _('Bez AI')),
+        ('pending', _('Čeka AI')),
+        ('processing', _('AI obrađuje')),
+        ('done', _('AI gotov')),
+        ('error', _('AI greška')),
+    ]
+    ai_status = models.CharField(max_length=12, choices=AI_STATUS_CHOICES, default='none',
+                                  db_index=True, verbose_name=_('AI status'))
+    ai_status_message = models.CharField(max_length=200, blank=True, default='',
+                                          verbose_name=_('AI poruka'))
+
     # Sprint 3: Labele za kategorizaciju
     labels = models.ManyToManyField('ArhivaLabel', blank=True, related_name='entries',
                                     verbose_name=_('Labele'))
