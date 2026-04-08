@@ -118,15 +118,31 @@ class TriKeyProfile(models.Model):
 
     # ── PIN Methods ──────────────────────────────────────────
 
+    BANNED_PINS = {
+        # Sekvencijalni
+        "123456", "234567", "345678", "456789", "567890",
+        "654321", "543210", "987654", "876543",
+        # Ponavljajući
+        "111111", "222222", "333333", "444444", "555555",
+        "666666", "777777", "888888", "999999", "000000",
+        # Poznate kombinacije
+        "112233", "998877", "121212", "010101", "131313",
+        "147258", "258369", "369147", "159753", "123123",
+    }
+
     def set_pin(self, raw_pin):
         """Postavi PIN (6 znakova). Hashira s Django hasher-om."""
         if len(raw_pin) != 6 or not raw_pin.isdigit():
-            raise ValueError('PIN mora biti točno 6 znamenki')
+            raise ValueError("PIN mora biti točno 6 znamenki")
+        if raw_pin in self.BANNED_PINS:
+            raise ValueError("Ovaj PIN je previše jednostavan. Odaberite sigurniji.")
+        if len(set(raw_pin)) < 3:
+            raise ValueError("PIN mora sadržavati barem 3 različite znamenke.")
         self.pin_hash = make_password(raw_pin)
         self.pin_set_at = timezone.now()
         self.pin_attempts = 0
         self.pin_locked_until = None
-        self.save(update_fields=['pin_hash', 'pin_set_at', 'pin_attempts', 'pin_locked_until'])
+        self.save(update_fields=["pin_hash", "pin_set_at", "pin_attempts", "pin_locked_until"])
 
     def verify_pin(self, raw_pin):
         """Provjeri PIN. Rate limiting: 5 pokušaja → 15min lockout."""

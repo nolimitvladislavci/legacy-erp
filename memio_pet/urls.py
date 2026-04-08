@@ -27,7 +27,8 @@ urlpatterns = [
     path("moj-profil/", views.breeder_dashboard, name="breeder_dashboard"),
 
     # Add animal — journey flow
-    path("ljubimac/novi/", views.add_animal, name="add_animal"),
+    # UKLONJENO 08.04.2026 — sigurnosna rupa, zamijenjeno token authom
+    # path("ljubimac/novi/", views.add_animal, name="add_animal"),
     path("ljubimac/zatrazi/", views.add_animal_request, name="add_animal_zatrazi"),
     path("ljubimac/token/<str:token>/", views.add_animal_with_token, name="add_animal_token"),
     path("ljubimac/milestone/novi/", views.add_milestone, name="add_milestone"),
