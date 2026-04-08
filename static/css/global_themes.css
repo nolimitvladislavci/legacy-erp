@@ -50,6 +50,9 @@
     --surface2: #1e293b;
     --surface3: #22222c;
     --surface-deep: #0f172a;
+    --bg: #0a0a0f;
+    --bg-card: #111214;
+    --bg-card-hover: #1a1c20;
     --card: #1e293b;
     --border: #252830;
     --border2: #334155;
@@ -171,6 +174,9 @@ html[data-theme="light"] {
     --surface2:     #f8fafc;
     --surface3:     #f1f5f9;
     --surface-deep: #e2e8f0;
+    --bg: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
     --card:         #ffffff;
 
     /* Borderi */

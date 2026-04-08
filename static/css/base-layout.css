@@ -1,37 +1,14 @@
-        :root {
-            --sidebar-bg:#0f1219; --sidebar-hover:#1a1c20; --accent:#3b82f6; --gold:#c9a84c;
-            /* Light theme (default) */
-            --bg:#f1f5f9; --bg-card:#ffffff; --bg-card-hover:#f8fafc;
-            --text:#1e293b; --text-secondary:#475569; --text-muted:#64748b;
-            --border:#e2e8f0; --border-light:#f1f5f9;
-            --topbar-bg:#ffffff; --topbar-text:#1e293b; --topbar-border:#e2e8f0;
-            --input-bg:#ffffff; --input-border:#e2e8f0;
-            --table-header-bg:#f8fafc; --table-row-hover:#f1f5f9;
-            --badge-bg:#f1f5f9; --shadow:rgba(0,0,0,0.05);
-            --cmd-bg:#ffffff; --cmd-border:var(--text); --cmd-input-color:var(--surface-deep);
-            --cmd-item-hover:#f1f5f9; --cmd-hint-bg:#f1f5f9;
-        }
+        /* Theme vars: see global_themes.css */
 
-        /* Light mode explicit — sprečava dark bleedthrough */
-        :root .table { --bs-table-bg:#ffffff; --bs-table-border-color:var(--text); color:var(--surface-deep); }
-        :root .table thead th { background:#f8fafc; color:#475569; }
-        :root .table td { color:var(--surface-deep); }
-        :root .stat-card { background:#ffffff; color:var(--surface-deep); }
-        :root .stat-card .value { color:var(--surface-deep); }
-        :root .form-control, :root .form-select { background:#ffffff; color:var(--surface-deep); }
+        /* Table/form theming — uses global_themes.css vars */
+        .table { --bs-table-bg:var(--surface, #fff); --bs-table-border-color:var(--border); color:var(--text); }
+        .table thead th { background:var(--surface2, #f8fafc); color:var(--text-dim); }
+        .table td { color:var(--text); }
+        .stat-card { background:var(--card, #fff); color:var(--text); }
+        .stat-card .value { color:var(--text); }
+        .form-control, .form-select { background:var(--input-bg, #fff); color:var(--text); border-color:var(--border); }
 
-        [data-theme="dark"] {
-            --bg:#0a0a0a; --bg-card:#111214; --bg-card-hover:#1a1c20;
-            --text:#e8e8e8; --text-secondary:#94a3b8; --text-muted:#6b7280;
-            --border:#2a2d3a; --border-light:#1e2130;
-            --topbar-bg:#111214; --topbar-text:#e8e8e8; --topbar-border:#2a2d3a;
-            --sidebar-bg:#0a0a0a; --sidebar-hover:#151720;
-            --input-bg:#0a0a0a; --input-border:#2a2d3a;
-            --table-header-bg:#0a0a0a; --table-row-hover:#1a1c20;
-            --badge-bg:#1e2130; --shadow:rgba(0,0,0,0.3);
-            --cmd-bg:#111214; --cmd-border:#2a2d3a; --cmd-input-color:#e8e8e8;
-            --cmd-item-hover:#1a1c20; --cmd-hint-bg:#1e2130;
-        }
+        /* Dark theme vars: see global_themes.css */
         * { box-sizing: border-box; }
         body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .3s,color .3s; }
 
