@@ -186,14 +186,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .chain{list-style:none}
 .chain li{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .chain li:last-child{border-bottom:none}
-.chain-icon{width:30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.chain-icon{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
 .chain-type{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--dim)}
 .chain-name{font-weight:500;font-size:.93rem}
 .chain-date{font-size:.78rem;color:var(--dim)}
 
 /* ── BREEDER CARD ── */
 .breeder-card{display:flex;align-items:center;gap:14px}
-.breeder-avatar{width:46px;height:46px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.2rem;font-weight:700;flex-shrink:0}
+.breeder-avatar{width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--white);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.2rem;font-weight:700;flex-shrink:0}
 .breeder-name{font-weight:500;font-size:.93rem}
 .breeder-meta{font-size:.78rem;color:var(--dim)}
 
@@ -235,9 +235,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 .share-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);transition:all .2s;font-family:var(--sans)}
 .share-btn:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow)}
-.share-btn.wa{background:#25D366;color:#fff;border-color:#25D366}
-.share-btn.wa:hover{background:#1da851;border-color:#1da851;color:#fff}
-.share-btn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+.share-btn.wa{background:#25D366;color:var(--white);border-color:#25D366}
+.share-btn.wa:hover{background:#1da851;border-color:#1da851;color:var(--white)}
+.share-btn.copied{background:var(--green);color:var(--white);border-color:var(--green)}
 
 /* ── FOOTER ── */
 .page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
@@ -268,8 +268,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <!-- TOP BAR -->
 <div class="top-bar">
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="javascript:history.back()" style="color:var(--gold);text-decoration:none;font-size:1.1rem;line-height:1" title="Natrag">←</a>
+  <div class="d-flex fx-gap-3 align-items-center">
+    <a href="javascript:history.back()" class="fx-no-underline fx-fs-xl fx-text-gold" style="line-height:1" title="Natrag">←</a>
     <a href="https://memio.pet" class="top-bar-logo">Memio<span>.pet</span></a>
   </div>
   <div class="top-bar-right">
@@ -278,33 +278,33 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     {% else %}
       <span class="unverified-tag">NEVERIFICIRAN</span>
     {% endif %}
-    <a href="/prijava/" style="color:var(--gold);text-decoration:none;font-size:.8rem;font-weight:600;padding:5px 12px;border:1px solid rgba(201,168,76,.4);border-radius:20px">Prijava</a>
+    <a href="/prijava/" class="fx-no-underline fx-fs-compact fx-fw-semibold fx-rounded-xl fx-text-gold" style="padding:5px 12px;border:1px solid rgba(201,168,76,.4)">Prijava</a>
     <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Promijeni temu">🌙</button>
   </div>
 </div>
 
 {% if needs_parental_consent %}
-<div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:0 0 12px 12px;padding:14px 20px;text-align:center;font-size:.85rem;color:#2563eb;line-height:1.5">
+<div class="text-center fx-fs-base fx-text-blue" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:0 0 12px 12px;padding:14px 20px;line-height:1.5">
   🔒 <strong>Čeka pristanak roditelja</strong> — profil je aktivan, ali po GDPR-u roditelj treba potvrditi korištenje.
-  <a href="/pristanak-ponovo/" style="color:#1d4ed8;font-weight:700;margin-left:6px">Pošalji email ponovo</a>
+  <a href="/pristanak-ponovo/" class="fx-fw-bold" style="color:#1d4ed8;margin-left:6px">Pošalji email ponovo</a>
 </div>
 {% endif %}
 
 {% if is_memorial %}
 <div class="memorial-header">
-  <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
-  <div style="font-size:2.5rem;margin-bottom:12px">🌈</div>
-  <h1 style="font-family:var(--serif);font-size:2rem;font-weight:700;margin-bottom:6px">U sjećanju</h1>
-  <p style="font-size:1.1rem;color:var(--gold);font-family:var(--serif);font-style:italic">
+  <div id="particles" class="fx-overflow-hidden" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div class="mb-3 fx-fs-7xl">🌈</div>
+  <h1 class="fx-fs-icon fx-fw-bold mb-1" style="font-family:var(--serif)">U sjećanju</h1>
+  <p class="fx-fs-xl fx-text-gold" style="font-family:var(--serif);font-style:italic">
     {{ animal.name }}
     {% if animal.date_of_birth %}({{ animal.date_of_birth|date:"Y." }}–{% endif %}{% if memorial.date_of_death %}{{ memorial.date_of_death|date:"Y." }}){% endif %}
   </p>
   {% if memorial.epitaph %}
-  <blockquote style="margin:20px auto 0;max-width:400px;font-family:var(--serif);font-size:1.05rem;font-style:italic;color:var(--ink2);line-height:1.8;border-left:3px solid var(--gold);padding-left:16px;text-align:left">
+  <blockquote class="text-start fx-text-dim" style="margin:20px auto 0;max-width:400px;font-family:var(--serif);font-size:1.05rem;font-style:italic;line-height:1.8;border-left:3px solid var(--gold);padding-left:16px">
     "{{ memorial.epitaph }}"
   </blockquote>
   {% endif %}
-  <button id="candle-btn" onclick="paliSvjecicu()" style="margin-top:20px;background:none;border:1px solid rgba(232,196,106,.4);border-radius:20px;padding:10px 24px;color:var(--gold);cursor:pointer;font-family:var(--sans);font-size:.9rem;transition:all .2s">
+  <button id="candle-btn" onclick="paliSvjecicu()" class="fx-rounded-xl fx-pointer fx-fs-md mt-4 fx-text-gold fx-bg-transparent" style="border:1px solid rgba(232,196,106,.4);padding:10px 24px;font-family:var(--sans);transition:all .2s">
     🕯️ Upali svjećicu <span id="candle-count">({{ memorial.candle_count }})</span>
   </button>
 </div>
@@ -336,10 +336,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <!-- MEMORIAL HEADER -->
   <div class="card">
     <div class="memorial-header">
-      <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
-      <div style="font-size:2.5rem;margin-bottom:12px">🌈</div>
+      <div id="particles" class="fx-overflow-hidden" style="position:absolute;inset:0;pointer-events:none"></div>
+      <div class="mb-3 fx-fs-7xl">🌈</div>
       <h1>U sjećanju</h1>
-      <p style="font-size:1.1rem;color:var(--gold);font-family:var(--serif);font-style:italic">
+      <p class="fx-fs-xl fx-text-gold" style="font-family:var(--serif);font-style:italic">
         {{ animal.name }}
         {% if animal.date_of_birth %}({{ animal.date_of_birth|date:"Y." }}–{% endif %}{% if memorial.date_of_death %}{{ memorial.date_of_death|date:"Y." }}){% elif animal.date_of_birth %}){% endif %}
       </p>
@@ -355,14 +355,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   {% if not memorial.cremated %}
   <div class="card">
     <div class="card-body">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:16px">Što sada?</h3>
-      <div style="display:flex;flex-direction:column;gap:10px">
+      <h3 class="fx-fs-2xl mb-3" style="font-family:var(--serif)">Što sada?</h3>
+      <div class="d-flex fx-gap-3 fx-flex-col">
         <a href="/krematoriji/" class="what-now-btn">⚱️ Krematorij — pronađi u blizini</a>
         <a href="https://e-uprava.gov.hr" target="_blank" class="what-now-btn">📋 Odjava iz Upisnika (zakonska obveza — 14 dana)</a>
         <a href="/memorijal/{{ identifier }}/uredi/" class="what-now-btn">✏️ Uredi stranicu sjećanja</a>
         <a href="/udomljavanje/" class="what-now-btn">🐾 Pomozi drugom ljubimcu</a>
       </div>
-      <p style="font-size:.75rem;color:var(--dim);margin-top:12px;line-height:1.6">
+      <p class="fx-fs-caption mt-3 fx-text-dim fx-lh-normal">
         Zakon o veterinarstvu (NN 82/13) — vlasnik je obvezan odjaviti
         ljubimca iz Upisnika u roku 14 dana od uginuća.
       </p>
@@ -372,14 +372,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
   {% if memorial.donation_target %}
   <div class="card" style="border:1px solid rgba(76,175,125,.2)">
-    <div class="card-body" style="text-align:center">
-      <p style="font-size:.9rem;color:var(--ink2);margin-bottom:12px">
+    <div class="card-body text-center">
+      <p class="fx-fs-md mb-3 fx-text-dim">
         U ime {{ animal.name }}, vlasnik predlaže donaciju azilu
         <strong>{{ memorial.donation_target.name }}</strong>
       </p>
       {% if memorial.donation_target.website %}
       <a href="{{ memorial.donation_target.website }}" target="_blank"
-         class="share-btn" style="background:var(--green);color:#fff;border-color:var(--green)">
+         class="share-btn fx-text-white" style="background:var(--green);border-color:var(--green)">
         🐾 Doniraj azilu
       </a>
       {% endif %}
@@ -401,7 +401,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       </div>
       <span class="trust-label">
         {{ trust_label }} ·
-        <a href="{% url 'memio_pet:breeder_profile' breeder.pk %}" style="color:var(--gold);text-decoration:none;">Vidi profil uzgajivača →</a>
+        <a href="{% url 'memio_pet:breeder_profile' breeder.pk %}" class="fx-no-underline fx-text-gold">Vidi profil uzgajivača →</a>
       </span>
     </div>
   </div>
@@ -493,7 +493,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         <div>
           <div class="breeder-name">
             {{ breeder.name }}
-            {% if breeder.verified_badge %}<span style="color:var(--green)"> ✓</span>{% endif %}
+            {% if breeder.verified_badge %}<span class="fx-text-green"> ✓</span>{% endif %}
           </div>
           <div class="breeder-meta">
             {{ breeder.city }}{% if breeder.city and breeder.country %}, {% endif %}{{ breeder.country }}
@@ -567,7 +567,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         {% if rev.comment %}<p class="rev-comment">{{ rev.comment }}</p>{% endif %}
         <div class="rev-meta">
           {{ rev.created_at|date:"d.m.Y." }}
-          {% if rev.is_verified_purchase %}<span style="color:var(--green)"> ✓ Verificirana kupnja</span>{% endif %}
+          {% if rev.is_verified_purchase %}<span class="fx-text-green"> ✓ Verificirana kupnja</span>{% endif %}
         </div>
       </div>
       {% endfor %}
@@ -579,7 +579,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   {% if timeline %}
   <div class="card">
     <div class="card-body">
-      <h2 class="section-title" style="margin-bottom:24px">🕰️ Životni trak</h2>
+      <h2 class="section-title mb-4">🕰️ Životni trak</h2>
       <div class="tl">
         {% for event in timeline %}
         <div class="tl-item tl-{{ event.type }}">
@@ -594,8 +594,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         {% endfor %}
       </div>
       {% if not is_memorial %}
-      <div style="margin-top:20px;text-align:center">
-        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn" style="text-decoration:none">+ Dodaj prekretnicu</a>
+      <div class="text-center mt-4">
+        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn fx-no-underline">+ Dodaj prekretnicu</a>
       </div>
       {% endif %}
     </div>
@@ -620,8 +620,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         </div>
         {% endfor %}
       </div>
-      <div style="margin-top:20px;text-align:center">
-        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn" style="font-size:.85rem">+ Dodaj prekretnicu</a>
+      <div class="text-center mt-4">
+        <a href="/ljubimac/milestone/novi/?animal={{ identifier }}" class="share-btn fx-fs-base">+ Dodaj prekretnicu</a>
       </div>
     </div>
   </div>
@@ -630,9 +630,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   {% if not is_memorial %}
   <!-- DUGINI MOST — životni ciklus -->
   <div class="card" style="border-color:rgba(201,168,76,.3)">
-    <div class="card-body" style="text-align:center;padding:20px 16px">
-      <p style="color:var(--dim);font-size:.85rem;margin-bottom:10px">Ako je {{ animal.name }} preminuo/la:</p>
-      <a href="/pas/{{ identifier }}/dugini-most/" class="share-btn" style="text-decoration:none;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:10px 20px;border-radius:8px;display:inline-block">🌈 Dugini Most — Kreiraj memorijal</a>
+    <div class="card-body text-center" style="padding:20px 16px">
+      <p class="fx-fs-base mb-2 fx-text-dim">Ako je {{ animal.name }} preminuo/la:</p>
+      <a href="/pas/{{ identifier }}/dugini-most/" class="share-btn fx-no-underline fx-rounded fx-text-gold d-inline-block" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);padding:10px 20px">🌈 Dugini Most — Kreiraj memorijal</a>
     </div>
   </div>
   {% endif %}
@@ -640,12 +640,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <!-- BOXGRAM — socijalni profil -->
   {% if not is_memorial %}
   <div class="card" style="border-color:rgba(201,168,76,.2)">
-    <div class="card-body" style="text-align:center;padding:20px 16px">
-      <h2 class="section-title" style="border:none;text-align:center;font-size:.9rem">📸 Boxgram</h2>
-      <p style="color:var(--dim);font-size:.85rem;margin-bottom:12px;line-height:1.5">Fotografije, natjecanja, događaji — socijalni profil za {{ animal.name|default:"ljubimca" }}.</p>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <a href="/boxgram/ljubimac/{{ animal.name|slugify|default:identifier }}/" style="text-decoration:none;padding:10px 20px;background:var(--gold);color:#fff;border-radius:8px;font-weight:700;font-size:.88rem">Otvori Boxgram profil</a>
-        <a href="/boxgram/feed/" style="text-decoration:none;padding:10px 20px;border:1.5px solid var(--line);border-radius:8px;font-weight:600;font-size:.88rem;color:var(--ink)">Feed</a>
+    <div class="card-body text-center" style="padding:20px 16px">
+      <h2 class="section-title fx-border-none text-center fx-fs-md">📸 Boxgram</h2>
+      <p class="fx-fs-base mb-3 fx-text-dim" style="line-height:1.5">Fotografije, natjecanja, događaji — socijalni profil za {{ animal.name|default:"ljubimca" }}.</p>
+      <div class="d-flex fx-gap-2 fx-flex-wrap justify-content-center">
+        <a href="/boxgram/ljubimac/{{ animal.name|slugify|default:identifier }}/" class="fx-no-underline fx-text-white fx-rounded fx-fw-bold fx-fs-body fx-bg-gold" style="padding:10px 20px">Otvori Boxgram profil</a>
+        <a href="/boxgram/feed/" class="fx-no-underline fx-rounded fx-fw-semibold fx-fs-body" style="padding:10px 20px;border:1.5px solid var(--line);color:var(--ink)">Feed</a>
       </div>
     </div>
   </div>
@@ -653,18 +653,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
   <!-- DIJELI PROFIL -->
   <div class="card">
-    <div class="card-body" style="text-align:center">
-      <h2 class="section-title" style="border:none;text-align:center">Dijeli ovaj profil</h2>
+    <div class="card-body text-center">
+      <h2 class="section-title fx-border-none text-center">Dijeli ovaj profil</h2>
       {% if qr_url %}
-      <img src="{{ qr_url }}" alt="QR kod za {{ animal.name|default:animal.ear_tag }}" style="width:140px;height:140px;margin:0 auto 10px;display:block">
+      <img src="{{ qr_url }}" alt="QR kod za {{ animal.name|default:animal.ear_tag }}" class="d-block" style="width:140px;height:140px;margin:0 auto 10px">
       {% endif %}
-      <p class="qr-url" style="margin-bottom:16px">{{ profile_url }}</p>
+      <p class="qr-url mb-3">{{ profile_url }}</p>
       <div class="share-row">
         <button class="share-btn" id="copyLinkBtn" onclick="copyLink()">🔗 Kopiraj link</button>
-        <button class="share-btn" id="nativeShareBtn" onclick="nativeShare()" style="display:none">📤 Podijeli</button>
+        <button class="share-btn fx-hidden" id="nativeShareBtn" onclick="nativeShare()">📤 Podijeli</button>
         <a class="share-btn wa" id="waShareBtn" href="https://api.whatsapp.com/send?text={{ animal.name|urlencode }}%20—%20Memio.pet%20profil%20{{ profile_url|urlencode }}" target="_blank" rel="noopener">💬 WhatsApp</a>
-        <a class="share-btn" href="/uvezi/?animal={{ identifier }}" style="text-decoration:none">📱 Uvezi s mreža</a>
-        <a class="share-btn" href="/pas/{{ identifier }}/knjiga/" target="_blank" style="text-decoration:none">📖 Knjiga sjećanja</a>
+        <a class="share-btn fx-no-underline" href="/uvezi/?animal={{ identifier }}">📱 Uvezi s mreža</a>
+        <a class="share-btn fx-no-underline" href="/pas/{{ identifier }}/knjiga/" target="_blank">📖 Knjiga sjećanja</a>
         {% if qr_url %}
         <a class="share-btn" href="{{ qr_url }}" download="qr-{{ animal.name|default:animal.ear_tag }}.png">📷 Preuzmi QR</a>
         {% endif %}
@@ -677,7 +677,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="page-footer">
   <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
   Verificirano putem <a href="https://limit-connect.com">LIMIT Connect</a> · SHA-256<br>
-  © 2026 <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">Konjik d.o.o.</a> & NO LIMIT udruga
+  © 2026 <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold">Konjik d.o.o.</a> & NO LIMIT udruga
 </div>
 
 <script>

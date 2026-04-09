@@ -10,11 +10,11 @@
 .opz-sub { color: #999; font-size: 0.85rem; margin-bottom: 20px; }
 .opz-controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
 .opz-select {
-    background: #0a0a0a; color: #e0e0e0; border: 1px solid #444;
+    background:var(--bg); color: #e0e0e0; border: 1px solid #444;
     padding: 8px 14px; border-radius: 6px; font-size: 0.9rem;
 }
 .opz-btn {
-    background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 8px 18px;
+    background: var(--gold,#c9a84c); color:var(--text); border: none; padding: 8px 18px;
     border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;
     text-decoration: none;
 }
@@ -26,7 +26,7 @@
 }
 .opz-stats { display: flex; gap: 16px; margin-bottom: 24px; }
 .opz-stat {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    background:var(--surface-deep); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
 }
 .opz-stat .val { font-size: 1.5rem; font-weight: 800; color: var(--gold,#c9a84c); }
@@ -48,7 +48,7 @@
 .opz-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .opz-table .total-row { font-weight: 700; border-top: 2px solid var(--gold,#c9a84c); color: var(--gold,#c9a84c); }
 .oib-badge {
-    background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 6px;
+    background: rgba(16,185,129,0.15); color:var(--green); padding: 1px 6px;
     border-radius: 4px; font-size: 0.75em; font-family: monospace;
 }
 </style>
@@ -58,7 +58,7 @@
     <div class="opz-sub">Statisticki izvjestaj o poslovnim transakcijama za FINA-u</div>
 
     <div class="opz-controls">
-        <form method="get" style="display:flex; gap:10px; align-items:center;">
+        <form method="get" class="d-flex fx-gap-3 align-items-center">
             <select name="year" class="opz-select" onchange="this.form.submit()">
                 {% for y in years %}
                 <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
@@ -158,7 +158,7 @@
     {% endif %}
 
     {% if not domestic and not foreign %}
-    <div style="text-align:center; padding:40px; color:#666;">
+    <div class="text-center fx-text-dim" style="padding:40px">
         Nema podataka za odabranu godinu.
     </div>
     {% endif %}

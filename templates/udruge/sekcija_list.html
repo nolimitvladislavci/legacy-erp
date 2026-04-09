@@ -2,65 +2,48 @@
 {% load i18n %}
 {% block title %}Sekcije{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+<div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-layer-group"></i> Sekcije</h4>
-    <small style="color:var(--muted)">Skupine / sekcije unutar udruge</small>
+    <h4 class="fx-text-gold fx-m-0"><i class="fas fa-layer-group"></i> Sekcije</h4>
+    <small class="fx-text-muted">Skupine / sekcije unutar udruge</small>
   </div>
   <a href="{% url 'udruge:sekcija_create' %}" class="btn btn-gold btn-sm">+ Nova sekcija</a>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+<div class="d-grid fx-gap-4" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
 {% for s in sekcije %}
 <div class="card" style="padding:1.2rem">
-  <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem">
-    <h5 style="margin:0;color:var(--text)">{{ s.name }}</h5>
+  <div class="d-flex justify-content-between fx-mb-4" style="align-items:start">
+    <h5 class="fx-text-body fx-m-0">{{ s.name }}</h5>
     {% if s.is_active %}
-    <span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600">Aktivna</span>
+    <span class="fx-text-green fx-fs-tiny fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(34,197,94,.15)">Aktivna</span>
     {% else %}
-    <span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600">Neaktivna</span>
+    <span class="fx-text-red fx-fs-tiny fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(239,68,68,.15)">Neaktivna</span>
     {% endif %}
   </div>
-  {% if s.description %}<p style="font-size:.82rem;color:var(--muted);margin-bottom:.75rem">{{ s.description|truncatewords:20 }}</p>{% endif %}
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+  {% if s.description %}<p class="fx-fs-note fx-text-muted fx-mb-4">{{ s.description|truncatewords:20 }}</p>{% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-2">
     <div>
-      <span style="font-size:1.5rem;font-weight:800;color:var(--gold)">{{ s.member_count }}</span>
-      <span style="font-size:.72rem;color:var(--muted);margin-left:4px">clanova</span>
+      <span class="fx-fs-5xl fx-fw-800 fx-text-gold">{{ s.member_count }}</span>
+      <span class="fx-fs-sm fx-text-muted" style="margin-left:4px">clanova</span>
     </div>
     {% if s.max_members %}
-    <span style="font-size:.72rem;color:var(--muted)">Max: {{ s.max_members }}</span>
+    <span class="fx-fs-sm fx-text-muted">Max: {{ s.max_members }}</span>
     {% endif %}
   </div>
   {% if s.leader %}
-  <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem">
-    <i class="fas fa-user-tie" style="color:var(--gold);margin-right:4px"></i> {{ s.leader }}
+  <div class="fx-fs-body-sm fx-text-muted fx-mb-4">
+    <i class="fas fa-user-tie fx-text-gold" style="margin-right:4px"></i> {{ s.leader }}
   </div>
   {% endif %}
-  <a href="{% url 'udruge:sekcija_detail' s.pk %}" class="btn btn-ghost btn-sm" style="width:100%">Detalji</a>
+  <a href="{% url 'udruge:sekcija_detail' s.pk %}" class="btn btn-ghost btn-sm fx-w-full">Detalji</a>
 </div>
 {% empty %}
-<div class="card" style="padding:3rem;text-align:center;grid-column:1/-1">
-  <p style="color:var(--muted);margin-bottom:1rem">Nema kreiranih sekcija.</p>
+<div class="card text-center fx-p-7 fx-col-full">
+  <p class="fx-text-muted mb-3">Nema kreiranih sekcija.</p>
   <a href="{% url 'udruge:sekcija_create' %}" class="btn btn-gold btn-sm">Kreiraj prvu sekciju</a>
 </div>
 {% endfor %}

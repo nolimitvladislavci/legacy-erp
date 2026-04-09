@@ -15,10 +15,10 @@
           <dl class="row small mb-0">
             <dt class="col-5 text-muted">Status</dt>
             <dd class="col-7">
-              {% if contract.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+              {% if contract.status == 'active' %}<span class="fenix-badge fenix-badge-success">Aktivan</span>
               {% elif contract.status == 'pending' %}<span class="badge bg-info text-dark">Na čekanju</span>
-              {% elif contract.status == 'completed' %}<span class="badge bg-secondary">Završen</span>
-              {% else %}<span class="badge bg-danger">Otkazan</span>{% endif %}
+              {% elif contract.status == 'completed' %}<span class="fenix-badge fenix-badge-muted">Završen</span>
+              {% else %}<span class="fenix-badge fenix-badge-danger">Otkazan</span>{% endif %}
             </dd>
             <dt class="col-5 text-muted">Periode</dt>
             <dd class="col-7">{{ contract.start_date }} → {{ contract.end_date }}<br><span class="text-muted">{{ contract.duration_days }} dana ukupno</span></dd>
@@ -40,7 +40,7 @@
 
       <!-- HZMO Status -->
       {% if contract.contract_type == 'odredjeno' %}
-      <div class="card border-secondary mb-3 {% if not contract.hzmo_prijava_sent and today >= contract.hzmo_prijava_deadline %}border-danger{% endif %}" style="background:#1a1a2e">
+      <div class="card border-secondary mb-3 {% if not contract.hzmo_prijava_sent and today >= contract.hzmo_prijava_deadline %}border-danger{% endif %}" style="background:var(--surface)">
         <div class="card-header fw-semibold text-warning">
           <i class="fas fa-building-columns me-2"></i>HZMO — Obvezne prijave
         </div>
@@ -52,7 +52,7 @@
               <div class="text-muted">Rok: {{ hzmo_prijava_deadline }}</div>
             </div>
             {% if contract.hzmo_prijava_sent %}
-              <span class="badge bg-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_prijava_date }}</span>
+              <span class="fenix-badge fenix-badge-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_prijava_date }}</span>
             {% else %}
               <form method="post" action="{% url 'seasonal:hzmo_mark' contract.pk 'm1' %}" class="d-inline">
                 {% csrf_token %}
@@ -68,7 +68,7 @@
               <div class="text-muted">Rok: {{ hzmo_odjava_deadline }}</div>
             </div>
             {% if contract.hzmo_odjava_sent %}
-              <span class="badge bg-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_odjava_date }}</span>
+              <span class="fenix-badge fenix-badge-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_odjava_date }}</span>
             {% else %}
               <form method="post" action="{% url 'seasonal:hzmo_mark' contract.pk 'm2' %}" class="d-inline">
                 {% csrf_token %}
@@ -134,9 +134,9 @@
                   <td class="text-muted small">{{ p.tax_amount }} €</td>
                   <td class="text-success fw-bold">{{ p.net_amount }} €</td>
                   <td>
-                    {% if p.status == 'paid' %}<span class="badge bg-success">Isplaćeno</span>
+                    {% if p.status == 'paid' %}<span class="fenix-badge fenix-badge-success">Isplaćeno</span>
                     {% elif p.status == 'approved' %}<span class="badge bg-info text-dark">Odobreno</span>
-                    {% else %}<span class="badge bg-secondary">Planirano</span>{% endif %}
+                    {% else %}<span class="fenix-badge fenix-badge-muted">Planirano</span>{% endif %}
                   </td>
                   <td>
                     {% if p.status == 'planned' %}

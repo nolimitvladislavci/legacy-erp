@@ -196,10 +196,10 @@ a:hover{color:var(--gold-hover)}
 .badge-paid{background:var(--gold-bg);color:var(--gold)}
 .badge-rejected{background:rgba(218,54,51,.12);color:var(--error)}
 .badge-overdue{background:rgba(210,153,34,.12);color:var(--warning)}
-.badge-cancelled{background:#222;color:#666}
-.badge-storno{background:#222;color:#666}
+.badge-cancelled{background:var(--surface);color:var(--text-dim)}
+.badge-storno{background:var(--surface);color:var(--text-dim)}
 .badge-unpaid{background:rgba(210,153,34,.12);color:var(--warning)}
-.badge-expired{background:#222;color:#666}
+.badge-expired{background:var(--surface);color:var(--text-dim)}
 
 /* ── Buttons ────────────────────────────────────────────────────────── */
 .btn{
@@ -212,11 +212,11 @@ a:hover{color:var(--gold-hover)}
   line-height:1.4;
 }
 .btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
-.btn-gold{background:var(--gold);color:#000}
-.btn-gold:hover{background:var(--gold-hover);color:#000}
+.btn-gold{background:var(--gold);color:var(--text)}
+.btn-gold:hover{background:var(--gold-hover);color:var(--text)}
 .btn-outline{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
 .btn-outline:hover{background:var(--gold-bg)}
-.btn-danger{background:var(--error);color:#fff}
+.btn-danger{background:var(--error);color:var(--white)}
 .btn-danger:hover{background:#c22d2a}
 .btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--surface);color:var(--text)}
@@ -266,7 +266,7 @@ a:hover{color:var(--gold-hover)}
 .b2b-filter-pill.active{
   background:var(--gold);
   border-color:var(--gold);
-  color:#000;font-weight:700;
+  color:var(--text);font-weight:700;
 }
 
 /* ── Timeline ───────────────────────────────────────────────────────── */
@@ -410,7 +410,7 @@ a:hover{color:var(--gold-hover)}
     <i class="fas fa-link"></i> LIMIT CONNECT
   </div>
   <div class="b2b-nav-partner">
-    <i class="fas fa-building" style="margin-right:4px;opacity:.5"></i>
+    <i class="fas fa-building fx-opacity-50" style="margin-right:4px"></i>
     {{ partner.name }}
   </div>
   <button class="b2b-hamburger" onclick="document.querySelector('.b2b-nav-links').classList.toggle('open')" aria-label="Menu">
@@ -430,7 +430,7 @@ a:hover{color:var(--gold-hover)}
 <div id="fc-toasts"></div>
 
 <!-- ── CSRF Token ──────────────────────────────────────────────────── -->
-<form id="fc-csrf-form" style="display:none">{% csrf_token %}</form>
+<form id="fc-csrf-form" class="fx-hidden">{% csrf_token %}</form>
 
 <!-- ── Main Content ────────────────────────────────────────────────── -->
 <main class="b2b-main">
@@ -446,8 +446,8 @@ a:hover{color:var(--gold-hover)}
 <!-- ── Reject Modal (reusable) ─────────────────────────────────────── -->
 <div class="fc-modal-overlay" id="rejectModal">
   <div class="fc-modal">
-    <h3><i class="fas fa-times-circle" style="margin-right:8px"></i>Odbijanje dokumenta</h3>
-    <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">
+    <h3><i class="fas fa-times-circle fx-mr-3"></i>Odbijanje dokumenta</h3>
+    <p class="fx-fs-base fx-text-dim mb-3">
       Molimo navedite razlog odbijanja. Ovo ce biti vidljivo izdavacu dokumenta.
     </p>
     <label class="b2b-label" for="rejectReason">Razlog odbijanja</label>

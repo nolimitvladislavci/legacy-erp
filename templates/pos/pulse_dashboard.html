@@ -3,24 +3,7 @@
 {% block title %}POS Pulse — AI Živčani Sustav{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
@@ -31,17 +14,17 @@
   }
   .pulse-card:hover { border-color: var(--gold, var(--gold,#c9a84c)); transform: translateY(-2px); }
   .pulse-stat { font-size: 32px; font-weight: bold; color: var(--gold, var(--gold,#c9a84c)); }
-  .pulse-label { font-size: 13px; color: #888; margin-top: 4px; }
+  .pulse-label { font-size: 13px; color:var(--text-muted); margin-top: 4px; }
 
   .terminal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 16px 0; }
   .terminal-card {
-    background: #111; border: 1px solid #333; border-radius: 10px; padding: 16px;
+    background:var(--bg-card); border: 1px solid #333; border-radius: 10px; padding: 16px;
     position: relative; overflow: hidden;
   }
   .terminal-card.active { border-color: #2ecc71; }
   .terminal-card.training { border-color: #e74c3c; }
   .terminal-card .name { font-size: 16px; font-weight: bold; }
-  .terminal-card .operator { font-size: 12px; color: #888; }
+  .terminal-card .operator { font-size: 12px; color:var(--text-muted); }
   .terminal-card .stats { display: flex; justify-content: space-between; margin-top: 10px; }
   .terminal-card .heartbeat {
     position: absolute; top: 10px; right: 12px;
@@ -64,8 +47,8 @@
   .event-dot.critical { background: #e74c3c; animation: heartbeat 1s infinite; }
   .event-dot.success { background: #2ecc71; }
   .event-title { font-size: 14px; font-weight: 500; }
-  .event-detail { font-size: 12px; color: #888; margin-top: 2px; }
-  .event-time { font-size: 11px; color: #666; }
+  .event-detail { font-size: 12px; color:var(--text-muted); margin-top: 2px; }
+  .event-time { font-size: 11px; color:var(--text-dim); }
 
   .chart-bar-row { display: flex; align-items: flex-end; gap: 4px; height: 100px; margin: 20px 0; }
   .chart-bar {
@@ -75,7 +58,7 @@
   .chart-bar:hover { opacity: 0.8; }
   .chart-bar .label {
     position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #666; white-space: nowrap;
+    font-size: 9px; color:var(--text-dim); white-space: nowrap;
   }
   .chart-bar .value {
     position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
@@ -86,11 +69,11 @@
 
   .section-title { font-size: 18px; color: var(--gold, var(--gold,#c9a84c)); margin: 24px 0 12px; }
   .badge-critical {
-    background: #e74c3c; color: #fff; padding: 2px 8px;
+    background: #e74c3c; color:var(--white); padding: 2px 8px;
     border-radius: 10px; font-size: 11px; margin-left: 8px;
   }
   .badge-unread {
-    background: #f39c12; color: #fff; padding: 2px 8px;
+    background: #f39c12; color:var(--white); padding: 2px 8px;
     border-radius: 10px; font-size: 11px; margin-left: 8px;
   }
   .btn-mark-read {
@@ -101,11 +84,11 @@
   .btn-mark-read:hover { border-color: var(--gold, var(--gold,#c9a84c)); color: var(--gold, var(--gold,#c9a84c)); }
 </style>
 
-<h2 style="display:flex;align-items:center;gap:10px">
+<h2 class="d-flex fx-gap-3 align-items-center">
   POS Pulse
-  <span style="font-size:14px;color:#888">— AI Živčani Sustav</span>
-  <span id="criticalBadge" class="badge-critical" style="display:none"></span>
-  <span id="unreadBadge" class="badge-unread" style="display:none"></span>
+  <span class="fx-text-muted" style="font-size:14px">— AI Živčani Sustav</span>
+  <span id="criticalBadge" class="badge-critical fx-hidden"></span>
+  <span id="unreadBadge" class="badge-unread fx-hidden"></span>
 </h2>
 
 <!-- Stats Cards -->
@@ -125,7 +108,7 @@
 <div class="terminal-grid" id="terminalGrid"></div>
 
 <!-- Events -->
-<div style="display:flex;justify-content:space-between;align-items:center">
+<div class="d-flex justify-content-between align-items-center">
   <div class="section-title">Pulse Events (24h)</div>
   <button class="btn-mark-read" onclick="markAllRead()">Označi sve pročitano</button>
 </div>
@@ -172,21 +155,21 @@ function render(data) {
       '<div class="operator">' + t.operator + ' | Smjena #' + t.session_number + '</div>' +
       '<div class="stats">' +
         '<span>' + t.receipt_count + ' bonova</span>' +
-        '<span style="color:var(--gold,#c9a84c);font-weight:bold">' + t.revenue.toFixed(2) + ' €</span>' +
+        '<span class="fx-fw-bold fx-text-gold">' + t.revenue.toFixed(2) + ' €</span>' +
       '</div></div>';
-  }).join('') || '<div style="color:#666;padding:20px">Nema aktivnih terminala</div>';
+  }).join('') || '<div class="fx-text-dim fx-p-20">Nema aktivnih terminala</div>';
 
   // Events
   document.getElementById('eventList').innerHTML = data.events.map(e => {
     const time = new Date(e.created_at).toLocaleTimeString('hr', {hour:'2-digit',minute:'2-digit'});
     return '<div class="event-item ' + (e.is_read ? 'read' : '') + '">' +
       '<div class="event-dot ' + e.severity + '"></div>' +
-      '<div style="flex:1">' +
+      '<div class="fx-flex-1">' +
         '<div class="event-title">' + e.title + '</div>' +
         '<div class="event-detail">' + (e.detail || '') + '</div>' +
         '<div class="event-time">' + time + (e.terminal ? ' — ' + e.terminal : '') + '</div>' +
       '</div></div>';
-  }).join('') || '<div style="color:#666;padding:20px;text-align:center">Nema događaja u zadnjih 24h</div>';
+  }).join('') || '<div class="fx-text-dim text-center fx-p-20">Nema događaja u zadnjih 24h</div>';
 }
 
 function markAllRead() {

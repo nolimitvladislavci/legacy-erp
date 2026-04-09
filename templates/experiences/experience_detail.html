@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -40,49 +40,49 @@
 <div class="exp-container">
 <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
   <div>
-    <a href="{% url 'experiences:experience_list' %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>Iskustva</a>
-    <h2 style="font-size:1.5rem;font-weight:800;margin:.5rem 0 0;color:var(--text)">{{ exp.name }}</h2>
-    <div style="font-size:.82rem;color:var(--text-dim)">
-      <span class="exp-badge" style="background:var(--gold-dim);color:var(--gold)">{{ exp.get_experience_type_display }}</span>
+    <a href="{% url 'experiences:experience_list' %}" class="fx-fs-base fx-text-dim"><i class="fas fa-arrow-left me-1"></i>Iskustva</a>
+    <h2 class="fx-fs-5xl fx-fw-800 fx-text-body" style="margin:.5rem 0 0">{{ exp.name }}</h2>
+    <div class="fx-fs-note fx-text-dim">
+      <span class="exp-badge fx-text-gold fx-bg-gold-dim">{{ exp.get_experience_type_display }}</span>
       <span class="ms-2"><i class="fas fa-clock me-1"></i>{{ exp.duration_minutes }} min</span>
       <span class="ms-2"><i class="fas fa-users me-1"></i>max {{ exp.capacity }}</span>
-      <span class="ms-2"><i class="fas fa-star me-1" style="color:#f59e0b"></i>{{ avg_rating|floatformat:1|default:"-" }}</span>
+      <span class="ms-2"><i class="fas fa-star me-1 fx-text-amber"></i>{{ avg_rating|floatformat:1|default:"-" }}</span>
     </div>
   </div>
   <div class="d-flex gap-2">
-    <a href="{% url 'experiences:experience_edit' exp.pk %}" class="btn btn-sm btn-outline-light" style="border-radius:10px"><i class="fas fa-edit me-1"></i>Uredi</a>
+    <a href="{% url 'experiences:experience_edit' exp.pk %}" class="btn btn-sm btn-outline-light fx-rounded"><i class="fas fa-edit me-1"></i>Uredi</a>
     <a href="{% url 'experiences:schedule_create' exp.pk %}" class="exp-btn-gold"><i class="fas fa-calendar-plus me-1"></i>Novi termin</a>
   </div>
 </div>
 
 <div class="exp-stats">
-  <div class="exp-stat"><div class="exp-stat-value" style="color:var(--gold)">{{ exp.price_per_person }} €</div><div class="exp-stat-label">Cijena/osobi</div></div>
-  <div class="exp-stat"><div class="exp-stat-value" style="color:#22c55e">{{ total_bookings }}</div><div class="exp-stat-label">Ukupno rezervacija</div></div>
+  <div class="exp-stat"><div class="exp-stat-value fx-text-gold">{{ exp.price_per_person }} €</div><div class="exp-stat-label">Cijena/osobi</div></div>
+  <div class="exp-stat"><div class="exp-stat-value fx-text-green">{{ total_bookings }}</div><div class="exp-stat-label">Ukupno rezervacija</div></div>
   <div class="exp-stat"><div class="exp-stat-value">{{ exp.deposit_pct }}%</div><div class="exp-stat-label">Depozit</div></div>
   <div class="exp-stat"><div class="exp-stat-value">{{ schedules|length }}</div><div class="exp-stat-label">Nadolazećih termina</div></div>
 </div>
 
-{% if exp.description %}<div class="exp-card mb-3"><p style="color:var(--text);margin:0">{{ exp.description }}</p></div>{% endif %}
+{% if exp.description %}<div class="exp-card mb-3"><p class="fx-text-body fx-m-0">{{ exp.description }}</p></div>{% endif %}
 
 <!-- Termini -->
 <div class="exp-section">
   <h5><i class="fas fa-calendar me-2"></i>Nadolazeći termini</h5>
   {% if schedules %}
-  <div class="table-responsive"><table class="table table-dark table-sm table-hover align-middle" style="border-radius:12px;overflow:hidden">
+  <div class="table-responsive"><table class="table table-dark table-sm table-hover align-middle fx-rounded fx-overflow-hidden">
     <thead><tr><th>Datum</th><th>Vrijeme</th><th>Status</th><th>Gosti</th><th>Akcije</th></tr></thead>
     <tbody>
     {% for s in schedules %}
     <tr>
-      <td style="font-weight:700">{{ s.date|date:"d.m.Y" }}</td>
+      <td class="fx-fw-bold">{{ s.date|date:"d.m.Y" }}</td>
       <td>{{ s.time_from|time:"H:i" }} — {{ s.time_to|time:"H:i" }}</td>
       <td><span class="exp-badge {% if s.status == 'full' %}severity-recall{% elif s.status == 'open' %}severity-warning{% else %}severity-critical{% endif %}">{{ s.get_status_display }}</span></td>
       <td>{{ s.booked_pax }}/{{ s.max_pax }}</td>
-      <td><a href="{% url 'experiences:booking_create' s.pk %}" class="btn btn-sm btn-outline-success" style="border-radius:8px;font-size:.75rem"><i class="fas fa-plus me-1"></i>Rezerviraj</a></td>
+      <td><a href="{% url 'experiences:booking_create' s.pk %}" class="btn btn-sm btn-outline-success fx-rounded fx-fs-caption"><i class="fas fa-plus me-1"></i>Rezerviraj</a></td>
     </tr>
     {% endfor %}
     </tbody>
   </table></div>
-  {% else %}<div class="exp-card" style="text-align:center;color:var(--text-dim)"><i class="fas fa-calendar-times"></i> Nema termina — <a href="{% url 'experiences:schedule_create' exp.pk %}">dodaj termin</a></div>{% endif %}
+  {% else %}<div class="exp-card text-center fx-text-dim"><i class="fas fa-calendar-times"></i> Nema termina — <a href="{% url 'experiences:schedule_create' exp.pk %}">dodaj termin</a></div>{% endif %}
 </div>
 
 <!-- Bookings za termine -->
@@ -90,21 +90,21 @@
 {% if s.bookings.all %}
 <div class="exp-section">
   <h5><i class="fas fa-users me-2"></i>{{ s.date|date:"d.m." }} {{ s.time_from|time:"H:i" }} — Rezervacije</h5>
-  <div class="table-responsive"><table class="table table-dark table-sm table-hover align-middle" style="border-radius:12px;overflow:hidden">
+  <div class="table-responsive"><table class="table table-dark table-sm table-hover align-middle fx-rounded fx-overflow-hidden">
     <thead><tr><th>Gost</th><th>Osobe</th><th>Status</th><th>Depozit</th><th>Akcije</th></tr></thead>
     <tbody>
     {% for b in s.bookings.all %}
     <tr>
-      <td style="font-weight:700">{{ b.guest_name }}<br><small style="color:var(--text-dim)">{{ b.guest_phone }}</small></td>
+      <td class="fx-fw-bold">{{ b.guest_name }}<br><small class="fx-text-dim">{{ b.guest_phone }}</small></td>
       <td>{{ b.pax_count }} {% if b.children_count %}({{ b.children_count }} dj.){% endif %}</td>
       <td><span class="exp-badge {% if b.status == 'confirmed' %}severity-warning{% elif b.status == 'checked_in' %}severity-warning{% elif b.status == 'completed' %}severity-warning{% elif b.status == 'no_show' %}severity-recall{% else %}severity-critical{% endif %}">{{ b.get_status_display }}</span></td>
-      <td>{% if b.deposit_paid %}<span style="color:#22c55e"><i class="fas fa-check me-1"></i>{{ b.deposit_amount }} €</span>{% else %}<span style="color:#ef4444">Čeka</span>{% endif %}</td>
+      <td>{% if b.deposit_paid %}<span class="fx-text-green"><i class="fas fa-check me-1"></i>{{ b.deposit_amount }} €</span>{% else %}<span class="fx-text-red">Čeka</span>{% endif %}</td>
       <td class="d-flex gap-1 flex-wrap">
-        {% if b.status == 'pending' %}<form method="POST" action="{% url 'experiences:booking_confirm_deposit' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-success" style="border-radius:6px;font-size:.7rem"><i class="fas fa-check"></i> Depozit</button></form>{% endif %}
-        {% if b.status == 'confirmed' %}<form method="POST" action="{% url 'experiences:booking_check_in' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-info" style="border-radius:6px;font-size:.7rem"><i class="fas fa-sign-in-alt"></i> Check-in</button></form>{% endif %}
-        {% if b.status == 'checked_in' %}<form method="POST" action="{% url 'experiences:booking_complete' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-success" style="border-radius:6px;font-size:.7rem"><i class="fas fa-flag-checkered"></i> Završi</button></form>{% endif %}
-        {% if b.status == 'confirmed' %}<form method="POST" action="{% url 'experiences:booking_no_show' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" style="border-radius:6px;font-size:.7rem"><i class="fas fa-user-slash"></i></button></form>{% endif %}
-        {% if b.status == 'confirmed' or b.status == 'pending' %}<form method="POST" action="{% url 'experiences:booking_cancel' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" style="border-radius:6px;font-size:.7rem"><i class="fas fa-times"></i></button></form>{% endif %}
+        {% if b.status == 'pending' %}<form method="POST" action="{% url 'experiences:booking_confirm_deposit' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-success fx-rounded-sm fx-fs-sm"><i class="fas fa-check"></i> Depozit</button></form>{% endif %}
+        {% if b.status == 'confirmed' %}<form method="POST" action="{% url 'experiences:booking_check_in' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-info fx-rounded-sm fx-fs-sm"><i class="fas fa-sign-in-alt"></i> Check-in</button></form>{% endif %}
+        {% if b.status == 'checked_in' %}<form method="POST" action="{% url 'experiences:booking_complete' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-success fx-rounded-sm fx-fs-sm"><i class="fas fa-flag-checkered"></i> Završi</button></form>{% endif %}
+        {% if b.status == 'confirmed' %}<form method="POST" action="{% url 'experiences:booking_no_show' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-danger fx-rounded-sm fx-fs-sm"><i class="fas fa-user-slash"></i></button></form>{% endif %}
+        {% if b.status == 'confirmed' or b.status == 'pending' %}<form method="POST" action="{% url 'experiences:booking_cancel' b.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary fx-rounded-sm fx-fs-sm"><i class="fas fa-times"></i></button></form>{% endif %}
       </td>
     </tr>
     {% endfor %}
@@ -118,14 +118,14 @@
 {% if inclusions %}
 <div class="exp-section">
   <h5><i class="fas fa-boxes me-2"></i>Normativi (BOM) — Što je uključeno</h5>
-  <div class="table-responsive"><table class="table table-dark table-sm align-middle" style="border-radius:12px;overflow:hidden">
+  <div class="table-responsive"><table class="table table-dark table-sm align-middle fx-rounded fx-overflow-hidden">
     <thead><tr><th>Stavka</th><th>Po osobi</th><th>Artikl</th><th>Zaliha</th></tr></thead>
     <tbody>
     {% for inc in inclusions %}
     <tr>
-      <td style="font-weight:700">{{ inc.description }}</td>
+      <td class="fx-fw-bold">{{ inc.description }}</td>
       <td>{{ inc.quantity_per_person }} {{ inc.unit }}</td>
-      <td>{% if inc.inventory_item %}<span style="color:#22c55e">{{ inc.inventory_item.name }}</span>{% else %}<span style="color:var(--text-dim)">—</span>{% endif %}</td>
+      <td>{% if inc.inventory_item %}<span class="fx-text-green">{{ inc.inventory_item.name }}</span>{% else %}<span class="fx-text-dim">—</span>{% endif %}</td>
       <td>{% if inc.inventory_item %}{{ inc.inventory_item.quantity }} {{ inc.inventory_item.unit }}{% else %}—{% endif %}</td>
     </tr>
     {% endfor %}
@@ -137,11 +137,11 @@
 <!-- Recenzije -->
 {% if reviews %}
 <div class="exp-section">
-  <h5><i class="fas fa-star me-2" style="color:#f59e0b"></i>Recenzije</h5>
+  <h5><i class="fas fa-star me-2 fx-text-amber"></i>Recenzije</h5>
   {% for r in reviews %}
   <div class="exp-card mb-2">
-    <div class="d-flex justify-content-between"><strong>{{ r.booking.guest_name }}</strong><span>{% for i in "12345" %}{% if forloop.counter <= r.rating %}<i class="fas fa-star" style="color:#f59e0b"></i>{% else %}<i class="far fa-star" style="color:var(--text-dim)"></i>{% endif %}{% endfor %}</span></div>
-    {% if r.text %}<p style="margin:.5rem 0 0;font-size:.85rem;color:var(--text-dim)">{{ r.text }}</p>{% endif %}
+    <div class="d-flex justify-content-between"><strong>{{ r.booking.guest_name }}</strong><span>{% for i in "12345" %}{% if forloop.counter <= r.rating %}<i class="fas fa-star fx-text-amber"></i>{% else %}<i class="far fa-star fx-text-dim"></i>{% endif %}{% endfor %}</span></div>
+    {% if r.text %}<p class="fx-fs-base fx-text-dim" style="margin:.5rem 0 0">{{ r.text }}</p>{% endif %}
   </div>
   {% endfor %}
 </div>

@@ -4,23 +4,23 @@
 {% block content %}
 <div class="container-fluid" style="max-width:600px">
 <h2 class="mb-3"><i class="fas fa-clock"></i> Moji sati</h2>
-<p class="text-muted" style="font-size:.85rem">{{ request.user.get_full_name|default:request.user.username }} | {{ week_start|date:"d.m." }} – {{ week_end|date:"d.m.Y." }}</p>
+<p class="text-muted fx-fs-base">{{ request.user.get_full_name|default:request.user.username }} | {{ week_start|date:"d.m." }} – {{ week_end|date:"d.m.Y." }}</p>
 
 <div class="row g-3 mb-4">
   <div class="col-6">
     <div class="card bg-dark border-secondary p-3 text-center">
-      <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px">Ovaj tjedan</div>
-      <div class="fs-2 fw-bold" style="color:var(--gold,#c9a84c)">{{ week_hours|floatformat:1 }}<small style="font-size:.5em;color:#94a3b8">/{{ weekly_target }}h</small></div>
-      <div class="progress mt-2" style="height:6px;background:#1e293b">
+      <div class="text-muted fx-fs-sm fx-uppercase fx-ls-2">Ovaj tjedan</div>
+      <div class="fs-2 fw-bold fx-text-gold">{{ week_hours|floatformat:1 }}<small class="fx-text-muted" style="font-size:.5em">/{{ weekly_target }}h</small></div>
+      <div class="progress mt-2 fx-bg-surface2" style="height:6px">
         <div class="progress-bar" style="width:{% widthratio week_hours weekly_target 100 %}%;background:var(--gold,#c9a84c)"></div>
       </div>
     </div>
   </div>
   <div class="col-6">
     <div class="card bg-dark border-secondary p-3 text-center">
-      <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px">Ovaj mjesec</div>
-      <div class="fs-2 fw-bold text-light">{{ month_hours|floatformat:1 }}<small style="font-size:.5em;color:#94a3b8">/{{ monthly_target }}h</small></div>
-      <div class="progress mt-2" style="height:6px;background:#1e293b">
+      <div class="text-muted fx-fs-sm fx-uppercase fx-ls-2">Ovaj mjesec</div>
+      <div class="fs-2 fw-bold text-light">{{ month_hours|floatformat:1 }}<small class="fx-text-muted" style="font-size:.5em">/{{ monthly_target }}h</small></div>
+      <div class="progress mt-2 fx-bg-surface2" style="height:6px">
         <div class="progress-bar bg-success" style="width:{% widthratio month_hours monthly_target 100 %}%"></div>
       </div>
     </div>
@@ -28,20 +28,20 @@
 </div>
 
 <div class="card bg-dark border-secondary">
-  <div class="card-header"><h6 class="mb-0" style="color:var(--gold,#c9a84c)">Ovaj tjedan — dan po dan</h6></div>
+  <div class="card-header"><h6 class="mb-0 fx-text-gold">Ovaj tjedan — dan po dan</h6></div>
   <div class="card-body p-0"><div class="table-responsive">
     <table class="table table-dark table-sm mb-0">
     <thead><tr>
-      <th style="font-size:.72rem">Datum</th>
-      <th style="font-size:.72rem">Projekt</th>
-      <th style="font-size:.72rem" class="text-end">Sati</th>
+      <th class="fx-fs-sm">Datum</th>
+      <th class="fx-fs-sm">Projekt</th>
+      <th class="text-end fx-fs-sm">Sati</th>
     </tr></thead>
     <tbody>
     {% for e in week_entries %}
     <tr>
-      <td style="font-size:.82rem">{{ e.date|date:"D d.m." }}</td>
-      <td style="font-size:.82rem">{{ e.project.name|default:"-" }}</td>
-      <td style="font-size:.85rem;font-weight:600" class="text-end">{{ e.duration|floatformat:1 }}h</td>
+      <td class="fx-fs-note">{{ e.date|date:"D d.m." }}</td>
+      <td class="fx-fs-note">{{ e.project.name|default:"-" }}</td>
+      <td class="text-end fx-fs-base fx-fw-semibold">{{ e.duration|floatformat:1 }}h</td>
     </tr>
     {% empty %}
     <tr><td colspan="3" class="text-center text-muted py-3">Nema unosa ovaj tjedan</td></tr>

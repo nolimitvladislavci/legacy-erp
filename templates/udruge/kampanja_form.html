@@ -2,94 +2,77 @@
 {% load i18n %}
 {% block title %}Nova kampanja{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="margin-bottom:1rem">
-  <a href="{% url 'udruge:kampanja_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Sve kampanje</a>
+<div class="mb-3">
+  <a href="{% url 'udruge:kampanja_list' %}" class="fx-fs-base fx-no-underline fx-text-gold">&laquo; Sve kampanje</a>
 </div>
-<h4 style="margin:0 0 1rem;color:var(--gold)">Nova kampanja</h4>
+<h4 class="fx-text-gold" style="margin:0 0 1rem">Nova kampanja</h4>
 
 <form method="post">
   {% csrf_token %}
-  <div class="card" style="padding:1rem;margin-bottom:1rem">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv *</label>
-        <input type="text" name="name" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+  <div class="card mb-3 fx-p-4">
+    <div class="d-grid fx-gap-3 fx-grid-2-equal">
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Naziv *</label>
+        <input type="text" name="name" required class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tip kampanje</label>
-        <select name="campaign_type" id="campaign_type" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Tip kampanje</label>
+        <select name="campaign_type" id="campaign_type" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           {% for val, lbl in type_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Status</label>
-        <select name="status" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Status</label>
+        <select name="status" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           {% for val, lbl in status_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Pocetak *</label>
-        <input type="date" name="start_date" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Pocetak *</label>
+        <input type="date" name="start_date" required class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Kraj</label>
-        <input type="date" name="end_date" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Kraj</label>
+        <input type="date" name="end_date" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Financijski cilj (EUR)</label>
-        <input type="number" name="goal_amount" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Financijski cilj (EUR)</label>
+        <input type="number" name="goal_amount" value="0" step="0.01" min="0" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Cilj clanova</label>
-        <input type="number" name="goal_members" value="0" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Cilj clanova</label>
+        <input type="number" name="goal_members" value="0" min="0" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
 
       <!-- EU Fond fields (shown/hidden by JS) -->
-      <div id="eu_fields" style="grid-column:1/-1;display:none;border-top:1px solid var(--border);padding-top:.75rem;margin-top:.25rem">
-        <div style="font-size:.82rem;color:#3b82f6;font-weight:600;margin-bottom:.5rem">EU Fond polja</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+      <div id="eu_fields" class="fx-hidden fx-bt fx-mt-2 fx-col-full" style="padding-top:.75rem">
+        <div class="fx-fs-note fx-text-blue fx-fw-semibold mb-2">EU Fond polja</div>
+        <div class="d-grid fx-gap-3 fx-grid-2-equal">
           <div>
-            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Sifra EU projekta</label>
-            <input type="text" name="eu_project_code" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+            <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Sifra EU projekta</label>
+            <input type="text" name="eu_project_code" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           </div>
           <div>
-            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">EU program (ESF+, ERDF...)</label>
-            <input type="text" name="eu_program" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+            <label class="fx-fs-body-sm fx-text-muted d-block mb-1">EU program (ESF+, ERDF...)</label>
+            <input type="text" name="eu_program" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           </div>
         </div>
       </div>
 
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Opis</label>
-        <textarea name="description" rows="4" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Opis</label>
+        <textarea name="description" rows="4" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b" style="resize:vertical"></textarea>
       </div>
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Napomene</label>
-        <textarea name="notes" rows="2" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Napomene</label>
+        <textarea name="notes" rows="2" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b" style="resize:vertical"></textarea>
       </div>
     </div>
   </div>
-  <div style="display:flex;gap:.5rem">
+  <div class="d-flex fx-gap-2">
     <button type="submit" class="btn btn-gold">Spremi kampanju</button>
     <a href="{% url 'udruge:kampanja_list' %}" class="btn btn-ghost">Odustani</a>
   </div>

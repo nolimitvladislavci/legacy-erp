@@ -43,22 +43,22 @@ select.sinput{cursor:pointer}
 
 /* ── Status badges ────────────────────────────────────────────────────────── */
 .sbadge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:600;padding:.25rem .65rem;border-radius:20px}
-.sbadge-ok{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
-.sbadge-off{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+.sbadge-ok{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.sbadge-off{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}
 .sbadge-warn{background:rgba(250,204,21,.1);color:#facc15;border:1px solid rgba(250,204,21,.25)}
 
 /* ── Toast ────────────────────────────────────────────────────────────────── */
 .toast{position:fixed;bottom:1.25rem;right:1.25rem;background:#1e1e1e;border:1px solid var(--gold);border-radius:8px;padding:.75rem 1.25rem;font-size:.85rem;z-index:9000;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;max-width:320px}
 .toast.show{opacity:1;transform:translateY(0)}
-.toast.err{border-color:#ef4444;color:#ef4444}
-.toast.ok{border-color:#22c55e;color:#22c55e}
+.toast.err{border-color:var(--red);color:var(--red)}
+.toast.ok{border-color:var(--green);color:var(--green)}
 
 /* ── Cashier table ────────────────────────────────────────────────────────── */
 .ctable{width:100%;border-collapse:collapse;font-size:.82rem}
 .ctable th{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:.5rem .75rem;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
 .ctable td{padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
 .ctable tr:hover td{background:rgba(201,168,76,.04)}
-.perm-chip{display:inline-block;font-size:.65rem;background:rgba(34,197,94,.12);color:#22c55e;border-radius:20px;padding:.15rem .5rem;margin-right:.25rem}
+.perm-chip{display:inline-block;font-size:.65rem;background:rgba(34,197,94,.12);color:var(--green);border-radius:20px;padding:.15rem .5rem;margin-right:.25rem}
 .perm-chip.no{background:rgba(239,68,68,.08);color:var(--muted)}
 
 /* ── Inventory table ──────────────────────────────────────────────────────── */
@@ -103,7 +103,7 @@ select.sinput{cursor:pointer}
 .toggle{position:relative;width:42px;height:24px;flex-shrink:0}
 .toggle input{display:none}
 .toggle-slider{position:absolute;inset:0;background:#333;border-radius:24px;transition:.2s}
-.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;bottom:3px;left:3px;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--bg-card);bottom:3px;left:3px;transition:.2s}
 .toggle input:checked + .toggle-slider{background:var(--gold)}
 .toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
 .toggle-lbl{font-size:.85rem;font-weight:600}
@@ -204,16 +204,16 @@ select.sinput{cursor:pointer}
         </div>
       </div>
 
-      <div style="display:flex;gap:.65rem;flex-wrap:wrap">
+      <div class="d-flex fx-flex-wrap" style="gap:.65rem">
         <button class="btn btn-gold" onclick="savePrinter()">{% trans "Spremi postavke" %}</button>
         <a href="{% url 'pos:settings_test_print' %}" target="_blank" class="btn btn-ghost">{% trans "&#x1F5A8; Test ispis" %}</a>
       </div>
     </div>
     <!-- ═══ BEZ PAPIRA — Dostava racuna ════════════════════════════════════ -->
-    <div class="scard" style="margin-top:.75rem;border-left:3px solid var(--gold,#c9a84c)">
-      <div class="scard-title" style="color:var(--gold,#c9a84c)">BEZ PAPIRA — Dostava racuna</div>
+    <div class="scard fx-mt-4" style="border-left:3px solid var(--gold,#c9a84c)">
+      <div class="scard-title fx-text-gold">BEZ PAPIRA — Dostava racuna</div>
       <div class="sfield">
-        <label style="font-weight:600;font-size:.8rem;display:block;margin-bottom:.3rem">Nacin dostave:</label>
+        <label class="fx-fw-semibold fx-fs-compact d-block fx-mb-2">Nacin dostave:</label>
         <select id="receipt_delivery" name="receipt_delivery" class="sinput" style="max-width:100%">
           <option value="thermal" {% if settings_obj.receipt_delivery == 'thermal' %}selected{% endif %}>Termalni ispis (80mm)</option>
           <option value="a4" {% if settings_obj.receipt_delivery == 'a4' %}selected{% endif %}>A4 ispis</option>
@@ -238,16 +238,16 @@ select.sinput{cursor:pointer}
         </label>
       </div>
       <div class="srow">
-        <label style="font-weight:600;font-size:.85rem">WhatsApp poruka:</label>
+        <label class="fx-fw-semibold fx-fs-base">WhatsApp poruka:</label>
         <input type="text" id="whatsapp_msg" value="{{ settings_obj.whatsapp_default_msg|default:'Hvala na posjetu! Evo Vas racun:' }}"
                class="sinput" style="max-width:100%" placeholder="Poruka uz racun">
       </div>
       <div class="srow">
-        <label style="font-weight:600;font-size:.85rem">Email subject:</label>
+        <label class="fx-fw-semibold fx-fs-base">Email subject:</label>
         <input type="text" id="email_subject" value="{{ settings_obj.receipt_email_subject|default:'Vas racun - {company}' }}"
                class="sinput" style="max-width:100%" placeholder="Koristi {company} i {number}">
       </div>
-      <div style="margin-top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap">
+      <div class="d-flex fx-flex-wrap fx-mt-4 fx-gap-1">
         <button class="btn btn-gold" onclick="saveDelivery()">Spremi dostavu</button>
         <a href="/static/kiosk/pos_kiosk_setup.bat" download class="btn btn-ghost btn-sm">Win Kiosk</a>
         <a href="/static/kiosk/pos_kiosk_setup.sh" download class="btn btn-ghost btn-sm">Linux Kiosk</a>
@@ -274,12 +274,12 @@ select.sinput{cursor:pointer}
       <div class="scard">
         <div class="scard-title">{% trans "Certifikat (.p12)" %}</div>
         {% if settings_obj.fiscal_cert %}
-        <div class="srow" style="margin-bottom:.75rem">
+        <div class="srow fx-mb-4">
           <span class="sbadge sbadge-ok">{% trans "&#10003; Certifikat učitan" %}</span>
-          <span style="font-size:.78rem;color:var(--muted)">{{ settings_obj.fiscal_cert.name|cut:"pos/certs/" }}</span>
+          <span class="fx-fs-body-sm fx-text-muted">{{ settings_obj.fiscal_cert.name|cut:"pos/certs/" }}</span>
         </div>
         {% else %}
-        <div class="srow" style="margin-bottom:.75rem">
+        <div class="srow fx-mb-4">
           <span class="sbadge sbadge-warn">{% trans "&#9888; Certifikat nije učitan" %}</span>
         </div>
         {% endif %}
@@ -299,25 +299,25 @@ select.sinput{cursor:pointer}
               value="{{ settings_obj.fiscal_oib }}">
           </div>
         </div>
-        <div style="display:flex;gap:.65rem;flex-wrap:wrap;margin-top:.25rem">
+        <div class="d-flex fx-flex-wrap fx-mt-2" style="gap:.65rem">
           <button class="btn btn-gold" onclick="saveFiscal()">{% trans "Spremi postavke" %}</button>
           <button class="btn btn-ghost" id="testFiscalBtn" onclick="testFiscal()">{% trans "&#x1F50C; Test konekcije" %}</button>
         </div>
-        <div id="fiscalTestResult" style="margin-top:.75rem;font-size:.82rem;display:none"></div>
+        <div id="fiscalTestResult" class="fx-fs-note fx-hidden fx-mt-4"></div>
       </div>
     </div>
 
     <!-- ═══ TAB 3: KORISNICI ════════════════════════════════════════════ -->
     <div class="tab-content" id="tab-cashiers">
       <div class="scard">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-          <div class="scard-title" style="margin:0">Blagajnici ({{ cashiers|length }})</div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="scard-title fx-m-0">Blagajnici ({{ cashiers|length }})</div>
           <button class="btn btn-gold btn-sm" onclick="openCashierModal(null)">{% trans "+ Dodaj blagajnika" %}</button>
         </div>
 
         {% if cashiers %}
-        <div style="overflow-x:auto">
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="ctable">
+        <div class="fx-scroll-x">
+          <div class="fx-scroll-x" style="-webkit-overflow-scrolling:touch"><table class="ctable">
             <thead>
               <tr>
                 <th>{% trans "Ime" %}</th>
@@ -331,14 +331,14 @@ select.sinput{cursor:pointer}
             <tbody id="cashierTableBody">
               {% for c in cashiers %}
               <tr id="crow-{{ c.id }}">
-                <td style="font-weight:600">{{ c.name }}</td>
-                <td style="font-family:monospace;letter-spacing:.1em;color:var(--muted)">{% trans "&#x2022;&#x2022;&#x2022;&#x2022;" %}</td>
+                <td class="fx-fw-semibold">{{ c.name }}</td>
+                <td class="fx-text-muted fx-font-mono" style="letter-spacing:.1em">{% trans "&#x2022;&#x2022;&#x2022;&#x2022;" %}</td>
                 <td>{% if c.can_void %}<span class="perm-chip">{% trans "Da" %}</span>{% else %}<span class="perm-chip no">{% trans "Ne" %}</span>{% endif %}</td>
                 <td>{% if c.can_discount %}<span class="perm-chip">{% trans "Da" %}</span>{% else %}<span class="perm-chip no">{% trans "Ne" %}</span>{% endif %}</td>
                 <td>{{ c.max_discount_percent }}%</td>
-                <td style="text-align:right">
+                <td class="text-end">
                   <button class="btn btn-ghost btn-sm" onclick="openCashierModal({{ c.id }}, '{{ c.name }}', {{ c.can_void|yesno:'true,false' }}, {{ c.can_discount|yesno:'true,false' }}, '{{ c.max_discount_percent }}')">{% trans "Uredi" %}</button>
-                  <button class="btn btn-ghost btn-sm" style="color:#ef4444" onclick="deleteCashier({{ c.id }}, '{{ c.name }}')">{% trans "&#x1F5D1;" %}</button>
+                  <button class="btn btn-ghost btn-sm fx-text-red" onclick="deleteCashier({{ c.id }}, '{{ c.name }}')">{% trans "&#x1F5D1;" %}</button>
                 </td>
               </tr>
               {% endfor %}
@@ -346,9 +346,9 @@ select.sinput{cursor:pointer}
           </table></div>
         </div>
         {% else %}
-        <div style="text-align:center;padding:2rem;color:var(--muted)">
+        <div class="text-center fx-text-muted fx-p-6">
           {% trans "Nema blagajnika." %}<br>
-          <button class="btn btn-gold" style="margin-top:.75rem" onclick="openCashierModal(null)">{% trans "+ Dodaj prvog blagajnika" %}</button>
+          <button class="btn btn-gold fx-mt-4" onclick="openCashierModal(null)">{% trans "+ Dodaj prvog blagajnika" %}</button>
         </div>
         {% endif %}
       </div>
@@ -357,41 +357,41 @@ select.sinput{cursor:pointer}
     <!-- ═══ TAB 4: ARTIKLI ══════════════════════════════════════════════ -->
     <div class="tab-content" id="tab-articles">
       <div class="scard">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
-          <div class="scard-title" style="margin:0">Cjenik artikala ({{ inv_items|length }}{% if inv_items|length == 200 %}+{% endif %})</div>
-          <div style="display:flex;gap:.5rem">
+        <div class="d-flex fx-flex-wrap align-items-center justify-content-between fx-gap-2 fx-mb-4">
+          <div class="scard-title fx-m-0">Cjenik artikala ({{ inv_items|length }}{% if inv_items|length == 200 %}+{% endif %})</div>
+          <div class="d-flex fx-gap-2">
             <button class="btn btn-gold btn-sm" onclick="openItemModal(null)">{% trans "+ Novi artikal" %}</button>
           </div>
         </div>
         <input class="inv-search" type="text" placeholder="{% trans "&#x1F50D; Pretraži artikle…" %}" oninput="filterItems(this.value)">
-        <div style="overflow-x:auto;max-height:360px;overflow-y:auto">
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="itable">
+        <div class="fx-scroll-x fx-scroll-y" style="max-height:360px">
+          <div class="fx-scroll-x" style="-webkit-overflow-scrolling:touch"><table class="itable">
             <thead>
               <tr>
                 <th>{% trans "Naziv" %}</th><th>{% trans "SKU" %}</th><th>{% trans "Barkod" %}</th><th>{% trans "Kategorija" %}</th><th>{% trans "Jmj" %}</th>
-                <th style="text-align:right">{% trans "Nab. cijena" %}</th>
-                <th style="text-align:right">{% trans "Prod. cijena" %}</th>
-                <th style="text-align:right">{% trans "PDV" %}</th>
+                <th class="text-end">{% trans "Nab. cijena" %}</th>
+                <th class="text-end">{% trans "Prod. cijena" %}</th>
+                <th class="text-end">{% trans "PDV" %}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="invTableBody">
               {% for item in inv_items %}
               <tr class="irow">
-                <td style="font-weight:600">{{ item.name }}</td>
-                <td style="font-family:monospace;font-size:.78rem">{{ item.sku }}</td>
-                <td style="font-family:monospace;font-size:.78rem">{{ item.barcode|default:"–" }}</td>
+                <td class="fx-fw-semibold">{{ item.name }}</td>
+                <td class="fx-fs-body-sm fx-font-mono">{{ item.sku }}</td>
+                <td class="fx-fs-body-sm fx-font-mono">{{ item.barcode|default:"–" }}</td>
                 <td>{{ item.get_category_display }}</td>
                 <td>{{ item.unit }}</td>
-                <td style="text-align:right">&euro;{{ item.purchase_price|floatformat:2 }}</td>
-                <td style="text-align:right;color:var(--gold);font-weight:700">&euro;{{ item.unit_price|floatformat:2 }}</td>
-                <td style="text-align:right">{{ item.tax_rate_obj.rate|default:"25" }}%</td>
-                <td style="text-align:right">
+                <td class="text-end">&euro;{{ item.purchase_price|floatformat:2 }}</td>
+                <td class="text-end fx-fw-bold fx-text-gold">&euro;{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-end">{{ item.tax_rate_obj.rate|default:"25" }}%</td>
+                <td class="text-end">
                   <span class="edit-link" onclick="openItemModal({{ item.id }}, '{{ item.name|escapejs }}', '{{ item.sku }}', '{{ item.barcode }}', '{{ item.category }}', '{{ item.unit }}', '{{ item.purchase_price }}', '{{ item.unit_price }}', {{ item.tax_rate_obj_id|default:'null' }})">{% trans "Uredi" %}</span>
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">{% trans "Nema artikala" %}</td></tr>
+              <tr><td colspan="9" class="text-center fx-text-muted fx-p-6">{% trans "Nema artikala" %}</td></tr>
               {% endfor %}
             </tbody>
           </table></div>
@@ -404,16 +404,16 @@ select.sinput{cursor:pointer}
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFile').click()"
              ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="this.classList.remove('drag-over')">
           <input type="file" id="csvFile" accept=".csv,.txt" onchange="onFileSelected(this)">
-          <div style="font-size:1.5rem;margin-bottom:.35rem">{% trans "&#x1F4C2;" %}</div>
+          <div class="fx-fs-5xl" style="margin-bottom:.35rem">{% trans "&#x1F4C2;" %}</div>
           <div>{% trans "Kliknite ili povucite CSV datoteku ovdje" %}</div>
-          <div style="font-size:.7rem;margin-top:.3rem">{% trans "Stupci: name, sku, barcode, category, unit, purchase_price, unit_price, tax_rate" %}</div>
-          <div id="selectedFile" style="margin-top:.5rem;color:var(--gold);font-size:.8rem"></div>
+          <div class="fx-fs-sm fx-mt-sm">{% trans "Stupci: name, sku, barcode, category, unit, purchase_price, unit_price, tax_rate" %}</div>
+          <div id="selectedFile" class="fx-fs-compact mt-2 fx-text-gold"></div>
         </div>
-        <div style="margin-top:.75rem">
+        <div class="fx-mt-4">
           <button class="btn btn-gold" onclick="importCsv()" id="importBtn">{% trans "Uvezi CSV" %}</button>
-          <span id="importResult" style="font-size:.82rem;margin-left:.75rem"></span>
+          <span id="importResult" class="fx-fs-note" style="margin-left:.75rem"></span>
         </div>
-        <div class="shint" style="margin-top:.5rem">
+        <div class="shint mt-2">
           {% trans "Delimiter: točka-zarez (;) ili zarez. Encoding: UTF-8 ili Latin-1. Prva linija = zaglavlje." %}
         </div>
       </div>
@@ -424,7 +424,7 @@ select.sinput{cursor:pointer}
       <!-- Daily revenue chart -->
       <div class="scard">
         <div class="report-hdr">
-          <div class="scard-title" style="margin:0">{% trans "Dnevni utržak – zadnjih 30 dana" %}</div>
+          <div class="scard-title fx-m-0">{% trans "Dnevni utržak – zadnjih 30 dana" %}</div>
           <div class="export-btns">
             <a href="{% url 'pos:reports_export' %}?type=daily&format=csv&days=30" class="btn btn-ghost btn-sm">{% trans "CSV" %}</a>
             <a href="{% url 'pos:reports_export' %}?type=daily&format=xlsx&days=30" class="btn btn-ghost btn-sm">{% trans "Excel" %}</a>
@@ -439,37 +439,37 @@ select.sinput{cursor:pointer}
         <!-- Top 10 artikala -->
         <div class="scard">
           <div class="report-hdr">
-            <div class="scard-title" style="margin:0">{% trans "Top 10 artikala" %}</div>
+            <div class="scard-title fx-m-0">{% trans "Top 10 artikala" %}</div>
             <a href="{% url 'pos:reports_export' %}?type=items&format=csv&days=30" class="btn btn-ghost btn-sm">{% trans "CSV" %}</a>
           </div>
           {% if top_items %}
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="rtable">
-            <thead><tr><th>#</th><th>{% trans "Artikal" %}</th><th style="text-align:right">{% trans "Kom" %}</th><th style="text-align:right">{% trans "Prihod" %}</th></tr></thead>
+          <div class="fx-scroll-x" style="-webkit-overflow-scrolling:touch"><table class="rtable">
+            <thead><tr><th>#</th><th>{% trans "Artikal" %}</th><th class="text-end">{% trans "Kom" %}</th><th class="text-end">{% trans "Prihod" %}</th></tr></thead>
             <tbody>
               {% for it in top_items %}
               <tr>
                 <td class="rank-num">{{ forloop.counter }}</td>
                 <td>{{ it.description }}</td>
-                <td style="text-align:right">{{ it.qty|floatformat:0 }}</td>
-                <td style="text-align:right;color:var(--gold);font-weight:700">&euro;{{ it.revenue|floatformat:2 }}</td>
+                <td class="text-end">{{ it.qty|floatformat:0 }}</td>
+                <td class="text-end fx-fw-bold fx-text-gold">&euro;{{ it.revenue|floatformat:2 }}</td>
               </tr>
               {% endfor %}
             </tbody>
           </table></div>
           {% else %}
-          <div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem">{% trans "Nema podataka" %}</div>
+          <div class="fx-fs-note text-center fx-text-muted fx-p-5">{% trans "Nema podataka" %}</div>
           {% endif %}
         </div>
 
         <!-- Promet po blagajniku -->
         <div class="scard">
           <div class="report-hdr">
-            <div class="scard-title" style="margin:0">{% trans "Promet po blagajniku" %}</div>
+            <div class="scard-title fx-m-0">{% trans "Promet po blagajniku" %}</div>
             <a href="{% url 'pos:reports_export' %}?type=cashiers&format=csv&days=30" class="btn btn-ghost btn-sm">{% trans "CSV" %}</a>
           </div>
           {% if cashier_rev %}
           <table class="rtable">
-            <thead><tr><th>{% trans "Blagajnik" %}</th><th style="text-align:right">{% trans "Bonovi" %}</th><th style="text-align:right">{% trans "Ukupno" %}</th></tr></thead>
+            <thead><tr><th>{% trans "Blagajnik" %}</th><th class="text-end">{% trans "Bonovi" %}</th><th class="text-end">{% trans "Ukupno" %}</th></tr></thead>
             <tbody>
               {% for cr in cashier_rev %}
               <tr>
@@ -480,14 +480,14 @@ select.sinput{cursor:pointer}
                     {{ cr.session__operator__username|default:"–" }}
                   {% endif %}
                 </td>
-                <td style="text-align:right">{{ cr.count }}</td>
-                <td style="text-align:right;color:var(--gold);font-weight:700">&euro;{{ cr.revenue|floatformat:2 }}</td>
+                <td class="text-end">{{ cr.count }}</td>
+                <td class="text-end fx-fw-bold fx-text-gold">&euro;{{ cr.revenue|floatformat:2 }}</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
           {% else %}
-          <div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem">{% trans "Nema podataka" %}</div>
+          <div class="fx-fs-note text-center fx-text-muted fx-p-5">{% trans "Nema podataka" %}</div>
           {% endif %}
         </div>
       </div>
@@ -495,8 +495,8 @@ select.sinput{cursor:pointer}
       <!-- Excel export full row -->
       <div class="scard">
         <div class="scard-title">{% trans "Export izvještaja" %}</div>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
-          <div class="sfield" style="margin:0">
+        <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center">
+          <div class="sfield fx-m-0">
             <label>{% trans "Period" %}</label>
             <select class="sinput sinput-sm" id="exportDays">
               <option value="7">{% trans "Zadnjih 7 dana" %}</option>
@@ -505,7 +505,7 @@ select.sinput{cursor:pointer}
               <option value="365">{% trans "Zadnjih 365 dana" %}</option>
             </select>
           </div>
-          <div style="display:flex;gap:.4rem;flex-wrap:wrap;padding-bottom:.875rem">
+          <div class="d-flex fx-flex-wrap fx-gap-1" style="padding-bottom:.875rem">
             <button class="btn btn-ghost btn-sm" onclick="exportReport('daily','csv')">{% trans "CSV dnevni" %}</button>
             <button class="btn btn-ghost btn-sm" onclick="exportReport('daily','xlsx')">{% trans "Excel dnevni" %}</button>
             <button class="btn btn-ghost btn-sm" onclick="exportReport('items','csv')">{% trans "CSV artikli" %}</button>
@@ -532,7 +532,7 @@ select.sinput{cursor:pointer}
       <input class="sinput" type="text" id="cmName" placeholder="{% trans "npr. Ana Horvat" %}">
     </div>
     <div class="sfield">
-      <label>{% trans "PIN (4 znamenke)" %} <span id="pinHint" style="color:var(--muted);font-size:.7rem">{% trans "(obavezno za novog)" %}</span></label>
+      <label>{% trans "PIN (4 znamenke)" %} <span id="pinHint" class="fx-fs-sm fx-text-muted">{% trans "(obavezno za novog)" %}</span></label>
       <div class="pwd-wrap"><input class="sinput sinput-sm" type="password" id="cmPin" maxlength="4" placeholder="0000"
              pattern="[0-9]{4}" inputmode="numeric"><button type="button" class="pwd-eye" onclick="togglePwd('cmPin',this)">👁</button></div>
     </div>
@@ -542,11 +542,11 @@ select.sinput{cursor:pointer}
       <div class="toggle"><input type="checkbox" id="cmVoid"></div>
       <div class="toggle-lbl">{% trans "Može stornirati bonove" %}</div>
     </label></div>
-    <div class="srow" style="margin-top:.5rem"><label class="toggle-wrap">
+    <div class="srow mt-2"><label class="toggle-wrap">
       <div class="toggle"><input type="checkbox" id="cmDiscount"></div>
       <div class="toggle-lbl">{% trans "Može davati popust" %}</div>
     </label></div>
-    <div class="sfield" style="margin-top:.75rem">
+    <div class="sfield fx-mt-4">
       <label>{% trans "Maksimalni popust (%)" %}</label>
       <input class="sinput sinput-sm" type="number" id="cmMaxDiscount" min="0" max="100" step="1" value="0">
     </div>
@@ -593,15 +593,15 @@ select.sinput{cursor:pointer}
     <hr class="sdiv">
     <div class="scard-title">{% trans "Kalkulacija cijene" %}</div>
     <div class="calc-box">
-      <div class="sfield" style="margin:0">
+      <div class="sfield fx-m-0">
         <label>{% trans "Nabavna cijena (€)" %}</label>
         <input class="sinput sinput-sm" type="number" id="imPurchase" step="0.01" min="0" placeholder="0.00" oninput="recalcPrice()">
       </div>
-      <div class="sfield" style="margin:0">
+      <div class="sfield fx-m-0">
         <label>{% trans "Markup (%)" %}</label>
         <input class="sinput sinput-sm" type="number" id="imMarkup" step="1" min="0" value="30" oninput="recalcPrice()">
       </div>
-      <div class="sfield" style="margin:0">
+      <div class="sfield fx-m-0">
         <label>{% trans "PDV stopa" %}</label>
         <select class="sinput sinput-sm" id="imTaxRate" onchange="recalcPrice()">
           {% for tr in tax_rates %}
@@ -612,7 +612,7 @@ select.sinput{cursor:pointer}
         </select>
       </div>
     </div>
-    <div class="calc-result" style="margin-top:.5rem">
+    <div class="calc-result mt-2">
       {% trans "Prodajna cijena bez PDV:" %} <span id="calcNeto">€0.00</span> {% trans "&nbsp;|&nbsp;
       S PDV-om:" %} <span id="calcGross">€0.00</span>
     </div>

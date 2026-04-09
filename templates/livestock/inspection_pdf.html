@@ -9,28 +9,28 @@
         @page {
             size: A4;
             margin: 15mm;
-            @bottom-right { content: "Stranica " counter(page) " / " counter(pages); font-size: 8pt; color: #666; }
+            @bottom-right { content: "Stranica " counter(page) " / " counter(pages); font-size: 8pt; color:var(--text-dim); }
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a2e; line-height: 1.4; }
+        body { font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif; font-size: 9pt; color:var(--text); line-height: 1.4; }
         .doc-header { text-align: center; border-bottom: 3px solid #1a1a2e; padding-bottom: 12px; margin-bottom: 16px; }
         .doc-header h1 { font-size: 14pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .doc-header .company-info { font-size: 10pt; color: #334155; }
-        .doc-header .company-info strong { color: #1a1a2e; }
-        .legal-basis { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 12px; font-size: 8pt; color: #64748b; margin-bottom: 16px; text-align: center; }
+        .doc-header .company-info strong { color:var(--text); }
+        .legal-basis { background:var(--surface2); border:1px solid var(--border); border-radius: 4px; padding: 8px 12px; font-size: 8pt; color:var(--text-dim); margin-bottom: 16px; text-align: center; }
         h2 { font-size: 11pt; padding: 6px 10px; border-radius: 4px; margin-bottom: 8px; margin-top: 16px; }
         h2.animals { background: #eff6ff; color: #1e40af; }
         h2.karencija { background: #fef2f2; color: #b91c1c; }
-        h2.health { background: #f0fdf4; color: #166534; }
+        h2.health { background:var(--green-dim); color:var(--green); }
         table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 8.5pt; }
-        th { background: #f1f5f9; padding: 5px 6px; text-align: left; font-weight: 700; border: 1px solid #cbd5e1; font-size: 8pt; }
-        td { padding: 4px 6px; border: 1px solid #e2e8f0; vertical-align: top; }
+        th { background:var(--surface3); padding: 5px 6px; text-align: left; font-weight: 700; border: 1px solid #cbd5e1; font-size: 8pt; }
+        td { padding: 4px 6px; border:1px solid var(--border); vertical-align: top; }
         tr:nth-child(even) td { background: #fafbfc; }
         .karencija-row td { background: #fff5f5 !important; }
-        .badge-blocked { display: inline-block; background: #dc2626; color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 7.5pt; font-weight: 700; }
-        .badge-organic { display: inline-block; background: #16a34a; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 7pt; font-weight: 700; }
-        .empty-notice { text-align: center; padding: 10px; color: #94a3b8; font-style: italic; border: 1px solid #e2e8f0; margin-bottom: 12px; }
-        .doc-footer { margin-top: 20px; border-top: 2px solid #1a1a2e; padding-top: 10px; font-size: 7.5pt; color: #64748b; text-align: center; }
+        .badge-blocked { display: inline-block; background:var(--red); color:var(--white); padding: 1px 6px; border-radius: 3px; font-size: 7.5pt; font-weight: 700; }
+        .badge-organic { display: inline-block; background: #16a34a; color:var(--white); padding: 1px 5px; border-radius: 3px; font-size: 7pt; font-weight: 700; }
+        .empty-notice { text-align: center; padding: 10px; color:var(--text-muted); font-style: italic; border:1px solid var(--border); margin-bottom: 12px; }
+        .doc-footer { margin-top: 20px; border-top: 2px solid #1a1a2e; padding-top: 10px; font-size: 7.5pt; color:var(--text-dim); text-align: center; }
         .doc-footer .timestamp { font-weight: 700; color: #334155; }
         .doc-footer .hash { font-family: monospace; font-size: 7pt; word-break: break-all; }
         .doc-footer .electronic { margin-top: 4px; font-style: italic; }

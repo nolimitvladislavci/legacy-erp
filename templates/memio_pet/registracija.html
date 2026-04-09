@@ -3,26 +3,26 @@
 {% block title %}Kreiraj profil — Memio.pet{% endblock %}
 
 {% block content %}
-<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
-<div style="width:100%;max-width:480px">
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;padding:24px 16px">
+<div class="fx-w-full" style="max-width:480px">
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <div class="d-flex align-items-center justify-content-between mb-4">
     <span></span>
     <span class="mp-badge mp-badge-green">✓ BESPLATNO ZAUVIJEK</span>
   </div>
 
   <div class="mp-card">
     <div class="mp-card-body">
-      <h1 style="margin-bottom:6px">Kreiraj profil</h1>
-      <p style="color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.5">
+      <h1 class="mb-1">Kreiraj profil</h1>
+      <p class="fx-fs-body fx-text-dim" style="margin-bottom:28px;line-height:1.5">
         Digitalni dom za tvog ljubimca — rodovnica, cijepljenja, sjećanja. Bez kartice, bez pretplate.
       </p>
 
       {% if pet_name %}
-      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:center">
-        <span style="font-size:1.3rem">🐾</span>
-        <p style="font-family:var(--serif);font-size:1.1rem;font-weight:700;margin:4px 0 2px">Kreiramo profil za <em style="color:var(--gold)">{{ pet_name }}</em></p>
-        <p style="font-size:.78rem;color:var(--dim)">Samo upiši ime i email — {{ pet_name }} dobiva digitalni dom!</p>
+      <div class="fx-rounded text-center mb-3" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);padding:14px 16px">
+        <span class="fx-fs-3xl">🐾</span>
+        <p class="fx-fs-xl fx-fw-bold" style="font-family:var(--serif);margin:4px 0 2px">Kreiramo profil za <em class="fx-text-gold">{{ pet_name }}</em></p>
+        <p class="fx-fs-body-sm fx-text-dim">Samo upiši ime i email — {{ pet_name }} dobiva digitalni dom!</p>
       </div>
       {% endif %}
 
@@ -48,10 +48,10 @@
         </div>
 
         <div class="mp-field"><label>Tip profila</label></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px" id="type-grid">
+        <div class="fx-gap-2 d-grid mb-4 fx-grid-2-equal" id="type-grid">
           {% for value, label in account_types %}
-          <label style="padding:12px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);font-size:.82rem;cursor:pointer;text-align:center;transition:all .2s{% if value == 'owner' %};border-color:var(--gold);background:rgba(201,168,76,.06){% endif %}">
-            <input type="radio" name="account_type" value="{{ value }}" {% if value == 'owner' %}checked{% endif %} style="display:none"
+          <label class="fx-rounded fx-fs-note fx-pointer text-center" style="padding:12px 10px;border:1.5px solid var(--line);background:var(--surface);transition:all .2s{% if value == 'owner' %};border-color:var(--gold);background:rgba(201,168,76,.06){% endif %}">
+            <input type="radio" name="account_type" value="{{ value }}" {% if value == 'owner' %}checked{% endif %} class="fx-hidden"
               onchange="document.querySelectorAll('#type-grid label').forEach(function(b){b.style.borderColor='var(--line)';b.style.background='var(--surface)'});this.closest('label').style.borderColor='var(--gold)';this.closest('label').style.background='rgba(201,168,76,.06)';togglePro(this.value)">
             {{ label }}
           </label>
@@ -59,8 +59,8 @@
         </div>
 
         <!-- Polja za profesionalne korisnike -->
-        <div id="pro-fields" style="display:none;margin-bottom:16px;padding:16px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px">
-          <p style="font-size:.72rem;color:var(--gold);font-weight:600;margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">Profesionalni podaci</p>
+        <div id="pro-fields" class="fx-hidden fx-rounded mb-3 fx-p-16" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2)">
+          <p class="fx-fs-sm fx-fw-semibold fx-text-gold mb-3 fx-uppercase" style="letter-spacing:.04em">Profesionalni podaci</p>
           <div class="mp-field">
             <label>OIB (opcijsko — za verifikaciju)</label>
             <input type="text" name="oib" placeholder="12345678901" maxlength="11" pattern="[0-9]{11}" inputmode="numeric">
@@ -69,11 +69,11 @@
             <label>Telefon</label>
             <input type="tel" name="telefon" placeholder="+385 91 234 5678" autocomplete="tel">
           </div>
-          <div class="mp-field" id="field-website" style="display:none">
+          <div class="mp-field fx-hidden" id="field-website">
             <label>Web stranica</label>
             <input type="url" name="website" placeholder="https://...">
           </div>
-          <p style="font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:4px">
+          <p class="fx-fs-sm mt-1 fx-text-dim" style="line-height:1.5">
             OIB služi za verifikaciju. Verificirani profili dobivaju ✓ oznaku i viši Trust Score.
           </p>
         </div>
@@ -81,8 +81,8 @@
         <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Kreiraj profil →</button>
       </form>
 
-      <p style="margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6">
-        Već imaš profil? <a href="/prijava/" style="font-weight:600">Prijavi se →</a>
+      <p class="fx-fs-caption text-center mt-4 fx-text-dim fx-lh-normal">
+        Već imaš profil? <a href="/prijava/" class="fx-fw-semibold">Prijavi se →</a>
       </p>
     </div>
   </div>

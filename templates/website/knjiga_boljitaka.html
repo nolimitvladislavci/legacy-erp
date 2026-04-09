@@ -7,51 +7,51 @@
 @page { size: A4; margin: 18mm 15mm; }
 @page :first { margin-top: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10.5pt; color: #1a1a1a; line-height: 1.6; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10.5pt; color:var(--text); line-height: 1.6; }
 
 /* Cover */
 .cover {
     height: 297mm; display: flex; flex-direction: column; justify-content: center; align-items: center;
     text-align: center; background: linear-gradient(180deg, #0a0a0a 0%, #1a1510 60%, #0a0a0a 100%);
-    color: #fff; page-break-after: always; padding: 20mm;
+    color:var(--white); page-break-after: always; padding: 20mm;
 }
-.cover .badge { background: rgba(212,160,23,.15); border: 1px solid rgba(212,160,23,.3); padding: 4mm 12mm; border-radius: 20px; font-size: 8pt; color: #d4a017; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12mm; }
+.cover .badge { background: rgba(212,160,23,.15); border: 1px solid rgba(212,160,23,.3); padding: 4mm 12mm; border-radius: 20px; font-size: 8pt; color:var(--gold); font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12mm; }
 .cover h1 { font-size: 32pt; font-weight: 900; line-height: 1.1; margin-bottom: 4mm; }
-.cover h1 span { color: #d4a017; }
-.cover .subtitle { font-size: 14pt; color: #94a3b8; margin-bottom: 15mm; font-weight: 300; }
-.cover .meta { font-size: 9pt; color: #475569; line-height: 2; }
-.cover .meta strong { color: #d4a017; }
-.cover .version { margin-top: 15mm; font-size: 8pt; color: #333; }
+.cover h1 span { color:var(--gold); }
+.cover .subtitle { font-size: 14pt; color:var(--text-muted); margin-bottom: 15mm; font-weight: 300; }
+.cover .meta { font-size: 9pt; color:var(--text-dim); line-height: 2; }
+.cover .meta strong { color:var(--gold); }
+.cover .version { margin-top: 15mm; font-size: 8pt; color:var(--text); }
 
 /* TOC */
 .toc { page-break-after: always; padding-top: 10mm; }
-.toc h2 { font-size: 16pt; color: #d4a017; margin-bottom: 8mm; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+.toc h2 { font-size: 16pt; color:var(--gold); margin-bottom: 8mm; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
 .toc-item { display: flex; justify-content: space-between; padding: 3mm 0; border-bottom: 0.5pt dotted #ddd; font-size: 10pt; }
-.toc-item .num { color: #d4a017; font-weight: 700; margin-right: 3mm; }
+.toc-item .num { color:var(--gold); font-weight: 700; margin-right: 3mm; }
 
 /* Chapters */
 .chapter { page-break-before: always; }
 .chapter-num { font-size: 36pt; font-weight: 900; color: rgba(212,160,23,.12); line-height: 1; margin-bottom: -5mm; }
-.chapter h2 { font-size: 18pt; font-weight: 700; color: #0f172a; margin-bottom: 2mm; }
-.chapter .slogan { font-size: 11pt; color: #d4a017; font-style: italic; margin-bottom: 6mm; padding-bottom: 4mm; border-bottom: 1pt solid #e8e0c8; }
+.chapter h2 { font-size: 18pt; font-weight: 700; color:var(--text); margin-bottom: 2mm; }
+.chapter .slogan { font-size: 11pt; color:var(--gold); font-style: italic; margin-bottom: 6mm; padding-bottom: 4mm; border-bottom: 1pt solid #e8e0c8; }
 .chapter p { margin-bottom: 4mm; text-align: justify; }
 .chapter ul { margin: 3mm 0 5mm 6mm; }
 .chapter li { margin-bottom: 2mm; }
-.chapter li strong { color: #0f172a; }
+.chapter li strong { color:var(--text); }
 
-.highlight { background: #fffbeb; border-left: 3pt solid #d4a017; padding: 4mm 5mm; margin: 5mm 0; font-size: 9.5pt; border-radius: 0 4pt 4pt 0; }
+.highlight { background:var(--amber-dim); border-left: 3pt solid #d4a017; padding: 4mm 5mm; margin: 5mm 0; font-size: 9.5pt; border-radius: 0 4pt 4pt 0; }
 .highlight strong { color: #92400e; }
 
-.compare { background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 4pt; padding: 4mm 5mm; margin: 5mm 0; font-size: 9pt; }
-.compare .old { color: #ef4444; text-decoration: line-through; }
-.compare .new { color: #10b981; font-weight: 600; }
+.compare { background:var(--surface2); border: 0.5pt solid #e2e8f0; border-radius: 4pt; padding: 4mm 5mm; margin: 5mm 0; font-size: 9pt; }
+.compare .old { color:var(--red); text-decoration: line-through; }
+.compare .new { color:var(--green); font-weight: 600; }
 
 .stat-row { display: flex; gap: 4mm; margin: 5mm 0; }
-.stat-box { flex: 1; background: #f1f5f9; border-radius: 4pt; padding: 4mm; text-align: center; }
-.stat-box .num { font-size: 16pt; font-weight: 800; color: #d4a017; }
-.stat-box .lbl { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+.stat-box { flex: 1; background:var(--surface3); border-radius: 4pt; padding: 4mm; text-align: center; }
+.stat-box .num { font-size: 16pt; font-weight: 800; color:var(--gold); }
+.stat-box .lbl { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; color:var(--text-dim); }
 
-.footer { position: fixed; bottom: 8mm; left: 15mm; right: 15mm; text-align: center; font-size: 7pt; color: #94a3b8; border-top: 0.5pt solid #e2e8f0; padding-top: 3pt; }
+.footer { position: fixed; bottom: 8mm; left: 15mm; right: 15mm; text-align: center; font-size: 7pt; color:var(--text-muted); border-top: 0.5pt solid #e2e8f0; padding-top: 3pt; }
 
 @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -74,11 +74,11 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10.5pt; color:
         <strong>Datum:</strong> 16. ozujka 2026.<br>
         <strong>Partneri:</strong> KS LIMIT · Konjik d.o.o. · Korpas d.o.o. · Uvijek Frisko
     </div>
-    <div style="margin-top:10mm;padding:4mm 8mm;border:1px solid rgba(16,185,129,.3);border-radius:6pt;background:rgba(16,185,129,.08);display:inline-block">
-        <span style="color:#10b981;font-size:9pt;font-weight:600">100% uskladjeno s hrvatskim propisima i zakonima</span><br>
-        <span style="color:#64748b;font-size:7pt">ZOR · Zakon o PDV-u · Zakon o fiskalizaciji · Zakon o racunovodstvu · GDPR · HACCP · eRacun 2026</span>
+    <div class="d-inline-block" style="margin-top:10mm;padding:4mm 8mm;border:1px solid rgba(16,185,129,.3);border-radius:6pt;background:rgba(16,185,129,.08)">
+        <span class="fx-text-green fx-fw-semibold" style="font-size:9pt">100% uskladjeno s hrvatskim propisima i zakonima</span><br>
+        <span class="fx-text-dim" style="font-size:7pt">ZOR · Zakon o PDV-u · Zakon o fiskalizaciji · Zakon o racunovodstvu · GDPR · HACCP · eRacun 2026</span>
     </div>
-    <div style="margin-top:8mm;color:#475569;font-size:9pt;letter-spacing:1px">Powered by <span style="color:#d4a017;font-weight:700">AI</span></div>
+    <div class="fx-text-dim fx-ls-2" style="margin-top:8mm;font-size:9pt">Powered by <span class="fx-text-gold fx-fw-bold">AI</span></div>
     <div class="version">Povjerljivo — za internu uporabu i prezentaciju HGK</div>
 </div>
 
@@ -416,10 +416,10 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10.5pt; color:
         <strong>Nasa misija:</strong> Svaki mali poduzetnik u Hrvatskoj zasluzuje alate koje si danas mogu priustiti samo velike korporacije. LIMIT Connect te alate donosi — uz pomoc AI-a, za djelice cijene, s beskonacnom prilagodljivoscu.
     </div>
 
-    <p style="text-align:center;margin-top:10mm;font-size:14pt;color:#d4a017;font-weight:700">
+    <p class="text-center fx-text-gold fx-fw-bold" style="margin-top:10mm;font-size:14pt">
         Svjeze. Domace. Uvijek naprijed.
     </p>
-    <p style="text-align:center;font-size:9pt;color:#94a3b8;margin-top:3mm">
+    <p class="text-center fx-text-muted" style="font-size:9pt;margin-top:3mm">
         LIMIT Connect — limit-connect.com — Ivan Brtan — 2026.
     </p>
 </div>

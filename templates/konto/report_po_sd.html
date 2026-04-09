@@ -4,32 +4,32 @@
 {% block page_title %}PO-SD — Pau&scaron;alni dohodak od samostalne djelatnosti{% endblock %}
 {% block content %}
 <style>
-.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
-.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
-.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-stat{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.k-card{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
 .k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:var(--text-muted);transition:all .15s}
 .k-nav a:hover,.k-nav a.active{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
-.k-nav a.active{background:var(--gold,#c9a84c);color:#0f172a}
+.k-nav a.active{background:var(--gold,#c9a84c);color:var(--text)}
 .k-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
-.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table th{padding:8px 12px;text-align:left;color:var(--text-dim);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border2)}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:var(--text)}
 .k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
 .k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
 .k-filter .fld{display:flex;flex-direction:column;gap:3px}
-.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
-.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim)}
+.k-filter .fld select{padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface-deep);color:var(--text);font-size:.82rem}
 .k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
-.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-gold{background:var(--gold,#c9a84c);color:var(--text)}.k-btn-gold:hover{background:var(--gold)}
 .badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
-.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
-.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
 .badge-gold{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
 </style>
 
-<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+<div class="fx-mb-3"><a href="{% url 'konto:dashboard' %}" class="fx-text-muted fx-no-underline fx-fs-note">&larr; Dashboard</a></div>
 
 <div class="k-nav">
   <a href="{% url 'konto:report_pnl' %}">P&amp;L</a>
@@ -42,10 +42,10 @@
 </div>
 
 {% if error %}
-<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+<div class="fx-rounded fx-text-red fx-fs-base mb-3" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);padding:12px 16px">{{ error }}</div>
 {% endif %}
 
-<form method="get" class="k-filter" style="margin-bottom:20px">
+<form method="get" class="k-filter mb-4">
   <div class="fld">
     <label>Godina</label>
     <select name="year">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
@@ -56,20 +56,20 @@
 
 {% if report %}
 {% if report.prekoracen %}
-<div style="background:rgba(239,68,68,.15);border:2px solid #ef4444;border-radius:12px;padding:16px;margin-bottom:16px;color:#ef4444;font-weight:700;font-size:.9rem">
+<div class="fx-rounded fx-text-red fx-fw-bold fx-fs-md mb-3 fx-p-16" style="background:rgba(239,68,68,.15);border:2px solid #ef4444">
   {{ report.napomena }}
 </div>
 {% endif %}
 
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+<div class="fx-gap-3 d-grid mb-3 fx-grid-3">
   <div class="k-stat">
-    <div><div class="lbl">Ukupni primitci</div><div class="num" style="color:var(--gold,#c9a84c)">{{ report.primitci|floatformat:2 }} &euro;</div></div>
+    <div><div class="lbl">Ukupni primitci</div><div class="num fx-text-gold">{{ report.primitci|floatformat:2 }} &euro;</div></div>
   </div>
   <div class="k-stat">
     <div><div class="lbl">Razred</div><div class="num" style="color:{% if report.prekoracen %}#ef4444{% else %}#22c55e{% endif %}">{{ report.razred }}</div></div>
   </div>
   <div class="k-stat">
-    <div><div class="lbl">Pau&scaron;alni porez + prirez</div><div class="num" style="color:#f59e0b">{{ report.ukupno_porez|floatformat:2 }} &euro;</div></div>
+    <div><div class="lbl">Pau&scaron;alni porez + prirez</div><div class="num fx-text-amber">{{ report.ukupno_porez|floatformat:2 }} &euro;</div></div>
   </div>
 </div>
 
@@ -80,13 +80,13 @@
     <tbody>
       <tr><td>Primitci iz faktura</td><td class="right mono">{{ report.primitci_fakture|floatformat:2 }} &euro;</td></tr>
       <tr><td>Primitci iz banke</td><td class="right mono">{{ report.primitci_banka|floatformat:2 }} &euro;</td></tr>
-      <tr style="font-weight:700;border-top:2px solid #334155"><td>UKUPNI PRIMITCI</td><td class="right mono" style="color:var(--gold,#c9a84c)">{{ report.primitci|floatformat:2 }} &euro;</td></tr>
+      <tr class="fx-fw-bold" style="border-top:2px solid #334155"><td>UKUPNI PRIMITCI</td><td class="right mono fx-text-gold">{{ report.primitci|floatformat:2 }} &euro;</td></tr>
       <tr><td colspan="2" style="height:8px"></td></tr>
       <tr><td>Razred</td><td class="right"><span class="badge badge-gold">{{ report.razred }}</span></td></tr>
       <tr><td>Gornja granica razreda</td><td class="right mono">{{ report.gornja_granica|floatformat:2 }} &euro;</td></tr>
       <tr><td>Pau&scaron;alni porez na dohodak</td><td class="right mono">{{ report.pausal_porez|floatformat:2 }} &euro;</td></tr>
       <tr><td>Prirez ({{ report.prirez_rate|floatformat:0 }}%)</td><td class="right mono">{{ report.prirez|floatformat:2 }} &euro;</td></tr>
-      <tr style="font-weight:700;border-top:2px solid var(--gold,#c9a84c)"><td style="color:var(--gold,#c9a84c)">UKUPNO ZA UPLATU</td><td class="right mono" style="color:var(--gold,#c9a84c);font-size:1.1rem">{{ report.ukupno_porez|floatformat:2 }} &euro;</td></tr>
+      <tr class="fx-fw-bold" style="border-top:2px solid var(--gold,#c9a84c)"><td class="fx-text-gold">UKUPNO ZA UPLATU</td><td class="right mono fx-fs-xl fx-text-gold">{{ report.ukupno_porez|floatformat:2 }} &euro;</td></tr>
     </tbody>
   </table>
 </div>
@@ -101,17 +101,17 @@
     <tr>
       <td>Q{{ q.q }}</td>
       <td class="mono">{{ q.start }} — {{ q.end }}</td>
-      <td class="right mono" style="color:#22c55e">{{ q.primitci|floatformat:2 }} &euro;</td>
+      <td class="right mono fx-text-green">{{ q.primitci|floatformat:2 }} &euro;</td>
     </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 
-<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:16px">
-  <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Napomena</div>
-  <div style="font-size:.82rem;color:#94a3b8">
-    PO-SD obrazac se predaje do <strong style="color:var(--gold,#c9a84c)">15. sije&ccedil;nja</strong> za prethodnu godinu.
+<div class="fx-bg-surface2 fx-rounded mb-3 fx-b2 fx-p-16">
+  <div class="fx-fs-sm fx-text-dim mb-1 fx-uppercase fx-ls-2">Napomena</div>
+  <div class="fx-fs-note fx-text-dim">
+    PO-SD obrazac se predaje do <strong class="fx-text-gold">15. sije&ccedil;nja</strong> za prethodnu godinu.
     Pau&scaron;alac NE vodi poslovne knjige, ali MORA voditi Knjigu prometa (KPR).
     Ako primitci prije&dstrok;u 39.816,84 &euro;, obrtnik je du&zcaron;an prijaviti se u sustav PDV-a.
   </div>

@@ -11,32 +11,32 @@
 }
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+<div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <h4 style="margin:0;color:var(--gold)">Clanovi udruge</h4>
-    <small style="color:var(--muted)">Evidencija, OIB lookup, AI analiza, WhatsApp</small>
+    <h4 class="fx-text-gold fx-m-0">Clanovi udruge</h4>
+    <small class="fx-text-muted">Evidencija, OIB lookup, AI analiza, WhatsApp</small>
 
 {% if kpi %}
 <!-- KPI Widget (Sprint Udruge-Konto) -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;margin-top:.5rem;margin-bottom:0">
+<div class="d-grid fx-gap-2 mt-2 mb-0" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
   <div class="card" style="padding:.6rem;border-left:3px solid var(--gold)">
-    <div style="font-size:1.1rem;font-weight:800;color:var(--gold)">{{ kpi.mrr_clanarina|floatformat:2 }} &euro;</div>
-    <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Clanarine ovaj mj.</div>
+    <div class="fx-fs-xl fx-fw-800 fx-text-gold">{{ kpi.mrr_clanarina|floatformat:2 }} &euro;</div>
+    <div class="fx-fs-xs fx-text-muted fx-uppercase fx-ls-1">Clanarine ovaj mj.</div>
   </div>
   <div class="card" style="padding:.6rem;border-left:3px solid #3b82f6">
-    <div style="font-size:1.1rem;font-weight:800;color:#3b82f6">{{ kpi.donacije_ytd_eur|floatformat:2 }} &euro;</div>
-    <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Donacije YTD ({{ kpi.donacije_ytd_n }})</div>
+    <div class="fx-fs-xl fx-fw-800 fx-text-blue">{{ kpi.donacije_ytd_eur|floatformat:2 }} &euro;</div>
+    <div class="fx-fs-xs fx-text-muted fx-uppercase fx-ls-1">Donacije YTD ({{ kpi.donacije_ytd_n }})</div>
   </div>
   {% if kpi.dospjele_clanarine > 0 %}
   <div class="card" style="padding:.6rem;border-left:3px solid #ef4444">
-    <div style="font-size:1.1rem;font-weight:800;color:#ef4444">{{ kpi.dospjele_clanarine }}</div>
-    <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Dospjelih clanarina</div>
+    <div class="fx-fs-xl fx-fw-800 fx-text-red">{{ kpi.dospjele_clanarine }}</div>
+    <div class="fx-fs-xs fx-text-muted fx-uppercase fx-ls-1">Dospjelih clanarina</div>
   </div>
   {% endif %}
   {% if kpi.uses_double_entry %}
   <div class="card" style="padding:.6rem;border-left:3px solid #22c55e">
-    <div style="font-size:.8rem;font-weight:700;color:#22c55e"><i class="fas fa-book"></i> Dvojno</div>
-    <div style="font-size:.65rem;color:var(--muted)">Auto-knjizenje aktivno</div>
+    <div class="fx-fs-compact fx-fw-bold fx-text-green"><i class="fas fa-book"></i> Dvojno</div>
+    <div class="fx-fs-xs fx-text-muted">Auto-knjizenje aktivno</div>
   </div>
   {% endif %}
 </div>
@@ -45,33 +45,33 @@
   <a href="{% url 'udruge:clan_create' %}" class="btn btn-gold btn-sm">+ Novi clan</a>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:1rem">
-  <div class="card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno }}</div>
-    <div style="font-size:.72rem;color:var(--muted)">Ukupno</div>
+<div class="d-grid fx-gap-2 mb-3" style="grid-template-columns:repeat(5,1fr)">
+  <div class="card text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ukupno</div>
   </div>
-  <div class="card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:var(--green)">{{ stats.aktivni }}</div>
-    <div style="font-size:.72rem;color:var(--muted)">Aktivnih</div>
+  <div class="card text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.aktivni }}</div>
+    <div class="fx-fs-sm fx-text-muted">Aktivnih</div>
   </div>
-  <div class="card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b">{{ stats.istice_7 }}</div>
-    <div style="font-size:.72rem;color:var(--muted)">Istice 7d</div>
+  <div class="card text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-amber">{{ stats.istice_7 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Istice 7d</div>
   </div>
-  <div class="card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.ima_opg }}</div>
-    <div style="font-size:.72rem;color:var(--muted)">Ima OPG</div>
+  <div class="card text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-blue">{{ stats.ima_opg }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ima OPG</div>
   </div>
-  <div class="card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#10b981">{{ stats.wa_optin }}</div>
-    <div style="font-size:.72rem;color:var(--muted)">WhatsApp</div>
+  <div class="card text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.wa_optin }}</div>
+    <div class="fx-fs-sm fx-text-muted">WhatsApp</div>
   </div>
 </div>
 
-<div class="card" style="padding:.75rem;margin-bottom:1rem">
-  <form method="get" style="display:flex;gap:.5rem;align-items:center">
-    <input type="text" name="q" value="{{ q }}" placeholder="Ime, OIB, telefon..." style="flex:1;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
-    <select name="status" style="padding:.4rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+<div class="card mb-3 fx-p-3">
+  <form method="get" class="d-flex fx-gap-2 align-items-center">
+    <input type="text" name="q" value="{{ q }}" placeholder="Ime, OIB, telefon..." class="fx-rounded-sm fx-fs-base fx-text-body fx-flex-1 fx-p-tag fx-bg-dark fx-b">
+    <select name="status" class="fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.4rem">
       <option value="">Svi statusi</option>
       {% for val, lbl in status_choices %}<option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
     </select>
@@ -81,44 +81,44 @@
 </div>
 
 <div class="card">
-  <div style="overflow-x:auto">
-    <div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+  <div class="fx-scroll-x">
+    <div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
       <thead>
         <tr>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Ime</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">OIB</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Telefon</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Istice</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Interes</th>
-          <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Ime</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">OIB</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Telefon</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Status</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Istice</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Interes</th>
+          <th class="fx-p-2 fx-bb"></th>
         </tr>
       </thead>
       <tbody>
         {% for m in page_obj %}
-        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-          <td style="padding:.5rem .6rem;font-size:.85rem" data-label="Ime">
-            <a href="{% url 'udruge:clan_detail' m.pk %}" style="font-weight:600;color:var(--text);text-decoration:none">{{ m.full_name }}</a>
-            {% if m.has_opg %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.6rem;padding:1px 5px;border-radius:8px;margin-left:4px">OPG</span>{% endif %}
+        <tr class="fx-bb-subtle">
+          <td class="fx-fs-base fx-p-cell" data-label="Ime">
+            <a href="{% url 'udruge:clan_detail' m.pk %}" class="fx-fw-semibold fx-no-underline fx-text-body">{{ m.full_name }}</a>
+            {% if m.has_opg %}<span class="fx-text-green fx-fs-2xs fx-rounded" style="background:rgba(34,197,94,.15);padding:1px 5px;margin-left:4px">OPG</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace" data-label="OIB">{{ m.oib|default:"-" }}</td>
-          <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Telefon">{{ m.phone|default:"-" }}</td>
-          <td style="padding:.5rem .6rem">
-            {% if m.status == "aktivan" %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Aktivan</span>
-            {% else %}<span style="color:var(--muted);font-size:.78rem">{{ m.get_status_display }}</span>{% endif %}
+          <td class="fx-fs-body-sm fx-p-cell fx-font-mono" data-label="OIB">{{ m.oib|default:"-" }}</td>
+          <td class="fx-fs-note fx-p-cell" data-label="Telefon">{{ m.phone|default:"-" }}</td>
+          <td class="fx-p-cell">
+            {% if m.status == "aktivan" %}<span class="fx-text-green fx-fs-body-sm fx-fw-semibold">Aktivan</span>
+            {% else %}<span class="fx-fs-body-sm fx-text-muted">{{ m.get_status_display }}</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;font-size:.82rem">
+          <td class="fx-fs-note fx-p-cell">
             {% if m.membership_expires %}
-              {% if m.is_expired %}<span style="color:#ef4444">{{ m.membership_expires|date:"d.m.Y" }}</span>
-              {% elif m.days_until_expiry <= 7 %}<span style="color:#f59e0b">{{ m.membership_expires|date:"d.m.Y" }}</span>
+              {% if m.is_expired %}<span class="fx-text-red">{{ m.membership_expires|date:"d.m.Y" }}</span>
+              {% elif m.days_until_expiry <= 7 %}<span class="fx-text-amber">{{ m.membership_expires|date:"d.m.Y" }}</span>
               {% else %}{{ m.membership_expires|date:"d.m.Y" }}{% endif %}
             {% else %}-{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;font-size:.78rem" data-label="Interes">{{ m.get_business_interest_display|default:"-" }}</td>
-          <td style="padding:.5rem .6rem"><a href="{% url 'udruge:clan_detail' m.pk %}" style="color:var(--gold);font-size:.8rem">Detalji</a></td>
+          <td class="fx-fs-body-sm fx-p-cell" data-label="Interes">{{ m.get_business_interest_display|default:"-" }}</td>
+          <td class="fx-p-cell"><a href="{% url 'udruge:clan_detail' m.pk %}" class="fx-fs-compact fx-text-gold">Detalji</a></td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">Nema clanova</td></tr>
+        <tr><td colspan="7" class="text-center fx-text-muted fx-p-6">Nema clanova</td></tr>
         {% endfor %}
       </tbody>
     </table></div>

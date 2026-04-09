@@ -10,7 +10,7 @@
 #}
 {% with star_color=gold|yesno:"var(--gold,#c9a84c),#f59e0b" font_size=size|default:"sm" %}
 <span class="review-stars review-stars-{{ font_size }}" style="display:inline-flex;align-items:center;gap:.25rem;{% if font_size == 'lg' %}font-size:1.1rem{% elif font_size == 'md' %}font-size:.9rem{% else %}font-size:.75rem{% endif %}">
-  {% if link %}<a href="{{ link }}" style="text-decoration:none;display:inline-flex;align-items:center;gap:.25rem">{% endif %}
+  {% if link %}<a href="{{ link }}" class="fx-no-underline d-inline-flex align-items-center" style="gap:.25rem">{% endif %}
 
   {# Full stars #}
   {% with full_stars=rating|floatformat:"0" %}
@@ -26,11 +26,11 @@
   {% endwith %}
 
   {# Rating number #}
-  <span style="font-weight:700;color:var(--text);margin-left:2px">{{ rating|floatformat:"1" }}</span>
+  <span class="fx-fw-bold fx-text-body" style="margin-left:2px">{{ rating|floatformat:"1" }}</span>
 
   {# Count #}
   {% if count %}
-  <span style="color:var(--text-dim);font-weight:400">({{ count }})</span>
+  <span class="fx-fw-normal fx-text-dim">({{ count }})</span>
   {% endif %}
 
   {% if link %}</a>{% endif %}

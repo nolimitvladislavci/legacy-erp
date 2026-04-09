@@ -1,30 +1,23 @@
 {% load i18n %}
 {% get_current_language as LANG %}
 {# Memio.pet language switcher — compact, inline, 5 jezika #}
-<div style="position:relative;display:inline-flex;align-items:center" id="mpLangWrap">
+<div class="d-inline-flex align-items-center fx-relative" id="mpLangWrap">
   <button type="button" onclick="this.nextElementSibling.classList.toggle('show')"
-    style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
-    border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.72rem;font-weight:600;
-    color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px;transition:all .15s">
+    class="fx-rounded-sm fx-pointer fx-fs-sm fx-fw-semibold d-flex fx-gap-1 align-items-center" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);padding:4px 8px;color:rgba(255,255,255,.6);transition:all .15s">
     {% if LANG == 'hr' %}🇭🇷{% elif LANG == 'de' %}🇩🇪{% elif LANG == 'en' %}🇬🇧{% elif LANG == 'tr' %}🇹🇷{% elif LANG == 'el' %}🇬🇷{% endif %}
     {{ LANG|upper }}
   </button>
-  <div class="mp-lang-dd" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;
-    background:#0d1117;border:1px solid rgba(201,168,76,.3);border-radius:10px;
-    box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:150px;z-index:200;overflow:hidden">
+  <div class="mp-lang-dd fx-hidden fx-bg-deep fx-rounded mt-1 fx-overflow-hidden" style="position:absolute;top:100%;right:0;border:1px solid rgba(201,168,76,.3);box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:150px;z-index:200">
     {% for code, flag, name in lang_choices %}
-    <form method="post" action="/i18n/setlang/" style="margin:0">
+    <form method="post" action="/i18n/setlang/" class="fx-m-0">
       {% csrf_token %}
       <input type="hidden" name="language" value="{{ code }}">
       <input type="hidden" name="next" value="{{ request.path }}">
-      <button type="submit" style="width:100%;padding:10px 14px;background:none;border:none;
-        color:{% if LANG == code %}#c9a84c{% else %}#94a3b8{% endif %};font-size:.82rem;cursor:pointer;
-        display:flex;align-items:center;gap:8px;font-family:inherit;transition:background .15s;
-        {% if LANG == code %}font-weight:700{% endif %}"
+      <button type="submit" class="fx-w-full fx-border-none fx-fs-note fx-pointer d-flex fx-gap-2" style="padding:10px 14px;background:none;color:{% if LANG == code %}#c9a84c{% else %}#94a3b8{% endif %};align-items:center;font-family:inherit;transition:background .15s;{% if lang == code %}font-weight:700{% endif %}"
         onmouseenter="this.style.background='rgba(201,168,76,.1)'"
         onmouseleave="this.style.background='none'">
         <span>{{ flag }}</span> {{ name }}
-        {% if LANG == code %}<span style="margin-left:auto;font-size:.7rem">✓</span>{% endif %}
+        {% if LANG == code %}<span class="fx-fs-sm fx-ml-auto">✓</span>{% endif %}
       </button>
     </form>
     {% endfor %}

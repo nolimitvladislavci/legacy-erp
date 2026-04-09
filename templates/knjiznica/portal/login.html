@@ -3,31 +3,31 @@
 {% block title %}Prijava{% endblock %}
 {% block content %}
 <div style="max-width:380px;margin:40px auto">
-  <div class="lib-card" style="text-align:center">
-    <div style="font-size:3rem;color:var(--lib-gold);margin-bottom:12px"><i class="fas fa-id-card"></i></div>
-    <h2 style="font-size:1.3rem;margin-bottom:4px">Prijava za članove</h2>
-    <p style="color:var(--lib-muted);font-size:.85rem;margin-bottom:20px">Unesite broj iskaznice i PIN koji ste dobili u knjižnici.</p>
+  <div class="lib-card text-center">
+    <div class="fx-fs-hero mb-3 fx-text-gold"><i class="fas fa-id-card"></i></div>
+    <h2 class="fx-fs-3xl mb-1">Prijava za članove</h2>
+    <p class="fx-fs-base mb-4 fx-text-muted">Unesite broj iskaznice i PIN koji ste dobili u knjižnici.</p>
 
     {% if error %}
-    <div style="background:#fef2f2;color:var(--lib-danger);padding:8px 12px;border-radius:8px;font-size:.85rem;margin-bottom:16px">
+    <div class="fx-bg-red-dim fx-rounded fx-fs-base mb-3 fx-p-8-12" style="color:var(--lib-danger)">
       <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
     </div>
     {% endif %}
 
     <form method="post">
       {% csrf_token %}
-      <div style="margin-bottom:12px;text-align:left">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Broj iskaznice</label>
-        <input type="text" name="member_number" class="form-control" placeholder="npr. CK-001" required style="font-size:1.1rem;text-align:center;letter-spacing:2px">
+      <div class="mb-3 text-start">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Broj iskaznice</label>
+        <input type="text" name="member_number" class="form-control fx-fs-xl text-center" placeholder="npr. CK-001" required style="letter-spacing:2px">
       </div>
-      <div style="margin-bottom:16px;text-align:left">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">PIN</label>
-        <input type="password" name="pin" class="form-control" placeholder="••••" required maxlength="6" style="font-size:1.3rem;text-align:center;letter-spacing:6px">
+      <div class="mb-3 text-start">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">PIN</label>
+        <input type="password" name="pin" class="form-control fx-fs-3xl text-center" placeholder="••••" required maxlength="6" style="letter-spacing:6px">
       </div>
       <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sign-in-alt me-1"></i>Prijavi se</button>
     </form>
 
-    <div style="margin-top:16px;font-size:.75rem;color:var(--lib-muted)">
+    <div class="fx-fs-caption mt-3 fx-text-muted">
       Nemate PIN? Zatražite ga u knjižnici pri sljedećem posjetu.
     </div>
   </div>

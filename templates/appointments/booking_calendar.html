@@ -8,20 +8,20 @@
 <style>
     .bc-wrap { max-width: 800px; margin: 0 auto; }
     .bc-card {
-        background: #fff; border-radius: 12px; padding: 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        background:var(--bg-card); border-radius: 12px; padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06); border:1px solid var(--border);
         margin-bottom: 20px;
     }
     .bc-header {
-        font-size: 1.1rem; font-weight: 700; color: #0f172a;
+        font-size: 1.1rem; font-weight: 700; color:var(--text);
         border-bottom: 2px solid var(--gold); padding-bottom: 10px;
         margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
     }
     .bc-header i { color: var(--gold); }
-    .bc-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .bc-label { font-size: 0.78rem; font-weight: 600; color:var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
     .bc-select, .bc-date {
-        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
-        font-size: 0.92rem; color: #0f172a; background: #fff;
+        width: 100%; padding: 10px 12px; border:1px solid var(--border); border-radius: 8px;
+        font-size: 0.92rem; color:var(--text); background:var(--bg-card);
         transition: border-color 0.2s;
     }
     .bc-select:focus, .bc-date:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
@@ -32,14 +32,14 @@
     .slot {
         padding: 12px 8px; text-align: center; border-radius: 8px;
         font-weight: 600; font-size: 0.92rem; cursor: pointer;
-        border: 2px solid #e2e8f0; background: #fff; color: #0f172a;
+        border: 2px solid #e2e8f0; background:var(--bg-card); color:var(--text);
         transition: all 0.2s;
     }
     .slot:hover:not(.slot-taken) { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(201,168,76,0.15); }
-    .slot.selected { background: var(--gold); color: #0f172a; border-color: var(--gold); }
-    .slot-taken { background: #f8fafc; color: #cbd5e1; border-color: #f1f5f9; cursor: not-allowed; text-decoration: line-through; }
+    .slot.selected { background: var(--gold); color:var(--text); border-color: var(--gold); }
+    .slot-taken { background:var(--surface2); color: #cbd5e1; border-color:var(--text); cursor: not-allowed; text-decoration: line-through; }
     .slot-reason { display: block; font-size: 0.6rem; font-weight: 400; margin-top: 2px; }
-    .bc-loader { text-align: center; padding: 32px; color: #94a3b8; }
+    .bc-loader { text-align: center; padding: 32px; color:var(--text-muted); }
     .bc-spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: var(--gold); border-radius: 50%; animation: bcspin 0.8s linear infinite; }
     @keyframes bcspin { to { transform: rotate(360deg); } }
     .bc-confirm {
@@ -48,27 +48,27 @@
     }
     .bc-confirm h4 { color: #92400e; font-size: 0.95rem; margin: 0 0 12px; }
     .bc-confirm .detail { font-size: 0.85rem; color: #78716c; margin-bottom: 4px; }
-    .bc-confirm .detail strong { color: #0f172a; }
+    .bc-confirm .detail strong { color:var(--text); }
     .bc-btn {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 10px 24px; border-radius: 8px; font-weight: 600;
         font-size: 0.9rem; border: none; cursor: pointer; transition: all 0.2s;
     }
-    .bc-btn-primary { background: var(--gold); color: #0f172a; }
+    .bc-btn-primary { background: var(--gold); color:var(--text); }
     .bc-btn-primary:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
     .bc-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .bc-btn-secondary { background: #f1f5f9; color: #64748b; }
+    .bc-btn-secondary { background:var(--surface3); color:var(--text-dim); }
     .bc-btn-secondary:hover { background: #e2e8f0; }
     .bc-field { margin-bottom: 12px; }
     .bc-input {
-        width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
-        font-size: 0.88rem; color: #0f172a;
+        width: 100%; padding: 9px 12px; border:1px solid var(--border); border-radius: 8px;
+        font-size: 0.88rem; color:var(--text);
     }
     .bc-input:focus { border-color: var(--gold); outline: none; }
     .bc-toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
     .bc-toast {
         min-width: 280px; padding: 14px 18px; border-radius: 8px;
-        font-size: 0.88rem; font-weight: 500; color: #fff;
+        font-size: 0.88rem; font-weight: 500; color:var(--white);
         display: flex; align-items: center; gap: 10px;
         opacity: 0; transform: translateX(40px); transition: all 0.3s;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
@@ -77,9 +77,9 @@
     .bc-toast-success { background: #166534; }
     .bc-toast-error { background: #991b1b; }
     .bc-toast-warning { background: #92400e; }
-    .bc-empty { text-align: center; padding: 40px 20px; color: #94a3b8; }
+    .bc-empty { text-align: center; padding: 40px 20px; color:var(--text-muted); }
     .bc-empty i { font-size: 2rem; color: var(--gold); margin-bottom: 12px; display: block; }
-    .svc-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #f1f5f9; border-radius: 20px; font-size: 0.78rem; color: #64748b; margin-top: 10px; }
+    .svc-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background:var(--surface3); border-radius: 20px; font-size: 0.78rem; color:var(--text-dim); margin-top: 10px; }
     .svc-badge i { color: var(--gold); }
     @media (max-width: 768px) {
         .slot-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
@@ -112,14 +112,14 @@
         <div id="bcSvcInfo"></div>
     </div>
 
-    <div class="bc-card" id="bcSlotsCard" style="display:none;">
+    <div class="bc-card fx-hidden" id="bcSlotsCard">
         <div class="bc-header"><i class="fa-solid fa-clock"></i> Dostupni Termini</div>
-        <div id="bcLoader" class="bc-loader" style="display:none;"><div class="bc-spinner"></div><p style="margin-top:10px;">Provjera resursa i radnika...</p></div>
+        <div id="bcLoader" class="bc-loader fx-hidden"><div class="bc-spinner"></div><p class="fx-mt-10">Provjera resursa i radnika...</p></div>
         <div id="bcSlotGrid" class="slot-grid"></div>
-        <div id="bcEmpty" class="bc-empty" style="display:none;"><i class="fa-solid fa-calendar-xmark"></i>Nema dostupnih termina za odabrani datum i uslugu.</div>
+        <div id="bcEmpty" class="bc-empty fx-hidden"><i class="fa-solid fa-calendar-xmark"></i>Nema dostupnih termina za odabrani datum i uslugu.</div>
     </div>
 
-    <div class="bc-card" id="bcConfirmCard" style="display:none;">
+    <div class="bc-card fx-hidden" id="bcConfirmCard">
         <div class="bc-confirm">
             <h4><i class="fa-solid fa-check-circle"></i> Potvrda Rezervacije</h4>
             <div class="detail">Usluga: <strong id="cfService"></strong></div>
@@ -127,7 +127,7 @@
             <div class="detail">Vrijeme: <strong id="cfTime"></strong></div>
             <div class="detail">Trajanje: <strong id="cfDuration"></strong> min</div>
             <div class="detail" id="cfPriceRow">Cijena: <strong id="cfPrice"></strong> EUR</div>
-            <hr style="border-color:#fde68a;margin:16px 0;">
+            <hr style="border-color:var(--amber);margin:16px 0;">
             <div class="bc-field">
                 <div class="bc-label">Ime klijenta</div>
                 <input type="text" id="cfName" class="bc-input" placeholder="Ime i prezime">
@@ -146,7 +146,7 @@
                     </div>
                 </div>
             </div>
-            <div style="display:flex;gap:10px;margin-top:16px;">
+            <div class="d-flex fx-gap-3 mt-3">
                 <button id="bcBookBtn" class="bc-btn bc-btn-primary" onclick="bcBook()">
                     <i class="fa-solid fa-calendar-plus"></i>
                     <span id="bcBookText">Potvrdi Termin</span>

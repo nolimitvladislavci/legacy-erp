@@ -7,28 +7,28 @@
   :root { --gold: #c9a84c; --black: #0a0a0a; --dark: #111; --gray: #888; --green: #4ade80; }
   .ob-container { max-width: 700px; margin: 0 auto; padding: 20px 16px; }
   .ob-progress { display: flex; gap: 4px; margin-bottom: 32px; }
-  .ob-progress-seg { flex: 1; height: 6px; border-radius: 3px; background: #222; transition: background .3s; }
+  .ob-progress-seg { flex: 1; height: 6px; border-radius: 3px; background:var(--surface); transition: background .3s; }
   .ob-progress-seg.done { background: var(--gold); }
   .ob-progress-seg.active { background: linear-gradient(90deg, var(--gold), #e8c84c); }
   .ob-card { background: linear-gradient(135deg, #1a1a1a, var(--dark)); border: 1px solid var(--gold,#c9a84c)33; border-radius: 14px; padding: 32px 28px; margin-bottom: 20px; }
-  .ob-step-num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: #000; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
+  .ob-step-num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color:var(--text); font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
   .ob-title { color: var(--gold); font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; font-family: "Cormorant Garamond", serif; }
   .ob-time { color: var(--gray); font-size: .78rem; margin-bottom: 16px; }
-  .ob-desc { color: #ccc; font-size: .92rem; line-height: 1.6; margin-bottom: 20px; }
+  .ob-desc { color:var(--text-muted); font-size: .92rem; line-height: 1.6; margin-bottom: 20px; }
   .ob-form-group { margin-bottom: 14px; }
   .ob-form-group label { display: block; color: var(--gold); font-size: .78rem; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
-  .ob-input { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: .95rem; outline: none; transition: border-color .2s; box-sizing: border-box; }
+  .ob-input { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color:var(--white); font-size: .95rem; outline: none; transition: border-color .2s; box-sizing: border-box; }
   .ob-input:focus { border-color: var(--gold); }
-  .ob-select { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: .95rem; outline: none; box-sizing: border-box; }
+  .ob-select { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color:var(--white); font-size: .95rem; outline: none; box-sizing: border-box; }
   .ob-row { display: flex; gap: 12px; flex-wrap: wrap; }
   .ob-row > * { flex: 1; min-width: 140px; }
   .ob-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; border-radius: 10px; font-size: .95rem; font-weight: 700; cursor: pointer; border: none; transition: all .2s; min-height: 56px; text-decoration: none; }
-  .ob-btn-primary { background: var(--gold); color: #000; }
+  .ob-btn-primary { background: var(--gold); color:var(--text); }
   .ob-btn-primary:hover { background: #d4b45a; transform: translateY(-1px); }
   .ob-btn-secondary { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
   .ob-btn-secondary:hover { background: var(--gold,#c9a84c)22; }
   .ob-btn-skip { background: transparent; color: var(--gray); border: 1px solid #333; }
-  .ob-btn-skip:hover { color: #ccc; border-color: #555; }
+  .ob-btn-skip:hover { color:var(--text-muted); border-color:var(--text-dim); }
   .ob-btn-big { width: 100%; padding: 20px; font-size: 1.1rem; }
   .ob-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
   .ob-actions > * { flex: 1; min-width: 140px; }
@@ -37,18 +37,18 @@
   .ob-nav a { color: var(--gray); text-decoration: none; font-size: .85rem; }
   .ob-nav a:hover { color: var(--gold); }
   .ob-checklist { list-style: none; padding: 0; margin: 16px 0; }
-  .ob-checklist li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0d0d0d; border-radius: 8px; margin-bottom: 6px; color: #ccc; font-size: .9rem; }
+  .ob-checklist li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0d0d0d; border-radius: 8px; margin-bottom: 6px; color:var(--text-muted); font-size: .9rem; }
   .ob-checklist li i { font-size: 1rem; }
   .ob-check-done { color: var(--gold); }
   .ob-check-pending { color: #444; }
   .ob-success { text-align: center; padding: 40px 20px; }
   .ob-success h2 { color: var(--gold); font-size: 2rem; font-family: "Cormorant Garamond", serif; margin-bottom: 12px; }
-  .ob-success p { color: #ccc; font-size: 1rem; margin-bottom: 24px; }
+  .ob-success p { color:var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
   .ob-confetti { font-size: 3rem; margin-bottom: 16px; }
   .ob-badge { background: #0f2318; border: 1px solid #16a34a44; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
   .ob-badge-icon { font-size: 1.8rem; }
   .ob-badge-title { color: var(--green); font-weight: 700; font-size: .85rem; }
-  .ob-badge-sub { color: #64748b; font-size: .72rem; }
+  .ob-badge-sub { color:var(--text-dim); font-size: .72rem; }
   .ob-feedback { background: #0d1a0d; border: 1px solid #16a34a33; border-radius: 8px; padding: 12px 16px; margin-top: 16px; display: none; color: var(--green); font-size: .9rem; text-align: center; }
   @media (max-width: 600px) {
     .ob-card { padding: 20px 16px; }
@@ -131,7 +131,7 @@
     <div class="ob-time"><i class="fas fa-clock me-1"></i> ~1 minuta</div>
     <div class="ob-desc">Dodajte kupca ili dobavljaca. Partneri se koriste kod izdavanja racuna, narudzbi i ponuda.</div>
     {% if onboarding.first_partner_added %}
-    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+    <div class="fx-rounded mb-3 fx-text-green fx-bg-surface" style="border:1px solid #16a34a44;padding:12px 16px">
       <i class="fas fa-check-circle me-2"></i> Vec imate dodane partnere!
     </div>
     {% endif %}
@@ -175,7 +175,7 @@
     <div class="ob-time"><i class="fas fa-clock me-1"></i> ~1 minuta</div>
     <div class="ob-desc">Dodajte proizvod ili uslugu koju nudite. Artikli se koriste kod izdavanja racuna i u POS blagajni.</div>
     {% if onboarding.first_item_added %}
-    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+    <div class="fx-rounded mb-3 fx-text-green fx-bg-surface" style="border:1px solid #16a34a44;padding:12px 16px">
       <i class="fas fa-check-circle me-2"></i> Vec imate artikle!
     </div>
     {% endif %}
@@ -219,18 +219,18 @@
     <div class="ob-desc">
       Sada imate partnera i artikle -- sve je spremno za vas prvi racun!
       <br><br>
-      <strong style="color:#fff">Kako:</strong> Odaberite partnera, dodajte stavke, kliknite "Spremi". Gotovo!
+      <strong class="fx-text-white">Kako:</strong> Odaberite partnera, dodajte stavke, kliknite "Spremi". Gotovo!
     </div>
     {% if onboarding.first_invoice_created %}
-    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+    <div class="fx-rounded mb-3 fx-text-green fx-bg-surface" style="border:1px solid #16a34a44;padding:12px 16px">
       <i class="fas fa-check-circle me-2"></i> Vec ste izdali racun! Bravo!
     </div>
     {% endif %}
-    <div class="ob-actions" style="flex-direction:column">
+    <div class="ob-actions fx-flex-col">
       <a href="{% url 'invoicing:invoice_create' %}" class="ob-btn ob-btn-primary ob-btn-big">
         <i class="fas fa-file-invoice"></i> Izdaj racun
       </a>
-      <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(4)" style="width:100%">
+      <button type="button" class="ob-btn ob-btn-skip fx-w-full" onclick="skipStep(4)">
         Preskoci -- napravit cu to kasnije
       </button>
     </div>
@@ -248,7 +248,7 @@
       Ako ne trebate POS (npr. samo fakturirate), slobodno preskocite.
     </div>
     {% if onboarding.pos_configured %}
-    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+    <div class="fx-rounded mb-3 fx-text-green fx-bg-surface" style="border:1px solid #16a34a44;padding:12px 16px">
       <i class="fas fa-check-circle me-2"></i> POS je vec aktiviran!
     </div>
     {% endif %}
@@ -267,7 +267,7 @@
     <div class="ob-confetti" id="confetti-display">&#127881; &#127882; &#127881;</div>
     <h2>Vas sustav je spreman!</h2>
     <p>Sve je postavljeno. Mozete poceti raditi s LIMIT Connect-om odmah.</p>
-    <div class="ob-badge" style="justify-content:center;margin:20px auto;max-width:400px">
+    <div class="ob-badge justify-content-center" style="margin:20px auto;max-width:400px">
       <div class="ob-badge-icon">&#128737;</div>
       <div>
         <div class="ob-badge-title">Uskladjeno s propisima za 2026.</div>
@@ -281,7 +281,7 @@
       <li><i class="fas fa-check-circle ob-check-{% if onboarding.first_invoice_created %}done{% else %}pending{% endif %}"></i> Racun izdan</li>
       <li><i class="fas fa-check-circle ob-check-{% if onboarding.pos_configured %}done{% else %}pending{% endif %}"></i> POS blagajna</li>
     </ul>
-    <div class="ob-actions" style="flex-direction:column;max-width:400px;margin:0 auto">
+    <div class="ob-actions fx-flex-col fx-m-auto" style="max-width:400px">
       <a href="{% url 'company_dashboard' %}" class="ob-btn ob-btn-primary ob-btn-big" onclick="completeOnboarding()">
         <i class="fas fa-tachometer-alt"></i> Idi na dashboard
       </a>
@@ -297,7 +297,7 @@
     {% if step > 1 %}
     <a href="?step={{ step|add:'-1' }}"><i class="fas fa-arrow-left me-1"></i> Natrag</a>
     {% else %}<span></span>{% endif %}
-    <span style="color:#666;font-size:.8rem">Korak {{ step }} od 5</span>
+    <span class="fx-text-dim fx-fs-compact">Korak {{ step }} od 5</span>
     {% if step < 5 %}
     <a href="?step={{ step|add:'1' }}">Dalje <i class="fas fa-arrow-right ms-1"></i></a>
     {% else %}<span></span>{% endif %}

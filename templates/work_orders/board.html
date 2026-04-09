@@ -5,7 +5,7 @@
 <style>
 .wo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
 .wo-title{font-size:1.4rem;font-weight:700;color:var(--text)}
-.wo-title span{color:#3b82f6}
+.wo-title span{color:var(--blue)}
 .kanban-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start;min-height:calc(100vh - 220px)}
 .kanban-col{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);overflow:hidden}
 .kanban-col-header{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
@@ -14,10 +14,10 @@
 .kanban-badge{background:var(--badge-bg);color:var(--text-muted);font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--border)}
 .kanban-cards{padding:10px;min-height:80px}
 .kanban-card{background:var(--bg-card-hover);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;transition:border-color .2s,transform .15s,box-shadow .2s}
-.kanban-card:hover{border-color:#3b82f6;transform:translateY(-1px);box-shadow:0 4px 16px var(--shadow)}
+.kanban-card:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 4px 16px var(--shadow)}
 .kanban-ghost{opacity:.4;border:2px dashed #3b82f6 !important}
 .kanban-chosen{box-shadow:0 8px 32px rgba(59,130,246,.2);transform:rotate(1deg)}
-.wo-card-num{font-size:.7rem;font-weight:700;color:#3b82f6;margin-bottom:4px}
+.wo-card-num{font-size:.7rem;font-weight:700;color:var(--blue);margin-bottom:4px}
 .wo-card-client{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:4px}
 .wo-card-desc{font-size:.72rem;color:var(--text-muted);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wo-card-meta{display:flex;gap:8px;font-size:.68rem;color:var(--text-muted);flex-wrap:wrap}
@@ -25,7 +25,7 @@
 .wo-card-sla{font-size:.62rem;margin-top:4px}
 .wo-card-actions{display:flex;gap:4px;margin-top:8px}
 .wo-btn{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.7rem;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-muted);transition:all .15s;text-align:center;text-decoration:none}
-.wo-btn:hover{border-color:#3b82f6;color:#3b82f6}
+.wo-btn:hover{border-color:var(--blue);color:var(--blue)}
 .col-empty{text-align:center;padding:28px 12px;color:var(--text-muted);font-size:.78rem;opacity:.5}
 @media(max-width:1200px){.kanban-wrap{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.kanban-wrap{grid-template-columns:1fr}}
@@ -34,10 +34,10 @@
 {% block content %}
 <div class="wo-header">
     <div class="wo-title">🔧 {% trans "Radni nalozi" %} <span>/ {% trans "Kanban" %}</span></div>
-    <div style="display:flex;gap:10px">
+    <div class="d-flex fx-gap-3">
         <button onclick="location.reload()" class="wo-btn" style="padding:8px 14px" title="Osvježi ploču">🔄 {% trans "Osvježi" %}</button>
         <a href="{% url 'work_orders:list' %}" class="wo-btn" style="padding:8px 14px">📋 {% trans "Lista" %}</a>
-        <a href="{% url 'work_orders:create' %}" class="wo-btn" style="padding:8px 14px;background:#3b82f6;color:#fff;border-color:#3b82f6">+ {% trans "Novi nalog" %}</a>
+        <a href="{% url 'work_orders:create' %}" class="wo-btn fx-bg-blue fx-text-white" style="padding:8px 14px;border-color:var(--blue)">+ {% trans "Novi nalog" %}</a>
     </div>
 </div>
 <div class="kanban-wrap" data-poll="30000">

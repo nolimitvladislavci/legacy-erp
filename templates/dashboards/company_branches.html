@@ -6,7 +6,7 @@
 .page{padding:1.5rem;max-width:1100px}
 .page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
 .page-title{font-size:1.2rem;font-weight:800}
-.page-sub{font-size:.8rem;color:#888;margin-top:.15rem}
+.page-sub{font-size:.8rem;color:var(--text-dim);margin-top:.15rem}
 
 /* Branch cards */
 .branches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem}
@@ -14,12 +14,12 @@
 .bcard.inactive{opacity:.55}
 .bcard-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem}
 .bcard-name{font-size:1rem;font-weight:700}
-.bcard-code{font-size:.72rem;color:#888;margin-top:.1rem;font-family:monospace}
+.bcard-code{font-size:.72rem;color:var(--text-dim);margin-top:.1rem;font-family:monospace}
 .bcard-type{display:inline-block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .6rem;border-radius:20px;margin-bottom:.65rem}
-.bcard-info{font-size:.8rem;color:#888;margin-bottom:.75rem;line-height:1.6}
+.bcard-info{font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem;line-height:1.6}
 .bcard-modules{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.875rem}
 .mod-chip{font-size:.65rem;background:rgba(201,168,76,.12);color:var(--gold,#c9a84c);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.15rem .5rem}
-.mod-chip.inherited{background:rgba(255,255,255,.05);color:#888;border-color:rgba(255,255,255,.1)}
+.mod-chip.inherited{background:rgba(255,255,255,.05);color:var(--text-dim);border-color:rgba(255,255,255,.1)}
 .bcard-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 
 /* Add branch form */
@@ -27,7 +27,7 @@
 .add-card-title{font-size:.85rem;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem}
 .sfield{margin-bottom:.65rem}
-.sfield label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:.3rem;font-weight:600}
+.sfield label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:.3rem;font-weight:600}
 .sinput{width:100%;background:var(--dark,#111);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#fff);padding:.55rem .875rem;font-size:.875rem;font-family:inherit}
 .sinput:focus{outline:none;border-color:var(--gold,#c9a84c)}
 select.sinput{cursor:pointer}
@@ -38,13 +38,13 @@ select.sinput{cursor:pointer}
 .mod-chk input{accent-color:var(--gold,#c9a84c)}
 
 /* Type badge colours */
-.type-optika{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
-.type-fitness{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)}
-.type-retail{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.3)}
-.type-accounting{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.type-optika{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.type-fitness{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.type-retail{background:rgba(249,115,22,.12);color:var(--amber);border:1px solid rgba(249,115,22,.3)}
+.type-accounting{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
 .type-restaurant{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.3)}
-.type-salon{background:rgba(244,114,182,.12);color:#f472b6;border:1px solid rgba(244,114,182,.3)}
-.type-other{background:rgba(255,255,255,.06);color:#888;border:1px solid rgba(255,255,255,.15)}
+.type-salon{background:rgba(244,114,182,.12);color:rgba(236,72,153,0.9);border:1px solid rgba(244,114,182,.3)}
+.type-other{background:rgba(255,255,255,.06);color:var(--text-dim);border:1px solid rgba(255,255,255,.15)}
 
 /* Module modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:1500;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -56,40 +56,18 @@ select.sinput{cursor:pointer}
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="page">
-  <div class="page-hdr">
-    <div>
-      <div class="page-title">Podružnice – {{ company.name }}</div>
-      <div class="page-sub">OIB: {{ company.oib }} &mdash; {{ branches|length }} podružnic{{ branches|length|pluralize:"a,a,a" }}</div>
-    </div>
-    <div style="display:flex;gap:.5rem">
+<!-- lang: topbar -->
+    <div class="d-flex fx-gap-2">
       <a href="/superadmin/companies/" class="btn btn-ghost btn-sm">{% trans "&#8592; Tvrtke" %}</a>
       <a href="/superadmin/impersonate/{{ company.id }}/" class="btn btn-ghost btn-sm">{% trans "&#x1F576; Pristupi" %}</a>
     </div>
   </div>
 
   {% if messages %}
-  <div style="margin-bottom:1rem">
+  <div class="mb-3">
     {% for msg in messages %}
-    <div style="padding:.65rem 1rem;border-radius:7px;font-size:.85rem;margin-bottom:.35rem;
-      {% if msg.tags == 'error' %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444
-      {% else %}background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e{% endif %}">
+    <div class="fx-fs-base" style="padding:.65rem 1rem;border-radius:7px;margin-bottom:.35rem;{% if msg.tags == 'error' %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)
+      {% else %}background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green){% endif %}">
       {{ msg }}
     </div>
     {% endfor %}
@@ -112,7 +90,7 @@ select.sinput{cursor:pointer}
         {% if b.address %}&#x1F4CD; {{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}<br>{% endif %}
         {% if b.phone %}&#x1F4DE; {{ b.phone }}<br>{% endif %}
         {% if b.email %}&#x2709; {{ b.email }}<br>{% endif %}
-        {% if not b.is_active %}<span style="color:#ef4444;font-size:.75rem;font-weight:700">{% trans "&#x26D4; Deaktivirana" %}</span>{% endif %}
+        {% if not b.is_active %}<span class="fx-text-red fx-fs-caption fx-fw-bold">{% trans "&#x26D4; Deaktivirana" %}</span>{% endif %}
       </div>
 
       <!-- Modules -->
@@ -126,20 +104,20 @@ select.sinput{cursor:pointer}
 
       <!-- Users in this branch -->
       {% with user_count=b.users.count %}
-      {% if user_count %}<div style="font-size:.72rem;color:#888;margin-bottom:.65rem">&#x1F464; {{ user_count }} korisnik{{ user_count|pluralize:',a' }}</div>{% endif %}
+      {% if user_count %}<div class="fx-fs-sm fx-text-muted" style="margin-bottom:.65rem">&#x1F464; {{ user_count }} korisnik{{ user_count|pluralize:',a' }}</div>{% endif %}
       {% endwith %}
 
       <div class="bcard-actions">
         <button class="btn btn-ghost btn-sm" onclick="openModulesModal({{ b.id }}, '{{ b.name|escapejs }}', [{% for m in b.active_modules %}'{{ m }}'{% if not forloop.last %},{% endif %}{% endfor %}])">{% trans "&#x1F527; Moduli" %}</button>
-        <form method="post" style="display:inline">{% csrf_token %}
+        <form method="post" class="d-inline">{% csrf_token %}
           <input type="hidden" name="action" value="toggle">
           <input type="hidden" name="branch_id" value="{{ b.id }}">
           <button class="btn btn-ghost btn-sm">{% if b.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}</button>
         </form>
-        <form method="post" style="display:inline" onsubmit="return confirm('Obrisati podružnicu {{ b.name|escapejs }}?')">{% csrf_token %}
+        <form method="post" class="d-inline" onsubmit="return confirm('Obrisati podružnicu {{ b.name|escapejs }}?')">{% csrf_token %}
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="branch_id" value="{{ b.id }}">
-          <button class="btn btn-ghost btn-sm" style="color:#ef4444">{% trans "&#x1F5D1;" %}</button>
+          <button class="btn btn-ghost btn-sm fx-text-red">{% trans "&#x1F5D1;" %}</button>
         </form>
       </div>
     </div>
@@ -160,7 +138,7 @@ select.sinput{cursor:pointer}
         </div>
         <div class="sfield">
           <label>{% trans "Šifra" %}</label>
-          <input class="sinput" type="text" name="branch_code" placeholder="{% trans "npr. OPT01" %}" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          <input class="sinput fx-uppercase" type="text" name="branch_code" placeholder="{% trans "npr. OPT01" %}" oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="sfield">
           <label>{% trans "Tip podružnice" %}</label>
@@ -188,7 +166,7 @@ select.sinput{cursor:pointer}
         </div>
       </div>
 
-      <div class="sfield" style="margin-top:.5rem">
+      <div class="sfield mt-2">
         <label>{% trans "Aktivni moduli (prazno = nasljeđuje plan matice)" %}</label>
         <div class="modules-grid">
           {% for val, label in all_modules %}
@@ -200,7 +178,7 @@ select.sinput{cursor:pointer}
         </div>
       </div>
 
-      <div style="margin-top:1rem">
+      <div class="mt-3">
         <button type="submit" class="btn btn-gold">{% trans "&#x2795; Kreiraj podružnicu" %}</button>
       </div>
     </form>
@@ -211,7 +189,7 @@ select.sinput{cursor:pointer}
 <div class="modal-overlay" id="modulesModal">
   <div class="fc-dialog">
     <div class="fc-dialog-title" id="modalBranchName">{% trans "Moduli podružnice" %}</div>
-    <div style="font-size:.78rem;color:#888;margin-bottom:1rem">{% trans "Prazno = nasljeđuje plan matične tvrtke" %}</div>
+    <div class="fx-fs-body-sm fx-text-muted mb-3">{% trans "Prazno = nasljeđuje plan matične tvrtke" %}</div>
     <form method="post" id="modulesForm">
       {% csrf_token %}
       <input type="hidden" name="action" value="update_modules">
@@ -224,7 +202,7 @@ select.sinput{cursor:pointer}
         </label>
         {% endfor %}
       </div>
-      <div style="font-size:.72rem;color:#888;margin-top:.75rem">
+      <div class="fx-fs-sm fx-text-muted fx-mt-4">
         {% trans "&#9432; Odznačite sve za nasljeđivanje modula s matičnog plana." %}
       </div>
       <div class="fc-dialog-btns">

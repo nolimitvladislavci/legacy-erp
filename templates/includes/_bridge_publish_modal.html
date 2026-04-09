@@ -2,20 +2,20 @@
 <!-- Bridge Publish Modal — "Ponudi na burzi" -->
 <div class="modal fade" id="bridgePublishModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
-    <div class="modal-content" style="background:var(--surface);border:1px solid var(--gold-border);border-radius:16px">
+    <div class="modal-content fx-rounded-lg fx-bg-surface" style="border:1px solid var(--gold-border)">
       <form method="post" action="{% url 'udruge:bridge_publish' %}" id="bridgePublishForm">
         {% csrf_token %}
         <input type="hidden" name="source_model" id="bp_source_model">
         <input type="hidden" name="source_id" id="bp_source_id">
 
-        <div style="padding:1.5rem 1.5rem 0;border-bottom:1px solid var(--border)">
+        <div class="fx-bb" style="padding:1.5rem 1.5rem 0">
           <div class="d-flex align-items-center gap-2 mb-3">
-            <div style="width:40px;height:40px;background:var(--gold-dim);border-radius:10px;display:flex;align-items:center;justify-content:center">
-              <i class="fas fa-store" style="color:var(--gold);font-size:1rem"></i>
+            <div class="fx-rounded d-flex align-items-center justify-content-center fx-bg-gold-dim" style="width:40px;height:40px">
+              <i class="fas fa-store fx-fs-lg fx-text-gold"></i>
             </div>
             <div>
-              <h5 style="margin:0;font-size:1rem;font-weight:700;color:var(--text)">Ponudi na burzi</h5>
-              <small style="color:var(--text-dim)" id="bp_product_name"></small>
+              <h5 class="fx-fs-lg fx-fw-bold fx-text-body fx-m-0">Ponudi na burzi</h5>
+              <small class="fx-text-dim" id="bp_product_name"></small>
             </div>
           </div>
         </div>
@@ -23,48 +23,48 @@
         <div style="padding:1.25rem 1.5rem">
           <div class="row g-3">
             <div class="col-6">
-              <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Cijena</label>
+              <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Cijena</label>
               <div class="input-group">
                 <input type="number" name="price" id="bp_price" step="0.01" min="0.01" required
-                  class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px 0 0 8px">
-                <span class="input-group-text" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-size:.82rem" id="bp_unit_label">EUR/kg</span>
+                  class="form-control fx-text-body fx-bg-dark fx-bc" style="border-radius:8px 0 0 8px">
+                <span class="input-group-text fx-fs-note fx-text-dim fx-bg-surface2 fx-bc" id="bp_unit_label">EUR/kg</span>
               </div>
             </div>
             <div class="col-6">
-              <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Kolicina</label>
+              <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Kolicina</label>
               <div class="input-group">
                 <input type="number" name="qty" id="bp_qty" step="0.1" min="0.1" required
-                  class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px 0 0 8px">
-                <span class="input-group-text" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-size:.82rem" id="bp_qty_unit">kg</span>
+                  class="form-control fx-text-body fx-bg-dark fx-bc" style="border-radius:8px 0 0 8px">
+                <span class="input-group-text fx-fs-note fx-text-dim fx-bg-surface2 fx-bc" id="bp_qty_unit">kg</span>
               </div>
             </div>
           </div>
 
           <div class="mt-3" id="bp_opg_row">
-            <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">
-              OPG broj <span style="color:var(--red);font-size:.7rem">(obavezno za hranu)</span>
+            <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">
+              OPG broj <span class="fx-fs-sm fx-text-red">(obavezno za hranu)</span>
             </label>
             <input type="text" name="opg_number" id="bp_opg_number" placeholder="HR-OPG-12345"
-              class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+              class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc">
           </div>
 
-          <div class="mt-3" style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:.75rem">
-            <div style="font-size:.72rem;color:#3b82f6;font-weight:600;margin-bottom:.3rem">
+          <div class="mt-3 fx-rounded fx-p-3" style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15)">
+            <div class="fx-fs-sm fx-text-blue fx-fw-semibold fx-mb-2">
               <i class="fas fa-info-circle me-1"></i>Auto-istjece
             </div>
-            <div style="font-size:.75rem;color:var(--text-dim)" id="bp_expiry_info">
+            <div class="fx-fs-caption fx-text-dim" id="bp_expiry_info">
               Listing automatski istice prema tipu proizvoda.
             </div>
           </div>
         </div>
 
-        <div style="padding:0 1.5rem 1.25rem;display:flex;gap:.5rem;justify-content:flex-end">
-          <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
-            style="border-radius:8px;padding:.5rem 1.25rem;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)">
+        <div class="d-flex fx-gap-2 justify-content-end" style="padding:0 1.5rem 1.25rem">
+          <button type="button" class="btn btn-sm fx-rounded fx-text-dim fx-bg-surface2 fx-b" data-bs-dismiss="modal"
+            style="padding:.5rem 1.25rem">
             Odustani
           </button>
-          <button type="submit" class="btn btn-sm"
-            style="border-radius:8px;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700">
+          <button type="submit" class="btn btn-sm fx-rounded fx-text-dark fx-fw-bold"
+            style="padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--gold),#a78b3d)">
             <i class="fas fa-store me-1"></i>Objavi
           </button>
         </div>

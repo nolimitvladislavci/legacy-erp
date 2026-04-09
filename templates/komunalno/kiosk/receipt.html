@@ -3,31 +3,31 @@
 {% block title %}Potvrda #{{ delivery.pk }}{% endblock %}
 
 {% block kiosk_content %}
-<div class="print-only" style="max-width: 300px; margin: 0 auto; font-family: monospace; font-size: 12px; color: black;">
-    <div style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 10px; margin-bottom: 10px;">
+<div class="print-only fx-m-auto fx-font-mono" style="max-width:300px;font-size:12px;color:black">
+    <div class="text-center mb-2" style="border-bottom:1px dashed black;padding-bottom:10px">
         <strong style="font-size: 14px;">{{ company.name }}</strong><br>
         OIB: {{ company.oib }}<br>
         {{ delivery.station.name }}<br>
         {{ delivery.station.address }}
     </div>
-    <div style="text-align: center; margin-bottom: 10px;">
+    <div class="text-center mb-2">
         <strong>POTVRDA O ZAPRIMANJU OTPADA</strong>
     </div>
-    <table style="width: 100%; font-size: 11px;">
-        <tr><td>Datum:</td><td style="text-align:right;">{{ delivery.delivery_date|date:"d.m.Y. H:i" }}</td></tr>
-        <tr><td>Građanin:</td><td style="text-align:right;">{{ delivery.citizen.partner.name }}</td></tr>
-        <tr><td>Iskaznica:</td><td style="text-align:right;">{{ delivery.citizen.card_number }}</td></tr>
-        <tr><td>Otpad:</td><td style="text-align:right;">{{ delivery.category.name }}</td></tr>
-        <tr><td>Ključni br.:</td><td style="text-align:right;">{{ delivery.category.key_number }}</td></tr>
-        <tr><td>Količina:</td><td style="text-align:right;"><strong>{{ delivery.quantity }} {{ delivery.unit }}</strong></td></tr>
-        <tr><td>Izvor:</td><td style="text-align:right;">{% if delivery.weight_source == 'scale' %}Vaga{% else %}Ručno{% endif %}</td></tr>
+    <table class="fx-w-full" style="font-size:11px">
+        <tr><td>Datum:</td><td class="text-end">{{ delivery.delivery_date|date:"d.m.Y. H:i" }}</td></tr>
+        <tr><td>Građanin:</td><td class="text-end">{{ delivery.citizen.partner.name }}</td></tr>
+        <tr><td>Iskaznica:</td><td class="text-end">{{ delivery.citizen.card_number }}</td></tr>
+        <tr><td>Otpad:</td><td class="text-end">{{ delivery.category.name }}</td></tr>
+        <tr><td>Ključni br.:</td><td class="text-end">{{ delivery.category.key_number }}</td></tr>
+        <tr><td>Količina:</td><td class="text-end"><strong>{{ delivery.quantity }} {{ delivery.unit }}</strong></td></tr>
+        <tr><td>Izvor:</td><td class="text-end">{% if delivery.weight_source == 'scale' %}Vaga{% else %}Ručno{% endif %}</td></tr>
         {% if delivery.over_quota > 0 %}
         <tr><td colspan="2" style="border-top: 1px dashed black; padding-top: 5px;"></td></tr>
-        <tr><td>Prekoračenje:</td><td style="text-align:right;">{{ delivery.over_quota }} {{ delivery.unit }}</td></tr>
-        <tr><td>Naknada:</td><td style="text-align:right;"><strong>{{ delivery.charge_amount }} EUR</strong></td></tr>
+        <tr><td>Prekoračenje:</td><td class="text-end">{{ delivery.over_quota }} {{ delivery.unit }}</td></tr>
+        <tr><td>Naknada:</td><td class="text-end"><strong>{{ delivery.charge_amount }} EUR</strong></td></tr>
         {% endif %}
     </table>
-    <div style="text-align: center; border-top: 1px dashed black; margin-top: 10px; padding-top: 10px; font-size: 10px;">
+    <div class="text-center fx-mt-10" style="border-top:1px dashed black;padding-top:10px;font-size:10px">
         Operater: {{ delivery.operator.get_short_name|default:delivery.operator.username }}<br>
         Hash: {{ delivery.integrity_hash|truncatechars:16 }}<br>
         <br>

@@ -32,7 +32,7 @@
   .stat .lbl { font-size:.75rem; color:var(--dim); text-transform:uppercase; letter-spacing:1px; }
 
   /* BUTTONS */
-  .btn-gold { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; background:var(--gold); color:#000; font-weight:700; font-size:1rem; border:none; border-radius:10px; text-decoration:none; cursor:pointer; transition:all .2s; }
+  .btn-gold { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; background:var(--gold); color:var(--text); font-weight:700; font-size:1rem; border:none; border-radius:10px; text-decoration:none; cursor:pointer; transition:all .2s; }
   .btn-gold:hover { filter:brightness(1.1); transform:translateY(-2px); }
   .btn-outline { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; border:2px solid rgba(201,168,76,.4); color:var(--gold); font-weight:700; font-size:1rem; border-radius:10px; text-decoration:none; transition:all .2s; background:transparent; }
   .btn-outline:hover { border-color:var(--gold); background:rgba(201,168,76,.05); }
@@ -59,7 +59,7 @@
   .dl-card .dl-icon { font-size:2.5rem; margin-bottom:16px; }
   .dl-card h4 { color:var(--gold); font-size:1.1rem; margin-bottom:8px; }
   .dl-card p { color:var(--dim); font-size:.85rem; line-height:1.5; margin-bottom:20px; }
-  .dl-card .dl-size { font-size:.75rem; color:#475569; margin-top:8px; }
+  .dl-card .dl-size { font-size:.75rem; color:var(--text-dim); margin-top:8px; }
 
   /* VALIDATOR */
   .validator { padding:80px 20px; max-width:800px; margin:0 auto; }
@@ -75,7 +75,7 @@
   .drop-zone:hover { border-color:var(--gold); background:rgba(201,168,76,.03); }
   .drop-zone i { font-size:2rem; color:var(--gold); margin-bottom:12px; display:block; }
   .drop-zone p { color:var(--dim); font-size:.9rem; }
-  .drop-zone .hint { font-size:.75rem; color:#475569; margin-top:8px; }
+  .drop-zone .hint { font-size:.75rem; color:var(--text-dim); margin-top:8px; }
   #val-result { display:none; margin-top:20px; padding:20px; border-radius:12px; }
 
   /* COMPLIANCE */
@@ -88,7 +88,7 @@
   .comp-card li { color:var(--dim); font-size:.85rem; padding:4px 0; padding-left:16px; position:relative; }
   .comp-card li::before { content:''; position:absolute; left:0; top:10px; width:6px; height:6px; background:var(--gold); border-radius:50%; }
 
-  footer { text-align:center; padding:30px 20px; border-top:1px solid rgba(255,255,255,.06); color:#475569; font-size:.85rem; }
+  footer { text-align:center; padding:30px 20px; border-top:1px solid rgba(255,255,255,.06); color:var(--text-dim); font-size:.85rem; }
   footer a { color:var(--gold); text-decoration:none; }
 
   @media (max-width:600px) {
@@ -211,7 +211,7 @@
   <h3>CroXML Validator</h3>
   <p class="subtitle">Provjerite valjanost vaših eRačun XML datoteka — besplatno, bez registracije</p>
   <div class="validator-box">
-    <h4><i class="fas fa-shield-alt" style="color:var(--gold)"></i> Validacija prema CIUS-HR-2025</h4>
+    <h4><i class="fas fa-shield-alt fx-text-gold"></i> Validacija prema CIUS-HR-2025</h4>
     <p>Povucite XML datoteku u polje ispod ili kliknite za odabir. Validator provjerava:</p>
     <div class="validator-features">
       <div class="vf-item"><i class="fas fa-check"></i> <span>UBL 2.1 strukturu</span></div>
@@ -223,10 +223,10 @@
     </div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('xmlFile').click()">
       <i class="fas fa-cloud-upload-alt"></i>
-      <p>Povucite XML datoteku ovdje<br>ili <strong style="color:var(--gold)">kliknite za odabir</strong></p>
+      <p>Povucite XML datoteku ovdje<br>ili <strong class="fx-text-gold">kliknite za odabir</strong></p>
       <div class="hint">Maksimalno 5 MB &bull; Vaša datoteka se NE uploaduje na server</div>
     </div>
-    <input type="file" id="xmlFile" accept=".xml" style="display:none" onchange="validateXML(this.files[0])">
+    <input type="file" id="xmlFile" accept=".xml" class="fx-hidden" onchange="validateXML(this.files[0])">
     <div id="val-result"></div>
   </div>
 </section>
@@ -259,11 +259,11 @@
 </section>
 
 <!-- CTA -->
-<section style="text-align:center; padding:60px 20px;">
-  <h3 style="font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); margin-bottom:16px;">
+<section class="text-center" style="padding:60px 20px">
+  <h3 class="fx-fs-icon fx-text-gold mb-3" style="font-family:'Cormorant Garamond',serif">
     Digitalizirajte svoju arhivu danas
   </h3>
-  <p style="color:var(--dim); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto;">
+  <p class="fx-text-dim fx-ml-auto" style="margin-bottom:30px;max-width:500px;margin-right:auto">
     Prvo skeniranje za manje od 2 minute. AI prepoznaje i klasificira automatski.
   </p>
   <div class="cta-buttons">
@@ -371,15 +371,15 @@ function displayResults(r) {
   const total = r.passed + r.failed;
   const isOk = r.failed === 0;
   
-  let html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">';
+  let html = '<div class="d-flex fx-gap-3 align-items-center mb-3">';
   html += isOk
-    ? '<span style="font-size:2rem">✅</span><div><strong style="color:#4ade80;font-size:1.1rem">Validacija uspješna</strong><br><span style="color:#94a3b8;font-size:.85rem">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>'
-    : '<span style="font-size:2rem">❌</span><div><strong style="color:#f87171;font-size:1.1rem">' + r.failed + ' greška pronađena</strong><br><span style="color:#94a3b8;font-size:.85rem">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>';
+    ? '<span class="fx-fs-icon">✅</span><div><strong class="fx-fs-xl fx-text-green">Validacija uspješna</strong><br><span class="fx-text-muted fx-fs-base">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>'
+    : '<span class="fx-fs-icon">❌</span><div><strong class="fx-fs-xl fx-text-red">' + r.failed + ' greška pronađena</strong><br><span class="fx-text-muted fx-fs-base">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>';
   html += '</div>';
 
-  if (r.errors.length) { html += '<div style="margin-bottom:12px">'; r.errors.forEach(e => html += '<div style="color:#f87171;font-size:.88rem;padding:4px 0"><i class="fas fa-times-circle" style="margin-right:6px"></i>' + e + '</div>'); html += '</div>'; }
-  if (r.warnings.length) { html += '<div style="margin-bottom:12px">'; r.warnings.forEach(w => html += '<div style="color:#facc15;font-size:.88rem;padding:4px 0"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>' + w + '</div>'); html += '</div>'; }
-  if (r.info.length) { html += '<div>'; r.info.forEach(i => html += '<div style="color:#94a3b8;font-size:.85rem;padding:3px 0"><i class="fas fa-info-circle" style="margin-right:6px;color:#3b82f6"></i>' + i + '</div>'); html += '</div>'; }
+  if (r.errors.length) { html += '<div class="mb-3">'; r.errors.forEach(e => html += '<div class="fx-fs-body fx-text-red" style="padding:4px 0"><i class="fas fa-times-circle fx-mr-2"></i>' + e + '</div>'); html += '</div>'; }
+  if (r.warnings.length) { html += '<div class="mb-3">'; r.warnings.forEach(w => html += '<div class="fx-fs-body" style="color:#facc15;padding:4px 0"><i class="fas fa-exclamation-triangle fx-mr-2"></i>' + w + '</div>'); html += '</div>'; }
+  if (r.info.length) { html += '<div>'; r.info.forEach(i => html += '<div class="fx-text-muted fx-fs-base" style="padding:3px 0"><i class="fas fa-info-circle fx-text-blue fx-mr-2"></i>' + i + '</div>'); html += '</div>'; }
 
   el.innerHTML = html;
   el.style.display = 'block';
@@ -389,7 +389,7 @@ function displayResults(r) {
 
 function showResult(type, msg) {
   const el = document.getElementById('val-result');
-  el.innerHTML = '<div style="color:' + (type==='error'?'#f87171':'#4ade80') + ';font-size:.9rem"><i class="fas fa-' + (type==='error'?'times':'check') + '-circle" style="margin-right:8px"></i>' + msg + '</div>';
+  el.innerHTML = '<div class="fx-fs-md" style="color:' + (type==='error'?'#f87171':'#4ade80') + '"><i class="fas fa-' + (type==='error'?'times':'check') + '-circle fx-mr-3"></i>' + msg + '</div>';
   el.style.display = 'block';
   el.style.background = type==='error' ? 'rgba(239,68,68,.08)' : 'rgba(34,197,94,.08)';
   el.style.border = '1px solid ' + (type==='error' ? 'rgba(239,68,68,.2)' : 'rgba(34,197,94,.2)');

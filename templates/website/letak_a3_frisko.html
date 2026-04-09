@@ -6,7 +6,7 @@
 <style>
 @page { size: A3 portrait; margin: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #1a1a1a; width: 297mm; min-height: 420mm; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background:var(--bg-card); color:var(--text); width: 297mm; min-height: 420mm; }
 
 .poster {
     width: 297mm; min-height: 420mm; padding: 15mm;
@@ -28,7 +28,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
 }
 
 .top-badge {
-    background: #d4a017; color: #fff; padding: 4mm 12mm; border-radius: 20px;
+    background: #d4a017; color:var(--white); padding: 4mm 12mm; border-radius: 20px;
     font-size: 5mm; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
     margin-bottom: 8mm;
 }
@@ -37,12 +37,12 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
     text-align: center; margin-bottom: 6mm;
 }
 .logo-area h1 {
-    font-size: 22mm; font-weight: 900; color: #1a1a1a;
+    font-size: 22mm; font-weight: 900; color:var(--text);
     letter-spacing: -1px; line-height: 1;
 }
-.logo-area h1 span { color: #d4a017; }
+.logo-area h1 span { color:var(--gold); }
 .logo-area .tagline {
-    font-size: 6mm; color: #666; font-weight: 400; margin-top: 2mm;
+    font-size: 6mm; color:var(--text-dim); font-weight: 400; margin-top: 2mm;
     font-style: italic;
 }
 
@@ -56,11 +56,11 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
     text-align: center; margin-bottom: 8mm;
 }
 .main-message h2 {
-    font-size: 14mm; font-weight: 800; color: #1a1a1a; line-height: 1.2;
+    font-size: 14mm; font-weight: 800; color:var(--text); line-height: 1.2;
     margin-bottom: 3mm;
 }
 .main-message p {
-    font-size: 5.5mm; color: #555; line-height: 1.5; max-width: 220mm;
+    font-size: 5.5mm; color:var(--text-dim); line-height: 1.5; max-width: 220mm;
 }
 
 /* QR sekcije */
@@ -69,19 +69,19 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
     position: relative; z-index: 1;
 }
 .qr-card {
-    background: #fff; border: 0.5mm solid #e8e0c8; border-radius: 6mm;
+    background:var(--bg-card); border: 0.5mm solid #e8e0c8; border-radius: 6mm;
     padding: 8mm; text-align: center; flex: 1; max-width: 120mm;
     box-shadow: 0 2mm 8mm rgba(0,0,0,.06);
 }
 .qr-card .qr-label {
-    font-size: 5mm; font-weight: 700; color: #d4a017; text-transform: uppercase;
+    font-size: 5mm; font-weight: 700; color:var(--gold); text-transform: uppercase;
     letter-spacing: 1px; margin-bottom: 3mm;
 }
 .qr-card img {
     width: 45mm; height: 45mm; display: block; margin: 0 auto 3mm;
 }
 .qr-card .qr-desc {
-    font-size: 4mm; color: #666; line-height: 1.4;
+    font-size: 4mm; color:var(--text-dim); line-height: 1.4;
 }
 .qr-card .qr-icon {
     font-size: 8mm; margin-bottom: 2mm;
@@ -89,11 +89,11 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
 
 /* Usluge */
 .services {
-    background: #1a1a1a; color: #fff; border-radius: 6mm; padding: 8mm 12mm;
+    background:var(--bg-card); color:var(--white); border-radius: 6mm; padding: 8mm 12mm;
     width: 100%; margin: 6mm 0; position: relative; z-index: 1;
 }
 .services h3 {
-    color: #d4a017; font-size: 7mm; font-weight: 700; text-align: center;
+    color:var(--gold); font-size: 7mm; font-weight: 700; text-align: center;
     margin-bottom: 5mm; letter-spacing: 1px;
 }
 .services-grid {
@@ -103,15 +103,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
     background: rgba(212,160,23,.15); border: 0.3mm solid rgba(212,160,23,.3);
     border-radius: 4mm; padding: 3mm 6mm; text-align: center;
 }
-.service-chip .s-name { font-size: 4mm; font-weight: 600; color: #fff; }
-.service-chip .s-price { font-size: 5mm; font-weight: 800; color: #d4a017; }
+.service-chip .s-name { font-size: 4mm; font-weight: 600; color:var(--white); }
+.service-chip .s-price { font-size: 5mm; font-weight: 800; color:var(--gold); }
 
 /* Lokacije */
 .locations {
     text-align: center; margin: 5mm 0; position: relative; z-index: 1;
 }
 .locations h3 {
-    font-size: 5mm; font-weight: 700; color: #1a1a1a; margin-bottom: 3mm;
+    font-size: 5mm; font-weight: 700; color:var(--text); margin-bottom: 3mm;
     text-transform: uppercase; letter-spacing: 1px;
 }
 .loc-chips {
@@ -119,9 +119,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
 }
 .loc-chip {
     background: #f5f0e3; border-radius: 3mm; padding: 2.5mm 5mm;
-    font-size: 3.8mm; color: #333; font-weight: 500;
+    font-size: 3.8mm; color:var(--text); font-weight: 500;
 }
-.loc-chip strong { color: #d4a017; }
+.loc-chip strong { color:var(--gold); }
 
 /* Footer */
 .footer {
@@ -129,9 +129,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
     border-top: 0.3mm solid #e8e0c8; width: 100%;
     position: relative; z-index: 1;
 }
-.footer .addr { font-size: 4.5mm; color: #666; }
+.footer .addr { font-size: 4.5mm; color:var(--text-dim); }
 .footer .slogan {
-    font-size: 6mm; font-weight: 700; color: #d4a017; margin-top: 2mm;
+    font-size: 6mm; font-weight: 700; color:var(--gold); margin-top: 2mm;
 }
 
 @media print {
@@ -201,7 +201,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: 
         </div>
     </div>
 
-    <div style="display:flex;gap:3mm;margin:4mm 0;justify-content:center;position:relative;z-index:1">
+    <div class="d-flex justify-content-center fx-relative" style="gap:3mm;margin:4mm 0;z-index:1">
       <img src="/static/img/frisko/pekara2.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
       <img src="/static/img/frisko/kruh2.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
       <img src="/static/img/frisko/pekara3.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">

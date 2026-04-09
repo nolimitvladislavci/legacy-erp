@@ -6,35 +6,35 @@
 <style>
 @page { size: A4; margin: 15mm; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.6; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color:var(--text); line-height: 1.6; }
 a { color: #7c3aed; text-decoration: underline; }
 
 .header {
-    background: #0a0a0a; color: #fff; padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
+    background:var(--bg); color:var(--white); padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
     text-align: center;
 }
 .header h1 { font-size: 22pt; font-weight: 900; margin-bottom: 2mm; }
-.header h1 span { color: #d4a017; }
-.header .sub { font-size: 10pt; color: #94a3b8; }
-.header .date { font-size: 8pt; color: #475569; margin-top: 3mm; }
+.header h1 span { color:var(--gold); }
+.header .sub { font-size: 10pt; color:var(--text-muted); }
+.header .date { font-size: 8pt; color:var(--text-dim); margin-top: 3mm; }
 
 .section {
-    background: #fff; border: 1pt solid #e2e8f0; border-radius: 8pt;
+    background:var(--bg-card); border: 1pt solid #e2e8f0; border-radius: 8pt;
     padding: 6mm 8mm; margin-bottom: 6mm;
 }
 .section h2 {
-    font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 3mm;
+    font-size: 13pt; font-weight: 700; color:var(--text); margin-bottom: 3mm;
     padding-bottom: 2mm; border-bottom: 1pt solid #e2e8f0;
 }
-.section h2 .icon { color: #d4a017; margin-right: 2mm; }
+.section h2 .icon { color:var(--gold); margin-right: 2mm; }
 
 .login-box {
-    background: #f8fafc; border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
+    background:var(--surface2); border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
     border-radius: 4pt; padding: 5mm 6mm; margin: 4mm 0;
     font-family: 'Courier New', monospace; font-size: 10pt;
 }
-.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-.login-box .value { font-size: 12pt; font-weight: 700; color: #0f172a; }
+.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color:var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.login-box .value { font-size: 12pt; font-weight: 700; color:var(--text); }
 
 .link-card {
     display: flex; align-items: center; gap: 4mm; padding: 3mm 4mm;
@@ -43,13 +43,13 @@ a { color: #7c3aed; text-decoration: underline; }
 .link-card:last-child { border-bottom: none; }
 .link-card .num {
     width: 7mm; height: 7mm; line-height: 7mm; border-radius: 50%;
-    background: #d4a017; color: #fff; font-size: 8pt; font-weight: 800;
+    background: #d4a017; color:var(--white); font-size: 8pt; font-weight: 800;
     text-align: center; flex-shrink: 0;
 }
 .link-card .info { flex: 1; }
 .link-card .title { font-weight: 600; font-size: 10pt; }
 .link-card .url { font-size: 8.5pt; color: #7c3aed; word-break: break-all; }
-.link-card .desc { font-size: 8pt; color: #64748b; }
+.link-card .desc { font-size: 8pt; color:var(--text-dim); }
 
 .steps { margin: 4mm 0; }
 .step { display: flex; gap: 3mm; margin-bottom: 3mm; }
@@ -61,7 +61,7 @@ a { color: #7c3aed; text-decoration: underline; }
 .step .stxt { font-size: 9.5pt; }
 
 .note {
-    background: #fffbeb; border-left: 3pt solid #d4a017;
+    background:var(--amber-dim); border-left: 3pt solid #d4a017;
     padding: 4mm 5mm; margin: 4mm 0; font-size: 9pt;
     border-radius: 0 4pt 4pt 0;
 }
@@ -69,7 +69,7 @@ a { color: #7c3aed; text-decoration: underline; }
 
 .footer {
     text-align: center; margin-top: 8mm; padding-top: 4mm;
-    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color: #94a3b8;
+    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color:var(--text-muted);
 }
 
 @media print {
@@ -90,7 +90,7 @@ a { color: #7c3aed; text-decoration: underline; }
 <!-- Pristupni podaci -->
 <div class="section">
     <h2><span class="icon">🔑</span> Pristupni podaci</h2>
-    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Ovim podacima se prijavujes na sustav. Sacuvaj ih na sigurnom mjestu.</p>
+    <p class="fx-text-dim" style="font-size:9.5pt;margin-bottom:3mm">Ovim podacima se prijavujes na sustav. Sacuvaj ih na sigurnom mjestu.</p>
 
     <div class="login-box">
         <div class="label">Web adresa</div>
@@ -185,7 +185,7 @@ a { color: #7c3aed; text-decoration: underline; }
 <!-- Letci -->
 <div class="section">
     <h2><span class="icon">🖨️</span> Letci za print — otvori i printaj</h2>
-    <p style="font-size:9pt;color:#475569;margin-bottom:3mm">Pripremili smo 3 verzije letka. Otvori link → Ctrl+P → Print u boji.</p>
+    <p class="fx-text-dim" style="font-size:9pt;margin-bottom:3mm">Pripremili smo 3 verzije letka. Otvori link → Ctrl+P → Print u boji.</p>
 
     <div class="link-card">
         <div class="num">A3</div>
@@ -237,29 +237,29 @@ a { color: #7c3aed; text-decoration: underline; }
     <h2><span class="icon">📦</span> Tvoja skladista u sustavu</h2>
     <p style="font-size:9.5pt;margin-bottom:3mm">Evo tvojih 5 lokacija — medjuskladisnica (izdatnica) za prijenos robe:</p>
 
-    <table style="width:100%;border-collapse:collapse;font-size:9.5pt">
-        <tr style="background:#f8fafc">
-            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">CENTRALA</td>
+    <table class="fx-w-full fx-b-collapse" style="font-size:9.5pt">
+        <tr class="fx-bg-surface2">
+            <td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">CENTRALA</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Proizvodnja</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kalnicka 30, Cepin</td>
         </tr>
         <tr>
-            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Ivanovac</td>
+            <td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">PM Ivanovac</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Ivanovac</td>
         </tr>
-        <tr style="background:#f8fafc">
-            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Vladislavci</td>
+        <tr class="fx-bg-surface2">
+            <td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">PM Vladislavci</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Vladislavci</td>
         </tr>
         <tr>
-            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Cepin</td>
+            <td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">PM Cepin</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Cepin</td>
         </tr>
-        <tr style="background:#f8fafc">
-            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">TEREN-1</td>
+        <tr class="fx-bg-surface2">
+            <td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">TEREN-1</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Vozilo</td>
             <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kombi dostava</td>
         </tr>

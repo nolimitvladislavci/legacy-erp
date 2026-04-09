@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;line-height:1.7}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
 a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underline}
 .container{max-width:900px;margin:0 auto;padding:0 20px}
 
@@ -18,89 +18,89 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .hero{background:linear-gradient(135deg,#0f172a 0%,#0d1b2a 50%,#1b2838 100%);padding:60px 20px 50px;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(34,197,94,.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(201,168,76,.06) 0%,transparent 60%)}
 .hero-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
-.hero-icon{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(201,168,76,.08));border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.8rem;color:#22c55e}
-.hero h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}.hero h1 span{color:#22c55e}.hero h1 .gold{color:var(--gold,#c9a84c)}
-.hero .subtitle{font-size:1.05rem;color:#94a3b8;max-width:640px;margin:0 auto 28px}
+.hero-icon{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(201,168,76,.08));border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.8rem;color:var(--green)}
+.hero h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}.hero h1 span{color:var(--green)}.hero h1 .gold{color:var(--gold,#c9a84c)}
+.hero .subtitle{font-size:1.05rem;color:var(--text-muted);max-width:640px;margin:0 auto 28px}
 .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.76rem;font-weight:600}
-.hero-badge.green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+.hero-badge.green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green)}
 .hero-badge.gold{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--gold,#c9a84c)}
-.hero-badge.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+.hero-badge.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--blue)}
 
 /* Sections */
 .section{padding:50px 0}.section-divider{border:none;border-top:1px solid rgba(201,168,76,.12);margin:0}
 .section-title{font-size:1.5rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
-.section-title i{color:#22c55e;font-size:1.2rem}
-.section-subtitle{color:#94a3b8;font-size:.95rem;margin-bottom:32px}
+.section-title i{color:var(--green);font-size:1.2rem}
+.section-subtitle{color:var(--text-muted);font-size:.95rem;margin-bottom:32px}
 
 /* Value cards */
 .value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:32px}
 .value-card{padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);transition:all .3s}
 .value-card:hover{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
 .value-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px}
-.value-card .icon.green{background:rgba(34,197,94,.12);color:#22c55e}
+.value-card .icon.green{background:rgba(34,197,94,.12);color:var(--green)}
 .value-card .icon.gold{background:rgba(201,168,76,.12);color:var(--gold,#c9a84c)}
-.value-card .icon.blue{background:rgba(59,130,246,.12);color:#60a5fa}
-.value-card .icon.red{background:rgba(239,68,68,.12);color:#ef4444}
+.value-card .icon.blue{background:rgba(59,130,246,.12);color:var(--blue)}
+.value-card .icon.red{background:rgba(239,68,68,.12);color:var(--red)}
 .value-card .icon.purple{background:rgba(168,85,247,.12);color:#a855f7}
 .value-card h3{font-size:1rem;font-weight:700;margin-bottom:6px}
-.value-card p{font-size:.85rem;color:#94a3b8;line-height:1.6}
+.value-card p{font-size:.85rem;color:var(--text-muted);line-height:1.6}
 
 /* Pipeline */
 .pipeline{display:flex;gap:0;margin:32px 0;flex-wrap:wrap}
 .pipeline-step{flex:1;min-width:180px;padding:20px 16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);position:relative;text-align:center}
 .pipeline-step:first-child{border-radius:14px 0 0 14px}
 .pipeline-step:last-child{border-radius:0 14px 14px 0}
-.pipeline-step .step-num{width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.15);color:#22c55e;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.pipeline-step .step-num{width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.15);color:var(--green);font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
 .pipeline-step h4{font-size:.85rem;font-weight:700;margin-bottom:4px}
-.pipeline-step p{font-size:.75rem;color:#94a3b8}
+.pipeline-step p{font-size:.75rem;color:var(--text-muted)}
 .pipeline-arrow{display:flex;align-items:center;color:rgba(34,197,94,.4);font-size:1.2rem;padding:0 2px}
 
 /* Standard badges */
 .standards{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}
 .std-badge{padding:10px 18px;border-radius:10px;font-size:.8rem;font-weight:700;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);display:flex;align-items:center;gap:8px}
 .std-badge i{font-size:.9rem}
-.std-badge.eu{border-color:rgba(59,130,246,.25);color:#60a5fa}
-.std-badge.hr{border-color:rgba(239,68,68,.2);color:#fca5a5}
+.std-badge.eu{border-color:rgba(59,130,246,.25);color:var(--blue)}
+.std-badge.hr{border-color:rgba(239,68,68,.2);color:var(--red)}
 .std-badge.de{border-color:rgba(245,158,11,.2);color:#fbbf24}
-.std-badge.peppol{border-color:rgba(34,197,94,.25);color:#4ade80}
+.std-badge.peppol{border-color:rgba(34,197,94,.25);color:var(--green)}
 
 /* How to use */
 .howto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
 .howto-step{padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);text-align:center}
 .howto-step .num{font-size:2rem;font-weight:900;color:rgba(34,197,94,.3);margin-bottom:8px}
 .howto-step h4{font-size:.9rem;font-weight:700;margin-bottom:6px}
-.howto-step p{font-size:.8rem;color:#94a3b8}
+.howto-step p{font-size:.8rem;color:var(--text-muted)}
 
 /* API section */
 .api-block{background:rgba(15,23,42,.8);border:1px solid rgba(59,130,246,.15);border-radius:14px;padding:24px;margin:20px 0;font-family:'Fira Code','Cascadia Code',monospace}
 .api-block .method{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.72rem;font-weight:800;margin-right:8px}
-.api-block .method.post{background:rgba(34,197,94,.15);color:#4ade80}
-.api-block .method.get{background:rgba(59,130,246,.15);color:#60a5fa}
-.api-block .url{font-size:.85rem;color:#e2e8f0}
-.api-block .desc{font-size:.78rem;color:#94a3b8;margin-top:8px}
-.api-block pre{background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-top:12px;font-size:.75rem;color:#94a3b8;overflow-x:auto;line-height:1.5}
-.api-block pre .key{color:var(--gold,#c9a84c)}.api-block pre .val{color:#4ade80}.api-block pre .comment{color:#475569}
+.api-block .method.post{background:rgba(34,197,94,.15);color:var(--green)}
+.api-block .method.get{background:rgba(59,130,246,.15);color:var(--blue)}
+.api-block .url{font-size:.85rem;color:var(--text)}
+.api-block .desc{font-size:.78rem;color:var(--text-muted);margin-top:8px}
+.api-block pre{background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-top:12px;font-size:.75rem;color:var(--text-muted);overflow-x:auto;line-height:1.5}
+.api-block pre .key{color:var(--gold,#c9a84c)}.api-block pre .val{color:var(--green)}.api-block pre .comment{color:var(--text-dim)}
 
 /* Comparison table */
 .cmp-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.82rem}
 .cmp-table th{padding:12px 16px;text-align:left;background:rgba(255,255,255,.03);border-bottom:2px solid rgba(201,168,76,.2);color:var(--gold,#c9a84c);font-weight:700;text-transform:uppercase;font-size:.7rem;letter-spacing:1px}
 .cmp-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
 .cmp-table tr:hover td{background:rgba(255,255,255,.02)}
-.cmp-check{color:#22c55e;font-weight:700}.cmp-x{color:#475569}
+.cmp-check{color:var(--green);font-weight:700}.cmp-x{color:var(--text-dim)}
 
 /* CTA */
 .cta{text-align:center;padding:50px 20px;background:linear-gradient(135deg,rgba(34,197,94,.04),rgba(201,168,76,.04))}
 .cta h2{font-size:1.8rem;font-weight:800;margin-bottom:10px}
-.cta p{color:#94a3b8;margin-bottom:28px;max-width:500px;margin-left:auto;margin-right:auto}
+.cta p{color:var(--text-muted);margin-bottom:28px;max-width:500px;margin-left:auto;margin-right:auto}
 .cta-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;font-size:.95rem;font-weight:700;text-decoration:none;transition:all .2s}
-.cta-btn.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.cta-btn.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:var(--white)}
 .cta-btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,.3)}
 .cta-btn.secondary{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);margin-left:12px}
 
 /* Footer */
-.footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.04);font-size:.75rem;color:#475569}
-.footer a{color:#94a3b8}
+.footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.04);font-size:.75rem;color:var(--text-dim)}
+.footer a{color:var(--text-muted)}
 
 /* Testimonial */
 .quote-block{background:rgba(201,168,76,.03);border-left:3px solid rgba(201,168,76,.4);border-radius:0 12px 12px 0;padding:20px 24px;margin:24px 0;font-style:italic;color:#cbd5e1;font-size:.9rem}
@@ -110,7 +110,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .rule-list{list-style:none;padding:0;margin:20px 0}
 .rule-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.85rem;display:flex;align-items:flex-start;gap:10px}
 .rule-list li:last-child{border-bottom:none}
-.rule-list .code{font-family:monospace;font-size:.75rem;color:#22c55e;background:rgba(34,197,94,.08);padding:2px 8px;border-radius:4px;white-space:nowrap;min-width:70px}
+.rule-list .code{font-family:monospace;font-size:.75rem;color:var(--green);background:rgba(34,197,94,.08);padding:2px 8px;border-radius:4px;white-space:nowrap;min-width:70px}
 
 @media(max-width:768px){
   .hero h1{font-size:1.7rem}
@@ -123,9 +123,9 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 }
 
 @media print{
-  body{background:#fff;color:#1a1a1a}
-  .hero{background:#f0f4f8!important;color:#1a1a1a}
-  .hero h1,.hero .subtitle{color:#1a1a1a}
+  body{background:var(--bg-card);color:var(--text)}
+  .hero{background:#f0f4f8!important;color:var(--text)}
+  .hero h1,.hero .subtitle{color:var(--text)}
   .hero-badge,.std-badge,.value-card,.howto-step,.pipeline-step,.api-block{border-color:#ddd;background:#f9f9f9}
   .section-divider{border-color:#ddd}
 }
@@ -153,7 +153,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 <!-- PROBLEM -->
 <div class="container">
 <div class="section">
-  <div class="section-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Problem koji rješavamo</div>
+  <div class="section-title"><i class="fas fa-exclamation-triangle fx-text-red"></i> Problem koji rješavamo</div>
   <div class="section-subtitle">Svaki odbijeni e-Račun košta vrijeme, novac i živce. CroXML Verify ih eliminira prije slanja.</div>
 
   <div class="value-grid">
@@ -288,7 +288,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   <div class="section-title"><i class="fas fa-play-circle"></i> Kako koristiti</div>
   <div class="section-subtitle">Tri načina — web sučelje, API, ili automatizirano unutar LIMIT Connect-a.</div>
 
-  <h3 style="font-size:1.1rem;margin-bottom:20px"><i class="fas fa-globe" style="color:#22c55e;margin-right:8px"></i> 1. Web Validator (javni pristup)</h3>
+  <h3 class="fx-fs-xl mb-4"><i class="fas fa-globe fx-text-green fx-mr-3"></i> 1. Web Validator (javni pristup)</h3>
   <div class="howto-grid" style="margin-bottom:36px">
     <div class="howto-step">
       <div class="num">01</div>
@@ -312,7 +312,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
     </div>
   </div>
 
-  <h3 style="font-size:1.1rem;margin-bottom:20px"><i class="fas fa-code" style="color:#60a5fa;margin-right:8px"></i> 2. e-Račun API (za integratere)</h3>
+  <h3 class="fx-fs-xl mb-4"><i class="fas fa-code fx-text-blue fx-mr-3"></i> 2. e-Račun API (za integratere)</h3>
 
   <div class="api-block">
     <span class="method post">POST</span>
@@ -360,7 +360,7 @@ TS-04: Fiskalizacija — CIS ping, fiskalni certifikat
 TS-05: Inbox — prijem e-Računa, Posrednik konekcija</pre>
   </div>
 
-  <h3 style="font-size:1.1rem;margin:36px 0 20px"><i class="fas fa-cog" style="color:var(--gold,#c9a84c);margin-right:8px"></i> 3. Automatski (unutar LIMIT Connect)</h3>
+  <h3 class="fx-fs-xl" style="margin:36px 0 20px"><i class="fas fa-cog fx-text-gold fx-mr-3"></i> 3. Automatski (unutar LIMIT Connect)</h3>
   <div class="value-grid">
     <div class="value-card">
       <div class="icon green"><i class="fas fa-robot"></i></div>
@@ -511,8 +511,8 @@ TS-05: Inbox — prijem e-Računa, Posrednik konekcija</pre>
 <!-- FOOTER -->
 <div class="footer">
   <p><strong>CroXML Verify</strong> — modul sustava <a href="https://limit-connect.com">LIMIT Connect</a></p>
-  <p style="margin-top:6px">Podržani standardi: UBL 2.1, EN 16931, PEPPOL BIS 3.0, HR CIUS-2025, XRechnung, ZUGFeRD 2.2, XAdES</p>
-  <p style="margin-top:6px">&copy; 2026 LIMIT Connect &middot; Sva prava pridržana</p>
+  <p class="mt-1">Podržani standardi: UBL 2.1, EN 16931, PEPPOL BIS 3.0, HR CIUS-2025, XRechnung, ZUGFeRD 2.2, XAdES</p>
+  <p class="mt-1">&copy; 2026 LIMIT Connect &middot; Sva prava pridržana</p>
 </div>
 
 </body>

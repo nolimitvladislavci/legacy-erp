@@ -5,21 +5,21 @@
 <meta charset="UTF-8">
 <style>
   @page { size: A4; margin: 18mm 14mm; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; line-height: 1.35; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color:var(--text); line-height: 1.35; }
   h1 { font-size: 13pt; text-align: center; margin: 0 0 2px; }
   h2 { font-size: 10pt; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 1px solid var(--gold,#c9a84c); }
   .hdr { border: 2px solid var(--gold,#c9a84c); padding: 10px 14px; margin-bottom: 14px; background: #fdfcf8; text-align: center; }
   .hdr .org { font-size: 10pt; font-weight: bold; color: var(--gold,#c9a84c); letter-spacing: 1px; }
   table { width: 100%; border-collapse: collapse; margin: 6px 0; }
-  th, td { border: 1px solid #ccc; padding: 4px 7px; font-size: 9pt; }
+  th, td { border:1px solid var(--border); padding: 4px 7px; font-size: 9pt; }
   th { background: #f5f0e5; font-weight: bold; }
   .r { text-align: right; }
   .b { font-weight: bold; }
   .tot { background: #f5f0e5; font-weight: bold; }
   .gold { color: var(--gold,#c9a84c); }
-  .info td:first-child { width: 34%; color: #666; }
+  .info td:first-child { width: 34%; color:var(--text-dim); }
   .warn { background: #fff3cd; border: 1px solid #ffc107; padding: 5px 8px; font-size: 8.5pt; margin: 6px 0; }
-  .note { margin-top: 14px; padding: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 7.5pt; color: #888; }
+  .note { margin-top: 14px; padding: 8px; border:1px solid var(--border); background: #fafafa; font-size: 7.5pt; color:var(--text-muted); }
   .sig { margin-top: 28px; display: flex; justify-content: space-between; }
   .sig-box { width: 44%; text-align: center; border-top: 1px solid #333; padding-top: 3px; font-size: 8.5pt; }
 </style>
@@ -29,7 +29,7 @@
 <div class="hdr">
   <div class="org">OBRAZAC PO-SD</div>
   <h1>Izvješće o paušalnom dohotku od samostalnih djelatnosti</h1>
-  <div style="font-size:8.5pt;color:#666;">Porezna godina: <b>{{ year }}.</b> | Čl.82. Zakona o porezu na dohodak</div>
+  <div class="fx-text-dim" style="font-size:8.5pt">Porezna godina: <b>{{ year }}.</b> | Čl.82. Zakona o porezu na dohodak</div>
 </div>
 
 <h2>I. Podaci o poreznom obvezniku</h2>
@@ -77,10 +77,10 @@
   <tr class="tot"><td>UKUPNO GODIŠNJE (porez + prirez)</td><td class="r b gold" style="font-size:12pt;">{{ ukupno_godisnje }} €</td></tr>
 </table>
 
-<div style="margin:8px 0;font-size:8.5pt;color:#666;">
+<div class="fx-text-dim" style="margin:8px 0;font-size:8.5pt">
   Efektivna porezna stopa: <b>{{ efektivna_stopa }}%</b> (porez / primitci)
   {% if efektivna_stopa > 30 %}
-  <span style="color:#ef4444;">— Razmotrite prijelaz na oporezivanje dohotka ako imate značajne troškove.</span>
+  <span class="fx-text-red">— Razmotrite prijelaz na oporezivanje dohotka ako imate značajne troškove.</span>
   {% endif %}
 </div>
 
@@ -101,11 +101,11 @@
 
 {% for rok in rokovi %}
 {% if rok.hub3a_base64 %}
-<div style="border:1px solid #ddd;padding:8px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;">
+<div class="d-flex justify-content-between align-items-center fx-p-8 fx-b" style="margin:4px 0">
   <div>
     <div class="b" style="font-size:9pt;">Q{{ rok.q }} — {{ rok.rata }} €</div>
-    <div style="font-size:7.5pt;color:#666;">Rok: {{ rok.deadline|date:"d.m.Y" }} | IBAN: {{ pu_iban }}</div>
-    <div style="font-size:7pt;color:#999;">Model: HR68 | Poziv: {{ rok.hub3a_reference }}</div>
+    <div class="fx-text-dim" style="font-size:7.5pt">Rok: {{ rok.deadline|date:"d.m.Y" }} | IBAN: {{ pu_iban }}</div>
+    <div class="fx-text-muted" style="font-size:7pt">Model: HR68 | Poziv: {{ rok.hub3a_reference }}</div>
   </div>
   <img src="data:image/png;base64,{{ rok.hub3a_base64 }}" style="width:170px;height:auto;" alt="HUB-3A Q{{ rok.q }}">
 </div>

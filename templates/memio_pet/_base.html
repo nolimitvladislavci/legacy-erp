@@ -71,12 +71,10 @@ function toggleTheme(){
 </script>
 
 <!-- Cookie banner (minimalni, samo tehničke) -->
-<div id="cookie-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
-  background:var(--ink);color:var(--top-text);padding:14px 24px;
-  font-size:.82rem;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-  <span>{% trans "Koristimo samo tehničke kolačiće nužne za rad stranice." %} <a href="/privatnost/" style="color:var(--gold)">{% trans "Saznaj više" %}</a></span>
+<div id="cookie-bar" class="fx-hidden fx-fs-note fx-gap-4 fx-flex-wrap align-items-center justify-content-between" style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:var(--ink);color:var(--top-text);padding:14px 24px">
+  <span>{% trans "Koristimo samo tehničke kolačiće nužne za rad stranice." %} <a href="/privatnost/" class="fx-text-gold">{% trans "Saznaj više" %}</a></span>
   <button onclick="document.getElementById('cookie-bar').style.display='none';localStorage.setItem('mp-cookies','1')"
-    style="background:var(--gold);color:var(--ink);border:none;padding:8px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:var(--sans);white-space:nowrap">
+    class="fx-border-none fx-rounded-sm fx-fw-semibold fx-pointer text-nowrap fx-bg-gold" style="color:var(--ink);padding:8px 20px;font-family:var(--sans)">
     U redu
   </button>
 </div>

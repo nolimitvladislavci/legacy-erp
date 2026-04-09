@@ -15,7 +15,7 @@
                     <td>{{ entry.asset.asset_code }}</td>
                     <td>{{ item.doc }}</td>
                     <td>{{ item.date }}</td>
-                    <td>{% if item.expired %}<span class="badge bg-danger">Isteklo</span>{% else %}<span class="badge bg-warning text-dark">Istice uskoro</span>{% endif %}</td>
+                    <td>{% if item.expired %}<span class="fenix-badge fenix-badge-danger">Isteklo</span>{% else %}<span class="fenix-badge fenix-badge-warning">Istice uskoro</span>{% endif %}</td>
                 </tr>
                 {% endfor %}{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema dokumenata koji isticu</td></tr>{% endfor %}
                 </tbody>

@@ -53,15 +53,15 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
 .login-gate-wrap h2 { font-family: "Cormorant Garamond", serif; font-size: 1.8rem; color: var(--gold); margin-top: 0; margin-bottom: .5rem; }
 .tabs { display: flex; gap: 0; margin-bottom: 24px; }
 .tab-btn { flex: 1; background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; font-family: Barlow, sans-serif; font-size: .85rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: .2s; }
-.tab-btn.active { background: var(--gold); border-color: var(--gold); color: #0a0a0a; font-weight: 700; }
+.tab-btn.active { background: var(--gold); border-color: var(--gold); color:var(--text); font-weight: 700; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 .auth-form-group { margin-bottom: 16px; }
 .auth-form-group label { display: block; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .auth-form-group input { width: 100%; background: var(--dark); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; font-family: Barlow, sans-serif; font-size: .95rem; outline: none; }
 .auth-form-group input:focus { border-color: var(--gold); }
-.auth-error { color: #ef4444; font-size: .85rem; margin-bottom: 12px; display: none; }
-.btn-gold { display: block; width: 100%; background: var(--gold); color: #0a0a0a; padding: 14px; border: none; font-family: Barlow, sans-serif; font-weight: 700; font-size: .9rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: .2s; margin-top: 8px; }
+.auth-error { color:var(--red); font-size: .85rem; margin-bottom: 12px; display: none; }
+.btn-gold { display: block; width: 100%; background: var(--gold); color:var(--text); padding: 14px; border: none; font-family: Barlow, sans-serif; font-weight: 700; font-size: .9rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: .2s; margin-top: 8px; }
 .btn-gold:hover { background: #e8c96a; }
 
 .success-section { display: none; padding: 60px 40px; text-align: center; }
@@ -69,7 +69,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
 {% endblock %}
 
 {% block content %}
-<div style="width:100%;padding:0 16px;max-width:960px;margin:0 auto">
+<div class="fx-w-full fx-m-auto" style="padding:0 16px;max-width:960px">
 <div class="booking-container">
     <div class="bk-header">
         <h1>{{ service.name }}</h1>
@@ -102,7 +102,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
             <div>{% trans "Čet" %}</div><div>{% trans "Pet" %}</div><div>{% trans "Sub" %}</div><div>{% trans "Ned" %}</div>
         </div>
         <div class="days-grid" id="daysGrid"></div>
-        <p class="step-hint" style="text-align:center">{% trans "Odaberite datum za nastavak" %}</p>
+        <p class="step-hint text-center">{% trans "Odaberite datum za nastavak" %}</p>
     </div>
 
     <!-- KORAK 3: VRIJEME -->
@@ -110,11 +110,11 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
         <div class="slots-title" id="slotsTitle">{% trans "Odaberite termin" %}</div>
         <div class="slots-grid" id="slotsGrid"><div class="no-slots">{% trans "Učitavanje termina..." %}</div></div>
         <div class="loader" id="slotsLoader">{% trans "Tražim slobodne termine..." %}</div>
-        <div class="slot-legend" id="slotLegend" style="display:none">
-            <span><span class="legend-dot" style="background:var(--gold)"></span> {% trans "Slobodno" %}</span>
+        <div class="slot-legend fx-hidden" id="slotLegend">
+            <span><span class="legend-dot fx-bg-gold"></span> {% trans "Slobodno" %}</span>
             <span><span class="legend-dot" style="background:var(--border)"></span> {% trans "Zauzeto" %}</span>
         </div>
-        <div class="btn-back-link" style="margin-top:20px" onclick="goToStep(2)">{% trans "&#8592; Natrag na datum" %}</div>
+        <div class="btn-back-link mt-4" onclick="goToStep(2)">{% trans "&#8592; Natrag na datum" %}</div>
     </div>
 
     <!-- LOGIN GATE -->
@@ -123,7 +123,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
         <div class="booking-summary-bar">
             {% trans "Odabrani termin:" %} <strong id="loginSummaryDate"></strong> u <strong id="loginSummaryTime"></strong> &nbsp;—&nbsp; {{ service.name }}
         </div>
-        <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">{% trans "Za rezervaciju termina potrebna je prijava ili registracija." %}</p>
+        <p class="fx-fs-md fx-text-muted mb-4">{% trans "Za rezervaciju termina potrebna je prijava ili registracija." %}</p>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('login')">{% trans "Prijava" %}</button>
             <button class="tab-btn" onclick="switchTab('register')">{% trans "Registracija" %}</button>
@@ -184,7 +184,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
             <div class="payment-opt" data-value="invoice" onclick="selectPayment(this)"><div class="pay-icon">&#128196;</div><div class="pay-label">{% trans "Na račun" %}</div></div>
         </div>
         <input type="hidden" id="selectedPayment" value="cash">
-        <div style="color:var(--muted);font-size:.8rem;margin-bottom:16px">{% trans "✉ Nakon rezervacije dobit ćete potvrdu na email." %}</div>
+        <div class="fx-fs-compact fx-text-muted mb-3">{% trans "✉ Nakon rezervacije dobit ćete potvrdu na email." %}</div>
         <div class="error-msg" id="errorMsg"></div>
         <button class="btn-next" id="submitBtn" onclick="submitBooking()">{% trans "Potvrdi rezervaciju" %}</button>
         <div class="btn-back-link" onclick="goToStep(4)">{% trans "&#8592; Natrag na podatke" %}</div>
@@ -192,10 +192,10 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
 
     <!-- KORAK 6: POTVRDA -->
     <div id="stepSuccess" class="success-section">
-        <div style="font-size:3rem">&#9989;</div>
-        <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:2.5rem;margin-bottom:10px">{% trans "Hvala Vam." %}</h2>
-        <p style="color:var(--muted);font-size:1rem">{% trans "Vaš termin je uspješno rezerviran." %}<br>{% trans "Potvrda je poslana na Vaš email." %}</p>
-        <a href="{% url 'dashboard' %}" style="display:inline-block;margin-top:28px;color:var(--gold);border:1px solid var(--gold);padding:10px 22px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:.8rem">{% trans "Povratak" %}</a>
+        <div class="fx-fs-hero">&#9989;</div>
+        <h2 class="fx-text-gold mb-2 fx-fs-7xl" style="font-family:'Cormorant Garamond',serif">{% trans "Hvala Vam." %}</h2>
+        <p class="fx-fs-lg fx-text-muted">{% trans "Vaš termin je uspješno rezerviran." %}<br>{% trans "Potvrda je poslana na Vaš email." %}</p>
+        <a href="{% url 'dashboard' %}" class="fx-no-underline fx-fs-compact d-inline-block fx-text-gold fx-uppercase" style="margin-top:28px;border:1px solid var(--gold);padding:10px 22px;letter-spacing:2px">{% trans "Povratak" %}</a>
     </div>
 
     <input type="hidden" id="serviceId" value="{{ service.id }}">
@@ -386,7 +386,7 @@ function submitRegister(e) {
 }
 
 /* pw-toggle */
-(function(){var EO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';var EC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';function addToggle(inp){if(inp._pwDone)return;inp._pwDone=true;var w=document.createElement('div');w.style.cssText='position:relative;display:block;';inp.parentNode.insertBefore(w,inp);w.appendChild(inp);inp.style.paddingRight='40px';var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title='Prikaži/sakrij lozinku';b.style.cssText='position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#888;line-height:0;z-index:2;';b.innerHTML=EO;b.onclick=function(e){e.preventDefault();if(inp.type==='password'){inp.type='text';b.innerHTML=EC;}else{inp.type='password';b.innerHTML=EO;}};w.appendChild(b);}function init(){document.querySelectorAll('input[type="password"]').forEach(addToggle);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();
+(function(){var EO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-block"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';var EC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-block"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';function addToggle(inp){if(inp._pwDone)return;inp._pwDone=true;var w=document.createElement('div');w.style.cssText='position:relative;display:block;';inp.parentNode.insertBefore(w,inp);w.appendChild(inp);inp.style.paddingRight='40px';var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title='Prikaži/sakrij lozinku';b.style.cssText='position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-dim);line-height:0;z-index:2;';b.innerHTML=EO;b.onclick=function(e){e.preventDefault();if(inp.type==='password'){inp.type='text';b.innerHTML=EC;}else{inp.type='password';b.innerHTML=EO;}};w.appendChild(b);}function init(){document.querySelectorAll('input[type="password"]').forEach(addToggle);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();
 
 renderCalendar();
 showStep(2);

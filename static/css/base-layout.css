@@ -17,7 +17,7 @@
 
         /* ═══ SIDEBAR ═══ */
         .sidebar {
-            width: 260px; background: #0f1219; color: #e2e8f0; transition:background .3s;
+            width: 260px; background: var(--sidebar-bg); color: var(--text-dim); transition:background .3s;
             display: flex; flex-direction: column; flex-shrink: 0;
             position: fixed; top: 0; left: 0; bottom: 0;
             overflow-y: auto; z-index: 1000;
@@ -29,8 +29,8 @@
         .sidebar-brand span { color: var(--gold); }
         .sidebar-close { display: none; background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; }
         .sidebar-role { padding: 6px 16px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; background: var(--surface2); color: var(--gold); }
-        .sidebar-section { padding: 8px 12px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-top: 6px; }
-        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
+        .sidebar-section { padding: 8px 12px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted3); margin-top: 6px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--text-dim); text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
         .sidebar a:hover, .sidebar a.active { background: rgba(201,168,76,0.1); color: #fff; }
         .sidebar a i { width: 18px; text-align: center; font-size: 0.85rem; }
         .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid var(--surface2); position: sticky; bottom: 0; background: var(--sidebar-bg, var(--surface-deep)); z-index: 10; }
@@ -40,7 +40,7 @@
         .sidebar-group-toggle {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 12px; font-size: 0.6rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1.5px; color: #475569;
+            text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim);
             margin-top: 6px; cursor: pointer; user-select: none;
             border: none; background: none; width: 100%;
             transition: color 0.15s;
@@ -332,9 +332,9 @@
     .htmx-request button[type=submit],.htmx-request .btn-submit{opacity:.6;pointer-events:none}
     .toast-container{position:fixed;top:20px;right:20px;z-index:20000}
     .borg-toast{padding:12px 20px;border-radius:10px;color:#fff;font-size:.85rem;font-weight:600;margin-bottom:8px;animation:toastIn .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.3)}
-    .borg-toast.success{background:#16a34a}
+    .borg-toast.success{background:var(--green)}
     .borg-toast.error{background:var(--red)}
-    .borg-toast.warning{background:#d97706}
+    .borg-toast.warning{background:var(--amber)}
     @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
 
 /* ═══ F1 AUDIT: Sidebar light mode fix ═══ */
@@ -344,7 +344,7 @@
 :root .sidebar a:hover, :root .sidebar a.active { color: var(--text, #0f172a); }
 :root .sidebar-section { color: var(--muted2, #64748b); }
 :root .sidebar-group-toggle { color: var(--text-dim, #475569); }
-[data-theme="dark"] .sidebar { color: #cbd5e1; }
-[data-theme="dark"] .sidebar-brand { color: white; }
+[data-theme="dark"] .sidebar { color: var(--text-dim); }
+[data-theme="dark"] .sidebar-brand { color: var(--white); }
 [data-theme="dark"] .sidebar a { color: var(--text-dim, #94a3b8); }
 [data-theme="dark"] .sidebar a:hover, [data-theme="dark"] .sidebar a.active { color: white; }

@@ -22,7 +22,7 @@
         <td>{{ l.unit_price }} EUR/{{ l.unit }}</td>
         <td>{{ l.total_capacity }} {{ l.unit }}</td>
         <td>
-            <div class="progress" style="height:6px;width:80px;display:inline-block;vertical-align:middle">
+            <div class="progress d-inline-block" style="height:6px;width:80px;vertical-align:middle">
                 <div class="progress-bar bg-success" style="width:{{ l.percent_reserved }}%"></div>
             </div>
             {{ l.percent_reserved }}%
@@ -52,11 +52,11 @@
         <td>{% if r.discount_percent > 0 %}<span class="text-success">-{{ r.discount_percent }}%</span>{% else %}-{% endif %}</td>
         <td><strong>{{ r.total_price|floatformat:2 }} EUR</strong></td>
         <td>{{ r.deposit_amount|floatformat:2 }} EUR
-            {% if r.deposit_paid %}<span class="badge bg-success">OK</span>{% else %}<span class="badge bg-warning">?</span>{% endif %}
+            {% if r.deposit_paid %}<span class="fenix-badge fenix-badge-success">OK</span>{% else %}<span class="fenix-badge fenix-badge-warning">?</span>{% endif %}
         </td>
-        <td><span class="badge bg-info">{{ r.get_status_display }}</span></td>
+        <td><span class="fenix-badge fenix-badge-info">{{ r.get_status_display }}</span></td>
         <td>{{ r.get_delivery_preference_display }}
-            {% if r.recurring_weekly %}<span class="badge bg-primary">{{ r.delivery_slots.count }}x tjedno</span>{% endif %}
+            {% if r.recurring_weekly %}<span class="fenix-badge fenix-badge-info">{{ r.delivery_slots.count }}x tjedno</span>{% endif %}
         </td>
     </tr>
     {% endfor %}

@@ -23,39 +23,39 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
         .logo-text {
-            color: white; font-weight: 800; font-size: 1.6rem;
+            color:var(--text); font-weight: 800; font-size: 1.6rem;
             text-align: center; margin-bottom: 28px; letter-spacing: 1px;
         }
         .logo-text span { color: var(--gold,#c9a84c); }
         .form-control {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 12px 15px; border-radius: 10px;
+            color:var(--text); padding: 12px 15px; border-radius: 10px;
             font-size: .95rem;
         }
         .form-control:focus {
             background: rgba(15, 23, 42, 0.8); border-color: var(--gold,#c9a84c);
-            box-shadow: 0 0 0 .2rem rgba(201,168,76,0.2); color: white;
+            box-shadow: 0 0 0 .2rem rgba(201,168,76,0.2); color:var(--text);
         }
         .btn-gold {
-            background: var(--gold,#c9a84c); border: none; color: #0f172a;
+            background: var(--gold,#c9a84c); border: none; color:var(--text);
             font-weight: 700; padding: 13px; border-radius: 10px;
             font-size: 1rem; width: 100%; transition: all .2s;
         }
-        .btn-gold:hover { background: #e8c96a; color: #0f172a; }
-        .form-label { color: #94a3b8; font-size: .82rem; margin-bottom: 4px; }
-        .error-box { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;color:#fca5a5;font-size:.84rem; }
+        .btn-gold:hover { background: #e8c96a; color:var(--text); }
+        .form-label { color:var(--text-muted); font-size: .82rem; margin-bottom: 4px; }
+        .error-box { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;color:var(--red);font-size:.84rem; }
         .success-box { background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;color:#86efac;font-size:.84rem; }
         .pwd-wrap { position: relative; }
         .pwd-eye { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gold,#c9a84c);font-size:15px;padding:0; }
         a { color: var(--gold,#c9a84c); text-decoration: none; font-weight: 600; }
         a:hover { color: #e8c96a; }
-        .footer-links { text-align:center;margin-top:20px;font-size:.82rem;color:#64748b; }
-        .footer-links a { color:#64748b;font-weight:400; }
+        .footer-links { text-align:center;margin-top:20px;font-size:.82rem;color:var(--text-dim); }
+        .footer-links a { color:var(--text-dim);font-weight:400; }
         .footer-links a:hover { color:var(--gold,#c9a84c); }
         .lang-bar { display:flex;gap:4px;justify-content:center;margin-top:16px; }
-        .lang-btn { padding:3px 10px;font-size:.7rem;font-weight:700;border-radius:5px;border:1px solid rgba(255,255,255,.1);color:#64748b;background:none;cursor:pointer;letter-spacing:.5px; }
-        .lang-btn.active { background:var(--gold,#c9a84c);color:#0f172a;border-color:var(--gold,#c9a84c); }
+        .lang-btn { padding:3px 10px;font-size:.7rem;font-weight:700;border-radius:5px;border:1px solid rgba(255,255,255,.1);color:var(--text-dim);background:none;cursor:pointer;letter-spacing:.5px; }
+        .lang-btn.active { background:var(--gold,#c9a84c);color:var(--text);border-color:var(--gold,#c9a84c); }
         /* Password strength */
         .pwd-strength { margin-top:8px; }
         .pwd-strength-bar { height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px; }
@@ -88,7 +88,7 @@
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center">
                 <label class="form-label mb-0"><i class="fas fa-lock me-1"></i>{% trans "Lozinka" %}</label>
-                <a href="{% url 'password_reset' %}" style="font-size:.78rem;font-weight:400;color:#64748b">{% trans "Zaboravljena?" %}</a>
+                <a href="{% url 'password_reset' %}" class="fx-fs-body-sm fx-fw-normal fx-text-muted">{% trans "Zaboravljena?" %}</a>
             </div>
             <div class="pwd-wrap mt-1">
                 <input type="password" name="password" id="pwd" class="form-control" required
@@ -98,7 +98,7 @@
                 </button>
             </div>
             <!-- Password strength indicator -->
-            <div class="pwd-strength" id="pwd-strength" style="display:none">
+            <div class="pwd-strength fx-hidden" id="pwd-strength">
                 <div class="pwd-strength-bar">
                     <div class="pwd-strength-fill" id="pwd-bar"></div>
                 </div>
@@ -107,7 +107,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <label style="color:#94a3b8;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <label class="fx-text-muted fx-fs-compact fx-pointer d-flex fx-gap-2 align-items-center">
                 <input type="checkbox" name="remember" checked style="accent-color:var(--gold,#c9a84c)"> {% trans "Zapamti me" %}
             </label>
         </div>
@@ -118,17 +118,17 @@
     </form>
 
     <div class="footer-links">
-        <div style="margin-top:16px">
-            <span style="color:#64748b">{% trans "Nemate račun?" %}</span>
-            <a href="{% url 'accounts:quick_register' %}" style="color:var(--gold,#c9a84c);font-weight:700"> {% trans "Registrirajte se" %}</a>
+        <div class="mt-3">
+            <span class="fx-text-muted">{% trans "Nemate račun?" %}</span>
+            <a href="{% url 'accounts:quick_register' %}" class="fx-fw-bold fx-text-gold"> {% trans "Registrirajte se" %}</a>
         </div>
     </div>
 
     {% get_current_language as CUR_LANG %}
-    <div class="lang-bar" style="display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap">
+    <div class="lang-bar d-flex fx-gap-2 fx-flex-wrap justify-content-center mt-3">
         {% for lang_code, lang_name in LANGUAGES %}
         <button class="lang-btn {% if CUR_LANG == lang_code %}active{% endif %}" onclick="switchLang('{{ lang_code }}')">
-            <span style="font-size:1.1rem">{% if lang_code == 'hr' %}&#127469;&#127479;{% elif lang_code == 'de' %}&#127465;&#127466;{% elif lang_code == 'en' %}&#127468;&#127463;{% elif lang_code == 'tr' %}&#127481;&#127479;{% elif lang_code == 'el' %}&#127468;&#127479;{% endif %}</span>
+            <span class="fx-fs-xl">{% if lang_code == 'hr' %}&#127469;&#127479;{% elif lang_code == 'de' %}&#127465;&#127466;{% elif lang_code == 'en' %}&#127468;&#127463;{% elif lang_code == 'tr' %}&#127481;&#127479;{% elif lang_code == 'el' %}&#127468;&#127479;{% endif %}</span>
             {{ lang_code|upper }}
         </button>
         {% endfor %}

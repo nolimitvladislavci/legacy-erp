@@ -3,61 +3,10 @@
 {% block title %}{{ prop.name }}{% endblock %}
 {% block page_title %}{{ prop.name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h2 class="mb-0">{{ prop.name }}</h2>
-    <small class="text-muted">{{ prop.get_type_display }}
-      {% if prop.location %} &middot; {{ prop.location }}{% endif %}
-    </small>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'rental:booking_create' prop.pk %}" class="btn btn-success">
-      <i class="fas fa-calendar-plus me-2"></i>{% trans "Nova rezervacija" %}
-    </a>
-    <a href="{% url 'rental:property_edit' prop.pk %}" class="btn btn-warning">
-      <i class="fas fa-edit me-2"></i>{% trans "Uredi" %}
-    </a>
-    <a href="{% url 'rental:property_list' %}" class="btn btn-outline-secondary">
-      <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
-    </a>
-  </div>
-</div>
+<!-- lang: topbar -->
 
 <div class="row g-3 mb-3">
   <div class="col-md-3">
@@ -71,9 +20,9 @@
     <div class="stat-card text-center">
       <div class="label">{% trans "Status" %}</div>
       {% if prop.is_available %}
-        <div class="value text-success" style="font-size:1.2rem">{% trans "Dostupno" %}</div>
+        <div class="value text-success fx-fs-2xl">{% trans "Dostupno" %}</div>
       {% else %}
-        <div class="value text-danger" style="font-size:1.2rem">{% trans "Zauzeto" %}</div>
+        <div class="value text-danger fx-fs-2xl">{% trans "Zauzeto" %}</div>
       {% endif %}
     </div>
   </div>
@@ -86,19 +35,19 @@
   <div class="col-md-3">
     <div class="stat-card text-center">
       <div class="label">{% trans "Smart Lock" %}</div>
-      <div style="font-size:0.9rem;font-weight:600">{{ prop.smart_lock_id|default:"—" }}</div>
+      <div class="fx-fs-md fx-fw-semibold">{{ prop.smart_lock_id|default:"—" }}</div>
     </div>
   </div>
 </div>
 
-<div class="stat-card">
+<div class="fenix-stat">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h6 class="fw-bold mb-0"><i class="fas fa-calendar me-2 text-primary"></i>{% trans "Rezervacije" %}</h6>
     <a href="{% url 'rental:booking_create' prop.pk %}" class="btn btn-sm btn-primary">{% trans "+ Nova" %}</a>
   </div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead class="table-light">
+      <thead >
         <tr><th>{% trans "Gost" %}</th><th>{% trans "Email / Tel" %}</th><th>{% trans "Od" %}</th><th>{% trans "Do" %}</th><th class="text-end">{% trans "Cijena" %}</th><th>{% trans "Kod" %}</th><th>{% trans "Status" %}</th></tr>
       </thead>
       <tbody>
@@ -114,11 +63,11 @@
           <td class="text-end fw-bold">{{ b.total_price|floatformat:2 }} €</td>
           <td><code class="small">{{ b.access_code|default:"—" }}</code></td>
           <td>
-            {% if b.status == "active" %}<span class="badge bg-success">{% trans "Aktivan" %}</span>
-            {% elif b.status == "confirmed" %}<span class="badge bg-primary">{% trans "Potvrđeno" %}</span>
-            {% elif b.status == "pending" %}<span class="badge bg-warning text-dark">{% trans "Na čekanju" %}</span>
-            {% elif b.status == "completed" %}<span class="badge bg-secondary">{% trans "Završeno" %}</span>
-            {% else %}<span class="badge bg-danger">{% trans "Otkazano" %}</span>{% endif %}
+            {% if b.status == "active" %}<span class="fenix-badge fenix-badge-success">{% trans "Aktivan" %}</span>
+            {% elif b.status == "confirmed" %}<span class="fenix-badge fenix-badge-info">{% trans "Potvrđeno" %}</span>
+            {% elif b.status == "pending" %}<span class="fenix-badge fenix-badge-warning">{% trans "Na čekanju" %}</span>
+            {% elif b.status == "completed" %}<span class="fenix-badge fenix-badge-muted">{% trans "Završeno" %}</span>
+            {% else %}<span class="fenix-badge fenix-badge-danger">{% trans "Otkazano" %}</span>{% endif %}
           </td>
         </tr>
         {% empty %}

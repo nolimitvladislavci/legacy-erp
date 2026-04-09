@@ -3,22 +3,22 @@
 {% block title %}Web Portal CMS{% endblock %}
 {% block page_title %}Zentrales Web Management{% endblock %}
 {% block content %}
-<div style="background-color: #0f172a; color: #f8fafc; min-height: 80vh; padding: 30px; border-radius: 12px; border: 1px solid #334155;">
-    <div style="border-bottom: 1px solid #334155; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+<div class="fx-bg-deep fx-rounded fx-text-body fx-b2" style="min-height:80vh;padding:30px">
+    <div class="d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--border2);padding-bottom:20px;margin-bottom:30px">
         <div>
-            <h1 style="font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; color: var(--gold,#c9a84c); text-transform: uppercase; margin: 0;">Web Portal CMS</h1>
-            <div style="color: #94a3b8; font-size: 0.95rem; margin-top: 5px;">Centralno zapovjedno mjesto za viskovic-group.de</div>
+            <h1 class="fx-text-gold fx-uppercase fx-m-0" style="font-family:'Barlow Condensed', sans-serif;font-size:2.2rem">Web Portal CMS</h1>
+            <div class="fx-text-muted fx-fs-normal" style="margin-top:5px">Centralno zapovjedno mjesto za viskovic-group.de</div>
         </div>
-        <a href="{% url 'dashboard' %}" target="_blank" style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 10px 20px; border-radius: 8px; text-decoration: none;"><i class="fas fa-external-link-alt"></i> Pregledaj Web</a>
+        <a href="{% url 'dashboard' %}" target="_blank" class="fx-bg-surface2 fx-rounded fx-no-underline fx-text-body fx-b2" style="padding:10px 20px"><i class="fas fa-external-link-alt"></i> Pregledaj Web</a>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; display: flex; flex-direction: column;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(201, 168, 76, 0.1); color: var(--gold,#c9a84c); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="fas fa-camera"></i></div>
-                <h2 style="font-size: 1.3rem; font-weight: 700; margin: 0; color: #f8fafc;">Foto Galerija</h2>
+    <div class="fx-gap-6 d-grid" style="grid-template-columns:repeat(auto-fit, minmax(320px, 1fr))">
+        <div class="fx-bg-surface2 fx-rounded d-flex fx-flex-col fx-b2" style="padding:24px">
+            <div class="d-flex align-items-center mb-4" style="gap:15px">
+                <div class="fx-rounded d-flex fx-fs-5xl fx-text-gold align-items-center justify-content-center" style="width:50px;height:50px;background:rgba(201, 168, 76, 0.1)"><i class="fas fa-camera"></i></div>
+                <h2 class="fx-fs-3xl fx-fw-bold fx-text-body fx-m-0">Foto Galerija</h2>
             </div>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">Upravljanje slikama na javnom portalu. Ukupno: <strong>{{ gallery.count }}</strong></p>
-            <a href="/website/cms/gallery/" style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 12px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; margin-top: auto; text-transform: uppercase; font-size: 0.85rem;"><i class="fas fa-images"></i> Upravljaj Galerijom</a>
+            <p class="fx-text-muted fx-fs-base mb-4">Upravljanje slikama na javnom portalu. Ukupno: <strong>{{ gallery.count }}</strong></p>
+            <a href="/website/cms/gallery/" class="fx-bg-surface2 fx-rounded fx-no-underline fx-fw-semibold text-center fx-fs-base fx-text-body fx-uppercase fx-b2" style="padding:12px 15px;margin-top:auto"><i class="fas fa-images"></i> Upravljaj Galerijom</a>
         </div>
     </div>
 </div>

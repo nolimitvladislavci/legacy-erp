@@ -3,12 +3,12 @@
 {% block title %}{% trans "Novi odstrjel" %}{% endblock %}
 {% block page_title %}{% trans "Novi odstrjel" %}{% endblock %}
 {% block content %}
-<div style="max-width:600px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:600px">
 
-  <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:1rem">
+  <form method="post" enctype="multipart/form-data" class="d-flex fx-flex-col fx-gap-4">
     {% csrf_token %}
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <div class="wiz-field">
         <label>{% trans "Lovište" %} *</label>
         <select name="ground" class="reg-input" required>
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <div class="wiz-field">
         <label>{% trans "Datum odstrjela" %} *</label>
         <input type="date" name="datum" required class="reg-input">
@@ -43,7 +43,7 @@
       <input type="text" name="lokacija" class="reg-input" placeholder="{% trans 'Opis lokacije odstrjela' %}">
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4" style="grid-template-columns:1fr 1fr 1fr">
       <div class="wiz-field">
         <label>{% trans "Težina (kg)" %}</label>
         <input type="number" name="weight_kg" step="0.1" class="reg-input" placeholder="85.0">
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <div class="wiz-field">
         <label>CITES {% trans "broj" %}</label>
         <input type="text" name="cites_number" class="reg-input" placeholder="HR-CITES-2026-001">
@@ -74,7 +74,7 @@
       <textarea name="notes" rows="3" class="reg-input" placeholder="{% trans 'Dodatne napomene...' %}"></textarea>
     </div>
 
-    <div style="display:flex;gap:1rem;margin-top:.5rem">
+    <div class="d-flex fx-gap-4 mt-2">
       <a href="{% url 'lovacki:dashboard' %}" class="wiz-btn wiz-btn-ghost">&larr; {% trans "Natrag" %}</a>
       <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Evidentiraj odstrjel" %} &rarr;</button>
     </div>

@@ -12,9 +12,9 @@
 .item-price{width:80px;text-align:right;font-weight:700}
 .guest-select{width:30px;text-align:center}
 .guest-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid;margin:0 2px}
-.bill-card{background:#0a1a0a;border:2px solid #22c55e;border-radius:12px;padding:16px;margin-bottom:12px}
+.bill-card{background:var(--surface-deep);border:2px solid #22c55e;border-radius:12px;padding:16px;margin-bottom:12px}
 .method-btn{padding:8px 16px;border-radius:8px;border:2px solid;font-weight:700;cursor:pointer;font-size:.85rem;background:transparent}
-.method-btn.active{background:var(--gold,#c9a84c);color:#000;border-color:var(--gold,#c9a84c)}
+.method-btn.active{background:var(--gold,#c9a84c);color:var(--black);border-color:var(--gold,#c9a84c)}
 .grand-total{font-size:1.8rem;font-weight:800;color:var(--gold,#c9a84c)}
 </style>
 {% endblock %}
@@ -49,7 +49,7 @@
   <h5 class="mb-3"><i class="fas fa-list me-2"></i>{% trans "Stavke na stolu" %}</h5>
   {% for item in all_items %}
   <div class="item-row" data-item-id="{{ item.order_item_id }}" data-price="{{ item.total }}">
-    <div class="guest-select" style="display:none">
+    <div class="guest-select fx-hidden">
       <input type="radio" name="assign_{{ item.order_item_id }}" value="" class="guest-radio">
     </div>
     <div class="item-qty">{{ item.quantity }}x</div>
@@ -60,7 +60,7 @@
 </div>
 
 <!-- Split bills container (hidden initially) -->
-<div id="splitContainer" style="display:none">
+<div id="splitContainer" class="fx-hidden">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h5><i class="fas fa-users me-2"></i>{% trans "Računi po gostima" %}</h5>
     <button class="btn btn-sm btn-outline-info" onclick="addGuest()">
@@ -78,10 +78,10 @@
 <!-- Single payment modal -->
 <div class="modal fade" id="payModal" tabindex="-1">
   <div class="modal-dialog modal-sm">
-    <div class="modal-content" style="background:#1a1a2e;border:2px solid var(--gold,#c9a84c)">
+    <div class="modal-content fx-bg-surface2" style="border:2px solid var(--gold,#c9a84c)">
       <div class="modal-body text-center p-4">
         <h4 class="mb-3" id="payModalTitle">Naplata</h4>
-        <h2 class="mb-3" style="color:var(--gold,#c9a84c)" id="payModalAmount">0,00 EUR</h2>
+        <h2 class="mb-3 fx-text-gold" id="payModalAmount">0,00 EUR</h2>
         <div class="d-flex gap-2 justify-content-center mb-3" id="payMethods">
           <button class="method-btn active" onclick="selectMethod(this,'CASH')">Gotovina</button>
           <button class="method-btn" onclick="selectMethod(this,'CARD')">Kartica</button>
@@ -139,11 +139,11 @@ function addGuest() {
   const html = `<div class="bill-card" id="guest${guestCount}" style="border-color:${color}">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <div>
-        <input type="text" class="form-control form-control-sm d-inline-block" style="width:150px;background:transparent;border:1px solid ${color};color:#fff"
+        <input type="text" class="form-control form-control-sm d-inline-block fx-text-white fx-bg-transparent" style="width:150px;border:1px solid ${color}"
                value="Gost ${guestCount}" id="guestName${guestCount}">
         <span class="badge ms-2" style="background:${color}">0,00 EUR</span>
       </div>
-      <select class="form-select form-select-sm" style="width:120px;background:#1a1a2e;color:#fff;border-color:${color}" id="guestMethod${guestCount}">
+      <select class="form-select form-select-sm fx-bg-surface2 fx-text-white" style="width:120px;border-color:${color}" id="guestMethod${guestCount}">
         <option value="CASH">Gotovina</option>
         <option value="CARD">Kartica</option>
         <option value="CRYPTO">Kripto</option>
@@ -222,7 +222,7 @@ function submitPayment(bills) {
       showStatus(msg, 'success');
       // Print opcija
       var printDiv = document.createElement('div');
-      printDiv.innerHTML = '<button onclick="printReceipts()" style="margin-top:1rem;padding:.75rem 2rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:1rem">Ispis</button>';
+      printDiv.innerHTML = '<button onclick="printReceipts()" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-fs-lg mt-3 fx-bg-gold" style="padding:.75rem 2rem">Ispis</button>';
       document.getElementById('statusMsg').appendChild(printDiv);
       window._lastReceipts = data.receipts;
       setTimeout(() => { window.location.href = "{% url 'pos:gastro_dashboard' %}"; }, 5000);

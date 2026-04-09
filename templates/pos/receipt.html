@@ -43,7 +43,7 @@
 
 /* ── Searchable autocomplete ── */
 .ac-wrap{position:relative;margin-bottom:.75rem}
-.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid var(--gold);border-top:none;border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;z-index:200;display:none}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--gold);border-top:none;border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;z-index:200;display:none}
 .ac-item{padding:.6rem .875rem;cursor:pointer;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center}
 .ac-item:hover,.ac-item.highlighted{background:rgba(201,168,76,.12);color:var(--gold)}
 .ac-item-name{font-weight:500}.ac-item-meta{font-size:.72rem;color:var(--muted)}
@@ -57,7 +57,7 @@
 
 /* ── Spinner ── */
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 
 /* ── Disabled state ── */
 button[disabled]{opacity:.5;cursor:not-allowed}
@@ -100,10 +100,10 @@ button[disabled]{opacity:.5;cursor:not-allowed}
   <div class="ip">
     <div class="rh">
       <div>
-        <div class="rh-title">Bon #{{ receipt.receipt_number }}{% if receipt.table_number %} <span style="color:var(--muted);font-weight:400;font-size:.85rem">| Stol {{ receipt.table_number }}</span>{% endif %}</div>
+        <div class="rh-title">Bon #{{ receipt.receipt_number }}{% if receipt.table_number %} <span class="fx-fw-normal fx-fs-base fx-text-muted">| Stol {{ receipt.table_number }}</span>{% endif %}</div>
         <div class="rh-meta">{{ receipt.session.terminal.name }} &mdash; {{ receipt.created_at|date:"d.m.Y H:i" }}{% if receipt.note %} &mdash; {{ receipt.note }}{% endif %}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:.5rem">
+      <div class="d-flex align-items-center fx-gap-2">
         <span class="badge badge-{{ receipt.status }}">{{ receipt.get_status_display }}</span>
         <a href="{% url 'pos:session_detail' receipt.session_id %}" class="btn btn-ghost btn-sm">{% trans "&larr; Smjena" %}</a>
         {% if receipt.status == "paid" %}
@@ -114,18 +114,18 @@ button[disabled]{opacity:.5;cursor:not-allowed}
     </div>
 
     {% if items %}
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <div class="fx-scroll-x" style="-webkit-overflow-scrolling:touch">
     <table class="it">
       <thead><tr><th>{% trans "Naziv" %}</th><th>{% trans "Kol" %}</th><th>{% trans "Cijena" %}</th><th>{% trans "PDV%" %}</th><th>{% trans "Ukupno" %}</th><th></th></tr></thead>
       <tbody>{% for item in items %}
       <tr>
-        <td><div>{{ item.description }}</div>{% if item.barcode %}<div style="font-size:.72rem;color:var(--muted)">{{ item.barcode }}</div>{% endif %}</td>
+        <td><div>{{ item.description }}</div>{% if item.barcode %}<div class="fx-fs-sm fx-text-muted">{{ item.barcode }}</div>{% endif %}</td>
         <td>{{ item.quantity|floatformat:"-2" }} {{ item.unit|default:"kom" }}</td>
         <td>&euro;{{ item.unit_price|floatformat:2 }}</td>
         <td>{{ item.tax_rate|floatformat:0 }}%</td>
-        <td style="color:var(--gold);font-weight:600">&euro;{{ item.total_price|floatformat:2 }}</td>
+        <td class="fx-fw-semibold fx-text-gold">&euro;{{ item.total_price|floatformat:2 }}</td>
         <td>{% if receipt.status == "open" %}
-          <form method="post" action="{% url 'pos:remove_item' receipt.id item.id %}" style="display:inline">{% csrf_token %}
+          <form method="post" action="{% url 'pos:remove_item' receipt.id item.id %}" class="d-inline">{% csrf_token %}
             <button type="submit" class="rm" title="{% trans "Ukloni" %}">{% trans "&times;" %}</button>
           </form>
         {% endif %}</td>
@@ -152,8 +152,8 @@ button[disabled]{opacity:.5;cursor:not-allowed}
         </div>
         <div class="r1-field"><label>Naziv kupca</label><input type="text" id="r1Name" placeholder="Tvrtka d.o.o."></div>
         <div class="r1-field"><label>Adresa kupca</label><input type="text" id="r1Addr" placeholder="Ulica i broj, Grad"></div>
-        <button type="button" class="btn btn-gold" onclick="r1SaveBuyer()" style="width:100%;margin-top:.5rem;min-height:44px">&#10003; Spremi R1 podatke</button>
-        <div id="r1Status" style="font-size:.78rem;margin-top:.4rem;text-align:center;display:none"></div>
+        <button type="button" class="btn btn-gold fx-w-full mt-2" onclick="r1SaveBuyer()" style="min-height:44px">&#10003; Spremi R1 podatke</button>
+        <div id="r1Status" class="fx-fs-body-sm text-center fx-hidden" style="margin-top:.4rem"></div>
       </div>
     </div>
     {% else %}
@@ -167,19 +167,17 @@ button[disabled]{opacity:.5;cursor:not-allowed}
 
       <!-- Brze tipke — top artikli -->
       {% if quick_items %}
-      <div style="margin-bottom:.75rem">
-        <div style="font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.5px">Brze tipke</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+      <div class="fx-mb-4">
+        <div class="fx-fs-caption fx-fw-semibold fx-text-muted fx-uppercase fx-ls-1" style="margin-bottom:.4rem">Brze tipke</div>
+        <div class="d-grid fx-grid-3" style="gap:5px">
           {% for qi in quick_items %}
-          <button type="button" class="qk-btn" onclick="quickAdd({{qi.id}})"
-                  style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 4px;
-                         font-size:.72rem;font-weight:600;color:var(--text);cursor:pointer;text-align:center;
-                         line-height:1.2;min-height:38px;transition:all .12s;font-family:inherit"
+          <button type="button" class="qk-btn fx-rounded-sm fx-fs-sm fx-fw-semibold fx-pointer text-center fx-text-body fx-b fx-lh-tight fx-bg-card" onclick="quickAdd({{qi.id}})"
+                  style="padding:6px 4px;min-height:38px;transition:all .12s;font-family:inherit"
                   onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'"
                   title="{{qi.name}} — {{qi.unit_price|floatformat:2}} €">
-            <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ qi.name|truncatechars:18 }}</div>
-            <div style="color:var(--gold);font-size:.68rem;margin-top:2px">{{ qi.unit_price|floatformat:2 }} €</div>
+            <div class="text-nowrap fx-overflow-hidden" style="text-overflow:ellipsis">{{ qi.name|truncatechars:18 }}</div>
+            <div class="fx-fs-tiny fx-text-gold fx-mt-1">{{ qi.unit_price|floatformat:2 }} €</div>
           </button>
           {% endfor %}
         </div>
@@ -190,15 +188,15 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <div class="bc-bar">
         <input type="text" class="ai-input" id="bcIn" placeholder="{% trans "Skenirajte barkod..." %}" autocomplete="off">
         <button class="btn btn-ghost btn-sm" onclick="lookupBC()">{% trans "Traži" %}</button>
-        <button type="button" class="btn btn-ghost btn-sm" onclick="openCamScanner()" title="Skeniraj kamerom"
-                style="font-size:1.1rem;padding:4px 10px">📷</button>
+        <button type="button" class="btn btn-ghost btn-sm fx-fs-xl" onclick="openCamScanner()" title="Skeniraj kamerom"
+                style="padding:4px 10px">📷</button>
       </div>
 
       <!-- Searchable autocomplete -->
       <label class="ai-label">{% trans "Pretraži iz zalihe" %}</label>
       <div class="ac-wrap">
         <input type="text" class="ai-input" id="acInput" placeholder="{% trans "Upišite naziv ili SKU artikla..." %}" autocomplete="off">
-        <button class="ac-clear" id="acClear" onclick="clearAC()" style="display:none">{% trans "&times;" %}</button>
+        <button class="ac-clear fx-hidden" id="acClear" onclick="clearAC()">{% trans "&times;" %}</button>
         <div class="ac-dropdown" id="acDropdown"></div>
       </div>
 
@@ -219,7 +217,7 @@ button[disabled]{opacity:.5;cursor:not-allowed}
           <div><label class="ai-label">{% trans "Popust (%)" %}</label><input type="number" name="discount_percent" class="ai-input" value="0" min="0" max="100" step="0.01"></div>
         </div>
         <button type="submit" id="addBtn" class="btn btn-gold btn-add-item">{% trans "+ Dodaj na bon" %}</button>
-        <button type="button" class="btn btn-ghost" onclick="openPfandReturn()" style="margin-top:.4rem;width:100%;font-size:.8rem">&#8617; {% trans "Povratna ambalaza" %}</button>
+        <button type="button" class="btn btn-ghost fx-w-full fx-fs-compact" onclick="openPfandReturn()" style="margin-top:.4rem">&#8617; {% trans "Povratna ambalaza" %}</button>
       </form>
     </div>
     {% endif %}
@@ -228,10 +226,10 @@ button[disabled]{opacity:.5;cursor:not-allowed}
   <!-- RIGHT: Totals + Payment -->
   <div class="pp">
     <div class="ts">
-      <div style="font-weight:700;margin-bottom:.875rem">{% trans "Iznosi" %}</div>
+      <div class="fx-fw-bold" style="margin-bottom:.875rem">{% trans "Iznosi" %}</div>
       <div class="t-row"><div class="t-lbl">{% trans "Neto (bez PDV)" %}</div><div class="t-val">&euro;{{ receipt.subtotal|floatformat:2 }}</div></div>
       <div class="t-row"><div class="t-lbl">{% trans "PDV" %}</div><div class="t-val">&euro;{{ receipt.tax_amount|floatformat:2 }}</div></div>
-      {% if receipt.discount %}<div class="t-row"><div class="t-lbl">{% trans "Popust" %}</div><div class="t-val" style="color:var(--red)">-&euro;{{ receipt.discount|floatformat:2 }}</div></div>{% endif %}
+      {% if receipt.discount %}<div class="t-row"><div class="t-lbl">{% trans "Popust" %}</div><div class="t-val fx-text-red">-&euro;{{ receipt.discount|floatformat:2 }}</div></div>{% endif %}
       <div class="t-row t-total"><div class="t-lbl">{% trans "UKUPNO" %}</div><div class="t-val">&euro;{{ receipt.total|floatformat:2 }}</div></div>
     </div>
 
@@ -253,9 +251,9 @@ button[disabled]{opacity:.5;cursor:not-allowed}
 
         <!-- Amount received -->
         <label class="ai-label" style="margin-bottom:.4rem">{% trans "Primljeno (&euro;)" %}</label>
-        <input type="number" name="amount_paid" id="amtPaid" class="ai-input"
+        <input type="number" name="amount_paid" id="amtPaid" class="ai-input fx-fs-2xl fx-fw-bold mb-2"
                value="{{ receipt.total|floatformat:2 }}" min="0" step="0.01"
-               oninput="calcChg()" style="font-size:1.2rem;font-weight:700;margin-bottom:.5rem">
+               oninput="calcChg()">
 
         <!-- Quick cash buttons -->
         <div class="cash-quick">
@@ -286,12 +284,12 @@ button[disabled]{opacity:.5;cursor:not-allowed}
     </div>
 
 <!-- Storno modal -->
-<div id="stornoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;width:360px;max-width:95vw">
-    <div style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:1rem">Storniraj bon #{{ receipt.receipt_number }}</div>
-    <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Razlog storniranja</label>
+<div id="stornoModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500">
+  <div class="fx-rounded fx-b fx-p-5 fx-bg-card" style="width:360px;max-width:95vw">
+    <div class="fx-fs-lg fx-fw-bold fx-text-red mb-3">Storniraj bon #{{ receipt.receipt_number }}</div>
+    <label class="fx-fs-body-sm fx-text-muted d-block fx-mb-2">Razlog storniranja</label>
     <select id="stornoReasonSelect" onchange="onReasonChange(this.value)"
-            style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem;font-size:.875rem;margin-bottom:.5rem;outline:none">
+            class="fx-w-full fx-rounded-sm fx-text-body mb-2 fx-bg-dark fx-b fx-p-2" style="font-size:.875rem;outline:none">
       <option value="">— Odaberite razlog —</option>
       <option value="Kupac odustao">Kupac odustao</option>
       <option value="Pogrešan unos">Pogrešan unos</option>
@@ -300,24 +298,24 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <option value="Ostalo">Ostalo</option>
     </select>
     <input type="text" id="stornoReasonOther" placeholder="Unesite razlog..."
-           style="display:none;width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem;font-size:.875rem;outline:none;margin-bottom:.5rem">
+           class="fx-hidden fx-w-full fx-rounded-sm fx-text-body mb-2 fx-bg-dark fx-b fx-p-2" style="font-size:.875rem;outline:none">
     <form method="post" action="{% url 'pos:cancel_receipt' receipt.id %}" id="cancelForm">
       {% csrf_token %}
       <input type="hidden" name="cancel_reason" id="cancelReasonHidden">
     </form>
-    <div style="display:flex;gap:.5rem;margin-top:.75rem">
-      <button onclick="closeStornoModal()" style="flex:1;background:rgba(255,255,255,.08);border:none;color:var(--text);border-radius:6px;padding:.6rem;font-size:.875rem;font-weight:600;cursor:pointer">Odustani</button>
-      <button onclick="submitStorno()" style="flex:1;background:var(--red);border:none;color:#fff;border-radius:6px;padding:.6rem;font-size:.875rem;font-weight:700;cursor:pointer">Storniraj</button>
+    <div class="d-flex fx-gap-2 fx-mt-4">
+      <button onclick="closeStornoModal()" class="fx-border-none fx-rounded-sm fx-fw-semibold fx-pointer fx-text-body fx-flex-1" style="background:rgba(255,255,255,.08);padding:.6rem;font-size:.875rem">Odustani</button>
+      <button onclick="submitStorno()" class="fx-border-none fx-text-white fx-rounded-sm fx-fw-bold fx-pointer fx-flex-1" style="background:var(--red);padding:.6rem;font-size:.875rem">Storniraj</button>
     </div>
   </div>
 </div>
 
     {% elif receipt.status == "paid" %}
-    <div class="pay" style="text-align:center;padding:2rem">
-      <div style="font-size:3rem;margin-bottom:.75rem">&#10003;</div>
-      <div style="font-weight:800;color:var(--green);margin-bottom:.5rem;font-size:1.1rem">{% trans "PLAĆENO" %}</div>
-      <div style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem">{{ receipt.paid_at|date:"d.m.Y H:i" }}</div>
-      {% if receipt.jir %}<div style="font-size:.7rem;color:var(--muted);margin-bottom:1.25rem">JIR: {{ receipt.jir }}</div>{% endif %}
+    <div class="pay text-center fx-p-6">
+      <div class="fx-fs-hero fx-mb-4">&#10003;</div>
+      <div class="fx-fw-800 fx-fs-xl fx-text-green mb-2">{% trans "PLAĆENO" %}</div>
+      <div class="fx-fs-base fx-text-muted fx-mb-1">{{ receipt.paid_at|date:"d.m.Y H:i" }}</div>
+      {% if receipt.jir %}<div class="fx-fs-sm fx-text-muted" style="margin-bottom:1.25rem">JIR: {{ receipt.jir }}</div>{% endif %}
 
       {# ── Invoice Symbiosis Bar ── #}
       {% if receipt.invoice %}
@@ -337,20 +335,20 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <div class="inv-bar warn">
         <div class="inv-bar-info">&#9888;&#65039; Fiskalni racun jos nije kreiran</div>
         <div class="inv-bar-actions">
-          <a href="/invoicing/wizard/?from_receipt={{ receipt.pk }}" class="btn btn-gold btn-sm" style="min-height:44px;display:flex;align-items:center">Kreiraj R1</a>
+          <a href="/invoicing/wizard/?from_receipt={{ receipt.pk }}" class="btn btn-gold btn-sm d-flex align-items-center" style="min-height:44px">Kreiraj R1</a>
         </div>
       </div>
       {% endif %}
-      <a href="{% url 'pos:receipt_pdf' receipt.id %}?format=thermal" class="btn btn-gold"
-         style="width:100%;justify-content:center;margin-bottom:.5rem;min-height:52px;font-size:.9rem"
+      <a href="{% url 'pos:receipt_pdf' receipt.id %}?format=thermal" class="btn btn-gold fx-w-full fx-fs-md justify-content-center mb-2"
+         style="min-height:52px"
          target="_blank">{% trans "&#128424; Ispisi (Thermal 80mm)" %}</a>
-      <a href="{% url 'pos:receipt_pdf' receipt.id %}?format=a4" class="btn btn-ghost"
-         style="width:100%;justify-content:center;min-height:48px;font-size:.85rem"
+      <a href="{% url 'pos:receipt_pdf' receipt.id %}?format=a4" class="btn btn-ghost fx-w-full fx-fs-base justify-content-center"
+         style="min-height:48px"
          target="_blank">{% trans "&#128196; Preuzmi (A4 PDF)" %}</a>
     </div>
     {% else %}
-    <div class="pay" style="text-align:center;padding:2rem;color:var(--red)">
-      <div style="font-size:2rem;margin-bottom:.5rem">{% trans "&times;" %}</div>
+    <div class="pay text-center fx-text-red fx-p-6">
+      <div class="fx-fs-icon mb-2">{% trans "&times;" %}</div>
       <div>{{ receipt.get_status_display }}</div>
     </div>
     {% endif %}
@@ -404,16 +402,16 @@ function r1SaveBuyer(){
 </script>
 
 <!-- Pfand return modal -->
-<div id="pfandModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;max-width:400px;width:100%">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+<div id="pfandModal" class="fx-hidden align-items-center justify-content-center fx-p-4" style="position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85)">
+  <div class="fx-rounded fx-w-full fx-b fx-bg-card" style="padding:1.2rem;max-width:400px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
       <strong>&#8617; Povratna ambalaza</strong>
-      <button onclick="closePfandModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">&times;</button>
+      <button onclick="closePfandModal()" class="fx-border-none fx-fs-2xl fx-pointer fx-text-muted fx-bg-transparent">&times;</button>
     </div>
-    <div id="pfandList" style="max-height:280px;overflow-y:auto">Ucitavanje...</div>
+    <div id="pfandList" class="fx-scroll-y" style="max-height:280px">Ucitavanje...</div>
   </div>
 </div>
 
-<div id="posToast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:none;background:#1e293b;color:#fff;padding:12px 24px;border-radius:10px;font-size:.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);border-left:4px solid var(--gold,#c9a84c);min-width:220px;text-align:center"></div>
+<div id="posToast" class="fx-hidden fx-bg-surface2 fx-text-white fx-rounded fx-fs-md fx-fw-semibold text-center" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 24px;box-shadow:0 4px 20px rgba(0,0,0,.4);border-left:4px solid var(--gold,#c9a84c);min-width:220px"></div>
 
 {% endblock %}

@@ -33,10 +33,10 @@
 <td class="text-end text-success">{{ item.asset.current_value|floatformat:2 }}</td>
 <td class="text-end">{% if item.fully_depreciated %}<span class="text-muted">Otpisano</span>{% else %}{{ item.monthly_depreciation|floatformat:2 }}{% endif %}</td>
 <td>{{ item.asset.last_depreciation_date|date:"m/Y"|default:"-" }}</td>
-<td>{% if item.asset.status == "active" %}<span class="badge bg-success">Aktivno</span>
-{% elif item.asset.status == "maintenance" %}<span class="badge bg-warning text-dark">Servis</span>
-{% elif item.asset.status == "retired" %}<span class="badge bg-secondary">Otpisano</span>
-{% elif item.asset.status == "sold" %}<span class="badge bg-info">Prodano</span>{% endif %}</td></tr>
+<td>{% if item.asset.status == "active" %}<span class="fenix-badge fenix-badge-success">Aktivno</span>
+{% elif item.asset.status == "maintenance" %}<span class="fenix-badge fenix-badge-warning">Servis</span>
+{% elif item.asset.status == "retired" %}<span class="fenix-badge fenix-badge-muted">Otpisano</span>
+{% elif item.asset.status == "sold" %}<span class="fenix-badge fenix-badge-info">Prodano</span>{% endif %}</td></tr>
 {% empty %}<tr><td colspan="10" class="text-center text-muted py-4">Nema imovine</td></tr>{% endfor %}
 </tbody></table></div></div></div></div>
 {% endblock %}

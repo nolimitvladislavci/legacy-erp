@@ -5,11 +5,11 @@
 
 {% block page_title %}
 {% if is_manager and company_workers %}
-<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:.6rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-  <span style="font-size:.85rem;font-weight:600;color:#856404">👷 Radnik:</span>
-  <form method="get" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+<div class="fx-rounded d-flex fx-flex-wrap align-items-center fx-gap-3 fx-mb-4" style="background:#fff3cd;border:1px solid #ffc107;padding:.6rem 1rem">
+  <span class="fx-fs-base fx-fw-semibold" style="color:#856404">👷 Radnik:</span>
+  <form method="get" class="d-flex fx-flex-wrap align-items-center fx-gap-2">
     <select name="worker_id" onchange="this.form.submit()"
-            style="border:1px solid #ffc107;border-radius:6px;padding:.3rem .7rem;font-size:.85rem;background:#fff;cursor:pointer">
+            class="fx-rounded-sm fx-fs-base fx-pointer fx-bg-card" style="border:1px solid #ffc107;padding:.3rem .7rem">
       <option value="">— {% trans "Ja" %} ({{ request.user.get_full_name|default:request.user.username }}) —</option>
       {% for w in company_workers %}
         <option value="{{ w.pk }}" {% if selected_worker.pk == w.pk %}selected{% endif %}>
@@ -19,13 +19,13 @@
     </select>
     {% if selected_worker %}
     <a href="{% url 'worktime:ts_worker' %}"
-       style="font-size:.78rem;color:#856404;text-decoration:none;border:1px solid #ffc107;border-radius:5px;padding:.25rem .6rem">
+       class="fx-fs-body-sm fx-no-underline fx-rounded-sm" style="color:#856404;border:1px solid #ffc107;padding:.25rem .6rem">
       ✕ Povratak na svoje
     </a>
     {% endif %}
   </form>
   {% if selected_worker %}
-  <span style="font-size:.82rem;color:#856404;font-weight:600">
+  <span class="fx-fs-note fx-fw-semibold" style="color:#856404">
     📋 Gledate dashboard za: <strong>{{ selected_worker.get_full_name|default:selected_worker.username }}</strong>
   </span>
   {% endif %}

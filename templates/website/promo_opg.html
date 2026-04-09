@@ -8,24 +8,24 @@
 <style>
 :root{--gold: #c9a84c;--black:#0a0a0a;--green:#16a34a;--red:#dc2626}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--black);color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif}
 .hero{text-align:center;padding:3rem 1.5rem;background:linear-gradient(180deg,#0a0a0a,#1a1200)}
 .hero h1{font-size:2.2rem;color:var(--gold);margin-bottom:.8rem}
-.hero p{font-size:1.1rem;color:#94a3b8;max-width:600px;margin:0 auto}
-.badge{display:inline-block;background:var(--green);color:#fff;padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;margin-top:1rem}
+.hero p{font-size:1.1rem;color:var(--text-muted);max-width:600px;margin:0 auto}
+.badge{display:inline-block;background:var(--green);color:var(--white);padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;margin-top:1rem}
 .features{max-width:900px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
-.card{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:1.5rem}
+.card{background:var(--bg-card);border:1px solid #333;border-radius:14px;padding:1.5rem}
 .card-icon{font-size:2rem;margin-bottom:.8rem}
 .card h3{color:var(--gold);font-size:1rem;margin-bottom:.5rem}
-.card p{color:#94a3b8;font-size:.85rem;line-height:1.6}
-.card ul{color:#94a3b8;font-size:.82rem;line-height:1.8;padding-left:1.2rem}
+.card p{color:var(--text-muted);font-size:.85rem;line-height:1.6}
+.card ul{color:var(--text-muted);font-size:.82rem;line-height:1.8;padding-left:1.2rem}
 .cta{text-align:center;padding:3rem 1.5rem}
-.cta-btn{display:inline-block;background:var(--gold);color:#000;padding:1rem 2.5rem;border-radius:12px;font-size:1.1rem;font-weight:700;text-decoration:none;margin:.5rem}
+.cta-btn{display:inline-block;background:var(--gold);color:var(--text);padding:1rem 2.5rem;border-radius:12px;font-size:1.1rem;font-weight:700;text-decoration:none;margin:.5rem}
 .cta-btn:active{transform:scale(.97)}
-.cta-btn.green{background:var(--green);color:#fff}
+.cta-btn.green{background:var(--green);color:var(--white)}
 .cta-btn.outline{background:transparent;border:2px solid var(--gold);color:var(--gold)}
-.footer{text-align:center;padding:2rem;color:#64748b;font-size:.8rem;border-top:1px solid #1e293b}
-.quote{max-width:700px;margin:2rem auto;padding:1.5rem;background:#0f172a;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;font-style:italic;color:#94a3b8}
+.footer{text-align:center;padding:2rem;color:var(--text-dim);font-size:.8rem;border-top:1px solid #1e293b}
+.quote{max-width:700px;margin:2rem auto;padding:1.5rem;background:var(--surface-deep);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;font-style:italic;color:var(--text-muted)}
 @media(max-width:600px){.hero h1{font-size:1.6rem}.features{grid-template-columns:1fr}.cta-btn{display:block;margin:.5rem 1rem}}
 </style>
 </head>
@@ -139,7 +139,7 @@ body{background:var(--black);color:#e2e8f0;font-family:'Segoe UI',system-ui,sans
 </div>
 
 <div class="cta">
-  <h2 style="color:var(--gold);margin-bottom:1.5rem;font-size:1.5rem">Spremni za digitalizaciju?</h2>
+  <h2 class="fx-fs-5xl fx-text-gold fx-mb-6">Spremni za digitalizaciju?</h2>
   <a href="tel:+385976091655" class="cta-btn green">&#128222; Nazovite: 097-609-1655</a>
   <a href="https://wa.me/385976091655?text=Zanima%20me%20LIMIT%20Connect%20za%20OPG" class="cta-btn green">&#128172; WhatsApp</a>
   <a href="{% url 'accounts:quick_register' %}" class="cta-btn">Registrirajte se</a>

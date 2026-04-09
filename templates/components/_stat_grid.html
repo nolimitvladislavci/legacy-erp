@@ -9,12 +9,12 @@ Usage:
     {"value": "3", "label": "Upozorenja", "color": "#ef4444"},
   ]
 {% endcomment %}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.5rem">
+<div class="d-grid fx-gap-3 fx-mb-6" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
 {% for s in stats %}
-  <div style="background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
-    {% if s.icon %}<div style="font-size:.9rem;color:{{ s.color|default:'var(--text)' }};margin-bottom:4px"><i class="{{ s.icon }}"></i></div>{% endif %}
-    <div style="font-size:1.6rem;font-weight:800;color:{{ s.color|default:'var(--text)' }}">{{ s.value }}</div>
-    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim,var(--text-muted));margin-top:2px">{{ s.label }}</div>
+  <div class="fx-rounded text-center fx-b fx-p-4" style="background:var(--surface,var(--bg-card))">
+    {% if s.icon %}<div class="fx-fs-md" style="color:{{ s.color|default:'var(--text)' }};margin-bottom:4px"><i class="{{ s.icon }}"></i></div>{% endif %}
+    <div class="fx-fw-800" style="font-size:1.6rem;color:{{ s.color|default:'var(--text)' }}">{{ s.value }}</div>
+    <div class="fx-fs-sm fx-fw-semibold fx-uppercase fx-mt-1" style="letter-spacing:.3px;color:var(--text-dim,var(--text-muted))">{{ s.label }}</div>
   </div>
 {% endfor %}
 </div>

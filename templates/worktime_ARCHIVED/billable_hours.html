@@ -2,111 +2,7 @@
 {% load i18n %}
 {% block title %}Nenaplaćeni sati – LIMIT Connect{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<style>
-:root{--gold: #c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--text:#e2e8f0;--text-dim:#94a3b8;--green:#10b981;--red:#ef4444}
-.bh-wrap{padding:20px 24px;max-width:1000px;margin:0 auto}
-.bh-title{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:4px}
-.bh-sub{font-size:.8rem;color:var(--text-dim);margin-bottom:20px}
-
-/* Filters */
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px}
-.filters input,.filters select{background:var(--surface2);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:7px;padding:7px 10px;font-size:.82rem;outline:none}
-.filters label{font-size:.72rem;color:var(--text-dim);display:flex;flex-direction:column;gap:4px}
-.btn-filter{background:var(--gold);color:#0a0a0a;border:none;border-radius:7px;padding:8px 18px;font-size:.82rem;font-weight:700;cursor:pointer;align-self:flex-end}
-
-/* Summary bar */
-.summary-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:linear-gradient(135deg,#1a1208,#0f172a);border:1px solid var(--gold-border);border-radius:10px}
-.sb-item{display:flex;flex-direction:column}
-.sb-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim)}
-.sb-val{font-size:1.2rem;font-weight:800;color:var(--gold)}
-
-/* Client groups */
-.client-group{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-bottom:16px}
-.client-header{padding:12px 16px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px}
-.client-name{font-weight:700;color:var(--text);flex:1}
-.client-total{font-weight:800;color:var(--gold);font-size:1.05rem}
-.client-bill-btn{background:var(--gold);color:#0a0a0a;border:none;border-radius:7px;padding:7px 16px;font-size:.78rem;font-weight:700;cursor:pointer}
-.client-bill-btn:hover{opacity:.85}
-
-/* Entry rows */
-.e-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
-.e-row:last-child{border-bottom:none}
-.e-check{accent-color:var(--gold);width:14px;height:14px;flex-shrink:0}
-.e-worker{font-weight:600;color:var(--text);width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.e-proj{color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.e-date{color:var(--text-dim);font-size:.72rem;width:60px}
-.e-dur{font-weight:700;color:var(--text);width:45px;text-align:right}
-.e-rate{color:var(--text-dim);font-size:.72rem;width:60px;text-align:right}
-.e-amt{font-weight:700;color:var(--gold);width:75px;text-align:right}
-.e-desc{color:var(--text-dim);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-
-/* Bill form */
-.bill-form{padding:12px 16px;background:rgba(201,168,76,.06);border-top:1px solid var(--gold-border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.bill-mode-select{background:var(--surface2);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:6px 10px;font-size:.78rem}
-
-/* Empty state */
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
-.empty-state .icon{font-size:3rem;margin-bottom:12px}
-.empty-state p{font-size:.9rem}
-
-@media(max-width:700px){.e-rate,.e-desc{display:none}.e-worker{width:100px}}
-</style>
-
-<div class="bh-wrap">
-  <div class="bh-title">{% trans "💰 Nenaplaćeni radni sati" %}</div>
-  <div class="bh-sub">{% trans "Odobreni sati koji još nisu fakturirani — grupirani po projektu/klijentu" %}</div>
-
-  <!-- Filters -->
-  <form method="get" class="filters">
-    <label>{% trans "Od datuma" %}<input type="date" name="date_from" value="{{ date_from }}"></label>
-    <label>{% trans "Do datuma" %}<input type="date" name="date_to" value="{{ date_to }}"></label>
-    <label>{% trans "Radnik" %}
-      <select name="worker">
-        <option value="">{% trans "Svi radnici" %}</option>
-        {% for w in all_workers %}<option value="{{ w.pk }}" {% if w.pk|stringformat:"s" == selected_worker %}selected{% endif %}>{{ w.get_full_name|default:w.username }}</option>{% endfor %}
-      </select>
-    </label>
-    <button type="submit" class="btn-filter">{% trans "Filtriraj" %}</button>
-    <a href="{% url 'worktime:billable' %}" style="align-self:flex-end;font-size:.78rem;color:var(--text-dim);padding:8px 12px;text-decoration:none">{% trans "Resetiraj" %}</a>
-  </form>
-
-  <!-- Summary -->
-  {% if total_hours %}
-  <div class="summary-bar">
-    <div class="sb-item"><span class="sb-lbl">{% trans "Ukupno sati" %}</span><span class="sb-val">{{ total_hours|floatformat:1 }}h</span></div>
-    <div class="sb-item"><span class="sb-lbl">{% trans "Ukupno € (procjena)" %}</span><span class="sb-val">{{ total_amount|floatformat:2 }} €</span></div>
-    <div class="sb-item"><span class="sb-lbl">{% trans "Br. unosa" %}</span><span class="sb-val">{{ total_entries }}</span></div>
-    <div class="sb-item"><span class="sb-lbl">{% trans "Br. projekata" %}</span><span class="sb-val">{{ total_projects }}</span></div>
-    <div style="flex:1"></div>
-    <div style="align-self:center">
-      <form method="post" action="{% url 'worktime:ts_bill' %}">
-        {% csrf_token %}
-        {% for w in all_workers %}<input type="hidden" name="bill_workers" value="{{ w.pk }}">{% endfor %}
-        <input type="hidden" name="date_from" value="{{ date_from }}">
-        <input type="hidden" name="date_to" value="{{ date_to }}">
-        <input type="hidden" name="bill_mode" value="summary">
-        <button type="submit" class="client-bill-btn" style="padding:10px 22px;font-size:.85rem">
-          📄 Fakturiraj SVE ({{ total_hours|floatformat:1 }}h = {{ total_amount|floatformat:0 }} €)
-        </button>
-      </form>
-    </div>
-  </div>
+<!-- lang: topbar -->
   {% endif %}
 
   <!-- Grouped by project -->
@@ -116,7 +12,7 @@
       <div class="client-header">
         <div>
           <div class="client-name">{{ g.project_name }}</div>
-          <div style="font-size:.72rem;color:var(--text-dim)">{{ g.client_name|default:"Interni projekt" }} · {{ g.entry_count }} unos(a)</div>
+          <div class="fx-fs-sm fx-text-dim">{{ g.client_name|default:"Interni projekt" }} · {{ g.entry_count }} unos(a)</div>
         </div>
         <div class="client-total">{{ g.total_hours|floatformat:1 }}h · {{ g.total_amount|floatformat:2 }} €</div>
         <form method="post" action="{% url 'worktime:ts_bill' %}">
@@ -142,7 +38,7 @@
     <div class="empty-state">
       <div class="icon">✅</div>
       <p>{% trans "Nema nenaplaćenih odobrenih sati za odabrani period." %}</p>
-      <p style="margin-top:8px"><a href="{% url 'worktime:ts_approve' %}" style="color:var(--gold)">{% trans "Odobriti sate →" %}</a></p>
+      <p class="mt-2"><a href="{% url 'worktime:ts_approve' %}" class="fx-text-gold">{% trans "Odobriti sate →" %}</a></p>
     </div>
   {% endif %}
 

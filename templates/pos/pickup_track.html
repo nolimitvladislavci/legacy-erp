@@ -7,18 +7,18 @@
 <title>Pracenje narudzbe</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;padding:20px}
-.card{max-width:500px;margin:0 auto;background:#1a1a1a;border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:24px}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+.card{max-width:500px;margin:0 auto;background:var(--bg-card);border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:24px}
 h2{color:var(--gold,#c9a84c);margin-bottom:16px;font-size:1.2rem}
 .status-bar{display:flex;gap:4px;margin-bottom:20px}
-.step{flex:1;height:6px;border-radius:3px;background:#222}
-.step.done{background:#22c55e}
+.step{flex:1;height:6px;border-radius:3px;background:var(--surface)}
+.step.done{background:var(--green)}
 .step.current{background:var(--gold,#c9a84c);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .status-text{text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:16px}
 .items-list{border-top:1px solid #222;padding-top:12px}
 .item-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem;border-bottom:1px solid #111}
-.meta{color:#94a3b8;font-size:.8rem;margin-top:12px}
+.meta{color:var(--text-muted);font-size:.8rem;margin-top:12px}
 </style>
 </head>
 <body>
@@ -49,7 +49,7 @@ h2{color:var(--gold,#c9a84c);margin-bottom:16px;font-size:1.2rem}
         {% for item in items %}
         <div class="item-row">
             <span>{{ item.quantity }}x {{ item.inventory_item.name }}</span>
-            <span style="color:var(--gold,#c9a84c)">{{ item.inventory_item.unit_price|floatformat:2 }} EUR</span>
+            <span class="fx-text-gold">{{ item.inventory_item.unit_price|floatformat:2 }} EUR</span>
         </div>
         {% endfor %}
     </div>
@@ -57,7 +57,7 @@ h2{color:var(--gold,#c9a84c);margin-bottom:16px;font-size:1.2rem}
     <div class="meta">
         <div>Ime: {{ order.guest_name }}</div>
         <div>Narudzba: {{ order.created_at|date:"d.m.Y H:i" }}</div>
-        <div style="margin-top:8px;font-size:.7rem;color:#475569">#{{ order.tracking_token|truncatechars:12 }}</div>
+        <div class="fx-fs-sm fx-text-dim mt-2">#{{ order.tracking_token|truncatechars:12 }}</div>
     </div>
 </div>
 

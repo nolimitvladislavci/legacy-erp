@@ -3,26 +3,26 @@
 {% block title %}Nova punomoć{% endblock %}
 {% block content %}
 <div class="container" style="max-width:600px;margin:40px auto">
-  <h2 style="color:var(--gold);font-family:'Cormorant Garamond',serif;margin-bottom:20px">Nova punomoć za e-Račun</h2>
-  <p style="color:var(--muted);font-size:.85rem;margin-bottom:20px">
+  <h2 class="fx-text-gold mb-4" style="font-family:'Cormorant Garamond',serif">Nova punomoć za e-Račun</h2>
+  <p class="fx-fs-base fx-text-muted mb-4">
     Odaberite firmu kojoj želite biti posrednik za e-Račun.
   </p>
 
   {% if children %}
-  <form method="post" style="display:flex;flex-direction:column;gap:8px">
+  <form method="post" class="d-flex fx-gap-2 fx-flex-col">
     {% csrf_token %}
-    <select name="principal_id" required style="background:var(--dark,#111);border:1px solid var(--border,#333);color:var(--text);padding:12px;border-radius:8px;font-size:.9rem">
+    <select name="principal_id" required class="fx-rounded fx-fs-md fx-text-body fx-p-12" style="background:var(--dark,#111);border:1px solid var(--border,#333)">
       <option value="">— Odaberite firmu —</option>
       {% for c in children %}
       <option value="{{ c.id }}">{{ c.name }} (OIB: {{ c.oib }})</option>
       {% endfor %}
     </select>
-    <button type="submit" style="background:var(--gold);color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px">Kreiraj punomoć</button>
+    <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-pointer mt-2 fx-bg-gold" style="padding:14px">Kreiraj punomoć</button>
   </form>
   {% else %}
-  <p style="color:var(--muted)">Nema firmi u umbrelli.</p>
+  <p class="fx-text-muted">Nema firmi u umbrelli.</p>
   {% endif %}
 
-  <a href="{% url 'eracun:mandate_list' %}" style="display:inline-block;margin-top:16px;color:var(--gold);text-decoration:none;font-size:.85rem">← Natrag na listu</a>
+  <a href="{% url 'eracun:mandate_list' %}" class="fx-no-underline fx-fs-base d-inline-block mt-3 fx-text-gold">← Natrag na listu</a>
 </div>
 {% endblock %}

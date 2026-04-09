@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Narudzba {{ order.order_number }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -37,14 +20,14 @@
 </div>
 <div class="stat-card p-4 mb-3">
   <h6>Stavke</h6>
-  <table class="table table-sm" style="font-size:.85rem">
+  <table class="table table-sm fx-fs-base">
     <thead><tr><th>Proizvod</th><th>OPG</th><th>Kolicina</th><th>Cijena</th><th class="text-end">Ukupno</th></tr></thead>
     <tbody>
       {% for item in items %}
       <tr><td>{{ item.product.name }}</td><td>{{ item.seller_company.name }}</td><td>{{ item.quantity }} {{ item.product.unit }}</td><td>{{ item.unit_price }}&euro;</td><td class="text-end fw-bold">{{ item.total }}&euro;</td></tr>
       {% endfor %}
     </tbody>
-    <tfoot><tr><td colspan="4" class="text-end fw-bold">Ukupno:</td><td class="text-end fw-bold" style="color:var(--gold,#c9a84c);font-size:1.1rem">{{ order.total }}&euro;</td></tr></tfoot>
+    <tfoot><tr><td colspan="4" class="text-end fw-bold">Ukupno:</td><td class="text-end fw-bold fx-fs-xl fx-text-gold">{{ order.total }}&euro;</td></tr></tfoot>
   </table>
 </div>
 {% if sub_orders %}

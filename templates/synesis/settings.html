@@ -15,7 +15,7 @@
 </div>
 
 {% if messages %}
-<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2 fx-fs-base">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
 {% endif %}
 
 <div class="row g-4">
@@ -29,22 +29,22 @@
         <div class="stat-card p-3 text-center" style="border-left:3px solid var(--color-success)">
       <div class="text-muted small mb-1"><i class="fas fa-shield-alt me-1"></i>Backup</div>
       <div class="fw-bold">{% if cfg.last_backup_at %}{{ cfg.last_backup_at|date:"d.m H:i" }}{% else %}—{% endif %}</div>
-      <div class="text-muted" style="font-size:.72rem">zadnji backup</div>
+      <div class="text-muted fx-fs-sm">zadnji backup</div>
     </div>
     <div class="stat-card p-3 text-center">
-          <div class="fw-bold" style="font-size:1.8rem;color:var(--accent)">{{ cfg.partners_total|default:"0" }}</div>
-          <div class="text-muted" style="font-size:.78rem"><i class="fas fa-handshake me-1"></i>Partneri uvezeni</div>
+          <div class="fw-bold fx-text-cyan fx-fs-6xl">{{ cfg.partners_total|default:"0" }}</div>
+          <div class="text-muted fx-fs-body-sm"><i class="fas fa-handshake me-1"></i>Partneri uvezeni</div>
           {% if cfg.last_sync_partners %}
-          <div class="text-muted mt-1" style="font-size:.72rem">{{ cfg.last_sync_partners|date:"d.m.Y H:i" }}</div>
+          <div class="text-muted mt-1 fx-fs-sm">{{ cfg.last_sync_partners|date:"d.m.Y H:i" }}</div>
           {% endif %}
         </div>
       </div>
       <div class="col-6">
         <div class="stat-card p-3 text-center">
-          <div class="fw-bold" style="font-size:1.8rem;color:var(--accent)">{{ cfg.items_total|default:"0" }}</div>
-          <div class="text-muted" style="font-size:.78rem"><i class="fas fa-boxes me-1"></i>Artikli uvezeni</div>
+          <div class="fw-bold fx-text-cyan fx-fs-6xl">{{ cfg.items_total|default:"0" }}</div>
+          <div class="text-muted fx-fs-body-sm"><i class="fas fa-boxes me-1"></i>Artikli uvezeni</div>
           {% if cfg.last_sync_items %}
-          <div class="text-muted mt-1" style="font-size:.72rem">{{ cfg.last_sync_items|date:"d.m.Y H:i" }}</div>
+          <div class="text-muted mt-1 fx-fs-sm">{{ cfg.last_sync_items|date:"d.m.Y H:i" }}</div>
           {% endif %}
         </div>
       </div>
@@ -55,7 +55,7 @@
       <h6 class="fw-bold mb-3"><i class="fas fa-key me-2 text-warning"></i>API Token</h6>
       <p class="text-muted small mb-2">Ovaj token se upisuje u sync skriptu. Čuvajte ga kao lozinku.</p>
       <div class="input-group input-group-sm mb-2">
-        <input type="text" id="apiToken" class="form-control font-monospace" value="{{ cfg.api_token }}" readonly style="font-size:.75rem">
+        <input type="text" id="apiToken" class="form-control font-monospace fx-fs-caption" value="{{ cfg.api_token }}" readonly>
         <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('apiToken').value);this.innerHTML='<i class=\'fas fa-check\'></i>'" title="Kopiraj">
           <i class="fas fa-copy"></i>
         </button>
@@ -75,10 +75,10 @@
         <li>Unesite putanje do Synesis baza ispod</li>
         <li>Kliknite <strong>Preuzmi sync skriptu</strong></li>
         <li>Na Windows računalu pokrenite:<br>
-          <code style="font-size:.75rem">python synesis_sync.py</code>
+          <code class="fx-fs-caption">python synesis_sync.py</code>
         </li>
         <li>Ili automatski svake noći:<br>
-          <code style="font-size:.75rem">schtasks /create /tn "SynesisSync" /tr "python C:\synesis_sync.py" /sc daily /st 02:00</code>
+          <code class="fx-fs-caption">schtasks /create /tn "SynesisSync" /tr "python C:\synesis_sync.py" /sc daily /st 02:00</code>
         </li>
       </ol>
     </div>
@@ -97,10 +97,9 @@
             Storage.mdb
             <span class="text-muted fw-normal">(partneri, artikli, zaliha)</span>
           </label>
-          <input type="text" name="storage_db_path" class="form-control font-monospace"
+          <input type="text" name="storage_db_path" class="form-control font-monospace fx-fs-base"
                  value="{{ cfg.storage_db_path }}"
-                 placeholder="C:\Synesis\KONJIK2025\Storage.mdb"
-                 style="font-size:.85rem">
+                 placeholder="C:\Synesis\KONJIK2025\Storage.mdb">
           <div class="form-text">Putanja na Windows računalu gdje je instaliran Synesis</div>
         </div>
         <div class="mb-3">
@@ -108,10 +107,9 @@
             Journal.mdb
             <span class="text-muted fw-normal">(knjiga transakcija)</span>
           </label>
-          <input type="text" name="journal_db_path" class="form-control font-monospace"
+          <input type="text" name="journal_db_path" class="form-control font-monospace fx-fs-base"
                  value="{{ cfg.journal_db_path }}"
-                 placeholder="C:\Synesis\KONJIK2025\Journal.mdb"
-                 style="font-size:.85rem">
+                 placeholder="C:\Synesis\KONJIK2025\Journal.mdb">
         </div>
         <div class="mb-2">
           <label class="form-label fw-semibold small mb-1">
@@ -119,17 +117,15 @@
           </label>
           <div class="row g-2">
             <div class="col-8">
-              <input type="text" name="pos_db_path" class="form-control font-monospace"
+              <input type="text" name="pos_db_path" class="form-control font-monospace fx-fs-base"
                      value="{{ cfg.pos_db_path }}"
-                     placeholder="C:\SynesisPOS\Kasa2025-01.mdb"
-                     style="font-size:.85rem">
+                     placeholder="C:\SynesisPOS\Kasa2025-01.mdb">
               <div class="form-text">Npr. C:\SynesisPOS\Kasa2025-01.mdb — ostavite prazno ako ne koristite</div>
             </div>
             <div class="col-4">
-              <input type="password" name="pos_db_password" class="form-control font-monospace"
+              <input type="password" name="pos_db_password" class="form-control font-monospace fx-fs-base"
                      value="{{ cfg.pos_db_password }}"
                      placeholder="lozinka baze"
-                     style="font-size:.85rem"
                      autocomplete="new-password">
               <div class="form-text">Lozinka .mdb baze</div>
             </div>
@@ -138,7 +134,7 @@
         <!-- ── Connect folder sekcija ── -->
         <hr class="my-3">
         <h6 class="fw-bold mb-2"><i class="fas fa-shield-alt me-2 text-success"></i>Izolacija i zaštita podataka</h6>
-        <div class="alert alert-success py-2 mb-3" style="font-size:.82rem">
+        <div class="alert alert-success py-2 mb-3 fx-fs-note">
           <strong>Originalni Synesis fajlovi se nikada ne diraju direktno.</strong>
           Connect uvijek radi s radnom kopijom — sve promjene idu kroz backup → work → original.
         </div>
@@ -147,10 +143,9 @@
             Connect bazni folder
             <span class="text-muted fw-normal">(automatski se kreira na Windows računalu)</span>
           </label>
-          <input type="text" name="connect_base_path" class="form-control font-monospace"
+          <input type="text" name="connect_base_path" class="form-control font-monospace fx-fs-base"
                  value="{{ cfg.connect_base_path|default:'C:\SynesisConnect' }}"
-                 placeholder="C:\SynesisConnect"
-                 style="font-size:.85rem">
+                 placeholder="C:\SynesisConnect">
           <div class="form-text">
             Connect kreira: <code>backup\</code> <code>work\</code> <code>export\</code> podfoldere i <code>connect_log.txt</code>
           </div>
@@ -172,7 +167,7 @@
           </div>
         </div>
         {% if cfg.last_backup_at %}
-        <div class="d-flex gap-3 mb-3" style="font-size:.82rem">
+        <div class="d-flex gap-3 mb-3 fx-fs-note">
           <span class="text-success"><i class="fas fa-check-circle me-1"></i>Zadnji backup: <strong>{{ cfg.last_backup_at|date:"d.m.Y H:i" }}</strong></span>
           {% if cfg.last_backup_path %}<span class="text-muted font-monospace">{{ cfg.last_backup_path|truncatechars:50 }}</span>{% endif %}
         </div>
@@ -200,7 +195,7 @@
     <div class="stat-card p-4">
       <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-secondary"></i>Povijest sinkronizacija</h6>
       <div class="table-responsive">
-        <table class="table table-sm align-middle" style="font-size:.82rem">
+        <table class="table table-sm align-middle fx-fs-note">
           <thead>
             <tr>
               <th>Datum</th>
@@ -217,9 +212,9 @@
             <tr>
               <td>{{ log.synced_at|date:"d.m.Y H:i" }}</td>
               <td>
-                {% if log.sync_type == 'partners' %}<span class="badge bg-primary">Partneri</span>
-                {% elif log.sync_type == 'items' %}<span class="badge bg-success">Artikli</span>
-                {% else %}<span class="badge bg-secondary">{{ log.sync_type }}</span>{% endif %}
+                {% if log.sync_type == 'partners' %}<span class="fenix-badge fenix-badge-info">Partneri</span>
+                {% elif log.sync_type == 'items' %}<span class="fenix-badge fenix-badge-success">Artikli</span>
+                {% else %}<span class="fenix-badge fenix-badge-muted">{{ log.sync_type }}</span>{% endif %}
               </td>
               <td class="text-center">{{ log.records_received }}</td>
               <td class="text-center text-success fw-bold">{{ log.records_created }}</td>
@@ -239,7 +234,7 @@
     </div>
     {% else %}
     <div class="stat-card p-4 text-center text-muted">
-      <i class="fas fa-clock" style="font-size:2rem;opacity:.3"></i>
+      <i class="fas fa-clock fx-fs-icon fx-opacity-50"></i>
       <p class="mt-2 mb-0 small">Nema sinkronizacija. Preuzmite skriptu i pokrenite ju na Windows računalu.</p>
     </div>
     {% endif %}

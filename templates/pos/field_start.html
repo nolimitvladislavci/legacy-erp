@@ -3,64 +3,64 @@
 {% block title %}Utovar — {{ terminal.name }}{% endblock %}
 
 {% block content %}
-<div style="max-width:800px;margin:0 auto;padding:20px">
-    <h4 style="font-weight:800;color:var(--gold);margin-bottom:4px">Terenska smjena</h4>
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:20px">{{ terminal.name }} — utovarite artikle u vozilo</p>
+<div class="fx-m-auto fx-p-20 fx-max-800">
+    <h4 class="fx-fw-800 fx-text-gold mb-1">Terenska smjena</h4>
+    <p class="fx-fs-base fx-text-muted mb-4">{{ terminal.name }} — utovarite artikle u vozilo</p>
 
     <form method="post">{% csrf_token %}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div class="fx-gap-3 d-grid mb-4 fx-grid-2-equal">
             <div>
-                <label style="font-size:.75rem;font-weight:600;color:var(--muted)">Reg. oznaka vozila</label>
+                <label class="fx-fs-caption fx-fw-semibold fx-text-muted">Reg. oznaka vozila</label>
                 <input type="text" name="vehicle_plate" placeholder="OS-123-AB" required
-                    style="width:100%;padding:10px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem;font-weight:700">
+                    class="fx-w-full fx-rounded fx-fs-lg fx-fw-bold fx-text-body fx-p-10 fx-bg-dark fx-b">
             </div>
             <div>
-                <label style="font-size:.75rem;font-weight:600;color:var(--muted)">Ruta</label>
+                <label class="fx-fs-caption fx-fw-semibold fx-text-muted">Ruta</label>
                 <input type="text" name="route_name" placeholder="Ivanovac - Vladislavci - Cepin" required
-                    style="width:100%;padding:10px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem">
+                    class="fx-w-full fx-rounded fx-fs-lg fx-text-body fx-p-10 fx-bg-dark fx-b">
             </div>
         </div>
-        <div style="margin-bottom:20px">
-            <label style="font-size:.75rem;font-weight:600;color:var(--muted)">Gotovina pri izlasku (EUR)</label>
+        <div class="mb-4">
+            <label class="fx-fs-caption fx-fw-semibold fx-text-muted">Gotovina pri izlasku (EUR)</label>
             <input type="number" name="opening_cash" value="0" step="0.01" min="0"
-                style="width:200px;padding:10px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem">
+                class="fx-rounded fx-fs-lg fx-text-body fx-p-10 fx-bg-dark fx-b" style="width:200px">
         </div>
 
-        <h5 style="font-weight:700;margin:20px 0 10px;color:var(--text)">Utovar artikala</h5>
-        <div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Unesite kolicinu za svaki artikl koji ide u vozilo</div>
+        <h5 class="fx-fw-bold fx-text-body" style="margin:20px 0 10px">Utovar artikala</h5>
+        <div class="fx-fs-sm fx-text-muted mb-2">Unesite kolicinu za svaki artikl koji ide u vozilo</div>
 
-        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+        <table class="fx-w-full fx-fs-base fx-b-collapse">
             <thead>
-                <tr style="border-bottom:2px solid var(--border);text-align:left">
-                    <th style="padding:8px">Artikl</th>
-                    <th style="padding:8px;width:80px">Zaliha</th>
-                    <th style="padding:8px;width:80px">Cijena</th>
-                    <th style="padding:8px;width:100px">Utovar</th>
+                <tr class="text-start" style="border-bottom:2px solid var(--border)">
+                    <th class="fx-p-8">Artikl</th>
+                    <th class="fx-p-8" style="width:80px">Zaliha</th>
+                    <th class="fx-p-8" style="width:80px">Cijena</th>
+                    <th class="fx-p-8" style="width:100px">Utovar</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
-                <tr style="border-bottom:1px solid var(--border)">
+                <tr class="fx-bb">
                     <td style="padding:6px 8px">
                         <strong>{{ item.name }}</strong>
-                        {% if item.sku %}<span style="color:var(--muted);font-size:.7rem;margin-left:4px">{{ item.sku }}</span>{% endif %}
+                        {% if item.sku %}<span class="fx-fs-sm fx-text-muted" style="margin-left:4px">{{ item.sku }}</span>{% endif %}
                     </td>
                     <td style="padding:6px 8px;color:{% if item.quantity > 10 %}#22c55e{% elif item.quantity > 0 %}#f59e0b{% else %}#ef4444{% endif %}">{{ item.quantity }}</td>
                     <td style="padding:6px 8px">{{ item.unit_price|floatformat:2 }}</td>
                     <td style="padding:6px 8px">
                         <input type="number" name="load_{{ item.pk }}" value="0" min="0" max="{{ item.quantity }}"
-                            style="width:80px;padding:6px;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-weight:700;text-align:center;font-size:.9rem">
+                            class="fx-rounded-sm fx-fw-bold text-center fx-fs-md fx-text-gold fx-bg-dark fx-b fx-p-sm" style="width:80px">
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <div style="margin-top:20px;display:flex;gap:12px">
-            <button type="submit" style="flex:1;padding:14px;background:var(--gold);color:#000;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer">
+        <div class="d-flex fx-gap-3 mt-4">
+            <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fs-lg fx-fw-800 fx-pointer fx-flex-1 fx-bg-gold" style="padding:14px">
                 KRENI NA TEREN
             </button>
-            <a href="{% url 'pos:dashboard' %}" style="padding:14px 24px;background:var(--dark);color:var(--muted);border:1px solid var(--border);border-radius:10px;text-decoration:none;font-weight:600;display:flex;align-items:center">
+            <a href="{% url 'pos:dashboard' %}" class="fx-rounded fx-no-underline fx-fw-semibold d-flex fx-text-muted align-items-center fx-bg-dark fx-b" style="padding:14px 24px">
                 Odustani
             </a>
         </div>

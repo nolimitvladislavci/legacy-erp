@@ -4,24 +4,24 @@
 {% block page_title %}{% trans "Bankovni izvod – CSV Import" %}{% endblock %}
 {% block content %}
 <style>
-.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;max-width:640px;margin:0 auto}
-.k-card h2{font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px}
-.k-card p{color:#64748b;font-size:.84rem;margin-bottom:20px}
+.k-card{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:24px;max-width:640px;margin:0 auto}
+.k-card h2{font-size:1rem;font-weight:700;color:var(--white);margin-bottom:4px}
+.k-card p{color:var(--text-dim);font-size:.84rem;margin-bottom:20px}
 .fg{margin-bottom:16px}
-.fg label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:5px}
-.fg select,.fg input[type=file]{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:9px 13px;font-size:.85rem}
+.fg label{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:5px}
+.fg select,.fg input[type=file]{width:100%;background:var(--surface-deep);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:9px 13px;font-size:.85rem}
 .k-btn{padding:10px 24px;border-radius:8px;border:none;font-weight:700;font-size:.88rem;cursor:pointer}
-.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}
-.k-btn-outline{background:transparent;border:1.5px solid #334155;color:#94a3b8;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:8px;font-weight:600;font-size:.88rem}
-.formats{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px;margin-bottom:20px}
-.formats h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 10px}
+.k-btn-gold{background:var(--gold,#c9a84c);color:var(--text)}
+.k-btn-outline{background:transparent;border:1.5px solid #334155;color:var(--text-muted);text-decoration:none;display:inline-block;padding:10px 20px;border-radius:8px;font-weight:600;font-size:.88rem}
+.formats{background:var(--surface-deep);border:1px solid var(--border2);border-radius:8px;padding:14px;margin-bottom:20px}
+.formats h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 10px}
 .fmt-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1e293b;font-size:.82rem}
 .fmt-row:last-child{border-bottom:none}
 .fmt-badge{padding:2px 8px;border-radius:6px;font-size:.68rem;font-weight:700;background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
 </style>
 
-<div style="margin-bottom:16px">
-  <a href="{% url 'konto:transactions' %}" style="color:#94a3b8;font-size:.82rem;text-decoration:none">← {% trans "Transakcije" %}</a>
+<div class="mb-3">
+  <a href="{% url 'konto:transactions' %}" class="fx-text-muted fx-fs-note fx-no-underline">← {% trans "Transakcije" %}</a>
 </div>
 
 <div class="k-card">
@@ -30,15 +30,15 @@
 
   {% if messages %}
     {% for m in messages %}
-      <div style="background:{% if 'error' in m.tags %}rgba(239,68,68,.12){% else %}rgba(16,185,129,.12){% endif %};border:1px solid {% if 'error' in m.tags %}rgba(239,68,68,.3){% else %}rgba(16,185,129,.3){% endif %};color:{% if 'error' in m.tags %}#f87171{% else %}#34d399{% endif %};padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:.84rem">{{ m }}</div>
+      <div class="fx-rounded" style="background:{% if 'error' in m.tags %}rgba(239,68,68,.12){% else %}rgba(16,185,129,.12){% endif %};border:1px solid {% if 'error' in m.tags %}rgba(239,68,68,.3){% else %}rgba(16,185,129,.3){% endif %};color:{% if 'error' in m.tags %}#f87171{% else %}#34d399{% endif %};padding:10px 14px;margin-bottom:14px;font-size:.84rem">{{ m }}</div>
     {% endfor %}
   {% endif %}
 
   <div class="formats">
     <h4>{% trans "Podržani formati" %}</h4>
-    <div class="fmt-row"><span class="fmt-badge">Commerzbank</span><span style="color:#94a3b8">Buchungstag; Auftraggeber/Beguenstigter; Verwendungszweck; Betrag</span></div>
-    <div class="fmt-row"><span class="fmt-badge">DKB</span><span style="color:#94a3b8">Buchungsdatum; Beguenstigter; Verwendungszweck; Betrag (EUR)</span></div>
-    <div class="fmt-row"><span class="fmt-badge">Generic</span><span style="color:#94a3b8">Datum/Date; Name/Auftraggeber; Betrag/Amount — auto-detekcija</span></div>
+    <div class="fmt-row"><span class="fmt-badge">Commerzbank</span><span class="fx-text-dim">Buchungstag; Auftraggeber/Beguenstigter; Verwendungszweck; Betrag</span></div>
+    <div class="fmt-row"><span class="fmt-badge">DKB</span><span class="fx-text-dim">Buchungsdatum; Beguenstigter; Verwendungszweck; Betrag (EUR)</span></div>
+    <div class="fmt-row"><span class="fmt-badge">Generic</span><span class="fx-text-dim">Datum/Date; Name/Auftraggeber; Betrag/Amount — auto-detekcija</span></div>
   </div>
 
   <form method="post" enctype="multipart/form-data" action="{% url 'finance:bank_import' %}">
@@ -57,9 +57,9 @@
     <div class="fg">
       <label>{% trans "CSV datoteka" %}</label>
       <input type="file" name="csvfile" accept=".csv,.txt" required>
-      <div style="font-size:.72rem;color:#64748b;margin-top:4px">{% trans "Encoding: UTF-8 ili UTF-8-BOM. Separator: ; ili ," %}</div>
+      <div class="fx-fs-sm fx-text-dim mt-1">{% trans "Encoding: UTF-8 ili UTF-8-BOM. Separator: ; ili ," %}</div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:20px">
+    <div class="d-flex fx-gap-3 mt-4">
       <button type="submit" class="k-btn k-btn-gold">📂 {% trans "Importiraj" %}</button>
       <a href="{% url 'konto:transactions' %}" class="k-btn-outline">{% trans "Odustani" %}</a>
     </div>

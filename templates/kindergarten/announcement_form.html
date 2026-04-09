@@ -4,15 +4,15 @@
 {% block page_title %}Nova obavijest{% endblock %}
 {% block extra_css %}
 <style>
-.kg-form{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
-.kg-form label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.3rem}
-.kg-form input,.kg-form select,.kg-form textarea{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:.5rem .8rem;width:100%}
-.kg-form input:focus,.kg-form select:focus,.kg-form textarea:focus{border-color:#c8a24e;outline:none}
+.kg-form{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
+.kg-form label{color:var(--gold);font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.kg-form input,.kg-form select,.kg-form textarea{background:var(--surface-deep);color:var(--text);border:1px solid rgba(200,162,78,0.2);border-radius:6px;padding:.5rem .8rem;width:100%}
+.kg-form input:focus,.kg-form select:focus,.kg-form textarea:focus{border-color:var(--gold);outline:none}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'kindergarten:dashboard' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Dashboard</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem"><i class="bi bi-megaphone"></i> Nova obavijest</h2>
+<a href="{% url 'kindergarten:dashboard' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Dashboard</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem"><i class="bi bi-megaphone"></i> Nova obavijest</h2>
 <form method="post" class="kg-form">
   {% csrf_token %}
   <div class="row g-3">
@@ -31,7 +31,7 @@
     </div>
   </div>
   <div class="mt-3">
-    <button type="submit" class="btn" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-megaphone"></i> Objavi</button>
+    <button type="submit" class="btn fx-bg-gold fx-fw-semibold fx-text-dark"><i class="bi bi-megaphone"></i> Objavi</button>
     <a href="{% url 'kindergarten:dashboard' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
   </div>
 </form>

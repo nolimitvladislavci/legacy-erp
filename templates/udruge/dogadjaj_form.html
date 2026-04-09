@@ -2,109 +2,92 @@
 {% load i18n %}
 {% block title %}Novi dogadjaj{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="margin-bottom:1rem">
-  <a href="{% url 'udruge:dogadjaj_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Svi dogadjaji</a>
+<div class="mb-3">
+  <a href="{% url 'udruge:dogadjaj_list' %}" class="fx-fs-base fx-no-underline fx-text-gold">&laquo; Svi dogadjaji</a>
 </div>
-<h4 style="margin:0 0 1rem;color:var(--gold)">Novi dogadjaj</h4>
+<h4 class="fx-text-gold" style="margin:0 0 1rem">Novi dogadjaj</h4>
 
 <form method="post">
   {% csrf_token %}
-  <div class="card" style="padding:1rem;margin-bottom:1rem">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv *</label>
-        <input type="text" name="name" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+  <div class="card mb-3 fx-p-4">
+    <div class="d-grid fx-gap-3 fx-grid-2-equal">
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Naziv *</label>
+        <input type="text" name="name" required class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tip</label>
-        <select name="event_type" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Tip</label>
+        <select name="event_type" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           {% for val, lbl in type_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Status</label>
-        <select name="status" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Status</label>
+        <select name="status" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           {% for val, lbl in status_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Pocetak *</label>
-        <input type="datetime-local" name="start_date" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Pocetak *</label>
+        <input type="datetime-local" name="start_date" required class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Kraj</label>
-        <input type="datetime-local" name="end_date" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Kraj</label>
+        <input type="datetime-local" name="end_date" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Lokacija</label>
-        <input type="text" name="location" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Lokacija</label>
+        <input type="text" name="location" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Online link</label>
-        <input type="url" name="online_url" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Online link</label>
+        <input type="url" name="online_url" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Max polaznika (0=neogr.)</label>
-        <input type="number" name="max_attendees" value="0" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Max polaznika (0=neogr.)</label>
+        <input type="number" name="max_attendees" value="0" min="0" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Budzet (EUR)</label>
-        <input type="number" name="budget" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Budzet (EUR)</label>
+        <input type="number" name="budget" value="0" step="0.01" min="0" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Cijena ulaznice (EUR)</label>
-        <input type="number" name="ticket_price" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Cijena ulaznice (EUR)</label>
+        <input type="number" name="ticket_price" value="0" step="0.01" min="0" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
-      <div style="display:flex;gap:1.5rem;align-items:center;grid-column:1/-1;padding:.5rem 0">
-        <label style="font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.4rem">
+      <div class="d-flex align-items-center fx-col-full fx-p-5-0" style="gap:1.5rem">
+        <label class="fx-fs-base d-flex fx-text-body align-items-center fx-gap-1">
           <input type="checkbox" name="is_free" checked> Besplatan
         </label>
-        <label style="font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.4rem">
+        <label class="fx-fs-base d-flex fx-text-body align-items-center fx-gap-1">
           <input type="checkbox" name="registration_required"> Prijava obavezna
         </label>
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Rok za prijavu</label>
-        <input type="datetime-local" name="registration_deadline" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Rok za prijavu</label>
+        <input type="datetime-local" name="registration_deadline" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Povezana kampanja</label>
-        <select name="kampanja" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Povezana kampanja</label>
+        <select name="kampanja" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b">
           <option value="">-- Bez kampanje --</option>
           {% for k in kampanje %}<option value="{{ k.pk }}">{{ k.name }}</option>{% endfor %}
         </select>
       </div>
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Opis</label>
-        <textarea name="description" rows="4" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Opis</label>
+        <textarea name="description" rows="4" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b" style="resize:vertical"></textarea>
       </div>
-      <div style="grid-column:1/-1">
-        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Napomene</label>
-        <textarea name="notes" rows="2" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      <div class="fx-col-full">
+        <label class="fx-fs-body-sm fx-text-muted d-block mb-1">Napomene</label>
+        <textarea name="notes" rows="2" class="fx-w-full fx-rounded-sm fx-fs-body fx-text-body fx-p-2 fx-bg-dark fx-b" style="resize:vertical"></textarea>
       </div>
     </div>
   </div>
-  <div style="display:flex;gap:.5rem">
+  <div class="d-flex fx-gap-2">
     <button type="submit" class="btn btn-gold">Spremi dogadjaj</button>
     <a href="{% url 'udruge:dogadjaj_list' %}" class="btn btn-ghost">Odustani</a>
   </div>

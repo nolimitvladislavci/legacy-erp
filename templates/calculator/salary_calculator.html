@@ -43,7 +43,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
 /* Country toggle (inner tabs within Gehaltsrechner) */
 .country-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--gold-border);border-radius:8px;overflow:hidden}
 .country-tab{flex:1;padding:14px;text-align:center;cursor:pointer;background:var(--surface2);color:var(--text-dim);font-size:.88rem;font-weight:700;border:none;transition:all .15s;font-family:inherit}
-.country-tab.active{background:var(--gold);color:#000}
+.country-tab.active{background:var(--gold);color:var(--text)}
 .country-tab:hover:not(.active){background:var(--surface3);color:var(--text)}
 .country-panel{display:none}
 .country-panel.active{display:block}
@@ -92,13 +92,13 @@ input[readonly]{cursor:default;opacity:.85}
 
 /* Visual chart */
 .chart-bar{height:28px;border-radius:4px;display:flex;overflow:hidden;margin:12px 0 8px}
-.chart-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#000;min-width:2px;transition:width .3s}
+.chart-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--text);min-width:2px;transition:width .3s}
 .chart-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .chart-legend span{font-size:.68rem;display:flex;align-items:center;gap:4px}
 .chart-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
 /* Gold button */
-.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#000;font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--text);font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
 .btn-gold:hover{background:var(--gold2)}
 
 /* Data feed card styling */
@@ -135,13 +135,13 @@ input[readonly]{cursor:default;opacity:.85}
   .tab-panel{display:block!important;page-break-before:always}
   .tab-panel:first-child{page-break-before:auto}
   .country-panel{display:block!important}
-  body{background:#fff;color:#000;font-size:11px}
-  .card,.data-feed{border:1px solid #ccc;break-inside:avoid;background:#fff}
-  .card-title{color:#333}
-  .bdown td{border-bottom:1px solid #eee;color:#000}
-  .bdown .total td{color:#000;border-top:2px solid #000}
+  body{background:var(--bg-card);color:var(--text);font-size:11px}
+  .card,.data-feed{border:1px solid var(--border);break-inside:avoid;background:var(--bg-card)}
+  .card-title{color:var(--text)}
+  .bdown td{border-bottom:1px solid var(--border);color:var(--text)}
+  .bdown .total td{color:var(--text);border-top:2px solid #000}
   .bdown .employer td{color:#1d4ed8}
-  .bdown .highlight td{color:#000}
+  .bdown .highlight td{color:var(--text)}
   .chart-bar,.chart-legend{display:none!important}
 }
 </style>
@@ -491,7 +491,7 @@ input[readonly]{cursor:default;opacity:.85}
         <div class="chart-legend" id="st-legend"></div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:14px">
+      <div class="d-flex fx-gap-3" style="margin-top:14px">
         <button class="btn-gold" onclick="window.print()">&#128424; Drucken / PDF</button>
       </div>
     </div>

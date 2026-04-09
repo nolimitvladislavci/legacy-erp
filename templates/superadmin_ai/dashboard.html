@@ -3,24 +3,7 @@
 {% block title %}AI Nadzorni Centar{% endblock %}
 {% block page_title %}AI Nadzorni Centar{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
@@ -28,18 +11,18 @@
 .ai-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.2rem}
 .ai-stat{padding:.7rem;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;text-align:center}
 .ai-stat .num{font-size:1.6rem;font-weight:700;color:var(--gold,#c9a84c);line-height:1.2}
-.ai-stat .lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.ai-stat .lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim)}
 .group-card{background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:12px;margin-bottom:.8rem;overflow:hidden}
 .group-header{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;cursor:pointer;user-select:none}
 .group-header:hover{background:rgba(201,168,76,.05)}
 .group-title{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px}
-.group-title .count{font-size:.7rem;color:#64748b;font-weight:400}
+.group-title .count{font-size:.7rem;color:var(--text-dim);font-weight:400}
 .group-actions{display:flex;gap:6px;align-items:center}
 .group-body{padding:0 1rem .8rem;display:none}
 .group-body.open{display:block}
 .mod-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .mod-row:last-child{border:none}
-.mod-name{flex:1;font-size:.82rem;color:#e8e8e8}
+.mod-name{flex:1;font-size:.82rem;color:var(--text)}
 .mod-toggles{display:flex;gap:12px}
 .tog{position:relative;display:inline-block;width:36px;height:18px}
 .tog input{opacity:0;width:0;height:0}
@@ -48,14 +31,14 @@
 .tog input:checked+span{background:rgba(201,168,76,.2)}
 .tog input:checked+span:before{transform:translateX(18px);background:var(--gold,#c9a84c)}
 .bulk-btn{padding:3px 10px;border-radius:16px;font-size:.7rem;font-weight:700;cursor:pointer;border:1px solid;background:transparent;transition:.2s}
-.bulk-on{color:#22c55e;border-color:#22c55e}.bulk-on:hover{background:rgba(34,197,94,.1)}
-.bulk-off{color:#ef4444;border-color:#ef4444}.bulk-off:hover{background:rgba(239,68,68,.1)}
+.bulk-on{color:var(--green);border-color:var(--green)}.bulk-on:hover{background:rgba(34,197,94,.1)}
+.bulk-off{color:var(--red);border-color:var(--red)}.bulk-off:hover{background:rgba(239,68,68,.1)}
 .master-bar{display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;margin-bottom:1rem}
 .master-bar .label{font-size:.82rem;font-weight:700;color:var(--gold,#c9a84c);margin-right:auto}
-.perm-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;text-align:center;width:36px}
+.perm-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);text-align:center;width:36px}
 .action-card{padding:.8rem 1rem;margin-bottom:.6rem;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;border-left:3px solid var(--gold,#c9a84c)}
 #toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:10px 16px;border-radius:8px;color:#e8e8e8;background:#1a1a2e;border:1px solid #2a2f45;box-shadow:0 4px 20px rgba(0,0,0,.3);font-size:.82rem;opacity:0;transform:translateY(20px);transition:.3s}
+.toast{padding:10px 16px;border-radius:8px;color:var(--text);background:var(--surface);border:1px solid #2a2f45;box-shadow:0 4px 20px rgba(0,0,0,.3);font-size:.82rem;opacity:0;transform:translateY(20px);transition:.3s}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast-ok{border-left:3px solid #22c55e}.toast-err{border-left:3px solid #ef4444}
 </style>
@@ -64,7 +47,7 @@
 
 <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0" style="color:var(--gold,#c9a84c)"><i class="fas fa-brain me-2"></i>AI Nadzorni Centar</h2>
+    <h2 class="mb-0 fx-text-gold"><i class="fas fa-brain me-2"></i>AI Nadzorni Centar</h2>
     <small class="text-muted">Ovlasti AI agenata po grupama — jedan klik za sve</small>
   </div>
   <div class="d-flex gap-2">
@@ -73,39 +56,39 @@
 </div>
 
 <!-- Live AI Status -->
-<div id="ai-live-status" style="background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:1rem;margin-bottom:1rem">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
-    <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:.85rem">
-      <i class="fas fa-circle" style="color:#22c55e;font-size:.6rem;margin-right:.4rem"></i>
+<div id="ai-live-status" class="fx-bg-deep fx-rounded mb-3 fx-p-4" style="border:1px solid #1e293b">
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <span class="fx-fw-bold fx-fs-base fx-text-gold">
+      <i class="fas fa-circle fx-text-green fx-fs-2xs" style="margin-right:.4rem"></i>
       Live AI Aktivnost
     </span>
-    <span id="ai-last-update" style="color:#475569;font-size:.7rem">Ucitavam...</span>
+    <span id="ai-last-update" class="fx-text-dim fx-fs-sm">Ucitavam...</span>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem">
-    <div style="text-align:center;padding:.5rem;background:#111827;border-radius:8px">
-      <div style="font-size:1.4rem;font-weight:700;color:#22c55e" id="metric-autonomous">-</div>
-      <div style="font-size:.65rem;color:#64748b">Autonomne danas</div>
+  <div class="d-grid fx-gap-2 fx-grid-4-cols">
+    <div class="text-center fx-bg-card fx-rounded fx-p-2">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-green" id="metric-autonomous">-</div>
+      <div class="fx-fs-xs fx-text-muted">Autonomne danas</div>
     </div>
-    <div style="text-align:center;padding:.5rem;background:#111827;border-radius:8px">
-      <div style="font-size:1.4rem;font-weight:700;color:#f59e0b" id="metric-pending">-</div>
-      <div style="font-size:.65rem;color:#64748b">Ceka odobrenje</div>
+    <div class="text-center fx-bg-card fx-rounded fx-p-2">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-amber" id="metric-pending">-</div>
+      <div class="fx-fs-xs fx-text-muted">Ceka odobrenje</div>
     </div>
-    <div style="text-align:center;padding:.5rem;background:#111827;border-radius:8px">
-      <div style="font-size:1.4rem;font-weight:700;color:#ef4444" id="metric-blocked">-</div>
-      <div style="font-size:.65rem;color:#64748b">Blokirano danas</div>
+    <div class="text-center fx-bg-card fx-rounded fx-p-2">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-red" id="metric-blocked">-</div>
+      <div class="fx-fs-xs fx-text-muted">Blokirano danas</div>
     </div>
-    <div style="text-align:center;padding:.5rem;background:#111827;border-radius:8px">
-      <div style="font-size:1.4rem;font-weight:700;color:#3b82f6" id="metric-council">-</div>
-      <div style="font-size:.65rem;color:#64748b">Council glasanja</div>
+    <div class="text-center fx-bg-card fx-rounded fx-p-2">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-blue" id="metric-council">-</div>
+      <div class="fx-fs-xs fx-text-muted">Council glasanja</div>
     </div>
   </div>
 </div>
 
 <div class="ai-stats">
   <div class="ai-stat"><div class="num">{{ modules|length }}</div><div class="lbl">Moduli</div></div>
-  <div class="ai-stat"><div class="num" style="color:#f59e0b">{{ actions|length }}</div><div class="lbl">Na cekanju</div></div>
-  <div class="ai-stat"><div class="num" style="color:#3b82f6">{{ today_logs }}</div><div class="lbl">AI poziva danas</div></div>
-  <div class="ai-stat"><div class="num" style="color:#ef4444">{{ blocked_today }}</div><div class="lbl">Blokirano</div></div>
+  <div class="ai-stat"><div class="num fx-text-amber">{{ actions|length }}</div><div class="lbl">Na cekanju</div></div>
+  <div class="ai-stat"><div class="num fx-text-blue">{{ today_logs }}</div><div class="lbl">AI poziva danas</div></div>
+  <div class="ai-stat"><div class="num fx-text-red">{{ blocked_today }}</div><div class="lbl">Blokirano</div></div>
 </div>
 
 <!-- Master control -->
@@ -120,16 +103,16 @@
 <div class="group-card">
   <div class="group-header" onclick="toggleGroup('g{{ forloop.counter }}')">
     <div class="group-title">
-      {% if 'Financije' in group_name %}<i class="fas fa-coins" style="color:var(--gold,#c9a84c)"></i>
-      {% elif 'Prodaja' in group_name %}<i class="fas fa-cash-register" style="color:#22c55e"></i>
-      {% elif 'Skladiste' in group_name %}<i class="fas fa-boxes" style="color:#3b82f6"></i>
-      {% elif 'Dokument' in group_name %}<i class="fas fa-archive" style="color:#f59e0b"></i>
-      {% elif 'Operacije' in group_name %}<i class="fas fa-clock" style="color:#a855f7"></i>
-      {% elif 'Partner' in group_name %}<i class="fas fa-users" style="color:#ec4899"></i>
-      {% elif 'AI' in group_name %}<i class="fas fa-robot" style="color:#14b8a6"></i>
-      {% else %}<i class="fas fa-cog" style="color:#64748b"></i>{% endif %}
+      {% if 'Financije' in group_name %}<i class="fas fa-coins fx-text-gold"></i>
+      {% elif 'Prodaja' in group_name %}<i class="fas fa-cash-register fx-text-green"></i>
+      {% elif 'Skladiste' in group_name %}<i class="fas fa-boxes fx-text-blue"></i>
+      {% elif 'Dokument' in group_name %}<i class="fas fa-archive fx-text-amber"></i>
+      {% elif 'Operacije' in group_name %}<i class="fas fa-clock fx-text-purple"></i>
+      {% elif 'Partner' in group_name %}<i class="fas fa-users" style="color:rgba(236,72,153,0.9)"></i>
+      {% elif 'AI' in group_name %}<i class="fas fa-robot fx-text-cyan"></i>
+      {% else %}<i class="fas fa-cog fx-text-muted"></i>{% endif %}
       {{ group_name }} <span class="count">({{ group.count }} modula)</span>
-      <i class="fas fa-chevron-down ms-2" style="font-size:.7rem;color:#64748b" id="chevg{{ forloop.counter }}"></i>
+      <i class="fas fa-chevron-down ms-2 fx-fs-sm fx-text-muted" id="chevg{{ forloop.counter }}"></i>
     </div>
     <div class="group-actions" onclick="event.stopPropagation()">
       <button class="bulk-btn bulk-on" onclick="bulkGroup('{{ group_name }}',true)" title="Uključi sve u grupi"><i class="fas fa-toggle-on"></i></button>
@@ -137,7 +120,7 @@
     </div>
   </div>
   <div class="group-body" id="g{{ forloop.counter }}">
-    <div style="display:flex;justify-content:flex-end;gap:12px;padding:4px 0 8px">
+    <div class="d-flex fx-gap-3 justify-content-end" style="padding:4px 0 8px">
       <div class="perm-label">R</div>
       <div class="perm-label">W</div>
       <div class="perm-label">C</div>
@@ -161,14 +144,14 @@
 <!-- Pending actions -->
 {% if actions %}
 <div style="margin-top:1.2rem">
-  <h5 style="color:var(--gold,#c9a84c)"><i class="fas fa-clock me-2"></i>Na cekanju ({{ actions|length }})</h5>
+  <h5 class="fx-text-gold"><i class="fas fa-clock me-2"></i>Na cekanju ({{ actions|length }})</h5>
   {% for a in actions %}
   <div class="action-card" id="act-{{ a.id }}">
     <div class="d-flex justify-content-between align-items-center mb-1">
-      <strong style="color:var(--gold,#c9a84c)">{{ a.module }}.{{ a.action_type }}</strong>
+      <strong class="fx-text-gold">{{ a.module }}.{{ a.action_type }}</strong>
       <small class="text-muted">{{ a.created_at|date:"d.m. H:i" }}</small>
     </div>
-    <div style="font-size:.85rem;margin-bottom:.5rem">{{ a.description }}</div>
+    <div class="fx-fs-base mb-2">{{ a.description }}</div>
     <div class="d-flex gap-2">
       <button class="bulk-btn bulk-on" onclick="resolve('{{ a.id }}','APPROVED',this)"><i class="fas fa-check"></i> Odobri</button>
       <button class="bulk-btn bulk-off" onclick="resolve('{{ a.id }}','REJECTED',this)"><i class="fas fa-times"></i> Odbij</button>

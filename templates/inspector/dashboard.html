@@ -13,7 +13,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .top-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gold)}
 .top-bar h1{color:var(--gold);font-size:1.3rem;letter-spacing:2px}
 .top-bar .meta{color:var(--muted);font-size:.85rem;text-align:right}
-.top-bar .scope-badge{background:var(--red);color:#fff;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.top-bar .scope-badge{background:var(--red);color:var(--white);padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .tabs{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto}
 .tab{padding:12px 24px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
 .tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
@@ -24,7 +24,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .tab-content.active{display:block}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
 .kpi{background:var(--card);border-radius:12px;padding:1.25rem;border-left:4px solid var(--gold)}
-.kpi .val{font-size:2rem;font-weight:800;color:#fff}
+.kpi .val{font-size:2rem;font-weight:800;color:var(--white)}
 .kpi .lbl{color:var(--muted);font-size:.85rem;margin-top:4px}
 .section{background:var(--card);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
 .section h3{color:var(--gold);margin-bottom:1rem;font-size:1.1rem;display:flex;align-items:center;gap:8px}
@@ -34,7 +34,7 @@ td{padding:8px;border-bottom:1px solid var(--border);color:var(--text)}
 tr:hover{background:rgba(255,255,255,.02)}
 .r{text-align:right;font-variant-numeric:tabular-nums}
 .ok{color:var(--green)}
-.warn{color:#f59e0b}
+.warn{color:var(--amber)}
 .err{color:var(--red)}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600}
 .badge-green{background:rgba(34,197,94,.15);color:var(--green)}
@@ -44,7 +44,7 @@ tr:hover{background:rgba(255,255,255,.02)}
 .footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
 .watermark{position:fixed;bottom:10px;right:20px;color:rgba(201,168,76,.08);font-size:4rem;font-weight:900;letter-spacing:5px;pointer-events:none;z-index:0}
 @media(max-width:768px){.grid{grid-template-columns:1fr 1fr}.top-bar{flex-direction:column;gap:.5rem;text-align:center}}
-@media print{body{background:#fff;color:#000}.top-bar{background:#000!important}th{background:#f0f0f0;color:#000}td{color:#000;border-color:#ccc}.tab{display:none}.tab-content{display:block!important}.watermark{display:none}}
+@media print{body{background:var(--bg-card);color:var(--text)}.top-bar{background:#000!important}th{background:var(--surface2);color:var(--text)}td{color:var(--text);border-color:var(--text-muted)}.tab{display:none}.tab-content{display:block!important}.watermark{display:none}}
 </style>
 </head>
 <body>
@@ -52,7 +52,7 @@ tr:hover{background:rgba(255,255,255,.02)}
 <div class="top-bar">
   <div>
     <h1><i class="fas fa-shield-halved"></i> INSPEKCIJA — {{ company.name }}</h1>
-    <div style="color:var(--muted);font-size:.85rem;margin-top:4px">
+    <div class="fx-fs-base fx-text-muted mt-1">
       {% if company.oib %}OIB: {{ company.oib }} | {% endif %}
       Period: {{ date_from|date:"d.m.Y" }} — {{ date_to|date:"d.m.Y" }}
     </div>
@@ -97,11 +97,11 @@ tr:hover{background:rgba(255,255,255,.02)}
   {% if porezna.balance_sheet %}
   <div class="section">
     <h3><i class="fas fa-balance-scale"></i> Bilanca na {{ date_to|date:"d.m.Y" }}</h3>
-    <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="grid fx-grid-2-equal">
       <div class="kpi" style="border-color:var(--blue)"><div class="val">{{ porezna.balance_sheet.assets.total|floatformat:2 }} &euro;</div><div class="lbl">Aktiva (imovina)</div></div>
       <div class="kpi" style="border-color:var(--gold)"><div class="val">{{ porezna.balance_sheet.total_pasiva|floatformat:2 }} &euro;</div><div class="lbl">Pasiva (obveze+kapital)</div></div>
     </div>
-    <p style="margin-top:10px;font-size:.9rem">
+    <p class="fx-fs-md fx-mt-10">
       {% if porezna.balance_sheet.is_balanced %}<span class="ok"><i class="fas fa-check-circle"></i> BILANCA U RAVNOTEZI</span>{% else %}<span class="err"><i class="fas fa-exclamation-circle"></i> BILANCA NIJE U RAVNOTEZI!</span>{% endif %}
     </p>
   </div>
@@ -110,7 +110,7 @@ tr:hover{background:rgba(255,255,255,.02)}
   {% if porezna.recent_invoices %}
   <div class="section">
     <h3><i class="fas fa-file-invoice"></i> Posljednje fakture</h3>
-    <div style="overflow-x:auto"><table>
+    <div class="fx-scroll-x"><table>
     <tr><th>Broj</th><th>Tip</th><th>Klijent</th><th>OIB</th><th>Datum</th><th>Iznos</th><th>PDV</th><th>Status</th></tr>
     {% for inv in porezna.recent_invoices %}
     <tr>
@@ -173,14 +173,14 @@ tr:hover{background:rgba(255,255,255,.02)}
   {% if pos.recent_receipts %}
   <div class="section">
     <h3><i class="fas fa-receipt"></i> Posljednji racuni (s JIR/ZKI)</h3>
-    <div style="overflow-x:auto"><table>
+    <div class="fx-scroll-x"><table>
     <tr><th>#</th><th>Terminal</th><th>Iznos</th><th>PDV</th><th>ZKI</th><th>JIR</th><th>Datum fiskalizacije</th><th>Status</th></tr>
     {% for r in pos.recent_receipts %}
     <tr>
       <td>{{ r.global_number }}</td><td>{{ r.session__terminal__name }}</td>
       <td class="r">{{ r.total|floatformat:2 }}</td><td class="r">{{ r.tax_amount|floatformat:2 }}</td>
-      <td style="font-size:.7rem">{{ r.zki|default:"-" }}</td>
-      <td style="font-size:.7rem" class="{% if r.jir %}ok{% else %}err{% endif %}">{{ r.jir|default:"NEMA" }}</td>
+      <td class="fx-fs-sm">{{ r.zki|default:"-" }}</td>
+      <td class="{% if r.jir %}ok{% else %}err{% endif %} fx-fs-sm">{{ r.jir|default:"NEMA" }}</td>
       <td>{{ r.fiscal_datetime|date:"d.m.Y H:i"|default:"-" }}</td>
       <td><span class="badge {% if r.status == 'paid' %}badge-green{% else %}badge-gold{% endif %}">{{ r.status }}</span></td>
     </tr>
@@ -216,7 +216,7 @@ tr:hover{background:rgba(255,255,255,.02)}
 
   {% if radna.zor_warnings %}
   <div class="section" style="border:2px solid var(--red)">
-    <h3 style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> ZOR Upozorenja</h3>
+    <h3 class="fx-text-red"><i class="fas fa-exclamation-triangle"></i> ZOR Upozorenja</h3>
     {% for w in radna.zor_warnings %}<p class="err" style="margin:4px 0">{{ w }}</p>{% endfor %}
   </div>
   {% endif %}
@@ -259,7 +259,7 @@ tr:hover{background:rgba(255,255,255,.02)}
 
   {% if livestock.in_karencija > 0 %}
   <div class="section" style="border:2px solid var(--red)">
-    <h3 style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> KARENCIJA — ZABRANA KLANJA/MUZNJE</h3>
+    <h3 class="fx-text-red"><i class="fas fa-exclamation-triangle"></i> KARENCIJA — ZABRANA KLANJA/MUZNJE</h3>
     <p>{{ livestock.in_karencija }} zivotinja ima aktivnu karenciju. Provjerite zdravstvene zapise.</p>
   </div>
   {% endif %}
@@ -302,17 +302,13 @@ document.querySelectorAll('.tab').forEach(function(tab) {
 </script>
 
 <!-- Zlatno dugme + Prijavi problem -->
-<div style="position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999">
+<div class="d-flex fx-gap-3 fx-flex-col" style="position:fixed;bottom:24px;right:24px;z-index:999">
   <a href="https://limit-connect.com/hr/pos/complaints/new/" target="_blank"
-    style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border-radius:12px;
-    padding:12px 20px;font-weight:700;font-size:.85rem;text-decoration:none;
-    box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px">
+    class="fx-text-white fx-rounded fx-fw-bold fx-fs-base fx-no-underline d-flex fx-gap-2 align-items-center" style="background:linear-gradient(135deg,#b45309,#92400e);padding:12px 20px;box-shadow:0 4px 16px rgba(0,0,0,.4)">
     <i class="fas fa-exclamation-triangle"></i> Prijavi problem
   </a>
   <button onclick="window.print()"
-    style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a07830);color:#000;border:none;border-radius:12px;
-    padding:12px 20px;font-weight:700;font-size:.85rem;cursor:pointer;
-    box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px">
+    class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-base fx-pointer d-flex fx-gap-2 align-items-center" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a07830);padding:12px 20px;box-shadow:0 4px 16px rgba(0,0,0,.4)">
     <i class="fas fa-print"></i> Print
   </button>
 </div>

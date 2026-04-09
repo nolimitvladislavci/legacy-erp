@@ -9,56 +9,56 @@
 }
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+<div class="d-flex fx-flex-wrap justify-content-between align-items-center mb-3 fx-gap-2">
   <div>
-    <h4 style="margin:0;color:var(--gold)">Email kampanje</h4>
-    <small style="color:var(--muted)">Newsletter, podsjetnici, pozivnice</small>
+    <h4 class="fx-text-gold fx-m-0">Email kampanje</h4>
+    <small class="fx-text-muted">Newsletter, podsjetnici, pozivnice</small>
   </div>
   <a href="{% url 'udruge:email_kampanja_create' %}" class="btn btn-gold btn-sm">+ Nova kampanja</a>
 </div>
 
 <div class="card">
-  <div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse">
+  <div class="fx-scroll-x">
+    <table class="fx-w-full fx-b-collapse">
       <thead>
         <tr>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Naziv</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Tip</th>
-          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Primatelja</th>
-          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Poslano</th>
-          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Open rate</th>
-          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Click rate</th>
-          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
-          <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Naziv</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Tip</th>
+          <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Primatelja</th>
+          <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Poslano</th>
+          <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Open rate</th>
+          <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Click rate</th>
+          <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Status</th>
+          <th class="fx-p-2 fx-bb"></th>
         </tr>
       </thead>
       <tbody>
         {% for ek in page_obj %}
-        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-          <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600">{{ ek.name }}</td>
-          <td style="padding:.5rem .6rem;font-size:.78rem">{{ ek.get_email_type_display }}</td>
-          <td style="padding:.5rem .6rem;font-size:.85rem;text-align:center">{{ ek.total_recipients }}</td>
-          <td style="padding:.5rem .6rem;font-size:.85rem;text-align:center">{{ ek.total_sent }}</td>
-          <td style="padding:.5rem .6rem;text-align:center">
+        <tr class="fx-bb-subtle">
+          <td class="fx-fs-base fx-fw-semibold fx-p-cell">{{ ek.name }}</td>
+          <td class="fx-fs-body-sm fx-p-cell">{{ ek.get_email_type_display }}</td>
+          <td class="fx-fs-base text-center fx-p-cell">{{ ek.total_recipients }}</td>
+          <td class="fx-fs-base text-center fx-p-cell">{{ ek.total_sent }}</td>
+          <td class="text-center fx-p-cell">
             {% if ek.total_sent %}
-            <span style="font-size:.85rem;{% if ek.open_rate >= 30 %}color:#22c55e{% elif ek.open_rate >= 15 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">{{ ek.open_rate }}%</span>
-            {% else %}<span style="color:var(--muted);font-size:.78rem">-</span>{% endif %}
+            <span class="fx-fs-base" style="{% if ek.open_rate >= 30 %}color:var(--green){% elif ek.open_rate >= 15 %}color:#f59e0b{% else %}color:var(--red){% endif %}">{{ ek.open_rate }}%</span>
+            {% else %}<span class="fx-fs-body-sm fx-text-muted">-</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;text-align:center">
+          <td class="text-center fx-p-cell">
             {% if ek.total_sent %}
-            <span style="font-size:.85rem;color:var(--gold)">{{ ek.click_rate }}%</span>
-            {% else %}<span style="color:var(--muted);font-size:.78rem">-</span>{% endif %}
+            <span class="fx-fs-base fx-text-gold">{{ ek.click_rate }}%</span>
+            {% else %}<span class="fx-fs-body-sm fx-text-muted">-</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;text-align:center">
-            {% if ek.status == 'sent' %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Poslana</span>
-            {% elif ek.status == 'sending' %}<span style="color:#f59e0b;font-size:.78rem;font-weight:600">Salje se...</span>
-            {% elif ek.status == 'scheduled' %}<span style="color:#3b82f6;font-size:.78rem;font-weight:600">Zakazana</span>
-            {% elif ek.status == 'draft' %}<span style="color:var(--muted);font-size:.78rem">Nacrt</span>
-            {% else %}<span style="color:var(--muted);font-size:.78rem">{{ ek.get_status_display }}</span>{% endif %}
+          <td class="text-center fx-p-cell">
+            {% if ek.status == 'sent' %}<span class="fx-text-green fx-fs-body-sm fx-fw-semibold">Poslana</span>
+            {% elif ek.status == 'sending' %}<span class="fx-text-amber fx-fs-body-sm fx-fw-semibold">Salje se...</span>
+            {% elif ek.status == 'scheduled' %}<span class="fx-text-blue fx-fs-body-sm fx-fw-semibold">Zakazana</span>
+            {% elif ek.status == 'draft' %}<span class="fx-fs-body-sm fx-text-muted">Nacrt</span>
+            {% else %}<span class="fx-fs-body-sm fx-text-muted">{{ ek.get_status_display }}</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;text-align:right">
+          <td class="text-end fx-p-cell">
             {% if ek.status == 'draft' or ek.status == 'scheduled' %}
-            <form method="post" action="{% url 'udruge:email_kampanja_send' ek.pk %}" style="display:inline">
+            <form method="post" action="{% url 'udruge:email_kampanja_send' ek.pk %}" class="d-inline">
               {% csrf_token %}
               <button type="submit" class="btn btn-gold btn-sm" onclick="return confirm('Poslati email kampanju?')">Posalji</button>
             </form>
@@ -66,7 +66,7 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted)">Nema email kampanja</td></tr>
+        <tr><td colspan="8" class="text-center fx-text-muted fx-p-6">Nema email kampanja</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -74,9 +74,9 @@
 </div>
 
 {% if page_obj.has_other_pages %}
-<div style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem">
+<div class="d-flex justify-content-center fx-gap-2 mt-3">
   {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="btn btn-ghost btn-sm">&laquo; Prethodna</a>{% endif %}
-  <span style="padding:.4rem .8rem;color:var(--muted);font-size:.85rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  <span class="fx-fs-base fx-text-muted" style="padding:.4rem .8rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
   {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="btn btn-ghost btn-sm">Sljedeca &raquo;</a>{% endif %}
 </div>
 {% endif %}

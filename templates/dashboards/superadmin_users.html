@@ -2,34 +2,34 @@
 {% load i18n %}
 {% block title %}Korisnici - Superadmin{% endblock %}
 {% block content %}
-<div style="max-width:1200px;margin:0 auto;padding:1rem">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+<div class="fx-m-auto fx-p-4" style="max-width:1200px">
+  <div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-4 fx-mb-6">
     <div>
-      <h4 style="margin:0;font-weight:700"><i class="fas fa-users-cog" style="color:var(--gold,#c9a84c)"></i> Svi korisnici</h4>
-      <p style="color:#6b7280;font-size:.82rem;margin:4px 0 0">{{ total_count }} korisnika ukupno</p>
+      <h4 class="fx-fw-bold fx-m-0"><i class="fas fa-users-cog fx-text-gold"></i> Svi korisnici</h4>
+      <p class="fx-fs-note fx-text-muted" style="margin:4px 0 0">{{ total_count }} korisnika ukupno</p>
     </div>
     <a href="{% url 'superadmin_dashboard' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i> Superadmin</a>
   </div>
 
   <!-- Filters -->
-  <form method="get" style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1rem;margin-bottom:1.5rem;display:flex;gap:.8rem;flex-wrap:wrap;align-items:end">
+  <form method="get" class="fx-bg-card fx-rounded d-flex fx-flex-wrap fx-b fx-p-4 fx-mb-6" style="gap:.8rem;align-items:end">
     <div style="flex:2;min-width:180px">
-      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Pretraga</label>
+      <label class="fx-fs-sm fx-text-muted d-block mb-1">Pretraga</label>
       <input type="text" name="q" value="{{ q }}" placeholder="Ime, email, username..."
-        style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        class="fx-w-full fx-bg-body fx-rounded-sm fx-fs-base fx-text-body fx-b fx-p-8-12">
     </div>
-    <div style="flex:1;min-width:150px">
-      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Tvrtka</label>
-      <select name="company" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+    <div class="fx-flex-1" style="min-width:150px">
+      <label class="fx-fs-sm fx-text-muted d-block mb-1">Tvrtka</label>
+      <select name="company" class="fx-w-full fx-bg-body fx-rounded-sm fx-fs-base fx-text-body fx-b fx-p-8-12">
         <option value="">Sve tvrtke</option>
         {% for c in companies %}
         <option value="{{ c.id }}" {% if company_filter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
         {% endfor %}
       </select>
     </div>
-    <div style="flex:1;min-width:120px">
-      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Rola</label>
-      <select name="role" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+    <div class="fx-flex-1" style="min-width:120px">
+      <label class="fx-fs-sm fx-text-muted d-block mb-1">Rola</label>
+      <select name="role" class="fx-w-full fx-bg-body fx-rounded-sm fx-fs-base fx-text-body fx-b fx-p-8-12">
         <option value="">Sve role</option>
         <option value="superuser" {% if role_filter == 'superuser' %}selected{% endif %}>Superadmin</option>
         <option value="staff" {% if role_filter == 'staff' %}selected{% endif %}>Staff</option>
@@ -38,85 +38,85 @@
         <option value="worker" {% if role_filter == 'worker' %}selected{% endif %}>Radnik</option>
       </select>
     </div>
-    <div style="flex:1;min-width:100px">
-      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Status</label>
-      <select name="status" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+    <div class="fx-flex-1" style="min-width:100px">
+      <label class="fx-fs-sm fx-text-muted d-block mb-1">Status</label>
+      <select name="status" class="fx-w-full fx-bg-body fx-rounded-sm fx-fs-base fx-text-body fx-b fx-p-8-12">
         <option value="">Svi</option>
         <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktivni</option>
         <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Neaktivni</option>
       </select>
     </div>
-    <button type="submit" style="padding:8px 20px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:600;font-size:.85rem;cursor:pointer">
+    <button type="submit" class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-semibold fx-fs-base fx-pointer fx-bg-gold" style="padding:8px 20px">
       <i class="fas fa-search"></i> Filtriraj
     </button>
   </form>
 
   <!-- Users table -->
-  <div style="background:#111214;border:1px solid #252830;border-radius:8px;overflow:hidden">
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+  <div class="fx-bg-card fx-rounded fx-b fx-overflow-hidden">
+    <div class="fx-scroll-x">
+      <table class="fx-w-full fx-fs-note fx-b-collapse">
         <thead>
-          <tr style="background:#0a0a0a;color:#6b7280;text-transform:uppercase;font-size:.68rem;letter-spacing:.05em">
-            <th style="padding:10px 14px;text-align:left">Korisnik</th>
-            <th style="padding:10px 14px;text-align:left">Email</th>
-            <th style="padding:10px 14px;text-align:left">Tvrtka</th>
-            <th style="padding:10px 14px;text-align:left">Rola</th>
-            <th style="padding:10px 14px;text-align:center">Status</th>
-            <th style="padding:10px 14px;text-align:left">Registriran</th>
-            <th style="padding:10px 14px;text-align:left">Zadnji login</th>
-            <th style="padding:10px 14px;text-align:center">Akcije</th>
+          <tr class="fx-bg-body fx-fs-tiny fx-text-muted fx-uppercase" style="letter-spacing:.05em">
+            <th class="text-start fx-p-10-14">Korisnik</th>
+            <th class="text-start fx-p-10-14">Email</th>
+            <th class="text-start fx-p-10-14">Tvrtka</th>
+            <th class="text-start fx-p-10-14">Rola</th>
+            <th class="text-center fx-p-10-14">Status</th>
+            <th class="text-start fx-p-10-14">Registriran</th>
+            <th class="text-start fx-p-10-14">Zadnji login</th>
+            <th class="text-center fx-p-10-14">Akcije</th>
           </tr>
         </thead>
         <tbody>
           {% for u in users_page %}
           <tr style="border-top:1px solid #1e2130;{% if not u.is_active %}opacity:.5{% endif %}">
-            <td style="padding:10px 14px">
-              <strong style="color:#e8e8e8">{{ u.first_name }} {{ u.last_name }}</strong>
-              <div style="color:#6b7280;font-size:.72rem">{{ u.username }}</div>
+            <td class="fx-p-10-14">
+              <strong class="fx-text-body">{{ u.first_name }} {{ u.last_name }}</strong>
+              <div class="fx-fs-sm fx-text-muted">{{ u.username }}</div>
             </td>
-            <td style="padding:10px 14px;color:#94a3b8">{{ u.email|default:"-" }}</td>
-            <td style="padding:10px 14px">
+            <td class="fx-text-dim fx-p-10-14">{{ u.email|default:"-" }}</td>
+            <td class="fx-p-10-14">
               {% if u.profile and u.profile.company %}
-                <span style="color:var(--gold,#c9a84c)">{{ u.profile.company.name }}</span>
+                <span class="fx-text-gold">{{ u.profile.company.name }}</span>
               {% else %}
-                <span style="color:#4a5060">-</span>
+                <span class="fx-text-muted">-</span>
               {% endif %}
             </td>
-            <td style="padding:10px 14px">
+            <td class="fx-p-10-14">
               {% if u.is_superuser %}
-                <span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:3px;font-size:.7rem">SUPER</span>
+                <span class="fx-text-white fx-fs-sm fx-p-btn" style="background:var(--purple);border-radius:3px">SUPER</span>
               {% elif u.is_staff %}
-                <span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:3px;font-size:.7rem">STAFF</span>
+                <span class="fx-text-white fx-fs-sm fx-p-btn" style="background:var(--blue);border-radius:3px">STAFF</span>
               {% elif u.profile %}
-                <span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:3px;font-size:.7rem">{{ u.profile.role|default:"user" }}</span>
+                <span class="fx-bg-surface2 fx-text-muted fx-fs-sm fx-p-btn" style="border-radius:3px">{{ u.profile.role|default:"user" }}</span>
               {% else %}
-                <span style="color:#4a5060">user</span>
+                <span class="fx-text-muted">user</span>
               {% endif %}
             </td>
-            <td style="padding:10px 14px;text-align:center">
+            <td class="text-center fx-p-10-14">
               {% if u.is_active %}
-                <span style="color:#4caf7d;font-size:.9rem" title="Aktivan">&#9679;</span>
+                <span class="fx-fs-md fx-text-green" title="Aktivan">&#9679;</span>
               {% else %}
-                <span style="color:#ef4444;font-size:.9rem" title="Neaktivan">&#9679;</span>
+                <span class="fx-text-red fx-fs-md" title="Neaktivan">&#9679;</span>
               {% endif %}
             </td>
-            <td style="padding:10px 14px;color:#6b7280;font-size:.75rem">{{ u.date_joined|date:"d.m.Y" }}</td>
-            <td style="padding:10px 14px;color:#6b7280;font-size:.75rem">{{ u.last_login|date:"d.m.Y H:i"|default:"-" }}</td>
-            <td style="padding:10px 14px;text-align:center;white-space:nowrap">
-              <form method="post" style="display:inline">
+            <td class="fx-fs-caption fx-text-muted fx-p-10-14">{{ u.date_joined|date:"d.m.Y" }}</td>
+            <td class="fx-fs-caption fx-text-muted fx-p-10-14">{{ u.last_login|date:"d.m.Y H:i"|default:"-" }}</td>
+            <td class="text-center text-nowrap fx-p-10-14">
+              <form method="post" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="user_id" value="{{ u.pk }}">
                 <a href="{% url 'superadmin_edit_user' u.pk %}" title="Uredi korisnika"
-                  style="display:inline-block;background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;color:#3b82f6;font-size:.75rem;text-decoration:none;margin-right:2px">
+                  class="fx-rounded-sm fx-text-blue fx-fs-caption fx-no-underline d-inline-block fx-bg-transparent fx-b" style="padding:4px 8px;margin-right:2px">
                   <i class="fas fa-edit"></i>
                 </a>
                 <button name="action" value="toggle_active" title="{% if u.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}"
-                  style="background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;cursor:pointer;color:{% if u.is_active %}#ef4444{% else %}#4caf7d{% endif %};font-size:.75rem">
+                  class="fx-rounded-sm fx-pointer fx-fs-caption" style="background:none;border:1px solid var(--border);padding:4px 8px;color:{% if u.is_active %}#ef4444{% else %}#4caf7d{% endif %}">
                   <i class="fas {% if u.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
                 </button>
                 {% if u.profile and u.profile.company and not u.is_superuser %}
                 <button name="action" value="impersonate_company" title="Pristupi kao {{ u.profile.company.name }}"
-                  style="background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;cursor:pointer;color:var(--gold,#c9a84c);font-size:.75rem">
+                  class="fx-rounded-sm fx-pointer fx-fs-caption fx-text-gold fx-bg-transparent fx-b" style="padding:4px 8px">
                   <i class="fas fa-sign-in-alt"></i>
                 </button>
                 {% endif %}
@@ -124,7 +124,7 @@
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="8" style="padding:2rem;text-align:center;color:#6b7280">Nema korisnika za odabrane filtere.</td></tr>
+          <tr><td colspan="8" class="text-center fx-text-muted fx-p-6">Nema korisnika za odabrane filtere.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -132,17 +132,17 @@
 
     <!-- Pagination -->
     {% if users_page.has_other_pages %}
-    <div style="padding:12px 14px;border-top:1px solid #1e2130;display:flex;justify-content:center;gap:4px">
+    <div class="d-flex fx-gap-1 justify-content-center" style="padding:12px 14px;border-top:1px solid #1e2130">
       {% if users_page.has_previous %}
       <a href="?page={{ users_page.previous_page_number }}&q={{ q }}&company={{ company_filter }}&role={{ role_filter }}&status={{ status_filter }}"
-         style="padding:6px 12px;background:#1e293b;color:#94a3b8;border-radius:4px;text-decoration:none;font-size:.8rem">&laquo; Prethodna</a>
+         class="fx-bg-surface2 fx-text-muted fx-rounded-sm fx-no-underline fx-fs-compact" style="padding:6px 12px">&laquo; Prethodna</a>
       {% endif %}
-      <span style="padding:6px 12px;color:#6b7280;font-size:.8rem">
+      <span class="fx-fs-compact fx-text-muted" style="padding:6px 12px">
         {{ users_page.number }} / {{ users_page.paginator.num_pages }}
       </span>
       {% if users_page.has_next %}
       <a href="?page={{ users_page.next_page_number }}&q={{ q }}&company={{ company_filter }}&role={{ role_filter }}&status={{ status_filter }}"
-         style="padding:6px 12px;background:#1e293b;color:#94a3b8;border-radius:4px;text-decoration:none;font-size:.8rem">Sljedeca &raquo;</a>
+         class="fx-bg-surface2 fx-text-muted fx-rounded-sm fx-no-underline fx-fs-compact" style="padding:6px 12px">Sljedeca &raquo;</a>
       {% endif %}
     </div>
     {% endif %}

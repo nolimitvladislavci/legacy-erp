@@ -4,24 +4,7 @@
 {% block page_title %}Grlo: {{ animal.ear_tag }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -40,7 +23,7 @@
                         <tr><th>Datum rodjenja</th><td>{{ animal.date_of_birth|default:"-" }}{% if animal.age_months %} ({{ animal.age_months }} mj.){% endif %}</td></tr>
                         <tr><th>Dnevna mlijecnost</th><td>{{ animal.avg_daily_milk_l|default:"-" }} L</td></tr>
                         <tr><th>Zadnje teljenje</th><td>{{ animal.last_calving|default:"-" }}</td></tr>
-                        <tr><th>Ocekivano teljenje</th><td>{{ animal.expected_calving|default:"-" }}{% if animal.calving_soon %} <span class="badge bg-danger">Uskoro!</span>{% endif %}</td></tr>
+                        <tr><th>Ocekivano teljenje</th><td>{{ animal.expected_calving|default:"-" }}{% if animal.calving_soon %} <span class="fenix-badge fenix-badge-danger">Uskoro!</span>{% endif %}</td></tr>
                         <tr><th>Ekoloski uzgoj</th><td>{% if animal.is_organic %}<i class="fas fa-leaf text-success"></i> Da (od {{ animal.organic_since }}){% else %}Ne{% endif %}</td></tr>
                     </table>
                     {% if animal.notes %}<p class="text-muted mt-2">{{ animal.notes }}</p>{% endif %}
@@ -59,7 +42,7 @@
                                 <td>{{ h.datum }}</td>
                                 <td>{{ h.get_tip_display }}</td>
                                 <td>{{ h.opis }}</td>
-                                <td>{% if h.u_karenciji %}<span class="badge bg-danger">Do {{ h.karencija_do }}</span>{% else %}-{% endif %}</td>
+                                <td>{% if h.u_karenciji %}<span class="fenix-badge fenix-badge-danger">Do {{ h.karencija_do }}</span>{% else %}-{% endif %}</td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="4" class="text-center text-muted py-3">Nema zapisa</td></tr>

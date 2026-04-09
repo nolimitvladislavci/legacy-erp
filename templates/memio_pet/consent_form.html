@@ -7,22 +7,22 @@
 <title>Pristanak roditelja — Memio.pet</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Space Grotesk',system-ui,sans-serif;background:#f8f6f0;color:#1a1a2e;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{max-width:520px;width:100%;background:#fff;border:1px solid #ddd9cc;border-radius:16px;padding:40px 32px}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:#f8f6f0;color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{max-width:520px;width:100%;background:var(--bg-card);border:1px solid #ddd9cc;border-radius:16px;padding:40px 32px}
 .card-center{text-align:center}
 h1{font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:8px;text-align:center}
-.name{color:#c9a84c;font-size:1.2rem;font-weight:700;margin-bottom:20px;display:block;text-align:center}
+.name{color:var(--gold);font-size:1.2rem;font-weight:700;margin-bottom:20px;display:block;text-align:center}
 p{color:#3d3d52;font-size:.88rem;line-height:1.7;margin-bottom:16px}
 .info-box{background:#f9f7f2;border:1px solid #ddd9cc;border-radius:10px;padding:18px;margin-bottom:20px}
 .info-box h3{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a7a8c;margin-bottom:10px}
 .info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem;border-bottom:1px solid rgba(0,0,0,.04)}
 .info-row:last-child{border:none}
 .info-key{color:#7a7a8c}
-.info-val{font-weight:600;color:#1a1a2e}
+.info-val{font-weight:600;color:var(--text)}
 .legal{background:#f0ede5;border-left:3px solid #c9a84c;border-radius:0 8px 8px 0;padding:14px 16px;font-size:.78rem;color:#3d3d52;line-height:1.6;margin-bottom:24px}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 .btn{flex:1;min-width:140px;padding:14px 24px;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;text-align:center}
-.btn-approve{background:#c9a84c;color:#fff}
+.btn-approve{background:var(--gold);color:var(--white)}
 .btn-approve:hover{opacity:.85}
 .btn-reject{background:transparent;border:1.5px solid #ddd9cc;color:#7a7a8c}
 .btn-reject:hover{border-color:#e05252;color:#e05252}
@@ -33,7 +33,7 @@ p{color:#3d3d52;font-size:.88rem;line-height:1.7;margin-bottom:16px}
 <body>
 <div class="card">
   <div class="card-center">
-    <div style="font-size:2.5rem;margin-bottom:12px">🐾</div>
+    <div class="mb-3 fx-fs-7xl">🐾</div>
     <h1>Pristanak roditelja</h1>
     <span class="name">{{ breeder.name }}</span>
   </div>
@@ -52,7 +52,7 @@ p{color:#3d3d52;font-size:.88rem;line-height:1.7;margin-bottom:16px}
 
   <div class="info-box">
     <h3>Što je Memio.pet?</h3>
-    <p style="margin:0;font-size:.84rem">Platforma gdje vlasnici kreiraju digitalne profile za svoje ljubimce — zdravstveni karton, fotografije, QR kod. <strong>Besplatno, bez oglasa, bez prodaje podataka.</strong> Osobni podaci su enkriptirani (AES-256).</p>
+    <p class="fx-m-0" style="font-size:.84rem">Platforma gdje vlasnici kreiraju digitalne profile za svoje ljubimce — zdravstveni karton, fotografije, QR kod. <strong>Besplatno, bez oglasa, bez prodaje podataka.</strong> Osobni podaci su enkriptirani (AES-256).</p>
   </div>
 
   <div class="legal">

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visković Group | Bauunternehmen, Immobilien & Handel</title>
     
-    <link rel="stylesheet" href="/static/css/global_themes.css">
+    <link rel="stylesheet" href="/static/css/fenix-tokens.css?v=4000">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     
     <style>
@@ -45,12 +45,12 @@
         /* URGENT SOS GUMB U HEADERU */
         .sos-btn {
             font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-            color: #fff; text-decoration: none; border: 1px solid #ef4444;
+            color:var(--white); text-decoration: none; border: 1px solid #ef4444;
             padding: 8px 20px; border-radius: 4px; transition: all 0.3s;
             background: rgba(239, 68, 68, 0.8);
             animation: pulse-red 2s infinite;
         }
-        .sos-btn:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        .sos-btn:hover { background:var(--red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         @keyframes pulse-red { 
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 
             70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 
@@ -108,9 +108,9 @@
 
         /* SPECIJALNI DIZAJN ZA SOS KARTICU */
         .card-sos { border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02); }
-        .card-sos .div-icon, .card-sos .div-title, .card-sos .div-link { color: #ef4444; }
-        .card-sos::after { background: #ef4444; }
-        .card-sos:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
+        .card-sos .div-icon, .card-sos .div-title, .card-sos .div-link { color:var(--red); }
+        .card-sos::after { background:var(--red); }
+        .card-sos:hover { border-color:var(--red); background: rgba(239, 68, 68, 0.05); }
 
         footer {
             padding: 30px 48px; border-top: 1px solid var(--border);
@@ -163,14 +163,14 @@
                 <div class="div-icon"><i class="fas fa-building"></i></div>
                 <h2 class="div-title">Immobilien & Vermietung</h2>
                 <p class="div-desc">Moderne Wohnungen, WG-Zimmer und Gastronomieobjekte zur Miete. Voll digitalisierte Verwaltung.</p>
-                <div class="div-link" style="color: var(--text-dim);">In Vorbereitung <i class="fas fa-clock"></i></div>
+                <div class="div-link fx-text-dim">In Vorbereitung <i class="fas fa-clock"></i></div>
             </a>
 
             <a href="#" class="division-card" onclick="fenixToast('Der Premium-Webshop für Baumaterialien befindet sich im Aufbau.', 'info'); return false;">
                 <div class="div-icon"><i class="fas fa-gem"></i></div>
                 <h2 class="div-title">Premium Handel</h2>
                 <p class="div-desc">Exklusiver Vertrieb von Benkovac-Naturstein, XXL-Wandpaneelen und unsichtbaren Duschabläufen.</p>
-                <div class="div-link" style="color: var(--text-dim);">In Vorbereitung <i class="fas fa-clock"></i></div>
+                <div class="div-link fx-text-dim">In Vorbereitung <i class="fas fa-clock"></i></div>
             </a>
             
         </div>
@@ -179,8 +179,8 @@
     <footer>
         <div class="footer-text">© {% now "Y" %} Visković Group Deutschland</div>
         <div class="footer-text">Stuttgart & Umgebung</div>
-        <div class="footer-text" style="margin-top:8px"><a href="/impressum/" style="color:var(--gold,#c9a84c)">Impressum</a> &middot; <a href="/datenschutz/" style="color:var(--gold,#c9a84c)">Datenschutz</a></div>
-    <div style="text-align:center; padding:1rem 0; font-size:.75rem; color:var(--gold,#c9a84c)88; border-top:1px solid var(--gold,#c9a84c)22;">Projekte: <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c); text-decoration:none;">LIMIT Connect</a> · <a href="https://sati.grosmarkt-online.eu" target="_blank" rel="noopener" style="color:var(--gold,#c9a84c); text-decoration:none;">SATI Dating</a></div>
+        <div class="footer-text mt-2"><a href="/impressum/" class="fx-text-gold">Impressum</a> &middot; <a href="/datenschutz/" class="fx-text-gold">Datenschutz</a></div>
+    <div class="text-center fx-fs-caption" style="padding:1rem 0;color:var(--gold,#c9a84c)88;border-top:1px solid var(--gold,#c9a84c)22">Projekte: <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold">LIMIT Connect</a> · <a href="https://sati.grosmarkt-online.eu" target="_blank" rel="noopener" class="fx-no-underline fx-text-gold">SATI Dating</a></div>
 </footer>
 
 </body>

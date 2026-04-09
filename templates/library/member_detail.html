@@ -4,21 +4,21 @@
 {% block page_title %}{{ member }}{% endblock %}
 {% block extra_css %}
 <style>
-.lib-detail{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem;margin-bottom:1rem}
-.lib-detail h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.5rem;margin-bottom:1rem}
+.lib-detail{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem;margin-bottom:1rem}
+.lib-detail h5{color:var(--gold);font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.5rem;margin-bottom:1rem}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
-.detail-item .label{font-size:.75rem;color:#888;text-transform:uppercase}
-.detail-item .value{color:#f0e6d3;font-weight:500}
-.qr-box{background:#fff;border-radius:12px;padding:1.5rem;text-align:center;max-width:250px;margin:0 auto}
+.detail-item .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase}
+.detail-item .value{color:var(--text);font-weight:500}
+.qr-box{background:var(--bg-card);border-radius:12px;padding:1.5rem;text-align:center;max-width:250px;margin:0 auto}
 .qr-box canvas{max-width:200px}
-.qr-box .name{color:#1a1a2e;font-weight:700;margin-top:.5rem}
-.qr-box .num{color:#888;font-size:.85rem}
+.qr-box .name{color:var(--surface-deep);font-weight:700;margin-top:.5rem}
+.qr-box .num{color:var(--text-dim);font-size:.85rem}
 .loan-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #ffffff08}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'library:member_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Clanovi</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{{ member.first_name }} {{ member.last_name }}</h2>
+<a href="{% url 'library:member_list' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Clanovi</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{{ member.first_name }} {{ member.last_name }}</h2>
 
 <div class="row g-3">
   <div class="col-md-8">
@@ -32,7 +32,7 @@
         <div class="detail-item"><div class="label">Email</div><div class="value">{{ member.email|default:"—" }}</div></div>
         <div class="detail-item"><div class="label">Telefon</div><div class="value">{{ member.phone|default:"—" }}</div></div>
         <div class="detail-item"><div class="label">Ukupno posudbi</div><div class="value">{{ member.total_borrowed }}</div></div>
-        <div class="detail-item"><div class="label">Dugovanje</div><div class="value" style="{% if member.outstanding_fines > 0 %}color:#ef4444{% else %}color:#22c55e{% endif %}">{{ member.outstanding_fines }} EUR</div></div>
+        <div class="detail-item"><div class="label">Dugovanje</div><div class="value" style="{% if member.outstanding_fines > 0 %}color:var(--red){% else %}color:var(--green){% endif %}">{{ member.outstanding_fines }} EUR</div></div>
       </div>
     </div>
 
@@ -42,20 +42,20 @@
       {% for l in active_loans %}
       <div class="loan-item">
         <div>
-          <div style="color:#f0e6d3;font-weight:500">{{ l.copy.book.title|truncatewords:6 }}</div>
-          <div style="font-size:.8rem;color:#888">{{ l.copy.barcode }} · Posudjena {{ l.borrowed_date|date:"d.m.Y" }}</div>
+          <div class="fx-fw-medium fx-text-body">{{ l.copy.book.title|truncatewords:6 }}</div>
+          <div class="fx-fs-compact fx-text-muted">{{ l.copy.barcode }} · Posudjena {{ l.borrowed_date|date:"d.m.Y" }}</div>
         </div>
         <div class="text-end">
-          <div style="font-size:.85rem;{% if l.is_overdue %}color:#ef4444{% else %}color:#22c55e{% endif %}">
+          <div class="fx-fs-base" style="{% if l.is_overdue %}color:var(--red){% else %}color:var(--green){% endif %}">
             {% if l.is_overdue %}Kasni {{ l.days_overdue }}d{% else %}Rok: {{ l.due_date|date:"d.m." }}{% endif %}
           </div>
-          <a href="{% url 'library:loan_renew' pk=l.pk %}" style="font-size:.75rem;color:#c8a24e" title="Produljenje">
+          <a href="{% url 'library:loan_renew' pk=l.pk %}" class="fx-fs-caption fx-text-gold" title="Produljenje">
             {% if l.renewed_count < 2 %}<i class="bi bi-arrow-repeat"></i> Produzi{% endif %}
           </a>
         </div>
       </div>
       {% empty %}
-      <p style="color:#666">Nema aktivnih posudbi.</p>
+      <p class="fx-text-dim">Nema aktivnih posudbi.</p>
       {% endfor %}
     </div>
 
@@ -65,8 +65,8 @@
       <h5><i class="bi bi-clock-history"></i> Historija</h5>
       {% for l in history %}
       <div class="loan-item">
-        <span style="color:#f0e6d3">{{ l.copy.book.title|truncatewords:5 }}</span>
-        <span style="color:#888;font-size:.8rem">{{ l.borrowed_date|date:"d.m." }} — {{ l.returned_date|date:"d.m.Y" }}{% if l.fine_amount > 0 %} <span style="color:#ef4444">({{ l.fine_amount }} EUR)</span>{% endif %}</span>
+        <span class="fx-text-body">{{ l.copy.book.title|truncatewords:5 }}</span>
+        <span class="fx-text-muted fx-fs-compact">{{ l.borrowed_date|date:"d.m." }} — {{ l.returned_date|date:"d.m.Y" }}{% if l.fine_amount > 0 %} <span class="fx-text-red">({{ l.fine_amount }} EUR)</span>{% endif %}</span>
       </div>
       {% endfor %}
     </div>
@@ -75,14 +75,14 @@
 
   <!-- QR Iskaznica -->
   <div class="col-md-4">
-    <div class="lib-detail" style="text-align:center">
+    <div class="lib-detail text-center">
       <h5><i class="bi bi-qr-code"></i> QR Iskaznica</h5>
       <div class="qr-box" id="qrBox">
         <canvas id="qrCanvas"></canvas>
         <div class="name">{{ member.first_name }} {{ member.last_name }}</div>
         <div class="num">#{{ member.member_number }}</div>
       </div>
-      <button onclick="printQR()" class="btn btn-sm mt-2" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-printer"></i> Isprintaj</button>
+      <button onclick="printQR()" class="btn btn-sm mt-2 fx-bg-gold fx-fw-semibold fx-text-dark"><i class="bi bi-printer"></i> Isprintaj</button>
     </div>
   </div>
 </div>
@@ -110,7 +110,7 @@
 function printQR() {
   const canvas = document.getElementById('qrCanvas');
   const win = window.open('', '_blank');
-  win.document.write('<html><body style="text-align:center;font-family:sans-serif"><h3>{{ member.first_name }} {{ member.last_name }}</h3><p>#{{ member.member_number }}</p><img src="' + canvas.toDataURL() + '" width="200"><p style="color:#888;font-size:12px">LIMIT Connect Knjiznica</p></body></html>');
+  win.document.write('<html><body class="text-center" style="font-family:sans-serif"><h3>{{ member.first_name }} {{ member.last_name }}</h3><p>#{{ member.member_number }}</p><img src="' + canvas.toDataURL() + '" width="200"><p class="fx-text-muted" style="font-size:12px">LIMIT Connect Knjiznica</p></body></html>');
   win.document.close();
   win.print();
 }

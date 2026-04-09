@@ -4,7 +4,7 @@
 {% block title %}e-ONTO Batch #{{ batch.pk }}{% endblock %}
 
 {% block content %}
-<div style="max-width:1100px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:1100px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0"><i class="fas fa-file-code me-2"></i>e-ONTO Batch #{{ batch.pk }}</h4>
         <a href="{% url 'komunalno:onto_dashboard' %}" class="btn btn-sm btn-outline-secondary">
@@ -15,35 +15,35 @@
     <!-- Info -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Status</div>
-                <div class="value" style="font-size:1.1rem">
+                <div class="value fx-fs-xl">
                     {% if batch.status == 'accepted' %}
-                    <span class="badge bg-success">Prihvaćeno</span>
+                    <span class="fenix-badge fenix-badge-success">Prihvaćeno</span>
                     {% elif batch.status == 'error' %}
-                    <span class="badge bg-danger">Greška</span>
+                    <span class="fenix-badge fenix-badge-danger">Greška</span>
                     {% else %}
-                    <span class="badge bg-secondary">{{ batch.get_status_display }}</span>
+                    <span class="fenix-badge fenix-badge-muted">{{ batch.get_status_display }}</span>
                     {% endif %}
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Dvorište</div>
-                <div class="value" style="font-size:1rem">{{ batch.station.name }}</div>
+                <div class="value fx-fs-lg">{{ batch.station.name }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Period</div>
-                <div class="value" style="font-size:1rem">{{ batch.date_from|date:"d.m.Y" }}</div>
+                <div class="value fx-fs-lg">{{ batch.date_from|date:"d.m.Y" }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Zapisi / Težina</div>
-                <div class="value" style="font-size:1rem">{{ batch.delivery_count }} / {{ batch.total_weight_kg|floatformat:1 }} kg</div>
+                <div class="value fx-fs-lg">{{ batch.delivery_count }} / {{ batch.total_weight_kg|floatformat:1 }} kg</div>
             </div>
         </div>
     </div>
@@ -89,9 +89,9 @@
                     <td data-label="Količina">{{ d.quantity|floatformat:1 }} {{ d.unit }}</td>
                     <td data-label="Izvor">
                         {% if d.weight_source == 'scale' %}
-                        <span class="badge bg-success"><i class="fas fa-weight-hanging me-1"></i>Vaga</span>
+                        <span class="fenix-badge fenix-badge-success"><i class="fas fa-weight-hanging me-1"></i>Vaga</span>
                         {% else %}
-                        <span class="badge bg-secondary">Ručno</span>
+                        <span class="fenix-badge fenix-badge-muted">Ručno</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -104,7 +104,7 @@
     {% if batch.xml_payload %}
     <details class="mt-4">
         <summary class="btn btn-sm btn-outline-secondary"><i class="fas fa-code me-1"></i>Prikaži XML</summary>
-        <pre class="mt-2 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;max-height:400px;overflow:auto;font-size:.75rem">{{ batch.xml_payload }}</pre>
+        <pre class="mt-2 p-3 fx-rounded fx-fs-caption fx-bg-card fx-b" style="max-height:400px;overflow:auto">{{ batch.xml_payload }}</pre>
     </details>
     {% endif %}
 </div>

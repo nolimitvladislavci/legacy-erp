@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Branitelji{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid">
@@ -31,7 +14,7 @@
   <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-danger">{{ stats.hrvi }}</div><small class="text-muted">HRVI</small></div></div>
   <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-info">{{ stats.dragovoljci }}</div><small class="text-muted">Dragovoljci</small></div></div>
   <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-success">{{ stats.borbeni_sektor }}</div><small class="text-muted">Borbeni sektor</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3" style="color:var(--gold,#c9a84c)">{{ stats.s_odlikovanjem }}</div><small class="text-muted">S odlikovanjem</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 fx-text-gold">{{ stats.s_odlikovanjem }}</div><small class="text-muted">S odlikovanjem</small></div></div>
   <a href="{% url 'udruge:clan_list' %}" class="btn btn-outline-secondary btn-sm">Clanovi bez statusa</a>
 </div>
 <div class="mb-3">
@@ -42,18 +25,18 @@
 </div>
 <div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
 <table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Ime</th><th style="font-size:.75rem">Status</th><th style="font-size:.75rem">Postrojba</th>
-  <th style="font-size:.75rem">Dana</th><th style="font-size:.75rem">HRVI %</th><th style="font-size:.75rem">Borbeni</th>
+  <th class="fx-fs-caption">Ime</th><th class="fx-fs-caption">Status</th><th class="fx-fs-caption">Postrojba</th>
+  <th class="fx-fs-caption">Dana</th><th class="fx-fs-caption">HRVI %</th><th class="fx-fs-caption">Borbeni</th>
 </tr></thead><tbody>
 {% for sb in page_obj %}
 <tr>
-  <td style="font-size:.85rem"><strong>{{ sb.clan.last_name }}, {{ sb.clan.first_name }}</strong></td>
-  <td style="font-size:.82rem">{{ sb.get_vrsta_statusa_display }}</td>
-  <td style="font-size:.82rem">{{ sb.get_postrojba_display }} {{ sb.naziv_postrojbe }}</td>
-  <td style="font-size:.82rem">{{ sb.dana_sudjelovanja }}</td>
-  <td style="font-size:.82rem">{% if sb.postotak_invalidnosti %}{{ sb.postotak_invalidnosti }}%{% else %}—{% endif %}</td>
-  <td>{% if sb.borbeni_sektor %}<span class="badge bg-success">Da</span>{% endif %}</td>
-  <td><a href="{% url 'udruge:branitelj_status_edit' sb.pk %}" class="btn btn-sm btn-outline-warning" style="font-size:.72rem">Uredi</a></td>
+  <td class="fx-fs-base"><strong>{{ sb.clan.last_name }}, {{ sb.clan.first_name }}</strong></td>
+  <td class="fx-fs-note">{{ sb.get_vrsta_statusa_display }}</td>
+  <td class="fx-fs-note">{{ sb.get_postrojba_display }} {{ sb.naziv_postrojbe }}</td>
+  <td class="fx-fs-note">{{ sb.dana_sudjelovanja }}</td>
+  <td class="fx-fs-note">{% if sb.postotak_invalidnosti %}{{ sb.postotak_invalidnosti }}%{% else %}—{% endif %}</td>
+  <td>{% if sb.borbeni_sektor %}<span class="fenix-badge fenix-badge-success">Da</span>{% endif %}</td>
+  <td><a href="{% url 'udruge:branitelj_status_edit' sb.pk %}" class="btn btn-sm btn-outline-warning fx-fs-sm">Uredi</a></td>
 </tr>
 {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Nema unesenih branitelja</td></tr>{% endfor %}
 </tbody></table></div></div></div>

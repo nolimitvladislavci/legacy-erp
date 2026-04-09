@@ -10,23 +10,23 @@
     <style>
         :root { --black: #0a0a0a; --gold: #c9a84c; --gold-dark: #a8893e; --gold-light: #e0c97a; }
         body { background: var(--black); color: #f0f0f0; font-family: "Barlow", sans-serif; min-height: 100vh; }
-        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; }
+        .card { background:var(--bg-card); border: 1px solid #333; border-radius: 12px; }
         .card-header { background: linear-gradient(135deg, #1a1a1a, #222); border-bottom: 2px solid var(--gold); }
         .form-control, .form-select {
-            background: #222; border: 1px solid #444; color: #f0f0f0;
+            background:var(--surface); border: 1px solid #444; color: #f0f0f0;
             border-radius: 8px; padding: 12px 14px; font-size: 1rem;
         }
         .form-control:focus, .form-select:focus {
-            background: #2a2a2a; border-color: var(--gold); color: #fff;
+            background: #2a2a2a; border-color: var(--gold); color:var(--white);
             box-shadow: 0 0 0 3px rgba(201,168,76,0.2);
         }
         .btn-gold {
             background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #000; border: none; font-weight: 700; font-size: 1.1rem;
+            color:var(--text); border: none; font-weight: 700; font-size: 1.1rem;
             height: 56px; border-radius: 12px; text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .btn-gold:hover { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #000; }
+        .btn-gold:hover { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color:var(--text); }
         .btn-camera {
             background: #333; border: 2px dashed var(--gold); color: var(--gold);
             height: 56px; border-radius: 12px; font-weight: 600;
@@ -38,12 +38,12 @@
         .farm-header p { color: #999; font-size: 0.9rem; }
         .toast-success {
             position: fixed; top: 20px; right: 20px; z-index: 9999;
-            background: #27ae60; color: #fff; padding: 16px 24px;
+            background: #27ae60; color:var(--white); padding: 16px 24px;
             border-radius: 10px; font-weight: 600; animation: fadeInOut 4s ease forwards;
         }
         .toast-error {
             position: fixed; top: 20px; right: 20px; z-index: 9999;
-            background: #e74c3c; color: #fff; padding: 16px 24px;
+            background: #e74c3c; color:var(--white); padding: 16px 24px;
             border-radius: 10px; font-weight: 600; animation: fadeInOut 4s ease forwards;
         }
         .karencija-warning {
@@ -65,15 +65,15 @@
 
     <div class="container" style="max-width: 600px;">
         <div class="farm-header">
-            <i class="fas fa-heartbeat fa-2x" style="color: var(--gold); margin-bottom: 8px;"></i>
+            <i class="fas fa-heartbeat fa-2x fx-text-gold mb-2"></i>
             <h2>{{ company.name }}</h2>
             <p><i class="fas fa-map-marker-alt me-1"></i>{{ company.address|default:"" }} {{ company.city|default:"" }}</p>
-            <p style="color: #666; font-size: 0.8rem;">Veterinarski unos tretmana</p>
+            <p class="fx-text-dim fx-fs-compact">Veterinarski unos tretmana</p>
         </div>
 
         <div class="card mb-4">
             <div class="card-header py-3">
-                <h5 class="mb-0 text-center" style="color: var(--gold);">
+                <h5 class="mb-0 text-center fx-text-gold">
                     <i class="fas fa-syringe me-2"></i>Novi tretman
                 </h5>
             </div>
@@ -142,7 +142,7 @@
                         <button type="button" class="btn btn-camera w-100" onclick="document.getElementById('photo-input').click()">
                             <i class="fas fa-camera me-2"></i>Uslikaj / Ucitaj fotografiju
                         </button>
-                        <input type="file" id="photo-input" name="photo" accept="image/*" capture="environment" style="display:none">
+                        <input type="file" id="photo-input" name="photo" accept="image/*" capture="environment" class="fx-hidden">
                         <small class="text-muted d-block mt-1" id="photo-name"></small>
                     </div>
 
@@ -153,8 +153,8 @@
             </div>
         </div>
 
-        <p class="text-center mb-5" style="color: #555; font-size: 0.75rem;">
-            Powered by <strong style="color: var(--gold);">LIMIT CONNECT</strong> &mdash; limit-connect.com
+        <p class="text-center mb-5 fx-text-dim fx-fs-caption">
+            Powered by <strong class="fx-text-gold">LIMIT CONNECT</strong> &mdash; limit-connect.com
         </p>
     </div>
 

@@ -61,7 +61,7 @@
 .dep-footer { display: flex; justify-content: flex-end; margin-top: .875rem; }
 .dep-btn {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: .6rem 1.4rem; background: var(--gold); color: #0f172a;
+    padding: .6rem 1.4rem; background: var(--gold); color:var(--text);
     border: none; border-radius: 7px; font-size: .85rem; font-weight: 700;
     cursor: pointer; transition: opacity .15s, transform .1s; font-family: inherit;
 }
@@ -86,15 +86,15 @@
 .badge-polog {
     display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
     border-radius: 20px; font-size: .72rem; font-weight: 700;
-    background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.25);
+    background: rgba(16,185,129,.12); color:var(--green); border: 1px solid rgba(16,185,129,.25);
 }
 .badge-isplata {
     display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
     border-radius: 20px; font-size: .72rem; font-weight: 700;
-    background: rgba(239,68,68,.12); color: #ef4444; border: 1px solid rgba(239,68,68,.25);
+    background: rgba(239,68,68,.12); color:var(--red); border: 1px solid rgba(239,68,68,.25);
 }
-.dep-amt-pos { color: #10b981; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dep-amt-neg { color: #ef4444; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dep-amt-pos { color:var(--green); font-weight: 700; font-variant-numeric: tabular-nums; }
+.dep-amt-neg { color:var(--red); font-weight: 700; font-variant-numeric: tabular-nums; }
 </style>
 {% endblock %}
 
@@ -112,7 +112,7 @@
     </div>
 
     <div class="dep-card">
-        <div class="dep-card-hdr"><i class="fa-solid fa-plus" style="margin-right:6px"></i>{% trans "Novi unos" %}</div>
+        <div class="dep-card-hdr"><i class="fa-solid fa-plus fx-mr-2"></i>{% trans "Novi unos" %}</div>
         <div class="dep-card-body">
             <form method="post">
                 {% csrf_token %}
@@ -143,7 +143,7 @@
     </div>
 
     <div class="dep-card">
-        <div class="dep-card-hdr"><i class="fa-solid fa-list" style="margin-right:6px"></i>{% trans "Evidentirani polozi / isplate" %}</div>
+        <div class="dep-card-hdr"><i class="fa-solid fa-list fx-mr-2"></i>{% trans "Evidentirani polozi / isplate" %}</div>
         <div class="dep-table-wrap">
             <table class="dep-table">
                 <thead><tr>
@@ -151,7 +151,7 @@
                     <th>{% trans "Vrsta" %}</th>
                     <th>{% trans "Operater" %}</th>
                     <th>{% trans "Napomena" %}</th>
-                    <th style="text-align:right">{% trans "Iznos (\xe2\x82\xac)" %}</th>
+                    <th class="text-end">{% trans "Iznos (\xe2\x82\xac)" %}</th>
                 </tr></thead>
                 <tbody>
                 {% for d in deposits %}
@@ -165,8 +165,8 @@
                         {% endif %}
                     </td>
                     <td>{{ d.operator.get_full_name|default:d.operator.username|default:"\xe2\x80\x94" }}</td>
-                    <td style="color:var(--text-muted)">{{ d.note|default:"\xe2\x80\x94" }}</td>
-                    <td style="text-align:right">
+                    <td class="fx-text-muted">{{ d.note|default:"\xe2\x80\x94" }}</td>
+                    <td class="text-end">
                         {% if d.deposit_type == "deposit" %}
                             <span class="dep-amt-pos">+{{ d.amount|floatformat:2 }}</span>
                         {% else %}
@@ -176,7 +176,7 @@
                 </tr>
                 {% empty %}
                 <tr><td colspan="5" class="dep-empty">
-                    <i class="fa-regular fa-folder-open" style="font-size:1.5rem;display:block;margin-bottom:.5rem;opacity:.4"></i>
+                    <i class="fa-regular fa-folder-open fx-fs-5xl d-block mb-2" style="opacity:.4"></i>
                     {% trans "Nema evidentiranih pologa." %}
                 </td></tr>
                 {% endfor %}

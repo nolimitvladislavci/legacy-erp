@@ -2,30 +2,30 @@
 {% load i18n %}
 {% block title %}Rechnung {{ invoice_number }}{% endblock %}
 {% block content %}
-<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">
+<h2 class="fx-text-dark" style="margin:0 0 16px;font-family:'Cormorant Garamond',Georgia,serif">
   {% if is_hr %}Račun {{ invoice_number }}{% else %}Rechnung {{ invoice_number }}{% endif %}
 </h2>
 {% if is_hr %}
-<p style="color:#333;line-height:1.6;">Poštovani/a {{ client_name }},</p>
-<p style="color:#333;line-height:1.6;">u privitku se nalazi račun <strong>{{ invoice_number }}</strong> u iznosu <strong>{{ total }} {{ currency }}</strong>.</p>
-<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
-  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Rok plaćanja</td>
-      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;font-weight:600;">{{ date_due|default:"Po dogovoru" }}</td></tr>
-  <tr><td style="padding:8px 12px;color:#555;">IBAN</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ issuer_iban }}</td></tr>
+<p class="fx-text-dark fx-lh-normal">Poštovani/a {{ client_name }},</p>
+<p class="fx-text-dark fx-lh-normal">u privitku se nalazi račun <strong>{{ invoice_number }}</strong> u iznosu <strong>{{ total }} {{ currency }}</strong>.</p>
+<table role="presentation" width="100%" class="fx-b-collapse" style="margin:20px 0">
+  <tr><td class="fx-bg-card fx-text-dim fx-p-8-12" style="border-left:3px solid #c9a84c">Rok plaćanja</td>
+      <td class="fx-bg-card fx-text-dark fx-fw-semibold fx-p-8-12">{{ date_due|default:"Po dogovoru" }}</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">IBAN</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ issuer_iban }}</td></tr>
 </table>
-<p style="color:#333;line-height:1.6;">Hvala na povjerenju!</p>
-<p style="color:#555;">{{ issuer_name }}</p>
+<p class="fx-text-dark fx-lh-normal">Hvala na povjerenju!</p>
+<p class="fx-text-dim">{{ issuer_name }}</p>
 {% else %}
-<p style="color:#333;line-height:1.6;">Sehr geehrte/r {{ client_name }},</p>
-<p style="color:#333;line-height:1.6;">im Anhang finden Sie die Rechnung <strong>Nr. {{ invoice_number }}</strong> über <strong>{{ total }} {{ currency }}</strong>.</p>
-<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
-  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Fälligkeitsdatum</td>
-      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;font-weight:600;">{{ date_due|default:"Sofort" }}</td></tr>
-  <tr><td style="padding:8px 12px;color:#555;">IBAN</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ issuer_iban }}</td></tr>
+<p class="fx-text-dark fx-lh-normal">Sehr geehrte/r {{ client_name }},</p>
+<p class="fx-text-dark fx-lh-normal">im Anhang finden Sie die Rechnung <strong>Nr. {{ invoice_number }}</strong> über <strong>{{ total }} {{ currency }}</strong>.</p>
+<table role="presentation" width="100%" class="fx-b-collapse" style="margin:20px 0">
+  <tr><td class="fx-bg-card fx-text-dim fx-p-8-12" style="border-left:3px solid #c9a84c">Fälligkeitsdatum</td>
+      <td class="fx-bg-card fx-text-dark fx-fw-semibold fx-p-8-12">{{ date_due|default:"Sofort" }}</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">IBAN</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ issuer_iban }}</td></tr>
 </table>
-<p style="color:#333;line-height:1.6;">Mit freundlichen Grüßen,</p>
-<p style="color:#555;">{{ issuer_name }}</p>
+<p class="fx-text-dark fx-lh-normal">Mit freundlichen Grüßen,</p>
+<p class="fx-text-dim">{{ issuer_name }}</p>
 {% endif %}
 {% endblock %}

@@ -24,7 +24,7 @@
 .sph-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.5rem}
 .sph-input{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.45rem .6rem;font-size:.88rem;font-family:inherit;width:100%}
 .sph-label{font-size:.72rem;color:var(--muted);margin-bottom:.2rem;display:block}
-.add-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit}
+.add-btn{width:100%;background:var(--gold);color:var(--text);border:none;border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit}
 .add-btn:hover{background:#b8922e}
 .back-link{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:none;margin-bottom:1rem}
 .back-link:hover{color:var(--gold)}
@@ -35,7 +35,7 @@
 <body>
 <nav class="booking-nav">
   <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="brand">{{ company.name }}</a>
-  <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" style="color:var(--gold);text-decoration:none;font-size:.9rem">Košarica →</a>
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" class="fx-no-underline fx-fs-md fx-text-gold">Košarica →</a>
 </nav>
 <div class="pd-wrap">
   <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="back-link">← Natrag</a>

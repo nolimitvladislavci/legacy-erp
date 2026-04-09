@@ -3,43 +3,26 @@
 {% block title %}Računi{% endblock %}
 {% block page_title %}Računi — {{ company.name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
 .rl-wrap{max-width:800px;margin:0 auto;padding:0 12px}
-.rl-card{background:#111;border:1px solid #222;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.rl-card{background:var(--dark);border:1px solid #222;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
 .rl-card:hover{border-color:var(--gold,#c9a84c)}
 .rl-num{color:var(--gold,#c9a84c);font-weight:800;font-size:1.1rem;min-width:60px}
 .rl-info{flex:1}
-.rl-total{font-weight:700;color:#e2e8f0;font-size:1rem}
-.rl-meta{font-size:.75rem;color:#666;margin-top:2px}
+.rl-total{font-weight:700;color:var(--text);font-size:1rem}
+.rl-meta{font-size:.75rem;color:var(--text-muted);margin-top:2px}
 .rl-actions{display:flex;gap:6px}
-.rl-btn{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:6px 10px;color:#ccc;font-size:.8rem;cursor:pointer;text-decoration:none;white-space:nowrap}
+.rl-btn{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text-muted);font-size:.8rem;cursor:pointer;text-decoration:none;white-space:nowrap}
 .rl-btn:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
 .rl-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
-.rl-status.paid{background:#1a2a1a;color:#22c55e}
-.rl-status.cancelled{background:#2a1a1a;color:#e74c3c}
-.rl-status.refunded{background:#2a2a1a;color:#f59e0b}
-.rl-fiscal{font-size:.65rem;color:#555;margin-top:2px}
-.rl-search{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#e2e8f0;font-size:.9rem;margin-bottom:16px}
+.rl-status.paid{background:var(--surface);color:var(--green)}
+.rl-status.cancelled{background:#2a1a1a;color:var(--red)}
+.rl-status.refunded{background:#2a2a1a;color:var(--amber)}
+.rl-fiscal{font-size:.65rem;color:var(--text-dim);margin-top:2px}
+.rl-search{width:100%;background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:.9rem;margin-bottom:16px}
 .rl-search:focus{border-color:var(--gold,#c9a84c);outline:none}
 </style>
 
@@ -64,7 +47,7 @@
       {% if r.jir %}
       <div class="rl-fiscal">JIR: {{ r.jir|truncatechars:20 }}</div>
       {% elif r.status == 'paid' %}
-      <div class="rl-fiscal" style="color:#e74c3c">⚠ Nije fiskalizirano</div>
+      <div class="rl-fiscal fx-text-red">⚠ Nije fiskalizirano</div>
       {% endif %}
     </div>
     <div class="rl-actions">
@@ -72,14 +55,14 @@
     </div>
   </div>
   {% empty %}
-  <div style="text-align:center;padding:40px;color:#666">
+  <div class="text-center fx-text-dim" style="padding:40px">
     Nema izdanih računa.
   </div>
   {% endfor %}
   </div>
 
-  <div style="text-align:center;margin:20px 0;">
-    <a href="{% url 'pos:new_terminal' %}" style="color:#94a3b8;font-size:.85rem">← Natrag na POS</a>
+  <div class="text-center" style="margin:20px 0">
+    <a href="{% url 'pos:new_terminal' %}" class="fx-text-muted fx-fs-base">← Natrag na POS</a>
   </div>
 </div>
 

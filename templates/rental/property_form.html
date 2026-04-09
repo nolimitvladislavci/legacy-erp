@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{% if prop %}Uredi sobu{% else %}Nova soba{% endif %}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .page{padding:1.5rem;max-width:600px}
@@ -92,8 +75,8 @@
       <div class="field"><label>Lokacija / Adresa</label><input name="location" value="{{ prop.location|default:'' }}"></div>
       <div class="field"><label>Opis</label><textarea name="description">{{ prop.description|default:'' }}</textarea></div>
 
-      <div style="display:flex;gap:.5rem;margin-top:1rem">
-        <button type="submit" class="btn btn-gold" style="flex:1">Spremi</button>
+      <div class="d-flex fx-gap-2 mt-3">
+        <button type="submit" class="btn btn-gold fx-flex-1">Spremi</button>
         <a href="{% url 'rental:dashboard' %}" class="btn btn-ghost">Odustani</a>
       </div>
     </form>

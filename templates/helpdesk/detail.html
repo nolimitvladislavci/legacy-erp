@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{{ ticket.ticket_number }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid">
@@ -45,7 +28,7 @@
                     <div class="border rounded p-3 mb-2 {% if msg.is_internal %}bg-light border-warning{% elif msg.is_from_client %}bg-white{% else %}bg-light{% endif %}">
                         <div class="d-flex justify-content-between mb-1">
                             <strong>{{ msg.sender_name|default:msg.sender|default:"Sustav" }}</strong>
-                            <small class="text-muted">{{ msg.created_at|date:"d.m.Y H:i" }}{% if msg.is_internal %} <span class="badge bg-warning text-dark">Interno</span>{% endif %}</small>
+                            <small class="text-muted">{{ msg.created_at|date:"d.m.Y H:i" }}{% if msg.is_internal %} <span class="fenix-badge fenix-badge-warning">Interno</span>{% endif %}</small>
                         </div>
                         <div>{{ msg.body|linebreaks }}</div>
                         {% if msg.attachment %}<div class="mt-1"><a href="{{ msg.attachment.url }}" class="btn btn-sm btn-outline-secondary">Prilog</a></div>{% endif %}
@@ -72,8 +55,8 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <div class="form-check form-check-inline"><input type="checkbox" name="is_internal" class="form-check-input" id="chk-internal"><label for="chk-internal" class="form-check-label">Interno (klijent ne vidi)</label></div>
-                                <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('helpdesk-reply-preview',{onReady:function(r){document.getElementById('helpdesk_reply_b64').value=r.b64}})}else{document.getElementById('helpdesk-reply-file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);padding:.3rem .75rem;border-radius:8px;cursor:pointer;margin-right:.5rem;font-size:.82rem">📷 Kamera</button>
-                                <div id="helpdesk-reply-preview" style="display:none;margin:.5rem 0"></div>
+                                <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('helpdesk-reply-preview',{onReady:function(r){document.getElementById('helpdesk_reply_b64').value=r.b64}})}else{document.getElementById('helpdesk-reply-file').click()}" class="fx-rounded fx-pointer fx-fs-note fx-text-gold fx-mr-2" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:.3rem .75rem">📷 Kamera</button>
+                                <div id="helpdesk-reply-preview" class="fx-hidden" style="margin:.5rem 0"></div>
                                 <input type="hidden" name="photo_b64" id="helpdesk_reply_b64">
                                 <input type="file" name="attachment" id="helpdesk-reply-file" class="form-control-sm d-inline-block" style="width:auto">
                             </div>

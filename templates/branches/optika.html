@@ -6,55 +6,33 @@
 .bpage{padding:1.5rem}
 .bpage-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
 .bpage-title{font-size:1.3rem;font-weight:800}
-.bpage-sub{font-size:.8rem;color:#888;margin-top:.15rem}
+.bpage-sub{font-size:.8rem;color:var(--text-dim);margin-top:.15rem}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
 .kpi-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:1.25rem 1.5rem;transition:border-color .2s}
-.kpi-card:hover{border-color:#60a5fa}
-.kpi-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.5rem;font-weight:600}
+.kpi-card:hover{border-color:var(--blue)}
+.kpi-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:.5rem;font-weight:600}
 .kpi-val{font-size:2rem;font-weight:900;line-height:1;margin-bottom:.25rem}
 .kpi-icon{font-size:1.6rem;margin-bottom:.5rem;opacity:.75}
 .action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem;margin-bottom:1.5rem}
 .action-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:var(--text,#fff);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:.4rem}
-.action-card:hover{border-color:#60a5fa;background:rgba(96,165,250,.06);transform:translateY(-2px)}
+.action-card:hover{border-color:var(--blue);background:rgba(96,165,250,.06);transform:translateY(-2px)}
 .action-icon{font-size:1.8rem;opacity:.85}
 .action-lbl{font-size:.8rem;font-weight:600}
-.action-sub{font-size:.68rem;color:#888}
+.action-sub{font-size:.68rem;color:var(--text-muted)}
 .sec-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1.1rem;margin-bottom:1rem}
-.sec-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#888;font-weight:700;margin-bottom:.75rem}
+.sec-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);font-weight:700;margin-bottom:.75rem}
 .dtable{width:100%;border-collapse:collapse;font-size:.82rem}
-.dtable th{font-size:.65rem;text-transform:uppercase;color:#888;padding:.4rem .65rem;text-align:left;border-bottom:1px solid var(--border,#2a2a2a);font-weight:600}
+.dtable th{font-size:.65rem;text-transform:uppercase;color:var(--text-dim);padding:.4rem .65rem;text-align:left;border-bottom:1px solid var(--border,#2a2a2a);font-weight:600}
 .dtable td{padding:.5rem .65rem;border-bottom:1px solid rgba(255,255,255,.04)}
 .dtable tr:last-child td{border-bottom:none}
 .dtable tr:hover td{background:rgba(96,165,250,.04)}
-.badge-blue{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3);border-radius:20px;font-size:.65rem;font-weight:700;padding:.15rem .55rem;white-space:nowrap}
+.badge-blue{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.3);border-radius:20px;font-size:.65rem;font-weight:700;padding:.15rem .55rem;white-space:nowrap}
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="bpage">
-  <div class="bpage-hdr">
-    <div>
-      <div style="margin-bottom:.35rem"><span style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.07em;padding:.2rem .7rem;text-transform:uppercase">{% trans "&#x1F453; Optika" %}</span></div>
-      <div class="bpage-title">{{ branch.name|default:"Optika dashboard" }}</div>
-      <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
-    </div>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+<!-- lang: topbar -->
+    <div class="d-flex fx-flex-wrap fx-gap-2">
       <a href="{% url 'appointments:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:new_terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
       <a href="{% url 'inventory:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
@@ -66,7 +44,7 @@
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F4C5;" %}</div>
       <div class="kpi-lbl">{% trans "Termini danas" %}</div>
-      <div class="kpi-val" style="color:#60a5fa">{{ today_appts }}</div>
+      <div class="kpi-val fx-text-blue">{{ today_appts }}</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F4C5;" %}</div>
@@ -76,7 +54,7 @@
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F4B0;" %}</div>
       <div class="kpi-lbl">{% trans "Utržak danas" %}</div>
-      <div class="kpi-val" style="color:var(--gold,#c9a84c)">&euro;{{ pos_revenue_today|floatformat:2 }}</div>
+      <div class="kpi-val fx-text-gold">&euro;{{ pos_revenue_today|floatformat:2 }}</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F9FE;" %}</div>
@@ -129,18 +107,18 @@
       <tbody>
         {% for appt in recent_appts %}
         <tr>
-          <td style="font-weight:600">{{ appt.client|default:appt.title }}</td>
+          <td class="fx-fw-semibold">{{ appt.client|default:appt.title }}</td>
           <td>{{ appt.start_time|date:"d.m.Y H:i" }}</td>
           <td><span class="badge-blue">{{ appt.get_status_display|default:appt.status }}</span></td>
-          <td style="color:#888">{{ appt.notes|default:"–"|truncatechars:40 }}</td>
+          <td class="fx-text-muted">{{ appt.notes|default:"–"|truncatechars:40 }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
     {% else %}
-    <div style="color:#888;font-size:.85rem;text-align:center;padding:1.5rem">
+    <div class="fx-text-muted fx-fs-base text-center fx-p-5">
       {% trans "Nema nadolazećih termina." %}<br>
-      <a href="/appointments/new/" style="color:#60a5fa">{% trans "+ Dodaj termin" %}</a>
+      <a href="/appointments/new/" class="fx-text-blue">{% trans "+ Dodaj termin" %}</a>
     </div>
     {% endif %}
   </div>
@@ -148,9 +126,9 @@
   <!-- Info box -->
   <div class="sec-card" style="border-color:rgba(96,165,250,.2)">
     <div class="sec-title">{% trans "Naočale u izradi" %}</div>
-    <div style="color:#888;font-size:.82rem;text-align:center;padding:1rem">
+    <div class="fx-text-muted fx-fs-note text-center fx-p-4">
       {% trans "Za praćenje narudžbi naočala u izradi koristite modul" %} <strong>{% trans "Dokumenti" %}</strong> {% trans "ili" %} <strong>{% trans "Zalihe" %}</strong>.
-      <br><a href="/documents/" style="color:#60a5fa;margin-top:.35rem;display:inline-block">{% trans "&#x1F4C4; Otvori dokumente &rarr;" %}</a>
+      <br><a href="/documents/" class="fx-text-blue d-inline-block" style="margin-top:.35rem">{% trans "&#x1F4C4; Otvori dokumente &rarr;" %}</a>
     </div>
   </div>
 </div>

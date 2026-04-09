@@ -16,7 +16,7 @@ nav a.logo{color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:no
 nav a.logo span{color:var(--text)}
 nav .links{display:flex;gap:1rem;align-items:center}
 nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
-.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;cursor:pointer;text-decoration:none}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;cursor:pointer;text-decoration:none}
 .hero-sm{padding:8rem 2rem 4rem;text-align:center}
 .hero-sm h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem}
 .hero-sm h1 span{color:var(--gold)}
@@ -28,14 +28,14 @@ td{padding:.75rem 1rem;border-bottom:1px solid var(--border)}
 tr:hover{background:rgba(201,168,76,.03)}
 .col-starter{color:var(--muted)}
 .col-business{color:var(--gold);font-weight:600}
-.col-enterprise{color:#3b82f6}
-.check{color:#4ade80}.cross{color:#333}
+.col-enterprise{color:var(--blue)}
+.check{color:var(--green)}.cross{color:var(--text)}
 .faq{max-width:800px;margin:0 auto;padding:3rem 2rem}
 .faq h2{text-align:center;font-size:1.8rem;margin-bottom:2rem}
 .faq-item{border-bottom:1px solid var(--border);padding:1rem 0}
 .faq-item summary{cursor:pointer;font-weight:600;font-size:.95rem;color:var(--text)}
 .faq-item p{color:var(--muted);font-size:.88rem;margin:.5rem 0 0;line-height:1.6}
-footer{background:#050505;padding:2rem;text-align:center;color:#333;font-size:.75rem}
+footer{background:#050505;padding:2rem;text-align:center;color:var(--text);font-size:.75rem}
 footer a{color:var(--gold);text-decoration:none}
 </style>
 </head>
@@ -45,7 +45,7 @@ footer a{color:var(--gold);text-decoration:none}
 <a href="/de/" class="logo">LIMIT<span>CONNECT</span></a>
 <div class="links">
 <a href="/de/">Start</a>
-<a href="/de/pakete/" style="color:var(--gold)">Pakete</a>
+<a href="/de/pakete/" class="fx-text-gold">Pakete</a>
 <a href="/de/anleitung/">Anleitung</a>
 <a href="{% url 'accounts:quick_register' %}" class="btn-gold">Kostenlos testen</a>
 </div>
@@ -61,30 +61,30 @@ footer a{color:var(--gold);text-decoration:none}
 <thead>
 <tr>
 <th style="width:35%">Funktion</th>
-<th class="col-starter" style="width:20%;text-align:center">Starter<br><span style="color:var(--text);font-size:1.2rem;font-weight:800">22€</span>/Mo</th>
-<th class="col-business" style="width:25%;text-align:center">Business<br><span style="color:var(--gold);font-size:1.2rem;font-weight:800">69€</span>/Mo</th>
-<th class="col-enterprise" style="width:20%;text-align:center">Enterprise<br><span style="color:#3b82f6;font-size:1.2rem;font-weight:800">189€</span>/Mo</th>
+<th class="col-starter text-center" style="width:20%">Starter<br><span class="fx-fs-2xl fx-fw-800 fx-text-body">22€</span>/Mo</th>
+<th class="col-business text-center" style="width:25%">Business<br><span class="fx-fs-2xl fx-fw-800 fx-text-gold">69€</span>/Mo</th>
+<th class="col-enterprise text-center" style="width:20%">Enterprise<br><span class="fx-text-blue fx-fs-2xl fx-fw-800">189€</span>/Mo</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><strong>Kassen / Terminals</strong></td><td style="text-align:center">1</td><td style="text-align:center">3</td><td style="text-align:center">Unbegrenzt</td></tr>
-<tr><td><strong>Artikel</strong></td><td style="text-align:center">500</td><td style="text-align:center">Unbegrenzt</td><td style="text-align:center">Unbegrenzt</td></tr>
-<tr><td>POS Kassieren</td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>TSE Cloud (Fiskaly)</td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>DSFinV-K Export</td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>WhatsApp-Belege</td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Offline-Modus</td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Gastro (Tische, KDS)</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Lagerverwaltung</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Inventur (Barcode)</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Zeiterfassung</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Rechnungsstellung</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>KI-Berichte</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Multi-Filiale</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>B2B Marketplace</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>HACCP Cold Chain</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>API-Zugang</td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-times cross"></i></td><td style="text-align:center"><i class="fas fa-check check"></i></td></tr>
-<tr><td>Dedicated Support</td><td style="text-align:center">E-Mail</td><td style="text-align:center">E-Mail + WhatsApp</td><td style="text-align:center">Account Manager</td></tr>
+<tr><td><strong>Kassen / Terminals</strong></td><td class="text-center">1</td><td class="text-center">3</td><td class="text-center">Unbegrenzt</td></tr>
+<tr><td><strong>Artikel</strong></td><td class="text-center">500</td><td class="text-center">Unbegrenzt</td><td class="text-center">Unbegrenzt</td></tr>
+<tr><td>POS Kassieren</td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>TSE Cloud (Fiskaly)</td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>DSFinV-K Export</td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>WhatsApp-Belege</td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Offline-Modus</td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Gastro (Tische, KDS)</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Lagerverwaltung</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Inventur (Barcode)</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Zeiterfassung</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Rechnungsstellung</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>KI-Berichte</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Multi-Filiale</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>B2B Marketplace</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>HACCP Cold Chain</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>API-Zugang</td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-times cross"></i></td><td class="text-center"><i class="fas fa-check check"></i></td></tr>
+<tr><td>Dedicated Support</td><td class="text-center">E-Mail</td><td class="text-center">E-Mail + WhatsApp</td><td class="text-center">Account Manager</td></tr>
 </tbody>
 </table>
 </div>

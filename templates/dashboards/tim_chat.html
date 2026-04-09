@@ -6,11 +6,11 @@
 <title>Tim Chat — LIMIT Connect</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;padding:1rem}
-.gold{color:var(--gold,#c9a84c)}.muted{color:#64748b}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;padding:1rem}
+.gold{color:var(--gold,#c9a84c)}.muted{color:var(--text-dim)}
 h1{font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c);letter-spacing:2px}
-.sub{font-size:.7rem;color:#64748b;letter-spacing:1px;text-transform:uppercase}
-.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.sub{font-size:.7rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
+.card{background:var(--bg-card);border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
 .card-gold{border-left:3px solid var(--gold,#c9a84c)}
 
 /* Okrugli stol — samo za superadmin */
@@ -24,30 +24,30 @@ h1{font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c);letter-spacing:2px
 .chat-panel.open{display:block}
 .chat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .chat-name{font-weight:700;font-size:1rem}
-.chat-role{font-size:.7rem;color:#64748b;margin-top:.2rem}
-.close-btn{background:none;border:none;color:#888;font-size:1.3rem;cursor:pointer;padding:.25rem}
+.chat-role{font-size:.7rem;color:var(--text-dim);margin-top:.2rem}
+.close-btn{background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:.25rem}
 
-.msg-history{max-height:220px;overflow-y:auto;margin-bottom:.75rem;padding:.5rem;background:#111;border-radius:8px;border:1px solid #1e293b}
+.msg-history{max-height:220px;overflow-y:auto;margin-bottom:.75rem;padding:.5rem;background:var(--bg-card);border-radius:8px;border:1px solid #1e293b}
 .msg{padding:.4rem .6rem;margin-bottom:.4rem;border-radius:6px;font-size:.8rem;line-height:1.4}
 .msg.sent{background:#1e3a5f;text-align:right;border-right:2px solid #3b82f6}
 .msg.recv{background:#1a2e1a;border-left:2px solid #22c55e}
-.msg .ts{font-size:.65rem;color:#64748b;margin-top:.2rem}
-.msg-empty{color:#64748b;font-size:.8rem;text-align:center;padding:1rem}
+.msg .ts{font-size:.65rem;color:var(--text-dim);margin-top:.2rem}
+.msg-empty{color:var(--text-dim);font-size:.8rem;text-align:center;padding:1rem}
 
-textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:8px;padding:.6rem;font-size:.85rem;resize:vertical;font-family:inherit;min-height:70px}
+textarea{width:100%;background:var(--bg-card);color:var(--white);border:1px solid #333;border-radius:8px;padding:.6rem;font-size:.85rem;resize:vertical;font-family:inherit;min-height:70px}
 textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
-.btn-send{background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:700;cursor:pointer;font-size:.85rem;margin-top:.5rem;width:100%}
+.btn-send{background:var(--gold,#c9a84c);color:var(--text);border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:700;cursor:pointer;font-size:.85rem;margin-top:.5rem;width:100%}
 .btn-send:hover{background:#d4a843}
-.status-msg{font-size:.75rem;color:#64748b;margin-top:.4rem;text-align:center}
+.status-msg{font-size:.75rem;color:var(--text-dim);margin-top:.4rem;text-align:center}
 
 /* Forma za sve (ne-superadmin) */
 .public-form textarea{min-height:100px}
 .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem}
-.team-member{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:.75rem;text-align:center;cursor:pointer;transition:all .2s}
+.team-member{background:var(--bg-card);border:1px solid #1e293b;border-radius:10px;padding:.75rem;text-align:center;cursor:pointer;transition:all .2s}
 .team-member:hover,.team-member.selected{border-color:var(--gold,#c9a84c);background:#1a1f2e}
 .team-member .avatar{font-size:2rem;margin-bottom:.3rem}
 .team-member .name{font-size:.8rem;font-weight:700}
-.team-member .role{font-size:.65rem;color:#64748b}
+.team-member .role{font-size:.65rem;color:var(--text-dim)}
 </style>
 </head>
 <body>
@@ -56,10 +56,10 @@ textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
 {% load i18n %}
 {% block content %}
 
-<div style="max-width:680px;margin:0 auto;padding:1rem">
+<div class="fx-m-auto fx-p-4" style="max-width:680px">
 
   <!-- Header -->
-  <div style="margin-bottom:1.5rem">
+  <div class="fx-mb-6">
     <h1>💬 Tim Chat</h1>
     <div class="sub">Direktna komunikacija s timom</div>
   </div>
@@ -67,7 +67,7 @@ textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
   {% if request.user.is_superuser %}
   <!-- ══ SUPERADMIN PRIKAZ — Okrugli stol ══ -->
   <div class="card card-gold">
-    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:1rem">
+    <div class="fx-fs-sm fx-fw-bold fx-text-gold mb-3 fx-uppercase fx-ls-2">
       ⬡ Okrugli stol — Odaberi s kim pričaš
     </div>
 
@@ -162,11 +162,11 @@ textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
   {% else %}
   <!-- ══ KORISNIČKI PRIKAZ — Forma za sve ══ -->
   <div class="card card-gold">
-    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:1rem">
+    <div class="fx-fs-sm fx-fw-bold fx-text-gold mb-3 fx-uppercase fx-ls-2">
       💬 Pošalji poruku timu
     </div>
 
-    <div style="font-size:.8rem;color:#64748b;margin-bottom:1rem">
+    <div class="fx-fs-compact fx-text-dim mb-3">
       Imaš pitanje, prijedlog ili problem? Tim je tu. Odaberi kome pišeš:
     </div>
 
@@ -195,12 +195,12 @@ textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
 
   <!-- Zadnje poslane poruke korisnika -->
   <div class="card">
-    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:.75rem">
+    <div class="fx-fs-sm fx-fw-bold fx-text-dim fx-uppercase fx-ls-2 fx-mb-4">
       Tvoje poruke
     </div>
     <div id="my-messages">
       {% for msg in user_messages %}
-      <div class="msg sent" style="margin-bottom:.5rem">
+      <div class="msg sent mb-2">
         <div>{{ msg.description|truncatechars:100 }}</div>
         <div class="ts">{{ msg.created_at|date:"d.m.Y H:i" }} · {{ msg.get_status_display }}</div>
       </div>

@@ -14,7 +14,7 @@
 .ql-pin-label{color:var(--text-muted,#94a3b8);font-size:.85rem;margin-bottom:.5rem;text-align:center}
 .ql-pin-input{width:100%;padding:14px;border:1px solid var(--border,#333);border-radius:10px;background:var(--bg,#0a0a0f);color:var(--gold,#c9a84c);font-size:1.5rem;text-align:center;letter-spacing:8px;font-weight:700;outline:none;box-sizing:border-box}
 .ql-pin-input:focus{border-color:var(--gold,#c9a84c)}
-.ql-btn{width:100%;padding:14px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem}
+.ql-btn{width:100%;padding:14px;background:var(--gold,#c9a84c);color:var(--black);border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem}
 .ql-sel-name{color:var(--gold,#c9a84c);font-weight:700;font-size:1.1rem;text-align:center;margin-bottom:.5rem}
 </style>
 {% endblock %}
@@ -22,7 +22,7 @@
 <div class="ql-wrap">
   <div class="ql-title">{{ company.name|default:"LIMIT Connect" }}</div>
   <div class="ql-sub">Odaberite ime i unesite PIN</div>
-  {% if messages %}{% for msg in messages %}<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:1rem">{{ msg }}</div>{% endfor %}{% endif %}
+  {% if messages %}{% for msg in messages %}<div class="fx-rounded fx-fs-base fx-text-red mb-3 fx-p-10-14" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">{{ msg }}</div>{% endfor %}{% endif %}
   <form method="post" id="qlForm">
     {% csrf_token %}
     <input type="hidden" name="user_id" id="userId" value="">

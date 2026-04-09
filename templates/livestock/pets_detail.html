@@ -15,17 +15,17 @@
         {% if pet.photo %}
         <img src="{{ pet.photo.url }}" class="card-img-top" style="height:240px;object-fit:cover;border-radius:8px 8px 0 0">
         {% else %}
-        <div style="height:180px;background:#111;display:flex;align-items:center;justify-content:center;font-size:5rem;border-radius:8px 8px 0 0">
+        <div class="fx-bg-card d-flex align-items-center justify-content-center" style="height:180px;font-size:5rem;border-radius:8px 8px 0 0">
           {% if pet.vrsta == 'pas' %}🐶{% elif pet.vrsta == 'macka' %}🐱{% elif pet.vrsta == 'konj' %}🐴{% else %}🐾{% endif %}
         </div>
         {% endif %}
         <div class="card-body">
-          <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold,#c9a84c);font-size:1.6rem;margin:0 0 .25rem">
+          <h2 class="fx-text-gold fx-fs-5xl" style="font-family:'Cormorant Garamond',serif;margin:0 0 .25rem">
             {{ pet.name|default:"Bez imena" }}
           </h2>
           <div class="text-muted mb-3">{{ pet.get_vrsta_display }} · {{ pet.breed|default:"Pasmina nepoznata" }}</div>
 
-          <table class="table table-dark table-sm table-borderless mb-0" style="font-size:.85rem">
+          <table class="table table-dark table-sm table-borderless mb-0 fx-fs-base">
             {% if pet.spol != 'N' %}
             <tr><td class="text-muted">Spol</td><td>{{ pet.get_spol_display }}</td></tr>
             {% endif %}
@@ -39,7 +39,7 @@
             <tr><td class="text-muted">Boja</td><td>{{ pet.color_description }}</td></tr>
             {% endif %}
             {% if pet.chip_number %}
-            <tr><td class="text-muted">Čip</td><td style="font-family:monospace;font-size:.8rem">{{ pet.chip_number }}</td></tr>
+            <tr><td class="text-muted">Čip</td><td class="fx-fs-compact fx-font-mono">{{ pet.chip_number }}</td></tr>
             {% endif %}
             {% if pet.pedigree_number %}
             <tr><td class="text-muted">Rodovnica</td><td>{{ pet.pedigree_number }}</td></tr>
@@ -73,7 +73,7 @@
               <i class="fas fa-paw me-1"></i>Objavi na Memio.pet
             </button>
           </div>
-          <div id="memioPushResult" style="display:none;margin-top:8px;font-size:.82rem"></div>
+          <div id="memioPushResult" class="fx-hidden fx-fs-note mt-2"></div>
         </div>
       </div>
     </div>
@@ -137,9 +137,7 @@
       <div class="list-group list-group-flush">
         {% for rec in records %}
         <div class="list-group-item bg-dark border-secondary text-light d-flex align-items-start gap-3 py-3">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.1);
-               border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;
-               font-size:1rem;flex-shrink:0">
+          <div class="fx-rounded-circle d-flex fx-fs-lg align-items-center justify-content-center flex-shrink-0" style="width:36px;height:36px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3)">
             {% if rec.tip == 'cijepljenje' %}💉{% elif rec.tip == 'pregled' %}🔍{% elif rec.tip == 'tretman' %}💊{% else %}📋{% endif %}
           </div>
           <div class="flex-grow-1">
@@ -147,7 +145,7 @@
               <div>
                 <span class="fw-semibold">{{ rec.opis }}</span>
                 {% if rec.lijek %}
-                <span class="badge bg-secondary ms-1" style="font-size:.7rem">{{ rec.lijek }}</span>
+                <span class="badge bg-secondary ms-1 fx-fs-sm">{{ rec.lijek }}</span>
                 {% endif %}
               </div>
               {% if rec.trosak_eur %}
@@ -197,7 +195,7 @@ function pushToMemio(){
     if(d.ok && d.public_url){
       res.style.display = 'block';
       res.innerHTML = '<span class="text-success"><i class="fas fa-paw me-1"></i>' +
-        'Profil živi na: <a href="' + d.public_url + '" target="_blank" style="color:#22c55e">' +
+        'Profil živi na: <a href="' + d.public_url + '" target="_blank" class="fx-text-green">' +
         d.public_url + '</a></span>';
     }
   })

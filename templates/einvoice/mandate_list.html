@@ -13,11 +13,11 @@
 .mn-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
 .mn-table tr:hover{background:var(--table-row-hover)}
 .mn-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.mn-badge.draft{background:#fef3c7;color:#92400e}
-.mn-badge.signed{background:#dbeafe;color:#1e40af}
-.mn-badge.active{background:#dcfce7;color:#166534}
-.mn-badge.revoked{background:#fef2f2;color:#991b1b}
-.mn-badge.expired{background:#f3e8ff;color:#7c3aed}
+.mn-badge.draft{background:var(--amber-dim);color:var(--amber)}
+.mn-badge.signed{background:var(--blue-dim);color:var(--blue)}
+.mn-badge.active{background:var(--green-dim);color:var(--green)}
+.mn-badge.revoked{background:var(--red-dim);color:var(--red)}
+.mn-badge.expired{background:#f3e8ff;color:var(--purple)}
 .mn-type{font-family:monospace;font-size:.72rem;padding:2px 6px;background:var(--badge-bg);border-radius:4px}
 .mn-section{margin-bottom:28px}
 .mn-section-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -31,10 +31,10 @@
 }
 </style>
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+<div class="d-flex fx-gap-3 align-items-center mb-3">
   <div>
-    <div style="font-weight:700;font-size:1.1rem;color:var(--text)"><i class="fas fa-file-signature" style="color:var(--gold)"></i> Punomoći (e-Račun Mandati)</div>
-    <div style="font-size:.7rem;color:var(--text-muted)">Upravljanje punomoćima za slanje e-Računa u ime drugih firmi</div>
+    <div class="fx-fw-bold fx-fs-xl fx-text-body"><i class="fas fa-file-signature fx-text-gold"></i> Punomoći (e-Račun Mandati)</div>
+    <div class="fx-fs-sm fx-text-muted">Upravljanje punomoćima za slanje e-Računa u ime drugih firmi</div>
   </div>
   <div class="ms-auto d-flex gap-2">
     <a href="{% url 'einvoice:smart_mailbox' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-inbox"></i> Inbox</a>
@@ -44,16 +44,16 @@
 
 <!-- Stats -->
 <div class="mn-grid">
-  <div class="mn-stat"><div class="val" style="color:#1e40af">{{ stats.held_total }}</div><div class="lbl">Držimo (agent)</div></div>
-  <div class="mn-stat"><div class="val" style="color:#166534">{{ stats.held_active }}</div><div class="lbl">Aktivnih (agent)</div></div>
-  <div class="mn-stat"><div class="val" style="color:#92400e">{{ stats.given_total }}</div><div class="lbl">Dali (principal)</div></div>
-  <div class="mn-stat"><div class="val" style="color:#166534">{{ stats.given_active }}</div><div class="lbl">Aktivnih (principal)</div></div>
+  <div class="mn-stat"><div class="val fx-text-blue">{{ stats.held_total }}</div><div class="lbl">Držimo (agent)</div></div>
+  <div class="mn-stat"><div class="val fx-text-green">{{ stats.held_active }}</div><div class="lbl">Aktivnih (agent)</div></div>
+  <div class="mn-stat"><div class="val fx-text-amber">{{ stats.given_total }}</div><div class="lbl">Dali (principal)</div></div>
+  <div class="mn-stat"><div class="val fx-text-green">{{ stats.given_active }}</div><div class="lbl">Aktivnih (principal)</div></div>
 </div>
 
 <!-- Mandates Held (we are Agent) -->
 <div class="mn-section">
   <div class="mn-section-title"><i class="fas fa-hand-holding-usd"></i> Punomoći koje držimo (mi smo opunomoćenik)</div>
-  <div class="stat-card" style="overflow-x:auto">
+  <div class="fenix-stat fx-scroll-x">
   {% if mandates_held %}
   <table class="mn-table">
     <thead>
@@ -70,7 +70,7 @@
     <tbody>
       {% for m in mandates_held %}
       <tr>
-        <td style="font-weight:600">{{ m.principal_company.name|truncatechars:35 }}</td>
+        <td class="fx-fw-semibold">{{ m.principal_company.name|truncatechars:35 }}</td>
         <td><code>{{ m.principal_oib }}</code></td>
         <td><span class="mn-type">{{ m.get_mandate_type_display }}</span></td>
         <td><span class="mn-badge {{ m.status }}">{{ m.get_status_display }}</span></td>
@@ -96,8 +96,8 @@
   </table>
   {% else %}
   <div class="text-center py-4">
-    <div style="font-size:2rem;margin-bottom:8px;color:var(--text-muted)"><i class="fas fa-file-signature"></i></div>
-    <p style="color:var(--text-muted);font-size:.85rem">Nemate punomoći kao opunomoćenik.</p>
+    <div class="fx-fs-icon mb-2 fx-text-muted"><i class="fas fa-file-signature"></i></div>
+    <p class="fx-fs-base fx-text-muted">Nemate punomoći kao opunomoćenik.</p>
   </div>
   {% endif %}
   </div>
@@ -106,7 +106,7 @@
 <!-- Mandates Given (we are Principal) -->
 <div class="mn-section">
   <div class="mn-section-title"><i class="fas fa-share-alt"></i> Punomoći koje smo dali (mi smo opunomoćitelj)</div>
-  <div class="stat-card" style="overflow-x:auto">
+  <div class="fenix-stat fx-scroll-x">
   {% if mandates_given %}
   <table class="mn-table">
     <thead>
@@ -123,7 +123,7 @@
     <tbody>
       {% for m in mandates_given %}
       <tr>
-        <td style="font-weight:600">{{ m.agent_company.name|truncatechars:35 }}</td>
+        <td class="fx-fw-semibold">{{ m.agent_company.name|truncatechars:35 }}</td>
         <td><code>{{ m.agent_oib }}</code></td>
         <td><span class="mn-type">{{ m.get_mandate_type_display }}</span></td>
         <td><span class="mn-badge {{ m.status }}">{{ m.get_status_display }}</span></td>
@@ -131,9 +131,9 @@
         <td><small>{% if m.valid_until %}{{ m.valid_until|date:"d.m.Y" }}{% else %}<em>neogr.</em>{% endif %}</small></td>
         <td>
           {% if m.registered_with_fina %}
-            <span style="color:#166534;font-size:.75rem"><i class="fas fa-check"></i> {{ m.fina_registered_at|date:"d.m.Y" }}</span>
+            <span class="fx-fs-caption fx-text-green"><i class="fas fa-check"></i> {{ m.fina_registered_at|date:"d.m.Y" }}</span>
           {% else %}
-            <span style="color:var(--text-muted);font-size:.75rem">—</span>
+            <span class="fx-fs-caption fx-text-muted">—</span>
           {% endif %}
         </td>
       </tr>
@@ -142,15 +142,15 @@
   </table>
   {% else %}
   <div class="text-center py-4">
-    <div style="font-size:2rem;margin-bottom:8px;color:var(--text-muted)"><i class="fas fa-share-alt"></i></div>
-    <p style="color:var(--text-muted);font-size:.85rem">Niste dali nijednu punomoć.</p>
+    <div class="fx-fs-icon mb-2 fx-text-muted"><i class="fas fa-share-alt"></i></div>
+    <p class="fx-fs-base fx-text-muted">Niste dali nijednu punomoć.</p>
   </div>
   {% endif %}
   </div>
 </div>
 
 <!-- Hidden upload form -->
-<form id="uploadForm" method="post" enctype="multipart/form-data" style="display:none">
+<form id="uploadForm" method="post" enctype="multipart/form-data" class="fx-hidden">
   {% csrf_token %}
   <input type="file" id="uploadFile" name="document" accept=".pdf,.jpg,.jpeg,.png,.tiff">
 </form>

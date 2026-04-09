@@ -31,7 +31,7 @@
     <p class="se-micro">Bez kreditne kartice. Bez ugovora.</p>
   </div>
 
-  <div id="seStatus" class="se-status" style="display:none;"></div>
+  <div id="seStatus" class="se-status fx-hidden"></div>
 
   <div class="se-proof">
     <span>✓ 96 firmi</span>
@@ -51,15 +51,15 @@
 .se-input-row{display:flex;gap:.5rem;margin-bottom:.75rem}
 .se-input{flex:1;padding:.875rem 1rem;border:1.5px solid var(--border,rgba(255,255,255,.08));border-radius:10px;background:var(--surface-elevated,#1e2024);color:var(--text-primary,#f1f5f9);font-size:1rem;outline:none;transition:border-color .2s}
 .se-input:focus{border-color:var(--gold,#c9a84c)}
-.se-input.se-error{border-color:#e74c3c}
-.se-error-msg{color:#e74c3c;font-size:.85rem;margin:.5rem 0 0}
-.se-btn-gold{padding:.875rem 1.5rem;background:var(--gold,#c9a84c);color:#000;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-size:1rem;white-space:nowrap;transition:opacity .2s}
+.se-input.se-error{border-color:var(--red)}
+.se-error-msg{color:var(--red);font-size:.85rem;margin:.5rem 0 0}
+.se-btn-gold{padding:.875rem 1.5rem;background:var(--gold,#c9a84c);color:var(--black);font-weight:700;border:none;border-radius:10px;cursor:pointer;font-size:1rem;white-space:nowrap;transition:opacity .2s}
 .se-btn-gold:hover{opacity:.88}
 .se-micro{color:var(--text-muted,#888);font-size:.8rem;margin:0}
 .se-status{max-width:520px;width:100%;padding:1rem 1.5rem;border-radius:12px;font-size:.95rem;text-align:center}
 .se-status.success{background:rgba(39,174,96,.15);color:#27ae60;border:1px solid rgba(39,174,96,.3)}
 .se-status.info{background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);border:1px solid rgba(201,168,76,.3)}
-.se-status.error{background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.3)}
+.se-status.error{background:rgba(231,76,60,.1);color:var(--red);border:1px solid rgba(231,76,60,.3)}
 .se-proof{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;color:var(--text-secondary,#94a3b8);font-size:.85rem}
 @media(max-width:480px){.se-input-row{flex-direction:column}.se-btn-gold{width:100%}}
 </style>

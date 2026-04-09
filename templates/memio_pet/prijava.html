@@ -4,13 +4,13 @@
 {% block title %}{% trans "Prijava" %} — Memio.pet{% endblock %}
 
 {% block content %}
-<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
-<div style="width:100%;max-width:440px">
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;padding:24px 16px">
+<div class="fx-w-full" style="max-width:440px">
 
   <div class="mp-card">
     <div class="mp-card-body">
-      <h1 style="margin-bottom:6px">{% trans "Prijava" %}</h1>
-      <p style="color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.6">
+      <h1 class="mb-1">{% trans "Prijava" %}</h1>
+      <p class="fx-fs-body fx-text-dim fx-lh-normal" style="margin-bottom:28px">
         {% trans "Upiši email koji si koristio pri registraciji i vratit ćemo te na tvoj profil." %}
       </p>
 
@@ -33,15 +33,15 @@
         <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">{% trans "Prijavi se" %} →</button>
       </form>
 
-      <div style="display:flex;align-items:center;gap:14px;margin:28px 0">
-        <div style="flex:1;height:1px;background:var(--line)"></div>
-        <span style="font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">{% trans "ili" %}</span>
-        <div style="flex:1;height:1px;background:var(--line)"></div>
+      <div class="d-flex align-items-center" style="gap:14px;margin:28px 0">
+        <div class="fx-flex-1" style="height:1px;background:var(--line)"></div>
+        <span class="fx-fs-body-sm fx-text-dim fx-uppercase" style="letter-spacing:.1em">{% trans "ili" %}</span>
+        <div class="fx-flex-1" style="height:1px;background:var(--line)"></div>
       </div>
 
-      <a href="/registracija/" class="mp-btn mp-btn-outline mp-btn-full" style="text-align:center">{% trans "Kreiraj novi profil" %}</a>
+      <a href="/registracija/" class="mp-btn mp-btn-outline mp-btn-full text-center">{% trans "Kreiraj novi profil" %}</a>
 
-      <p style="margin-top:20px;font-size:.75rem;color:var(--dim);text-align:center;line-height:1.6">
+      <p class="fx-fs-caption text-center mt-4 fx-text-dim fx-lh-normal">
         {% trans "Nema lozinke — samo email koji si koristio." %}<br>
         {% trans "Tvoj profil je uvijek dostupan." %}
       </p>

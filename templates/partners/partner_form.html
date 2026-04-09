@@ -2,24 +2,7 @@
 {% load i18n l10n %}
 {% block title %}{{ action }} — LIMIT Connect{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 
@@ -33,7 +16,7 @@
 {% if messages %}
 <div class="mb-3">
   {% for m in messages %}
-  <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">
+  <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2 fx-fs-base">
     {{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
   </div>
   {% endfor %}
@@ -76,10 +59,10 @@
                 <i class="fas fa-camera"></i>
               </button>
             </div>
-            <div id="oibInputFeedback" class="mt-1" style="font-size:.78rem;min-height:1.2em"></div>
+            <div id="oibInputFeedback" class="mt-1 fx-fs-body-sm" style="min-height:1.2em"></div>
           </div>
           <div class="col-sm-3 d-flex align-items-end">
-            <small class="text-muted" style="font-size:.75rem">
+            <small class="text-muted fx-fs-caption">
               <i class="fas fa-info-circle"></i> Auto-pretraga pri 11 znamenki
             </small>
           </div>
@@ -117,10 +100,10 @@
 
       <!-- URED U DŽEPU — eRačun routing -->
       <div class="stat-card p-4 mb-3" style="border-left:3px solid #6366f1">
-        <h6 class="fw-bold mb-1" style="color:#6366f1">
+        <h6 class="fw-bold mb-1 fx-text-purple">
           <i class="fas fa-mobile-alt me-2"></i>Ured u džepu — tip kupca
         </h6>
-        <p class="text-muted small mb-3" style="font-size:.8rem">
+        <p class="text-muted small mb-3 fx-fs-compact">
           Odabirom tipa sustav automatski zna koji račun izdati (eRačun / fiskalni bon / PDF).
           Postavi jednom — nikad više ne razmišljaj o fiskalizaciji.
         </p>
@@ -129,87 +112,87 @@
         <div class="row g-2 mb-3" id="buyerTypeCards">
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'b2c' or not partner.buyer_type %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'b2c' or not partner.buyer_type %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="b2c" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'b2c' or not partner.buyer_type %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🧑</div>
-              <div class="fw-semibold" style="font-size:.8rem">Građanin (B2C)</div>
-              <div class="text-muted" style="font-size:.7rem">Fiskalni bon F1.0</div>
+              <div class="fx-fs-4xl mb-1">🧑</div>
+              <div class="fw-semibold fx-fs-compact">Građanin (B2C)</div>
+              <div class="text-muted fx-fs-sm">Fiskalni bon F1.0</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'b2b_vat' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'b2b_vat' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="b2b_vat" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'b2b_vat' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🏢</div>
-              <div class="fw-semibold" style="font-size:.8rem">Tvrtka u PDV-u</div>
-              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+              <div class="fx-fs-4xl mb-1">🏢</div>
+              <div class="fw-semibold fx-fs-compact">Tvrtka u PDV-u</div>
+              <div class="text-muted fx-fs-sm">eRačun F2.0</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'b2b_novat' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'b2b_novat' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="b2b_novat" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'b2b_novat' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🏬</div>
-              <div class="fw-semibold" style="font-size:.8rem">Tvrtka bez PDV-a</div>
-              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+              <div class="fx-fs-4xl mb-1">🏬</div>
+              <div class="fw-semibold fx-fs-compact">Tvrtka bez PDV-a</div>
+              <div class="text-muted fx-fs-sm">eRačun F2.0</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'b2g' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'b2g' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="b2g" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'b2g' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🏛️</div>
-              <div class="fw-semibold" style="font-size:.8rem">Proračunski (škola…)</div>
-              <div class="text-muted" style="font-size:.7rem">eRačun B2G</div>
+              <div class="fx-fs-4xl mb-1">🏛️</div>
+              <div class="fw-semibold fx-fs-compact">Proračunski (škola…)</div>
+              <div class="text-muted fx-fs-sm">eRačun B2G</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'udruga_vat' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'udruga_vat' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="udruga_vat" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'udruga_vat' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🤝</div>
-              <div class="fw-semibold" style="font-size:.8rem">Udruga u PDV-u</div>
-              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+              <div class="fx-fs-4xl mb-1">🤝</div>
+              <div class="fw-semibold fx-fs-compact">Udruga u PDV-u</div>
+              <div class="text-muted fx-fs-sm">eRačun F2.0</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'udruga_novat' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'udruga_novat' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="udruga_novat" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'udruga_novat' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🌱</div>
-              <div class="fw-semibold" style="font-size:.8rem">Udruga bez PDV-a</div>
-              <div class="text-muted" style="font-size:.7rem">Obični PDF</div>
+              <div class="fx-fs-4xl mb-1">🌱</div>
+              <div class="fw-semibold fx-fs-compact">Udruga bez PDV-a</div>
+              <div class="text-muted fx-fs-sm">Obični PDF</div>
             </label>
           </div>
 
           <div class="col-6 col-md-4">
-            <label class="buyer-card {% if partner.buyer_type == 'inozemstvo' %}active{% endif %}"
-                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+            <label class="buyer-card {% if partner.buyer_type == 'inozemstvo' %}active{% endif %} fx-pointer fx-rounded text-center fx-bg-surface2 d-block"
+                   style="border:2px solid transparent;padding:12px 10px;transition:.15s">
               <input type="radio" name="buyer_type" value="inozemstvo" class="d-none buyer-radio"
                      {% if partner.buyer_type == 'inozemstvo' %}checked{% endif %}>
-              <div style="font-size:1.4rem;margin-bottom:4px">🌍</div>
-              <div class="fw-semibold" style="font-size:.8rem">Inozemstvo</div>
-              <div class="text-muted" style="font-size:.7rem">Obični PDF</div>
+              <div class="fx-fs-4xl mb-1">🌍</div>
+              <div class="fw-semibold fx-fs-compact">Inozemstvo</div>
+              <div class="text-muted fx-fs-sm">Obični PDF</div>
             </label>
           </div>
 
         </div>
 
         <!-- Routing rezultat — live prikaz -->
-        <div id="routingResult" style="padding:10px 14px;border-radius:8px;background:#eef2ff;border:1px solid #c7d2fe;font-size:.82rem;display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.2rem" id="routingIcon">🧑</span>
+        <div id="routingResult" class="fx-rounded fx-fs-note d-flex fx-gap-3 align-items-center fx-bg-purple-dim fx-p-10-14" style="border:1px solid #c7d2fe">
+          <span class="fx-fs-2xl" id="routingIcon">🧑</span>
           <div>
             <div class="fw-semibold" id="routingLabel">Fiskalni bon F1.0 (građanin / krajnja potrošnja)</div>
             <div class="text-muted" id="routingNote">OIB u fiskalizaciji: Ne &nbsp;|&nbsp; Gotovina: Da</div>
@@ -264,7 +247,7 @@
                  placeholder="Unesite naziv ili šifru djelatnosti"
                  value="{% if partner.nkd_code %}{{ partner.nkd_code.code }} — {{ partner.nkd_code.name_hr }}{% endif %}">
           <input type="hidden" name="nkd_code_id" id="nkdHidden" value="{{ partner.nkd_code_id|default:'' }}">
-          <div class="mt-1" style="font-size:.75rem;color:#6c757d">
+          <div class="mt-1 fx-fs-caption fx-text-dim">
             <i class="fas fa-info-circle"></i> Počnite tipkati — prikazuje se lista djelatnosti
           </div>
         </div>
@@ -304,18 +287,18 @@
         </div>
 
         <!-- "Bez adrese" — koristi Konjik d.o.o. -->
-        <div class="mt-3 p-3" style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px">
+        <div class="mt-3 p-3 fx-rounded fx-bg-green-dim" style="border:1px solid #86efac">
           <div class="d-flex align-items-center gap-2 mb-1">
             <i class="fas fa-mobile-alt text-success"></i>
             <span class="fw-semibold small text-success">Ured u džepu</span>
           </div>
-          <div style="font-size:.75rem;color:#166534">
+          <div class="fx-fs-caption fx-text-green">
             Klijent nema fizički ured? Može koristiti adresu računovodstva kao sjedište — legalno po ZTD-u uz pismenu suglasnost vlasnika prostora.
           </div>
           <div class="mt-2">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="useKonjikAddr" onchange="toggleKonjikAddr(this)">
-              <label class="form-check-label small fw-semibold" for="useKonjikAddr" style="color:#166534">
+              <label class="form-check-label small fw-semibold fx-text-green" for="useKonjikAddr">
                 Koristiti adresu računovodstva
               </label>
             </div>

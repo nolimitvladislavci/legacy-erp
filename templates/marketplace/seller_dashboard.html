@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}OPG Panel{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -33,30 +16,30 @@
   </div>
 </div>
 <div class="row g-3 mb-4">
-  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:var(--gold,#c9a84c)">{{ stats.total_products }}</div><small class="text-muted">Ukupno proizvoda</small></div></div>
-  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.active_products }}</div><small class="text-muted">Aktivnih</small></div></div>
-  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#ffc107">{{ stats.pending_orders }}</div><small class="text-muted">Ceka potvrdu</small></div></div>
-  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.this_month_revenue }}&euro;</div><small class="text-muted">Zarada ovaj mj.</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div class="fx-fs-icon fx-text-gold">{{ stats.total_products }}</div><small class="text-muted">Ukupno proizvoda</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div class="fx-fs-icon fx-text-green">{{ stats.active_products }}</div><small class="text-muted">Aktivnih</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div class="fx-fs-icon fx-text-amber">{{ stats.pending_orders }}</div><small class="text-muted">Ceka potvrdu</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div class="fx-fs-icon fx-text-green">{{ stats.this_month_revenue }}&euro;</div><small class="text-muted">Zarada ovaj mj.</small></div></div>
 </div>
 {% if sub_orders %}
 <div class="stat-card p-4 mb-4">
   <h6 class="mb-3"><i class="fas fa-bell text-warning me-2"></i>Narudzbe</h6>
   <div class="table-responsive">
-    <table class="table table-sm table-hover mb-0" style="font-size:.85rem">
+    <table class="table table-sm table-hover mb-0 fx-fs-base">
       <thead><tr><th>Narudzba</th><th>Kupac</th><th>Datum</th><th>Iznos</th><th>Status</th><th>Akcije</th></tr></thead>
       <tbody>
         {% for sub in sub_orders %}
         <tr>
-          <td><a href="{% url 'marketplace:order_detail' sub.marketplace_order.pk %}" style="color:var(--gold,#c9a84c)">{{ sub.marketplace_order.order_number }}</a></td>
+          <td><a href="{% url 'marketplace:order_detail' sub.marketplace_order.pk %}" class="fx-text-gold">{{ sub.marketplace_order.order_number }}</a></td>
           <td>{{ sub.marketplace_order.buyer_company.name }}</td>
           <td>{{ sub.created_at|date:"d.m.Y H:i" }}</td>
           <td class="fw-bold">{{ sub.seller_payout }}&euro;</td>
           <td>
-            {% if sub.status == "pending" %}<span class="badge bg-warning text-dark">Ceka</span>
-            {% elif sub.status == "confirmed" %}<span class="badge bg-primary">Potvrdeno</span>
-            {% elif sub.status == "ready" %}<span class="badge bg-info">Spremno</span>
-            {% elif sub.status == "delivered" %}<span class="badge bg-success">Dostavljeno</span>
-            {% elif sub.status == "rejected" %}<span class="badge bg-danger">Odbijeno</span>
+            {% if sub.status == "pending" %}<span class="fenix-badge fenix-badge-warning">Ceka</span>
+            {% elif sub.status == "confirmed" %}<span class="fenix-badge fenix-badge-info">Potvrdeno</span>
+            {% elif sub.status == "ready" %}<span class="fenix-badge fenix-badge-info">Spremno</span>
+            {% elif sub.status == "delivered" %}<span class="fenix-badge fenix-badge-success">Dostavljeno</span>
+            {% elif sub.status == "rejected" %}<span class="fenix-badge fenix-badge-danger">Odbijeno</span>
             {% endif %}
           </td>
           <td>
@@ -86,12 +69,12 @@
     <div class="col-md-4 col-lg-3">
       <div class="stat-card h-100 p-3">
         <div class="d-flex justify-content-between mb-2">
-          <span style="font-size:1.5rem">&#x1f96c;</span>
-          {% if p.is_available %}<span class="badge bg-success" style="font-size:.6rem">Dostupno</span>
-          {% else %}<span class="badge bg-danger" style="font-size:.6rem">Nedostupno</span>{% endif %}
+          <span class="fx-fs-5xl">&#x1f96c;</span>
+          {% if p.is_available %}<span class="fenix-badge fenix-badge-success fx-fs-2xs">Dostupno</span>
+          {% else %}<span class="fenix-badge fenix-badge-danger fx-fs-2xs">Nedostupno</span>{% endif %}
         </div>
         <h6 class="mb-1">{{ p.name }}</h6>
-        <div class="fw-bold" style="color:var(--gold,#c9a84c)">{{ p.unit_price }}&euro;/{{ p.unit }}</div>
+        <div class="fw-bold fx-text-gold">{{ p.unit_price }}&euro;/{{ p.unit }}</div>
         <small class="text-muted">Skladiste: {{ p.available_qty }} {{ p.unit }}</small>
         {% if p.is_organic %}<br><small class="text-success">Ekoloski</small>{% endif %}
         <div class="mt-2"><a href="{% url 'marketplace:seller_product_edit' p.pk %}" class="btn btn-sm btn-outline-warning w-100"><i class="fas fa-edit me-1"></i>Uredi</a></div>
@@ -101,7 +84,7 @@
   </div>
   {% else %}
   <div class="text-center py-4">
-    <i class="fas fa-seedling" style="font-size:2.5rem;color:#444"></i>
+    <i class="fas fa-seedling fx-text-muted fx-fs-7xl"></i>
     <p class="text-muted mt-2">Nemate proizvoda. Dodajte prvi!</p>
     <a href="{% url 'marketplace:seller_product_new' %}" class="btn btn-success"><i class="fas fa-plus me-1"></i>Dodaj proizvod</a>
   </div>

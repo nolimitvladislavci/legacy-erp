@@ -7,7 +7,7 @@
   <h2><i class="fas fa-ticket-alt me-2 text-warning"></i>Pozivni kodovi</h2>
 </div>
 
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <h5>Novi pozivni kod</h5>
   <form method="post" class="row g-2">
     {% csrf_token %}
@@ -41,9 +41,9 @@
   </form>
 </div>
 
-<div class="stat-card p-0">
+<div class="fenix-table-wrap">
   <table class="table table-hover mb-0">
-    <thead class="table-light">
+    <thead >
       <tr>
         <th>Kod</th><th>Plan</th><th>Veza</th><th>Koristeno</th>
         <th>Besplatno mj.</th><th>Napomena</th><th>Status</th><th></th>
@@ -52,22 +52,22 @@
     <tbody>
       {% for c in codes %}
       <tr>
-        <td><code class="fw-bold" style="font-size:1rem">{{ c.code }}</code>
+        <td><code class="fw-bold fx-fs-lg">{{ c.code }}</code>
           <button class="btn btn-sm btn-outline-secondary ms-1" onclick="navigator.clipboard.writeText('https://limit-connect.com/register/?invite={{ c.code }}');this.innerHTML='<i class=\'fas fa-check\'></i>';setTimeout(()=>this.innerHTML='<i class=\'fas fa-copy\'></i>',1500)" title="Kopiraj link"><i class="fas fa-copy"></i></button>
         </td>
-        <td><span class="badge bg-info">{{ c.plan_slug }}</span></td>
+        <td><span class="fenix-badge fenix-badge-info">{{ c.plan_slug }}</span></td>
         <td>{{ c.get_relation_type_display }}</td>
         <td>{{ c.times_used }} / {{ c.max_uses }}</td>
         <td>{{ c.free_months }}</td>
         <td>{{ c.note }}</td>
         <td>
-          {% if c.is_active and c.is_valid %}<span class="badge bg-success">Aktivan</span>
-          {% elif not c.is_active %}<span class="badge bg-secondary">Deaktiviran</span>
-          {% else %}<span class="badge bg-warning">Iskoristen</span>{% endif %}
+          {% if c.is_active and c.is_valid %}<span class="fenix-badge fenix-badge-success">Aktivan</span>
+          {% elif not c.is_active %}<span class="fenix-badge fenix-badge-muted">Deaktiviran</span>
+          {% else %}<span class="fenix-badge fenix-badge-warning">Iskoristen</span>{% endif %}
         </td>
         <td>
           {% if c.is_active %}
-          <form method="post" style="display:inline">
+          <form method="post" class="d-inline">
             {% csrf_token %}
             <input type="hidden" name="action" value="deactivate">
             <input type="hidden" name="code_id" value="{{ c.id }}">

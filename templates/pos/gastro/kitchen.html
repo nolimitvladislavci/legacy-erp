@@ -19,7 +19,7 @@ body{font-size:16px}
 .kds-card .kc-notes{font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:.5rem}
 .kds-btns{display:flex;gap:.4rem;flex-wrap:wrap}
 .kds-btn{padding:.5rem 1rem;border-radius:6px;border:none;cursor:pointer;font-weight:700;font-size:.85rem;font-family:inherit;transition:all .15s}
-.kds-btn.confirm{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid #60a5fa}
+.kds-btn.confirm{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid #60a5fa}
 .kds-btn.prepare{background:rgba(249,115,22,.15);color:#f97316;border:1px solid #f97316}
 .kds-btn.ready{background:rgba(76,175,125,.15);color:var(--green);border:1px solid var(--green)}
 .kds-btn:hover{opacity:.8}
@@ -55,7 +55,7 @@ function loadOrders(){
       html+='<div class="kds-card '+cls+'">';
       html+='<div class="kc-head"><span class="kc-table">'+o.table+'</span>';
       html+='<span class="kc-time '+timeClass+'">'+o.wait_minutes+' min</span></div>';
-      if(o.guest_name) html+='<div style="font-size:.8rem;color:var(--muted);margin-bottom:.3rem">'+o.guest_name+'</div>';
+      if(o.guest_name) html+='<div class="fx-fs-compact fx-text-muted fx-mb-2">'+o.guest_name+'</div>';
       html+='<div class="kc-items">';
       o.items.forEach(function(i){
         html+='<div class="kc-item"><span class="qty">'+i.quantity+'x</span>'+i.name;

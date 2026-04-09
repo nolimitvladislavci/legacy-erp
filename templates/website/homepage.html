@@ -10,21 +10,21 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
   :root { --gold: #c9a84c; --dark: #0f172a; --accent: #3b82f6; }
-  body { font-family: "Segoe UI", system-ui, sans-serif; color: #0f172a; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; color:var(--text); }
   .navbar-brand { font-size: 1.5rem; font-weight: 800; color: var(--dark) !important; }
   .navbar-brand span { color: var(--gold); }
-  .hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); color: white; padding: 100px 0 80px; position: relative; overflow: hidden; }
+  .hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); color:var(--text); padding: 100px 0 80px; position: relative; overflow: hidden; }
   .hero::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
   .hero-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.2; }
   .hero-gold { color: var(--gold); }
   .service-card { border: none; border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; height: 100%; }
   .service-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
   .service-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
-  .cta-section { background: linear-gradient(135deg, #0f172a, #1e3a5f); color: white; padding: 80px 0; }
+  .cta-section { background: linear-gradient(135deg, #0f172a, #1e3a5f); color:var(--text); padding: 80px 0; }
   .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--gold); }
-  footer { background: #0f172a; color: #94a3b8; padding: 40px 0; }
-  .booking-btn { background: var(--gold); color: #0f172a; font-weight: 700; border: none; padding: 14px 32px; border-radius: 50px; font-size: 1rem; text-decoration: none; display: inline-block; transition: all 0.2s; }
-  .booking-btn:hover { background: #b8922f; color: #0f172a; transform: scale(1.05); }
+  footer { background:var(--surface-deep); color:var(--text-muted); padding: 40px 0; }
+  .booking-btn { background: var(--gold); color:var(--text); font-weight: 700; border: none; padding: 14px 32px; border-radius: 50px; font-size: 1rem; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .booking-btn:hover { background: #b8922f; color:var(--text); transform: scale(1.05); }
 </style>
 </head>
 <body>
@@ -38,7 +38,7 @@
         <li class="nav-item"><a class="nav-link" href="#services">{% trans "Leistungen" %}</a></li>
         <li class="nav-item"><a class="nav-link" href="#about">{% trans "Über uns" %}</a></li>
         <li class="nav-item"><a class="nav-link" href="#contact">{% trans "Kontakt" %}</a></li>
-        <li class="nav-item"><a class="booking-btn" href="/appointments/booking/" style="padding:8px 20px;font-size:0.9rem">{% trans "Online Buchung" %}</a></li>
+        <li class="nav-item"><a class="booking-btn fx-fs-md" href="/appointments/booking/" style="padding:8px 20px">{% trans "Online Buchung" %}</a></li>
         <li class="nav-item"><a class="btn btn-outline-dark btn-sm" href="{% url 'login' %}">{% trans "Login" %}</a></li>
       </ul>
     </div>
@@ -73,7 +73,7 @@
 </section>
 
 <!-- Services -->
-<section id="services" class="py-5" style="background:#f8fafc">
+<section id="services" class="py-5 fx-bg-surface2">
   <div class="container">
     <div class="text-center mb-5">
       <h2 class="display-6 fw-bold">{% trans "Unsere Leistungen" %}</h2>
@@ -82,7 +82,7 @@
     <div class="row g-4">
       <div class="col-md-6 col-lg-4">
         <div class="card service-card shadow-sm p-4">
-          <div class="service-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-hard-hat"></i></div>
+          <div class="service-icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-hard-hat"></i></div>
           <h5 class="fw-bold">{% trans "Bauleistungen" %}</h5>
           <p class="text-muted">{% trans "Professionelle Bauleistungen, Renovierungen und Innenausbau in Deutschland und Kroatien." %}</p>
           <a href="/appointments/booking/" class="btn btn-outline-primary btn-sm mt-auto">{% trans "Anfragen" %}</a>
@@ -90,7 +90,7 @@
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card service-card shadow-sm p-4">
-          <div class="service-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-home"></i></div>
+          <div class="service-icon fx-text-green fx-bg-green-dim"><i class="fas fa-home"></i></div>
           <h5 class="fw-bold">{% trans "Wohnvermietung" %}</h5>
           <p class="text-muted">{% trans "Möblierte Zimmer, Apartments und Ferienwohnungen – komfortabel und zu fairen Preisen." %}</p>
           <a href="/appointments/booking/" class="btn btn-outline-success btn-sm mt-auto">{% trans "Anfragen" %}</a>
@@ -106,15 +106,15 @@
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card service-card shadow-sm p-4">
-          <div class="service-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-shopping-cart"></i></div>
+          <div class="service-icon fx-text-purple" style="background:#ede9fe"><i class="fas fa-shopping-cart"></i></div>
           <h5 class="fw-bold">{% trans "Webshop" %}</h5>
           <p class="text-muted">{% trans "Online-Shop mit Baumaterialien, Sportartikeln und Haushaltswaren zu Großhandelspreisen." %}</p>
-          <a href="/webshop/" class="btn btn-outline-purple btn-sm mt-auto" style="color:#7c3aed;border-color:#7c3aed">{% trans "Shop besuchen" %}</a>
+          <a href="/webshop/" class="btn btn-outline-purple btn-sm mt-auto fx-text-purple" style="border-color:#7c3aed">{% trans "Shop besuchen" %}</a>
         </div>
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card service-card shadow-sm p-4">
-          <div class="service-icon" style="background:#fee2e2;color:#dc2626"><i class="fas fa-shield-alt"></i></div>
+          <div class="service-icon fx-text-red fx-bg-red-dim"><i class="fas fa-shield-alt"></i></div>
           <h5 class="fw-bold">{% trans "Versicherungen" %}</h5>
           <p class="text-muted">{% trans "Beratung und Vermittlung von Kranken-, Lebens- und Sachversicherungen." %}</p>
           <a href="/appointments/booking/" class="btn btn-outline-danger btn-sm mt-auto">{% trans "Beratung anfragen" %}</a>
@@ -122,10 +122,10 @@
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card service-card shadow-sm p-4" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white">
-          <div class="service-icon" style="background:rgba(201,168,76,0.2);color:var(--gold,#c9a84c)"><i class="fas fa-calendar-check"></i></div>
+          <div class="service-icon fx-text-gold" style="background:rgba(201,168,76,0.2)"><i class="fas fa-calendar-check"></i></div>
           <h5 class="fw-bold" style="color:white">{% trans "Online Buchung" %}</h5>
           <p style="color:rgba(255,255,255,0.7)">{% trans "Buchen Sie Termine, Dienstleistungen und Ressourcen schnell und einfach online." %}</p>
-          <a href="/appointments/booking/" class="booking-btn" style="padding:8px 20px;font-size:0.85rem">{% trans "Jetzt buchen" %}</a>
+          <a href="/appointments/booking/" class="booking-btn fx-fs-base" style="padding:8px 20px">{% trans "Jetzt buchen" %}</a>
         </div>
       </div>
     </div>
@@ -149,7 +149,7 @@
   <div class="container">
     <div class="row g-4">
       <div class="col-md-4">
-        <div class="fw-bold text-white mb-2" style="font-size:1.2rem">{% trans "VISKOVIC" %}<span style="color:var(--gold,#c9a84c)">{% trans "GROUP" %}</span></div>
+        <div class="fw-bold text-white mb-2 fx-fs-2xl">{% trans "VISKOVIC" %}<span class="fx-text-gold">{% trans "GROUP" %}</span></div>
         <p class="small">{% trans "Ihr zuverlässiger Partner für Bau, Wohnen & Business in Deutschland und Kroatien." %}</p>
       </div>
       <div class="col-md-4">

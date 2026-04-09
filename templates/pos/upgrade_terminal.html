@@ -2,45 +2,45 @@
 {% load i18n %}
 {% block title %}Nadogradite plan{% endblock %}
 {% block content %}
-<div style="max-width:500px;margin:2rem auto;padding:0 16px;text-align:center">
+<div class="text-center" style="max-width:500px;margin:2rem auto;padding:0 16px">
 
-  <div style="font-size:3rem;margin-bottom:12px">🔒</div>
-  <h2 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;margin-bottom:8px">
+  <div class="fx-fs-hero mb-3">🔒</div>
+  <h2 class="fx-text-gold mb-2" style="font-family:'Cormorant Garamond',serif">
     Dosegnuli ste limit
   </h2>
-  <p style="color:#888;font-size:.9rem;margin-bottom:24px">
+  <p class="fx-text-muted fx-fs-md mb-4">
     Vaš plan podržava {{ max_terminals }} blagajn{{ max_terminals|pluralize:"u,e" }}.
     Već imate aktivnu smjenu na <strong style="color:#e2e8e0">{{ current_terminal.name }}</strong>.
   </p>
 
-  <div style="background:#111;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:20px;text-align:left">
-    <div style="font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Aktivna blagajna</div>
-    <div style="font-weight:700;color:#e2e8e0;font-size:1rem">{{ current_terminal.name }}</div>
-    <div style="font-size:.82rem;color:#888;margin-top:4px">
+  <div class="fx-bg-card fx-rounded mb-4 text-start fx-p-20" style="border:1px solid #222">
+    <div class="fx-fs-caption fx-text-dim mb-2 fx-uppercase fx-ls-2">Aktivna blagajna</div>
+    <div class="fx-fw-bold fx-fs-lg" style="color:#e2e8e0">{{ current_terminal.name }}</div>
+    <div class="fx-fs-note fx-text-muted mt-1">
       Smjena #{{ current_session.session_number }} · {{ current_session.opened_at|date:"d.m. H:i" }}
       · {{ current_session.total_sales|floatformat:2 }} €
     </div>
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:10px">
+  <div class="d-flex fx-gap-3 fx-flex-col">
     <a href="{% url 'pos:quick_pos' current_terminal.pk %}"
-       style="background:var(--gold,#c9a84c);color:#000;padding:14px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none">
+       class="fx-text-dark fx-rounded fx-fw-bold fx-fs-lg fx-no-underline fx-bg-gold" style="padding:14px">
       ⚡ Nastavi na {{ current_terminal.name }}
     </a>
 
     <a href="/register/upgrade/?module=pos"
-       style="background:#111;border:1px solid var(--gold,#c9a84c);color:var(--gold,#c9a84c);padding:12px;border-radius:10px;font-weight:600;font-size:.9rem;text-decoration:none">
+       class="fx-bg-card fx-rounded fx-fw-semibold fx-fs-md fx-no-underline fx-text-gold fx-p-12" style="border:1px solid var(--gold,#c9a84c)">
       ⬆ Nadogradi plan — više blagajni
     </a>
 
     <a href="{% url 'pos:dashboard' %}"
-       style="color:#666;font-size:.82rem;text-decoration:none;padding:8px">
+       class="fx-text-dim fx-fs-note fx-no-underline fx-p-8">
       ← Natrag na POS
     </a>
   </div>
 
-  <div style="margin-top:24px;padding:16px;background:#0a1a0a;border:1px solid #22c55e33;border-radius:10px;text-align:left;font-size:.82rem;color:#888">
-    <strong style="color:#22c55e">💡 Savjet:</strong>
+  <div class="fx-rounded fx-fs-note fx-text-muted mt-4 text-start fx-p-16" style="background:var(--surface-deep);border:1px solid #22c55e33">
+    <strong class="fx-text-green">💡 Savjet:</strong>
     Zatvorite smjenu na {{ current_terminal.name }} (Z gumb) pa otvorite novu ovdje.
     Ili nadogradite plan za istovremeni rad na više blagajni.
   </div>

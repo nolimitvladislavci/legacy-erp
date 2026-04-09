@@ -50,10 +50,10 @@
               <td class="text-warning fw-bold">{{ c.gross_amount }} €</td>
               <td class="text-success">{{ c.net_estimate }} €</td>
               <td>
-                {% if c.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+                {% if c.status == 'active' %}<span class="fenix-badge fenix-badge-success">Aktivan</span>
                 {% elif c.status == 'pending' %}<span class="badge bg-info text-dark">Na čekanju</span>
-                {% elif c.status == 'completed' %}<span class="badge bg-secondary">Završen</span>
-                {% else %}<span class="badge bg-danger">Otkazan</span>{% endif %}
+                {% elif c.status == 'completed' %}<span class="fenix-badge fenix-badge-muted">Završen</span>
+                {% else %}<span class="fenix-badge fenix-badge-danger">Otkazan</span>{% endif %}
               </td>
             </tr>
             {% endfor %}

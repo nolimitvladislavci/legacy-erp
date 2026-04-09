@@ -10,67 +10,67 @@ Varijable:
 
 {% if format == 'thermal' %}
 {# ── THERMAL (80mm) — QR + tekst ── #}
-<div style="text-align:center;margin-top:6px;padding-top:4px;border-top:1px dashed #ccc">
+<div class="text-center mt-1" style="padding-top:4px;border-top:1px dashed #ccc">
   <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://limit-connect.com/register/%3Fsource%3Dbon&color=000000&bgcolor=ffffff"
-       style="width:20mm;height:20mm;margin:4px auto;display:block" alt="QR">
+       class="d-block" style="width:20mm;height:20mm;margin:4px auto" alt="QR">
   {% if receipt.chain_link_safe %}
-  <div style="font-size:5.5pt;color:#666;font-family:monospace">
+  <div class="fx-text-dim fx-font-mono" style="font-size:5.5pt">
     SHA-256: {{ receipt.chain_link_safe.chain_hash|truncatechars:16 }}
   </div>
   {% endif %}
-  <div style="font-size:6pt;color:#888;margin-top:2px">
+  <div class="fx-text-muted fx-mt-1" style="font-size:6pt">
     Fiskalizacija u džepu · limit-connect.com
   </div>
 </div>
 
 {% elif format == 'public' %}
 {# ── PUBLIC (web receipt) — vizualan, klikabilan ── #}
-<div style="margin-top:16px;padding:12px;background:#0a0a0a;border:1px solid #222;border-radius:8px;text-align:center">
+<div class="fx-bg-body fx-rounded text-center mt-3 fx-p-12" style="border:1px solid #222">
   {% if receipt.chain_link_safe %}
-  <div style="display:inline-flex;align-items:center;gap:6px;background:#0d1a0d;border:1px solid #2ecc71;border-radius:6px;padding:4px 10px;margin-bottom:8px">
-    <span style="color:#2ecc71;font-size:14px">&#x1F6E1;</span>
-    <span style="font-size:11px;color:#2ecc71;font-family:monospace">SHA-256 zaštićen</span>
-    <span style="font-size:9px;color:#555;font-family:monospace">{{ receipt.chain_link_safe.chain_hash|truncatechars:16 }}</span>
+  <div class="fx-gap-2 fx-rounded-sm d-inline-flex align-items-center mb-2" style="background:#0d1a0d;border:1px solid #2ecc71;padding:4px 10px">
+    <span class="fx-text-green" style="font-size:14px">&#x1F6E1;</span>
+    <span class="fx-text-green fx-font-mono" style="font-size:11px">SHA-256 zaštićen</span>
+    <span class="fx-text-dim fx-font-mono" style="font-size:9px">{{ receipt.chain_link_safe.chain_hash|truncatechars:16 }}</span>
   </div>
   {% endif %}
-  <div style="font-size:11px;color:#888;margin-top:6px">
+  <div class="fx-text-muted mt-1" style="font-size:11px">
     {% if company.country == 'DE' or company.country == 'AT' %}
-    Erstellt mit <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:bold">LIMIT Connect</a>
+    Erstellt mit <a href="https://limit-connect.com" class="fx-no-underline fx-fw-bold fx-text-gold">LIMIT Connect</a>
     &mdash; SHA-256 Hash Chain &bull; EU ViDA 2028 konform
     {% else %}
-    Izrađeno u <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:bold">LIMIT Connect</a>
+    Izrađeno u <a href="https://limit-connect.com" class="fx-no-underline fx-fw-bold fx-text-gold">LIMIT Connect</a>
     &mdash; SHA-256 Hash Chain &bull; EU ViDA 2028
     {% endif %}
   </div>
-  <div style="font-size:9px;color:#555;margin-top:4px">
+  <div class="fx-text-dim mt-1" style="font-size:9px">
     Fiskalizacija u džepu — besplatna POS blagajna
   </div>
-  <div style="margin-top:10px">
+  <div class="fx-mt-10">
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://limit-connect.com/register/%3Fsource%3Dreceipt&color=c9a84c&bgcolor=0a0a0a"
-         alt="QR" style="width:80px;height:80px;border-radius:6px;border:1px solid #222">
-    <div style="font-size:8px;color:#555;margin-top:3px">Skeniraj za besplatnu registraciju</div>
+         alt="QR" class="fx-rounded-sm" style="width:80px;height:80px;border:1px solid #222">
+    <div class="fx-text-dim" style="font-size:8px;margin-top:3px">Skeniraj za besplatnu registraciju</div>
   </div>
 </div>
 
 {% else %}
 {# ── A4 / e-RAČUN — profesionalno + QR ── #}
-<div style="margin-top:12px;padding:8px 12px;border-top:1px solid #ddd;font-size:7.5pt;color:#666;display:flex;justify-content:space-between;align-items:center">
-  <div style="flex:1">
+<div class="fx-text-dim d-flex mt-3 justify-content-between align-items-center fx-p-8-12" style="border-top:1px solid #ddd;font-size:7.5pt">
+  <div class="fx-flex-1">
     {% if company.country == 'DE' or company.country == 'AT' %}
-    Erstellt mit <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
+    Erstellt mit <strong class="fx-text-dark">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
     <span style="font-size:6.5pt">SHA-256 Hash Chain &bull; EU ViDA 2028 &bull; GoBD-konform</span>
     {% else %}
-    Izrađeno u <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
+    Izrađeno u <strong class="fx-text-dark">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
     <span style="font-size:6.5pt">SHA-256 Hash Chain &bull; EU ViDA 2028 &bull; čl. 9. ZOR-a</span>
     {% endif %}
     {% if receipt.chain_link_safe %}
-    <br><span style="font-family:monospace;font-size:6pt;color:#999">{{ receipt.chain_link_safe.chain_hash|truncatechars:24 }}</span>
+    <br><span class="fx-text-muted fx-font-mono" style="font-size:6pt">{{ receipt.chain_link_safe.chain_hash|truncatechars:24 }}</span>
     {% endif %}
   </div>
-  <div style="text-align:center;margin-left:8px">
+  <div class="text-center" style="margin-left:8px">
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://limit-connect.com/register/%3Fsource%3Dpdf&color=333333&bgcolor=ffffff"
          style="width:15mm;height:15mm" alt="QR">
-    <div style="font-size:5pt;color:#999">limit-connect.com</div>
+    <div class="fx-text-muted" style="font-size:5pt">limit-connect.com</div>
   </div>
 </div>
 {% endif %}

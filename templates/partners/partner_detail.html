@@ -31,60 +31,10 @@ function copyPortalLink(){
 </script>
 {% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h2 class="mb-0">{{ partner.name }}</h2>
-    <small class="text-muted">{{ partner.get_partner_type_display }} &middot; {{ partner.city }}</small>
-  </div>
-  <div class="d-flex gap-2">
-    <button onclick="copyPortalLink()" class="btn btn-outline-info" title="{% trans 'Kopiraj portal link' %}"><i class="fas fa-link me-1"></i>{% trans "Portal" %}</button>
-    {% if partner.email %}
-    <a href="{% url 'partners:send_portal_link' partner.pk %}" class="btn btn-outline-success" title="Pošalji portal link emailom"><i class="fas fa-envelope me-1"></i>{% trans "Pošalji portal" %}</a>
-    {% endif %}
-    {% if partner.phone or partner.contact_phone %}
-    <a href="{% url 'partners:send_portal_whatsapp' partner.pk %}" class="btn btn-outline-success" style="background:#25d366;border-color:#25d366;color:#fff" title="Pošalji portal link via WhatsApp" onclick="return confirm('Poslati portal link via WhatsApp na {{ partner.phone }}?')"><i class="fab fa-whatsapp me-1"></i>{% trans "WhatsApp" %}</a>
-    {% endif %}
-    <a href="/portal/{{ partner.portal_token }}/" target="_blank" class="btn btn-outline-secondary btn-sm" title="Otvori portal kao klijent"><i class="fas fa-external-link-alt me-1"></i>{% trans "Preview" %}</a>
-    <a href="{% url 'partners:edit' partner.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>{% trans "Uredi" %}</a>
-    <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
-  </div>
-</div>
+<!-- lang: topbar -->
 
 <div class="row g-3 mb-3">
   <div class="col-md-8">
@@ -104,16 +54,16 @@ function copyPortalLink(){
         <!-- URED U DŽEPU — invoice routing -->
         <div class="col-12 mt-2">
           {% with r=partner.get_invoice_routing %}
-          <div class="d-flex align-items-center gap-2 p-2" style="border-radius:8px;background:{% if r.route == 'eracun_f20' %}#f0fdf4{% elif r.route == 'eracun_b2g' %}#fefce8{% elif r.route == 'obicni_pdf' %}#fff7ed{% else %}#eef2ff{% endif %};border:1px solid {% if r.route == 'eracun_f20' %}#86efac{% elif r.route == 'eracun_b2g' %}#fde68a{% elif r.route == 'obicni_pdf' %}#fed7aa{% else %}#c7d2fe{% endif %}">
-            <span style="font-size:1.1rem">
+          <div class="d-flex align-items-center gap-2 p-2 fx-rounded" style="background:{% if r.route == 'eracun_f20' %}#f0fdf4{% elif r.route == 'eracun_b2g' %}#fefce8{% elif r.route == 'obicni_pdf' %}#fff7ed{% else %}#eef2ff{% endif %};border:1px solid {% if r.route == 'eracun_f20' %}#86efac{% elif r.route == 'eracun_b2g' %}#fde68a{% elif r.route == 'obicni_pdf' %}#fed7aa{% else %}#c7d2fe{% endif %}">
+            <span class="fx-fs-xl">
               {% if r.route == 'eracun_f20' %}📄
               {% elif r.route == 'eracun_b2g' %}🏛️
               {% elif r.route == 'fiskalni_f10' %}🧾
               {% else %}📋{% endif %}
             </span>
             <div>
-              <div class="fw-semibold" style="font-size:.8rem">{{ r.label }}</div>
-              <div class="text-muted" style="font-size:.72rem">
+              <div class="fw-semibold fx-fs-compact">{{ r.label }}</div>
+              <div class="text-muted fx-fs-sm">
                 OIB u fiskalizaciji: {% if r.needs_oib %}Da{% else %}Ne{% endif %}
                 &nbsp;·&nbsp;
                 Gotovina: {% if r.can_be_cash %}Da{% else %}Ne{% endif %}
@@ -139,18 +89,18 @@ function copyPortalLink(){
 </div>
 
 {% if transactions %}
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <h6 class="fw-bold mb-3"><i class="fas fa-exchange-alt me-2 text-info"></i>{% trans "Zadnje transakcije" %}</h6>
   <div class="table-responsive">
     <table class="table table-sm table-hover mb-0">
-      <thead class="table-light"><tr><th>{% trans "Datum" %}</th><th>{% trans "Opis" %}</th><th>{% trans "Smjer" %}</th><th class="text-end">{% trans "Iznos" %}</th></tr></thead>
+      <thead ><tr><th>{% trans "Datum" %}</th><th>{% trans "Opis" %}</th><th>{% trans "Smjer" %}</th><th class="text-end">{% trans "Iznos" %}</th></tr></thead>
       <tbody>
         {% for t in transactions %}
         <tr>
           <td>{{ t.date|date:"d.m.Y" }}</td>
           <td>{{ t.description }}</td>
-          <td>{% if t.direction == 'income' %}<span class="badge bg-success">{% trans "Uplata" %}</span>
-          {% else %}<span class="badge bg-danger">{% trans "Isplata" %}</span>{% endif %}</td>
+          <td>{% if t.direction == 'income' %}<span class="fenix-badge fenix-badge-success">{% trans "Uplata" %}</span>
+          {% else %}<span class="fenix-badge fenix-badge-danger">{% trans "Isplata" %}</span>{% endif %}</td>
           <td class="text-end {% if t.direction == 'income' %}text-success{% else %}text-danger{% endif %}">
             {{ t.amount|floatformat:2 }} €
           </td>
@@ -163,17 +113,17 @@ function copyPortalLink(){
 {% endif %}
 
 {% if appointments %}
-<div class="stat-card">
+<div class="fenix-stat">
   <h6 class="fw-bold mb-3"><i class="fas fa-calendar me-2 text-warning"></i>{% trans "Termini" %}</h6>
   <div class="table-responsive">
     <table class="table table-sm mb-0">
-      <thead class="table-light"><tr><th>{% trans "Naziv" %}</th><th>{% trans "Početak" %}</th><th>{% trans "Status" %}</th></tr></thead>
+      <thead ><tr><th>{% trans "Naziv" %}</th><th>{% trans "Početak" %}</th><th>{% trans "Status" %}</th></tr></thead>
       <tbody>
         {% for a in appointments %}
         <tr>
           <td>{{ a.title }}</td>
           <td>{{ a.start_time|date:"d.m.Y H:i" }}</td>
-          <td><span class="badge bg-secondary">{{ a.status }}</span></td>
+          <td><span class="fenix-badge fenix-badge-muted">{{ a.status }}</span></td>
         </tr>
         {% endfor %}
       </tbody>

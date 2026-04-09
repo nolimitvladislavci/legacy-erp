@@ -3,28 +3,28 @@
 {% block title %}{% trans "Upload dokumenata" %} - {{ partner.name }}{% endblock %}
 {% block content %}
 <h5 class="mb-3"><i class="fas fa-cloud-upload-alt"></i> {% trans "Upload dokumenata" %}</h5>
-<p class="text-muted" style="font-size:.85rem">{% trans "Povucite datoteke ili kliknite za odabir. PDF, slike, Excel, Word — max 20 MB." %}</p>
+<p class="text-muted fx-fs-base">{% trans "Povucite datoteke ili kliknite za odabir. PDF, slike, Excel, Word — max 20 MB." %}</p>
 
-<div id="drop-zone" style="border:3px dashed var(--gold,#d4a843);border-radius:16px;padding:60px 20px;text-align:center;cursor:pointer;background:rgba(212,168,67,.05);transition:all .2s">
-  <i class="fas fa-file-upload" style="font-size:3rem;color:var(--gold,#d4a843);margin-bottom:1rem;display:block"></i>
-  <p style="font-size:1.1rem;font-weight:600;margin:0">{% trans "Povucite datoteke ovdje" %}</p>
-  <p class="text-muted" style="font-size:.8rem;margin:.5rem 0 0">{% trans "ili kliknite za odabir" %}</p>
-  <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.csv,.doc,.docx,.xml" style="display:none">
+<div id="drop-zone" class="fx-rounded-lg text-center fx-pointer" style="border:3px dashed var(--gold,#d4a843);padding:60px 20px;background:rgba(212,168,67,.05);transition:all .2s">
+  <i class="fas fa-file-upload fx-fs-hero mb-3 d-block" style="color:var(--gold,#d4a843)"></i>
+  <p class="fx-fs-xl fx-fw-semibold fx-m-0">{% trans "Povucite datoteke ovdje" %}</p>
+  <p class="text-muted fx-fs-compact" style="margin:.5rem 0 0">{% trans "ili kliknite za odabir" %}</p>
+  <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.csv,.doc,.docx,.xml" class="fx-hidden">
 </div>
 
 <div id="file-list" class="mt-3"></div>
-<div id="upload-progress" class="mt-2" style="display:none">
-  <div class="progress" style="height:8px;border-radius:4px">
+<div id="upload-progress" class="mt-2 fx-hidden">
+  <div class="progress fx-rounded-sm" style="height:8px">
     <div id="progress-bar" class="progress-bar" style="background:var(--gold,#d4a843);width:0%"></div>
   </div>
   <small id="progress-text" class="text-muted"></small>
 </div>
 
-<button id="btn-upload" class="btn mt-3" style="background:var(--gold,#d4a843);color:#000;font-weight:bold;display:none">
+<button id="btn-upload" class="btn mt-3 fx-text-dark fx-fw-bold fx-hidden" style="background:var(--gold,#d4a843)">
   <i class="fas fa-upload me-1"></i> <span id="btn-text">{% trans "Upload" %}</span>
 </button>
 
-<div id="success-msg" class="alert alert-success mt-3" style="display:none">
+<div id="success-msg" class="alert alert-success mt-3 fx-hidden">
   <i class="fas fa-check-circle me-1"></i> <span id="success-text"></span>
 </div>
 
@@ -58,11 +58,11 @@ function addFiles(newFiles){
 
 function renderList(){
   fileList.innerHTML=files.map((f,i)=>
-    `<div class="d-flex align-items-center mb-1" style="font-size:.82rem">
-      <i class="fas fa-file me-2" style="color:var(--gold)"></i>
+    `<div class="d-flex align-items-center mb-1 fx-fs-note">
+      <i class="fas fa-file me-2 fx-text-gold"></i>
       <span class="flex-grow-1">${f.name}</span>
       <span class="text-muted me-2">${(f.size/1024).toFixed(0)} KB</span>
-      <button class="btn btn-sm btn-outline-danger" style="font-size:.65rem;padding:1px 6px" onclick="removeFile(${i})"><i class="fas fa-times"></i></button>
+      <button class="btn btn-sm btn-outline-danger fx-fs-xs" style="padding:1px 6px" onclick="removeFile(${i})"><i class="fas fa-times"></i></button>
     </div>`
   ).join('');
   btnUpload.style.display=files.length?'inline-block':'none';

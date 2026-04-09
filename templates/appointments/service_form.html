@@ -3,24 +3,7 @@
 {% block title %}{{ action }}{% endblock %}
 {% block page_title %}{{ action }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -28,7 +11,7 @@
 </div>
 <div class="row g-3">
   <div class="col-lg-8">
-    <div class="stat-card">
+    <div class="fenix-stat">
       <form method="post" id="svcForm">
         {% csrf_token %}
         <div class="row g-3">
@@ -76,7 +59,7 @@
           <div class="col-md-4">
             <label class="form-label fw-bold">FA ikona</label>
             <div class="input-group">
-              <span class="input-group-text" style="background:#111;border-color:#333"><i id="iconPreviewSmall" class="fas fa-calendar-check" style="color:var(--gold)"></i></span>
+              <span class="input-group-text fx-bg-card fx-bc2"><i id="iconPreviewSmall" class="fas fa-calendar-check fx-text-gold"></i></span>
               <input type="text" name="icon" id="iconField" class="form-control" value="{{ form.icon.value|default:'fa-calendar-check' }}" placeholder="fa-calendar-check" oninput="updatePreview()">
             </div>
             <small class="text-muted">npr. fa-eye, fa-cut, fa-stethoscope</small>
@@ -85,7 +68,7 @@
             <label class="form-label fw-bold">Boja</label>
             <div class="d-flex gap-2 align-items-center">
               <input type="color" name="color" id="colorPicker" class="form-control form-control-color" value="{{ form.color.value|default:'#10b981' }}" oninput="updatePreview()">
-              <input type="text" id="colorText" class="form-control" value="{{ form.color.value|default:'#10b981' }}" placeholder="#10b981" style="font-family:monospace" oninput="syncColor(this.value)">
+              <input type="text" id="colorText" class="form-control fx-font-mono" value="{{ form.color.value|default:'#10b981' }}" placeholder="#10b981" oninput="syncColor(this.value)">
             </div>
           </div>
           <div class="col-md-4">
@@ -121,17 +104,17 @@
     </div>
   </div>
   <div class="col-lg-4">
-    <div class="stat-card" style="position:sticky;top:80px">
-      <h6 style="color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Pregled kartice</h6>
-      <div id="previewCard" style="background:var(--dark);border:1px solid var(--border);padding:20px;transition:border-color .2s">
-        <div id="prevIcon" style="width:48px;height:48px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.3rem;color:var(--gold)">
+    <div class="fenix-stat" style="position:sticky;top:80px">
+      <h6 class="fx-fs-compact fx-text-gold mb-3 fx-uppercase fx-ls-1">Pregled kartice</h6>
+      <div id="previewCard" class="fx-bg-dark fx-b fx-p-20" style="transition:border-color .2s">
+        <div id="prevIcon" class="d-flex fx-fs-3xl align-items-center justify-content-center fx-text-gold fx-mb-3" style="width:48px;height:48px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25)">
           <i id="prevIconEl" class="fas fa-calendar-check"></i>
         </div>
-        <h5 id="prevName" style="font-size:1rem;font-weight:600;margin:0 0 8px;color:var(--text)">Naziv usluge</h5>
-        <p id="prevDesc" style="color:var(--muted);font-size:.82rem;margin:0 0 14px"></p>
+        <h5 id="prevName" class="fx-fs-lg fx-fw-semibold fx-text-body" style="margin:0 0 8px">Naziv usluge</h5>
+        <p id="prevDesc" class="fx-fs-note fx-text-muted" style="margin:0 0 14px"></p>
         <div class="d-flex gap-2 flex-wrap" id="prevBadges">
-          <span id="prevPrice" class="badge" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold)"></span>
-          <span id="prevDur" class="badge" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold)"></span>
+          <span id="prevPrice" class="badge fx-text-gold" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3)"></span>
+          <span id="prevDur" class="badge fx-text-gold" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3)"></span>
         </div>
       </div>
     </div>

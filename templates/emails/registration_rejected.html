@@ -2,13 +2,13 @@
 {% load i18n %}
 {% block title %}Registration Update{% endblock %}
 {% block content %}
-<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">Registration Update</h2>
-<p style="color:#333;line-height:1.6;">Dear {{ contact_name }},</p>
-<p style="color:#333;line-height:1.6;">Your registration for <strong>{{ company_name }}</strong> could not be approved at this time.</p>
+<h2 class="fx-text-dark" style="margin:0 0 16px;font-family:'Cormorant Garamond',Georgia,serif">Registration Update</h2>
+<p class="fx-text-dark fx-lh-normal">Dear {{ contact_name }},</p>
+<p class="fx-text-dark fx-lh-normal">Your registration for <strong>{{ company_name }}</strong> could not be approved at this time.</p>
 {% if reason %}
-<div style="margin:20px 0;padding:16px;background:#fdf2f2;border-left:3px solid #c0392b;border-radius:4px;">
-  <p style="margin:0;color:#333;"><strong>Reason:</strong> {{ reason }}</p>
+<div class="fx-rounded-sm fx-p-16" style="margin:20px 0;background:var(--red-dim);border-left:3px solid #c0392b">
+  <p class="fx-text-dark fx-m-0"><strong>Reason:</strong> {{ reason }}</p>
 </div>
 {% endif %}
-<p style="color:#333;line-height:1.6;">If you have questions, please contact us at <a href="mailto:info@limit-connect.com" style="color:#c9a84c;">info@limit-connect.com</a>.</p>
+<p class="fx-text-dark fx-lh-normal">If you have questions, please contact us at <a href="mailto:info@limit-connect.com" class="fx-text-gold">info@limit-connect.com</a>.</p>
 {% endblock %}

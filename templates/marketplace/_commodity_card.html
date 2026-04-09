@@ -1,22 +1,22 @@
 {% load i18n l10n %}
 {# Commodity card: cijena/kg, kolicina, rok, lokacija, OPG badge #}
-<div class="stat-card h-100" style="overflow:hidden;position:relative">
+<div class="stat-card h-100 fx-overflow-hidden fx-relative">
   <!-- Image -->
-  <div style="height:160px;background:#1a1d21;display:flex;align-items:center;justify-content:center;position:relative">
+  <div class="d-flex align-items-center justify-content-center fx-relative" style="height:160px;background:#1a1d21">
     {% if product.image_main %}
-    <img src="{{ product.image_main.url }}" style="width:100%;height:100%;object-fit:cover" alt="{{ product.name }}">
+    <img src="{{ product.image_main.url }}" class="fx-w-full" style="height:100%;object-fit:cover" alt="{{ product.name }}">
     {% else %}
-    <span style="font-size:3rem">{{ product.category.icon|default:"&#x1f96c;" }}</span>
+    <span class="fx-fs-hero">{{ product.category.icon|default:"&#x1f96c;" }}</span>
     {% endif %}
     <!-- Badges top-right -->
-    <div style="position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-      {% if product.is_organic %}<span style="background:#22c55e;color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:4px">EKO</span>{% endif %}
-      {% if product.requires_cold_chain %}<span style="background:#3b82f6;color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:4px"><i class="fas fa-snowflake"></i></span>{% endif %}
-      {% if product.opg_number %}<span style="background:rgba(201,168,76,.9);color:#0a0a0a;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:4px">OPG</span>{% endif %}
+    <div class="d-flex fx-gap-1 fx-flex-col align-items-end" style="position:absolute;top:8px;right:8px">
+      {% if product.is_organic %}<span class="fx-bg-green fx-text-white fx-fs-2xs fx-fw-bold fx-rounded-sm fx-p-btn">EKO</span>{% endif %}
+      {% if product.requires_cold_chain %}<span class="fx-bg-blue fx-text-white fx-fs-2xs fx-fw-bold fx-rounded-sm fx-p-btn"><i class="fas fa-snowflake"></i></span>{% endif %}
+      {% if product.opg_number %}<span class="fx-text-dark fx-fw-bold fx-rounded-sm fx-p-btn" style="background:rgba(201,168,76,.9);font-size:.58rem">OPG</span>{% endif %}
     </div>
     <!-- Expiry badge -->
     {% if product.expires_at %}
-    <div style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.7);color:#f59e0b;font-size:.6rem;font-weight:600;padding:2px 8px;border-radius:4px">
+    <div class="fx-text-amber fx-fs-2xs fx-fw-semibold fx-rounded-sm fx-p-btn" style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.7)">
       <i class="fas fa-clock me-1"></i>Istice: {{ product.expires_at|date:"d.m. H:i" }}
     </div>
     {% endif %}
@@ -24,7 +24,7 @@
 
   <div class="p-3">
     <h6 class="mb-1">
-      <a href="{% url 'marketplace:product_detail' product.slug %}" class="text-decoration-none" style="color:var(--gold,#c9a84c);font-weight:700">{{ product.name|truncatechars:40 }}</a>
+      <a href="{% url 'marketplace:product_detail' product.slug %}" class="text-decoration-none fx-fw-bold fx-text-gold">{{ product.name|truncatechars:40 }}</a>
     </h6>
     <small class="text-muted"><i class="fas fa-tractor me-1"></i>{{ product.seller_company.name }}</small>
     {% if product.origin_region %}<br><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ product.origin_region }}</small>{% endif %}
@@ -37,30 +37,30 @@
     <!-- Price + Qty -->
     <div class="mt-2 d-flex justify-content-between align-items-center">
       <div>
-        <span style="font-weight:800;font-size:1.15rem;color:var(--gold,#c9a84c)">{{ product.unit_price }}&euro;</span>
-        <small style="color:var(--text-dim)">/{{ product.unit }}</small>
+        <span class="fx-fw-800 fx-text-gold" style="font-size:1.15rem">{{ product.unit_price }}&euro;</span>
+        <small class="fx-text-dim">/{{ product.unit }}</small>
       </div>
-      <small style="color:var(--text-dim)">min: {{ product.min_order_qty }} {{ product.unit }}</small>
+      <small class="fx-text-dim">min: {{ product.min_order_qty }} {{ product.unit }}</small>
     </div>
 
     {% if product.available_qty > 0 %}
-    <div class="mt-1"><small style="color:#22c55e"><i class="fas fa-box me-1"></i>{{ product.available_qty }} {{ product.unit }} dostupno</small></div>
+    <div class="mt-1"><small class="fx-text-green"><i class="fas fa-box me-1"></i>{{ product.available_qty }} {{ product.unit }} dostupno</small></div>
     {% else %}
-    <div class="mt-1"><small style="color:#ef4444">Nema na skladistu</small></div>
+    <div class="mt-1"><small class="fx-text-red">Nema na skladistu</small></div>
     {% endif %}
 
     {% if product.shelf_life_days %}
-    <div class="mt-1"><small style="color:var(--text-dim);font-size:.72rem"><i class="fas fa-calendar-alt me-1"></i>Rok: {{ product.shelf_life_days }} dana</small></div>
+    <div class="mt-1"><small class="fx-fs-sm fx-text-dim"><i class="fas fa-calendar-alt me-1"></i>Rok: {{ product.shelf_life_days }} dana</small></div>
     {% endif %}
 
     {% if product.delivery_zone_km %}
-    <div class="mt-1"><small style="color:var(--text-dim);font-size:.72rem"><i class="fas fa-truck me-1"></i>Dostava: {{ product.delivery_zone_km }}km</small></div>
+    <div class="mt-1"><small class="fx-fs-sm fx-text-dim"><i class="fas fa-truck me-1"></i>Dostava: {{ product.delivery_zone_km }}km</small></div>
     {% endif %}
 
     <!-- QR traceability -->
     {% if product.source_model %}
     <div class="mt-2">
-      <a href="{% url 'marketplace:traceability' product.pk %}" style="font-size:.68rem;color:#3b82f6;text-decoration:none;font-weight:600">
+      <a href="{% url 'marketplace:traceability' product.pk %}" class="fx-fs-tiny fx-text-blue fx-no-underline fx-fw-semibold">
         <i class="fas fa-qrcode me-1"></i>Farm-to-Fork
       </a>
     </div>

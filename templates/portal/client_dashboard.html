@@ -5,24 +5,7 @@
 {% block title %}Klijentski Portal{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 /* ── Tab Navigation ─────────────────────────────────────────────────── */
@@ -106,11 +89,11 @@
 <!-- Header -->
 <div class="flex-between mb-3">
   <div>
-    <h1 style="font-family:var(--font-heading);font-size:1.6rem;color:var(--gold);font-weight:700">
-      <i class="fas fa-th-large" style="font-size:1.1rem;opacity:.6;margin-right:8px"></i>
+    <h1 class="fx-fw-bold fx-text-gold fx-fs-5xl" style="font-family:var(--font-heading)">
+      <i class="fas fa-th-large fx-fs-xl fx-mr-3" style="opacity:.6"></i>
       Klijentski Portal
     </h1>
-    <p class="text-muted" style="font-size:.85rem;margin-top:4px">
+    <p class="text-muted fx-fs-base mt-1">
       {{ partner.name }} &mdash; Sve na jednom mjestu
     </p>
   </div>
@@ -170,13 +153,13 @@
   <div class="section-header">
     <h3><i class="fas fa-truck"></i> Aktivne dostave</h3>
     <a href="{% url 'client_portal:deliveries' token %}" class="btn btn-outline btn-sm">
-      Sve dostave <i class="fas fa-arrow-right" style="font-size:.7rem"></i>
+      Sve dostave <i class="fas fa-arrow-right fx-fs-sm"></i>
     </a>
   </div>
 
   {% if deliveries %}
     {% for d in deliveries %}
-    <div class="b2b-card" style="margin-bottom:14px">
+    <div class="b2b-card fx-mb-3">
       <div class="flex-between">
         <div>
           <span class="text-mono text-gold">{{ d.delivery_number }}</span>
@@ -189,7 +172,7 @@
         </a>
       </div>
       {% if d.eta %}
-      <div style="font-size:.82rem;color:var(--text-secondary);margin-top:8px">
+      <div class="fx-fs-note fx-text-dim mt-2">
         <i class="fas fa-clock" style="margin-right:4px"></i> ETA: {{ d.eta|date:"d.m.Y H:i" }}
       </div>
       {% endif %}
@@ -204,11 +187,11 @@
       {% for box in smart_boxes %}
       <div class="smartbox-card">
         <div>
-          <i class="fas fa-box fa-lg" style="color:var(--gold)"></i>
+          <i class="fas fa-box fa-lg fx-text-gold"></i>
         </div>
-        <div style="flex:1">
+        <div class="fx-flex-1">
           <div class="smartbox-id">{{ box.box_id }}</div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">
+          <div class="fx-fs-caption fx-text-muted fx-mt-1">
             Dostava: {{ box.delivery }}
           </div>
         </div>
@@ -218,11 +201,11 @@
               <i class="fas fa-thermometer-half"></i>
               {{ box.temp }}&deg;C
             </div>
-            <div style="font-size:.68rem;color:var(--text-muted);text-align:center;margin-top:4px">
+            <div class="fx-fs-tiny text-center fx-text-muted mt-1">
               Raspon: {{ box.target }}
             </div>
           {% else %}
-            <span style="font-size:.78rem;color:var(--text-muted)">Nema ocitanja</span>
+            <span class="fx-fs-body-sm fx-text-muted">Nema ocitanja</span>
           {% endif %}
         </div>
       </div>
@@ -242,7 +225,7 @@
   <div class="section-header">
     <h3><i class="fas fa-file-invoice-dollar"></i> Nedavne fakture</h3>
     <a href="{% url 'client_portal:invoices' token %}" class="btn btn-outline btn-sm">
-      Sve fakture <i class="fas fa-arrow-right" style="font-size:.7rem"></i>
+      Sve fakture <i class="fas fa-arrow-right fx-fs-sm"></i>
     </a>
   </div>
 
@@ -262,7 +245,7 @@
         <tr>
           <td class="text-mono">{{ inv.number }}</td>
           <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
-          <td style="font-weight:600">{{ inv.total|floatformat:2 }} &euro;</td>
+          <td class="fx-fw-semibold">{{ inv.total|floatformat:2 }} &euro;</td>
           <td>
             <span class="badge badge-{% if inv.status == 'PAID' %}paid{% elif inv.status == 'OVERDUE' %}overdue{% elif inv.status == 'SENT' or inv.status == 'UNPAID' %}unpaid{% else %}draft{% endif %}">
               {{ inv.get_status_display }}
@@ -283,7 +266,7 @@
       </div>
       <div class="b2b-info-row">
         <span>Ukupno</span>
-        <span style="color:var(--warning);font-weight:700">{{ invoices_unpaid.total|default:"0"|floatformat:2 }} &euro;</span>
+        <span class="fx-fw-bold" style="color:var(--warning)">{{ invoices_unpaid.total|default:"0"|floatformat:2 }} &euro;</span>
       </div>
     </div>
     <div class="b2b-info-box">
@@ -294,7 +277,7 @@
       </div>
       <div class="b2b-info-row">
         <span>Ukupno</span>
-        <span style="color:var(--success);font-weight:700">{{ invoices_paid.total|default:"0"|floatformat:2 }} &euro;</span>
+        <span class="fx-fw-bold" style="color:var(--success)">{{ invoices_paid.total|default:"0"|floatformat:2 }} &euro;</span>
       </div>
     </div>
   </div>
@@ -330,7 +313,7 @@
           <td class="text-mono">{{ o.number }}</td>
           <td>{{ o.issue_date|date:"d.m.Y" }}</td>
           <td>{{ o.delivery_date|date:"d.m.Y" }}</td>
-          <td style="font-weight:600">{{ o.total|floatformat:2 }} &euro;</td>
+          <td class="fx-fw-semibold">{{ o.total|floatformat:2 }} &euro;</td>
           <td>
             <span class="badge badge-{% if o.status == 'completed' %}paid{% elif o.status == 'pending' %}sent{% else %}draft{% endif %}">
               {{ o.status }}
@@ -360,17 +343,17 @@
 
   {% if tickets_open %}
     {% for t in tickets_open %}
-    <a href="{% url 'client_portal:ticket_detail' token t.id %}" class="b2b-card" style="display:block;text-decoration:none;margin-bottom:12px">
+    <a href="{% url 'client_portal:ticket_detail' token t.id %}" class="b2b-card fx-no-underline d-block mb-3">
       <div class="flex-between">
         <div>
           <span class="text-mono text-gold">{{ t.ticket_number }}</span>
-          <span style="margin-left:10px;font-size:.88rem;color:var(--text)">{{ t.subject }}</span>
+          <span class="fx-fs-body fx-text-body" style="margin-left:10px">{{ t.subject }}</span>
         </div>
         <span class="badge badge-{% if t.status == 'open' %}sent{% elif t.status == 'in_progress' %}accepted{% elif t.status == 'waiting_client' %}overdue{% else %}draft{% endif %}">
           {{ t.status }}
         </span>
       </div>
-      <div style="font-size:.78rem;color:var(--text-muted);margin-top:6px">
+      <div class="fx-fs-body-sm fx-text-muted mt-1">
         {% if t.sla_deadline %}
           {% now "U" as now_ts %}
           <span class="sla-dot {% if t.sla_deadline < now %}red{% else %}green{% endif %}"></span>
@@ -413,9 +396,9 @@
           <td>{{ p.created_at|date:"d.m.Y H:i" }}</td>
           <td>{{ p.description|truncatechars:40 }}</td>
           <td>
-            <span style="font-size:.78rem;text-transform:uppercase">{{ p.method }}</span>
+            <span class="fx-fs-body-sm fx-uppercase">{{ p.method }}</span>
           </td>
-          <td style="font-weight:600">{{ p.amount|floatformat:2 }} {{ p.currency }}</td>
+          <td class="fx-fw-semibold">{{ p.amount|floatformat:2 }} {{ p.currency }}</td>
           <td>
             <span class="badge badge-{% if p.status == 'completed' %}paid{% elif p.status == 'pending' or p.status == 'processing' %}sent{% elif p.status == 'failed' %}rejected{% else %}draft{% endif %}">
               {{ p.status }}
@@ -439,36 +422,32 @@
     <h3><i class="fas fa-cloud-upload-alt"></i> Upload dokumenta</h3>
   </div>
 
-  <div id="dropzone" style="
-    border:2px dashed var(--gold-muted);border-radius:var(--radius);
-    padding:60px 20px;text-align:center;cursor:pointer;
-    transition:all .3s;background:var(--surface);
-  ">
-    <i class="fas fa-file-upload" style="font-size:2.5rem;color:var(--gold);margin-bottom:16px;display:block"></i>
-    <p style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:8px">
+  <div id="dropzone" class="text-center fx-pointer fx-bg-surface" style="border:2px dashed var(--gold-muted);border-radius:var(--radius);padding:60px 20px;transition:all .3s">
+    <i class="fas fa-file-upload fx-text-gold mb-3 d-block fx-fs-7xl"></i>
+    <p class="fx-fs-lg fx-fw-semibold fx-text-body mb-2">
       Povucite datoteku ovdje
     </p>
-    <p style="font-size:.82rem;color:var(--text-secondary)">
+    <p class="fx-fs-note fx-text-dim">
       ili kliknite za odabir &middot; PDF, JPG, PNG &middot; Max 10 MB
     </p>
-    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none">
+    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" class="fx-hidden">
   </div>
 
-  <div id="uploadResult" style="display:none;margin-top:16px" class="b2b-card">
-    <div style="display:flex;align-items:center;gap:12px">
-      <i id="uploadIcon" class="fas fa-check-circle" style="font-size:1.4rem;color:var(--success)"></i>
+  <div id="uploadResult" class="b2b-card fx-hidden mt-3">
+    <div class="d-flex fx-gap-3 align-items-center">
+      <i id="uploadIcon" class="fas fa-check-circle fx-fs-4xl" style="color:var(--success)"></i>
       <div>
-        <div id="uploadMsg" style="font-weight:600"></div>
-        <div id="uploadDetail" style="font-size:.82rem;color:var(--text-secondary)"></div>
+        <div id="uploadMsg" class="fx-fw-semibold"></div>
+        <div id="uploadDetail" class="fx-fs-note fx-text-dim"></div>
       </div>
     </div>
   </div>
 
-  <div id="uploadProgress" style="display:none;margin-top:16px">
-    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-      <div id="uploadBar" style="height:100%;background:var(--gold);width:0%;transition:width .3s"></div>
+  <div id="uploadProgress" class="fx-hidden mt-3">
+    <div class="fx-overflow-hidden" style="height:4px;background:var(--border);border-radius:2px">
+      <div id="uploadBar" class="fx-bg-gold" style="height:100%;width:0%;transition:width .3s"></div>
     </div>
-    <p style="font-size:.78rem;color:var(--text-secondary);margin-top:6px">Ucitavanje...</p>
+    <p class="fx-fs-body-sm fx-text-dim mt-1">Ucitavanje...</p>
   </div>
 </div>
 
@@ -564,26 +543,26 @@ function loadTimeline() {
       }
       let html = '';
       data.eracuni.forEach(er => {
-        html += '<div class="b2b-card" style="margin-bottom:14px">';
-        html += '<div class="flex-between" style="margin-bottom:12px">';
+        html += '<div class="b2b-card fx-mb-3">';
+        html += '<div class="flex-between mb-3">';
         html += '<div><span class="text-mono text-gold">' + er.number + '</span>';
-        html += '<span style="margin-left:10px;font-size:.82rem;color:var(--text-secondary)">' + er.date + '</span></div>';
-        html += '<span style="font-weight:700">' + er.total + ' ' + er.currency + '</span></div>';
+        html += '<span class="fx-fs-note fx-text-dim" style="margin-left:10px">' + er.date + '</span></div>';
+        html += '<span class="fx-fw-bold">' + er.total + ' ' + er.currency + '</span></div>';
         // Timeline steps
-        html += '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
+        html += '<div class="d-flex fx-gap-1 fx-flex-wrap align-items-center">';
         er.steps.forEach((s, i) => {
           const color = s.error ? 'var(--error)' : s.done ? 'var(--success)' : 'var(--text-muted)';
           const icon = s.error ? 'fa-times-circle' : s.done ? 'fa-check-circle' : 'fa-circle';
-          html += '<div style="display:flex;align-items:center;gap:4px">';
-          html += '<i class="fas ' + icon + '" style="font-size:.7rem;color:' + color + '"></i>';
-          html += '<span style="font-size:.75rem;color:' + color + ';font-weight:' + (s.done?'600':'400') + '">' + s.label + '</span>';
-          if (i < er.steps.length - 1) html += '<i class="fas fa-chevron-right" style="font-size:.5rem;color:var(--border);margin:0 2px"></i>';
+          html += '<div class="d-flex fx-gap-1 align-items-center">';
+          html += '<i class="fas ' + icon + ' fx-fs-sm" style="color:' + color + '"></i>';
+          html += '<span class="fx-fs-caption" style="color:' + color + ';font-weight:' + (s.done?'600':'400') + '">' + s.label + '</span>';
+          if (i < er.steps.length - 1) html += '<i class="fas fa-chevron-right fx-text-muted" style="font-size:.5rem;margin:0 2px"></i>';
           html += '</div>';
         });
         html += '</div>';
         // ZKI/JIR
         if (er.zki || er.jir) {
-          html += '<div style="font-size:.72rem;color:var(--text-muted);margin-top:8px;font-family:monospace">';
+          html += '<div class="fx-fs-sm fx-text-muted mt-2 fx-font-mono">';
           if (er.zki) html += 'ZKI: ' + er.zki.substring(0,20) + '... ';
           if (er.jir) html += 'JIR: ' + er.jir;
           html += '</div>';

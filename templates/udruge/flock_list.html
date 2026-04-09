@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Jata peradi{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .flock-container { max-width: 1100px; margin: 0 auto; }
@@ -52,10 +35,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div>
-    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)"><i class="fas fa-egg me-2" style="color:var(--gold)"></i>Jata peradi</h2>
-    <small style="color:var(--text-dim)">Evidencija jata, nesenje jaja, zdravlje</small>
+    <h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0"><i class="fas fa-egg me-2 fx-text-gold"></i>Jata peradi</h2>
+    <small class="fx-text-dim">Evidencija jata, nesenje jaja, zdravlje</small>
   </div>
-  <a href="{% url 'udruge:flock_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:flock_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded fx-fs-base" style="background:linear-gradient(135deg,var(--gold),#a78b3d);padding:.5rem 1.5rem">
     <i class="fas fa-plus me-1"></i>Novo jato
   </a>
 </div>
@@ -63,11 +46,11 @@
 <!-- Stats -->
 <div class="flock-stats">
   <div class="flock-stat">
-    <div class="flock-stat-value" style="color:var(--gold)">{{ stats.ukupno_jata|default:0 }}</div>
+    <div class="flock-stat-value fx-text-gold">{{ stats.ukupno_jata|default:0 }}</div>
     <div class="flock-stat-label">Jata</div>
   </div>
   <div class="flock-stat">
-    <div class="flock-stat-value" style="color:#22c55e">{{ stats.ukupno_aktivnih|default:0 }}</div>
+    <div class="flock-stat-value fx-text-green">{{ stats.ukupno_aktivnih|default:0 }}</div>
     <div class="flock-stat-label">Aktivnih</div>
   </div>
   <div class="flock-stat">
@@ -77,16 +60,16 @@
 </div>
 
 <!-- Search + Filter -->
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem">
+<div class="fx-rounded fx-bg-surface fx-b" style="padding:.75rem 1rem;margin-bottom:1.25rem">
   <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
-    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Pretrazi jata..." style="max-width:250px;background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
-    <select name="vrsta" class="form-select form-select-sm" style="max-width:160px;background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm fx-rounded fx-text-body fx-bg-dark fx-bc" placeholder="Pretrazi jata..." style="max-width:250px">
+    <select name="vrsta" class="form-select form-select-sm fx-rounded fx-text-body fx-bg-dark fx-bc" style="max-width:160px">
       <option value="">Sve vrste</option>
       {% for code, label in vrsta_choices %}
       <option value="{{ code }}" {% if vrsta == code %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <button type="submit" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:600">
+    <button type="submit" class="btn btn-sm fx-rounded fx-fw-semibold fx-text-gold fx-bg-gold-dim" style="border:1px solid var(--gold-border)">
       <i class="fas fa-search me-1"></i>Trazi
     </button>
   </form>
@@ -102,24 +85,24 @@
         <div class="flock-vrsta-icon" style="background:{% if flock.vrsta == 'kokos' %}rgba(245,158,11,.1){% elif flock.vrsta == 'patka' %}rgba(59,130,246,.1){% elif flock.vrsta == 'guska' %}rgba(34,197,94,.1){% else %}rgba(168,85,247,.1){% endif %}">
           {% if flock.vrsta == 'kokos' %}&#x1F414;{% elif flock.vrsta == 'patka' %}&#x1F986;{% elif flock.vrsta == 'guska' %}&#x1FAB6;{% else %}&#x1F426;{% endif %}
         </div>
-        <div style="flex:1;min-width:0">
-          <h6 style="font-weight:700;margin:0 0 .25rem;color:var(--text)">{{ flock.naziv }}</h6>
-          <div style="font-size:.78rem;color:var(--text-dim)">
+        <div class="fx-flex-1 min-w-0">
+          <h6 class="fx-fw-bold fx-text-body" style="margin:0 0 .25rem">{{ flock.naziv }}</h6>
+          <div class="fx-fs-body-sm fx-text-dim">
             {{ flock.get_vrsta_display }} | {{ flock.get_tip_uzgoja_display }}
           </div>
-          {% if flock.pasmina %}<div style="font-size:.72rem;color:var(--text-dim)">{{ flock.pasmina }}</div>{% endif %}
+          {% if flock.pasmina %}<div class="fx-fs-sm fx-text-dim">{{ flock.pasmina }}</div>{% endif %}
           <div class="d-flex gap-3 mt-2">
             <div>
-              <span style="font-weight:800;font-size:1rem;color:var(--gold)">{{ flock.aktivnih_komada }}</span>
-              <span style="font-size:.68rem;color:var(--text-dim)">kom</span>
+              <span class="fx-fw-800 fx-fs-lg fx-text-gold">{{ flock.aktivnih_komada }}</span>
+              <span class="fx-fs-tiny fx-text-dim">kom</span>
             </div>
             {% if flock.objekt %}
-            <div style="font-size:.75rem;color:var(--text-dim)"><i class="fas fa-home me-1"></i>{{ flock.objekt|truncatechars:20 }}</div>
+            <div class="fx-fs-caption fx-text-dim"><i class="fas fa-home me-1"></i>{{ flock.objekt|truncatechars:20 }}</div>
             {% endif %}
           </div>
         </div>
         {% if not flock.aktivan %}
-        <span style="background:rgba(239,68,68,.1);color:#ef4444;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:6px">Neaktivno</span>
+        <span class="fx-text-red fx-fs-xs fx-fw-bold fx-rounded-sm" style="background:rgba(239,68,68,.1);padding:3px 8px">Neaktivno</span>
         {% endif %}
       </div>
     </div>
@@ -142,9 +125,9 @@
 {% else %}
 <div class="flock-empty">
   <i class="fas fa-egg"></i>
-  <h5 style="color:var(--text)">Nema jata</h5>
+  <h5 class="fx-text-body">Nema jata</h5>
   <p>Dodajte prvo jato za poceti s evidencijom nesenja.</p>
-  <a href="{% url 'udruge:flock_create' %}" class="btn" style="background:var(--gold);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem">
+  <a href="{% url 'udruge:flock_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded fx-bg-gold" style="padding:.5rem 1.5rem">
     <i class="fas fa-plus me-1"></i>Novo jato
   </a>
 </div>

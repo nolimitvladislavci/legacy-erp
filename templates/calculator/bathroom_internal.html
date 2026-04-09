@@ -56,7 +56,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
 /* Buttons */
 .btn-sm{font-size:.72rem;padding:4px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);cursor:pointer;transition:all .15s;font-family:inherit}
 .btn-sm:hover{color:var(--text);border-color:var(--gold-border)}
-.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#000;font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--text);font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
 .btn-gold:hover{background:var(--gold2)}
 .btn-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;padding:2px 6px;opacity:.5}
 .btn-del:hover{opacity:1}
@@ -112,11 +112,11 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
   .header,.sidebar,.bar,button,.btn-sm,.btn-gold,.btn-del{display:none!important}
   .layout{display:block}
   .tab-panel{display:block!important}
-  body{background:#fff;color:#000;font-size:11px}
-  .card{border:1px solid #ccc;break-inside:avoid}
-  .card-title{color:#333}
-  .tbl td,.bdown td{border-bottom:1px solid #eee;color:#000}
-  .bdown .total td{color:#000;border-top:2px solid #000}
+  body{background:var(--bg-card);color:var(--text);font-size:11px}
+  .card{border:1px solid var(--border);break-inside:avoid}
+  .card-title{color:var(--text)}
+  .tbl td,.bdown td{border-bottom:1px solid var(--border);color:var(--text)}
+  .bdown .total td{color:var(--text);border-top:2px solid #000}
 }
 </style>
 </head>
@@ -157,7 +157,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
     <div id="panel-material" class="tab-panel active">
       <div class="card">
         <div class="card-title">Projekt-Parameter</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div class="d-flex fx-gap-3 fx-flex-wrap">
           <div class="wcard-field" style="width:140px">
             <label>Grundflache (m&sup2;)</label>
             <input type="number" id="int-flaeche" value="8" min="1" max="50" step="0.5" oninput="recalc()">
@@ -168,14 +168,14 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
           </div>
           <div class="wcard-field" style="width:140px">
             <label>Fliesenflache (m&sup2;)</label>
-            <input type="number" id="int-fliesen-flaeche" value="0" readonly style="color:var(--gold);font-weight:700">
+            <input type="number" id="int-fliesen-flaeche" value="0" readonly class="fx-fw-bold fx-text-gold">
           </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Material &amp; Beschaffung
-          <button class="btn-sm" style="margin-left:auto" onclick="addMaterial()">+ Hinzufugen</button>
+          <button class="btn-sm fx-ml-auto" onclick="addMaterial()">+ Hinzufugen</button>
         </div>
         <table class="tbl">
           <thead><tr><th>Beschreibung</th><th>Menge</th><th>Einheit</th><th class="r">Einzelpreis</th><th class="r">Gesamt</th><th></th></tr></thead>
@@ -189,7 +189,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
     <div id="panel-arbeit" class="tab-panel">
       <div class="card">
         <div class="card-title">Arbeitskrafte
-          <button class="btn-sm" style="margin-left:auto" onclick="addWorker()">+ Hinzufugen</button>
+          <button class="btn-sm fx-ml-auto" onclick="addWorker()">+ Hinzufugen</button>
         </div>
         <div id="workers-container"></div>
       </div>
@@ -226,7 +226,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
         <table class="bdown" id="int-breakdown"></table>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:14px">
+      <div class="d-flex fx-gap-3" style="margin-top:14px">
         <button class="btn-gold" onclick="window.print()">Drucken / PDF</button>
       </div>
     </div>
@@ -288,9 +288,9 @@ function renderMaterials(){
   materials.forEach(function(m,i){
     var total = m.qty * m.price;
     html+='<tr>'
-      +'<td><input type="text" value="'+m.desc+'" style="width:160px;text-align:left" onchange="materials['+i+'].desc=this.value"></td>'
+      +'<td><input type="text" value="'+m.desc+'" class="text-start" style="width:160px" onchange="materials['+i+'].desc=this.value"></td>'
       +'<td><input type="number" value="'+m.qty+'" style="width:60px" min="0" step="0.5" oninput="materials['+i+'].qty=parseFloat(this.value)||0;recalc()"></td>'
-      +'<td><input type="text" value="'+m.unit+'" style="width:50px;text-align:left" onchange="materials['+i+'].unit=this.value"></td>'
+      +'<td><input type="text" value="'+m.unit+'" class="text-start" style="width:50px" onchange="materials['+i+'].unit=this.value"></td>'
       +'<td><input type="number" value="'+m.price+'" min="0" step="0.5" oninput="materials['+i+'].price=parseFloat(this.value)||0;recalc()"></td>'
       +'<td>'+fmt(total)+'</td>'
       +'<td><button class="btn-del" onclick="materials.splice('+i+',1);renderMaterials();recalc()">&times;</button></td>'
@@ -389,14 +389,14 @@ function recalc(){
     var c = w.count * w.hours * w.rate * days;
     h+='<tr><td>'+w.count+'&times; '+w.trade+' ('+w.hours+'h/Tag &times; '+days+' Tage &times; '+fmtN(w.rate)+' &euro;/h)</td><td>'+fmt(c)+'</td></tr>';
   });
-  h+='<tr style="font-weight:600"><td>Zwischensumme Personal</td><td>'+fmt(costLabor)+'</td></tr>';
+  h+='<tr class="fx-fw-semibold"><td>Zwischensumme Personal</td><td>'+fmt(costLabor)+'</td></tr>';
 
   h+='<tr class="section-head"><td colspan="2">Material</td></tr>';
   materials.forEach(function(m){
     var c = m.qty * m.price;
     if(c>0) h+='<tr><td>'+m.desc+' ('+m.qty+' '+m.unit+')</td><td>'+fmt(c)+'</td></tr>';
   });
-  h+='<tr style="font-weight:600"><td>Zwischensumme Material</td><td>'+fmt(costMat)+'</td></tr>';
+  h+='<tr class="fx-fw-semibold"><td>Zwischensumme Material</td><td>'+fmt(costMat)+'</td></tr>';
 
   h+='<tr class="section-head"><td colspan="2">Kalkulation</td></tr>';
   h+='<tr><td>Direktkosten</td><td>'+fmt(direkt)+'</td></tr>';

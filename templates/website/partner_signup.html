@@ -35,7 +35,7 @@ nav a.logo span{color:var(--text)}
 .check-row{display:flex;align-items:flex-start;gap:.5rem;margin:.75rem 0}
 .check-row input{margin-top:3px;accent-color:var(--gold)}
 .check-row label{font-size:.82rem;color:var(--muted)}
-.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.9rem 2rem;border-radius:10px;border:none;font-size:1rem;cursor:pointer;width:100%;margin-top:1rem;transition:opacity .2s}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:700;padding:.9rem 2rem;border-radius:10px;border:none;font-size:1rem;cursor:pointer;width:100%;margin-top:1rem;transition:opacity .2s}
 .btn-gold:hover{opacity:.85}
 .btn-gold:disabled{opacity:.4;cursor:not-allowed}
 .success-box{display:none;text-align:center;padding:3rem}
@@ -43,11 +43,11 @@ nav a.logo span{color:var(--text)}
 .success-box h2{color:var(--green);margin-bottom:.5rem}
 .lang-switch{display:flex;gap:4px}
 .lang-switch a{padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700;text-decoration:none;border:1px solid var(--border);color:var(--muted)}
-.lang-switch a.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.lang-switch a.active{background:var(--gold);color:var(--text);border-color:var(--gold)}
 .status-msg{margin-top:1rem;padding:.8rem;border-radius:8px;font-size:.85rem;display:none}
-.status-msg.error{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3);display:block}
-.status-msg.success{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3);display:block}
-footer{padding:2rem;text-align:center;color:#333;font-size:.75rem}
+.status-msg.error{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3);display:block}
+.status-msg.success{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3);display:block}
+footer{padding:2rem;text-align:center;color:var(--text);font-size:.75rem}
 footer a{color:var(--gold);text-decoration:none}
 @media(max-width:600px){.form-row{grid-template-columns:1fr}.hero h1{font-size:1.8rem}}
 </style>
@@ -75,7 +75,7 @@ footer a{color:var(--gold);text-decoration:none}
 
 <div class="form-wrap">
 <div class="form-card" id="signup-form-wrap">
-<h2 id="t-form-title"><i class="fas fa-handshake" style="margin-right:.5rem"></i> Online-Registrierung</h2>
+<h2 id="t-form-title"><i class="fas fa-handshake fx-mr-2"></i> Online-Registrierung</h2>
 
 <form id="partnerForm">
 <div class="form-row">
@@ -140,7 +140,7 @@ footer a{color:var(--gold);text-decoration:none}
 <p><strong>Steuer:</strong> Der Tippgeber ist für die Versteuerung selbst verantwortlich (§ 22 Nr. 3 EStG). Einnahmen unter 256€/Jahr sind steuerfrei.</p>
 <p><strong>Kündigung:</strong> Jederzeit mit 4 Wochen Frist zum Monatsende. Bestehende Provisionsansprüche bleiben erhalten.</p>
 <p><strong>Recht:</strong> Es gilt deutsches Recht. Gerichtsstand: Paderborn.</p>
-<p style="margin-top:10px;font-size:.75rem">Vollständiger Vertrag wird nach Registrierung per E-Mail zugestellt. | Gemäß §§ 611 ff. BGB</p>
+<p class="fx-fs-caption fx-mt-10">Vollständiger Vertrag wird nach Registrierung per E-Mail zugestellt. | Gemäß §§ 611 ff. BGB</p>
 </div>
 
 <div class="check-row">
@@ -157,7 +157,7 @@ footer a{color:var(--gold);text-decoration:none}
 </div>
 
 <button type="submit" class="btn-gold" id="submitBtn">
-<i class="fas fa-file-signature" style="margin-right:.5rem"></i>
+<i class="fas fa-file-signature fx-mr-2"></i>
 <span id="t-submit">Vertrag digital unterzeichnen</span>
 </button>
 
@@ -169,37 +169,37 @@ footer a{color:var(--gold);text-decoration:none}
 <div class="success-box" id="success-box">
 <div class="icon">🎉</div>
 <h2 id="t-success-title">Willkommen im Team!</h2>
-<p id="t-success-text" style="color:var(--muted)">Ihr Partner-Vertrag wurde erstellt. Sie erhalten in Kürze eine E-Mail mit:</p>
-<div style="text-align:left;max-width:400px;margin:1rem auto;font-size:.9rem">
-<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-file-contract" style="color:var(--gold);margin-right:.5rem"></i> Vollständiger Vertrag (PDF)</div>
-<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-id-card" style="color:var(--gold);margin-right:.5rem"></i> Ihre Legitimationskarte</div>
-<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-link" style="color:var(--gold);margin-right:.5rem"></i> Ihr persönlicher Referral-Link</div>
-<div style="padding:.5rem 0"><i class="fas fa-book" style="color:var(--gold);margin-right:.5rem"></i> Verkaufsleitfaden & Materialien</div>
+<p id="t-success-text" class="fx-text-muted">Ihr Partner-Vertrag wurde erstellt. Sie erhalten in Kürze eine E-Mail mit:</p>
+<div class="fx-fs-md text-start" style="max-width:400px;margin:1rem auto">
+<div class="fx-bb fx-p-5-0"><i class="fas fa-file-contract fx-text-gold fx-mr-2"></i> Vollständiger Vertrag (PDF)</div>
+<div class="fx-bb fx-p-5-0"><i class="fas fa-id-card fx-text-gold fx-mr-2"></i> Ihre Legitimationskarte</div>
+<div class="fx-bb fx-p-5-0"><i class="fas fa-link fx-text-gold fx-mr-2"></i> Ihr persönlicher Referral-Link</div>
+<div class="fx-p-5-0"><i class="fas fa-book fx-text-gold fx-mr-2"></i> Verkaufsleitfaden & Materialien</div>
 </div>
-<p style="margin-top:1.5rem"><a href="/de/" style="color:var(--gold)">← Zurück zur Startseite</a></p>
+<p class="fx-mt-6"><a href="/de/" class="fx-text-gold">← Zurück zur Startseite</a></p>
 </div>
 </div>
 
 <!-- Preporuči nas / Empfehlen Sie uns -->
-<section style="padding:3rem 2rem;text-align:center;background:#050508">
-<h2 style="font-size:1.5rem;font-weight:800;margin-bottom:.5rem" id="t-rec-title">Empfehlen Sie uns weiter</h2>
-<p style="color:var(--muted);margin-bottom:1.5rem;font-size:.95rem" id="t-rec-sub">Teilen Sie diesen Link oder QR-Code — jeder kann Partner werden.</p>
-<div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;align-items:center">
-<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center">
-<div style="background:#fff;padding:12px;border-radius:8px;display:inline-block;margin-bottom:.75rem">
+<section class="text-center" style="padding:3rem 2rem;background:#050508">
+<h2 class="fx-fs-5xl fx-fw-800 mb-2" id="t-rec-title">Empfehlen Sie uns weiter</h2>
+<p class="fx-fs-normal fx-text-muted fx-mb-6" id="t-rec-sub">Teilen Sie diesen Link oder QR-Code — jeder kann Partner werden.</p>
+<div class="d-flex fx-flex-wrap justify-content-center align-items-center" style="gap:2rem">
+<div class="fx-rounded text-center fx-b fx-p-5 fx-bg-card">
+<div class="fx-rounded d-inline-block fx-bg-card fx-p-12 fx-mb-4">
 <img id="partner-qr" src="" alt="QR" style="width:150px;height:150px;image-rendering:pixelated">
 </div>
-<div style="font-size:.8rem;color:var(--muted)">QR-Code scannen</div>
+<div class="fx-fs-compact fx-text-muted">QR-Code scannen</div>
 </div>
-<div style="text-align:left">
-<div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem" id="t-rec-link">Oder Link teilen:</div>
-<div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem">
-<code style="color:var(--gold);font-size:.85rem;flex:1" id="share-url">limit-connect.com/partner/</code>
-<button onclick="copyLink()" style="background:var(--gold);color:#000;border:none;padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:700" id="copyBtn">Kopieren</button>
+<div class="text-start">
+<div class="fx-fs-base fx-text-muted mb-2" id="t-rec-link">Oder Link teilen:</div>
+<div class="fx-rounded d-flex align-items-center fx-gap-2 fx-bg-dark fx-b" style="padding:.6rem 1rem">
+<code class="fx-fs-base fx-text-gold fx-flex-1" id="share-url">limit-connect.com/partner/</code>
+<button onclick="copyLink()" class="fx-text-dark fx-border-none fx-rounded-sm fx-pointer fx-fs-caption fx-fw-bold fx-bg-gold" style="padding:.3rem .8rem" id="copyBtn">Kopieren</button>
 </div>
-<div style="display:flex;gap:.5rem;margin-top:.75rem">
-<a id="wa-share" href="#" target="_blank" style="background:#25D366;color:#fff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.8rem;font-weight:600"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-<a id="email-share" href="#" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.8rem"><i class="fas fa-envelope"></i> E-Mail</a>
+<div class="d-flex fx-gap-2 fx-mt-4">
+<a id="wa-share" href="#" target="_blank" class="fx-text-white fx-rounded fx-no-underline fx-fs-compact fx-fw-semibold" style="background:#25D366;padding:.5rem 1rem"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+<a id="email-share" href="#" class="fx-rounded fx-no-underline fx-fs-compact fx-text-body fx-b fx-bg-card" style="padding:.5rem 1rem"><i class="fas fa-envelope"></i> E-Mail</a>
 </div>
 </div>
 </div>
@@ -217,7 +217,7 @@ const TR = {
     title:'Werden Sie <span>Vertriebspartner</span>',
     sub:'20% monatliche Provision für jeden vermittelten Kunden. Keine Fixkosten, kein Risiko.',
     b1:'Monatliche Provision',b2:'Monate Laufzeit pro Kunde',b3:'Startkosten',
-    formTitle:'<i class="fas fa-handshake" style="margin-right:.5rem"></i> Online-Registrierung',
+    formTitle:'<i class="fas fa-handshake fx-mr-2"></i> Online-Registrierung',
     vorname:'Vorname *',nachname:'Nachname *',telefon:'Telefon / WhatsApp *',
     land:'Land *',adresse:'Adresse',steuerid:'Steuer-ID / OIB',region:'Vertriebsgebiet',
     agree1:'Ich habe die Tippgeber-Vereinbarung gelesen und stimme den Bedingungen zu. *',
@@ -233,7 +233,7 @@ const TR = {
     title:'Postanite <span>prodajni partner</span>',
     sub:'20% mjesečne provizije za svakog preporučenog korisnika. Bez fiksnih troškova, bez rizika.',
     b1:'Mjesečna provizija',b2:'Mjeseci trajanja po korisniku',b3:'Početni troškovi',
-    formTitle:'<i class="fas fa-handshake" style="margin-right:.5rem"></i> Online registracija',
+    formTitle:'<i class="fas fa-handshake fx-mr-2"></i> Online registracija',
     vorname:'Ime *',nachname:'Prezime *',telefon:'Telefon / WhatsApp *',
     land:'Država *',adresse:'Adresa',steuerid:'OIB',region:'Područje djelovanja',
     agree1:'Pročitao/la sam Ugovor o posredničkoj proviziji i prihvaćam uvjete. *',
@@ -321,13 +321,13 @@ document.getElementById('partnerForm').addEventListener('submit', function(e){
       status.className='status-msg error';
       status.textContent=d.error||'Fehler bei der Registrierung.';
       btn.disabled=false;
-      btn.innerHTML='<i class="fas fa-file-signature" style="margin-right:.5rem"></i>'+TR[lang].submit;
+      btn.innerHTML='<i class="fas fa-file-signature fx-mr-2"></i>'+TR[lang].submit;
     }
   }).catch(function(){
     status.className='status-msg error';
     status.textContent='Netzwerkfehler — bitte versuchen Sie es erneut.';
     btn.disabled=false;
-    btn.innerHTML='<i class="fas fa-file-signature" style="margin-right:.5rem"></i>'+TR[lang].submit;
+    btn.innerHTML='<i class="fas fa-file-signature fx-mr-2"></i>'+TR[lang].submit;
   });
 });
 </script>

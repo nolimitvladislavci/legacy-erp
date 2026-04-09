@@ -6,22 +6,22 @@
 .sci-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20000;display:none;align-items:center;justify-content:center}
 .sci-overlay.show{display:flex}
 .sci-card{background:#0d1117;border:1px solid var(--gold,#c9a84c)33;border-radius:14px;width:95%;max-width:440px;padding:20px;position:relative}
-.sci-close{position:absolute;right:12px;top:10px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer}
+.sci-close{position:absolute;right:12px;top:10px;background:none;border:none;color:var(--text-dim);font-size:1.4rem;cursor:pointer}
 .sci-h2{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin:0 0 16px}
-.sci-input{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#e2e8f0;font-size:.95rem;margin-bottom:10px;box-sizing:border-box}
+.sci-input{width:100%;background:var(--bg-card);border:1px solid #333;border-radius:8px;padding:10px 12px;color:var(--text);font-size:.95rem;margin-bottom:10px;box-sizing:border-box}
 .sci-input:focus{border-color:var(--gold,#c9a84c);outline:none}
 .sci-row{display:flex;gap:8px;margin-bottom:10px}
 .sci-row>*{flex:1}
-.sci-label{display:block;color:#94a3b8;font-size:.75rem;margin-bottom:3px}
-.sci-select{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#e2e8f0;font-size:.9rem}
-.sci-chip{display:inline-block;background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:4px 10px;font-size:.75rem;color:#94a3b8;margin-right:4px}
+.sci-label{display:block;color:var(--text-muted);font-size:.75rem;margin-bottom:3px}
+.sci-select{width:100%;background:var(--bg-card);border:1px solid #333;border-radius:8px;padding:10px;color:var(--text);font-size:.9rem}
+.sci-chip{display:inline-block;background:var(--bg-card);border:1px solid #333;border-radius:16px;padding:4px 10px;font-size:.75rem;color:var(--text-muted);margin-right:4px}
 .sci-chip.active{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c);background:#1a1a0a}
-.sci-btn{width:100%;background:var(--gold,#c9a84c);color:#0a0a0a;border:none;border-radius:8px;padding:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:6px}
+.sci-btn{width:100%;background:var(--gold,#c9a84c);color:var(--text);border:none;border-radius:8px;padding:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:6px}
 .sci-btn:disabled{opacity:.4}
-.sci-ai{font-size:.7rem;color:#666;margin-top:8px;text-align:center}
+.sci-ai{font-size:.7rem;color:var(--text-dim);margin-top:8px;text-align:center}
 .sci-ai b{color:var(--gold,#c9a84c)}
-.sci-barcode{font-family:monospace;font-size:.8rem;color:#22c55e;background:#0a1a0a;border:1px solid #1a3a1a;border-radius:6px;padding:6px 10px;text-align:center;margin-top:6px}
-.sci-stock-note{font-size:.72rem;color:#f59e0b;margin-top:4px}
+.sci-barcode{font-family:monospace;font-size:.8rem;color:var(--green);background:var(--surface-deep);border:1px solid #1a3a1a;border-radius:6px;padding:6px 10px;text-align:center;margin-top:6px}
+.sci-stock-note{font-size:.72rem;color:var(--amber);margin-top:4px}
 </style>
 
 {# Django URL tags — language-aware, no hardcoded /hr/ prefix #}
@@ -73,13 +73,13 @@ var _SCI_URL_AI_PREDICT = '{% url "inventory:api_ai_predict_item" %}';
       </div>
       <div>
         <label class="sci-label">{% trans "Jed. mjere" %}</label>
-        <input type="text" class="sci-input" id="sciUnit" value="kom" style="margin-bottom:0">
+        <input type="text" class="sci-input mb-0" id="sciUnit" value="kom">
       </div>
     </div>
 
     <!-- Auto-barkod -->
-    <div id="sciBarcode" class="sci-barcode" style="display:none"></div>
-    <div id="sciStockNote" class="sci-stock-note" style="display:none"></div>
+    <div id="sciBarcode" class="sci-barcode fx-hidden"></div>
+    <div id="sciStockNote" class="sci-stock-note fx-hidden"></div>
 
     <button class="sci-btn" id="sciSubmit" onclick="_sciSave()">{% trans "Spremi artikl" %}</button>
 

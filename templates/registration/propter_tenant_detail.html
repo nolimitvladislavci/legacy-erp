@@ -4,31 +4,31 @@
 {% block page_title %}Propter — {{ tenant.company.name }}{% endblock %}
 {% block content %}
 <style>
-.td-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
-.td-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.td-card{background:var(--bg-card);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:16px}
+.td-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 12px}
 .td-field{margin-bottom:12px}
-.td-field label{display:block;font-size:.78rem;font-weight:600;color:#334155;margin-bottom:4px}
-.td-field input,.td-field select,.td-field textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.82rem;background:#fff}
+.td-field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted2);margin-bottom:4px}
+.td-field input,.td-field select,.td-field textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;background:var(--bg-card)}
 .td-field input[type=checkbox]{width:auto;margin-right:6px}
 .td-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:768px){.td-grid{grid-template-columns:1fr}}
-.td-stat{background:#f8fafc;border-radius:8px;padding:12px;text-align:center}
+.td-stat{background:var(--surface2);border-radius:8px;padding:12px;text-align:center}
 .td-stat .val{font-size:1.3rem;font-weight:700}
-.td-stat .lbl{font-size:.7rem;color:#64748b}
+.td-stat .lbl{font-size:.7rem;color:var(--text-dim)}
 .tier-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:700}
-.tier-badge.bookkeeper{background:#dbeafe;color:#1e40af}
-.tier-badge.client{background:#f0fdf4;color:#166534}
+.tier-badge.bookkeeper{background:var(--blue-dim);color:var(--blue)}
+.tier-badge.client{background:var(--green-dim);color:var(--green)}
 </style>
 
-<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+<div class="d-flex fx-gap-2 fx-flex-wrap mb-3 align-items-center">
   <a href="{% url 'registration:propter_dashboard' %}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
-  <span class="tier-badge {{ tenant.tier }}" style="font-size:.85rem;padding:5px 14px">{{ tenant.get_tier_display }}</span>
+  <span class="tier-badge {{ tenant.tier }} fx-fs-base" style="padding:5px 14px">{{ tenant.get_tier_display }}</span>
   {% if tenant.is_active %}
-  <span style="color:#22c55e;font-weight:700;font-size:.85rem">Aktivan</span>
+  <span class="fx-text-green fx-fw-bold fx-fs-base">Aktivan</span>
   {% else %}
-  <span style="color:#ef4444;font-weight:700;font-size:.85rem">Neaktivan</span>
+  <span class="fx-text-red fx-fw-bold fx-fs-base">Neaktivan</span>
   {% endif %}
-  <form method="post" style="display:inline;margin-left:auto">
+  <form method="post" class="d-inline fx-ml-auto">
     {% csrf_token %}
     <input type="hidden" name="action" value="toggle_active">
     {% if tenant.is_active %}
@@ -41,12 +41,12 @@
 
 <!-- e-Racun stats -->
 {% if eracun_stats %}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:16px">
+<div class="fx-gap-3 d-grid mb-3" style="grid-template-columns:repeat(auto-fit,minmax(100px,1fr))">
   <div class="td-stat"><div class="val">{{ eracun_stats.total }}</div><div class="lbl">Ukupno</div></div>
-  <div class="td-stat"><div class="val" style="color:#22c55e">{{ eracun_stats.accepted }}</div><div class="lbl">Prihvaceno</div></div>
-  <div class="td-stat"><div class="val" style="color:#ef4444">{{ eracun_stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
-  <div class="td-stat"><div class="val" style="color:#f59e0b">{{ eracun_stats.draft }}</div><div class="lbl">Nacrt</div></div>
-  <div class="td-stat"><div class="val" style="color:#ef4444">{{ eracun_stats.errors }}</div><div class="lbl">Greske</div></div>
+  <div class="td-stat"><div class="val fx-text-green">{{ eracun_stats.accepted }}</div><div class="lbl">Prihvaceno</div></div>
+  <div class="td-stat"><div class="val fx-text-red">{{ eracun_stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="td-stat"><div class="val fx-text-amber">{{ eracun_stats.draft }}</div><div class="lbl">Nacrt</div></div>
+  <div class="td-stat"><div class="val fx-text-red">{{ eracun_stats.errors }}</div><div class="lbl">Greske</div></div>
 </div>
 {% endif %}
 
@@ -96,7 +96,7 @@
     </div>
     <div style="padding:4px 0">
       <input type="checkbox" name="is_active" id="is_active" {% if tenant.is_active %}checked{% endif %}>
-      <label for="is_active" style="display:inline;font-weight:600">Aktivna pretplata</label>
+      <label for="is_active" class="fx-fw-semibold d-inline">Aktivna pretplata</label>
     </div>
   </div>
 
@@ -138,14 +138,14 @@
       </select>
     </div>
     {% if tenant.managed_by %}
-    <div style="background:#f1f5f9;border-radius:6px;padding:10px;font-size:.82rem;margin-top:8px">
+    <div class="fx-rounded-sm fx-fs-note mt-2 fx-bg-surface3 fx-p-10">
       Upravljano od: <strong>{{ tenant.managed_by.operator_name|default:tenant.managed_by.company.name }}</strong>
     </div>
     {% endif %}
   </div>
 </div>
 
-<!-- API pristup -->{% if eracun_cfg %}<div class="td-card" style="margin-top:16px">  <h6>API pristup</h6>  <div class="td-field">    <label>API kljuc</label>    <div style="display:flex;gap:8px;align-items:center">      <input type="text" value="{{ api_key_masked|default:'—' }}" readonly style="font-family:monospace;font-size:.75rem;background:#f8fafc" title="Maskiran iz sigurnosnih razloga">      <form method="post" action="{% url 'registration:propter_regenerate_key' tenant.pk %}" style="display:inline">        {% csrf_token %}        <button class="btn btn-sm btn-outline-warning" onclick="return confirm('Regenerirati API kljuc?')">Regeneriraj</button>      </form>    </div>  </div>  <div class="td-field">    <label>API status</label>    <div style="display:flex;gap:8px;align-items:center">      {% if eracun_cfg.api_enabled %}      <span style="color:#22c55e;font-weight:700">Aktivan</span>      {% else %}      <span style="color:#ef4444;font-weight:700">Neaktivan</span>      {% endif %}      <form method="post" action="{% url 'registration:propter_toggle_api' tenant.pk %}" style="display:inline">        {% csrf_token %}        {% if eracun_cfg.api_enabled %}        <button class="btn btn-sm btn-outline-danger">Deaktiviraj API</button>        {% else %}        <button class="btn btn-sm btn-outline-success">Aktiviraj API</button>        {% endif %}      </form>    </div>  </div>  <div class="td-field">    <label>Rate limit</label>    <input type="text" value="{{ eracun_cfg.api_rate_limit }} zahtjeva/sat" disabled>  </div>  <div class="td-field">    <label>e-Racun konfiguracija</label>    <div style="font-size:.82rem;color:#64748b">      Testno okruzenje: {% if eracun_cfg.use_test_env %}Da{% else %}Ne (produkcija){% endif %} |      Auto-send: {% if eracun_cfg.auto_send %}Da{% else %}Ne{% endif %} |      Prostor: {{ eracun_cfg.oznaka_prostora }} / Uredaj: {{ eracun_cfg.oznaka_uredjaja }}    </div>  </div></div>{% endif %}
+<!-- API pristup -->{% if eracun_cfg %}<div class="td-card mt-3">  <h6>API pristup</h6>  <div class="td-field">    <label>API kljuc</label>    <div class="d-flex fx-gap-2 align-items-center">      <input type="text" value="{{ api_key_masked|default:'—' }}" readonly class="fx-fs-caption fx-bg-surface2 fx-font-mono" title="Maskiran iz sigurnosnih razloga">      <form method="post" action="{% url 'registration:propter_regenerate_key' tenant.pk %}" class="d-inline">        {% csrf_token %}        <button class="btn btn-sm btn-outline-warning" onclick="return confirm('Regenerirati API kljuc?')">Regeneriraj</button>      </form>    </div>  </div>  <div class="td-field">    <label>API status</label>    <div class="d-flex fx-gap-2 align-items-center">      {% if eracun_cfg.api_enabled %}      <span class="fx-text-green fx-fw-bold">Aktivan</span>      {% else %}      <span class="fx-text-red fx-fw-bold">Neaktivan</span>      {% endif %}      <form method="post" action="{% url 'registration:propter_toggle_api' tenant.pk %}" class="d-inline">        {% csrf_token %}        {% if eracun_cfg.api_enabled %}        <button class="btn btn-sm btn-outline-danger">Deaktiviraj API</button>        {% else %}        <button class="btn btn-sm btn-outline-success">Aktiviraj API</button>        {% endif %}      </form>    </div>  </div>  <div class="td-field">    <label>Rate limit</label>    <input type="text" value="{{ eracun_cfg.api_rate_limit }} zahtjeva/sat" disabled>  </div>  <div class="td-field">    <label>e-Racun konfiguracija</label>    <div class="fx-fs-note fx-text-muted">      Testno okruzenje: {% if eracun_cfg.use_test_env %}Da{% else %}Ne (produkcija){% endif %} |      Auto-send: {% if eracun_cfg.auto_send %}Da{% else %}Ne{% endif %} |      Prostor: {{ eracun_cfg.oznaka_prostora }} / Uredaj: {{ eracun_cfg.oznaka_uredjaja }}    </div>  </div></div>{% endif %}
 <!-- Napomene -->
 <div class="td-card">
   <h6>Napomene</h6>
@@ -159,22 +159,22 @@
 
 <!-- Managed clients -->
 {% if managed_clients %}
-<div class="td-card" style="margin-top:20px">
+<div class="td-card mt-4">
   <h6>Klijenti ovog servisa ({{ managed_clients|length }})</h6>
-  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
-    <thead><tr style="border-bottom:2px solid #e2e8f0">
-      <th style="text-align:left;padding:6px">Tvrtka</th>
-      <th style="text-align:left;padding:6px">OIB</th>
-      <th style="text-align:center;padding:6px">Certifikat</th>
-      <th style="text-align:right;padding:6px">e-Racuna</th>
+  <table class="fx-w-full fx-fs-note fx-b-collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th class="text-start fx-p-sm">Tvrtka</th>
+      <th class="text-start fx-p-sm">OIB</th>
+      <th class="text-center fx-p-sm">Certifikat</th>
+      <th class="text-end fx-p-sm">e-Racuna</th>
     </tr></thead>
     <tbody>
     {% for mc in managed_clients %}
     <tr style="border-bottom:1px solid #f1f5f9">
-      <td style="padding:6px"><a href="{% url 'registration:propter_tenant_detail' mc.pk %}">{{ mc.company.name }}</a></td>
-      <td style="padding:6px;color:#64748b">{{ mc.company.oib }}</td>
-      <td style="padding:6px;text-align:center"><span class="cert-dot {{ mc.fina_cert_status }}"></span></td>
-      <td style="padding:6px;text-align:right">{{ mc.eracuni_sent_month }}</td>
+      <td class="fx-p-sm"><a href="{% url 'registration:propter_tenant_detail' mc.pk %}">{{ mc.company.name }}</a></td>
+      <td class="fx-text-muted fx-p-sm">{{ mc.company.oib }}</td>
+      <td class="text-center fx-p-sm"><span class="cert-dot {{ mc.fina_cert_status }}"></span></td>
+      <td class="text-end fx-p-sm">{{ mc.eracuni_sent_month }}</td>
     </tr>
     {% endfor %}
     </tbody>

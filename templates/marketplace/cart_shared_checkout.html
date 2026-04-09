@@ -14,7 +14,7 @@
 .wa-item:last-child { border-bottom: none; }
 .wa-total { display: flex; justify-content: space-between; padding: 14px 0; font-size: 1.2rem; font-weight: 900; border-top: 2px solid var(--border, rgba(255,255,255,0.1)); margin-top: 8px; }
 .wa-total .val { color: var(--gold,#c9a84c); }
-.btn-pay { background: #25D366; color: #fff; border: none; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 12px; }
+.btn-pay { background: #25D366; color:var(--white); border: none; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 12px; }
 .btn-pay:hover { background: #1da851; }
 .wa-info { font-size: .78rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
 .wa-company { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
@@ -36,9 +36,9 @@
     <div class="wa-item">
       <div>
         <strong>{{ item.name }}</strong>
-        <span style="color:var(--text-muted);font-size:.8rem;">x{{ item.qty }} {{ item.unit }}</span>
+        <span class="fx-fs-compact fx-text-muted">x{{ item.qty }} {{ item.unit }}</span>
       </div>
-      <span style="font-weight:700;">{{ item.line_total }}&euro;</span>
+      <span class="fx-fw-bold">{{ item.line_total }}&euro;</span>
     </div>
     {% endfor %}
     <div class="wa-total">
@@ -48,7 +48,7 @@
   </div>
 
   {% if snapshot.delivery_address %}
-  <div class="wa-card" style="font-size:.88rem;">
+  <div class="wa-card fx-fs-body">
     <strong>&#128205; {% trans "Dostava" %}:</strong> {{ snapshot.delivery_address }}
     {% if snapshot.notes %}<br><strong>{% trans "Napomena" %}:</strong> {{ snapshot.notes }}{% endif %}
   </div>

@@ -58,7 +58,7 @@
 .photo-preview{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;justify-content:center}
 .photo-thumb{position:relative;width:72px;height:72px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:3px;width:18px;height:18px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.photo-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);color:var(--white);border:none;border-radius:3px;width:18px;height:18px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .upload-status{font-size:.72rem;color:var(--muted);margin-top:.4rem}
 .upload-status.ok{color:var(--green)}
 .upload-status.err{color:var(--red)}
@@ -66,8 +66,8 @@
 /* Navigation */
 .wz-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface2);border-top:1px solid var(--border);padding:.875rem 1rem;display:flex;gap:.6rem;z-index:100;max-width:760px;margin:0 auto;left:50%;transform:translateX(-50%)}
 .btn-prev{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;cursor:pointer;font-family:inherit;min-height:48px}
-.btn-next{flex:1;background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
-.btn-submit{flex:1;background:var(--green);color:#fff;border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.btn-next{flex:1;background:var(--gold);color:var(--black);border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.btn-submit{flex:1;background:var(--green);color:var(--white);border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
 
 /* Save indicator */
 .save-ind{position:fixed;top:54px;right:12px;font-size:.72rem;padding:.3rem .65rem;border-radius:6px;transition:opacity .4s;z-index:200}
@@ -94,7 +94,7 @@
 .offline-badge.show{display:inline-block}
 
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 
 @media(max-width:500px){
   .wz-grid2,.wz-grid3{grid-template-columns:1fr}
@@ -105,28 +105,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="wz-wrap">
-  <div class="wz-header">
-    <div class="wz-title">{% trans "📋 Novi nalaz / dijagnoza" %}</div>
-    <span class="offline-badge" id="offlineBadge">{% trans "⚡ Offline – lokalno spremanje" %}</span>
-    <div id="saveIndicator" class="save-ind"></div>
-  </div>
+<!-- lang: topbar -->
 
   <!-- Step progress -->
   <div class="wz-steps" id="stepBar">
@@ -182,7 +161,7 @@
       <div class="opt-group" id="opt-object_type">
         <label class="opt"><input type="radio" name="object_type" value="apartment">
           <span class="opt-icon">🏢</span><div class="opt-wrap"><span class="opt-text">{% trans "Stambena zgrada (stan)" %}</span>
-            <span class="opt-sub"><input class="wz-input" name="floor" id="f_floor" placeholder="{% trans "Etaža: ___" %}" style="display:inline;width:100px;margin-top:.3rem;padding:.3rem .5rem;font-size:.8rem" onclick="event.stopPropagation()"></span>
+            <span class="opt-sub"><input class="wz-input fx-fs-compact d-inline fx-mt-sm" name="floor" id="f_floor" placeholder="{% trans "Etaža: ___" %}" style="width:100px;padding:.3rem .5rem" onclick="event.stopPropagation()"></span>
           </div></label>
         <label class="opt"><input type="radio" name="object_type" value="house">
           <span class="opt-icon">🏠</span><div class="opt-wrap"><span class="opt-text">{% trans "Obiteljska kuća" %}</span></div></label>
@@ -366,7 +345,7 @@
         <label class="opt"><input type="radio" name="complexity" value="challenging">
           <span class="opt-icon">🔴</span><div class="opt-wrap"><span class="opt-text">{% trans "Izazovno" %}</span></div></label>
       </div>
-      <div style="margin-top:.75rem">
+      <div class="fx-mt-4">
         <label class="wz-label">{% trans "Skriveni rizici" %}</label>
         <textarea class="wz-textarea" name="hidden_risks" id="f_hidden_risks" placeholder="{% trans "Zapažanja majstora o potencijalnim problemima..." %}"></textarea>
       </div>
@@ -379,8 +358,8 @@
           {% trans "📸 Fotografirajte: sva 4 zida · pod · instalacije · strop" %}
         </div>
         <button type="button" class="photo-btn" onclick="if(window.FenixCamera){FenixCamera.quick('assess-photo-preview-3',{onReady:function(r){fetch(r.dataUrl).then(function(res){return res.blob()}).then(function(blob){var f=new File([blob],r.filename,{type:'image/jpeg'});var dt=new DataTransfer();dt.items.add(f);document.getElementById('photo-input-3').files=dt.files;handlePhotos(document.getElementById('photo-input-3'),3)})}})}else{triggerPhoto(3)}">{% trans "📷 Fotografiraj / Odaberi" %}</button>
-        <div id="assess-photo-preview-3" style="display:none;margin:.5rem 0"></div>
-        <input type="file" id="photo-input-3" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotos(this,3)">
+        <div id="assess-photo-preview-3" class="fx-hidden" style="margin:.5rem 0"></div>
+        <input type="file" id="photo-input-3" accept="image/*" capture="environment" multiple class="fx-hidden" onchange="handlePhotos(this,3)">
         <div class="photo-preview" id="preview-3"></div>
         <div class="upload-status" id="status-3"></div>
       </div>
@@ -409,7 +388,7 @@
 
     <div class="wz-card">
       <div class="wz-card-title">{% trans "🪟 Prozor / Ventilacija" %}</div>
-      <div class="opt-group" id="opt-window" style="margin-bottom:.75rem">
+      <div class="opt-group fx-mb-4" id="opt-window">
         <label class="opt"><input type="radio" name="window" value="good">
           <span class="opt-icon">✅</span><span class="opt-text">{% trans "Prozor postoji – dobro stanje" %}</span></label>
         <label class="opt"><input type="radio" name="window" value="replace">
@@ -519,7 +498,7 @@
 
     <div class="wz-card">
       <div class="wz-card-title">{% trans "📱 SMART kupaona" %}</div>
-      <div class="check-grid" style="margin-bottom:.75rem">
+      <div class="check-grid fx-mb-4">
         <label class="opt"><input type="checkbox" name="smart" value="smart_mirror"><span class="opt-text">{% trans "Pametno ogledalo" %}</span></label>
         <label class="opt"><input type="checkbox" name="smart" value="smart_shower"><span class="opt-text">{% trans "Smart tuš" %}</span></label>
         <label class="opt"><input type="checkbox" name="smart" value="leak_sensor"><span class="opt-text">{% trans "Senzori curenja" %}</span></label>
@@ -608,7 +587,7 @@
           <input class="wz-input" name="price_to" id="f_price_to" type="number" min="0" step="100" placeholder="{% trans "npr. 5000" %}">
         </div>
       </div>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">{% trans "Okvirna procjena – konačna cijena u ponudi" %}</div>
+      <div class="fx-fs-sm fx-text-muted" style="margin-top:.4rem">{% trans "Okvirna procjena – konačna cijena u ponudi" %}</div>
     </div>
 
   </div><!-- /panel-5 -->
@@ -700,9 +679,9 @@
 
   <!-- Navigation buttons (fixed bottom) -->
   <div class="wz-nav">
-    <button type="button" class="btn-prev" id="prevBtn" onclick="prevStep()" style="display:none">{% trans "← Natrag" %}</button>
+    <button type="button" class="btn-prev fx-hidden" id="prevBtn" onclick="prevStep()">{% trans "← Natrag" %}</button>
     <button type="button" class="btn-next" id="nextBtn" onclick="nextStep()">{% trans "Dalje →" %}</button>
-    <button type="button" class="btn-submit" id="submitBtn" onclick="submitWizard()" style="display:none">{% trans "✓ Spremi nalaz" %}</button>
+    <button type="button" class="btn-submit fx-hidden" id="submitBtn" onclick="submitWizard()">{% trans "✓ Spremi nalaz" %}</button>
   </div>
 </div>
 

@@ -4,22 +4,22 @@
 {% block page_title %}Audit Hash Chain{% endblock %}
 {% block content %}
 <style>
-.av-card{background:#fff;border-radius:10px;padding:20px;border:1px solid #f1f5f9;margin-bottom:16px;max-width:700px}
-.av-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 16px}
+.av-card{background:var(--bg-card);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;max-width:700px}
+.av-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 16px}
 .av-result{text-align:center;padding:30px 20px;border-radius:10px;margin-bottom:20px}
 .av-result.valid{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #22c55e}
 .av-result.broken{background:linear-gradient(135deg,#fef2f2,#fecaca);border:2px solid #ef4444}
 .av-result .icon{font-size:3rem;margin-bottom:8px}
 .av-result .title{font-size:1.2rem;font-weight:800}
-.av-result.valid .title{color:#166534}
-.av-result.broken .title{color:#dc2626}
+.av-result.valid .title{color:var(--green)}
+.av-result.broken .title{color:var(--red)}
 .av-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-.av-stat{background:#f8fafc;border-radius:8px;padding:12px;text-align:center}
-.av-stat .val{font-size:1.3rem;font-weight:700;color:#0f172a}
-.av-stat .lbl{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-.av-hash{font-family:monospace;font-size:.72rem;color:#64748b;background:#f1f5f9;padding:8px 12px;border-radius:6px;word-break:break-all;margin-top:8px}
-.av-broken{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;margin-top:16px}
-.av-broken strong{color:#dc2626}
+.av-stat{background:var(--surface2);border-radius:8px;padding:12px;text-align:center}
+.av-stat .val{font-size:1.3rem;font-weight:700;color:var(--text)}
+.av-stat .lbl{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.av-hash{font-family:monospace;font-size:.72rem;color:var(--text-dim);background:var(--surface3);padding:8px 12px;border-radius:6px;word-break:break-all;margin-top:8px}
+.av-broken{background:var(--red-dim);border:1px solid #fecaca;border-radius:8px;padding:14px;margin-top:16px}
+.av-broken strong{color:var(--red)}
 .av-actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
 </style>
 
@@ -34,7 +34,7 @@
       HASH CHAIN PREKINUT
     {% endif %}
   </div>
-  <div style="font-size:.85rem;color:#475569;margin-top:6px">
+  <div class="fx-fs-base fx-text-dim mt-1">
     {{ company.name }} — Provjera izvrsena {{ "now"|date:"d.m.Y H:i" }}
   </div>
 </div>
@@ -59,9 +59,9 @@
   </div>
 
   {% if last_hash %}
-  <div style="font-size:.8rem;font-weight:600;color:#334155;margin-bottom:4px">Zadnji hash u lancu:</div>
+  <div class="fx-fs-compact fx-fw-semibold mb-1" style="color:var(--muted2)">Zadnji hash u lancu:</div>
   <div class="av-hash">{{ last_hash }}</div>
-  <div style="font-size:.75rem;color:#64748b;margin-top:4px">
+  <div class="fx-fs-caption fx-text-dim mt-1">
     Temeljnica: {{ last_entry.entry_number }} ({{ last_entry.date|date:"d.m.Y" }})
   </div>
   {% endif %}
@@ -69,7 +69,7 @@
   {% if broken_line %}
   <div class="av-broken">
     <strong>Manipulacija detektirana!</strong><br>
-    <span style="font-size:.85rem">
+    <span class="fx-fs-base">
       Linija ID={{ broken_line.id }} — Temeljnica {{ broken_line.journal_entry.entry_number }}<br>
       Konto {{ broken_line.account.code }} | {{ broken_line.get_side_display }} | {{ broken_line.amount }} EUR<br>
       Hash chain prekinut na ovoj tocki. Svi zapisi NAKON ove linije su nepouzdani.
@@ -80,16 +80,16 @@
 
 <div class="av-card">
   <h6>O SHA-256 Hash Chainu</h6>
-  <div style="font-size:.82rem;color:#475569;line-height:1.6">
+  <div class="fx-fs-note fx-text-dim fx-lh-normal">
     <p>Svaki financijski zapis (LedgerLine) sadrzi SHA-256 hash koji ovisi o:</p>
     <ul style="margin:6px 0;padding-left:20px">
       <li>ID zapisa, konto, strana (duguje/potrazuje), iznos</li>
       <li>Broj temeljnice i datum</li>
       <li><strong>Hash prethodnog zapisa</strong> (blockchain princip)</li>
     </ul>
-    <p style="margin-top:8px"><strong>Formula:</strong> <code>H(n) = SHA256(H(n-1) | Data(n))</code></p>
+    <p class="mt-2"><strong>Formula:</strong> <code>H(n) = SHA256(H(n-1) | Data(n))</code></p>
     <p>Promjena bilo kojeg zapisa lomi lanac od te tocke nadalje i odmah je detektabilna.</p>
-    <p style="margin-top:8px;color:#1e40af"><strong>GoBD / porezna uskladenost:</strong> Ovaj mehanizam osigurava nepromjenjivost knjizenja u skladu s njemackim GoBD standardom i hrvatskim poreznim propisima.</p>
+    <p class="mt-2 fx-text-blue"><strong>GoBD / porezna uskladenost:</strong> Ovaj mehanizam osigurava nepromjenjivost knjizenja u skladu s njemackim GoBD standardom i hrvatskim poreznim propisima.</p>
   </div>
 </div>
 

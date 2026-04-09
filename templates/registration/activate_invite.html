@@ -3,25 +3,25 @@
 {% block title %}Aktivirajte pristup — {{ company.name }}{% endblock %}
 {% block content %}
 <div style="max-width:480px;margin:60px auto;padding:0 20px">
-  <div style="text-align:center;margin-bottom:32px">
-    <h1 style="font-family:'Cormorant Garamond',serif;color:var(--gold,#c9a84c);font-size:1.6rem;margin-bottom:8px">
+  <div class="text-center mb-5">
+    <h1 class="fx-text-gold mb-2 fx-fs-5xl" style="font-family:'Cormorant Garamond',serif">
       Dobrodošli, {{ claim.first_name }}!
     </h1>
-    <p style="color:#94a3b8;font-size:.9rem">Aktivirajte pristup firmi <strong style="color:#e2e8f0">{{ company.name }}</strong></p>
+    <p class="fx-text-muted fx-fs-md">Aktivirajte pristup firmi <strong class="fx-text-body">{{ company.name }}</strong></p>
   </div>
 
-  <form method="post" style="display:flex;flex-direction:column;gap:12px">
+  <form method="post" class="d-flex fx-gap-3 fx-flex-col">
     {% csrf_token %}
-    <label style="color:#94a3b8;font-size:.8rem">Postavite lozinku (min. 8 znakova)</label>
+    <label class="fx-text-muted fx-fs-compact">Postavite lozinku (min. 8 znakova)</label>
     <input name="password1" type="password" required minlength="8" placeholder="Nova lozinka"
-      style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
-    <button type="submit" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px">
+      class="fx-bg-card fx-text-body fx-rounded fx-fs-normal fx-p-12" style="border:1px solid #333">
+    <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-pointer mt-2 fx-bg-gold" style="padding:14px">
       Aktivirajte pristup
     </button>
   </form>
 
   {% for msg in messages %}
-  <div style="margin-top:16px;padding:12px;border-radius:8px;font-size:.85rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171">{{ msg }}</div>
+  <div class="fx-rounded fx-fs-base mt-3 fx-p-12 fx-text-red" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">{{ msg }}</div>
   {% endfor %}
 </div>
 {% endblock %}

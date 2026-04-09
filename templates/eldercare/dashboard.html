@@ -4,25 +4,25 @@
 {% block page_title %}Dom za starije{% endblock %}
 {% block extra_css %}
 <style>
-.ec-stat{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #c8a24e33;border-radius:12px;padding:1.5rem;text-align:center;color:#f0e6d3}
-.ec-stat .val{font-size:2rem;font-weight:700;color:#c8a24e;font-family:"Cormorant Garamond",serif}
+.ec-stat{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(200,162,78,0.2);border-radius:12px;padding:1.5rem;text-align:center;color:var(--text)}
+.ec-stat .val{font-size:2rem;font-weight:700;color:var(--gold);font-family:"Cormorant Garamond",serif}
 .ec-stat .label{font-size:.85rem;color:#a0a0b0;margin-top:.3rem}
-.ec-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.ec-card h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
+.ec-card{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.ec-card h5{color:var(--gold);font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
 .shift-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;margin:3px}
-.shift-badge.morning{background:#f59e0b22;color:#f59e0b}
-.shift-badge.afternoon{background:#3b82f622;color:#3b82f6}
-.shift-badge.night{background:#8b5cf622;color:#8b5cf6}
-.shift-badge.day{background:#22c55e22;color:#22c55e}
-.act-item{padding:.6rem .8rem;border-left:3px solid #c8a24e;background:#c8a24e0a;border-radius:0 8px 8px 0;margin-bottom:.5rem}
+.shift-badge.morning{background:var(--amber)22;color:var(--amber)}
+.shift-badge.afternoon{background:rgba(59,130,246,0.13);color:var(--blue)}
+.shift-badge.night{background:var(--purple)22;color:#8b5cf6}
+.shift-badge.day{background:var(--green)22;color:var(--green)}
+.act-item{padding:.6rem .8rem;border-left:3px solid #c8a24e;background:var(--gold)0a;border-radius:0 8px 8px 0;margin-bottom:.5rem}
 @media(max-width:768px){.ec-stat .val{font-size:1.5rem}.ec-stat{padding:1rem}}
 </style>
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif">Dashboard — Dom za starije</h2>
+  <h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif">Dashboard — Dom za starije</h2>
   <div class="d-flex gap-2 flex-wrap">
-    <a href="{% url 'eldercare:resident_create' %}" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-plus-lg"></i> Novi korisnik</a>
+    <a href="{% url 'eldercare:resident_create' %}" class="btn btn-sm fx-bg-gold fx-fw-semibold fx-text-dark"><i class="bi bi-plus-lg"></i> Novi korisnik</a>
     <a href="{% url 'eldercare:shift_schedule' %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-calendar3"></i> Smjene</a>
   </div>
 </div>
@@ -39,12 +39,12 @@
     <div class="ec-card">
       <h5><i class="bi bi-clock"></i> Danas na smjeni</h5>
       {% for s in today_shifts %}
-      <div style="margin-bottom:.3rem">
+      <div class="fx-mb-2">
         <span class="shift-badge {{ s.shift_type }}">{{ s.get_shift_type_display }}</span>
-        <span style="color:#f0e6d3">{{ s.staff_member.get_full_name }}</span>
+        <span class="fx-text-body">{{ s.staff_member.get_full_name }}</span>
       </div>
       {% empty %}
-      <p style="color:#666">Nema unesenih smjena za danas.</p>
+      <p class="fx-text-dim">Nema unesenih smjena za danas.</p>
       {% endfor %}
     </div>
   </div>
@@ -54,11 +54,11 @@
       {% for a in upcoming_activities %}
       <div class="act-item">
         <strong>{{ a.title }}</strong>
-        <span style="float:right;font-size:.8rem;color:#888">{{ a.date|date:"d.m.Y" }}</span>
-        <div style="font-size:.8rem;color:#888">{{ a.get_category_display }}{% if a.time_from %} · {{ a.time_from|time:"H:i" }}{% endif %}</div>
+        <span class="fx-fs-compact fx-text-muted" style="float:right">{{ a.date|date:"d.m.Y" }}</span>
+        <div class="fx-fs-compact fx-text-muted">{{ a.get_category_display }}{% if a.time_from %} · {{ a.time_from|time:"H:i" }}{% endif %}</div>
       </div>
       {% empty %}
-      <p style="color:#666">Nema planiranih aktivnosti.</p>
+      <p class="fx-text-dim">Nema planiranih aktivnosti.</p>
       {% endfor %}
     </div>
   </div>

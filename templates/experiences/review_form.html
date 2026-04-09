@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -38,12 +38,12 @@
 {% endblock %}
 {% block content %}
 <div class="exp-container">
-<h2 style="font-size:1.5rem;font-weight:800;margin:0 0 1.5rem;color:var(--text)"><i class="fas fa-star me-2" style="color:#f59e0b"></i>Ocijeni: {{ booking.schedule.experience.name }}</h2>
+<h2 class="fx-fs-5xl fx-fw-800 fx-text-body" style="margin:0 0 1.5rem"><i class="fas fa-star me-2 fx-text-amber"></i>Ocijeni: {{ booking.schedule.experience.name }}</h2>
 <form method="POST" class="exp-form">
   {% csrf_token %}
   <div class="row g-3">
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Ocjena (1-5)</label><select name="rating" class="form-select exp-input" required><option value="5">⭐⭐⭐⭐⭐ Izvrsno</option><option value="4">⭐⭐⭐⭐ Vrlo dobro</option><option value="3">⭐⭐⭐ Dobro</option><option value="2">⭐⭐ Loše</option><option value="1">⭐ Užasno</option></select></div>
-    <div class="col-12"><label class="form-label small fw-bold" style="color:var(--text-dim)">Komentar</label><textarea name="text" rows="3" class="form-control exp-input"></textarea></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Ocjena (1-5)</label><select name="rating" class="form-select exp-input" required><option value="5">⭐⭐⭐⭐⭐ Izvrsno</option><option value="4">⭐⭐⭐⭐ Vrlo dobro</option><option value="3">⭐⭐⭐ Dobro</option><option value="2">⭐⭐ Loše</option><option value="1">⭐ Užasno</option></select></div>
+    <div class="col-12"><label class="form-label small fw-bold fx-text-dim">Komentar</label><textarea name="text" rows="3" class="form-control exp-input"></textarea></div>
   </div>
   <div class="mt-4"><button type="submit" class="exp-btn-gold"><i class="fas fa-paper-plane me-1"></i>Pošalji ocjenu</button></div>
 </form>

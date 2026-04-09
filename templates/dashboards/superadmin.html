@@ -4,11 +4,11 @@
 <!-- Company Subscriptions and Recent Registrations -->
 {% if company_subs %}
 <div class="stat-card mt-3">
-  <h6 style="font-weight:700;font-size:0.85rem;margin-bottom:12px">
-    <i class="fas fa-crown" style="color:var(--gold,#c9a84c)"></i> {% trans "Aktivne pretplate tvrtki" %}
+  <h6 class="fx-fw-bold fx-fs-base mb-3">
+    <i class="fas fa-crown fx-text-gold"></i> {% trans "Aktivne pretplate tvrtki" %}
   </h6>
   <div class="table-responsive">
-    <table class="table table-sm mb-0" style="font-size:0.78rem">
+    <table class="table table-sm mb-0 fx-fs-body-sm">
       <thead><tr><th>{% trans "Tvrtka" %}</th><th>{% trans "Plan" %}</th><th>{% trans "Cijena" %}</th><th>{% trans "Od" %}</th></tr></thead>
       <tbody>
       {% for sub in company_subs %}
@@ -28,24 +28,24 @@
 
 {% if all_companies_subs %}
 <div class="stat-card mt-3" id="company-module-mgmt">
-  <h6 style="font-weight:700;font-size:0.85rem;margin-bottom:16px">
-    <i class="fas fa-sliders-h" style="color:var(--gold,#c9a84c)"></i>
+  <h6 class="fx-fw-bold fx-fs-base mb-3">
+    <i class="fas fa-sliders-h fx-text-gold"></i>
     {% trans "Upravljanje modulima po tvrtki" %}
-    <span style="font-size:.72rem;font-weight:400;color:#6b7280;margin-left:8px">{% trans "Potvrdite okvire → Spremi" %}</span>
+    <span class="fx-fs-sm fx-fw-normal fx-text-muted" style="margin-left:8px">{% trans "Potvrdite okvire → Spremi" %}</span>
   </h6>
   {% for row in all_companies_subs %}
   {% if row.sub %}
   <details class="f-accordion">
     <summary>
       <span>
-        <strong style="color:#f0ede8">{{ row.company.name }}</strong>
-        <span style="color:#4a5060;margin-left:8px">{{ row.company.oib }}</span>
+        <strong class="fx-text-white">{{ row.company.name }}</strong>
+        <span class="fx-text-muted" style="margin-left:8px">{{ row.company.oib }}</span>
       </span>
       <span>
-        <span class="badge" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);font-size:.65rem;padding:3px 8px;border-radius:2px">
+        <span class="badge fx-fs-xs fx-text-gold" style="background:rgba(201,168,76,.15);padding:3px 8px;border-radius:2px">
           {{ row.sub.plan|upper }}{% if row.sub.modules_override %} *{% endif %}
         </span>
-        <i class="fas fa-chevron-down" style="color:#4a5060;margin-left:8px;font-size:.7rem"></i>
+        <i class="fas fa-chevron-down fx-fs-sm fx-text-muted" style="margin-left:8px"></i>
       </span>
     </summary>
     <div class="f-accordion-body">
@@ -61,22 +61,22 @@
           </label>
           {% endfor %}
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <button type="submit" class="f-btn f-btn-gold" style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase">
+        <div class="d-flex fx-gap-3 align-items-center">
+          <button type="submit" class="f-btn f-btn-gold fx-fs-compact fx-uppercase" style="font-family:'Barlow Condensed',sans-serif;letter-spacing:2px">
             {% trans "Spremi module" %}
           </button>
           {% if row.sub.modules_override %}
           <a href="#" onclick="if(confirm('Resetirati na plan defaults?'))this.closest('form').querySelector('[name=modules]').checked=false;return false"
-             style="font-size:.75rem;color:#4a5060">{% trans "* Prilagođeno (klikni Spremi bez oznaka = reset na plan)" %}</a>
+             class="fx-fs-caption fx-text-muted">{% trans "* Prilagođeno (klikni Spremi bez oznaka = reset na plan)" %}</a>
           {% else %}
-          <span style="font-size:.72rem;color:#4a5060">Plan: {{ row.sub.plan }}</span>
+          <span class="fx-fs-sm fx-text-muted">Plan: {{ row.sub.plan }}</span>
           {% endif %}
         </div>
       </form>
     </div>
   </details>
   {% else %}
-  <div style="padding:8px 14px;border:1px solid #1a1a1a;margin-bottom:4px;font-size:0.78rem;color:#4a5060">
+  <div class="fx-fs-body-sm mb-1 fx-text-muted" style="padding:8px 14px;border:1px solid #1a1a1a">
     {{ row.company.name }} <em>{% trans "– nema aktivne pretplate" %}</em>
   </div>
   {% endif %}
@@ -86,12 +86,12 @@
 
 {% if recent_registrations %}
 <div class="stat-card mt-3">
-  <h6 style="font-weight:700;font-size:0.85rem;margin-bottom:12px">
-    <i class="fas fa-building" style="color:var(--gold,#c9a84c)"></i> {% trans "Zadnje registracije" %}
-    <a href="/register/superadmin/registrations/" style="font-size:.75rem;color:var(--gold,#c9a84c);float:right;font-weight:400">{% trans "Sve &rarr;" %}</a>
+  <h6 class="fx-fw-bold fx-fs-base mb-3">
+    <i class="fas fa-building fx-text-gold"></i> {% trans "Zadnje registracije" %}
+    <a href="/register/superadmin/registrations/" class="fx-fs-caption fx-fw-normal fx-text-gold" style="float:right">{% trans "Sve &rarr;" %}</a>
   </h6>
   <div class="table-responsive">
-    <table class="table table-sm mb-0" style="font-size:0.78rem">
+    <table class="table table-sm mb-0 fx-fs-body-sm">
       <thead><tr><th>{% trans "Tvrtka" %}</th><th>{% trans "Plan" %}</th><th>{% trans "Status" %}</th><th>{% trans "Datum" %}</th><th></th></tr></thead>
       <tbody>
       {% for reg in recent_registrations %}
@@ -100,7 +100,7 @@
         <td>{{ reg.selected_plan }}</td>
         <td>{{ reg.status }}</td>
         <td>{{ reg.created_at|date:"d.m H:i" }}</td>
-        <td><a href="/register/superadmin/registrations/{{ reg.pk }}/" style="color:var(--gold,#c9a84c)">{% trans "Pregledaj" %}</a></td>
+        <td><a href="/register/superadmin/registrations/{{ reg.pk }}/" class="fx-text-gold">{% trans "Pregledaj" %}</a></td>
       </tr>
       {% endfor %}
       </tbody>
@@ -114,19 +114,19 @@
 
 {% block content %}
 <link rel="stylesheet" href="/static/css/apps/dashboard.css">
-<div class="mb-3"><a href="{% url 'cross_company_dashboard' %}" class="btn" style="background:var(--gold);color:#000;font-weight:bold"><i class="fas fa-globe me-1"></i>Cross-Company Dashboard — Dugovi po OIB-u</a></div>
+<div class="mb-3"><a href="{% url 'cross_company_dashboard' %}" class="btn fx-text-dark fx-fw-bold fx-bg-gold"><i class="fas fa-globe me-1"></i>Cross-Company Dashboard — Dugovi po OIB-u</a></div>
 
 <div class="lang-switcher">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
   {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
+  <form action="/i18n/setlang/" method="post" class="d-inline">
     {% csrf_token %}
     <input name="next" type="hidden" value="{{ request.get_full_path }}">
     <input name="language" type="hidden" value="{{ lang_code }}">
     {% if lang_code == CURRENT_LANG %}
-    <button type="submit" class="lang-btn lang-btn-active"><span style="font-size:1rem">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-active"><span class="fx-fs-lg">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
     {% else %}
-    <button type="submit" class="lang-btn lang-btn-inactive"><span style="font-size:1rem">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-inactive"><span class="fx-fs-lg">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
     {% endif %}
   </form>
   {% endfor %}
@@ -135,106 +135,106 @@
 <!-- Stats -->
 <div class="row g-2 mb-3">
     <div class="col-6 col-md-3">
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="d-flex justify-content-between align-items-start">
                 <div><div class="label">{% trans "Korisnici" %}</div><div class="value">{{ total_users|default:"0" }}</div></div>
-                <div class="icon f-stat-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-users"></i></div>
+                <div class="icon f-stat-icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-users"></i></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="d-flex justify-content-between align-items-start">
                 <div><div class="label">{% trans "Aktivni" %}</div><div class="value">{{ active_users|default:"0" }}</div></div>
-                <div class="icon f-stat-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-user-check"></i></div>
+                <div class="icon f-stat-icon fx-text-green fx-bg-green-dim"><i class="fas fa-user-check"></i></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="d-flex justify-content-between align-items-start">
                 <div><div class="label">{% trans "Staff" %}</div><div class="value">{{ staff_users|default:"0" }}</div></div>
-                <div class="icon f-stat-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-shield"></i></div>
+                <div class="icon f-stat-icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-user-shield"></i></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="d-flex justify-content-between align-items-start">
                 <div><div class="label">{% trans "Admini" %}</div><div class="value">{{ superusers|default:"0" }}</div></div>
-                <div class="icon f-stat-icon" style="background:#fce7f3;color:#db2777"><i class="fas fa-crown"></i></div>
+                <div class="icon f-stat-icon" style="background:rgba(236,72,153,0.1);color:rgba(236,72,153,0.9)"><i class="fas fa-crown"></i></div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Quick Actions - Mobile Friendly -->
-<h6 style="font-weight:700;font-size:0.85rem;margin-bottom:12px">
+<h6 class="fx-fw-bold fx-fs-base mb-3">
     <i class="fas fa-bolt text-warning"></i> {% trans "Brze akcije" %}
 </h6>
 
 <div class="row g-2 mb-3">
     <div class="col-12 col-md-6">
         <a href="{% url 'worktime:ts_worker' %}" class="action-card">
-            <i class="f-stat-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-clock"></i></i>
+            <i class="f-stat-icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-clock"></i></i>
             <div>{% trans "Radno vrijeme" %}<div class="desc">{% trans "Štoperica, unos sati, evidencija" %}</div></div>
         </a>
         <a href="/worktime/manager/" class="action-card">
-            <i class="f-stat-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-users"></i></i>
+            <i class="f-stat-icon fx-text-green fx-bg-green-dim"><i class="fas fa-users"></i></i>
             <div>{% trans "Evidencija sati" %}<div class="desc">{% trans "Pregled, odobrenje, PDF export" %}</div></div>
         </a>
         <a href="{% url 'invoicing:index' %}" class="action-card">
-            <i class="f-stat-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-file-invoice-dollar"></i></i>
+            <i class="f-stat-icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-file-invoice-dollar"></i></i>
             <div>{% trans "Fakturiranje" %}<div class="desc">{% trans "Kreiraj i upravljaj fakturama" %}</div></div>
         </a>
         <a href="/projects/" class="action-card">
-            <i class="f-stat-icon" style="background:#e0e7ff;color:#4f46e5"><i class="fas fa-hard-hat"></i></i>
+            <i class="f-stat-icon fx-text-purple fx-bg-blue-dim"><i class="fas fa-hard-hat"></i></i>
             <div>{% trans "Projekti" %}<div class="desc">{% trans "Aktivni projekti i zadaci" %}</div></div>
         </a>
         <a href="{% url 'partners:list' %}" class="action-card">
-            <i class="f-stat-icon" style="background:#fce7f3;color:#db2777"><i class="fas fa-handshake"></i></i>
+            <i class="f-stat-icon" style="background:rgba(236,72,153,0.1);color:rgba(236,72,153,0.9)"><i class="fas fa-handshake"></i></i>
             <div>{% trans "Partneri" %}<div class="desc">{% trans "Klijenti i dobavljači" %}</div></div>
         </a>
     </div>
     <div class="col-12 col-md-6">
         <a href="/accounts/" class="action-card">
-            <i class="f-stat-icon" style="background:#f1f5f9;color:#475569"><i class="fas fa-users-cog"></i></i>
+            <i class="f-stat-icon fx-text-dim fx-bg-surface3"><i class="fas fa-users-cog"></i></i>
             <div>{% trans "Korisnici" %}<div class="desc">{% trans "Upravljanje korisnicima i rolama" %}</div></div>
         </a>
         <a href="/companies/" class="action-card">
-            <i class="f-stat-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-building"></i></i>
+            <i class="f-stat-icon fx-text-green fx-bg-green-dim"><i class="fas fa-building"></i></i>
             <div>{% trans "Tvrtke" %}<div class="desc">{% trans "Upravljanje tvrtkama" %}</div></div>
         </a>
         <a href="/documents/" class="action-card">
-            <i class="f-stat-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-folder-open"></i></i>
+            <i class="f-stat-icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-folder-open"></i></i>
             <div>{% trans "Dokumenti" %}<div class="desc">{% trans "Upload i pregled dokumenata" %}</div></div>
         </a>
         <a href="/calculator/" class="action-card">
-            <i class="f-stat-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-calculator"></i></i>
+            <i class="f-stat-icon fx-text-purple fx-bg-purple-dim"><i class="fas fa-calculator"></i></i>
             <div>{% trans "Kalkulator" %}<div class="desc">{% trans "Procjene i kalkulacije" %}</div></div>
         </a>
         <a href="{% url 'pos:new_terminal' %}" class="action-card">
-            <i class="f-stat-icon" style="background:#111827;color:var(--gold,#c9a84c)"><i class="fas fa-cash-register"></i></i>
+            <i class="f-stat-icon fx-bg-card fx-text-gold"><i class="fas fa-cash-register"></i></i>
             <div>{% trans "POS Kasa" %}<div class="desc">{% trans "Terminali, smjene, bonovi" %}</div></div>
         </a>
         <a href="/burza/" class="action-card">
-            <i class="f-stat-icon" style="background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)"><i class="fas fa-handshake-angle"></i></i>
+            <i class="f-stat-icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-handshake-angle"></i></i>
             <div>{% trans "Burza projekata" %}<div class="desc">{% trans "Upiti, kanban, ponude" %}</div></div>
         </a>
         <a href="/superadmin/companies/" class="action-card">
-            <i class="f-stat-icon" style="background:#0f172a;color:var(--gold,#c9a84c)"><i class="fas fa-building"></i></i>
+            <i class="f-stat-icon fx-bg-deep fx-text-gold"><i class="fas fa-building"></i></i>
             <div>{% trans "Upravljanje tvrtkama" %}<div class="desc">{% trans "Lista, impersonacija, nova tvrtka" %}</div></div>
         </a>
         <a href="/register/superadmin/registrations/" class="action-card">
-            <i class="f-stat-icon" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)"><i class="fas fa-building"></i></i>
-            <div>Registracije {% if pending_registrations %}<span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">{{ pending_registrations }}</span>{% endif %}<div class="desc">{% trans "Odobravanje novih tvrtki" %}</div></div>
+            <i class="f-stat-icon fx-text-gold" style="background:rgba(201,168,76,.15)"><i class="fas fa-building"></i></i>
+            <div>Registracije {% if pending_registrations %}<span class="badge bg-warning text-dark ms-1 fx-fs-xs">{{ pending_registrations }}</span>{% endif %}<div class="desc">{% trans "Odobravanje novih tvrtki" %}</div></div>
         </a>
         <a href="/admin/" class="action-card" target="_blank">
-            <i class="f-stat-icon" style="background:#0f172a;color:var(--gold,#c9a84c)"><i class="fas fa-tools"></i></i>
+            <i class="f-stat-icon fx-bg-deep fx-text-gold"><i class="fas fa-tools"></i></i>
             <div>{% trans "Django Admin" %}<div class="desc">{% trans "Napredne postavke sustava" %}</div></div>
         </a>
         <a href="{% url 'website:admin_panel' %}" class="action-card" onclick="this.style.pointerEvents='none'; this.style.opacity='0.6'; this.querySelector('.fa-globe').className='fas fa-spinner fa-spin';">
-            <i class="f-stat-icon" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)"><i class="fas fa-globe"></i></i>
+            <i class="f-stat-icon fx-text-gold" style="background:rgba(201,168,76,.15)"><i class="fas fa-globe"></i></i>
             <div>{% trans "Web Portal CMS" %}<div class="desc">{% trans "Javni web, galerija, SOS" %}</div></div>
         </a>
     </div>
@@ -244,36 +244,36 @@
 {% if ai_pending_count %}
 <div class="stat-card mt-3" style="border-left:3px solid var(--amber)">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 style="font-weight:700;font-size:0.85rem;margin:0">
-            <i class="fas fa-robot" style="color:var(--amber)"></i> {% trans "AI čekajuće akcije" %}
-            <span class="badge ms-1" style="background:var(--amber);color:#000;font-size:.65rem">{{ ai_pending_count }}</span>
+        <h6 class="fx-fw-bold fx-fs-base fx-m-0">
+            <i class="fas fa-robot fx-text-amber"></i> {% trans "AI čekajuće akcije" %}
+            <span class="badge ms-1 fx-text-dark fx-fs-xs" style="background:var(--amber)">{{ ai_pending_count }}</span>
         </h6>
-        <a href="/hr/superadmin-ai/" class="btn btn-sm" style="font-size:.7rem;padding:2px 8px;border:1px solid var(--amber);color:var(--amber)">{% trans "Pregled" %} &rarr;</a>
+        <a href="/hr/superadmin-ai/" class="btn btn-sm fx-fs-sm fx-text-amber fx-p-btn" style="border:1px solid var(--amber)">{% trans "Pregled" %} &rarr;</a>
     </div>
     {% for item in ai_pending_by_module %}
-    <div class="d-flex justify-content-between" style="font-size:.75rem;padding:2px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text-dim)"><i class="fas fa-code-branch" style="width:14px"></i> {{ item.module }}.{{ item.action_type }}</span>
-        <span class="badge" style="background:var(--surface2);color:var(--text)">{{ item.n }}</span>
+    <div class="d-flex justify-content-between fx-fs-caption fx-bb" style="padding:2px 0">
+        <span class="fx-text-dim"><i class="fas fa-code-branch" style="width:14px"></i> {{ item.module }}.{{ item.action_type }}</span>
+        <span class="badge fx-text-body fx-bg-surface2">{{ item.n }}</span>
     </div>
     {% endfor %}
 </div>
 {% endif %}
 
 <!-- Recent Logins -->
-<div class="stat-card">
-    <h6 style="font-weight:700;font-size:0.85rem;margin-bottom:12px">
+<div class="fenix-stat">
+    <h6 class="fx-fw-bold fx-fs-base mb-3">
         <i class="fas fa-history text-info"></i> {% trans "Zadnje prijave" %}
     </h6>
     <div class="table-responsive">
-        <table class="table table-sm mb-0" style="font-size:0.78rem">
+        <table class="table table-sm mb-0 fx-fs-body-sm">
             <thead><tr><th>{% trans "Korisnik" %}</th><th class="d-none d-md-table-cell">{% trans "IP" %}</th><th>{% trans "Status" %}</th><th>{% trans "Kada" %}</th></tr></thead>
             <tbody>
             {% for a in recent_logins %}
             <tr>
-                <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.email }}</td>
-                <td class="d-none d-md-table-cell"><code style="font-size:0.7rem">{{ a.ip_address|default:"-" }}</code></td>
-                <td>{% if a.success %}<span class="badge bg-success" style="font-size:0.6rem">{% trans "OK" %}</span>{% else %}<span class="badge bg-danger" style="font-size:0.6rem">{% trans "FAIL" %}</span>{% endif %}</td>
-                <td style="white-space:nowrap">{{ a.attempted_at|date:"d.m H:i" }}</td>
+                <td class="text-nowrap fx-overflow-hidden" style="max-width:120px;text-overflow:ellipsis">{{ a.email }}</td>
+                <td class="d-none d-md-table-cell"><code class="fx-fs-sm">{{ a.ip_address|default:"-" }}</code></td>
+                <td>{% if a.success %}<span class="fenix-badge fenix-badge-success fx-fs-2xs">{% trans "OK" %}</span>{% else %}<span class="fenix-badge fenix-badge-danger fx-fs-2xs">{% trans "FAIL" %}</span>{% endif %}</td>
+                <td class="text-nowrap">{{ a.attempted_at|date:"d.m H:i" }}</td>
             </tr>
             {% empty %}
             <tr><td colspan="4" class="text-muted text-center">{% trans "Nema podataka" %}</td></tr>
@@ -287,19 +287,19 @@
 {% if all_companies_subs %}
 <div class="stat-card mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 style="font-weight:700;font-size:.85rem;margin:0">
-      <i class="fas fa-building" style="color:var(--gold,#c9a84c)"></i>
+    <h6 class="fx-fw-bold fx-fs-base fx-m-0">
+      <i class="fas fa-building fx-text-gold"></i>
       {% trans "Sve firme" %}
       {% if platform_owner %}
-        <span style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);border:1px solid rgba(201,168,76,.3);padding:1px 8px;border-radius:20px;font-size:.65rem;font-weight:700;margin-left:6px">
+        <span class="fx-rounded-xl fx-fs-xs fx-fw-bold fx-text-gold" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:1px 8px;margin-left:6px">
           OWNER: {{ platform_owner.name }}
         </span>
       {% endif %}
     </h6>
-    <a href="/superadmin/companies/" class="btn btn-outline-secondary btn-sm" style="font-size:.72rem">Upravljanje &rarr;</a>
+    <a href="/superadmin/companies/" class="btn btn-outline-secondary btn-sm fx-fs-sm">Upravljanje &rarr;</a>
   </div>
   <div class="table-responsive">
-    <table class="table table-sm mb-0" style="font-size:.78rem">
+    <table class="table table-sm mb-0 fx-fs-body-sm">
       <thead>
         <tr style="border-bottom:2px solid rgba(201,168,76,.2)">
           <th>{% trans "Tvrtka" %}</th>
@@ -311,37 +311,35 @@
       </thead>
       <tbody>
       {% for item in all_companies_subs %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+      <tr class="fx-bb-subtle">
         <td>
           <strong>{{ item.company.name }}</strong>
           {% if item.company.is_platform_owner %}
-            <span style="background:var(--gold,#c9a84c);color:#0f172a;padding:1px 6px;border-radius:4px;font-size:.6rem;font-weight:700;vertical-align:middle;margin-left:4px">OWNER</span>
+            <span class="fx-text-dark fx-rounded-sm fx-fs-2xs fx-fw-bold fx-bg-gold" style="padding:1px 6px;vertical-align:middle;margin-left:4px">OWNER</span>
           {% endif %}
         </td>
-        <td class="d-none d-md-table-cell" style="font-family:monospace;color:#64748b">{{ item.company.oib }}</td>
+        <td class="d-none d-md-table-cell fx-text-muted fx-font-mono">{{ item.company.oib }}</td>
         <td>
           {% if item.sub %}
-            <span style="font-size:.7rem;font-weight:700;{% if item.sub.plan == 'enterprise' %}color:var(--gold,#c9a84c){% elif item.sub.plan == 'business' %}color:#3b82f6{% else %}color:#64748b{% endif %}">
+            <span class="fx-fs-sm fx-fw-bold" style="{% if item.sub.plan == 'enterprise' %}color:var(--gold,#c9a84c){% elif item.sub.plan == 'business' %}color:#3b82f6{% else %}color:#64748b{% endif %}">
               {{ item.sub.plan|upper }}
             </span>
           {% else %}
-            <span style="color:#475569;font-size:.7rem">&mdash;</span>
+            <span class="fx-text-dim fx-fs-sm">&mdash;</span>
           {% endif %}
         </td>
         <td>
           {% if item.sub and item.sub.is_active %}
-            <span style="color:#22c55e;font-size:.7rem">&#9679; {% trans "Aktivan" %}</span>
+            <span class="fx-text-green fx-fs-sm">&#9679; {% trans "Aktivan" %}</span>
           {% elif item.company.is_platform_owner %}
-            <span style="color:var(--gold,#c9a84c);font-size:.7rem">&#9889; Owner</span>
+            <span class="fx-fs-sm fx-text-gold">&#9889; Owner</span>
           {% else %}
-            <span style="color:#64748b;font-size:.7rem">&#9675; {% trans "Neaktivan" %}</span>
+            <span class="fx-text-dim fx-fs-sm">&#9675; {% trans "Neaktivan" %}</span>
           {% endif %}
         </td>
         <td>
           <a href="/superadmin/impersonate/{{ item.company.id }}/"
-             style="padding:3px 10px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);
-                    color:var(--gold,#c9a84c);font-size:.7rem;font-weight:700;text-decoration:none;
-                    border-radius:4px;white-space:nowrap"
+             class="fx-fs-sm fx-fw-bold fx-no-underline fx-rounded-sm fx-text-gold text-nowrap" style="padding:3px 10px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3)"
              title="Pristupi kao {{ item.company.name }}">
             <i class="fas fa-sign-in-alt me-1"></i>Pristupi
           </a>
@@ -359,34 +357,31 @@
 <!-- PROMO KODOVI -->
 <div class="stat-card mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 style="font-weight:700;font-size:.85rem;margin:0">
-      <i class="fas fa-ticket-alt" style="color:var(--gold,#c9a84c)"></i>
+    <h6 class="fx-fw-bold fx-fs-base fx-m-0">
+      <i class="fas fa-ticket-alt fx-text-gold"></i>
       {% trans "Promo kodovi" %}
     </h6>
     <button type="button" onclick="togglePromoForm()"
-            style="padding:4px 12px;background:transparent;border:1px solid rgba(201,168,76,.4);
-                   color:var(--gold,#c9a84c);font-size:.72rem;font-weight:700;cursor:pointer;border-radius:4px">
+            class="fx-fs-sm fx-fw-bold fx-pointer fx-rounded-sm fx-text-gold fx-bg-transparent" style="padding:4px 12px;border:1px solid rgba(201,168,76,.4)">
       <i class="fas fa-plus me-1"></i>Novi kod
     </button>
   </div>
-  <div id="promo-form-wrap" class="f-promo-wrap" style="display:none">
+  <div id="promo-form-wrap" class="f-promo-wrap fx-hidden">
     <form method="post" action="/superadmin/promo/create/">
       {% csrf_token %}
-      <div class="row g-2" style="font-size:.82rem">
+      <div class="row g-2 fx-fs-note">
         <div class="col-md-3">
-          <label style="color:#94a3b8;font-size:.72rem">Kod</label>
-          <input type="text" name="code" class="form-control form-control-sm" placeholder="PRIMJER30"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0;font-family:monospace;text-transform:uppercase"
+          <label class="fx-text-muted fx-fs-sm">Kod</label>
+          <input type="text" name="code" class="form-control form-control-sm fx-bg-deep fx-text-body fx-uppercase fx-bc2 fx-font-mono" placeholder="PRIMJER30"
                  oninput="this.value=this.value.toUpperCase()" required>
         </div>
         <div class="col-md-3">
-          <label style="color:#94a3b8;font-size:.72rem">Naziv</label>
-          <input type="text" name="name" class="form-control form-control-sm" placeholder="Opis koda"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0" required>
+          <label class="fx-text-muted fx-fs-sm">Naziv</label>
+          <input type="text" name="name" class="form-control form-control-sm fx-bg-deep fx-text-body fx-bc2" placeholder="Opis koda" required>
         </div>
         <div class="col-md-2">
-          <label style="color:#94a3b8;font-size:.72rem">Tip</label>
-          <select name="promo_type" class="form-select form-select-sm" style="background:#0f172a;border-color:#334155;color:#e2e8f0" onchange="updatePromoFields(this)">
+          <label class="fx-text-muted fx-fs-sm">Tip</label>
+          <select name="promo_type" class="form-select form-select-sm fx-bg-deep fx-text-body fx-bc2" onchange="updatePromoFields(this)">
             <option value="free_months">Besplatni mj</option>
             <option value="discount_percent">Popust %</option>
             <option value="discount_fixed">Popust EUR</option>
@@ -394,37 +389,33 @@
           </select>
         </div>
         <div class="col-md-2" id="pf-free">
-          <label style="color:#94a3b8;font-size:.72rem">Besplatnih mj</label>
-          <input type="number" name="free_months" value="1" min="1" max="24" class="form-control form-control-sm"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0">
+          <label class="fx-text-muted fx-fs-sm">Besplatnih mj</label>
+          <input type="number" name="free_months" value="1" min="1" max="24" class="form-control form-control-sm fx-bg-deep fx-text-body fx-bc2">
         </div>
-        <div class="col-md-2" id="pf-pct" style="display:none">
-          <label style="color:#94a3b8;font-size:.72rem">Popust %</label>
-          <input type="number" name="discount_percent" value="10" min="1" max="100" class="form-control form-control-sm"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0">
+        <div class="col-md-2 fx-hidden" id="pf-pct">
+          <label class="fx-text-muted fx-fs-sm">Popust %</label>
+          <input type="number" name="discount_percent" value="10" min="1" max="100" class="form-control form-control-sm fx-bg-deep fx-text-body fx-bc2">
         </div>
-        <div class="col-md-2" id="pf-eur" style="display:none">
-          <label style="color:#94a3b8;font-size:.72rem">Popust EUR</label>
-          <input type="number" name="discount_amount" value="10" min="1" class="form-control form-control-sm"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0">
+        <div class="col-md-2 fx-hidden" id="pf-eur">
+          <label class="fx-text-muted fx-fs-sm">Popust EUR</label>
+          <input type="number" name="discount_amount" value="10" min="1" class="form-control form-control-sm fx-bg-deep fx-text-body fx-bc2">
         </div>
         <div class="col-md-2">
-          <label style="color:#94a3b8;font-size:.72rem">Max korištenja (0=neograničeno)</label>
-          <input type="number" name="max_uses" value="100" min="0" class="form-control form-control-sm"
-                 style="background:#0f172a;border-color:#334155;color:#e2e8f0">
+          <label class="fx-text-muted fx-fs-sm">Max korištenja (0=neograničeno)</label>
+          <input type="number" name="max_uses" value="100" min="0" class="form-control form-control-sm fx-bg-deep fx-text-body fx-bc2">
         </div>
         <div class="col-12 mt-2">
-          <button type="submit" class="f-btn f-btn-gold" style="font-size:.8rem">
+          <button type="submit" class="f-btn f-btn-gold fx-fs-compact">
             <i class="fas fa-save me-1"></i>Spremi kod
           </button>
-          <button type="button" onclick="togglePromoForm()" style="padding:6px 12px;background:transparent;border:1px solid #334155;color:#94a3b8;border-radius:6px;font-size:.8rem;cursor:pointer;margin-left:8px">Odustani</button>
+          <button type="button" onclick="togglePromoForm()" class="fx-text-muted fx-rounded-sm fx-fs-compact fx-pointer fx-bg-transparent fx-b2" style="padding:6px 12px;margin-left:8px">Odustani</button>
         </div>
       </div>
     </form>
   </div>
   {% if promo_codes %}
   <div class="table-responsive">
-    <table class="table table-sm mb-0" style="font-size:.78rem">
+    <table class="table table-sm mb-0 fx-fs-body-sm">
       <thead>
         <tr style="border-bottom:2px solid rgba(201,168,76,.2)">
           <th>Kod</th><th>Tip</th><th>Opis</th><th>Korišteno</th><th>Status</th>
@@ -432,16 +423,16 @@
       </thead>
       <tbody>
       {% for p in promo_codes %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="font-family:monospace;font-weight:700;color:var(--gold,#c9a84c)">{{ p.code }}</td>
-        <td style="font-size:.7rem">{{ p.get_promo_type_display }}</td>
-        <td style="color:#94a3b8;font-size:.75rem">{{ p.name|truncatechars:40 }}</td>
-        <td style="font-size:.75rem">{{ p.times_used }}{% if p.max_uses %}/{{ p.max_uses }}{% else %}/&#8734;{% endif %}</td>
+      <tr class="fx-bb-subtle">
+        <td class="fx-fw-bold fx-text-gold fx-font-mono">{{ p.code }}</td>
+        <td class="fx-fs-sm">{{ p.get_promo_type_display }}</td>
+        <td class="fx-text-muted fx-fs-caption">{{ p.name|truncatechars:40 }}</td>
+        <td class="fx-fs-caption">{{ p.times_used }}{% if p.max_uses %}/{{ p.max_uses }}{% else %}/&#8734;{% endif %}</td>
         <td>
           {% if p.is_valid %}
-            <span style="color:#22c55e;font-size:.7rem">&#9679; Aktivan</span>
+            <span class="fx-text-green fx-fs-sm">&#9679; Aktivan</span>
           {% else %}
-            <span style="color:#64748b;font-size:.7rem">&#9675; Neaktivan</span>
+            <span class="fx-text-dim fx-fs-sm">&#9675; Neaktivan</span>
           {% endif %}
         </td>
       </tr>
@@ -450,7 +441,7 @@
     </table>
   </div>
   {% else %}
-  <p style="color:#64748b;font-size:.82rem;margin:0">Nema promo kodova. Klikni &bdquo;Novi kod&ldquo; za kreiranje.</p>
+  <p class="fx-text-dim fx-fs-note fx-m-0">Nema promo kodova. Klikni &bdquo;Novi kod&ldquo; za kreiranje.</p>
   {% endif %}
 </div>
 <script>

@@ -8,22 +8,22 @@ Fiscal Health Widget v2 — 3 statusa:
 {% load fiscal_health_tags %}
 {% fiscal_health_status as fh %}
 {% if fh.configured %}
-<div style="background:var(--surface,var(--bg-card));border:1px solid {% if fh.status == 'green' %}rgba(34,197,94,.3){% elif fh.status == 'orange' %}rgba(245,158,11,.3){% else %}rgba(239,68,68,.3){% endif %};border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-  <div style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;{% if fh.status == 'green' %}background:rgba(34,197,94,.15);color:#22c55e{% elif fh.status == 'orange' %}background:rgba(245,158,11,.15);color:#f59e0b{% else %}background:rgba(239,68,68,.15);color:#ef4444{% endif %}">
+<div class="fx-rounded d-flex fx-flex-wrap" style="background:var(--surface,var(--bg-card));border:1px solid {% if fh.status == 'green' %}rgba(34,197,94,.3){% elif fh.status == 'orange' %}rgba(245,158,11,.3){% else %}rgba(239,68,68,.3){% endif %};padding:1rem 1.25rem;margin-bottom:1rem;align-items:center;gap:1rem">
+  <div class="fx-rounded d-flex fx-fs-2xl" style="width:44px;height:44px;align-items:center;justify-content:center;flex-shrink:0;{% if fh.status == 'green' %}background:rgba(34,197,94,.15);color:var(--green){% elif fh.status == 'orange' %}background:rgba(245,158,11,.15);color:#f59e0b{% else %}background:rgba(239,68,68,.15);color:var(--red){% endif %}">
     <i class="fas fa-{% if fh.status == 'green' %}check-circle{% elif fh.status == 'orange' %}exclamation-triangle{% else %}times-circle{% endif %}"></i>
   </div>
-  <div style="flex:1">
-    <div style="font-weight:700;font-size:.9rem;color:{% if fh.status == 'green' %}#22c55e{% elif fh.status == 'orange' %}#f59e0b{% else %}#ef4444{% endif %}">
+  <div class="fx-flex-1">
+    <div class="fx-fw-bold fx-fs-md" style="color:{% if fh.status == 'green' %}#22c55e{% elif fh.status == 'orange' %}#f59e0b{% else %}#ef4444{% endif %}">
       {{ fh.headline }}
     </div>
-    <div style="font-size:.78rem;color:var(--text-dim,var(--text-muted))">{{ fh.detail }}</div>
+    <div class="fx-fs-body-sm" style="color:var(--text-dim,var(--text-muted))">{{ fh.detail }}</div>
   </div>
   {% if fh.status == 'green' %}
-  <span style="font-size:.7rem;padding:3px 10px;border-radius:20px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#22c55e;font-weight:600">● SPREMNO</span>
+  <span class="fx-fs-sm fx-rounded-xl fx-text-green fx-fw-semibold" style="padding:3px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">● SPREMNO</span>
   {% elif fh.status == 'orange' %}
-  <a href="{% url 'eracun:sukladnost_dashboard' %}" style="font-size:.75rem;padding:4px 12px;border-radius:8px;background:#f59e0b22;border:1px solid #f59e0b44;color:#f59e0b;text-decoration:none;font-weight:600">Provjeri →</a>
+  <a href="{% url 'eracun:sukladnost_dashboard' %}" class="fx-fs-caption fx-rounded fx-text-amber fx-no-underline fx-fw-semibold" style="padding:4px 12px;background:var(--amber)22;border:1px solid #f59e0b44">Provjeri →</a>
   {% else %}
-  <a href="{% url 'eracun:sukladnost_dashboard' %}" style="font-size:.75rem;padding:4px 12px;border-radius:8px;background:#ef444422;border:1px solid #ef444444;color:#ef4444;text-decoration:none;font-weight:600">Dijagnostika →</a>
+  <a href="{% url 'eracun:sukladnost_dashboard' %}" class="fx-fs-caption fx-rounded fx-text-red fx-no-underline fx-fw-semibold" style="padding:4px 12px;background:var(--red)22;border:1px solid #ef444444">Dijagnostika →</a>
   {% endif %}
 </div>
 {% endif %}

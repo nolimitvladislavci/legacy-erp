@@ -19,7 +19,7 @@
         .row-value { font-weight: bold; }
         .divider { border-top: 1px solid #000; margin: 8px 0; }
         .total-row { font-size: 13pt; font-weight: bold; }
-        .footer { margin-top: 30px; font-size: 9pt; color: #666; text-align: center; }
+        .footer { margin-top: 30px; font-size: 9pt; color:var(--text-dim); text-align: center; }
         .no-print { margin-bottom: 20px; text-align: center; }
         @media print {
             .no-print { display: none; }
@@ -29,8 +29,8 @@
 </head>
 <body>
     <div class="no-print">
-        <button onclick="window.print()" style="padding:8px 24px;font-size:12pt;cursor:pointer">ISPIS</button>
-        <button onclick="history.back()" style="padding:8px 24px;font-size:12pt;cursor:pointer">NATRAG</button>
+        <button onclick="window.print()" class="fx-pointer" style="padding:8px 24px;font-size:12pt">ISPIS</button>
+        <button onclick="history.back()" class="fx-pointer" style="padding:8px 24px;font-size:12pt">NATRAG</button>
     </div>
 
     <div class="header">
@@ -75,7 +75,7 @@
     {% if payslip.compliance_notes %}
     <div class="section">
         <div class="section-title">NAPOMENE (ArbZG/ZOR)</div>
-        <div style="font-size:9pt;color:#666">{{ payslip.compliance_notes }}</div>
+        <div class="fx-text-dim" style="font-size:9pt">{{ payslip.compliance_notes }}</div>
     </div>
     {% endif %}
 

@@ -4,14 +4,14 @@
 {% block page_title %}Knjižnica{% endblock %}
 {% block extra_css %}
 <style>
-.lib-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.lib-card h5{color:#c8a24e;margin-bottom:.8rem}
+.lib-card{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.lib-card h5{color:var(--gold);margin-bottom:.8rem}
 .overdue-row{background:rgba(239,68,68,.08);border-left:3px solid #ef4444;padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:4px}
 .loan-row{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
 .loan-row:last-child{border-bottom:none}
-.badge-borrowed{background:#3b82f6;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
-.badge-overdue{background:#ef4444;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
-.badge-returned{background:#22c55e;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
+.badge-borrowed{background:var(--blue);color:var(--white);padding:3px 8px;border-radius:12px;font-size:.75rem}
+.badge-overdue{background:var(--red);color:var(--white);padding:3px 8px;border-radius:12px;font-size:.75rem}
+.badge-returned{background:var(--green);color:var(--white);padding:3px 8px;border-radius:12px;font-size:.75rem}
 </style>
 {% endblock %}
 {% block content %}
@@ -53,7 +53,7 @@
       <span class="text-muted ms-2">{{ loan.member.partner.name }} [{{ loan.member.member_number }}]</span>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <span class="text-danger" style="font-size:.85rem">{{ loan.days_overdue }} dana kasni — {{ loan.fine_total }}€</span>
+      <span class="text-danger fx-fs-base">{{ loan.days_overdue }} dana kasni — {{ loan.fine_total }}€</span>
       <a href="{% url 'knjiznica:loan_return' loan.pk %}" class="btn btn-sm btn-outline-danger">Vrati</a>
     </div>
   </div>
@@ -71,15 +71,15 @@
       <span class="text-muted ms-2">{{ loan.member.partner.name }}</span>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <span class="text-muted" style="font-size:.85rem">{{ loan.loan_date }} — rok {{ loan.due_date }}</span>
+      <span class="text-muted fx-fs-base">{{ loan.loan_date }} — rok {{ loan.due_date }}</span>
       <span class="badge-{{ loan.status }}">{{ loan.get_status_display }}</span>
       {% if loan.status == 'borrowed' or loan.status == 'overdue' %}
-      <a href="{% url 'knjiznica:loan_return' loan.pk %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">Vrati</a>
+      <a href="{% url 'knjiznica:loan_return' loan.pk %}" class="btn btn-sm btn-outline-light fx-fs-caption">Vrati</a>
       {% endif %}
     </div>
   </div>
   {% empty %}
-  <p class="text-muted mb-0">Nema posudbi. <a href="{% url 'knjiznica:loan_create' %}" style="color:#c8a24e">Kreiraj prvu →</a></p>
+  <p class="text-muted mb-0">Nema posudbi. <a href="{% url 'knjiznica:loan_create' %}" class="fx-text-gold">Kreiraj prvu →</a></p>
   {% endfor %}
 </div>
 {% endblock %}

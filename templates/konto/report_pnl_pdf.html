@@ -6,19 +6,19 @@
 <meta charset="UTF-8">
 <style>
   @page { size: A4; margin: 20mm 15mm; }
-  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color:var(--text); }
   h1 { font-size: 16pt; font-weight: 700; margin: 0 0 4px; }
-  h2 { font-size: 11pt; font-weight: 600; margin: 18px 0 6px; border-bottom: 1.5px solid #c9a84c; padding-bottom: 4px; color: #c9a84c; }
+  h2 { font-size: 11pt; font-weight: 600; margin: 18px 0 6px; border-bottom: 1.5px solid #c9a84c; padding-bottom: 4px; color:var(--gold); }
   .header { display: flex; justify-content: space-between; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; }
-  .company { font-size: 9pt; color: #555; }
+  .company { font-size: 9pt; color:var(--text-dim); }
   table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-bottom: 8px; }
-  th { background: #0f172a; color: #fff; padding: 5px 8px; text-align: left; font-size: 8.5pt; }
+  th { background:var(--surface-deep); color:var(--white); padding: 5px 8px; text-align: left; font-size: 8.5pt; }
   td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; }
   .right { text-align: right; }
-  .total-row td { font-weight: 700; background: #f8fafc; border-top: 2px solid #0f172a; }
-  .profit { color: #16a34a; font-weight: 700; }
-  .loss { color: #dc2626; font-weight: 700; }
-  .footer { margin-top: 30px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+  .total-row td { font-weight: 700; background:var(--surface2); border-top: 2px solid #0f172a; }
+  .profit { color:var(--green); font-weight: 700; }
+  .loss { color:var(--red); font-weight: 700; }
+  .footer { margin-top: 30px; font-size: 8pt; color:var(--text-muted); border-top: 1px solid #e2e8f0; padding-top: 8px; }
 </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
     <h1>Gewinn- und Verlustrechnung</h1>
     <div class="company">{{ company.name }} &bull; {{ date_from }} – {{ date_to }}</div>
   </div>
-  <div style="text-align:right;font-size:9pt;color:#555">
+  <div class="text-end fx-text-dim" style="font-size:9pt">
     Erstellt: {{ today }}<br>
     LIMIT CONNECT
   </div>
@@ -40,7 +40,7 @@
   {% for item in report.income_items %}
   <tr><td>{{ item.code }}</td><td>{{ item.name }}</td><td class="right">{{ item.balance|floatformat:2 }} &euro;</td></tr>
   {% empty %}
-  <tr><td colspan="3" style="color:#94a3b8;font-style:italic">Keine Ertr&#228;ge im Zeitraum</td></tr>
+  <tr><td colspan="3" class="fx-text-muted" style="font-style:italic">Keine Ertr&#228;ge im Zeitraum</td></tr>
   {% endfor %}
   <tr class="total-row"><td colspan="2">Gesamt Ertr&#228;ge</td><td class="right">{{ report.total_income|floatformat:2 }} &euro;</td></tr>
   </tbody>
@@ -53,13 +53,13 @@
   {% for item in report.expense_items %}
   <tr><td>{{ item.code }}</td><td>{{ item.name }}</td><td class="right">{{ item.balance|floatformat:2 }} &euro;</td></tr>
   {% empty %}
-  <tr><td colspan="3" style="color:#94a3b8;font-style:italic">Keine Aufwendungen im Zeitraum</td></tr>
+  <tr><td colspan="3" class="fx-text-muted" style="font-style:italic">Keine Aufwendungen im Zeitraum</td></tr>
   {% endfor %}
   <tr class="total-row"><td colspan="2">Gesamt Aufwendungen</td><td class="right">{{ report.total_expenses|floatformat:2 }} &euro;</td></tr>
   </tbody>
 </table>
 
-<table style="margin-top:16px">
+<table class="mt-3">
   <tbody>
   <tr class="total-row">
     <td style="font-size:11pt">Jahres&#252;berschuss / Jahresfehlbetrag</td>

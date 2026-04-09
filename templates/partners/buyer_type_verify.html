@@ -16,7 +16,7 @@
   {% for bt, cnt in stats.items %}
   <div class="col-auto">
     <div class="stat-card p-2 px-3 text-center" style="min-width:100px">
-      <div class="fw-bold" style="font-size:1.3rem">{{ cnt }}</div>
+      <div class="fw-bold fx-fs-3xl">{{ cnt }}</div>
       <small class="text-muted">{{ bt }}</small>
     </div>
   </div>
@@ -24,7 +24,7 @@
 </div>
 {% endif %}
 
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <form method="get" class="row g-2">
     <div class="col-md-3">
       <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, OIB...">
@@ -61,10 +61,10 @@
 {% else %}
 <form method="post" id="verifyForm">
   {% csrf_token %}
-  <div class="stat-card p-0">
+  <div class="fenix-table-wrap">
     <div class="table-responsive">
-      <table class="table table-hover mb-0" style="font-size:0.88rem">
-        <thead class="table-light">
+      <table class="table table-hover mb-0 fx-fs-body">
+        <thead >
           <tr>
             <th style="width:30px"><input type="checkbox" id="checkAll"></th>
             <th>Naziv</th>
@@ -84,7 +84,7 @@
               <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none text-dark">{{ p.name|truncatechars:45 }}</a>
               {% if p.city %}<br><small class="text-muted">{{ p.city }}</small>{% endif %}
             </td>
-            <td><code style="font-size:0.78rem">{{ p.oib|default:"-" }}</code></td>
+            <td><code class="fx-fs-body-sm">{{ p.oib|default:"-" }}</code></td>
             <td><small>{{ p.company.name|truncatechars:20 }}</small></td>
             <td>
               <span class="badge {% if p.buyer_type == 'b2g' %}bg-danger{% elif p.buyer_type == 'b2b_novat' %}bg-primary{% elif p.buyer_type == 'udruga_novat' %}bg-info{% elif p.buyer_type == 'inozemstvo' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
@@ -92,7 +92,7 @@
               </span>
             </td>
             <td>
-              <select name="new_type_{{ p.pk }}" class="form-select form-select-sm" style="width:140px;font-size:0.78rem">
+              <select name="new_type_{{ p.pk }}" class="form-select form-select-sm fx-fs-body-sm" style="width:140px">
                 {% for val, label in buyer_type_choices %}
                 <option value="{{ val }}" {% if p.buyer_type == val %}selected{% endif %}>{{ val }}</option>
                 {% endfor %}

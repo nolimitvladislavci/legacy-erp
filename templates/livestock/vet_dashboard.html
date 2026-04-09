@@ -4,24 +4,7 @@
 {% block page_title %}Veterinarski dashboard{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -65,7 +48,7 @@
     <!-- Karencija warnings -->
     <div class="card mb-4" style="border: 2px solid #e74c3c;">
         <div class="card-header" style="background: rgba(231,76,60,0.1);">
-            <h5 class="mb-0" style="color: #e74c3c;">
+            <h5 class="mb-0 fx-text-red">
                 <i class="fas fa-exclamation-triangle me-2"></i>Grla u karenciji
             </h5>
         </div>
@@ -87,7 +70,7 @@
                         <td>{{ rec.animal.name|default:"-" }}</td>
                         <td>{{ rec.animal.company.name }}</td>
                         <td>{{ rec.lijek|default:"-" }}</td>
-                        <td><span class="badge bg-danger">{{ rec.karencija_do|date:"d.m.Y." }}</span></td>
+                        <td><span class="fenix-badge fenix-badge-danger">{{ rec.karencija_do|date:"d.m.Y." }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -120,7 +103,7 @@
                         <td>{{ rec.datum|date:"d.m.Y." }}</td>
                         <td><strong>{{ rec.animal.ear_tag }}</strong></td>
                         <td>{{ rec.animal.company.name }}</td>
-                        <td><span class="badge bg-info">{{ rec.get_tip_display }}</span></td>
+                        <td><span class="fenix-badge fenix-badge-info">{{ rec.get_tip_display }}</span></td>
                         <td>{{ rec.opis|truncatewords:8 }}</td>
                         <td>{{ rec.lijek|default:"-" }}</td>
                         <td>{{ rec.veterinar|default:"-" }}</td>
@@ -140,7 +123,7 @@
         </div>
         <div class="card-body">
             {% for c in companies %}
-            <div class="d-flex align-items-center justify-content-between mb-2 p-2" style="background:#1a1a1a; border-radius:8px;">
+            <div class="d-flex align-items-center justify-content-between mb-2 p-2 fx-bg-card fx-rounded">
                 <span><strong>{{ c.name }}</strong></span>
                 <div>
                     <a href="{% url 'livestock:vet_quick_entry' farm_token=c.booking_slug %}" class="btn btn-sm btn-outline-warning me-1" target="_blank">

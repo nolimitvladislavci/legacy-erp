@@ -5,47 +5,47 @@
 {% block content %}
 <style>
 .er-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:700}
-.er-badge.accepted{background:#dcfce7;color:#166534}
-.er-badge.rejected,.er-badge.error{background:#fef2f2;color:#991b1b}
-.er-badge.draft{background:#f1f5f9;color:#475569}
-.er-badge.sending,.er-badge.validating,.er-badge.signing,.er-badge.sent{background:#fef3c7;color:#92400e}
+.er-badge.accepted{background:var(--green-dim);color:var(--green)}
+.er-badge.rejected,.er-badge.error{background:var(--red-dim);color:var(--red)}
+.er-badge.draft{background:var(--surface3);color:var(--text-dim)}
+.er-badge.sending,.er-badge.validating,.er-badge.signing,.er-badge.sent{background:var(--amber-dim);color:var(--amber)}
 .er-badge.invalid{background:#fce4ec;color:#880e4f}
 .er-badge.archived{background:#e8eaf6;color:#283593}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 @media(max-width:768px){.detail-grid{grid-template-columns:1fr}}
-.detail-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9}
-.detail-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 10px}
+.detail-card{background:var(--bg-card);border-radius:10px;padding:16px;border:1px solid var(--border)}
+.detail-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 10px}
 .detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.82rem;border-bottom:1px solid #f8fafc}
-.detail-row .label{color:#64748b}
+.detail-row .label{color:var(--text-dim)}
 .detail-row .value{font-weight:600}
 .log-item{padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:.82rem}
-.log-item .time{color:#94a3b8;font-size:.7rem}
-.xml-box{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;font-family:monospace;font-size:.72rem;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+.log-item .time{color:var(--text-muted);font-size:.7rem}
+.xml-box{background:var(--surface-deep);color:var(--text);padding:12px;border-radius:8px;font-family:monospace;font-size:.72rem;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-all}
 </style>
 
-<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+<div class="d-flex fx-gap-2 fx-flex-wrap mb-3 align-items-center">
   <a href="{% url 'eracun:dashboard' %}" class="btn btn-outline-secondary btn-sm">&larr; Natrag</a>
-  <span class="er-badge {{ eracun.status }}" style="font-size:.85rem;padding:5px 14px">{{ eracun.get_status_display }}</span>
+  <span class="er-badge {{ eracun.status }} fx-fs-base" style="padding:5px 14px">{{ eracun.get_status_display }}</span>
 
   {% if eracun.status == 'draft' or eracun.status == 'valid' or eracun.status == 'invalid' or eracun.status == 'error' or eracun.status == 'rejected' %}
   <button id="btn-send-fina" class="btn btn-primary btn-sm" data-url="{% url 'eracun:send' eracun.pk %}">
     <i class="fas fa-paper-plane"></i> <span id="btn-send-text">Pošalji na FINA</span>
   </button>
-  <div id="fina-status" style="display:none;margin-left:8px;font-size:.8rem;padding:6px 12px;border-radius:6px;align-self:center"></div>
+  <div id="fina-status" class="fx-hidden fx-fs-compact fx-rounded-sm" style="margin-left:8px;padding:6px 12px;align-self:center"></div>
   {% endif %}
 
   <a href="{% url 'eracun:download_xml' eracun.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-code"></i> UBL XML</a>
 
   {% if eracun.xml_request %}
-  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=request" class="btn btn-outline-secondary btn-sm" style="font-size:.7rem">FINA Request</a>
+  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=request" class="btn btn-outline-secondary btn-sm fx-fs-sm">FINA Request</a>
   {% endif %}
   {% if eracun.xml_response %}
-  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=response" class="btn btn-outline-secondary btn-sm" style="font-size:.7rem">FINA Response</a>
+  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=response" class="btn btn-outline-secondary btn-sm fx-fs-sm">FINA Response</a>
   {% endif %}
 </div>
 
 {% if eracun.error_message %}
-<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;margin-bottom:16px;color:#991b1b;font-size:.85rem">
+<div class="fx-bg-red-dim fx-rounded fx-fs-base mb-3 fx-text-red fx-p-12" style="border:1px solid #fecaca">
   <strong>Greska:</strong> {{ eracun.error_message }}
   {% if eracun.error_code %}<br><small>Kod: {{ eracun.error_code }}</small>{% endif %}
 </div>
@@ -86,35 +86,35 @@
     <h6>Iznosi</h6>
     <div class="detail-row"><span class="label">Osnovica</span><span class="value">&euro;{{ eracun.subtotal|floatformat:2 }}</span></div>
     <div class="detail-row"><span class="label">PDV</span><span class="value">&euro;{{ eracun.tax_amount|floatformat:2 }}</span></div>
-    <div class="detail-row" style="font-size:.95rem"><span class="label"><strong>Ukupno</strong></span><span class="value" style="color:#166534">&euro;{{ eracun.total|floatformat:2 }}</span></div>
-    {% if eracun.zki %}<div class="detail-row"><span class="label">ZKI</span><span class="value" style="font-size:.7rem">{{ eracun.zki }}</span></div>{% endif %}
-    {% if eracun.jir %}<div class="detail-row"><span class="label">JIR</span><span class="value" style="font-size:.7rem">{{ eracun.jir }}</span></div>{% endif %}
-    {% if eracun.fina_uuid %}<div class="detail-row"><span class="label">FINA UUID</span><span class="value" style="font-size:.7rem">{{ eracun.fina_uuid }}</span></div>{% endif %}
+    <div class="detail-row fx-fs-normal"><span class="label"><strong>Ukupno</strong></span><span class="value fx-text-green">&euro;{{ eracun.total|floatformat:2 }}</span></div>
+    {% if eracun.zki %}<div class="detail-row"><span class="label">ZKI</span><span class="value fx-fs-sm">{{ eracun.zki }}</span></div>{% endif %}
+    {% if eracun.jir %}<div class="detail-row"><span class="label">JIR</span><span class="value fx-fs-sm">{{ eracun.jir }}</span></div>{% endif %}
+    {% if eracun.fina_uuid %}<div class="detail-row"><span class="label">FINA UUID</span><span class="value fx-fs-sm">{{ eracun.fina_uuid }}</span></div>{% endif %}
   </div>
 </div>
 
 <!-- Stavke -->
 {% if items %}
-<div class="detail-card" style="margin-bottom:16px">
+<div class="detail-card mb-3">
   <h6>Stavke</h6>
-  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
-    <thead><tr style="border-bottom:2px solid #e2e8f0">
-      <th style="text-align:left;padding:6px">#</th>
-      <th style="text-align:left;padding:6px">Opis</th>
-      <th style="text-align:right;padding:6px">Kol.</th>
-      <th style="text-align:right;padding:6px">Cijena</th>
-      <th style="text-align:center;padding:6px">PDV</th>
-      <th style="text-align:right;padding:6px">Ukupno</th>
+  <table class="fx-w-full fx-fs-note fx-b-collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th class="text-start fx-p-sm">#</th>
+      <th class="text-start fx-p-sm">Opis</th>
+      <th class="text-end fx-p-sm">Kol.</th>
+      <th class="text-end fx-p-sm">Cijena</th>
+      <th class="text-center fx-p-sm">PDV</th>
+      <th class="text-end fx-p-sm">Ukupno</th>
     </tr></thead>
     <tbody>
     {% for item in items %}
     <tr style="border-bottom:1px solid #f1f5f9">
-      <td style="padding:6px">{{ item.line_number }}</td>
-      <td style="padding:6px">{{ item.description }}</td>
-      <td style="padding:6px;text-align:right">{{ item.quantity|floatformat:2 }} {{ item.unit_code }}</td>
-      <td style="padding:6px;text-align:right">&euro;{{ item.unit_price|floatformat:2 }}</td>
-      <td style="padding:6px;text-align:center">{{ item.tax_rate|floatformat:0 }}% ({{ item.tax_category }})</td>
-      <td style="padding:6px;text-align:right">&euro;{{ item.line_total|floatformat:2 }}</td>
+      <td class="fx-p-sm">{{ item.line_number }}</td>
+      <td class="fx-p-sm">{{ item.description }}</td>
+      <td class="text-end fx-p-sm">{{ item.quantity|floatformat:2 }} {{ item.unit_code }}</td>
+      <td class="text-end fx-p-sm">&euro;{{ item.unit_price|floatformat:2 }}</td>
+      <td class="text-center fx-p-sm">{{ item.tax_rate|floatformat:0 }}% ({{ item.tax_category }})</td>
+      <td class="text-end fx-p-sm">&euro;{{ item.line_total|floatformat:2 }}</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -124,22 +124,22 @@
 
 <!-- PDV raspodjela -->
 {% if tax_summaries %}
-<div class="detail-card" style="margin-bottom:16px">
+<div class="detail-card mb-3">
   <h6>PDV Raspodjela</h6>
-  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
-    <thead><tr style="border-bottom:2px solid #e2e8f0">
-      <th style="text-align:left;padding:6px">Kategorija</th>
-      <th style="text-align:right;padding:6px">Stopa</th>
-      <th style="text-align:right;padding:6px">Osnovica</th>
-      <th style="text-align:right;padding:6px">PDV</th>
+  <table class="fx-w-full fx-fs-note fx-b-collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th class="text-start fx-p-sm">Kategorija</th>
+      <th class="text-end fx-p-sm">Stopa</th>
+      <th class="text-end fx-p-sm">Osnovica</th>
+      <th class="text-end fx-p-sm">PDV</th>
     </tr></thead>
     <tbody>
     {% for ts in tax_summaries %}
     <tr style="border-bottom:1px solid #f1f5f9">
-      <td style="padding:6px">{{ ts.tax_category }}</td>
-      <td style="padding:6px;text-align:right">{{ ts.tax_rate|floatformat:0 }}%</td>
-      <td style="padding:6px;text-align:right">&euro;{{ ts.taxable_amount|floatformat:2 }}</td>
-      <td style="padding:6px;text-align:right">&euro;{{ ts.tax_amount|floatformat:2 }}</td>
+      <td class="fx-p-sm">{{ ts.tax_category }}</td>
+      <td class="text-end fx-p-sm">{{ ts.tax_rate|floatformat:0 }}%</td>
+      <td class="text-end fx-p-sm">&euro;{{ ts.taxable_amount|floatformat:2 }}</td>
+      <td class="text-end fx-p-sm">&euro;{{ ts.tax_amount|floatformat:2 }}</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -153,7 +153,7 @@
   <h6>Tijek obrade</h6>
   {% for log in logs %}
   <div class="log-item">
-    <span class="er-badge {{ log.status }}" style="font-size:.65rem">{{ log.status }}</span>
+    <span class="er-badge {{ log.status }} fx-fs-xs">{{ log.status }}</span>
     <strong>{{ log.action }}</strong>: {{ log.message }}
     <div class="time">{{ log.created_at|date:"d.m.Y H:i:s" }}{% if log.user %} &middot; {{ log.user.get_full_name|default:log.user.username }}{% endif %}</div>
   </div>

@@ -4,10 +4,10 @@
 {% block title %}e-ONTO — Pregled{% endblock %}
 
 {% block content %}
-<div style="max-width:1100px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:1100px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="mb-1"><i class="fas fa-cloud-upload-alt me-2" style="color:#2196F3"></i>e-ONTO izvoz</h4>
+            <h4 class="mb-1"><i class="fas fa-cloud-upload-alt me-2 fx-text-blue"></i>e-ONTO izvoz</h4>
             <small class="text-muted">Elektronički očevidnik o nastanku i tijeku otpada</small>
         </div>
         <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-secondary">
@@ -47,15 +47,15 @@
                     <td data-label="Težina">{{ b.total_weight_kg|floatformat:1 }} kg</td>
                     <td data-label="Status">
                         {% if b.status == 'accepted' %}
-                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Prihvaćeno</span>
+                        <span class="fenix-badge fenix-badge-success"><i class="fas fa-check me-1"></i>Prihvaćeno</span>
                         {% elif b.status == 'error' or b.status == 'rejected' %}
-                        <span class="badge bg-danger"><i class="fas fa-times me-1"></i>{{ b.get_status_display }}</span>
+                        <span class="fenix-badge fenix-badge-danger"><i class="fas fa-times me-1"></i>{{ b.get_status_display }}</span>
                         {% elif b.status == 'sending' %}
-                        <span class="badge bg-primary"><i class="fas fa-spinner fa-spin me-1"></i>Slanje</span>
+                        <span class="fenix-badge fenix-badge-info"><i class="fas fa-spinner fa-spin me-1"></i>Slanje</span>
                         {% elif b.status == 'retry' %}
-                        <span class="badge bg-warning text-dark"><i class="fas fa-redo me-1"></i>Retry</span>
+                        <span class="fenix-badge fenix-badge-warning"><i class="fas fa-redo me-1"></i>Retry</span>
                         {% else %}
-                        <span class="badge bg-secondary">{{ b.get_status_display }}</span>
+                        <span class="fenix-badge fenix-badge-muted">{{ b.get_status_display }}</span>
                         {% endif %}
                     </td>
                     <td data-label="Pokušaj">{{ b.retry_count }}/{{ b.max_retries }}</td>

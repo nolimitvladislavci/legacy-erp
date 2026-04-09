@@ -3,16 +3,16 @@
 {% block title %}GDPR Export — Osobni podaci{% endblock %}
 {% block content %}
 <div class="container py-5" style="max-width:550px">
-  <div style="background:var(--card-bg,#fff);border-radius:12px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
-    <h3 style="margin-bottom:4px">Izvoz osobnih podataka</h3>
-    <p class="text-muted" style="font-size:.85rem">GDPR Članak 20 — Pravo na prenosivost podataka</p>
+  <div class="fx-rounded" style="background:var(--card-bg,#fff);padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+    <h3 class="mb-1">Izvoz osobnih podataka</h3>
+    <p class="text-muted fx-fs-base">GDPR Članak 20 — Pravo na prenosivost podataka</p>
 
     <hr>
 
-    <p style="font-size:.9rem">
+    <p class="fx-fs-md">
       Ovaj alat generira JSON datoteku koja sadrži sve vaše osobne podatke pohranjene u sustavu LIMIT Connect:
     </p>
-    <ul style="font-size:.85rem;color:#555">
+    <ul class="fx-fs-base fx-text-dim">
       <li>Korisnički račun (email, ime, datum registracije)</li>
       <li>Profil (telefon, odjel, jezične postavke)</li>
       <li>Članstva u tvrtkama i uloge</li>
@@ -20,7 +20,7 @@
       <li>Uređaji i pristupni tokeni (nazivi, ne ključevi)</li>
     </ul>
 
-    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin:16px 0;font-size:.85rem">
+    <div class="fx-rounded fx-fs-base fx-bg-amber-dim fx-p-12" style="border:1px solid #fde68a;margin:16px 0">
       <strong>Sigurnosna provjera:</strong> Za preuzimanje morate potvrditi svoju lozinku.
       Ovo štiti vaše podatke u slučaju neovlaštenog pristupa vašem računalu.
     </div>
@@ -37,9 +37,9 @@
       </button>
     </form>
 
-    <div id="gdpr-status" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:.85rem"></div>
+    <div id="gdpr-status" class="fx-hidden fx-rounded-sm fx-fs-base mt-3 fx-p-10"></div>
 
-    <p class="text-muted mt-3" style="font-size:.75rem">
+    <p class="text-muted mt-3 fx-fs-caption">
       Napomena: Sigurnosni ključevi (2FA tajne, push tokeni) se iz sigurnosnih razloga NE uključuju u izvoz.
       Za brisanje svih podataka (čl. 17 GDPR-a) kontaktirajte administratora.
     </p>

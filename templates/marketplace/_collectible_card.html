@@ -1,19 +1,19 @@
 {% load i18n l10n %}
 {# Collectible card: pigeon auction — pedigree, foto, SHA-256, timer #}
-<div class="stat-card h-100" style="overflow:hidden;position:relative;border:1px solid rgba(201,168,76,.2)">
+<div class="stat-card h-100 fx-overflow-hidden fx-relative" style="border:1px solid rgba(201,168,76,.2)">
   <!-- Photo -->
-  <div style="height:180px;background:linear-gradient(135deg,#0f172a,#1a1000);display:flex;align-items:center;justify-content:center;position:relative">
+  <div class="d-flex align-items-center justify-content-center fx-relative" style="height:180px;background:linear-gradient(135deg,#0f172a,#1a1000)">
     {% if product.image_main %}
-    <img src="{{ product.image_main.url }}" style="width:100%;height:100%;object-fit:cover" alt="{{ product.name }}">
+    <img src="{{ product.image_main.url }}" class="fx-w-full" style="height:100%;object-fit:cover" alt="{{ product.name }}">
     {% else %}
-    <i class="fas fa-dove" style="font-size:3rem;color:rgba(201,168,76,.2)"></i>
+    <i class="fas fa-dove fx-fs-hero" style="color:rgba(201,168,76,.2)"></i>
     {% endif %}
     <!-- Auction badge -->
-    <div style="position:absolute;top:8px;left:8px;background:linear-gradient(135deg,rgba(201,168,76,.9),#a78b3d);color:#0a0a0a;font-size:.62rem;font-weight:800;padding:4px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px">
+    <div class="fx-text-dark fx-fw-800 fx-rounded-sm fx-uppercase fx-ls-1" style="position:absolute;top:8px;left:8px;background:linear-gradient(135deg,rgba(201,168,76,.9),#a78b3d);font-size:.62rem;padding:4px 10px">
       <i class="fas fa-gavel me-1"></i>Aukcija
     </div>
     {% if product.expires_at %}
-    <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);color:#ef4444;font-size:.65rem;font-weight:700;padding:4px 10px;border-radius:6px" data-auction-timer="{{ product.expires_at|date:'c' }}">
+    <div class="fx-text-red fx-fs-xs fx-fw-bold fx-rounded-sm" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);padding:4px 10px" data-auction-timer="{{ product.expires_at|date:'c' }}">
       <i class="fas fa-hourglass-half me-1"></i><span class="timer-text">{{ product.expires_at|date:"d.m. H:i" }}</span>
     </div>
     {% endif %}
@@ -21,22 +21,22 @@
 
   <div class="p-3">
     <h6 class="mb-1">
-      <a href="{% if product.is_auction %}{% url 'marketplace:auction_live' product.pk %}{% else %}{% url 'marketplace:product_detail' product.slug %}{% endif %}" class="text-decoration-none" style="color:var(--gold,#c9a84c);font-weight:800;font-size:.95rem">{{ product.name }}</a>
+      <a href="{% if product.is_auction %}{% url 'marketplace:auction_live' product.pk %}{% else %}{% url 'marketplace:product_detail' product.slug %}{% endif %}" class="text-decoration-none fx-fw-800 fx-fs-normal fx-text-gold">{{ product.name }}</a>
     </h6>
-    <small style="color:var(--text-dim)"><i class="fas fa-home me-1"></i>{{ product.seller_company.name }}</small>
+    <small class="fx-text-dim"><i class="fas fa-home me-1"></i>{{ product.seller_company.name }}</small>
 
     <!-- Pedigree info -->
     {% if product.description %}
-    <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-dim);line-height:1.4">{{ product.description|truncatechars:120 }}</div>
+    <div class="fx-fs-caption mt-2 fx-text-dim" style="line-height:1.4">{{ product.description|truncatechars:120 }}</div>
     {% endif %}
 
     <!-- SHA-256 seal -->
     {% if product.disclaimer_text and 'SHA-256' in product.disclaimer_text or product.source_model == 'Golub' %}
-    <div style="margin-top:.6rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:.5rem .6rem;display:flex;align-items:center;gap:.5rem">
-      <i class="fas fa-shield-alt" style="color:var(--gold,#c9a84c);font-size:.8rem;flex-shrink:0"></i>
+    <div class="fx-rounded d-flex align-items-center fx-gap-2 fx-p-cell" style="margin-top:.6rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15)">
+      <i class="fas fa-shield-alt fx-fs-compact fx-text-gold flex-shrink-0"></i>
       <div>
-        <div style="font-size:.62rem;font-weight:700;color:var(--gold,#c9a84c);text-transform:uppercase;letter-spacing:.3px">Rodovnik zapecacen</div>
-        <div style="font-size:.6rem;color:var(--text-dim);font-family:monospace">Data Vaulting verificiran</div>
+        <div class="fx-fw-bold fx-text-gold fx-uppercase" style="font-size:.62rem;letter-spacing:.3px">Rodovnik zapecacen</div>
+        <div class="fx-fs-2xs fx-text-dim fx-font-mono">Data Vaulting verificiran</div>
       </div>
     </div>
     {% endif %}
@@ -44,14 +44,14 @@
     <!-- Price -->
     <div class="mt-2 d-flex justify-content-between align-items-center">
       <div>
-        <span style="font-weight:800;font-size:1.2rem;color:var(--gold,#c9a84c)">{{ product.unit_price }}&euro;</span>
-        <small style="color:var(--text-dim)">/{{ product.unit }}</small>
+        <span class="fx-fw-800 fx-fs-2xl fx-text-gold">{{ product.unit_price }}&euro;</span>
+        <small class="fx-text-dim">/{{ product.unit }}</small>
       </div>
     </div>
 
     <!-- Traceability QR -->
     <div class="mt-2">
-      <a href="{% url 'marketplace:traceability' product.pk %}" style="font-size:.7rem;color:#3b82f6;text-decoration:none;font-weight:600">
+      <a href="{% url 'marketplace:traceability' product.pk %}" class="fx-fs-sm fx-text-blue fx-no-underline fx-fw-semibold">
         <i class="fas fa-qrcode me-1"></i>Pedigree & Traceability
       </a>
     </div>
@@ -59,11 +59,11 @@
     <!-- Bid / Buy -->
     <div class="mt-3">
       {% if product.is_auction and product.auction_status != 'sold' %}
-      <a href="{% url 'marketplace:auction_live' product.pk %}" class="btn btn-sm w-100" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:8px">
+      <a href="{% url 'marketplace:auction_live' product.pk %}" class="btn btn-sm w-100 fx-text-dark fx-fw-bold fx-rounded" style="background:linear-gradient(135deg,var(--gold),#a78b3d)">
         <i class="fas fa-gavel me-1"></i>Licitiraj uživo
       </a>
       {% elif product.auction_status == 'sold' %}
-      <button class="btn btn-sm w-100" disabled style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;font-weight:700;border-radius:8px">
+      <button class="btn btn-sm w-100 fx-text-green fx-fw-bold fx-rounded" disabled style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
         <i class="fas fa-check-circle me-1"></i>Prodano
       </button>
       {% else %}
@@ -71,7 +71,7 @@
         {% csrf_token %}
         <input type="hidden" name="product_id" value="{{ product.pk }}">
         <input type="hidden" name="qty" value="1">
-        <button type="submit" class="btn btn-sm w-100" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:8px">
+        <button type="submit" class="btn btn-sm w-100 fx-text-dark fx-fw-bold fx-rounded" style="background:linear-gradient(135deg,var(--gold),#a78b3d)">
           <i class="fas fa-cart-plus me-1"></i>Kupi
         </button>
       </form>

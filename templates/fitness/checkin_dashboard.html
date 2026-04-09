@@ -3,76 +3,29 @@
 {% block title %}Fitness – Prijave{% endblock %}
 {% block page_title %}Fitness – Prijave danas{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h2 class="mb-0"><i class="fas fa-door-open me-2 text-success"></i>{% trans "Prijave danas" %}</h2>
-    <small class="text-muted">{{ today|date:"d.m.Y" }}</small>
-  </div>
-  <a href="{% url 'fitness:member_list' %}" class="btn btn-outline-secondary">
-    <i class="fas fa-arrow-left me-2"></i>{% trans "Svi članovi" %}
-  </a>
-</div>
-
-<div class="row g-2 mb-3">
-  <div class="col-md-4"><div class="stat-card text-center">
-    <div class="label">{% trans "Trenutno unutra" %}</div>
-    <div class="value text-success" style="font-size:2.5rem">{{ present_count }}</div>
-  </div></div>
+<!-- lang: topbar --></div>
   <div class="col-md-4"><div class="stat-card text-center">
     <div class="label">{% trans "Ukupno danas" %}</div>
-    <div class="value text-primary" style="font-size:2.5rem">{{ today_total }}</div>
+    <div class="value text-primary fx-fs-7xl">{{ today_total }}</div>
   </div></div>
   <div class="col-md-4"><div class="stat-card text-center">
     <div class="label">{% trans "Datum" %}</div>
-    <div class="fw-bold mt-2" style="font-size:1.1rem">{{ today|date:"l, d.m.Y" }}</div>
+    <div class="fw-bold mt-2 fx-fs-xl">{{ today|date:"l, d.m.Y" }}</div>
   </div></div>
 </div>
 
 {% if present %}
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <h6 class="fw-bold mb-3 text-success"><i class="fas fa-user-check me-2"></i>Trenutno prisutni ({{ present_count }})</h6>
   <div class="row g-2">
     {% for c in present %}
     <div class="col-md-4 col-6">
       <div class="d-flex align-items-center gap-2 p-2 rounded border border-success bg-light">
-        <div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold"
-             style="width:36px;height:36px;font-size:0.8rem;flex-shrink:0">
+        <div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold fx-fs-compact flex-shrink-0"
+             style="width:36px;height:36px">
           {{ c.member.first_name|first }}{{ c.member.last_name|first }}
         </div>
         <div>
@@ -90,11 +43,11 @@
 </div>
 {% endif %}
 
-<div class="stat-card">
+<div class="fenix-stat">
   <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-info"></i>{% trans "Log danas" %}</h6>
   <div class="table-responsive">
     <table class="table table-sm mb-0">
-      <thead class="table-light"><tr><th>{% trans "Član" %}</th><th>{% trans "Prijava" %}</th><th>{% trans "Odjava" %}</th><th>{% trans "Tip" %}</th></tr></thead>
+      <thead ><tr><th>{% trans "Član" %}</th><th>{% trans "Prijava" %}</th><th>{% trans "Odjava" %}</th><th>{% trans "Tip" %}</th></tr></thead>
       <tbody>
         {% for c in today_log %}
         <tr>
@@ -104,7 +57,7 @@
             </a>
           </td>
           <td>{{ c.check_in|date:"H:i" }}</td>
-          <td>{% if c.check_out %}{{ c.check_out|date:"H:i" }}{% else %}<span class="badge bg-success">{% trans "Unutra" %}</span>{% endif %}</td>
+          <td>{% if c.check_out %}{{ c.check_out|date:"H:i" }}{% else %}<span class="fenix-badge fenix-badge-success">{% trans "Unutra" %}</span>{% endif %}</td>
           <td><span class="badge
             {% if c.member.membership_type == 'vip' %}bg-warning text-dark
             {% elif c.member.membership_type == 'premium' %}bg-danger

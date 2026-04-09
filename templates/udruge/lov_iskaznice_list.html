@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Lovacke iskaznice{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid">
@@ -29,17 +12,17 @@
 </div>
 <div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
 <table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Broj</th><th style="font-size:.75rem">Lovac</th><th style="font-size:.75rem">Kategorija</th>
-  <th style="font-size:.75rem">Vrijedi do</th><th style="font-size:.75rem">Markica</th><th style="font-size:.75rem">Status</th>
+  <th class="fx-fs-caption">Broj</th><th class="fx-fs-caption">Lovac</th><th class="fx-fs-caption">Kategorija</th>
+  <th class="fx-fs-caption">Vrijedi do</th><th class="fx-fs-caption">Markica</th><th class="fx-fs-caption">Status</th>
 </tr></thead><tbody>
 {% for i in page_obj %}
 <tr>
-  <td style="font-size:.82rem"><strong>{{ i.broj_iskaznice }}</strong></td>
-  <td style="font-size:.82rem">{{ i.clan.last_name }}, {{ i.clan.first_name }}</td>
-  <td style="font-size:.82rem">{{ i.get_kategorija_display }}</td>
-  <td style="font-size:.82rem">{{ i.vrijedi_do|date:"d.m.Y" }}</td>
-  <td style="font-size:.82rem">{% if i.treba_markicu %}<span class="badge bg-danger">Treba obnovu</span>{% else %}<span class="badge bg-success">{{ i.markica_godina }}</span>{% endif %}</td>
-  <td>{% if i.je_aktivna %}<span class="badge bg-success">Aktivna</span>{% else %}<span class="badge bg-secondary">Istekla</span>{% endif %}</td>
+  <td class="fx-fs-note"><strong>{{ i.broj_iskaznice }}</strong></td>
+  <td class="fx-fs-note">{{ i.clan.last_name }}, {{ i.clan.first_name }}</td>
+  <td class="fx-fs-note">{{ i.get_kategorija_display }}</td>
+  <td class="fx-fs-note">{{ i.vrijedi_do|date:"d.m.Y" }}</td>
+  <td class="fx-fs-note">{% if i.treba_markicu %}<span class="fenix-badge fenix-badge-danger">Treba obnovu</span>{% else %}<span class="fenix-badge fenix-badge-success">{{ i.markica_godina }}</span>{% endif %}</td>
+  <td>{% if i.je_aktivna %}<span class="fenix-badge fenix-badge-success">Aktivna</span>{% else %}<span class="fenix-badge fenix-badge-muted">Istekla</span>{% endif %}</td>
 </tr>
 {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nema iskaznica</td></tr>{% endfor %}
 </tbody></table></div></div></div>

@@ -2,21 +2,21 @@
 {% load i18n %}
 {% block title %}{% if form.instance.pk %}Uredi kostim{% else %}Novi kostim{% endif %}{% endblock %}
 {% block content %}
-<div style="max-width:700px">
-  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem">
-    <a href="{% url 'udruge:kostim_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
-    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-tshirt"></i> {% if form.instance.pk %}Uredi kostim{% else %}Novi kostim{% endif %}</h4>
+<div class="fx-max-700">
+  <div class="d-flex align-items-center fx-gap-2 fx-mb-6">
+    <a href="{% url 'udruge:kostim_list' %}" class="fx-fs-base fx-text-muted"><i class="fas fa-arrow-left"></i></a>
+    <h4 class="fx-text-gold fx-m-0"><i class="fas fa-tshirt"></i> {% if form.instance.pk %}Uredi kostim{% else %}Novi kostim{% endif %}</h4>
   </div>
-  <div class="card" style="padding:1.5rem;border-radius:12px;border:1px solid var(--border)">
+  <div class="card fx-rounded fx-p-5 fx-b">
     <form method="post">{% csrf_token %}
       {% for field in form %}
-      <div style="margin-bottom:1rem">
-        <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">{{ field.label }}</label>
+      <div class="mb-3">
+        <label class="fx-fs-caption fx-fw-semibold d-block fx-text-muted mb-1 fx-uppercase fx-ls-1">{{ field.label }}</label>
         {{ field }}
-        {% if field.errors %}<div style="color:#ef4444;font-size:.75rem;margin-top:2px">{{ field.errors.0 }}</div>{% endif %}
+        {% if field.errors %}<div class="fx-text-red fx-fs-caption fx-mt-1">{{ field.errors.0 }}</div>{% endif %}
       </div>
       {% endfor %}
-      <div style="display:flex;gap:.5rem;margin-top:1.5rem">
+      <div class="d-flex fx-gap-2 fx-mt-6">
         <button type="submit" class="btn btn-gold">Spremi</button>
         <a href="{% url 'udruge:kostim_list' %}" class="btn btn-ghost">Odustani</a>
       </div>

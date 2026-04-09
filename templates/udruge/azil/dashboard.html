@@ -5,9 +5,9 @@
 .azil-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.5rem}
 .azil-stat{background:var(--card-bg,#1a1a1a);border:1px solid var(--gold,#c9a84c);border-radius:8px;padding:1rem;text-align:center}
 .azil-stat .num{font-size:2rem;font-weight:700;color:var(--gold)}
-.azil-stat .lbl{font-size:.75rem;color:#999;text-transform:uppercase;letter-spacing:.5px}
-.status-karantena{color:#e74c3c}.status-slobodan{color:#2ecc71}.status-rezerviran{color:#f39c12}
-.chip-badge{background:#333;border:1px solid #555;border-radius:4px;padding:2px 6px;font-size:.7rem;font-family:monospace}
+.azil-stat .lbl{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+.status-karantena{color:var(--red)}.status-slobodan{color:var(--green)}.status-rezerviran{color:var(--amber)}
+.chip-badge{background:var(--surface2);border:1px solid #555;border-radius:4px;padding:2px 6px;font-size:.7rem;font-family:monospace}
 @media(max-width:600px){
   .azil-stats{grid-template-columns:1fr 1fr}
   .azil-stat .num{font-size:1.4rem}
@@ -17,9 +17,9 @@
 }
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
-  <h4 style="margin:0;color:var(--gold)">Azil — Skloniste za zivotinje</h4>
-  <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+<div class="d-flex fx-flex-wrap justify-content-between align-items-center mb-3 fx-gap-2">
+  <h4 class="fx-text-gold fx-m-0">Azil — Skloniste za zivotinje</h4>
+  <div class="d-flex fx-flex-wrap fx-gap-2">
     <a href="{% url 'udruge:azil_zivotinja_nova' %}" class="btn btn-gold btn-sm">+ Nova zivotinja</a>
     <a href="{% url 'udruge:azil_intervencija_nova' %}" class="btn btn-ghost btn-sm">+ Intervencija</a>
     <a href="{% url 'udruge:azil_terenska' %}" class="btn btn-ghost btn-sm">Terenska</a>
@@ -31,17 +31,17 @@
   <div class="azil-stat"><div class="num status-karantena">{{ karantena }}</div><div class="lbl">Karantena</div></div>
   <div class="azil-stat"><div class="num status-slobodan">{{ slobodni }}</div><div class="lbl">Slobodni</div></div>
   <div class="azil-stat"><div class="num status-rezerviran">{{ rezervirani }}</div><div class="lbl">Rezervirani</div></div>
-  <div class="azil-stat"><div class="num" style="color:#2ecc71">{{ udomljeni_ovaj_mj }}</div><div class="lbl">Udomljeni (mj.)</div></div>
+  <div class="azil-stat"><div class="num fx-text-green">{{ udomljeni_ovaj_mj }}</div><div class="lbl">Udomljeni (mj.)</div></div>
 </div>
 
-<div class="card" style="padding:1rem;margin-bottom:1.5rem">
-  <h5 style="color:var(--gold);margin:0 0 .75rem">Zivotinje u sklonistu</h5>
-  <div style="overflow-x:auto">
-    <table style="width:100%">
+<div class="card fx-p-4 fx-mb-6">
+  <h5 class="fx-text-gold" style="margin:0 0 .75rem">Zivotinje u sklonistu</h5>
+  <div class="fx-scroll-x">
+    <table class="fx-w-full">
       <thead><tr><th>Ev. br.</th><th>Ime / Pasmina</th><th>Vrsta</th><th>Status</th><th>Mikrocip</th><th>Karantena do</th></tr></thead>
       <tbody>
         {% for z in zivotinje %}
-        <tr style="cursor:pointer" onclick="location='{% url 'udruge:azil_zivotinja_detalj' z.pk %}'">
+        <tr class="fx-pointer" onclick="location='{% url 'udruge:azil_zivotinja_detalj' z.pk %}'">
           <td><strong>{{ z.evidencijski_br }}</strong></td>
           <td>{{ z.ime|default:z.naziv_pasmina|default:"-" }}</td>
           <td>{{ z.get_vrsta_display }}</td>
@@ -50,7 +50,7 @@
           <td>{{ z.datum_karantena_kraj|date:"d.m.Y"|default:"-" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" style="text-align:center;color:#666;padding:2rem">Nema zivotinja u sklonistu</td></tr>
+        <tr><td colspan="6" class="text-center fx-text-dim fx-p-6">Nema zivotinja u sklonistu</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -58,10 +58,10 @@
 </div>
 
 {% if intervencije %}
-<div class="card" style="padding:1rem">
-  <h5 style="color:var(--gold);margin:0 0 .75rem">Zadnje intervencije</h5>
-  <div style="overflow-x:auto">
-    <table style="width:100%">
+<div class="card fx-p-4">
+  <h5 class="fx-text-gold" style="margin:0 0 .75rem">Zadnje intervencije</h5>
+  <div class="fx-scroll-x">
+    <table class="fx-w-full">
       <thead><tr><th>Datum</th><th>Adresa</th><th>Zivotinja</th><th>Rezultat</th></tr></thead>
       <tbody>
         {% for i in intervencije %}

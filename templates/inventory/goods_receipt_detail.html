@@ -3,35 +3,18 @@
 {% block title %}Primka {{ receipt.receipt_number }}{% endblock %}
 {% block page_title %}Primka {{ receipt.receipt_number }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <h2 class="mb-0">
-    <i class="fas fa-file-invoice me-2" style="color:var(--gold)"></i>
+    <i class="fas fa-file-invoice me-2 fx-text-gold"></i>
     Primka {{ receipt.receipt_number }}
   </h2>
   <div class="d-flex gap-2">
     {% if receipt.status == 'draft' %}
-    <form method="post" action="{% url 'inventory:receipt_confirm' receipt.pk %}" style="display:inline">
+    <form method="post" action="{% url 'inventory:receipt_confirm' receipt.pk %}" class="d-inline">
       {% csrf_token %}
       <button type="submit" class="btn btn-sm btn-success"
               onclick="return confirm('Potvrdi primku? Ovo će ažurirati zalihe i cijene artikala.')">
@@ -55,8 +38,8 @@
      {% else %}border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05){% endif %}">
   <div class="row g-3">
     <div class="col-sm-3">
-      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Status</div>
-      <div style="font-size:1rem;font-weight:700">
+      <div class="fx-text-dim fx-fs-sm fx-fw-bold fx-uppercase">Status</div>
+      <div class="fx-fs-lg fx-fw-bold">
         {% if receipt.status == 'draft' %}
           <span class="badge bg-warning text-dark fs-6">Nacrt</span>
         {% elif receipt.status == 'confirmed' %}
@@ -67,20 +50,20 @@
       </div>
     </div>
     <div class="col-sm-3">
-      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Datum</div>
-      <div style="font-size:.95rem">{{ receipt.date|date:"d.m.Y" }}</div>
+      <div class="fx-text-dim fx-fs-sm fx-fw-bold fx-uppercase">Datum</div>
+      <div class="fx-fs-normal">{{ receipt.date|date:"d.m.Y" }}</div>
     </div>
     <div class="col-sm-3">
-      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Dobavljač</div>
-      <div style="font-size:.95rem">{{ receipt.supplier.name|default:"—" }}</div>
+      <div class="fx-text-dim fx-fs-sm fx-fw-bold fx-uppercase">Dobavljač</div>
+      <div class="fx-fs-normal">{{ receipt.supplier.name|default:"—" }}</div>
     </div>
     <div class="col-sm-3">
-      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Dokument br.</div>
-      <div style="font-size:.95rem">{{ receipt.document_number|default:"—" }}</div>
+      <div class="fx-text-dim fx-fs-sm fx-fw-bold fx-uppercase">Dokument br.</div>
+      <div class="fx-fs-normal">{{ receipt.document_number|default:"—" }}</div>
     </div>
   </div>
   {% if receipt.notes %}
-  <div class="mt-2" style="color:#94a3b8;font-size:.85rem">
+  <div class="mt-2 fx-text-muted fx-fs-base">
     <i class="fas fa-sticky-note me-1"></i>{{ receipt.notes }}
   </div>
   {% endif %}
@@ -88,24 +71,24 @@
 
 <!-- Items table -->
 <div class="stat-card mb-4">
-  <h6 style="color:var(--gold);font-size:.85rem;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">
+  <h6 class="fx-fs-base fx-fw-bold fx-text-gold mb-3 fx-uppercase fx-ls-1">
     <i class="fas fa-boxes me-2"></i>Stavke primke
   </h6>
   <div class="table-responsive">
-    <table class="table table-sm mb-0" style="font-size:.78rem">
+    <table class="table table-sm mb-0 fx-fs-body-sm">
       <thead>
         <tr style="border-bottom:2px solid rgba(201,168,76,.2)">
           <th>Artikl</th>
           <th class="text-end">Kol.</th>
           <th class="text-end">Nab. cij.</th>
           <th class="text-end">Zav. troš.</th>
-          <th class="text-end" style="color:var(--gold)">Nab. s troš.</th>
+          <th class="text-end fx-text-gold">Nab. s troš.</th>
           <th class="text-end">Marža %</th>
           <th class="text-end">Prod. bez PDV</th>
           <th class="text-end">PDV %</th>
-          <th class="text-end" style="color:var(--gold)">MPC</th>
+          <th class="text-end fx-text-gold">MPC</th>
           <th class="text-end">Uk. nabavna</th>
-          <th class="text-end" style="color:var(--gold)">Uk. MPC</th>
+          <th class="text-end fx-text-gold">Uk. MPC</th>
         </tr>
       </thead>
       <tbody>
@@ -113,21 +96,21 @@
         <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
           <td>
             <a href="{% url 'inventory:detail' item.inventory_item.pk %}"
-               style="color:#e2e8f0;text-decoration:none;font-weight:600">
+               class="fx-text-body fx-no-underline fx-fw-semibold">
               {{ item.inventory_item.name }}
             </a>
-            <div style="color:#64748b;font-size:.7rem;font-family:monospace">{{ item.inventory_item.sku }}</div>
+            <div class="fx-text-dim fx-fs-sm fx-font-mono">{{ item.inventory_item.sku }}</div>
           </td>
-          <td class="text-end" style="font-family:monospace">{{ item.quantity }}</td>
-          <td class="text-end" style="font-family:monospace">{{ item.purchase_price_unit }}</td>
-          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ item.dependent_costs_unit }}</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold)">{{ item.cost_price_unit }}</td>
-          <td class="text-end" style="font-family:monospace">{{ item.margin_percent }}%</td>
-          <td class="text-end" style="font-family:monospace;color:#3b82f6">{{ item.selling_price_net }}</td>
-          <td class="text-end" style="font-family:monospace">{{ item.tax_rate }}%</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold);font-weight:700">{{ item.selling_price_gross }}</td>
-          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ item.total_cost_price }} EUR</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold);font-weight:700">{{ item.total_selling_gross }} EUR</td>
+          <td class="text-end fx-font-mono">{{ item.quantity }}</td>
+          <td class="text-end fx-font-mono">{{ item.purchase_price_unit }}</td>
+          <td class="text-end fx-text-dim fx-font-mono">{{ item.dependent_costs_unit }}</td>
+          <td class="text-end fx-text-gold fx-font-mono">{{ item.cost_price_unit }}</td>
+          <td class="text-end fx-font-mono">{{ item.margin_percent }}%</td>
+          <td class="text-end fx-text-blue fx-font-mono">{{ item.selling_price_net }}</td>
+          <td class="text-end fx-font-mono">{{ item.tax_rate }}%</td>
+          <td class="text-end fx-fw-bold fx-text-gold fx-font-mono">{{ item.selling_price_gross }}</td>
+          <td class="text-end fx-text-dim fx-font-mono">{{ item.total_cost_price }} EUR</td>
+          <td class="text-end fx-fw-bold fx-text-gold fx-font-mono">{{ item.total_selling_gross }} EUR</td>
         </tr>
         {% empty %}
         <tr><td colspan="11" class="text-center text-muted py-3">Nema stavki.</td></tr>
@@ -135,10 +118,10 @@
       </tbody>
       {% if receipt.status == 'confirmed' %}
       <tfoot>
-        <tr style="border-top:2px solid rgba(201,168,76,.2);font-weight:700">
-          <td colspan="9" class="text-end" style="color:#94a3b8">UKUPNO:</td>
-          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ receipt.total_purchase }} EUR</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold)">{{ receipt.total_selling }} EUR</td>
+        <tr class="fx-fw-bold" style="border-top:2px solid rgba(201,168,76,.2)">
+          <td colspan="9" class="text-end fx-text-dim">UKUPNO:</td>
+          <td class="text-end fx-text-dim fx-font-mono">{{ receipt.total_purchase }} EUR</td>
+          <td class="text-end fx-text-gold fx-font-mono">{{ receipt.total_selling }} EUR</td>
         </tr>
       </tfoot>
       {% endif %}
@@ -147,7 +130,7 @@
 </div>
 
 <!-- Meta info -->
-<div style="color:#64748b;font-size:.78rem">
+<div class="fx-text-dim fx-fs-body-sm">
   Kreirala: {{ receipt.created_by.get_full_name|default:receipt.created_by.username|default:"—" }} ·
   {{ receipt.created_at|date:"d.m.Y H:i" }}
 </div>

@@ -16,7 +16,7 @@ nav a.logo{color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:no
 nav a.logo span{color:var(--text)}
 nav .links{display:flex;gap:1rem;align-items:center}
 nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
-.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;text-decoration:none}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;text-decoration:none}
 .hero-emo{min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;background:linear-gradient(135deg,#0a0a0a,#0a1a0a,#0a0a0a)}
 .hero-emo .leaf{font-size:5rem;margin-bottom:1rem;display:block}
 .hero-emo h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem}
@@ -40,7 +40,7 @@ nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
 .cta{text-align:center;padding:4rem 2rem;background:linear-gradient(135deg,#0a1a0a,#0a0a0a)}
 .cta h2{font-size:2rem;font-weight:800;margin-bottom:.5rem}
 .cta p{color:var(--muted);margin-bottom:1.5rem}
-footer{background:#050505;padding:2rem;text-align:center;color:#333;font-size:.75rem}
+footer{background:#050505;padding:2rem;text-align:center;color:var(--text);font-size:.75rem}
 footer a{color:var(--gold);text-decoration:none}
 @media(max-width:600px){.benefit{flex-direction:column;gap:.8rem}.stat-row{gap:1.5rem}}
 </style>
@@ -53,7 +53,7 @@ footer a{color:var(--gold);text-decoration:none}
 <a href="/de/">Start</a>
 <a href="/de/pakete/">Pakete</a>
 <a href="/de/anleitung/">Anleitung</a>
-<a href="/de/ohne-papier/" style="color:var(--green)">Ohne Papier</a>
+<a href="/de/ohne-papier/" class="fx-text-green">Ohne Papier</a>
 <a href="{% url 'accounts:quick_register' %}" class="btn-gold">Kostenlos testen</a>
 </div>
 </nav>
@@ -63,7 +63,7 @@ footer a{color:var(--gold);text-decoration:none}
 <span class="leaf">🌿</span>
 <h1>Schluss mit<br><span>Thermopapier</span></h1>
 <p>Jedes Jahr landen 12,5 Milliarden Kassenzettel im Müll — beschichtet mit BPA, nicht recycelbar. Es geht auch anders.</p>
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:.8rem 2rem;font-size:1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>Jetzt papierlos kassieren</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold fx-fs-lg fx-text-dark" style="padding:.8rem 2rem;background:var(--green)"><i class="fas fa-leaf fx-mr-2"></i>Jetzt papierlos kassieren</a>
 
 <div class="stat-row">
 <div class="stat"><div class="num">0</div><div class="lbl">Papierrollen nötig</div></div>
@@ -77,7 +77,7 @@ footer a{color:var(--gold);text-decoration:none}
 <h2>Warum ohne Papier?</h2>
 
 <div class="benefit">
-<div class="benefit-icon" style="background:rgba(34,197,94,.12);color:var(--green)"><i class="fas fa-heartbeat"></i></div>
+<div class="benefit-icon fx-text-green" style="background:rgba(34,197,94,.12)"><i class="fas fa-heartbeat"></i></div>
 <div>
 <h3>BPA-frei = Gesünder</h3>
 <p>Thermopapier enthält Bisphenol A (BPA) — ein endokriner Disruptor. Ihre Mitarbeiter fassen täglich hunderte Belege an. Digitale Belege eliminieren dieses Risiko komplett.</p>
@@ -85,7 +85,7 @@ footer a{color:var(--gold);text-decoration:none}
 </div>
 
 <div class="benefit">
-<div class="benefit-icon" style="background:rgba(59,130,246,.12);color:#3b82f6"><i class="fas fa-mobile-alt"></i></div>
+<div class="benefit-icon fx-text-blue" style="background:rgba(59,130,246,.12)"><i class="fas fa-mobile-alt"></i></div>
 <div>
 <h3>WhatsApp statt Zettel</h3>
 <p>Der Gast nennt seine Nummer, tippt auf "Senden" — fertig. Der Beleg ist in 2 Sekunden auf dem Handy. Kein Zettel, kein Müll, kein Problem.</p>
@@ -93,7 +93,7 @@ footer a{color:var(--gold);text-decoration:none}
 </div>
 
 <div class="benefit">
-<div class="benefit-icon" style="background:rgba(201,168,76,.12);color:var(--gold)"><i class="fas fa-piggy-bank"></i></div>
+<div class="benefit-icon fx-text-gold" style="background:rgba(201,168,76,.12)"><i class="fas fa-piggy-bank"></i></div>
 <div>
 <h3>200€/Jahr sparen</h3>
 <p>Ein Restaurant verbraucht ca. 50 Rollen Thermopapier pro Jahr (à 3-4€). Dazu kommt der Drucker, die Wartung, der Strom. Alles gespart.</p>
@@ -110,7 +110,7 @@ footer a{color:var(--gold);text-decoration:none}
 </section>
 
 <div class="how">
-<h3><i class="fas fa-magic" style="margin-right:.5rem"></i> So funktioniert's</h3>
+<h3><i class="fas fa-magic fx-mr-2"></i> So funktioniert's</h3>
 <ol>
 <li><strong>Kassieren</strong> wie gewohnt — Artikel scannen oder antippen</li>
 <li><strong>Zahlungsmethode</strong> wählen — Bar, Karte, Revolut, oder Crypto</li>
@@ -122,7 +122,7 @@ footer a{color:var(--gold);text-decoration:none}
 <section class="cta">
 <h2>Bereit für die Zukunft?</h2>
 <p>Die Kasse der Zukunft druckt nicht — sie sendet.</p>
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:1rem 3rem;font-size:1.1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>30 Tage kostenlos</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold fx-fs-xl fx-text-dark" style="padding:1rem 3rem;background:var(--green)"><i class="fas fa-leaf fx-mr-2"></i>30 Tage kostenlos</a>
 </section>
 
 <footer>

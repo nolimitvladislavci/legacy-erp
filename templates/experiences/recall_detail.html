@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -38,43 +38,43 @@
 {% endblock %}
 {% block content %}
 <div class="exp-container">
-<a href="{% url 'experiences:recall_list' %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>Recall</a>
+<a href="{% url 'experiences:recall_list' %}" class="fx-fs-base fx-text-dim"><i class="fas fa-arrow-left me-1"></i>Recall</a>
 <div class="d-flex justify-content-between align-items-start mb-4 mt-2">
   <div>
-    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)">{{ recall.title }}</h2>
-    <div style="margin-top:.25rem">
+    <h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0">{{ recall.title }}</h2>
+    <div class="fx-mt-2">
       <span class="exp-badge severity-{{ recall.severity }}">{{ recall.get_severity_display }}</span>
-      <span class="exp-badge ms-1" style="background:var(--surface);color:var(--text-dim);border:1px solid var(--border)">{{ recall.get_status_display }}</span>
+      <span class="exp-badge ms-1 fx-text-dim fx-bg-surface fx-b">{{ recall.get_status_display }}</span>
     </div>
   </div>
   <div class="d-flex gap-2">
-    <form method="POST" action="{% url 'experiences:recall_trace' recall.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-warning" style="border-radius:8px"><i class="fas fa-search me-1"></i>Trace</button></form>
-    <a href="{% url 'experiences:recall_notify' recall.pk %}" class="btn btn-sm btn-outline-danger" style="border-radius:8px"><i class="fas fa-bell me-1"></i>Obavijesti</a>
+    <form method="POST" action="{% url 'experiences:recall_trace' recall.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-warning fx-rounded"><i class="fas fa-search me-1"></i>Trace</button></form>
+    <a href="{% url 'experiences:recall_notify' recall.pk %}" class="btn btn-sm btn-outline-danger fx-rounded"><i class="fas fa-bell me-1"></i>Obavijesti</a>
   </div>
 </div>
 
 <div class="exp-stats">
-  <div class="exp-stat"><div class="exp-stat-value" style="color:#ef4444">{{ recall.affected_guests_count }}</div><div class="exp-stat-label">Pogođenih gostiju</div></div>
-  <div class="exp-stat"><div class="exp-stat-value" style="color:#f59e0b">{{ recall.affected_orders_count }}</div><div class="exp-stat-label">Pogođenih narudžbi</div></div>
+  <div class="exp-stat"><div class="exp-stat-value fx-text-red">{{ recall.affected_guests_count }}</div><div class="exp-stat-label">Pogođenih gostiju</div></div>
+  <div class="exp-stat"><div class="exp-stat-value fx-text-amber">{{ recall.affected_orders_count }}</div><div class="exp-stat-label">Pogođenih narudžbi</div></div>
   <div class="exp-stat"><div class="exp-stat-value">{{ recall.lot_number|default:"—" }}</div><div class="exp-stat-label">LOT</div></div>
-  <div class="exp-stat"><div class="exp-stat-value">{% if recall.health_authority_notified %}<i class="fas fa-check" style="color:#22c55e"></i>{% else %}<i class="fas fa-times" style="color:#ef4444"></i>{% endif %}</div><div class="exp-stat-label">Sanitarna</div></div>
+  <div class="exp-stat"><div class="exp-stat-value">{% if recall.health_authority_notified %}<i class="fas fa-check fx-text-green"></i>{% else %}<i class="fas fa-times fx-text-red"></i>{% endif %}</div><div class="exp-stat-label">Sanitarna</div></div>
 </div>
 
 <div class="exp-card mb-3">
-  <h6 style="font-weight:700;color:var(--text)">Opis</h6>
-  <p style="color:var(--text-dim);margin:0">{{ recall.description }}</p>
-  {% if recall.reported_symptoms %}<h6 style="font-weight:700;color:var(--text);margin-top:1rem">Simptomi</h6><p style="color:var(--text-dim);margin:0">{{ recall.reported_symptoms }}</p>{% endif %}
+  <h6 class="fx-fw-bold fx-text-body">Opis</h6>
+  <p class="fx-text-dim fx-m-0">{{ recall.description }}</p>
+  {% if recall.reported_symptoms %}<h6 class="fx-fw-bold fx-text-body mt-3">Simptomi</h6><p class="fx-text-dim fx-m-0">{{ recall.reported_symptoms }}</p>{% endif %}
 </div>
 
 {% if notifications %}
 <div class="exp-section">
   <h5><i class="fas fa-bell me-2"></i>Obavijesti</h5>
-  <div class="table-responsive"><table class="table table-dark table-sm align-middle" style="border-radius:12px;overflow:hidden">
+  <div class="table-responsive"><table class="table table-dark table-sm align-middle fx-rounded fx-overflow-hidden">
     <thead><tr><th>Primatelj</th><th>Kanal</th><th>Status</th><th>Poslano</th></tr></thead>
     <tbody>
     {% for n in notifications %}
     <tr>
-      <td>{{ n.recipient_name }}<br><small style="color:var(--text-dim)">{{ n.recipient_contact }}</small></td>
+      <td>{{ n.recipient_name }}<br><small class="fx-text-dim">{{ n.recipient_contact }}</small></td>
       <td>{{ n.channel }}</td>
       <td><span class="exp-badge {% if n.status == 'sent' %}severity-warning{% elif n.status == 'failed' %}severity-recall{% else %}severity-critical{% endif %}">{{ n.get_status_display }}</span></td>
       <td>{{ n.sent_at|date:"d.m. H:i"|default:"—" }}</td>

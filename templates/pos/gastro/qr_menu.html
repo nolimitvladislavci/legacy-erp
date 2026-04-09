@@ -17,7 +17,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 /* Header */
 .header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)}
 .header h1{color:var(--gold);font-size:1.1rem;font-weight:700}
-.header .table-badge{background:var(--gold);color:#000;font-size:.65rem;font-weight:800;padding:3px 8px;border-radius:20px}
+.header .table-badge{background:var(--gold);color:var(--text);font-size:.65rem;font-weight:800;padding:3px 8px;border-radius:20px}
 /* Search */
 .search-bar{padding:.5rem 1rem}
 .search-bar input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.55rem .8rem;border-radius:8px;font-size:.9rem;outline:none}
@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .cat-scroll{display:flex;gap:.4rem;padding:.4rem 1rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cat-scroll::-webkit-scrollbar{display:none}
 .cat-btn{flex-shrink:0;padding:.35rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
-.cat-btn.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.cat-btn.active{background:var(--gold);color:var(--text);border-color:var(--gold)}
 /* Items */
 .items{padding:.5rem 1rem}
 .item-card{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.65rem;margin-bottom:.4rem;gap:.7rem;transition:border-color .2s}
@@ -43,20 +43,20 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .item-price{color:var(--gold);font-weight:700;font-size:.95rem;white-space:nowrap}
 .item-qty{display:flex;align-items:center;gap:.4rem;margin-left:.5rem}
 .qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--gold);font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700}
-.qty-btn:active{background:var(--gold);color:#000}
+.qty-btn:active{background:var(--gold);color:var(--text)}
 .qty-num{font-weight:700;font-size:.85rem;min-width:20px;text-align:center}
 /* Cart bar */
-.cart-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#1a1a1a;border-top:2px solid var(--gold);padding:.7rem 1rem;display:none;gap:.6rem;align-items:center}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg-card);border-top:2px solid var(--gold);padding:.7rem 1rem;display:none;gap:.6rem;align-items:center}
 .cart-bar.show{display:flex}
-.cart-count{background:var(--gold);color:#000;font-weight:800;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.cart-count{background:var(--gold);color:var(--text);font-weight:800;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem}
 .cart-total{flex:1;font-weight:700;font-size:1rem}
 .cart-total small{display:block;font-weight:400;font-size:.65rem;color:var(--muted)}
-.cart-submit{background:var(--gold);color:#000;border:none;padding:.6rem 1.2rem;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer}
+.cart-submit{background:var(--gold);color:var(--text);border:none;padding:.6rem 1.2rem;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer}
 .cart-submit:active{opacity:.8}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.show{display:flex}
-.modal{background:#1a1a1a;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:1.2rem}
+.modal{background:var(--bg-card);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:1.2rem}
 .modal h2{color:var(--gold);font-size:1rem;margin-bottom:.8rem;text-align:center}
 .modal input,.modal textarea{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.55rem .7rem;border-radius:8px;font-size:.85rem;margin-bottom:.5rem;outline:none;font-family:inherit}
 .modal input:focus,.modal textarea:focus{border-color:var(--gold)}
@@ -68,7 +68,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .modal .ci .ci-remove{color:var(--red);cursor:pointer;margin-left:.5rem;font-size:.9rem}
 .modal .total-line{display:flex;justify-content:space-between;font-weight:700;font-size:1rem;padding:.5rem 0;border-top:2px solid var(--gold);margin-top:.3rem}
 .modal .total-line .t-val{color:var(--gold)}
-.btn-order{width:100%;background:var(--gold);color:#000;border:none;padding:.75rem;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:.6rem}
+.btn-order{width:100%;background:var(--gold);color:var(--text);border:none;padding:.75rem;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:.6rem}
 .btn-order:disabled{opacity:.4;cursor:not-allowed}
 .btn-order:active:not(:disabled){opacity:.8}
 .btn-cancel{width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);padding:.55rem;border-radius:8px;font-size:.8rem;cursor:pointer;margin-top:.4rem}
@@ -78,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .success-screen .check{font-size:3rem;margin-bottom:1rem}
 .success-screen h2{color:var(--gold);font-size:1.3rem;margin-bottom:.5rem}
 .success-screen p{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;line-height:1.5}
-.success-screen a{display:inline-block;background:var(--gold);color:#000;padding:.6rem 1.5rem;border-radius:8px;font-weight:700;text-decoration:none;font-size:.9rem}
+.success-screen a{display:inline-block;background:var(--gold);color:var(--text);padding:.6rem 1.5rem;border-radius:8px;font-weight:700;text-decoration:none;font-size:.9rem}
 /* Empty cat */
 .empty-msg{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
 /* Welcome screen */
@@ -89,12 +89,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .welcome .w-sub{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;line-height:1.6}
 .welcome .w-steps{text-align:left;margin-bottom:1.5rem;width:100%;max-width:320px}
 .welcome .w-step{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.8rem}
-.welcome .w-step .w-num{background:var(--gold);color:#000;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0}
+.welcome .w-step .w-num{background:var(--gold);color:var(--text);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0}
 .welcome .w-input{width:100%;max-width:320px;margin-bottom:.6rem}
 .welcome .w-input input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.65rem .8rem;border-radius:10px;font-size:.9rem;outline:none;text-align:center}
 .welcome .w-input input:focus{border-color:var(--gold)}
 .welcome .w-input label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:.3rem}
-.welcome .w-go{background:var(--gold);color:#000;border:none;padding:.7rem 2.5rem;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:.5rem}
+.welcome .w-go{background:var(--gold);color:var(--text);border:none;padding:.7rem 2.5rem;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:.5rem}
 .welcome .w-go:active{opacity:.8}
 .welcome .w-skip{background:transparent;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.8rem;text-decoration:underline}
 </style>
@@ -112,10 +112,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
     <div class="w-step"><span class="w-num">3</span> Posaljite narudzbu</div>
     <div class="w-step"><span class="w-num">4</span> Konobar donosi - vi uzivate</div>
   </div>
-  <div style="background:linear-gradient(135deg,#1a1500,#141414);border:1px solid var(--gold);border-radius:10px;padding:.7rem;margin-bottom:1rem;width:100%;max-width:320px;text-align:center">
-    <div style="font-size:.65rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem">&#127942; Program lojalnosti</div>
-    <div style="font-size:.8rem;color:var(--text)">Svaka 6. kava GRATIS!</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem">Upisite email za pracenje</div>
+  <div class="fx-rounded fx-w-full text-center mb-3" style="background:linear-gradient(135deg,#1a1500,#141414);border:1px solid var(--gold);padding:.7rem;max-width:320px">
+    <div class="fx-fs-xs fx-fw-bold fx-text-gold fx-uppercase" style="letter-spacing:.06em;margin-bottom:.2rem">&#127942; Program lojalnosti</div>
+    <div class="fx-fs-compact fx-text-body">Svaka 6. kava GRATIS!</div>
+    <div class="fx-fs-xs fx-text-muted" style="margin-top:.2rem">Upisite email za pracenje</div>
   </div>
   <div class="w-input">
     <label>Email (za digitalni racun)</label>
@@ -160,23 +160,23 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
     <input type="email" id="guestEmail" placeholder="Email (za e-racun, opcionalno)">
     <textarea id="orderNotes" rows="2" placeholder="Napomene (alergije, posebni zahtjevi...)"></textarea>
     <div style="margin-bottom:.8rem">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.4rem">Nacin placanja</div>
-      <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="payMethods">
+      <div class="fx-fs-sm fx-text-muted fx-uppercase" style="letter-spacing:.05em;margin-bottom:.4rem">Nacin placanja</div>
+      <div class="d-flex fx-flex-wrap fx-gap-1" id="payMethods">
         <label class="pm-opt pm-active" onclick="selectPM(this)">
-          <input type="radio" name="payment_method" value="cash" checked style="display:none">
-          <div style="font-size:1.2rem">&#128181;</div><div>Gotovina</div>
+          <input type="radio" name="payment_method" value="cash" checked class="fx-hidden">
+          <div class="fx-fs-2xl">&#128181;</div><div>Gotovina</div>
         </label>
-        <label class="pm-opt" id="pmStripe" style="display:none" onclick="selectPM(this)">
-          <input type="radio" name="payment_method" value="stripe" style="display:none">
-          <div style="font-size:1.2rem">&#128179;</div><div>Kartica</div>
+        <label class="pm-opt fx-hidden" id="pmStripe" onclick="selectPM(this)">
+          <input type="radio" name="payment_method" value="stripe" class="fx-hidden">
+          <div class="fx-fs-2xl">&#128179;</div><div>Kartica</div>
         </label>
-        <label class="pm-opt" id="pmPaypal" style="display:none" onclick="selectPM(this)">
-          <input type="radio" name="payment_method" value="paypal" style="display:none">
-          <div style="font-size:1.2rem">&#128176;</div><div>PayPal</div>
+        <label class="pm-opt fx-hidden" id="pmPaypal" onclick="selectPM(this)">
+          <input type="radio" name="payment_method" value="paypal" class="fx-hidden">
+          <div class="fx-fs-2xl">&#128176;</div><div>PayPal</div>
         </label>
-        <label class="pm-opt" id="pmBtcpay" style="display:none" onclick="selectPM(this)">
-          <input type="radio" name="payment_method" value="btcpay" style="display:none">
-          <div style="font-size:1.2rem">&#8383;</div><div>Crypto</div>
+        <label class="pm-opt fx-hidden" id="pmBtcpay" onclick="selectPM(this)">
+          <input type="radio" name="payment_method" value="btcpay" class="fx-hidden">
+          <div class="fx-fs-2xl">&#8383;</div><div>Crypto</div>
         </label>
       </div>
     </div>

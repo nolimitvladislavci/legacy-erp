@@ -7,12 +7,12 @@ Then in JS: openQuickAdd('partner', '/partners/api/quick-create/', callback)
 
 <div id="quickAddModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:12px;border:none;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div class="modal-content fx-rounded fx-border-none" style="box-shadow:0 8px 32px rgba(0,0,0,.2)">
       <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:16px 20px">
-        <h5 class="modal-title" style="font-weight:700;font-size:0.95rem" id="quickAddTitle">Brzo dodavanje</h5>
+        <h5 class="modal-title fx-fw-bold fx-fs-normal" id="quickAddTitle">Brzo dodavanje</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body" style="padding:20px" id="quickAddBody">
+      <div class="modal-body fx-p-20" id="quickAddBody">
         <!-- Dynamic form fields inserted here by JS -->
       </div>
       <div class="modal-footer" style="border-top:1px solid #e2e8f0;padding:12px 20px">
@@ -77,15 +77,14 @@ function openQuickAdd(type, url, callback) {
                 `<option value="${o.v}" ${o.v === f.default ? 'selected' : ''}>${o.l}</option>`
             ).join('');
             html += `<div class="mb-3">
-                <label class="form-label" style="font-weight:600;font-size:0.8rem">${f.label}</label>
-                <select name="${f.name}" class="form-select form-select-sm" style="border-radius:8px">${opts}</select>
+                <label class="form-label fx-fw-semibold fx-fs-compact">${f.label}</label>
+                <select name="${f.name}" class="form-select form-select-sm fx-rounded">${opts}</select>
             </div>`;
         } else {
             html += `<div class="mb-3">
-                <label class="form-label" style="font-weight:600;font-size:0.8rem">${f.label}${f.required ? ' *' : ''}</label>
-                <input type="${f.type || 'text'}" name="${f.name}" class="form-control form-control-sm"
-                       ${f.required ? 'required' : ''} ${f.placeholder ? 'placeholder="'+f.placeholder+'"' : ''}
-                       style="border-radius:8px">
+                <label class="form-label fx-fw-semibold fx-fs-compact">${f.label}${f.required ? ' *' : ''}</label>
+                <input type="${f.type || 'text'}" name="${f.name}" class="form-control form-control-sm fx-rounded"
+                       ${f.required ? 'required' : ''} ${f.placeholder ? 'placeholder="'+f.placeholder+'"' : ''}>
             </div>`;
         }
     });
@@ -157,14 +156,14 @@ function showToast(type, message) {
         document.body.appendChild(container);
     }
     const colors = {
-        success: 'background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:#166534',
-        error: 'background:rgba(254,242,242,.95);border:1px solid #fecaca;color:#991b1b',
+        success: 'background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:var(--green)',
+        error: 'background:rgba(254,242,242,.95);border:1px solid #fecaca;color:var(--red)',
         warning: 'background:rgba(255,251,235,.95);border:1px solid #fed7aa;color:#92400e',
     };
     const el = document.createElement('div');
     el.className = 'alert shadow py-2 px-3';
     el.style = `font-size:0.82rem;border-radius:10px;margin-bottom:8px;backdrop-filter:blur(8px);${colors[type] || colors.success}`;
-    el.innerHTML = `${message}<button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;font-size:1rem;opacity:.5;cursor:pointer;line-height:1">×</button>`;
+    el.innerHTML = `${message}<button onclick="this.parentElement.remove()" class="fx-border-none fx-fs-lg fx-opacity-50 fx-pointer fx-bg-transparent" style="float:right;line-height:1">×</button>`;
     container.prepend(el);
     if (type === 'success') {
         setTimeout(() => { el.style.transition='all 0.5s'; el.style.opacity='0'; el.style.transform='translateX(20px)'; setTimeout(() => el.remove(), 500); }, 4000);

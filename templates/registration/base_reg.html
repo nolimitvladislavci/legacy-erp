@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/global_themes.css' %}">
+<link rel="stylesheet" href="{% static 'css/fenix-tokens.css' %}?v=4000">
 <link rel="stylesheet" href="{% static 'css/fenix-ui.css' %}">
 <script>(function(){var t=localStorage.getItem('fina-theme');if(t)document.documentElement.setAttribute('data-theme',t);})()</script>
 <style>
@@ -57,7 +57,7 @@
   .reg-msg.warning { background: rgba(201,168,76,0.1); border: 1px solid var(--gold); color: var(--gold); }
   @media (max-width: 600px) { .reg-form-row { grid-template-columns: 1fr; } .reg-card { padding: 1.5rem; } .step-line { width: 40px; } }
   /* Global language picker */
-  .glang-btn { padding:4px 8px; border:1px solid #333; border-radius:6px; background:transparent; color:#888; cursor:pointer; font-size:.75rem; transition:all .2s; }
+  .glang-btn { padding:4px 8px; border:1px solid #333; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:.75rem; transition:all .2s; }
   .glang-btn:hover { border-color:var(--gold); color:var(--gold); }
   .glang-btn.active { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
 </style>
@@ -66,14 +66,14 @@
 <body>
 <header class="reg-header">
   <a href="{% url 'dashboard' %}" class="reg-logo">LIMIT<span> Connect</span></a>
-  <div style="display:flex;align-items:center;gap:12px">
-    <div style="display:flex;gap:4px">
+  <div class="d-flex fx-gap-3 align-items-center">
+    <div class="d-flex fx-gap-1">
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'hr' %}active{% endif %}" onclick="switchLang('hr')" title="Hrvatski">🇭🇷 HR</button>
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'de' %}active{% endif %}" onclick="switchLang('de')" title="Deutsch">🇩🇪 DE</button>
       <button type="button" class="glang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}" onclick="switchLang('en')" title="English">🇬🇧 EN</button>
     </div>
     <button id="theme-toggle" onclick="toggleTheme()" title="Tamna/Svijetla tema"
-            style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--gold);font-size:.85rem;display:flex;align-items:center">
+            class="fx-rounded-sm fx-pointer fx-fs-base d-flex fx-text-gold align-items-center fx-bg-transparent fx-b" style="padding:4px 8px">
       <i class="fas fa-moon" id="theme-icon"></i>
     </button>
     <a href="{% url 'dashboard' %}" class="reg-back">{% trans "← Natrag" %}</a>

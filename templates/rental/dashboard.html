@@ -3,24 +3,7 @@
 {% load i18n %}
 {% block title %}Robot Hotel{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .page{padding:1rem;max-width:1000px}
@@ -34,7 +17,7 @@
 .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem}
 .room-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;font-size:.8rem}
 .room-card.available{border-color:var(--green)}
-.room-card.occupied{border-color:var(--red);background:#1a0a0a}
+.room-card.occupied{border-color:var(--red);background:var(--surface-deep)}
 .room-card.cleaning{border-color:var(--orange);background:#1a1500}
 .room-card .r-name{font-weight:700;font-size:.85rem}
 .room-card .r-status{font-size:.6rem;text-transform:uppercase;font-weight:700;margin-top:.2rem}
@@ -47,7 +30,7 @@
 .b-dates{font-size:.7rem;color:var(--muted)}
 .b-status{font-size:.6rem;padding:2px 8px;border-radius:8px;font-weight:700;text-transform:uppercase}
 .b-status.pending{background:#1a1a00;color:var(--gold)}
-.b-status.confirmed{background:#0a1a0a;color:var(--green)}
+.b-status.confirmed{background:var(--surface-deep);color:var(--green)}
 .b-status.checked_in{background:#0a0a1a;color:var(--blue)}
 .quick-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
 </style>
@@ -57,7 +40,7 @@
 <div class="page">
   <div class="page-title">
     <span>&#127968; Robot Hotel</span>
-    <div style="display:flex;gap:.4rem">
+    <div class="d-flex fx-gap-1">
       <a href="{% url 'rental:property_create' %}" class="btn btn-gold btn-sm">+ Soba</a>
       <a href="{% url 'rental:booking_create' %}" class="btn btn-green btn-sm">+ Rezervacija</a>
       <a href="{% url 'rental:calendar' %}" class="btn btn-ghost btn-sm">&#128197; Kalendar</a>
@@ -66,8 +49,8 @@
 
   <div class="stats">
     <div class="stat"><div class="val">{{ total_rooms }}</div><div class="lbl">Ukupno soba</div></div>
-    <div class="stat"><div class="val" style="color:var(--green)">{{ available }}</div><div class="lbl">Slobodne</div></div>
-    <div class="stat"><div class="val" style="color:var(--red)">{{ occupied }}</div><div class="lbl">Zauzete</div></div>
+    <div class="stat"><div class="val fx-text-green">{{ available }}</div><div class="lbl">Slobodne</div></div>
+    <div class="stat"><div class="val fx-text-red">{{ occupied }}</div><div class="lbl">Zauzete</div></div>
     <div class="stat"><div class="val" style="color:var(--orange)">{{ cleaning }}</div><div class="lbl">Ciscenje</div></div>
     <div class="stat"><div class="val">&euro;{{ month_revenue|floatformat:0 }}</div><div class="lbl">Prihod (mjesec)</div></div>
   </div>
@@ -80,10 +63,10 @@
         <div>{% if p.type == 'room' %}&#128719;{% elif p.type == 'apartment' %}&#127969;{% elif p.type == 'dorm' %}&#128716;{% else %}&#127968;{% endif %}</div>
         <div class="r-name">{{ p.name }}</div>
         <div class="r-status {{ p.status }}">{{ p.get_status_display }}</div>
-        <div style="font-size:.6rem;color:var(--muted)">&euro;{{ p.price_per_night }}/noc</div>
+        <div class="fx-fs-2xs fx-text-muted">&euro;{{ p.price_per_night }}/noc</div>
       </div>
       {% empty %}
-      <div style="color:var(--muted);padding:1rem">Nema soba. Dodajte prvu!</div>
+      <div class="fx-text-muted fx-p-4">Nema soba. Dodajte prvu!</div>
       {% endfor %}
     </div>
   </div>
@@ -97,7 +80,7 @@
         <div class="b-guest">{{ b.guest_name }}</div>
         <div class="b-room">{{ b.rental_property.name }} &middot; {{ b.guest_count }} gost{{ b.guest_count|pluralize:"iju,a" }}</div>
       </div>
-      <div style="display:flex;gap:.3rem;align-items:center">
+      <div class="d-flex align-items-center" style="gap:.3rem">
         <span class="b-status {{ b.status }}">{{ b.get_status_display }}</span>
         <a href="{% url 'rental:check_in' b.pk %}" class="btn btn-green btn-sm">Check-in</a>
       </div>

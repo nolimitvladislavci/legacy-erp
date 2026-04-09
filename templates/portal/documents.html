@@ -3,9 +3,9 @@
 {% block title %}{% trans "Dokumenti" %} - {{ partner.name }}{% endblock %}
 {% block content %}
 <h5 class="mb-3"><i class="fas fa-folder-open"></i> {% trans "Dokumenti" %}</h5>
-<div class="card" style="border-radius:12px">
+<div class="card fx-rounded">
     <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+        <table class="table table-sm table-hover mb-0 fx-fs-note">
             <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Tip" %}</th><th>{% trans "Datum" %}</th><th class="text-end">{% trans "Iznos" %}</th><th></th></tr></thead>
             <tbody>
                 {% for doc in documents %}
@@ -15,7 +15,7 @@
                     <td>{{ doc.date_issued|date:"d.m.Y" }}</td>
                     <td class="text-end">{{ doc.total_amount|floatformat:2 }} EUR</td>
                     <td>
-                        {% if doc.file %}<a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-secondary" style="font-size:.7rem"><i class="fas fa-download"></i></a>{% endif %}
+                        {% if doc.file %}<a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-secondary fx-fs-sm"><i class="fas fa-download"></i></a>{% endif %}
                     </td>
                 </tr>
                 {% empty %}

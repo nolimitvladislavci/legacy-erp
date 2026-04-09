@@ -3,52 +3,35 @@
 {% block title %}Tabla pecenja | LIMIT Connect{% endblock %}
 {% block page_title %}Tabla pecenja{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:800px;margin:0 auto">
+<div class="fx-m-auto fx-max-800">
 
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem">
+  <div class="d-flex fx-flex-wrap fx-gap-3 justify-content-between align-items-start fx-mb-6">
     <div>
-      <h2 style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
-        <i class="fas fa-fire" style="color:var(--gold);margin-right:8px"></i>Tabla pecenja
+      <h2 class="fx-fw-bold fx-fs-4xl fx-text-body" style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif">
+        <i class="fas fa-fire fx-text-gold fx-mr-3"></i>Tabla pecenja
       </h2>
-      <p style="color:var(--text-muted);margin:0;font-size:.82rem">Aktivne narudzbe za usluzno pecenje · Danas zavrseno: {{ completed_today }}</p>
+      <p class="fx-fs-note fx-text-muted fx-m-0">Aktivne narudzbe za usluzno pecenje · Danas zavrseno: {{ completed_today }}</p>
     </div>
     <a href="{% url 'appointments:booking_by_slug' 'pekara-uvijek-frisko' %}" target="_blank"
-       style="background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+       class="fx-rounded fx-fs-base fx-no-underline fx-gap-2 fx-text-dim d-inline-flex align-items-center fx-bg-transparent fx-b fx-p-8-16">
       <i class="fas fa-plus"></i> Nova rezervacija
     </a>
   </div>
 
   {% for order in orders %}
-  <div class="stat-card" style="padding:1.25rem;margin-bottom:.75rem;border-left:3px solid {% if order.status == 'scheduled' %}#f59e0b{% elif order.status == 'confirmed' %}#3b82f6{% elif order.status == 'in_progress' %}#ef4444{% else %}#10b981{% endif %}">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem">
+  <div class="fenix-stat" style="padding:1.25rem;margin-bottom:.75rem;border-left:3px solid {% if order.status == 'scheduled' %}#f59e0b{% elif order.status == 'confirmed' %}#3b82f6{% elif order.status == 'in_progress' %}#ef4444{% else %}#10b981{% endif %}">
+    <div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-2 fx-mb-4">
       <div>
         {% if order.token_number %}
-        <span style="display:inline-block;width:40px;height:40px;line-height:40px;text-align:center;border-radius:50%;background:var(--gold);color:#0a0a0a;font-weight:900;font-size:1.1rem;margin-right:.5rem">{{ order.token_number }}</span>
+        <span class="text-center fx-rounded-circle fx-text-dark fx-fs-xl d-inline-block fx-bg-gold fx-mr-2" style="width:40px;height:40px;line-height:40px;font-weight:900">{{ order.token_number }}</span>
         {% endif %}
-        <strong style="font-size:1rem">{{ order.service.name }}</strong>
-        <span style="color:var(--text-muted);font-size:.82rem;margin-left:.5rem">{{ order.client.name|default:"Gost" }}</span>
+        <strong class="fx-fs-lg">{{ order.service.name }}</strong>
+        <span class="fx-fs-note fx-text-muted" style="margin-left:.5rem">{{ order.client.name|default:"Gost" }}</span>
       </div>
-      <div style="font-size:.82rem;color:var(--text-muted)">
+      <div class="fx-fs-note fx-text-muted">
         {{ order.start_time|date:"d.m. H:i" }}
         {% if order.weight_kg %} · {{ order.weight_kg }}kg{% endif %}
         {% if order.should_salt == True %} · Soliti{% elif order.should_salt == False %} · NE soliti{% endif %}
@@ -56,49 +39,48 @@
     </div>
 
     {% if order.intake_notes %}
-    <div style="background:rgba(201,168,76,.06);border-left:2px solid var(--gold);padding:.4rem .75rem;margin-bottom:.75rem;font-size:.82rem;color:var(--text-secondary)">
+    <div class="fx-fs-note fx-text-dim fx-mb-4" style="background:rgba(201,168,76,.06);border-left:2px solid var(--gold);padding:.4rem .75rem">
       {{ order.intake_notes }}
     </div>
     {% endif %}
 
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+    <div class="d-flex fx-flex-wrap fx-gap-2">
       {% if order.status == 'scheduled' %}
         <a href="{% url 'appointments:baking_intake' order.pk %}"
-           style="background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.82rem;text-decoration:none;display:inline-flex;align-items:center;gap:5px">
+           class="fx-text-dark fx-fw-bold fx-border-none fx-rounded fx-fs-note fx-no-underline d-inline-flex align-items-center fx-bg-gold fx-p-8-16" style="gap:5px">
           <i class="fas fa-clipboard-check"></i> Zaprimi
         </a>
       {% elif order.status == 'confirmed' %}
-        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" style="display:inline">
+        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="status" value="in_progress">
-          <button type="submit" style="background:#ef4444;color:#fff;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.82rem;cursor:pointer">
+          <button type="submit" class="fx-bg-red fx-text-white fx-fw-bold fx-border-none fx-rounded fx-fs-note fx-pointer fx-p-8-16">
             <i class="fas fa-fire"></i> Stavi u pec
           </button>
         </form>
       {% elif order.status == 'in_progress' %}
-        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" style="display:inline">
+        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="status" value="completed">
-          <button type="submit" style="background:#10b981;color:#fff;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.82rem;cursor:pointer">
+          <button type="submit" class="fx-bg-green fx-text-white fx-fw-bold fx-border-none fx-rounded fx-fs-note fx-pointer fx-p-8-16">
             <i class="fas fa-check"></i> Gotovo!
           </button>
         </form>
       {% endif %}
 
       {% if order.status == 'completed' %}
-        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" style="display:inline">
+        <form method="post" action="{% url 'appointments:baking_status_update' order.pk %}" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="status" value="picked_up">
-          <button type="submit" style="background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.82rem;cursor:pointer">
+          <button type="submit" class="fx-rounded fx-fs-note fx-pointer fx-text-dim fx-bg-transparent fx-b fx-p-8-16">
             <i class="fas fa-handshake"></i> Preuzeto
           </button>
         </form>
       {% endif %}
 
-      <span style="padding:8px 12px;border-radius:8px;font-size:.75rem;font-weight:600;
-        {% if order.status == 'scheduled' %}background:rgba(245,158,11,.1);color:#f59e0b
+      <span class="fx-rounded fx-fs-caption fx-fw-semibold" style="padding:8px 12px;{% if order.status == 'scheduled' %}background:rgba(245,158,11,.1);color:#f59e0b
         {% elif order.status == 'confirmed' %}background:rgba(59,130,246,.1);color:#3b82f6
-        {% elif order.status == 'in_progress' %}background:rgba(239,68,68,.1);color:#ef4444
+        {% elif order.status == 'in_progress' %}background:rgba(239,68,68,.1);color:var(--red)
         {% elif order.status == 'completed' %}background:rgba(16,185,129,.1);color:#10b981
         {% endif %}">
         {% if order.status == 'scheduled' %}Ceka prijem
@@ -110,8 +92,8 @@
     </div>
   </div>
   {% empty %}
-  <div class="stat-card" style="padding:3rem;text-align:center;color:var(--text-muted)">
-    <i class="fas fa-fire" style="font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.2"></i>
+  <div class="fenix-stat text-center fx-text-muted fx-p-7">
+    <i class="fas fa-fire d-block fx-mb-4 fx-fs-7xl" style="opacity:.2"></i>
     Nema aktivnih narudzbi za pecenje
   </div>
   {% endfor %}

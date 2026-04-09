@@ -39,7 +39,7 @@
                 <th>Broj</th><th>Zaposlenik</th><th>Odrediste</th><th>Polazak</th><th>Povratak</th><th>Prijevoz</th><th class="text-end">Ukupno</th><th>Status</th>
             </tr></thead><tbody>
             {% for order in orders %}
-            <tr onclick="window.location='{% url 'worktime:travel_order_detail' order.pk %}'" style="cursor:pointer">
+            <tr onclick="window.location='{% url 'worktime:travel_order_detail' order.pk %}'" class="fx-pointer">
                 <td><strong>{{ order.order_number }}</strong></td>
                 <td>{{ order.employee.get_full_name|default:order.employee.username }}</td>
                 <td>{{ order.destination }}</td>

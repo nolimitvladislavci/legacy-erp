@@ -4,17 +4,17 @@
 {% block title %}Porezni Savjetnik — {{ template.get_form_type_display }} {{ session.tax_year }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-2 px-md-4 py-3" style="max-width:800px;">
+<div class="container-fluid px-2 px-md-4 py-3 fx-max-800">
 
   {# ── HEADER ─────────────────────────────────────────── #}
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
-      <h4 class="mb-0" style="color:var(--gold);font-family:'Cormorant Garamond',serif;">
+      <h4 class="mb-0 fx-text-gold" style="font-family:'Cormorant Garamond',serif">
         <i class="fas fa-file-invoice-dollar me-2"></i>{{ template.get_form_type_display }}
       </h4>
       <small class="text-muted">{{ company.name }} — {{ session.tax_year }}. godina</small>
     </div>
-    <span class="badge" id="statusBadge" style="background:var(--gold);color:#000;">Nacrt</span>
+    <span class="badge fx-text-dark fx-bg-gold" id="statusBadge">Nacrt</span>
   </div>
 
   {# ── PROGRESS BAR ──────────────────────────────────── #}
@@ -24,8 +24,8 @@
       <small class="text-muted" id="progressPct">0%</small>
     </div>
     <div class="progress" style="height:6px;background:var(--border);">
-      <div class="progress-bar" id="progressBar"
-           style="width:0%;background:var(--gold);transition:width 0.4s ease;"></div>
+      <div class="progress-bar fx-bg-gold" id="progressBar"
+           style="width:0%;transition:width 0.4s ease"></div>
     </div>
     <div class="d-flex justify-content-between mt-1">
       <div class="wizard-dots" id="wizardDots"></div>
@@ -36,14 +36,14 @@
   <div id="toastContainer" style="position:fixed;top:80px;right:16px;z-index:9999;max-width:360px;"></div>
 
   {# ── AI MESSAGE PANEL ──────────────────────────────── #}
-  <div id="aiPanel" class="mb-3" style="display:none;">
-    <div class="card" style="border-left:3px solid var(--gold);background:var(--bg-card);">
+  <div id="aiPanel" class="mb-3 fx-hidden">
+    <div class="card fx-bg-card" style="border-left:3px solid var(--gold)">
       <div class="card-body p-3">
         <div class="d-flex align-items-start">
-          <i class="fas fa-robot me-2 mt-1" style="color:var(--gold);"></i>
+          <i class="fas fa-robot me-2 mt-1 fx-text-gold"></i>
           <div>
             <small class="text-muted d-block mb-1">LIMIT AI Asistent</small>
-            <div id="aiMessage" style="font-size:0.9rem;color:var(--text);"></div>
+            <div id="aiMessage" class="fx-fs-md fx-text-body"></div>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@
   </div>
 
   {# ── WIZARD STEPS ──────────────────────────────────── #}
-  <div id="wizardBody" class="card" style="background:var(--bg-card);border:1px solid var(--border);">
+  <div id="wizardBody" class="card fx-bg-card fx-b">
     <div class="card-body p-3 p-md-4">
 
       {# Step 0: Osnovni podaci #}
@@ -59,34 +59,34 @@
         <h5 class="mb-3"><i class="fas fa-user me-2"></i>Osnovni podaci</h5>
         <div class="mb-3">
           <label class="form-label small">OIB obveznika</label>
-          <input type="text" class="form-control" id="f_oib" maxlength="11"
-                 placeholder="12345678901" style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+          <input type="text" class="form-control fx-text-body" id="f_oib" maxlength="11"
+                 placeholder="12345678901" style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
         <div class="mb-3">
           <label class="form-label small">Ime i prezime</label>
-          <input type="text" class="form-control" id="f_ime_prezime"
-                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+          <input type="text" class="form-control fx-text-body" id="f_ime_prezime"
+                 style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
         <div class="mb-3">
           <label class="form-label small">Adresa prebivališta</label>
-          <input type="text" class="form-control" id="f_adresa"
-                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+          <input type="text" class="form-control fx-text-body" id="f_adresa"
+                 style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
         <div class="mb-3">
           <label class="form-label small">Naziv obrta</label>
-          <input type="text" class="form-control" id="f_naziv_obrta"
-                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+          <input type="text" class="form-control fx-text-body" id="f_naziv_obrta"
+                 style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
         <div class="mb-3">
           <label class="form-label small">Djelatnost (NKD šifra)</label>
-          <input type="text" class="form-control" id="f_djelatnost_nkd"
+          <input type="text" class="form-control fx-text-body" id="f_djelatnost_nkd"
                  placeholder="47.11 — Trgovina na malo"
-                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+                 style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
       </div>
 
       {# Step 1: Primitci po kvartalima #}
-      <div class="wizard-step" data-step="1" style="display:none;">
+      <div class="wizard-step fx-hidden" data-step="1">
         <h5 class="mb-3"><i class="fas fa-coins me-2"></i>Primitci po kvartalima</h5>
         <p class="text-muted small mb-3" id="prefillNote"></p>
 
@@ -94,46 +94,46 @@
           <div class="col-6">
             <label class="form-label small">Q1 (sij–ožu)</label>
             <div class="input-group">
-              <input type="number" class="form-control q-input" id="f_q1_primitak"
+              <input type="number" class="form-control q-input fx-text-body" id="f_q1_primitak"
                      step="0.01" min="0" data-q="1"
-                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
-              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+                     style="background:var(--input-bg);border-color:var(--input-border)">
+              <span class="input-group-text fx-text-muted" style="background:var(--border)">EUR</span>
             </div>
           </div>
           <div class="col-6">
             <label class="form-label small">Q2 (tra–lip)</label>
             <div class="input-group">
-              <input type="number" class="form-control q-input" id="f_q2_primitak"
+              <input type="number" class="form-control q-input fx-text-body" id="f_q2_primitak"
                      step="0.01" min="0" data-q="2"
-                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
-              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+                     style="background:var(--input-bg);border-color:var(--input-border)">
+              <span class="input-group-text fx-text-muted" style="background:var(--border)">EUR</span>
             </div>
           </div>
           <div class="col-6">
             <label class="form-label small">Q3 (srp–ruj)</label>
             <div class="input-group">
-              <input type="number" class="form-control q-input" id="f_q3_primitak"
+              <input type="number" class="form-control q-input fx-text-body" id="f_q3_primitak"
                      step="0.01" min="0" data-q="3"
-                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
-              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+                     style="background:var(--input-bg);border-color:var(--input-border)">
+              <span class="input-group-text fx-text-muted" style="background:var(--border)">EUR</span>
             </div>
           </div>
           <div class="col-6">
             <label class="form-label small">Q4 (lis–pro)</label>
             <div class="input-group">
-              <input type="number" class="form-control q-input" id="f_q4_primitak"
+              <input type="number" class="form-control q-input fx-text-body" id="f_q4_primitak"
                      step="0.01" min="0" data-q="4"
-                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
-              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+                     style="background:var(--input-bg);border-color:var(--input-border)">
+              <span class="input-group-text fx-text-muted" style="background:var(--border)">EUR</span>
             </div>
           </div>
         </div>
 
         {# Live kalkulator #}
-        <div class="card p-3 mb-2" style="background:var(--table-header-bg);border:1px solid var(--border);">
+        <div class="card p-3 mb-2 fx-b fx-bg-surface2">
           <div class="d-flex justify-content-between">
             <span class="fw-bold">Ukupno:</span>
-            <span class="fw-bold" id="liveTotal" style="color:var(--gold);font-size:1.2rem;">0,00 EUR</span>
+            <span class="fw-bold fx-fs-2xl fx-text-gold" id="liveTotal">0,00 EUR</span>
           </div>
           <div class="d-flex justify-content-between mt-1">
             <small class="text-muted">Razred:</small>
@@ -152,11 +152,11 @@
       </div>
 
       {# Step 2: Izračun poreza #}
-      <div class="wizard-step" data-step="2" style="display:none;">
+      <div class="wizard-step fx-hidden" data-step="2">
         <h5 class="mb-3"><i class="fas fa-calculator me-2"></i>Izračun poreza</h5>
 
         <div class="table-responsive">
-          <table class="table table-sm" style="color:var(--text);">
+          <table class="table table-sm fx-text-body">
             <tr><td class="text-muted">Ukupni primitak</td><td class="text-end fw-bold" id="calc_total">—</td></tr>
             <tr><td class="text-muted">Porezni razred</td><td class="text-end fw-bold" id="calc_tier">—</td></tr>
             <tr><td class="text-muted">Godišnji porez</td><td class="text-end fw-bold" id="calc_tax">—</td></tr>
@@ -164,7 +164,7 @@
             <tr><td class="text-muted">Godišnji doprinosi</td><td class="text-end" id="calc_contrib_yr">—</td></tr>
             <tr style="border-top:2px solid var(--gold);">
               <td class="fw-bold">Ukupni godišnji troškovi</td>
-              <td class="text-end fw-bold" style="color:var(--gold);" id="calc_total_cost">—</td>
+              <td class="text-end fw-bold fx-text-gold" id="calc_total_cost">—</td>
             </tr>
           </table>
         </div>
@@ -172,43 +172,42 @@
         <div class="mb-3">
           <label class="form-label small">Već plaćeni predujam poreza (EUR)</label>
           <div class="input-group">
-            <input type="number" class="form-control" id="f_vec_placeni_porez"
+            <input type="number" class="form-control fx-text-body" id="f_vec_placeni_porez"
                    step="0.01" min="0" value="0"
-                   style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
-            <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+                   style="background:var(--input-bg);border-color:var(--input-border)">
+            <span class="input-group-text fx-text-muted" style="background:var(--border)">EUR</span>
           </div>
           <small class="text-muted">Koliko ste ukupno platili kvartalnih predujmova?</small>
         </div>
 
-        <div class="card p-3" id="razlikaCard" style="border:2px solid var(--gold);background:var(--table-header-bg);">
+        <div class="card p-3 fx-bg-surface2" id="razlikaCard" style="border:2px solid var(--gold)">
           <div class="d-flex justify-content-between">
             <span class="fw-bold" id="razlikaLabel">Razlika:</span>
-            <span class="fw-bold" style="font-size:1.3rem;" id="razlikaValue">—</span>
+            <span class="fw-bold fx-fs-3xl" id="razlikaValue">—</span>
           </div>
         </div>
       </div>
 
       {# Step 3: AI provjera #}
-      <div class="wizard-step" data-step="3" style="display:none;">
+      <div class="wizard-step fx-hidden" data-step="3">
         <h5 class="mb-3"><i class="fas fa-brain me-2"></i>Provjera i analiza</h5>
         <div id="aiCheckResults"></div>
       </div>
 
       {# Step 4: Preview i podnošenje #}
-      <div class="wizard-step" data-step="4" style="display:none;">
+      <div class="wizard-step fx-hidden" data-step="4">
         <h5 class="mb-3"><i class="fas fa-check-circle me-2"></i>Pregled i podnošenje</h5>
 
         <div id="previewSummary" class="mb-3"></div>
 
         <div class="d-grid gap-2">
-          <button class="btn btn-lg" id="btnFinalize"
-                  style="background:var(--gold);color:#000;font-weight:bold;">
+          <button class="btn btn-lg fx-text-dark fx-fw-bold fx-bg-gold" id="btnFinalize">
             <i class="fas fa-lock me-2"></i>Finaliziraj obrazac
           </button>
-          <button class="btn btn-outline-secondary" id="btnDownloadXml" style="display:none;">
+          <button class="btn btn-outline-secondary fx-hidden" id="btnDownloadXml">
             <i class="fas fa-file-code me-2"></i>Preuzmi XML za ePorezna
           </button>
-          <button class="btn btn-outline-secondary" id="btnDownloadPdf" style="display:none;">
+          <button class="btn btn-outline-secondary fx-hidden" id="btnDownloadPdf">
             <i class="fas fa-file-pdf me-2"></i>Preuzmi PDF za arhivu
           </button>
         </div>
@@ -222,14 +221,14 @@
     <button class="btn btn-outline-secondary" id="btnPrev" disabled>
       <i class="fas fa-arrow-left me-1"></i> Natrag
     </button>
-    <button class="btn" id="btnNext" style="background:var(--gold);color:#000;font-weight:bold;">
+    <button class="btn fx-text-dark fx-fw-bold fx-bg-gold" id="btnNext">
       Dalje <i class="fas fa-arrow-right ms-1"></i>
     </button>
   </div>
 
   {# ── PREFILL BADGE ─────────────────────────────────── #}
-  <div class="text-center mt-3" id="prefillBadge" style="display:none;">
-    <span class="badge" style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:6px 12px;">
+  <div class="text-center mt-3 fx-hidden" id="prefillBadge">
+    <span class="badge fx-text-blue" style="background:rgba(59,130,246,0.1);padding:6px 12px">
       <i class="fas fa-magic me-1"></i>
       Podaci automatski povučeni iz sustava — <span id="prefillSources"></span>
     </span>
@@ -238,8 +237,8 @@
 </div>
 
 {# ── DISCLAIMER ──────────────────────────────────────── #}
-<div class="text-center py-3 px-4" style="max-width:800px;margin:0 auto;">
-  <small class="text-muted" style="font-size:0.75rem;">
+<div class="text-center py-3 px-4 fx-m-auto fx-max-800">
+  <small class="text-muted fx-fs-caption">
     Ovo je informativni izračun temeljen na trenutno važećim poreznim stopama.
     Ne predstavlja porezni ili pravni savjet. Za službeno tumačenje obratite se
     ovlaštenom poreznom savjetniku ili nadležnoj ispostavi Porezne uprave.
@@ -531,7 +530,7 @@
       div.style.background = 'var(--bg-card)';
       div.innerHTML = `<div class="card-body p-3">
         <i class="fas fa-${icons[type] || 'info-circle'} me-2" style="color:${colors[type] || '#6b7280'};"></i>
-        <span style="font-size:0.9rem;">${m.message}</span>
+        <span class="fx-fs-md">${m.message}</span>
       </div>`;
       container.appendChild(div);
     });
@@ -544,10 +543,10 @@
     const container = document.getElementById('previewSummary');
 
     container.innerHTML = `
-      <div class="card mb-3" style="background:var(--table-header-bg);border:1px solid var(--border);">
+      <div class="card mb-3 fx-b fx-bg-surface2">
         <div class="card-body p-3">
           <h6 class="mb-2">Obveznik</h6>
-          <table class="table table-sm mb-0" style="color:var(--text);">
+          <table class="table table-sm mb-0 fx-text-body">
             <tr><td class="text-muted">OIB</td><td>${d.oib || '—'}</td></tr>
             <tr><td class="text-muted">Ime</td><td>${d.ime_prezime || '—'}</td></tr>
             <tr><td class="text-muted">Obrt</td><td>${d.naziv_obrta || '—'}</td></tr>
@@ -555,31 +554,31 @@
           </table>
         </div>
       </div>
-      <div class="card mb-3" style="background:var(--table-header-bg);border:1px solid var(--border);">
+      <div class="card mb-3 fx-b fx-bg-surface2">
         <div class="card-body p-3">
           <h6 class="mb-2">Primitci ${d.porezna_godina || ''}</h6>
-          <table class="table table-sm mb-0" style="color:var(--text);">
+          <table class="table table-sm mb-0 fx-text-body">
             <tr><td class="text-muted">Q1</td><td class="text-end">${formatEUR(d.q1_primitak || 0)}</td></tr>
             <tr><td class="text-muted">Q2</td><td class="text-end">${formatEUR(d.q2_primitak || 0)}</td></tr>
             <tr><td class="text-muted">Q3</td><td class="text-end">${formatEUR(d.q3_primitak || 0)}</td></tr>
             <tr><td class="text-muted">Q4</td><td class="text-end">${formatEUR(d.q4_primitak || 0)}</td></tr>
             <tr style="border-top:2px solid var(--gold);">
               <td class="fw-bold">Ukupno</td>
-              <td class="text-end fw-bold" style="color:var(--gold);">${formatEUR(c.ukupni_primitak || 0)}</td>
+              <td class="text-end fw-bold fx-text-gold">${formatEUR(c.ukupni_primitak || 0)}</td>
             </tr>
           </table>
         </div>
       </div>
-      <div class="card" style="border:2px solid var(--gold);background:var(--table-header-bg);">
+      <div class="card fx-bg-surface2" style="border:2px solid var(--gold)">
         <div class="card-body p-3">
           <h6 class="mb-2">Izračun</h6>
-          <table class="table table-sm mb-0" style="color:var(--text);">
+          <table class="table table-sm mb-0 fx-text-body">
             <tr><td class="text-muted">Razred</td><td class="text-end fw-bold">${c.porezni_razred || '—'}</td></tr>
             <tr><td class="text-muted">Godišnji porez</td><td class="text-end">${formatEUR(c.godisnji_porez || 0)}</td></tr>
             <tr><td class="text-muted">Godišnji doprinosi</td><td class="text-end">${formatEUR(c.annual_contributions || 0)}</td></tr>
             <tr style="border-top:2px solid var(--gold);">
               <td class="fw-bold">Ukupni godišnji troškovi</td>
-              <td class="text-end fw-bold" style="color:var(--gold);">${formatEUR(c.total_annual_cost || 0)}</td>
+              <td class="text-end fw-bold fx-text-gold">${formatEUR(c.total_annual_cost || 0)}</td>
             </tr>
           </table>
         </div>
@@ -644,7 +643,7 @@
       const total = SESSION.form_data.ukupni_primitak || 0;
       if (total > 0) {
         document.getElementById('prefillNote').innerHTML =
-          `<i class="fas fa-magic me-1" style="color:var(--gold);"></i> ` +
+          `<i class="fas fa-magic me-1 fx-text-gold"></i> ` +
           `Automatski povučeno <strong>${formatEUR(total)}</strong> iz vaših ${text.toLowerCase()}.`;
       }
     }
@@ -787,8 +786,8 @@
     vertical-align: middle;
   }
   .confidence-high { background: #10b981; }   /* zeleno — 0.8-1.0 */
-  .confidence-medium { background: #f59e0b; } /* žuto — 0.5-0.79 */
-  .confidence-low { background: #ef4444; }    /* crveno — <0.5 */
+  .confidence-medium { background:var(--amber); } /* žuto — 0.5-0.79 */
+  .confidence-low { background:var(--red); }    /* crveno — <0.5 */
   .confidence-none { background: #6b7280; }   /* sivo — 0.0 */
 
   .yoy-badge {
@@ -799,8 +798,8 @@
     margin-left: 4px;
     font-weight: 600;
   }
-  .yoy-up { background: rgba(239,68,68,0.15); color: #ef4444; }
-  .yoy-down { background: rgba(16,185,129,0.15); color: #10b981; }
+  .yoy-up { background: rgba(239,68,68,0.15); color:var(--red); }
+  .yoy-down { background: rgba(16,185,129,0.15); color:var(--green); }
   .yoy-neutral { background: rgba(107,114,128,0.15); color: #6b7280; }
   @media (max-width:576px) {
     .container-fluid { padding-left:8px !important; padding-right:8px !important; }

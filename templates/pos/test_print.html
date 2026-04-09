@@ -15,8 +15,8 @@ body {
   max-width: 80mm;
   margin: 0 auto;
   padding: 8px;
-  background: #fff;
-  color: #000;
+  background:var(--bg-card);
+  color:var(--text);
 }
 .center { text-align: center; }
 .bold   { font-weight: bold; }
@@ -48,11 +48,11 @@ body {
 <div class="row bold"><span>{% trans "UKUPNO TEST:" %}</span><span>€9.99</span></div>
 <div class="line"></div>
 <div class="center" style="font-size:10px">{% trans "Hvala na kupnji!" %}</div>
-<div class="center" style="font-size:10px;margin-top:4px">{% trans "LIMIT Connect POS" %}</div>
+<div class="center mt-1" style="font-size:10px">{% trans "LIMIT Connect POS" %}</div>
 
 <div class="no-print">
-  <button onclick="window.print()" style="padding:6px 16px;cursor:pointer;background:var(--gold,#c9a84c);border:none;border-radius:4px;font-weight:bold">{% trans "&#x1F5A8; Ispiši" %}</button>
-  <button onclick="window.close()" style="padding:6px 16px;cursor:pointer;background:#333;color:#fff;border:none;border-radius:4px">{% trans "Zatvori" %}</button>
+  <button onclick="window.print()" class="fx-pointer fx-border-none fx-rounded-sm fx-fw-bold fx-bg-gold" style="padding:6px 16px">{% trans "&#x1F5A8; Ispiši" %}</button>
+  <button onclick="window.close()" class="fx-pointer fx-text-white fx-border-none fx-rounded-sm" style="padding:6px 16px;background:#333">{% trans "Zatvori" %}</button>
 </div>
 <script>
 window.addEventListener('load', () => setTimeout(() => window.print(), 400));

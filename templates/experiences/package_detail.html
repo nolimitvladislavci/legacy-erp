@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -38,19 +38,19 @@
 {% endblock %}
 {% block content %}
 <div class="exp-container">
-<a href="{% url 'experiences:package_list' %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>Paketi</a>
+<a href="{% url 'experiences:package_list' %}" class="fx-fs-base fx-text-dim"><i class="fas fa-arrow-left me-1"></i>Paketi</a>
 <div class="d-flex justify-content-between align-items-start mb-4 mt-2">
-  <div><h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)">{{ pkg.name }}</h2><p style="color:var(--text-dim);margin:.25rem 0 0">{{ pkg.description }}</p></div>
-  <div style="font-size:1.5rem;font-weight:800;color:var(--gold)">{{ pkg.advertised_price }} €</div>
+  <div><h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0">{{ pkg.name }}</h2><p class="fx-text-dim" style="margin:.25rem 0 0">{{ pkg.description }}</p></div>
+  <div class="fx-fs-5xl fx-fw-800 fx-text-gold">{{ pkg.advertised_price }} €</div>
 </div>
 
 {% if components %}
 <div class="exp-section">
   <h5><i class="fas fa-puzzle-piece me-2"></i>Komponente paketa</h5>
-  <div class="table-responsive"><table class="table table-dark table-sm align-middle" style="border-radius:12px;overflow:hidden">
+  <div class="table-responsive"><table class="table table-dark table-sm align-middle fx-rounded fx-overflow-hidden">
     <thead><tr><th>Stavka</th><th>Tip</th><th>PDV</th><th class="text-end">Cijena</th></tr></thead>
     <tbody>
-    {% for c in components %}<tr><td style="font-weight:700">{{ c.name }}</td><td>{{ c.get_component_type_display }}</td><td>{{ c.tax_rate }}%</td><td class="text-end">{{ c.unit_price }} €</td></tr>{% endfor %}
+    {% for c in components %}<tr><td class="fx-fw-bold">{{ c.name }}</td><td>{{ c.get_component_type_display }}</td><td>{{ c.tax_rate }}%</td><td class="text-end">{{ c.unit_price }} €</td></tr>{% endfor %}
     </tbody>
   </table></div>
 </div>
@@ -60,12 +60,12 @@
 <div class="exp-section">
   <h5><i class="fas fa-calculator me-2"></i>TaxSplitter — Porezni raspored</h5>
   <div class="exp-card">
-    {% for rate, info in tax_info.items %}<div class="d-flex justify-content-between mb-1"><span style="color:var(--text-dim)">PDV {{ rate }}%</span><span style="font-weight:700">{{ info.base }} € (porez: {{ info.tax }} €)</span></div>{% endfor %}
-    <hr style="border-color:var(--border)"><div class="d-flex justify-content-between"><span style="font-weight:700">Ukupno</span><span style="font-weight:800;color:var(--gold)">{{ pkg.advertised_price }} €</span></div>
+    {% for rate, info in tax_info.items %}<div class="d-flex justify-content-between mb-1"><span class="fx-text-dim">PDV {{ rate }}%</span><span class="fx-fw-bold">{{ info.base }} € (porez: {{ info.tax }} €)</span></div>{% endfor %}
+    <hr class="fx-bc"><div class="d-flex justify-content-between"><span class="fx-fw-bold">Ukupno</span><span class="fx-fw-800 fx-text-gold">{{ pkg.advertised_price }} €</span></div>
   </div>
 </div>
 {% endif %}
 
-<a href="{% url 'experiences:package_tax_breakdown' pkg.pk %}" class="btn btn-sm btn-outline-info" style="border-radius:8px"><i class="fas fa-file-invoice me-1"></i>JSON Tax Breakdown</a>
+<a href="{% url 'experiences:package_tax_breakdown' pkg.pk %}" class="btn btn-sm btn-outline-info fx-rounded"><i class="fas fa-file-invoice me-1"></i>JSON Tax Breakdown</a>
 </div>
 {% endblock %}

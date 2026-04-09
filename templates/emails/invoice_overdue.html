@@ -2,30 +2,30 @@
 {% load i18n %}
 {% block title %}{% if is_hr %}Dospjeli račun{% else %}Überfällige Rechnung{% endif %}{% endblock %}
 {% block content %}
-<h2 style="margin:0 0 16px;color:#c0392b;font-family:'Cormorant Garamond',Georgia,serif;">
+<h2 class="fx-text-red" style="margin:0 0 16px;font-family:'Cormorant Garamond',Georgia,serif">
   {% if is_hr %}Podsjetnik: Račun {{ invoice_number }}{% else %}Zahlungserinnerung: Rechnung {{ invoice_number }}{% endif %}
 </h2>
 {% if is_hr %}
-<p style="color:#333;line-height:1.6;">Poštovani/a {{ client_name }},</p>
-<p style="color:#333;line-height:1.6;">obavještavamo Vas da je rok plaćanja za račun <strong>{{ invoice_number }}</strong> istekao <strong>{{ date_due }}</strong>.</p>
-<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
-  <tr><td style="padding:8px 12px;background:#fdf2f2;border-left:3px solid #c0392b;color:#555;">Iznos</td>
-      <td style="padding:8px 12px;background:#fdf2f2;color:#c0392b;font-weight:700;">{{ total }} {{ currency }}</td></tr>
-  <tr><td style="padding:8px 12px;color:#555;">IBAN</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ issuer_iban }}</td></tr>
+<p class="fx-text-dark fx-lh-normal">Poštovani/a {{ client_name }},</p>
+<p class="fx-text-dark fx-lh-normal">obavještavamo Vas da je rok plaćanja za račun <strong>{{ invoice_number }}</strong> istekao <strong>{{ date_due }}</strong>.</p>
+<table role="presentation" width="100%" class="fx-b-collapse" style="margin:20px 0">
+  <tr><td class="fx-text-dim fx-p-8-12" style="background:var(--red-dim);border-left:3px solid #c0392b">Iznos</td>
+      <td class="fx-fw-bold fx-p-8-12 fx-text-red" style="background:var(--red-dim)">{{ total }} {{ currency }}</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">IBAN</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ issuer_iban }}</td></tr>
 </table>
-<p style="color:#333;line-height:1.6;">Molimo izvršite uplatu u najkraćem roku. Ako ste već platili, zanemarite ovu poruku.</p>
-<p style="color:#555;">{{ issuer_name }}</p>
+<p class="fx-text-dark fx-lh-normal">Molimo izvršite uplatu u najkraćem roku. Ako ste već platili, zanemarite ovu poruku.</p>
+<p class="fx-text-dim">{{ issuer_name }}</p>
 {% else %}
-<p style="color:#333;line-height:1.6;">Sehr geehrte/r {{ client_name }},</p>
-<p style="color:#333;line-height:1.6;">wir möchten Sie darauf hinweisen, dass die Rechnung <strong>Nr. {{ invoice_number }}</strong> am <strong>{{ date_due }}</strong> fällig war.</p>
-<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
-  <tr><td style="padding:8px 12px;background:#fdf2f2;border-left:3px solid #c0392b;color:#555;">Betrag</td>
-      <td style="padding:8px 12px;background:#fdf2f2;color:#c0392b;font-weight:700;">{{ total }} {{ currency }}</td></tr>
-  <tr><td style="padding:8px 12px;color:#555;">IBAN</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ issuer_iban }}</td></tr>
+<p class="fx-text-dark fx-lh-normal">Sehr geehrte/r {{ client_name }},</p>
+<p class="fx-text-dark fx-lh-normal">wir möchten Sie darauf hinweisen, dass die Rechnung <strong>Nr. {{ invoice_number }}</strong> am <strong>{{ date_due }}</strong> fällig war.</p>
+<table role="presentation" width="100%" class="fx-b-collapse" style="margin:20px 0">
+  <tr><td class="fx-text-dim fx-p-8-12" style="background:var(--red-dim);border-left:3px solid #c0392b">Betrag</td>
+      <td class="fx-fw-bold fx-p-8-12 fx-text-red" style="background:var(--red-dim)">{{ total }} {{ currency }}</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">IBAN</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ issuer_iban }}</td></tr>
 </table>
-<p style="color:#333;line-height:1.6;">Bitte überweisen Sie den offenen Betrag umgehend. Falls Sie bereits bezahlt haben, ignorieren Sie diese Nachricht.</p>
-<p style="color:#555;">{{ issuer_name }}</p>
+<p class="fx-text-dark fx-lh-normal">Bitte überweisen Sie den offenen Betrag umgehend. Falls Sie bereits bezahlt haben, ignorieren Sie diese Nachricht.</p>
+<p class="fx-text-dim">{{ issuer_name }}</p>
 {% endif %}
 {% endblock %}

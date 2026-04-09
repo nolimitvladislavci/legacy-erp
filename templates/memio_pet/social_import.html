@@ -3,21 +3,21 @@
 {% block title %}Uvezi objavu — {{ animal.name }} — Memio.pet{% endblock %}
 
 {% block content %}
-<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
-<div style="width:100%;max-width:500px">
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;padding:24px 16px">
+<div class="fx-w-full" style="max-width:500px">
 
   <div class="mp-card">
     <div class="mp-card-body">
-      <h1 style="font-size:1.6rem;margin-bottom:4px">Uvezi objavu</h1>
-      <p style="color:var(--dim);font-size:.85rem;margin-bottom:20px">
+      <h1 class="mb-1 fx-fs-5xl">Uvezi objavu</h1>
+      <p class="fx-fs-base mb-4 fx-text-dim">
         Dodaj objavu s društvenih mreža na životni trak za {{ animal.name }}
       </p>
 
-      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px">
-        <span style="font-size:1.8rem;opacity:.5" title="Facebook">📘</span>
-        <span style="font-size:1.8rem;opacity:.5" title="Instagram">📷</span>
-        <span style="font-size:1.8rem;opacity:.5" title="TikTok">🎵</span>
-        <span style="font-size:1.8rem;opacity:.5" title="YouTube">▶️</span>
+      <div class="d-flex fx-gap-3 justify-content-center mb-4">
+        <span class="fx-opacity-50 fx-fs-6xl" title="Facebook">📘</span>
+        <span class="fx-opacity-50 fx-fs-6xl" title="Instagram">📷</span>
+        <span class="fx-opacity-50 fx-fs-6xl" title="TikTok">🎵</span>
+        <span class="fx-opacity-50 fx-fs-6xl" title="YouTube">▶️</span>
       </div>
 
       {% if error %}
@@ -25,16 +25,16 @@
       {% endif %}
 
       {% if preview %}
-      <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:20px">
-        <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px">{{ preview.platform }}</div>
+      <div class="fx-rounded mb-4 fx-bg-body fx-p-16" style="border:1px solid var(--line)">
+        <div class="fx-fs-sm fx-fw-semibold fx-text-gold mb-2 fx-uppercase" style="letter-spacing:.1em">{{ preview.platform }}</div>
         {% if preview.thumbnail %}
-        <img src="{{ preview.thumbnail }}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px" alt="Preview">
+        <img src="{{ preview.thumbnail }}" class="fx-w-full fx-rounded mb-2" style="max-height:200px;object-fit:cover" alt="Preview">
         {% endif %}
         {% if preview.caption %}
-        <div style="font-size:.88rem;color:var(--ink2);line-height:1.6">{{ preview.caption|truncatechars:200 }}</div>
+        <div class="fx-fs-body fx-text-dim fx-lh-normal">{{ preview.caption|truncatechars:200 }}</div>
         {% endif %}
         {% if preview.author %}
-        <div style="font-size:.78rem;color:var(--dim);margin-top:6px">— {{ preview.author }}</div>
+        <div class="fx-fs-body-sm mt-1 fx-text-dim">— {{ preview.author }}</div>
         {% endif %}
       </div>
 
@@ -49,7 +49,7 @@
         </div>
         <button type="submit" class="mp-btn mp-btn-green mp-btn-full">Dodaj na životni trak</button>
       </form>
-      <form method="get" style="margin-top:10px">
+      <form method="get" class="fx-mt-10">
         <input type="hidden" name="animal" value="{{ chip }}">
         <button type="submit" class="mp-btn mp-btn-outline mp-btn-full">← Drugi link</button>
       </form>
@@ -67,7 +67,7 @@
       </form>
       {% endif %}
 
-      <a href="/pas/{{ chip }}/" style="display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--dim)">← Natrag na profil {{ animal.name }}</a>
+      <a href="/pas/{{ chip }}/" class="text-center fx-fs-note d-block mt-3 fx-text-dim">← Natrag na profil {{ animal.name }}</a>
     </div>
   </div>
 

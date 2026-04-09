@@ -4,25 +4,25 @@
 {% block page_title %}Djeca{% endblock %}
 {% block extra_css %}
 <style>
-.child-row{background:#1a1a2e;border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem;transition:border-color .2s}
-.child-row:hover{border-color:#c8a24e55}
-.child-avatar{width:40px;height:40px;border-radius:50%;background:#c8a24e22;display:flex;align-items:center;justify-content:center;font-weight:700;color:#c8a24e;font-size:1.1rem}
+.child-row{background:var(--surface);border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem;transition:border-color .2s}
+.child-row:hover{border-color:var(--gold)55}
+.child-avatar{width:40px;height:40px;border-radius:50%;background:var(--gold)22;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:1.1rem}
 .child-info{flex:1}
-.child-info .name{color:#f0e6d3;font-weight:600}
-.child-info .meta{font-size:.8rem;color:#888}
+.child-info .name{color:var(--text);font-weight:600}
+.child-info .meta{font-size:.8rem;color:var(--text-muted)}
 .status-pill{font-size:.75rem;padding:2px 10px;border-radius:12px}
-.status-pill.active{background:#22c55e22;color:#22c55e}
-.status-pill.waitlist{background:#f59e0b22;color:#f59e0b}
-.status-pill.inactive{background:#ef444422;color:#ef4444}
+.status-pill.active{background:var(--green)22;color:var(--green)}
+.status-pill.waitlist{background:var(--amber)22;color:var(--amber)}
+.status-pill.inactive{background:var(--red)22;color:var(--red)}
 .filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
-.filter-bar select{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:4px 10px;font-size:.85rem}
+.filter-bar select{background:var(--surface-deep);color:var(--text);border:1px solid rgba(200,162,78,0.2);border-radius:6px;padding:4px 10px;font-size:.85rem}
 @media(max-width:768px){.child-row{flex-wrap:wrap}.child-avatar{width:35px;height:35px;font-size:.9rem}}
 </style>
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif"><i class="bi bi-people-fill"></i> Djeca</h2>
-  <a href="{% url 'kindergarten:child_create' %}" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-plus-lg"></i> Upis djeteta</a>
+  <h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif"><i class="bi bi-people-fill"></i> Djeca</h2>
+  <a href="{% url 'kindergarten:child_create' %}" class="btn btn-sm fx-bg-gold fx-fw-semibold fx-text-dark"><i class="bi bi-plus-lg"></i> Upis djeteta</a>
 </div>
 
 <div class="filter-bar">
@@ -43,7 +43,7 @@
 </div>
 
 {% for child in children %}
-<a href="{% url 'kindergarten:child_detail' pk=child.pk %}" style="text-decoration:none">
+<a href="{% url 'kindergarten:child_detail' pk=child.pk %}" class="fx-no-underline">
   <div class="child-row">
     <div class="child-avatar">{{ child.first_name|first }}{{ child.last_name|first }}</div>
     <div class="child-info">
@@ -51,17 +51,17 @@
       <div class="meta">
         {% if child.group %}{{ child.group.name }}{% else %}Bez grupe{% endif %}
         · {{ child.age }} god.
-        {% if child.allergies %} · <span style="color:#ef4444">⚠ Alergije</span>{% endif %}
+        {% if child.allergies %} · <span class="fx-text-red">⚠ Alergije</span>{% endif %}
       </div>
     </div>
     <span class="status-pill {{ child.status }}">{{ child.get_status_display }}</span>
   </div>
 </a>
 {% empty %}
-<div style="text-align:center;padding:3rem;color:#666">
-  <i class="bi bi-emoji-smile" style="font-size:3rem;color:#c8a24e44"></i>
+<div class="text-center fx-text-dim fx-p-7">
+  <i class="bi bi-emoji-smile fx-fs-hero" style="color:var(--gold)44"></i>
   <p class="mt-2">Nema upisane djece.</p>
-  <a href="{% url 'kindergarten:child_create' %}" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e">Upiši prvo dijete</a>
+  <a href="{% url 'kindergarten:child_create' %}" class="btn btn-sm fx-bg-gold fx-text-dark">Upiši prvo dijete</a>
 </div>
 {% endfor %}
 {% endblock %}

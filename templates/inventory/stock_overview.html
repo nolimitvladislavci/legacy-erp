@@ -6,7 +6,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <h2 class="mb-0">
-    <i class="fas fa-warehouse me-2" style="color:var(--gold)"></i>
+    <i class="fas fa-warehouse me-2 fx-text-gold"></i>
     Pregled zalihe
   </h2>
   <div class="d-flex gap-2">
@@ -23,26 +23,26 @@
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
     <div class="stat-card text-center">
-      <div style="color:var(--gold);font-size:1.8rem;font-weight:700">{{ total_items }}</div>
-      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Aktivnih artikala</div>
+      <div class="fx-fw-bold fx-text-gold fx-fs-6xl">{{ total_items }}</div>
+      <div class="fx-text-muted fx-fs-body-sm mt-1">Aktivnih artikala</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card text-center">
-      <div style="color:#3b82f6;font-size:1.6rem;font-weight:700">{{ total_purchase_value|floatformat:2 }} EUR</div>
-      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Vrijednost po nabavnoj</div>
+      <div class="fx-text-blue fx-fw-bold fx-fs-5xl">{{ total_purchase_value|floatformat:2 }} EUR</div>
+      <div class="fx-text-muted fx-fs-body-sm mt-1">Vrijednost po nabavnoj</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card text-center">
-      <div style="color:var(--gold);font-size:1.6rem;font-weight:700">{{ total_selling_value|floatformat:2 }} EUR</div>
-      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Vrijednost po MPC</div>
+      <div class="fx-fw-bold fx-text-gold fx-fs-5xl">{{ total_selling_value|floatformat:2 }} EUR</div>
+      <div class="fx-text-muted fx-fs-body-sm mt-1">Vrijednost po MPC</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card text-center {% if low_stock_count > 0 %}border-warning{% endif %}">
-      <div style="color:{% if low_stock_count > 0 %}#f59e0b{% else %}#22c55e{% endif %};font-size:1.8rem;font-weight:700">{{ low_stock_count }}</div>
-      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Ispod minimalne zalihe</div>
+      <div class="fx-fw-bold" style="color:{% if low_stock_count > 0 %}#f59e0b{% else %}#22c55e{% endif %};font-size:1.8rem">{{ low_stock_count }}</div>
+      <div class="fx-text-muted fx-fs-body-sm mt-1">Ispod minimalne zalihe</div>
     </div>
   </div>
 </div>
@@ -50,16 +50,15 @@
 {% if low_stock %}
 <!-- Low stock alert -->
 <div class="stat-card mb-4" style="border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04)">
-  <div style="color:#f59e0b;font-weight:700;font-size:.85rem;margin-bottom:10px">
+  <div class="fx-text-amber fx-fw-bold fx-fs-base mb-2">
     <i class="fas fa-exclamation-triangle me-2"></i>Artikli ispod minimalne zalihe
   </div>
   <div class="d-flex flex-wrap gap-2">
     {% for i in low_stock %}
     <a href="{% url 'inventory:detail' i.pk %}"
-       style="padding:4px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);
-              color:#f59e0b;text-decoration:none;border-radius:6px;font-size:.78rem">
+       class="fx-text-amber fx-no-underline fx-rounded-sm fx-fs-body-sm" style="padding:4px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)">
       {{ i.name }}
-      <span style="opacity:.7">{{ i.quantity|floatformat:2 }}/{{ i.min_quantity|floatformat:2 }} {{ i.unit }}</span>
+      <span class="fx-opacity-70">{{ i.quantity|floatformat:2 }}/{{ i.min_quantity|floatformat:2 }} {{ i.unit }}</span>
     </a>
     {% endfor %}
   </div>
@@ -67,9 +66,9 @@
 {% endif %}
 
 <!-- Full items table -->
-<div class="stat-card">
+<div class="fenix-stat">
   <div class="table-responsive">
-    <table class="table table-hover table-sm align-middle mb-0" style="font-size:.82rem">
+    <table class="table table-hover table-sm align-middle mb-0 fx-fs-note">
       <thead>
         <tr style="border-bottom:2px solid rgba(201,168,76,.3)">
           <th>Artikl</th>
@@ -79,37 +78,37 @@
           <th class="text-end">Nab. cij.</th>
           <th class="text-end">MPC</th>
           <th class="text-end">Vr. (nabavna)</th>
-          <th class="text-end" style="color:var(--gold)">Vr. (MPC)</th>
+          <th class="text-end fx-text-gold">Vr. (MPC)</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
         {% for i in items %}
-        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <tr class="fx-bb-subtle">
           <td>
             <a href="{% url 'inventory:detail' i.pk %}"
-               style="color:{% if i.is_low_stock %}#f59e0b{% else %}#e2e8f0{% endif %};font-weight:600;text-decoration:none">
+               class="fx-fw-semibold fx-no-underline" style="color:{% if i.is_low_stock %}#f59e0b{% else %}#e2e8f0{% endif %}">
               {{ i.name }}
             </a>
           </td>
-          <td style="font-family:monospace;color:#64748b;font-size:.75rem">{{ i.sku }}</td>
-          <td class="text-end" style="font-family:monospace;font-weight:700;color:{% if i.is_low_stock %}#f59e0b{% elif i.quantity > 0 %}#22c55e{% else %}#ef4444{% endif %}">
+          <td class="fx-text-dim fx-fs-caption fx-font-mono">{{ i.sku }}</td>
+          <td class="text-end fx-fw-bold" style="font-family:monospace;color:{% if i.is_low_stock %}#f59e0b{% elif i.quantity > 0 %}#22c55e{% else %}#ef4444{% endif %}">
             {{ i.quantity|floatformat:2 }} {{ i.unit }}
           </td>
-          <td class="text-end" style="font-family:monospace;color:#64748b">{{ i.min_quantity|floatformat:2 }}</td>
-          <td class="text-end" style="font-family:monospace">{{ i.purchase_price|floatformat:2 }}</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold)">{{ i.unit_price|floatformat:2 }}</td>
-          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ i.stock_value|floatformat:2 }} EUR</td>
-          <td class="text-end" style="font-family:monospace;color:var(--gold)">
+          <td class="text-end fx-text-muted fx-font-mono">{{ i.min_quantity|floatformat:2 }}</td>
+          <td class="text-end fx-font-mono">{{ i.purchase_price|floatformat:2 }}</td>
+          <td class="text-end fx-text-gold fx-font-mono">{{ i.unit_price|floatformat:2 }}</td>
+          <td class="text-end fx-text-dim fx-font-mono">{{ i.stock_value|floatformat:2 }} EUR</td>
+          <td class="text-end fx-text-gold fx-font-mono">
             {{ i.selling_value|floatformat:2 }} EUR
           </td>
           <td>
             {% if i.is_low_stock %}
-              <span class="badge bg-warning text-dark" style="font-size:.65rem">Nisko</span>
+              <span class="fenix-badge fenix-badge-warning fx-fs-xs">Nisko</span>
             {% elif i.quantity <= 0 %}
-              <span class="badge bg-danger" style="font-size:.65rem">Nema</span>
+              <span class="fenix-badge fenix-badge-danger fx-fs-xs">Nema</span>
             {% else %}
-              <span class="badge bg-success" style="font-size:.65rem">OK</span>
+              <span class="fenix-badge fenix-badge-success fx-fs-xs">OK</span>
             {% endif %}
           </td>
         </tr>

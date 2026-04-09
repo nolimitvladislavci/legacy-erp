@@ -2,71 +2,54 @@
 {% load i18n %}
 {% block title %}KUD Kostimi{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-tshirt"></i> Inventar kostima</h4>
-  <small style="color:var(--text-muted)">Kostimi, dodjela clanovima, stanje</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-tshirt"></i> Inventar kostima</h4>
+  <small class="fx-text-muted">Kostimi, dodjela clanovima, stanje</small></div>
   <a href="{% url 'udruge:kostim_create' %}" class="btn btn-gold btn-sm">+ Novi kostim</a>
 </div>
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-3">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ukupno</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b">{{ stats.dodijeljeno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Dodijeljeno</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-amber">{{ stats.dodijeljeno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Dodijeljeno</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.slobodno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Slobodno</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.slobodno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Slobodno</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Sekcija</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Velicina</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Stanje</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Dodijeljen</th>
-      <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Naziv</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Sekcija</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Velicina</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Stanje</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Dodijeljen</th>
+      <th class="fx-p-2 fx-bb"></th>
     </tr></thead>
     <tbody>
       {% for k in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ k.naziv }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Sekcija">{{ k.sekcija|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Velicina">{{ k.velicina|default:"-" }}</td>
-        <td style="padding:.5rem .6rem" data-label="Stanje">
-          {% if k.stanje == 'dobro' %}<span style="color:#22c55e;font-size:.78rem">Dobro</span>
-          {% elif k.stanje == 'osteceno' %}<span style="color:#f59e0b;font-size:.78rem">Osteceno</span>
-          {% else %}<span style="color:#ef4444;font-size:.78rem">{{ k.get_stanje_display }}</span>{% endif %}
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Naziv">{{ k.naziv }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Sekcija">{{ k.sekcija|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Velicina">{{ k.velicina|default:"-" }}</td>
+        <td class="fx-p-cell" data-label="Stanje">
+          {% if k.stanje == 'dobro' %}<span class="fx-text-green fx-fs-body-sm">Dobro</span>
+          {% elif k.stanje == 'osteceno' %}<span class="fx-text-amber fx-fs-body-sm">Osteceno</span>
+          {% else %}<span class="fx-text-red fx-fs-body-sm">{{ k.get_stanje_display }}</span>{% endif %}
         </td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Dodijeljen">{{ k.dodijeljen_clanu|default:"Slobodan" }}</td>
-        <td style="padding:.5rem .6rem"><a href="{% url 'udruge:kostim_edit' k.pk %}" style="color:var(--gold);font-size:.8rem">Uredi</a></td>
+        <td class="fx-fs-note fx-p-cell" data-label="Dodijeljen">{{ k.dodijeljen_clanu|default:"Slobodan" }}</td>
+        <td class="fx-p-cell"><a href="{% url 'udruge:kostim_edit' k.pk %}" class="fx-fs-compact fx-text-gold">Uredi</a></td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema kostima</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema kostima</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

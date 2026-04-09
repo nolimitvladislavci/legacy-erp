@@ -6,17 +6,15 @@
 {% block content %}
 <div style="max-width:480px;margin:2rem auto;padding:0 1rem">
 
-  <div style="background:#111;border:1px solid var(--gold,#c9a84c)33;border-radius:16px;padding:2rem">
+  <div class="fx-bg-card fx-rounded-lg fx-p-6" style="border:1px solid var(--gold,#c9a84c)33">
 
-    <h2 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.6rem;
-               font-weight:700;margin:0 0 .3rem">Novi blagajnik</h2>
-    <p style="color:#64748b;font-size:.9rem;margin:0 0 1.5rem">
+    <h2 class="fx-fw-bold fx-text-gold fx-fs-5xl" style="font-family:'Cormorant Garamond',serif;margin:0 0 .3rem">Novi blagajnik</h2>
+    <p class="fx-text-dim fx-fs-md" style="margin:0 0 1.5rem">
       Unesite podatke blagajnika. OIB i PIN su zakonska obaveza (NN 133/2015).
     </p>
 
     {% if error %}
-    <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);
-                border-radius:8px;padding:12px 16px;color:#ef4444;margin-bottom:1rem;font-size:.9rem">
+    <div class="fx-rounded fx-text-red fx-fs-md mb-3" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);padding:12px 16px">
       ⚠ {{ error }}
     </div>
     {% endif %}
@@ -26,64 +24,58 @@
       <input type="hidden" name="next" value="{{ next }}">
 
       <!-- Ime blagajnika -->
-      <div style="margin-bottom:1rem">
-        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+      <div class="mb-3">
+        <label class="fx-text-muted fx-fs-base d-block mb-1">
           Ime i prezime *
         </label>
         <input type="text" name="cashier_name" required autofocus
                placeholder="npr. Ana Kovač"
-               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
-                      padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
+               class="fx-w-full fx-bg-body fx-rounded fx-text-body fx-fs-normal fx-b2" style="padding:12px 14px;box-sizing:border-box"
                onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="this.style.borderColor='#333'">
       </div>
 
       <!-- OIB -->
-      <div style="margin-bottom:1rem">
-        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
-          OIB blagajnika <span style="color:#555">(11 znamenki)</span>
+      <div class="mb-3">
+        <label class="fx-text-muted fx-fs-base d-block mb-1">
+          OIB blagajnika <span class="fx-text-dim">(11 znamenki)</span>
         </label>
         <input type="text" name="cashier_oib" maxlength="11" inputmode="numeric"
                placeholder="12345678901"
-               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
-                      padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
+               class="fx-w-full fx-bg-body fx-rounded fx-text-body fx-fs-normal fx-b2" style="padding:12px 14px;box-sizing:border-box"
                onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="validateOIBField(this)"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
-        <div id="oib-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">
+        <div id="oib-error" class="fx-text-red fx-fs-body-sm fx-hidden mt-1">
           Neispravan OIB (MOD 11,10 provjera)
         </div>
       </div>
 
       <!-- PIN -->
-      <div style="margin-bottom:1rem">
-        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
-          PIN kod * <span style="color:#555">(4–6 znamenki)</span>
+      <div class="mb-3">
+        <label class="fx-text-muted fx-fs-base d-block mb-1">
+          PIN kod * <span class="fx-text-dim">(4–6 znamenki)</span>
         </label>
         <input type="password" name="cashier_pin" id="pin1" required
                maxlength="6" inputmode="numeric" placeholder="••••"
-               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
-                      padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
-                      box-sizing:border-box"
+               class="fx-w-full fx-bg-body fx-rounded fx-text-body fx-fs-2xl fx-b2" style="padding:12px 14px;letter-spacing:4px;box-sizing:border-box"
                onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="this.style.borderColor='#333'"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
       </div>
 
       <!-- Potvrda PIN-a -->
-      <div style="margin-bottom:1.5rem">
-        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+      <div class="fx-mb-6">
+        <label class="fx-text-muted fx-fs-base d-block mb-1">
           Potvrdi PIN *
         </label>
         <input type="password" name="cashier_pin2" id="pin2" required
                maxlength="6" inputmode="numeric" placeholder="••••"
-               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
-                      padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
-                      box-sizing:border-box"
+               class="fx-w-full fx-bg-body fx-rounded fx-text-body fx-fs-2xl fx-b2" style="padding:12px 14px;letter-spacing:4px;box-sizing:border-box"
                onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="checkPinMatch(this)"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
-        <div id="pin-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">
+        <div id="pin-error" class="fx-text-red fx-fs-body-sm fx-hidden mt-1">
           PIN-ovi se ne podudaraju
         </div>
       </div>
@@ -93,7 +85,7 @@
     </form>
   </div>
 
-  <p style="text-align:center;margin-top:1rem;font-size:.75rem;color:#334155">
+  <p class="text-center fx-fs-caption mt-3" style="color:var(--muted2)">
     Podaci se pohranjuju prema ZSF i ZZP — PIN se nikad ne pohranjuje u čitljivom obliku.
   </p>
 

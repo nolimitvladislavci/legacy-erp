@@ -5,66 +5,66 @@
 {% block extra_css %}
 <style>
 .hub-hero{background:linear-gradient(135deg,#0f172a,#1a1a2e);border:1px solid #c8a24e22;border-radius:16px;padding:2rem;margin-bottom:2rem;text-align:center}
-.hub-hero h2{color:#c8a24e;font-family:"Cormorant Garamond",serif;font-size:1.8rem;margin-bottom:.5rem}
-.hub-hero p{color:#888;font-size:.95rem;max-width:600px;margin:0 auto 1.5rem}
+.hub-hero h2{color:var(--gold);font-family:"Cormorant Garamond",serif;font-size:1.8rem;margin-bottom:.5rem}
+.hub-hero p{color:var(--text-dim);font-size:.95rem;max-width:600px;margin:0 auto 1.5rem}
 
 /* Search */
-.mega-search{max-width:700px;margin:0 auto;display:flex;background:#16213e;border:2px solid #c8a24e33;border-radius:12px;overflow:hidden;transition:border-color .2s}
-.mega-search:focus-within{border-color:#c8a24e}
-.mega-search input{flex:1;background:transparent;border:none;padding:.9rem 1.2rem;color:#f0e6d3;font-size:1.05rem;outline:none}
-.mega-search input::placeholder{color:#555}
-.mega-search select{background:#0f172a;color:#c8a24e;border:none;border-left:1px solid #c8a24e22;padding:0 1rem;font-size:.85rem;cursor:pointer;outline:none}
-.mega-search button{background:#c8a24e;border:none;padding:0 1.5rem;color:#1a1a2e;font-size:1.1rem;cursor:pointer;transition:background .2s}
+.mega-search{max-width:700px;margin:0 auto;display:flex;background:var(--surface-deep);border:2px solid #c8a24e33;border-radius:12px;overflow:hidden;transition:border-color .2s}
+.mega-search:focus-within{border-color:var(--gold)}
+.mega-search input{flex:1;background:transparent;border:none;padding:.9rem 1.2rem;color:var(--text);font-size:1.05rem;outline:none}
+.mega-search input::placeholder{color:var(--text-dim)}
+.mega-search select{background:var(--surface-deep);color:var(--gold);border:none;border-left:1px solid #c8a24e22;padding:0 1rem;font-size:.85rem;cursor:pointer;outline:none}
+.mega-search button{background:var(--gold);border:none;padding:0 1.5rem;color:var(--surface-deep);font-size:1.1rem;cursor:pointer;transition:background .2s}
 .mega-search button:hover{background:#d4b456}
 .mega-search button:disabled{opacity:.5}
 
 /* Source cards */
 .source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem}
-.source-card{background:#1a1a2e;border:1px solid #ffffff08;border-radius:12px;padding:1.2rem;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
-.source-card:hover{border-color:#c8a24e44;transform:translateY(-2px)}
+.source-card{background:var(--surface);border:1px solid #ffffff08;border-radius:12px;padding:1.2rem;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.source-card:hover{border-color:var(--gold)44;transform:translateY(-2px)}
 .source-card .badge{position:absolute;top:0;right:0;font-size:.6rem;padding:3px 10px;border-radius:0 12px 0 8px;font-weight:700;text-transform:uppercase}
 .source-card .header{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
 .source-card .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
-.source-card .name{font-weight:700;color:#f0e6d3;font-size:.95rem}
-.source-card .desc{font-size:.82rem;color:#888;line-height:1.4;margin-bottom:.5rem}
+.source-card .name{font-weight:700;color:var(--text);font-size:.95rem}
+.source-card .desc{font-size:.82rem;color:var(--text-dim);line-height:1.4;margin-bottom:.5rem}
 .source-card .formats{display:flex;gap:4px;flex-wrap:wrap}
 .source-card .fmt{font-size:.65rem;padding:2px 6px;border-radius:4px;background:#ffffff08;color:#aaa}
-.source-card .legal{font-size:.7rem;color:#22c55e;margin-top:.4rem}
+.source-card .legal{font-size:.7rem;color:var(--green);margin-top:.4rem}
 
 /* Results */
 .results-area{display:none;margin-top:1.5rem}
 .results-area.show{display:block}
 .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.results-header h4{color:#c8a24e;font-family:"Cormorant Garamond",serif}
-.results-header .count{color:#888;font-size:.85rem}
+.results-header h4{color:var(--gold);font-family:"Cormorant Garamond",serif}
+.results-header .count{color:var(--text-dim);font-size:.85rem}
 
-.result-card{background:#1a1a2e;border:1px solid #ffffff08;border-radius:10px;padding:1rem;margin-bottom:.6rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s}
-.result-card:hover{border-color:#c8a24e33}
-.result-card .thumb{width:60px;height:85px;background:#16213e;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.result-card{background:var(--surface);border:1px solid #ffffff08;border-radius:10px;padding:1rem;margin-bottom:.6rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s}
+.result-card:hover{border-color:var(--gold)33}
+.result-card .thumb{width:60px;height:85px;background:var(--surface-deep);border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .result-card .thumb img{width:100%;height:100%;object-fit:cover}
-.result-card .thumb .no-img{color:#333;font-size:1.5rem}
+.result-card .thumb .no-img{color:var(--text);font-size:1.5rem}
 .result-card .info{flex:1;min-width:0}
-.result-card .title{color:#f0e6d3;font-weight:600;font-size:.95rem;margin-bottom:.2rem}
-.result-card .meta{font-size:.8rem;color:#888}
+.result-card .title{color:var(--text);font-weight:600;font-size:.95rem;margin-bottom:.2rem}
+.result-card .meta{font-size:.8rem;color:var(--text-muted)}
 .result-card .links{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
 .result-card .link-btn{font-size:.7rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;transition:all .15s;border:none;cursor:pointer}
-.link-btn.view{background:#3b82f622;color:#3b82f6;border:1px solid #3b82f633}
-.link-btn.view:hover{background:#3b82f644}
-.link-btn.import{background:#c8a24e22;color:#c8a24e;border:1px solid #c8a24e33}
-.link-btn.import:hover{background:#c8a24e44}
+.link-btn.view{background:rgba(59,130,246,0.13);color:var(--blue);border:1px solid #3b82f633}
+.link-btn.view:hover{background:var(--blue)44}
+.link-btn.import{background:var(--gold)22;color:var(--gold);border:1px solid rgba(200,162,78,0.2)}
+.link-btn.import:hover{background:var(--gold)44}
 .link-btn.import:disabled{opacity:.4;cursor:not-allowed}
-.link-btn.import.done{background:#22c55e22;color:#22c55e;border-color:#22c55e33}
+.link-btn.import.done{background:var(--green)22;color:var(--green);border-color:var(--green)33}
 
 /* Loading */
-.loading-bar{height:3px;background:#16213e;border-radius:2px;overflow:hidden;margin:1rem 0;display:none}
+.loading-bar{height:3px;background:var(--surface-deep);border-radius:2px;overflow:hidden;margin:1rem 0;display:none}
 .loading-bar.show{display:block}
 .loading-bar .fill{height:100%;background:linear-gradient(90deg,#c8a24e,#22c55e,#c8a24e);width:30%;border-radius:2px;animation:loadSlide 1.5s ease infinite}
 @keyframes loadSlide{0%{margin-left:0}50%{margin-left:70%}100%{margin-left:0}}
 
 /* Toast */
 .toast-wrap{position:fixed;bottom:2rem;right:2rem;z-index:9999}
-.toast{background:#1a1a2e;border:1px solid #c8a24e44;border-radius:10px;padding:.8rem 1.2rem;color:#f0e6d3;font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:toastIn .3s ease;display:flex;align-items:center;gap:.6rem;margin-top:.5rem}
-.toast.error{border-color:#ef4444}
+.toast{background:var(--surface);border:1px solid #c8a24e44;border-radius:10px;padding:.8rem 1.2rem;color:var(--text);font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:toastIn .3s ease;display:flex;align-items:center;gap:.6rem;margin-top:.5rem}
+.toast.error{border-color:var(--red)}
 @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 @media(max-width:768px){
@@ -97,7 +97,7 @@
 </div>
 
 <!-- Source Cards -->
-<h4 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-collection"></i> Povezani izvori</h4>
+<h4 class="fx-text-gold mb-3" style="font-family:Cormorant Garamond,serif"><i class="bi bi-collection"></i> Povezani izvori</h4>
 <div class="source-grid">
   {% for key, src in sources.items %}
   <div class="source-card" onclick="window.open('{{ src.url }}', '_blank')">
@@ -184,7 +184,7 @@ async function doSearch() {
   resultCount.textContent = allResults.length + ' rezultata';
 
   if (!allResults.length) {
-    resultsList.innerHTML = '<div style="text-align:center;padding:2rem;color:#555"><i class="bi bi-search" style="font-size:2rem"></i><p>Nema rezultata.</p></div>';
+    resultsList.innerHTML = '<div class="text-center fx-text-dim fx-p-6"><i class="bi bi-search fx-fs-icon"></i><p>Nema rezultata.</p></div>';
     return;
   }
 

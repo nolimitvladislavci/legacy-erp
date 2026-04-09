@@ -4,9 +4,9 @@
 {% block title %}Komunalno — Dashboard{% endblock %}
 
 {% block content %}
-<div style="max-width:1200px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:1200px">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="fas fa-recycle me-2" style="color:#4CAF50"></i>Komunalno upravljanje</h4>
+        <h4 class="mb-0"><i class="fas fa-recycle me-2 fx-text-green"></i>Komunalno upravljanje</h4>
         <div class="d-flex gap-2">
             <a href="{% url 'komunalno:onto_dashboard' %}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-cloud-upload-alt me-1"></i>e-ONTO
@@ -20,25 +20,25 @@
     <!-- Stats -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Danas zaprimljeno</div>
                 <div class="value">{{ today_count }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Ukupna težina (kg)</div>
                 <div class="value">{{ today_weight|floatformat:1 }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Prekoračenja danas</div>
                 <div class="value" style="color:{% if overages_today > 0 %}#f44336{% else %}inherit{% endif %}">{{ overages_today }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <div class="label">Naplate (EUR)</div>
                 <div class="value">{{ today_charges|floatformat:2 }}</div>
             </div>
@@ -98,25 +98,25 @@
     <div class="row g-3">
         <div class="col-6 col-md-3">
             <a href="{% url 'komunalno:station_list' %}" class="action-card">
-                <i class="fas fa-building" style="background:rgba(76,175,80,.1);color:#4CAF50"></i>
+                <i class="fas fa-building fx-text-green" style="background:rgba(76,175,80,.1)"></i>
                 <div>Dvorišta<div class="desc">Upravljaj lokacijama</div></div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{% url 'komunalno:citizen_list' %}" class="action-card">
-                <i class="fas fa-id-card" style="background:rgba(33,150,243,.1);color:#2196F3"></i>
+                <i class="fas fa-id-card fx-text-blue" style="background:rgba(33,150,243,.1)"></i>
                 <div>Građani<div class="desc">Iskaznice i kvote</div></div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{% url 'komunalno:category_list' %}" class="action-card">
-                <i class="fas fa-tags" style="background:rgba(255,152,0,.1);color:#FF9800"></i>
+                <i class="fas fa-tags fx-text-amber" style="background:rgba(255,152,0,.1)"></i>
                 <div>Kategorije<div class="desc">Ključni brojevi otpada</div></div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{% url 'komunalno:quota_management' %}" class="action-card">
-                <i class="fas fa-tachometer-alt" style="background:rgba(156,39,176,.1);color:#9C27B0"></i>
+                <i class="fas fa-tachometer-alt fx-text-purple" style="background:rgba(156,39,176,.1)"></i>
                 <div>Kvote<div class="desc">Godišnji limiti</div></div>
             </a>
         </div>

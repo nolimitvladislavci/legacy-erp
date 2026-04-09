@@ -6,46 +6,46 @@
 <meta charset="UTF-8">
 <style>
   @page { size: A4; margin: 20mm 15mm; }
-  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color:var(--text); }
   h1 { font-size: 15pt; font-weight: 700; margin: 0 0 4px; }
   .header { display: flex; justify-content: space-between; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; }
-  .label { font-size: 8.5pt; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+  .label { font-size: 8.5pt; color:var(--text-dim); text-transform: uppercase; letter-spacing: .5px; }
   .value { font-size: 13pt; font-weight: 700; }
-  .section { background: #f8fafc; border-left: 3px solid #c9a84c; padding: 10px 14px; margin: 16px 0; }
+  .section { background:var(--surface2); border-left: 3px solid #c9a84c; padding: 10px 14px; margin: 16px 0; }
   table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 12px 0; }
-  th { background: #0f172a; color: #fff; padding: 5px 8px; text-align: left; }
+  th { background:var(--surface-deep); color:var(--white); padding: 5px 8px; text-align: left; }
   td { padding: 5px 8px; border-bottom: 1px solid #e2e8f0; }
   .right { text-align: right; }
   .total-row td { font-weight: 700; border-top: 2px solid #0f172a; font-size: 10.5pt; }
   .payable { font-size: 14pt; font-weight: 800; color: {% if period.vat_payable > 0 %}#dc2626{% else %}#16a34a{% endif %}; }
-  .footer { margin-top: 30px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 8px; }
-  .filed-badge { display: inline-block; background: #dcfce7; color: #16a34a; padding: 3px 10px; border-radius: 4px; font-size: 8.5pt; font-weight: 700; }
-  .unfiled-badge { display: inline-block; background: #fef3c7; color: #d97706; padding: 3px 10px; border-radius: 4px; font-size: 8.5pt; font-weight: 700; }
+  .footer { margin-top: 30px; font-size: 8pt; color:var(--text-muted); border-top: 1px solid #e2e8f0; padding-top: 8px; }
+  .filed-badge { display: inline-block; background: #dcfce7; color:var(--green); padding: 3px 10px; border-radius: 4px; font-size: 8.5pt; font-weight: 700; }
+  .unfiled-badge { display: inline-block; background: #fef3c7; color:var(--amber); padding: 3px 10px; border-radius: 4px; font-size: 8.5pt; font-weight: 700; }
 </style>
 </head>
 <body>
 <div class="header">
   <div>
     <h1>Umsatzsteuer-Voranmeldung</h1>
-    <div style="font-size:9pt;color:#555;margin-top:4px">
+    <div class="fx-text-dim mt-1" style="font-size:9pt">
       {{ company.name }} &bull; {{ period.period_label }}
       &bull; {% if period.is_filed %}<span class="filed-badge">Eingereicht</span>{% else %}<span class="unfiled-badge">Noch nicht eingereicht</span>{% endif %}
     </div>
   </div>
-  <div style="text-align:right;font-size:9pt;color:#555">Erstellt: {{ today }}<br>LIMIT CONNECT</div>
+  <div class="text-end fx-text-dim" style="font-size:9pt">Erstellt: {{ today }}<br>LIMIT CONNECT</div>
 </div>
 
-<div style="display:flex;gap:20px;margin-bottom:20px">
-  <div class="section" style="flex:1">
+<div class="d-flex fx-gap-5 mb-4">
+  <div class="section fx-flex-1">
     <div class="label">Umsatzsteuer (Izlazni PDV)</div>
-    <div class="value" style="color:#dc2626">{{ period.total_output_vat|floatformat:2 }} &euro;</div>
-    <div style="font-size:8.5pt;color:#64748b">Steuerpflichtige Ums.: {{ period.total_revenue|floatformat:2 }} &euro;</div>
+    <div class="value fx-text-red">{{ period.total_output_vat|floatformat:2 }} &euro;</div>
+    <div class="fx-text-muted" style="font-size:8.5pt">Steuerpflichtige Ums.: {{ period.total_revenue|floatformat:2 }} &euro;</div>
   </div>
-  <div class="section" style="flex:1">
+  <div class="section fx-flex-1">
     <div class="label">Vorsteuer (Pretporez)</div>
-    <div class="value" style="color:#16a34a">{{ period.total_input_vat|floatformat:2 }} &euro;</div>
+    <div class="value fx-text-green">{{ period.total_input_vat|floatformat:2 }} &euro;</div>
   </div>
-  <div class="section" style="flex:1;border-color:#0f172a">
+  <div class="section fx-flex-1" style="border-color:#0f172a">
     <div class="label">Zahllast / Erstattung</div>
     <div class="payable">{{ period.vat_payable|floatformat:2 }} &euro;</div>
   </div>
@@ -72,7 +72,7 @@
 {% endif %}
 
 {% if period.filing_deadline %}
-<div style="font-size:9pt;color:#64748b;margin-top:12px">
+<div class="fx-text-dim mt-3" style="font-size:9pt">
   Abgabefrist: {{ period.filing_deadline }}
   {% if period.is_filed %}&bull; Eingereicht: {{ period.filed_at|date:"d.m.Y" }}{% endif %}
 </div>

@@ -2,76 +2,59 @@
 {% load i18n %}
 {% block title %}Ribolovne dozvole{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-id-card"></i> Ribolovne dozvole</h4>
-  <small style="color:var(--text-muted)">Izdane dozvole, status, uplata</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-id-card"></i> Ribolovne dozvole</h4>
+  <small class="fx-text-muted">Izdane dozvole, status, uplata</small></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Izdano</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Izdano</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.aktivne|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Aktivne</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.aktivne|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Aktivne</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.istekle|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Istekle</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-red">{{ stats.istekle|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Istekle</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.prihod|default:"0" }} EUR</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Prihod</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-gold">{{ stats.prihod|default:"0" }} EUR</div>
+    <div class="fx-fs-sm fx-text-muted">Prihod</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Broj</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Clan</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tip</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrijedi do</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Iznos</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Broj</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Clan</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Tip</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vrijedi do</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Iznos</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Status</th>
     </tr></thead>
     <tbody>
       {% for d in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace" data-label="Broj">{{ d.broj_dozvole }}</td>
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Clan">{{ d.clan }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Tip">{{ d.get_tip_display|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vrijedi do">
-          {% if d.istekla %}<span style="color:#ef4444">{{ d.vrijedi_do|date:"d.m.Y" }}</span>
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-body-sm fx-p-cell fx-font-mono" data-label="Broj">{{ d.broj_dozvole }}</td>
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Clan">{{ d.clan }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Tip">{{ d.get_tip_display|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Vrijedi do">
+          {% if d.istekla %}<span class="fx-text-red">{{ d.vrijedi_do|date:"d.m.Y" }}</span>
           {% else %}{{ d.vrijedi_do|date:"d.m.Y" }}{% endif %}
         </td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Iznos">{{ d.iznos|default:"-" }} EUR</td>
-        <td style="padding:.5rem .6rem" data-label="Status">
-          {% if d.aktivna %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Aktivna</span>
-          {% else %}<span style="color:#ef4444;font-size:.78rem">Istekla</span>{% endif %}
+        <td class="fx-fs-note fx-p-cell" data-label="Iznos">{{ d.iznos|default:"-" }} EUR</td>
+        <td class="fx-p-cell" data-label="Status">
+          {% if d.aktivna %}<span class="fx-text-green fx-fs-body-sm fx-fw-semibold">Aktivna</span>
+          {% else %}<span class="fx-text-red fx-fs-body-sm">Istekla</span>{% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema dozvola</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema dozvola</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

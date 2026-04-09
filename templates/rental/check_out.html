@@ -2,18 +2,18 @@
 {% load i18n %}
 {% block title %}Check-out{% endblock %}
 {% block content %}
-<div style="padding:2rem;max-width:400px;margin:0 auto;text-align:center">
-  <div style="font-size:3rem;margin-bottom:1rem">{% if 'in' in 'check_out.html' %}&#128272;{% else %}&#128587;{% endif %}</div>
-  <h2 style="color:var(--gold);margin-bottom:.5rem">Check-out</h2>
-  <div style="color:var(--muted);margin-bottom:1.5rem">Odjavite gosta</div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:left;margin-bottom:1rem">
-    <div style="margin-bottom:.3rem"><strong>{{ booking.guest_name }}</strong></div>
-    <div style="font-size:.85rem;color:var(--muted)">{{ booking.rental_property.name }} &middot; {{ booking.check_in|date:"d.m" }} - {{ booking.check_out|date:"d.m" }}</div>
-    <div style="font-size:.85rem;color:var(--green);font-weight:600;margin-top:.3rem">&euro;{{ booking.total_price|floatformat:2 }}</div>
+<div class="text-center fx-p-6 fx-m-auto" style="max-width:400px">
+  <div class="fx-fs-hero mb-3">{% if 'in' in 'check_out.html' %}&#128272;{% else %}&#128587;{% endif %}</div>
+  <h2 class="fx-text-gold mb-2">Check-out</h2>
+  <div class="fx-text-muted fx-mb-6">Odjavite gosta</div>
+  <div class="fx-rounded text-start mb-3 fx-b fx-p-4 fx-bg-card">
+    <div class="fx-mb-2"><strong>{{ booking.guest_name }}</strong></div>
+    <div class="fx-fs-base fx-text-muted">{{ booking.rental_property.name }} &middot; {{ booking.check_in|date:"d.m" }} - {{ booking.check_out|date:"d.m" }}</div>
+    <div class="fx-fs-base fx-fw-semibold fx-text-green fx-mt-sm">&euro;{{ booking.total_price|floatformat:2 }}</div>
   </div>
   <form method="post">{% csrf_token %}
-    <button type="submit" class="btn btn-gold" style="width:100%">Potvrdi Check-out</button>
+    <button type="submit" class="btn btn-gold fx-w-full">Potvrdi Check-out</button>
   </form>
-  <a href="{% url 'rental:dashboard' %}" style="display:block;margin-top:.8rem;color:var(--muted);font-size:.85rem">Odustani</a>
+  <a href="{% url 'rental:dashboard' %}" class="fx-fs-base d-block fx-text-muted" style="margin-top:.8rem">Odustani</a>
 </div>
 {% endblock %}

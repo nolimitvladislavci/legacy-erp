@@ -2,38 +2,21 @@
 {% load i18n %}
 {% block title %}{{ kampanja.name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="margin-bottom:1rem">
-  <a href="{% url 'udruge:kampanja_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Sve kampanje</a>
+<div class="mb-3">
+  <a href="{% url 'udruge:kampanja_list' %}" class="fx-fs-base fx-no-underline fx-text-gold">&laquo; Sve kampanje</a>
 </div>
 
-<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+<div class="d-flex fx-flex-wrap justify-content-between mb-3 fx-gap-2" style="align-items:start">
   <div>
-    <h4 style="margin:0;color:var(--gold)">{{ kampanja.name }}</h4>
-    <div style="display:flex;gap:.5rem;margin-top:.3rem;flex-wrap:wrap">
-      <span style="background:rgba(201,168,76,.1);color:var(--gold);font-size:.7rem;padding:2px 8px;border-radius:10px">{{ kampanja.get_campaign_type_display }}</span>
-      {% if kampanja.status == 'active' %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:600">Aktivna</span>
-      {% elif kampanja.status == 'completed' %}<span style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:600">Zavrsena</span>
-      {% elif kampanja.status == 'draft' %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:600">Nacrt</span>
+    <h4 class="fx-text-gold fx-m-0">{{ kampanja.name }}</h4>
+    <div class="d-flex fx-flex-wrap fx-gap-2 fx-mt-sm">
+      <span class="fx-fs-sm fx-rounded fx-text-gold fx-p-btn" style="background:rgba(201,168,76,.1)">{{ kampanja.get_campaign_type_display }}</span>
+      {% if kampanja.status == 'active' %}<span class="fx-text-green fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(34,197,94,.15)">Aktivna</span>
+      {% elif kampanja.status == 'completed' %}<span class="fx-text-blue fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(59,130,246,.15)">Zavrsena</span>
+      {% elif kampanja.status == 'draft' %}<span class="fx-fs-sm fx-rounded fx-fw-semibold fx-text-dim fx-p-btn" style="background:rgba(156,163,175,.15)">Nacrt</span>
       {% endif %}
     </div>
   </div>
@@ -41,52 +24,52 @@
 
 <!-- Progress Bar -->
 {% if kampanja.goal_amount %}
-<div class="card" style="padding:1rem;margin-bottom:1rem">
-  <h5 style="margin:0 0 .5rem;color:var(--gold);font-size:.85rem">Napredak</h5>
-  <div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:6px">
+<div class="card mb-3 fx-p-4">
+  <h5 class="fx-fs-base fx-text-gold" style="margin:0 0 .5rem">Napredak</h5>
+  <div class="d-flex fx-fs-body justify-content-between mb-1">
     <span>{{ kampanja.raised_amount }} EUR prikupljeno</span>
-    <span style="color:var(--gold);font-weight:700">{{ kampanja.progress_percent }}%</span>
+    <span class="fx-fw-bold fx-text-gold">{{ kampanja.progress_percent }}%</span>
   </div>
-  <div style="background:var(--dark);border-radius:6px;height:12px;overflow:hidden;margin-bottom:.5rem">
-    <div style="height:100%;width:{{ kampanja.progress_percent }}%;background:linear-gradient(90deg,var(--gold),#e8c547);border-radius:6px;transition:width .3s"></div>
+  <div class="fx-rounded-sm mb-2 fx-bg-dark fx-overflow-hidden" style="height:12px">
+    <div class="fx-rounded-sm" style="height:100%;width:{{ kampanja.progress_percent }}%;background:linear-gradient(90deg,var(--gold),#e8c547);transition:width .3s"></div>
   </div>
-  <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)">
+  <div class="d-flex fx-fs-body-sm justify-content-between fx-text-muted">
     <span>Cilj: {{ kampanja.goal_amount }} EUR</span>
     {% if kampanja.days_remaining is not None %}
       {% if kampanja.days_remaining > 0 %}<span>Jos {{ kampanja.days_remaining }} dana</span>
-      {% elif kampanja.days_remaining == 0 %}<span style="color:#f59e0b">Zavrsava danas</span>
-      {% else %}<span style="color:#ef4444">Istekla</span>{% endif %}
+      {% elif kampanja.days_remaining == 0 %}<span class="fx-text-amber">Zavrsava danas</span>
+      {% else %}<span class="fx-text-red">Istekla</span>{% endif %}
     {% endif %}
   </div>
 </div>
 {% endif %}
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+<div class="d-grid fx-gap-4 fx-grid-2-equal">
   <!-- Details -->
   <div>
-    <div class="card" style="padding:1rem;margin-bottom:1rem">
-      <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Detalji</h5>
-      <div style="display:grid;gap:.5rem">
+    <div class="card mb-3 fx-p-4">
+      <h5 class="fx-fs-base fx-text-gold" style="margin:0 0 .75rem">Detalji</h5>
+      <div class="d-grid fx-gap-2">
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Period</div>
-          <div style="font-size:.88rem">{{ kampanja.start_date|date:"d.m.Y" }} {% if kampanja.end_date %}- {{ kampanja.end_date|date:"d.m.Y" }}{% endif %}</div>
+          <div class="fx-fs-sm fx-text-muted">Period</div>
+          <div class="fx-fs-body">{{ kampanja.start_date|date:"d.m.Y" }} {% if kampanja.end_date %}- {{ kampanja.end_date|date:"d.m.Y" }}{% endif %}</div>
         </div>
         {% if kampanja.goal_members %}
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Cilj clanova</div>
-          <div style="font-size:.88rem">{{ kampanja.acquired_members }} / {{ kampanja.goal_members }}</div>
+          <div class="fx-fs-sm fx-text-muted">Cilj clanova</div>
+          <div class="fx-fs-body">{{ kampanja.acquired_members }} / {{ kampanja.goal_members }}</div>
         </div>
         {% endif %}
         {% if kampanja.responsible %}
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Odgovorna osoba</div>
-          <div style="font-size:.88rem">{{ kampanja.responsible.get_full_name|default:kampanja.responsible.username }}</div>
+          <div class="fx-fs-sm fx-text-muted">Odgovorna osoba</div>
+          <div class="fx-fs-body">{{ kampanja.responsible.get_full_name|default:kampanja.responsible.username }}</div>
         </div>
         {% endif %}
         {% if kampanja.description %}
-        <div style="margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">Opis</div>
-          <div style="font-size:.85rem;line-height:1.5;white-space:pre-wrap">{{ kampanja.description }}</div>
+        <div class="mt-2 fx-bt" style="padding-top:.5rem">
+          <div class="fx-fs-sm fx-text-muted mb-1">Opis</div>
+          <div class="fx-fs-base" style="line-height:1.5;white-space:pre-wrap">{{ kampanja.description }}</div>
         </div>
         {% endif %}
       </div>
@@ -94,34 +77,34 @@
 
     <!-- EU Fond Section -->
     {% if kampanja.campaign_type == 'eu_fond' %}
-    <div class="card" style="padding:1rem;margin-bottom:1rem;border-left:3px solid #3b82f6">
-      <h5 style="margin:0 0 .75rem;color:#3b82f6;font-size:.85rem">EU Fond</h5>
-      <div style="display:grid;gap:.5rem">
+    <div class="card mb-3 fx-p-4" style="border-left:3px solid #3b82f6">
+      <h5 class="fx-text-blue fx-fs-base" style="margin:0 0 .75rem">EU Fond</h5>
+      <div class="d-grid fx-gap-2">
         {% if kampanja.eu_project_code %}
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Sifra projekta</div>
-          <div style="font-size:.88rem;font-family:monospace">{{ kampanja.eu_project_code }}</div>
+          <div class="fx-fs-sm fx-text-muted">Sifra projekta</div>
+          <div class="fx-fs-body fx-font-mono">{{ kampanja.eu_project_code }}</div>
         </div>
         {% endif %}
         {% if kampanja.eu_program %}
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Program</div>
-          <div style="font-size:.88rem">{{ kampanja.eu_program }}</div>
+          <div class="fx-fs-sm fx-text-muted">Program</div>
+          <div class="fx-fs-body">{{ kampanja.eu_program }}</div>
         </div>
         {% endif %}
         {% if kampanja.eu_status %}
         <div>
-          <div style="font-size:.72rem;color:var(--muted)">Status</div>
-          <div style="font-size:.88rem">
-            {% if kampanja.eu_status == 'approved' %}<span style="color:#22c55e;font-weight:600">{{ kampanja.get_eu_status_display }}</span>
-            {% elif kampanja.eu_status == 'rejected' %}<span style="color:#ef4444;font-weight:600">{{ kampanja.get_eu_status_display }}</span>
-            {% else %}<span style="color:#3b82f6;font-weight:600">{{ kampanja.get_eu_status_display }}</span>{% endif %}
+          <div class="fx-fs-sm fx-text-muted">Status</div>
+          <div class="fx-fs-body">
+            {% if kampanja.eu_status == 'approved' %}<span class="fx-text-green fx-fw-semibold">{{ kampanja.get_eu_status_display }}</span>
+            {% elif kampanja.eu_status == 'rejected' %}<span class="fx-text-red fx-fw-semibold">{{ kampanja.get_eu_status_display }}</span>
+            {% else %}<span class="fx-text-blue fx-fw-semibold">{{ kampanja.get_eu_status_display }}</span>{% endif %}
           </div>
         </div>
         {% endif %}
         <!-- Status timeline -->
-        <div style="margin-top:.5rem">
-          <div style="display:flex;gap:2px;align-items:center">
+        <div class="mt-2">
+          <div class="d-flex align-items-center" style="gap:2px">
             {% for code, label in kampanja.EU_STATUS_STEPS %}
             <div style="flex:1;height:4px;border-radius:2px;{% if code == kampanja.eu_status %}background:var(--gold){% elif forloop.counter <= kampanja.eu_status_index %}background:var(--gold);opacity:.5{% else %}background:var(--border){% endif %}"></div>
             {% endfor %}
@@ -135,30 +118,30 @@
   <!-- Right: Events + Donations -->
   <div>
     <!-- Linked Events -->
-    <div class="card" style="padding:1rem;margin-bottom:1rem">
-      <h5 style="margin:0 0 .5rem;color:var(--gold);font-size:.85rem">Povezani dogadjaji ({{ events|length }})</h5>
+    <div class="card mb-3 fx-p-4">
+      <h5 class="fx-fs-base fx-text-gold" style="margin:0 0 .5rem">Povezani dogadjaji ({{ events|length }})</h5>
       {% for e in events %}
-      <a href="{% url 'udruge:dogadjaj_detail' e.pk %}" style="display:block;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;color:var(--text);font-size:.85rem">
-        <div style="display:flex;justify-content:space-between">
+      <a href="{% url 'udruge:dogadjaj_detail' e.pk %}" class="fx-no-underline fx-fs-base d-block fx-text-body fx-bb-subtle fx-p-5-0">
+        <div class="d-flex justify-content-between">
           <span>{{ e.name }}</span>
-          <span style="color:var(--muted);font-size:.78rem">{{ e.start_date|date:"d.m.Y" }}</span>
+          <span class="fx-fs-body-sm fx-text-muted">{{ e.start_date|date:"d.m.Y" }}</span>
         </div>
       </a>
       {% empty %}
-      <div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Nema povezanih dogadjaja</div>
+      <div class="fx-fs-note fx-text-muted fx-p-5-0">Nema povezanih dogadjaja</div>
       {% endfor %}
     </div>
 
     <!-- Linked Donations -->
-    <div class="card" style="padding:1rem;margin-bottom:1rem">
-      <h5 style="margin:0 0 .5rem;color:var(--gold);font-size:.85rem">Donacije u periodu ({{ donacije|length }})</h5>
+    <div class="card mb-3 fx-p-4">
+      <h5 class="fx-fs-base fx-text-gold" style="margin:0 0 .5rem">Donacije u periodu ({{ donacije|length }})</h5>
       {% for d in donacije %}
-      <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem">
+      <div class="d-flex fx-fs-base justify-content-between fx-bb-subtle" style="padding:.4rem 0">
         <span>{{ d.donor_name }}</span>
-        <span style="color:var(--gold);font-weight:600">{{ d.amount }} EUR</span>
+        <span class="fx-fw-semibold fx-text-gold">{{ d.amount }} EUR</span>
       </div>
       {% empty %}
-      <div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Nema donacija u periodu kampanje</div>
+      <div class="fx-fs-note fx-text-muted fx-p-5-0">Nema donacija u periodu kampanje</div>
       {% endfor %}
     </div>
   </div>

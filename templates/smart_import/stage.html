@@ -46,11 +46,11 @@
   <!-- Document Preview -->
   {% if batch.file and batch.file_type == "image" %}
   <div class="mb-3 text-center">
-    <img src="{{ batch.file.url }}" alt="Skenirana slika" class="img-fluid rounded shadow-sm" style="max-height: 400px; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+    <img src="{{ batch.file.url }}" alt="Skenirana slika" class="img-fluid rounded shadow-sm fx-pointer" style="max-height:400px" onclick="window.open(this.src, '_blank')">
   </div>
   {% elif batch.file and batch.file_type == "pdf" %}
   <div class="mb-3">
-    <iframe src="{{ batch.file.url }}" style="width: 100%; height: 400px; border: 1px solid #dee2e6; border-radius: 8px;"></iframe>
+    <iframe src="{{ batch.file.url }}" class="fx-w-full fx-rounded" style="height:400px;border:1px solid #dee2e6"></iframe>
   </div>
   {% endif %}
 
@@ -97,7 +97,7 @@
         <div class="small text-muted mb-2">{{ batch.error_msg }}</div>
         {% endif %}
         <div class="d-flex gap-2 flex-wrap">
-          <button type="button" class="btn btn-warning btn-sm" onclick="retryBatch()">
+          <button type="button" class="btn-gold btn-sm" onclick="retryBatch()">
             <i class="fas fa-redo me-1"></i>Pokusaj ponovo
           </button>
           <a href="{% url 'smart_import:manual_entry' batch.pk %}" class="btn btn-primary btn-sm">
@@ -254,7 +254,7 @@
               </tr>
             {% endfor %}
             </tbody>
-            <tfoot class="table-light">
+            <tfoot >
               <tr>
                 <td colspan="5" class="text-end fw-bold">UKUPNO:</td>
                 <td class="text-end fw-bold" id="grandTotal">—</td>
@@ -285,7 +285,7 @@
             <div class="d-flex justify-content-between align-items-start mb-1">
               <strong class="small">{{ forloop.counter }}.</strong>
               <button type="button" class="btn btn-sm btn-outline-danger px-1 py-0"
-                      onclick="deleteItem({{ item.pk }})"><i class="fas fa-trash-alt" style="font-size:0.7rem"></i></button>
+                      onclick="deleteItem({{ item.pk }})"><i class="fas fa-trash-alt fx-fs-sm"></i></button>
             </div>
             <input type="text" class="form-control form-control-sm mb-1 fw-semibold item-name"
                    value="{{ item.vendor_name }}" data-item-id="{{ item.pk }}"
@@ -299,19 +299,19 @@
             </select>
             <div class="row g-1">
               <div class="col-4">
-                <label class="form-label mb-0" style="font-size:0.65rem">Kolicina</label>
+                <label class="form-label mb-0 fx-fs-xs">Kolicina</label>
                 <input type="number" class="form-control form-control-sm item-qty" value="{{ item.quantity }}"
                        step="0.001" data-item-id="{{ item.pk }}"
                        onchange="saveField({{ item.pk }}, 'quantity', this.value); recalcRow({{ item.pk }})">
               </div>
               <div class="col-4">
-                <label class="form-label mb-0" style="font-size:0.65rem">Nabavna</label>
+                <label class="form-label mb-0 fx-fs-xs">Nabavna</label>
                 <input type="number" class="form-control form-control-sm item-pp text-end" value="{{ item.purchase_price }}"
                        step="0.01" data-item-id="{{ item.pk }}"
                        onchange="saveField({{ item.pk }}, 'purchase_price', this.value); recalcRow({{ item.pk }})">
               </div>
               <div class="col-4">
-                <label class="form-label mb-0" style="font-size:0.65rem">Marza %</label>
+                <label class="form-label mb-0 fx-fs-xs">Marza %</label>
                 <input type="number" class="form-control form-control-sm item-margin text-center"
                        value="{{ item.margin_override|default:'' }}" placeholder="—" step="0.1"
                        data-item-id="{{ item.pk }}"

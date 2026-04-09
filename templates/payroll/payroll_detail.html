@@ -3,46 +3,28 @@
 {% block page_title %}{% trans "Obracun" %} {{ run.month|stringformat:"02d" }}/{{ run.year }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:1000px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:1000px">
     <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+    <div class="d-flex fx-flex-wrap fx-gap-3 justify-content-between align-items-center mb-4">
         <div>
-            <h2 style="margin:0;color:var(--gold)">
+            <h2 class="fx-text-gold fx-m-0">
                 <i class="fas fa-file-invoice-dollar"></i>
                 {{ run.month|stringformat:"02d" }}/{{ run.year }}
             </h2>
-            <span style="padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;
-                {% if run.status == 'DRAFT' %}background:#fef3c7;color:#92400e
-                {% elif run.status == 'LOCKED' %}background:#dbeafe;color:#1e40af
-                {% elif run.status == 'FINALIZED' %}background:#d1fae5;color:#065f46
-                {% elif run.status == 'PAID' %}background:#e0e7ff;color:#3730a3
+            <span class="fx-rounded fx-fs-caption fx-fw-semibold" style="padding:3px 10px;{% if run.status == 'draft' %}background:var(--amber-dim);color:var(--amber)
+                {% elif run.status == 'LOCKED' %}background:var(--blue-dim);color:var(--blue)
+                {% elif run.status == 'FINALIZED' %}background:var(--green-dim);color:var(--green)
+                {% elif run.status == 'PAID' %}background:var(--purple-dim);color:var(--purple)
                 {% endif %}">{{ run.get_status_display }}</span>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
             {% if can_run %}
-            <form method="post" action="{% url 'payroll:run' run.pk %}" style="display:inline">
+            <form method="post" action="{% url 'payroll:run' run.pk %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" style="padding:8px 16px;background:#059669;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600"
+                <button type="submit" class="fx-text-white fx-border-none fx-rounded fx-pointer fx-fw-semibold fx-p-8-16" style="background:var(--green)"
                         onclick="return confirm('Pokrenuti obracun za sve radnike?')">
                     <i class="fas fa-play"></i> {% trans "Pokreni obracun" %}
                 </button>
@@ -50,9 +32,9 @@
             {% endif %}
 
             {% if can_book %}
-            <form method="post" action="{% url 'payroll:book' run.pk %}" style="display:inline">
+            <form method="post" action="{% url 'payroll:book' run.pk %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" style="padding:8px 16px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600"
+                <button type="submit" class="fx-text-white fx-border-none fx-rounded fx-pointer fx-fw-semibold fx-p-8-16" style="background:var(--purple)"
                         onclick="return confirm('Proknjiziti obracun u konto?')">
                     <i class="fas fa-book"></i> {% trans "Proknjizi" %}
                 </button>
@@ -60,22 +42,22 @@
             {% endif %}
 
             {% if can_pay %}
-            <form method="post" action="{% url 'payroll:pain001' run.pk %}" style="display:inline">
+            <form method="post" action="{% url 'payroll:pain001' run.pk %}" class="d-inline">
                 {% csrf_token %}
-                <select name="bank_account" required style="padding:8px;border:1px solid #e2e8f0;border-radius:8px">
+                <select name="bank_account" required class="fx-rounded fx-p-8 fx-b">
                     <option value="">-- {% trans "Banka" %} --</option>
                     {% for bank in banks %}
                     <option value="{{ bank.pk }}">{{ bank.bank_name }} ({{ bank.iban|truncatechars:20 }})</option>
                     {% endfor %}
                 </select>
-                <button type="submit" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">
+                <button type="submit" class="fx-text-white fx-border-none fx-rounded fx-pointer fx-fw-semibold fx-p-8-16" style="background:var(--blue)">
                     <i class="fas fa-file-export"></i> pain.001
                 </button>
             </form>
             {% endif %}
 
             {% if is_de and run.status != 'DRAFT' %}
-            <a href="{% url 'payroll:datev' run.pk %}" style="padding:8px 16px;background:#0f766e;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+            <a href="{% url 'payroll:datev' run.pk %}" class="fx-text-white fx-rounded fx-no-underline fx-fw-semibold fx-p-8-16" style="background:var(--cyan)">
                 <i class="fas fa-download"></i> DATEV
             </a>
             {% endif %}
@@ -84,57 +66,57 @@
 
     <!-- Summary Cards -->
     {% if run.status != 'DRAFT' %}
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px">
-        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Bruto ukupno" %}</div>
-            <div style="font-size:1.5rem;font-weight:700;color:#0f172a">{{ run.total_gross|floatformat:2 }} &euro;</div>
+    <div class="fx-gap-4 d-grid mb-4" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+        <div class="fx-rounded fx-bg-card fx-p-20" style="box-shadow:var(--shadow-sm)">
+            <div class="fx-fs-caption fx-text-dim fx-uppercase fx-ls-2">{% trans "Bruto ukupno" %}</div>
+            <div class="fx-fs-5xl fx-fw-bold fx-text-dark">{{ run.total_gross|floatformat:2 }} &euro;</div>
         </div>
-        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Neto ukupno" %}</div>
-            <div style="font-size:1.5rem;font-weight:700;color:#059669">{{ run.total_net|floatformat:2 }} &euro;</div>
+        <div class="fx-rounded fx-bg-card fx-p-20" style="box-shadow:var(--shadow-sm)">
+            <div class="fx-fs-caption fx-text-dim fx-uppercase fx-ls-2">{% trans "Neto ukupno" %}</div>
+            <div class="fx-fs-5xl fx-fw-bold fx-text-green">{{ run.total_net|floatformat:2 }} &euro;</div>
         </div>
-        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Porez + doprinosi" %}</div>
-            <div style="font-size:1.5rem;font-weight:700;color:#dc2626">{{ run.total_tax|floatformat:2 }} &euro;</div>
+        <div class="fx-rounded fx-bg-card fx-p-20" style="box-shadow:var(--shadow-sm)">
+            <div class="fx-fs-caption fx-text-dim fx-uppercase fx-ls-2">{% trans "Porez + doprinosi" %}</div>
+            <div class="fx-fs-5xl fx-fw-bold fx-text-red">{{ run.total_tax|floatformat:2 }} &euro;</div>
         </div>
-        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Radnika" %}</div>
-            <div style="font-size:1.5rem;font-weight:700;color:#0f172a">{{ payslips|length }}</div>
+        <div class="fx-rounded fx-bg-card fx-p-20" style="box-shadow:var(--shadow-sm)">
+            <div class="fx-fs-caption fx-text-dim fx-uppercase fx-ls-2">{% trans "Radnika" %}</div>
+            <div class="fx-fs-5xl fx-fw-bold fx-text-dark">{{ payslips|length }}</div>
         </div>
     </div>
     {% endif %}
 
     <!-- Payslips Table -->
     {% if payslips %}
-    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+    <table class="fx-w-full fx-rounded fx-bg-card fx-b-collapse fx-overflow-hidden" style="box-shadow:var(--shadow-sm)">
         <thead>
-            <tr style="background:#f8f9fa;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:#64748b">
-                <th style="padding:12px 16px;text-align:left">{% trans "Radnik" %}</th>
-                <th style="padding:12px 8px;text-align:right">{% trans "Sati" %}</th>
-                <th style="padding:12px 8px;text-align:right">{% trans "Prekovr." %}</th>
-                <th style="padding:12px 8px;text-align:right">{% trans "Bruto" %}</th>
-                <th style="padding:12px 8px;text-align:right">{% trans "Neto" %}</th>
-                <th style="padding:12px 8px;text-align:center">{% trans "Placeno" %}</th>
-                <th style="padding:12px 8px;text-align:center"></th>
+            <tr class="fx-fs-caption fx-text-muted fx-bg-surface2 fx-uppercase fx-ls-2">
+                <th class="text-start" style="padding:12px 16px">{% trans "Radnik" %}</th>
+                <th class="text-end" style="padding:12px 8px">{% trans "Sati" %}</th>
+                <th class="text-end" style="padding:12px 8px">{% trans "Prekovr." %}</th>
+                <th class="text-end" style="padding:12px 8px">{% trans "Bruto" %}</th>
+                <th class="text-end" style="padding:12px 8px">{% trans "Neto" %}</th>
+                <th class="text-center" style="padding:12px 8px">{% trans "Placeno" %}</th>
+                <th class="text-center" style="padding:12px 8px"></th>
             </tr>
         </thead>
         <tbody>
         {% for ps in payslips %}
-            <tr style="border-top:1px solid #f1f5f9">
-                <td style="padding:10px 16px;font-weight:600">{{ ps.employee_name }}</td>
-                <td style="padding:10px 8px;text-align:right">{{ ps.regular_hours|floatformat:1 }}</td>
-                <td style="padding:10px 8px;text-align:right">{{ ps.overtime_hours|floatformat:1 }}</td>
-                <td style="padding:10px 8px;text-align:right">{{ ps.gross_amount|floatformat:2 }}</td>
-                <td style="padding:10px 8px;text-align:right;font-weight:600;color:#059669">{{ ps.net_amount|floatformat:2 }}</td>
-                <td style="padding:10px 8px;text-align:center">
+            <tr class="fx-bt">
+                <td class="fx-fw-semibold" style="padding:10px 16px">{{ ps.employee_name }}</td>
+                <td class="text-end" style="padding:10px 8px">{{ ps.regular_hours|floatformat:1 }}</td>
+                <td class="text-end" style="padding:10px 8px">{{ ps.overtime_hours|floatformat:1 }}</td>
+                <td class="text-end" style="padding:10px 8px">{{ ps.gross_amount|floatformat:2 }}</td>
+                <td class="text-end fx-fw-semibold fx-text-green" style="padding:10px 8px">{{ ps.net_amount|floatformat:2 }}</td>
+                <td class="text-center" style="padding:10px 8px">
                     {% if ps.is_paid %}
-                        <i class="fas fa-check-circle" style="color:#059669"></i>
+                        <i class="fas fa-check-circle fx-text-green"></i>
                     {% else %}
-                        <i class="fas fa-clock" style="color:#f59e0b"></i>
+                        <i class="fas fa-clock fx-text-amber"></i>
                     {% endif %}
                 </td>
-                <td style="padding:10px 8px;text-align:center">
-                    <a href="{% url 'payroll:payslip_pdf' run.pk ps.user_id %}" style="color:var(--gold);text-decoration:none" title="{% trans 'Isplatna lista' %}">
+                <td class="text-center" style="padding:10px 8px">
+                    <a href="{% url 'payroll:payslip_pdf' run.pk ps.user_id %}" class="fx-no-underline fx-text-gold" title="{% trans 'Isplatna lista' %}">
                         <i class="fas fa-print"></i>
                     </a>
                 </td>
@@ -143,13 +125,13 @@
         </tbody>
     </table>
     {% else %}
-    <div style="text-align:center;padding:40px;background:#fff;border-radius:10px;color:#94a3b8">
+    <div class="text-center fx-rounded fx-text-dim fx-bg-card" style="padding:40px">
         <p>{% trans "Pokrenite obracun da biste generirali listicce." %}</p>
     </div>
     {% endif %}
 
-    <div style="text-align:center;margin-top:20px">
-        <a href="{% url 'payroll:list' %}" style="color:#64748b;text-decoration:none">
+    <div class="text-center mt-4">
+        <a href="{% url 'payroll:list' %}" class="fx-text-dim fx-no-underline">
             <i class="fas fa-arrow-left"></i> {% trans "Svi obracuni" %}
         </a>
     </div>

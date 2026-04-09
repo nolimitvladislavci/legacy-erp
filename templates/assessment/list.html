@@ -19,7 +19,7 @@
 .filter-bar input,.filter-bar select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem .7rem;font-size:.82rem;outline:none}
 .filter-bar input:focus,.filter-bar select:focus{border-color:var(--gold)}
 .filter-bar label{font-size:.72rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
-.btn-filter{background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;padding:.5rem 1.1rem;font-size:.82rem;font-weight:700;cursor:pointer;align-self:flex-end;min-height:36px}
+.btn-filter{background:var(--gold);color:var(--black);border:none;border-radius:6px;padding:.5rem 1.1rem;font-size:.82rem;font-weight:700;cursor:pointer;align-self:flex-end;min-height:36px}
 .btn-reset{color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;font-size:.78rem;cursor:pointer;align-self:flex-end}
 
 /* Assessment cards grid */
@@ -53,36 +53,10 @@
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="al-wrap">
-  <div class="al-header">
-    <div class="al-title">{% trans "📋 Terenske procjene / Nalazi" %}</div>
-    <a href="{% url 'assessment:new' %}" class="btn btn-gold" style="min-height:44px;display:flex;align-items:center;gap:.4rem">
-      {% trans "+ Nova procjena" %}
-    </a>
-  </div>
-
-  <!-- KPIs -->
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-val">{{ counts.total }}</div><div class="kpi-lbl">{% trans "Ukupno" %}</div></div>
-    <div class="kpi"><div class="kpi-val" style="color:var(--muted)">{{ counts.draft }}</div><div class="kpi-lbl">{% trans "Skice" %}</div></div>
-    <div class="kpi"><div class="kpi-val" style="color:var(--green)">{{ counts.completed }}</div><div class="kpi-lbl">{% trans "Završeno" %}</div></div>
-    <div class="kpi"><div class="kpi-val" style="color:var(--blue)">{{ counts.sent }}</div><div class="kpi-lbl">{% trans "Ponuda poslana" %}</div></div>
+<!-- lang: topbar -->
+    <div class="kpi"><div class="kpi-val fx-text-muted">{{ counts.draft }}</div><div class="kpi-lbl">{% trans "Skice" %}</div></div>
+    <div class="kpi"><div class="kpi-val fx-text-green">{{ counts.completed }}</div><div class="kpi-lbl">{% trans "Završeno" %}</div></div>
+    <div class="kpi"><div class="kpi-val fx-text-blue">{{ counts.sent }}</div><div class="kpi-lbl">{% trans "Ponuda poslana" %}</div></div>
   </div>
 
   <!-- Filters -->
@@ -132,7 +106,7 @@
           {% if a.created_by %}<span>·</span><span>{{ a.created_by.get_full_name|default:a.created_by.username }}</span>{% endif %}
           {% if a.photos.count %}<span>·</span><span>📷 {{ a.photos.count }}</span>{% endif %}
           {% if a.calculated_price_from %}
-          <span>·</span><span style="color:var(--gold)">{{ a.calculated_price_from|floatformat:0 }}–{{ a.calculated_price_to|floatformat:0 }} €</span>
+          <span>·</span><span class="fx-text-gold">{{ a.calculated_price_from|floatformat:0 }}–{{ a.calculated_price_to|floatformat:0 }} €</span>
           {% endif %}
         </div>
       </div>
@@ -147,7 +121,7 @@
   <div class="empty-state">
     <div class="icon">📋</div>
     <p>{% trans "Nema procjena za odabrane filtre." %}</p>
-    <a href="{% url 'assessment:new' %}" class="btn btn-gold" style="margin-top:1rem;display:inline-flex">{% trans "+ Nova procjena" %}</a>
+    <a href="{% url 'assessment:new' %}" class="btn btn-gold mt-3 d-inline-flex">{% trans "+ Nova procjena" %}</a>
   </div>
   {% endif %}
 </div>

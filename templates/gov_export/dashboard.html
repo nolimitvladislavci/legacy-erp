@@ -10,8 +10,8 @@
 .gx-stat .lbl{font-size:.7rem;text-transform:uppercase;color:var(--text-dim)}
 .gx-pipeline{display:flex;gap:4px;margin:.5rem 0}
 .gx-step{height:6px;border-radius:3px;flex:1}
-.gx-step.done{background:#22c55e}
-.gx-step.active{background:#f59e0b}
+.gx-step.done{background:var(--green)}
+.gx-step.active{background:var(--amber)}
 .gx-step.pending{background:var(--border)}
 .gx-card{background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
 @media(max-width:768px){.gx-stats{grid-template-columns:repeat(2,1fr)}}
@@ -20,38 +20,38 @@
 {% block content %}
 <div class="gx-container">
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+<div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-3 fx-mb-6">
   <div>
-    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)">
-      <i class="fas fa-university me-2" style="color:var(--gold)"></i>GovExport
+    <h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0">
+      <i class="fas fa-university me-2 fx-text-gold"></i>GovExport
     </h2>
-    <small style="color:var(--text-dim)">Univerzalni pipeline za državne institucije — potpisan, validiran, isporučen</small>
+    <small class="fx-text-dim">Univerzalni pipeline za državne institucije — potpisan, validiran, isporučen</small>
   </div>
 </div>
 
 <div class="gx-stats">
-  <div class="gx-stat"><div class="val" style="color:var(--gold)">{{ stats.total }}</div><div class="lbl">Ukupno</div></div>
-  <div class="gx-stat"><div class="val" style="color:#22c55e">{{ stats.accepted }}</div><div class="lbl">Prihvaćeno</div></div>
-  <div class="gx-stat"><div class="val" style="color:#f59e0b">{{ stats.pending }}</div><div class="lbl">U tijeku</div></div>
-  <div class="gx-stat"><div class="val" style="color:#ef4444">{{ stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="gx-stat"><div class="val fx-text-gold">{{ stats.total }}</div><div class="lbl">Ukupno</div></div>
+  <div class="gx-stat"><div class="val fx-text-green">{{ stats.accepted }}</div><div class="lbl">Prihvaćeno</div></div>
+  <div class="gx-stat"><div class="val fx-text-amber">{{ stats.pending }}</div><div class="lbl">U tijeku</div></div>
+  <div class="gx-stat"><div class="val fx-text-red">{{ stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
 </div>
 
 {% for export in exports %}
 <div class="gx-card">
-  <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:.5rem">
+  <div class="d-flex fx-flex-wrap justify-content-between fx-gap-2" style="align-items:start">
     <div>
-      <div style="font-weight:700;color:var(--text)">{{ export.document_type.name }}</div>
-      <div style="font-size:.8rem;color:var(--text-dim)">{{ export.reference_number }} | {{ export.institution.name }} | {{ export.period_start|date:"d.m.Y" }}—{{ export.period_end|date:"d.m.Y" }}</div>
+      <div class="fx-fw-bold fx-text-body">{{ export.document_type.name }}</div>
+      <div class="fx-fs-compact fx-text-dim">{{ export.reference_number }} | {{ export.institution.name }} | {{ export.period_start|date:"d.m.Y" }}—{{ export.period_end|date:"d.m.Y" }}</div>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center">
-      <span style="font-size:.72rem;padding:3px 10px;border-radius:6px;font-weight:700;{% if export.status == 'accepted' %}background:rgba(34,197,94,.15);color:#22c55e{% elif export.status == 'error' or export.status == 'rejected' %}background:rgba(239,68,68,.15);color:#ef4444{% else %}background:rgba(245,158,11,.15);color:#f59e0b{% endif %}">{{ export.get_status_display }}</span>
+    <div class="d-flex fx-gap-2 align-items-center">
+      <span class="fx-fs-sm fx-rounded-sm fx-fw-bold" style="padding:3px 10px;{% if export.status == 'accepted' %}background:rgba(34,197,94,.15);color:var(--green){% elif export.status == 'error' or export.status == 'rejected' %}background:rgba(239,68,68,.15);color:var(--red){% else %}background:rgba(245,158,11,.15);color:#f59e0b{% endif %}">{{ export.get_status_display }}</span>
       {% if export.status != 'accepted' %}
       <form method="POST" action="{% url 'dashboard' export.pk %}" class="d-inline">{% csrf_token %}
-        <button class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;border-radius:8px;font-weight:700;font-size:.75rem;border:none"><i class="fas fa-play me-1"></i>Pipeline</button>
+        <button class="btn btn-sm fx-text-dark fx-rounded fx-fw-bold fx-fs-caption fx-border-none fx-bg-gold"><i class="fas fa-play me-1"></i>Pipeline</button>
       </form>
       {% endif %}
       {% if export.xml_content %}
-      <a href="{% url 'dashboard' export.pk %}" class="btn btn-sm btn-outline-info" style="border-radius:8px;font-size:.75rem"><i class="fas fa-download me-1"></i>XML</a>
+      <a href="{% url 'dashboard' export.pk %}" class="btn btn-sm btn-outline-info fx-rounded fx-fs-caption"><i class="fas fa-download me-1"></i>XML</a>
       {% endif %}
     </div>
   </div>
@@ -62,18 +62,18 @@
     <div class="gx-step {% if export.pipeline_progress >= 80 %}done{% elif export.pipeline_progress >= 60 %}active{% else %}pending{% endif %}" title="Send"></div>
     <div class="gx-step {% if export.pipeline_progress >= 100 %}done{% elif export.pipeline_progress >= 80 %}active{% else %}pending{% endif %}" title="Confirm"></div>
   </div>
-  {% if export.xml_size %}<div style="font-size:.72rem;color:var(--text-dim)">{{ export.xml_size }} bytes | SHA-256: {{ export.xml_hash|truncatechars:24 }}{% if export.is_signed %} | ✍️ {{ export.signature_method }}{% endif %}{% if export.confirmation_id %} | 📋 {{ export.confirmation_id }}{% endif %}</div>{% endif %}
+  {% if export.xml_size %}<div class="fx-fs-sm fx-text-dim">{{ export.xml_size }} bytes | SHA-256: {{ export.xml_hash|truncatechars:24 }}{% if export.is_signed %} | ✍️ {{ export.signature_method }}{% endif %}{% if export.confirmation_id %} | 📋 {{ export.confirmation_id }}{% endif %}</div>{% endif %}
 </div>
 {% empty %}
-<div style="text-align:center;padding:3rem;color:var(--text-dim)">
-  <i class="fas fa-university" style="font-size:3rem;opacity:.2;display:block;margin-bottom:1rem"></i>
+<div class="text-center fx-text-dim fx-p-7">
+  <i class="fas fa-university fx-fs-hero d-block mb-3" style="opacity:.2"></i>
   <h5>Nema exporta</h5>
   <p>GovExport pipeline spreman. Dodajte institucije i tipove dokumenata u Admin-u.</p>
 </div>
 {% endfor %}
 
-<div style="margin-top:2rem;padding:1rem;background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:12px;font-size:.8rem;color:var(--text-dim)">
-  <strong style="color:var(--gold)"><i class="fas fa-lightbulb me-1"></i>Pipeline logika:</strong>
+<div class="fx-rounded fx-fs-compact fx-text-dim fx-p-4 fx-b" style="margin-top:2rem;background:var(--surface,var(--bg-card))">
+  <strong class="fx-text-gold"><i class="fas fa-lightbulb me-1"></i>Pipeline logika:</strong>
   Generate XML → Validate (XSD) → Sign (XAdES-BES) → Send → Confirm.
   Isti protokol kao fiskalizacija računa — potpisan, hashiran, auditiran.
 </div>

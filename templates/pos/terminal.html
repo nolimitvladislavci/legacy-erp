@@ -21,14 +21,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 {% endblock %}
 {% block content %}
 <div class="page">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-    <div class="breadcrumb" style="margin-bottom:0"><a href="{% url 'pos:dashboard' %}">{% trans "Terminali" %}</a> / {{ terminal.name }}</div>
-    <a href="{% url 'pos:dashboard' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:6px">← POS</a>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="breadcrumb mb-0"><a href="{% url 'pos:dashboard' %}">{% trans "Terminali" %}</a> / {{ terminal.name }}</div>
+    <a href="{% url 'pos:dashboard' %}" class="fx-fs-base fx-no-underline fx-rounded-sm fx-text-gold fx-b" style="padding:6px 12px">← POS</a>
   </div>
   <div class="page-header">
     <div>
-      <div class="page-title">{{ terminal.name }} <span style="color:var(--muted);font-weight:400;font-size:.85rem">({{ terminal.terminal_code }})</span></div>
-      {% if terminal.description %}<div style="color:var(--muted);font-size:.875rem;margin-top:.25rem">{{ terminal.description }}</div>{% endif %}
+      <div class="page-title">{{ terminal.name }} <span class="fx-fw-normal fx-fs-base fx-text-muted">({{ terminal.terminal_code }})</span></div>
+      {% if terminal.description %}<div class="fx-text-muted fx-mt-2" style="font-size:.875rem">{{ terminal.description }}</div>{% endif %}
     </div>
     {% if active_session %}
       {% if terminal.pos_type == "quick" %}
@@ -42,30 +42,30 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   {% if not active_session %}
   <div class="open-form">
-    <div style="font-weight:600;margin-bottom:.5rem;font-size:1.05rem;color:var(--gold)">{% trans "Početak radnog vremena" %}</div>
-    <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">{% trans "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu." %}</div>
+    <div class="fx-fw-semibold mb-2 fx-text-gold" style="font-size:1.05rem">{% trans "Početak radnog vremena" %}</div>
+    <div class="fx-fs-note fx-text-muted mb-3">{% trans "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu." %}</div>
     <form method="post" action="{% url 'pos:open_session' terminal.id %}">{% csrf_token %}
-      <div style="margin-bottom:1rem">
-        <label style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:.35rem">{% trans "Početna gotovina (€)" %}</label>
+      <div class="mb-3">
+        <label class="fx-fs-caption fx-text-muted d-block fx-uppercase" style="letter-spacing:.05em;margin-bottom:.35rem">{% trans "Početna gotovina (€)" %}</label>
         <input type="number" name="opening_cash" value="0" min="0" step="0.01"
-               style="width:100%;max-width:250px;padding:12px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:1.3rem;font-weight:700;text-align:center">
-        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">{% trans "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije." %}</div>
+               class="fx-w-full fx-rounded fx-fs-3xl fx-fw-bold text-center fx-text-gold fx-p-12 fx-bg-dark fx-b" style="max-width:250px">
+        <div class="fx-fs-caption fx-text-muted mt-1">{% trans "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije." %}</div>
       </div>
-      <button type="submit" class="btn btn-gold" style="width:100%;max-width:250px;padding:14px;font-size:1rem"
+      <button type="submit" class="btn btn-gold fx-w-full fx-fs-lg" style="max-width:250px;padding:14px"
               onclick="var cash=this.form.opening_cash.value; if(parseFloat(cash)===0||!cash){return confirm('Blagajna je prazna (0 EUR).\nAko imate gotovinu u ladici, unesite iznos prije otvaranja.\n\nPotvrdite: blagajna je zaista prazna?')}">
         {% trans "Otvori blagajnu →" %}
       </button>
     </form>
   </div>
   {% else %}
-  <div style="background:rgba(76,175,125,.08);border:1px solid var(--green);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between">
-    <div><span class="badge badge-open" style="margin-right:.5rem">{% trans "AKTIVNA SMJENA" %}</span>
-    #{{ active_session.session_number }} &mdash; {{ active_session.opened_at|date:"d.m.Y H:i" }} &mdash; <strong style="color:var(--green)">&euro;{{ active_session.total_sales|floatformat:2 }}</strong></div>
+  <div class="fx-rounded d-flex align-items-center justify-content-between fx-mb-6" style="background:rgba(76,175,125,.08);border:1px solid var(--green);padding:1rem 1.25rem">
+    <div><span class="badge badge-open fx-mr-2">{% trans "AKTIVNA SMJENA" %}</span>
+    #{{ active_session.session_number }} &mdash; {{ active_session.opened_at|date:"d.m.Y H:i" }} &mdash; <strong class="fx-text-green">&euro;{{ active_session.total_sales|floatformat:2 }}</strong></div>
     <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold btn-sm">{% trans "Blagajna" %}</a>
   </div>
   {% endif %}
-  <div class="card" style="padding:1rem">
-    <div style="font-weight:600;margin-bottom:.75rem;font-size:.875rem">{% trans "Zadnje smjene" %}</div>
+  <div class="card fx-p-4">
+    <div class="fx-fw-semibold fx-mb-4" style="font-size:.875rem">{% trans "Zadnje smjene" %}</div>
     {% if recent_sessions %}
     <table>
       <thead><tr><th>#</th><th>{% trans "Otvorena" %}</th><th>{% trans "Zatvorena" %}</th><th>{% trans "Prihod" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
@@ -75,14 +75,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <td><strong>#{{ s.session_number }}</strong></td>
         <td>{{ s.opened_at|date:"d.m H:i" }}</td>
         <td>{{ s.closed_at|date:"d.m H:i"|default:"--" }}</td>
-        <td style="color:var(--green)">&euro;{{ s.total_sales|floatformat:2 }}</td>
+        <td class="fx-text-green">&euro;{{ s.total_sales|floatformat:2 }}</td>
         <td><span class="badge badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
         <td><a href="{% url 'pos:session_detail' s.id %}" class="btn btn-ghost btn-sm">{% trans "Pregledaj" %}</a></td>
       </tr>
       {% endfor %}
       </tbody>
     </table>
-    {% else %}<div style="color:var(--muted);text-align:center;padding:1.5rem">{% trans "Nema smjena." %}</div>{% endif %}
+    {% else %}<div class="text-center fx-text-muted fx-p-5">{% trans "Nema smjena." %}</div>{% endif %}
   </div>
 </div>
 {% endblock %}

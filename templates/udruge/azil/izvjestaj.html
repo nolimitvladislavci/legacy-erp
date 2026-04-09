@@ -9,15 +9,15 @@
 }
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <h4 style="margin:0;color:var(--gold)">Mjesecni izvjestaji azila</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fx-text-gold fx-m-0">Mjesecni izvjestaji azila</h4>
   <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
 </div>
 
-<div class="card" style="padding:1rem">
-  <p style="color:#999;font-size:.85rem;margin-bottom:1rem">Sluzbeni mjesecni izvjestaj za JLS (Jedinicu lokalne samouprave). Generira se automatski 1. u mjesecu.</p>
-  <div style="overflow-x:auto">
-    <table style="width:100%">
+<div class="card fx-p-4">
+  <p class="fx-text-muted fx-fs-base mb-3">Sluzbeni mjesecni izvjestaj za JLS (Jedinicu lokalne samouprave). Generira se automatski 1. u mjesecu.</p>
+  <div class="fx-scroll-x">
+    <table class="fx-w-full">
       <thead>
         <tr>
           <th>Razdoblje</th>
@@ -38,7 +38,7 @@
         <tr>
           <td><strong>{{ i.mjesec|stringformat:"02d" }}/{{ i.godina }}</strong></td>
           <td>{{ i.primljeno }}</td>
-          <td style="color:#2ecc71">{{ i.udomljeno }}</td>
+          <td class="fx-text-green">{{ i.udomljeno }}</td>
           <td>{{ i.vráceno_vlasniku }}</td>
           <td>{{ i.uginulo }}</td>
           <td>{{ i.eutanazirano }}</td>
@@ -48,14 +48,14 @@
           <td>{{ i.trosak_ostalo_eur }}</td>
           <td>
             {% if i.pdf_file %}
-            <a href="{{ i.pdf_file.url }}" target="_blank" style="color:var(--gold)">PDF</a>
+            <a href="{{ i.pdf_file.url }}" target="_blank" class="fx-text-gold">PDF</a>
             {% else %}
-            <span style="color:#666">-</span>
+            <span class="fx-text-dim">-</span>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="11" style="text-align:center;color:#666;padding:2rem">Nema generiranih izvjestaja. Izvjestaj se generira automatski 1. u mjesecu.</td></tr>
+        <tr><td colspan="11" class="text-center fx-text-dim fx-p-6">Nema generiranih izvjestaja. Izvjestaj se generira automatski 1. u mjesecu.</td></tr>
         {% endfor %}
       </tbody>
     </table>

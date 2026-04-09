@@ -11,11 +11,11 @@
 </div>
 
 <!-- Filters -->
-<div class="stat-card mb-3">
+<div class="fenix-filters">
     <form method="get" class="d-flex gap-2 flex-wrap align-items-end">
         <div>
-            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#64748b">Modul</label>
-            <select name="module" class="form-select form-select-sm" style="font-size:0.78rem;min-width:150px">
+            <label class="fx-fs-tiny fx-fw-bold fx-text-muted fx-uppercase">Modul</label>
+            <select name="module" class="form-select form-select-sm fx-fs-body-sm" style="min-width:150px">
                 <option value="">Svi moduli</option>
                 {% for code, label in module_choices %}
                 <option value="{{ code }}" {% if module_filter == code %}selected{% endif %}>{{ label }}</option>
@@ -23,8 +23,8 @@
             </select>
         </div>
         <div>
-            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#64748b">Ishod</label>
-            <select name="outcome" class="form-select form-select-sm" style="font-size:0.78rem;min-width:150px">
+            <label class="fx-fs-tiny fx-fw-bold fx-text-muted fx-uppercase">Ishod</label>
+            <select name="outcome" class="form-select form-select-sm fx-fs-body-sm" style="min-width:150px">
                 <option value="">Svi ishodi</option>
                 {% for code, label in outcome_choices %}
                 <option value="{{ code }}" {% if outcome_filter == code %}selected{% endif %}>{{ label }}</option>
@@ -35,7 +35,7 @@
     </form>
 </div>
 
-<div class="stat-card">
+<div class="fenix-stat">
     <div class="table-responsive">
         <table class="table table-sm mb-0" style="font-size:0.76rem">
             <thead>
@@ -52,21 +52,21 @@
             <tbody>
             {% for log in logs %}
             <tr>
-                <td style="white-space:nowrap">{{ log.timestamp|date:"d.m H:i:s" }}</td>
+                <td class="text-nowrap">{{ log.timestamp|date:"d.m H:i:s" }}</td>
                 <td><code>{{ log.module }}</code></td>
                 <td>{{ log.action_type }}</td>
                 <td>
-                    {% if log.access_level == 0 %}<span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.6rem">OFF</span>
-                    {% elif log.access_level == 1 %}<span class="badge" style="background:#dbeafe;color:#1d4ed8;font-size:0.6rem">READ</span>
-                    {% elif log.access_level == 2 %}<span class="badge" style="background:#fef3c7;color:#b45309;font-size:0.6rem">ASSIST</span>
-                    {% elif log.access_level == 3 %}<span class="badge" style="background:#d1fae5;color:#047857;font-size:0.6rem">AUTO</span>
+                    {% if log.access_level == 0 %}<span class="badge fx-text-dim fx-fs-2xs fx-bg-surface3">OFF</span>
+                    {% elif log.access_level == 1 %}<span class="badge fx-fs-2xs fx-text-blue fx-bg-blue-dim">READ</span>
+                    {% elif log.access_level == 2 %}<span class="badge fx-fs-2xs fx-bg-amber-dim" style="color:#b45309">ASSIST</span>
+                    {% elif log.access_level == 3 %}<span class="badge fx-fs-2xs" style="background:#d1fae5;color:#047857">AUTO</span>
                     {% endif %}
                 </td>
                 <td>
-                    {% if log.outcome == 'allowed' %}<span class="badge bg-success" style="font-size:0.6rem">✓</span>
-                    {% elif log.outcome == 'blocked' %}<span class="badge bg-danger" style="font-size:0.6rem">✕</span>
-                    {% elif log.outcome == 'queued' %}<span class="badge bg-warning text-dark" style="font-size:0.6rem">⏳</span>
-                    {% else %}<span class="badge bg-secondary" style="font-size:0.6rem">{{ log.outcome }}</span>{% endif %}
+                    {% if log.outcome == 'allowed' %}<span class="fenix-badge fenix-badge-success fx-fs-2xs">✓</span>
+                    {% elif log.outcome == 'blocked' %}<span class="fenix-badge fenix-badge-danger fx-fs-2xs">✕</span>
+                    {% elif log.outcome == 'queued' %}<span class="fenix-badge fenix-badge-warning fx-fs-2xs">⏳</span>
+                    {% else %}<span class="fenix-badge fenix-badge-muted fx-fs-2xs">{{ log.outcome }}</span>{% endif %}
                 </td>
                 <td class="d-none d-md-table-cell">{{ log.company.name|default:"-" }}</td>
                 <td class="d-none d-md-table-cell">{{ log.user|default:"-" }}</td>

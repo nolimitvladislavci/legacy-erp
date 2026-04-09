@@ -13,13 +13,13 @@ body { font-family:'Barlow',sans-serif; background:var(--black); color:#e0e0e0; 
 .container { max-width:1100px; margin:0 auto; padding:2rem 1.5rem; }
 .header { text-align:center; padding:3rem 1rem; border-bottom:1px solid var(--border); margin-bottom:3rem; }
 .header h1 { font-family:'Cormorant Garamond',serif; font-size:2.5rem; color:var(--gold); margin-bottom:.5rem; }
-.header .sub { color:#888; font-size:1rem; }
+.header .sub { color:var(--text-muted); font-size:1rem; }
 .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
 .section { margin-bottom:3rem; }
 .section-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--gold); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); }
-.section-title .count { font-size:1rem; color:#888; font-weight:400; }
+.section-title .count { font-size:1rem; color:var(--text-muted); font-weight:400; }
 table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.88rem; }
-th { text-align:left; padding:8px 10px; background:#111; color:var(--gold); font-size:.75rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); position:sticky; top:0; }
+th { text-align:left; padding:8px 10px; background:var(--bg-card); color:var(--gold); font-size:.75rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); position:sticky; top:0; }
 td { padding:8px 10px; border-bottom:1px solid var(--border); }
 tr:hover { background:rgba(201,168,76,.03); }
 .num { text-align:right; font-family:'Barlow',monospace; }
@@ -32,7 +32,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:1rem 0; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem; text-align:center; }
 .card .num-big { font-size:1.8rem; font-weight:700; color:var(--gold); font-family:'Cormorant Garamond',serif; }
-.card .label { color:#888; font-size:.75rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
+.card .label { color:var(--text-muted); font-size:.75rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
 .card.green-border { border-color:rgba(34,197,94,.3); }
 .card.green-border .num-big { color:var(--green); }
 .card.purple-border { border-color:rgba(168,85,247,.3); }
@@ -41,39 +41,39 @@ tr:hover { background:rgba(201,168,76,.03); }
 .scenario { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin:1.5rem 0; }
 .scenario.gold { border-color:var(--gold); }
 .scenario h3 { color:var(--gold); font-size:1.1rem; margin-bottom:.75rem; }
-.scenario p { color:#bbb; margin-bottom:.5rem; font-size:.9rem; }
+.scenario p { color:var(--text-muted); margin-bottom:.5rem; font-size:.9rem; }
 .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
 .tag-full { background:rgba(34,197,94,.15); color:var(--green); }
 .tag-partial { background:rgba(249,115,22,.15); color:var(--orange); }
 .tag-none { background:rgba(239,68,68,.15); color:var(--red); }
 .tag-new { background:rgba(168,85,247,.15); color:var(--purple); }
-.progress-bar { height:6px; background:#222; border-radius:3px; overflow:hidden; margin:4px 0; }
+.progress-bar { height:6px; background:var(--surface); border-radius:3px; overflow:hidden; margin:4px 0; }
 .progress-fill { height:100%; border-radius:3px; }
 .sector-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin:1rem 0; display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 .sector-card:hover { border-color:rgba(201,168,76,.3); }
-.sector-card h4 { color:#fff; font-size:1rem; margin-bottom:.5rem; grid-column:1/-1; }
-.sector-card .meta { font-size:.85rem; color:#bbb; }
+.sector-card h4 { color:var(--white); font-size:1rem; margin-bottom:.5rem; grid-column:1/-1; }
+.sector-card .meta { font-size:.85rem; color:var(--text-muted); }
 .sector-card .meta strong { color:var(--gold); }
 .key-metric { background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02)); border:2px solid var(--gold); border-radius:14px; padding:2rem; text-align:center; margin:2rem 0; }
 .key-metric .big { font-family:'Cormorant Garamond',serif; font-size:2.5rem; font-weight:700; color:var(--gold); }
-.key-metric .desc { color:#bbb; font-size:.95rem; margin-top:.5rem; }
+.key-metric .desc { color:var(--text-muted); font-size:.95rem; margin-top:.5rem; }
 .horizon { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; margin:1.5rem 0; }
 .horizon-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
 .horizon-card h4 { color:var(--gold); margin-bottom:.75rem; font-size:1rem; }
 .horizon-card ul { list-style:none; padding:0; }
-.horizon-card li { padding:4px 0; font-size:.88rem; color:#bbb; }
+.horizon-card li { padding:4px 0; font-size:.88rem; color:var(--text-muted); }
 .horizon-card li::before { content:'› '; color:var(--gold); font-weight:700; }
 .domek-compare { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin:1.5rem 0; }
 .domek-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
 .domek-card.winner { border-color:var(--gold); }
 .domek-card h4 { margin-bottom:1rem; font-size:1rem; }
 .domek-card ul { list-style:none; padding:0; }
-.domek-card li { padding:3px 0; font-size:.85rem; color:#bbb; }
+.domek-card li { padding:3px 0; font-size:.85rem; color:var(--text-muted); }
 .domek-card li.pro::before { content:'+ '; color:var(--green); font-weight:700; }
 .domek-card li.con::before { content:'- '; color:var(--red); font-weight:700; }
-.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:#555; font-size:.85rem; }
+.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:var(--text-dim); font-size:.85rem; }
 .tabs { display:flex; gap:4px; margin-bottom:1.5rem; flex-wrap:wrap; }
-.tab { padding:8px 16px; border:1px solid var(--border); border-radius:8px; background:transparent; color:#888; cursor:pointer; font-size:.85rem; font-family:'Barlow',sans-serif; transition:all .2s; }
+.tab { padding:8px 16px; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:.85rem; font-family:'Barlow',sans-serif; transition:all .2s; }
 .tab:hover { border-color:var(--gold); color:var(--gold); }
 .tab.active { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
 .tab-content { display:none; }
@@ -95,7 +95,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 <div class="header">
   <h1>Tržišna Analiza — Hrvatska 2026</h1>
   <div class="sub">LIMIT Connect — Globalna potražnja, nepokrivenost, nove prilike</div>
-  <div style="margin-top:.75rem"><span class="badge">Interno — Strateški dokument</span></div>
+  <div class="fx-mt-4"><span class="badge">Interno — Strateški dokument</span></div>
 </div>
 
 <!-- EXECUTIVE SUMMARY -->
@@ -109,7 +109,7 @@ tr:hover { background:rgba(201,168,76,.03); }
     <div class="card gold-border"><div class="num-big">~70K</div><div class="label">Realistično osvojivih</div></div>
     <div class="card green-border"><div class="num-big">2,76M€</div><div class="label">ARR potencijal</div></div>
   </div>
-  <p style="color:#888;font-size:.88rem;margin-top:1rem;text-align:center">Samo 38,6% HR MSP-ova ima osnovnu digitalnu razinu. EU cilj je 75% do 2030. — ogroman prostor za rast.</p>
+  <p class="fx-text-muted fx-fs-body text-center mt-3">Samo 38,6% HR MSP-ova ima osnovnu digitalnu razinu. EU cilj je 75% do 2030. — ogroman prostor za rast.</p>
 </div>
 
 <!-- SEKTORI -->
@@ -195,7 +195,7 @@ tr:hover { background:rgba(201,168,76,.03); }
       <tr><td>Privatni domovi</td><td class="num">~100</td><td>d.o.o. / obrt</td><td class="num">700 – 1.700€</td></tr>
       <tr><td>Obiteljski domovi</td><td class="num">~300</td><td>Fizičke osobe</td><td class="num">500 – 1.000€</td></tr>
       <tr><td>Udomiteljske obitelji</td><td class="num">~47</td><td>Fizičke osobe</td><td class="num">HZZO plaća</td></tr>
-      <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~502</td><td></td><td class="num">avg ~650€</td></tr>
+      <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~502</td><td></td><td class="num">avg ~650€</td></tr>
     </table>
   </div>
 
@@ -216,11 +216,11 @@ tr:hover { background:rgba(201,168,76,.03); }
     </table>
   </div>
 
-  <h3 style="color:#fff;margin:1.5rem 0 1rem">Konkurencija: DOMEK vs LIMIT Connect</h3>
+  <h3 class="fx-text-white" style="margin:1.5rem 0 1rem">Konkurencija: DOMEK vs LIMIT Connect</h3>
 
   <div class="domek-compare">
     <div class="domek-card">
-      <h4 style="color:#888">DOMEK <span style="font-size:.75rem;color:#555">(jedini HR konkurent)</span></h4>
+      <h4 class="fx-text-muted">DOMEK <span class="fx-fs-caption fx-text-dim">(jedini HR konkurent)</span></h4>
       <ul>
         <li class="pro">7 specijaliziranih modula (korisnici, lijekovi, prehrana...)</li>
         <li class="pro">15+ godina na tržištu, poznati u sektoru</li>
@@ -234,7 +234,7 @@ tr:hover { background:rgba(201,168,76,.03); }
       </ul>
     </div>
     <div class="domek-card winner">
-      <h4 style="color:var(--gold)">LIMIT Connect <span style="font-size:.75rem;color:#888">(potencijal)</span></h4>
+      <h4 class="fx-text-gold">LIMIT Connect <span class="fx-fs-caption fx-text-muted">(potencijal)</span></h4>
       <ul>
         <li class="pro">Web-based — pristup s bilo kojeg uređaja</li>
         <li class="pro">Neograničen broj korisnika po licenci</li>
@@ -263,7 +263,7 @@ tr:hover { background:rgba(201,168,76,.03); }
       <tr><td>Tehnička služba</td><td>Održavanje, inventar, nabava</td><td>Maintenance + Inventory</td><td><span class="tag tag-full">90% GOTOVO</span></td></tr>
       <tr><td>Ambulanta</td><td>Medicinski pregledi, triage</td><td>—</td><td><span class="tag tag-new">NOVI</span></td></tr>
     </table>
-    <p style="color:#888;font-size:.85rem;margin-top:.75rem"><strong>Procjena:</strong> ~60% funkcionalnosti već postoji. Preostaje ~3-4 tjedna za MVP "Socijalna skrb" modul s fokusom na Korisnici + Prehrana + Lijekovi.</p>
+    <p class="fx-text-muted fx-fs-base fx-mt-4"><strong>Procjena:</strong> ~60% funkcionalnosti već postoji. Preostaje ~3-4 tjedna za MVP "Socijalna skrb" modul s fokusom na Korisnici + Prehrana + Lijekovi.</p>
   </div>
 
   <div class="key-metric">
@@ -275,7 +275,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 <!-- SLIČNI SEKTORI -->
 <div class="section">
   <h2 class="section-title">Slični sektori — Ista arhitektura</h2>
-  <p style="color:#888;margin-bottom:1rem">Modul "Socijalna skrb" se može prilagoditi za srodne ustanove s minimalnim promjenama:</p>
+  <p class="fx-text-muted mb-3">Modul "Socijalna skrb" se može prilagoditi za srodne ustanove s minimalnim promjenama:</p>
 
   <table>
     <tr><th>Ustanova</th><th class="num">Broj u HR</th><th>Specifičnost</th><th>Što dijeli s domovima</th><th class="num">ARPU</th></tr>
@@ -284,10 +284,10 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><td><strong>Centri za socijalnu skrb</strong></td><td class="num">80</td><td>Javne ustanove, MRSSP</td><td>Evidencija korisnika, izvještavanje</td><td class="num">200€</td></tr>
     <tr><td><strong>Hospiciji / palijativna skrb</strong></td><td class="num">~15</td><td>Medicinska njega</td><td>Lijekovi, kadrovi, evidencija</td><td class="num">400€</td></tr>
     <tr><td><strong>Privatne bolnice (manje)</strong></td><td class="num">~50</td><td>Specijalizirane klinike</td><td>Lijekovi, kadrovska, financije</td><td class="num">600€</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO srodnih</td><td class="num highlight">~255</td><td></td><td></td><td class="num">avg 380€</td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO srodnih</td><td class="num highlight">~255</td><td></td><td></td><td class="num">avg 380€</td></tr>
   </table>
 
-  <p style="color:var(--gold);font-size:.88rem;margin-top:.75rem"><strong>Ukupni potencijal sektora skrbi:</strong> (502 domova + 255 srodnih) × avg 420€/mj = <strong>~3,8 mil € ARR</strong></p>
+  <p class="fx-fs-body fx-text-gold fx-mt-4"><strong>Ukupni potencijal sektora skrbi:</strong> (502 domova + 255 srodnih) × avg 420€/mj = <strong>~3,8 mil € ARR</strong></p>
 </div>
 
 <!-- SEOSKI / PLANINSKI / MORSKI -->
@@ -305,7 +305,7 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><td><strong>EU fondovi</strong></td><td class="num green">do 200K€</td><td class="num">djelomično</td><td class="num red">ograničeno</td></tr>
     <tr><td><strong>LC pokrivenost</strong></td><td><span class="tag tag-full">95%</span></td><td><span class="tag tag-partial">85%</span></td><td><span class="tag tag-partial">90%</span></td></tr>
     <tr><td><strong>Top pain point</strong></td><td>Nula softvera, izolacija</td><td>Off-grid, infrastruktura</td><td>Sezonalnost, 2/3 suglasnost</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>Prioritet za LC</td><td class="green">VISOK — greenfield</td><td class="blue">SREDNJI</td><td class="orange">NIZAK — konkurencija</td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>Prioritet za LC</td><td class="green">VISOK — greenfield</td><td class="blue">SREDNJI</td><td class="orange">NIZAK — konkurencija</td></tr>
   </table>
 </div>
 
@@ -315,34 +315,34 @@ tr:hover { background:rgba(201,168,76,.03); }
 
   <div class="horizon">
     <div class="horizon-card" style="border-color:var(--green)">
-      <h4 style="color:var(--green)">H1: Low-Hanging Fruit <span style="color:#888;font-size:.8rem">sad — Q3 2026</span></h4>
+      <h4 class="fx-text-green">H1: Low-Hanging Fruit <span class="fx-text-muted fx-fs-compact">sad — Q3 2026</span></h4>
       <ul>
         <li><strong>Beauty/frizeri</strong> (10.800) — 90% pokriveno, samo marketing</li>
         <li><strong>Fitness</strong> (1.200) — aktivirati dormant modul</li>
         <li><strong>Paušalci</strong> (133K) — freemium gateway</li>
         <li><strong>Seoski turizam OPG</strong> (1.144) — greenfield, EU fondovi</li>
       </ul>
-      <p style="color:var(--green);font-size:.85rem;margin-top:.75rem"><strong>Procjena: +3.000€ MRR</strong></p>
+      <p class="fx-fs-base fx-text-green fx-mt-4"><strong>Procjena: +3.000€ MRR</strong></p>
     </div>
     <div class="horizon-card" style="border-color:var(--gold)">
-      <h4>H2: Premium niše <span style="color:#888;font-size:.8rem">Q4 2026 — Q2 2027</span></h4>
+      <h4>H2: Premium niše <span class="fx-text-muted fx-fs-compact">Q4 2026 — Q2 2027</span></h4>
       <ul>
         <li><strong>Domovi za starije</strong> (502) — ARPU 500€, novi modul</li>
         <li><strong>Veterina</strong> (900) — proširiti Livestock</li>
         <li><strong>Građevinarstvo</strong> (22K) — situacije + normativi</li>
         <li><strong>Digitalni posrednik</strong> — certifikacija, transakcijski prihod</li>
       </ul>
-      <p style="color:var(--gold);font-size:.85rem;margin-top:.75rem"><strong>Procjena: +25.000€ MRR</strong></p>
+      <p class="fx-fs-base fx-text-gold fx-mt-4"><strong>Procjena: +25.000€ MRR</strong></p>
     </div>
     <div class="horizon-card" style="border-color:var(--purple)">
-      <h4 style="color:var(--purple)">H3: Vertikalna ekspanzija <span style="color:#888;font-size:.8rem">2027+</span></h4>
+      <h4 class="fx-text-purple">H3: Vertikalna ekspanzija <span class="fx-text-muted fx-fs-compact">2027+</span></h4>
       <ul>
         <li><strong>Privatno zdravstvo</strong> (5K) — HZZO integracija</li>
         <li><strong>Vrtići/škole</strong> (1.500) — Edukacija modul</li>
         <li><strong>Ustanove za invalide</strong> (80) — proširenje Soc. skrb</li>
         <li><strong>EU ekspanzija</strong> — AT, SI, DE tržišta</li>
       </ul>
-      <p style="color:var(--purple);font-size:.85rem;margin-top:.75rem"><strong>Cilj: 150K€+ ARR</strong></p>
+      <p class="fx-fs-base fx-text-purple fx-mt-4"><strong>Cilj: 150K€+ ARR</strong></p>
     </div>
   </div>
 </div>
@@ -363,7 +363,7 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><td>Računovođe (distributor)</td><td class="num">30</td><td class="num">350€</td><td class="num">10.500€</td><td class="num">126.000€</td></tr>
     <tr><td>OPG + seoski turizam</td><td class="num">300</td><td class="num">15€</td><td class="num">4.500€</td><td class="num">54.000€</td></tr>
     <tr><td>Ostali (vet, nekretnine, IT)</td><td class="num">300</td><td class="num">50€</td><td class="num">15.000€</td><td class="num">180.000€</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~10.705</td><td class="num"></td><td class="num highlight">~251.500€</td><td class="num highlight">~3.018.000€</td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~10.705</td><td class="num"></td><td class="num highlight">~251.500€</td><td class="num highlight">~3.018.000€</td></tr>
   </table>
 
   <div class="key-metric">
@@ -374,7 +374,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 
 <div class="footer">
   <p>&copy; 2026 LIMIT Connect &middot; Konjik d.o.o. &middot; Interno — Strateški dokument</p>
-  <p style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:.5rem">550.000 subjekata. 79 modula. Jedna platforma.</p>
+  <p class="fx-text-gold mt-2" style="font-family:'Cormorant Garamond',serif;font-style:italic">550.000 subjekata. 79 modula. Jedna platforma.</p>
 </div>
 
 </div>

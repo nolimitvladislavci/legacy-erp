@@ -8,36 +8,36 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
-body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;margin:0;color:#e2e8f0}
+body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;margin:0;color:var(--text)}
 .reg-wrap{max-width:600px;margin:0 auto;padding:40px 20px}
 .reg-card{background:rgba(30,41,59,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px;box-shadow:0 25px 50px -12px rgba(0,0,0,.5)}
-.logo{text-align:center;font-weight:800;font-size:1.6rem;margin-bottom:4px;color:#fff}
-.logo span{color:#c9a84c}
-.subtitle{text-align:center;color:#64748b;font-size:.82rem;margin-bottom:24px}
+.logo{text-align:center;font-weight:800;font-size:1.6rem;margin-bottom:4px;color:var(--white)}
+.logo span{color:var(--gold)}
+.subtitle{text-align:center;color:var(--text-dim);font-size:.82rem;margin-bottom:24px}
 .step-bar{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
 .step-dot{width:40px;height:4px;border-radius:2px;background:#334155}
-.step-dot.active{background:#c9a84c}
-.step-dot.done{background:#22c55e}
-.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#c9a84c;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
-.fc{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);color:#fff;padding:10px 14px;border-radius:8px;width:100%;font-size:.9rem}
-.fc:focus{border-color:#c9a84c;box-shadow:0 0 0 .2rem rgba(201,168,76,.25);outline:none;background:rgba(15,23,42,.8)}
-.fl{color:#94a3b8;font-size:.82rem;display:block;margin-bottom:4px}
+.step-dot.active{background:var(--gold)}
+.step-dot.done{background:var(--green)}
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin:20px 0 12px;display:flex;align-items:center;gap:8px}
+.fc{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);color:var(--white);padding:10px 14px;border-radius:8px;width:100%;font-size:.9rem}
+.fc:focus{border-color:var(--gold);box-shadow:0 0 0 .2rem rgba(201,168,76,.25);outline:none;background:rgba(15,23,42,.8)}
+.fl{color:var(--text-muted);font-size:.82rem;display:block;margin-bottom:4px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.err{color:#f87171;font-size:.78rem;margin-top:2px}
-.err a{color:#c9a84c}
-.btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:14px;border-radius:10px;width:100%;font-size:1rem;cursor:pointer;transition:all .3s;margin-top:8px}
+.err{color:var(--red);font-size:.78rem;margin-top:2px}
+.err a{color:var(--gold)}
+.btn-gold{background:var(--gold);border:none;color:var(--text);font-weight:700;padding:14px;border-radius:10px;width:100%;font-size:1rem;cursor:pointer;transition:all .3s;margin-top:8px}
 .btn-gold:hover{background:#e8c96a;transform:translateY(-2px)}
 .oib-result{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 14px;margin:8px 0;display:none}
 .oib-result.show{display:block}
-.oib-result .name{font-weight:700;color:#22c55e}
-.oib-result .addr{font-size:.82rem;color:#94a3b8}
+.oib-result .name{font-weight:700;color:var(--green)}
+.oib-result .addr{font-size:.82rem;color:var(--text-muted)}
 .pin-row{display:flex;gap:8px;justify-content:center;margin:8px 0}
-.pin-row input{width:44px;height:52px;text-align:center;font-size:1.4rem;font-weight:800;background:rgba(15,23,42,.6);border:2px solid #334155;border-radius:10px;color:#c9a84c;outline:none}
-.pin-row input:focus{border-color:#c9a84c}
+.pin-row input{width:44px;height:52px;text-align:center;font-size:1.4rem;font-weight:800;background:rgba(15,23,42,.6);border:2px solid #334155;border-radius:10px;color:var(--gold);outline:none}
+.pin-row input:focus{border-color:var(--gold)}
 .key-icons{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
-.ki{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #334155;color:#64748b;font-size:.9rem}
-.ki.on{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08)}
-.ki.setup{border-color:#c9a84c;color:#c9a84c;animation:pulse 2s infinite}
+.ki{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #334155;color:var(--text-dim);font-size:.9rem}
+.ki.on{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08)}
+.ki.setup{border-color:var(--gold);color:var(--gold);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
 </style>
 </head>
@@ -87,12 +87,12 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
                 <div class="addr" id="oibAddr"></div>
             </div>
 
-            <div style="margin-top:10px">
+            <div class="fx-mt-10">
                 <label class="fl">Naziv firme</label>
                 <input name="company_name" id="companyName" class="fc" value="{{ company_name|default:'' }}" required placeholder="Moja Firma d.o.o.">
                 {% if errors.company_name %}<div class="err">{{ errors.company_name }}</div>{% endif %}
             </div>
-            <div class="row2" style="margin-top:10px">
+            <div class="row2 fx-mt-10">
                 <div>
                     <label class="fl">Adresa</label>
                     <input name="address" id="addressInput" class="fc" value="{{ address|default:'' }}" placeholder="Ulica i kbr">
@@ -121,12 +121,12 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
                     <input name="last_name" class="fc" value="{{ last_name|default:'' }}" placeholder="Horvat">
                 </div>
             </div>
-            <div style="margin-top:10px">
+            <div class="fx-mt-10">
                 <label class="fl">Email</label>
                 <input name="email" type="email" class="fc" value="{{ email|default:'' }}" required placeholder="ivan@firma.hr">
                 {% if errors.email %}<div class="err">{{ errors.email|safe }}</div>{% endif %}
             </div>
-            <div style="margin-top:10px">
+            <div class="fx-mt-10">
                 <label class="fl">Lozinka (min. 8 znakova)</label>
                 <input name="password1" type="password" class="fc" required minlength="8">
                 {% if errors.password1 %}<div class="err">{{ errors.password1 }}</div>{% endif %}
@@ -134,7 +134,7 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
 
             <!-- PIN -->
             <div class="section-title"><i class="fas fa-hashtag"></i> TriKey PIN (6 znamenki)</div>
-            <p style="font-size:.78rem;color:#64748b;margin-bottom:8px">PIN za brzu prijavu — kao mBanking. Ostavite prazno za automatski generirani.</p>
+            <p class="fx-fs-body-sm fx-text-dim mb-2">PIN za brzu prijavu — kao mBanking. Ostavite prazno za automatski generirani.</p>
             <div class="pin-row">
                 <input type="tel" maxlength="1" inputmode="numeric" data-p="0" autocomplete="off">
                 <input type="tel" maxlength="1" inputmode="numeric" data-p="1" autocomplete="off">
@@ -144,13 +144,13 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
                 <input type="tel" maxlength="1" inputmode="numeric" data-p="5" autocomplete="off">
             </div>
             <input type="hidden" name="pin" id="pinHidden">
-            {% if errors.pin %}<div class="err" style="text-align:center">{{ errors.pin }}</div>{% endif %}
+            {% if errors.pin %}<div class="err text-center">{{ errors.pin }}</div>{% endif %}
 
             <button type="submit" class="btn-gold"><i class="fas fa-rocket me-2"></i> Kreiraj račun i postavi PIN</button>
         </form>
 
-        <div style="text-align:center;margin-top:16px">
-            <a href="{% url 'login' %}" style="color:#64748b;font-size:.82rem;text-decoration:none">Već imate račun? <span style="color:#c9a84c">Prijavite se →</span></a>
+        <div class="text-center mt-3">
+            <a href="{% url 'login' %}" class="fx-text-dim fx-fs-note fx-no-underline">Već imate račun? <span class="fx-text-gold">Prijavite se →</span></a>
         </div>
     </div>
 </div>

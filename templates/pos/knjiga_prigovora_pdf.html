@@ -5,27 +5,27 @@
 <meta charset="utf-8">
 <style>
   @page { size: A4; margin: 15mm; }
-  body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #1a1a1a; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color:var(--text); }
   h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
-  .sub { text-align: center; font-size: 9px; color: #666; margin-bottom: 12px; }
+  .sub { text-align: center; font-size: 9px; color:var(--text-dim); margin-bottom: 12px; }
   table { width: 100%; border-collapse: collapse; margin-top: 8px; page-break-inside: auto; }
   tr { page-break-inside: avoid; }
   th, td { border: 1px solid #333; padding: 5px 6px; font-size: 9px; vertical-align: top; }
   th { background: #f0f0f0; font-weight: bold; text-align: center; }
-  .expired { color: #dc2626; font-weight: bold; }
-  .answered { color: #16a34a; }
-  .escalated { color: #dc2626; font-weight: bold; background: #fee2e2; }
-  .pohvala { background: #f0fdf4; }
+  .expired { color:var(--red); font-weight: bold; }
+  .answered { color:var(--green); }
+  .escalated { color:var(--red); font-weight: bold; background: #fee2e2; }
+  .pohvala { background:var(--green-dim); }
   .utisak { background: #eff6ff; }
   .type-badge { display: inline-block; padding: 1px 4px; border-radius: 3px; font-size: 7px; font-weight: bold; }
-  .type-prigovor { background: #fecaca; color: #991b1b; }
-  .type-pohvala { background: #bbf7d0; color: #166534; }
+  .type-prigovor { background: #fecaca; color:var(--red); }
+  .type-pohvala { background: #bbf7d0; color:var(--green); }
   .type-utisak { background: #bfdbfe; color: #1e40af; }
   .type-reklamacija { background: #fde68a; color: #92400e; }
   .type-prijedlog { background: #e9d5ff; color: #6b21a8; }
   .sig-img { max-width: 80px; max-height: 30px; }
   .stars { color: #d4af37; font-size: 10px; }
-  .footer { text-align: center; font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+  .footer { text-align: center; font-size: 7px; color:var(--text-muted); margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
   .integrity { font-family: monospace; font-size: 6px; color: #999; }
   .section-title { background: #1a1a2e; color: #d4af37; padding: 6px; font-size: 11px; font-weight: bold; margin-top: 12px; }
 </style>
@@ -67,14 +67,14 @@
   <tbody>
     {% for p in prigovori %}
     <tr class="{% if p.is_escalated %}escalated{% endif %}">
-      <td style="text-align:center;font-weight:bold">{{ p.redni_broj }}</td>
+      <td class="text-center fx-fw-bold">{{ p.redni_broj }}</td>
       <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
       <td>
         <span class="type-badge type-{{ p.record_type }}">
           {% if p.record_type == 'prigovor' %}P{% elif p.record_type == 'reklamacija' %}R{% else %}{{ p.record_type|first|upper }}{% endif %}
         </span>
       </td>
-      <td>{{ p.ime_potrosaca }}<br><span style="font-size:7px;color:#666">{{ p.consumer_email|default:p.kontakt }}</span></td>
+      <td>{{ p.ime_potrosaca }}<br><span class="fx-text-dim" style="font-size:7px">{{ p.consumer_email|default:p.kontakt }}</span></td>
       <td>{{ p.opis_prigovora|truncatewords:50 }}</td>
       <td>
         {% if p.datum_odgovora %}
@@ -82,12 +82,12 @@
         {% elif p.rok_istekao %}
           <span class="expired">{% if lang == 'de' %}FRIST ABGELAUFEN!{% else %}PROBIJEN ROK!{% endif %}</span>
         {% elif p.dana_do_roka is not None %}
-          <em style="color:#888">{{ p.dana_do_roka }}{% if lang == 'de' %}T{% else %}d{% endif %}</em>
+          <em class="fx-text-muted">{{ p.dana_do_roka }}{% if lang == 'de' %}T{% else %}d{% endif %}</em>
         {% else %}
           —
         {% endif %}
       </td>
-      <td style="text-align:center">
+      <td class="text-center">
         {% if p.signature %}
           <img src="{{ p.signature }}" class="sig-img" alt="sig">
         {% else %}—{% endif %}
@@ -95,7 +95,7 @@
       <td class="integrity">{{ p.integrity_hash|truncatechars:12 }}</td>
     </tr>
     {% empty %}
-    <tr><td colspan="8" style="text-align:center;color:#888;padding:15px">
+    <tr><td colspan="8" class="text-center fx-text-muted" style="padding:15px">
       {% if lang == 'de' %}Keine Einträge registriert.{% else %}Nema zapisa.{% endif %}
     </td></tr>
     {% endfor %}
@@ -123,7 +123,7 @@
   <tbody>
     {% for p in pohvale %}
     <tr class="{{ p.record_type }}">
-      <td style="text-align:center">{{ p.redni_broj }}</td>
+      <td class="text-center">{{ p.redni_broj }}</td>
       <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
       <td>
         <span class="type-badge type-{{ p.record_type }}">
@@ -133,7 +133,7 @@
       <td>{{ p.public_display_name|default:p.ime_potrosaca }}</td>
       <td class="stars">{% if p.star_rating %}{{ p.star_rating }}★{% else %}—{% endif %}</td>
       <td>{{ p.opis_prigovora|truncatewords:40 }}</td>
-      <td style="text-align:center">
+      <td class="text-center">
         {% if p.signature %}<img src="{{ p.signature }}" class="sig-img" alt="sig">{% else %}—{% endif %}
       </td>
     </tr>

@@ -4,28 +4,11 @@
 {% block page_title %}Fond: {{ fund.naziv|truncatechars:50 }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="card" style="max-width:800px">
+    <div class="card fx-max-800">
         <div class="card-header">
             <h5 class="mb-0">{{ fund.naziv }}</h5>
         </div>
@@ -37,7 +20,7 @@
                         <tr><th>Status</th><td><span class="badge {% if fund.status == 'aktivan' %}bg-success{% else %}bg-secondary{% endif %}">{{ fund.get_status_display }}</span></td></tr>
                         <tr><th>Ciljna skupina</th><td>{{ fund.get_ciljna_skupina_display }}</td></tr>
                         <tr><th>Tijelo</th><td>{{ fund.tijelo }}</td></tr>
-                        <tr><th>Rok prijave</th><td>{{ fund.rok_prijave|default:"-" }}{% if fund.hitno %} <span class="badge bg-danger">{{ fund.days_until_deadline }} dana!</span>{% elif fund.days_until_deadline %} ({{ fund.days_until_deadline }} dana){% endif %}</td></tr>
+                        <tr><th>Rok prijave</th><td>{{ fund.rok_prijave|default:"-" }}{% if fund.hitno %} <span class="fenix-badge fenix-badge-danger">{{ fund.days_until_deadline }} dana!</span>{% elif fund.days_until_deadline %} ({{ fund.days_until_deadline }} dana){% endif %}</td></tr>
                     </table>
                 </div>
                 <div class="col-md-6">

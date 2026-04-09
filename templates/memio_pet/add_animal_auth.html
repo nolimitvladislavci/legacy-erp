@@ -18,13 +18,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .top-bar{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
 .logo{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--ink);text-decoration:none}
 .logo span{color:var(--gold)}
-.card{width:100%;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px 36px;text-align:center}
+.card{width:100%;max-width:440px;background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:40px 36px;text-align:center}
 .card-icon{font-size:3rem;margin-bottom:16px}
 .card-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;margin-bottom:8px}
 .card-sub{color:var(--dim);font-size:.88rem;margin-bottom:28px;line-height:1.5}
 .field{margin-bottom:20px;text-align:left}
 .field label{display:block;font-size:.78rem;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.field input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:1rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s;text-align:center}
+.field input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:1rem;color:var(--ink);background:var(--bg-card);outline:none;transition:border-color .2s;text-align:center}
 .field input:focus{border-color:var(--gold)}
 .btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer;transition:background .2s}
 .btn-submit:hover{background:#b8942a}
@@ -54,7 +54,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       <h2>Provjerite email!</h2>
       <p>Poslali smo vam sigurni link za dodavanje ljubimca.</p>
       <span class="email-highlight">{{ email_sent }}</span>
-      <p style="margin-top:12px;font-size:.8rem;color:var(--dim)">Link vrijedi 30 minuta. Provjerite i spam folder.</p>
+      <p class="fx-fs-compact mt-3 fx-text-dim">Link vrijedi 30 minuta. Provjerite i spam folder.</p>
     </div>
     {% if breeder %}
     <div class="alt-action">
@@ -84,7 +84,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     {% endif %}
 
     <p class="footer-note">
-      Nemaš profil? <a href="/registracija/" style="color:var(--gold)">Kreiraj ga besplatno</a> za 30 sekundi.
+      Nemaš profil? <a href="/registracija/" class="fx-text-gold">Kreiraj ga besplatno</a> za 30 sekundi.
     </p>
   {% endif %}
 </div>

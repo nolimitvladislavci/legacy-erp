@@ -8,60 +8,60 @@
 <title>🔥 Fenix Cockpit</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:1rem}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:1rem}
 .gold{color:var(--gold,#c9a84c)}
-.green{color:#22c55e}
-.red{color:#ef4444}
-.blue{color:#3b82f6}
-.amber{color:#f59e0b}
-.muted{color:#64748b}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.blue{color:var(--blue)}
+.amber{color:var(--amber)}
+.muted{color:var(--text-dim)}
 h1{font-size:1.4rem;font-weight:800;letter-spacing:2px}
-.sub{font-size:.75rem;color:#64748b;letter-spacing:1px}
+.sub{font-size:.75rem;color:var(--text-dim);letter-spacing:1px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin:1rem 0}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin:.75rem 0}
 @media(max-width:600px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
-.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1rem}
+.card{background:var(--bg-card);border:1px solid #1e293b;border-radius:12px;padding:1rem}
 .card-gold{border-left:3px solid var(--gold,#c9a84c)}
 .card-green{border-left:3px solid #22c55e}
 .card-blue{border-left:3px solid #3b82f6}
 .card-red{border-left:3px solid #ef4444}
 .stat-num{font-size:1.8rem;font-weight:800;line-height:1}
-.stat-lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
-.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:1.25rem 0 .5rem;border-bottom:1px solid #1e293b;padding-bottom:.4rem}
+.stat-lbl{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin:1.25rem 0 .5rem;border-bottom:1px solid #1e293b;padding-bottom:.4rem}
 table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{color:#64748b;font-weight:600;text-align:left;padding:.4rem .5rem;font-size:.7rem;text-transform:uppercase}
+th{color:var(--text-dim);font-weight:600;text-align:left;padding:.4rem .5rem;font-size:.7rem;text-transform:uppercase}
 td{padding:.4rem .5rem;border-top:1px solid #1e293b}
 .badge{display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.65rem;font-weight:700}
 .badge-gold{background:#451a03;color:var(--gold,#c9a84c)}
-.badge-green{background:#052e16;color:#22c55e}
-.badge-blue{background:#0f172a;color:#3b82f6}
+.badge-green{background:#052e16;color:var(--green)}
+.badge-blue{background:var(--surface-deep);color:var(--blue)}
 .log-line{font-family:monospace;font-size:.68rem;padding:.2rem .4rem;border-radius:4px;margin:.15rem 0}
-.log-err{background:#1c0505;color:#f87171}
+.log-err{background:#1c0505;color:var(--red)}
 .log-warn{background:#1c1205;color:#fbbf24}
-.log-info{background:#051c0c;color:#4ade80}
+.log-info{background:#051c0c;color:var(--green)}
 /* Okrugli stol */
 .table-wrap{display:flex;justify-content:center;padding:1rem 0}
 .seat{cursor:pointer;transition:all .2s}
 .seat:hover circle{filter:brightness(1.4)}
 .chat-panel{background:#0d1117;border:1px solid #1e293b;border-radius:10px;padding:1rem;margin-top:.75rem;display:none}
 .chat-panel.open{display:block}
-textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:6px;padding:.5rem;font-size:.8rem;resize:vertical;font-family:inherit}
+textarea{width:100%;background:var(--bg-card);color:var(--white);border:1px solid #333;border-radius:6px;padding:.5rem;font-size:.8rem;resize:vertical;font-family:inherit}
 .btn{border:none;border-radius:6px;padding:.4rem 1rem;font-weight:700;cursor:pointer;font-size:.8rem}
-.btn-gold{background:var(--gold,#c9a84c);color:#000}
-.btn-ghost{background:#1e293b;color:#94a3b8}
-.response-box{background:#111;border-left:3px solid var(--gold,#c9a84c);padding:.75rem;border-radius:0 6px 6px 0;font-size:.78rem;color:#ccc;white-space:pre-wrap;max-height:180px;overflow-y:auto;margin-top:.75rem;display:none}
+.btn-gold{background:var(--gold,#c9a84c);color:var(--text)}
+.btn-ghost{background:var(--surface2);color:var(--text-muted)}
+.response-box{background:var(--bg-card);border-left:3px solid var(--gold,#c9a84c);padding:.75rem;border-radius:0 6px 6px 0;font-size:.78rem;color:var(--text-muted);white-space:pre-wrap;max-height:180px;overflow-y:auto;margin-top:.75rem;display:none}
 </style>
 </head>
 <body>
 
 <!-- Header -->
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+<div class="d-flex fx-flex-wrap justify-content-between align-items-start mb-3 fx-gap-2">
   <div>
     <h1 class="gold">🔥 FENIX COCKPIT</h1>
     <div class="sub">{{ now|date:"d.m.Y H:i" }} — Auto-refresh 60s</div>
   </div>
-  <div style="text-align:right">
-    <div style="font-size:.8rem;font-weight:700">Ivan Brtan</div>
+  <div class="text-end">
+    <div class="fx-fs-compact fx-fw-bold">Ivan Brtan</div>
     <div class="sub">Superadmin</div>
   </div>
 </div>
@@ -81,7 +81,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
     <div class="stat-lbl">Pretplate</div>
   </div>
   <div class="card" style="border-left:3px solid #8b5cf6">
-    <div class="stat-num" style="color:#8b5cf6">{{ companies }}</div>
+    <div class="stat-num fx-text-purple">{{ companies }}</div>
     <div class="stat-lbl">Kompanije</div>
   </div>
 </div>
@@ -161,36 +161,36 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 <!-- API & Certifikati -->
 <div class="section-title">🔑 API & Sigurnost</div>
 <div class="grid2">
-  <div class="card" style="{% if api_status == 'ok' %}border-color:#22c55e44{% elif api_status == 'no_credit' %}border-color:#ef444466{% else %}border-color:#f59e0b44{% endif %}">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Anthropic AI</div>
+  <div class="card" style="{% if api_status == 'ok' %}border-color:var(--green)44{% elif api_status == 'no_credit' %}border-color:var(--red)66{% else %}border-color:#f59e0b44{% endif %}">
+    <div class="fx-fs-caption fx-text-dim fx-mb-1">Anthropic AI</div>
     {% if api_status == 'ok' %}
-    <div style="font-size:1rem;font-weight:700;color:#22c55e">● Aktivan</div>
-    <div class="muted" style="font-size:.7rem">{{ api_key_short }}</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-green">● Aktivan</div>
+    <div class="muted fx-fs-sm">{{ api_key_short }}</div>
     {% elif api_status == 'no_credit' %}
-    <div style="font-size:1rem;font-weight:700;color:#ef4444">● Nema kredita!</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-red">● Nema kredita!</div>
     <a href="https://console.anthropic.com/settings/billing" target="_blank"
-       style="display:inline-block;margin-top:6px;background:var(--gold,#c9a84c);color:#000;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;text-decoration:none">
+       class="fx-text-dark fx-rounded-sm fx-fs-compact fx-fw-bold fx-no-underline d-inline-block mt-1 fx-bg-gold" style="padding:6px 14px">
       Nadoplati →
     </a>
     {% elif api_status == 'missing' %}
-    <div style="font-size:1rem;font-weight:700;color:#f59e0b">● Nema API ključa</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-amber">● Nema API ključa</div>
     {% else %}
-    <div style="font-size:1rem;font-weight:700;color:#f59e0b">● Greška</div>
-    <div class="muted" style="font-size:.7rem">{{ api_error|default:"" }}</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-amber">● Greška</div>
+    <div class="muted fx-fs-sm">{{ api_error|default:"" }}</div>
     {% endif %}
   </div>
   <div class="card">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">FINA Certifikati</div>
+    <div class="fx-fs-caption fx-text-dim fx-mb-1">FINA Certifikati</div>
     {% if certs_expiring %}
     {% for c in certs_expiring %}
-    <div style="font-size:.85rem;color:{% if c.status == 'EXPIRED' or c.status == 'CRITICAL' %}#ef4444{% else %}#f59e0b{% endif %};font-weight:700">
+    <div class="fx-fs-base fx-fw-bold" style="color:{% if c.status == 'EXPIRED' or c.status == 'CRITICAL' %}#ef4444{% else %}#f59e0b{% endif %}">
       ● {{ c.cert_type }} — {{ c.days_left }}d
     </div>
     {% endfor %}
     {% else %}
-    <div style="font-size:1rem;font-weight:700;color:#22c55e">● Svi OK</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-green">● Svi OK</div>
     {% for c in certs %}
-    <div class="muted" style="font-size:.7rem">{{ c.company }}: {{ c.days_left }}d</div>
+    <div class="muted fx-fs-sm">{{ c.company }}: {{ c.days_left }}d</div>
     {% endfor %}
     {% endif %}
   </div>
@@ -200,42 +200,42 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 <div class="section-title">🖥️ Server</div>
 <div class="grid2">
   <div class="card">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Disk</div>
-    <div style="font-size:1.1rem;font-weight:700">{{ disk_used }} <span class="muted">korišteno</span></div>
-    <div class="muted" style="font-size:.75rem">{{ disk_free }} slobodno</div>
+    <div class="fx-fs-caption fx-text-dim fx-mb-1">Disk</div>
+    <div class="fx-fs-xl fx-fw-bold">{{ disk_used }} <span class="muted">korišteno</span></div>
+    <div class="muted fx-fs-caption">{{ disk_free }} slobodno</div>
   </div>
   <div class="card">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Memorija</div>
-    <div style="font-size:1.1rem;font-weight:700">{{ mem_used }} <span class="muted">/ {{ mem_total }}</span></div>
+    <div class="fx-fs-caption fx-text-dim fx-mb-1">Memorija</div>
+    <div class="fx-fs-xl fx-fw-bold">{{ mem_used }} <span class="muted">/ {{ mem_total }}</span></div>
   </div>
 </div>
 
 <!-- Logovi -->
 {% if logs %}
 <div class="section-title">⚙️ Kontrole</div>
-<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1rem">
-  <button class="ctrl-btn" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('gunicorn')">
+<div class="fx-gap-3 d-grid mb-3" style="grid-template-columns:repeat(2,1fr)">
+  <button class="ctrl-btn fx-text-green fx-rounded fx-fw-bold fx-fs-base fx-pointer" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);padding:14px;min-height:56px" onclick="ctrlAction('gunicorn')">
     🔄 Restart App
   </button>
-  <button class="ctrl-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('celery')">
+  <button class="ctrl-btn fx-rounded fx-fw-bold fx-fs-base fx-pointer fx-text-blue" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);padding:14px;min-height:56px" onclick="ctrlAction('celery')">
     ⚡ Restart Celery
   </button>
-  <button class="ctrl-btn" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:#fb923c;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('all')">
+  <button class="ctrl-btn fx-rounded fx-fw-bold fx-fs-base fx-pointer" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:#fb923c;padding:14px;min-height:56px" onclick="ctrlAction('all')">
     🚀 Restart SVE
   </button>
-  <button class="ctrl-btn" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#a78bfa;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="window.location.href='/hr/pos/daily-reports/'">
+  <button class="ctrl-btn fx-rounded fx-fw-bold fx-fs-base fx-pointer" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#a78bfa;padding:14px;min-height:56px" onclick="window.location.href='/hr/pos/daily-reports/'">
     📊 Dnevni Report
   </button>
-  <button class="ctrl-btn" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="window.location.href='/hr/documents/arhiva/'">
+  <button class="ctrl-btn fx-rounded fx-fw-bold fx-fs-base fx-pointer fx-text-gold" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:14px;min-height:56px" onclick="window.location.href='/hr/documents/arhiva/'">
     📂 Arhiva
   </button>
-  <button class="ctrl-btn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('backup')">
+  <button class="ctrl-btn fx-text-red fx-rounded fx-fw-bold fx-fs-base fx-pointer" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);padding:14px;min-height:56px" onclick="ctrlAction('backup')">
     💾 Backup Sad
   </button>
 </div>
 
 <div class="section-title">📋 Zadnji Logovi</div>
-<div style="background:#0d1117;border-radius:8px;padding:.5rem">
+<div class="fx-bg-deep fx-rounded fx-p-2">
   {% for line in logs %}
   <div class="log-line {% if 'ERROR' in line %}log-err{% elif 'WARNING' in line %}log-warn{% else %}log-info{% endif %}">{{ line|truncatechars:120 }}</div>
   {% endfor %}
@@ -246,9 +246,9 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 {% if feedback %}
 <div class="section-title">⚠️ Feedback od korisnika</div>
 {% for f in feedback %}
-<div class="card card-gold" style="margin-bottom:.5rem">
-  <div style="font-size:.75rem;color:#64748b">{{ f.created_at|date:"d.m H:i" }} — {{ f.category }}</div>
-  <div style="font-size:.85rem;margin-top:.25rem">{{ f.title }}</div>
+<div class="card card-gold mb-2">
+  <div class="fx-fs-caption fx-text-muted">{{ f.created_at|date:"d.m H:i" }} — {{ f.category }}</div>
+  <div class="fx-fs-base fx-mt-2">{{ f.title }}</div>
 </div>
 {% endfor %}
 {% endif %}
@@ -308,45 +308,45 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 
   <!-- Chat panel -->
   <div id="seat-panel" class="chat-panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-      <span id="seat-name" style="font-weight:700;font-size:.9rem"></span>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span id="seat-name" class="fx-fw-bold fx-fs-md"></span>
       <button class="btn btn-ghost" onclick="closeSeat()" style="padding:.2rem .6rem">✕</button>
     </div>
-    <div id="seat-desc" style="font-size:.72rem;color:#64748b;margin-bottom:.75rem"></div>
+    <div id="seat-desc" class="fx-fs-sm fx-text-dim fx-mb-4"></div>
     <textarea id="seat-msg" rows="3" placeholder="Upiši poruku ili zadatak..."></textarea>
 
     <!-- Kamera / slika -->
-    <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center">
-      <button type="button" onclick="fenixSeatCamera()" style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:var(--gold,#c9a84c)">
+    <div class="d-flex mt-2 fx-gap-2 align-items-center">
+      <button type="button" onclick="fenixSeatCamera()" class="d-flex fx-pointer fx-bg-card fx-rounded fx-fs-body-sm align-items-center fx-text-gold" style="gap:.3rem;border:1px solid #333;padding:.4rem .8rem">
         <i class="fas fa-camera"></i> Slikaj
       </button>
-      <input type="file" accept="image/*" capture="environment" id="seat-camera" style="display:none" onchange="previewPhoto(this)">
-      <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#64748b">
+      <input type="file" accept="image/*" capture="environment" id="seat-camera" class="fx-hidden" onchange="previewPhoto(this)">
+      <label class="d-flex fx-pointer fx-bg-card fx-rounded fx-fs-body-sm align-items-center fx-text-muted" style="gap:.3rem;border:1px solid #333;padding:.4rem .8rem">
         <i class="fas fa-image"></i> Galerija
-        <input type="file" accept="image/*" id="seat-gallery" style="display:none" onchange="previewPhoto(this)">
+        <input type="file" accept="image/*" id="seat-gallery" class="fx-hidden" onchange="previewPhoto(this)">
       </label>
-      <span id="photo-name" style="font-size:.7rem;color:#475569;flex:1;overflow:hidden;text-overflow:ellipsis"></span>
+      <span id="photo-name" class="fx-fs-sm fx-text-dim fx-flex-1 fx-overflow-hidden" style="text-overflow:ellipsis"></span>
     </div>
-    <div id="photo-preview" style="display:none;margin-top:.5rem;position:relative">
-      <img id="photo-img" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #333">
-      <button onclick="clearPhoto()" style="position:absolute;top:4px;right:4px;background:#111;border:1px solid #333;border-radius:50%;width:24px;height:24px;color:#ef4444;cursor:pointer;font-size:.8rem">✕</button>
+    <div id="photo-preview" class="fx-hidden mt-2 fx-relative">
+      <img id="photo-img" class="fx-rounded" style="max-width:100%;max-height:200px;border:1px solid #333">
+      <button onclick="clearPhoto()" class="fx-bg-card fx-rounded-circle fx-text-red fx-pointer fx-fs-compact" style="position:absolute;top:4px;right:4px;border:1px solid #333;width:24px;height:24px">✕</button>
     </div>
 
-    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+    <div class="d-flex align-items-center fx-gap-2 mt-2">
       <button class="btn btn-gold" onclick="sendMsg()">Pošalji</button>
-      <span id="seat-status" style="font-size:.75rem;color:#64748b"></span>
+      <span id="seat-status" class="fx-fs-caption fx-text-muted"></span>
     </div>
     <div id="seat-response" class="response-box"></div>
   </div>
 
   <!-- Fotke stol feed -->
-  <div id="photo-feed" style="margin-top:1rem">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:.5rem"><i class="fas fa-images"></i> Zadnje fotke</div>
-    <div id="photo-feed-list" style="display:flex;gap:.5rem;overflow-x:auto;padding:.25rem 0"></div>
+  <div id="photo-feed" class="mt-3">
+    <div class="fx-fs-caption fx-text-dim mb-2"><i class="fas fa-images"></i> Zadnje fotke</div>
+    <div id="photo-feed-list" class="d-flex fx-scroll-x fx-gap-2" style="padding:.25rem 0"></div>
   </div>
 </div>
 
-<div style="text-align:center;margin-top:1.5rem;font-size:.65rem;color:#1e293b">
+<div class="text-center fx-fs-xs fx-mt-6" style="color:#1e293b">
   LIMIT Connect — Fenix Platform — {{ today }}
 </div>
 
@@ -538,14 +538,14 @@ function loadPhotoFeed() {
     .then(d => {
       const list = document.getElementById('photo-feed-list');
       if (!d.photos || !d.photos.length) {
-        list.innerHTML = '<span style="color:#333;font-size:.7rem">Nema fotki</span>';
+        list.innerHTML = '<span class="fx-text-dark fx-fs-sm">Nema fotki</span>';
         return;
       }
       list.innerHTML = d.photos.map(p =>
-        '<div style="flex-shrink:0;position:relative">' +
-        '<img src="' + p.url + '" style="height:80px;border-radius:6px;border:1px solid #333;cursor:pointer" ' +
+        '<div class="flex-shrink-0 fx-relative">' +
+        '<img src="' + p.url + '" class="fx-rounded-sm fx-pointer" style="height:80px;border:1px solid #333" ' +
         'onclick="window.open(this.src)" title="' + p.seat + ': ' + p.message + '">' +
-        '<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.7);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:3px">' +
+        '<div class="fx-text-white fx-fs-2xs" style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.7);padding:1px 4px;border-radius:3px">' +
         p.seat + ' ' + p.time + '</div></div>'
       ).join('');
     }).catch(() => {});

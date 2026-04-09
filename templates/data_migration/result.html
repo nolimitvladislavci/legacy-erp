@@ -7,28 +7,28 @@
 {% block content %}
 <div class="container-fluid px-3 py-3" style="max-width:1000px">
 
-  <nav class="mb-3" style="font-size:.85rem">
-    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+  <nav class="mb-3 fx-fs-base">
+    <a href="{% url 'data_migration:dashboard' %}" class="fx-no-underline fx-text-cyan">
       <i class="fas fa-arrow-left me-1"></i>Svi projekti
     </a>
-    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+    <span class="fx-text-muted"> / {{ project.name }}</span>
   </nav>
 
   <!-- Status header -->
   {% if project.status == 'completed' %}
-  <div class="d-flex align-items-center gap-3 mb-3 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;border-left:4px solid #059669">
-    <i class="fas fa-check-circle fa-2x" style="color:#059669"></i>
+  <div class="d-flex align-items-center gap-3 mb-3 p-3 fx-rounded fx-bg-card fx-b" style="border-left:4px solid #059669">
+    <i class="fas fa-check-circle fa-2x fx-text-green"></i>
     <div>
-      <h5 class="mb-0" style="color:var(--text)">Import zavrsen</h5>
-      <span class="small" style="color:var(--text-muted)">{{ project.completed_at|date:"d.m.Y H:i" }} — {{ project.get_entity_type_display }}</span>
+      <h5 class="mb-0 fx-text-body">Import zavrsen</h5>
+      <span class="small fx-text-muted">{{ project.completed_at|date:"d.m.Y H:i" }} — {{ project.get_entity_type_display }}</span>
     </div>
   </div>
   {% else %}
-  <div class="d-flex align-items-center gap-3 mb-3 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;border-left:4px solid #dc2626">
-    <i class="fas fa-exclamation-triangle fa-2x" style="color:#dc2626"></i>
+  <div class="d-flex align-items-center gap-3 mb-3 p-3 fx-rounded fx-bg-card fx-b" style="border-left:4px solid #dc2626">
+    <i class="fas fa-exclamation-triangle fa-2x fx-text-red"></i>
     <div>
-      <h5 class="mb-0" style="color:var(--text)">Import neuspjesan</h5>
-      <span class="small" style="color:var(--text-muted)">{{ project.completed_at|date:"d.m.Y H:i"|default:"—" }}</span>
+      <h5 class="mb-0 fx-text-body">Import neuspjesan</h5>
+      <span class="small fx-text-muted">{{ project.completed_at|date:"d.m.Y H:i"|default:"—" }}</span>
     </div>
   </div>
   {% endif %}
@@ -36,34 +36,34 @@
   <!-- Stats -->
   <div class="row g-2 mb-4">
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Kreirano</div>
-        <div class="fw-bold fs-4" style="color:#059669">{{ project.records_created }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-16">
+        <div class="small fx-text-muted">Kreirano</div>
+        <div class="fw-bold fs-4 fx-text-green">{{ project.records_created }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Azurirano</div>
-        <div class="fw-bold fs-4" style="color:var(--accent)">{{ project.records_updated }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-16">
+        <div class="small fx-text-muted">Azurirano</div>
+        <div class="fw-bold fs-4 fx-text-cyan">{{ project.records_updated }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Preskoceno</div>
-        <div class="fw-bold fs-4" style="color:var(--text-muted)">{{ project.records_skipped }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-16">
+        <div class="small fx-text-muted">Preskoceno</div>
+        <div class="fw-bold fs-4 fx-text-muted">{{ project.records_skipped }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Greske</div>
-        <div class="fw-bold fs-4" style="color:#dc2626">{{ project.records_failed }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-16">
+        <div class="small fx-text-muted">Greske</div>
+        <div class="fw-bold fs-4 fx-text-red">{{ project.records_failed }}</div>
       </div>
     </div>
   </div>
 
   <!-- Log filteri -->
   <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-    <strong style="color:var(--text)">Logovi:</strong>
+    <strong class="fx-text-body">Logovi:</strong>
     <a href="?level=" class="btn btn-sm {% if not level_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">
       Sve ({{ log_counts.info|add:log_counts.warning|add:log_counts.error }})
     </a>
@@ -80,17 +80,17 @@
 
   <!-- Log tablica -->
   {% if logs %}
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="fx-rounded fx-bg-card fx-b fx-overflow-hidden">
     <div class="table-responsive" style="max-height:500px;overflow:auto">
-      <table class="table table-sm mb-0" style="color:var(--text);font-size:.82rem">
-        <thead style="background:var(--table-header-bg);position:sticky;top:0;z-index:1">
+      <table class="table table-sm mb-0 fx-fs-note fx-text-body">
+        <thead class="fx-bg-surface2" style="position:sticky;top:0;z-index:1">
           <tr>
-            <th style="color:var(--text-secondary);width:8%">Red</th>
-            <th style="color:var(--text-secondary);width:10%">Razina</th>
-            <th style="color:var(--text-secondary);width:10%">Polje</th>
-            <th style="color:var(--text-secondary);width:42%">Poruka</th>
-            <th style="color:var(--text-secondary);width:15%">Originalno</th>
-            <th style="color:var(--text-secondary);width:15%">Razrijeseno</th>
+            <th class="fx-text-dim" style="width:8%">Red</th>
+            <th class="fx-text-dim" style="width:10%">Razina</th>
+            <th class="fx-text-dim" style="width:10%">Polje</th>
+            <th class="fx-text-dim" style="width:42%">Poruka</th>
+            <th class="fx-text-dim" style="width:15%">Originalno</th>
+            <th class="fx-text-dim" style="width:15%">Razrijeseno</th>
           </tr>
         </thead>
         <tbody>
@@ -99,17 +99,17 @@
             <td class="text-muted">{{ log.row_number|default:"—" }}</td>
             <td>
               {% if log.level == 'error' %}
-                <span class="badge" style="background:#dc2626;color:#fff">Greska</span>
+                <span class="badge fx-bg-red fx-text-white">Greska</span>
               {% elif log.level == 'warning' %}
-                <span class="badge" style="background:#d97706;color:#fff">Upozorenje</span>
+                <span class="badge fx-text-white" style="background:var(--amber)">Upozorenje</span>
               {% else %}
-                <span class="badge" style="background:var(--accent);color:#fff">Info</span>
+                <span class="badge fx-text-white" style="background:var(--accent)">Info</span>
               {% endif %}
             </td>
             <td class="text-muted">{{ log.field_name|default:"—" }}</td>
             <td>{{ log.message }}</td>
-            <td class="text-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ log.original_value|default:"—" }}</td>
-            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ log.resolved_value|default:"—" }}</td>
+            <td class="text-muted text-nowrap fx-overflow-hidden" style="max-width:120px;text-overflow:ellipsis">{{ log.original_value|default:"—" }}</td>
+            <td class="text-nowrap fx-overflow-hidden" style="max-width:120px;text-overflow:ellipsis">{{ log.resolved_value|default:"—" }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -117,8 +117,8 @@
     </div>
   </div>
   {% else %}
-  <div class="text-center py-4" style="color:var(--text-muted)">
-    <i class="fas fa-check-circle fa-2x mb-2" style="color:#059669"></i>
+  <div class="text-center py-4 fx-text-muted">
+    <i class="fas fa-check-circle fa-2x mb-2 fx-text-green"></i>
     <p>Nema logova za prikaz — import je prosan bez upozorenja.</p>
   </div>
   {% endif %}

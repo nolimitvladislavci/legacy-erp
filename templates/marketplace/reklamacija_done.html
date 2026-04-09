@@ -2,14 +2,14 @@
 {% load i18n %}
 {% block title %}Reklamacija zaprimljena{% endblock %}
 {% block content %}
-<div style="max-width:600px;margin:60px auto;text-align:center;padding:20px;">
-  <div style="font-size:4rem;margin-bottom:16px;">&#10003;</div>
-  <h2 style="font-weight:900;margin-bottom:12px;">{% trans "Reklamacija zaprimljena" %}</h2>
-  <p style="color:var(--text-muted, #94a3b8);font-size:.95rem;margin-bottom:24px;">
-    {% trans "Vasa reklamacija za narudzbu" %} <strong style="color:var(--gold,#c9a84c);">{{ order.order_number }}</strong>
+<div class="text-center fx-p-20" style="max-width:600px;margin:60px auto">
+  <div class="mb-3" style="font-size:4rem">&#10003;</div>
+  <h2 class="mb-3" style="font-weight:900">{% trans "Reklamacija zaprimljena" %}</h2>
+  <p class="fx-fs-normal mb-4" style="color:var(--text-muted, #94a3b8)">
+    {% trans "Vasa reklamacija za narudzbu" %} <strong class="fx-text-gold">{{ order.order_number }}</strong>
     {% trans "je uspjesno zaprimljena. Obavijestit cemo vas o statusu." %}
   </p>
-  <a href="{% url 'marketplace:order_detail' order.pk %}" style="background:var(--gold,#c9a84c);color:#000;padding:12px 24px;border-radius:10px;font-weight:700;text-decoration:none;display:inline-block;">
+  <a href="{% url 'marketplace:order_detail' order.pk %}" class="fx-text-dark fx-rounded fx-fw-bold fx-no-underline d-inline-block fx-bg-gold" style="padding:12px 24px">
     {% trans "Natrag na narudzbu" %}
   </a>
 </div>

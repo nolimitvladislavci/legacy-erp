@@ -8,7 +8,7 @@
   <div class="col-md-4">
     <div class="card text-center {% if pending_count > 0 %}border-warning{% else %}border-success{% endif %}">
       <div class="card-body">
-        <div style="font-size:2.5rem;font-weight:800;color:{% if pending_count > 0 %}#f59e0b{% else %}#22c55e{% endif %}">
+        <div class="fx-fw-800" style="font-size:2.5rem;color:{% if pending_count > 0 %}#f59e0b{% else %}#22c55e{% endif %}">
           {{ pending_count }}
         </div>
         <div class="text-muted small">Čeka fiskalizaciju</div>
@@ -18,7 +18,7 @@
   <div class="col-md-4">
     <div class="card text-center {% if critical_count > 0 %}border-danger{% else %}border-success{% endif %}">
       <div class="card-body">
-        <div style="font-size:2.5rem;font-weight:800;color:{% if critical_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
+        <div class="fx-fw-800" style="font-size:2.5rem;color:{% if critical_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
           {{ critical_count }}
         </div>
         <div class="text-muted small">Kritično (>36h)</div>
@@ -74,10 +74,10 @@
           <td class="text-muted small">{{ log.created_at|date:"d.m.Y H:i:s" }}</td>
           <td>{{ log.receipt_type }} #{{ log.receipt_id }}</td>
           <td>
-            {% if log.status == 'success' %}<span class="badge bg-success">OK</span>
-            {% elif log.status == 'error' %}<span class="badge bg-danger">Greška</span>
-            {% elif log.status == 'pending' %}<span class="badge bg-warning text-dark">Na čekanju</span>
-            {% else %}<span class="badge bg-secondary">{{ log.status }}</span>{% endif %}
+            {% if log.status == 'success' %}<span class="fenix-badge fenix-badge-success">OK</span>
+            {% elif log.status == 'error' %}<span class="fenix-badge fenix-badge-danger">Greška</span>
+            {% elif log.status == 'pending' %}<span class="fenix-badge fenix-badge-warning">Na čekanju</span>
+            {% else %}<span class="fenix-badge fenix-badge-muted">{{ log.status }}</span>{% endif %}
           </td>
           <td class="small text-muted">{{ log.jir|truncatechars:20|default:"—" }}</td>
           <td class="small text-danger">{{ log.error_message|truncatechars:60|default:"" }}</td>

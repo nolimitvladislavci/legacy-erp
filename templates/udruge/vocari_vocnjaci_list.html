@@ -2,70 +2,53 @@
 {% load i18n %}
 {% block title %}Vocnjaci{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-tree"></i> Vocnjaci</h4>
-  <small style="color:var(--text-muted)">Parcele, kulture, povrsine</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-tree"></i> Vocnjaci</h4>
+  <small class="fx-text-muted">Parcele, kulture, povrsine</small></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.vocnjaka|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Vocnjaka</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.vocnjaka|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Vocnjaka</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ha_ukupno|default:"0" }} ha</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Povrsina</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-gold">{{ stats.ha_ukupno|default:"0" }} ha</div>
+    <div class="fx-fs-sm fx-text-muted">Povrsina</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.stabala|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Stabala</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.stabala|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Stabala</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.kultura|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Kultura</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-blue">{{ stats.kultura|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Kultura</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vlasnik</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kultura</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Povrsina</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Stabala</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Godina sadnje</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Naziv</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vlasnik</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Kultura</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Povrsina</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Stabala</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Godina sadnje</th>
     </tr></thead>
     <tbody>
       {% for v in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ v.naziv }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vlasnik">{{ v.vlasnik|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kultura">{{ v.kultura }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem;color:var(--gold);font-weight:700" data-label="Povrsina">{{ v.povrsina_ha }} ha</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Stabala">{{ v.broj_stabala|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Godina">{{ v.godina_sadnje|default:"-" }}</td>
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Naziv">{{ v.naziv }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Vlasnik">{{ v.vlasnik|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Kultura">{{ v.kultura }}</td>
+        <td class="fx-fs-note fx-fw-bold fx-text-gold fx-p-cell" data-label="Povrsina">{{ v.povrsina_ha }} ha</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Stabala">{{ v.broj_stabala|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Godina">{{ v.godina_sadnje|default:"-" }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema vocnjaka</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema vocnjaka</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

@@ -15,7 +15,7 @@
   @keyframes flashGreen { 0%,100%{background:transparent} 50%{background:rgba(34,197,94,0.2)} }
   @keyframes flashRed { 0%,100%{background:transparent} 50%{background:rgba(239,68,68,0.2)} }
   .scan-btn { width: 100%; padding: 16px; font-size: 1.2rem; border-radius: 12px; }
-  .progress-ring { position: fixed; top: 10px; right: 10px; z-index: 999; background: rgba(0,0,0,0.8); border-radius: 50px; padding: 8px 16px; color: #fff; font-size: 0.85rem; }
+  .progress-ring { position: fixed; top: 10px; right: 10px; z-index: 999; background: rgba(0,0,0,0.8); border-radius: 50px; padding: 8px 16px; color:var(--white); font-size: 0.85rem; }
 </style>
 
 <!-- Offline inventura (IndexedDB) -->
@@ -146,7 +146,7 @@
 </script>
 
 <div style="position:fixed;bottom:1rem;right:1rem;z-index:999">
-  <span id="offlineBadge" style="display:none;background:#f59e0b;color:#000;padding:.4rem .8rem;border-radius:20px;font-weight:700;font-size:.85rem;cursor:pointer" onclick="syncOfflineCounts()">0 offline</span>
+  <span id="offlineBadge" class="fx-hidden fx-bg-amber fx-text-dark fx-rounded-xl fx-fw-bold fx-fs-base fx-pointer" style="padding:.4rem .8rem" onclick="syncOfflineCounts()">0 offline</span>
 </div>
 
 
@@ -344,8 +344,8 @@ function lookupBarcode(barcode) {
       var html = '<strong>' + (data.error || 'Slični artikli:') + '</strong><br>';
       data.suggestions.forEach(function(s) {
         html += '<a href="#" onclick="selectSuggestion(' + s.item_id + ');return false" '
-          + 'style="display:block;padding:6px 8px;margin:4px 0;background:rgba(201,168,76,.1);border-radius:6px;color:#fff;text-decoration:none">'
-          + '<strong>' + s.name + '</strong> <small style="color:#888">(' + s.sku + ')</small></a>';
+          + 'class="fx-rounded-sm fx-text-white fx-no-underline d-block" style="padding:6px 8px;margin:4px 0;background:rgba(201,168,76,.1)">'
+          + '<strong>' + s.name + '</strong> <small class="fx-text-muted">(' + s.sku + ')</small></a>';
       });
       showStatus(html, 'info');
       document.getElementById('statusMsg').innerHTML = html;
@@ -391,7 +391,7 @@ function showItem(data) {
   nameEl.textContent = data.name;
   // AI badge
   if (data.ai_matched) {
-    nameEl.innerHTML = data.name + ' <span style="background:#a855f7;color:#fff;font-size:.6rem;padding:2px 6px;border-radius:8px;margin-left:6px">AI ' + (data.ai_confidence || '') + '%</span>';
+    nameEl.innerHTML = data.name + ' <span class="fx-text-white fx-fs-2xs fx-rounded" style="background:var(--purple);padding:2px 6px;margin-left:6px">AI ' + (data.ai_confidence || '') + '%</span>';
   }
   document.getElementById('itemSku').textContent = data.sku + (data.barcode ? ' | ' + data.barcode : '');
   document.getElementById('itemCategory').textContent = data.category;

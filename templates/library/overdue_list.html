@@ -4,15 +4,15 @@
 {% block page_title %}Kasnjenja{% endblock %}
 {% block extra_css %}
 <style>
-.overdue-row{background:#1a1a2e;border:1px solid #ef444433;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-.overdue-row .book{color:#f0e6d3;font-weight:600}
-.overdue-row .member{color:#888;font-size:.85rem}
-.overdue-row .days{color:#ef4444;font-weight:700;font-size:1.1rem}
-.overdue-row .fine{color:#f59e0b;font-size:.85rem}
+.overdue-row{background:var(--surface);border:1px solid #ef444433;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.overdue-row .book{color:var(--text);font-weight:600}
+.overdue-row .member{color:var(--text-dim);font-size:.85rem}
+.overdue-row .days{color:var(--red);font-weight:700;font-size:1.1rem}
+.overdue-row .fine{color:var(--amber);font-size:.85rem}
 </style>
 {% endblock %}
 {% block content %}
-<h2 style="color:#ef4444;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-exclamation-triangle"></i> Kasnjenja ({{ overdue_loans|length }})</h2>
+<h2 class="fx-text-red mb-3" style="font-family:Cormorant Garamond,serif"><i class="bi bi-exclamation-triangle"></i> Kasnjenja ({{ overdue_loans|length }})</h2>
 {% for l in overdue_loans %}
 <div class="overdue-row">
   <div>
@@ -25,6 +25,6 @@
   </div>
 </div>
 {% empty %}
-<div style="text-align:center;padding:3rem;color:#22c55e"><i class="bi bi-check-circle" style="font-size:3rem"></i><p class="mt-2">Nema kasnjenja!</p></div>
+<div class="text-center fx-text-green fx-p-7"><i class="bi bi-check-circle fx-fs-hero"></i><p class="mt-2">Nema kasnjenja!</p></div>
 {% endfor %}
 {% endblock %}

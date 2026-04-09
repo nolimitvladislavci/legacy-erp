@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="flex-between mb-2">
-  <h1 style="font-family:var(--font-heading);font-size:1.4rem;font-weight:700;color:var(--gold)">
-    <i class="fas fa-file-invoice" style="margin-right:8px;opacity:.6"></i>Dokumenti
+  <h1 class="fx-fs-4xl fx-fw-bold fx-text-gold" style="font-family:var(--font-heading)">
+    <i class="fas fa-file-invoice fx-mr-3" style="opacity:.6"></i>Dokumenti
   </h1>
-  <span style="font-size:.82rem;color:var(--text-muted)">{{ invoices|length }} dokumenata</span>
+  <span class="fx-fs-note fx-text-muted">{{ invoices|length }} dokumenata</span>
 </div>
 
 <!-- Filters -->
@@ -30,7 +30,7 @@
 
 <!-- Table -->
 {% if invoices %}
-<div class="b2b-card" style="padding:0;overflow:hidden">
+<div class="b2b-card fx-p-0 fx-overflow-hidden">
   <div class="b2b-table-wrap">
     <table class="b2b-table">
       <thead>
@@ -49,15 +49,15 @@
         {% for inv in invoices %}
         <tr>
           <td>
-            <a href="{% url 'portal_invoice_detail' token inv.pk %}" class="text-mono" style="color:var(--gold);font-weight:600">
+            <a href="{% url 'portal_invoice_detail' token inv.pk %}" class="text-mono fx-fw-semibold fx-text-gold">
               {{ inv.number|default:"—" }}
             </a>
           </td>
           <td>{{ inv.get_doctype_display }}</td>
           <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
           <td>{% if inv.date_due %}{{ inv.date_due|date:"d.m.Y" }}{% else %}—{% endif %}</td>
-          <td style="font-size:.82rem">{{ inv.get_payment_method_display|default:"—" }}</td>
-          <td class="text-right text-mono" style="font-weight:600">
+          <td class="fx-fs-note">{{ inv.get_payment_method_display|default:"—" }}</td>
+          <td class="text-right text-mono fx-fw-semibold">
             {{ inv.currency|default:"EUR" }} {{ inv.total|floatformat:2 }}
           </td>
           <td><span class="badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span></td>

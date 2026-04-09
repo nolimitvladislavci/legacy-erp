@@ -2,82 +2,65 @@
 {% load i18n %}
 {% block title %}Berbe{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-apple-alt"></i> Berbe</h4>
-  <small style="color:var(--text-muted)">Evidencija berbi, prinosi, kvaliteta</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-apple-alt"></i> Berbe</h4>
+  <small class="fx-text-muted">Evidencija berbi, prinosi, kvaliteta</small></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.berbi|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Berbi</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.berbi|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Berbi</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_kg|default:"0" }} kg</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ubrano</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-gold">{{ stats.ukupno_kg|default:"0" }} kg</div>
+    <div class="fx-fs-sm fx-text-muted">Ubrano</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.prosjek_prinos|default:"0" }} kg/ha</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Prosjek</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.prosjek_prinos|default:"0" }} kg/ha</div>
+    <div class="fx-fs-sm fx-text-muted">Prosjek</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.kultura|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Kultura</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-blue">{{ stats.kultura|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Kultura</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vocnjak</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kultura</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kolicina</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kvaliteta</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Radnika</th>
-      <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Burza</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Datum</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vocnjak</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Kultura</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Kolicina</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Kvaliteta</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Radnika</th>
+      <th class="text-center fx-fs-sm fx-text-muted fx-p-cell fx-bb">Burza</th>
     </tr></thead>
     <tbody>
       {% for b in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ b.datum|date:"d.m.Y" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vocnjak">{{ b.vocnjak }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kultura">{{ b.kultura }}</td>
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Kolicina">{{ b.kolicina_kg }} kg</td>
-        <td style="padding:.5rem .6rem" data-label="Kvaliteta">
-          {% if b.kvaliteta == 'A' %}<span style="color:#22c55e;font-weight:600;font-size:.82rem">A</span>
-          {% elif b.kvaliteta == 'B' %}<span style="color:#f59e0b;font-size:.82rem">B</span>
-          {% else %}<span style="font-size:.82rem">{{ b.kvaliteta|default:"-" }}</span>{% endif %}
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Datum">{{ b.datum|date:"d.m.Y" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Vocnjak">{{ b.vocnjak }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Kultura">{{ b.kultura }}</td>
+        <td class="fx-fs-base fx-fw-bold fx-text-gold fx-p-cell" data-label="Kolicina">{{ b.kolicina_kg }} kg</td>
+        <td class="fx-p-cell" data-label="Kvaliteta">
+          {% if b.kvaliteta == 'A' %}<span class="fx-text-green fx-fw-semibold fx-fs-note">A</span>
+          {% elif b.kvaliteta == 'B' %}<span class="fx-text-amber fx-fs-note">B</span>
+          {% else %}<span class="fx-fs-note">{{ b.kvaliteta|default:"-" }}</span>{% endif %}
         </td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Radnika">{{ b.broj_radnika|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;text-align:center" data-label="Burza">
-          <button type="button" class="btn btn-sm"
-            style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;padding:3px 10px;font-size:.72rem;font-weight:600"
+        <td class="fx-fs-note fx-p-cell" data-label="Radnika">{{ b.broj_radnika|default:"-" }}</td>
+        <td class="text-center fx-p-cell" data-label="Burza">
+          <button type="button" class="btn btn-sm fx-rounded fx-fs-sm fx-fw-semibold fx-text-gold fx-bg-gold-dim"
+            style="border:1px solid var(--gold-border);padding:3px 10px"
             onclick="openBridgePublish({model:'BerbaLog',id:{{ b.pk }},name:'{{ b.kultura|escapejs }} — {{ b.kolicina_kg }}kg',price:'',qty:'{{ b.kolicina_kg }}',unit:'kg'})">
             <i class="fas fa-store me-1"></i>Ponudi
           </button>
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema berbi</td></tr>
+      <tr><td colspan="7" class="text-center fx-text-muted fx-p-6">Nema berbi</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

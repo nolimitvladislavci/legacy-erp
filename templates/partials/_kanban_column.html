@@ -7,12 +7,12 @@
     <span class="fw-semibold small text-white">{{ col_title }}</span>
     <span class="badge ms-auto rounded-pill" style="background:{{ col_color }}">{{ items|length }}</span>
   </div>
-  <div class="kanban-col-body p-2 d-flex flex-column gap-2 bg-dark border border-secondary border-top-0 rounded-bottom"
-       style="min-height:200px;max-height:70vh;overflow-y:auto">
+  <div class="kanban-col-body p-2 d-flex flex-column gap-2 bg-dark border border-secondary border-top-0 rounded-bottom fx-scroll-y"
+       style="min-height:200px;max-height:70vh">
     {% for item in items %}
       {% include card_template with item=item %}
     {% empty %}
-      <div class="text-center text-muted py-4" style="font-size:.8rem">
+      <div class="text-center text-muted py-4 fx-fs-compact">
         <i class="fas fa-inbox mb-2 d-block fs-4"></i>Prazno
       </div>
     {% endfor %}

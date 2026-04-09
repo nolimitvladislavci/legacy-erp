@@ -45,13 +45,13 @@
                 <td class="px-4 py-3 text-center">
                     <a href="{% url 'dashboard' e.pk %}" class="text-blue-500 hover:underline text-sm">{% trans "Uredi" %}</a>
                     <a href="{% url 'calculator:estimate_pdf' e.pk %}" class="text-slate-400 hover:text-slate-600 text-sm ml-2">{% trans "PDF" %}</a>
-                    <form method="post" action="{% url 'calculator:synesis_export' e.pk %}" style="display:inline" class="synesis-export-form">
+                    <form method="post" action="{% url 'calculator:synesis_export' e.pk %}" class="synesis-export-form d-inline">
                         {% csrf_token %}
                         <button type="submit" class="text-emerald-600 hover:text-emerald-800 text-sm ml-2 font-medium" title="Spremi kalkulaciju u Synesis kao ponudu (OFFERS)">
                             📤 Synesis
                         </button>
                     </form>
-                    <form method="post" action="{% url 'calculator:pkv_export' e.pk %}" style="display:inline" class="pkv-export-form">
+                    <form method="post" action="{% url 'calculator:pkv_export' e.pk %}" class="pkv-export-form d-inline">
                         {% csrf_token %}
                         <button type="submit" class="text-orange-600 hover:text-orange-800 text-sm ml-2 font-medium" title="Spremi kao PKV primku u Synesis (nabavna → prodajna cijena s maržom)">
                             📦 PKV

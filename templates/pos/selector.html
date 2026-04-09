@@ -9,13 +9,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;
+body{background:#0d1117;color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
   min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 
 .logo{font-size:.9rem;font-weight:900;letter-spacing:.1em;color:var(--gold,#c9a84c);margin-bottom:8px;text-align:center}
-.logo span{color:#e2e8f0}
-.title{font-size:1.5rem;font-weight:700;color:#f1f5f9;text-align:center;margin-bottom:4px}
-.subtitle{font-size:.82rem;color:#64748b;text-align:center;margin-bottom:32px}
+.logo span{color:var(--text)}
+.title{font-size:1.5rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
+.subtitle{font-size:.82rem;color:var(--text-dim);text-align:center;margin-bottom:32px}
 
 .terminals{width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px}
 
@@ -28,7 +28,7 @@ body{background:#0d1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-seri
 .term-card:hover{border-color:rgba(201,168,76,.5);background:#1c2128;transform:translateY(-1px)}
 .term-card.has-session{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
 .term-card.has-session::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#22c55e
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)
 }
 
 .term-icon{
@@ -40,9 +40,9 @@ body{background:#0d1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-seri
 .term-card.has-session .term-icon{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)}
 
 .term-info{flex:1;min-width:0}
-.term-name{font-size:.95rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.term-type{font-size:.72rem;color:#64748b;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
-.term-session{font-size:.72rem;color:#4ade80;margin-top:3px;font-weight:600}
+.term-name{font-size:.95rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-type{font-size:.72rem;color:var(--text-dim);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.term-session{font-size:.72rem;color:var(--green);margin-top:3px;font-weight:600}
 
 .term-arrow{color:#374151;font-size:.85rem;flex-shrink:0;transition:color .15s}
 .term-card:hover .term-arrow{color:var(--gold,#c9a84c)}
@@ -58,7 +58,7 @@ body{background:#0d1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-seri
 .btn-new:hover{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.5)}
 
 .back-link{margin-top:24px;font-size:.75rem;color:#374151;text-decoration:none}
-.back-link:hover{color:#64748b}
+.back-link:hover{color:var(--text-dim)}
 
 @media(max-width:480px){
   .title{font-size:1.2rem}

@@ -13,11 +13,11 @@
     .arhiva-header h2 i { color: var(--gold); margin-right: 8px; }
     .arhiva-header .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-gold {
-        background: var(--gold); color: #0a0a0a; font-weight: 700; border: none;
+        background: var(--gold); color:var(--text); font-weight: 700; border: none;
         padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
         transition: opacity 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
     }
-    .btn-gold:hover { opacity: 0.85; color: #0a0a0a; }
+    .btn-gold:hover { opacity: 0.85; color:var(--text); }
     .btn-ghost {
         background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
         padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
@@ -32,8 +32,8 @@
         align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
     }
     .stat-icon.gold { background: rgba(201,168,76,0.12); color: var(--gold); }
-    .stat-icon.green { background: rgba(16,185,129,0.12); color: #10b981; }
-    .stat-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .stat-icon.green { background: rgba(16,185,129,0.12); color:var(--green); }
+    .stat-icon.blue { background: rgba(59,130,246,0.12); color:var(--blue); }
     .stat-icon.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
 
     .filter-panel { margin-bottom: 16px; position: sticky; top: 60px; z-index: 100; background: var(--bg); }
@@ -70,7 +70,7 @@
     }
     .filter-actions { display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
     .btn-search {
-        background: var(--gold); color: #0a0a0a; font-weight: 700; border: none;
+        background: var(--gold); color:var(--text); font-weight: 700; border: none;
         padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; white-space: nowrap;
         cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
     }
@@ -80,7 +80,7 @@
         padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; text-decoration: none;
         display: inline-flex; align-items: center;
     }
-    .btn-reset:hover { border-color: #ef4444; color: #ef4444; }
+    .btn-reset:hover { border-color:var(--red); color:var(--red); }
     .filter-divider { width: 100%; border: none; border-top: 1px solid var(--border-light); margin: 8px 0; }
     .filter-check { display: flex; align-items: center; gap: 8px; padding-bottom: 2px; }
     .filter-check label { color: var(--gold); font-size: 0.85rem; font-weight: 600; margin: 0; cursor: pointer; }
@@ -129,12 +129,12 @@
         background: var(--bg-card); border: 1px solid var(--border);
         color: var(--gold); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;
     }
-    .fiscal-yes { color: #10b981; }
+    .fiscal-yes { color:var(--green); }
     .fiscal-no { color: var(--text-muted); }
     .file-link { margin-right: 8px; font-size: 1.25rem; text-decoration: none; transition: opacity 0.15s; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; }
     @media (max-width: 767px) { .file-link { min-width: 44px; min-height: 44px; font-size: 1.4rem; margin-right: 6px; } }
     .file-link:hover { opacity: 0.7; }
-    .file-pdf { color: #ef4444; }
+    .file-pdf { color:var(--red); }
     .file-xml { color: #38bdf8; }
     .file-img { color: var(--gold); }
 
@@ -191,7 +191,7 @@
         text-decoration: none; display: inline-flex; align-items: center;
     }
     .page-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .page-btn.active { background: var(--gold); border-color: var(--gold); color: #0a0a0a; }
+    .page-btn.active { background: var(--gold); border-color: var(--gold); color:var(--text); }
     .page-info { color: var(--text-muted); font-size: 0.78rem; padding: 0 8px; }
 
     .arhiva-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
@@ -243,8 +243,8 @@
 .preview-modal-overlay { display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.82); align-items:center; justify-content:center; animation:fadeIn .15s ease; }
 .preview-modal-overlay.open { display:flex; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.preview-modal { position:relative; width:90vw; max-width:900px; height:88vh; background:#fff; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(0,0,0,.5); }
-[data-theme="dark"] .preview-modal { background:#1e293b; }
+.preview-modal { position:relative; width:90vw; max-width:900px; height:88vh; background:var(--bg-card); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(0,0,0,.5); }
+[data-theme="dark"] .preview-modal { background:var(--surface2); }
 .preview-modal-header { display:flex; align-items:center; justify-content:space-between; padding:.6rem 1rem; border-bottom:1px solid var(--border); background:var(--bg-card); flex-shrink:0; }
 .preview-modal-title { font-size:.88rem; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%; }
 .preview-modal-actions { display:flex; gap:.5rem; align-items:center; }
@@ -254,17 +254,17 @@
 .preview-modal-close:hover { color:var(--text); }
 .preview-modal-body { flex:1; overflow:hidden; position:relative; }
 .preview-modal-body iframe, .preview-modal-body img { width:100%; height:100%; border:none; display:block; }
-.preview-modal-body img { object-fit:contain; background:#f0f0f0; }
+.preview-modal-body img { object-fit:contain; background:var(--surface2); }
 .preview-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-muted); gap:.75rem; }
 .preview-loading .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; }
 
 /* ── Drawer preview ── */
-.drawer-preview-thumb { width:100%; height:140px; border-radius:8px; overflow:hidden; cursor:pointer; position:relative; border:1px solid var(--border); background:#f8fafc; transition:opacity .15s; }
+.drawer-preview-thumb { width:100%; height:140px; border-radius:8px; overflow:hidden; cursor:pointer; position:relative; border:1px solid var(--border); background:var(--surface2); transition:opacity .15s; }
 .drawer-preview-thumb:hover { opacity:.88; }
 .drawer-preview-thumb img { width:100%; height:100%; object-fit:cover; }
 .drawer-preview-thumb .preview-overlay { position:absolute; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s; }
 .drawer-preview-thumb:hover .preview-overlay { opacity:1; }
-.drawer-preview-thumb .preview-overlay i { font-size:2rem; color:#fff; }
+.drawer-preview-thumb .preview-overlay i { font-size:2rem; color:var(--white); }
 </style>
 
 <style>
@@ -284,7 +284,7 @@
     color: var(--gold); font-weight: 700; font-size: 0.95rem;
     display: flex; align-items: center; gap: 8px;
 }
-.batch-count span { background: var(--gold); color: #0a0a0a; padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; }
+.batch-count span { background: var(--gold); color:var(--text); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; }
 .batch-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn-batch {
     background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
@@ -293,10 +293,10 @@
     display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
 }
 .btn-batch:hover { background: rgba(201,168,76,0.2); border-color: var(--gold); }
-.btn-batch-book { color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
-.btn-batch-book:hover { border-color: #10b981; background: rgba(16,185,129,0.15); }
+.btn-batch-book { color:var(--green); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+.btn-batch-book:hover { border-color:var(--green); background: rgba(16,185,129,0.15); }
 .btn-batch-close { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-.btn-batch-close:hover { border-color: #ef4444; color: #ef4444; }
+.btn-batch-close:hover { border-color:var(--red); color:var(--red); }
 
 /* ── Label Dropdown ── */
 .label-dropdown {
@@ -347,7 +347,7 @@
 .label-delete-btn {
     background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;
 }
-.label-delete-btn:hover { color: #ef4444; }
+.label-delete-btn:hover { color:var(--red); }
 .label-cell { min-width: 80px; }
 
 @media (max-width: 768px) {
@@ -359,29 +359,29 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="padding: 4px 0;">
+<div class="container-fluid" class="fx-py-1">
 
     <div class="arhiva-header">
         <div>
             <h2><i class="fas fa-archive"></i> {% trans "Arhiva Dokumenata" %}</h2>
-            <small style="color: var(--text-muted); font-size: 0.78rem;">{% trans "Pregled svih arhiviranih dokumenata" %}</small>
+            <small class="fx-fs-body-sm fx-text-muted">{% trans "Pregled svih arhiviranih dokumenata" %}</small>
         </div>
         <div class="header-actions">
             <a href="{% url 'documents:arhiva_export' %}?{{ request.GET.urlencode }}" class="btn-ghost" title="{% trans 'Exportiraj filtrirane dokumente u CSV' %}">
                 <i class="fas fa-file-csv"></i> CSV
             </a>
             {% if company.country == 'DE' or company.country == 'AT' %}
-            <a href="{% url 'pos:dsfinvk_export' %}" class="btn-ghost" title="DSFinV-K Kassenarchiv" style="color:var(--gold)">
+            <a href="{% url 'pos:dsfinvk_export' %}" class="btn-ghost fx-text-gold" title="DSFinV-K Kassenarchiv">
               &#128230; DSFinV-K
             </a>
             {% endif %}
-            <button class="btn-ghost" onclick="bulkDownload()" id="bulkBtn" style="display:none" title="{% trans 'Preuzmi odabrane' %}">
+            <button class="btn-ghost fx-hidden" onclick="bulkDownload()" id="bulkBtn" title="{% trans 'Preuzmi odabrane' %}">
                 <i class="fas fa-download"></i> <span id="bulkCount">0</span>
             </button>
             <a href="{% url 'documents:arhiva_upload' %}" class="btn-ghost">
                 <i class="fas fa-upload"></i> {% trans "Upload" %}
             </a>
-            <a href="{% url 'documents:arhiva_convert' %}?camera=1" class="btn-gold" style="font-size:1rem;padding:10px 24px">
+            <a href="{% url 'documents:arhiva_convert' %}?camera=1" class="btn-gold fx-fs-lg" class="fx-p-btn-lg">
                 <i class="fas fa-camera"></i> {% trans "Skeniraj dokument" %}
             </a>
         </div>
@@ -389,19 +389,19 @@
 
     {% if stats %}
     <div class="stats-row">
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="stat-icon gold"><i class="fas fa-layer-group"></i></div>
             <div><div class="label">{% trans "Ukupno zapisa" %}</div><div class="value">{{ stats.total_count|default:0 }}</div></div>
         </div>
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="stat-icon green"><i class="fas fa-euro-sign"></i></div>
             <div><div class="label">{% trans "Ukupan iznos" %}</div><div class="value">{{ stats.total_amount|floatformat:2|default:"0.00" }}</div></div>
         </div>
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
             <div><div class="label">{% trans "Fiskalizirano" %}</div><div class="value">{{ stats.fiscal_count|default:0 }}</div></div>
         </div>
-        <div class="stat-card">
+        <div class="fenix-stat">
             <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
             <div><div class="label">{% trans "S datotekama" %}</div><div class="value">{{ stats.file_count|default:0 }}</div></div>
         </div>
@@ -422,23 +422,23 @@
     </div>
 
     <div class="filter-panel">
-        <button class="filter-toggle" id="filterToggleBtn" type="button" style="width:100%;justify-content:center;padding:10px;font-size:.9rem">
-            <span><i class="fas fa-sliders-h" style="margin-right:6px"></i> {% trans "Filteri" %}
+        <button class="filter-toggle fx-w-full fx-fs-md justify-content-center fx-p-10" id="filterToggleBtn" type="button">
+            <span><i class="fas fa-sliders-h fx-mr-2"></i> {% trans "Filteri" %}
                 {% if q or source_type or company_filter or date_from or date_to or currency or has_fiscal or has_file or bookmarked %}
-                <span style="background:var(--gold);color:#0a0a0a;padding:1px 7px;border-radius:10px;font-size:0.68rem;margin-left:6px">{% trans "Aktivno" %}</span>
+                <span class="fx-text-dark fx-rounded fx-fs-tiny fx-bg-gold" class="fx-p-tag fx-ml-2">{% trans "Aktivno" %}</span>
                 {% endif %}
             </span>
             <i class="fas fa-chevron-down chevron"></i>
         </button>
         <div class="filter-body" id="filterBody">
-            <div class="stat-card">
+            <div class="fenix-stat">
                 <form method="get" id="arhivaFilterForm" hx-get="{% url 'documents:arhiva_list' %}" hx-target="#arhiva-results" hx-push-url="true" hx-trigger="submit">
                     <div class="filter-row">
                         <div class="filter-group" style="flex:2;min-width:200px">
                             <label>{% trans "Pretraga" %}</label>
-                            <div style="display:flex;gap:6px">
+                            <div class="d-flex fx-gap-2">
                                 <input type="text" name="q" id="voiceSearchInput" style="padding-right:2.5rem" value="{{ q }}" class="form-control" id="searchInput" placeholder="{% trans 'Broj dokumenta, partner, barcode...' %}">
-                                <button type="button" id="scanBtn" title="Skeniraj barcode kamerom" style="background:var(--gold);border:none;border-radius:8px;padding:0 12px;cursor:pointer;color:#0a0a0a;font-size:1rem;flex-shrink:0"><i class="fas fa-barcode"></i></button>
+                                <button type="button" id="scanBtn" title="Skeniraj barcode kamerom" class="fx-border-none fx-rounded fx-pointer fx-text-dark fx-fs-lg fx-bg-gold flex-shrink-0" class="fx-px-3"><i class="fas fa-barcode"></i></button>
                             </div>
                         </div>
                         <div class="filter-group">
@@ -451,26 +451,26 @@
                             </select>
                         </div>
                         {% if is_superadmin %}
-                        <div class="filter-group" style="min-width:200px;position:relative">
+                        <div class="filter-group fx-relative" style="min-width:200px">
                             <label>{% trans "Tvrtka" %}</label>
                             <input type="text" id="companySearch" class="form-control" placeholder="{% trans 'Sve firme (pretraži...)' %}"
                                    value="{{ company_filter_name }}"
                                    autocomplete="off" style="padding-right:2rem">
                             <input type="hidden" name="company" id="companyId" value="{{ company_filter }}">
-                            <div id="companyDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card,#fff);border:1px solid var(--border,#ddd);border-radius:8px;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.15)">
-                                <div class="company-opt" data-id="" data-name="{% trans 'Sve tvrtke' %}" style="padding:8px 12px;cursor:pointer;font-size:.85rem;color:var(--text-muted,#888);border-bottom:1px solid var(--border,#eee)">
-                                    <i class="fas fa-layer-group" style="margin-right:6px"></i>{% trans "Sve tvrtke" %}
+                            <div id="companyDropdown" class="fx-hidden fx-rounded fx-scroll-y" style="position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);max-height:220px;box-shadow:0 4px 16px rgba(0,0,0,.15)">
+                                <div class="company-opt fx-pointer fx-fs-base fx-p-8-12" data-id="" data-name="{% trans 'Sve tvrtke' %}" style="color:var(--text-muted);border-bottom:1px solid var(--border)">
+                                    <i class="fas fa-layer-group fx-mr-2"></i>{% trans "Sve tvrtke" %}
                                 </div>
                                 {% for c in companies %}
-                                <div class="company-opt" data-id="{{ c.id }}" data-name="{{ c.name }}" style="padding:8px 12px;cursor:pointer;font-size:.85rem">{{ c.name }}</div>
+                                <div class="company-opt fx-pointer fx-fs-base fx-p-8-12" data-id="{{ c.id }}" data-name="{{ c.name }}">{{ c.name }}</div>
                                 {% endfor %}
                             </div>
                         </div>
                         {% endif %}
                         <div class="filter-group" style="min-width:100px">
                             <label>{% trans "Godina" %}</label>
-                            <input type="text" name="year" class="form-control" placeholder="2024"
-                                   value="{{ year_filter_val }}" maxlength="4" style="text-align:center">
+                            <input type="text" name="year" class="form-control text-center" placeholder="2024"
+                                   value="{{ year_filter_val }}" maxlength="4">
                         </div>
                         <div class="filter-group" style="min-width:130px">
                             <label>{% trans "Datum od" %}</label>
@@ -532,7 +532,7 @@
                             </div>
                         </div>
                         {% endif %}
-                        <div class="filter-actions" style="margin-left:auto">
+                        <div class="filter-actions fx-ml-auto">
                             <button type="submit" class="btn-search"><i class="fas fa-search"></i> {% trans "Filtriraj" %}</button>
                             <a href="{% url 'documents:arhiva_list' %}" class="btn-reset"><i class="fas fa-times"></i></a>
                         </div>
@@ -544,9 +544,9 @@
 
     <div class="stat-card table-card p-0">
         <div class="card-header">
-            <h5><i class="fas fa-archive" style="color:var(--gold);margin-right:6px"></i> {% trans "Arhiva" %} <span class="count">({{ page_obj.paginator.count }})</span></h5>
-            <div style="display:flex;gap:6px">
-                <button class="btn-ghost" onclick="toggleAllChecks()" style="padding:6px 10px;font-size:0.75rem"><i class="fas fa-check-double"></i></button>
+            <h5><i class="fas fa-archive fx-text-gold fx-mr-2"></i> {% trans "Arhiva" %} <span class="count">({{ page_obj.paginator.count }})</span></h5>
+            <div class="d-flex fx-gap-2">
+                <button class="btn-ghost fx-fs-caption" onclick="toggleAllChecks()" class="fx-p-btn"><i class="fas fa-check-double"></i></button>
             </div>
         </div>
 
@@ -556,26 +556,26 @@
     </div>
 
     <!-- Batch Action Bar -->
-    <div id="batchBar" class="batch-action-bar" style="display:none">
+    <div id="batchBar" class="batch-action-bar fx-hidden">
         <div class="batch-bar-inner">
             <span class="batch-count"><span id="batchSelectedCount">0</span> {% trans "odabrano" %}</span>
             <div class="batch-actions">
-                <div class="batch-label-dropdown" style="position:relative">
+                <div class="batch-label-dropdown fx-relative">
                     <button class="btn-batch" onclick="toggleLabelDropdown()" type="button">
                         <i class="fas fa-tag"></i> {% trans "Labeliraj" %}
                     </button>
-                    <div id="labelDropdown" class="label-dropdown" style="display:none">
+                    <div id="labelDropdown" class="label-dropdown fx-hidden">
                         {% for lbl in labels %}
                         <div class="label-option" onclick="batchLabel({{ lbl.id }}, '{{ lbl.name|escapejs }}')" style="border-left:3px solid {{ lbl.color }}">
                             <i class="fas fa-{{ lbl.icon }}" style="color:{{ lbl.color }}"></i> {{ lbl.name }}
                         </div>
                         {% empty %}
-                        <div class="label-option" style="color:var(--text-muted);cursor:default;font-size:.8rem">
+                        <div class="label-option fx-fs-compact fx-text-muted" style="cursor:default">
                             <i class="fas fa-info-circle"></i> {% trans "Nema labela. Kreiraj u postavkama." %}
                         </div>
                         {% endfor %}
-                        <div class="label-option label-manage-btn" onclick="openLabelManager()" style="border-top:1px solid var(--border)">
-                            <i class="fas fa-cog" style="color:var(--gold)"></i> {% trans "Upravljaj labelama" %}
+                        <div class="label-option label-manage-btn fx-bt" onclick="openLabelManager()">
+                            <i class="fas fa-cog fx-text-gold"></i> {% trans "Upravljaj labelama" %}
                         </div>
                     </div>
                 </div>
@@ -593,17 +593,17 @@
     </div>
 
     <!-- Label Manager Modal -->
-    <div id="labelManagerModal" class="label-manager-overlay" style="display:none">
+    <div id="labelManagerModal" class="label-manager-overlay fx-hidden">
         <div class="label-manager-panel">
             <div class="label-manager-head">
-                <h3><i class="fas fa-tags" style="color:var(--gold);margin-right:8px"></i>{% trans "Upravljanje labelama" %}</h3>
+                <h3><i class="fas fa-tags fx-text-gold fx-mr-3"></i>{% trans "Upravljanje labelama" %}</h3>
                 <button onclick="closeLabelManager()" class="drawer-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="label-manager-body" id="labelManagerBody">
                 <div class="label-create-form">
-                    <input type="text" id="newLabelName" placeholder="{% trans 'Naziv labele...' %}" class="form-control" style="flex:1">
-                    <input type="color" id="newLabelColor" value="var(--gold,#c9a84c)" style="width:40px;height:36px;border:none;border-radius:6px;cursor:pointer">
-                    <button onclick="createLabel()" class="btn-gold" style="padding:8px 16px"><i class="fas fa-plus"></i></button>
+                    <input type="text" id="newLabelName" placeholder="{% trans 'Naziv labele...' %}" class="form-control fx-flex-1">
+                    <input type="color" id="newLabelColor" value="var(--gold)" class="fx-border-none fx-rounded-sm fx-pointer" class="fx-icon-box-sm">
+                    <button onclick="createLabel()" class="btn-gold fx-p-8-16"><i class="fas fa-plus"></i></button>
                 </div>
                 <div id="labelsList" class="labels-list"></div>
             </div>
@@ -618,7 +618,7 @@
     <div class="drawer-head">
         <div class="drawer-nav">
             <button class="btn-drawer-nav" id="drawerPrev" onclick="navigateDrawer(-1)" title="Prethodni (←)"><i class="fas fa-chevron-left"></i></button>
-            <h3 id="drawerTitle" style="margin:0 8px;font-size:.95rem">{% trans "Detalji dokumenta" %}</h3>
+            <h3 id="drawerTitle" class="fx-fs-normal" class="fx-mx-2 fx-m-0">{% trans "Detalji dokumenta" %}</h3>
             <button class="btn-drawer-nav" id="drawerNext" onclick="navigateDrawer(1)" title="Sljedeći (→)"><i class="fas fa-chevron-right"></i></button>
         </div>
         <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
@@ -626,38 +626,38 @@
     <div class="drawer-body" id="drawerBody">
         <div class="drawer-loading"><i class="fas fa-spinner"></i><p>{% trans "Ucitavanje..." %}</p></div>
     </div>
-    <div class="drawer-footer" id="drawerFooter" style="display:none;flex-direction:column;gap:8px">
+    <div class="drawer-footer fx-hidden fx-gap-2 fx-flex-col" id="drawerFooter">
         <!-- Akcije za komitenta -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button onclick="sendKomitent('whatsapp')" class="btn-drawer" style="background:#25D366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;flex:1;min-width:120px">
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
+            <button onclick="sendKomitent('whatsapp')" class="btn-drawer fx-text-white fx-border-none fx-rounded fx-fs-compact fx-fw-semibold fx-pointer fx-flex-1" class="fx-bg-green fx-p-btn-lg">
                 <i class="fab fa-whatsapp"></i> WhatsApp
             </button>
-            <button onclick="sendKomitent('email')" class="btn-drawer" style="background:#4A90D9;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;flex:1;min-width:120px">
+            <button onclick="sendKomitent('email')" class="btn-drawer fx-text-white fx-border-none fx-rounded fx-fs-compact fx-fw-semibold fx-pointer fx-flex-1" class="fx-bg-blue fx-p-btn-lg">
                 <i class="fas fa-envelope"></i> Email
             </button>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <a href="#" id="drawerDownloadLink" class="btn-drawer" style="background:var(--gold,#c9a84c);color:#000;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;text-align:center;flex:1;min-width:120px">
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
+            <a href="#" id="drawerDownloadLink" class="btn-drawer fx-text-dark fx-no-underline fx-rounded fx-fs-compact fx-fw-semibold text-center fx-bg-gold fx-flex-1" style="padding:8px 14px;min-width:120px">
                 <i class="fas fa-download"></i> {% trans "Spremi lokalno" %}
             </a>
-            <a href="{% url 'documents:arhiva_upload' %}" class="btn-drawer" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;text-align:center;border:1px solid rgba(201,168,76,.3);flex:1;min-width:120px">
+            <a href="{% url 'documents:arhiva_upload' %}" class="btn-drawer fx-no-underline fx-rounded fx-fs-compact fx-fw-semibold text-center fx-text-gold fx-flex-1" style="background:rgba(201,168,76,.15);padding:8px 14px;border:1px solid rgba(201,168,76,.3);min-width:120px">
                 <i class="fas fa-cloud-upload-alt"></i> {% trans "Učitaj arhivu" %}
             </a>
         </div>
-        <a href="#" id="drawerModuleLink" class="btn-gold" target="_blank" style="text-align:center"><i class="fas fa-external-link-alt"></i> {% trans "Otvori u modulu" %}</a>
+        <a href="#" id="drawerModuleLink" class="btn-gold text-center" target="_blank"><i class="fas fa-external-link-alt"></i> {% trans "Otvori u modulu" %}</a>
     </div>
 
     <!-- Modal za slanje komitentu -->
-    <div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001;justify-content:center;align-items:center">
-        <div style="background:var(--bg-card,#111);border:1px solid var(--border,#333);border-radius:12px;padding:24px;max-width:400px;width:90%">
-            <h3 style="color:var(--gold,#c9a84c);margin:0 0 16px" id="sendModalTitle">Pošalji komitentu</h3>
+    <div id="sendModal" class="fx-hidden justify-content-center align-items-center" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10001">
+        <div class="fx-rounded" style="background:var(--bg-card);border:1px solid var(--border);padding:24px;max-width:400px;width:90%">
+            <h3 class="fx-text-gold" style="margin:0 0 16px" id="sendModalTitle">Pošalji komitentu</h3>
             <input type="text" id="sendRecipient" placeholder="Unesite broj ili email..."
-                style="width:100%;padding:10px 14px;border:1px solid var(--border,#333);border-radius:8px;background:var(--bg,#0a0a0a);color:var(--text,#e2e8f0);font-size:.9rem;box-sizing:border-box;margin-bottom:12px">
-            <div style="display:flex;gap:8px">
-                <button onclick="doSend()" style="flex:1;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Pošalji</button>
-                <button onclick="closeSendModal()" style="flex:1;padding:10px;background:transparent;color:var(--text-muted,#94a3b8);border:1px solid var(--border,#333);border-radius:8px;cursor:pointer">Odustani</button>
+                class="fx-w-full fx-rounded fx-fs-md mb-3 fx-p-10-14" style="border:1px solid var(--border);background:var(--bg,#0a0a0a);color:var(--text);box-sizing:border-box">
+            <div class="d-flex fx-gap-2">
+                <button onclick="doSend()" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-flex-1 fx-p-10 fx-bg-gold">Pošalji</button>
+                <button onclick="closeSendModal()" class="fx-rounded fx-pointer fx-bg-transparent fx-flex-1 fx-p-10" style="color:var(--text-muted);border:1px solid var(--border)">Odustani</button>
             </div>
-            <div id="sendResult" style="margin-top:12px;font-size:.85rem;display:none"></div>
+            <div id="sendResult" class="fx-fs-base fx-hidden mt-3"></div>
         </div>
     </div>
 </div>
@@ -722,12 +722,12 @@ function renderDrawer(d){
         var sc = statusColors[d.ai_status] || '#94a3b8';
         var si = statusIcons[d.ai_status] || 'fa-circle';
         h+='<div class="drawer-row"><span class="dl">AI Status</span><span class="dv">';
-        h+='<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:'+sc+'15;color:'+sc+';font-size:.8rem;font-weight:600">';
+        h+='<span class="fx-gap-2 fx-rounded-sm fx-fs-compact fx-fw-semibold d-inline-flex align-items-center" style="padding:4px 10px;background:'+sc+'15;color:'+sc+'">';
         h+='<i class="fas '+si+'"></i> '+(d.ai_status_message||d.ai_status)+'</span></span></div>';
     }
-    h+='<div class="drawer-row"><span class="dl">Iznos</span><span class="dv" style="color:var(--gold);font-weight:700">'+d.amount+' '+d.currency+'</span></div>';
-    if(d.zki) h+='<div class="drawer-row"><span class="dl">ZKI</span><span class="dv" style="font-family:monospace;font-size:0.75rem">'+d.zki+'</span></div>';
-    if(d.jir) h+='<div class="drawer-row"><span class="dl">JIR</span><span class="dv" style="font-family:monospace;font-size:0.75rem">'+d.jir+'</span></div>';
+    h+='<div class="drawer-row"><span class="dl">Iznos</span><span class="dv fx-fw-bold fx-text-gold">'+d.amount+' '+d.currency+'</span></div>';
+    if(d.zki) h+='<div class="drawer-row"><span class="dl">ZKI</span><span class="dv fx-fs-caption fx-font-mono">'+d.zki+'</span></div>';
+    if(d.jir) h+='<div class="drawer-row"><span class="dl">JIR</span><span class="dv fx-fs-caption fx-font-mono">'+d.jir+'</span></div>';
     if(d.extra){
         if(d.extra.invoice_type) h+='<div class="drawer-row"><span class="dl">Vrsta racuna</span><span class="dv">'+d.extra.invoice_type+'</span></div>';
         if(d.extra.tax_classification) h+='<div class="drawer-row"><span class="dl">Klasifikacija</span><span class="dv">'+d.extra.tax_classification+'</span></div>';
@@ -773,7 +773,7 @@ function renderDrawer(d){
         h+='<table class="drawer-items"><thead><tr><th>Naziv</th><th>Kol.</th><th>Jed.</th><th>Cijena</th><th>PDV</th><th>Ukupno</th></tr></thead><tbody>';
         for(var i=0;i<d.items.length;i++){
             var it=d.items[i];
-            h+='<tr><td>'+it.name+'</td><td>'+it.qty+'</td><td>'+it.unit+'</td><td>'+it.price+'</td><td>'+it.vat+'%</td><td style="font-weight:700">'+it.total+'</td></tr>';
+            h+='<tr><td>'+it.name+'</td><td>'+it.qty+'</td><td>'+it.unit+'</td><td>'+it.price+'</td><td>'+it.vat+'%</td><td class="fx-fw-bold">'+it.total+'</td></tr>';
         }
         h+='</tbody></table></div>';
     }
@@ -785,20 +785,20 @@ function renderDrawer(d){
         var conf=Math.round((p.confidence||0)*100);
         var confColor=conf>=80?'#22c55e':conf>=50?'#eab308':'#ef4444';
         h+='<div class="drawer-section"><div class="ai-bookkeeper-panel">';
-        h+='<h5><i class="fas fa-brain"></i> Prijedlog knjizenja <span style="margin-left:auto;font-size:.72rem;color:'+confColor+'">'+conf+'% pouzdanost</span></h5>';
+        h+='<h5><i class="fas fa-brain"></i> Prijedlog knjizenja <span class="fx-fs-sm fx-ml-auto" style="color:'+confColor+'">'+conf+'% pouzdanost</span></h5>';
         h+='<div class="confidence-bar"><div class="confidence-fill" style="width:'+conf+'%;background:'+confColor+'"></div></div>';
         if(p.debit){for(var i=0;i<p.debit.length;i++){var l=p.debit[i];h+='<div class="ai-booking-line"><span class="abl-code">'+l.account+'</span><span>'+(l.description||'')+'</span><span class="abl-d">'+parseFloat(l.amount).toFixed(2)+' D</span><span></span></div>';}}
         if(p.credit){for(var i=0;i<p.credit.length;i++){var l=p.credit[i];h+='<div class="ai-booking-line"><span class="abl-code">'+l.account+'</span><span>'+(l.description||'')+'</span><span></span><span class="abl-c">'+parseFloat(l.amount).toFixed(2)+' C</span></div>';}}
-        if(p.reasoning){h+='<div style="font-size:.72rem;color:var(--muted);margin-top:6px;font-style:italic">'+p.reasoning+'</div>';}
-        h+='<div style="display:flex;gap:6px;margin-top:10px">';
-        h+='<button onclick="doProknjizi('+d.id+')" class="btn-gold" style="flex:1;font-size:.8rem;padding:8px;border-radius:6px;font-weight:700;border:none;cursor:pointer;min-height:44px;background:#c9a84c;color:#0f172a"><i class="fas fa-book"></i> Proknjizi</button>';
-        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-ghost" style="flex:1;font-size:.8rem;padding:8px;border-radius:6px;font-weight:600;cursor:pointer;min-height:44px"><i class="fas fa-sync"></i> Osvjezi prijedlog</button>';
+        if(p.reasoning){h+='<div class="fx-fs-sm fx-text-muted mt-1" style="font-style:italic">'+p.reasoning+'</div>';}
+        h+='<div class="d-flex fx-gap-2 fx-mt-10">';
+        h+='<button onclick="doProknjizi('+d.id+')" class="btn-gold fx-fs-compact fx-rounded-sm fx-fw-bold fx-border-none fx-pointer fx-bg-gold fx-text-dark fx-flex-1 fx-p-8" style="min-height:44px"><i class="fas fa-book"></i> Proknjizi</button>';
+        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-ghost fx-fs-compact fx-rounded-sm fx-fw-semibold fx-pointer fx-flex-1 fx-p-8" style="min-height:44px"><i class="fas fa-sync"></i> Osvjezi prijedlog</button>';
         h+='</div></div></div>';
     } else if(!d.is_booked && d.amount && parseFloat(d.amount)>0){
         h+='<div class="drawer-section"><div class="ai-bookkeeper-panel" style="border-color:rgba(201,168,76,.3)">';
-        h+='<h5 style="color:#c9a84c"><i class="fas fa-brain"></i> AI Bookkeeper</h5>';
-        h+='<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">Nema prijedloga. Kliknite za AI analizu.</div>';
-        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-gold" style="width:100%;font-size:.8rem;padding:8px;border-radius:6px;font-weight:700;border:none;cursor:pointer;min-height:44px;background:#c9a84c;color:#0f172a"><i class="fas fa-brain"></i> Generiraj prijedlog</button>';
+        h+='<h5 class="fx-text-gold"><i class="fas fa-brain"></i> AI Bookkeeper</h5>';
+        h+='<div class="fx-fs-body-sm fx-text-muted mb-2">Nema prijedloga. Kliknite za AI analizu.</div>';
+        h+='<button onclick="doProknjizi('+d.id+',true)" class="btn-gold fx-w-full fx-fs-compact fx-rounded-sm fx-fw-bold fx-border-none fx-pointer fx-bg-gold fx-text-dark fx-p-8" style="min-height:44px"><i class="fas fa-brain"></i> Generiraj prijedlog</button>';
         h+='</div></div>';
     }
 
@@ -810,8 +810,8 @@ function renderDrawer(d){
         h+='<span class="dv"><code>'+d.barcode+'</code>';
         h+=' <button class="btn-copy-bc" onclick="copyBarcode(\''+d.barcode+'\')" title="Kopiraj"><i class="fas fa-copy"></i></button>';
         h+='</span></div>';
-        h+='<div style="text-align:center;margin:10px 0">';
-        h+='<img src="/hr/documents/arhiva/'+d.id+'/barcode.png" style="max-width:220px;border-radius:6px;border:1px solid var(--border);background:#fff;padding:6px" alt="barcode" onerror="this.style.display=\'none\'">';
+        h+='<div class="text-center" style="margin:10px 0">';
+        h+='<img src="/hr/documents/arhiva/'+d.id+'/barcode.png" class="fx-rounded-sm fx-bg-card fx-b fx-p-sm" style="max-width:220px" alt="barcode" onerror="this.style.display=\'none\'">';
         h+='</div>';
         h+='</div>';
     }
@@ -822,17 +822,17 @@ function renderDrawer(d){
         h+='<img src="/hr/documents/arhiva/'+d.id+'/thumbnail/" loading="lazy" alt="preview" onerror="this.style.display='none'">';
         h+='<div class="preview-overlay"><i class="fas fa-search-plus"></i></div>';
         h+='</div>';
-        h+='<div style="display:flex;gap:.4rem;margin-top:.5rem">';
-        h+='<button onclick="openPreview('+d.id+','+JSON.stringify(d.doc_number)+')" class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem"><i class="fas fa-eye"></i> Pregledaj</button>';
+        h+='<div class="d-flex mt-2 fx-gap-1">';
+        h+='<button onclick="openPreview('+d.id+','+JSON.stringify(d.doc_number)+')" class="btn-ghost fx-fs-compact justify-content-center fx-flex-1"><i class="fas fa-eye"></i> Pregledaj</button>';
         if(d.file_path){
-            h+='<a href="/hr/documents/arhiva/file/'+d.file_path+'/" target="_blank" class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem"><i class="fas fa-download"></i> Preuzmi</a>';
+            h+='<a href="/hr/documents/arhiva/file/'+d.file_path+'/" target="_blank" class="btn-ghost fx-fs-compact justify-content-center fx-flex-1"><i class="fas fa-download"></i> Preuzmi</a>';
         } else {
-            h+='<a href="/hr/documents/arhiva/'+d.id+'/preview/" download class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem"><i class="fas fa-download"></i> Preuzmi</a>';
+            h+='<a href="/hr/documents/arhiva/'+d.id+'/preview/" download class="btn-ghost fx-fs-compact justify-content-center fx-flex-1"><i class="fas fa-download"></i> Preuzmi</a>';
         }
         h+='</div>';
-        h+='<div style="display:flex;gap:.4rem;margin-top:.3rem">';
-        h+='<a href="/hr/documents/arhiva/'+d.id+'/pdf/" class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem;color:#ef4444;border-color:#ef4444"><i class="fas fa-file-pdf"></i> PDF</a>';
-        h+='<a href="/hr/documents/arhiva/'+d.id+'/xml/" class="btn-ghost" style="flex:1;justify-content:center;font-size:.8rem;color:#38bdf8;border-color:#38bdf8"><i class="fas fa-file-code"></i> XML</a>';
+        h+='<div class="d-flex fx-mt-sm fx-gap-1">';
+        h+='<a href="/hr/documents/arhiva/'+d.id+'/pdf/" class="btn-ghost fx-fs-compact fx-text-red justify-content-center fx-flex-1" style="border-color:var(--red)"><i class="fas fa-file-pdf"></i> PDF</a>';
+        h+='<a href="/hr/documents/arhiva/'+d.id+'/xml/" class="btn-ghost fx-fs-compact justify-content-center fx-text-blue fx-flex-1" style="border-color:var(--blue)"><i class="fas fa-file-code"></i> XML</a>';
         h+='</div></div>';
     }
     document.getElementById('drawerBody').innerHTML=h;
@@ -968,7 +968,7 @@ function openPreview(entryId, docNumber) {
         .then(function(r){return r.json();})
         .then(function(info){
             if(!info.has_preview){
-                body.innerHTML='<div class="preview-loading"><i class="fas fa-file-alt" style="font-size:3rem;color:#94a3b8"></i><span style="color:#94a3b8">Pregled nije dostupan</span></div>';
+                body.innerHTML='<div class="preview-loading"><i class="fas fa-file-alt fx-fs-hero fx-text-dim"></i><span class="fx-text-dim">Pregled nije dostupan</span></div>';
                 return;
             }
             if(info.file_type==='image'){
@@ -1064,10 +1064,10 @@ document.addEventListener('keydown', function(e){
     var modal=document.createElement('div');
     modal.id='bcScanModal';
     modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
-    modal.innerHTML='<div style="color:#fff;font-size:1rem;font-weight:600;letter-spacing:.02em"><i class="fas fa-barcode" style="color:var(--gold);margin-right:8px"></i>Usmjeri kameru na barcode</div>'
-      +'<video id="bcVideo" style="max-width:90vw;max-height:55vh;border-radius:12px;border:2px solid var(--gold,#c9a84c)"></video>'
-      +'<div id="bcStatus" style="color:rgba(255,255,255,.65);font-size:.82rem">Inicijalizacija kamere...</div>'
-      +'<button onclick="closeScan()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;padding:.5rem 2rem;border-radius:8px;cursor:pointer;font-size:.9rem">Zatvori</button>';
+    modal.innerHTML='<div class="fx-text-white fx-fs-lg fx-fw-semibold" style="letter-spacing:.02em"><i class="fas fa-barcode fx-text-gold fx-mr-3"></i>Usmjeri kameru na barcode</div>'
+      +'<video id="bcVideo" class="fx-rounded" style="max-width:90vw;max-height:55vh;border:2px solid var(--gold)"></video>'
+      +'<div id="bcStatus" class="fx-fs-note" style="color:rgba(255,255,255,.65)">Inicijalizacija kamere...</div>'
+      +'<button onclick="closeScan()" class="fx-text-white fx-rounded fx-pointer fx-fs-md fx-bg-transparent" style="border:1px solid rgba(255,255,255,.3);padding:.5rem 2rem">Zatvori</button>';
     document.body.appendChild(modal);
     var script=document.createElement('script');
     script.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js';
@@ -1210,7 +1210,7 @@ function loadLabels(){
                 html += '<button class="label-delete-btn" onclick="deleteLabel('+l.id+')" title="Obrisi"><i class="fas fa-trash"></i></button>';
                 html += '</div>';
             });
-            if(!d.labels || !d.labels.length) html = '<p style="color:var(--text-muted);text-align:center;padding:20px">Nema labela.</p>';
+            if(!d.labels || !d.labels.length) html = '<p class="text-center fx-text-muted fx-p-20">Nema labela.</p>';
             document.getElementById('labelsList').innerHTML = html;
         });
 }
@@ -1276,7 +1276,7 @@ document.addEventListener('DOMContentLoaded', function(){
         if(labelData[eid]){
             var html = '';
             labelData[eid].forEach(function(l){
-                html += '<span class="label-badge" style="color:' + l.color + ';border-color:' + l.color + ';background:' + l.color + '15"><i class="fas fa-tag" style="font-size:.6rem"></i> ' + l.name + '</span>';
+                html += '<span class="label-badge" style="color:' + l.color + ';border-color:' + l.color + ';background:' + l.color + '15"><i class="fas fa-tag fx-fs-2xs"></i> ' + l.name + '</span>';
             });
             el.innerHTML = html;
         }
@@ -1286,16 +1286,16 @@ document.addEventListener('DOMContentLoaded', function(){
 
 {% block extra_js %}
 <style>
-.voice-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted,#888);font-size:1.1rem;padding:4px;transition:color .2s}
-.voice-btn:hover{color:var(--gold,#c9a84c)}
+.voice-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;padding:4px;transition:color .2s}
+.voice-btn:hover{color:var(--gold)}
 .voice-search-wrap{position:relative;display:inline-block;width:100%}
-.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid #333;border-radius:0 0 8px 8px;z-index:100;max-height:300px;overflow-y:auto;display:none}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:0 0 8px 8px;z-index:100;max-height:300px;overflow-y:auto;display:none}
 .ac-dropdown.show{display:block}
 .ac-item{padding:.55rem .75rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center}
 .ac-item:hover{background:rgba(201,168,76,.08)}
-.ac-item .ac-label{color:#fff;font-size:.85rem}
-.ac-item .ac-type{color:#888;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
-.ac-item .ac-amt{color:#4ade80;font-size:.8rem;font-weight:600}
+.ac-item .ac-label{color:var(--white);font-size:.85rem}
+.ac-item .ac-type{color:var(--text-dim);font-size:.7rem;text-transform:uppercase;letter-spacing:0.05em}
+.ac-item .ac-amt{color:var(--green);font-size:.8rem;font-weight:600}
 </style>
 <script>
 function startVoice(){
@@ -1382,17 +1382,17 @@ function deleteEntry(pk, row) {
 </script>
 
 <!-- Onboarding modal -->
-<div id="arhivaOnboarding" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);align-items:center;justify-content:center">
-  <div style="background:#1a1a1a;border:1px solid var(--gold);border-radius:16px;max-width:480px;width:90%;padding:2.5rem;text-align:center">
-    <div style="font-size:3rem;margin-bottom:1rem">📂</div>
-    <h2 style="color:var(--gold);font-size:1.4rem;margin-bottom:.8rem">Dobrodošli u Arhivu!</h2>
-    <p style="color:#ccc;font-size:1rem;line-height:1.6;margin-bottom:1.5rem">
+<div id="arhivaOnboarding" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85)">
+  <div class="fx-bg-card fx-rounded-lg text-center" style="border:1px solid var(--gold);max-width:480px;width:90%;padding:2.5rem">
+    <div class="fx-fs-hero mb-3">📂</div>
+    <h2 class="fx-fs-4xl fx-text-gold" style="margin-bottom:.8rem">Dobrodošli u Arhivu!</h2>
+    <p class="fx-fs-lg fx-text-muted fx-lh-normal fx-mb-6">
       Ovdje se čuvaju svi vaši dokumenti — računi, fakture, e-računi.<br>
       Sustav ih automatski sortira i indeksira.
     </p>
-    <div style="display:flex;gap:.8rem;justify-content:center">
-      <a href="/hr/documents/arhiva-upute/" style="padding:.7rem 1.5rem;background:var(--gold);color:#000;border-radius:8px;text-decoration:none;font-weight:700">Pokaži mi kako</a>
-      <button onclick="dismissOnboarding()" style="padding:.7rem 1.5rem;background:rgba(255,255,255,.1);color:#ccc;border:1px solid #444;border-radius:8px;cursor:pointer">Znam, hvala</button>
+    <div class="d-flex justify-content-center" style="gap:.8rem">
+      <a href="/hr/documents/arhiva-upute/" class="fx-text-dark fx-rounded fx-no-underline fx-fw-bold fx-bg-gold" style="padding:.7rem 1.5rem">Pokaži mi kako</a>
+      <button onclick="dismissOnboarding()" class="fx-rounded fx-pointer fx-text-muted fx-b2" style="padding:.7rem 1.5rem;background:rgba(255,255,255,.1)">Znam, hvala</button>
     </div>
   </div>
 </div>
@@ -1462,7 +1462,7 @@ function doSend() {
     var result = document.getElementById("sendResult");
     if (!recipient) { result.style.display = "block"; result.style.color = "#ef4444"; result.textContent = "Unesite primatelja."; return; }
     if (!_currentEntryId) { result.style.display = "block"; result.style.color = "#ef4444"; result.textContent = "Odaberite dokument."; return; }
-    result.style.display = "block"; result.style.color = "var(--gold,#c9a84c)"; result.textContent = "Šaljem...";
+    result.style.display = "block"; result.style.color = "var(--gold)"; result.textContent = "Šaljem...";
     fetch("/hr/documents/arhiva/" + _currentEntryId + "/send/", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },

@@ -7,17 +7,17 @@
 {% block content %}
 <style>
     .patrol-header { margin-bottom: 2rem; }
-    .patrol-header h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-    .patrol-header p { color: #888; font-size: 0.9rem; margin-top: 4px; }
+    .patrol-header h1 { font-size: 1.6rem; font-weight: 700; color:var(--white); }
+    .patrol-header p { color:var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
     .patrol-card {
-        background: #111;
+        background:var(--bg-card);
         border-left: 4px solid var(--gold, var(--gold,#c9a84c));
         padding: 1.5rem;
         margin-bottom: 1rem;
         border-radius: 8px;
     }
-    .patrol-card.has-issues { border-left-color: #ef4444; }
-    .patrol-date { color: #888; font-size: 0.85rem; }
+    .patrol-card.has-issues { border-left-color:var(--red); }
+    .patrol-date { color:var(--text-muted); font-size: 0.85rem; }
     .patrol-badge {
         display: inline-block;
         padding: 2px 10px;
@@ -26,8 +26,8 @@
         font-weight: 600;
         margin-left: 8px;
     }
-    .patrol-badge.ok { background: #22c55e22; color: #22c55e; }
-    .patrol-badge.alert { background: #ef444422; color: #ef4444; }
+    .patrol-badge.ok { background:var(--green)22; color:var(--green); }
+    .patrol-badge.alert { background:var(--red)22; color:var(--red); }
     .patrol-summary {
         margin-top: 1rem;
         color: #ddd;
@@ -38,7 +38,7 @@
     .patrol-toggle {
         background: none;
         border: 1px solid #333;
-        color: #888;
+        color:var(--text-muted);
         padding: 4px 12px;
         border-radius: 6px;
         font-size: 0.75rem;
@@ -50,13 +50,13 @@
     .patrol-raw {
         display: none;
         margin-top: 1rem;
-        background: #0a0a0a;
+        background:var(--bg);
         border: 1px solid #222;
         border-radius: 6px;
         padding: 1rem;
         overflow-x: auto;
         font-size: 0.75rem;
-        color: #888;
+        color:var(--text-muted);
         font-family: monospace;
         white-space: pre-wrap;
         max-height: 400px;
@@ -64,10 +64,10 @@
     .patrol-empty {
         text-align: center;
         padding: 4rem 2rem;
-        color: #555;
+        color:var(--text-dim);
         font-size: 1.1rem;
     }
-    .patrol-empty i { font-size: 3rem; display: block; margin-bottom: 1rem; color: #333; }
+    .patrol-empty i { font-size: 3rem; display: block; margin-bottom: 1rem; color:var(--text); }
 </style>
 
 <div class="patrol-header">
@@ -78,7 +78,7 @@
 {% if reports %}
     {% for report in reports %}
     <div class="patrol-card {% if report.has_issues %}has-issues{% endif %}">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div class="d-flex fx-flex-wrap fx-gap-2 align-items-center justify-content-between">
             <div>
                 <span class="patrol-date">{{ report.created_at|date:"d.m.Y H:i" }}</span>
                 {% if report.has_issues %}

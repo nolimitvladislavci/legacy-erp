@@ -38,12 +38,12 @@
   50% { box-shadow: 0 0 20px 8px rgba(201,168,76,.1); }
 }
 .golubar-hero h1 {
-  font-size: 1.8rem; font-weight: 800; color: #fff;
+  font-size: 1.8rem; font-weight: 800; color:var(--white);
   margin: 0 0 .25rem;
   letter-spacing: -.5px;
 }
 .golubar-hero h1 span { color: var(--gold,#c9a84c); }
-.golubar-hero p { color: #94a3b8; font-size: .9rem; margin: 0; }
+.golubar-hero p { color:var(--text-muted); font-size: .9rem; margin: 0; }
 
 /* Stat cards */
 .g-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 2rem; }
@@ -72,10 +72,10 @@
 }
 .g-stat-icon.teal { background: rgba(20,184,166,.12); color: #14b8a6; }
 .g-stat-icon.gold { background: rgba(201,168,76,.12); color: var(--gold,#c9a84c); }
-.g-stat-icon.green { background: rgba(34,197,94,.12); color: #22c55e; }
+.g-stat-icon.green { background: rgba(34,197,94,.12); color:var(--green); }
 .g-stat-icon.pink { background: rgba(236,72,153,.12); color: #ec4899; }
-.g-stat-icon.red { background: rgba(239,68,68,.12); color: #ef4444; }
-.g-stat-icon.blue { background: rgba(59,130,246,.12); color: #3b82f6; }
+.g-stat-icon.red { background: rgba(239,68,68,.12); color:var(--red); }
+.g-stat-icon.blue { background: rgba(59,130,246,.12); color:var(--blue); }
 .g-stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
 .g-stat-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: 2px; }
 
@@ -135,9 +135,9 @@
 .g-race-table table tbody tr { transition: background .15s; }
 .g-race-table table tbody tr:hover { background: rgba(201,168,76,.03); }
 .g-medal { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; }
-.g-medal-1 { background: linear-gradient(135deg, var(--gold,#c9a84c), #e8d48b); color: #0a0a0a; }
-.g-medal-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
-.g-medal-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
+.g-medal-1 { background: linear-gradient(135deg, var(--gold,#c9a84c), #e8d48b); color:var(--text); }
+.g-medal-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color:var(--text); }
+.g-medal-3 { background: linear-gradient(135deg, #b45309, #d97706); color:var(--white); }
 
 /* Empty state */
 .g-empty {
@@ -160,7 +160,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item active">Nadzorna ploča</li>
   </ol>
@@ -174,9 +174,9 @@
 </div>
 
 <!-- Offline Pending -->
-<div id="offline-pending" style="display:none" class="alert mb-3" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);border-radius:12px;padding:1rem 1.25rem">
+<div id="offline-pending" class="alert mb-3 fx-hidden">
   <i class="fas fa-cloud-upload-alt"></i> <span id="pending-count">0</span> zapisa ceka sinkronizaciju
-  <button onclick="GolubarOffline.syncNow()" class="btn btn-sm btn-warning ms-2" style="font-weight:600;font-size:.78rem">Sinkroniziraj sad</button>
+  <button onclick="GolubarOffline.syncNow()" class="btn btn-sm btn-warning ms-2 fx-fw-semibold fx-fs-body-sm">Sinkroniziraj sad</button>
 </div>
 
 <!-- Stats -->
@@ -224,10 +224,10 @@
 </div>
 
 <!-- Recent Races -->
-<div class="g-race-table card" style="background:var(--bg-card)">
+<div class="g-race-table card fx-bg-card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Zadnje utrke</h5>
-    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-sm" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:600;font-size:.78rem">
+    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-sm fx-text-dark fx-fw-semibold fx-fs-body-sm" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d)">
       <i class="fas fa-plus me-1"></i>Nova utrka
     </a>
   </div>
@@ -249,24 +249,24 @@
           {% for u in utrke %}
           <tr>
             <td>
-              <span style="background:var(--badge-bg);padding:3px 8px;border-radius:6px;font-size:.78rem;font-weight:600">
+              <span class="fx-rounded-sm fx-fs-body-sm fx-fw-semibold" style="background:var(--badge-bg);padding:3px 8px">
                 {{ u.datum|date:"d.m.Y" }}
               </span>
             </td>
             <td>
-              <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">
+              <a href="{% url 'udruge:utrka_detail' u.pk %}" class="fx-fw-semibold fx-no-underline fx-text-gold">
                 {{ u.naziv }}
               </a>
             </td>
-            <td style="color:var(--text-secondary)">{{ u.startna_tocka|default:"--" }}</td>
+            <td class="fx-text-dim">{{ u.startna_tocka|default:"--" }}</td>
             <td>
-              <span style="background:rgba(59,130,246,.1);color:#60a5fa;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600">
+              <span class="fx-rounded-xl fx-fs-body-sm fx-fw-semibold fx-text-blue" style="background:rgba(59,130,246,.1);padding:3px 10px">
                 {{ u.udaljenost_km }} km
               </span>
             </td>
-            <td style="color:var(--text-secondary)">{{ u.organizator|default:"--" }}</td>
+            <td class="fx-text-dim">{{ u.organizator|default:"--" }}</td>
             <td>
-              <a href="{% url 'udruge:utrka_detail' u.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;padding:3px 10px">
+              <a href="{% url 'udruge:utrka_detail' u.pk %}" class="btn btn-sm btn-outline-secondary fx-fs-sm" style="padding:3px 10px">
                 <i class="fas fa-eye"></i>
               </a>
             </td>
@@ -280,7 +280,7 @@
       <div class="g-empty-dove"><i class="fas fa-dove"></i></div>
       <h3>Dobrodošli u Golubarski Centar!</h3>
       <p>Započnite dodavanjem golubinjaka, registracijom golubova i stvaranjem prvog uzgojnog para.</p>
-      <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px">
+      <a href="{% url 'udruge:golubinjak_create' %}" class="btn fx-text-dark fx-fw-bold" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);padding:10px 28px">
         <i class="fas fa-plus me-1"></i>Dodaj prvi golubinjak
       </a>
     </div>

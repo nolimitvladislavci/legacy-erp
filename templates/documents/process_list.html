@@ -1,24 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -60,9 +43,9 @@
             <td>{{ doc.partner.name|default:"—" }}</td>
             <td>{{ doc.date_issued|date:"d.m.Y" }}</td>
             <td>
-              {% if doc.status == 'draft' %}<span class="badge bg-warning text-dark">Nacrt</span>
-              {% elif doc.status == 'confirmed' %}<span class="badge bg-success">Potvrđeno</span>
-              {% else %}<span class="badge bg-secondary">{{ doc.get_status_display }}</span>{% endif %}
+              {% if doc.status == 'draft' %}<span class="fenix-badge fenix-badge-warning">Nacrt</span>
+              {% elif doc.status == 'confirmed' %}<span class="fenix-badge fenix-badge-success">Potvrđeno</span>
+              {% else %}<span class="fenix-badge fenix-badge-muted">{{ doc.get_status_display }}</span>{% endif %}
             </td>
             <td class="text-end">{{ doc.total_with_vat|floatformat:2 }} €</td>
             <td class="text-end">

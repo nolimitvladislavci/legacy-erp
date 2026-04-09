@@ -3,13 +3,13 @@
 {% block title %}Knjižnična TV{% endblock %}
 {% block content %}
 
-<h2 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">
+<h2 class="fx-fs-4xl fx-fw-bold mb-1">
   <i class="fas fa-play-circle" style="color:var(--lib-accent)"></i> Knjižnična TV
 </h2>
-<p style="color:var(--lib-muted);margin-bottom:16px">Sigurna zona — bez reklama, bez praćenja, sadržaj odabran od knjižničara.</p>
+<p class="mb-3 fx-text-muted">Sigurna zona — bez reklama, bez praćenja, sadržaj odabran od knjižničara.</p>
 
 <!-- Tier filter -->
-<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+<div class="d-flex fx-gap-2 fx-flex-wrap mb-4">
   <a href="{% url 'knjiznica:portal_media' slug %}" class="btn btn-sm {% if not tier %}btn-primary{% else %}btn-outline-secondary{% endif %}">Sve</a>
   <a href="?tier=mrvice" class="btn btn-sm {% if tier == 'mrvice' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Mrvice (0-5)</a>
   <a href="?tier=explorer" class="btn btn-sm {% if tier == 'explorer' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Istraživači (6-9)</a>
@@ -19,10 +19,10 @@
 
 <div class="media-grid">
   {% for m in media %}
-  <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card" style="text-decoration:none;color:inherit">
+  <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card fx-no-underline" style="color:inherit">
     <div class="media-thumb">
       {% if m.thumbnail %}
-      <img src="{{ m.thumbnail.url }}" style="width:100%;height:100%;object-fit:cover" alt="">
+      <img src="{{ m.thumbnail.url }}" class="fx-w-full" style="height:100%;object-fit:cover" alt="">
       {% else %}
       <i class="fas fa-{% if m.content_type == 'audio_story' %}headphones{% elif m.content_type == 'video_read' %}book-reader{% elif m.content_type == 'quiz' %}question-circle{% elif m.content_type == 'debate' %}comments{% else %}play{% endif %}"></i>
       {% endif %}
@@ -38,8 +38,8 @@
     </div>
   </a>
   {% empty %}
-  <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--lib-muted)">
-    <i class="fas fa-video" style="font-size:2rem;margin-bottom:8px"></i>
+  <div class="text-center fx-text-muted fx-col-full" style="padding:40px">
+    <i class="fas fa-video fx-fs-icon mb-2"></i>
     <p>Još nema sadržaja. Knjižničari uskoro dodaju prve materijale!</p>
   </div>
   {% endfor %}

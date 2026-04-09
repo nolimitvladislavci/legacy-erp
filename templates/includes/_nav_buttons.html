@@ -13,14 +13,12 @@
   - danger_cancel : ako je True, Odustani gumb je crven
   - no_submit     : ako je True, submit gumb se ne prikazuje (samo Natrag/Odustani)
 #}
-<div style="display:flex;gap:10px;justify-content:space-between;align-items:center;
-            margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.08)">
+<div class="d-flex fx-gap-3 justify-content-between align-items-center fx-mt-6" style="padding-top:1rem;border-top:1px solid rgba(255,255,255,.08)">
 
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="d-flex fx-gap-2 fx-flex-wrap">
     {% if back_url %}
     <a href="{{ back_url }}"
-       style="padding:10px 20px;border:1px solid #444;border-radius:8px;color:#94a3b8;
-              text-decoration:none;font-size:.9rem;transition:all .15s;display:inline-block"
+       class="fx-rounded fx-text-muted fx-no-underline fx-fs-md d-inline-block" style="padding:10px 20px;border:1px solid #444;transition:all .15s"
        onmouseover="this.style.borderColor='var(--gold,#c9a84c)';this.style.color='var(--gold,#c9a84c)'"
        onmouseout="this.style.borderColor='#444';this.style.color='#94a3b8'">
       ← Natrag
@@ -29,9 +27,7 @@
 
     {% if cancel_url %}
     <a href="{{ cancel_url }}"
-       style="padding:10px 20px;border:1px solid {% if danger_cancel %}rgba(239,68,68,.4){% else %}#333{% endif %};
-              border-radius:8px;color:{% if danger_cancel %}#ef4444{% else %}#64748b{% endif %};
-              text-decoration:none;font-size:.9rem;transition:all .15s;display:inline-block"
+       class="fx-rounded fx-no-underline fx-fs-md" style="padding:10px 20px;border:1px solid {% if danger_cancel %}rgba(239,68,68,.4){% else %}#333{% endif %};color:{% if danger_cancel %}#ef4444{% else %}#64748b{% endif %};transition:all .15s;display:inline-block"
        onmouseover="this.style.opacity='.75'"
        onmouseout="this.style.opacity='1'">
       Odustani
@@ -41,9 +37,7 @@
 
   {% if not no_submit %}
   <button type="submit" name="{{ forward_name|default:'submit' }}"
-          style="padding:10px 28px;background:var(--gold,#c9a84c);border:none;border-radius:8px;
-                 color:#0a0a0a;font-weight:700;font-size:.95rem;cursor:pointer;
-                 transition:all .2s;letter-spacing:.02em"
+          class="fx-border-none fx-rounded fx-text-dark fx-fw-bold fx-fs-normal fx-pointer fx-bg-gold" style="padding:10px 28px;transition:all .2s;letter-spacing:.02em"
           onmouseover="this.style.background='#e8c96a';this.style.transform='translateY(-1px)'"
           onmouseout="this.style.background='var(--gold,#c9a84c)';this.style.transform='none'">
     {{ forward_label|default:"Nastavi →" }}

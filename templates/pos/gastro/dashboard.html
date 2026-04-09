@@ -19,7 +19,7 @@
   position:relative;text-decoration:none;display:flex;flex-direction:column;align-items:center}
 .g-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.45)}
 .g-icon{font-size:1.6rem;margin-bottom:.3rem;line-height:1}
-.g-name{font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.15rem}
+.g-name{font-weight:700;font-size:.9rem;color:var(--white);margin-bottom:.15rem}
 .g-cap{font-size:.68rem;color:rgba(255,255,255,.5)}
 .g-status-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
   margin-top:.35rem;padding:.15rem .45rem;border-radius:20px}
@@ -28,23 +28,23 @@
 .g-card.free{background:rgba(30,41,59,.7);border-color:rgba(255,255,255,.08)}
 .g-card.free .g-status-label{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
 .g-card.s-new{background:rgba(202,138,4,.15);border-color:#ca8a04}
-.g-card.s-new .g-status-label{background:#ca8a04;color:#000}
-.g-card.s-confirmed{background:rgba(59,130,246,.13);border-color:#3b82f6}
-.g-card.s-confirmed .g-status-label{background:#3b82f6;color:#fff}
+.g-card.s-new .g-status-label{background:#ca8a04;color:var(--text)}
+.g-card.s-confirmed{background:rgba(59,130,246,.13);border-color:var(--blue)}
+.g-card.s-confirmed .g-status-label{background:var(--blue);color:var(--white)}
 .g-card.s-preparing{background:rgba(234,88,12,.13);border-color:#ea580c}
-.g-card.s-preparing .g-status-label{background:#ea580c;color:#fff}
-.g-card.s-ready{background:rgba(22,163,74,.15);border-color:#16a34a}
-.g-card.s-ready .g-name{color:#4ade80}
-.g-card.s-ready .g-status-label{background:#16a34a;color:#fff}
+.g-card.s-preparing .g-status-label{background:#ea580c;color:var(--white)}
+.g-card.s-ready{background:rgba(22,163,74,.15);border-color:var(--green)}
+.g-card.s-ready .g-name{color:var(--green)}
+.g-card.s-ready .g-status-label{background:#16a34a;color:var(--white)}
 .g-card.s-delivering{background:rgba(139,92,246,.13);border-color:#8b5cf6}
-.g-card.s-delivering .g-status-label{background:#8b5cf6;color:#fff}
+.g-card.s-delivering .g-status-label{background:#8b5cf6;color:var(--white)}
 
 @keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.6)}50%{box-shadow:0 0 0 8px rgba(22,163,74,.0)}}
 .g-card.s-ready{animation:pulse-border 2s ease infinite}
 
 .g-timer{position:absolute;top:5px;right:6px;font-size:.6rem;font-weight:700;
   background:rgba(0,0,0,.55);color:rgba(255,255,255,.7);padding:.1rem .35rem;border-radius:10px}
-.g-timer.warn{background:#dc2626;color:#fff}
+.g-timer.warn{background:var(--red);color:var(--white)}
 
 /* Legend */
 .legend{display:flex;flex-wrap:wrap;gap:.5rem;padding:.4rem 1rem .2rem}
@@ -58,12 +58,12 @@
 .oc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
 .oc-table{font-weight:700;color:var(--gold);font-size:.88rem}
 .oc-time{font-size:.67rem;color:var(--muted)}
-.oc-time.warn{color:#f87171}
+.oc-time.warn{color:var(--red)}
 .oc-status{display:inline-block;padding:.1rem .4rem;border-radius:4px;font-size:.63rem;font-weight:700}
 .oc-status.new{background:rgba(202,138,4,.2);color:#fbbf24}
-.oc-status.confirmed{background:rgba(59,130,246,.2);color:#60a5fa}
+.oc-status.confirmed{background:rgba(59,130,246,.2);color:var(--blue)}
 .oc-status.preparing{background:rgba(234,88,12,.2);color:#fb923c}
-.oc-status.ready{background:rgba(22,163,74,.2);color:#4ade80}
+.oc-status.ready{background:rgba(22,163,74,.2);color:var(--green)}
 .oc-status.delivering{background:rgba(139,92,246,.2);color:#a78bfa}
 .oc-item-row{font-size:.77rem;padding:.08rem 0;color:var(--text)}
 
@@ -77,31 +77,31 @@
   <span class="legend-item"><span class="legend-dot" style="background:#ca8a04"></span>Nova narudžba</span>
   <span class="legend-item"><span class="legend-dot" style="background:#ea580c"></span>U pripremi</span>
   <span class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>Gotovo — čeka</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Potvrđeno</span>
+  <span class="legend-item"><span class="legend-dot fx-bg-blue"></span>Potvrđeno</span>
   <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>Na putu</span>
 </div>
 
 <div class="g-layout">
 
   <!-- ───── Stolovi po zonama ───── -->
-  <div style="padding:0 .5rem .5rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-    <a href="#" onclick="document.getElementById('qrModal').classList.add('open');return false" class="btn btn-ghost btn-sm" style="font-size:.75rem"><i class="fas fa-qrcode"></i> QR kodovi stolova</a>
+  <div class="d-flex fx-flex-wrap fx-gap-2 align-items-center" style="padding:0 .5rem .5rem">
+    <a href="#" onclick="document.getElementById('qrModal').classList.add('open');return false" class="btn btn-ghost btn-sm fx-fs-caption"><i class="fas fa-qrcode"></i> QR kodovi stolova</a>
   </div>
   <!-- QR Modal -->
-  <div id="qrModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h5 style="margin:0;color:var(--gold)">QR kodovi za stolove</h5>
-        <button onclick="document.getElementById('qrModal').classList.remove('open');document.getElementById('qrModal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">&times;</button>
+  <div id="qrModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7)">
+    <div class="fx-rounded fx-b fx-p-5 fx-scroll-y fx-bg-card" style="max-width:600px;width:90%;max-height:80vh">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fx-text-gold fx-m-0">QR kodovi za stolove</h5>
+        <button onclick="document.getElementById('qrModal').classList.remove('open');document.getElementById('qrModal').style.display='none'" class="fx-border-none fx-fs-2xl fx-pointer fx-text-muted fx-bg-transparent">&times;</button>
       </div>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:1rem">Kopirajte link ili otvorite u novom tabu. Gosti skeniraju QR kod za self-ordering.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <p class="fx-fs-compact fx-text-muted mb-3">Kopirajte link ili otvorite u novom tabu. Gosti skeniraju QR kod za self-ordering.</p>
+      <div class="d-grid fx-gap-2 fx-grid-2-equal">
         {% for t in tables %}
-        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:.6rem;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:.82rem;font-weight:600">{{ t.name }}</span>
-          <div style="display:flex;gap:.3rem">
+        <div class="fx-rounded-sm d-flex justify-content-between align-items-center fx-b" style="background:rgba(255,255,255,.03);padding:.6rem">
+          <span class="fx-fs-note fx-fw-semibold">{{ t.name }}</span>
+          <div class="d-flex" style="gap:.3rem">
             <button onclick="navigator.clipboard.writeText(window.location.origin+'/pos/gastro/qr/{{ t.qr_code }}/');this.textContent='OK';setTimeout(()=>this.textContent='Copy',1500)" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:2px 8px;font-size:.7rem;color:var(--gold);cursor:pointer">Copy</button>
-            <a href="/pos/gastro/qr/{{ t.qr_code }}/" target="_blank" style="background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.3);border-radius:4px;padding:2px 8px;font-size:.7rem;color:var(--green);text-decoration:none">Open</a>
+            <a href="/pos/gastro/qr/{{ t.qr_code }}/" target="_blank" class="fx-rounded-sm fx-fs-sm fx-no-underline fx-text-green fx-p-btn" style="background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.3)">Open</a>
           </div>
         </div>
         {% endfor %}
@@ -118,7 +118,7 @@
     <div class="g-zone">
       <div class="g-zone-title">
         {% if zone.grouper %}📍 {{ zone.grouper }}{% else %}🏠 Unutra{% endif %}
-        <span style="color:rgba(255,255,255,.3);font-weight:400">&nbsp;({{ zone.list|length }})</span>
+        <span class="fx-fw-normal" style="color:rgba(255,255,255,.3)">&nbsp;({{ zone.list|length }})</span>
       </div>
       <div class="g-grid">
         {% for t in zone.list %}
@@ -135,13 +135,13 @@
               <div class="g-status-label">{{ t.active_order.get_status_display }}</div>
               {% if t.active_order.status in 'delivered,ready' %}
               <div style="position:absolute;bottom:4px;right:4px">
-                <a href="{% url 'pos:table_checkout' t.pk %}" class="btn btn-sm" style="background:#22c55e;color:#000;font-weight:700;font-size:.65rem;padding:2px 8px;border-radius:12px" onclick="event.stopPropagation()">Naplati</a>
+                <a href="{% url 'pos:table_checkout' t.pk %}" class="btn btn-sm fx-bg-green fx-text-dark fx-fw-bold fx-fs-xs fx-rounded fx-p-btn" onclick="event.stopPropagation()">Naplati</a>
               </div>
               {% endif %}
             </a>
           {% else %}
             {# ── Slobodan stol ── #}
-            <div style="position:relative">
+            <div class="fx-relative">
             <a href="{% url 'pos:gastro_table_order' t.pk %}" class="g-card free">
               <div class="g-icon">{% if t.table_type == 'bar' %}🍹{% elif t.table_type == 'terrace' %}☀️{% elif t.table_type == 'vip' %}⭐{% elif t.table_type == 'room' %}🛏{% else %}🍽{% endif %}</div>
               <div class="g-name">{{ t.name }}</div>
@@ -149,7 +149,7 @@
               <div class="g-status-label">Slobodan</div>
             </a>
             <a href="/pos/gastro/qr/{{ t.qr_code }}/" target="_blank" title="QR meni za {{ t.name }}"
-               style="position:absolute;top:4px;right:4px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:2px 5px;font-size:.65rem;color:var(--gold);text-decoration:none;z-index:2"
+               class="fx-rounded-sm fx-fs-xs fx-no-underline fx-text-gold" style="position:absolute;top:4px;right:4px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:2px 5px;z-index:2"
                onclick="event.stopPropagation()">QR</a>
             </div>
           {% endif %}
@@ -157,9 +157,9 @@
       </div>
     </div>
     {% empty %}
-    <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
-      <div style="font-size:3rem;margin-bottom:.75rem">🍽</div>
-      <p style="margin-bottom:.5rem">Nema stolova.</p>
+    <div class="text-center fx-text-muted" style="padding:3rem 1rem">
+      <div class="fx-fs-hero fx-mb-4">🍽</div>
+      <p class="mb-2">Nema stolova.</p>
       <a href="/admin/pos/table/add/" class="btn btn-gold btn-sm">+ Dodaj stol</a>
     </div>
     {% endfor %}
@@ -167,9 +167,9 @@
 
   <!-- ───── Sidebar: Aktivne narudžbe ───── -->
   <div class="g-sidebar">
-    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)">
+    <div class="fx-fs-sm fx-text-gold fx-uppercase" style="letter-spacing:.08em">
       📋 Aktivne narudžbe
-      <span style="color:rgba(255,255,255,.35);font-weight:400">({{ active_orders|length }})</span>
+      <span class="fx-fw-normal" style="color:rgba(255,255,255,.35)">({{ active_orders|length }})</span>
     </div>
 
     {% for o in active_orders %}
@@ -181,17 +181,17 @@
       <div class="oc-time" data-created="{{ o.created_at.isoformat }}" id="sidebar-timer-{{ o.pk }}">--</div>
       {% for i in o.items.all %}
       <div class="oc-item-row">
-        {{ i.quantity|floatformat:0 }}× {{ i.inventory_item.name|default:"?" }}{% if i.notes %} <span style="color:var(--muted);font-size:.7rem">({{ i.notes }})</span>{% endif %}
+        {{ i.quantity|floatformat:0 }}× {{ i.inventory_item.name|default:"?" }}{% if i.notes %} <span class="fx-fs-sm fx-text-muted">({{ i.notes }})</span>{% endif %}
       </div>
       {% endfor %}
-      {% if o.notes %}<div style="font-size:.7rem;color:var(--muted);margin-top:.3rem">📝 {{ o.notes }}</div>{% endif %}
+      {% if o.notes %}<div class="fx-fs-sm fx-text-muted fx-mt-sm">📝 {{ o.notes }}</div>{% endif %}
     </a>
     {% empty %}
-    <div style="color:var(--muted);font-size:.8rem;text-align:center;padding:.75rem">Nema aktivnih narudžbi.</div>
+    <div class="fx-fs-compact text-center fx-text-muted fx-p-3">Nema aktivnih narudžbi.</div>
     {% endfor %}
 
     <div style="margin-top:auto;padding-top:.75rem">
-      <a href="{% url 'pos:gastro_kitchen' %}" class="btn btn-gold" style="width:100%;justify-content:center">
+      <a href="{% url 'pos:gastro_kitchen' %}" class="btn btn-gold fx-w-full justify-content-center">
         🍳 Kitchen Display (KDS)
       </a>
     </div>

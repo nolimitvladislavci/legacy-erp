@@ -2,14 +2,14 @@
 {% load i18n %}
 {% block title %}Upload Dokumenta — LIMIT CONNECT
 <!-- LIVE KAMERA MODAL -->
-<div id="liveCamModal" style="display:none;position:fixed;inset:0;z-index:10000;background:#000">
-  <video id="liveCamVideo" autoplay playsinline style="width:100%;height:calc(100% - 60px);object-fit:cover"></video>
-  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:#111;display:flex;align-items:center;justify-content:center;gap:20px">
-    <button onclick="liveCamSnap()" style="width:50px;height:50px;border-radius:50%;background:var(--gold,#c9a84c);border:3px solid #fff;cursor:pointer"></button>
-    <button onclick="liveCamClose()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;position:absolute;right:16px">&times;</button>
+<div id="liveCamModal" class="fx-hidden" style="position:fixed;inset:0;z-index:10000;background:var(--black)">
+  <video id="liveCamVideo" autoplay playsinline class="fx-w-full" style="height:calc(100% - 60px);object-fit:cover"></video>
+  <div class="fx-bg-card d-flex fx-gap-5 align-items-center justify-content-center" style="position:absolute;bottom:0;left:0;right:0;height:60px">
+    <button onclick="liveCamSnap()" class="fx-rounded-circle fx-pointer fx-bg-gold" style="width:50px;height:50px;border:3px solid var(--white)"></button>
+    <button onclick="liveCamClose()" class="fx-border-none fx-text-white fx-fs-5xl fx-pointer fx-bg-transparent" style="position:absolute;right:16px">&times;</button>
   </div>
 </div>
-<canvas id="liveCamCanvas" style="display:none"></canvas>
+<canvas id="liveCamCanvas" class="fx-hidden"></canvas>
 <script>
 var _camStream=null;
 function openLiveCamera(){
@@ -47,16 +47,16 @@ function liveCamClose(){
 {% block page_title %}Upload Dokumenta{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width:700px;padding:30px 20px">
+<div class="container fx-max-700" class="fx-p-6">
 
   <!-- INFO BANNER -->
-  <div style="background:var(--bg-card);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start">
-    <span style="font-size:2rem;line-height:1">&#129302;</span>
+  <div class="fx-rounded-lg d-flex fx-gap-4 align-items-start fx-bg-card fx-mb-6" style="border:1px solid var(--gold-border);padding:1.25rem 1.5rem">
+    <span class="fx-fs-icon" style="line-height:1">&#129302;</span>
     <div>
-      <div style="color:var(--gold,#c9a84c);font-weight:700;font-size:1rem;margin-bottom:.25rem">Sustav automatski &#269;ita podatke s ra&#269;una</div>
-      <div style="color:#94a3b8;font-size:.875rem;line-height:1.5">
+      <div class="fx-fw-bold fx-fs-lg fx-text-gold fx-mb-1">Sustav automatski &#269;ita podatke s ra&#269;una</div>
+      <div class="fx-text-muted" style="font-size:var(--font-size-base);line-height:1.5">
         Fotografirajte ili prilo&#382;ite PDF &mdash; AI prepoznaje partnera, iznos i datum. Nema ru&#269;nog tipkanja.
-        Rezultat vidite za 30 sekundi u <a href="{% url 'documents:ai_inbox' %}" style="color:var(--gold,#c9a84c)">AI Inboxu</a>.
+        Rezultat vidite za 30 sekundi u <a href="{% url 'documents:ai_inbox' %}" class="fx-text-gold">AI Inboxu</a>.
       </div>
     </div>
   </div>
@@ -67,146 +67,146 @@ function liveCamClose(){
     <!-- DRAG & DROP ZONA -->
     <div id="dropZone"
          title="Mozete fotografirati zguzvan racun - AI ga automatski ispravlja i cita sve podatke"
-         style="border:2px dashed #334155;border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg-card);margin-bottom:1.5rem;position:relative">
+         class="fx-rounded-lg text-center fx-pointer fx-bg-card fx-mb-6 fx-relative" style="border:2px dashed var(--border2);padding:3rem 2rem;transition:all .3s">
 
       <div id="dropContent">
-        <div style="font-size:3rem;margin-bottom:.75rem">&#128196;</div>
-        <div style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Prevucite ra&#269;un ovdje</div>
-        <div style="color:#64748b;font-size:.875rem;margin-bottom:1.5rem">ili odaberite jednu od opcija ispod</div>
+        <div class="fx-fs-hero fx-mb-4">&#128196;</div>
+        <div class="fx-text-white fx-fs-xl fx-fw-semibold mb-2">Prevucite ra&#269;un ovdje</div>
+        <div class="fx-text-dim fx-mb-6" style="font-size:var(--font-size-base)">ili odaberite jednu od opcija ispod</div>
 
-        <div style="display:flex;flex-direction:column;gap:.75rem;align-items:center;max-width:280px;margin:0 auto">
+        <div class="d-flex fx-flex-col fx-gap-3 align-items-center fx-m-auto" style="max-width:280px">
           <button type="button" id="btnCameraFenix"
                   title="Fotografirajte fizicki racun direktno mobilnim uredajem"
-                  style="background:var(--gold,#c9a84c);color:#0a0a0a;border:none;border-radius:12px;padding:14px 24px;cursor:pointer;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%"
+                  class="fx-text-dark fx-border-none fx-rounded fx-pointer fx-fw-bold fx-fs-lg d-flex fx-w-full align-items-center justify-content-center fx-gap-2 fx-bg-gold" class="fx-p-5"
                   onclick="openLiveCamera()">
             <i class="fas fa-camera"></i> Slikaj kamerom
           </button>
-          <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
+          <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" class="fx-hidden" onchange="handleFile(this)">
 
           <label title="Odaberite PDF, sliku ili XML datoteku s racunala"
-                 style="background:transparent;color:#94a3b8;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%">
+                 class="fx-text-muted fx-rounded fx-pointer fx-fw-semibold fx-fs-base d-flex fx-w-full align-items-center justify-content-center fx-gap-2 fx-bg-transparent" style="border:1px solid var(--border-light);padding:10px 20px">
             <i class="fas fa-folder-open"></i> Odaberi iz galerije
-            <input type="file" name="file" id="fileInputMain" accept=".pdf,.xml,.jpg,.jpeg,.png,.gif,.webp,.heic,.doc,.docx" style="display:none" onchange="handleFile(this)">
+            <input type="file" name="file" id="fileInputMain" accept=".pdf,.xml,.jpg,.jpeg,.png,.gif,.webp,.heic,.doc,.docx" class="fx-hidden" onchange="handleFile(this)">
           </label>
         </div>
 
-        <div style="color:#475569;font-size:.75rem;margin-top:1rem">
+        <div class="fx-text-dim fx-fs-caption mt-3">
           Prihvacamo: PDF, JPG, PNG, WebP, XML &middot; Max 20MB
         </div>
       </div>
 
       <!-- Preview nakon odabira -->
-      <div id="filePreview" style="display:none">
-        <div id="previewImage" style="margin-bottom:.75rem"></div>
-        <div id="previewName" style="color:var(--gold,#c9a84c);font-weight:700;font-size:1rem"></div>
-        <div id="previewSize" style="color:#64748b;font-size:.8rem;margin-top:.25rem"></div>
-        <div style="margin-top:.75rem">
-          <button type="button" onclick="clearFile()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:6px;padding:.3rem .75rem;cursor:pointer;font-size:.8rem">&#10005; Promijeni fajl</button>
+      <div id="filePreview" class="fx-hidden">
+        <div id="previewImage" class="fx-mb-4"></div>
+        <div id="previewName" class="fx-fw-bold fx-fs-lg fx-text-gold"></div>
+        <div id="previewSize" class="fx-text-dim fx-fs-compact fx-mt-2"></div>
+        <div class="fx-mt-4">
+          <button type="button" onclick="clearFile()" class="fx-text-red fx-rounded-sm fx-pointer fx-fs-compact fx-bg-transparent" style="border:1px solid var(--red);padding:.3rem .75rem">&#10005; Promijeni fajl</button>
         </div>
       </div>
     </div>
 
     <!-- PROGRESS BAR -->
-    <div id="progressSection" style="display:none;margin-bottom:1.5rem">
-      <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
-        <span id="step1" style="color:var(--gold,#c9a84c);font-size:.8rem;font-weight:600">&#9312; Odabir &#10003;</span>
-        <span id="step2" style="color:#475569;font-size:.8rem;font-weight:600">&#9313; Prijenos...</span>
-        <span id="step3" style="color:#475569;font-size:.8rem;font-weight:600">&#9314; AI cita...</span>
-        <span id="step4" style="color:#475569;font-size:.8rem;font-weight:600">&#9315; Spreman!</span>
+    <div id="progressSection" class="fx-hidden fx-mb-6">
+      <div class="d-flex justify-content-between fx-mb-4">
+        <span id="step1" class="fx-fs-compact fx-fw-semibold fx-text-gold">&#9312; Odabir &#10003;</span>
+        <span id="step2" class="fx-text-dim fx-fs-compact fx-fw-semibold">&#9313; Prijenos...</span>
+        <span id="step3" class="fx-text-dim fx-fs-compact fx-fw-semibold">&#9314; AI cita...</span>
+        <span id="step4" class="fx-text-dim fx-fs-compact fx-fw-semibold">&#9315; Spreman!</span>
       </div>
-      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-        <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--gold,#c9a84c),#f59e0b);width:25%;transition:width .8s ease;border-radius:2px"></div>
+      <div class="fx-overflow-hidden" class="fx-rounded-sm" style="height:4px;background:var(--border)">
+        <div id="progressBar" class="fx-rounded-sm" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--amber));width:25%;transition:width .8s ease"></div>
       </div>
     </div>
 
     <!-- FENIXSCAN: AI Invoice Reader -->
-    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--gold,#c9a84c);margin-bottom:.75rem;letter-spacing:.5px">
+    <div class="fx-rounded mb-3 fx-bg-card fx-b fx-p-125">
+      <div class="fx-fs-sm fx-fw-bold fx-text-gold fx-uppercase fx-mb-4 fx-ls-1">
         <i class="fas fa-magic" style="margin-right:4px"></i> AI Skeniranje racuna (opcionalno)
       </div>
       <div id="scan-invoice"></div>
-      <div style="font-size:.68rem;color:#64748b;margin-top:.5rem">Slikajte racun — AI automatski popunjava polja ispod. Radi i za zgužvane racune.</div>
+      <div class="fx-fs-tiny fx-text-dim mt-2">Slikajte racun — AI automatski popunjava polja ispod. Radi i za zgužvane racune.</div>
     </div>
 
     <!-- DETALJI -->
-    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
+    <div class="fx-rounded fx-bg-card fx-b fx-mb-6 fx-p-125">
 
       <div class="row mb-3">
         <div class="col-md-6">
-          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label class="fx-fs-caption fx-fw-semibold fx-text-muted d-block fx-uppercase" style="letter-spacing:0.05em;margin-bottom:.4rem">
             Tip dokumenta
             <span title="Ulazni racun = sto ste Vi platili dobavljacu. Izlazni = sto ste Vi naplatili kupcu."
-                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
+                  class="fx-text-gold" style="cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <select name="source_type" class="form-select" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
+          <select name="source_type" class="form-select fx-rounded fx-text-body" style="background:var(--input-bg);border:1px solid var(--input-border)">
             {% for val, label in source_types %}
             <option value="{{ val }}">{{ label }}</option>
             {% endfor %}
           </select>
-          <small style="color:#475569;font-size:.72rem;margin-top:.3rem;display:block">
+          <small class="fx-text-dim fx-fs-sm d-block fx-mt-sm">
             Ako ne znate - ostavite "Dokument (rucni upload)"
           </small>
         </div>
         <div class="col-md-6">
-          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label class="fx-fs-caption fx-fw-semibold fx-text-muted d-block fx-uppercase" style="letter-spacing:0.05em;margin-bottom:.4rem">
             Broj dokumenta
             <span title="Broj s racuna. Mozete ostaviti prazno, AI ce ga automatski procitati."
-                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
+                  class="fx-text-gold" style="cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="text" name="doc_number" id="doc_number" class="form-control"
-                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
+          <input type="text" name="doc_number" id="doc_number" class="form-control fx-rounded fx-text-body"
+                 style="background:var(--input-bg);border:1px solid var(--input-border)"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
       </div>
 
-      <details style="margin-top:.5rem">
-        <summary style="color:#64748b;font-size:.82rem;cursor:pointer;font-weight:600">Dodatni podaci (opcionalno — AI popunjava automatski)</summary>
-      <div class="row mb-3" style="margin-top:.75rem">
+      <details class="mt-2">
+        <summary class="fx-text-dim fx-fs-note fx-pointer fx-fw-semibold">Dodatni podaci (opcionalno — AI popunjava automatski)</summary>
+      <div class="row mb-3 fx-mt-4">
         <div class="col-md-6">
-          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label class="fx-fs-caption fx-fw-semibold fx-text-muted d-block fx-uppercase" style="letter-spacing:0.05em;margin-bottom:.4rem">
             Partner (dobavljac / kupac)
             <span title="Naziv firme koja je izdala ili primila racun. Mozete ostaviti prazno."
-                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
+                  class="fx-text-gold" style="cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="text" name="partner_name" id="partner_name" class="form-control"
-                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
+          <input type="text" name="partner_name" id="partner_name" class="form-control fx-rounded fx-text-body"
+                 style="background:var(--input-bg);border:1px solid var(--input-border)"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
         <div class="col-md-3">
-          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label class="fx-fs-caption fx-fw-semibold fx-text-muted d-block fx-uppercase" style="letter-spacing:0.05em;margin-bottom:.4rem">
             Iznos (EUR)
             <span title="Ukupni iznos s PDV-om. Mozete ostaviti prazno."
-                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
+                  class="fx-text-gold" style="cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="number" name="amount" id="amount" step="0.01" class="form-control"
-                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
+          <input type="number" name="amount" id="amount" step="0.01" class="form-control fx-rounded fx-text-body"
+                 style="background:var(--input-bg);border:1px solid var(--input-border)"
                  placeholder="0.00 (auto)">
         </div>
         <div class="col-md-3">
-          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label class="fx-fs-caption fx-fw-semibold fx-text-muted d-block fx-uppercase" style="letter-spacing:0.05em;margin-bottom:.4rem">
             Datum
             <span title="Datum s racuna. Ako ostavite prazno, koristit ce se danasnji datum."
-                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
+                  class="fx-text-gold" style="cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="date" name="doc_date" id="doc_date" class="form-control"
-                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
+          <input type="date" name="doc_date" id="doc_date" class="form-control fx-rounded fx-text-body"
+                 style="background:var(--input-bg);border:1px solid var(--input-border)">
         </div>
       </div>
 
       </details>
-      <details style="margin-top:.5rem">
-        <summary style="color:#475569;font-size:.78rem;cursor:pointer">&#9881; Napredne opcije (pohrana)</summary>
-        <div style="margin-top:.75rem;display:flex;gap:1.5rem;flex-wrap:wrap">
-          <label title="Preporuceno: sustav sam odabire najbrzu i najsigurniju pohranu" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+      <details class="mt-2">
+        <summary class="fx-text-dim fx-fs-body-sm fx-pointer">&#9881; Napredne opcije (pohrana)</summary>
+        <div class="d-flex fx-flex-wrap fx-mt-4" style="gap:1.5rem">
+          <label title="Preporuceno: sustav sam odabire najbrzu i najsigurniju pohranu" class="fx-text-muted fx-fs-base fx-pointer d-flex align-items-center fx-gap-1">
             <input type="radio" name="backend" value="" checked> Auto (preporuceno)
           </label>
-          <label title="Pohrana na serveru" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+          <label title="Pohrana na serveru" class="fx-text-muted fx-fs-base fx-pointer d-flex align-items-center fx-gap-1">
             <input type="radio" name="backend" value="local"> &#128190; Lokalno
           </label>
-          <label title="Pohrana u oblaku (Backblaze B2)" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+          <label title="Pohrana u oblaku (Backblaze B2)" class="fx-text-muted fx-fs-base fx-pointer d-flex align-items-center fx-gap-1">
             <input type="radio" name="backend" value="cloud"> &#9729; Cloud (B2)
           </label>
-          <label title="Pohrana u bazu podataka" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+          <label title="Pohrana u bazu podataka" class="fx-text-muted fx-fs-base fx-pointer d-flex align-items-center fx-gap-1">
             <input type="radio" name="backend" value="database"> &#128452; Baza
           </label>
         </div>
@@ -214,9 +214,9 @@ function liveCamClose(){
     </div>
 
     <!-- ZAKONSKA NAPOMENA -->
-    <div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:.875rem 1rem;margin-bottom:1.5rem;display:flex;gap:.75rem;align-items:flex-start">
+    <div class="fx-rounded d-flex fx-gap-3 align-items-start fx-mb-6" style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);padding:.875rem 1rem">
       <span style="font-size:1.25rem">&#128274;</span>
-      <div style="font-size:.8rem;color:#6ee7b7;line-height:1.5">
+      <div class="fx-fs-compact fx-text-green" style="line-height:1.5">
         <strong>Zakonska zastita:</strong> Svi dokumenti automatski se cuvaju <strong>11 godina</strong> prema Zakonu o racunovodstvu (ZOR).
         Sustav sprjecava brisanje dok traje zakonski rok cuvanja.
       </div>
@@ -227,7 +227,7 @@ function liveCamClose(){
   </form>
 </div>
 
-<div id="camera-preview" style="display:none"></div>
+<div id="camera-preview" class="fx-hidden"></div>
 <script src="/static/js/arhiva-upload.js"></script>
 <script src="/static/js/fenix-scan.js"></script>
 <script>

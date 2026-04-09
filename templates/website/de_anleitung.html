@@ -16,7 +16,7 @@ nav a.logo{color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:no
 nav a.logo span{color:var(--text)}
 nav .links{display:flex;gap:1rem;align-items:center}
 nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
-.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;text-decoration:none}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;text-decoration:none}
 .hero-sm{padding:8rem 2rem 3rem;text-align:center}
 .hero-sm h1{font-size:2.5rem;font-weight:800}
 .hero-sm h1 span{color:var(--gold)}
@@ -32,7 +32,7 @@ nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
 .cta{text-align:center;padding:3rem 2rem;background:linear-gradient(135deg,#1a1025,#0a0a0a)}
 .cta h2{font-size:2rem;font-weight:800;margin-bottom:1rem}
 .cta p{color:var(--muted);margin-bottom:1.5rem}
-footer{background:#050505;padding:2rem;text-align:center;color:#333;font-size:.75rem}
+footer{background:#050505;padding:2rem;text-align:center;color:var(--text);font-size:.75rem}
 footer a{color:var(--gold);text-decoration:none}
 @media(max-width:600px){.step{flex-direction:column;gap:1rem}.step-num{width:48px;height:48px;font-size:1.2rem}}
 </style>
@@ -44,7 +44,7 @@ footer a{color:var(--gold);text-decoration:none}
 <div class="links">
 <a href="/de/">Start</a>
 <a href="/de/pakete/">Pakete</a>
-<a href="/de/anleitung/" style="color:var(--gold)">Anleitung</a>
+<a href="/de/anleitung/" class="fx-text-gold">Anleitung</a>
 <a href="{% url 'accounts:quick_register' %}" class="btn-gold">Kostenlos testen</a>
 </div>
 </nav>
@@ -88,7 +88,7 @@ footer a{color:var(--gold);text-decoration:none}
 <section class="cta">
 <h2>Bereit?</h2>
 <p>30 Tage kostenlos. Keine Kreditkarte. Keine Einrichtungsgebühr.</p>
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:1rem 3rem;font-size:1.1rem"><i class="fas fa-rocket" style="margin-right:.5rem"></i>Jetzt starten</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold fx-fs-xl" style="padding:1rem 3rem"><i class="fas fa-rocket fx-mr-2"></i>Jetzt starten</a>
 </section>
 
 <footer>

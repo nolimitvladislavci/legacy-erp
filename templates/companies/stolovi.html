@@ -71,7 +71,7 @@
   cursor:pointer; border: 1px solid rgba(255,255,255,.1); background: transparent;
   color: var(--text-muted,#94a3b8); transition: all .15s; }
 .st-btn:hover { border-color: var(--gold,#c9a84c); color: var(--gold,#c9a84c); }
-.st-btn-danger:hover { border-color: #ef4444; color: #ef4444; }
+.st-btn-danger:hover { border-color:var(--red); color:var(--red); }
 
 /* Dodaj stol card */
 .st-add-card { background: rgba(201,168,76,.04); border: 2px dashed rgba(201,168,76,.25);
@@ -84,13 +84,13 @@
 /* Slobodni komitenti panel */
 .st-slobodni { background: var(--bg-card,#0d1117); border-radius: 12px;
   border: 1px solid rgba(255,255,255,.08); padding: 1rem; }
-.st-slobodni-title { font-size:.82rem; font-weight:700; color:#4ade80; margin-bottom:10px;
+.st-slobodni-title { font-size:.82rem; font-weight:700; color:var(--green); margin-bottom:10px;
   display:flex; align-items:center; gap:8px; }
 .st-slobodni-grid { display:flex; flex-wrap:wrap; gap:6px; max-height:200px;
   overflow-y:auto; }
 .st-slobodni-pill { display:inline-flex; align-items:center; gap:6px;
   background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
-  border-radius:20px; padding:4px 10px; font-size:.75rem; color:#4ade80;
+  border-radius:20px; padding:4px 10px; font-size:.75rem; color:var(--green);
   cursor:grab; user-select:none; transition: all .15s; }
 .st-slobodni-pill:hover { background: rgba(34,197,94,.15); }
 .st-slobodni-pill.dragging { opacity:.5; }
@@ -137,11 +137,11 @@
       <span class="st-stat-lbl">Stolova</span>
     </div>
     <div class="st-stat">
-      <span class="st-stat-val" style="color:#22c55e">{{ ukupno_komitenata }}</span>
+      <span class="st-stat-val fx-text-green">{{ ukupno_komitenata }}</span>
       <span class="st-stat-lbl">Komitenata</span>
     </div>
     <div class="st-stat">
-      <span class="st-stat-val" style="color:#64748b">{{ slobodni_count }}</span>
+      <span class="st-stat-val fx-text-muted">{{ slobodni_count }}</span>
       <span class="st-stat-lbl">Slobodnih</span>
     </div>
   </div>
@@ -166,12 +166,12 @@
       </div>
 
       <!-- Referent -->
-      <div class="st-referent" onclick="openReferentModal({{ stol.id }}, '{{ stol.referent.id|default:'' }}')" style="cursor:pointer" title="Kliknite za dodjelu referenta">
+      <div class="st-referent fx-pointer" onclick="openReferentModal({{ stol.id }}, '{{ stol.referent.id|default:'' }}')" title="Kliknite za dodjelu referenta">
         {% if stol.referent %}
           <div class="st-referent-avatar">{{ stol.referent.first_name.0|upper }}{{ stol.referent.last_name.0|upper }}</div>
           <span class="st-referent-name">{{ stol.referent.get_full_name|default:stol.referent.username }}</span>
         {% else %}
-          <div class="st-referent-avatar" style="background:rgba(100,116,139,.15);color:#64748b">?</div>
+          <div class="st-referent-avatar fx-text-muted" style="background:rgba(100,116,139,.15)">?</div>
           <span class="st-referent-empty">Bez referenta — kliknite za dodjelu</span>
         {% endif %}
       </div>
@@ -242,15 +242,13 @@
       <span>{{ r.get_full_name|default:r.username }}</span>
     </button>
     {% empty %}
-    <p style="color:var(--text-muted);font-size:.85rem">Nema dostupnih referenata. Dodajte ih u postavkama.</p>
+    <p class="fx-fs-base fx-text-muted">Nema dostupnih referenata. Dodajte ih u postavkama.</p>
     {% endfor %}
     <button class="st-referent-btn" onclick="setReferent('')">
-      <div class="st-ref-avatar" style="background:rgba(100,116,139,.15);color:#64748b">—</div>
-      <span style="color:var(--text-muted)">Bez referenta</span>
+      <div class="st-ref-avatar fx-text-muted" style="background:rgba(100,116,139,.15)">—</div>
+      <span class="fx-text-muted">Bez referenta</span>
     </button>
-    <button onclick="closeRefModal()" style="width:100%;margin-top:10px;padding:8px;
-      background:transparent;border:1px solid var(--border,#333);border-radius:8px;
-      color:var(--text-muted);cursor:pointer;font-size:.82rem">Odustani</button>
+    <button onclick="closeRefModal()" class="fx-w-full fx-rounded fx-pointer fx-fs-note fx-text-muted fx-bg-transparent fx-p-8 fx-mt-10" style="border:1px solid var(--border,#333)">Odustani</button>
   </div>
 </div>
 
@@ -281,8 +279,8 @@ function addStol() {
                onblur="renameStol(${d.stol_id},this.textContent.trim())">${d.naziv}</div>
           <button class="st-btn st-btn-danger" onclick="deleteStol(${d.stol_id})">✕</button>
         </div>
-        <div class="st-referent" onclick="openReferentModal(${d.stol_id},'')" style="cursor:pointer">
-          <div class="st-referent-avatar" style="background:rgba(100,116,139,.15);color:#64748b">?</div>
+        <div class="st-referent fx-pointer" onclick="openReferentModal(${d.stol_id},'')">
+          <div class="st-referent-avatar fx-text-muted" style="background:rgba(100,116,139,.15)">?</div>
           <span class="st-referent-empty">Bez referenta — kliknite za dodjelu</span>
         </div>
         <div class="st-komitenti" id="komitenti-${d.stol_id}">

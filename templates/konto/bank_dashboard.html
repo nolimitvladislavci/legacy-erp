@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Banka{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -41,7 +24,7 @@
         <div class="col-md-3">
             <div class="card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <div style="font-size:2rem; font-weight:800; color:var(--gold);">{{ stats.total_balance|floatformat:2 }}</div>
+                    <div class="fx-fs-icon fx-fw-800 fx-text-gold">{{ stats.total_balance|floatformat:2 }}</div>
                     <small class="text-muted">EUR ukupno</small>
                 </div>
             </div>
@@ -49,7 +32,7 @@
         <div class="col-md-3">
             <div class="card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <div style="font-size:2rem; font-weight:800;">{{ stats.accounts }}</div>
+                    <div class="fx-fs-icon fx-fw-800">{{ stats.accounts }}</div>
                     <small class="text-muted">Racuna</small>
                 </div>
             </div>
@@ -57,7 +40,7 @@
         <div class="col-md-3">
             <div class="card text-center border-warning shadow-sm">
                 <div class="card-body">
-                    <div style="font-size:2rem; font-weight:800; color:#f59e0b;">{{ stats.unmatched }}</div>
+                    <div class="fx-fs-icon fx-fw-800 fx-text-amber">{{ stats.unmatched }}</div>
                     <small class="text-muted">Nepariranih</small>
                 </div>
             </div>
@@ -65,7 +48,7 @@
         <div class="col-md-3">
             <div class="card text-center border-success shadow-sm">
                 <div class="card-body">
-                    <div style="font-size:2rem; font-weight:800; color:#22c55e;">{{ stats.matched }}</div>
+                    <div class="fx-fs-icon fx-fw-800 fx-text-green">{{ stats.matched }}</div>
                     <small class="text-muted">Pariranih</small>
                 </div>
             </div>
@@ -83,7 +66,7 @@
                     <p class="mb-1"><small class="text-muted">{{ acc.iban }}</small></p>
                     {% if acc.bank_name %}<p class="mb-1"><small>{{ acc.bank_name }}</small></p>{% endif %}
                     <p class="mb-0 fs-4 fw-bold">{{ acc.current_balance|floatformat:2 }} {{ acc.currency }}</p>
-                    {% if acc.is_primary %}<span class="badge bg-primary">Primarni</span>{% endif %}
+                    {% if acc.is_primary %}<span class="fenix-badge fenix-badge-info">Primarni</span>{% endif %}
                 </div>
             </div>
         </div>
@@ -95,11 +78,11 @@
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Transakcije</strong>
-            <span class="badge bg-secondary">{{ transactions|length }}</span>
+            <span class="fenix-badge fenix-badge-muted">{{ transactions|length }}</span>
         </div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead >
                     <tr>
                         <th>Datum</th>
                         <th>Opis</th>
@@ -120,12 +103,12 @@
                         </td>
                         <td>
                             {% if tx.status == 'matched' %}
-                                <span class="badge bg-success">Parirano</span>
+                                <span class="fenix-badge fenix-badge-success">Parirano</span>
                                 {% if tx.matched_invoice %}<br><small>{{ tx.matched_invoice.number }}</small>{% endif %}
                             {% elif tx.status == 'ignored' %}
-                                <span class="badge bg-secondary">Ignorirano</span>
+                                <span class="fenix-badge fenix-badge-muted">Ignorirano</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark">Ceka</span>
+                                <span class="fenix-badge fenix-badge-warning">Ceka</span>
                             {% endif %}
                         </td>
                         <td>

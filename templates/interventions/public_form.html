@@ -7,25 +7,25 @@
 <title>{% trans "Hitna intervencija – Prijava" %}</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh;display:flex;flex-direction:column}
-.header{background:#0f172a;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem}
+body{font-family:system-ui,sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.header{background:var(--surface-deep);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem}
 .header-brand{font-weight:700;font-size:1.1rem;color:var(--gold,#c9a84c)}
-.header-sub{font-size:.8rem;color:#94a3b8}
+.header-sub{font-size:.8rem;color:var(--text-muted)}
 .container{max-width:560px;margin:2rem auto;padding:0 1rem;width:100%}
-.card{background:#fff;border-radius:12px;padding:2rem;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card-title{font-size:1.2rem;font-weight:700;margin-bottom:.25rem;color:#0f172a}
-.card-sub{font-size:.85rem;color:#64748b;margin-bottom:1.5rem}
+.card{background:var(--bg-card);border-radius:12px;padding:2rem;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:1.2rem;font-weight:700;margin-bottom:.25rem;color:var(--text)}
+.card-sub{font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .form-group{margin-bottom:1rem}
-.form-group label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#64748b;margin-bottom:.4rem}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:.65rem .9rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-family:inherit;background:#fff;color:#0f172a;transition:border-color .15s}
+.form-group label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:.4rem}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.65rem .9rem;border:1px solid var(--border);border-radius:8px;font-size:.95rem;font-family:inherit;background:var(--bg-card);color:var(--text);transition:border-color .15s}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold,#c9a84c);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
 .form-group textarea{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.btn-submit{width:100%;padding:.9rem;background:var(--gold,#c9a84c);color:#0f172a;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .15s;margin-top:.5rem}
+.btn-submit{width:100%;padding:.9rem;background:var(--gold,#c9a84c);color:var(--text);border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .15s;margin-top:.5rem}
 .btn-submit:hover{background:#e8c96a}
 .error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.75rem 1rem;color:#b91c1c;font-size:.88rem;margin-bottom:1rem}
-.urgent-badge{display:inline-flex;align-items:center;gap:.4rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:.4rem .8rem;font-size:.78rem;font-weight:600;margin-bottom:1.25rem}
-.track-note{font-size:.75rem;color:#64748b;margin-top:1rem;text-align:center;line-height:1.5}
+.urgent-badge{display:inline-flex;align-items:center;gap:.4rem;background:#fef2f2;color:var(--red);border:1px solid #fecaca;border-radius:6px;padding:.4rem .8rem;font-size:.78rem;font-weight:600;margin-bottom:1.25rem}
+.track-note{font-size:.75rem;color:var(--text-dim);margin-top:1rem;text-align:center;line-height:1.5}
 @media(max-width:480px){.form-row{grid-template-columns:1fr}}
 </style>
 </head>

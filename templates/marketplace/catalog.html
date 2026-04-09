@@ -40,7 +40,7 @@
     <div class="col-md-2">
       <div class="form-check mt-2">
         <input class="form-check-input" type="checkbox" name="organic" value="1" id="organicCheck" {% if organic_only %}checked{% endif %}>
-        <label class="form-check-label" for="organicCheck" style="font-size:.85rem">Samo ekolosko</label>
+        <label class="form-check-label fx-fs-base" for="organicCheck">Samo ekolosko</label>
       </div>
     </div>
     <div class="col-md-2 d-flex gap-1">
@@ -63,8 +63,8 @@
 </div>
 {% else %}
 <div class="stat-card p-5 text-center">
-  <i class="fas fa-store" style="font-size:3rem;color:#444"></i>
-  <h5 class="mt-3" style="color:#888">Nema proizvoda</h5>
+  <i class="fas fa-store fx-fs-hero fx-text-muted"></i>
+  <h5 class="mt-3 fx-text-muted">Nema proizvoda</h5>
   <p class="text-muted">OPG-ovi mogu dodati proizvode putem OPG Panela.</p>
   <a href="{% url 'marketplace:seller_dashboard' %}" class="btn btn-warning mt-2"><i class="fas fa-tractor me-1"></i>OPG Panel</a>
 </div>

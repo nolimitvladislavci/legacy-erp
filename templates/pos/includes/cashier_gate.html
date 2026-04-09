@@ -6,31 +6,31 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
 <style>
 .cg-overlay{position:fixed;inset:0;z-index:9800;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .cg-overlay.show{display:flex}
-.cg-box{background:#111214;border:2px solid rgba(201,168,76,.4);border-radius:16px;width:400px;max-width:95vw;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.cg-box{background:var(--bg-card);border:2px solid rgba(201,168,76,.4);border-radius:16px;width:400px;max-width:95vw;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
 .cg-head{padding:1rem 1.25rem;background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.2);text-align:center}
 .cg-head h3{color:var(--gold,#c9a84c);font-size:1rem;font-weight:800;margin:0;letter-spacing:.02em}
-.cg-head small{color:#64748b;font-size:.72rem}
+.cg-head small{color:var(--text-dim);font-size:.72rem}
 .cg-body{padding:1.25rem}
 .cg-step{display:none}
 .cg-step.active{display:block}
-.cg-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.4rem}
-.cg-select{width:100%;background:#0a0a0a;border:1px solid #252830;color:#e8e8e8;border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.8rem;font-family:inherit}
+.cg-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);margin-bottom:.4rem}
+.cg-select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.8rem;font-family:inherit}
 .cg-select:focus{border-color:var(--gold,#c9a84c)}
-.cg-input{width:100%;background:#0a0a0a;border:1px solid #252830;color:#e8e8e8;border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.4rem;font-family:inherit;box-sizing:border-box}
+.cg-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.4rem;font-family:inherit;box-sizing:border-box}
 .cg-input:focus{border-color:var(--gold,#c9a84c)}
 .cg-input.pin{text-align:center;font-size:1.5rem;letter-spacing:.5em;font-weight:800}
-.cg-warn{display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:#f87171;margin-bottom:.6rem}
+.cg-warn{display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:var(--red);margin-bottom:.6rem}
 .cg-warn.show{display:flex;align-items:center;gap:.4rem}
 .cg-warn i{flex-shrink:0}
-.cg-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:#60a5fa;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.cg-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:var(--blue);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
 .cg-cash-presets{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
-.cg-cash-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e8e8e8;border-radius:6px;padding:.4rem .65rem;font-size:.82rem;cursor:pointer;font-weight:600;font-family:inherit;flex:1;min-width:60px;text-align:center}
+.cg-cash-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:.4rem .65rem;font-size:.82rem;cursor:pointer;font-weight:600;font-family:inherit;flex:1;min-width:60px;text-align:center}
 .cg-cash-btn:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
 .cg-foot{padding:.75rem 1.25rem;border-top:1px solid #252830;display:flex;gap:.5rem}
 .cg-btn{flex:1;border:none;border-radius:8px;padding:.65rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;transition:all .15s}
-.cg-btn-next{background:var(--gold,#c9a84c);color:#000}
+.cg-btn-next{background:var(--gold,#c9a84c);color:var(--text)}
 .cg-btn-next:disabled{opacity:.4;cursor:not-allowed}
-.cg-btn-skip{background:rgba(255,255,255,.06);color:#94a3b8}
+.cg-btn-skip{background:rgba(255,255,255,.06);color:var(--text-muted)}
 .cg-dots{display:flex;gap:6px;justify-content:center;padding:.5rem 0}
 .cg-dot{width:8px;height:8px;border-radius:50%;background:#252830}
 .cg-dot.active{background:var(--gold,#c9a84c)}
@@ -39,7 +39,7 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
 <div class="cg-overlay" id="cashierGate">
 <div class="cg-box">
   <div class="cg-head">
-    <h3><i class="fas fa-user-shield" style="margin-right:6px"></i>Otvaranje smjene</h3>
+    <h3><i class="fas fa-user-shield fx-mr-2"></i>Otvaranje smjene</h3>
     <small>{{ terminal.name }} — {{ terminal.company.name }}</small>
   </div>
   <div class="cg-dots">
@@ -66,7 +66,7 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
         <i class="fas fa-exclamation-triangle"></i>
         <span>Blagajnik nema OIB! Zakon o fiskalizaciji (čl. 9) zahtijeva OIB operatera.</span>
       </div>
-      <div id="cgOibFix" style="display:none">
+      <div id="cgOibFix" class="fx-hidden">
         <div class="cg-label">Unesite OIB operatera</div>
         <input type="text" class="cg-input" id="cgOibInput" maxlength="11" placeholder="12345678901" inputmode="numeric">
       </div>
@@ -87,7 +87,7 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
       </div>
       <div class="cg-label" style="margin-top:.6rem">Oznaka poslovnog prostora</div>
       <input type="text" class="cg-input" id="cgLocationCode" placeholder="PP1" maxlength="20">
-      <div style="font-size:.65rem;color:#64748b;margin-bottom:.4rem">
+      <div class="fx-fs-xs fx-text-dim" style="margin-bottom:.4rem">
         Format: PP + broj (npr. PP1, ŠANK1, KIOSK2). AI hint: koristite kratku oznaku bez razmaka.
       </div>
       <div class="cg-label">Adresa</div>
@@ -98,7 +98,7 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
     <!-- STEP 3: Početna gotovina -->
     <div class="cg-step" data-step="3">
       <div class="cg-label">Početna gotovina u blagajni</div>
-      <input type="number" class="cg-input" id="cgOpeningCash" value="0" min="0" step="0.01" style="font-size:1.5rem;text-align:center;font-weight:800;color:var(--gold,#c9a84c)" inputmode="decimal">
+      <input type="number" class="cg-input fx-fs-5xl text-center fx-fw-800 fx-text-gold" id="cgOpeningCash" value="0" min="0" step="0.01" inputmode="decimal">
       <div class="cg-cash-presets">
         <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='0'">0 €</button>
         <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='50'">50 €</button>
@@ -114,7 +114,7 @@ Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
   </div>
 
   <div class="cg-foot">
-    <button class="cg-btn cg-btn-skip" id="cgBackBtn" onclick="cgBack()" style="display:none">
+    <button class="cg-btn cg-btn-skip fx-hidden" id="cgBackBtn" onclick="cgBack()">
       <i class="fas fa-arrow-left"></i> Nazad
     </button>
     <button class="cg-btn cg-btn-next" id="cgNextBtn" onclick="cgNext()">

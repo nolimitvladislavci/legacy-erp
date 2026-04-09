@@ -14,7 +14,7 @@
 .rek-card h3 { font-size: .82rem; font-weight: 800; color: var(--gold,#c9a84c); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 
 .rek-label { font-size: .78rem; font-weight: 600; color: var(--text-muted, #94a3b8); margin-bottom: 4px; display: block; }
-.rek-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: .9rem; width: 100%; }
+.rek-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color:var(--text); padding: 10px 14px; border-radius: 8px; font-size: .9rem; width: 100%; }
 .rek-input::placeholder { color: var(--text-muted, #666); }
 .rek-row { margin-bottom: 14px; }
 
@@ -40,7 +40,7 @@
 .photo-upload .icon { font-size: 2rem; margin-bottom: 8px; }
 .photo-upload .text { font-size: .82rem; color: var(--text-muted); }
 
-.btn-submit { background: #dc3545; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
+.btn-submit { background: #dc3545; color:var(--white); border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
 .btn-submit:hover { background: #b91c2c; }
 </style>
 
@@ -70,13 +70,13 @@
             <span class="item-name">{{ item.product.name }}</span>
             <span class="item-qty">x{{ item.quantity }} {{ item.product.unit|default:"kg" }}</span>
           </div>
-          <span style="font-weight:700;color:var(--gold,#c9a84c);">{{ item.total|floatformat:2 }}&euro;</span>
+          <span class="fx-fw-bold fx-text-gold">{{ item.total|floatformat:2 }}&euro;</span>
         </label>
       </div>
       {% endfor %}
     </div>
 
-    <div class="rek-card" style="margin-top:16px;">
+    <div class="rek-card mt-3">
       <h3>{% trans "Razlog reklamacije" %}</h3>
       <div class="reason-grid">
         <div class="reason-pill">
@@ -116,8 +116,8 @@
 
       <div class="rek-row">
         <label class="rek-label">{% trans "Fotografija dokaza" %}</label>
-        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('rek-photo-preview',{onReady:function(r){document.getElementById('rek_photo_b64').value=r.b64;document.getElementById('photo-label').querySelector('.text').textContent='Fotografirano'}})}else{document.getElementById('rek-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
-        <div id="rek-photo-preview" style="display:none;margin:.5rem 0"></div>
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('rek-photo-preview',{onReady:function(r){document.getElementById('rek_photo_b64').value=r.b64;document.getElementById('photo-label').querySelector('.text').textContent='Fotografirano'}})}else{document.getElementById('rek-file-input').click()}" class="fx-rounded fx-pointer fx-fs-base fx-text-gold mb-2" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:.5rem 1rem">📷 Kamera</button>
+        <div id="rek-photo-preview" class="fx-hidden" style="margin:.5rem 0"></div>
         <input type="hidden" name="photo_b64" id="rek_photo_b64">
         <label class="photo-upload" id="photo-label">
           <div class="icon">&#128247;</div>

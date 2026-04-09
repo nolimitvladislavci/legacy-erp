@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <div>
-      <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold,#c9a84c);margin:0">
+      <h1 class="fx-text-gold fx-m-0 fx-fs-6xl" style="font-family:'Cormorant Garamond',serif">
         🐾 Uzgajalište
       </h1>
       <div class="text-muted small">Evidencija, cijepljenja, rodovnice</div>
@@ -21,28 +21,28 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
       <div class="card bg-dark border-secondary text-center py-3">
-        <div style="font-size:2rem">🐶</div>
+        <div class="fx-fs-icon">🐶</div>
         <div class="fw-bold text-warning fs-4">{{ stats.psi }}</div>
         <div class="text-muted small">Psi</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card bg-dark border-secondary text-center py-3">
-        <div style="font-size:2rem">🐱</div>
+        <div class="fx-fs-icon">🐱</div>
         <div class="fw-bold text-warning fs-4">{{ stats.macke }}</div>
         <div class="text-muted small">Mačke</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card bg-dark border-secondary text-center py-3">
-        <div style="font-size:2rem">🐴</div>
+        <div class="fx-fs-icon">🐴</div>
         <div class="fw-bold text-warning fs-4">{{ stats.konji }}</div>
         <div class="text-muted small">Konji</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card bg-dark border-secondary text-center py-3">
-        <div style="font-size:2rem">🐾</div>
+        <div class="fx-fs-icon">🐾</div>
         <div class="fw-bold text-warning fs-4">{{ stats.ukupno }}</div>
         <div class="text-muted small">Ukupno</div>
       </div>
@@ -63,12 +63,12 @@
     {% for pet in pets %}
     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
       <a href="{% url 'livestock:pet_detail' pet.pk %}" class="text-decoration-none">
-        <div class="card bg-dark border-secondary h-100" style="transition:border-color .2s;cursor:pointer"
+        <div class="card bg-dark border-secondary h-100 fx-pointer" style="transition:border-color .2s"
              onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)'">
           {% if pet.photo %}
           <img src="{{ pet.photo.url }}" class="card-img-top" style="height:160px;object-fit:cover">
           {% else %}
-          <div style="height:160px;background:#111;display:flex;align-items:center;justify-content:center;font-size:4rem">
+          <div class="fx-bg-card d-flex align-items-center justify-content-center" style="height:160px;font-size:4rem">
             {% if pet.vrsta == 'pas' %}🐶{% elif pet.vrsta == 'macka' %}🐱{% elif pet.vrsta == 'konj' %}🐴{% else %}🐾{% endif %}
           </div>
           {% endif %}
@@ -76,13 +76,13 @@
             <div class="fw-bold text-white mb-1">{{ pet.name|default:pet.ear_tag }}</div>
             <div class="text-muted small mb-1">{{ pet.breed|default:"Pasmina nepoznata" }}</div>
             <div class="d-flex justify-content-between align-items-center">
-              <span class="badge bg-secondary">{{ pet.get_vrsta_display }}</span>
+              <span class="fenix-badge fenix-badge-muted">{{ pet.get_vrsta_display }}</span>
               {% if pet.chip_number %}
-              <span class="text-muted" style="font-size:.7rem">🔖 čip</span>
+              <span class="text-muted fx-fs-sm">🔖 čip</span>
               {% endif %}
             </div>
             {% if pet.pedigree_number %}
-            <div class="mt-1" style="font-size:.72rem;color:#c9a84c">
+            <div class="mt-1 fx-fs-sm fx-text-gold">
               <i class="fas fa-scroll me-1"></i>{{ pet.pedigree_number }}
             </div>
             {% endif %}
@@ -94,7 +94,7 @@
   </div>
   {% else %}
   <div class="text-center py-5">
-    <div style="font-size:4rem;margin-bottom:1rem">🐾</div>
+    <div class="mb-3" style="font-size:4rem">🐾</div>
     <div class="text-muted mb-3">Još nema unesenih ljubimaca.</div>
     <a href="{% url 'livestock:pet_create' %}" class="btn btn-warning">
       <i class="fas fa-plus me-2"></i>Dodaj prvog

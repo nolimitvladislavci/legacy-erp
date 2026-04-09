@@ -4,31 +4,14 @@
 {% block title %}Sastavnice (BOM){% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0"><i class="fas fa-sitemap me-2 text-warning"></i>Sastavnice (BOM / Normativi)</h4>
-    <a href="{% url 'calculator:bom_create' %}" class="btn btn-warning btn-sm">
+    <a href="{% url 'calculator:bom_create' %}" class="btn-gold btn-sm">
       <i class="fas fa-plus me-1"></i>Nova sastavnica
     </a>
   </div>
@@ -67,9 +50,9 @@
           <td class="text-end">{{ bom.total_material_cost }} €</td>
           <td>
             {% if bom.is_active %}
-              <span class="badge bg-success">Aktivan</span>
+              <span class="fenix-badge fenix-badge-success">Aktivan</span>
             {% else %}
-              <span class="badge bg-secondary">Neaktivan</span>
+              <span class="fenix-badge fenix-badge-muted">Neaktivan</span>
             {% endif %}
           </td>
           <td class="text-end">

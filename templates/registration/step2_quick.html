@@ -9,64 +9,63 @@
 </div>
 
 <div class="reg-card">
-  <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:.3rem">Kreiranje računa</h2>
-  <p style="color:var(--muted);margin-bottom:2rem;font-size:.9rem">Samo 3 polja — tvrtku postavljate unutar platforme</p>
+  <h2 class="fx-mb-2 fx-fs-6xl" style="font-family:'Cormorant Garamond',serif">Kreiranje računa</h2>
+  <p class="fx-fs-md fx-text-muted" style="margin-bottom:2rem">Samo 3 polja — tvrtku postavljate unutar platforme</p>
 
   <form method="post" id="quickForm">
     {% csrf_token %}
 
     <div class="field-group" style="margin-bottom:1.2rem">
-      <label style="display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">Vaše ime *</label>
-      <div style="display:flex;gap:8px">
+      <label class="fx-fs-body-sm d-block fx-text-muted fx-uppercase fx-mb-2 fx-ls-1">Vaše ime *</label>
+      <div class="d-flex fx-gap-2">
       <input type="text" name="first_name" id="nameInput" value="{{ first_name|default:'' }}" required
-             placeholder="Ivan" autofocus style="flex:1"
-             style="width:100%;background:var(--dark);border:1.5px solid {% if errors.first_name %}var(--error){% else %}var(--border){% endif %};border-radius:8px;padding:.75rem 1rem;color:var(--text);font-size:1rem;font-family:inherit"
+             placeholder="Ivan" autofocus class="fx-flex-1"
              aria-describedby="err-name">
       <button type="button" id="micBtn" onclick="startVoice()" title="Izgovorite ime"
-              style="background:var(--card,#1a1a1a);border:1.5px solid var(--border,#2a2a2a);border-radius:8px;padding:0 1rem;cursor:pointer;color:var(--muted);font-size:1.1rem;min-height:48px;min-width:48px;transition:all .2s">
+              class="fx-rounded fx-pointer fx-fs-xl fx-text-muted" style="background:var(--card,#1a1a1a);border:1.5px solid var(--border,#2a2a2a);padding:0 1rem;min-height:48px;min-width:48px;transition:all .2s">
         <i class="fas fa-microphone" id="micIcon"></i>
       </button>
       </div>
-      {% if errors.first_name %}<span id="err-name" class="f-error-msg" role="alert" style="color:var(--error);font-size:.8rem;margin-top:.3rem;display:block">{{ errors.first_name }}</span>{% endif %}
+      {% if errors.first_name %}<span id="err-name" class="f-error-msg fx-fs-compact d-block fx-mt-sm" role="alert" style="color:var(--error)">{{ errors.first_name }}</span>{% endif %}
     </div>
 
     <div class="field-group" style="margin-bottom:1.2rem">
-      <label style="display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">Email *</label>
+      <label class="fx-fs-body-sm d-block fx-text-muted fx-uppercase fx-mb-2 fx-ls-1">Email *</label>
       <input type="email" name="email" value="{{ email|default:'' }}" required
              placeholder="ivan@tvrtka.hr"
-             style="width:100%;background:var(--dark);border:1.5px solid {% if errors.email %}var(--error){% else %}var(--border){% endif %};border-radius:8px;padding:.75rem 1rem;color:var(--text);font-size:1rem;font-family:inherit"
+             class="fx-w-full fx-rounded fx-fs-lg" style="background:var(--dark);border:1.5px solid {% if errors.email %}var(--error){% else %}var(--border){% endif %};padding:.75rem 1rem;color:var(--text);font-family:inherit"
              aria-describedby="err-email">
-      {% if errors.email %}<span id="err-email" class="f-error-msg" role="alert" style="color:var(--error);font-size:.8rem;margin-top:.3rem;display:block">{{ errors.email|safe }}</span>{% endif %}
+      {% if errors.email %}<span id="err-email" class="f-error-msg fx-fs-compact d-block fx-mt-sm" role="alert" style="color:var(--error)">{{ errors.email|safe }}</span>{% endif %}
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal" style="margin-bottom:1.2rem">
       <div>
-        <label style="display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">Lozinka *</label>
+        <label class="fx-fs-body-sm d-block fx-text-muted fx-uppercase fx-mb-2 fx-ls-1">Lozinka *</label>
         <input type="password" name="password1" required minlength="8"
                placeholder="Min. 8 znakova"
-               style="width:100%;background:var(--dark);border:1.5px solid {% if errors.password1 %}var(--error){% else %}var(--border){% endif %};border-radius:8px;padding:.75rem 1rem;color:var(--text);font-size:1rem;font-family:inherit"
+               class="fx-w-full fx-rounded fx-fs-lg" style="background:var(--dark);border:1.5px solid {% if errors.password1 %}var(--error){% else %}var(--border){% endif %};padding:.75rem 1rem;color:var(--text);font-family:inherit"
                aria-describedby="err-pw1">
-        {% if errors.password1 %}<span id="err-pw1" class="f-error-msg" role="alert" style="color:var(--error);font-size:.8rem;margin-top:.3rem;display:block">{{ errors.password1 }}</span>{% endif %}
+        {% if errors.password1 %}<span id="err-pw1" class="f-error-msg fx-fs-compact d-block fx-mt-sm" role="alert" style="color:var(--error)">{{ errors.password1 }}</span>{% endif %}
       </div>
       <div>
-        <label style="display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">Ponovi lozinku *</label>
+        <label class="fx-fs-body-sm d-block fx-text-muted fx-uppercase fx-mb-2 fx-ls-1">Ponovi lozinku *</label>
         <input type="password" name="password2" required
                placeholder="Ponovi"
-               style="width:100%;background:var(--dark);border:1.5px solid {% if errors.password2 %}var(--error){% else %}var(--border){% endif %};border-radius:8px;padding:.75rem 1rem;color:var(--text);font-size:1rem;font-family:inherit"
+               class="fx-w-full fx-rounded fx-fs-lg" style="background:var(--dark);border:1.5px solid {% if errors.password2 %}var(--error){% else %}var(--border){% endif %};padding:.75rem 1rem;color:var(--text);font-family:inherit"
                aria-describedby="err-pw2">
-        {% if errors.password2 %}<span id="err-pw2" class="f-error-msg" role="alert" style="color:var(--error);font-size:.8rem;margin-top:.3rem;display:block">{{ errors.password2 }}</span>{% endif %}
+        {% if errors.password2 %}<span id="err-pw2" class="f-error-msg fx-fs-compact d-block fx-mt-sm" role="alert" style="color:var(--error)">{{ errors.password2 }}</span>{% endif %}
       </div>
     </div>
 
     <button type="submit" id="submitBtn"
-            style="width:100%;background:var(--gold);color:var(--black);border:none;border-radius:8px;padding:1rem;font-size:1.1rem;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.5px;min-height:56px;transition:all .2s"
+            class="fx-w-full fx-border-none fx-rounded fx-fs-xl fx-fw-bold fx-pointer fx-bg-gold fx-p-4 fx-ls-1" style="color:var(--black);font-family:inherit;min-height:56px;transition:all .2s"
             onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'"
             onclick="this.disabled=true;this.textContent='Kreiram račun...';this.form.submit()">
       Kreiraj račun →
     </button>
 
-    <p style="text-align:center;margin-top:1.5rem;font-size:.82rem;color:var(--muted)">
-      Već imate račun? <a href="/hr/login/" style="color:var(--gold)">Prijavite se →</a>
+    <p class="text-center fx-fs-note fx-text-muted fx-mt-6">
+      Već imate račun? <a href="/hr/login/" class="fx-text-gold">Prijavite se →</a>
     </p>
   </form>
 </div>

@@ -9,22 +9,22 @@
 .sh-card{background:#0d1117;border:1px solid var(--gold,#c9a84c)33;border-radius:16px;width:92%;max-width:400px;padding:0;overflow:hidden}
 .sh-header{background:linear-gradient(135deg,#1a1a2e,#0d1117);padding:16px 20px;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between}
 .sh-title{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700}
-.sh-close{background:none;border:none;color:#666;font-size:1.5rem;cursor:pointer;line-height:1}
+.sh-close{background:none;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;line-height:1}
 .sh-body{padding:16px 20px}
 .sh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.sh-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:#111;border:1px solid #222;border-radius:12px;padding:16px 10px;cursor:pointer;transition:all .15s;text-decoration:none;color:#ccc}
+.sh-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg-card);border:1px solid #222;border-radius:12px;padding:16px 10px;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text-muted)}
 .sh-btn:hover,.sh-btn:active{border-color:var(--gold,#c9a84c);transform:scale(.97);color:var(--gold,#c9a84c)}
 .sh-btn .sh-icon{font-size:1.8rem}
 .sh-btn .sh-label{font-size:.8rem;font-weight:600}
 .sh-input-row{display:flex;gap:6px;margin-bottom:10px}
-.sh-input{flex:1;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#e2e8f0;font-size:.9rem}
+.sh-input{flex:1;background:var(--bg-card);border:1px solid #333;border-radius:8px;padding:10px;color:var(--text);font-size:.9rem}
 .sh-input:focus{border-color:var(--gold,#c9a84c);outline:none}
-.sh-send{background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sh-send{background:var(--gold,#c9a84c);color:var(--text);border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
 .sh-section{display:none;margin-top:12px}
 .sh-section.show{display:block}
-.sh-qr-box{text-align:center;padding:16px;background:#fff;border-radius:10px;margin:8px auto;max-width:200px}
+.sh-qr-box{text-align:center;padding:16px;background:var(--bg-card);border-radius:10px;margin:8px auto;max-width:200px}
 .sh-qr-box img{width:100%;image-rendering:pixelated}
-.sh-viral{text-align:center;padding:10px 20px 16px;border-top:1px solid #1a1a1a;font-size:.7rem;color:#555}
+.sh-viral{text-align:center;padding:10px 20px 16px;border-top:1px solid #1a1a1a;font-size:.7rem;color:var(--text-dim)}
 .sh-viral a{color:var(--gold,#c9a84c);text-decoration:none}
 </style>
 
@@ -224,12 +224,12 @@ function _shGenerateQR() {
       }
       document.getElementById('shQrImg').innerHTML =
         '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
-        '<div style="margin-top:6px;font-size:.75rem;color:#333">Skeniraj za pregled</div>';
+        '<div class="fx-fs-caption fx-text-dark mt-1">Skeniraj za pregled</div>';
     });
   } else {
     document.getElementById('shQrImg').innerHTML =
       '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
-      '<div style="margin-top:6px;font-size:.75rem;color:#333">Skeniraj za pregled</div>';
+      '<div class="fx-fs-caption fx-text-dark mt-1">Skeniraj za pregled</div>';
   }
 }
 

@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Golubinjaci{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .gl-container { max-width: 1100px; margin: 0 auto; }
@@ -65,8 +48,8 @@
   padding: 3px 10px; border-radius: 20px;
   font-size: .72rem; font-weight: 600;
 }
-.gl-status-active { background: rgba(34,197,94,.1); color: #22c55e; }
-.gl-status-inactive { background: rgba(239,68,68,.1); color: #ef4444; }
+.gl-status-active { background: rgba(34,197,94,.1); color:var(--green); }
+.gl-status-inactive { background: rgba(239,68,68,.1); color:var(--red); }
 .gl-capacity-bar {
   width: 80px; height: 6px; background: var(--border);
   border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle;
@@ -79,7 +62,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item active">Golubinjaci</li>
   </ol>
@@ -88,15 +71,15 @@
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div class="d-flex align-items-center gap-3">
-    <div style="width:48px;height:48px;background:rgba(20,184,166,.1);border-radius:12px;display:flex;align-items:center;justify-content:center">
-      <i class="fas fa-home" style="font-size:1.2rem;color:#14b8a6"></i>
+    <div class="fx-rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:rgba(20,184,166,.1)">
+      <i class="fas fa-home fx-fs-2xl fx-text-cyan"></i>
     </div>
     <div>
-      <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Golubinjaci</h2>
-      <p style="font-size:.78rem;color:var(--text-muted);margin:0">Upravljanje lokacijama za smještaj golubova</p>
+      <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">Golubinjaci</h2>
+      <p class="fx-fs-body-sm fx-text-muted fx-m-0">Upravljanje lokacijama za smještaj golubova</p>
     </div>
   </div>
-  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:golubinjak_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded fx-fs-base" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);padding:.55rem 1.5rem">
     <i class="fas fa-plus me-1"></i>Novi golubinjak
   </a>
 </div>
@@ -128,22 +111,22 @@
         {% for g in page_obj %}
         <tr>
           <td>
-            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">
-              <i class="fas fa-home me-1" style="font-size:.75rem;opacity:.5"></i>{{ g.naziv }}
+            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" class="fx-fw-semibold fx-no-underline fx-text-gold">
+              <i class="fas fa-home me-1 fx-fs-caption fx-opacity-50"></i>{{ g.naziv }}
             </a>
           </td>
-          <td style="color:var(--text-secondary)">{{ g.adresa|default:"--" }}</td>
+          <td class="fx-text-dim">{{ g.adresa|default:"--" }}</td>
           <td>
             {% if g.eu_reg_broj %}
-            <span style="background:rgba(59,130,246,.08);color:#60a5fa;padding:2px 8px;border-radius:6px;font-size:.75rem;font-weight:600;font-family:monospace">
+            <span class="fx-rounded-sm fx-fs-caption fx-fw-semibold fx-text-blue fx-p-btn fx-font-mono" style="background:rgba(59,130,246,.08)">
               {{ g.eu_reg_broj }}
             </span>
             {% else %}--{% endif %}
           </td>
           <td>
             {% if g.kapacitet %}
-            <span style="font-weight:600;font-size:.82rem">{{ g.kapacitet }}</span>
-            <span style="font-size:.7rem;color:var(--text-muted)">mjesta</span>
+            <span class="fx-fw-semibold fx-fs-note">{{ g.kapacitet }}</span>
+            <span class="fx-fs-sm fx-text-muted">mjesta</span>
             {% else %}--{% endif %}
           </td>
           <td>
@@ -154,7 +137,7 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;padding:3px 10px;border-radius:8px">
+            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" class="btn btn-sm btn-outline-secondary fx-fs-sm fx-rounded" style="padding:3px 10px">
               <i class="fas fa-eye"></i>
             </a>
           </td>
@@ -186,15 +169,15 @@
 
 {% else %}
 <!-- Empty state -->
-<div style="text-align:center;padding:5rem 2rem">
-  <div style="font-size:3rem;color:#14b8a6;margin-bottom:1.5rem;animation:emptyFloat 4s ease-in-out infinite">
+<div class="text-center" style="padding:5rem 2rem">
+  <div class="fx-fs-hero fx-text-cyan fx-mb-6" style="animation:emptyFloat 4s ease-in-out infinite">
     <i class="fas fa-home"></i>
   </div>
-  <h3 style="font-weight:700;color:var(--text);margin-bottom:.5rem">Dodajte svoj prvi golubinjak</h3>
-  <p style="color:var(--text-muted);max-width:400px;margin:0 auto 1.5rem;font-size:.88rem">
+  <h3 class="fx-fw-bold fx-text-body mb-2">Dodajte svoj prvi golubinjak</h3>
+  <p class="fx-fs-body fx-text-muted" style="max-width:400px;margin:0 auto 1.5rem">
     Golubinjak je dom vaših golubova. Registrirajte lokaciju, kapacitet i EU broj.
   </p>
-  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+  <a href="{% url 'udruge:golubinjak_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);padding:10px 28px">
     <i class="fas fa-plus me-1"></i>Dodaj golubinjak
   </a>
 </div>

@@ -5,7 +5,7 @@
 {% block extra_css %}
 <style>
 .panic-container{max-width:700px;margin:0 auto;padding:2rem 1rem}
-.panic-hero{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:2.5rem;border-radius:16px;text-align:center;margin-bottom:2rem;box-shadow:0 8px 30px rgba(220,38,38,.3)}
+.panic-hero{background:linear-gradient(135deg,#b91c1c,#dc2626);color:var(--white);padding:2.5rem;border-radius:16px;text-align:center;margin-bottom:2rem;box-shadow:0 8px 30px rgba(220,38,38,.3)}
 .panic-hero h1{font-size:2.5rem;font-weight:900;letter-spacing:3px;margin:0}
 .panic-hero p{opacity:.9;margin-top:.5rem;font-size:1.05rem}
 .scope-form{background:var(--bg-card,#1a1a1a);border-radius:14px;padding:2rem;margin-bottom:1.5rem;border:1px solid var(--border,#333)}
@@ -15,26 +15,26 @@
 .scope-btn:hover{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.05)}
 .scope-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
 .scope-btn i{font-size:1.3rem;width:28px;text-align:center}
-.scope-btn.porezna i{color:#dc2626}.scope-btn.pos i{color:#f59e0b}
-.scope-btn.radna i{color:#3b82f6}.scope-btn.sanitarna i{color:#16a34a}
+.scope-btn.porezna i{color:var(--red)}.scope-btn.pos i{color:var(--amber)}
+.scope-btn.radna i{color:var(--blue)}.scope-btn.sanitarna i{color:var(--green)}
 .scope-btn.all i{color:var(--gold,#c9a84c)}
 .period-row{display:flex;gap:1rem;margin:1.5rem 0;align-items:end}
 .period-row label{display:block;color:var(--muted,#888);font-size:.85rem;margin-bottom:4px}
 .period-row input,.period-row select{background:var(--bg,#0f0f0f);border:1px solid var(--border,#333);color:var(--text,#e5e5e5);padding:.6rem;border-radius:8px;font-size:.9rem;width:100%}
-.generate-btn{width:100%;padding:1rem;font-size:1.2rem;font-weight:800;border:none;border-radius:12px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:.2s}
+.generate-btn{width:100%;padding:1rem;font-size:1.2rem;font-weight:800;border:none;border-radius:12px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:var(--white);cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:.2s}
 .generate-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(220,38,38,.4)}
 .active-tokens{background:var(--bg-card,#1a1a1a);border-radius:14px;padding:1.5rem;border:1px solid var(--border,#333)}
 .active-tokens h3{color:var(--gold);margin-bottom:1rem}
 .token-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem;border-bottom:1px solid var(--border,#333)}
 .token-row:last-child{border:none}
-.revoke-btn{background:#dc2626;color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+.revoke-btn{background:var(--red);color:var(--white);border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="panic-container">
   <div class="panic-hero">
-    <i class="fas fa-exclamation-triangle" style="font-size:3rem;margin-bottom:.5rem"></i>
+    <i class="fas fa-exclamation-triangle fx-fs-hero mb-2"></i>
     <h1>PANIC BUTTON</h1>
     <p>Generiraj QR pristup za inspektora — read-only, vremenski ogranicen</p>
   </div>
@@ -56,9 +56,9 @@
     <div class="scope-form">
       <h3><i class="fas fa-calendar"></i> 2. Period i trajanje</h3>
       <div class="period-row">
-        <div style="flex:1"><label>Od datuma</label><input type="date" name="date_from" value="{{ today_year }}-01-01"></div>
-        <div style="flex:1"><label>Do datuma</label><input type="date" name="date_to" value=""></div>
-        <div style="flex:1"><label>QR vrijedi</label>
+        <div class="fx-flex-1"><label>Od datuma</label><input type="date" name="date_from" value="{{ today_year }}-01-01"></div>
+        <div class="fx-flex-1"><label>Do datuma</label><input type="date" name="date_to" value=""></div>
+        <div class="fx-flex-1"><label>QR vrijedi</label>
           <select name="hours">
             <option value="24" selected>24 sata</option>
             <option value="48">48 sati</option>
@@ -81,9 +81,9 @@
     <div class="token-row">
       <div>
         <strong>{{ t.label }}</strong><br>
-        <small style="color:var(--muted)">Istjece: {{ t.expires_at|date:"d.m.Y H:i" }} | Pregleda: {{ t.view_count }}</small>
+        <small class="fx-text-muted">Istjece: {{ t.expires_at|date:"d.m.Y H:i" }} | Pregleda: {{ t.view_count }}</small>
       </div>
-      <form method="post" action="{% url 'panic_revoke' t.pk %}" style="display:inline">{% csrf_token %}<button class="revoke-btn"><i class="fas fa-ban"></i> Ukini</button></form>
+      <form method="post" action="{% url 'panic_revoke' t.pk %}" class="d-inline">{% csrf_token %}<button class="revoke-btn"><i class="fas fa-ban"></i> Ukini</button></form>
     </div>
     {% endfor %}
   </div>

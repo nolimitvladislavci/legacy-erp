@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;line-height:1.7}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
 a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underline}
 .container{max-width:900px;margin:0 auto;padding:0 20px}
 
@@ -20,7 +20,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .hero-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
 .hero-icon{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:2px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.5rem;color:var(--gold,#c9a84c)}
 .hero h1{font-size:2.2rem;font-weight:800;margin-bottom:8px}.hero h1 span{color:var(--gold,#c9a84c)}
-.hero .subtitle{font-size:1.05rem;color:#94a3b8;max-width:620px;margin:0 auto 28px}
+.hero .subtitle{font-size:1.05rem;color:var(--text-muted);max-width:620px;margin:0 auto 28px}
 .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.76rem;font-weight:600;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--gold,#c9a84c)}
 
@@ -28,7 +28,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .section{padding:50px 0}.section-divider{border:none;border-top:1px solid rgba(201,168,76,.15);margin:0}
 .section-title{font-size:1.5rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
 .section-title i{color:var(--gold,#c9a84c);font-size:1.2rem}
-.section-subtitle{color:#94a3b8;font-size:.95rem;margin-bottom:32px}
+.section-subtitle{color:var(--text-muted);font-size:.95rem;margin-bottom:32px}
 
 /* Profile tabs */
 .profile-tabs{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap}
@@ -36,7 +36,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .profile-tab:hover,.profile-tab.active{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05)}
 .profile-tab .tab-icon{font-size:2rem;margin-bottom:8px}
 .profile-tab h3{font-size:1rem;font-weight:700;margin-bottom:4px}
-.profile-tab p{font-size:.8rem;color:#94a3b8;line-height:1.4}
+.profile-tab p{font-size:.8rem;color:var(--text-muted);line-height:1.4}
 
 /* Feature cards */
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
@@ -44,15 +44,15 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .feature-card:hover{border-color:rgba(201,168,76,.3);transform:translateY(-2px)}
 .feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px}
 .feature-card h3{font-size:1rem;font-weight:700;margin-bottom:6px}
-.feature-card p{font-size:.85rem;color:#94a3b8;line-height:1.6}
+.feature-card p{font-size:.85rem;color:var(--text-muted);line-height:1.6}
 
 /* Steps */
 .steps{counter-reset:step}
 .step{display:flex;gap:20px;margin-bottom:24px;padding:20px;background:rgba(255,255,255,.02);border-radius:12px;border:1px solid rgba(255,255,255,.06)}
-.step-num{counter-increment:step;width:44px;height:44px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#0a0a0a}
+.step-num{counter-increment:step;width:44px;height:44px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--text)}
 .step-num::after{content:counter(step)}
 .step h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
-.step p{font-size:.83rem;color:#94a3b8}
+.step p{font-size:.83rem;color:var(--text-muted)}
 
 /* Legal */
 .legal-card{border-radius:14px;padding:24px;margin-bottom:16px}
@@ -61,16 +61,16 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 .legal-card.ok{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2)}
 .legal-card.info{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.2)}
 .legal-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.legal-card p,.legal-card li{font-size:.85rem;color:#94a3b8}
+.legal-card p,.legal-card li{font-size:.85rem;color:var(--text-muted)}
 .legal-card ul{padding-left:20px}.legal-card li{margin-bottom:4px}
-.fine{color:#ef4444;font-weight:700}.fine-warn{color:#f59e0b;font-weight:700}.fine-ok{color:#22c55e;font-weight:700}
+.fine{color:var(--red);font-weight:700}.fine-warn{color:var(--amber);font-weight:700}.fine-ok{color:var(--green);font-weight:700}
 
 /* Comparison */
 .comparison-table{width:100%;border-collapse:collapse;font-size:.85rem;background:rgba(255,255,255,.02);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
 .comparison-table th{background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);text-align:left;padding:12px 16px;font-size:.75rem;text-transform:uppercase;letter-spacing:1px}
 .comparison-table td{padding:10px 16px;border-top:1px solid rgba(255,255,255,.05)}
 .comparison-table tr:hover{background:rgba(255,255,255,.03)}
-.check{color:#22c55e}.cross{color:#ef4444}
+.check{color:var(--green)}.cross{color:var(--red)}
 
 /* Ljubimci highlight */
 .ljubimci-box{background:linear-gradient(135deg,rgba(236,72,153,.05),rgba(139,92,246,.05));border:1px solid rgba(236,72,153,.2);border-radius:14px;padding:28px;margin-bottom:24px}
@@ -87,9 +87,9 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 
 /* CTA */
 .cta-section{text-align:center;padding:60px 20px;background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(59,130,246,.05));border-top:1px solid rgba(201,168,76,.15)}
-.cta-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:12px;background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s;box-shadow:0 4px 20px rgba(201,168,76,.3)}
-.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.4);text-decoration:none;color:#0a0a0a}
-.footer{text-align:center;padding:30px 20px;font-size:.75rem;color:#475569;border-top:1px solid rgba(255,255,255,.05)}
+.cta-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:12px;background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:var(--text);font-weight:700;font-size:1rem;text-decoration:none;transition:all .3s;box-shadow:0 4px 20px rgba(201,168,76,.3)}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.4);text-decoration:none;color:var(--text)}
+.footer{text-align:center;padding:30px 20px;font-size:.75rem;color:var(--text-dim);border-top:1px solid rgba(255,255,255,.05)}
 
 @media(max-width:600px){
   .hero h1{font-size:1.6rem}.features{grid-template-columns:1fr}
@@ -152,40 +152,40 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 
   <div class="ljubimci-box">
     <h3><span class="emoji">🕊️</span> Ne natječete se? Ne prodajete? Nema problema.</h3>
-    <p style="color:#e2e8f0;font-size:.92rem;margin-bottom:16px">Zakon o zaštiti životinja (NN 102/17) definira <strong>kućnog ljubimca</strong> kao životinju koja se drži <em>"za društvo, zaštitu i pomoć ili iz interesa za tu životinju"</em>. Ako su vaši golubovi ljubimci:</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-      <div style="background:rgba(34,197,94,.08);border-radius:10px;padding:14px;border:1px solid rgba(34,197,94,.15)">
-        <div style="color:#22c55e;font-weight:700;font-size:.85rem;margin-bottom:4px"><i class="fas fa-check-circle"></i> Do ~20 golubova</div>
-        <div style="font-size:.8rem;color:#94a3b8">Nema obaveze registracije objekta. Nema obaveze cijepljenja. Nema obaveze prstena.</div>
+    <p class="fx-text-body mb-3" style="font-size:.92rem">Zakon o zaštiti životinja (NN 102/17) definira <strong>kućnog ljubimca</strong> kao životinju koja se drži <em>"za društvo, zaštitu i pomoć ili iz interesa za tu životinju"</em>. Ako su vaši golubovi ljubimci:</p>
+    <div class="fx-gap-3 d-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div class="fx-rounded" style="background:rgba(34,197,94,.08);padding:14px;border:1px solid rgba(34,197,94,.15)">
+        <div class="fx-text-green fx-fw-bold fx-fs-base mb-1"><i class="fas fa-check-circle"></i> Do ~20 golubova</div>
+        <div class="fx-fs-compact fx-text-dim">Nema obaveze registracije objekta. Nema obaveze cijepljenja. Nema obaveze prstena.</div>
       </div>
-      <div style="background:rgba(245,158,11,.08);border-radius:10px;padding:14px;border:1px solid rgba(245,158,11,.15)">
-        <div style="color:#f59e0b;font-weight:700;font-size:.85rem;margin-bottom:4px"><i class="fas fa-exclamation-circle"></i> 20-50 golubova</div>
-        <div style="font-size:.8rem;color:#94a3b8">Preporučena registracija kod veterinara. Zdravstveni pregled ako veterinar zatraži.</div>
+      <div class="fx-rounded" style="background:rgba(245,158,11,.08);padding:14px;border:1px solid rgba(245,158,11,.15)">
+        <div class="fx-text-amber fx-fw-bold fx-fs-base mb-1"><i class="fas fa-exclamation-circle"></i> 20-50 golubova</div>
+        <div class="fx-fs-compact fx-text-dim">Preporučena registracija kod veterinara. Zdravstveni pregled ako veterinar zatraži.</div>
       </div>
-      <div style="background:rgba(239,68,68,.08);border-radius:10px;padding:14px;border:1px solid rgba(239,68,68,.15)">
-        <div style="color:#ef4444;font-weight:700;font-size:.85rem;margin-bottom:4px"><i class="fas fa-exclamation-triangle"></i> Preko 50</div>
-        <div style="font-size:.8rem;color:#94a3b8">Obavezna registracija objekta. Veterinarski nadzor. Salmonella monitoring.</div>
+      <div class="fx-rounded" style="background:rgba(239,68,68,.08);padding:14px;border:1px solid rgba(239,68,68,.15)">
+        <div class="fx-text-red fx-fw-bold fx-fs-base mb-1"><i class="fas fa-exclamation-triangle"></i> Preko 50</div>
+        <div class="fx-fs-compact fx-text-dim">Obavezna registracija objekta. Veterinarski nadzor. Salmonella monitoring.</div>
       </div>
     </div>
   </div>
 
   <div class="ljubimci-box" style="border-color:rgba(139,92,246,.2);background:linear-gradient(135deg,rgba(139,92,246,.05),rgba(201,168,76,.03))">
     <h3><span class="emoji">🛡️</span> Jedina obaveza za sve — adekvatna skrb</h3>
-    <p style="color:#e2e8f0;font-size:.9rem;margin-bottom:12px">Bez obzira na broj golubova, Zakon o zaštiti životinja zahtijeva:</p>
-    <ul style="color:#cbd5e1;font-size:.85rem;padding-left:20px">
+    <p class="fx-text-body fx-fs-md mb-3">Bez obzira na broj golubova, Zakon o zaštiti životinja zahtijeva:</p>
+    <ul class="fx-fs-base" style="color:#cbd5e1;padding-left:20px">
       <li><strong>Hrana i voda</strong> — redovita i kvalitetna</li>
       <li><strong>Zaklon</strong> — zaštita od vremenskih uvjeta</li>
       <li><strong>Prostor</strong> — dovoljno za normalno ponašanje</li>
       <li><strong>Veterinarska skrb</strong> — kad je potrebna</li>
       <li><strong>Bez zlostavljanja</strong> — kazna do <span class="fine">13.270 EUR</span></li>
     </ul>
-    <p style="color:#8b5cf6;font-size:.82rem;margin-top:12px;font-weight:600"><i class="fas fa-lightbulb"></i> LIMIT Connect vam pomaže dokazati sve ovo — evidencija na mobitelu, 3 klika za inspektora.</p>
+    <p class="fx-text-purple fx-fs-note fx-fw-semibold mt-3"><i class="fas fa-lightbulb"></i> LIMIT Connect vam pomaže dokazati sve ovo — evidencija na mobitelu, 3 klika za inspektora.</p>
   </div>
 
-  <div style="background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:24px">
-    <h4 style="color:var(--gold,#c9a84c);font-weight:700;margin-bottom:8px"><i class="fas fa-gavel"></i> Kad susjed prijavi?</h4>
-    <p style="font-size:.88rem;color:#cbd5e1;margin-bottom:8px">Ako netko prijavi buku ili smrad, veterinarska inspekcija <strong>mora reagirati</strong>. U tom trenutku je bolje imati:</p>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem">
+  <div class="fx-rounded-lg" style="background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);padding:24px">
+    <h4 class="fx-fw-bold fx-text-gold mb-2"><i class="fas fa-gavel"></i> Kad susjed prijavi?</h4>
+    <p class="fx-fs-body mb-2" style="color:#cbd5e1">Ako netko prijavi buku ili smrad, veterinarska inspekcija <strong>mora reagirati</strong>. U tom trenutku je bolje imati:</p>
+    <div class="d-flex fx-gap-6 fx-flex-wrap fx-fs-base">
       <div><span class="cross"><i class="fas fa-times"></i></span> Ništa — "imam ih par, što ćeš" → <span class="fine">zapisnik, moguća kazna</span></div>
       <div><span class="check"><i class="fas fa-check"></i></span> LIMIT Connect — <span class="fine-ok">evidencija, fotografije, zdravlje, uredan golubinjak</span></div>
     </div>
@@ -198,50 +198,50 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 <!-- OFFLINE SEKCIJA -->
 <div class="section">
 <div class="container">
-  <div class="section-title"><i class="fas fa-wifi-slash" style="color:#06b6d4"></i> Radi i bez interneta</div>
+  <div class="section-title"><i class="fas fa-wifi-slash fx-text-cyan"></i> Radi i bez interneta</div>
   <p class="section-subtitle">Golubinjak je na selu, signal je slab. Znamo. Zato LIMIT Connect radi offline.</p>
 
   <div class="offline-box">
     <h3><i class="fas fa-download"></i> Kako radi offline pristup</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:16px">
-      <div style="text-align:center;padding:16px">
-        <div style="font-size:2rem;margin-bottom:8px">📱</div>
-        <div style="font-weight:700;font-size:.9rem;margin-bottom:4px">1. Otvori s internetom</div>
-        <div style="font-size:.8rem;color:#94a3b8">Stranica se automatski sprema na mobitel</div>
+    <div class="fx-gap-4 d-grid mt-3" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="text-center fx-p-16">
+        <div class="fx-fs-icon mb-2">📱</div>
+        <div class="fx-fw-bold fx-fs-md mb-1">1. Otvori s internetom</div>
+        <div class="fx-fs-compact fx-text-dim">Stranica se automatski sprema na mobitel</div>
       </div>
-      <div style="text-align:center;padding:16px">
-        <div style="font-size:2rem;margin-bottom:8px">✈️</div>
-        <div style="font-weight:700;font-size:.9rem;margin-bottom:4px">2. Idi u golubinjak</div>
-        <div style="font-size:.8rem;color:#94a3b8">Nema signala? Nema problema — forme rade</div>
+      <div class="text-center fx-p-16">
+        <div class="fx-fs-icon mb-2">✈️</div>
+        <div class="fx-fw-bold fx-fs-md mb-1">2. Idi u golubinjak</div>
+        <div class="fx-fs-compact fx-text-dim">Nema signala? Nema problema — forme rade</div>
       </div>
-      <div style="text-align:center;padding:16px">
-        <div style="font-size:2rem;margin-bottom:8px">📝</div>
-        <div style="font-weight:700;font-size:.9rem;margin-bottom:4px">3. Unesi podatke</div>
-        <div style="font-size:.8rem;color:#94a3b8">Golubovi, slike iz galerije — sve se sprema lokalno</div>
+      <div class="text-center fx-p-16">
+        <div class="fx-fs-icon mb-2">📝</div>
+        <div class="fx-fw-bold fx-fs-md mb-1">3. Unesi podatke</div>
+        <div class="fx-fs-compact fx-text-dim">Golubovi, slike iz galerije — sve se sprema lokalno</div>
       </div>
-      <div style="text-align:center;padding:16px">
-        <div style="font-size:2rem;margin-bottom:8px">🔄</div>
-        <div style="font-weight:700;font-size:.9rem;margin-bottom:4px">4. Sinkroniziraj</div>
-        <div style="font-size:.8rem;color:#94a3b8">Kad dođe signal — automatski ili jednim klikom</div>
+      <div class="text-center fx-p-16">
+        <div class="fx-fs-icon mb-2">🔄</div>
+        <div class="fx-fw-bold fx-fs-md mb-1">4. Sinkroniziraj</div>
+        <div class="fx-fs-compact fx-text-dim">Kad dođe signal — automatski ili jednim klikom</div>
       </div>
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
-      <h4 style="font-size:.9rem;font-weight:700;color:#22c55e;margin-bottom:8px"><i class="fas fa-check-circle"></i> Radi offline</h4>
-      <ul style="font-size:.82rem;color:#94a3b8;padding-left:16px">
+  <div class="fx-gap-4 d-grid fx-grid-2-equal">
+    <div class="fx-rounded fx-p-20" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+      <h4 class="fx-fs-md fx-fw-bold fx-text-green mb-2"><i class="fas fa-check-circle"></i> Radi offline</h4>
+      <ul class="fx-fs-note fx-text-muted" style="padding-left:16px">
         <li>Unos novog goluba</li>
         <li>Unos golubinjaka</li>
         <li>Fotografije iz galerije</li>
         <li>Pregled postojećih podataka</li>
         <li>AI skeniranje prstena*</li>
       </ul>
-      <small style="font-size:.7rem;color:#64748b">* AI zahtijeva internet, ali slika se sprema za kasnije</small>
+      <small class="fx-fs-sm fx-text-muted">* AI zahtijeva internet, ali slika se sprema za kasnije</small>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
-      <h4 style="font-size:.9rem;font-weight:700;color:var(--gold,#c9a84c);margin-bottom:8px"><i class="fas fa-shield-alt"></i> Sigurnost podataka</h4>
-      <ul style="font-size:.82rem;color:#94a3b8;padding-left:16px">
+    <div class="fx-rounded fx-p-20" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+      <h4 class="fx-fs-md fx-fw-bold fx-text-gold mb-2"><i class="fas fa-shield-alt"></i> Sigurnost podataka</h4>
+      <ul class="fx-fs-note fx-text-muted" style="padding-left:16px">
         <li>Podaci ostaju na vašem mobitelu</li>
         <li>Šifrirani prijenos na server</li>
         <li>Automatski backup</li>
@@ -263,12 +263,12 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 
   <div class="features">
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)"><i class="fas fa-home"></i></div>
+      <div class="feature-icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-home"></i></div>
       <h3>Golubinjak</h3>
       <p>Naziv, adresa, GPS, EU broj, kapacitet. Za natjecatelje: obavezna EU registracija. Za ljubitelje: vašeg golubinjaka ime i detalji.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-dove"></i></div>
+      <div class="feature-icon fx-text-blue" style="background:rgba(59,130,246,.1)"><i class="fas fa-dove"></i></div>
       <h3>Kartoteka golubova</h3>
       <p>Prsten, ime, spol, boja, fotografija. Svaki golub ima svoj profil — kao Facebook za golubove.</p>
     </div>
@@ -278,27 +278,27 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
       <p>Otac, majka, djedovi, bake — vizualni pedigree. Za uzgajivače: znate točno tko je čiji. Za ljubitelje: lijepa obiteljska stabla.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6"><i class="fas fa-lock"></i></div>
+      <div class="feature-icon fx-text-purple" style="background:rgba(139,92,246,.1)"><i class="fas fa-lock"></i></div>
       <h3>Genetski pečat</h3>
       <p>SHA-256 kriptografski hash zaključava rodovnik. Za prodaju ili aukciju — kupac može verificirati autentičnost.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(34,197,94,.1);color:#22c55e"><i class="fas fa-heartbeat"></i></div>
+      <div class="feature-icon fx-text-green" style="background:rgba(34,197,94,.1)"><i class="fas fa-heartbeat"></i></div>
       <h3>Zdravstveni dnevnik</h3>
       <p>PMV, Newcastle, paratifus, vet pregledi. Datumi, lijekovi, doze, veterinar. Podsjetnik za sljedeći tretman.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(239,68,68,.1);color:#ef4444"><i class="fas fa-flag-checkered"></i></div>
+      <div class="feature-icon fx-text-red" style="background:rgba(239,68,68,.1)"><i class="fas fa-flag-checkered"></i></div>
       <h3>Utrke & rezultati</h3>
       <p>Registrirajte utrke, unesite rezultate. Brzina, plasman, bodovi. Leaderboard s medaljama. Win ratio po golubu.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(245,158,11,.1);color:#f59e0b"><i class="fas fa-heart"></i></div>
+      <div class="feature-icon fx-text-amber" style="background:rgba(245,158,11,.1)"><i class="fas fa-heart"></i></div>
       <h3>Parovi & legla</h3>
       <p>Mužjak + ženka, sezona, datumi jaja, izliježanje. Povežite potomke s roditeljima. Kompletna reproduktivna evidencija.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(6,182,212,.1);color:#06b6d4"><i class="fas fa-camera"></i></div>
+      <div class="feature-icon fx-text-cyan" style="background:rgba(6,182,212,.1)"><i class="fas fa-camera"></i></div>
       <h3>AI skeniranje + galerija</h3>
       <p>Slikajte prsten → AI čita broj automatski. Učitajte fotografije iz galerije. Radi i offline — slike se čuvaju lokalno.</p>
     </div>
@@ -348,7 +348,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   <p class="section-subtitle">Što kaže zakon — ovisno o tome jeste li natjecatelj, uzgajivač ili ljubitelj.</p>
 
   <div class="legal-card info">
-    <h4><i class="fas fa-heart" style="color:#3b82f6"></i> Ljubimci (do ~20 golubova, bez prodaje, bez utrka)</h4>
+    <h4><i class="fas fa-heart fx-text-blue"></i> Ljubimci (do ~20 golubova, bez prodaje, bez utrka)</h4>
     <ul>
       <li><span class="fine-ok">Registracija objekta — NIJE obavezna</span></li>
       <li><span class="fine-ok">Cijepljenje — NIJE obavezno</span> (ali preporučeno)</li>
@@ -359,7 +359,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   </div>
 
   <div class="legal-card danger">
-    <h4><i class="fas fa-globe-europe" style="color:#ef4444"></i> Natjecatelji & uzgajivači — EU Uredba 2016/429</h4>
+    <h4><i class="fas fa-globe-europe fx-text-red"></i> Natjecatelji & uzgajivači — EU Uredba 2016/429</h4>
     <ul>
       <li><strong>Registracija objekta</strong> kod veterinarskog ureda — <strong>OBAVEZNA</strong></li>
       <li>EU registracijski broj: HR-XX-YYYY-ZZZZ</li>
@@ -369,7 +369,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   </div>
 
   <div class="legal-card warning">
-    <h4><i class="fas fa-syringe" style="color:#f59e0b"></i> PMV cijepljenje — obavezno za natjecatelje</h4>
+    <h4><i class="fas fa-syringe fx-text-amber"></i> PMV cijepljenje — obavezno za natjecatelje</h4>
     <ul>
       <li><strong>Paramyxovirus (PMV/Newcastle)</strong> — godišnje cijepljenje</li>
       <li>Dokaz o cijepljenju za prijavu na utrke (HOG)</li>
@@ -378,7 +378,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   </div>
 
   <div class="legal-card danger">
-    <h4><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Zakon o veterinarstvu (NN 82/13)</h4>
+    <h4><i class="fas fa-exclamation-triangle fx-text-red"></i> Zakon o veterinarstvu (NN 82/13)</h4>
     <ul>
       <li>Neregistrirani objekt (za natjecatelje): <span class="fine">660 — 6.630 EUR</span></li>
       <li>Veterinarska inspekcija može narediti <strong>uklanjanje životinja</strong></li>
@@ -387,7 +387,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   </div>
 
   <div class="legal-card warning">
-    <h4><i class="fas fa-trophy" style="color:#f59e0b"></i> HOG — za natjecatelje</h4>
+    <h4><i class="fas fa-trophy fx-text-amber"></i> HOG — za natjecatelje</h4>
     <ul>
       <li>Bez registracije u savezu: nema službenih prstena → <strong>nema utrka</strong></li>
       <li>Prsteni se naručuju godinu unaprijed</li>
@@ -396,7 +396,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   </div>
 
   <div class="legal-card ok">
-    <h4><i class="fas fa-shield-alt" style="color:#22c55e"></i> Kako LIMIT Connect pokriva sve scenarije</h4>
+    <h4><i class="fas fa-shield-alt fx-text-green"></i> Kako LIMIT Connect pokriva sve scenarije</h4>
     <ul>
       <li><span class="fine-ok">Ljubimci:</span> fotografije, imena, zdravlje — uredna evidencija za vlastiti mir i za inspektora</li>
       <li><span class="fine-ok">Natjecatelji:</span> EU broj, zdravstveni dnevnik, PMV zapisi, statistika utrka</li>
@@ -415,7 +415,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
   <div class="section-title"><i class="fas fa-balance-scale"></i> Usporedba</div>
 
   <table class="comparison-table">
-    <thead><tr><th>Funkcija</th><th>Papir</th><th>Excel</th><th style="color:var(--gold,#c9a84c)">LIMIT Connect</th></tr></thead>
+    <thead><tr><th>Funkcija</th><th>Papir</th><th>Excel</th><th class="fx-text-gold">LIMIT Connect</th></tr></thead>
     <tbody>
       <tr><td>Fotografije golubova</td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i> + AI skeniranje</td></tr>
       <tr><td>Rodovnik 3 generacije</td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i> automatski</td></tr>
@@ -425,7 +425,7 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
       <tr><td>Pokazati inspektoru</td><td><i class="fas fa-check check"></i> ako nađeš</td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i> 3 klika</td></tr>
       <tr><td>Genetski pečat</td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i> SHA-256</td></tr>
       <tr><td>Statistika utrka</td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i> ručno</td><td><i class="fas fa-check check"></i> automatski</td></tr>
-      <tr><td>Cijena</td><td>Besplatno</td><td>~12€/mj</td><td style="color:var(--gold,#c9a84c);font-weight:700">Besplatno</td></tr>
+      <tr><td>Cijena</td><td>Besplatno</td><td>~12€/mj</td><td class="fx-fw-bold fx-text-gold">Besplatno</td></tr>
     </tbody>
   </table>
 </div>
@@ -435,26 +435,26 @@ a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underli
 <div class="section">
 <div class="container">
   <div class="qr-section">
-    <p style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--gold,#c9a84c)">Podijeli s golubarima</p>
+    <p class="fx-fs-xl fx-fw-bold mb-3 fx-text-gold">Podijeli s golubarima</p>
     <img src="/static/brochures/golubar_qr.png" alt="QR kod — LIMIT Connect Golubar">
-    <p style="margin-top:12px;font-size:.82rem;color:#94a3b8">Skeniraj QR kod ili proslijedi link: <strong>limit-connect.com/golubar</strong></p>
+    <p class="fx-fs-note mt-3 fx-text-dim">Skeniraj QR kod ili proslijedi link: <strong>limit-connect.com/golubar</strong></p>
   </div>
 </div>
 </div>
 
 <!-- CTA -->
 <div class="cta-section">
-  <div style="margin-bottom:20px">
-    <div style="font-size:1.5rem;font-weight:800;margin-bottom:8px">Vaši golubovi zaslužuju red.</div>
-    <p style="color:#94a3b8;font-size:.95rem;max-width:500px;margin:0 auto">Bilo da su natjecatelji ili ljubimci — evidencija u 5 minuta, besplatno, radi i bez interneta.</p>
+  <div class="mb-4">
+    <div class="fx-fs-5xl fx-fw-800 mb-2">Vaši golubovi zaslužuju red.</div>
+    <p class="fx-text-muted fx-fs-normal fx-m-auto" style="max-width:500px">Bilo da su natjecatelji ili ljubimci — evidencija u 5 minuta, besplatno, radi i bez interneta.</p>
   </div>
   <a href="https://limit-connect.com/hr/login/" class="cta-btn"><i class="fas fa-dove"></i> Započni besplatno</a>
-  <p style="margin-top:16px;font-size:.75rem;color:#64748b">Bez kartice. Bez obveze. Bez roka.</p>
+  <p class="fx-fs-caption mt-3 fx-text-muted">Bez kartice. Bez obveze. Bez roka.</p>
 </div>
 
 <div class="footer">
   <p>&copy; 2026 LIMIT Connect — limit-connect.com</p>
-  <p style="margin-top:4px">Razvijeno u suradnji s golubarima iz Čepina, Hrvatska.</p>
+  <p class="mt-1">Razvijeno u suradnji s golubarima iz Čepina, Hrvatska.</p>
 </div>
 
 </body>

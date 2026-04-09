@@ -3,40 +3,40 @@
 {% block title %}Odobri pristup — {{ claim.company.name }}{% endblock %}
 {% block content %}
 <div class="container" style="max-width:600px;margin:40px auto">
-  <h2 style="color:var(--gold);font-family:'Cormorant Garamond',serif">Zahtjev za pristup firmi</h2>
+  <h2 class="fx-text-gold" style="font-family:'Cormorant Garamond',serif">Zahtjev za pristup firmi</h2>
 
-  <div style="background:var(--card,#1a1a1a);border:1px solid var(--border,#333);border-radius:12px;padding:20px;margin:20px 0">
-    <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:.9rem">
-      <span style="color:var(--muted)">Firma:</span><strong>{{ claim.company.name }}</strong>
-      <span style="color:var(--muted)">OIB:</span><span>{{ claim.company.oib }}</span>
-      <span style="color:var(--muted)">Podnositelj:</span><strong>{{ claim.first_name }} {{ claim.last_name }}</strong>
-      <span style="color:var(--muted)">Email:</span><span>{{ claim.email }}</span>
-      {% if claim.phone %}<span style="color:var(--muted)">Telefon:</span><span>{{ claim.phone }}</span>{% endif %}
-      <span style="color:var(--muted)">Tražena uloga:</span><span>{{ claim.role_claimed }}</span>
-      <span style="color:var(--muted)">Datum:</span><span>{{ claim.created_at|date:"d.m.Y. H:i" }}</span>
+  <div class="fx-rounded fx-p-20" style="background:var(--card,#1a1a1a);border:1px solid var(--border,#333);margin:20px 0">
+    <div class="fx-gap-2 fx-fs-md d-grid" style="grid-template-columns:120px 1fr">
+      <span class="fx-text-muted">Firma:</span><strong>{{ claim.company.name }}</strong>
+      <span class="fx-text-muted">OIB:</span><span>{{ claim.company.oib }}</span>
+      <span class="fx-text-muted">Podnositelj:</span><strong>{{ claim.first_name }} {{ claim.last_name }}</strong>
+      <span class="fx-text-muted">Email:</span><span>{{ claim.email }}</span>
+      {% if claim.phone %}<span class="fx-text-muted">Telefon:</span><span>{{ claim.phone }}</span>{% endif %}
+      <span class="fx-text-muted">Tražena uloga:</span><span>{{ claim.role_claimed }}</span>
+      <span class="fx-text-muted">Datum:</span><span>{{ claim.created_at|date:"d.m.Y. H:i" }}</span>
     </div>
 
     {% if stats %}
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border,#333);display:flex;gap:16px;font-size:.8rem">
-      {% if stats.invoices %}<span style="color:var(--gold)">{{ stats.invoices }} faktura</span>{% endif %}
-      {% if stats.partners %}<span style="color:var(--gold)">{{ stats.partners }} partnera</span>{% endif %}
+    <div class="d-flex fx-gap-4 fx-fs-compact mt-3" style="padding-top:12px;border-top:1px solid var(--border,#333)">
+      {% if stats.invoices %}<span class="fx-text-gold">{{ stats.invoices }} faktura</span>{% endif %}
+      {% if stats.partners %}<span class="fx-text-gold">{{ stats.partners }} partnera</span>{% endif %}
     </div>
     {% endif %}
   </div>
 
-  <div style="display:flex;gap:12px;margin-top:20px">
-    <form method="post" style="flex:1">
+  <div class="d-flex fx-gap-3 mt-4">
+    <form method="post" class="fx-flex-1">
       {% csrf_token %}
       <input type="hidden" name="action" value="approve">
-      <button type="submit" style="width:100%;background:var(--gold,#c9a84c);color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer">
+      <button type="submit" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-pointer fx-bg-gold" style="padding:14px">
         ✅ Odobri pristup
       </button>
     </form>
-    <form method="post" style="flex:1" onsubmit="var r=prompt('Razlog odbijanja:');if(!r)return false;this.querySelector('[name=reason]').value=r">
+    <form method="post" class="fx-flex-1" onsubmit="var r=prompt('Razlog odbijanja:');if(!r)return false;this.querySelector('[name=reason]').value=r">
       {% csrf_token %}
       <input type="hidden" name="action" value="reject">
       <input type="hidden" name="reason" value="">
-      <button type="submit" style="width:100%;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);padding:14px;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer">
+      <button type="submit" class="fx-w-full fx-rounded fx-fw-semibold fx-fs-lg fx-pointer fx-text-red" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);padding:14px">
         ❌ Odbij
       </button>
     </form>

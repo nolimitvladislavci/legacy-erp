@@ -6,36 +6,36 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;padding:1.5rem}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:1.5rem}
 .card{max-width:440px;width:100%}
 .header{text-align:center;margin-bottom:1.5rem}
 .header .icon{font-size:2.5rem;margin-bottom:.5rem}
-.header h1{font-size:1.3rem;font-weight:700;color:#d4a017}
-.header .sub{color:#888;font-size:.85rem;margin-top:.3rem}
+.header h1{font-size:1.3rem;font-weight:700;color:var(--gold)}
+.header .sub{color:var(--text-muted);font-size:.85rem;margin-top:.3rem}
 
 .status-badge{display:inline-block;padding:.4rem 1rem;border-radius:20px;font-size:.85rem;font-weight:600;margin:1rem 0}
-.status-scheduled{background:rgba(59,130,246,.12);color:#3b82f6}
-.status-confirmed{background:rgba(16,185,129,.12);color:#10b981}
+.status-scheduled{background:rgba(59,130,246,.12);color:var(--blue)}
+.status-confirmed{background:rgba(16,185,129,.12);color:var(--green)}
 .status-completed{background:rgba(168,85,247,.12);color:#a855f7}
-.status-cancelled{background:rgba(239,68,68,.12);color:#ef4444}
+.status-cancelled{background:rgba(239,68,68,.12);color:var(--red)}
 
-.info-card{background:#111;border:1px solid #222;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.info-card{background:var(--bg-card);border:1px solid #222;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
 .info-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1a1a1a;font-size:.9rem}
 .info-row:last-child{border-bottom:none}
-.info-row .label{color:#888}
+.info-row .label{color:var(--text-muted)}
 .info-row .val{font-weight:600;text-align:right}
 
 .timeline{margin:1rem 0}
 .tl-item{display:flex;gap:.75rem;padding:.5rem 0}
 .tl-dot{width:12px;height:12px;border-radius:50%;border:2px solid #333;flex-shrink:0;margin-top:4px}
-.tl-dot.done{background:#10b981;border-color:#10b981}
-.tl-dot.active{background:#d4a017;border-color:#d4a017;box-shadow:0 0 8px rgba(212,160,23,.4)}
+.tl-dot.done{background:#10b981;border-color:var(--green)}
+.tl-dot.active{background:#d4a017;border-color:var(--gold);box-shadow:0 0 8px rgba(212,160,23,.4)}
 .tl-dot.pending{background:transparent}
 .tl-content .tl-title{font-size:.85rem;font-weight:600}
-.tl-content .tl-time{font-size:.72rem;color:#666}
+.tl-content .tl-time{font-size:.72rem;color:var(--text-dim)}
 
-.footer{text-align:center;margin-top:2rem;font-size:.78rem;color:#555}
-.footer a{color:#d4a017;text-decoration:none}
+.footer{text-align:center;margin-top:2rem;font-size:.78rem;color:var(--text-dim)}
+.footer a{color:var(--gold);text-decoration:none}
 </style>
 </head><body>
 <div class="card">
@@ -46,7 +46,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f
     <div class="sub">{{ appointment.company.name }}</div>
 </div>
 
-<div style="text-align:center">
+<div class="text-center">
     <span class="status-badge status-{{ appointment.status }}">
         {% if appointment.status == 'scheduled' %}Zakazano
         {% elif appointment.status == 'confirmed' %}Potvrdjeno
@@ -57,7 +57,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f
 </div>
 
 <div class="info-card">
-    <div class="info-row"><span class="label">Usluga</span><span class="val" style="color:#d4a017">{{ appointment.service.name }}</span></div>
+    <div class="info-row"><span class="label">Usluga</span><span class="val fx-text-gold">{{ appointment.service.name }}</span></div>
     <div class="info-row"><span class="label">Datum</span><span class="val">{{ appointment.start_time|date:"d.m.Y" }}</span></div>
     <div class="info-row"><span class="label">Vrijeme</span><span class="val">{{ appointment.start_time|date:"H:i" }} — {{ appointment.end_time|date:"H:i" }}</span></div>
     {% if appointment.total_price %}<div class="info-row"><span class="label">Cijena</span><span class="val">{{ appointment.total_price }} EUR</span></div>{% endif %}
@@ -66,7 +66,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f
 </div>
 
 <div class="info-card">
-    <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:.75rem;font-weight:600">Pracenje procesa</div>
+    <div class="fx-fs-caption fx-text-muted fx-fw-semibold fx-uppercase fx-ls-2 fx-mb-4">Pracenje procesa</div>
     <div class="timeline">
         <div class="tl-item">
             <div class="tl-dot done"></div>
@@ -100,9 +100,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f
 </div>
 
 {% if appointment.status != 'cancelled' and appointment.status != 'completed' %}
-<div style="text-align:center;margin:1rem 0">
+<div class="text-center" style="margin:1rem 0">
     <a href="https://wa.me/{{ appointment.company.phone|default:'' }}?text=Zelim%20otkazati%20rezervaciju%20{{ appointment.start_time|date:'d.m.Y' }}%20u%20{{ appointment.start_time|date:'H:i' }}"
-       style="display:inline-block;padding:.6rem 1.2rem;border:1px solid #333;border-radius:8px;color:#888;font-size:.82rem;text-decoration:none">
+       class="fx-rounded fx-text-muted fx-fs-note fx-no-underline d-inline-block" style="padding:.6rem 1.2rem;border:1px solid #333">
         Otkazi rezervaciju
     </a>
 </div>

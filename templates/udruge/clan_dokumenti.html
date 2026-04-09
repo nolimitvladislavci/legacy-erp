@@ -2,93 +2,93 @@
 {% load i18n %}
 {% block title %}Dokumenti — {{ clan.full_name }}{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+<div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-id-card"></i> Dokumenti</h4>
-    <small style="color:var(--muted)">{{ clan.full_name }} — dozvole, licence, certifikati</small>
+    <h4 class="fx-text-gold fx-m-0"><i class="fas fa-id-card"></i> Dokumenti</h4>
+    <small class="fx-text-muted">{{ clan.full_name }} — dozvole, licence, certifikati</small>
   </div>
   <a href="{% url 'udruge:clan_detail' clan.pk %}" class="btn btn-ghost btn-sm">Natrag</a>
 </div>
 
-<div class="card" style="padding:1rem;margin-bottom:1rem">
-  <h6 style="color:var(--gold);margin-bottom:.75rem">Dodaj dokument</h6>
+<div class="card mb-3 fx-p-4">
+  <h6 class="fx-text-gold fx-mb-4">Dodaj dokument</h6>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+    <div class="d-grid fx-gap-3 fx-grid-2-equal fx-mb-4">
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Tip dokumenta *</label>
-        <select name="doc_type" required style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Tip dokumenta *</label>
+        <select name="doc_type" required class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
           {% for val, lbl in doc_types %}
           <option value="{{ val }}">{{ lbl }}</option>
           {% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Broj dokumenta</label>
-        <input type="text" name="doc_number" style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Broj dokumenta</label>
+        <input type="text" name="doc_number" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Izdao</label>
-        <input type="text" name="issued_by" placeholder="Npr. MUP, Sportski savez..." style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Izdao</label>
+        <input type="text" name="issued_by" placeholder="Npr. MUP, Sportski savez..." class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Datum izdavanja</label>
-        <input type="date" name="issue_date" style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Datum izdavanja</label>
+        <input type="date" name="issue_date" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Vrijedi do</label>
-        <input type="date" name="valid_until" style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Vrijedi do</label>
+        <input type="date" name="valid_until" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
       </div>
       <div>
-        <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Prilog (sken)</label>
-        <input type="file" name="file" style="width:100%;padding:.35rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.8rem">
+        <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Prilog (sken)</label>
+        <input type="file" name="file" class="fx-w-full fx-rounded-sm fx-fs-compact fx-text-body fx-bg-dark fx-b" style="padding:.35rem">
       </div>
     </div>
-    <div style="margin-bottom:.75rem">
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Napomena</label>
-      <input type="text" name="notes" style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    <div class="fx-mb-4">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:3px">Napomena</label>
+      <input type="text" name="notes" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-tag fx-bg-dark fx-b">
     </div>
     <button type="submit" class="btn btn-gold btn-sm">Dodaj dokument</button>
   </form>
 </div>
 
 <div class="card">
-  <div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse">
+  <div class="fx-scroll-x">
+    <table class="fx-w-full fx-b-collapse">
       <thead>
         <tr>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Tip</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Broj</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Izdao</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Vrijedi do</th>
-          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
-          <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Tip</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Broj</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Izdao</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vrijedi do</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Status</th>
+          <th class="fx-p-2 fx-bb"></th>
         </tr>
       </thead>
       <tbody>
         {% for d in docs %}
-        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-          <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600">{{ d.get_doc_type_display }}</td>
-          <td style="padding:.5rem .6rem;font-size:.82rem;font-family:monospace">{{ d.doc_number|default:"-" }}</td>
-          <td style="padding:.5rem .6rem;font-size:.82rem">{{ d.issued_by|default:"-" }}</td>
-          <td style="padding:.5rem .6rem;font-size:.82rem">{{ d.valid_until|date:"d.m.Y"|default:"Bez roka" }}</td>
-          <td style="padding:.5rem .6rem">
+        <tr class="fx-bb-subtle">
+          <td class="fx-fs-base fx-fw-semibold fx-p-cell">{{ d.get_doc_type_display }}</td>
+          <td class="fx-fs-note fx-p-cell fx-font-mono">{{ d.doc_number|default:"-" }}</td>
+          <td class="fx-fs-note fx-p-cell">{{ d.issued_by|default:"-" }}</td>
+          <td class="fx-fs-note fx-p-cell">{{ d.valid_until|date:"d.m.Y"|default:"Bez roka" }}</td>
+          <td class="fx-p-cell">
             {% if d.is_expired %}
-            <span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">Istekao</span>
+            <span class="fx-text-red fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(239,68,68,.15)">Istekao</span>
             {% elif d.expires_soon %}
-            <span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">Istice uskoro</span>
+            <span class="fx-text-amber fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(245,158,11,.15)">Istice uskoro</span>
             {% elif d.valid_until %}
-            <span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">Aktivan</span>
+            <span class="fx-text-green fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(34,197,94,.15)">Aktivan</span>
             {% else %}
-            <span style="font-size:.72rem;color:var(--muted)">Bez roka</span>
+            <span class="fx-fs-sm fx-text-muted">Bez roka</span>
             {% endif %}
           </td>
-          <td style="padding:.5rem .6rem">
-            {% if d.file %}<a href="{{ d.file.url }}" target="_blank" style="color:var(--gold);font-size:.78rem"><i class="fas fa-download"></i></a>{% endif %}
+          <td class="fx-p-cell">
+            {% if d.file %}<a href="{{ d.file.url }}" target="_blank" class="fx-fs-body-sm fx-text-gold"><i class="fas fa-download"></i></a>{% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">Nema dokumenata za ovog clana</td></tr>
+        <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema dokumenata za ovog clana</td></tr>
         {% endfor %}
       </tbody>
     </table>

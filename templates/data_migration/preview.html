@@ -7,52 +7,52 @@
 {% block content %}
 <div class="container-fluid px-3 py-3" style="max-width:1100px">
 
-  <nav class="mb-3" style="font-size:.85rem">
-    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+  <nav class="mb-3 fx-fs-base">
+    <a href="{% url 'data_migration:dashboard' %}" class="fx-no-underline fx-text-cyan">
       <i class="fas fa-arrow-left me-1"></i>Svi projekti
     </a>
-    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+    <span class="fx-text-muted"> / {{ project.name }}</span>
   </nav>
 
-  <h4 class="mb-3"><i class="fas fa-search me-2" style="color:var(--gold)"></i>Korak 3: Pregled podataka</h4>
+  <h4 class="mb-3"><i class="fas fa-search me-2 fx-text-gold"></i>Korak 3: Pregled podataka</h4>
 
   <!-- Info -->
   <div class="row g-2 mb-3">
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Ukupno redova</div>
-        <div class="fw-bold fs-5" style="color:var(--text)">{{ total_rows }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Ukupno redova</div>
+        <div class="fw-bold fs-5 fx-text-body">{{ total_rows }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Prikazano</div>
-        <div class="fw-bold fs-5" style="color:var(--text)">{{ preview_data|length }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Prikazano</div>
+        <div class="fw-bold fs-5 fx-text-body">{{ preview_data|length }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Tip</div>
-        <div class="fw-bold" style="color:var(--text)">{{ project.get_entity_type_display }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Tip</div>
+        <div class="fw-bold fx-text-body">{{ project.get_entity_type_display }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Mapirana polja</div>
-        <div class="fw-bold" style="color:var(--text)">{{ mapped_fields|length }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Mapirana polja</div>
+        <div class="fw-bold fx-text-body">{{ mapped_fields|length }}</div>
       </div>
     </div>
   </div>
 
   <!-- Preview tablica -->
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="fx-rounded fx-bg-card fx-b fx-overflow-hidden">
     <div class="table-responsive" style="max-height:500px;overflow:auto">
-      <table class="table table-hover table-sm mb-0" style="color:var(--text);font-size:.82rem">
-        <thead style="background:var(--table-header-bg);position:sticky;top:0;z-index:1">
+      <table class="table table-hover table-sm mb-0 fx-fs-note fx-text-body">
+        <thead class="fx-bg-surface2" style="position:sticky;top:0;z-index:1">
           <tr>
-            <th style="color:var(--text-secondary)">#</th>
+            <th class="fx-text-dim">#</th>
             {% for f in mapped_fields %}
-            <th style="color:var(--text-secondary)">{{ f.label }}</th>
+            <th class="fx-text-dim">{{ f.label }}</th>
             {% endfor %}
           </tr>
         </thead>
@@ -71,41 +71,41 @@
   </div>
 
   {% if total_rows > 50 %}
-  <div class="text-center mt-2 small" style="color:var(--text-muted)">
+  <div class="text-center mt-2 small fx-text-muted">
     <i class="fas fa-info-circle me-1"></i>Prikazano prvih 50 od {{ total_rows }} redova
   </div>
   {% endif %}
 
   <!-- Progress area (hidden until import starts) -->
   <div id="progressArea" class="d-none mt-4">
-    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center">
-      <i class="fas fa-cog fa-spin fa-2x mb-3" style="color:var(--gold)"></i>
-      <h5 style="color:var(--text)" id="progressTitle">Inicijalizacija importa...</h5>
-      <div class="progress mb-2" style="height:24px;background:var(--badge-bg);border-radius:12px">
-        <div class="progress-bar" id="progressBar" role="progressbar"
-             style="width:0%;background:var(--gold);border-radius:12px;font-weight:600;color:#000;transition:width .3s">
+    <div class="fx-rounded text-center fx-bg-card fx-b" style="padding:24px">
+      <i class="fas fa-cog fa-spin fa-2x mb-3 fx-text-gold"></i>
+      <h5 class="fx-text-body" id="progressTitle">Inicijalizacija importa...</h5>
+      <div class="progress mb-2 fx-rounded" style="height:24px;background:var(--badge-bg)">
+        <div class="progress-bar fx-rounded fx-fw-semibold fx-text-dark fx-bg-gold" id="progressBar" role="progressbar"
+             style="width:0%;transition:width .3s">
           0%
         </div>
       </div>
-      <div id="progressDetail" class="small" style="color:var(--text-muted)">
+      <div id="progressDetail" class="small fx-text-muted">
         Obrada: 0 / {{ total_rows }} redova
       </div>
       <div class="row g-2 mt-3" id="progressStats">
         <div class="col-3">
-          <div class="small" style="color:var(--text-muted)">Kreirano</div>
-          <div class="fw-bold" style="color:#059669" id="statCreated">0</div>
+          <div class="small fx-text-muted">Kreirano</div>
+          <div class="fw-bold fx-text-green" id="statCreated">0</div>
         </div>
         <div class="col-3">
-          <div class="small" style="color:var(--text-muted)">Azurirano</div>
-          <div class="fw-bold" style="color:var(--accent)" id="statUpdated">0</div>
+          <div class="small fx-text-muted">Azurirano</div>
+          <div class="fw-bold fx-text-cyan" id="statUpdated">0</div>
         </div>
         <div class="col-3">
-          <div class="small" style="color:var(--text-muted)">Preskoceno</div>
-          <div class="fw-bold" style="color:var(--text-muted)" id="statSkipped">0</div>
+          <div class="small fx-text-muted">Preskoceno</div>
+          <div class="fw-bold fx-text-muted" id="statSkipped">0</div>
         </div>
         <div class="col-3">
-          <div class="small" style="color:var(--text-muted)">Greske</div>
-          <div class="fw-bold" style="color:#dc2626" id="statFailed">0</div>
+          <div class="small fx-text-muted">Greske</div>
+          <div class="fw-bold fx-text-red" id="statFailed">0</div>
         </div>
       </div>
     </div>
@@ -210,10 +210,10 @@
         progressBar.textContent = '100%';
 
         if(data.status === 'completed'){
-          progressTitle.innerHTML = '<i class="fas fa-check-circle me-2" style="color:#059669"></i>Import zavrsen!';
+          progressTitle.innerHTML = '<i class="fas fa-check-circle me-2 fx-text-green"></i>Import zavrsen!';
           progressBar.style.background = '#059669';
         } else {
-          progressTitle.innerHTML = '<i class="fas fa-exclamation-triangle me-2" style="color:#dc2626"></i>Import zavrsen s greskama';
+          progressTitle.innerHTML = '<i class="fas fa-exclamation-triangle me-2 fx-text-red"></i>Import zavrsen s greskama';
           progressBar.style.background = '#dc2626';
         }
 

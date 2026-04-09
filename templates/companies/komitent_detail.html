@@ -3,24 +3,7 @@
 {% block title %}{{ company.name }} — Komitent{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
@@ -28,33 +11,33 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <a href="{% url 'companies:komitent_dashboard' %}" class="text-muted small"><i class="fas fa-arrow-left"></i> Natrag na listu</a>
-    <h2 style="color:var(--gold);margin:0"><i class="fas fa-building"></i> {{ company.name }}</h2>
+    <h2 class="fx-text-gold fx-m-0"><i class="fas fa-building"></i> {{ company.name }}</h2>
     <small class="text-muted">OIB: {{ company.oib }} | {{ company.address }}, {{ company.zip_code }} {{ company.city }}</small>
   </div>
   <div>
-    {% if profile.status == 'active' %}<span class="badge bg-success" style="font-size:1rem;padding:8px 16px">AKTIVAN</span>
-    {% elif profile.status == 'notice' %}<span class="badge bg-warning text-dark" style="font-size:1rem;padding:8px 16px">U OTKAZU</span>
-    {% elif profile.status == 'archived' %}<span class="badge bg-secondary" style="font-size:1rem;padding:8px 16px">ARHIVIRAN</span>
-    {% else %}<span class="badge bg-info" style="font-size:1rem;padding:8px 16px">{{ profile.get_status_display|upper }}</span>{% endif %}
+    {% if profile.status == 'active' %}<span class="fenix-badge fenix-badge-success fx-fs-lg fx-p-8-16">AKTIVAN</span>
+    {% elif profile.status == 'notice' %}<span class="fenix-badge fenix-badge-warning fx-fs-lg fx-p-8-16">U OTKAZU</span>
+    {% elif profile.status == 'archived' %}<span class="fenix-badge fenix-badge-muted fx-fs-lg fx-p-8-16">ARHIVIRAN</span>
+    {% else %}<span class="fenix-badge fenix-badge-info fx-fs-lg fx-p-8-16">{{ profile.get_status_display|upper }}</span>{% endif %}
   </div>
 </div>
 
 <!-- Stats -->
 <div class="row g-2 mb-3">
-  <div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800">{{ stats.partners|default:0 }}</div><small class="text-muted">Partnera</small></div></div>
-  <div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800">{{ stats.invoices|default:0 }}</div><small class="text-muted">Faktura</small></div></div>
-  <div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800">{{ stats.entries|default:0 }}</div><small class="text-muted">Temeljnica</small></div></div>
-  <div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800">{{ stats.items|default:0 }}</div><small class="text-muted">Artikala</small></div></div>
-  <div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800;color:var(--gold)">{{ stats.revenue|floatformat:0|default:0 }}€</div><small class="text-muted">Promet</small></div></div>
-  {% if profile.days_as_client %}<div class="col"><div class="stat-card text-center"><div style="font-size:1.8rem;font-weight:800">{{ profile.days_as_client }}</div><small class="text-muted">Dana klijent</small></div></div>{% endif %}
+  <div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-fs-6xl">{{ stats.partners|default:0 }}</div><small class="text-muted">Partnera</small></div></div>
+  <div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-fs-6xl">{{ stats.invoices|default:0 }}</div><small class="text-muted">Faktura</small></div></div>
+  <div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-fs-6xl">{{ stats.entries|default:0 }}</div><small class="text-muted">Temeljnica</small></div></div>
+  <div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-fs-6xl">{{ stats.items|default:0 }}</div><small class="text-muted">Artikala</small></div></div>
+  <div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-text-gold fx-fs-6xl">{{ stats.revenue|floatformat:0|default:0 }}€</div><small class="text-muted">Promet</small></div></div>
+  {% if profile.days_as_client %}<div class="col"><div class="stat-card text-center"><div class="fx-fw-800 fx-fs-6xl">{{ profile.days_as_client }}</div><small class="text-muted">Dana klijent</small></div></div>{% endif %}
 </div>
 
 <div class="row g-3">
 
 <!-- LIJEVO: Edit forma -->
 <div class="col-lg-7">
-<div class="stat-card">
-<h5 style="color:var(--gold);margin-bottom:1rem"><i class="fas fa-edit"></i> Profil komitenta</h5>
+<div class="fenix-stat">
+<h5 class="fx-text-gold mb-3"><i class="fas fa-edit"></i> Profil komitenta</h5>
 <form method="post">
 {% csrf_token %}
 <input type="hidden" name="action" value="update_profile">
@@ -121,8 +104,8 @@
 
 <!-- DESNO: Timeline -->
 <div class="col-lg-5">
-<div class="stat-card">
-<h5 style="color:var(--gold);margin-bottom:1rem"><i class="fas fa-history"></i> Timeline</h5>
+<div class="fenix-stat">
+<h5 class="fx-text-gold mb-3"><i class="fas fa-history"></i> Timeline</h5>
 
 <!-- Dodaj bilješku -->
 <form method="post" class="mb-3">
@@ -140,24 +123,24 @@
 </div>
 </form>
 
-<div style="max-height:500px;overflow-y:auto">
+<div class="fx-scroll-y" style="max-height:500px">
 {% for e in events %}
 <div style="border-left:3px solid {% if e.event_type == 'activated' %}#22c55e{% elif e.event_type == 'archived' %}#888{% elif e.event_type == 'notice' %}#f59e0b{% elif e.event_type == 'blocked' %}#dc2626{% elif e.event_type == 'contact' %}#3b82f6{% elif e.event_type == 'meeting' %}#8b5cf6{% else %}var(--gold){% endif %};padding:8px 12px;margin-bottom:8px;border-radius:0 8px 8px 0;background:rgba(255,255,255,.02)">
   <div class="d-flex justify-content-between">
-    <strong style="font-size:.85rem">
+    <strong class="fx-fs-base">
       {% if e.event_type == 'activated' %}<i class="fas fa-check-circle text-success"></i>
       {% elif e.event_type == 'archived' %}<i class="fas fa-archive text-muted"></i>
       {% elif e.event_type == 'notice' %}<i class="fas fa-exclamation-triangle text-warning"></i>
       {% elif e.event_type == 'blocked' %}<i class="fas fa-ban text-danger"></i>
       {% elif e.event_type == 'contact' %}<i class="fas fa-phone text-info"></i>
       {% elif e.event_type == 'meeting' %}<i class="fas fa-handshake text-purple"></i>
-      {% elif e.event_type == 'note' %}<i class="fas fa-sticky-note" style="color:var(--gold)"></i>
-      {% else %}<i class="fas fa-circle" style="font-size:.5rem;color:var(--gold)"></i>{% endif %}
+      {% elif e.event_type == 'note' %}<i class="fas fa-sticky-note fx-text-gold"></i>
+      {% else %}<i class="fas fa-circle fx-text-gold" style="font-size:.5rem"></i>{% endif %}
       {{ e.get_event_type_display }}
     </strong>
     <small class="text-muted">{{ e.created_at|date:"d.m.Y H:i" }}</small>
   </div>
-  <div style="font-size:.85rem;margin-top:4px">{{ e.description }}</div>
+  <div class="fx-fs-base mt-1">{{ e.description }}</div>
   {% if e.created_by %}<small class="text-muted">{{ e.created_by.get_full_name|default:e.created_by.username }}</small>{% endif %}
 </div>
 {% empty %}

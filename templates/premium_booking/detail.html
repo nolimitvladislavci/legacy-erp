@@ -41,12 +41,12 @@
             <div class="resource-meta"><span class="label">{% trans "Cijena" %}</span><span class="value">{{ resource.base_price }} € / {{ resource.get_unit_display }}</span></div>
             {% if resource.capacity %}<div class="resource-meta"><span class="label">{% trans "Kapacitet" %}</span><span class="value">{{ resource.capacity }} {% trans "Osoba" %}</span></div>{% endif %}
             <div class="resource-meta"><span class="label">{% trans "Minimalno trajanje" %}</span><span class="value">{{ resource.min_duration }} {{ resource.get_unit_display }}</span></div>
-            <div class="resource-meta" style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+            <div class="resource-meta mt-2 fx-bt" style="padding-top:12px">
                 <span class="label" id="qtyLabel">{% trans "Količina" %}</span>
-                <div style="display:flex;align-items:center;gap:8px">
-                    <button onclick="changeQty(-1)" style="background:none;border:1px solid var(--border);color:var(--gold);width:26px;height:26px;cursor:pointer;font-size:1.1rem;line-height:1">&#8722;</button>
-                    <span id="qtyValue" style="color:var(--text);font-weight:700;min-width:24px;text-align:center">{{ resource.min_duration }}</span>
-                    <button onclick="changeQty(1)" style="background:none;border:1px solid var(--border);color:var(--gold);width:26px;height:26px;cursor:pointer;font-size:1.1rem;line-height:1">+</button>
+                <div class="d-flex fx-gap-2 align-items-center">
+                    <button onclick="changeQty(-1)" class="fx-pointer fx-fs-xl fx-text-gold fx-bg-transparent fx-b" style="width:26px;height:26px;line-height:1">&#8722;</button>
+                    <span id="qtyValue" class="fx-fw-bold text-center fx-text-body" style="min-width:24px">{{ resource.min_duration }}</span>
+                    <button onclick="changeQty(1)" class="fx-pointer fx-fs-xl fx-text-gold fx-bg-transparent fx-b" style="width:26px;height:26px;line-height:1">+</button>
                 </div>
             </div>
             <div class="resource-meta">
@@ -56,7 +56,7 @@
         </div>
 
         {% if addons %}
-        <div class="resource-card addons-section" style="margin-top:16px">
+        <div class="resource-card addons-section mt-3">
             <h6>{% trans "Dodatne usluge" %}</h6>
             {% for addon in addons %}
             <div class="addon-card" onclick="toggleAddon({{ addon.id }}, {{ addon.price }}, this)">
@@ -110,7 +110,7 @@
             <h2>{% trans "Vaši podaci" %}</h2>
             <div class="summary-bar" id="summaryBar4"></div>
             <div class="form-grid">
-                <div class="form-group" style="grid-column:1/-1"><label>{% trans "Ime *" %}</label><input type="text" id="name" placeholder="{% trans "Ime i prezime" %}" required></div>
+                <div class="form-group fx-col-full"><label>{% trans "Ime *" %}</label><input type="text" id="name" placeholder="{% trans "Ime i prezime" %}" required></div>
             </div>
             <div class="form-grid">
                 <div class="form-group"><label>{% trans "E-mail *" %}</label><input type="email" id="email" placeholder="vas@email.hr" required></div>
@@ -133,8 +133,8 @@
             </div>
             <input type="hidden" id="selectedPayment" value="invoice">
             <div class="price-summary">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span style="color:var(--muted);font-size:.85rem">{% trans "Ukupna cijena" %}</span>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fx-fs-base fx-text-muted">{% trans "Ukupna cijena" %}</span>
                     <span class="price-total" id="totalPrice">{{ resource.base_price }} €</span>
                 </div>
                 <p class="price-note" id="priceNote">{% trans "Osnovna cijena za" %} {{ resource.min_duration }} {{ resource.get_unit_display }}</p>
@@ -146,12 +146,12 @@
 
         <!-- Step 6: Bestätigung -->
         <div class="step-panel hidden" id="stepBestatigung">
-            <div style="text-align:center;padding:28px 16px">
-                <div style="font-size:3.5rem;margin-bottom:16px">&#9989;</div>
+            <div class="text-center" style="padding:28px 16px">
+                <div class="mb-3" style="font-size:3.5rem">&#9989;</div>
                 <h2>{% trans "Rezervacija uspješna!" %}</h2>
-                <div class="summary-bar" style="text-align:left;margin:20px auto;max-width:420px" id="confirmSummary"></div>
-                <p style="color:var(--muted);font-size:.85rem;margin-top:8px">{% trans "Broj rezervacije:" %} <strong id="confirmBookingNumber" style="color:var(--gold)"></strong></p>
-                <a href="/premium/" style="display:inline-block;margin-top:24px;color:var(--gold);border:1px solid var(--gold);padding:10px 22px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:.8rem">{% trans "Nova rezervacija" %}</a>
+                <div class="summary-bar text-start" style="margin:20px auto;max-width:420px" id="confirmSummary"></div>
+                <p class="fx-fs-base fx-text-muted mt-2">{% trans "Broj rezervacije:" %} <strong id="confirmBookingNumber" class="fx-text-gold"></strong></p>
+                <a href="/premium/" class="fx-no-underline fx-fs-compact d-inline-block mt-4 fx-text-gold fx-uppercase" style="border:1px solid var(--gold);padding:10px 22px;letter-spacing:2px">{% trans "Nova rezervacija" %}</a>
             </div>
         </div>
     </div>

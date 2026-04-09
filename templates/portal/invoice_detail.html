@@ -3,24 +3,7 @@
 {% block title %}{{ invoice.number|default:"Dokument" }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .inv-header{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
@@ -47,7 +30,7 @@
 
 {% block content %}
 <!-- Back link -->
-<a href="{% url 'portal_invoices' token %}" style="font-size:.82rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px;margin-bottom:20px">
+<a href="{% url 'portal_invoices' token %}" class="fx-fs-note fx-gap-2 fx-text-dim d-inline-flex align-items-center mb-4">
   <i class="fas fa-arrow-left"></i> Natrag na listu
 </a>
 
@@ -55,7 +38,7 @@
 <div class="inv-header">
   <div>
     <div class="inv-number">{{ invoice.number|default:"Dokument" }}</div>
-    <div style="font-size:.85rem;color:var(--text-secondary);margin-top:4px">
+    <div class="fx-fs-base fx-text-dim mt-1">
       {{ invoice.get_doctype_display }} &middot; {{ invoice.date_issued|date:"d.m.Y" }}
       &middot; <span class="badge badge-{{ invoice.status|lower }}">{{ invoice.get_status_display }}</span>
     </div>
@@ -103,7 +86,7 @@
 <!-- Parties -->
 <div class="b2b-info-grid mb-3">
   <div class="b2b-info-box">
-    <h4><i class="fas fa-building" style="margin-right:6px"></i>Izdavac</h4>
+    <h4><i class="fas fa-building fx-mr-2"></i>Izdavac</h4>
     <div class="b2b-info-row"><span>Naziv</span><span>{{ invoice.company.name|default:"—" }}</span></div>
     <div class="b2b-info-row"><span>OIB</span><span>{{ invoice.company.oib|default:"—" }}</span></div>
     <div class="b2b-info-row"><span>Adresa</span><span>{{ invoice.company.address|default:"—" }}</span></div>
@@ -115,7 +98,7 @@
     {% endif %}
   </div>
   <div class="b2b-info-box">
-    <h4><i class="fas fa-user-tie" style="margin-right:6px"></i>Primatelj</h4>
+    <h4><i class="fas fa-user-tie fx-mr-2"></i>Primatelj</h4>
     <div class="b2b-info-row"><span>Naziv</span><span>{{ invoice.client_name|default:partner.name }}</span></div>
     <div class="b2b-info-row"><span>OIB</span><span>{{ invoice.client_oib|default:partner.oib|default:"—" }}</span></div>
     <div class="b2b-info-row"><span>Adresa</span><span>{{ invoice.client_address|default:partner.address|default:"—" }}</span></div>
@@ -124,10 +107,10 @@
 </div>
 
 <!-- Items -->
-<div class="b2b-card" style="padding:0;overflow:hidden">
-  <div style="padding:18px 24px 12px;border-bottom:1px solid var(--border)">
-    <span style="font-family:var(--font-heading);font-size:1.05rem;font-weight:700;color:var(--gold)">
-      <i class="fas fa-list" style="margin-right:8px;opacity:.6"></i>Stavke
+<div class="b2b-card fx-p-0 fx-overflow-hidden">
+  <div class="fx-bb" style="padding:18px 24px 12px">
+    <span class="fx-fw-bold fx-text-gold" style="font-family:var(--font-heading);font-size:1.05rem">
+      <i class="fas fa-list fx-mr-3" style="opacity:.6"></i>Stavke
     </span>
   </div>
   <div class="b2b-table-wrap">
@@ -147,14 +130,14 @@
       <tbody>
         {% for item in items %}
         <tr>
-          <td style="color:var(--text-muted)">{{ forloop.counter }}</td>
+          <td class="fx-text-muted">{{ forloop.counter }}</td>
           <td>{{ item.description }}</td>
           <td class="text-mono">{{ item.quantity|floatformat:2 }}</td>
           <td>{{ item.unit|default:"kom" }}</td>
           <td class="text-mono">{{ item.price|floatformat:2 }}</td>
           {% if has_discount %}<td class="text-mono">{% if item.discount_percent %}{{ item.discount_percent|floatformat:0 }}%{% else %}—{% endif %}</td>{% endif %}
           <td class="text-mono">{{ item.tax_rate|floatformat:0 }}%</td>
-          <td class="text-mono" style="font-weight:600">{{ item.total|floatformat:2 }}</td>
+          <td class="text-mono fx-fw-semibold">{{ item.total|floatformat:2 }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -162,7 +145,7 @@
   </div>
 
   <!-- Totals -->
-  <div style="padding:16px 24px;border-top:1px solid var(--border)">
+  <div class="fx-bt" style="padding:16px 24px">
     <div class="inv-totals">
       <div class="row"><span>Netto</span><span class="text-mono">{{ invoice.currency|default:"EUR" }} {{ invoice.subtotal|floatformat:2 }}</span></div>
       <div class="row"><span>PDV ({{ invoice.tax_percent|floatformat:0 }}%)</span><span class="text-mono">{{ invoice.currency|default:"EUR" }} {{ invoice.tax_amount|floatformat:2 }}</span></div>
@@ -174,7 +157,7 @@
 <!-- Payment Info -->
 <div class="b2b-info-grid mb-3">
   <div class="b2b-info-box">
-    <h4><i class="fas fa-credit-card" style="margin-right:6px"></i>Podaci za placanje</h4>
+    <h4><i class="fas fa-credit-card fx-mr-2"></i>Podaci za placanje</h4>
     <div class="b2b-info-row"><span>Nacin</span><span>{{ invoice.get_payment_method_display|default:"—" }}</span></div>
     {% if invoice.effective_iban %}
     <div class="b2b-info-row"><span>IBAN</span><span class="text-mono">{{ invoice.effective_iban }}</span></div>
@@ -188,9 +171,9 @@
   </div>
   {% if invoice.is_fiscalized %}
   <div class="b2b-info-box">
-    <h4><i class="fas fa-certificate" style="margin-right:6px"></i>Fiskalizacija</h4>
-    {% if invoice.zki %}<div class="b2b-info-row"><span>ZKI</span><span class="text-mono" style="font-size:.75rem;word-break:break-all">{{ invoice.zki }}</span></div>{% endif %}
-    {% if invoice.jir %}<div class="b2b-info-row"><span>JIR</span><span class="text-mono" style="font-size:.75rem;word-break:break-all">{{ invoice.jir }}</span></div>{% endif %}
+    <h4><i class="fas fa-certificate fx-mr-2"></i>Fiskalizacija</h4>
+    {% if invoice.zki %}<div class="b2b-info-row"><span>ZKI</span><span class="text-mono fx-fs-caption text-break">{{ invoice.zki }}</span></div>{% endif %}
+    {% if invoice.jir %}<div class="b2b-info-row"><span>JIR</span><span class="text-mono fx-fs-caption text-break">{{ invoice.jir }}</span></div>{% endif %}
   </div>
   {% endif %}
 </div>
@@ -216,19 +199,19 @@
 <!-- PDV One-Tap Approve -->
 {% if invoice.status in 'DRAFT,SENT,ACCEPTED' %}
 <div class="b2b-card" style="border:2px solid var(--gold);background:rgba(212,168,67,.05)">
-  <div class="b2b-card-header" style="color:var(--gold)"><i class="fas fa-calculator"></i> PDV odobrenje</div>
-  <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">
+  <div class="b2b-card-header fx-text-gold"><i class="fas fa-calculator"></i> PDV odobrenje</div>
+  <p class="fx-fs-base fx-text-dim mb-3">
     Potvrdite da su PDV podaci na ovom računu ispravni — jednim klikom.
   </p>
-  <div style="display:flex;gap:12px;flex-wrap:wrap">
-    <button class="btn btn-gold" id="btnPdvApprove" onclick="pdvAction('approve')" style="font-size:1.1rem;padding:12px 32px">
+  <div class="d-flex fx-gap-3 fx-flex-wrap">
+    <button class="btn btn-gold fx-fs-xl" id="btnPdvApprove" onclick="pdvAction('approve')" style="padding:12px 32px">
       <i class="fas fa-check-circle me-1"></i> PDV OK — Odobri
     </button>
     <button class="btn btn-outline" style="border-color:var(--error);color:var(--error);padding:12px 24px" onclick="pdvAction('reject')">
       <i class="fas fa-exclamation-triangle me-1"></i> PDV netočan
     </button>
   </div>
-  <div id="pdv-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-weight:600"></div>
+  <div id="pdv-result" class="fx-hidden fx-rounded fx-fw-semibold mt-3 fx-p-12"></div>
 </div>
 {% endif %}
 
@@ -237,7 +220,7 @@
   <div class="b2b-card-header"><i class="fas fa-comment-dots"></i> Posaljite poruku</div>
   <label class="b2b-label" for="commentText">Vas komentar ili pitanje</label>
   <textarea class="b2b-textarea" id="commentText" placeholder="Napisite poruku izdavacu dokumenta..."></textarea>
-  <div style="margin-top:12px;display:flex;justify-content:flex-end">
+  <div class="d-flex mt-3 justify-content-end">
     <button class="btn btn-gold" id="btnComment" onclick="doComment(this)">
       <i class="fas fa-paper-plane"></i> Posalji
     </button>

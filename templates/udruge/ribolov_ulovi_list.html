@@ -2,73 +2,56 @@
 {% load i18n %}
 {% block title %}Evidencija ulova{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-fish"></i> Evidencija ulova</h4>
-  <small style="color:var(--text-muted)">Ulovi po revirima, statistika</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-fish"></i> Evidencija ulova</h4>
+  <small class="fx-text-muted">Ulovi po revirima, statistika</small></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno_ulova|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ulova</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno_ulova|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ulova</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_kg|default:"0" }} kg</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-gold">{{ stats.ukupno_kg|default:"0" }} kg</div>
+    <div class="fx-fs-sm fx-text-muted">Ukupno</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.vrsta_riba|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Vrsta</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-blue">{{ stats.vrsta_riba|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Vrsta</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.pusteno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Pusteno</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.pusteno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Pusteno</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Ribar</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Revir</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrsta</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tezina</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Pusteno</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Datum</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Ribar</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Revir</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vrsta</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Tezina</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Pusteno</th>
     </tr></thead>
     <tbody>
       {% for u in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ u.datum|date:"d.m.Y" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Ribar">{{ u.ribar }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Revir">{{ u.revir|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vrsta">{{ u.vrsta_ribe }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Tezina">{{ u.tezina_kg }} kg</td>
-        <td style="padding:.5rem .6rem" data-label="Pusteno">
-          {% if u.pusteno %}<span style="color:#22c55e;font-size:.78rem"><i class="fas fa-check"></i></span>
-          {% else %}<span style="color:var(--text-muted);font-size:.78rem">-</span>{% endif %}
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Datum">{{ u.datum|date:"d.m.Y" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Ribar">{{ u.ribar }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Revir">{{ u.revir|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Vrsta">{{ u.vrsta_ribe }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Tezina">{{ u.tezina_kg }} kg</td>
+        <td class="fx-p-cell" data-label="Pusteno">
+          {% if u.pusteno %}<span class="fx-text-green fx-fs-body-sm"><i class="fas fa-check"></i></span>
+          {% else %}<span class="fx-fs-body-sm fx-text-muted">-</span>{% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema ulova</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema ulova</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

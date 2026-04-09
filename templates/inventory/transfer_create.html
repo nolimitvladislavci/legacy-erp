@@ -8,53 +8,53 @@
 .item-row select,.item-row input{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:.82rem}
 .item-row select{flex:2;min-width:200px}
 .item-row input{flex:0 0 80px;text-align:right}
-.item-row button{background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.78rem}
+.item-row button{background:transparent;border:1px solid #ef4444;color:var(--red);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.78rem}
 </style>
 {% endblock %}
 {% block content %}
-<div style="max-width:700px;margin:0 auto">
-  <div style="margin-bottom:1.5rem">
-    <h2 style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
-      <i class="fas fa-truck-loading" style="color:var(--gold);margin-right:8px"></i>Nova izdatnica
+<div class="fx-m-auto fx-max-700">
+  <div class="fx-mb-6">
+    <h2 class="fx-fw-bold fx-fs-4xl fx-text-body" style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif">
+      <i class="fas fa-truck-loading fx-text-gold fx-mr-3"></i>Nova izdatnica
     </h2>
-    <p style="color:var(--text-muted);margin:0;font-size:.82rem">Prijenos robe iz jednog skladista u drugo</p>
+    <p class="fx-fs-note fx-text-muted fx-m-0">Prijenos robe iz jednog skladista u drugo</p>
   </div>
-  <form method="post" class="stat-card" style="padding:1.5rem">
+  <form method="post" class="fenix-stat fx-p-5">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+    <div class="d-grid fx-gap-4 mb-3 fx-grid-2-equal">
       <div>
-        <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.25rem">Iz skladista</label>
-        <select name="source_warehouse" required style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.88rem">
+        <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-1">Iz skladista</label>
+        <select name="source_warehouse" required class="fx-w-full fx-rounded fx-fs-body fx-text-body fx-b fx-p-10" style="background:var(--input-bg)">
           {% for w in warehouses %}<option value="{{ w.pk }}">{{ w.name }} ({{ w.get_warehouse_type_display }})</option>{% endfor %}
         </select>
       </div>
       <div>
-        <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.25rem">U skladiste</label>
-        <select name="destination_warehouse" required style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.88rem">
+        <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-1">U skladiste</label>
+        <select name="destination_warehouse" required class="fx-w-full fx-rounded fx-fs-body fx-text-body fx-b fx-p-10" style="background:var(--input-bg)">
           {% for w in warehouses %}<option value="{{ w.pk }}" {% if not forloop.first %}selected{% endif %}>{{ w.name }} ({{ w.get_warehouse_type_display }})</option>{% endfor %}
         </select>
       </div>
     </div>
-    <div style="margin-bottom:1rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.25rem">Datum</label>
-      <input type="date" name="date" value="{% now 'Y-m-d' %}" style="background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.88rem">
+    <div class="mb-3">
+      <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-1">Datum</label>
+      <input type="date" name="date" value="{% now 'Y-m-d' %}" class="fx-rounded fx-fs-body fx-text-body fx-b fx-p-10" style="background:var(--input-bg)">
     </div>
-    <div style="margin-bottom:1rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.25rem">Napomena</label>
-      <textarea name="notes" rows="2" style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.85rem;resize:vertical" placeholder="npr. Jutarnji utovar za PM Ivanovac"></textarea>
+    <div class="mb-3">
+      <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-1">Napomena</label>
+      <textarea name="notes" rows="2" class="fx-w-full fx-rounded fx-fs-base fx-text-body fx-b fx-p-10" style="background:var(--input-bg);resize:vertical" placeholder="npr. Jutarnji utovar za PM Ivanovac"></textarea>
     </div>
-    <div style="border-top:1px solid var(--border);padding-top:1rem;margin-bottom:1rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.5rem">Stavke</label>
+    <div class="mb-3 fx-bt" style="padding-top:1rem">
+      <label class="fx-fs-sm fx-text-muted d-block mb-2 fx-uppercase fx-ls-1">Stavke</label>
       <div id="itemRows"></div>
-      <button type="button" onclick="addItemRow()" style="background:transparent;border:1px solid var(--border);color:var(--gold);padding:6px 14px;border-radius:6px;font-size:.82rem;cursor:pointer;margin-top:.5rem">
+      <button type="button" onclick="addItemRow()" class="fx-rounded-sm fx-fs-note fx-pointer fx-text-gold mt-2 fx-bg-transparent fx-b" style="padding:6px 14px">
         <i class="fas fa-plus"></i> Dodaj artikl
       </button>
     </div>
-    <div style="display:flex;gap:.5rem">
-      <button type="submit" style="background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:10px 24px;border-radius:8px;font-size:.88rem;cursor:pointer">
+    <div class="d-flex fx-gap-2">
+      <button type="submit" class="fx-text-dark fx-fw-bold fx-border-none fx-rounded fx-fs-body fx-pointer fx-bg-gold" style="padding:10px 24px">
         <i class="fas fa-save"></i> Spremi izdatnicu
       </button>
-      <a href="{% url 'inventory:transfer_list' %}" style="background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:10px 24px;border-radius:8px;font-size:.88rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">Odustani</a>
+      <a href="{% url 'inventory:transfer_list' %}" class="fx-rounded fx-fs-body fx-no-underline fx-gap-2 fx-text-dim d-inline-flex align-items-center fx-bg-transparent fx-b" style="padding:10px 24px">Odustani</a>
     </div>
   </form>
 </div>

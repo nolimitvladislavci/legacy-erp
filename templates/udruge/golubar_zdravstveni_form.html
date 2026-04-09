@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Zdravstveni zapis — {{ golub.prsten_broj }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .zf-container { max-width: 750px; margin: 0 auto; }
@@ -74,12 +57,12 @@
 .zf-type-btn i { font-size: 1.1rem; }
 .zf-type-btn span { font-size: .68rem; font-weight: 600; color: var(--text-secondary); }
 .zf-type-btn.selected span { color: var(--gold,#c9a84c); }
-.zf-type-pmv i { color: #ef4444; }
+.zf-type-pmv i { color:var(--red); }
 .zf-type-newcastle i { color: #f97316; }
-.zf-type-paratifus i { color: #f59e0b; }
+.zf-type-paratifus i { color:var(--amber); }
 .zf-type-antipar i { color: #eab308; }
-.zf-type-antibiot i { color: #3b82f6; }
-.zf-type-vet i { color: #22c55e; }
+.zf-type-antibiot i { color:var(--blue); }
+.zf-type-vet i { color:var(--green); }
 .zf-type-ostalo i { color: #6b7280; }
 .zf-input {
   background: var(--input-bg) !important;
@@ -102,7 +85,7 @@
 }
 .zf-btn-submit {
   background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
-  color: #0a0a0a !important; border: none !important;
+  color:var(--text) !important; border: none !important;
   font-weight: 700 !important; padding: .6rem 2rem !important;
   border-radius: 10px !important; font-size: .88rem !important;
   transition: all .2s !important;
@@ -115,7 +98,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:golub_detail' golub.pk %}">{{ golub.prsten_broj }}</a></li>
     <li class="breadcrumb-item active">Zdravstveni zapis</li>
@@ -124,12 +107,12 @@
 
 <!-- Header -->
 <div class="d-flex align-items-center gap-3 mb-4">
-  <div style="width:52px;height:52px;background:rgba(59,130,246,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-heartbeat" style="font-size:1.3rem;color:#3b82f6"></i>
+  <div class="fx-rounded-lg d-flex align-items-center justify-content-center" style="width:52px;height:52px;background:rgba(59,130,246,.1)">
+    <i class="fas fa-heartbeat fx-fs-3xl fx-text-blue"></i>
   </div>
   <div>
-    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Novi zdravstveni zapis</h2>
-    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Evidencija tretmana i veterinarskih pregleda</p>
+    <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">Novi zdravstveni zapis</h2>
+    <p class="fx-fs-note fx-text-muted fx-m-0">Evidencija tretmana i veterinarskih pregleda</p>
   </div>
 </div>
 
@@ -137,8 +120,8 @@
 <div class="zf-golub-header">
   <div class="zf-golub-icon"><i class="fas fa-dove"></i></div>
   <div>
-    <div style="font-size:.9rem;font-weight:700;color:var(--text)">{{ golub.naziv|default:"Golub" }}</div>
-    <div style="font-size:.72rem;font-family:monospace;color:var(--gold,#c9a84c)">{{ golub.prsten_broj }}</div>
+    <div class="fx-fs-md fx-fw-bold fx-text-body">{{ golub.naziv|default:"Golub" }}</div>
+    <div class="fx-fs-sm fx-text-gold fx-font-mono">{{ golub.prsten_broj }}</div>
   </div>
 </div>
 
@@ -157,7 +140,7 @@
       </div>
       {% endfor %}
     </div>
-    <select name="vrsta" id="vrsta-select" required class="form-select zf-input" style="display:none">
+    <select name="vrsta" id="vrsta-select" required class="form-select zf-input fx-hidden">
       <option value="">--</option>
       {% for code, label in vrsta_choices %}
       <option value="{{ code }}">{{ label }}</option>
@@ -216,7 +199,7 @@
 </div>
 
 <div class="zf-footer">
-  <a href="{% url 'udruge:golub_detail' golub.pk %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+  <a href="{% url 'udruge:golub_detail' golub.pk %}" class="btn btn-outline-secondary fx-rounded" style="padding:.6rem 1.5rem">
     <i class="fas fa-arrow-left me-1"></i>Odustani
   </a>
   <button type="submit" class="zf-btn-submit">

@@ -3,41 +3,10 @@
 {% block title %}Partneri{% endblock %}
 {% block page_title %}Partneri{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
+<!-- lang: see topbar -->
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
@@ -47,7 +16,7 @@
   <a href="{% url 'partners:create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Novi partner" %}</a>
 </div>
 
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <form method="get" class="row g-2"
         hx-get="{% url 'partners:list' %}"
         hx-target="#partner-table"
@@ -83,10 +52,10 @@
 {% if not page_obj %}
 {% include "partials/empty_state.html" with title="Dodajte prvog klijenta" subtitle="Kreirajte partnera za izdavanje računa i praćenje salda." cta_text="Novi partner" cta_url="/hr/partners/create/" icon="fas fa-handshake" time_estimate="1 min" %}
 {% else %}
-<div class="stat-card p-0">
+<div class="fenix-table-wrap">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead class="table-light">
+      <thead >
         <tr>
           <th>{% trans "Naziv" %}</th><th>{% trans "Tip" %}</th><th>{% trans "Grad" %}</th><th>{% trans "Email / Telefon" %}</th>
           <th class="text-end">{% trans "Saldo" %}</th><th>{% trans "Status" %}</th><th></th>
@@ -97,14 +66,14 @@
         <tr>
           <td>
             <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none text-dark">{{ p.name }}</a>
-            {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1" style="font-size:.6rem">Nepotpun</span>{% endif %}
+            {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1 fx-fs-2xs">Nepotpun</span>{% endif %}
             {% if p.oib %}<br><small class="text-muted">OIB: {{ p.oib }}</small>{% endif %}
           </td>
           <td>
-            {% if p.partner_type == 'client' %}<span class="badge bg-primary">{{ p.get_partner_type_display }}</span>
-            {% elif p.partner_type == 'supplier' %}<span class="badge bg-warning text-dark">{{ p.get_partner_type_display }}</span>
+            {% if p.partner_type == 'client' %}<span class="fenix-badge fenix-badge-info">{{ p.get_partner_type_display }}</span>
+            {% elif p.partner_type == 'supplier' %}<span class="fenix-badge fenix-badge-warning">{{ p.get_partner_type_display }}</span>
             {% elif p.partner_type == 'employee' %}<span class="badge bg-info text-dark">{{ p.get_partner_type_display }}</span>
-            {% else %}<span class="badge bg-secondary">{{ p.get_partner_type_display }}</span>{% endif %}
+            {% else %}<span class="fenix-badge fenix-badge-muted">{{ p.get_partner_type_display }}</span>{% endif %}
           </td>
           <td>{{ p.city|default:"-" }}</td>
           <td>
@@ -114,8 +83,8 @@
           <td class="text-end fw-bold {% if p.cached_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
             {{ p.cached_balance|floatformat:2 }} €
           </td>
-          <td>{% if p.is_active %}<span class="badge bg-success">{% trans "Aktivan" %}</span>
-          {% else %}<span class="badge bg-danger">{% trans "Neaktivan" %}</span>{% endif %}</td>
+          <td>{% if p.is_active %}<span class="fenix-badge fenix-badge-success">{% trans "Aktivan" %}</span>
+          {% else %}<span class="fenix-badge fenix-badge-danger">{% trans "Neaktivan" %}</span>{% endif %}</td>
           <td>
             <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-edit"></i></a>
             <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>

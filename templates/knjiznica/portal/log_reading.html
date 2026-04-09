@@ -3,19 +3,19 @@
 {% block title %}Zabilježi čitanje{% endblock %}
 {% block content %}
 
-<div style="max-width:500px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:500px">
   <div class="lib-card">
-    <div style="text-align:center;margin-bottom:16px">
-      <i class="fas fa-book-reader" style="font-size:2.5rem;color:var(--lib-gold)"></i>
-      <h2 style="font-size:1.3rem;margin-top:8px">Pročitana knjiga!</h2>
-      <p style="color:var(--lib-muted);font-size:.85rem">Zabilježite što je vaše dijete pročitalo i osvojite bodove.</p>
+    <div class="text-center mb-3">
+      <i class="fas fa-book-reader fx-text-gold fx-fs-7xl"></i>
+      <h2 class="fx-fs-3xl mt-2">Pročitana knjiga!</h2>
+      <p class="fx-fs-base fx-text-muted">Zabilježite što je vaše dijete pročitalo i osvojite bodove.</p>
     </div>
 
     <form method="post" action="{% url 'knjiznica:portal_log_reading' slug %}">
       {% csrf_token %}
 
-      <div style="margin-bottom:12px">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Dijete</label>
+      <div class="mb-3">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Dijete</label>
         <select name="child_id" class="form-select" required>
           <option value="">— Odaberi dijete —</option>
           {% for c in children %}
@@ -24,8 +24,8 @@
         </select>
       </div>
 
-      <div style="margin-bottom:12px">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Knjiga iz kataloga</label>
+      <div class="mb-3">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Knjiga iz kataloga</label>
         <select name="item_id" class="form-select">
           <option value="">— Odaberi ili upiši naziv ispod —</option>
           {% for b in books %}
@@ -34,16 +34,16 @@
         </select>
       </div>
 
-      <div style="margin-bottom:12px">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Ili upiši naziv (vlastita knjiga)</label>
+      <div class="mb-3">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Ili upiši naziv (vlastita knjiga)</label>
         <input type="text" name="custom_title" class="form-control" placeholder="Npr. Harry Potter i Kamen mudraca">
       </div>
 
-      <div style="margin-bottom:12px">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Ocjena (1-5)</label>
-        <div style="display:flex;gap:8px" id="ratingStars">
+      <div class="mb-3">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Ocjena (1-5)</label>
+        <div class="d-flex fx-gap-2" id="ratingStars">
           {% for i in "12345" %}
-          <span onclick="setRating({{ forloop.counter }})" style="font-size:1.5rem;cursor:pointer;color:#ddd" data-star="{{ forloop.counter }}">
+          <span onclick="setRating({{ forloop.counter }})" class="fx-fs-5xl fx-pointer" style="color:#ddd" data-star="{{ forloop.counter }}">
             <i class="fas fa-star"></i>
           </span>
           {% endfor %}
@@ -51,8 +51,8 @@
         <input type="hidden" name="rating" id="ratingInput" value="0">
       </div>
 
-      <div style="margin-bottom:16px">
-        <label style="font-size:.8rem;font-weight:600;color:var(--lib-muted)">Kratka recenzija (opcionalno)</label>
+      <div class="mb-3">
+        <label class="fx-fs-compact fx-fw-semibold fx-text-muted">Kratka recenzija (opcionalno)</label>
         <textarea name="review" class="form-control" rows="2" placeholder="Što ti se svidjelo? Koji je tvoj omiljeni lik?"></textarea>
       </div>
 
@@ -62,7 +62,7 @@
     </form>
   </div>
 
-  <div class="text-center" style="margin-top:16px">
+  <div class="text-center mt-3">
     <a href="{% url 'knjiznica:portal_family' slug %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
   </div>
 </div>

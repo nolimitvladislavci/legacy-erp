@@ -3,83 +3,41 @@
 {% block title %}Osiguranja{% endblock %}
 {% block page_title %}Osiguranja{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="mb-0"><i class="fas fa-shield-alt me-2 text-primary"></i>{% trans "Police osiguranja" %}</h2>
-  <a href="{% url 'dashboard' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Nova polica" %}</a>
-</div>
-
-<div class="row g-2 mb-3">
-  <div class="col-6 col-md-3">
-    <div class="stat-card">
-      <div class="d-flex justify-content-between align-items-start">
-        <div><div class="label">{% trans "Ukupno" %}</div><div class="value">{{ total }}</div></div>
-        <div class="icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-file-contract"></i></div>
+<!-- lang: topbar -->
+        <div class="icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-file-contract"></i></div>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="d-flex justify-content-between align-items-start">
         <div><div class="label">{% trans "Aktivne" %}</div><div class="value text-success">{{ active_count }}</div></div>
-        <div class="icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-check-circle"></i></div>
+        <div class="icon fx-text-green fx-bg-green-dim"><i class="fas fa-check-circle"></i></div>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="d-flex justify-content-between align-items-start">
         <div><div class="label">{% trans "Istječe uskoro" %}</div><div class="value {% if expiring_soon > 0 %}text-warning{% endif %}">{{ expiring_soon }}</div></div>
-        <div class="icon" style="background:#fef9c3;color:#ca8a04"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-exclamation-triangle"></i></div>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="d-flex justify-content-between align-items-start">
-        <div><div class="label">{% trans "Ukupna premija" %}</div><div class="value text-primary" style="font-size:1.2rem">{{ total_premium|floatformat:2 }} €</div></div>
-        <div class="icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-euro-sign"></i></div>
+        <div><div class="label">{% trans "Ukupna premija" %}</div><div class="value text-primary fx-fs-2xl">{{ total_premium|floatformat:2 }} €</div></div>
+        <div class="icon fx-text-purple fx-bg-purple-dim"><i class="fas fa-euro-sign"></i></div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <form method="get" class="row g-2">
     <div class="col-md-4">
       <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Broj police, osiguravatelj, partner...">
@@ -107,10 +65,10 @@
   </form>
 </div>
 
-<div class="stat-card p-0">
+<div class="fenix-table-wrap">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead class="table-light">
+      <thead >
         <tr>
           <th>{% trans "Broj police" %}</th><th>{% trans "Vrsta" %}</th><th>{% trans "Osiguravatelj" %}</th><th>{% trans "Osiguranik" %}</th>
           <th>{% trans "Kraj" %}</th><th class="text-end">{% trans "Premija" %}</th><th>{% trans "Status" %}</th><th></th>
@@ -121,16 +79,16 @@
         {% with days_left=p.end_date|timeuntil %}
         <tr {% if p.status == "active" and p.end_date %}class="{% if p.end_date|date:'Y-m-d' < '2026-03-20' %}table-warning{% endif %}"{% endif %}>
           <td class="fw-bold">{{ p.policy_number }}</td>
-          <td><span class="badge bg-secondary">{{ p.get_insurance_type_display }}</span></td>
+          <td><span class="fenix-badge fenix-badge-muted">{{ p.get_insurance_type_display }}</span></td>
           <td>{{ p.insurer }}</td>
           <td>{% if p.partner %}<a href="{% url 'partners:detail' p.partner.pk %}">{{ p.partner.name }}</a>{% else %}-{% endif %}</td>
-          <td style="white-space:nowrap">{{ p.end_date|date:"d.m.Y" }}</td>
+          <td class="text-nowrap">{{ p.end_date|date:"d.m.Y" }}</td>
           <td class="text-end fw-bold">{{ p.premium|floatformat:2 }} €</td>
           <td>
-            {% if p.status == "active" %}<span class="badge bg-success">{% trans "Aktivna" %}</span>
-            {% elif p.status == "expired" %}<span class="badge bg-danger">{% trans "Istekla" %}</span>
-            {% elif p.status == "cancelled" %}<span class="badge bg-secondary">{% trans "Otkazana" %}</span>
-            {% else %}<span class="badge bg-warning text-dark">{% trans "Na čekanju" %}</span>{% endif %}
+            {% if p.status == "active" %}<span class="fenix-badge fenix-badge-success">{% trans "Aktivna" %}</span>
+            {% elif p.status == "expired" %}<span class="fenix-badge fenix-badge-danger">{% trans "Istekla" %}</span>
+            {% elif p.status == "cancelled" %}<span class="fenix-badge fenix-badge-muted">{% trans "Otkazana" %}</span>
+            {% else %}<span class="fenix-badge fenix-badge-warning">{% trans "Na čekanju" %}</span>{% endif %}
           </td>
           <td>
             <div class="d-flex gap-1">

@@ -3,53 +3,36 @@
 {% block title %}Propter — Operator Dashboard{% endblock %}
 {% block page_title %}Propter — Operator Dashboard{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
 .prop-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .prop-header img{height:36px}
-.prop-header h4{margin:0;font-weight:700;color:#0f172a}
+.prop-header h4{margin:0;font-weight:700;color:var(--text)}
 .prop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
-.prop-stat{background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #f1f5f9}
-.prop-stat .val{font-size:1.5rem;font-weight:700;color:#0f172a}
-.prop-stat .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-top:2px}
-.prop-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
-.prop-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.prop-stat{background:var(--bg-card);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
+.prop-stat .val{font-size:1.5rem;font-weight:700;color:var(--text)}
+.prop-stat .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-top:2px}
+.prop-card{background:var(--bg-card);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:16px}
+.prop-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 12px}
 .prop-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.prop-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
+.prop-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.7rem;text-transform:uppercase;color:var(--text-dim)}
 .prop-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
-.prop-table tr:hover{background:#f8fafc}
+.prop-table tr:hover{background:var(--surface2)}
 .tier-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.tier-badge.bookkeeper{background:#dbeafe;color:#1e40af}
-.tier-badge.client{background:#f0fdf4;color:#166534}
+.tier-badge.bookkeeper{background:var(--blue-dim);color:var(--blue)}
+.tier-badge.client{background:var(--green-dim);color:var(--green)}
 .cert-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
-.cert-dot.active{background:#22c55e}
-.cert-dot.pending{background:#f59e0b}
-.cert-dot.expired,.cert-dot.expiring{background:#ef4444}
+.cert-dot.active{background:var(--green)}
+.cert-dot.pending{background:var(--amber)}
+.cert-dot.expired,.cert-dot.expiring{background:var(--red)}
 .cert-dot.none{background:#cbd5e1}
 .prop-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-.prop-filters select,.prop-filters input{padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.8rem}
-.mrr-box{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:10px;padding:20px;text-align:center}
+.prop-filters select,.prop-filters input{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.8rem}
+.mrr-box{background:linear-gradient(135deg,#0f172a,#1e293b);color:var(--white);border-radius:10px;padding:20px;text-align:center}
 .mrr-box .val{font-size:2rem;font-weight:700;color:var(--gold,#c9a84c)}
-.mrr-box .lbl{font-size:.75rem;color:#94a3b8;margin-top:4px}
+.mrr-box .lbl{font-size:.75rem;color:var(--text-muted);margin-top:4px}
 </style>
 
 <div class="prop-header">
@@ -63,8 +46,8 @@
 <div class="prop-grid">
   <div class="mrr-box"><div class="val">&euro;{{ mrr|floatformat:2 }}</div><div class="lbl">MRR (Monthly Recurring Revenue)</div></div>
   <div class="prop-stat"><div class="val">{{ active_tenants }}</div><div class="lbl">Aktivni tenanti</div></div>
-  <div class="prop-stat"><div class="val" style="color:#1e40af">{{ bookkeepers }}</div><div class="lbl">Knjigovodstva</div></div>
-  <div class="prop-stat"><div class="val" style="color:#166534">{{ clients }}</div><div class="lbl">Direktni klijenti</div></div>
+  <div class="prop-stat"><div class="val fx-text-blue">{{ bookkeepers }}</div><div class="lbl">Knjigovodstva</div></div>
+  <div class="prop-stat"><div class="val fx-text-green">{{ clients }}</div><div class="lbl">Direktni klijenti</div></div>
   <div class="prop-stat"><div class="val">{{ month_eracuni }}</div><div class="lbl">e-Racuna / mjesec</div></div>
   <div class="prop-stat"><div class="val">{{ total_eracuni }}</div><div class="lbl">e-Racuna ukupno</div></div>
 </div>
@@ -72,7 +55,7 @@
 <!-- Cert overview -->
 <div class="prop-card">
   <h6>FINA certifikati</h6>
-  <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:.85rem">
+  <div class="d-flex fx-gap-5 fx-flex-wrap fx-fs-base">
     <div><span class="cert-dot active"></span> Aktivni: <strong>{{ cert_active }}</strong></div>
     <div><span class="cert-dot pending"></span> Pending: <strong>{{ cert_pending }}</strong></div>
     <div><span class="cert-dot expired"></span> Istekli: <strong>{{ cert_expired }}</strong></div>
@@ -102,7 +85,7 @@
 
 <!-- Filters -->
 <div class="prop-filters">
-  <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  <form method="get" class="d-flex fx-gap-2 fx-flex-wrap align-items-center">
     <select name="tier" onchange="this.form.submit()">
       <option value="">Svi tipovi</option>
       <option value="client" {% if tier_filter == 'client' %}selected{% endif %}>Klijent</option>
@@ -145,23 +128,23 @@
     {% for t in tenants %}
     <tr>
       <td><strong>{{ t.company.name }}</strong></td>
-      <td style="font-size:.75rem;color:#64748b">{{ t.company.oib }}</td>
+      <td class="fx-fs-caption fx-text-muted">{{ t.company.oib }}</td>
       <td><span class="tier-badge {{ t.tier }}">{{ t.get_tier_display }}</span></td>
       <td>{{ t.operator_name|default:"-" }}</td>
       <td><span class="cert-dot {{ t.fina_cert_status }}"></span>{{ t.get_fina_cert_status_display }}</td>
       <td>{{ t.eracuni_sent_month }} / {{ t.eracuni_sent_total }}</td>
       <td>&euro;{{ t.monthly_fee|floatformat:2 }}</td>
       <td>
-        {% if t.is_active %}<span style="color:#22c55e;font-weight:700">Aktivan</span>
-        {% else %}<span style="color:#ef4444;font-weight:700">Neaktivan</span>{% endif %}
+        {% if t.is_active %}<span class="fx-text-green fx-fw-bold">Aktivan</span>
+        {% else %}<span class="fx-text-red fx-fw-bold">Neaktivan</span>{% endif %}
       </td>
-      <td><a href="{% url 'registration:propter_tenant_detail' t.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:.7rem">Detalji</a></td>
+      <td><a href="{% url 'registration:propter_tenant_detail' t.pk %}" class="btn btn-sm btn-outline-primary fx-fs-sm">Detalji</a></td>
     </tr>
     {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <div class="text-center py-4" style="color:#64748b">
+  <div class="text-center py-4 fx-text-muted">
     <p>Nema tenanta s odabranim filterima.</p>
   </div>
   {% endif %}
@@ -170,11 +153,11 @@
 <!-- Pricing tiers info -->
 <div class="prop-card">
   <h6>Propter plan tiers</h6>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-    <div style="background:#f0fdf4;border-radius:8px;padding:14px">
-      <div style="font-weight:700;color:#166534;margin-bottom:6px">Direktni klijent</div>
-      <div style="font-size:1.3rem;font-weight:700;color:#0f172a">30 - 80 &euro;/mj</div>
-      <ul style="font-size:.8rem;color:#475569;margin:8px 0 0;padding-left:16px">
+  <div class="fx-gap-4 d-grid fx-grid-2-equal">
+    <div class="fx-rounded fx-bg-green-dim" style="padding:14px">
+      <div class="fx-fw-bold fx-text-green mb-1">Direktni klijent</div>
+      <div class="fx-fs-3xl fx-fw-bold fx-text-dark">30 - 80 &euro;/mj</div>
+      <ul class="fx-fs-compact fx-text-dim" style="margin:8px 0 0;padding-left:16px">
         <li>1 tvrtka</li>
         <li>e-Racun slanje</li>
         <li>UBL 2.1 generiranje</li>
@@ -182,10 +165,10 @@
         <li>Arhiva 11+ godina</li>
       </ul>
     </div>
-    <div style="background:#dbeafe;border-radius:8px;padding:14px">
-      <div style="font-weight:700;color:#1e40af;margin-bottom:6px">Knjigovodstveni servis</div>
-      <div style="font-size:1.3rem;font-weight:700;color:#0f172a">150 - 200 &euro;/mj</div>
-      <ul style="font-size:.8rem;color:#475569;margin:8px 0 0;padding-left:16px">
+    <div class="fx-rounded fx-bg-blue-dim" style="padding:14px">
+      <div class="fx-fw-bold fx-text-blue mb-1">Knjigovodstveni servis</div>
+      <div class="fx-fs-3xl fx-fw-bold fx-text-dark">150 - 200 &euro;/mj</div>
+      <ul class="fx-fs-compact fx-text-dim" style="margin:8px 0 0;padding-left:16px">
         <li>Do N klijenata (konfigurirajuce)</li>
         <li>Operator dashboard</li>
         <li>Batch e-Racun obrada</li>

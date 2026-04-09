@@ -4,33 +4,33 @@ AI Compliance Monitor — background provjera 7 zakonskih pravila svakih 5 min.
 Nikad ne blokira naplatu — samo obavještava.
 {% endcomment %}
 <style>
-.comp-panel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:#111214;border-left:2px solid rgba(201,168,76,.3);z-index:9700;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.6)}
+.comp-panel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:var(--bg-card);border-left:2px solid rgba(201,168,76,.3);z-index:9700;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.6)}
 .comp-panel.show{transform:translateX(0)}
-.comp-head{padding:1rem 1.25rem;border-bottom:1px solid #252830;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.comp-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .comp-head h3{color:var(--gold,#c9a84c);font-size:.95rem;font-weight:800;margin:0}
-.comp-close{background:none;border:none;color:#64748b;font-size:1.2rem;cursor:pointer;padding:4px}
+.comp-close{background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:4px}
 .comp-body{flex:1;overflow-y:auto;padding:.75rem}
-.comp-item{background:rgba(255,255,255,.03);border:1px solid #252830;border-radius:10px;padding:.75rem;margin-bottom:.5rem;transition:all .15s}
+.comp-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:.5rem;transition:all .15s}
 .comp-item.ok{border-left:3px solid #22c55e}
 .comp-item.warn{border-left:3px solid #f59e0b;background:rgba(245,158,11,.04)}
 .comp-item.critical{border-left:3px solid #ef4444;background:rgba(239,68,68,.04)}
-.comp-title{font-size:.82rem;font-weight:700;color:#e8e8e8;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
+.comp-title{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
 .comp-title i{font-size:.7rem}
-.comp-desc{font-size:.72rem;color:#94a3b8;line-height:1.4;margin-bottom:.4rem}
-.comp-law{font-size:.62rem;color:#64748b;font-style:italic;margin-bottom:.4rem}
+.comp-desc{font-size:.72rem;color:var(--text-muted);line-height:1.4;margin-bottom:.4rem}
+.comp-law{font-size:.62rem;color:var(--text-dim);font-style:italic;margin-bottom:.4rem}
 .comp-action{display:inline-block;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);border-radius:5px;padding:.25rem .6rem;font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .12s}
 .comp-action:hover{background:rgba(201,168,76,.25)}
-.comp-footer{padding:.5rem .75rem;border-top:1px solid #252830;font-size:.62rem;color:#475569;text-align:center;flex-shrink:0}
+.comp-footer{padding:.5rem .75rem;border-top:1px solid #252830;font-size:.62rem;color:var(--text-dim);text-align:center;flex-shrink:0}
 </style>
 
 <div class="comp-panel" id="compliancePanel">
   <div class="comp-head">
-    <h3><i class="fas fa-shield-alt" style="margin-right:6px"></i>Compliance Monitor</h3>
+    <h3><i class="fas fa-shield-alt fx-mr-2"></i>Compliance Monitor</h3>
     <button class="comp-close" onclick="toggleCompliancePanel()"><i class="fas fa-times"></i></button>
   </div>
   <div class="comp-body" id="complianceBody">
-    <div style="text-align:center;padding:2rem;color:#64748b">
-      <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:.5rem;display:block"></i>
+    <div class="text-center fx-text-muted fx-p-6">
+      <i class="fas fa-spinner fa-spin fx-fs-5xl mb-2 d-block"></i>
       Provjera u tijeku...
     </div>
   </div>
@@ -172,7 +172,7 @@ Nikad ne blokira naplatu — samo obavještava.
     document.getElementById('compLastCheck').textContent = timeStr;
 
     if (issues.length === 0) {
-      body.innerHTML = '<div style="text-align:center;padding:2rem"><div style="font-size:3rem;margin-bottom:.5rem">✓</div><div style="color:#22c55e;font-weight:700;font-size:1.1rem">Sve u redu</div><div style="color:#64748b;font-size:.82rem;margin-top:.4rem">Nema zakonskih upozorenja</div></div>';
+      body.innerHTML = '<div class="text-center fx-p-6"><div class="fx-fs-hero mb-2">✓</div><div class="fx-text-green fx-fw-bold fx-fs-xl">Sve u redu</div><div class="fx-text-dim fx-fs-note" style="margin-top:.4rem">Nema zakonskih upozorenja</div></div>';
       dot.className = 'mn-dot';
       lbl.textContent = 'OK';
       return;

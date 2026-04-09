@@ -5,30 +5,30 @@
 <meta charset="UTF-8">
 <title>PO-SD {{ data.porezna_godina }}</title>
 <style>
-  body { font-family: 'Barlow', Arial, sans-serif; font-size: 11pt; color: #0f172a; margin: 30px; }
-  h1 { font-family: 'Cormorant Garamond', Georgia, serif; color: #c9a84c; font-size: 18pt; margin-bottom: 5px; }
+  body { font-family: 'Barlow', Arial, sans-serif; font-size: 11pt; color:var(--text); margin: 30px; }
+  h1 { font-family: 'Cormorant Garamond', Georgia, serif; color:var(--gold); font-size: 18pt; margin-bottom: 5px; }
   h2 { font-size: 13pt; border-bottom: 2px solid #c9a84c; padding-bottom: 4px; margin-top: 20px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-  th, td { padding: 6px 10px; border: 1px solid #e2e8f0; text-align: left; }
-  th { background: #f8fafc; font-size: 9pt; color: #64748b; text-transform: uppercase; }
+  th, td { padding: 6px 10px; border:1px solid var(--border); text-align: left; }
+  th { background:var(--surface2); font-size: 9pt; color:var(--text-dim); text-transform: uppercase; }
   .text-right { text-align: right; }
   .total-row { background: #fef9e7; font-weight: bold; }
-  .gold { color: #c9a84c; }
-  .footer { margin-top: 30px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
-  .disclaimer { background: #f1f5f9; padding: 10px; border-radius: 4px; font-size: 8pt; color: #64748b; margin-top: 20px; }
-  .logo { font-family: 'Cormorant Garamond', serif; color: #c9a84c; font-size: 24pt; font-weight: bold; }
+  .gold { color:var(--gold); }
+  .footer { margin-top: 30px; font-size: 8pt; color:var(--text-muted); border-top: 1px solid #e2e8f0; padding-top: 10px; }
+  .disclaimer { background:var(--surface3); padding: 10px; border-radius: 4px; font-size: 8pt; color:var(--text-dim); margin-top: 20px; }
+  .logo { font-family: 'Cormorant Garamond', serif; color:var(--gold); font-size: 24pt; font-weight: bold; }
 </style>
 </head>
 <body>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <div class="logo">LIMIT CONNECT</div>
-    <div style="font-size:9pt;color:#64748b;">Porezni Savjetnik — Informativni izračun</div>
+    <div class="fx-text-dim" style="font-size:9pt">Porezni Savjetnik — Informativni izračun</div>
   </div>
-  <div style="text-align:right;">
-    <div style="font-size:9pt;color:#64748b;">Generirano: {{ generated_at|date:"d.m.Y H:i" }}</div>
-    <div style="font-size:9pt;color:#64748b;">Porezna godina: {{ data.porezna_godina }}</div>
+  <div class="text-end">
+    <div class="fx-text-dim" style="font-size:9pt">Generirano: {{ generated_at|date:"d.m.Y H:i" }}</div>
+    <div class="fx-text-dim" style="font-size:9pt">Porezna godina: {{ data.porezna_godina }}</div>
   </div>
 </div>
 

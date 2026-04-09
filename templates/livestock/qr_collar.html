@@ -8,8 +8,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Barlow', 'Arial Narrow', Arial, sans-serif;
-    background: #fff;
-    color: #1a1a2e;
+    background:var(--bg-card);
+    color:var(--text);
     width: 79mm;
     height: 48mm;
     display: flex;
@@ -31,7 +31,7 @@
   }
   .brand {
     font-size: 6pt;
-    color: #c9a84c;
+    color:var(--gold);
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -48,26 +48,26 @@
   }
   .breed {
     font-size: 7pt;
-    color: #475569;
+    color:var(--text-dim);
     margin-bottom: 2mm;
   }
   .chip {
     font-size: 5.5pt;
-    color: #475569;
+    color:var(--text-dim);
     font-family: monospace;
     word-break: break-all;
   }
-  .chip strong { color: #1a1a2e; }
+  .chip strong { color:var(--text); }
   .no-limit {
     margin-top: 2mm;
     font-size: 5pt;
-    color: #c9a84c;
+    color:var(--gold);
     border-top: 0.3mm solid #e2e8f0;
     padding-top: 1mm;
   }
   .url {
     font-size: 5pt;
-    color: #94a3b8;
+    color:var(--text-muted);
     margin-top: 1mm;
   }
 </style>

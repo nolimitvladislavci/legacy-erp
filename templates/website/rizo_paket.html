@@ -6,34 +6,34 @@
 <style>
 @page { size: A4; margin: 15mm; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.6; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color:var(--text); line-height: 1.6; }
 a { color: #7c3aed; text-decoration: underline; }
 
 .header {
-    background: #0a0a0a; color: #fff; padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
+    background:var(--bg); color:var(--white); padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
     text-align: center;
 }
-.header h1 { font-size: 22pt; font-weight: 900; margin-bottom: 2mm; color: #d4a017; }
-.header .sub { font-size: 10pt; color: #94a3b8; }
-.header .date { font-size: 8pt; color: #475569; margin-top: 3mm; }
+.header h1 { font-size: 22pt; font-weight: 900; margin-bottom: 2mm; color:var(--gold); }
+.header .sub { font-size: 10pt; color:var(--text-muted); }
+.header .date { font-size: 8pt; color:var(--text-dim); margin-top: 3mm; }
 
 .section {
-    background: #fff; border: 1pt solid #e2e8f0; border-radius: 8pt;
+    background:var(--bg-card); border: 1pt solid #e2e8f0; border-radius: 8pt;
     padding: 6mm 8mm; margin-bottom: 6mm;
 }
 .section h2 {
-    font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 3mm;
+    font-size: 13pt; font-weight: 700; color:var(--text); margin-bottom: 3mm;
     padding-bottom: 2mm; border-bottom: 1pt solid #e2e8f0;
 }
-.section h2 .icon { color: #d4a017; margin-right: 2mm; }
+.section h2 .icon { color:var(--gold); margin-right: 2mm; }
 
 .login-box {
-    background: #f8fafc; border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
+    background:var(--surface2); border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
     border-radius: 4pt; padding: 5mm 6mm; margin: 4mm 0;
     font-family: 'Courier New', monospace; font-size: 10pt;
 }
-.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-.login-box .value { font-size: 12pt; font-weight: 700; color: #0f172a; }
+.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color:var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.login-box .value { font-size: 12pt; font-weight: 700; color:var(--text); }
 
 .link-card {
     display: flex; align-items: center; gap: 4mm; padding: 3mm 4mm;
@@ -42,13 +42,13 @@ a { color: #7c3aed; text-decoration: underline; }
 .link-card:last-child { border-bottom: none; }
 .link-card .num {
     width: 7mm; height: 7mm; line-height: 7mm; border-radius: 50%;
-    background: #d4a017; color: #fff; font-size: 8pt; font-weight: 800;
+    background: #d4a017; color:var(--white); font-size: 8pt; font-weight: 800;
     text-align: center; flex-shrink: 0;
 }
 .link-card .info { flex: 1; }
 .link-card .title { font-weight: 600; font-size: 10pt; }
 .link-card .url { font-size: 8.5pt; color: #7c3aed; word-break: break-all; }
-.link-card .desc { font-size: 8pt; color: #64748b; }
+.link-card .desc { font-size: 8pt; color:var(--text-dim); }
 
 .steps { margin: 4mm 0; }
 .step { display: flex; gap: 3mm; margin-bottom: 3mm; }
@@ -60,7 +60,7 @@ a { color: #7c3aed; text-decoration: underline; }
 .step .stxt { font-size: 9.5pt; }
 
 .note {
-    background: #fffbeb; border-left: 3pt solid #d4a017;
+    background:var(--amber-dim); border-left: 3pt solid #d4a017;
     padding: 4mm 5mm; margin: 4mm 0; font-size: 9pt;
     border-radius: 0 4pt 4pt 0;
 }
@@ -70,15 +70,15 @@ a { color: #7c3aed; text-decoration: underline; }
     display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 4mm 0;
 }
 .info-item {
-    background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 4pt;
+    background:var(--surface2); border: 0.5pt solid #e2e8f0; border-radius: 4pt;
     padding: 3mm 4mm;
 }
-.info-item .i-label { font-size: 7pt; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-item .i-value { font-size: 10pt; font-weight: 600; color: #0f172a; }
+.info-item .i-label { font-size: 7pt; color:var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.info-item .i-value { font-size: 10pt; font-weight: 600; color:var(--text); }
 
 .footer {
     text-align: center; margin-top: 8mm; padding-top: 4mm;
-    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color: #94a3b8;
+    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color:var(--text-muted);
 }
 
 @media print {
@@ -97,7 +97,7 @@ a { color: #7c3aed; text-decoration: underline; }
 
 <div class="section">
     <h2><span class="icon">&#x1F3EA;</span> Podaci o obrtu</h2>
-    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Službeni podaci iz registra &#8212; FRIŠKO PEKARNICA, pekarski obrt, vl. Riz Temaj</p>
+    <p class="fx-text-dim" style="font-size:9.5pt;margin-bottom:3mm">Službeni podaci iz registra &#8212; FRIŠKO PEKARNICA, pekarski obrt, vl. Riz Temaj</p>
     <div class="info-grid">
         <div class="info-item"><div class="i-label">Vlasnik</div><div class="i-value">Riz Temaj</div></div>
         <div class="info-item"><div class="i-label">OIB</div><div class="i-value">05823287665</div></div>
@@ -112,7 +112,7 @@ a { color: #7c3aed; text-decoration: underline; }
 
 <div class="section">
     <h2><span class="icon">&#x1F511;</span> Pristupni podaci</h2>
-    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Ovim podacima se prijavuješ na sustav. Sačuvaj ih na sigurnom mjestu.</p>
+    <p class="fx-text-dim" style="font-size:9.5pt;margin-bottom:3mm">Ovim podacima se prijavuješ na sustav. Sačuvaj ih na sigurnom mjestu.</p>
     <div class="login-box"><div class="label">Web adresa</div><div class="value"><a href="https://limit-connect.com">https://limit-connect.com</a></div></div>
     <div class="login-box"><div class="label">Korisničko ime</div><div class="value">rizo</div></div>
     <div class="login-box"><div class="label">Lozinka</div><div class="value">(dogovoreno osobno)</div></div>
@@ -131,7 +131,7 @@ a { color: #7c3aed; text-decoration: underline; }
 
 <div class="section">
     <h2><span class="icon">&#x1F5A8;</span> Letci za print &#8212; otvori i printaj</h2>
-    <p style="font-size:9pt;color:#475569;margin-bottom:3mm">Pripremili smo letke za tvoju pekaru. Otvori link &#8594; Ctrl+P &#8594; Print u boji.</p>
+    <p class="fx-text-dim" style="font-size:9pt;margin-bottom:3mm">Pripremili smo letke za tvoju pekaru. Otvori link &#8594; Ctrl+P &#8594; Print u boji.</p>
     <div class="link-card"><div class="num">A3</div><div class="info"><div class="title">Veliki letak za ulazna vrata</div><div class="url"><a href="https://limit-connect.com/frisko-rizo/letak-a3/">https://limit-connect.com/frisko-rizo/letak-a3/</a></div><div class="desc">A3 format &#8212; QR kodovi, usluge s cijenama, asortiman. Za vrata ili izlog.</div></div></div>
     <div class="link-card"><div class="num">A4</div><div class="info"><div class="title">Interijer letak (bijela pozadina)</div><div class="url"><a href="https://limit-connect.com/frisko-rizo/letak-a4/">https://limit-connect.com/frisko-rizo/letak-a4/</a></div><div class="desc">A4 u boji &#8212; za unutar pekare, pored blagajne, na zidu. Koraci 1-2-3.</div></div></div>
 </div>
@@ -150,24 +150,24 @@ a { color: #7c3aed; text-decoration: underline; }
 
 <div class="section">
     <h2><span class="icon">&#x1F525;</span> Uslužno pečenje &#8212; cjenik</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:10pt">
-        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Janjetina</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">25 &#8364;</td></tr>
-        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Odojak</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">30 &#8364;</td></tr>
-        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Kolači</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">10 &#8364;</td></tr>
-        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Kruh</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">8 &#8364;</td></tr>
-        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Pite</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">12 &#8364;</td></tr>
-        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Pizza</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">15 &#8364;</td></tr>
+    <table class="fx-w-full fx-b-collapse" style="font-size:10pt">
+        <tr class="fx-bg-surface2"><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Janjetina</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">25 &#8364;</td></tr>
+        <tr><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Odojak</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">30 &#8364;</td></tr>
+        <tr class="fx-bg-surface2"><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kolači</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">10 &#8364;</td></tr>
+        <tr><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kruh</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">8 &#8364;</td></tr>
+        <tr class="fx-bg-surface2"><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Pite</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">12 &#8364;</td></tr>
+        <tr><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Pizza</td><td class="text-end fx-text-gold fx-fw-800" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-size:12pt">15 &#8364;</td></tr>
     </table>
 </div>
 
 <div class="section">
     <h2><span class="icon">&#x1F69A;</span> Dostava &#8212; zone i cijene</h2>
-    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Dostava svaki dan 13:00 &#8212; 14:00h</p>
-    <table style="width:100%;border-collapse:collapse;font-size:10pt">
-        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Čepin centar</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">2,50 &#8364;</td></tr>
-        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Šire područje Čepina</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">3,00 &#8364;</td></tr>
-        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Okolna sela</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">3,50 &#8364;</td></tr>
-        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Udaljena sela</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">4,50 &#8364;</td></tr>
+    <p class="fx-text-dim" style="font-size:9.5pt;margin-bottom:3mm">Dostava svaki dan 13:00 &#8212; 14:00h</p>
+    <table class="fx-w-full fx-b-collapse" style="font-size:10pt">
+        <tr class="fx-bg-surface2"><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Čepin centar</td><td class="text-end fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">2,50 &#8364;</td></tr>
+        <tr><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Šire područje Čepina</td><td class="text-end fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">3,00 &#8364;</td></tr>
+        <tr class="fx-bg-surface2"><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Okolna sela</td><td class="text-end fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">3,50 &#8364;</td></tr>
+        <tr><td class="fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Udaljena sela</td><td class="text-end fx-fw-bold" style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">4,50 &#8364;</td></tr>
     </table>
     <div class="note" style="margin-top:4mm"><strong>Besplatna dostava iznad 15 &#8364;!</strong> Naručite online i mi vam donesemo svježe na kućnu adresu.</div>
 </div>

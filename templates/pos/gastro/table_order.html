@@ -26,12 +26,12 @@
     <div class="to-header">
       <div>
         <div class="to-title">{{ table.name }}</div>
-        <div style="font-size:.8rem;color:var(--muted)">{{ table.get_table_type_display }} &middot; {{ table.capacity }} os.{% if table.floor %} &middot; {{ table.floor }}{% endif %}</div>
+        <div class="fx-fs-compact fx-text-muted">{{ table.get_table_type_display }} &middot; {{ table.capacity }} os.{% if table.floor %} &middot; {{ table.floor }}{% endif %}</div>
       </div>
       <a href="{% url 'pos:gastro_dashboard' %}" class="btn btn-ghost btn-sm">&larr; {% trans "Nazad" %}</a>
     </div>
     {% if order %}
-    <div style="margin-bottom:.6rem;font-size:.85rem;color:var(--muted)">
+    <div class="fx-fs-base fx-text-muted" style="margin-bottom:.6rem">
       {% trans "Narudzba" %} #{{ order.pk }} &middot; <span class="badge badge-open">{{ order.get_status_display }}</span>
       {% if order.guest_name %} &middot; {{ order.guest_name }}{% endif %}
     </div>
@@ -42,15 +42,15 @@
         <div class="to-item-qty">{{ i.quantity|floatformat:0 }}x</div>
       </div>
       {% empty %}
-      <p style="color:var(--muted);font-size:.85rem">{% trans "Prazna narudzba." %}</p>
+      <p class="fx-fs-base fx-text-muted">{% trans "Prazna narudzba." %}</p>
       {% endfor %}
     </div>
     {% else %}
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">{% trans "Nema aktivne narudzbe za ovaj stol." %}</p>
+    <p class="fx-fs-base fx-text-muted mb-3">{% trans "Nema aktivne narudzbe za ovaj stol." %}</p>
     {% endif %}
   </div>
   <div class="to-menu">
-    <h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:.5rem">{% trans "Meni" %}</h3>
+    <h3 class="fx-fs-compact fx-text-gold mb-2 fx-uppercase" style="letter-spacing:.06em">{% trans "Meni" %}</h3>
     <input type="text" class="search-box" id="menu-search" placeholder="{% trans 'Pretrazi artikle...' %}" oninput="filterMenu()">
     <div id="menu-list">
       {% for item in inventory_items %}

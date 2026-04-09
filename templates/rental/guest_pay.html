@@ -13,14 +13,14 @@ h2{color:var(--gold);font-size:1.2rem;margin-bottom:.5rem}
 .breakdown{text-align:left;font-size:.8rem;margin-bottom:1.5rem}
 .breakdown div{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--border)}
 .pay-btn{display:block;width:100%;padding:.7rem;border:none;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;text-align:center}
-.pay-btn.stripe{background:var(--gold);color:#000}
-.pay-btn.btcpay{background:#f7931a;color:#fff}
-.pay-btn.paypal{background:#0070ba;color:#fff}
+.pay-btn.stripe{background:var(--gold);color:var(--text)}
+.pay-btn.btcpay{background:#f7931a;color:var(--white)}
+.pay-btn.paypal{background:#0070ba;color:var(--white)}
 </style>
 </head><body>
 <div class="card">
   <h2>&#128179; Placanje boravka</h2>
-  <div style="font-size:.85rem;color:var(--muted)">{{ booking.rental_property.name }} &middot; {{ booking.booking_number }}</div>
+  <div class="fx-fs-base fx-text-muted">{{ booking.rental_property.name }} &middot; {{ booking.booking_number }}</div>
 
   <div class="amount">&euro;{{ booking.total_price|floatformat:2 }}</div>
 

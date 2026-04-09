@@ -2,26 +2,12 @@
 {% load i18n %}
 {% block title %}{{ branch.name|default:"Podružnica" }}{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
+<!-- lang: see topbar -->
 
-<div style="padding:2rem">
-  <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:1rem">{{ branch.name|default:"Podružnica" }}</h2>
-  <p style="color:#888">Tip podružnice: {{ branch.get_branch_type_display|default:"Ostalo" }}</p>
-  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem">
+<div class="fx-p-6">
+  <h2 class="fx-fs-3xl fx-fw-800 mb-3">{{ branch.name|default:"Podružnica" }}</h2>
+  <p class="fx-text-muted">Tip podružnice: {{ branch.get_branch_type_display|default:"Ostalo" }}</p>
+  <div class="d-flex fx-flex-wrap fx-gap-3 fx-mt-6">
     <a href="/dashboard/company/" class="btn btn-ghost">{% trans "&#x2190; Glavni dashboard" %}</a>
     <a href="{% url 'pos:new_terminal' %}" class="btn btn-ghost">{% trans "POS" %}</a>
     <a href="{% url 'invoicing:index' %}" class="btn btn-ghost">{% trans "Fakture" %}</a>

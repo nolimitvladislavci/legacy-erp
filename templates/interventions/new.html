@@ -2,67 +2,7 @@
 {% load i18n %}
 {% block page_title %}Nova intervencija{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<style>
-.ni-page{max-width:640px;margin:2rem auto;padding:0 1rem}
-.ni-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:2rem}
-.ni-title{font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:#0f172a}
-.ni-field{margin-bottom:1.1rem}
-.ni-field label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.35rem}
-.ni-field input,.ni-field select,.ni-field textarea{width:100%;padding:.6rem .875rem;border:1px solid #e2e8f0;border-radius:6px;font-size:.9rem;font-family:inherit;color:#0f172a;background:#fff}
-.ni-field input:focus,.ni-field select:focus,.ni-field textarea:focus{outline:none;border-color:#3b82f6}
-.ni-field textarea{resize:vertical;min-height:80px}
-.ni-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.ni-actions{display:flex;gap:.75rem;margin-top:1.5rem}
-.btn-primary{background:#0f172a;color:#fff;padding:.65rem 1.5rem;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:.9rem}
-.btn-secondary{background:#fff;color:#64748b;padding:.65rem 1.5rem;border:1px solid #e2e8f0;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
-</style>
-<div class="ni-page">
-  <div style="margin-bottom:1rem">
-    <a href="{% url 'interventions:kanban' %}" style="color:#64748b;font-size:.85rem;text-decoration:none">{% trans "&larr; Natrag na kanban" %}</a>
-  </div>
-  <div class="ni-card">
-    <div class="ni-title">{% trans "🚨 Nova hitna intervencija" %}</div>
-    <form method="post">
-      {% csrf_token %}
-      <div class="ni-field">
-        <label>{% trans "Naslov *" %}</label>
-        <input type="text" name="title" placeholder="{% trans "npr. Pukla cijev u kupaonici" %}" required autofocus>
-      </div>
-      <div class="ni-grid">
-        <div class="ni-field">
-          <label>{% trans "Kategorija" %}</label>
-          <select name="category">
-            {% for val, lbl in categories %}
-            <option value="{{ val }}">{{ lbl }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="ni-field">
-          <label>{% trans "Dodjeli radniku" %}</label>
-          <select name="assigned_to">
-            <option value="">{% trans "-- dodijeli poslije --" %}</option>
-            {% for w in workers %}
-            <option value="{{ w.pk }}">{{ w.get_full_name|default:w.username }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
+<!-- lang: topbar -->
       <div class="ni-field">
         <label>{% trans "Adresa intervencije *" %}</label>
         <input type="text" name="address" placeholder="{% trans "Ul. sv. Dominika 5, Split" %}" required>

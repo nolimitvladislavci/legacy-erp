@@ -2,75 +2,58 @@
 {% load i18n %}
 {% block title %}DVD Intervencije{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-fire"></i> Intervencije</h4>
-  <small style="color:var(--text-muted)">Evidencija izlazaka, INT-1 obrazac</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-fire"></i> Intervencije</h4>
+  <small class="fx-text-muted">Evidencija izlazaka, INT-1 obrazac</small></div>
   <a href="{% url 'udruge:intervencija_create' %}" class="btn btn-gold btn-sm">+ Nova intervencija</a>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ukupno</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.pozar|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Pozar</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-red">{{ stats.pozar|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Pozar</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.tehnicka|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Tehnicka</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-blue">{{ stats.tehnicka|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Tehnicka</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ovaj_mjesec|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Ovaj mjesec</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ovaj_mjesec|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Ovaj mjesec</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tip</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Lokacija</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Gasitelji</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Trajanje</th>
-      <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Datum</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Tip</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Lokacija</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Gasitelji</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Trajanje</th>
+      <th class="fx-p-2 fx-bb"></th>
     </tr></thead>
     <tbody>
       {% for i in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ i.datum|date:"d.m.Y H:i" }}</td>
-        <td style="padding:.5rem .6rem" data-label="Tip">
-          {% if i.tip == 'pozar' %}<span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.72rem;padding:2px 8px;border-radius:8px;font-weight:600">Pozar</span>
-          {% elif i.tip == 'tehnicka' %}<span style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.72rem;padding:2px 8px;border-radius:8px;font-weight:600">Tehnicka</span>
-          {% else %}<span style="font-size:.82rem">{{ i.get_tip_display }}</span>{% endif %}
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Datum">{{ i.datum|date:"d.m.Y H:i" }}</td>
+        <td class="fx-p-cell" data-label="Tip">
+          {% if i.tip == 'pozar' %}<span class="fx-text-red fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(239,68,68,.15)">Pozar</span>
+          {% elif i.tip == 'tehnicka' %}<span class="fx-text-blue fx-fs-sm fx-rounded fx-fw-semibold fx-p-btn" style="background:rgba(59,130,246,.15)">Tehnicka</span>
+          {% else %}<span class="fx-fs-note">{{ i.get_tip_display }}</span>{% endif %}
         </td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Lokacija">{{ i.lokacija|truncatechars:30 }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Gasitelji">{{ i.broj_gasitelja|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Trajanje">{{ i.trajanje_min|default:"-" }} min</td>
-        <td style="padding:.5rem .6rem"><a href="{% url 'udruge:intervencija_detail' i.pk %}" style="color:var(--gold);font-size:.8rem">Detalji</a></td>
+        <td class="fx-fs-note fx-p-cell" data-label="Lokacija">{{ i.lokacija|truncatechars:30 }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Gasitelji">{{ i.broj_gasitelja|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Trajanje">{{ i.trajanje_min|default:"-" }} min</td>
+        <td class="fx-p-cell"><a href="{% url 'udruge:intervencija_detail' i.pk %}" class="fx-fs-compact fx-text-gold">Detalji</a></td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema intervencija</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema intervencija</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

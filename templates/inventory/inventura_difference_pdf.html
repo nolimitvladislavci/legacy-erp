@@ -8,33 +8,33 @@
   @page { size: A4; margin: 15mm; }
   body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #222; }
   h1 { font-size: 16px; margin-bottom: 4px; }
-  h2 { font-size: 11px; color: #555; margin: 15px 0 5px; }
+  h2 { font-size: 11px; color:var(--text-dim); margin: 15px 0 5px; }
   .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
   table { width: 100%; border-collapse: collapse; margin-top: 6px; }
   th, td { border: 1px solid #999; padding: 3px 6px; font-size: 8.5px; }
   th { background: #e8e8e8; font-weight: bold; text-align: center; }
   .text-right { text-align: right; }
-  .shortage { color: #dc2626; }
-  .surplus { color: #16a34a; }
+  .shortage { color:var(--red); }
+  .surplus { color:var(--green); }
   .totals td { font-weight: bold; background: #f0f0f0; font-size: 10px; }
-  .summary { background: #f8f8f8; border: 1px solid #ccc; padding: 12px; margin-top: 15px; border-radius: 4px; }
+  .summary { background: #f8f8f8; border:1px solid var(--border); padding: 12px; margin-top: 15px; border-radius: 4px; }
   .summary h3 { font-size: 13px; margin: 0 0 8px; }
   .summary td { border: none; padding: 2px 8px; font-size: 10px; }
   .sig-line { display: inline-block; width: 180px; border-bottom: 1px solid #333; text-align: center; margin-right: 25px; padding-top: 35px; }
-  .legal { font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+  .legal { font-size: 7px; color:var(--text-muted); margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <table style="border:none; margin:0">
+  <table class="fx-border-none fx-m-0">
     <tr>
-      <td style="border:none; width:60%">
+      <td class="fx-border-none" style="width:60%">
         <h1>INVENTURNA RAZLIKA</h1>
         <small>Izvještaj o manjkovima i viškovima</small><br>
         <strong>{{ inv.inventura_number }}</strong> — {{ inv.get_inventura_type_display }}
       </td>
-      <td style="border:none; text-align:right; vertical-align:top">
+      <td class="fx-border-none text-end" style="vertical-align:top">
         <strong>{{ company.name }}</strong><br>
         OIB: {{ company.oib|default:"—" }}<br>
         {{ company.address|default:"" }}
@@ -114,18 +114,18 @@
 {% endif %}
 
 {% if not shortages and not surpluses %}
-<div class="summary" style="text-align:center; padding:30px">
-  <h3 style="color:#16a34a">Nema razlika — knjižno stanje odgovara stvarnom stanju.</h3>
+<div class="summary text-center" style="padding:30px">
+  <h3 class="fx-text-green">Nema razlika — knjižno stanje odgovara stvarnom stanju.</h3>
 </div>
 {% endif %}
 
 <div class="summary">
   <h3>Rekapitulacija</h3>
-  <table style="border:none; width:auto">
-    <tr><td style="font-weight:bold">Ukupno stavki s razlikom:</td><td>{{ shortages|length|add:surpluses|length }}</td></tr>
-    <tr><td style="font-weight:bold">Manjkovi:</td><td class="shortage">{{ shortages|length }} stavki — {{ total_shortage|floatformat:2 }} EUR</td></tr>
-    <tr><td style="font-weight:bold">Viškovi:</td><td class="surplus">{{ surpluses|length }} stavki — +{{ total_surplus|floatformat:2 }} EUR</td></tr>
-    <tr><td style="font-weight:bold">Neto razlika:</td><td style="font-weight:bold">{{ inv.total_difference_value|floatformat:2 }} EUR</td></tr>
+  <table class="fx-border-none" style="width:auto">
+    <tr><td class="fx-fw-bold">Ukupno stavki s razlikom:</td><td>{{ shortages|length|add:surpluses|length }}</td></tr>
+    <tr><td class="fx-fw-bold">Manjkovi:</td><td class="shortage">{{ shortages|length }} stavki — {{ total_shortage|floatformat:2 }} EUR</td></tr>
+    <tr><td class="fx-fw-bold">Viškovi:</td><td class="surplus">{{ surpluses|length }} stavki — +{{ total_surplus|floatformat:2 }} EUR</td></tr>
+    <tr><td class="fx-fw-bold">Neto razlika:</td><td class="fx-fw-bold">{{ inv.total_difference_value|floatformat:2 }} EUR</td></tr>
   </table>
   <br>
   <small>

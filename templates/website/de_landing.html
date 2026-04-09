@@ -16,9 +16,9 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 .hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem}
 .hero h1 span{color:var(--gold)}
 .hero p{font-size:1.1rem;color:var(--muted);max-width:600px;margin:0 auto 2rem}
-.badge-kassensi{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3);padding:.4rem 1rem;border-radius:50px;font-size:.8rem;font-weight:700;display:inline-block;margin-bottom:1.5rem}
-.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.8rem 2rem;border-radius:10px;border:none;font-size:1rem;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s}
-.btn-gold:hover{opacity:.85;color:#000}
+.badge-kassensi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);padding:.4rem 1rem;border-radius:50px;font-size:.8rem;font-weight:700;display:inline-block;margin-bottom:1.5rem}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:700;padding:.8rem 2rem;border-radius:10px;border:none;font-size:1rem;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s}
+.btn-gold:hover{opacity:.85;color:var(--text)}
 .btn-outline{border:2px solid var(--border);color:var(--text);padding:.8rem 2rem;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block;transition:border-color .2s}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .section{padding:5rem 2rem}
@@ -33,7 +33,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 .pakete{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto}
 .paket{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;position:relative}
 .paket.popular{border-color:var(--gold);box-shadow:0 0 30px rgba(201,168,76,.15)}
-.paket-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:.7rem;font-weight:800;padding:.3rem 1rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px}
+.paket-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--text);font-size:.7rem;font-weight:800;padding:.3rem 1rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px}
 .paket h3{font-size:1.3rem;font-weight:700;margin-bottom:.3rem}
 .paket .preis{font-size:2.5rem;font-weight:800;color:var(--gold);margin:1rem 0 .3rem}
 .paket .preis small{font-size:.9rem;color:var(--muted);font-weight:400}
@@ -54,13 +54,13 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <body>
 
 <!-- NAV -->
-<nav style="position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;justify-content:space-between;align-items:center">
-<a href="/de/" style="color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:none;letter-spacing:1px">LIMIT<span style="color:var(--text)">CONNECT</span></a>
-<div style="display:flex;gap:1rem;align-items:center">
-<a href="/de/pakete/" style="color:var(--muted);text-decoration:none;font-size:.85rem">Pakete</a>
-<a href="/de/anleitung/" style="color:var(--muted);text-decoration:none;font-size:.85rem">Anleitung</a>
-<a href="/de/ohne-papier/" style="color:var(--muted);text-decoration:none;font-size:.85rem">Ohne Papier</a>
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:.5rem 1.2rem;font-size:.8rem">Kostenlos testen</a>
+<nav class="d-flex justify-content-between align-items-center fx-bb" style="position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.9);backdrop-filter:blur(10px);padding:.8rem 2rem">
+<a href="/de/" class="fx-fw-800 fx-fs-xl fx-no-underline fx-text-gold fx-ls-2">LIMIT<span class="fx-text-body">CONNECT</span></a>
+<div class="d-flex fx-gap-4 align-items-center">
+<a href="/de/pakete/" class="fx-no-underline fx-fs-base fx-text-muted">Pakete</a>
+<a href="/de/anleitung/" class="fx-no-underline fx-fs-base fx-text-muted">Anleitung</a>
+<a href="/de/ohne-papier/" class="fx-no-underline fx-fs-base fx-text-muted">Ohne Papier</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold fx-fs-compact" style="padding:.5rem 1.2rem">Kostenlos testen</a>
 </div>
 </nav>
 
@@ -70,9 +70,9 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <div class="badge-kassensi"><i class="fas fa-shield-alt"></i> KassenSichV & TSE konform</div>
 <h1>Ihre Kasse läuft<br>auf dem <span>Handy</span></h1>
 <p>Cloud-Kassensystem für Gastronomie, Einzelhandel und Handwerk. Ohne Hardware, ohne Papier, nach deutschem Recht. Ab 22€/Monat.</p>
-<div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold"><i class="fas fa-rocket" style="margin-right:.5rem"></i>30 Tage kostenlos</a>
-<a href="/de/anleitung/" class="btn-outline"><i class="fas fa-play" style="margin-right:.5rem"></i>So funktioniert's</a>
+<div class="d-flex fx-flex-wrap fx-gap-4 justify-content-center">
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold"><i class="fas fa-rocket fx-mr-2"></i>30 Tage kostenlos</a>
+<a href="/de/anleitung/" class="btn-outline"><i class="fas fa-play fx-mr-2"></i>So funktioniert's</a>
 </div>
 <div class="trust" style="margin-top:2.5rem">
 <div class="trust-item"><i class="fas fa-check-circle"></i> KassenSichV §146a</div>
@@ -89,17 +89,17 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <div class="section-sub">Alles was Sie brauchen — nichts was Sie nicht brauchen.</div>
 <div class="features">
 <div class="feat">
-<div class="feat-icon" style="background:rgba(201,168,76,.12);color:var(--gold)"><i class="fas fa-mobile-alt"></i></div>
+<div class="feat-icon fx-text-gold" style="background:rgba(201,168,76,.12)"><i class="fas fa-mobile-alt"></i></div>
 <h3>Kasse auf dem Handy</h3>
 <p>Kein Terminal, keine Hardware. Öffnen Sie den Browser, scannen Sie den QR-Code — fertig. Funktioniert auf jedem Gerät.</p>
 </div>
 <div class="feat">
-<div class="feat-icon" style="background:rgba(34,197,94,.12);color:#4ade80"><i class="fas fa-shield-alt"></i></div>
+<div class="feat-icon fx-text-green" style="background:rgba(34,197,94,.12)"><i class="fas fa-shield-alt"></i></div>
 <h3>KassenSichV & TSE</h3>
 <p>Fiskaly Cloud-TSE integriert. Jede Transaktion wird kryptographisch signiert. DSFinV-K Export auf Knopfdruck für die Betriebsprüfung.</p>
 </div>
 <div class="feat">
-<div class="feat-icon" style="background:rgba(59,130,246,.12);color:#3b82f6"><i class="fas fa-leaf"></i></div>
+<div class="feat-icon fx-text-blue" style="background:rgba(59,130,246,.12)"><i class="fas fa-leaf"></i></div>
 <h3>Ohne Papier</h3>
 <p>Belege per WhatsApp oder E-Mail. Kein Thermopapier, kein BPA. Der Gast bekommt den Beleg direkt aufs Handy.</p>
 </div>
@@ -114,7 +114,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <p>Tischverwaltung, Küchendisplay, Split Payment, Trinkgeld-Tracking. Alles was Ihr Restaurant braucht.</p>
 </div>
 <div class="feat">
-<div class="feat-icon" style="background:rgba(245,158,11,.12);color:#f59e0b"><i class="fas fa-robot"></i></div>
+<div class="feat-icon fx-text-amber" style="background:rgba(245,158,11,.12)"><i class="fas fa-robot"></i></div>
 <h3>KI-Assistent</h3>
 <p>Unser AI-System erkennt Anomalien, optimiert Lagerbestände und erstellt automatische Tagesberichte. Auf Deutsch.</p>
 </div>
@@ -129,7 +129,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <div class="paket">
 <h3>Starter</h3>
 <div class="preis">22€ <small>/Monat</small></div>
-<p style="color:var(--muted);font-size:.85rem">Für Einzelunternehmer und kleine Läden</p>
+<p class="fx-fs-base fx-text-muted">Für Einzelunternehmer und kleine Läden</p>
 <ul>
 <li><i class="fas fa-check"></i> 1 Kasse / Terminal</li>
 <li><i class="fas fa-check"></i> POS + Belegdruck</li>
@@ -138,13 +138,13 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <li><i class="fas fa-check"></i> WhatsApp-Belege</li>
 <li><i class="fas fa-check"></i> DSFinV-K Export</li>
 </ul>
-<a href="{% url 'accounts:quick_register' %}" class="btn-outline" style="width:100%;text-align:center">Jetzt starten</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-outline fx-w-full text-center">Jetzt starten</a>
 </div>
 <div class="paket popular">
 <div class="paket-badge">Beliebtestes Paket</div>
 <h3>Business</h3>
 <div class="preis">69€ <small>/Monat</small></div>
-<p style="color:var(--muted);font-size:.85rem">Für Gastro, Einzelhandel und Handwerk</p>
+<p class="fx-fs-base fx-text-muted">Für Gastro, Einzelhandel und Handwerk</p>
 <ul>
 <li><i class="fas fa-check"></i> 3 Kassen / Terminals</li>
 <li><i class="fas fa-check"></i> Gastro-Modus (Tische, KDS)</li>
@@ -155,12 +155,12 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <li><i class="fas fa-check"></i> Rechnungsstellung</li>
 <li><i class="fas fa-check"></i> E-Mail + WhatsApp Support</li>
 </ul>
-<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="width:100%;text-align:center">30 Tage kostenlos</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold fx-w-full text-center">30 Tage kostenlos</a>
 </div>
 <div class="paket">
 <h3>Enterprise</h3>
 <div class="preis">189€ <small>/Monat</small></div>
-<p style="color:var(--muted);font-size:.85rem">Für Filialbetriebe und Großhandel</p>
+<p class="fx-fs-base fx-text-muted">Für Filialbetriebe und Großhandel</p>
 <ul>
 <li><i class="fas fa-check"></i> Unbegrenzte Kassen</li>
 <li><i class="fas fa-check"></i> Multi-Filial-Dashboard</li>
@@ -171,7 +171,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <li><i class="fas fa-check"></i> API-Zugang</li>
 <li><i class="fas fa-check"></i> SLA 99.9%</li>
 </ul>
-<a href="{% url 'accounts:quick_register' %}" class="btn-outline" style="width:100%;text-align:center">Kontakt aufnehmen</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-outline fx-w-full text-center">Kontakt aufnehmen</a>
 </div>
 </div>
 </section>
@@ -184,7 +184,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 
 <!-- FOOTER -->
 <footer class="footer">
-<div style="margin-bottom:1rem">
+<div class="mb-3">
 <a href="/de/" style="margin:0 1rem">Start</a>
 <a href="/de/pakete/" style="margin:0 1rem">Pakete</a>
 <a href="/de/anleitung/" style="margin:0 1rem">Anleitung</a>
@@ -193,7 +193,7 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark)
 <a href="/datenschutz/" style="margin:0 1rem">Datenschutz</a>
 </div>
 © 2026 Visković Group · LIMIT Connect · Alle Rechte vorbehalten<br>
-<span style="font-size:.7rem;color:#333">System bewertet mit 10/10 für Sicherheit und Produktionsstabilität</span>
+<span class="fx-fs-sm fx-text-dark">System bewertet mit 10/10 für Sicherheit und Produktionsstabilität</span>
 </footer>
 
 </body>

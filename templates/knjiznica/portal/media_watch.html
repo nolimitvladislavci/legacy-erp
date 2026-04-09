@@ -3,40 +3,40 @@
 {% block title %}{{ item.title }}{% endblock %}
 {% block content %}
 
-<div style="max-width:800px;margin:0 auto">
+<div class="fx-m-auto fx-max-800">
   <!-- Player -->
-  <div class="lib-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+  <div class="lib-card mb-3 fx-p-0 fx-overflow-hidden">
     {% if item.media_file %}
       {% if 'video' in item.media_file.name or item.content_type in 'video_read,book_trailer,workshop,debate' %}
-      <video controls style="width:100%;max-height:500px;background:#000" preload="metadata">
+      <video controls class="fx-w-full" style="max-height:500px;background:#000" preload="metadata">
         <source src="{{ item.media_file.url }}">
         Vaš preglednik ne podržava video.
       </video>
       {% elif 'audio' in item.media_file.name or item.content_type == 'audio_story' %}
-      <div style="padding:40px;text-align:center;background:var(--lib-warm)">
-        <i class="fas fa-headphones" style="font-size:4rem;color:var(--lib-gold);margin-bottom:16px"></i>
-        <audio controls style="width:100%;max-width:500px" preload="metadata">
+      <div class="text-center" style="padding:40px;background:var(--lib-warm)">
+        <i class="fas fa-headphones mb-3 fx-text-gold" style="font-size:4rem"></i>
+        <audio controls class="fx-w-full" style="max-width:500px" preload="metadata">
           <source src="{{ item.media_file.url }}">
         </audio>
       </div>
       {% else %}
-      <div style="padding:40px;text-align:center;background:var(--lib-warm)">
-        <i class="fas fa-file" style="font-size:3rem;color:var(--lib-muted)"></i>
+      <div class="text-center" style="padding:40px;background:var(--lib-warm)">
+        <i class="fas fa-file fx-fs-hero fx-text-muted"></i>
         <p><a href="{{ item.media_file.url }}">Preuzmi sadržaj</a></p>
       </div>
       {% endif %}
     {% else %}
-    <div style="padding:60px;text-align:center;background:var(--lib-warm)">
-      <i class="fas fa-video-slash" style="font-size:3rem;color:var(--lib-muted)"></i>
-      <p style="color:var(--lib-muted)">Sadržaj nije dostupan.</p>
+    <div class="text-center" style="padding:60px;background:var(--lib-warm)">
+      <i class="fas fa-video-slash fx-fs-hero fx-text-muted"></i>
+      <p class="fx-text-muted">Sadržaj nije dostupan.</p>
     </div>
     {% endif %}
   </div>
 
   <!-- Info -->
   <div class="lib-card">
-    <h2 style="font-size:1.3rem;margin-bottom:4px">{{ item.title }}</h2>
-    <div style="color:var(--lib-muted);font-size:.85rem;margin-bottom:12px">
+    <h2 class="fx-fs-3xl mb-1">{{ item.title }}</h2>
+    <div class="fx-fs-base mb-3 fx-text-muted">
       {{ item.get_content_type_display }}
       {% if item.duration_minutes %} · {{ item.duration_minutes }} min{% endif %}
       {% if item.tier %} · {{ item.get_tier_display }}{% endif %}
@@ -46,14 +46,14 @@
     <p>{{ item.description }}</p>
     {% endif %}
     {% if item.related_book %}
-    <div style="margin-top:12px;padding:12px;background:var(--lib-warm);border-radius:8px">
-      <i class="fas fa-book" style="color:var(--lib-gold)"></i>
+    <div class="fx-rounded mt-3 fx-p-12" style="background:var(--lib-warm)">
+      <i class="fas fa-book fx-text-gold"></i>
       Povezana knjiga: <a href="{% url 'knjiznica:portal_book_detail' slug item.related_book.pk %}"><strong>{{ item.related_book.name }}</strong></a>
     </div>
     {% endif %}
   </div>
 
-  <div class="text-center" style="margin-top:16px">
+  <div class="text-center mt-3">
     <a href="{% url 'knjiznica:portal_media' slug %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Svi sadržaji</a>
   </div>
 </div>

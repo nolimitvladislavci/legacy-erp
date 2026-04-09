@@ -20,14 +20,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .card.new{border-color:var(--gold);animation:glow 2s infinite}
 .card.confirmed{border-color:var(--orange)}
 .card.preparing{border-color:var(--orange);background:#1a1500}
-.card.ready{border-color:var(--green);background:#0a1a0a;animation:ready-pulse 1.5s infinite}
+.card.ready{border-color:var(--green);background:var(--surface-deep);animation:ready-pulse 1.5s infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 5px rgba(201,168,76,.3)}50%{box-shadow:0 0 20px rgba(201,168,76,.6)}}
 @keyframes ready-pulse{0%,100%{box-shadow:0 0 5px rgba(34,197,94,.3)}50%{box-shadow:0 0 15px rgba(34,197,94,.5)}}
 .c-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
 .c-table{font-weight:800;font-size:1.1rem}
 .c-table small{font-weight:400;font-size:.7rem;color:var(--muted)}
-.c-wait{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#1a0a0a;color:var(--red)}
-.c-wait.ok{background:#0a1a0a;color:var(--green)}
+.c-wait{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--surface-deep);color:var(--red)}
+.c-wait.ok{background:var(--surface-deep);color:var(--green)}
 .c-guest{font-size:.75rem;color:var(--muted);margin-bottom:.3rem}
 .c-items{list-style:none;margin-bottom:.4rem}
 .c-items li{font-size:.85rem;padding:2px 0;border-bottom:1px solid #1a1a1a;display:flex;gap:.3rem}
@@ -38,9 +38,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .c-actions{display:flex;gap:.3rem}
 .c-btn{flex:1;padding:.5rem;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;text-align:center}
 .c-btn:active{opacity:.7}
-.c-btn.confirm{background:var(--gold);color:#000}
-.c-btn.prep{background:var(--orange);color:#000}
-.c-btn.done{background:var(--green);color:#000}
+.c-btn.confirm{background:var(--gold);color:var(--text)}
+.c-btn.prep{background:var(--orange);color:var(--text)}
+.c-btn.done{background:var(--green);color:var(--text)}
 .c-btn:disabled{opacity:.3}
 .empty{text-align:center;padding:4rem;color:var(--muted);font-size:1.2rem}
 .sound-btn{position:fixed;bottom:1rem;right:1rem;width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--gold);font-size:1.2rem;cursor:pointer;z-index:200}
@@ -58,23 +58,23 @@ function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if
 
 <div class="top">
   <h1>&#127859; {{ company.name }}</h1>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span id="cookBadge" style="display:none;background:var(--green);color:#000;font-weight:700;font-size:.75rem;padding:3px 10px;border-radius:20px"></span> <button id="cookLogoutBtn" onclick="cookLogout()" style="display:none;margin-left:.5rem;padding:.25rem .75rem;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.8rem">Odjava</button>
-    <button onclick="showCookScan()" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:20px;font-size:.7rem;cursor:pointer" title="Prijavi se barcodom">&#128100; Prijava</button>
+  <div class="d-flex fx-gap-3 align-items-center">
+    <span id="cookBadge" class="fx-hidden fx-text-dark fx-fw-bold fx-fs-caption fx-rounded-xl" style="background:var(--green);padding:3px 10px"></span> <button id="cookLogoutBtn" onclick="cookLogout()" class="fx-hidden fx-bg-red fx-text-white fx-border-none fx-rounded-sm fx-pointer fx-fs-compact" style="margin-left:.5rem;padding:.25rem .75rem">Odjava</button>
+    <button onclick="showCookScan()" class="fx-rounded-xl fx-fs-sm fx-pointer fx-text-gold fx-bg-transparent" style="border:1px solid var(--gold);padding:3px 10px" title="Prijavi se barcodom">&#128100; Prijava</button>
     <div class="live">LIVE</div>
   </div>
 </div>
 
 <!-- Cook barcode scan modal -->
-<div id="cookModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center">
-    <h3 style="color:var(--gold);margin-bottom:12px">&#128100; Prijava kuhara</h3>
-    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Skeniraj svoj barcode ili upiši kod</p>
+<div id="cookModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9)">
+  <div class="fx-rounded-lg text-center fx-bg-card" style="border:2px solid var(--gold);padding:24px;max-width:400px;width:90%">
+    <h3 class="fx-text-gold mb-3">&#128100; Prijava kuhara</h3>
+    <p class="fx-fs-compact fx-text-muted mb-3">Skeniraj svoj barcode ili upiši kod</p>
     <input type="text" id="cookBarcodeInput" placeholder="LC-DEV-XXXXXXXX"
-           style="width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:1rem;text-align:center;letter-spacing:2px"
+           class="fx-w-full fx-rounded fx-text-white fx-fs-lg text-center fx-bg-body fx-p-12 fx-b" style="letter-spacing:2px"
            autocomplete="off" autofocus>
-    <div id="cookStatus" style="margin-top:10px;font-size:.85rem;min-height:20px"></div>
-    <button onclick="closeCookModal()" style="margin-top:12px;background:none;border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.8rem">Zatvori</button>
+    <div id="cookStatus" class="fx-fs-base fx-mt-10" style="min-height:20px"></div>
+    <button onclick="closeCookModal()" class="fx-rounded fx-pointer fx-fs-compact mt-3 fx-text-muted fx-bg-transparent fx-b" style="padding:6px 16px">Zatvori</button>
   </div>
 </div>
 
@@ -102,7 +102,7 @@ document.getElementById('cookBarcodeInput').addEventListener('keydown',function(
     e.preventDefault();
     var bc=this.value.trim();
     if(!bc)return;
-    document.getElementById('cookStatus').innerHTML='<span style="color:var(--gold)">Provjera...</span>';
+    document.getElementById('cookStatus').innerHTML='<span class="fx-text-gold">Provjera...</span>';
     fetch('/pos/gastro/kds/'+TOKEN+'/cook-scan/',{
       method:'POST',
       headers:{'Content-Type':'application/json', 'X-CSRFToken':getCsrf()},
@@ -117,14 +117,14 @@ document.getElementById('cookBarcodeInput').addEventListener('keydown',function(
         document.getElementById('cookBadge').textContent=activeCook;
         document.getElementById('cookBadge').style.display='inline-block';
         document.getElementById('cookLogoutBtn').style.display='inline-block';
-        document.getElementById('cookStatus').innerHTML='<span style="color:var(--green)">'+activeCook+' prijavljen!</span>';
+        document.getElementById('cookStatus').innerHTML='<span class="fx-text-green">'+activeCook+' prijavljen!</span>';
         setTimeout(closeCookModal,1000);
       } else {
-        document.getElementById('cookStatus').innerHTML='<span style="color:var(--red)">'+(res.data.error||'Greška')+'</span>';
+        document.getElementById('cookStatus').innerHTML='<span class="fx-text-red">'+(res.data.error||'Greška')+'</span>';
       }
     })
     .catch(function(e){
-      document.getElementById('cookStatus').innerHTML='<span style="color:var(--red)">'+e+'</span>';
+      document.getElementById('cookStatus').innerHTML='<span class="fx-text-red">'+e+'</span>';
     });
   }
 });

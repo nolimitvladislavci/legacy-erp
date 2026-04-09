@@ -4,54 +4,54 @@
 {% block content %}
 <div class="container-fluid py-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 style="font-family:var(--font-heading);color:var(--gold)">
+    <h4 class="fx-text-gold" style="font-family:var(--font-heading)">
       <i class="fas fa-robot me-2"></i>BORG Error Queue — {{ pending_count }} pending
     </h4>
     <a href="{% url 'superadmin_dashboard' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i></a>
   </div>
 
   {% if pending %}
-  <div class="card mb-4" style="border:2px solid #ef4444;background:var(--bg-card)">
+  <div class="card mb-4 fx-bg-card" style="border:2px solid #ef4444">
     <div class="card-header" style="background:rgba(239,68,68,.1)">
-      <h6 class="mb-0" style="color:#ef4444"><i class="fas fa-exclamation-circle me-2"></i>Pending ({{ pending_count }})</h6>
+      <h6 class="mb-0 fx-text-red"><i class="fas fa-exclamation-circle me-2"></i>Pending ({{ pending_count }})</h6>
     </div>
     <div class="card-body p-0">
       {% for err in pending %}
-      <div class="p-3" style="border-bottom:1px solid var(--border)">
+      <div class="p-3 fx-bb">
         <div class="d-flex justify-content-between">
           <div>
-            <strong style="color:#ef4444">{{ err.payload.error_type|default:"Error" }}</strong>
-            <span class="text-muted ms-2" style="font-size:.75rem">{{ err.created_at|timesince }} ago</span>
+            <strong class="fx-text-red">{{ err.payload.error_type|default:"Error" }}</strong>
+            <span class="text-muted ms-2 fx-fs-caption">{{ err.created_at|timesince }} ago</span>
           </div>
-          <span class="badge" style="background:var(--gold);color:#000;font-size:.65rem">{{ err.payload.source_file }}:{{ err.payload.source_line }}</span>
+          <span class="badge fx-text-dark fx-fs-xs fx-bg-gold">{{ err.payload.source_file }}:{{ err.payload.source_line }}</span>
         </div>
-        <div style="font-size:.82rem;margin-top:4px">
+        <div class="fx-fs-note mt-1">
           <span class="text-muted">{{ err.payload.method }}</span> <code>{{ err.payload.url }}</code>
           <span class="text-muted ms-2">User: {{ err.payload.user_name }}</span>
           <span class="text-muted ms-2">Firma: {{ err.payload.company_name|default:"?" }}</span>
         </div>
-        <pre style="font-size:.7rem;max-height:150px;overflow:auto;margin-top:8px;padding:8px;background:rgba(0,0,0,.3);border-radius:6px;color:#ccc">{{ err.payload.error_message }}
+        <pre class="fx-fs-sm fx-rounded-sm mt-2 fx-text-muted fx-p-8" style="max-height:150px;overflow:auto;background:rgba(0,0,0,.3)">{{ err.payload.error_message }}
 {{ err.payload.stack_trace|truncatechars:1500 }}</pre>
       </div>
       {% endfor %}
     </div>
   </div>
   {% else %}
-  <div class="card" style="background:var(--bg-card);border:2px solid #10b981">
+  <div class="card fx-bg-card" style="border:2px solid #10b981">
     <div class="card-body text-center py-5">
-      <i class="fas fa-check-circle" style="font-size:3rem;color:#10b981"></i>
-      <p class="mt-3 mb-0" style="color:#10b981;font-size:1.1rem;font-weight:600">Zero errors. BORG je miran.</p>
+      <i class="fas fa-check-circle fx-fs-hero fx-text-green"></i>
+      <p class="mt-3 mb-0 fx-text-green fx-fs-xl fx-fw-semibold">Zero errors. BORG je miran.</p>
     </div>
   </div>
   {% endif %}
 
   {% if resolved %}
-  <div class="card mt-3" style="background:var(--bg-card)">
-    <div class="card-header" style="background:var(--table-header-bg)">
+  <div class="card mt-3 fx-bg-card">
+    <div class="card-header fx-bg-surface2">
       <h6 class="mb-0"><i class="fas fa-history me-2"></i>Resolved</h6>
     </div>
     <div class="card-body p-0">
-      <table class="table table-sm mb-0" style="color:var(--text);font-size:.8rem">
+      <table class="table table-sm mb-0 fx-fs-compact fx-text-body">
         <thead><tr><th>Error</th><th>File</th><th>Status</th><th>When</th></tr></thead>
         <tbody>
           {% for r in resolved %}
@@ -59,9 +59,9 @@
             <td>{{ r.payload.error_type }}</td>
             <td><code>{{ r.payload.source_file }}:{{ r.payload.source_line }}</code></td>
             <td>
-              {% if r.status == 'approved' %}<span class="badge bg-success">Approved</span>
-              {% elif r.status == 'executed' %}<span class="badge bg-info">Executed</span>
-              {% elif r.status == 'rejected' %}<span class="badge bg-secondary">Rejected</span>
+              {% if r.status == 'approved' %}<span class="fenix-badge fenix-badge-success">Approved</span>
+              {% elif r.status == 'executed' %}<span class="fenix-badge fenix-badge-info">Executed</span>
+              {% elif r.status == 'rejected' %}<span class="fenix-badge fenix-badge-muted">Rejected</span>
               {% endif %}
             </td>
             <td>{{ r.created_at|timesince }}</td>

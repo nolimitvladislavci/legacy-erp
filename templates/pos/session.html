@@ -61,7 +61,7 @@ td{padding:.55rem .6rem;border-bottom:1px solid rgba(255,255,255,.03);font-size:
 
 /* Spinner */
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 button[disabled]{opacity:.5;cursor:not-allowed}
 
 @media(max-width:900px){
@@ -87,11 +87,11 @@ button[disabled]{opacity:.5;cursor:not-allowed}
         <div class="sh-title">{{ session.terminal.name }} &mdash; Smjena #{{ session.session_number }}</div>
         <div class="sh-meta">Otvorena {{ session.opened_at|date:"d.m.Y H:i" }} &mdash; {{ session.operator.get_full_name|default:session.operator.username }}</div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div class="d-flex fx-gap-2">
         {% if session.terminal.pos_type == 'restaurant' %}
-        <a href="{% url 'pos:restaurant_pos' session.terminal.pk %}" class="btn btn-gold btn-sm" style="white-space:nowrap">🍽 Blagajna</a>
+        <a href="{% url 'pos:restaurant_pos' session.terminal.pk %}" class="btn btn-gold btn-sm text-nowrap">🍽 Blagajna</a>
         {% else %}
-        <a href="{% url 'pos:quick_pos' session.terminal.pk %}" class="btn btn-gold btn-sm" style="white-space:nowrap">⚡ Blagajna</a>
+        <a href="{% url 'pos:quick_pos' session.terminal.pk %}" class="btn btn-gold btn-sm text-nowrap">⚡ Blagajna</a>
         {% endif %}
       </div>
       <div class="sh-stats">
@@ -108,8 +108,8 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <input type="text" name="table_number" placeholder="{% trans "Stol / zona (opcionalno)" %}">
       <input type="text" name="note" placeholder="{% trans "Napomena" %}">
       <button type="submit" id="newReceiptBtn" class="btn btn-gold btn-sm btn-new-receipt">{% trans "+ Novi bon" %}</button>
-      <a href="{% url 'pos:cash_deposit' session.id %}" class="btn btn-sm"
-         style="background:#1e3a1e;color:#22c55e;border:1px solid #22c55e" title="Polog/Isplata gotovine">
+      <a href="{% url 'pos:cash_deposit' session.id %}" class="btn btn-sm fx-text-green"
+         style="background:#1e3a1e;border:1px solid #22c55e" title="Polog/Isplata gotovine">
         <i class="fas fa-coins"></i> Polog
       </a>
     </form>
@@ -118,23 +118,23 @@ button[disabled]{opacity:.5;cursor:not-allowed}
     {% if open_receipts %}
     <div class="stitle">{% trans "Otvoreni bonovi" %}</div>
     {% for r in open_receipts %}
-    <div class="rc" style="display:flex;align-items:center;gap:10px">
-      <a href="{% url 'pos:receipt_detail' r.id %}" style="flex:1;text-decoration:none;min-width:0">
-        <div class="rc-num">Bon #{{ r.receipt_number }}{% if r.table_number %} <span style="color:var(--muted);font-weight:400;font-size:.8rem">| Stol {{ r.table_number }}</span>{% endif %}</div>
-        <div class="rc-meta">{{ r.created_at|date:"H:i" }} &mdash; {{ r.items.count }} stavki &mdash; <span style="color:var(--gold);font-weight:700">&euro;{{ r.total|floatformat:2 }}</span></div>
+    <div class="rc d-flex fx-gap-3 align-items-center">
+      <a href="{% url 'pos:receipt_detail' r.id %}" class="fx-no-underline fx-flex-1 min-w-0">
+        <div class="rc-num">Bon #{{ r.receipt_number }}{% if r.table_number %} <span class="fx-fw-normal fx-fs-compact fx-text-muted">| Stol {{ r.table_number }}</span>{% endif %}</div>
+        <div class="rc-meta">{{ r.created_at|date:"H:i" }} &mdash; {{ r.items.count }} stavki &mdash; <span class="fx-fw-bold fx-text-gold">&euro;{{ r.total|floatformat:2 }}</span></div>
       </a>
-      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+      <div class="d-flex fx-gap-2 align-items-center flex-shrink-0">
         <a href="{% url 'pos:receipt_detail' r.id %}"
-           style="display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:6px;font-size:.75rem;font-weight:700;background:var(--dark);color:var(--muted);border:1px solid var(--border);text-decoration:none">
+           class="fx-rounded-sm fx-fs-caption fx-fw-bold fx-no-underline d-inline-flex align-items-center fx-text-muted fx-bg-dark fx-b" style="gap:5px;padding:6px 11px">
           <i class="fas fa-edit"></i> Detalji
         </a>
-        <form method="post" action="{% url 'pos:process_payment' r.id %}" style="margin:0"
+        <form method="post" action="{% url 'pos:process_payment' r.id %}" class="fx-m-0"
               onsubmit="return confirm('Naplatiti Bon #{{ r.receipt_number }} gotovinom?')">
           {% csrf_token %}
           <input type="hidden" name="payment_method" value="CASH">
           <input type="hidden" name="amount_paid" value="{{ r.total|floatformat:2 }}">
           <button type="submit"
-                  style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:6px;font-size:.75rem;font-weight:700;background:#16a34a;color:#fff;border:none;cursor:pointer">
+                  class="fx-rounded-sm fx-fs-caption fx-fw-bold fx-text-white fx-border-none fx-pointer d-inline-flex align-items-center" style="gap:5px;padding:6px 14px;background:#16a34a">
             <i class="fas fa-check"></i> Naplati
           </button>
         </form>
@@ -149,9 +149,9 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       <thead><tr><th>{% trans "Bon" %}</th><th>{% trans "Naplaćen u" %}</th><th>{% trans "Iznos" %}</th></tr></thead>
       <tbody>{% for r in paid_receipts %}
       <tr>
-        <td><a href="{% url 'pos:receipt_detail' r.id %}" style="color:var(--gold)">#{{ r.receipt_number }}</a></td>
+        <td><a href="{% url 'pos:receipt_detail' r.id %}" class="fx-text-gold">#{{ r.receipt_number }}</a></td>
         <td>{{ r.paid_at|date:"H:i" }}</td>
-        <td style="color:var(--green)">&euro;{{ r.total|floatformat:2 }}</td>
+        <td class="fx-text-green">&euro;{{ r.total|floatformat:2 }}</td>
       </tr>
       {% endfor %}</tbody>
     </table>
@@ -161,11 +161,11 @@ button[disabled]{opacity:.5;cursor:not-allowed}
   <!-- RIGHT: Summary + Close panel -->
   <div class="sl-right">
     <div class="sp">
-      <div style="font-weight:700;margin-bottom:.875rem">{% trans "Pregled smjene" %}</div>
+      <div class="fx-fw-bold" style="margin-bottom:.875rem">{% trans "Pregled smjene" %}</div>
       <div class="sp-row"><div class="sp-lbl">{% trans "Početna gotovina" %}</div><div class="sp-val">&euro;{{ session.opening_cash|floatformat:2 }}</div></div>
       <div class="sp-row"><div class="sp-lbl">{% trans "Gotovinska prodaja" %}</div><div class="sp-val">&euro;{{ session.total_cash_sales|floatformat:2 }}</div></div>
-      <div class="sp-row sp-total"><div class="sp-lbl">{% trans "Očekivana gotovina" %}</div><div class="sp-val" style="color:var(--gold)">&euro;{{ session.expected_closing_cash|floatformat:2 }}</div></div>
-      <div class="sp-row" style="margin-top:.5rem"><div class="sp-lbl">{% trans "Ukupan prihod" %}</div><div class="sp-val" style="color:var(--green)">&euro;{{ session.total_sales|floatformat:2 }}</div></div>
+      <div class="sp-row sp-total"><div class="sp-lbl">{% trans "Očekivana gotovina" %}</div><div class="sp-val fx-text-gold">&euro;{{ session.expected_closing_cash|floatformat:2 }}</div></div>
+      <div class="sp-row mt-2"><div class="sp-lbl">{% trans "Ukupan prihod" %}</div><div class="sp-val fx-text-green">&euro;{{ session.total_sales|floatformat:2 }}</div></div>
     </div>
 
     {% if session.status == "open" %}
@@ -205,14 +205,14 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       </div>
 
       {% if confirm_empty_close %}
-      <div style="background:rgba(245,158,11,.1);border:1px solid #f59e0b44;border-radius:8px;padding:12px;margin-bottom:12px;text-align:center">
-        <div style="color:#f59e0b;font-weight:700;font-size:.9rem;margin-bottom:6px">⚠ Smjena nema bonova</div>
-        <div style="color:var(--muted);font-size:.8rem;margin-bottom:10px">Zatvarate praznu smjenu. Jeste li sigurni?</div>
-        <form method="post" action="{% url 'pos:close_session' session.id %}" style="display:inline">
+      <div class="fx-rounded text-center mb-3 fx-p-12" style="background:rgba(245,158,11,.1);border:1px solid #f59e0b44">
+        <div class="fx-text-amber fx-fw-bold fx-fs-md mb-1">⚠ Smjena nema bonova</div>
+        <div class="fx-fs-compact fx-text-muted mb-2">Zatvarate praznu smjenu. Jeste li sigurni?</div>
+        <form method="post" action="{% url 'pos:close_session' session.id %}" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="closing_cash" value="0">
           <input type="hidden" name="force_close" value="1">
-          <button type="submit" class="btn btn-red" style="padding:10px 24px;font-size:.9rem">Da, zatvori praznu smjenu</button>
+          <button type="submit" class="btn btn-red fx-fs-md" style="padding:10px 24px">Da, zatvori praznu smjenu</button>
         </form>
       </div>
       {% endif %}
@@ -230,18 +230,18 @@ button[disabled]{opacity:.5;cursor:not-allowed}
       </form>
 
       <!-- Detektiv Box -->
-      <div id="detective-box" style="display:none;margin-top:1rem;padding:1rem;border-radius:8px;border:2px dashed #ef4444;background:rgba(239,68,68,.1)">
-        <h3 id="debalans-title" style="margin:0 0 .5rem;color:#ef4444;font-size:.95rem;font-weight:700"></h3>
-        <div id="debalans-amount" style="font-size:1.75rem;font-weight:700;margin-bottom:.75rem;color:#ef4444"></div>
-        <p style="color:#e2e8f0;font-size:.82rem;margin:.5rem 0 .25rem">Mogudi razlozi:</p>
-        <ul style="color:#94a3b8;font-size:.8rem;padding-left:1.2rem;margin-bottom:1rem">
+      <div id="detective-box" class="fx-hidden fx-rounded mt-3 fx-p-4" style="border:2px dashed #ef4444;background:rgba(239,68,68,.1)">
+        <h3 id="debalans-title" class="fx-text-red fx-fs-normal fx-fw-bold" style="margin:0 0 .5rem"></h3>
+        <div id="debalans-amount" class="fx-fw-bold fx-text-red fx-mb-4" style="font-size:1.75rem"></div>
+        <p class="fx-text-body fx-fs-note" style="margin:.5rem 0 .25rem">Mogudi razlozi:</p>
+        <ul class="fx-text-muted fx-fs-compact mb-3" style="padding-left:1.2rem">
           <li>Krivo vracen kusur.</li>
           <li>Racun placen karticom, a oznacen kao Gotovina.</li>
-          <li id="debalans-hint" style="color:var(--gold);font-weight:600"></li>
+          <li id="debalans-hint" class="fx-fw-semibold fx-text-gold"></li>
         </ul>
-        <div style="display:flex;gap:.5rem">
-          <button type="button" class="btn btn-ghost" style="flex:1;padding:.5rem" onclick="resetDebalans()">Prebrojat cu ponovo</button>
-          <button type="button" id="forceCloseBtn" class="btn btn-red" style="flex:1;padding:.5rem" onclick="forceClose()">Potvrdi i zatvori</button>
+        <div class="d-flex fx-gap-2">
+          <button type="button" class="btn btn-ghost fx-flex-1 fx-p-2" onclick="resetDebalans()">Prebrojat cu ponovo</button>
+          <button type="button" id="forceCloseBtn" class="btn btn-red fx-flex-1 fx-p-2" onclick="forceClose()">Potvrdi i zatvori</button>
         </div>
       </div>
     </div>
@@ -249,15 +249,13 @@ button[disabled]{opacity:.5;cursor:not-allowed}
     {% else %}
     <div class="close-panel">
       {% if session.status == "z_done" %}
-      <span class="badge" style="background:rgba(201,168,76,.15);color:var(--gold)">{% trans "Z-IZVJEŠTAJ GENERIRAN" %}</span>
+      <span class="badge fx-text-gold" style="background:rgba(201,168,76,.15)">{% trans "Z-IZVJEŠTAJ GENERIRAN" %}</span>
       {% else %}
       <span class="badge badge-closed">{% trans "SMJENA ZATVORENA" %}</span>
       {% endif %}
-      <div style="margin-top:.5rem;font-size:.8rem;color:var(--muted)">{{ session.closed_at|date:"d.m.Y H:i" }}</div>
-      <a href="{% url 'pos:session_zreport' session.id %}" class="btn btn-gold"
-         style="margin-top:.75rem;width:100%;justify-content:center" target="_blank">{% trans "&#128221; Z-report PDF" %}</a>
-      <a href="{% url 'pos:terminal_detail' session.terminal_id %}" class="btn btn-ghost"
-         style="margin-top:.5rem;width:100%;justify-content:center">{% trans "&larr; Terminal" %}</a>
+      <div class="fx-fs-compact mt-2 fx-text-muted">{{ session.closed_at|date:"d.m.Y H:i" }}</div>
+      <a href="{% url 'pos:session_zreport' session.id %}" class="btn btn-gold fx-w-full justify-content-center fx-mt-4" target="_blank">{% trans "&#128221; Z-report PDF" %}</a>
+      <a href="{% url 'pos:terminal_detail' session.terminal_id %}" class="btn btn-ghost fx-w-full mt-2 justify-content-center">{% trans "&larr; Terminal" %}</a>
     </div>
     {% endif %}
   </div>

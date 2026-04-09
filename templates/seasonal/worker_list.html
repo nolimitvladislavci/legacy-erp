@@ -31,12 +31,12 @@
               <td><strong>{{ w.full_name }}</strong></td>
               <td class="font-monospace text-muted">{{ w.oib }}</td>
               <td class="text-muted">{{ w.phone|default:"—" }}</td>
-              <td><span class="badge bg-secondary">{{ w.contracts.count }}</span></td>
+              <td><span class="fenix-badge fenix-badge-muted">{{ w.contracts.count }}</span></td>
               <td>
                 {% if w.is_active %}
-                  <span class="badge bg-success">Aktivan</span>
+                  <span class="fenix-badge fenix-badge-success">Aktivan</span>
                 {% else %}
-                  <span class="badge bg-secondary">Neaktivan</span>
+                  <span class="fenix-badge fenix-badge-muted">Neaktivan</span>
                 {% endif %}
               </td>
               <td class="text-end">

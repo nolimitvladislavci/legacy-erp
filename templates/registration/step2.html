@@ -23,7 +23,7 @@
   <!-- ═══ DRŽAVA (gornji red, setira jezik sesije) ═══ -->
   <div class="reg-field">
     <label>{% trans "Država" %}</label>
-    <div style="display:flex;gap:1rem;padding-top:.5rem;flex-wrap:wrap">
+    <div class="d-flex fx-flex-wrap fx-gap-4" style="padding-top:.5rem">
       <label class="country-opt">
         <input type="radio" name="country" value="HR" {% if data.country == 'HR' or not data.country %}checked{% endif %}>
         <span class="country-flag">🇭🇷</span> Hrvatska
@@ -47,7 +47,7 @@
   <div class="reg-field">
     <label>{% trans "Naziv tvrtke" %} *</label>
     <input type="text" name="name" id="nameInput" value="{{ data.name }}" class="reg-input" placeholder="{% trans 'Primjer d.o.o.' %}" required autocomplete="organization">
-    <div id="nameHints" style="margin-top:4px;display:none;max-height:120px;overflow-y:auto;border:1px solid #333;border-radius:6px;background:#111"></div>
+    <div id="nameHints" class="fx-hidden fx-rounded-sm fx-bg-card mt-1 fx-scroll-y" style="max-height:120px;border:1px solid #333"></div>
     {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
   </div>
 
@@ -55,9 +55,9 @@
   <div class="reg-field">
     <label id="oibLabel">{% trans "OIB / Porezni broj" %} *</label>
     <input type="text" name="oib" id="oib-input" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-      <div id="oib-status" style="font-size:0.85rem;display:none"></div>
-      <a href="#" onclick="showOibHelp();return false" style="font-size:.8rem;color:var(--gold);text-decoration:none">
+    <div class="d-flex justify-content-between align-items-center mt-1">
+      <div id="oib-status" class="fx-fs-base fx-hidden"></div>
+      <a href="#" onclick="showOibHelp();return false" class="fx-fs-compact fx-no-underline fx-text-gold">
         {% trans "Ne znam OIB?" %} →
       </a>
     </div>
@@ -65,36 +65,36 @@
   </div>
 
   <!-- ═══ OIB HELP MODAL ═══ -->
-  <div id="oibModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center">
-    <div style="background:#111;border:1px solid var(--gold);border-radius:12px;padding:24px;max-width:460px;width:90%;position:relative">
-      <button onclick="hideOibHelp()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:#666;font-size:20px;cursor:pointer">&times;</button>
-      <h3 style="color:var(--gold);margin-bottom:12px">{% trans "Kako pronaći OIB?" %}</h3>
+  <div id="oibModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000">
+    <div class="fx-bg-card fx-rounded fx-relative" style="border:1px solid var(--gold);padding:24px;max-width:460px;width:90%">
+      <button onclick="hideOibHelp()" class="fx-border-none fx-text-dim fx-pointer fx-bg-transparent" style="position:absolute;top:10px;right:14px;font-size:20px">&times;</button>
+      <h3 class="fx-text-gold mb-3">{% trans "Kako pronaći OIB?" %}</h3>
 
       <div id="oibHelpHR" class="oib-help-section">
-        <p style="font-size:.9rem;color:#ccc;line-height:1.6">
+        <p class="fx-fs-md fx-text-muted fx-lh-normal">
           <strong>Hrvatska:</strong> OIB je Osobni identifikacijski broj (11 znamenki).<br>
           Možete ga pronaći na:
         </p>
-        <ul style="font-size:.85rem;color:#aaa;line-height:1.8;padding-left:18px">
-          <li><a href="https://e-porezna.porezna-uprava.hr" target="_blank" rel="noopener" style="color:var(--gold)">ePorezna</a> — unesite naziv tvrtke</li>
-          <li><a href="https://sudreg.pravosudje.hr" target="_blank" rel="noopener" style="color:var(--gold)">Sudski registar</a> — pretraga po nazivu</li>
+        <ul class="fx-fs-base fx-text-muted" style="line-height:1.8;padding-left:18px">
+          <li><a href="https://e-porezna.porezna-uprava.hr" target="_blank" rel="noopener" class="fx-text-gold">ePorezna</a> — unesite naziv tvrtke</li>
+          <li><a href="https://sudreg.pravosudje.hr" target="_blank" rel="noopener" class="fx-text-gold">Sudski registar</a> — pretraga po nazivu</li>
           <li>Izvod iz Obrtnog registra</li>
           <li>Na svakom računu koji ste ikad primili</li>
         </ul>
       </div>
-      <div id="oibHelpDE" class="oib-help-section" style="display:none">
-        <p style="font-size:.9rem;color:#ccc;line-height:1.6">
+      <div id="oibHelpDE" class="oib-help-section fx-hidden">
+        <p class="fx-fs-md fx-text-muted fx-lh-normal">
           <strong>Deutschland/Österreich:</strong> Steuernummer oder USt-IdNr.<br>
         </p>
-        <ul style="font-size:.85rem;color:#aaa;line-height:1.8;padding-left:18px">
-          <li><a href="https://www.unternehmensregister.de" target="_blank" rel="noopener" style="color:var(--gold)">Unternehmensregister</a></li>
-          <li><a href="https://ec.europa.eu/taxation_customs/vies/" target="_blank" rel="noopener" style="color:var(--gold)">EU VIES</a> — USt-IdNr Prüfung</li>
+        <ul class="fx-fs-base fx-text-muted" style="line-height:1.8;padding-left:18px">
+          <li><a href="https://www.unternehmensregister.de" target="_blank" rel="noopener" class="fx-text-gold">Unternehmensregister</a></li>
+          <li><a href="https://ec.europa.eu/taxation_customs/vies/" target="_blank" rel="noopener" class="fx-text-gold">EU VIES</a> — USt-IdNr Prüfung</li>
           <li>Gewerbeanmeldung / Steuerbescheid</li>
         </ul>
       </div>
 
-      <div style="margin-top:16px;text-align:center">
-        <button onclick="hideOibHelp()" style="padding:8px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer">
+      <div class="text-center mt-3">
+        <button onclick="hideOibHelp()" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-bg-gold" style="padding:8px 24px">
           {% trans "Razumijem" %}
         </button>
       </div>
@@ -141,10 +141,10 @@
 .country-opt input { display:none; }
 .country-flag { font-size:1.2rem; }
 .name-hint-item {
-  padding:8px 12px; cursor:pointer; font-size:.88rem; color:#ccc;
+  padding:8px 12px; cursor:pointer; font-size:.88rem; color:var(--text-muted);
   border-bottom:1px solid #222; transition: background .15s;
 }
-.name-hint-item:hover { background:#1a1a1a; color:var(--gold); }
+.name-hint-item:hover { background:var(--bg-card); color:var(--gold); }
 .name-hint-item:last-child { border-bottom:none; }
 </style>
 
@@ -223,7 +223,7 @@ document.getElementById('oibModal').addEventListener('click', function(e) {
           if (d.results && d.results.length > 0) {
             hintsEl.innerHTML = d.results.map(function(r) {
               return '<div class="name-hint-item" data-oib="' + (r.oib||'') + '" data-name="' + r.name + '" data-addr="' + (r.address||'') + '" data-city="' + (r.city||'') + '" data-zip="' + (r.zip||'') + '">'
-                + r.name + (r.oib ? ' <span style="color:#666;font-size:.75rem">(' + r.oib + ')</span>' : '')
+                + r.name + (r.oib ? ' <span class="fx-text-dim fx-fs-caption">(' + r.oib + ')</span>' : '')
                 + '</div>';
             }).join('');
             hintsEl.style.display = 'block';

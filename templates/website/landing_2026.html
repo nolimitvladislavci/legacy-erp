@@ -15,14 +15,14 @@
     a{color:inherit;text-decoration:none}
     nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(13,15,17,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
     .nav-logo{font-weight:800;font-size:1.1rem;color:var(--gold)}.nav-logo span{color:var(--text)}
-    .nav-cta{padding:.6rem 1.25rem;background:var(--gold);color:#000;font-weight:700;border-radius:8px;font-size:.9rem;transition:opacity .2s}.nav-cta:hover{opacity:.88}
+    .nav-cta{padding:.6rem 1.25rem;background:var(--gold);color:var(--text);font-weight:700;border-radius:8px;font-size:.9rem;transition:opacity .2s}.nav-cta:hover{opacity:.88}
     .hero{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 1.5rem;background:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(201,168,76,.12) 0%,transparent 70%)}
     .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:99px;font-size:.8rem;color:var(--gold);margin-bottom:1.5rem}
     .hero h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;line-height:1.1;margin-bottom:1.25rem}
     .hero h1 .gold{color:var(--gold)}
     .hero-sub{font-size:clamp(1rem,2.5vw,1.35rem);color:var(--text-muted);max-width:600px;margin-bottom:2.5rem}
     .hero-cta-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:3rem}
-    .btn-primary{padding:.9rem 2rem;background:var(--gold);color:#000;font-weight:700;font-size:1.05rem;border-radius:10px;transition:opacity .2s}.btn-primary:hover{opacity:.88}
+    .btn-primary{padding:.9rem 2rem;background:var(--gold);color:var(--text);font-weight:700;font-size:1.05rem;border-radius:10px;transition:opacity .2s}.btn-primary:hover{opacity:.88}
     .btn-ghost{padding:.9rem 2rem;border:1.5px solid var(--border);color:var(--text-muted);font-size:1rem;border-radius:10px;transition:border-color .2s,color .2s}.btn-ghost:hover{border-color:var(--gold);color:var(--text)}
     .hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap;justify-content:center}
     .hero-stat strong{display:block;font-size:1.75rem;font-weight:800;color:var(--gold)}.hero-stat span{font-size:.8rem;color:var(--text-muted)}
@@ -44,7 +44,7 @@
     .price-card p{font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem}
     .price-features{list-style:none;font-size:.88rem;color:var(--text-muted);margin-bottom:1.5rem}
     .price-features li{padding:.3rem 0}.price-features li::before{content:"✓ ";color:var(--gold)}
-    .btn-plan{display:block;text-align:center;padding:.75rem;border-radius:8px;font-weight:700;font-size:.95rem;background:var(--gold);color:#000;transition:opacity .2s}.btn-plan:hover{opacity:.88}
+    .btn-plan{display:block;text-align:center;padding:.75rem;border-radius:8px;font-weight:700;font-size:.95rem;background:var(--gold);color:var(--text);transition:opacity .2s}.btn-plan:hover{opacity:.88}
     .btn-plan.outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}.btn-plan.outline:hover{border-color:var(--gold)}
     .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
     .testimonial{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
@@ -63,7 +63,7 @@
 </head>
 <body>
 <!-- WCAG 2.4.1 Skip link -->
-<a href="#main-content" class="wcag-skip-link" style="position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:#c9a84c;color:#0a0a0a;padding:12px 24px;font-size:16px;font-weight:700;text-decoration:none;z-index:99999;border-radius:0 0 8px 8px;transition:top 0.2s;">Preskoči na sadržaj</a>
+<a href="#main-content" class="wcag-skip-link fx-bg-gold fx-text-dark fx-fw-bold fx-no-underline" style="position:absolute;top:-100%;left:50%;transform:translateX(-50%);padding:12px 24px;font-size:16px;z-index:99999;border-radius:0 0 8px 8px;transition:top 0.2s">Preskoči na sadržaj</a>
 <style>
 .wcag-skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px;}
 *:focus-visible{outline:3px solid #c9a84c!important;outline-offset:2px!important;}
@@ -107,7 +107,7 @@
 </section>
 
 <section id="cijene" style="background:var(--surface-2);max-width:100%;padding:5rem 1.5rem">
-  <div style="max-width:1100px;margin:0 auto">
+  <div class="fx-m-auto" style="max-width:1100px">
     <div class="section-label">Transparentne cijene</div>
     <h2 class="section-title">Bez skrivenih naknada.</h2>
     <p class="section-sub">Cijena ne raste s brojem korisnika. Jedna firma, jedan iznos.</p>
@@ -116,7 +116,7 @@
         <div class="price-tag"><strong>0 EUR</strong></div>
         <h3>Paušalac</h3><p>Za paušalne obrtnike. Besplatno zauvijek.</p>
         <ul class="price-features"><li>POS + fiskalizacija</li><li>PO-SD obrazac</li><li>Tax Wizard</li><li>1 korisnik</li></ul>
-        <a href="/pocni/?plan=pausalac&profile=obrtnik" class="btn-plan outline" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#22c55e">Besplatno →</a>
+        <a href="/pocni/?plan=pausalac&profile=obrtnik" class="btn-plan outline fx-text-green" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3)">Besplatno →</a>
       </div>
       <div class="price-card">
         <div class="price-tag"><strong>9 EUR</strong><span>/mj</span></div>
@@ -143,8 +143,8 @@
         <a href="/pocni/?plan=enterprise" class="btn-plan outline">Kontaktirajte nas</a>
       </div>
     </div>
-    <div style="text-align:center;margin-top:1.5rem">
-      <a href="/hr/pricing/" style="color:var(--gold);font-weight:700;font-size:.9rem;text-decoration:none">Svi planovi (15) — udruge, rental, računovođe, komunalno →</a>
+    <div class="text-center fx-mt-6">
+      <a href="/hr/pricing/" class="fx-fw-bold fx-fs-md fx-no-underline fx-text-gold">Svi planovi (15) — udruge, rental, računovođe, komunalno →</a>
     </div>
   </div>
 </section>
@@ -160,7 +160,7 @@
 </section>
 
 <section style="background:var(--surface-2);max-width:100%;padding:5rem 1.5rem">
-  <div style="max-width:800px;margin:0 auto">
+  <div class="fx-m-auto fx-max-800">
     <div class="section-label">Česta pitanja</div>
     <h2 class="section-title">Sve što vas zanima.</h2>
     <div class="faq-list">
@@ -173,17 +173,17 @@
   </div>
 </section>
 
-<section style="text-align:center;padding:6rem 1.5rem">
-  <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:800;margin-bottom:1rem">Počnite danas.<br><span style="color:var(--gold)">14 dana besplatno.</span></h2>
-  <p style="color:var(--text-muted);margin-bottom:2rem;font-size:1.1rem">Bez kreditne kartice. Bez ugovora.</p>
+<section class="text-center" style="padding:6rem 1.5rem">
+  <h2 class="fx-fw-800 mb-3" style="font-size:clamp(2rem,5vw,3.5rem)">Počnite danas.<br><span class="fx-text-gold">14 dana besplatno.</span></h2>
+  <p class="fx-fs-xl fx-text-muted" style="margin-bottom:2rem">Bez kreditne kartice. Bez ugovora.</p>
   <a href="/pocni/" class="btn-primary" style="font-size:1.15rem;padding:1rem 2.5rem">Kreirajte račun →</a>
 </section>
 
 <footer>
   <div class="footer-logo">LIMIT Connect</div>
   <p>Konjik d.o.o. · Čepin, Hrvatska · <a href="mailto:info@limit-connect.com">info@limit-connect.com</a></p>
-  <p style="margin-top:.5rem"><a href="/hr/gdpr/" style="color:var(--text-muted);margin:0 .75rem">GDPR</a><a href="/hr/tos/" style="color:var(--text-muted);margin:0 .75rem">Uvjeti</a><a href="/hr/pricing/" style="color:var(--text-muted);margin:0 .75rem">Cijene</a></p>
-  <p style="margin-top:.75rem;font-size:.75rem;color:#4a5568">© 2026 Konjik d.o.o. Sva prava pridržana.</p>
+  <p class="mt-2"><a href="/hr/gdpr/" class="fx-text-muted" style="margin:0 .75rem">GDPR</a><a href="/hr/tos/" class="fx-text-muted" style="margin:0 .75rem">Uvjeti</a><a href="/hr/pricing/" class="fx-text-muted" style="margin:0 .75rem">Cijene</a></p>
+  <p class="fx-fs-caption fx-mt-4" style="color:#4a5568">© 2026 Konjik d.o.o. Sva prava pridržana.</p>
 </footer>
 
 </main>

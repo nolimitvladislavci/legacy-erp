@@ -34,21 +34,21 @@
       <tr>
         <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="text-white text-decoration-none">{{ book.name }}</a></td>
         <td class="text-muted">{% if book.book_meta %}{{ book.book_meta.author }}{% endif %}</td>
-        <td class="text-muted" style="font-size:.85rem">{% if book.book_meta %}{{ book.book_meta.isbn }}{% endif %}</td>
-        <td class="text-muted" style="font-size:.85rem">{% if book.book_meta %}{{ book.book_meta.shelf_location }}{% endif %}</td>
+        <td class="text-muted fx-fs-base">{% if book.book_meta %}{{ book.book_meta.isbn }}{% endif %}</td>
+        <td class="text-muted fx-fs-base">{% if book.book_meta %}{{ book.book_meta.shelf_location }}{% endif %}</td>
         <td>
           {% if book.book_meta and book.book_meta.is_reference %}
-          <span style="color:#f59e0b;font-size:.85rem"><i class="fas fa-lock me-1"></i>Referentna</span>
+          <span class="fx-text-amber fx-fs-base"><i class="fas fa-lock me-1"></i>Referentna</span>
           {% elif book.is_loaned %}
-          <span style="color:#ef4444;font-size:.85rem"><i class="fas fa-times-circle me-1"></i>Posuđena</span>
+          <span class="fx-text-red fx-fs-base"><i class="fas fa-times-circle me-1"></i>Posuđena</span>
           {% else %}
-          <span style="color:#22c55e;font-size:.85rem"><i class="fas fa-check-circle me-1"></i>Dostupna</span>
+          <span class="fx-text-green fx-fs-base"><i class="fas fa-check-circle me-1"></i>Dostupna</span>
           {% endif %}
         </td>
-        <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">Detalji</a></td>
+        <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="btn btn-sm btn-outline-light fx-fs-caption">Detalji</a></td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-muted text-center py-4">Nema knjiga u katalogu. <a href="{% url 'knjiznica:catalog_create' %}" style="color:#c8a24e">Dodaj prvu →</a></td></tr>
+      <tr><td colspan="6" class="text-muted text-center py-4">Nema knjiga u katalogu. <a href="{% url 'knjiznica:catalog_create' %}" class="fx-text-gold">Dodaj prvu →</a></td></tr>
       {% endfor %}
     </tbody>
   </table>

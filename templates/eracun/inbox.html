@@ -57,7 +57,7 @@
     <div class="card">
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead >
                     <tr>
                         <th>Broj</th>
                         <th>Dobavljač</th>
@@ -79,9 +79,9 @@
                         <td class="text-end fw-bold">{{ er.total }} {{ er.currency }}</td>
                         <td>
                             {% if er.is_booked %}
-                                <span class="badge bg-success">Proknjiženo</span>
+                                <span class="fenix-badge fenix-badge-success">Proknjiženo</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark">Čeka</span>
+                                <span class="fenix-badge fenix-badge-warning">Čeka</span>
                             {% endif %}
                         </td>
                         <td><small>{{ er.received_at|date:"d.m.Y H:i" }}</small></td>

@@ -3,45 +3,28 @@
 {% block title %}Komitenti — KS LIMIT{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 style="color:var(--gold)"><i class="fas fa-users-cog"></i> Komitenti — KS LIMIT</h2>
+  <h2 class="fx-text-gold"><i class="fas fa-users-cog"></i> Komitenti — KS LIMIT</h2>
   <a href="{% url 'companies:komitent_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Novi komitent</a>
 </div>
 
 <!-- KPI -->
 <div class="row g-2 mb-3">
-  <div class="col"><div class="stat-card text-center"><div style="font-size:2rem;font-weight:800">{{ kpi.total }}</div><small class="text-muted">Ukupno</small></div></div>
-  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #22c55e"><div style="font-size:2rem;font-weight:800;color:#22c55e">{{ kpi.active }}</div><small class="text-muted">Aktivnih</small></div></div>
-  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #3b82f6"><div style="font-size:2rem;font-weight:800;color:#3b82f6">{{ kpi.onboarding }}</div><small class="text-muted">U prijemu</small></div></div>
-  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #f59e0b"><div style="font-size:2rem;font-weight:800;color:#f59e0b">{{ kpi.notice }}</div><small class="text-muted">U otkazu</small></div></div>
-  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #888"><div style="font-size:2rem;font-weight:800;color:#888">{{ kpi.archived }}</div><small class="text-muted">Arhivirano</small></div></div>
-  <div class="col"><div class="stat-card text-center" style="border-left:3px solid var(--gold)"><div style="font-size:2rem;font-weight:800;color:var(--gold)">{{ kpi.mrr }}€</div><small class="text-muted">MRR</small></div></div>
+  <div class="col"><div class="stat-card text-center"><div class="fx-fs-icon fx-fw-800">{{ kpi.total }}</div><small class="text-muted">Ukupno</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #22c55e"><div class="fx-fs-icon fx-fw-800 fx-text-green">{{ kpi.active }}</div><small class="text-muted">Aktivnih</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #3b82f6"><div class="fx-fs-icon fx-fw-800 fx-text-blue">{{ kpi.onboarding }}</div><small class="text-muted">U prijemu</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #f59e0b"><div class="fx-fs-icon fx-fw-800 fx-text-amber">{{ kpi.notice }}</div><small class="text-muted">U otkazu</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #888"><div class="fx-fs-icon fx-fw-800 fx-text-muted">{{ kpi.archived }}</div><small class="text-muted">Arhivirano</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid var(--gold)"><div class="fx-fs-icon fx-fw-800 fx-text-gold">{{ kpi.mrr }}€</div><small class="text-muted">MRR</small></div></div>
 </div>
 
 <!-- Filteri -->
-<div class="stat-card mb-3">
+<div class="fenix-filters">
   <form method="get" class="d-flex gap-2 align-items-end flex-wrap">
     <div>
       <label class="form-label small mb-0">Status</label>
@@ -62,7 +45,7 @@
         <option value="strano" {% if category_filter == "strano" %}selected{% endif %}>Strano</option>
       </select>
     </div>
-    <div style="flex:1">
+    <div class="fx-flex-1">
       <label class="form-label small mb-0">Pretraga</label>
       <input type="text" name="q" value="{{ search }}" class="form-control form-control-sm" placeholder="Ime, OIB, kontakt...">
     </div>
@@ -72,9 +55,9 @@
 </div>
 
 <!-- Lista -->
-<div class="stat-card" style="padding:0;overflow:hidden">
+<div class="fenix-stat fx-p-0 fx-overflow-hidden">
 <div class="table-responsive">
-<table class="table table-hover mb-0" style="font-size:.82rem">
+<table class="table table-hover mb-0 fx-fs-note">
 <thead><tr>
   <th style="width:30px"></th>
   <th>Firma</th>
@@ -93,18 +76,18 @@
 {% for item in profiles %}
 <tr style="{% if item.profile.status == 'archived' %}opacity:.5{% elif item.profile.status == 'notice' %}background:rgba(245,158,11,.05){% elif item.profile.status == 'blocked' %}background:rgba(220,38,38,.05){% endif %}">
   <td>
-    {% if item.profile.synesis_imported %}<i class="fas fa-database" title="Synesis import" style="color:var(--gold);font-size:.7rem"></i>{% endif %}
+    {% if item.profile.synesis_imported %}<i class="fas fa-database fx-fs-sm fx-text-gold" title="Synesis import"></i>{% endif %}
   </td>
-  <td><a href="{% url 'companies:komitent_detail' item.profile.pk %}" style="font-weight:600">{{ item.company.name }}</a></td>
-  <td><code style="font-size:.75rem">{{ item.company.oib }}</code></td>
+  <td><a href="{% url 'companies:komitent_detail' item.profile.pk %}" class="fx-fw-semibold">{{ item.company.name }}</a></td>
+  <td><code class="fx-fs-caption">{{ item.company.oib }}</code></td>
   <td>
-    {% if item.profile.status == 'active' %}<span class="badge bg-success">Aktivan</span>
-    {% elif item.profile.status == 'onboarding' %}<span class="badge bg-info">U prijemu</span>
-    {% elif item.profile.status == 'notice' %}<span class="badge bg-warning text-dark">U otkazu</span>
-    {% elif item.profile.status == 'archived' %}<span class="badge bg-secondary">Arhiviran</span>
-    {% elif item.profile.status == 'paused' %}<span class="badge bg-dark">Pauziran</span>
-    {% elif item.profile.status == 'blocked' %}<span class="badge bg-danger">Blokiran</span>
-    {% elif item.profile.status == 'lead' %}<span class="badge bg-primary">Lead</span>
+    {% if item.profile.status == 'active' %}<span class="fenix-badge fenix-badge-success">Aktivan</span>
+    {% elif item.profile.status == 'onboarding' %}<span class="fenix-badge fenix-badge-info">U prijemu</span>
+    {% elif item.profile.status == 'notice' %}<span class="fenix-badge fenix-badge-warning">U otkazu</span>
+    {% elif item.profile.status == 'archived' %}<span class="fenix-badge fenix-badge-muted">Arhiviran</span>
+    {% elif item.profile.status == 'paused' %}<span class="fenix-badge fenix-badge-muted">Pauziran</span>
+    {% elif item.profile.status == 'blocked' %}<span class="fenix-badge fenix-badge-danger">Blokiran</span>
+    {% elif item.profile.status == 'lead' %}<span class="fenix-badge fenix-badge-info">Lead</span>
     {% endif %}
   </td>
   <td>{{ item.profile.get_category_display|default:"-" }}</td>

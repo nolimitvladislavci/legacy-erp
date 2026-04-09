@@ -8,7 +8,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Barlow:wght@400;500&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #fff; font-family: 'Barlow', sans-serif; }
+body { background:var(--bg-card); font-family: 'Barlow', sans-serif; }
 @media print {
     @page { size: 105mm 148mm; margin: 0; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -16,14 +16,14 @@ body { background: #fff; font-family: 'Barlow', sans-serif; }
 .card {
     width: 105mm; height: 148mm; margin: auto;
     background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
-    color: #fff; display: flex; flex-direction: column;
+    color:var(--white); display: flex; flex-direction: column;
     align-items: center; justify-content: center; padding: 8mm;
     border: 2px solid var(--gold,#c9a84c);
 }
 .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold,#c9a84c); font-weight: 700; margin-bottom: 4mm; letter-spacing: 1px; }
-.company-name { font-size: 14px; color: #ccc; margin-bottom: 6mm; }
+.company-name { font-size: 14px; color:var(--text-muted); margin-bottom: 6mm; }
 .qr-frame {
-    width: 55mm; height: 55mm; background: #fff; border-radius: 8px;
+    width: 55mm; height: 55mm; background:var(--bg-card); border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     padding: 3mm; margin-bottom: 5mm;
 }
@@ -31,7 +31,7 @@ body { background: #fff; font-family: 'Barlow', sans-serif; }
 .terminal-name { font-size: 12px; color: var(--gold,#c9a84c); font-weight: 500; margin-bottom: 3mm; }
 .instructions { font-size: 10px; color: #aaa; text-align: center; line-height: 1.6; }
 .instructions strong { color: var(--gold,#c9a84c); }
-.footer { margin-top: auto; font-size: 8px; color: #666; }
+.footer { margin-top: auto; font-size: 8px; color:var(--text-dim); }
 .divider { width: 40mm; height: 1px; background: var(--gold,#c9a84c)44; margin: 3mm 0; }
 
 /* Dual language */

@@ -6,22 +6,22 @@
 {% for order in orders %}
 <div class="stat-card p-3 mb-2">
   <div class="d-flex justify-content-between">
-    <div><a href="{% url 'marketplace:order_detail' order.pk %}" style="color:var(--gold,#c9a84c)" class="fw-bold">{{ order.order_number }}</a><br><small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small></div>
+    <div><a href="{% url 'marketplace:order_detail' order.pk %}" class="fw-bold fx-text-gold">{{ order.order_number }}</a><br><small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small></div>
     <div class="text-end"><span class="fw-bold">{{ order.total }}&euro;</span><br>
-      {% if order.status == "pending" %}<span class="badge bg-warning text-dark">Ceka</span>
-      {% elif order.status == "confirmed" %}<span class="badge bg-primary">Potvrdeno</span>
-      {% elif order.status == "in_transit" %}<span class="badge bg-info">U dostavi</span>
-      {% elif order.status == "delivered" %}<span class="badge bg-success">Dostavljeno</span>
-      {% elif order.status == "completed" %}<span class="badge bg-success">Zavrseno</span>
-      {% elif order.status == "cancelled" %}<span class="badge bg-danger">Otkazano</span>
+      {% if order.status == "pending" %}<span class="fenix-badge fenix-badge-warning">Ceka</span>
+      {% elif order.status == "confirmed" %}<span class="fenix-badge fenix-badge-info">Potvrdeno</span>
+      {% elif order.status == "in_transit" %}<span class="fenix-badge fenix-badge-info">U dostavi</span>
+      {% elif order.status == "delivered" %}<span class="fenix-badge fenix-badge-success">Dostavljeno</span>
+      {% elif order.status == "completed" %}<span class="fenix-badge fenix-badge-success">Zavrseno</span>
+      {% elif order.status == "cancelled" %}<span class="fenix-badge fenix-badge-danger">Otkazano</span>
       {% endif %}
     </div>
   </div>
 </div>
 {% empty %}
 <div class="stat-card p-5 text-center">
-  <i class="fas fa-list" style="font-size:3rem;color:#444"></i>
-  <h5 class="mt-3" style="color:#888">Nemate narudzbi</h5>
+  <i class="fas fa-list fx-fs-hero fx-text-muted"></i>
+  <h5 class="mt-3 fx-text-muted">Nemate narudzbi</h5>
   <a href="{% url 'marketplace:catalog' %}" class="btn btn-warning mt-2">Idi na trzicu</a>
 </div>
 {% endfor %}

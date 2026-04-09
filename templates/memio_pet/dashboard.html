@@ -26,7 +26,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .trust-bar{width:100%;height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0}
 .trust-bar-fill{height:100%;border-radius:4px;transition:width .6s}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .2s;font-family:var(--sans)}
-.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{opacity:.85}
+.btn-gold{background:var(--gold);color:var(--white)}.btn-gold:hover{opacity:.85}
 .btn-outline{background:none;border:1px solid var(--line);color:var(--ink)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .animal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .animal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:all .2s;text-decoration:none;color:var(--ink)}
@@ -47,7 +47,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .msg{padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:10px}
 .msg.success{background:rgba(40,167,69,.12);border:1px solid rgba(40,167,69,.3);color:var(--green)}
 .msg.error{background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.3);color:var(--red)}
-.msg.info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#3b82f6}
+.msg.info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--blue)}
 .qr-link{font-size:.72rem;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim)}
 .page-footer a{color:var(--gold);text-decoration:none}
@@ -77,7 +77,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="container">
 
   {% if messages %}
-  <div style="margin-bottom:16px">
+  <div class="mb-3">
     {% for msg in messages %}
     <div class="msg {{ msg.tags }}">{{ msg }}</div>
     {% endfor %}
@@ -87,21 +87,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <!-- BREEDER INFO -->
   <div class="card">
     <div class="card-body">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+      <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center justify-content-between mb-3">
         <div>
-          <h1 style="font-family:var(--serif);font-size:1.6rem;font-weight:700;margin-bottom:2px">
+          <h1 class="fx-fw-bold mb-1 fx-fs-5xl" style="font-family:var(--serif)">
             {{ breeder.name }}
-            {% if breeder.is_cro_validated %}<span style="color:var(--green)"> ✓</span>{% endif %}
+            {% if breeder.is_cro_validated %}<span class="fx-text-green"> ✓</span>{% endif %}
           </h1>
-          <div style="font-size:.85rem;color:var(--dim)">{{ breeder.get_account_type_display }} · {{ breeder.city }}</div>
+          <div class="fx-fs-base fx-text-dim">{{ breeder.get_account_type_display }} · {{ breeder.city }}</div>
         </div>
         <a href="{% url 'memio_pet:breeder_profile' breeder.pk %}" class="btn btn-outline" target="_blank">Javni profil</a>
       </div>
 
       <!-- Trust Score -->
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:.82rem;font-weight:600">Trust Score</span>
-        <span style="font-family:var(--serif);font-size:1.3rem;font-weight:700;color:{{ trust_color }}">{{ trust_score }}/100</span>
+      <div class="d-flex align-items-center justify-content-between">
+        <span class="fx-fs-note fx-fw-semibold">Trust Score</span>
+        <span class="fx-fs-3xl fx-fw-bold" style="font-family:var(--serif);color:{{ trust_color }}">{{ trust_score }}/100</span>
       </div>
       <div class="trust-bar">
         <div class="trust-bar-fill" style="width:{{ trust_score }}%;background:{{ trust_color }}"></div>
@@ -112,8 +112,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <!-- MOJI LJUBIMCI -->
   <div class="card">
     <div class="card-body">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <h2 class="section-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none">Moji ljubimci ({{ animals|length }})</h2>
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="section-title mb-0" style="padding-bottom:0;border-bottom:none">Moji ljubimci ({{ animals|length }})</h2>
         <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold">+ Dodaj</a>
       </div>
 
@@ -131,20 +131,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
           <div class="animal-info">
             <div class="animal-name">{{ a.name|default:"Bez imena" }}</div>
             <div class="animal-meta">{{ a.get_vrsta_display }} · {{ a.breed|default:"" }}</div>
-            <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+            <div class="d-flex fx-gap-1 fx-flex-wrap mt-1">
               <span class="badge badge-gold">{{ a.get_status_display }}</span>
               {% if a.chip_number %}<span class="badge badge-green">Čip</span>{% endif %}
             </div>
-            <div class="qr-link" style="margin-top:6px">📱 QR profil</div>
+            <div class="qr-link mt-1">📱 QR profil</div>
           </div>
         </a>
         {% endfor %}
       </div>
       {% else %}
-      <div style="text-align:center;padding:24px;color:var(--dim)">
-        <div style="font-size:2.5rem;margin-bottom:8px">🐾</div>
+      <div class="text-center fx-text-dim" style="padding:24px">
+        <div class="mb-2 fx-fs-7xl">🐾</div>
         <p>Nemate još niti jednog ljubimca.</p>
-        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold" style="margin-top:12px">Dodaj prvog ljubimca</a>
+        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold mt-3">Dodaj prvog ljubimca</a>
       </div>
       {% endif %}
     </div>
@@ -157,8 +157,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       <h2 class="section-title">Recenzije ({{ reviews|length }})</h2>
       {% for rev in reviews %}
       <div class="rev-row">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-weight:500;font-size:.9rem">{{ rev.reviewer_name }}</span>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="fx-fw-medium fx-fs-md">{{ rev.reviewer_name }}</span>
           <span class="rev-stars">{% for i in "12345" %}{% if forloop.counter <= rev.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
         </div>
         {% if rev.comment %}<p class="rev-comment">{{ rev.comment }}</p>{% endif %}
@@ -172,13 +172,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
   <!-- PODIJELI / POZOVI -->
   <div class="card">
-    <div class="card-body" style="text-align:center">
-      <h2 class="section-title" style="border:none;text-align:center">Podijeli svoj profil</h2>
-      <p style="font-size:.85rem;color:var(--dim);margin-bottom:16px">Pozovi prijatelje na Memio.pet ili podijeli svoj profil uzgajivača</p>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button onclick="copyMyLink()" id="copyBtn" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:inherit;transition:all .2s">🔗 Kopiraj link profila</button>
-        <a href="https://wa.me/?text=Pogledaj%20moj%20profil%20na%20Memio.pet%3A%20https%3A%2F%2Fmemio.pet%2Fuzgajivac%2F{{ breeder.pk }}%2F" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;background:#25D366;color:#fff;border:1px solid #25D366">💬 WhatsApp</a>
-        <a href="https://wa.me/?text=Hej!%20Kreiraj%20besplatni%20digitalni%20profil%20za%20svog%20ljubimca%20na%20memio.pet%20🐾" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid var(--gold);color:var(--gold);background:transparent">🐾 Pozovi prijatelja</a>
+    <div class="card-body text-center">
+      <h2 class="section-title fx-border-none text-center">Podijeli svoj profil</h2>
+      <p class="fx-fs-base mb-3 fx-text-dim">Pozovi prijatelje na Memio.pet ili podijeli svoj profil uzgajivača</p>
+      <div class="d-flex fx-gap-3 fx-flex-wrap justify-content-center">
+        <button onclick="copyMyLink()" id="copyBtn" class="fx-rounded fx-fs-note fx-fw-semibold fx-pointer d-inline-flex align-items-center fx-bg-surface" style="gap:7px;padding:10px 18px;border:1px solid var(--line);color:var(--ink);font-family:inherit;transition:all .2s">🔗 Kopiraj link profila</button>
+        <a href="https://wa.me/?text=Pogledaj%20moj%20profil%20na%20Memio.pet%3A%20https%3A%2F%2Fmemio.pet%2Fuzgajivac%2F{{ breeder.pk }}%2F" target="_blank" rel="noopener" class="fx-rounded fx-fs-note fx-fw-semibold fx-no-underline fx-text-white d-inline-flex align-items-center" style="gap:7px;padding:10px 18px;background:#25D366;border:1px solid #25D366">💬 WhatsApp</a>
+        <a href="https://wa.me/?text=Hej!%20Kreiraj%20besplatni%20digitalni%20profil%20za%20svog%20ljubimca%20na%20memio.pet%20🐾" target="_blank" rel="noopener" class="fx-rounded fx-fs-note fx-fw-semibold fx-no-underline d-inline-flex align-items-center fx-text-gold fx-bg-transparent" style="gap:7px;padding:10px 18px;border:1px solid var(--gold)">🐾 Pozovi prijatelja</a>
       </div>
     </div>
   </div>
@@ -187,7 +187,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <div class="page-footer">
   <a href="/">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
-  © 2026 <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">Konjik d.o.o.</a> & NO LIMIT udruga
+  © 2026 <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold">Konjik d.o.o.</a> & NO LIMIT udruga
 </div>
 
 <script>

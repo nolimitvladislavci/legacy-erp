@@ -4,24 +4,7 @@
 {% block page_title %}Poslovna inteligencija{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -90,8 +73,8 @@
                 <thead><tr><th>Naziv</th><th>Tip</th><th>Rok prijave</th><th>Max iznos</th></tr></thead>
                 <tbody>
                     {% for f in funds %}
-                    <tr onclick="window.location='{% url 'intelligence:fund_detail' f.pk %}'" style="cursor:pointer">
-                        <td>{{ f.naziv|truncatechars:60 }}{% if f.hitno %} <span class="badge bg-danger">HITNO</span>{% endif %}</td>
+                    <tr onclick="window.location='{% url 'intelligence:fund_detail' f.pk %}'" class="fx-pointer">
+                        <td>{{ f.naziv|truncatechars:60 }}{% if f.hitno %} <span class="fenix-badge fenix-badge-danger">HITNO</span>{% endif %}</td>
                         <td>{{ f.get_tip_display }}</td>
                         <td>{{ f.rok_prijave|default:"-" }}</td>
                         <td>{% if f.iznos_max_eur %}{{ f.iznos_max_eur }} EUR{% else %}-{% endif %}</td>

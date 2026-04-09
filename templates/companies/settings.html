@@ -6,13 +6,13 @@
 <div id="lcToastContainer"></div>
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div class="d-flex align-items-center gap-2">
-    <a href="/dashboard/company/" class="btn btn-sm btn-outline-secondary" style="font-size:.78rem"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
+    <a href="/dashboard/company/" class="btn btn-sm btn-outline-secondary fx-fs-body-sm"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
     <h5 class="mb-0"><i class="fas fa-cog text-muted me-2"></i>Postavke tvrtke</h5>
   </div>
 </div>
 
 {% if not company.oib %}
-<div class="alert mb-3 py-2" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35);color:var(--gold,#c9a84c);font-size:.85rem;border-radius:8px">
+<div class="alert mb-3 py-2 fx-fs-base fx-rounded fx-text-gold" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35)">
   <i class="fas fa-exclamation-triangle me-2"></i><strong>OIB nije unesen.</strong> Unesite OIB u tab "Info" za fiskalizaciju i e-racune.
 </div>
 {% endif %}
@@ -48,10 +48,10 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="row g-3">
       <div class="col-md-6">
         <label class="form-label fw-bold f-form-label-sm">Naziv tvrtke</label>
-        <div style="position:relative">
+        <div class="fx-relative">
           <input type="text" name="name" id="coName" class="form-control" value="{{ company.name }}" required
                  oninput="searchCompanyName(this.value)" autocomplete="off">
-          <div id="nameHints" style="display:none;position:absolute;z-index:100;width:100%;max-height:180px;overflow-y:auto;background:#111;border:1px solid #333;border-radius:6px;margin-top:2px"></div>
+          <div id="nameHints" class="fx-hidden fx-w-full fx-bg-card fx-rounded-sm fx-scroll-y fx-b2 fx-mt-1" style="position:absolute;z-index:100;max-height:180px"></div>
         </div>
       </div>
       <div class="col-md-4">
@@ -60,21 +60,21 @@ document.addEventListener('DOMContentLoaded',function(){
           <input type="text" name="oib" id="coOib" class="form-control" value="{{ company.oib }}" required>
           <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="{% trans 'Traži po OIB-u' %}">🔍</button>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="btn btn-sm" id="oibScanBtn"
-                  style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);flex:1;min-width:100px"
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
+          <button type="button" class="btn btn-sm fx-text-blue fx-flex-1" id="oibScanBtn"
+                  style="background:linear-gradient(135deg,#0c4a6e,#082f49);border:1px solid rgba(56,189,248,.35);min-width:100px"
                   onclick="DocScan.open({fields:{oib:'coOib',address:'address',city:'city',zip_code:'zip_code'}})">
             <i class="fas fa-camera"></i> {% trans "Kamera" %}
           </button>
-          <button type="button" class="btn btn-sm"
-                  style="background:#1e293b;color:#94a3b8;border:1px solid #334155;flex:1;min-width:100px"
+          <button type="button" class="btn btn-sm fx-bg-surface2 fx-text-muted fx-b2 fx-flex-1"
+                  style="min-width:100px"
                   onclick="DocScan.open({fields:{oib:'coOib',address:'address',city:'city',zip_code:'zip_code'}});setTimeout(function(){DocScan._switchTab('upload')},50)">
             <i class="fas fa-folder-open"></i> {% trans "Učitaj sliku" %}
           </button>
           <input type="file" id="oibFileInput" accept="image/*"
-                 style="display:none;" onchange="fenixGalleryDirect(this)">
+                 class="fx-hidden" onchange="fenixGalleryDirect(this)">
         </div>
-        <div id="oibResult" style="font-size:.78rem;margin-top:4px;min-height:16px"></div>
+        <div id="oibResult" class="fx-fs-body-sm mt-1" style="min-height:16px"></div>
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold f-form-label-sm">Drzava</label>
@@ -131,14 +131,14 @@ document.addEventListener('DOMContentLoaded',function(){
             value="{% if company.nkd_code %}{{ company.nkd_code.code }} – {{ company.nkd_code.name_hr }}{% endif %}">
           <input type="hidden" name="nkd_code_id" id="nkdCodeId"
             value="{% if company.nkd_code %}{{ company.nkd_code.pk }}{% endif %}">
-          <div id="nkdDropdown" class="dropdown-menu w-100" style="display:none;max-height:220px;overflow-y:auto;font-size:.85rem"></div>
+          <div id="nkdDropdown" class="dropdown-menu w-100 fx-hidden fx-fs-base fx-scroll-y" style="max-height:220px"></div>
         </div>
         {% if company.nkd_code %}<small class="text-muted">Trenutna sifra: <strong>{{ company.nkd_code.code }}</strong> – {{ company.nkd_code.name_hr }}</small>{% endif %}
       </div>
       <div class="col-md-4">
         <label class="form-label fw-bold f-form-label-sm">Logo</label>
         <input type="file" name="logo" class="form-control" accept="image/*">
-        {% if company.logo %}<div class="mt-1"><img src="{{ company.logo.url }}" style="max-height:40px;border-radius:4px"></div>{% endif %}
+        {% if company.logo %}<div class="mt-1"><img src="{{ company.logo.url }}" class="fx-rounded-sm" style="max-height:40px"></div>{% endif %}
       </div>
     </div>
     <div class="mt-3 sticky-save-bar">
@@ -155,16 +155,16 @@ document.addEventListener('DOMContentLoaded',function(){
     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal"><i class="fas fa-plus me-1"></i> Novi zaposlenik</button>
   </div>
   <div class="table-responsive">
-  <table class="table table-sm" style="font-size:.85rem">
+  <table class="table table-sm fx-fs-base">
     <thead><tr><th>Ime</th><th>Email</th><th>Uloga</th><th>Telefon</th><th>Status</th><th>Akcije</th></tr></thead>
     <tbody>
     {% for emp in employees %}
     <tr>
       <td>{{ emp.user.get_full_name|default:emp.user.username }}</td>
       <td>{{ emp.user.email }}</td>
-      <td><span class="badge bg-secondary">{{ emp.get_role_display }}</span></td>
+      <td><span class="fenix-badge fenix-badge-muted">{{ emp.get_role_display }}</span></td>
       <td>{{ emp.phone }}</td>
-      <td>{% if emp.user.is_active %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-danger">Neaktivan</span>{% endif %}</td>
+      <td>{% if emp.user.is_active %}<span class="fenix-badge fenix-badge-success">Aktivan</span>{% else %}<span class="fenix-badge fenix-badge-danger">Neaktivan</span>{% endif %}</td>
       <td>
         <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editEmployee({{ emp.pk }},'{{ emp.user.first_name }}','{{ emp.user.last_name }}','{{ emp.user.email }}','{{ emp.phone }}','{{ emp.role }}')" title="Uredi"><i class="fas fa-edit"></i></button>
         <button class="btn btn-sm btn-outline-warning py-0 px-1" onclick="changePassword({{ emp.pk }})" title="Lozinka"><i class="fas fa-key"></i></button>
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <label class="form-label f-form-label-sm">Nova lozinka (min 10 znakova)</label>
     <input type="password" name="password" class="form-control" minlength="10" required>
   </div>
-  <div class="modal-footer"><button type="submit" class="btn btn-warning btn-sm">Postavi</button></div>
+  <div class="modal-footer"><button type="submit" class="btn-gold btn-sm">Postavi</button></div>
   </form>
 </div></div></div>
 {% endif %}
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="clearBranchForm()"><i class="fas fa-plus me-1"></i> Nova podruznica</button>
   </div>
   <div class="table-responsive">
-  <table class="table table-sm" style="font-size:.85rem">
+  <table class="table table-sm fx-fs-base">
     <thead><tr><th>Naziv</th><th>Tip</th><th>Grad</th><th>Telefon</th><th>Status</th><th>Akcije</th></tr></thead>
     <tbody>
     {% for b in branches %}
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <td><span class="badge" style="background:{{ b.badge_color }}">{{ b.get_branch_type_display }}</span></td>
       <td>{{ b.city }}</td>
       <td>{{ b.phone }}</td>
-      <td>{% if b.is_active %}<span class="badge bg-success">Aktivna</span>{% else %}<span class="badge bg-danger">Neaktivna</span>{% endif %}</td>
+      <td>{% if b.is_active %}<span class="fenix-badge fenix-badge-success">Aktivna</span>{% else %}<span class="fenix-badge fenix-badge-danger">Neaktivna</span>{% endif %}</td>
       <td>
         <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editBranch({{ b.pk }},'{{ b.name }}','{{ b.branch_code }}','{{ b.branch_type }}','{{ b.address }}','{{ b.city }}','{{ b.phone }}','{{ b.email }}')" title="Uredi"><i class="fas fa-edit"></i></button>
         <form method="post" action="{% url 'companies:branch_toggle_active' b.pk %}" class="d-inline" onsubmit="return ajaxPost(this)">{% csrf_token %}<button class="btn btn-sm btn-outline-{% if b.is_active %}danger{% else %}success{% endif %} py-0 px-1"><i class="fas fa-{% if b.is_active %}ban{% else %}check{% endif %}"></i></button></form>
@@ -287,8 +287,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="col-md-4">
       <div class="p-3 rounded sub-stat sub-stat-dark">
         <div class="sub-stat-label">Plan</div>
-        <div class="sub-stat-value" style="color:var(--gold)">{{ subscription.get_plan_display }}</div>
-        {% if subscription.is_trial %}<span class="badge bg-warning text-dark">Trial do {{ subscription.trial_ends }}</span>{% else %}<span class="badge bg-success">Aktivan</span>{% endif %}
+        <div class="sub-stat-value fx-text-gold">{{ subscription.get_plan_display }}</div>
+        {% if subscription.is_trial %}<span class="fenix-badge fenix-badge-warning">Trial do {{ subscription.trial_ends }}</span>{% else %}<span class="fenix-badge fenix-badge-success">Aktivan</span>{% endif %}
       </div>
     </div>
     <div class="col-md-4">
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <input type="text" name="invoice_number_format" class="form-control"
         value="{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}"
         placeholder="{YYYY}-{NUM}">
-      <div class="form-text" style="font-size:.72rem;color:#888">{YYYY} = godina &nbsp;·&nbsp; {MM} = mjesec &nbsp;·&nbsp; {NUM} = redni broj</div>
+      <div class="form-text fx-fs-sm fx-text-muted">{YYYY} = godina &nbsp;·&nbsp; {MM} = mjesec &nbsp;·&nbsp; {NUM} = redni broj</div>
     </div>
     <div class="col-md-5">
       <label class="form-label fw-bold f-form-label-sm">Format broja ponude</label>
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded',function(){
         placeholder="PON-{YYYY}-{NUM}">
     </div>
     <div class="col-md-2 d-flex align-items-end pb-1">
-      <small class="text-muted" style="font-size:.75rem">Primjer:<br>
+      <small class="text-muted fx-fs-caption">Primjer:<br>
         <code>{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}</code>
       </small>
     </div>
@@ -418,16 +418,16 @@ document.addEventListener('DOMContentLoaded',function(){
       <input type="email" name="email_reply_to" class="form-control"
         value="{{ settings_data.email_reply_to }}"
         placeholder="racuni@moja-tvrtka.hr">
-      <div class="form-text" style="font-size:.72rem;color:#888">Adresa na koju kupci mogu odgovoriti</div>
+      <div class="form-text fx-fs-sm fx-text-muted">Adresa na koju kupci mogu odgovoriti</div>
     </div>
     <div class="col-md-7 d-flex gap-4 align-items-end pb-1">
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="send_invoice_email" value="1" id="chkInvMail"{% if settings_data.send_invoice_email %} checked{% endif %}>
-        <label class="form-check-label" for="chkInvMail" style="font-size:.85rem">Automatski slati račune e-mailom</label>
+        <label class="form-check-label fx-fs-base" for="chkInvMail">Automatski slati račune e-mailom</label>
       </div>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="send_offer_email" value="1" id="chkOffMail"{% if settings_data.send_offer_email %} checked{% endif %}>
-        <label class="form-check-label" for="chkOffMail" style="font-size:.85rem">Automatski slati ponude e-mailom</label>
+        <label class="form-check-label fx-fs-base" for="chkOffMail">Automatski slati ponude e-mailom</label>
       </div>
     </div>
   </div>
@@ -514,13 +514,13 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
       <div class="col-md-3 d-flex align-items-end pb-1">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="is_vat_registered" value="1" id="chkVat"{% if company.is_vat_registered %} checked{% endif %}>
-          <label class="form-check-label" for="chkVat" style="font-size:.85rem">U sustavu PDV-a</label>
+          <label class="form-check-label fx-fs-base" for="chkVat">U sustavu PDV-a</label>
         </div>
       </div>
       <div class="col-md-3 d-flex align-items-end pb-1">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="is_kleinunternehmer" value="1" id="chkKlein"{% if company.is_kleinunternehmer %} checked{% endif %}>
-          <label class="form-check-label" for="chkKlein" style="font-size:.85rem">Kleinunternehmer §19</label>
+          <label class="form-check-label fx-fs-base" for="chkKlein">Kleinunternehmer §19</label>
         </div>
       </div>
     </div>
@@ -540,7 +540,7 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
   </div>
   {% if fiscal_certs %}
   <div class="table-responsive">
-    <table class="table table-sm align-middle" style="font-size:.85rem">
+    <table class="table table-sm align-middle fx-fs-base">
       <thead>
         <tr><th>Naziv</th><th>OIB</th><th>Vrijedi do</th><th>Status</th><th>Zadnji test</th></tr>
       </thead>
@@ -558,13 +558,13 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
           </td>
           <td>
             {% if cert.is_valid and cert.is_active and not cert.is_expired %}
-              <span class="badge bg-success">Aktivan</span>
+              <span class="fenix-badge fenix-badge-success">Aktivan</span>
             {% elif cert.is_expired %}
-              <span class="badge bg-danger">Istekao</span>
+              <span class="fenix-badge fenix-badge-danger">Istekao</span>
             {% elif not cert.is_valid %}
-              <span class="badge bg-warning text-dark">Nevažeći</span>
+              <span class="fenix-badge fenix-badge-warning">Nevažeći</span>
             {% else %}
-              <span class="badge bg-secondary">Neaktivan</span>
+              <span class="fenix-badge fenix-badge-muted">Neaktivan</span>
             {% endif %}
           </td>
           <td>
@@ -580,9 +580,9 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
     </table>
   </div>
   {% else %}
-  <div class="text-center py-4" style="color:#888">
+  <div class="text-center py-4 fx-text-muted">
     <i class="fas fa-certificate fa-2x mb-2 text-muted"></i>
-    <p style="font-size:.85rem">Nema uploadanih certifikata.<br>
+    <p class="fx-fs-base">Nema uploadanih certifikata.<br>
     <a href="/invoicing/fiscal/certificates/" class="btn btn-sm btn-warning mt-2">
       <i class="fas fa-upload me-1"></i> Učitaj certifikat
     </a></p>
@@ -638,8 +638,8 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
 
   {# ── FINA Info.BIZ ─────────────────────────────────────────────────────── #}
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div style="width:48px;height:48px;background:linear-gradient(135deg,#003d7a,#0066cc);border-radius:12px;display:flex;align-items:center;justify-content:center">
-      <i class="fas fa-search-dollar" style="color:#fff;font-size:1.3rem"></i>
+    <div class="fx-rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:linear-gradient(135deg,#003d7a,#0066cc)">
+      <i class="fas fa-search-dollar fx-text-white fx-fs-3xl"></i>
     </div>
     <div>
       <h6 class="mb-0 fw-bold">FINA Info.BIZ — Automatski OIB lookup</h6>
@@ -653,7 +653,7 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
   </div>
 
   {# Objašnjenje #}
-  <div class="alert alert-info" style="font-size:.85rem;border-left:4px solid #0dcaf0">
+  <div class="alert alert-info fx-fs-base" style="border-left:4px solid #0dcaf0">
     <strong><i class="fas fa-info-circle me-1"></i>Zašto je ovo korisno?</strong><br>
     EU VIES registar pronalazi samo firme koje su <strong>PDV obveznici</strong>. Mikro poduzetnici,
     obrti i OPG-ovi koji <em>nisu</em> u sustavu PDV-a (npr. KORPAŠ d.o.o., OPG Kruljac...) nisu vidljivi
@@ -664,18 +664,18 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
   </div>
 
   {# Koraci za aktivaciju #}
-  <div class="card mb-4" style="border:1px solid #334155;background:#0f172a">
+  <div class="card mb-4 fx-bg-deep fx-b2">
     <div class="card-body">
       <h6 class="fw-bold mb-3"><i class="fas fa-list-ol me-2 text-warning"></i>Kako aktivirati FINA Info.BIZ lookup?</h6>
-      <ol style="font-size:.85rem;line-height:1.8;color:#cbd5e1;padding-left:1.2rem">
+      <ol class="fx-fs-base fx-text-dim" style="line-height:1.8;padding-left:1.2rem">
         <li>Otvorite <a href="https://infobiz.fina.hr/Registration" target="_blank" rel="noopener" class="text-info">
-            <i class="fas fa-external-link-alt me-1" style="font-size:.7rem"></i>infobiz.fina.hr/Registration</a>
+            <i class="fas fa-external-link-alt me-1 fx-fs-sm"></i>infobiz.fina.hr/Registration</a>
             i registrirajte <strong>svoju tvrtku</strong> (besplatno, potreban OIB)</li>
         <li>Nakon potvrde e-mailom, prijavite se na <a href="https://infobiz.fina.hr" target="_blank" rel="noopener" class="text-info">infobiz.fina.hr</a></li>
         <li>U korisničkim postavkama pronađite <strong>API ključ / token</strong> i kopirajte ga</li>
         <li>Zalijepite token u polje ispod i kliknite <strong>Spremi</strong></li>
       </ol>
-      <div class="alert alert-warning py-2 mb-0" style="font-size:.8rem">
+      <div class="alert alert-warning py-2 mb-0 fx-fs-compact">
         <i class="fas fa-shield-alt me-1"></i>
         <strong>Važno — legalna napomena:</strong> API token koristite isključivo za svoju tvrtku.
         Token je osoban i vezan za vašu registraciju na FINA Info.BIZ. Svaki korisnik LIMIT Connect sustava
@@ -689,16 +689,15 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
   <form method="post">
     {% csrf_token %}
     <div class="mb-3">
-      <label class="form-label fw-bold" style="font-size:.85rem">
+      <label class="form-label fw-bold fx-fs-base">
         <i class="fas fa-key me-1 text-warning"></i>FINA Info.BIZ API token
       </label>
       {% if has_fina_token %}
       <div class="input-group mb-2">
-        <span class="input-group-text" style="background:#1e293b;border-color:#334155;color:#64748b">
+        <span class="input-group-text fx-bg-surface2 fx-text-muted fx-bc2">
           <i class="fas fa-lock"></i>
         </span>
-        <input type="text" class="form-control" value="{{ fina_token_masked }}" disabled
-               style="background:#0f172a;color:#64748b;border-color:#334155;font-family:monospace">
+        <input type="text" class="form-control fx-bg-deep fx-text-dim fx-bc2 fx-font-mono" value="{{ fina_token_masked }}" disabled>
         <span class="badge bg-success d-flex align-items-center px-3" style="border-radius:0 6px 6px 0">
           <i class="fas fa-check me-1"></i>Aktivan
         </span>
@@ -706,20 +705,19 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
       <small class="text-muted">Token je aktivan i maskiran zbog sigurnosti. Za promjenu unesite novi token ispod.</small>
       {% endif %}
       <div class="input-group mt-2">
-        <span class="input-group-text" style="background:#1e293b;border-color:#334155;color:#94a3b8">
+        <span class="input-group-text fx-bg-surface2 fx-text-dim fx-bc2">
           <i class="fas fa-key"></i>
         </span>
-        <input type="password" name="fina_infobiz_token" class="form-control"
+        <input type="password" name="fina_infobiz_token" class="form-control fx-bg-surface2 fx-text-body fx-bc2"
                placeholder="{% if has_fina_token %}Unesite novi token za zamjenu...{% else %}Zalijepite API token s infobiz.fina.hr...{% endif %}"
-               autocomplete="off"
-               style="background:#1e293b;color:#e2e8f0;border-color:#334155">
+               autocomplete="off">
         <button type="button" class="btn btn-outline-secondary btn-sm"
                 onclick="var f=this.previousElementSibling;f.type=f.type==='password'?'text':'password';this.innerHTML=f.type==='password'?'<i class=\'fas fa-eye\'></i>':'<i class=\'fas fa-eye-slash\'></i>'"
-                style="border-color:#334155;color:#94a3b8" title="Prikaži/sakrij token">
+                style="border-color:var(--border2);color:var(--text-dim)" title="Prikaži/sakrij token">
           <i class="fas fa-eye"></i>
         </button>
       </div>
-      <div class="form-text" style="font-size:.78rem;color:#64748b">
+      <div class="form-text fx-fs-body-sm fx-text-muted">
         Token se šifrira u bazi i nikada se ne prikazuje u potpunosti. Koristite isključivo token
         registriran za <strong>{{ company.name }}</strong>.
       </div>
@@ -741,16 +739,16 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
 
   {# Test sekcija - samo ako ima token #}
   {% if has_fina_token %}
-  <hr style="border-color:#334155;margin:2rem 0">
+  <hr class="fx-bc2" style="margin:2rem 0">
   <h6 class="fw-bold mb-3"><i class="fas fa-vial me-2 text-info"></i>Testiraj lookup</h6>
   <div class="input-group" style="max-width:400px">
-    <input type="text" id="testOibInput" class="form-control" placeholder="Unesite OIB (npr. 92922919857)"
-           maxlength="11" style="background:#1e293b;color:#e2e8f0;border-color:#334155">
+    <input type="text" id="testOibInput" class="form-control fx-bg-surface2 fx-text-body fx-bc2" placeholder="Unesite OIB (npr. 92922919857)"
+           maxlength="11">
     <button class="btn btn-outline-info btn-sm" onclick="testFinaLookup()">
       <i class="fas fa-search me-1"></i>Testiraj
     </button>
   </div>
-  <div id="testFinaResult" class="mt-2" style="font-size:.82rem"></div>
+  <div id="testFinaResult" class="mt-2 fx-fs-note"></div>
   <script>
   function testFinaLookup() {
     var oib = document.getElementById('testOibInput').value.trim();
@@ -797,10 +795,10 @@ function searchCompanyName(q) {
       .then(function(d) {
         if (d.results && d.results.length) {
           hints.innerHTML = d.results.map(function(r) {
-            return '<div style="padding:8px 12px;cursor:pointer;font-size:.85rem;color:#ccc;border-bottom:1px solid #222" '
+            return '<div class="fx-pointer fx-fs-base fx-text-muted fx-p-8-12" style="border-bottom:1px solid #222" '
               + 'onmouseover="this.style.background=\'#1a1a1a\'" onmouseout="this.style.background=\'\'" '
               + 'onclick="fillCompany(\'' + (r.name||'').replace(/'/g,"\\'") + '\',\'' + (r.oib||'') + '\',\'' + (r.address||'').replace(/'/g,"\\'") + '\',\'' + (r.city||'') + '\',\'' + (r.zip||'') + '\')">'
-              + r.name + (r.oib ? ' <span style="color:#666;font-size:.7rem">(' + r.oib + ')</span>' : '')
+              + r.name + (r.oib ? ' <span class="fx-text-dim fx-fs-sm">(' + r.oib + ')</span>' : '')
               + '</div>';
           }).join('');
           hints.style.display = 'block';
@@ -824,22 +822,22 @@ function fillCompany(name, oib, addr, city, zip) {
 function lookupOIB() {
   var oib = document.getElementById('coOib').value.trim();
   var res = document.getElementById('oibResult');
-  if (oib.length < 8) { res.innerHTML = '<span style="color:#f59e0b">Unesite OIB</span>'; return; }
-  res.innerHTML = '<span style="color:#888">Tražim...</span>';
+  if (oib.length < 8) { res.innerHTML = '<span class="fx-text-amber">Unesite OIB</span>'; return; }
+  res.innerHTML = '<span class="fx-text-muted">Tražim...</span>';
   var country = document.querySelector('[name=country]').value || 'HR';
   fetch('/hr/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
     .then(function(r){ return r.json(); })
     .then(function(d) {
       if (d.found) {
-        res.innerHTML = '<span style="color:#22c55e">✓ ' + (d.name || 'Pronađeno') + '</span>';
+        res.innerHTML = '<span class="fx-text-green">✓ ' + (d.name || 'Pronađeno') + '</span>';
         if (d.name) document.getElementById('coName').value = d.name;
         if (d.address) { var a = document.querySelector('[name=address]'); if (a) a.value = d.address; }
         if (d.city) { var c = document.querySelector('[name=city]'); if (c) c.value = d.city; }
         if (d.zip_code) { var z = document.querySelector('[name=zip_code]'); if (z) z.value = d.zip_code; }
       } else {
-        res.innerHTML = '<span style="color:#f59e0b">' + (d.error || 'Nije pronađeno') + '</span>';
+        res.innerHTML = '<span class="fx-text-amber">' + (d.error || 'Nije pronađeno') + '</span>';
       }
-    }).catch(function(){ res.innerHTML = '<span style="color:#ef4444">Greška</span>'; });
+    }).catch(function(){ res.innerHTML = '<span class="fx-text-red">Greška</span>'; });
 }
 
 document.addEventListener('click', function(e) {
@@ -852,33 +850,28 @@ document.addEventListener('click', function(e) {
 
 
 <!-- Fenix OIB Camera Modal -->
-<div id="fenixCamModal" style="display:none;position:fixed;inset:0;z-index:99999;
-     background:rgba(0,0,0,.92);flex-direction:column;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:480px;padding:16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span style="color:#38bdf8;font-weight:700;font-size:1rem;">
+<div id="fenixCamModal" class="fx-hidden fx-flex-col align-items-center justify-content-center" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92)">
+  <div class="fx-w-full fx-p-16" style="max-width:480px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="fx-fw-bold fx-fs-lg fx-text-blue">
         <i class="fas fa-id-card me-2"></i>Skeniraj osobnu iskaznicu
       </span>
-      <button onclick="fenixCloseCamera()" style="background:none;border:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;">✕</button>
+      <button onclick="fenixCloseCamera()" class="fx-border-none fx-text-muted fx-fs-4xl fx-pointer fx-bg-transparent">✕</button>
     </div>
     <video id="fenixCamVideo" autoplay playsinline muted
-           style="width:100%;border-radius:12px;border:2px solid rgba(56,189,248,.4);background:#000;max-height:320px;object-fit:cover;"></video>
-    <canvas id="fenixCamCanvas" style="display:none;"></canvas>
-    <div id="fenixCamHint" style="text-align:center;color:#94a3b8;font-size:.82rem;margin-top:8px;">
+           class="fx-w-full fx-rounded" style="border:2px solid rgba(56,189,248,.4);background:var(--black);max-height:320px;object-fit:cover"></video>
+    <canvas id="fenixCamCanvas" class="fx-hidden"></canvas>
+    <div id="fenixCamHint" class="text-center fx-text-muted fx-fs-note mt-2">
       Usmjerite kameru prema osobnoj iskaznici i pritisnite Snimi
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
+    <div class="d-flex fx-gap-2 mt-3">
       <button onclick="fenixSnapPhoto()"
-              style="flex:1;background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;
-                     border:1px solid rgba(56,189,248,.4);border-radius:8px;
-                     padding:12px;font-weight:700;font-size:.95rem;cursor:pointer;">
+              class="fx-rounded fx-fw-bold fx-fs-normal fx-pointer fx-text-blue fx-flex-1 fx-p-12" style="background:linear-gradient(135deg,#0c4a6e,#082f49);border:1px solid rgba(56,189,248,.4)">
         <i class="fas fa-camera me-2"></i>Snimi
       </button>
-      <label style="flex:1;background:#1e293b;color:#94a3b8;border:1px solid #334155;
-                    border-radius:8px;padding:12px;font-weight:600;font-size:.85rem;
-                    cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <label class="fx-bg-surface2 fx-text-muted fx-rounded fx-fw-semibold fx-fs-base fx-pointer text-center d-flex fx-gap-2 align-items-center justify-content-center fx-flex-1 fx-b2 fx-p-12">
         <i class="fas fa-image"></i> Iz galerije
-        <input type="file" accept="image/*" style="display:none;" onchange="fenixFromGallery(this)">
+        <input type="file" accept="image/*" class="fx-hidden" onchange="fenixFromGallery(this)">
       </label>
     </div>
   </div>
@@ -977,20 +970,20 @@ function fenixSendToAI(blob, filename) {
 
     if (data.fields && data.fields.oib) {
       oibField.value = data.fields.oib;
-      resultEl.innerHTML = '<span style="color:#4ade80;font-weight:600">✓ OIB prepoznat: ' + data.fields.oib + '</span>';
+      resultEl.innerHTML = '<span class="fx-fw-semibold fx-text-green">✓ OIB prepoznat: ' + data.fields.oib + '</span>';
       if (data.fields.name) {
         var nameEl = document.getElementById('coName') || document.querySelector('[name=name]');
         if (nameEl) nameEl.value = data.fields.name;
       }
     } else {
-      resultEl.innerHTML = '<span style="color:#fbbf24">⚠ OIB nije prepoznat — unesite ručno u polje iznad</span>';
+      resultEl.innerHTML = '<span class="fx-text-amber">⚠ OIB nije prepoznat — unesite ručno u polje iznad</span>';
     }
     btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
     btn.disabled = false;
   })
   .catch(function() {
     document.getElementById('oibResult').innerHTML =
-      '<span style="color:#f87171">Greška. Unesite OIB ručno.</span>';
+      '<span class="fx-text-red">Greška. Unesite OIB ručno.</span>';
     btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
     btn.disabled = false;
   });

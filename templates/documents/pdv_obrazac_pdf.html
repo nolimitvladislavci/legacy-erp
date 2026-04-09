@@ -3,39 +3,39 @@
 <html><head><meta charset="utf-8"><style>
 @page { margin: 15mm; size: A4; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:9pt; color:#1a1a1a; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:9pt; color:var(--text); }
 
 .header { border-bottom:2pt solid #0f172a; padding-bottom:10pt; margin-bottom:14pt; }
-.header h1 { font-size:16pt; color:#0f172a; }
-.header .sub { font-size:9pt; color:#475569; margin-top:2pt; }
-.header .period { float:right; font-size:11pt; font-weight:700; color:#c9a84c; margin-top:-18pt; }
+.header h1 { font-size:16pt; color:var(--text); }
+.header .sub { font-size:9pt; color:var(--text-dim); margin-top:2pt; }
+.header .period { float:right; font-size:11pt; font-weight:700; color:var(--gold); margin-top:-18pt; }
 
-.company-info { background:#f8fafc; border-left:3pt solid #c9a84c; padding:8pt 12pt; margin-bottom:14pt; font-size:8pt; color:#475569; }
-.company-info strong { color:#0f172a; font-size:10pt; }
+.company-info { background:var(--surface2); border-left:3pt solid #c9a84c; padding:8pt 12pt; margin-bottom:14pt; font-size:8pt; color:var(--text-dim); }
+.company-info strong { color:var(--text); font-size:10pt; }
 
 .result-box { text-align:center; padding:14pt; margin-bottom:14pt; border-radius:6pt; }
 .result-box.pay { background:#fef2f2; border:1pt solid #ef4444; }
 .result-box.refund { background:#ecfdf5; border:1pt solid #10b981; }
-.result-box .label { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#475569; }
+.result-box .label { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); }
 .result-box .amount { font-size:18pt; font-weight:800; margin:4pt 0; }
-.result-box .amount.pay { color:#ef4444; }
-.result-box .amount.refund { color:#10b981; }
-.result-box .detail { font-size:8pt; color:#475569; }
+.result-box .amount.pay { color:var(--red); }
+.result-box .amount.refund { color:var(--green); }
+.result-box .detail { font-size:8pt; color:var(--text-dim); }
 
 .section { margin-bottom:14pt; }
-.section h2 { font-size:10pt; color:#0f172a; border-bottom:1pt solid #e2e8f0; padding-bottom:4pt; margin-bottom:8pt; }
-.section h2 span { color:#c9a84c; }
+.section h2 { font-size:10pt; color:var(--text); border-bottom:1pt solid #e2e8f0; padding-bottom:4pt; margin-bottom:8pt; }
+.section h2 span { color:var(--gold); }
 
 table { width:100%; border-collapse:collapse; font-size:9pt; }
-th { text-align:left; padding:4pt 6pt; background:#f1f5f9; border-bottom:1pt solid #e2e8f0; font-size:7pt; text-transform:uppercase; color:#64748b; }
+th { text-align:left; padding:4pt 6pt; background:var(--surface3); border-bottom:1pt solid #e2e8f0; font-size:7pt; text-transform:uppercase; color:var(--text-dim); }
 th.r { text-align:right; }
 td { padding:4pt 6pt; border-bottom:.5pt solid #e2e8f0; }
 td.r { text-align:right; font-variant-numeric:tabular-nums; }
 tr.total td { font-weight:700; border-top:1.5pt solid #0f172a; }
 
 .signatures { display:flex; justify-content:space-between; margin-top:30pt; }
-.sig { width:35%; text-align:center; border-top:1pt solid #000; padding-top:4pt; font-size:8pt; color:#475569; }
-.footer { position:static; margin-top:10mm; text-align:center; font-size:7pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:3pt; }
+.sig { width:35%; text-align:center; border-top:1pt solid #000; padding-top:4pt; font-size:8pt; color:var(--text-dim); }
+.footer { position:static; margin-top:10mm; text-align:center; font-size:7pt; color:var(--text-muted); border-top:.5pt solid #e2e8f0; padding-top:3pt; }
 </style></head><body>
 
 <div class="header">
@@ -89,15 +89,15 @@ tr.total td { font-weight:700; border-top:1.5pt solid #0f172a; }
   <div class="sig">Odgovorna osoba</div>
 </div>
 
-<div class="footer" style="display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #cbd5e1;padding-top:8pt;margin-top:12pt;font-size:7pt;color:#64748b">
+<div class="footer d-flex justify-content-between align-items-center fx-text-muted" style="border-top:1pt solid #cbd5e1;padding-top:8pt;margin-top:12pt;font-size:7pt">
   <div>
     {{ company.name }}{% if company.oib %} · OIB: {{ company.oib }}{% endif %} · {% now "d.m.Y H:i" %}<br>
     <span style="font-size:6pt">Fiskalizacija u džepu · SHA-256 Hash Chain · EU ViDA 2028</span>
   </div>
-  <div style="text-align:center">
+  <div class="text-center">
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://limit-connect.com/register/%3Fsource%3Dpdv&color=333333&bgcolor=ffffff"
          style="width:12mm;height:12mm" alt="QR">
-    <div style="font-size:5pt;color:#999">limit-connect.com</div>
+    <div class="fx-text-muted" style="font-size:5pt">limit-connect.com</div>
   </div>
 </div>
 

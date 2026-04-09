@@ -9,27 +9,27 @@
 <style>
 :root{--primary:#0f172a;--accent: #c9a84c;--bg:#f8fafc}
 body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;margin:0;min-height:100vh}
-.portal-header{background:var(--primary);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.portal-header{background:var(--primary);color:var(--white);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 .portal-header h1{font-size:1rem;margin:0;font-weight:700}.portal-header .accent{color:var(--accent)}
 .portal-body{max-width:800px;margin:0 auto;padding:20px}
-.card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:16px;margin-bottom:16px}
+.card{background:var(--bg-card);border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:16px}
 .hd-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.hd-badge.open{background:#dbeafe;color:#1e40af}.hd-badge.in_progress{background:#fef3c7;color:#92400e}.hd-badge.waiting_client{background:#fce4ec;color:#880e4f}.hd-badge.resolved{background:#dcfce7;color:#166534}.hd-badge.closed{background:#f1f5f9;color:#475569}
+.hd-badge.open{background:var(--blue-dim);color:var(--blue)}.hd-badge.in_progress{background:var(--amber-dim);color:var(--amber)}.hd-badge.waiting_client{background:#fce4ec;color:#880e4f}.hd-badge.resolved{background:#dcfce7;color:var(--green)}.hd-badge.closed{background:var(--surface3);color:var(--text-dim)}
 .ticket-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem}.ticket-row:last-child{border-bottom:none}
 </style>
 </head>
 <body>
 <div class="portal-header">
   <h1><i class="fas fa-headset"></i> <span class="accent">Podrska</span> - {{ partner.name }}</h1>
-  <a href="{% url 'helpdesk_portal_new' token=token %}" class="btn btn-sm" style="background:var(--accent);color:#000;font-weight:600;font-size:.8rem"><i class="fas fa-plus"></i> Novi tiket</a>
+  <a href="{% url 'helpdesk_portal_new' token=token %}" class="btn btn-sm fx-text-dark fx-fw-semibold fx-fs-compact" style="background:var(--accent)"><i class="fas fa-plus"></i> Novi tiket</a>
 </div>
 <div class="portal-body">
-  {% if open_tickets %}<div class="card"><div style="font-weight:700;font-size:.9rem;margin-bottom:10px">Otvoreni tiketi</div>
-    {% for t in open_tickets %}<div class="ticket-row"><div><strong>{{ t.ticket_number }}</strong> - {{ t.subject|truncatechars:50 }}<div style="font-size:.72rem;color:#64748b">{{ t.get_category_display }} | {{ t.created_at|date:"d.m.Y" }}</div></div><div style="display:flex;gap:6px;align-items:center"><span class="hd-badge {{ t.status }}">{{ t.get_status_display }}</span><a href="{% url 'helpdesk_portal_ticket' token=token pk=t.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:.72rem">Otvori</a></div></div>{% endfor %}
+  {% if open_tickets %}<div class="card"><div class="fx-fw-bold fx-fs-md mb-2">Otvoreni tiketi</div>
+    {% for t in open_tickets %}<div class="ticket-row"><div><strong>{{ t.ticket_number }}</strong> - {{ t.subject|truncatechars:50 }}<div class="fx-fs-sm fx-text-muted">{{ t.get_category_display }} | {{ t.created_at|date:"d.m.Y" }}</div></div><div class="d-flex fx-gap-2 align-items-center"><span class="hd-badge {{ t.status }}">{{ t.get_status_display }}</span><a href="{% url 'helpdesk_portal_ticket' token=token pk=t.pk %}" class="btn btn-sm btn-outline-primary fx-fs-sm">Otvori</a></div></div>{% endfor %}
   </div>{% endif %}
-  {% if resolved_tickets %}<div class="card"><div style="font-weight:700;font-size:.9rem;margin-bottom:10px">Rijeseni tiketi</div>
-    {% for t in resolved_tickets %}<div class="ticket-row"><div><strong>{{ t.ticket_number }}</strong> - {{ t.subject|truncatechars:50 }}<div style="font-size:.72rem;color:#64748b">{{ t.created_at|date:"d.m.Y" }}</div></div><div style="display:flex;gap:6px;align-items:center"><span class="hd-badge {{ t.status }}">{{ t.get_status_display }}</span><a href="{% url 'helpdesk_portal_ticket' token=token pk=t.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem">Detalji</a></div></div>{% endfor %}
+  {% if resolved_tickets %}<div class="card"><div class="fx-fw-bold fx-fs-md mb-2">Rijeseni tiketi</div>
+    {% for t in resolved_tickets %}<div class="ticket-row"><div><strong>{{ t.ticket_number }}</strong> - {{ t.subject|truncatechars:50 }}<div class="fx-fs-sm fx-text-muted">{{ t.created_at|date:"d.m.Y" }}</div></div><div class="d-flex fx-gap-2 align-items-center"><span class="hd-badge {{ t.status }}">{{ t.get_status_display }}</span><a href="{% url 'helpdesk_portal_ticket' token=token pk=t.pk %}" class="btn btn-sm btn-outline-secondary fx-fs-sm">Detalji</a></div></div>{% endfor %}
   </div>{% endif %}
-  {% if not open_tickets and not resolved_tickets %}<div class="card text-center py-5"><div style="font-size:2rem;margin-bottom:10px"><i class="fas fa-inbox" style="color:#94a3b8"></i></div><h5>Nemate tiketa</h5><p style="color:#64748b;font-size:.85rem">Kreirajte prvi tiket za podrsku.</p><a href="{% url 'helpdesk_portal_new' token=token %}" class="btn btn-primary btn-sm">Novi tiket</a></div>{% endif %}
+  {% if not open_tickets and not resolved_tickets %}<div class="card text-center py-5"><div class="fx-fs-icon mb-2"><i class="fas fa-inbox fx-text-dim"></i></div><h5>Nemate tiketa</h5><p class="fx-text-dim fx-fs-base">Kreirajte prvi tiket za podrsku.</p><a href="{% url 'helpdesk_portal_new' token=token %}" class="btn btn-primary btn-sm">Novi tiket</a></div>{% endif %}
 </div>
 </body></html>

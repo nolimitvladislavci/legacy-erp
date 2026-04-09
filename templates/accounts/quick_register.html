@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block title %}{% trans "Brza registracija" %} – LIMIT Connect{% endblock %}
 {% block content %}
-<div class="reg-card" style="max-width:480px;margin:0 auto">
+<div class="reg-card fx-m-auto" style="max-width:480px">
   <div class="reg-card-title">{% trans "Kreirajte račun" %}</div>
   <div class="reg-card-subtitle">{% trans "Brza registracija za klijente." %}</div>
 
@@ -34,12 +34,12 @@
     {% if errors.password %}<div class="error-msg">{{ errors.password }}</div>{% endif %}
   </div>
 
-  <div style="margin-top:1.5rem">
-    <button type="submit" class="reg-btn" style="width:100%;justify-content:center">{% trans "Registriraj se" %}</button>
+  <div class="fx-mt-6">
+    <button type="submit" class="reg-btn fx-w-full justify-content-center">{% trans "Registriraj se" %}</button>
   </div>
 
-  <div style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--muted)">
-    {% trans "Već imate račun?" %} <a href="/accounts/login/" style="color:var(--gold)">{% trans "Prijavite se" %}</a>
+  <div class="text-center fx-fs-base mt-3 fx-text-muted">
+    {% trans "Već imate račun?" %} <a href="/accounts/login/" class="fx-text-gold">{% trans "Prijavite se" %}</a>
   </div>
   </form>
 </div>

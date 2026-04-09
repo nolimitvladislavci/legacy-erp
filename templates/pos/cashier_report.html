@@ -24,7 +24,7 @@
 .rep-total-row .lbl{color:var(--muted)}
 .rep-total-row .val{color:var(--gold)}
 .rep-actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
-.rep-btn{background:var(--gold);color:#000;border:none;border-radius:8px;padding:.6rem 1.25rem;font-weight:700;font-size:.85rem;cursor:pointer;font-family:inherit}
+.rep-btn{background:var(--gold);color:var(--text);border:none;border-radius:8px;padding:.6rem 1.25rem;font-weight:700;font-size:.85rem;cursor:pointer;font-family:inherit}
 .rep-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem 1.25rem;font-size:.85rem;cursor:pointer;font-family:inherit;text-decoration:none}
 .rep-btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .rep-empty{text-align:center;padding:2rem;color:var(--muted)}
@@ -53,7 +53,7 @@
 
   {% if cashiers %}
     {% for c in cashiers %}
-    <div class="rep-card" style="margin-top:1rem">
+    <div class="rep-card mt-3">
       <div class="rep-card-head">
         <span class="rep-card-name">👤 {{ c.name }}</span>
         <span class="rep-card-total">{{ c.ukupno|floatformat:2 }} €</span>
@@ -77,7 +77,7 @@
     <div class="rep-empty">Nema računa u ovoj smjeni.</div>
   {% endif %}
 
-  <div class="rep-actions" style="margin-top:1rem">
+  <div class="rep-actions mt-3">
     <button class="rep-btn" onclick="window.print()">🖨️ Isprintaj</button>
     <a href="javascript:history.back()" class="rep-btn-ghost">← Nazad na POS</a>
   </div>

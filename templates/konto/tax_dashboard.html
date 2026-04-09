@@ -3,64 +3,47 @@
 {% block title %}Porezni pregled – LIMIT CONNECT{% endblock %}
 {% block page_title %}Porezni pregled svih firmi{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
-.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
-.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
-.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-stat{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.k-card{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
 .k-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
-.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table th{padding:8px 12px;text-align:left;color:var(--text-dim);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border2)}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:var(--text)}
 .k-table tr:hover{background:rgba(201,168,76,.05)}
 .k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
 .k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
 .k-filter .fld{display:flex;flex-direction:column;gap:3px}
-.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
-.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim)}
+.k-filter .fld select{padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface-deep);color:var(--text);font-size:.82rem}
 .k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-gold{background:var(--gold,#c9a84c);color:var(--text)}.k-btn-gold:hover{background:var(--gold)}
 .badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
-.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
-.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
-.badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b}
-.badge-gray{background:rgba(100,116,139,.15);color:#64748b}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-yellow{background:rgba(245,158,11,.15);color:var(--amber)}
+.badge-gray{background:rgba(100,116,139,.15);color:var(--text-dim)}
 .badge-gold{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
-.vat-pos{color:#ef4444}.vat-neg{color:#22c55e}
+.vat-pos{color:var(--red)}.vat-neg{color:var(--green)}
 </style>
 
-<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+<div class="fx-mb-3"><a href="{% url 'konto:dashboard' %}" class="fx-text-muted fx-no-underline fx-fs-note">&larr; Dashboard</a></div>
 
 <!-- SUMMARY STATS -->
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+<div class="fx-gap-3 d-grid mb-3 fx-grid-4-cols">
   <div class="k-stat">
-    <div><div class="lbl">Firme</div><div class="num" style="color:var(--gold,#c9a84c)">{{ company_count }}</div></div>
+    <div><div class="lbl">Firme</div><div class="num fx-text-gold">{{ company_count }}</div></div>
   </div>
   <div class="k-stat">
     <div><div class="lbl">Ukupna PDV obveza</div><div class="num {% if totals.obveza > 0 %}vat-pos{% else %}vat-neg{% endif %}">{{ totals.obveza|floatformat:2 }} &euro;</div></div>
   </div>
   <div class="k-stat">
-    <div><div class="lbl">Ukupni prihodi</div><div class="num" style="color:#22c55e">{{ totals.prihod|floatformat:2 }} &euro;</div></div>
+    <div><div class="lbl">Ukupni prihodi</div><div class="num fx-text-green">{{ totals.prihod|floatformat:2 }} &euro;</div></div>
   </div>
   <div class="k-stat">
     <div><div class="lbl">Aktivni alarmi</div><div class="num" style="color:{% if totals.alerts > 0 %}#ef4444{% else %}#22c55e{% endif %}">{{ totals.alerts }}</div></div>
@@ -68,7 +51,7 @@
 </div>
 
 <!-- FILTERS -->
-<form method="get" class="k-filter" style="margin-bottom:20px">
+<form method="get" class="k-filter mb-4">
   <div class="fld">
     <label>PDV Status</label>
     <select name="pdv_status" onchange="this.form.submit()">
@@ -91,7 +74,7 @@
 <div class="k-card">
   <div class="k-card-head">
     <h3>Porezni status po firmama</h3>
-    <span style="color:#64748b;font-size:.75rem">{{ company_count }} firmi</span>
+    <span class="fx-text-dim fx-fs-caption">{{ company_count }} firmi</span>
   </div>
   <table class="k-table">
     <thead>
@@ -109,7 +92,7 @@
     <tbody>
     {% for row in rows %}
     <tr>
-      <td><a href="{% url 'konto:report_vat' %}?calc=1&year=2026&month=3" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:600">{{ row.company.name }}</a></td>
+      <td><a href="{% url 'konto:report_vat' %}?calc=1&year=2026&month=3" class="fx-no-underline fx-fw-semibold fx-text-gold">{{ row.company.name }}</a></td>
       <td><span class="badge badge-gray">{{ row.business_type }}</span></td>
       <td>
         {% if row.pdv_status == 'obveznik' %}<span class="badge badge-gold">Obveznik</span>
@@ -120,7 +103,7 @@
       <td class="right mono {% if row.vat_payable > 0 %}vat-pos{% elif row.vat_payable < 0 %}vat-neg{% endif %}">
         {% if row.latest_period %}{{ row.vat_payable|floatformat:2 }} &euro;{% else %}&mdash;{% endif %}
       </td>
-      <td class="right mono" style="color:#22c55e">
+      <td class="right mono fx-text-green">
         {% if row.latest_period %}{{ row.total_revenue|floatformat:2 }} &euro;{% else %}&mdash;{% endif %}
       </td>
       <td>
@@ -134,7 +117,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px">Nema firmi za prikaz</td></tr>
+    <tr><td colspan="8" class="text-center fx-text-dim" style="padding:24px">Nema firmi za prikaz</td></tr>
     {% endfor %}
     </tbody>
   </table>

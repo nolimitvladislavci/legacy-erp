@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Staging — {{ batch.title|default:"Batch" }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -29,7 +12,7 @@
             <small class="text-muted">{{ batch.total_files }} fajlova — {{ batch.get_status_display }}</small>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'smart_import:review_dashboard' %}" class="btn btn-warning btn-sm">
+            <a href="{% url 'smart_import:review_dashboard' %}" class="btn-gold btn-sm">
                 <i class="fas fa-eye me-1"></i>Predkomora (pregled sumnjivih)
             </a>
             <a href="{% url 'smart_import:staging_upload' %}" class="btn btn-outline-secondary btn-sm">
@@ -76,13 +59,13 @@
     </div>
 
     <!-- AI Live Log -->
-    <div class="card border-0 shadow-sm mb-4" id="aiLogCard" {% if batch.status == 'pending' %}style="display:none"{% endif %}>
+    <div class="card border-0 shadow-sm mb-4 fx-hidden" id="aiLogCard" {% if batch.status == 'pending' %}{% endif %}>
         <div class="card-header bg-white">
             <h6 class="mb-0"><i class="fas fa-terminal me-2"></i>AI Log — razmišljanje na glas</h6>
         </div>
-        <div class="card-body p-0" style="max-height:300px;overflow-y:auto" id="aiLog">
+        <div class="card-body p-0 fx-scroll-y" style="max-height:300px" id="aiLog">
             {% if batch.last_message %}
-            <div class="px-3 py-2 border-bottom" style="font-size:0.88rem;color:#64748b">
+            <div class="px-3 py-2 border-bottom fx-fs-body fx-text-muted">
                 <i class="fas fa-robot me-1 text-primary"></i>{{ batch.last_message }}
             </div>
             {% endif %}
@@ -97,7 +80,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-sm mb-0">
-                    <thead class="table-light">
+                    <thead >
                         <tr><th>#</th><th>Naziv</th><th>Status</th><th>AI poruka</th><th>Obrađeno</th></tr>
                     </thead>
                     <tbody id="filesTable">
@@ -106,10 +89,10 @@
                             <td>{{ forloop.counter }}</td>
                             <td><small>{{ f.original_filename|truncatechars:40 }}</small></td>
                             <td>
-                                {% if f.status == 'done' %}<span class="badge bg-success">OK</span>
-                                {% elif f.status == 'error' %}<span class="badge bg-danger">Greška</span>
-                                {% elif f.status == 'processing' %}<span class="badge bg-info">Čita...</span>
-                                {% else %}<span class="badge bg-secondary">Čeka</span>{% endif %}
+                                {% if f.status == 'done' %}<span class="fenix-badge fenix-badge-success">OK</span>
+                                {% elif f.status == 'error' %}<span class="fenix-badge fenix-badge-danger">Greška</span>
+                                {% elif f.status == 'processing' %}<span class="fenix-badge fenix-badge-info">Čita...</span>
+                                {% else %}<span class="fenix-badge fenix-badge-muted">Čeka</span>{% endif %}
                             </td>
                             <td><small class="text-muted">{{ f.ai_message|default:"-" }}</small></td>
                             <td><small>{{ f.processed_at|date:"H:i:s"|default:"-" }}</small></td>

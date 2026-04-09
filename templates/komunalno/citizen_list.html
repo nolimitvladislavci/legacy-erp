@@ -4,7 +4,7 @@
 {% block title %}Građani — Iskaznice{% endblock %}
 
 {% block content %}
-<div style="max-width:1000px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:1000px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>Iskaznice građana</h4>
         <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-secondary">
@@ -43,9 +43,9 @@
                     <td data-label="Članovi">{{ card.household_members }}</td>
                     <td data-label="Status">
                         {% if card.is_active %}
-                        <span class="badge bg-success">Aktivna</span>
+                        <span class="fenix-badge fenix-badge-success">Aktivna</span>
                         {% else %}
-                        <span class="badge bg-danger">Neaktivna</span>
+                        <span class="fenix-badge fenix-badge-danger">Neaktivna</span>
                         {% endif %}
                     </td>
                     <td>

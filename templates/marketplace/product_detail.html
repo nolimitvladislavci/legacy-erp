@@ -4,30 +4,13 @@
 
 {% block title %}{{ product.name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <a href="{% url 'marketplace:catalog' %}" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
 <div class="row g-4">
   <div class="col-md-5">
-    <div class="stat-card" style="height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+    <div class="fenix-stat d-flex align-items-center justify-content-center fx-overflow-hidden" style="height:300px">
       {% if product.image_main %}<img src="{{ product.image_main.url }}" style="max-width:100%;max-height:100%;object-fit:contain">
       {% else %}<span style="font-size:5rem">&#x1f96c;</span>{% endif %}
     </div>
@@ -36,9 +19,9 @@
     <div class="stat-card p-4">
       <h3>{{ product.name }}</h3>
       <p class="text-muted"><i class="fas fa-tractor me-1"></i>{{ product.seller_company.name }}{% if product.origin_region %} &mdash; {{ product.origin_region }}{% endif %}</p>
-      {% if product.is_organic %}<span class="badge bg-success">Ekoloski</span>{% endif %}
-      {% if product.requires_cold_chain %}<span class="badge bg-info">Hladni lanac</span>{% endif %}
-      <h2 class="mt-3" style="color:var(--gold,#c9a84c)">{{ product.unit_price }}&euro; <small class="text-muted">/{{ product.unit }}</small></h2>
+      {% if product.is_organic %}<span class="fenix-badge fenix-badge-success">Ekoloski</span>{% endif %}
+      {% if product.requires_cold_chain %}<span class="fenix-badge fenix-badge-info">Hladni lanac</span>{% endif %}
+      <h2 class="mt-3 fx-text-gold">{{ product.unit_price }}&euro; <small class="text-muted">/{{ product.unit }}</small></h2>
       <p>{{ product.description }}</p>
       <form method="post" action="{% url 'marketplace:cart_add' %}" class="d-flex gap-2 mt-3">{% csrf_token %}
         <input type="hidden" name="product_id" value="{{ product.pk }}">
@@ -52,7 +35,7 @@
 <h5 class="mt-4">Slicni proizvodi</h5>
 <div class="row g-3">
   {% for p in related %}
-  <div class="col-md-3"><div class="stat-card p-3"><a href="{% url 'marketplace:product_detail' p.slug %}" style="color:var(--gold,#c9a84c)">{{ p.name }}</a><div>{{ p.unit_price }}&euro;/{{ p.unit }}</div></div></div>
+  <div class="col-md-3"><div class="stat-card p-3"><a href="{% url 'marketplace:product_detail' p.slug %}" class="fx-text-gold">{{ p.name }}</a><div>{{ p.unit_price }}&euro;/{{ p.unit }}</div></div></div>
   {% endfor %}
 </div>
 {% endif %}

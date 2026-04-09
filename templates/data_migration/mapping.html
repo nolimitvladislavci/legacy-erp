@@ -7,20 +7,20 @@
 {% block content %}
 <div class="container-fluid px-3 py-3" style="max-width:1100px">
 
-  <nav class="mb-3" style="font-size:.85rem">
-    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+  <nav class="mb-3 fx-fs-base">
+    <a href="{% url 'data_migration:dashboard' %}" class="fx-no-underline fx-text-cyan">
       <i class="fas fa-arrow-left me-1"></i>Svi projekti
     </a>
-    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+    <span class="fx-text-muted"> / {{ project.name }}</span>
   </nav>
 
   <div class="d-flex align-items-center justify-content-between mb-3">
-    <h4 class="mb-0"><i class="fas fa-columns me-2" style="color:var(--gold)"></i>Korak 2: Mapiranje polja</h4>
+    <h4 class="mb-0"><i class="fas fa-columns me-2 fx-text-gold"></i>Korak 2: Mapiranje polja</h4>
     <div>
       <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="autoMatchBtn">
         <i class="fas fa-magic me-1"></i>Auto-Match
       </button>
-      <span id="saveIndicator" class="small d-none" style="color:#059669">
+      <span id="saveIndicator" class="small d-none fx-text-green">
         <i class="fas fa-check-circle me-1"></i>Spremljeno
       </span>
     </div>
@@ -29,65 +29,65 @@
   <!-- Info kartica -->
   <div class="row g-2 mb-3">
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Datoteka</div>
-        <div class="fw-bold" style="color:var(--text)">{{ mf.original_filename|truncatechars:25 }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Datoteka</div>
+        <div class="fw-bold fx-text-body">{{ mf.original_filename|truncatechars:25 }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Redova</div>
-        <div class="fw-bold" style="color:var(--text)">{{ mf.row_count }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Redova</div>
+        <div class="fw-bold fx-text-body">{{ mf.row_count }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Kolona</div>
-        <div class="fw-bold" style="color:var(--text)">{{ detected_columns|length }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Kolona</div>
+        <div class="fw-bold fx-text-body">{{ detected_columns|length }}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
-        <div class="small" style="color:var(--text-muted)">Tip</div>
-        <div class="fw-bold" style="color:var(--text)">{{ project.get_entity_type_display }}</div>
+      <div class="fx-rounded text-center fx-bg-card fx-b fx-p-12">
+        <div class="small fx-text-muted">Tip</div>
+        <div class="fw-bold fx-text-body">{{ project.get_entity_type_display }}</div>
       </div>
     </div>
   </div>
 
   <!-- Mapping tablica -->
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="fx-rounded fx-bg-card fx-b fx-overflow-hidden">
     <div class="table-responsive">
-      <table class="table mb-0" style="color:var(--text)">
-        <thead style="background:var(--table-header-bg)">
+      <table class="table mb-0 fx-text-body">
+        <thead class="fx-bg-surface2">
           <tr>
-            <th style="color:var(--text-secondary);width:40%">Kolona iz datoteke</th>
-            <th style="color:var(--text-secondary);width:5%;text-align:center"><i class="fas fa-arrow-right"></i></th>
-            <th style="color:var(--text-secondary);width:40%">ERP polje</th>
-            <th style="color:var(--text-secondary);width:15%">Primjer</th>
+            <th class="fx-text-dim" style="width:40%">Kolona iz datoteke</th>
+            <th class="text-center fx-text-dim" style="width:5%"><i class="fas fa-arrow-right"></i></th>
+            <th class="fx-text-dim" style="width:40%">ERP polje</th>
+            <th class="fx-text-dim" style="width:15%">Primjer</th>
           </tr>
         </thead>
         <tbody id="mappingBody">
           {% for col in detected_columns %}
           <tr data-col="{{ col }}">
             <td class="fw-semibold align-middle">
-              <i class="fas fa-table me-2" style="color:var(--text-muted)"></i>{{ col }}
+              <i class="fas fa-table me-2 fx-text-muted"></i>{{ col }}
             </td>
-            <td class="text-center align-middle"><i class="fas fa-long-arrow-alt-right" style="color:var(--gold)"></i></td>
+            <td class="text-center align-middle"><i class="fas fa-long-arrow-alt-right fx-text-gold"></i></td>
             <td>
-              <select class="form-select form-select-sm mapping-select"
+              <select class="form-select form-select-sm mapping-select fx-text-body"
                       data-source-col="{{ col }}"
-                      style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+                      style="background:var(--input-bg);border-color:var(--input-border)">
                 <option value="">— Ne importiraj —</option>
                 {% for f in schema %}
                 <option value="{{ f.key }}"
                   {% if f.key == existing_mapping|default_if_none:"" %}selected{% endif %}
-                  {% if f.required %}style="font-weight:600"{% endif %}>
+                  {% if f.required %}class="fx-fw-semibold"{% endif %}>
                   {{ f.label }}{% if f.required %} *{% endif %}{% if f.hint %} ({{ f.hint }}){% endif %}
                 </option>
                 {% endfor %}
               </select>
             </td>
-            <td class="small align-middle" style="color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+            <td class="small align-middle fx-text-muted text-nowrap fx-overflow-hidden" style="max-width:150px;text-overflow:ellipsis"
                 data-sample-col="{{ col }}">
             </td>
           </tr>
@@ -116,11 +116,11 @@
   <!-- Sample preview -->
   {% if sample_table %}
   <div class="mt-4">
-    <h6 style="color:var(--text-muted)"><i class="fas fa-eye me-1"></i>Prvih {{ sample_table|length }} redova iz datoteke:</h6>
+    <h6 class="fx-text-muted"><i class="fas fa-eye me-1"></i>Prvih {{ sample_table|length }} redova iz datoteke:</h6>
     <div class="table-responsive" style="max-height:200px;overflow:auto">
-      <table class="table table-sm" style="font-size:.78rem;background:var(--bg-card);color:var(--text)">
-        <thead style="background:var(--table-header-bg)">
-          <tr>{% for col in detected_columns %}<th style="color:var(--text-secondary)">{{ col }}</th>{% endfor %}</tr>
+      <table class="table table-sm fx-fs-body-sm fx-text-body fx-bg-card">
+        <thead class="fx-bg-surface2">
+          <tr>{% for col in detected_columns %}<th class="fx-text-dim">{{ col }}</th>{% endfor %}</tr>
         </thead>
         <tbody>
           {% for row in sample_table %}

@@ -9,9 +9,9 @@
 <style>
 body{background:#0d0d1a;font-family:Barlow,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
 .portal-box{background:#1a1a2e;border:1px solid #c8a24e33;border-radius:16px;padding:2.5rem;max-width:400px;width:100%;text-align:center}
-.portal-box h2{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.5rem}
-.portal-box p{color:#888;font-size:.9rem}
-.portal-box a.btn{background:#c8a24e;color:#1a1a2e;font-weight:600;padding:.6rem 2rem;border-radius:8px;text-decoration:none;display:inline-block;margin-top:1rem}
+.portal-box h2{color:var(--gold);font-family:"Cormorant Garamond",serif;margin-bottom:.5rem}
+.portal-box p{color:var(--text-muted);font-size:.9rem}
+.portal-box a.btn{background:var(--gold);color:var(--text);font-weight:600;padding:.6rem 2rem;border-radius:8px;text-decoration:none;display:inline-block;margin-top:1rem}
 .portal-box a.btn:hover{background:#d4b05e}
 .logo{font-size:2.5rem;margin-bottom:1rem}
 </style>
@@ -21,7 +21,7 @@ body{background:#0d0d1a;font-family:Barlow,sans-serif;min-height:100vh;display:f
   <div class="logo">🏫</div>
   <h2>{{ company.name }}</h2>
   <p>Roditeljski portal</p>
-  <p style="color:#aaa;font-size:.85rem">Prijavite se kako biste vidjeli izvještaje, obavijesti i račune za vaše dijete.</p>
+  <p class="fx-text-muted fx-fs-base">Prijavite se kako biste vidjeli izvještaje, obavijesti i račune za vaše dijete.</p>
   <a href="/accounts/login/?next=/vrtic/{{ slug }}/portal/" class="btn">Prijava</a>
 </div>
 </body>

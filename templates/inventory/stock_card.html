@@ -7,8 +7,8 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="mb-0" style="font-weight:700">{{ item.name }}</h4>
-            <small style="color:var(--text-muted)">SKU: {{ item.sku|default:"-" }} | Kategorija: {{ item.get_category_display|default:item.category }} | Jedinica: {{ item.unit }}</small>
+            <h4 class="mb-0 fx-fw-bold">{{ item.name }}</h4>
+            <small class="fx-text-muted">SKU: {{ item.sku|default:"-" }} | Kategorija: {{ item.get_category_display|default:item.category }} | Jedinica: {{ item.unit }}</small>
         </div>
         <a href="{% url 'inventory:stock_overview' %}" class="btn btn-sm btn-outline-secondary">Nazad na pregled</a>
     </div>
@@ -16,46 +16,46 @@
     <!-- Summary cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card p-3" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)">Trenutno stanje</div>
-                <div style="font-size:1.8rem;font-weight:800;color:{% if current_balance > 0 %}#22c55e{% elif current_balance == 0 %}var(--text-muted){% else %}#ef4444{% endif %}">{{ current_balance }} {{ item.unit }}</div>
+            <div class="card p-3 fx-rounded fx-b" style="background:var(--card-bg)">
+                <div class="fx-fs-sm fx-text-muted fx-uppercase fx-ls-2">Trenutno stanje</div>
+                <div class="fx-fw-800" style="font-size:1.8rem;color:{% if current_balance > 0 %}#22c55e{% elif current_balance == 0 %}var(--text-muted){% else %}#ef4444{% endif %}">{{ current_balance }} {{ item.unit }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card p-3" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#22c55e">Ukupni ulaz</div>
-                <div style="font-size:1.4rem;font-weight:700">{{ total_in }} {{ item.unit }}</div>
-                <div style="font-size:.75rem;color:var(--text-muted)">{{ total_in_value|floatformat:2 }} EUR</div>
+            <div class="card p-3 fx-rounded fx-b" style="background:var(--card-bg)">
+                <div class="fx-fs-sm fx-text-green fx-uppercase fx-ls-2">Ukupni ulaz</div>
+                <div class="fx-fs-4xl fx-fw-bold">{{ total_in }} {{ item.unit }}</div>
+                <div class="fx-fs-caption fx-text-muted">{{ total_in_value|floatformat:2 }} EUR</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card p-3" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#ef4444">Ukupni izlaz</div>
-                <div style="font-size:1.4rem;font-weight:700">{{ total_out }} {{ item.unit }}</div>
-                <div style="font-size:.75rem;color:var(--text-muted)">{{ total_out_value|floatformat:2 }} EUR</div>
+            <div class="card p-3 fx-rounded fx-b" style="background:var(--card-bg)">
+                <div class="fx-fs-sm fx-text-red fx-uppercase fx-ls-2">Ukupni izlaz</div>
+                <div class="fx-fs-4xl fx-fw-bold">{{ total_out }} {{ item.unit }}</div>
+                <div class="fx-fs-caption fx-text-muted">{{ total_out_value|floatformat:2 }} EUR</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card p-3" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold)">Vrijednost zalihe</div>
-                <div style="font-size:1.4rem;font-weight:700">{{ item.selling_value|floatformat:2 }} EUR</div>
-                <div style="font-size:.75rem;color:var(--text-muted)">Nabavna: {{ item.purchase_price|floatformat:2 }} / Prodajna: {{ item.unit_price|floatformat:2 }}</div>
+            <div class="card p-3 fx-rounded fx-b" style="background:var(--card-bg)">
+                <div class="fx-fs-sm fx-text-gold fx-uppercase fx-ls-2">Vrijednost zalihe</div>
+                <div class="fx-fs-4xl fx-fw-bold">{{ item.selling_value|floatformat:2 }} EUR</div>
+                <div class="fx-fs-caption fx-text-muted">Nabavna: {{ item.purchase_price|floatformat:2 }} / Prodajna: {{ item.unit_price|floatformat:2 }}</div>
             </div>
         </div>
     </div>
 
     {% if boms %}
-    <div class="card mb-4 p-3" style="background:var(--card-bg);border:1px solid rgba(201,168,76,.3);border-radius:10px">
-        <div style="font-size:.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Normativ / Sastavnica (BOM)</div>
+    <div class="card mb-4 p-3 fx-rounded" style="background:var(--card-bg);border:1px solid rgba(201,168,76,.3)">
+        <div class="fx-fs-caption fx-fw-bold fx-text-gold mb-2 fx-uppercase fx-ls-2">Normativ / Sastavnica (BOM)</div>
         {% for bom in boms %}
-        <div style="margin-bottom:8px">
+        <div class="mb-2">
             <strong>{{ bom.name|default:bom }}</strong> (prinos: {{ bom.yield_quantity }} kom, cijena materijala: {{ bom.total_material_cost }} EUR)
-            <table class="table table-sm mt-1 mb-0" style="font-size:.78rem">
+            <table class="table table-sm mt-1 mb-0 fx-fs-body-sm">
                 <thead><tr><th>Materijal</th><th>Kolicina</th><th>Jedinica</th><th>Otpad %</th></tr></thead>
                 <tbody>
                 {% for bi in bom.items.all %}
                 <tr>
-                    <td><a href="{% url 'inventory:stock_card' bi.material.id %}" style="color:var(--gold)">{{ bi.material.name }}</a></td>
+                    <td><a href="{% url 'inventory:stock_card' bi.material.id %}" class="fx-text-gold">{{ bi.material.name }}</a></td>
                     <td>{{ bi.quantity }}</td>
                     <td>{{ bi.unit }}</td>
                     <td>{{ bi.waste_percent }}%</td>
@@ -69,26 +69,26 @@
     {% endif %}
 
     <!-- Date filter -->
-    <form method="get" class="d-flex gap-2 mb-3 align-items-end" style="font-size:.82rem">
+    <form method="get" class="d-flex gap-2 mb-3 align-items-end fx-fs-note">
         <div>
-            <label class="form-label mb-0" style="font-size:.7rem">Od</label>
-            <input type="date" name="from" value="{{ date_from }}" class="form-control form-control-sm" style="background:var(--card-bg);color:var(--text);border-color:var(--border)">
+            <label class="form-label mb-0 fx-fs-sm">Od</label>
+            <input type="date" name="from" value="{{ date_from }}" class="form-control form-control-sm fx-text-body fx-bc" style="background:var(--card-bg)">
         </div>
         <div>
-            <label class="form-label mb-0" style="font-size:.7rem">Do</label>
-            <input type="date" name="to" value="{{ date_to }}" class="form-control form-control-sm" style="background:var(--card-bg);color:var(--text);border-color:var(--border)">
+            <label class="form-label mb-0 fx-fs-sm">Do</label>
+            <input type="date" name="to" value="{{ date_to }}" class="form-control form-control-sm fx-text-body fx-bc" style="background:var(--card-bg)">
         </div>
-        <button type="submit" class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:600">Filtriraj</button>
+        <button type="submit" class="btn btn-sm fx-text-dark fx-fw-semibold fx-bg-gold">Filtriraj</button>
         {% if date_from or date_to %}<a href="?" class="btn btn-sm btn-outline-secondary">Reset</a>{% endif %}
     </form>
 
     <!-- Movements table -->
-    <div class="card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
+    <div class="card fx-rounded fx-b" style="background:var(--card-bg)">
         <div class="table-responsive">
-            <table class="table table-hover mb-0" style="font-size:.8rem">
+            <table class="table table-hover mb-0 fx-fs-compact">
                 <thead>
                     <tr style="border-bottom:2px solid var(--border)">
-                        <th style="padding:10px 14px">Datum</th>
+                        <th class="fx-p-10-14">Datum</th>
                         <th>Tip</th>
                         <th class="text-end">Kolicina</th>
                         <th class="text-end">Cijena</th>
@@ -100,26 +100,26 @@
                 </thead>
                 <tbody>
                     {% for e in entries %}
-                    <tr style="border-bottom:1px solid var(--border)">
-                        <td style="padding:8px 14px;white-space:nowrap">{{ e.date|date:"d.m.Y H:i" }}</td>
+                    <tr class="fx-bb">
+                        <td class="text-nowrap" style="padding:8px 14px">{{ e.date|date:"d.m.Y H:i" }}</td>
                         <td>
                             {% if e.type == 'in' %}
-                            <span class="badge bg-success" style="font-size:.65rem">ULAZ</span>
+                            <span class="fenix-badge fenix-badge-success fx-fs-xs">ULAZ</span>
                             {% else %}
-                            <span class="badge bg-danger" style="font-size:.65rem">IZLAZ</span>
+                            <span class="fenix-badge fenix-badge-danger fx-fs-xs">IZLAZ</span>
                             {% endif %}
                         </td>
-                        <td class="text-end" style="font-weight:600;color:{% if e.type == 'in' %}#22c55e{% else %}#ef4444{% endif %}">
+                        <td class="text-end fx-fw-semibold" style="color:{% if e.type == 'in' %}#22c55e{% else %}#ef4444{% endif %}">
                             {% if e.type == 'in' %}+{% else %}-{% endif %}{{ e.quantity }}
                         </td>
                         <td class="text-end">{{ e.unit_price|floatformat:2 }}</td>
                         <td class="text-end">{{ e.value|floatformat:2 }}</td>
-                        <td class="text-end" style="font-weight:700">{{ e.balance }}</td>
-                        <td style="color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis">{{ e.reason }}</td>
-                        <td style="color:var(--text-muted)">{% if e.performed_by %}{{ e.performed_by.get_full_name|default:e.performed_by.username }}{% endif %}</td>
+                        <td class="text-end fx-fw-bold">{{ e.balance }}</td>
+                        <td class="fx-text-muted fx-overflow-hidden" style="max-width:200px;text-overflow:ellipsis">{{ e.reason }}</td>
+                        <td class="fx-text-muted">{% if e.performed_by %}{{ e.performed_by.get_full_name|default:e.performed_by.username }}{% endif %}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="8" class="text-center py-4" style="color:var(--text-muted)">Nema kretanja za ovaj artikl</td></tr>
+                    <tr><td colspan="8" class="text-center py-4 fx-text-muted">Nema kretanja za ovaj artikl</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -7,7 +7,7 @@
 </div>
 
 {% if messages %}
-<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2 fx-fs-base">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
 {% endif %}
 
 <!-- Upload forma -->
@@ -17,11 +17,11 @@
     {% csrf_token %}
     <div class="row g-3 align-items-end">
       <div class="col-md-5">
-        <label class="form-label fw-bold" style="font-size:.8rem">P12 / PFX datoteka</label>
+        <label class="form-label fw-bold fx-fs-compact">P12 / PFX datoteka</label>
         <input type="file" name="cert_file" class="form-control" accept=".p12,.pfx" required>
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold" style="font-size:.8rem">Lozinka certifikata</label>
+        <label class="form-label fw-bold fx-fs-compact">Lozinka certifikata</label>
         <input type="password" name="cert_password" class="form-control" placeholder="Lozinka za .p12" required>
       </div>
       <div class="col-md-3">
@@ -37,7 +37,7 @@
   <h6 class="mb-3"><i class="fas fa-list me-2"></i>Učitani certifikati</h6>
   {% if certs %}
   <div class="table-responsive">
-    <table class="table table-sm align-middle" style="font-size:.85rem">
+    <table class="table table-sm align-middle fx-fs-base">
       <thead>
         <tr>
           <th>Naziv</th>
@@ -67,11 +67,11 @@
           </td>
           <td>
             {% if cert.is_valid and cert.is_active %}
-              <span class="badge bg-success">Aktivan</span>
+              <span class="fenix-badge fenix-badge-success">Aktivan</span>
             {% elif not cert.is_valid %}
-              <span class="badge bg-danger">Nevažeći</span>
+              <span class="fenix-badge fenix-badge-danger">Nevažeći</span>
             {% else %}
-              <span class="badge bg-secondary">Neaktivan</span>
+              <span class="fenix-badge fenix-badge-muted">Neaktivan</span>
             {% endif %}
           </td>
           <td>
@@ -113,16 +113,16 @@
   </div>
   {% else %}
   <div class="text-center py-5">
-    <i class="fas fa-certificate" style="font-size:3rem;color:#444"></i>
+    <i class="fas fa-certificate fx-fs-hero fx-text-muted"></i>
     <p class="text-muted mt-3">Nemate učitanih certifikata.</p>
-    <p class="text-muted" style="font-size:.85rem">Učitajte .p12 certifikat od FINA-e kako biste aktivirali fiskalizaciju.</p>
+    <p class="text-muted fx-fs-base">Učitajte .p12 certifikat od FINA-e kako biste aktivirali fiskalizaciju.</p>
   </div>
   {% endif %}
 </div>
 
 <div class="stat-card p-4 mt-4">
   <h6><i class="fas fa-info-circle text-info me-2"></i>Kako do certifikata?</h6>
-  <ol style="font-size:.85rem;color:#aaa">
+  <ol class="fx-fs-base fx-text-muted">
     <li>Pristupite <a href="https://www.fina.hr" target="_blank" class="text-warning">FINA-inoj web stranici</a></li>
     <li>Zatražite digitalni certifikat za fiskalizaciju (aplikacijski certifikat)</li>
     <li>Preuzmite .p12 datoteku i zapamtite lozinku</li>

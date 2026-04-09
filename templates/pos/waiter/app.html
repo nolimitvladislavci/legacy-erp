@@ -18,8 +18,8 @@
 .shift-info .status.off{color:var(--red,#ef4444)}
 .shift-info .timer{color:var(--muted);font-size:.68rem}
 .shift-btn{padding:.4rem .9rem;border-radius:8px;border:none;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit}
-.shift-btn.start{background:var(--green,#22c55e);color:#000}
-.shift-btn.end{background:var(--red,#ef4444);color:#fff}
+.shift-btn.start{background:var(--green,#22c55e);color:var(--text)}
+.shift-btn.end{background:var(--red,#ef4444);color:var(--white)}
 
 /* Heartbeat */
 .hb-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
@@ -54,13 +54,13 @@
 .oc-items span{color:var(--gold);font-weight:600;margin-right:2px}
 .oc-status{display:inline-block;font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase}
 .oc-status.new{background:rgba(201,168,76,.12);color:var(--gold)}
-.oc-status.preparing{background:rgba(245,158,11,.12);color:#f59e0b}
+.oc-status.preparing{background:rgba(245,158,11,.12);color:var(--amber)}
 .oc-status.ready{background:rgba(34,197,94,.12);color:var(--green,#22c55e)}
-.oc-status.delivering{background:rgba(59,130,246,.12);color:#3b82f6}
+.oc-status.delivering{background:rgba(59,130,246,.12);color:var(--blue)}
 .oc-actions{display:flex;gap:.4rem;margin-top:.5rem}
 .act-btn{flex:1;padding:.5rem;border-radius:8px;border:none;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit;transition:all .15s}
-.act-btn.claim{background:var(--green,#22c55e);color:#000}
-.act-btn.deliver{background:var(--gold);color:#000}
+.act-btn.claim{background:var(--green,#22c55e);color:var(--text)}
+.act-btn.deliver{background:var(--gold);color:var(--text)}
 .act-btn:active{opacity:.7}
 .act-btn:disabled{opacity:.3;cursor:not-allowed}
 .wa-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.88rem}
@@ -79,7 +79,7 @@
 .qr-overlay.show{display:flex}
 .qr-overlay h2{color:var(--gold);font-size:1.1rem;margin-bottom:.3rem}
 .qr-overlay .qr-table-name{font-size:.82rem;color:var(--muted);margin-bottom:1rem}
-.qr-overlay .qr-box{background:#fff;padding:1rem;border-radius:12px;margin-bottom:1rem}
+.qr-overlay .qr-box{background:var(--bg-card);padding:1rem;border-radius:12px;margin-bottom:1rem}
 .qr-overlay .qr-hint{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
 .qr-overlay .qr-close{background:var(--card,#1a1a1a);border:1px solid var(--border);color:var(--text);padding:.6rem 2rem;border-radius:8px;font-size:.88rem;cursor:pointer;font-family:inherit}
 .qr-overlay .qr-close:hover{border-color:var(--gold);color:var(--gold)}
@@ -133,7 +133,7 @@
   {% for o in my_orders %}
   <div class="order-card mine">
     <div class="oc-header">
-      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small style="color:var(--muted)">{{ o.table.floor }}</small>{% endif %}</span>
+      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small class="fx-text-muted">{{ o.table.floor }}</small>{% endif %}</span>
       <span class="oc-status delivering">{% trans "Nosim" %}</span>
     </div>
     {% if o.guest_name %}<div class="oc-guest">{{ o.guest_name }}</div>{% endif %}
@@ -150,7 +150,7 @@
   {% for o in available_orders %}
   <div class="order-card ready">
     <div class="oc-header">
-      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small style="color:var(--muted)">{{ o.table.floor }}</small>{% endif %}</span>
+      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small class="fx-text-muted">{{ o.table.floor }}</small>{% endif %}</span>
       <span class="oc-status ready">{% trans "Gotovo" %}</span>
     </div>
     {% if o.guest_name %}<div class="oc-guest">{{ o.guest_name }}</div>{% endif %}
@@ -187,7 +187,7 @@
   <div class="sec-title">{% trans "Odaberite stol za prikaz QR koda gostu" %}</div>
   {% regroup tables by floor as zones %}
   {% for zone in zones %}
-  <div class="sec-title" style="color:var(--muted)">{{ zone.grouper|default:"Bez zone" }}</div>
+  <div class="sec-title fx-text-muted">{{ zone.grouper|default:"Bez zone" }}</div>
   <div class="table-grid">
     {% for t in zone.list %}
     <div class="table-card {% if t.is_occupied %}occupied{% endif %}" onclick="showQR('{{ t.qr_code }}','{{ t.name|escapejs }}','{{ t.floor|escapejs }}')">

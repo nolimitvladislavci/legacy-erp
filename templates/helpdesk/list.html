@@ -1,79 +1,77 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Tiketi{% endblock %}
-{% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
-{% endblock %}
+{% block title %}{% trans "Tiketi" %}{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Tiketi</h2>
-        <a href="{% url 'helpdesk:create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Novi tiket</a>
+    <div class="fenix-page-header">
+        <h2>{% trans "Tiketi" %}</h2>
+        <a href="{% url 'helpdesk:create' %}" class="btn-gold"><i class="fas fa-plus"></i> {% trans "Novi tiket" %}</a>
     </div>
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="get" class="row g-2">
-                <div class="col-md-2">
-                    <select name="status" class="form-select"><option value="">-- Status --</option>
-                        {% for val, label in statuses %}<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="priority" class="form-select"><option value="">-- Prioritet --</option>
-                        {% for val, label in priorities %}<option value="{{ val }}" {% if current_priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="category" class="form-select"><option value="">-- Kategorija --</option>
-                        {% for val, label in categories %}<option value="{{ val }}" {% if current_category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="assigned" class="form-select"><option value="">-- Dodijeljen --</option>
-                        <option value="me" {% if current_assigned == 'me' %}selected{% endif %}>Moji tiketi</option>
-                        <option value="none" {% if current_assigned == 'none' %}selected{% endif %}>Nedodijeljeni</option>
-                    </select>
-                </div>
-                <div class="col-md-2"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Pretrazi..."></div>
-                <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Filtriraj</button></div>
-            </form>
-        </div>
+
+    <div class="fenix-filters">
+        <form method="get" class="row g-2">
+            <div class="col-md-2">
+                <select name="status" class="form-select"><option value="">-- {% trans "Status" %} --</option>
+                    {% for val, label in statuses %}<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select"><option value="">-- {% trans "Prioritet" %} --</option>
+                    {% for val, label in priorities %}<option value="{{ val }}" {% if current_priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select"><option value="">-- {% trans "Kategorija" %} --</option>
+                    {% for val, label in categories %}<option value="{{ val }}" {% if current_category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="assigned" class="form-select"><option value="">-- {% trans "Dodijeljen" %} --</option>
+                    <option value="me" {% if current_assigned == 'me' %}selected{% endif %}>{% trans "Moji tiketi" %}</option>
+                    <option value="none" {% if current_assigned == 'none' %}selected{% endif %}>{% trans "Nedodijeljeni" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="{% trans 'Pretraži...' %}"></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">{% trans "Filtriraj" %}</button></div>
+        </form>
     </div>
-    <div class="card">
+
+    <div class="fenix-table-wrap">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead><tr><th>Broj</th><th>Predmet</th><th>Klijent</th><th>Kategorija</th><th>Prioritet</th><th>Status</th><th>Dodijeljen</th><th>SLA</th><th></th></tr></thead>
+                <thead><tr>
+                    <th>{% trans "Broj" %}</th><th>{% trans "Predmet" %}</th><th>{% trans "Klijent" %}</th>
+                    <th>{% trans "Kategorija" %}</th><th>{% trans "Prioritet" %}</th><th>{% trans "Status" %}</th>
+                    <th>{% trans "Dodijeljen" %}</th><th>SLA</th><th></th>
+                </tr></thead>
                 <tbody>
                 {% for t in tickets %}
-                <tr class="{% if t.is_overdue %}table-danger{% endif %}">
-                    <td><a href="{% url 'helpdesk:detail' t.pk %}">{{ t.ticket_number }}</a></td>
+                <tr>
+                    <td><a href="{% url 'helpdesk:detail' t.pk %}" class="fw-bold text-decoration-none">{{ t.ticket_number }}</a></td>
                     <td>{{ t.subject|truncatewords:8 }}</td>
                     <td>{{ t.client|default:t.contact_name|default:"-" }}</td>
                     <td>{{ t.get_category_display }}</td>
-                    <td><span class="badge bg-{% if t.priority == 'critical' %}dark{% elif t.priority == 'urgent' %}danger{% elif t.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ t.get_priority_display }}</span></td>
-                    <td><span class="badge bg-{% if t.status == 'open' %}danger{% elif t.status == 'in_progress' %}primary{% elif t.status == 'resolved' %}success{% elif t.status == 'closed' %}secondary{% else %}warning{% endif %}">{{ t.get_status_display }}</span></td>
+                    <td>
+                        {% if t.priority == 'critical' %}<span class="fenix-badge fenix-badge-danger">{{ t.get_priority_display }}</span>
+                        {% elif t.priority == 'urgent' %}<span class="fenix-badge fenix-badge-danger">{{ t.get_priority_display }}</span>
+                        {% elif t.priority == 'high' %}<span class="fenix-badge fenix-badge-warning">{{ t.get_priority_display }}</span>
+                        {% else %}<span class="fenix-badge fenix-badge-muted">{{ t.get_priority_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.status == 'open' %}<span class="fenix-badge fenix-badge-danger">{{ t.get_status_display }}</span>
+                        {% elif t.status == 'in_progress' %}<span class="fenix-badge fenix-badge-info">{{ t.get_status_display }}</span>
+                        {% elif t.status == 'resolved' %}<span class="fenix-badge fenix-badge-success">{{ t.get_status_display }}</span>
+                        {% elif t.status == 'closed' %}<span class="fenix-badge fenix-badge-muted">{{ t.get_status_display }}</span>
+                        {% else %}<span class="fenix-badge fenix-badge-warning">{{ t.get_status_display }}</span>
+                        {% endif %}
+                    </td>
                     <td>{{ t.assigned_to|default:"-" }}</td>
-                    <td>{% if t.is_overdue %}<span class="badge bg-danger">SLA!</span>{% elif t.sla_deadline %}{{ t.sla_deadline|date:"d.m. H:i" }}{% else %}-{% endif %}</td>
-                    <td><a href="{% url 'helpdesk:detail' t.pk %}" class="btn btn-sm btn-outline-primary">Otvori</a></td>
+                    <td>{% if t.is_overdue %}<span class="fenix-badge fenix-badge-danger">SLA!</span>{% elif t.sla_deadline %}{{ t.sla_deadline|date:"d.m. H:i" }}{% else %}-{% endif %}</td>
+                    <td><a href="{% url 'helpdesk:detail' t.pk %}" class="btn btn-sm btn-ghost">{% trans "Otvori" %}</a></td>
                 </tr>
-                {% empty %}<tr><td colspan="9" class="text-center text-muted py-4">Nema tiketa</td></tr>{% endfor %}
+                {% empty %}<tr><td colspan="9" class="fenix-empty fx-p-6">{% trans "Nema tiketa" %}</td></tr>{% endfor %}
                 </tbody>
             </table>
         </div>

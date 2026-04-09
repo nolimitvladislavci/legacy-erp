@@ -3,87 +3,12 @@
 {% block title %}Narudžba #{{ order.order_number }}{% endblock %}
 {% block page_title %}Narudžba #{{ order.order_number }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h2 class="mb-0">#{{ order.order_number }}</h2>
-    <small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }} &middot;
-      <a href="{% url 'partners:detail' order.customer.pk %}">{{ order.customer.name }}</a>
-    </small>
-  </div>
-  <a href="{% url 'webshop:order_list' %}" class="btn btn-outline-secondary">
-    <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
-  </a>
-</div>
-
-<div class="row g-3">
-  <div class="col-md-8">
-    <div class="stat-card mb-3">
-      <h6 class="fw-bold mb-3"><i class="fas fa-list me-2"></i>{% trans "Stavke narudžbe" %}</h6>
-      <div class="table-responsive">
-        <table class="table mb-0">
-          <thead class="table-light"><tr><th>{% trans "Proizvod" %}</th><th class="text-center">{% trans "Kol." %}</th><th class="text-end">{% trans "Jed. cijena" %}</th><th class="text-end">{% trans "Ukupno" %}</th></tr></thead>
-          <tbody>
-            {% for item in items %}
-            <tr>
-              <td>
-                <div class="fw-semibold">{{ item.product.name }}</div>
-                <small class="text-muted">{{ item.product.sku }}</small>
-              </td>
-              <td class="text-center fw-bold">{{ item.quantity }}</td>
-              <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
-              <td class="text-end fw-bold">{{ item.total_price|floatformat:2 }} €</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" class="text-center text-muted">{% trans "Nema stavki." %}</td></tr>
-            {% endfor %}
-          </tbody>
-          <tfoot class="table-light">
-            <tr>
-              <td colspan="3" class="text-end fw-bold">{% trans "UKUPNO:" %}</td>
-              <td class="text-end fw-bold text-success" style="font-size:1.1rem">{{ order.total_amount|floatformat:2 }} €</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
+<!-- lang: topbar -->
     {% if order.notes %}
-    <div class="stat-card">
+    <div class="fenix-stat">
       <h6 class="fw-bold mb-2">{% trans "Napomene" %}</h6>
       <p class="text-muted mb-0">{{ order.notes }}</p>
     </div>
@@ -91,7 +16,7 @@
   </div>
 
   <div class="col-md-4">
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <h6 class="fw-bold mb-3">{% trans "Detalji" %}</h6>
       <div class="row g-2 small">
         <div class="col-6"><div class="label">{% trans "Kupac" %}</div>
@@ -105,7 +30,7 @@
       </div>
     </div>
 
-    <div class="stat-card">
+    <div class="fenix-stat">
       <h6 class="fw-bold mb-3">{% trans "Promijeni status" %}</h6>
       <form method="post" action="{% url 'webshop:order_status' order.pk %}">
         {% csrf_token %}

@@ -8,17 +8,17 @@
 
 <style>
 .gate-page{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 50px);background:var(--dark,#0a0a0f);padding:1rem}
-.gate-card{background:#111214;border:2px solid rgba(201,168,76,.35);border-radius:20px;width:440px;max-width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.gate-card{background:var(--bg-card);border:2px solid rgba(201,168,76,.35);border-radius:20px;width:440px;max-width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7)}
 .gate-logo{text-align:center;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid rgba(201,168,76,.15)}
 .gate-step{display:none;padding:1.5rem 1.5rem 1rem}
 .gate-step.active{display:block}
 .gate-step-num{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,.15);border:2px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem}
-.gate-title{text-align:center;color:#e2e8f0;font-size:1.15rem;font-weight:700;margin:0 0 .3rem}
-.gate-desc{text-align:center;color:#64748b;font-size:.82rem;margin:0 0 1.25rem}
+.gate-title{text-align:center;color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 .3rem}
+.gate-desc{text-align:center;color:var(--text-dim);font-size:.82rem;margin:0 0 1.25rem}
 
 /* Cashier grid */
 .gate-cashier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem}
-.gate-cashier-btn{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;color:#e2e8f0;font-family:inherit}
+.gate-cashier-btn{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;color:var(--text);font-family:inherit}
 .gate-cashier-btn:hover{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.06)}
 .gate-cashier-btn.selected{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.1);box-shadow:0 0 20px rgba(201,168,76,.15)}
 .gate-cashier-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,.3),rgba(201,168,76,.1));display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)}
@@ -27,26 +27,26 @@
 
 /* PIN */
 .gate-pin-display{text-align:center;font-size:2.2rem;letter-spacing:.6em;color:var(--gold,#c9a84c);min-height:3.2rem;display:flex;align-items:center;justify-content:center;margin-bottom:.5rem}
-.gate-pin-error{text-align:center;color:#f87171;font-size:.8rem;min-height:1.2rem;margin-bottom:.5rem}
+.gate-pin-error{text-align:center;color:var(--red);font-size:.8rem;min-height:1.2rem;margin-bottom:.5rem}
 .gate-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;max-width:260px;margin:0 auto 1rem}
-.gate-np-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;font-size:1.3rem;font-weight:700;border-radius:10px;min-height:56px;cursor:pointer;font-family:inherit;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.gate-np-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);font-size:1.3rem;font-weight:700;border-radius:10px;min-height:56px;cursor:pointer;font-family:inherit;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .gate-np-btn:active{background:rgba(201,168,76,.15);transform:scale(.95)}
-.gate-np-back{color:#f87171;font-size:1.1rem}
-.gate-np-ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#4ade80}
+.gate-np-back{color:var(--red);font-size:1.1rem}
+.gate-np-ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:var(--green)}
 
 /* Cash */
-.gate-cash-input{width:100%;padding:16px;background:#0a0a0a;border:2px solid rgba(201,168,76,.3);border-radius:12px;color:var(--gold,#c9a84c);font-size:2rem;font-weight:800;text-align:center;font-family:inherit;box-sizing:border-box;margin-bottom:.75rem}
+.gate-cash-input{width:100%;padding:16px;background:var(--bg);border:2px solid rgba(201,168,76,.3);border-radius:12px;color:var(--gold,#c9a84c);font-size:2rem;font-weight:800;text-align:center;font-family:inherit;box-sizing:border-box;margin-bottom:.75rem}
 .gate-cash-input:focus{outline:none;border-color:var(--gold,#c9a84c);box-shadow:0 0 20px rgba(201,168,76,.15)}
 .gate-cash-presets{display:flex;gap:.4rem;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap}
-.gate-cash-presets button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:.5rem .8rem;font-size:.85rem;cursor:pointer;font-weight:600;font-family:inherit;min-width:54px}
+.gate-cash-presets button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:8px;padding:.5rem .8rem;font-size:.85rem;cursor:pointer;font-weight:600;font-family:inherit;min-width:54px}
 .gate-cash-presets button:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
-.gate-open-btn{width:100%;padding:16px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:12px;font-size:1.15rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s}
+.gate-open-btn{width:100%;padding:16px;background:var(--gold,#c9a84c);color:var(--text);border:none;border-radius:12px;font-size:1.15rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s}
 .gate-open-btn:hover{filter:brightness(1.1)}
 .gate-open-btn:active{transform:scale(.98)}
 
 /* Nav */
-.gate-back-btn{display:block;margin:.75rem auto 0;background:none;border:none;color:#64748b;font-size:.82rem;cursor:pointer;padding:.5rem 1rem;font-family:inherit}
-.gate-back-btn:hover{color:#e2e8f0}
+.gate-back-btn{display:block;margin:.75rem auto 0;background:none;border:none;color:var(--text-dim);font-size:.82rem;cursor:pointer;padding:.5rem 1rem;font-family:inherit}
+.gate-back-btn:hover{color:var(--text)}
 .gate-dots{display:flex;gap:8px;justify-content:center;padding:.75rem 0 1rem}
 .gate-dot{width:10px;height:10px;border-radius:50%;background:#252830;transition:all .2s}
 .gate-dot.active{background:var(--gold,#c9a84c)}
@@ -66,9 +66,9 @@
       <img src="{{ terminal.company.logo.url }}" alt="{{ terminal.company.name }}"
            style="height:48px;max-width:160px;object-fit:contain">
       {% else %}
-      <div style="font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c)">{{ terminal.company.name }}</div>
+      <div class="fx-fs-3xl fx-fw-800 fx-text-gold">{{ terminal.company.name }}</div>
       {% endif %}
-      <div style="font-size:.78rem;color:#64748b;margin-top:4px">{{ terminal.name }}</div>
+      <div class="fx-fs-body-sm fx-text-dim mt-1">{{ terminal.name }}</div>
     </div>
 
     {# ── Korak 1: Odabir blagajnika ── #}
@@ -91,9 +91,9 @@
         {% endfor %}
       </div>
       {% else %}
-      <div style="text-align:center;padding:2rem">
-        <p style="color:#94a3b8;margin-bottom:1rem">{% trans "Nema registriranih blagajnika." %}</p>
-        <a href="/pos/settings/#cashiers" class="btn btn-gold" style="display:inline-flex;padding:10px 20px;background:var(--gold,#c9a84c);color:#000;border-radius:8px;font-weight:700;text-decoration:none">{% trans "Dodaj blagajnika" %}</a>
+      <div class="text-center fx-p-6">
+        <p class="fx-text-muted mb-3">{% trans "Nema registriranih blagajnika." %}</p>
+        <a href="/pos/settings/#cashiers" class="btn btn-gold fx-text-dark fx-rounded fx-fw-bold fx-no-underline d-inline-flex fx-bg-gold" style="padding:10px 20px">{% trans "Dodaj blagajnika" %}</a>
       </div>
       {% endif %}
     </div>

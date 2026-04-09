@@ -6,9 +6,9 @@
 .suklad-container{max-width:900px;margin:0 auto}
 .ts-card{background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem}
 .ts-status{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-.ts-pass{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
-.ts-fail{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
-.ts-pending{background:rgba(148,163,184,.1);color:#94a3b8;border:1px solid rgba(148,163,184,.2)}
+.ts-pass{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.ts-fail{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.ts-pending{background:rgba(148,163,184,.1);color:var(--text-muted);border:1px solid rgba(148,163,184,.2)}
 .ts-body{flex:1}
 .ts-title{font-weight:700;color:var(--text);font-size:.95rem}
 .ts-desc{font-size:.8rem;color:var(--text-dim,var(--text-muted));margin-top:2px}
@@ -28,16 +28,16 @@
 {% block content %}
 <div class="suklad-container">
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+<div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-3 fx-mb-6">
   <div>
-    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)">
-      <i class="fas fa-shield-alt me-2" style="color:var(--gold)"></i>Sukladnost — Digitalni Posrednik
+    <h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0">
+      <i class="fas fa-shield-alt me-2 fx-text-gold"></i>Sukladnost — Digitalni Posrednik
     </h2>
-    <small style="color:var(--text-dim)">Testni scenariji Porezne uprave za status informacijskog posrednika</small>
+    <small class="fx-text-dim">Testni scenariji Porezne uprave za status informacijskog posrednika</small>
   </div>
   <form method="POST" action="{% url 'eracun:sukladnost_run' %}">
     {% csrf_token %}
-    <button type="submit" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.6rem 1.5rem;font-size:.85rem;border:none;cursor:pointer">
+    <button type="submit" class="fx-text-dark fx-fw-bold fx-rounded fx-fs-base fx-border-none fx-pointer" style="background:linear-gradient(135deg,var(--gold),#a78b3d);padding:.6rem 1.5rem">
       <i class="fas fa-play me-1"></i>Pokreni test sukladnosti
     </button>
   </form>
@@ -45,14 +45,14 @@
 
 <!-- Score -->
 {% if last_run %}
-<div style="text-align:center;margin-bottom:2rem">
+<div class="text-center" style="margin-bottom:2rem">
   <div class="score-ring" style="border:4px solid {% if last_run.all_pass %}#22c55e{% elif last_run.score_pct >= 60 %}#f59e0b{% else %}#ef4444{% endif %}">
     <div class="val" style="color:{% if last_run.all_pass %}#22c55e{% elif last_run.score_pct >= 60 %}#f59e0b{% else %}#ef4444{% endif %}">{{ last_run.total_pass }}/5</div>
-    <div class="lbl" style="color:var(--text-dim)">{{ last_run.score_pct }}%</div>
+    <div class="lbl fx-text-dim">{{ last_run.score_pct }}%</div>
   </div>
-  <div style="font-size:.8rem;color:var(--text-dim)">Zadnji test: {{ last_run.started_at|date:"d.m.Y H:i" }}</div>
+  <div class="fx-fs-compact fx-text-dim">Zadnji test: {{ last_run.started_at|date:"d.m.Y H:i" }}</div>
   {% if last_run.all_pass %}
-  <div style="margin-top:.5rem;padding:.5rem 1rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;display:inline-block;color:#22c55e;font-weight:700;font-size:.85rem">
+  <div class="fx-rounded fx-text-green fx-fw-bold fx-fs-base mt-2 d-inline-block" style="padding:.5rem 1rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
     <i class="fas fa-check-circle me-1"></i>SPREMAN ZA PORTAL POREZNE UPRAVE
   </div>
   {% endif %}
@@ -69,7 +69,7 @@
     <div class="ts-title">TS-01: FINA Certifikat (mTLS)</div>
     <div class="ts-desc">P12 certifikat za pristup FINA servisima. Mutual TLS autentifikacija.</div>
     {% if d.ts01.subject %}<div class="ts-detail">{{ d.ts01.subject }} | {{ d.ts01.days_left }} dana do isteka</div>{% endif %}
-    {% if d.ts01.error %}<div class="ts-detail" style="color:#ef4444">{{ d.ts01.error }}</div>{% endif %}
+    {% if d.ts01.error %}<div class="ts-detail fx-text-red">{{ d.ts01.error }}</div>{% endif %}
   </div>
 </div>
 
@@ -81,7 +81,7 @@
     <div class="ts-title">TS-02: UBL 2.1 Generacija (CIUS-HR 2025)</div>
     <div class="ts-desc">XML eRačun prema hrvatskom profilu EN 16931.</div>
     {% if d.ts02.size %}<div class="ts-detail">{{ d.ts02.size }} bytes | CIUS: {{ d.ts02.cius }}</div>{% endif %}
-    {% if d.ts02.error %}<div class="ts-detail" style="color:#ef4444">{{ d.ts02.error }}</div>{% endif %}
+    {% if d.ts02.error %}<div class="ts-detail fx-text-red">{{ d.ts02.error }}</div>{% endif %}
   </div>
 </div>
 
@@ -92,7 +92,7 @@
   <div class="ts-body">
     <div class="ts-title">TS-03: XSD + Business Rules Validacija</div>
     <div class="ts-desc">EN 16931 schema validacija + PROPTER poslovni pravila.</div>
-    {% if d.ts03.error %}<div class="ts-detail" style="color:#ef4444">{{ d.ts03.error }}</div>{% endif %}
+    {% if d.ts03.error %}<div class="ts-detail fx-text-red">{{ d.ts03.error }}</div>{% endif %}
   </div>
 </div>
 
@@ -105,7 +105,7 @@
     <div class="ts-desc">ZKI generacija + SOAP XML-DSig → FINA CIS → JIR.</div>
     {% if d.ts04.demo %}<div class="ts-detail">Demo mode: {{ d.ts04.demo }}</div>{% endif %}
     {% if d.ts04.note %}<div class="ts-detail">{{ d.ts04.note }}</div>{% endif %}
-    {% if d.ts04.error %}<div class="ts-detail" style="color:#ef4444">{{ d.ts04.error }}</div>{% endif %}
+    {% if d.ts04.error %}<div class="ts-detail fx-text-red">{{ d.ts04.error }}</div>{% endif %}
   </div>
 </div>
 
@@ -117,14 +117,14 @@
     <div class="ts-title">TS-05: Inbox — primanje eRačuna</div>
     <div class="ts-desc">Zaprimanje ulaznih eRačuna od drugih subjekata.</div>
     {% if d.ts05.note %}<div class="ts-detail">{{ d.ts05.note }}</div>{% endif %}
-    {% if d.ts05.error %}<div class="ts-detail" style="color:#ef4444">{{ d.ts05.error }}</div>{% endif %}
+    {% if d.ts05.error %}<div class="ts-detail fx-text-red">{{ d.ts05.error }}</div>{% endif %}
   </div>
 </div>
 
 {% endwith %}
 {% else %}
-<div style="text-align:center;padding:3rem;color:var(--text-dim)">
-  <i class="fas fa-shield-alt" style="font-size:3rem;opacity:.2;display:block;margin-bottom:1rem"></i>
+<div class="text-center fx-text-dim fx-p-7">
+  <i class="fas fa-shield-alt fx-fs-hero d-block mb-3" style="opacity:.2"></i>
   <h5>Još nema testova</h5>
   <p>Kliknite "Pokreni test sukladnosti" za provjeru spremnosti.</p>
 </div>
@@ -133,25 +133,25 @@
 <!-- Povijest -->
 {% if runs.count > 1 %}
 <div style="margin-top:2rem">
-  <h5 style="font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem">
+  <h5 class="fx-fs-base fx-fw-bold fx-text-dim fx-uppercase fx-ls-1 fx-mb-4">
     <i class="fas fa-history me-2"></i>Povijest testiranja
   </h5>
   {% for r in runs %}
   <div class="history-row">
-    <span style="font-weight:700;color:{% if r.all_pass %}#22c55e{% else %}#f59e0b{% endif %}">{{ r.total_pass }}/5</span>
-    <span style="color:var(--text)">{{ r.started_at|date:"d.m.Y H:i" }}</span>
-    <span style="color:var(--text-dim)">{{ r.run_by.get_full_name|default:r.run_by.username }}</span>
-    {% if r.all_pass %}<span style="color:#22c55e;font-size:.72rem"><i class="fas fa-check-circle"></i> PASS</span>{% endif %}
+    <span class="fx-fw-bold" style="color:{% if r.all_pass %}#22c55e{% else %}#f59e0b{% endif %}">{{ r.total_pass }}/5</span>
+    <span class="fx-text-body">{{ r.started_at|date:"d.m.Y H:i" }}</span>
+    <span class="fx-text-dim">{{ r.run_by.get_full_name|default:r.run_by.username }}</span>
+    {% if r.all_pass %}<span class="fx-text-green fx-fs-sm"><i class="fas fa-check-circle"></i> PASS</span>{% endif %}
   </div>
   {% endfor %}
 </div>
 {% endif %}
 
 <!-- Info -->
-<div style="margin-top:2rem;padding:1rem;background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:12px;font-size:.8rem;color:var(--text-dim)">
-  <strong style="color:var(--gold)"><i class="fas fa-info-circle me-1"></i>Sljedeći korak:</strong>
+<div class="fx-rounded fx-fs-compact fx-text-dim fx-p-4 fx-b" style="margin-top:2rem;background:var(--surface,var(--bg-card))">
+  <strong class="fx-text-gold"><i class="fas fa-info-circle me-1"></i>Sljedeći korak:</strong>
   Kad svih 5 scenarija bude PASS, pristupite 
-  <a href="https://e-porezna.porezna-uprava.hr/" target="_blank" style="color:var(--gold)">Portalu za testiranje Porezne uprave</a>
+  <a href="https://e-porezna.porezna-uprava.hr/" target="_blank" class="fx-text-gold">Portalu za testiranje Porezne uprave</a>
   i pokrenite službeni test sukladnosti za dobivanje Potvrde o sukladnosti.
 </div>
 

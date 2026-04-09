@@ -10,7 +10,7 @@
 .form-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.75rem;align-items:end}
 .form-group label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.3rem}
 .form-group input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem .75rem;font-size:.9rem}
-.btn-create{background:var(--gold);color:#000;border:none;border-radius:6px;padding:.55rem 1.2rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-create{background:var(--gold);color:var(--text);border:none;border-radius:6px;padding:.55rem 1.2rem;font-weight:700;cursor:pointer;white-space:nowrap}
 .btn-create:hover{background:var(--gold2)}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:.75rem;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border)}
@@ -69,20 +69,20 @@ tr:hover td{background:var(--card)}
     <tbody>
       {% for v in vouchers %}
       <tr>
-        <td><strong style="color:var(--gold)">{{ v.code }}</strong></td>
+        <td><strong class="fx-text-gold">{{ v.code }}</strong></td>
         <td>{{ v.original_amount }} €</td>
         <td>{{ v.remaining }} €</td>
-        <td>{% if v.expiry_date %}{{ v.expiry_date }}{% else %}<span style="color:var(--muted)">—</span>{% endif %}</td>
+        <td>{% if v.expiry_date %}{{ v.expiry_date }}{% else %}<span class="fx-text-muted">—</span>{% endif %}</td>
         <td>{{ v.notes|default:"—" }}</td>
         <td>
           {% if not v.is_active %}<span class="badge badge-no">Iskorišten</span>
           {% elif v.is_expired %}<span class="badge badge-exp">Istekao</span>
           {% else %}<span class="badge badge-ok">Aktivan</span>{% endif %}
         </td>
-        <td style="color:var(--muted);font-size:.8rem">{{ v.created_at|date:"d.m.Y" }}</td>
+        <td class="fx-fs-compact fx-text-muted">{{ v.created_at|date:"d.m.Y" }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nema vaučera</td></tr>
+      <tr><td colspan="7" class="text-center fx-text-muted fx-p-6">Nema vaučera</td></tr>
       {% endfor %}
     </tbody>
   </table>

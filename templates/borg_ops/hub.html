@@ -7,12 +7,12 @@
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <div>
     <h4 class="mb-0 text-white">
-      <i class="fas fa-globe me-2" style="color:var(--gold,#c9a84c)"></i>
-      BORG Hub <span class="text-muted fw-normal" style="font-size:.85rem">— Command Center</span>
+      <i class="fas fa-globe me-2 fx-text-gold"></i>
+      BORG Hub <span class="text-muted fw-normal fx-fs-base">— Command Center</span>
     </h4>
     <div class="text-muted small mt-1">
       <i class="fas fa-clock me-1"></i>{{ now|date:"d.m.Y H:i" }}
-      <span class="ms-2 badge bg-secondary" style="font-size:.65rem">
+      <span class="ms-2 badge bg-secondary fx-fs-xs">
         <i class="fas fa-sync-alt me-1"></i>Auto-refresh: <span id="refresh-countdown">60</span>s
       </span>
     </div>
@@ -31,7 +31,7 @@
   <div>
     <strong>{{ alerts|length }} aktivnih upozorenja</strong>
     {% for a in alerts %}
-      <span class="badge bg-danger ms-2" style="font-size:.7rem">{{ a.signal_type }}: {{ a.message|truncatechars:40 }}</span>
+      <span class="badge bg-danger ms-2 fx-fs-sm">{{ a.signal_type }}: {{ a.message|truncatechars:40 }}</span>
     {% endfor %}
   </div>
 </div>
@@ -43,7 +43,7 @@
   <div>
     <strong>{{ interventions|length }} aktivnih intervencija</strong>
     {% for hi in interventions %}
-      <span class="badge bg-warning text-dark ms-2" style="font-size:.7rem">{{ hi.get_status_display }} — {{ hi.description|truncatechars:30 }}</span>
+      <span class="badge bg-warning text-dark ms-2 fx-fs-sm">{{ hi.get_status_display }} — {{ hi.description|truncatechars:30 }}</span>
     {% endfor %}
   </div>
 </div>
@@ -118,7 +118,7 @@
               <tbody>
               {% for s in upcoming_schedules %}
               <tr>
-                <td><i class="fas fa-mountain me-1 text-warning" style="font-size:.75rem"></i>{{ s.experience.name|truncatechars:30 }}</td>
+                <td><i class="fas fa-mountain me-1 text-warning fx-fs-caption"></i>{{ s.experience.name|truncatechars:30 }}</td>
                 <td>{{ s.date|date:"d.m." }}</td>
                 <td>{{ s.time_from|time:"H:i" }}–{{ s.time_to|time:"H:i" }}</td>
                 <td>{{ s.booked_pax }}/{{ s.max_pax }}</td>
@@ -142,7 +142,7 @@
                 <td>{{ b.schedule.experience.name|truncatechars:25 }}</td>
                 <td>{{ b.pax_count }}</td>
                 <td class="text-warning">{{ b.deposit_amount|floatformat:0 }}€</td>
-                <td><span class="badge bg-warning text-dark">Pending</span></td>
+                <td><span class="fenix-badge fenix-badge-warning">Pending</span></td>
               </tr>
               {% endfor %}
               </tbody>
@@ -170,9 +170,9 @@
                 <td>{{ inv.date_due|date:"d.m.Y"|default:"—" }}</td>
                 <td>
                   {% if inv.status == 'OVERDUE' %}
-                  <span class="badge bg-danger">Overdue</span>
+                  <span class="fenix-badge fenix-badge-danger">Overdue</span>
                   {% else %}
-                  <span class="badge bg-info">{{ inv.status }}</span>
+                  <span class="fenix-badge fenix-badge-info">{{ inv.status }}</span>
                   {% endif %}
                 </td>
               </tr>
@@ -195,13 +195,13 @@
               {% for lead in burza_active %}
               <tr>
                 <td>{{ lead.title|truncatechars:35 }}</td>
-                <td><span class="badge bg-secondary">{{ lead.category }}</span></td>
+                <td><span class="fenix-badge fenix-badge-muted">{{ lead.category }}</span></td>
                 <td>{{ lead.location|truncatechars:20 }}</td>
                 <td>
-                  {% if lead.status == 'NOVI_UPIT' %}<span class="badge bg-primary">Novi</span>
-                  {% elif lead.status == 'INTERNA_PROCJENA' %}<span class="badge bg-warning text-dark">Procjena</span>
-                  {% elif lead.status == 'NA_BURZI' %}<span class="badge bg-success">Na burzi</span>
-                  {% else %}<span class="badge bg-secondary">{{ lead.status }}</span>{% endif %}
+                  {% if lead.status == 'NOVI_UPIT' %}<span class="fenix-badge fenix-badge-info">Novi</span>
+                  {% elif lead.status == 'INTERNA_PROCJENA' %}<span class="fenix-badge fenix-badge-warning">Procjena</span>
+                  {% elif lead.status == 'NA_BURZI' %}<span class="fenix-badge fenix-badge-success">Na burzi</span>
+                  {% else %}<span class="fenix-badge fenix-badge-muted">{{ lead.status }}</span>{% endif %}
                 </td>
                 <td class="text-muted">{{ lead.created_at|date:"d.m." }}</td>
               </tr>
@@ -227,7 +227,7 @@
         <span class="text-muted small fw-semibold"><i class="fas fa-bolt me-1 text-warning"></i>Brze akcije</span>
       </div>
       <div class="card-body p-2">
-        <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr">
+        <div class="d-grid gap-2 fx-grid-2-equal">
           <a href="{% url 'work_orders:create' %}" class="btn btn-sm btn-outline-primary text-start">
             <i class="fas fa-plus me-1"></i>Novi WO
           </a>
@@ -248,9 +248,9 @@
     <div class="card bg-dark border-secondary">
       <div class="card-header bg-dark border-secondary py-2 d-flex justify-content-between align-items-center">
         <span class="text-muted small fw-semibold"><i class="fas fa-stream me-1 text-info"></i>Aktivnost — Live Feed</span>
-        <span class="badge bg-secondary" style="font-size:.6rem">zadnjih 20</span>
+        <span class="fenix-badge fenix-badge-muted fx-fs-2xs">zadnjih 20</span>
       </div>
-      <div class="card-body p-2" style="max-height:60vh;overflow-y:auto">
+      <div class="card-body p-2 fx-scroll-y" style="max-height:60vh">
         {% include "partials/_timeline.html" with activities=recent_activity %}
       </div>
     </div>
@@ -259,10 +259,10 @@
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<div class="text-center text-muted mt-4 pt-3 border-top border-secondary" style="font-size:.75rem">
+<div class="text-center text-muted mt-4 pt-3 border-top border-secondary fx-fs-caption">
   <i class="fas fa-sync-alt me-1"></i>Zadnje osvježenje: {{ now|date:"H:i:s" }}
   · Sljedeće za <span id="refresh-countdown-footer">60</span>s
-  · <a href="{% url 'borg_ops:borg_hub' %}" class="text-decoration-none" style="color:var(--gold,#c9a84c)">Osvježi sada</a>
+  · <a href="{% url 'borg_ops:borg_hub' %}" class="text-decoration-none fx-text-gold">Osvježi sada</a>
 </div>
 
 <!-- Auto-refresh -->

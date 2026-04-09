@@ -2,74 +2,57 @@
 {% load i18n %}
 {% block title %}Tretmani{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-spray-can"></i> Tretmani vocnjaka</h4>
-  <small style="color:var(--text-muted)">Prskanje, karencija, evidencija</small></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h4 class="fx-text-gold fx-m-0"><i class="fas fa-spray-can"></i> Tretmani vocnjaka</h4>
+  <small class="fx-text-muted">Prskanje, karencija, evidencija</small></div>
 </div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Tretmana</div>
+<div class="stats-grid d-grid fx-gap-2 mb-3 fx-grid-4-cols">
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800">{{ stats.ukupno|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Tretmana</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.karencija_ok|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Karencija OK</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-green">{{ stats.karencija_ok|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Karencija OK</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.u_karenciji|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">U karenciji</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-red">{{ stats.u_karenciji|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">U karenciji</div>
   </div>
-  <div class="stat-card" style="text-align:center;padding:.75rem">
-    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b">{{ stats.istice_7d|default:0 }}</div>
-    <div style="font-size:.72rem;color:var(--text-muted)">Istice 7d</div>
+  <div class="fenix-stat text-center fx-p-3">
+    <div class="fx-fs-3xl fx-fw-800 fx-text-amber">{{ stats.istice_7d|default:0 }}</div>
+    <div class="fx-fs-sm fx-text-muted">Istice 7d</div>
   </div>
 </div>
-<div class="card" style="border-radius:12px;border:1px solid var(--border)">
-  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+<div class="card fx-rounded fx-b">
+  <div class="fx-scroll-x"><div class="mobile-cards"><table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vocnjak</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Sredstvo</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Doza</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Karencija (dana)</th>
-      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Datum</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Vocnjak</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Sredstvo</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Doza</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Karencija (dana)</th>
+      <th class="fx-fs-sm text-start fx-text-muted fx-p-cell fx-bb">Status</th>
     </tr></thead>
     <tbody>
       {% for t in object_list %}
-      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ t.datum|date:"d.m.Y" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vocnjak">{{ t.vocnjak }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Sredstvo">{{ t.sredstvo }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Doza">{{ t.doza|default:"-" }}</td>
-        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Karencija">{{ t.karencija_dana|default:"-" }}</td>
-        <td style="padding:.5rem .6rem" data-label="Status">
-          {% if t.karencija_status == 'ok' %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">OK</span>
-          {% elif t.karencija_status == 'istice' %}<span style="color:#f59e0b;font-size:.78rem;font-weight:600">Istice {{ t.karencija_do|date:"d.m.Y" }}</span>
-          {% else %}<span style="color:#ef4444;font-size:.78rem;font-weight:600">U karenciji do {{ t.karencija_do|date:"d.m.Y" }}</span>{% endif %}
+      <tr class="fx-bb-subtle">
+        <td class="fx-fs-base fx-fw-semibold fx-p-cell" data-label="Datum">{{ t.datum|date:"d.m.Y" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Vocnjak">{{ t.vocnjak }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Sredstvo">{{ t.sredstvo }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Doza">{{ t.doza|default:"-" }}</td>
+        <td class="fx-fs-note fx-p-cell" data-label="Karencija">{{ t.karencija_dana|default:"-" }}</td>
+        <td class="fx-p-cell" data-label="Status">
+          {% if t.karencija_status == 'ok' %}<span class="fx-text-green fx-fs-body-sm fx-fw-semibold">OK</span>
+          {% elif t.karencija_status == 'istice' %}<span class="fx-text-amber fx-fs-body-sm fx-fw-semibold">Istice {{ t.karencija_do|date:"d.m.Y" }}</span>
+          {% else %}<span class="fx-text-red fx-fs-body-sm fx-fw-semibold">U karenciji do {{ t.karencija_do|date:"d.m.Y" }}</span>{% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema tretmana</td></tr>
+      <tr><td colspan="6" class="text-center fx-text-muted fx-p-6">Nema tretmana</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>

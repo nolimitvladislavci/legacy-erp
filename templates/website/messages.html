@@ -5,7 +5,7 @@
 {% block title %}Kontakt poruke — {{ site.site_title|default:site.company.name }}{% endblock %}
 
 {% block content %}
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+<div class="d-flex align-items-center justify-content-between fx-mb-6">
   <h1 class="page-title">Kontakt poruke</h1>
   <a href="{% url 'website:website_editor' %}" class="btn btn-outline-secondary">&#8592; Nazad na editor</a>
 </div>
@@ -15,23 +15,23 @@
     {% if messages %}
     {% for msg in messages %}
     <div class="msg-row">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
+      <div class="d-flex fx-flex-wrap justify-content-between align-items-start fx-gap-2">
         <div>
           <strong>{{ msg.name }}</strong>
-          {% if msg.phone %}<span style="font-size:.85rem;color:var(--muted);margin-left:.5rem">&#9742; {{ msg.phone }}</span>{% endif %}
+          {% if msg.phone %}<span class="fx-fs-base fx-text-muted" style="margin-left:.5rem">&#9742; {{ msg.phone }}</span>{% endif %}
         </div>
-        <a href="mailto:{{ msg.email }}" style="font-size:.9rem">{{ msg.email }}</a>
+        <a href="mailto:{{ msg.email }}" class="fx-fs-md">{{ msg.email }}</a>
       </div>
-      <p style="margin-top:.75rem;line-height:1.7">{{ msg.message|linebreaksbr }}</p>
+      <p class="fx-mt-4" style="line-height:1.7">{{ msg.message|linebreaksbr }}</p>
       <div class="msg-meta">
         {{ msg.created_at|date:"d.m.Y H:i" }}
       </div>
     </div>
     {% endfor %}
     {% else %}
-    <div style="text-align:center;padding:3rem;color:var(--muted)">
-      <div style="font-size:2rem">&#9993;</div>
-      <p style="margin-top:1rem">Nema kontakt poruka.</p>
+    <div class="text-center fx-text-muted fx-p-7">
+      <div class="fx-fs-icon">&#9993;</div>
+      <p class="mt-3">Nema kontakt poruka.</p>
     </div>
     {% endif %}
   </div>

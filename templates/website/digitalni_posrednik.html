@@ -44,7 +44,7 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 
 /* Architecture */
 .arch-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:20px 0;padding:20px;background:var(--card);border-radius:12px;border:1px solid var(--border)}
-.arch-step{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;min-width:90px}
+.arch-step{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;min-width:90px}
 .arch-step i{font-size:1.2rem;color:var(--gold);display:block;margin-bottom:4px}
 .arch-step span{font-size:.7rem;color:var(--text)}
 .arch-arrow{color:var(--gold);font-size:1.2rem}
@@ -52,7 +52,7 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 /* Checklist */
 .checklist{list-style:none;margin:16px 0}
 .checklist li{padding:10px 12px;margin-bottom:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.85rem;display:flex;align-items:center;gap:10px}
-.checklist li .num{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#000;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.checklist li .num{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--text);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
 .checklist li.done{opacity:.6;border-color:var(--green)}
 .checklist li.done .num{background:var(--green)}
 
@@ -78,11 +78,11 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 
 /* Print */
 @media print{
-  body{background:#fff;color:#000}
-  h1,h2,h3{color:#333}
-  .stat,.server-card,.law-card,.arch-flow{border-color:#ccc}
-  .stat .val,.law-card .year{color:#333}
-  .tl-dot{background:#333;border-color:#fff}
+  body{background:var(--bg-card);color:var(--text)}
+  h1,h2,h3{color:var(--text)}
+  .stat,.server-card,.law-card,.arch-flow{border-color:var(--text-muted)}
+  .stat .val,.law-card .year{color:var(--text)}
+  .tl-dot{background:#333;border-color:var(--white)}
 }
 
 /* Mobile */
@@ -139,7 +139,7 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 
     <div class="tl-item done"><div class="tl-dot"></div><div class="tl-date">Infrastruktura</div><div class="tl-title">MinIO S3 + Sandbox Strike</div><div class="tl-desc">MinIO Docker kontejner s propter-einvoice-archive bucketom. End-to-end test: certifikat → UBL → validacija → mTLS → submit = 6/6 PASS u 0.48 sekundi. DR backup/restore skripte (289 MB, 30s).</div></div>
 
-    <div class="tl-item"><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-date">Ceka</div><div class="tl-title">FINA Sandbox Live Test</div><div class="tl-desc">Pipeline spreman. Ceka API kljuc od posrednika (FINA ili Moj-eRacun.hr) za --live test s pravim FINA sandboxom.</div></div>
+    <div class="tl-item"><div class="tl-dot fx-bg-gold"></div><div class="tl-date">Ceka</div><div class="tl-title">FINA Sandbox Live Test</div><div class="tl-desc">Pipeline spreman. Ceka API kljuc od posrednika (FINA ili Moj-eRacun.hr) za --live test s pravim FINA sandboxom.</div></div>
 
     <div class="tl-item"><div class="tl-dot" style="background:var(--muted)"></div><div class="tl-date">Q3 2026</div><div class="tl-title">Faza 3 — Vlastiti Peppol AP</div><div class="tl-desc">Kad sustav predje 200 firmi: phase4 Java microservice (256 MB), SMP/SML registracija, ISO 27001 gap analysis.</div></div>
 
@@ -155,15 +155,15 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
     <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
     <div class="arch-step"><i class="fas fa-code"></i><span>UBL 2.1</span></div>
     <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
-    <div class="arch-step"><i class="fas fa-shield-alt"></i><span>Validator<br><small style="color:var(--green)">3 stupnja</small></span></div>
+    <div class="arch-step"><i class="fas fa-shield-alt"></i><span>Validator<br><small class="fx-text-green">3 stupnja</small></span></div>
     <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
-    <div class="arch-step"><i class="fas fa-route"></i><span>Router<br><small style="color:var(--muted)">4 kanala</small></span></div>
+    <div class="arch-step"><i class="fas fa-route"></i><span>Router<br><small class="fx-text-muted">4 kanala</small></span></div>
     <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
-    <div class="arch-step"><i class="fas fa-paper-plane"></i><span>FINA<br><small style="color:var(--blue)">Posrednik</small></span></div>
+    <div class="arch-step"><i class="fas fa-paper-plane"></i><span>FINA<br><small class="fx-text-blue">Posrednik</small></span></div>
     <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
-    <div class="arch-step"><i class="fas fa-archive"></i><span>S3 Arhiva<br><small style="color:var(--green)">SHA-256</small></span></div>
+    <div class="arch-step"><i class="fas fa-archive"></i><span>S3 Arhiva<br><small class="fx-text-green">SHA-256</small></span></div>
   </div>
-  <p style="font-size:.82rem;color:var(--muted);text-align:center;margin-top:12px">
+  <p class="fx-fs-note text-center fx-text-muted mt-3">
     Smart Mailbox (ulazni): Primanje → AI klasifikacija → One-click proknjizi → Arhiva
   </p>
 </section>
@@ -182,7 +182,7 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
         <tr><td>Servisi</td><td>Gunicorn, Celery, PostgreSQL, Redis, Nginx, MinIO, WAHA</td></tr>
         <tr><td>Firmi</td><td>78 aktivnih / 200 max</td></tr>
         <tr><td>Backup</td><td>289 MB, &lt;30 sekundi</td></tr>
-        <tr><td>Status</td><td style="color:var(--green)">ACTIVE</td></tr>
+        <tr><td>Status</td><td class="fx-text-green">ACTIVE</td></tr>
       </table>
     </div>
     <div class="server-card">
@@ -195,7 +195,7 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
         <tr><td>Servisi</td><td>Isti stack + phase4 AP</td></tr>
         <tr><td>Kapacitet</td><td>1.500+ firmi</td></tr>
         <tr><td>Migracija</td><td>backup → scp → restore (15 min)</td></tr>
-        <tr><td>Status</td><td style="color:var(--gold)">PLANIRANO</td></tr>
+        <tr><td>Status</td><td class="fx-text-gold">PLANIRANO</td></tr>
       </table>
     </div>
   </div>
@@ -204,14 +204,14 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 <!-- ZA MARIJU -->
 <section>
   <h2><i class="fas fa-tasks"></i> Marijine Zadace</h2>
-  <p style="font-size:.9rem;color:var(--muted);margin-bottom:16px">Tehnika je spremna. Ovo su koraci koje treba odraditi da sustav prodje u produkciju:</p>
+  <p class="fx-fs-md fx-text-muted mb-3">Tehnika je spremna. Ovo su koraci koje treba odraditi da sustav prodje u produkciju:</p>
   <ul class="checklist">
-    <li><div class="num">1</div><div><strong>API kljuc za eRacun sandbox</strong><br><span style="color:var(--muted);font-size:.78rem">Registrirati se na FINA eRacun test portal ili Moj-eRacun.hr. Dobiti API kljuc i unijeti ga u sustav. Bez toga ne mozemo slati prave e-racune.</span></div></li>
-    <li><div class="num">2</div><div><strong>T&C suglasnost — 78 firmi</strong><br><span style="color:var(--muted);font-size:.78rem">Svaka firma mora potpisati Uvjete koristenja. Trenutno: 0/78 potpisanih. Pokrenuti potpisivanje s Konjik d.o.o. kao prvom firmom.</span></div></li>
-    <li><div class="num">3</div><div><strong>Testno slanje prvog e-racuna</strong><br><span style="color:var(--muted);font-size:.78rem">Kad API kljuc stigne: python manage.py test_fina_sandbox --live. Ako prodje — spremni smo za produkciju.</span></div></li>
-    <li><div class="num">4</div><div><strong>Verifikacija 469 partnera</strong><br><span style="color:var(--muted);font-size:.78rem">Na /partners/verify-buyer-type/ — partneri koji cekaju klasifikaciju (B2B/B2G/udruga). Potrebno za ispravno rutiranje e-racuna.</span></div></li>
-    <li><div class="num">5</div><div><strong>3 beta iznajmljivaca (rental modul)</strong><br><span style="color:var(--muted);font-size:.78rem">Kontaktirati iznajmljivace za beta testiranje. Sezona pocinje za 2 tjedna. Ivan priprema WhatsApp kampanju.</span></div></li>
-    <li><div class="num">6</div><div><strong>Niksa/Dragan — 2FA aktivacija</strong><br><span style="color:var(--muted);font-size:.78rem">WhatsApp poslan 23.03.2026. Cekamo potvrdu za aktivaciju dvofaktorske autentifikacije.</span></div></li>
+    <li><div class="num">1</div><div><strong>API kljuc za eRacun sandbox</strong><br><span class="fx-fs-body-sm fx-text-muted">Registrirati se na FINA eRacun test portal ili Moj-eRacun.hr. Dobiti API kljuc i unijeti ga u sustav. Bez toga ne mozemo slati prave e-racune.</span></div></li>
+    <li><div class="num">2</div><div><strong>T&C suglasnost — 78 firmi</strong><br><span class="fx-fs-body-sm fx-text-muted">Svaka firma mora potpisati Uvjete koristenja. Trenutno: 0/78 potpisanih. Pokrenuti potpisivanje s Konjik d.o.o. kao prvom firmom.</span></div></li>
+    <li><div class="num">3</div><div><strong>Testno slanje prvog e-racuna</strong><br><span class="fx-fs-body-sm fx-text-muted">Kad API kljuc stigne: python manage.py test_fina_sandbox --live. Ako prodje — spremni smo za produkciju.</span></div></li>
+    <li><div class="num">4</div><div><strong>Verifikacija 469 partnera</strong><br><span class="fx-fs-body-sm fx-text-muted">Na /partners/verify-buyer-type/ — partneri koji cekaju klasifikaciju (B2B/B2G/udruga). Potrebno za ispravno rutiranje e-racuna.</span></div></li>
+    <li><div class="num">5</div><div><strong>3 beta iznajmljivaca (rental modul)</strong><br><span class="fx-fs-body-sm fx-text-muted">Kontaktirati iznajmljivace za beta testiranje. Sezona pocinje za 2 tjedna. Ivan priprema WhatsApp kampanju.</span></div></li>
+    <li><div class="num">6</div><div><strong>Niksa/Dragan — 2FA aktivacija</strong><br><span class="fx-fs-body-sm fx-text-muted">WhatsApp poslan 23.03.2026. Cekamo potvrdu za aktivaciju dvofaktorske autentifikacije.</span></div></li>
   </ul>
 </section>
 
@@ -234,78 +234,78 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 <!-- GOVEXPORT STANDARD -->
 <section style="margin-top:60px">
   <h2><i class="fas fa-shield-alt"></i> GovExport Standard — Kriptografski Trezor</h2>
-  <p style="color:var(--muted);margin-bottom:24px">
+  <p class="fx-text-muted mb-4">
     LIMIT Connect uvodi novi standard za komunikaciju s državnim institucijama. 
     Umjesto krhkih live konekcija, koristimo <strong>potpisane XML dokumente</strong> — 
     ista logika kao fiskalizacija računa, ali za sve izvještaje.
   </p>
 
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px">
-    <h3 style="font-size:1.3rem;margin-bottom:16px"><i class="fas fa-cogs" style="color:var(--blue)"></i> Kako funkcionira</h3>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;text-align:center">
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-file-code" style="color:var(--gold);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Generate<br>XML</div></div>
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-check-double" style="color:var(--green);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Validate<br>XSD</div></div>
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-signature" style="color:var(--gold2);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Sign<br>XAdES</div></div>
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-clock" style="color:var(--blue);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Timestamp<br>TSA</div></div>
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-paper-plane" style="color:var(--green);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Send<br>Transport</div></div>
-      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-stamp" style="color:var(--gold);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Confirm<br>Potvrda</div></div>
+  <div class="fx-rounded-lg mb-4 fx-b fx-bg-card" style="padding:28px">
+    <h3 class="fx-fs-3xl mb-3"><i class="fas fa-cogs fx-text-blue"></i> Kako funkcionira</h3>
+    <div class="fx-gap-2 text-center d-grid mb-3" style="grid-template-columns:repeat(6,1fr)">
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-file-code fx-fs-2xl fx-text-gold"></i><div class="fx-fs-sm mt-1 fx-text-muted">Generate<br>XML</div></div>
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-check-double fx-fs-2xl fx-text-green"></i><div class="fx-fs-sm mt-1 fx-text-muted">Validate<br>XSD</div></div>
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-signature fx-fs-2xl" style="color:var(--gold2)"></i><div class="fx-fs-sm mt-1 fx-text-muted">Sign<br>XAdES</div></div>
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-clock fx-fs-2xl fx-text-blue"></i><div class="fx-fs-sm mt-1 fx-text-muted">Timestamp<br>TSA</div></div>
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-paper-plane fx-fs-2xl fx-text-green"></i><div class="fx-fs-sm mt-1 fx-text-muted">Send<br>Transport</div></div>
+      <div class="fx-bg-surface2 fx-rounded" style="padding:12px 8px"><i class="fas fa-stamp fx-fs-2xl fx-text-gold"></i><div class="fx-fs-sm mt-1 fx-text-muted">Confirm<br>Potvrda</div></div>
     </div>
-    <p style="font-size:.82rem;color:var(--muted)">Svaki dokument je potpisan, hashiran (SHA-256), vremenski žigosan (RFC 3161) i auditiran. 
+    <p class="fx-fs-note fx-text-muted">Svaki dokument je potpisan, hashiran (SHA-256), vremenski žigosan (RFC 3161) i auditiran. 
     Država ga može preuzeti danas, sutra ili za 3 godine — matematika garantira neizmjenjivost.</p>
   </div>
 
   <!-- 3 Standarda -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #4caf7d">
-      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-leaf" style="color:#4caf7d"></i> Agro-Fiskalizacija</h3>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Veterinarski zapisi, karenca lijekova, mortalitet peradi, nesenje jaja — potpisan XML za HAPIH i sanitarnu inspekciju.</p>
-      <a href="/static/schemas/agro-health-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+  <div class="fx-gap-4 d-grid mb-4" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+    <div class="fx-rounded-lg fx-b fx-p-20 fx-bg-card" style="border-top:3px solid #4caf7d">
+      <h3 class="mb-2" style="font-size:1.05rem"><i class="fas fa-leaf" style="color:#4caf7d"></i> Agro-Fiskalizacija</h3>
+      <p class="fx-fs-compact fx-text-muted mb-3">Veterinarski zapisi, karenca lijekova, mortalitet peradi, nesenje jaja — potpisan XML za HAPIH i sanitarnu inspekciju.</p>
+      <a href="/static/schemas/agro-health-v1.0.xsd" class="fx-fs-caption fx-text-gold"><i class="fas fa-download"></i> XSD Shema</a>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #3b82f6">
-      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-plane-arrival" style="color:#3b82f6"></i> Turistički ZKI</h3>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Asinkrona prijava gostiju s lokalnim ZKI kodom. Radi bez eVisitora — kriptografski dokaz vremena prijave.</p>
-      <a href="/static/schemas/tourist-registration-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+    <div class="fx-rounded-lg fx-b fx-p-20 fx-bg-card" style="border-top:3px solid #3b82f6">
+      <h3 class="mb-2" style="font-size:1.05rem"><i class="fas fa-plane-arrival fx-text-blue"></i> Turistički ZKI</h3>
+      <p class="fx-fs-compact fx-text-muted mb-3">Asinkrona prijava gostiju s lokalnim ZKI kodom. Radi bez eVisitora — kriptografski dokaz vremena prijave.</p>
+      <a href="/static/schemas/tourist-registration-v1.0.xsd" class="fx-fs-caption fx-text-gold"><i class="fas fa-download"></i> XSD Shema</a>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #e8c96a">
-      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-warehouse" style="color:#e8c96a"></i> Forenzika Zaliha</h3>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Mjesečni snapshot inventara — artikli, LOT šarže, kretanja, SplitAllocation. Skladišna fiskalizacija.</p>
-      <a href="/static/schemas/inventory-ledger-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+    <div class="fx-rounded-lg fx-b fx-p-20 fx-bg-card" style="border-top:3px solid #e8c96a">
+      <h3 class="mb-2" style="font-size:1.05rem"><i class="fas fa-warehouse fx-text-gold"></i> Forenzika Zaliha</h3>
+      <p class="fx-fs-compact fx-text-muted mb-3">Mjesečni snapshot inventara — artikli, LOT šarže, kretanja, SplitAllocation. Skladišna fiskalizacija.</p>
+      <a href="/static/schemas/inventory-ledger-v1.0.xsd" class="fx-fs-caption fx-text-gold"><i class="fas fa-download"></i> XSD Shema</a>
     </div>
   </div>
 
   <!-- Alati -->
-  <div style="background:var(--card);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:24px;margin-bottom:20px">
-    <h3 style="font-size:1.1rem;margin-bottom:12px"><i class="fas fa-tools" style="color:var(--gold)"></i> Javni Alati</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-      <a href="/hr/gov-export/validator/" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
-        <i class="fas fa-shield-alt" style="color:var(--gold);font-size:1.3rem"></i>
-        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">CroXML Verify</div><div style="color:var(--muted);font-size:.72rem">Javna provjera kriptografskog potpisa</div></div>
+  <div class="fx-rounded-lg mb-4 fx-bg-card" style="border:1px solid rgba(201,168,76,.2);padding:24px">
+    <h3 class="fx-fs-xl mb-3"><i class="fas fa-tools fx-text-gold"></i> Javni Alati</h3>
+    <div class="fx-gap-3 d-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <a href="/hr/gov-export/validator/" class="d-flex fx-gap-3 fx-bg-surface2 fx-rounded fx-no-underline align-items-center" style="padding:14px;border:1px solid #2a2a3e">
+        <i class="fas fa-shield-alt fx-fs-3xl fx-text-gold"></i>
+        <div><div class="fx-fw-semibold fx-fs-body fx-text-body">CroXML Verify</div><div class="fx-fs-sm fx-text-muted">Javna provjera kriptografskog potpisa</div></div>
       </a>
-      <a href="/static/schemas/" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
-        <i class="fas fa-file-alt" style="color:var(--blue);font-size:1.3rem"></i>
-        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">XSD Sheme</div><div style="color:var(--muted);font-size:.72rem">Javne definicije formata (MIT)</div></div>
+      <a href="/static/schemas/" class="d-flex fx-gap-3 fx-bg-surface2 fx-rounded fx-no-underline align-items-center" style="padding:14px;border:1px solid #2a2a3e">
+        <i class="fas fa-file-alt fx-fs-3xl fx-text-blue"></i>
+        <div><div class="fx-fw-semibold fx-fs-body fx-text-body">XSD Sheme</div><div class="fx-fs-sm fx-text-muted">Javne definicije formata (MIT)</div></div>
       </a>
-      <a href="https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/validation" target="_blank" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
-        <i class="fas fa-globe-europe" style="color:#22c55e;font-size:1.3rem"></i>
-        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">EU DSS Validator</div><div style="color:var(--muted);font-size:.72rem">Neovisna verifikacija (EU)</div></div>
+      <a href="https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/validation" target="_blank" class="d-flex fx-gap-3 fx-bg-surface2 fx-rounded fx-no-underline align-items-center" style="padding:14px;border:1px solid #2a2a3e">
+        <i class="fas fa-globe-europe fx-text-green fx-fs-3xl"></i>
+        <div><div class="fx-fw-semibold fx-fs-body fx-text-body">EU DSS Validator</div><div class="fx-fs-sm fx-text-muted">Neovisna verifikacija (EU)</div></div>
       </a>
     </div>
   </div>
 
   <!-- Tehnička specifikacija -->
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px">
-    <h3 style="font-size:1.1rem;margin-bottom:12px"><i class="fas fa-microchip" style="color:var(--gold)"></i> Tehnička Specifikacija</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.82rem">
-      <div><span style="color:var(--muted)">Potpis:</span> <strong>XAdES-T</strong> (eIDAS)</div>
-      <div><span style="color:var(--muted)">Hash:</span> <strong>SHA-256</strong></div>
-      <div><span style="color:var(--muted)">Timestamp:</span> <strong>RFC 3161</strong> (FINA TSA)</div>
-      <div><span style="color:var(--muted)">Format:</span> <strong>XML + XSD</strong></div>
-      <div><span style="color:var(--muted)">Certifikat:</span> <strong>FINA X.509</strong></div>
-      <div><span style="color:var(--muted)">Transport:</span> <strong>SOAP / REST / AS4</strong></div>
-      <div><span style="color:var(--muted)">Validacija:</span> <strong>EN 16931 + CIUS-HR</strong></div>
-      <div><span style="color:var(--muted)">Licenca:</span> <strong>MIT (sheme)</strong></div>
+  <div class="fx-rounded-lg fx-b fx-bg-card" style="padding:24px">
+    <h3 class="fx-fs-xl mb-3"><i class="fas fa-microchip fx-text-gold"></i> Tehnička Specifikacija</h3>
+    <div class="fx-gap-3 fx-fs-note d-grid fx-grid-2-equal">
+      <div><span class="fx-text-muted">Potpis:</span> <strong>XAdES-T</strong> (eIDAS)</div>
+      <div><span class="fx-text-muted">Hash:</span> <strong>SHA-256</strong></div>
+      <div><span class="fx-text-muted">Timestamp:</span> <strong>RFC 3161</strong> (FINA TSA)</div>
+      <div><span class="fx-text-muted">Format:</span> <strong>XML + XSD</strong></div>
+      <div><span class="fx-text-muted">Certifikat:</span> <strong>FINA X.509</strong></div>
+      <div><span class="fx-text-muted">Transport:</span> <strong>SOAP / REST / AS4</strong></div>
+      <div><span class="fx-text-muted">Validacija:</span> <strong>EN 16931 + CIUS-HR</strong></div>
+      <div><span class="fx-text-muted">Licenca:</span> <strong>MIT (sheme)</strong></div>
     </div>
-    <p style="font-size:.75rem;color:var(--muted);margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
+    <p class="fx-fs-caption fx-text-muted mt-3 fx-bt" style="padding-top:12px">
       Svi XML dokumenti su usklađeni s EU eIDAS regulativom (Uredba 910/2014). 
       Kvalificirani elektronički potpis ima istu pravnu snagu kao vlastoručni potpis.
       Javne XSD sheme omogućuju neovisnu implementaciju i verifikaciju bez pristupa LIMIT Connect sustavu.
@@ -317,8 +317,8 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 <div class="footer">
   <div class="logo">LIMIT Connect</div>
   <div>Konjik d.o.o. | OIB: 37590751921 | Cepin, Hrvatska</div>
-  <div style="margin-top:8px">Generirano: 24.03.2026 | LIMIT Connect v3.0 | Automatska analiza</div>
-  <div style="margin-top:4px"><a href="https://limit-connect.com">limit-connect.com</a></div>
+  <div class="mt-2">Generirano: 24.03.2026 | LIMIT Connect v3.0 | Automatska analiza</div>
+  <div class="mt-1"><a href="https://limit-connect.com">limit-connect.com</a></div>
 </div>
 
 </body>

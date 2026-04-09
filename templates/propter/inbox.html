@@ -16,21 +16,21 @@
 .inbox-tbl td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
 .inbox-tbl tr:hover td{background:rgba(255,255,255,.02)}
 .bi{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.72rem;font-weight:600}
-.bi-email{background:rgba(33,150,243,.15);color:#2196f3}
-.bi-pos{background:rgba(76,175,125,.15);color:#4caf7d}
-.bi-invoice{background:rgba(100,100,100,.15);color:#888}
+.bi-email{background:rgba(33,150,243,.15);color:var(--blue)}
+.bi-pos{background:rgba(76,175,125,.15);color:var(--green)}
+.bi-invoice{background:rgba(100,100,100,.15);color:var(--text-muted)}
 .bi-staging{background:rgba(156,39,176,.15);color:#9c27b0}
-.bi-scan{background:rgba(201,168,76,.15);color:#c9a84c}
+.bi-scan{background:rgba(201,168,76,.15);color:var(--gold)}
 .bi-upload{background:rgba(255,255,255,.08);color:#aaa}
-.bi-ura{background:rgba(255,152,0,.15);color:#ff9800}
-.bi-ira{background:rgba(76,175,125,.15);color:#4caf7d}
-.bi-interna{background:rgba(100,116,139,.15);color:#94a3b8}
+.bi-ura{background:rgba(255,152,0,.15);color:var(--amber)}
+.bi-ira{background:rgba(76,175,125,.15);color:var(--green)}
+.bi-interna{background:rgba(100,116,139,.15);color:var(--text-muted)}
 .bi-nepoznato{background:rgba(244,67,54,.15);color:#f44336}
 .bi-ceka{background:rgba(255,193,7,.15);color:#ffc107;border:1px solid rgba(202,138,4,.3)}
-.bi-arhivirano{background:rgba(76,175,125,.1);color:#4caf7d}
-.bi-novo{background:rgba(33,150,243,.1);color:#2196f3}
+.bi-arhivirano{background:rgba(76,175,125,.1);color:var(--green)}
+.bi-novo{background:rgba(33,150,243,.1);color:var(--blue)}
 .bi-usmjereno{background:rgba(156,39,176,.1);color:#9c27b0}
-.bi-klasificira{background:rgba(201,168,76,.1);color:#c9a84c}
+.bi-klasificira{background:rgba(201,168,76,.1);color:var(--gold)}
 .bi-greska{background:rgba(244,67,54,.1);color:#f44336}
 .inbox-actions{display:flex;gap:.3rem;flex-wrap:wrap}
 .inbox-actions button,.inbox-actions a{font-size:.7rem;padding:.25rem .5rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;text-decoration:none;font-weight:600;font-family:inherit;min-height:32px;display:inline-flex;align-items:center}
@@ -39,17 +39,17 @@
 .inbox-pag{display:flex;gap:.5rem;justify-content:center;margin-top:1rem}
 .inbox-pag a,.inbox-pag span{padding:.4rem .8rem;border-radius:4px;font-size:.8rem;text-decoration:none;border:1px solid var(--border);color:var(--muted)}
 .inbox-pag a:hover{border-color:var(--gold);color:var(--gold)}
-.inbox-pag .current{background:var(--gold);color:#0f172a;border-color:var(--gold);font-weight:700}
+.inbox-pag .current{background:var(--gold);color:var(--text);border-color:var(--gold);font-weight:700}
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Stats -->
 <div class="inbox-grid">
-  <div class="inbox-stat" style="border-left:3px solid #c9a84c"><div class="val" style="color:#c9a84c">{{ ceka }}</div><div class="lbl">Čeka Mariju</div></div>
-  <div class="inbox-stat" style="border-left:3px solid #3b82f6"><div class="val" style="color:#3b82f6">{{ ukupno }}</div><div class="lbl">Svi dokumenti</div></div>
-  <div class="inbox-stat" style="border-left:3px solid #22c55e"><div class="val" style="color:#22c55e">{{ arhiv }}</div><div class="lbl">Obrađeno</div></div>
-  <div class="inbox-stat" style="border-left:3px solid #ff9800"><div class="val" style="color:#ff9800">{{ ura_eur|floatformat:2 }} €</div><div class="lbl">URA ulaznih</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #c9a84c"><div class="val fx-text-gold">{{ ceka }}</div><div class="lbl">Čeka Mariju</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #3b82f6"><div class="val fx-text-blue">{{ ukupno }}</div><div class="lbl">Svi dokumenti</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #22c55e"><div class="val fx-text-green">{{ arhiv }}</div><div class="lbl">Obrađeno</div></div>
+  <div class="inbox-stat" style="border-left:3px solid #ff9800"><div class="val fx-text-amber">{{ ura_eur|floatformat:2 }} €</div><div class="lbl">URA ulaznih</div></div>
 </div>
 
 <!-- Filters -->
@@ -58,26 +58,26 @@
   <select name="tip"><option value="">Svi tipovi</option>{% for val, lbl in tip_choices %}<option value="{{ val }}" {% if tip_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}</select>
   <select name="izvor"><option value="">Svi izvori</option>{% for val, lbl in izvor_choices %}<option value="{{ val }}" {% if izvor_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}</select>
   <button type="submit" class="btn btn-gold btn-sm">Filtriraj</button>
-  <a href="{% url 'propter:fenix_inbox' %}" style="color:var(--muted);font-size:.78rem">Resetiraj</a>
+  <a href="{% url 'propter:fenix_inbox' %}" class="fx-fs-body-sm fx-text-muted">Resetiraj</a>
 </form>
 
 <!-- Table -->
-<div class="stat-card fenix-card" style="padding:0;overflow-x:auto">
+<div class="fenix-stat fx-scroll-x fx-p-0">
 <table class="inbox-tbl">
   <thead><tr><th>Datum</th><th>Izvor</th><th>Tip</th><th>Partner / Iznos</th><th>Status</th><th>Akcije</th></tr></thead>
   <tbody>
   {% for item in items %}
   <tr>
-    <td style="white-space:nowrap;font-size:.78rem;color:var(--muted)">{{ item.created_at|date:"d.m.Y H:i" }}</td>
+    <td class="fx-fs-body-sm text-nowrap fx-text-muted">{{ item.created_at|date:"d.m.Y H:i" }}</td>
     <td><span class="bi bi-{{ item.izvor }}">{{ item.get_izvor_display }}</span></td>
     <td>
       <span class="bi bi-{{ item.tip }}">{{ item.get_tip_display }}</span>
-      {% if item.ai_tip_confidence > 0 %}<small style="color:var(--muted);margin-left:2px">({{ item.ai_tip_confidence|floatformat:0 }}%)</small>{% endif %}
+      {% if item.ai_tip_confidence > 0 %}<small class="fx-text-muted" style="margin-left:2px">({{ item.ai_tip_confidence|floatformat:0 }}%)</small>{% endif %}
     </td>
     <td>
       <div>{{ item.partner_naziv|default:"-" }}</div>
       {% if item.iznos %}<div class="inbox-amt">{{ item.iznos|floatformat:2 }} {{ item.valuta }}</div>{% endif %}
-      {% if item.doc_broj %}<div style="font-size:.7rem;color:var(--muted)">{{ item.doc_broj }}</div>{% endif %}
+      {% if item.doc_broj %}<div class="fx-fs-sm fx-text-muted">{{ item.doc_broj }}</div>{% endif %}
     </td>
     <td><span class="bi bi-{{ item.status }}">{{ item.get_status_display }}</span></td>
     <td>
@@ -92,7 +92,7 @@
     </td>
   </tr>
   {% empty %}
-  <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--muted)">
+  <tr><td colspan="6" class="text-center fx-text-muted fx-p-7">
     Fenix Inbox je prazan. Dokumenti se automatski pojavljuju kad stignu.
   </td></tr>
   {% endfor %}

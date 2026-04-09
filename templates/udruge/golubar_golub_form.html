@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
@@ -29,8 +12,8 @@
 .gf-input{background:var(--input-bg)!important;color:var(--text)!important;border-color:var(--input-border)!important;border-radius:8px!important}
 .gf-input:focus{border-color:var(--gold,#c9a84c)!important;box-shadow:0 0 0 .2rem rgba(201,168,76,.15)!important}
 .gf-input::placeholder{color:var(--text-muted)!important}
-.gf-submit{background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;border:none;border-radius:8px;padding:12px 28px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s}
-.gf-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,.3);color:#0a0a0a}
+.gf-submit{background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:var(--black);border:none;border-radius:8px;padding:12px 28px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s}
+.gf-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,.3);color:var(--text)}
 .gf-breadcrumb{font-size:.78rem;color:var(--text-muted);margin-bottom:1rem}
 .gf-breadcrumb a{color:var(--gold,#c9a84c);text-decoration:none}
 .btn-regen{background:none;border:1px solid var(--input-border);color:var(--text-muted);border-radius:0 8px 8px 0;padding:0 12px;cursor:pointer;transition:color .2s}
@@ -47,12 +30,12 @@
 </div>
 
 <div class="d-flex align-items-center gap-3 mb-3">
-  <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-dove" style="font-size:1.3rem;color:var(--gold,#c9a84c)"></i>
+  <div class="fx-rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))">
+    <i class="fas fa-dove fx-fs-3xl fx-text-gold"></i>
   </div>
   <div>
-    <h4 class="mb-0" style="font-weight:700">{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}</h4>
-    {% if golub %}<small style="color:var(--text-muted)">{{ golub.prsten_broj }}</small>{% endif %}
+    <h4 class="mb-0 fx-fw-bold">{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}</h4>
+    {% if golub %}<small class="fx-text-muted">{{ golub.prsten_broj }}</small>{% endif %}
   </div>
 </div>
 
@@ -64,7 +47,7 @@
 <div class="gf-card-body">
   <div class="gf-section"><i class="fas fa-dove me-1"></i> Fotografija goluba — AI generira ime</div>
   {% if golub.fotografija %}
-  <div class="mb-2"><img src="{{ golub.fotografija.url }}" style="max-height:120px;border-radius:8px;border:1px solid rgba(201,168,76,.3)"></div>
+  <div class="mb-2"><img src="{{ golub.fotografija.url }}" class="fx-rounded" style="max-height:120px;border:1px solid rgba(201,168,76,.3)"></div>
   {% endif %}
   <div id="scan-golub"></div>
   <input type="file" id="foto-form-input" name="fotografija" class="d-none">
@@ -85,7 +68,7 @@
   <div class="gf-section"><i class="fas fa-info-circle me-1"></i> Osnovni podaci</div>
 
   <div class="mb-3">
-    <label class="form-label" style="font-weight:600;font-size:.85rem">Golubinjak <span class="text-danger">*</span></label>
+    <label class="form-label fx-fw-semibold fx-fs-base">Golubinjak <span class="text-danger">*</span></label>
     <select name="golubinjak" required class="form-select gf-input">
       <option value="">-- Odaberi golubinjak --</option>
       {% for gj in golubinjaci %}<option value="{{ gj.pk }}" {% if golub.golubinjak_id == gj.pk %}selected{% endif %}>{{ gj.naziv }}</option>{% endfor %}
@@ -94,16 +77,16 @@
 
   <div class="row g-3 mb-3">
     <div class="col-md-6">
-      <label class="form-label" style="font-weight:600;font-size:.85rem">Broj prstena <span class="text-danger">*</span></label>
+      <label class="form-label fx-fw-semibold fx-fs-base">Broj prstena <span class="text-danger">*</span></label>
       <input type="text" name="prsten_broj" id="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control gf-input" placeholder="AI popunjava automatski">
-      <small style="color:var(--text-muted);font-size:.72rem">Format: HR-YYYY-NNNNN ili HOG/LOK oznaka</small>
+      <small class="fx-fs-sm fx-text-muted">Format: HR-YYYY-NNNNN ili HOG/LOK oznaka</small>
     </div>
     <div class="col-md-6">
-      <label class="form-label" style="font-weight:600;font-size:.85rem">Naziv / Ime</label>
+      <label class="form-label fx-fw-semibold fx-fs-base">Naziv / Ime</label>
       <div class="input-group">
         <input type="text" name="naziv" id="naziv" value="{{ golub.naziv|default:'' }}" class="form-control gf-input" placeholder="AI predlaže automatski">
-        <button type="button" class="btn-regen" id="btn-regen-name" style="display:none" title="Regeneriraj AI ime">
-          <i class="fas fa-sync-alt" style="font-size:.8rem"></i>
+        <button type="button" class="btn-regen fx-hidden" id="btn-regen-name" title="Regeneriraj AI ime">
+          <i class="fas fa-sync-alt fx-fs-compact"></i>
         </button>
       </div>
       <div class="ai-name-hint" id="ai-name-hint"></div>
@@ -112,20 +95,20 @@
 
   <div class="row g-3 mb-3">
     <div class="col-4">
-      <label class="form-label" style="font-weight:600;font-size:.85rem">Spol <span class="text-danger">*</span></label>
+      <label class="form-label fx-fw-semibold fx-fs-base">Spol <span class="text-danger">*</span></label>
       <select name="spol" required class="form-select gf-input">
         {% for code, label in spol_choices %}<option value="{{ code }}" {% if golub.spol == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div class="col-4">
-      <label class="form-label" style="font-weight:600;font-size:.85rem">Boja</label>
+      <label class="form-label fx-fw-semibold fx-fs-base">Boja</label>
       <select name="boja" id="boja-select" class="form-select gf-input">
         <option value="">—</option>
         {% for code, label in boja_choices %}<option value="{{ code }}" {% if golub.boja == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div class="col-4">
-      <label class="form-label" style="font-weight:600;font-size:.85rem">Izliježanje</label>
+      <label class="form-label fx-fw-semibold fx-fs-base">Izliježanje</label>
       <input type="date" name="datum_izlijeganja" value="{{ golub.datum_izlijeganja|date:'Y-m-d'|default:'' }}" class="form-control gf-input">
     </div>
   </div>
@@ -138,14 +121,14 @@
   <div class="gf-section"><i class="fas fa-sitemap me-1"></i> Rodovnik</div>
   <div class="row g-3">
     <div class="col-md-6">
-      <label class="form-label" style="font-weight:600;font-size:.85rem"><i class="fas fa-mars" style="color:#3b82f6;font-size:.75rem"></i> Otac</label>
+      <label class="form-label fx-fw-semibold fx-fs-base"><i class="fas fa-mars fx-text-blue fx-fs-caption"></i> Otac</label>
       <select name="otac" class="form-select gf-input">
         <option value="">-- Nepoznat --</option>
         {% for m in muzjaci %}<option value="{{ m.pk }}" {% if golub.otac_id == m.pk %}selected{% endif %}>{{ m.prsten_broj }} — {{ m.naziv|default:"" }}</option>{% endfor %}
       </select>
     </div>
     <div class="col-md-6">
-      <label class="form-label" style="font-weight:600;font-size:.85rem"><i class="fas fa-venus" style="color:#ec4899;font-size:.75rem"></i> Majka</label>
+      <label class="form-label fx-fw-semibold fx-fs-base"><i class="fas fa-venus fx-fs-caption" style="color:rgba(236,72,153,0.9)"></i> Majka</label>
       <select name="majka" class="form-select gf-input">
         <option value="">-- Nepoznata --</option>
         {% for z in zenke %}<option value="{{ z.pk }}" {% if golub.majka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}

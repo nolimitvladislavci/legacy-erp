@@ -7,70 +7,70 @@
 {% block content %}
 <div class="container-fluid px-3 py-3" style="max-width:680px">
 
-  <nav class="mb-3" style="font-size:.85rem">
-    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+  <nav class="mb-3 fx-fs-base">
+    <a href="{% url 'data_migration:dashboard' %}" class="fx-no-underline fx-text-cyan">
       <i class="fas fa-arrow-left me-1"></i>Svi projekti
     </a>
   </nav>
 
-  <h4 class="mb-3"><i class="fas fa-file-upload me-2" style="color:var(--gold)"></i>Korak 1: Upload datoteke</h4>
+  <h4 class="mb-3"><i class="fas fa-file-upload me-2 fx-text-gold"></i>Korak 1: Upload datoteke</h4>
 
   {% if error %}
   <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-1"></i>{{ error }}</div>
   {% endif %}
 
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px">
+  <div class="fx-rounded fx-bg-card fx-b" style="padding:24px">
     <form method="post" enctype="multipart/form-data" id="uploadForm">
       {% csrf_token %}
 
       <div class="mb-3">
-        <label class="form-label fw-semibold" style="color:var(--text)">Naziv projekta</label>
-        <input type="text" name="name" class="form-control" placeholder="Npr. Prijelaz s Luceeda — partneri"
-               style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+        <label class="form-label fw-semibold fx-text-body">Naziv projekta</label>
+        <input type="text" name="name" class="form-control fx-text-body" placeholder="Npr. Prijelaz s Luceeda — partneri"
+               style="background:var(--input-bg);border-color:var(--input-border)">
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-md-6">
-          <label class="form-label fw-semibold" style="color:var(--text)">Tip podataka</label>
-          <select name="entity_type" class="form-select" style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+          <label class="form-label fw-semibold fx-text-body">Tip podataka</label>
+          <select name="entity_type" class="form-select fx-text-body" style="background:var(--input-bg);border-color:var(--input-border)">
             <option value="partners">Partneri</option>
             <option value="items">Artikli</option>
           </select>
         </div>
         <div class="col-md-6">
-          <label class="form-label fw-semibold" style="color:var(--text)">Izvorni program (opcionalno)</label>
-          <input type="text" name="source_program" class="form-control" placeholder="Npr. Luceed, Pantheon, minimax..."
-                 style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+          <label class="form-label fw-semibold fx-text-body">Izvorni program (opcionalno)</label>
+          <input type="text" name="source_program" class="form-control fx-text-body" placeholder="Npr. Luceed, Pantheon, minimax..."
+                 style="background:var(--input-bg);border-color:var(--input-border)">
         </div>
       </div>
 
       <!-- Drop zone -->
-      <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3"
-           style="border-color:var(--gold)!important;cursor:pointer;background:var(--bg-card-hover);transition:all .15s"
+      <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3 fx-pointer fx-bg-card-hover"
+           style="border-color:var(--gold)!important;transition:all .15s"
            onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:var(--gold)"></i>
-        <p class="mb-1 fw-semibold" style="color:var(--text)">Povucite datoteku ovdje ili kliknite za odabir</p>
-        <p class="small mb-0" style="color:var(--text-muted)">CSV, Excel (.xlsx / .xls) — max 50 MB</p>
+        <i class="fas fa-cloud-upload-alt fa-3x mb-2 fx-text-gold"></i>
+        <p class="mb-1 fw-semibold fx-text-body">Povucite datoteku ovdje ili kliknite za odabir</p>
+        <p class="small mb-0 fx-text-muted">CSV, Excel (.xlsx / .xls) — max 50 MB</p>
       </div>
       <input type="file" id="fileInput" name="file"
              accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
              class="d-none">
-      <div id="fileInfo" class="d-none mb-3 p-2 rounded d-flex align-items-center gap-2"
-           style="background:var(--badge-bg);border:1px solid var(--border)">
-        <i class="fas fa-file-alt" style="color:var(--accent)"></i>
-        <span id="fileName" class="fw-semibold" style="color:var(--text)"></span>
+      <div id="fileInfo" class="d-none mb-3 p-2 rounded d-flex align-items-center gap-2 fx-b"
+           style="background:var(--badge-bg)">
+        <i class="fas fa-file-alt fx-text-cyan"></i>
+        <span id="fileName" class="fw-semibold fx-text-body"></span>
         <span id="fileSize" class="text-muted small"></span>
-        <button type="button" class="btn btn-sm ms-auto" style="color:#dc2626" onclick="clearFile()">
+        <button type="button" class="btn btn-sm ms-auto fx-text-red" onclick="clearFile()">
           <i class="fas fa-times"></i>
         </button>
       </div>
 
       <!-- TIER 1: Pravno obvezujuci disclaimer checkbox -->
-      <div class="mb-3 p-3 rounded" style="background:var(--badge-bg);border:1px solid var(--border)">
+      <div class="mb-3 p-3 rounded fx-b" style="background:var(--badge-bg)">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="disclaimer_accepted"
                  id="disclaimerCheck" required>
-          <label class="form-check-label small" for="disclaimerCheck" style="color:var(--text)">
+          <label class="form-check-label small fx-text-body" for="disclaimerCheck">
             <strong>Potvrdujete</strong> da LIMIT Connect nije arhivski sustav te da ste duzni
             cuvati originalnu datoteku sukladno Zakonu o racunovodstvu
             (NN 78/15, 134/15, 120/16, 116/18, 42/20, 47/20, 114/22, 82/23).

@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}Dodaj rezultat — {{ utrka.naziv }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .rf-container { max-width: 700px; margin: 0 auto; }
@@ -51,7 +34,7 @@
   background: rgba(239,68,68,.1);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; color: #ef4444;
+  font-size: 1.2rem; color:var(--red);
   flex-shrink: 0;
 }
 .rf-input {
@@ -87,7 +70,7 @@
 }
 .rf-btn-submit {
   background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
-  color: #0a0a0a !important; border: none !important;
+  color:var(--text) !important; border: none !important;
   font-weight: 700 !important; padding: .6rem 2rem !important;
   border-radius: 10px !important; font-size: .88rem !important;
   transition: all .2s !important;
@@ -100,7 +83,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_list' %}">Utrke</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_detail' utrka.pk %}">{{ utrka.naziv }}</a></li>
@@ -110,12 +93,12 @@
 
 <!-- Header -->
 <div class="d-flex align-items-center gap-3 mb-4">
-  <div style="width:52px;height:52px;background:rgba(201,168,76,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-trophy" style="font-size:1.3rem;color:var(--gold,#c9a84c)"></i>
+  <div class="fx-rounded-lg d-flex align-items-center justify-content-center" style="width:52px;height:52px;background:rgba(201,168,76,.1)">
+    <i class="fas fa-trophy fx-fs-3xl fx-text-gold"></i>
   </div>
   <div>
-    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Dodaj rezultat</h2>
-    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Unesite plasman goluba na utrci</p>
+    <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">Dodaj rezultat</h2>
+    <p class="fx-fs-note fx-text-muted fx-m-0">Unesite plasman goluba na utrci</p>
   </div>
 </div>
 
@@ -123,8 +106,8 @@
 <div class="rf-race-info">
   <div class="rf-race-icon"><i class="fas fa-flag-checkered"></i></div>
   <div>
-    <div style="font-size:.9rem;font-weight:700;color:var(--text)">{{ utrka.naziv }}</div>
-    <div style="font-size:.75rem;color:var(--text-muted)">
+    <div class="fx-fs-md fx-fw-bold fx-text-body">{{ utrka.naziv }}</div>
+    <div class="fx-fs-caption fx-text-muted">
       {{ utrka.datum|date:"d.m.Y" }}
       {% if utrka.udaljenost_km %} | {{ utrka.udaljenost_km }} km{% endif %}
       {% if utrka.startna_tocka %} | {{ utrka.startna_tocka }}{% endif %}
@@ -161,7 +144,7 @@
         <input type="number" name="placiranje_ukupno" min="1" class="form-control rf-input" placeholder="od ukupno">
         <div class="rf-hint">Ukupan broj natjecatelja</div>
       </div>
-      <div class="col-md-3" style="position:relative">
+      <div class="col-md-3 fx-relative">
         <label class="rf-label">Brzina</label>
         <input type="number" name="brzina_mpm" step="0.01" class="form-control rf-input" placeholder="1200.50" style="padding-right:50px !important">
         <span class="rf-unit">m/min</span>
@@ -191,7 +174,7 @@
 </div>
 
 <div class="rf-footer">
-  <a href="{% url 'udruge:utrka_detail' utrka.pk %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+  <a href="{% url 'udruge:utrka_detail' utrka.pk %}" class="btn btn-outline-secondary fx-rounded" style="padding:.6rem 1.5rem">
     <i class="fas fa-arrow-left me-1"></i>Odustani
   </a>
   <button type="submit" class="rf-btn-submit">

@@ -5,45 +5,41 @@
 {% block content %}
 <!-- ═══ WELCOME CARD (first login) ═══ -->
 {% if first_login %}
-<div class="welcome-card" id="welcomeCard" style="
-  background:linear-gradient(135deg,rgba(201,168,76,.08) 0%,var(--card,#1e293b) 100%);
-  border:1px solid rgba(201,168,76,.3);border-radius:16px;
-  padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden">
+<div class="welcome-card fx-rounded-lg fx-p-6 fx-overflow-hidden fx-relative" id="welcomeCard" style="background:linear-gradient(135deg,rgba(201,168,76,.08) 0%,var(--card,#1e293b) 100%);border:1px solid rgba(201,168,76,.3);margin-bottom:2rem">
 
   <button onclick="document.getElementById('welcomeCard').remove()"
-    style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;
-    color:var(--muted,#94a3b8);font-size:1.2rem;cursor:pointer">&times;</button>
+    class="fx-border-none fx-fs-2xl fx-pointer fx-text-muted fx-bg-transparent" style="position:absolute;top:1rem;right:1rem">&times;</button>
 
-  <div style="display:flex;align-items:flex-start;gap:1.25rem;flex-wrap:wrap">
+  <div class="d-flex fx-flex-wrap align-items-start" style="gap:1.25rem">
     <div style="font-size:3.5rem">&#127919;</div>
-    <div style="flex:1;min-width:280px">
-      <h2 style="font-size:1.35rem;font-weight:800;margin-bottom:.4rem;color:var(--text,#eee)">
+    <div class="fx-flex-1" style="min-width:280px">
+      <h2 class="fx-fw-800" style="font-size:1.35rem;margin-bottom:.4rem;color:var(--text,#eee)">
         {% trans "Dobrodošli u LIMIT Connect" %}{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!
       </h2>
-      <p style="color:var(--muted,#94a3b8);margin-bottom:1rem;font-size:.9rem">
+      <p class="fx-fs-md fx-text-muted mb-3">
         {% trans "Vaš profil je" %} {{ setup_completion }}% {% trans "postavljen. Evo sljedećih koraka:" %}
       </p>
 
-      <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem">
+      <div class="d-flex fx-flex-col" style="gap:.6rem;margin-bottom:1.25rem">
         {% if setup_completion < 100 %}
         <a href="{% url 'companies:setup_wizard' %}" class="welcome-action">
           <span>&#9881;</span> {% trans "Dovršite postavljanje profila" %}
-          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+          <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>
         {% endif %}
         <a href="{% url 'invoicing:create' %}" class="welcome-action">
           <span>&#129534;</span> {% trans "Kreirajte prvu fakturu" %}
-          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+          <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>
         <a href="{% url 'pos:index' %}" class="welcome-action">
           <span>&#128722;</span> {% trans "Otvorite POS blagajnu" %}
-          <span style="margin-left:auto;color:var(--gold,#c9a84c)">&rarr;</span>
+          <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>
       </div>
 
-      <div style="font-size:.78rem;color:var(--muted,#94a3b8)">
+      <div class="fx-fs-body-sm fx-text-muted">
         &#128161; {% trans "Trebate pomoć? Napišite nam na" %}
-        <a href="mailto:info@limit-connect.com" style="color:var(--gold,#c9a84c)">info@limit-connect.com</a>
+        <a href="mailto:info@limit-connect.com" class="fx-text-gold">info@limit-connect.com</a>
       </div>
     </div>
   </div>
@@ -60,8 +56,8 @@
 <div id="onboarding-widget" class="onboarding-widget">
   <a href="{% url 'onboarding_wizard' %}" class="onboarding-guide-btn">Vodic</a>
   <button onclick="dismissOnboarding()" class="onboarding-close-btn" title="Zatvori">&times;</button>
-  <h6 style="color:var(--gold,#c9a84c);margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
-  <p style="color:#999;font-size:.85rem;margin-bottom:14px">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
+  <h6 class="fx-text-gold mb-1"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
+  <p class="fx-text-muted fx-fs-base fx-mb-3">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
   <div class="onboarding-progress">
     <div class="onboarding-progress-fill" style="width:{{ onboarding.percent }}%"></div>
   </div>
@@ -138,14 +134,14 @@ function dismissOnboarding() {
 {% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 or ai_insights and ai_insights.total_opportunities > 0 or ai_insights and ai_insights.total_legal_alerts > 0 %}
 <div class="ai-insights-widget">
   <div class="ai-insights-header">
-    <i class="fas fa-brain" style="color:var(--gold,#c9a84c);font-size:1.1rem"></i>
-    <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:.85rem">AI Uvidi</span>
+    <i class="fas fa-brain fx-fs-xl fx-text-gold"></i>
+    <span class="fx-fw-bold fx-fs-base fx-text-gold">AI Uvidi</span>
     <span class="ai-insights-meta">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga{% if ai_insights.total_opportunities %} &bull; {{ ai_insights.total_opportunities }} prilika{% endif %}{% if ai_insights.total_legal_alerts %} &bull; {{ ai_insights.total_legal_alerts }} zakona{% endif %}</span>
   </div>
   {% for alert in ai_insights.alerts %}
   <div class="ai-insight-row {% if alert.type == 'danger' %}danger{% elif alert.type == 'warning' %}warning{% else %}info{% endif %}">
-    <i class="fas fa-{{ alert.icon }}" style="color:{% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
-    <div style="flex:1">
+    <i class="fas fa-{{ alert.icon }} fx-fs-base" style="color:{% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %};margin-top:2px"></i>
+    <div class="fx-flex-1">
       <div class="ai-insight-title">{{ alert.title }}</div>
       {% if alert.detail %}<div class="ai-insight-detail">{{ alert.detail }}</div>{% endif %}
     </div>
@@ -154,8 +150,8 @@ function dismissOnboarding() {
   {% endfor %}
   {% for sug in ai_insights.suggestions %}
   <div class="ai-insight-row success">
-    <i class="fas fa-{{ sug.icon }}" style="color:#22c55e;margin-top:2px;font-size:.85rem"></i>
-    <div style="flex:1">
+    <i class="fas fa-{{ sug.icon }} fx-text-green fx-fs-base fx-mt-1"></i>
+    <div class="fx-flex-1">
       <div class="ai-insight-title">{{ sug.title }}</div>
       {% if sug.detail %}<div class="ai-insight-detail">{{ sug.detail }}</div>{% endif %}
     </div>
@@ -165,17 +161,17 @@ function dismissOnboarding() {
   {% if ai_insights.opportunities %}
   <div class="ai-insights-section">
     <div class="ai-insights-section-title">
-      <i class="fas fa-gem" style="color:#22c55e;font-size:.8rem"></i>
-      <span style="color:#22c55e;font-weight:700;font-size:.78rem">PRILIKE ZA USTEDU</span>
+      <i class="fas fa-gem fx-text-green fx-fs-compact"></i>
+      <span class="fx-text-green fx-fw-bold fx-fs-body-sm">PRILIKE ZA USTEDU</span>
     </div>
     {% for opp in ai_insights.opportunities %}
     <div class="ai-insight-row {% if opp.type == 'success' %}success{% else %}info{% endif %}">
-      <i class="fas fa-{{ opp.icon }}" style="color:{% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
-      <div style="flex:1">
+      <i class="fas fa-{{ opp.icon }} fx-fs-base" style="color:{% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %};margin-top:2px"></i>
+      <div class="fx-flex-1">
         <div class="ai-insight-title">{{ opp.title }}</div>
         {% if opp.detail %}<div class="ai-insight-detail">{{ opp.detail }}</div>{% endif %}
       </div>
-      {% if opp.action_url %}<a href="{{ opp.action_url }}" style="color:#22c55e;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ opp.action_text }}</a>{% endif %}
+      {% if opp.action_url %}<a href="{{ opp.action_url }}" class="fx-text-green fx-fs-sm fx-no-underline fx-fw-semibold text-nowrap">{{ opp.action_text }}</a>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -183,17 +179,17 @@ function dismissOnboarding() {
   {% if ai_insights.legal_alerts %}
   <div class="ai-insights-section">
     <div class="ai-insights-section-title">
-      <i class="fas fa-gavel" style="color:#a78bfa;font-size:.8rem"></i>
-      <span style="color:#a78bfa;font-weight:700;font-size:.78rem">ZAKONSKE PROMJENE (7 DANA)</span>
+      <i class="fas fa-gavel fx-fs-compact fx-text-purple"></i>
+      <span class="fx-fw-bold fx-fs-body-sm fx-text-purple">ZAKONSKE PROMJENE (7 DANA)</span>
     </div>
     {% for law in ai_insights.legal_alerts %}
     <div class="ai-insight-row {% if law.type == 'danger' %}danger{% elif law.type == 'warning' %}warning{% else %}purple{% endif %}">
-      <i class="fas fa-{{ law.icon }}" style="color:{% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %};margin-top:2px;font-size:.85rem"></i>
-      <div style="flex:1">
+      <i class="fas fa-{{ law.icon }} fx-fs-base" style="color:{% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %};margin-top:2px"></i>
+      <div class="fx-flex-1">
         <div class="ai-insight-title">{{ law.title }}</div>
         {% if law.detail %}<div class="ai-insight-detail">{{ law.detail }}</div>{% endif %}
       </div>
-      {% if law.action_url %}<a href="{{ law.action_url }}" style="color:#a78bfa;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ law.action_text }}</a>{% endif %}
+      {% if law.action_url %}<a href="{{ law.action_url }}" class="fx-fs-sm fx-no-underline fx-fw-semibold fx-text-purple text-nowrap">{{ law.action_text }}</a>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -203,62 +199,62 @@ function dismissOnboarding() {
 
 <!-- Wizard Funnel — Ured u džepu -->
 {% if wizard_funnel and wizard_funnel.total > 0 %}
-<div class="stat-card mb-3" style="border-left:3px solid #6366f1">
+<div class="fenix-filters" style="border-left:3px solid #6366f1">
   <div class="d-flex align-items-center justify-content-between px-3 pt-3 pb-2">
     <div class="d-flex align-items-center gap-2">
-      <i class="fas fa-mobile-alt" style="color:#6366f1"></i>
-      <span style="font-weight:700;font-size:.85rem;color:#6366f1">Ured u džepu — funnel</span>
+      <i class="fas fa-mobile-alt fx-text-purple"></i>
+      <span class="fx-fw-bold fx-fs-base fx-text-purple">Ured u džepu — funnel</span>
     </div>
-    <a href="{% url 'partners:wizard' %}" class="btn btn-sm" style="background:#eef2ff;color:#4338ca;font-size:.72rem;font-weight:700;border:none">
+    <a href="{% url 'partners:wizard' %}" class="btn btn-sm fx-fs-sm fx-fw-bold fx-border-none fx-text-purple fx-bg-purple-dim">
       <i class="fas fa-plus me-1"></i>Novi klijent
     </a>
   </div>
   <div class="px-3 pb-3">
     <!-- Funnel metrike -->
-    <div class="d-flex gap-3 mb-3" style="font-size:.78rem">
+    <div class="d-flex gap-3 mb-3 fx-fs-body-sm">
       <div class="text-center">
-        <div class="fw-bold" style="font-size:1.2rem;color:#6366f1">{{ wizard_funnel.total }}</div>
+        <div class="fw-bold fx-fs-2xl fx-text-purple">{{ wizard_funnel.total }}</div>
         <div class="text-muted">Ukupno</div>
       </div>
       <div class="text-center">
-        <div class="fw-bold" style="font-size:1.2rem;color:#22c55e">{{ wizard_funnel.completed }}</div>
+        <div class="fw-bold fx-fs-2xl fx-text-green">{{ wizard_funnel.completed }}</div>
         <div class="text-muted">Završeno</div>
       </div>
       <div class="text-center">
-        <div class="fw-bold" style="font-size:1.2rem;color:#f59e0b">{{ wizard_funnel.in_progress }}</div>
+        <div class="fw-bold fx-fs-2xl fx-text-amber">{{ wizard_funnel.in_progress }}</div>
         <div class="text-muted">U tijeku</div>
       </div>
       <div class="text-center">
-        <div class="fw-bold" style="font-size:1.2rem;color:#94a3b8">{{ wizard_funnel.abandoned }}</div>
+        <div class="fw-bold fx-fs-2xl fx-text-dim">{{ wizard_funnel.abandoned }}</div>
         <div class="text-muted">Napušteno</div>
       </div>
     </div>
     <!-- Lista aktivnih draftova -->
     {% if wizard_funnel.recent %}
-    <div style="font-size:.78rem">
+    <div class="fx-fs-body-sm">
       {% for d in wizard_funnel.recent %}
       <div class="d-flex align-items-center justify-content-between py-2"
            style="border-top:1px solid var(--border-color,#222)">
         <div>
           <div class="fw-semibold" style="color:var(--text,#fff)">
             {{ d.firma_ime|default:"(bez naziva)" }}
-            <span class="badge ms-1" style="background:#{{ d.kapital_tip|yesno:'6366f1,6366f1' }};font-size:.65rem">
+            <span class="badge ms-1 fx-fs-xs" style="background:#{{ d.kapital_tip|yesno:'6366f1,6366f1' }}">
               {{ d.kapital_tip|upper }}
             </span>
           </div>
           {% if d.direktor_email %}
-          <div class="text-muted" style="font-size:.72rem">{{ d.direktor_email }}</div>
+          <div class="text-muted fx-fs-sm">{{ d.direktor_email }}</div>
           {% endif %}
         </div>
         <div class="text-end">
           {% if d.completed %}
-          <span class="badge bg-success" style="font-size:.68rem">Završeno ✓</span>
+          <span class="fenix-badge fenix-badge-success fx-fs-tiny">Završeno ✓</span>
           {% else %}
-          <span style="font-size:.72rem;color:#f59e0b">
+          <span class="fx-fs-sm fx-text-amber">
             Korak {{ d.current_step }}/7
           </span>
           {% endif %}
-          <div class="text-muted" style="font-size:.68rem">{{ d.updated_at|date:"d.m H:i" }}</div>
+          <div class="text-muted fx-fs-tiny">{{ d.updated_at|date:"d.m H:i" }}</div>
         </div>
       </div>
       {% endfor %}
@@ -271,10 +267,10 @@ function dismissOnboarding() {
 <!-- Push notification opt-in -->
 <div id="push-banner" class="push-banner">
   <div class="push-banner-inner">
-    <i class="fas fa-bell" style="color:var(--gold);font-size:1.3rem"></i>
-    <div style="flex:1">
-      <div style="font-size:.85rem;font-weight:600;color:var(--text)">{% trans "Uključi obavijesti" %}</div>
-      <div style="font-size:.75rem;color:var(--text-dim)">{% trans "Primajte push obavijesti za odobrenja, fakture i intervencije" %}</div>
+    <i class="fas fa-bell fx-fs-3xl fx-text-gold"></i>
+    <div class="fx-flex-1">
+      <div class="fx-fs-base fx-fw-semibold fx-text-body">{% trans "Uključi obavijesti" %}</div>
+      <div class="fx-fs-caption fx-text-dim">{% trans "Primajte push obavijesti za odobrenja, fakture i intervencije" %}</div>
     </div>
     <button onclick="enablePush()" class="push-banner-enable">{% trans "Uključi" %}</button>
     <button onclick="dismissPushBanner()" class="push-banner-dismiss">&times;</button>
@@ -307,43 +303,43 @@ function dismissPushBanner(){
 <div class="lang-switcher">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
   {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
+  <form action="/i18n/setlang/" method="post" class="d-inline">
     {% csrf_token %}
     <input name="next" type="hidden" value="{{ request.get_full_path }}">
     <input name="language" type="hidden" value="{{ lang_code }}">
     {% if lang_code == CURRENT_LANG %}
-    <button type="submit" class="lang-btn lang-btn-active"><span style="font-size:1rem">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-active"><span class="fx-fs-lg">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
     {% else %}
-    <button type="submit" class="lang-btn lang-btn-inactive"><span style="font-size:1rem">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-inactive"><span class="fx-fs-lg">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %}</span> {{ lang_code|upper }}</button>
     {% endif %}
   </form>
   {% endfor %}
 </div>
 
 <div class="cd-wrap page-enter">
-  <div class="cd-title"><a href="{% url 'dashboard' %}" style="color:var(--text-dim);text-decoration:none;font-size:.78rem;margin-right:8px"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
-    {% if company %}<span style="font-size:.8rem;color:var(--text-dim);font-weight:400">— {{ company.name }}</span>
-    <a href="/companies/settings/" style="margin-left:auto;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600;background:var(--gold-dim);border:1px solid var(--gold-border);padding:5px 12px;border-radius:6px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
+  <div class="cd-title"><a href="{% url 'dashboard' %}" class="fx-no-underline fx-fs-body-sm fx-text-dim fx-mr-3"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
+    {% if company %}<span class="fx-fs-compact fx-fw-normal fx-text-dim">— {{ company.name }}</span>
+    <a href="/companies/settings/" class="fx-fs-caption fx-no-underline fx-fw-semibold fx-rounded-sm fx-text-gold fx-bg-gold-dim fx-ml-auto" style="border:1px solid var(--gold-border);padding:5px 12px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
   </div>
 
   <!-- KPI Cards -->
   <div class="kpi-grid">
-    <a href="{% url 'invoicing:index' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="{% url 'invoicing:index' %}" class="fx-no-underline"><div class="kpi fenix-card fx-pointer">
       <div class="kpi-lbl">{% trans "💰 Prihod ovaj mj." %}</div>
       <div class="kpi-val green">{{ paid_month|floatformat:0 }} €</div>
       <div class="kpi-sub">Ukupno: {{ total_invoiced|floatformat:0 }} €</div>
     </div></a>
-    <a href="/invoicing/?status=sent" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="/invoicing/?status=sent" class="fx-no-underline"><div class="kpi fenix-card fx-pointer">
       <div class="kpi-lbl">{% trans "📄 Neplaćene fakture" %}</div>
       <div class="kpi-val {% if unpaid > 0 %}red{% else %}green{% endif %}">{{ unpaid|floatformat:0 }} €</div>
       <div class="kpi-sub">{{ pending_offers }} ponuda u toku</div>
     </div></a>
-    <a href="{% url 'worktime:ts_manager' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="{% url 'worktime:ts_manager' %}" class="fx-no-underline"><div class="kpi fenix-card fx-pointer">
       <div class="kpi-lbl">{% trans "👷 Radnici online" %}</div>
       <div class="kpi-val gold">{{ workers_online }}/{{ workers_total }}</div>
       <div class="kpi-sub">{{ pending_approvals }} sati čeka odobr.</div>
     </div></a>
-    <a href="{% url 'interventions:kanban' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="{% url 'interventions:kanban' %}" class="fx-no-underline"><div class="kpi fenix-card fx-pointer">
       <div class="kpi-lbl">{% trans "🚨 Aktivne interv." %}</div>
       <div class="kpi-val {% if active_interventions > 0 %}amber{% else %}green{% endif %}">{{ active_interventions }}</div>
       <div class="kpi-sub">{{ total_projects }} aktivnih proj.</div>
@@ -353,9 +349,9 @@ function dismissPushBanner(){
   <!-- Getting started — shows when no activity yet -->
   {% if not recent_invoices and not active_iv_list and workers_total == 0 %}
   <div class="getting-started">
-    <div style="font-size:2rem;margin-bottom:8px">🚀</div>
-    <h6 style="color:var(--gold);font-weight:700;margin-bottom:6px">Pocnite koristiti LIMIT Connect</h6>
-    <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:16px">Evo 3 brza koraka za pocetak:</p>
+    <div class="fx-fs-icon mb-2">🚀</div>
+    <h6 class="fx-fw-bold fx-text-gold mb-1">Pocnite koristiti LIMIT Connect</h6>
+    <p class="fx-fs-base fx-text-dim mb-3">Evo 3 brza koraka za pocetak:</p>
     <div class="getting-started-actions">
       <a href="/companies/settings/?tab=info" class="getting-started-card">
         <i class="fas fa-building"></i>1. Postavite firmu
@@ -372,30 +368,30 @@ function dismissPushBanner(){
 
   <!-- Worker status grid -->
   <div class="s-title">{% trans "👷 Status radnika" %}</div>
-  <div class="workers-grid" style="margin-bottom:24px">
+  <div class="workers-grid mb-4">
     {% for w in worker_status %}
     <div class="worker-card {% if w.is_clocked_in %}clocked-in{% endif %}">
       <div class="worker-avatar">{{ w.initials }}</div>
       <div class="worker-info">
-        <div class="worker-name"><a href="{% url 'worktime:ts_manager' %}?workers={{ w.user_id }}" style="color:inherit;text-decoration:none">{{ w.name }}</a></div>
+        <div class="worker-name"><a href="{% url 'worktime:ts_manager' %}?workers={{ w.user_id }}" class="fx-no-underline" style="color:inherit">{{ w.name }}</a></div>
         <div class="worker-status">
           <div class="worker-dot" style="background:{% if w.is_clocked_in %}var(--green){% else %}#374151{% endif %}"></div>
           {% if w.is_clocked_in %}
-            <span style="color:var(--green)">{{ w.timer_elapsed }} · {{ w.timer_project }}</span>
+            <span class="fx-text-green">{{ w.timer_elapsed }} · {{ w.timer_project }}</span>
           {% else %}
             <span>{% trans "Nije prijavljen" %}</span>
           {% endif %}
         </div>
-        <div class="worker-status" style="margin-top:2px">
+        <div class="worker-status fx-mt-1">
           <span>{% trans "Tjedan:" %} </span><span class="worker-hours">{{ w.hours_week|floatformat:1 }}h</span>
         </div>
       </div>
     </div>
     {% empty %}
-    <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;padding:20px 0;text-align:center">
-      <div style="font-size:2rem;margin-bottom:8px">👷</div>
-      <div style="margin-bottom:10px">Nemate registriranih radnika.</div>
-      <a href="/companies/settings/?tab=employees" style="display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none"><i class="fas fa-user-plus me-1"></i>Dodaj zaposlenika</a>
+    <div class="fx-fs-base text-center fx-text-dim fx-col-full" style="padding:20px 0">
+      <div class="fx-fs-icon mb-2">👷</div>
+      <div class="mb-2">Nemate registriranih radnika.</div>
+      <a href="/companies/settings/?tab=employees" class="fx-rounded fx-fs-body-sm fx-fw-bold fx-no-underline d-inline-block fx-text-gold fx-bg-gold-dim" style="border:1px solid var(--gold-border);padding:6px 16px"><i class="fas fa-user-plus me-1"></i>Dodaj zaposlenika</a>
     </div>
     {% endfor %}
   </div>
@@ -411,7 +407,7 @@ function dismissPushBanner(){
       {% if pending_entries %}
         {% for e in pending_entries %}
         <div class="approve-row">
-          <div style="flex:1;min-width:0">
+          <div class="fx-flex-1 min-w-0">
             <div class="t-main">{{ e.user.get_full_name|default:e.user.username }}</div>
             <div class="t-sub">{{ e.project.name }} · {{ e.date|date:"d.m." }} · {{ e.duration }}h</div>
           </div>
@@ -424,8 +420,8 @@ function dismissPushBanner(){
         {% endfor %}
       {% else %}
         <div class="empty-row" style="padding:28px 16px">
-        <div style="font-size:1.6rem;margin-bottom:6px;color:var(--green)"><i class="fas fa-check-circle"></i></div>
-        <div style="color:var(--text-dim);font-size:.82rem">Svi sati odobreni — nema cekanja.</div>
+        <div class="mb-1 fx-text-green fx-fs-5xl"><i class="fas fa-check-circle"></i></div>
+        <div class="fx-fs-note fx-text-dim">Svi sati odobreni — nema cekanja.</div>
       </div>
       {% endif %}
     </div>
@@ -438,18 +434,18 @@ function dismissPushBanner(){
       </div>
       {% if active_iv_list %}
         {% for iv in active_iv_list %}
-        <a href="{% url 'interventions:field' iv.pk %}" style="text-decoration:none"><div class="t-row" style="cursor:pointer">
-          <div style="flex:1;min-width:0">
+        <a href="{% url 'interventions:field' iv.pk %}" class="fx-no-underline"><div class="t-row fx-pointer">
+          <div class="fx-flex-1 min-w-0">
             <div class="t-main">{{ iv.title }}</div>
             <div class="t-sub">{{ iv.address|default:iv.client_name }} · {% if iv.assigned_to %}{{ iv.assigned_to.get_full_name|default:iv.assigned_to.username }}{% else %}Nedodijeljena{% endif %}</div>
           </div>
-          <span class="iv-pill" style="background:rgba(201,168,76,.15);color:var(--gold)">{{ iv.get_status_display }}</span>
+          <span class="iv-pill fx-text-gold" style="background:rgba(201,168,76,.15)">{{ iv.get_status_display }}</span>
         </div></a>
         {% endfor %}
       {% else %}
         <div class="empty-row" style="padding:28px 16px">
-        <div style="font-size:1.6rem;margin-bottom:6px;color:var(--green)"><i class="fas fa-check-circle"></i></div>
-        <div style="color:var(--text-dim);font-size:.82rem">Nema aktivnih intervencija — sve je pod kontrolom.</div>
+        <div class="mb-1 fx-text-green fx-fs-5xl"><i class="fas fa-check-circle"></i></div>
+        <div class="fx-fs-note fx-text-dim">Nema aktivnih intervencija — sve je pod kontrolom.</div>
       </div>
       {% endif %}
     </div>
@@ -457,7 +453,7 @@ function dismissPushBanner(){
   </div><!-- /two-col -->
 
   <!-- Recent invoices -->
-  <div class="panel fenix-card" style="margin-bottom:24px">
+  <div class="panel fenix-card mb-4">
     <div class="panel-header">
       {% trans "📄 Nedavne fakture" %}
       <a href="{% url 'worktime:ts_bill' %}" onclick="return confirm('Otvoriti fakturiranje radnih sati?')">{% trans "Naplati sate →" %}</a>
@@ -465,38 +461,38 @@ function dismissPushBanner(){
     {% if recent_invoices %}
       {% for inv in recent_invoices %}
       <div class="t-row">
-        <a href="/invoicing/{{ inv.pk }}/" style="width:120px;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600">{{ inv.number }}</a>
-        <div class="t-main"><a href="/invoicing/{{ inv.pk }}/" style="color:inherit;text-decoration:none">{{ inv.client_name|default:"—" }}</a></div>
-        <div class="t-sub" style="white-space:nowrap">{{ inv.date_issued|date:"d.m.Y" }}</div>
+        <a href="/invoicing/{{ inv.pk }}/" class="fx-fs-caption fx-no-underline fx-fw-semibold fx-text-gold" style="width:120px">{{ inv.number }}</a>
+        <div class="t-main"><a href="/invoicing/{{ inv.pk }}/" class="fx-no-underline" style="color:inherit">{{ inv.client_name|default:"—" }}</a></div>
+        <div class="t-sub text-nowrap">{{ inv.date_issued|date:"d.m.Y" }}</div>
         <div class="t-val">{{ inv.total|floatformat:2 }} €</div>
-        <a href="/invoicing/{{ inv.pk }}/" style="text-decoration:none"><span class="t-badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span></a>
+        <a href="/invoicing/{{ inv.pk }}/" class="fx-no-underline"><span class="t-badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span></a>
       </div>
       {% endfor %}
     {% else %}
       <div class="empty-row" style="padding:28px 16px">
-        <div style="font-size:2rem;margin-bottom:8px">📄</div>
-        <div style="color:var(--text-dim);font-size:.85rem;margin-bottom:10px">Nemate jos niti jednu fakturu.</div>
-        <a href="/invoicing/wizard/" style="display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none"><i class="fas fa-plus me-1"></i>Izdajte prvi racun</a>
+        <div class="fx-fs-icon mb-2">📄</div>
+        <div class="fx-fs-base fx-text-dim mb-2">Nemate jos niti jednu fakturu.</div>
+        <a href="/invoicing/wizard/" class="fx-rounded fx-fs-body-sm fx-fw-bold fx-no-underline d-inline-block fx-text-gold fx-bg-gold-dim" style="border:1px solid var(--gold-border);padding:6px 16px"><i class="fas fa-plus me-1"></i>Izdajte prvi racun</a>
       </div>
     {% endif %}
   </div>
 
   <!-- Bank Reconciliation widget -->
-  <div class="panel fenix-card" style="margin-bottom:24px">
+  <div class="panel fenix-card mb-4">
     <div class="panel-header">
-      <span style="color:#03dac6">{% trans "Bankovna rekoncilijacija" %}</span>
+      <span class="fx-text-cyan">{% trans "Bankovna rekoncilijacija" %}</span>
       <a href="/konto/reconciliation/">{% trans "Otvori" %} &rarr;</a>
     </div>
     {% if unmatched_bank_count > 0 %}
     <div class="t-row">
-      <div style="flex:1">
+      <div class="fx-flex-1">
         <div class="t-main">{{ unmatched_bank_count }} nesravnjenih uplata</div>
         <div class="t-sub">Ukupno: {{ unmatched_bank_amount|floatformat:2 }} EUR</div>
       </div>
-      <a href="/konto/reconciliation/" class="approve-btn" style="background:#03dac6;text-decoration:none">Sravni</a>
+      <a href="/konto/reconciliation/" class="approve-btn fx-no-underline" style="background:var(--cyan)">Sravni</a>
     </div>
     {% else %}
-    <div class="empty-row" style="color:#03dac6">{% trans "Sve transakcije su parirane" %} &#10003;</div>
+    <div class="empty-row fx-text-cyan">{% trans "Sve transakcije su parirane" %} &#10003;</div>
     {% endif %}
   </div>
 
@@ -504,101 +500,101 @@ function dismissPushBanner(){
 
 {% if synesis_cfg %}
 <!-- SYNESIS widget -->
-<div style="background:var(--surface);border:1px solid #3b82f622;border-radius:12px;padding:18px;margin-bottom:16px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <span style="color:#3b82f6;font-weight:600"><i class="fas fa-database me-2"></i>Synesis integracija</span>
-    <a href="/synesis/" style="color:#3b82f6;font-size:.78rem;font-weight:600;text-decoration:none">Postavke <i class="fas fa-cog ms-1"></i></a>
+<div class="fx-rounded mb-3 fx-bg-surface" style="border:1px solid #3b82f622;padding:18px">
+  <div class="d-flex justify-content-between align-items-center fx-mb-3">
+    <span class="fx-text-blue fx-fw-semibold"><i class="fas fa-database me-2"></i>Synesis integracija</span>
+    <a href="/synesis/" class="fx-text-blue fx-fs-body-sm fx-fw-semibold fx-no-underline">Postavke <i class="fas fa-cog ms-1"></i></a>
   </div>
 
   <!-- ERP: Partners + Items -->
-  <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:#475569;margin-bottom:6px">ERP — Synesis</div>
-  <div style="display:flex;gap:8px;text-align:center;margin-bottom:12px">
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.4rem;font-weight:700;color:#3b82f6">{{ synesis_cfg.partners_total }}</div>
-      <div style="color:#888;font-size:.72rem"><i class="fas fa-handshake me-1"></i>Partneri</div>
+  <div class="fx-fs-tiny fx-text-dim mb-1 fx-uppercase" style="letter-spacing:.8px">ERP — Synesis</div>
+  <div class="d-flex fx-gap-2 text-center mb-3">
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-blue">{{ synesis_cfg.partners_total }}</div>
+      <div class="fx-text-muted fx-fs-sm"><i class="fas fa-handshake me-1"></i>Partneri</div>
     </div>
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.4rem;font-weight:700;color:#3b82f6">{{ synesis_cfg.items_total }}</div>
-      <div style="color:#888;font-size:.72rem"><i class="fas fa-boxes me-1"></i>Artikli</div>
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-4xl fx-fw-bold fx-text-blue">{{ synesis_cfg.items_total }}</div>
+      <div class="fx-text-muted fx-fs-sm"><i class="fas fa-boxes me-1"></i>Artikli</div>
     </div>
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
       {% if synesis_cfg.last_sync_partners %}
-        <div style="font-size:.8rem;font-weight:600;color:#4ade80"><i class="fas fa-check-circle"></i></div>
-        <div style="color:#888;font-size:.7rem">{{ synesis_cfg.last_sync_partners|date:"d.m H:i" }}</div>
+        <div class="fx-fs-compact fx-fw-semibold fx-text-green"><i class="fas fa-check-circle"></i></div>
+        <div class="fx-text-muted fx-fs-sm">{{ synesis_cfg.last_sync_partners|date:"d.m H:i" }}</div>
       {% else %}
-        <div style="font-size:.8rem;color:#f87171"><i class="fas fa-exclamation-circle"></i></div>
-        <div style="color:#888;font-size:.7rem">Nije sync</div>
+        <div class="fx-fs-compact fx-text-red"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="fx-text-muted fx-fs-sm">Nije sync</div>
       {% endif %}
     </div>
   </div>
 
   <!-- POS: Cash register stats -->
   {% if synesis_cfg.pos_db_path %}
-  <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:#475569;margin-bottom:6px">{{ synesis_cfg.pos_name }} — SynesisPOS</div>
-  <div style="display:flex;gap:8px;text-align:center;margin-bottom:12px">
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_today }} €</div>
-      <div style="color:#888;font-size:.72rem">Danas</div>
+  <div class="fx-fs-tiny fx-text-dim mb-1 fx-uppercase" style="letter-spacing:.8px">{{ synesis_cfg.pos_name }} — SynesisPOS</div>
+  <div class="d-flex fx-gap-2 text-center mb-3">
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-xl fx-fw-bold fx-text-green">{{ synesis_cfg.pos_revenue_today }} €</div>
+      <div class="fx-text-muted fx-fs-sm">Danas</div>
     </div>
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_week }} €</div>
-      <div style="color:#888;font-size:.72rem">Ovaj tjedan</div>
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-xl fx-fw-bold fx-text-green">{{ synesis_cfg.pos_revenue_week }} €</div>
+      <div class="fx-text-muted fx-fs-sm">Ovaj tjedan</div>
     </div>
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_month }} €</div>
-      <div style="color:#888;font-size:.72rem">Ovaj mjesec</div>
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-xl fx-fw-bold fx-text-green">{{ synesis_cfg.pos_revenue_month }} €</div>
+      <div class="fx-text-muted fx-fs-sm">Ovaj mjesec</div>
     </div>
-    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
-      <div style="font-size:1.1rem;font-weight:700;color:#64748b">{{ synesis_cfg.pos_receipts_total }}</div>
-      <div style="color:#888;font-size:.72rem">Racuna</div>
+    <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-10">
+      <div class="fx-fs-xl fx-fw-bold fx-text-muted">{{ synesis_cfg.pos_receipts_total }}</div>
+      <div class="fx-text-muted fx-fs-sm">Racuna</div>
     </div>
   </div>
   {% endif %}
 
-  <a href="/synesis/download-setup/" style="display:block;background:#3b82f622;border:1px solid #3b82f655;color:#3b82f6;padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.82rem;font-weight:600">
+  <a href="/synesis/download-setup/" class="fx-text-blue fx-rounded text-center fx-no-underline fx-fs-note fx-fw-semibold d-block fx-p-8" style="background:rgba(59,130,246,0.13);border:1px solid #3b82f655">
     <i class="fas fa-rocket me-1"></i>Preuzmi Setup (.bat) &mdash; jednom pokreni, automatski svaki dan
   </a>
 </div>
 {% endif %}
 
   <!-- Fiskalizacija Summary -->
-  <div style="background:var(--surface);border:1px solid var(--gold,#c9a84c)44;border-radius:12px;padding:18px;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <span style="color:var(--gold);font-weight:600"><i class="fas fa-receipt me-2"></i>Fiskalizacija</span>
-      <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:var(--gold);font-size:.78rem;font-weight:600;text-decoration:none">Certifikati</a>
+  <div class="fx-rounded mb-3 fx-bg-surface" style="border:1px solid var(--gold,#c9a84c)44;padding:18px">
+    <div class="d-flex justify-content-between align-items-center fx-mb-3">
+      <span class="fx-fw-semibold fx-text-gold"><i class="fas fa-receipt me-2"></i>Fiskalizacija</span>
+      <a href="{% url 'invoicing:fiscal_certificates' %}" class="fx-fs-body-sm fx-fw-semibold fx-no-underline fx-text-gold">Certifikati</a>
     </div>
-    <div style="display:flex;gap:12px;text-align:center">
-      <a href="{% url 'invoicing:fiscal_batch_list' %}" style="flex:1;text-decoration:none"><div style="background:#0d0d0d;border-radius:8px;padding:12px;text-align:center">
-        <div style="font-size:1.5rem;font-weight:700;color:#e8994d">{{ fiscal_stats.unfiscalized_count }}</div>
-        <div style="color:#888;font-size:.75rem">Nefiskaliziranih</div>
+    <div class="d-flex fx-gap-3 text-center">
+      <a href="{% url 'invoicing:fiscal_batch_list' %}" class="fx-no-underline fx-flex-1"><div class="fx-rounded text-center fx-bg-body fx-p-12">
+        <div class="fx-fs-5xl fx-fw-bold" style="color:var(--gold2)">{{ fiscal_stats.unfiscalized_count }}</div>
+        <div class="fx-text-muted fx-fs-caption">Nefiskaliziranih</div>
       </div></a>
-      <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:12px">
-        <div style="font-size:1.5rem;font-weight:700">{% if fiscal_stats.cert_valid %}<span style="color:#4ade80">OK</span>{% else %}<span style="color:#f87171">—</span>{% endif %}</div>
-        <div style="color:#888;font-size:.75rem">Certifikat</div>
+      <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-12">
+        <div class="fx-fs-5xl fx-fw-bold">{% if fiscal_stats.cert_valid %}<span class="fx-text-green">OK</span>{% else %}<span class="fx-text-red">—</span>{% endif %}</div>
+        <div class="fx-text-muted fx-fs-caption">Certifikat</div>
       </div>
-      <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:12px">
+      <div class="fx-rounded fx-bg-body fx-flex-1 fx-p-12">
         {% if fiscal_stats.cert_expiring_soon %}
-        <div style="font-size:1.5rem;font-weight:700;color:#fbbf24">{{ fiscal_stats.days_until_expiry }}</div>
-        <div style="color:#888;font-size:.75rem">Dana do isteka</div>
+        <div class="fx-fs-5xl fx-fw-bold fx-text-amber">{{ fiscal_stats.days_until_expiry }}</div>
+        <div class="fx-text-muted fx-fs-caption">Dana do isteka</div>
         {% else %}
-        <div style="font-size:1.5rem;font-weight:700;color:#555">—</div>
-        <div style="color:#888;font-size:.75rem">Upozorenja</div>
+        <div class="fx-fs-5xl fx-fw-bold fx-text-dim">—</div>
+        <div class="fx-text-muted fx-fs-caption">Upozorenja</div>
         {% endif %}
       </div>
     </div>
     {% if fiscal_stats.unfiscalized_count > 0 %}
-    <a href="{% url 'invoicing:fiscal_batch_list' %}" style="display:block;margin-top:12px;background:var(--gold,#c9a84c)22;border:1px solid var(--gold,#c9a84c)77;color:var(--gold);padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.83rem;font-weight:600">
+    <a href="{% url 'invoicing:fiscal_batch_list' %}" class="fx-rounded text-center fx-no-underline fx-fw-semibold d-block mt-3 fx-text-gold fx-p-8" style="background:var(--gold,#c9a84c)22;border:1px solid var(--gold,#c9a84c)77;font-size:.83rem">
       <i class="fas fa-paper-plane me-1"></i>Pokretni batch fiskalizaciju
     </a>
     {% endif %}
   </div>
   <!-- Quick links -->
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a href="{% url 'worktime:ts_manager' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "📋 Timesheet pregled" %}</a>
-    <a href="{% url 'worktime:ts_analytics' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "📊 Analitika" %}</a>
-    <a href="{% url 'worktime:ts_bill' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "💶 Naplati sate" %}</a>
-    <a href="{% url 'interventions:new' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "🚨 Nova intervencija" %}</a>
-    <a href="{% url 'worktime:billable' %}" style="background:rgba(201,168,76,.12);border:1px solid var(--gold-border);color:var(--gold);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none;font-weight:600">{% trans "💰 Nenaplaćeni sati" %}</a>
+  <div class="d-flex fx-gap-3 fx-flex-wrap">
+    <a href="{% url 'worktime:ts_manager' %}" class="fx-rounded fx-fs-note fx-no-underline fx-text-dim fx-bg-surface" style="border:1px solid rgba(255,255,255,.1);padding:10px 16px">{% trans "📋 Timesheet pregled" %}</a>
+    <a href="{% url 'worktime:ts_analytics' %}" class="fx-rounded fx-fs-note fx-no-underline fx-text-dim fx-bg-surface" style="border:1px solid rgba(255,255,255,.1);padding:10px 16px">{% trans "📊 Analitika" %}</a>
+    <a href="{% url 'worktime:ts_bill' %}" class="fx-rounded fx-fs-note fx-no-underline fx-text-dim fx-bg-surface" style="border:1px solid rgba(255,255,255,.1);padding:10px 16px">{% trans "💶 Naplati sate" %}</a>
+    <a href="{% url 'interventions:new' %}" class="fx-rounded fx-fs-note fx-no-underline fx-text-dim fx-bg-surface" style="border:1px solid rgba(255,255,255,.1);padding:10px 16px">{% trans "🚨 Nova intervencija" %}</a>
+    <a href="{% url 'worktime:billable' %}" class="fx-rounded fx-fs-note fx-no-underline fx-fw-semibold fx-text-gold" style="background:rgba(201,168,76,.12);border:1px solid var(--gold-border);padding:10px 16px">{% trans "💰 Nenaplaćeni sati" %}</a>
   </div>
 
 </div>
@@ -607,47 +603,47 @@ function dismissPushBanner(){
 <!-- SKLADIŠTE card -->
 <div class="stat-card mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 style="font-weight:700;font-size:.85rem;margin:0">
-      <i class="fas fa-warehouse" style="color:var(--gold)"></i>
+    <h6 class="fx-fw-bold fx-fs-base fx-m-0">
+      <i class="fas fa-warehouse fx-text-gold"></i>
       &nbsp;{% trans "Skladište" %}
       {% if inventory_stats.low_stock_count > 0 %}
-        <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">
+        <span class="badge bg-warning text-dark ms-1 fx-fs-xs">
           {{ inventory_stats.low_stock_count }} nisko
         </span>
       {% endif %}
     </h6>
-    <a href="/inventory/overview/" class="btn btn-outline-secondary btn-sm" style="font-size:.72rem">Pregled &rarr;</a>
+    <a href="/inventory/overview/" class="btn btn-outline-secondary btn-sm fx-fs-sm">Pregled &rarr;</a>
   </div>
   <div class="row g-2">
     <div class="col-6 col-md-3">
-      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:var(--gold);font-size:1.4rem;font-weight:700">{{ inventory_stats.total_items }}</div>
-        <div style="color:#64748b;font-size:.72rem">Artikala</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(201,168,76,.06)">
+        <div class="fx-fs-4xl fx-fw-bold fx-text-gold">{{ inventory_stats.total_items }}</div>
+        <div class="fx-text-dim fx-fs-sm">Artikala</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:#f59e0b;font-size:1.1rem;font-weight:700">{{ inventory_stats.low_stock_count }}</div>
-        <div style="color:#64748b;font-size:.72rem">Ispod min.</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(201,168,76,.06)">
+        <div class="fx-text-amber fx-fs-xl fx-fw-bold">{{ inventory_stats.low_stock_count }}</div>
+        <div class="fx-text-dim fx-fs-sm">Ispod min.</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:#94a3b8;font-size:.85rem;font-weight:700">{{ inventory_stats.stock_value|floatformat:2 }} EUR</div>
-        <div style="color:#64748b;font-size:.72rem">Vr. (nabavna)</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(201,168,76,.06)">
+        <div class="fx-text-muted fx-fs-base fx-fw-bold">{{ inventory_stats.stock_value|floatformat:2 }} EUR</div>
+        <div class="fx-text-dim fx-fs-sm">Vr. (nabavna)</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:var(--gold);font-size:.85rem;font-weight:700">{{ inventory_stats.selling_value|floatformat:2 }} EUR</div>
-        <div style="color:#64748b;font-size:.72rem">Vr. (MPC)</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(201,168,76,.06)">
+        <div class="fx-fs-base fx-fw-bold fx-text-gold">{{ inventory_stats.selling_value|floatformat:2 }} EUR</div>
+        <div class="fx-text-dim fx-fs-sm">Vr. (MPC)</div>
       </div>
     </div>
   </div>
-  <div class="mt-2 d-flex gap-2" style="font-size:.78rem">
-    <a href="/inventory/receipts/new/" style="color:var(--gold)"><i class="fas fa-plus me-1"></i>Nova primka</a>
-    <span style="color:#334155">|</span>
-    <a href="/inventory/receipts/" style="color:#94a3b8">Sve primke</a>
+  <div class="mt-2 d-flex gap-2 fx-fs-body-sm">
+    <a href="/inventory/receipts/new/" class="fx-text-gold"><i class="fas fa-plus me-1"></i>Nova primka</a>
+    <span style="color:var(--muted2)">|</span>
+    <a href="/inventory/receipts/" class="fx-text-dim">Sve primke</a>
   </div>
 </div>
 {% endif %}
@@ -656,92 +652,91 @@ function dismissPushBanner(){
 <!-- RADNI NALOZI card -->
 <div class="stat-card mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 style="font-weight:700;font-size:.85rem;margin:0">
-      <i class="fas fa-tools" style="color:var(--gold)"></i>
+    <h6 class="fx-fw-bold fx-fs-base fx-m-0">
+      <i class="fas fa-tools fx-text-gold"></i>
       &nbsp;Radni nalozi
       {% if wo_stats.in_progress > 0 %}
-        <span class="badge ms-1" style="background:#3b82f6;font-size:.65rem">
+        <span class="badge ms-1 fx-bg-blue fx-fs-xs">
           {{ wo_stats.in_progress }} u tijeku
         </span>
       {% endif %}
       {% if wo_stats.today > 0 %}
-        <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">
+        <span class="badge bg-warning text-dark ms-1 fx-fs-xs">
           {{ wo_stats.today }} danas
         </span>
       {% endif %}
     </h6>
-    <a href="/work-orders/" class="btn btn-outline-secondary btn-sm" style="font-size:.72rem">Svi nalozi &rarr;</a>
+    <a href="/work-orders/" class="btn btn-outline-secondary btn-sm fx-fs-sm">Svi nalozi &rarr;</a>
   </div>
   <div class="row g-2">
     <div class="col-6 col-md-3">
-      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:var(--gold);font-size:1.4rem;font-weight:700">{{ wo_stats.total }}</div>
-        <div style="color:#64748b;font-size:.72rem">Ukupno</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(201,168,76,.06)">
+        <div class="fx-fs-4xl fx-fw-bold fx-text-gold">{{ wo_stats.total }}</div>
+        <div class="fx-text-dim fx-fs-sm">Ukupno</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(59,130,246,.08);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:#3b82f6;font-size:1.4rem;font-weight:700">{{ wo_stats.in_progress }}</div>
-        <div style="color:#64748b;font-size:.72rem">U tijeku</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(59,130,246,.08)">
+        <div class="fx-text-blue fx-fs-4xl fx-fw-bold">{{ wo_stats.in_progress }}</div>
+        <div class="fx-text-dim fx-fs-sm">U tijeku</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(34,197,94,.08);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:#22c55e;font-size:1.4rem;font-weight:700">{{ wo_stats.completed }}</div>
-        <div style="color:#64748b;font-size:.72rem">Završeno</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(34,197,94,.08)">
+        <div class="fx-text-green fx-fs-4xl fx-fw-bold">{{ wo_stats.completed }}</div>
+        <div class="fx-text-dim fx-fs-sm">Završeno</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div style="background:rgba(100,116,139,.08);border-radius:8px;padding:10px;text-align:center">
-        <div style="color:#94a3b8;font-size:1.4rem;font-weight:700">{{ wo_stats.today }}</div>
-        <div style="color:#64748b;font-size:.72rem">Danas</div>
+      <div class="fx-rounded text-center fx-p-10" style="background:rgba(100,116,139,.08)">
+        <div class="fx-text-muted fx-fs-4xl fx-fw-bold">{{ wo_stats.today }}</div>
+        <div class="fx-text-dim fx-fs-sm">Danas</div>
       </div>
     </div>
   </div>
-  <div class="mt-2 d-flex gap-2" style="font-size:.78rem">
-    <a href="/work-orders/new/" style="color:var(--gold)"><i class="fas fa-plus me-1"></i>Novi nalog</a>
-    <span style="color:#334155">|</span>
-    <a href="/work-orders/?status=in_progress" style="color:#3b82f6">U tijeku</a>
-    <span style="color:#334155">|</span>
-    <a href="/work-orders/vehicles/" style="color:#94a3b8">Vozila</a>
+  <div class="mt-2 d-flex gap-2 fx-fs-body-sm">
+    <a href="/work-orders/new/" class="fx-text-gold"><i class="fas fa-plus me-1"></i>Novi nalog</a>
+    <span style="color:var(--muted2)">|</span>
+    <a href="/work-orders/?status=in_progress" class="fx-text-blue">U tijeku</a>
+    <span style="color:var(--muted2)">|</span>
+    <a href="/work-orders/vehicles/" class="fx-text-dim">Vozila</a>
   </div>
 </div>
 {% endif %}
 
 
 {% if grosmarkt_stats.otpremnice_count or grosmarkt_stats.otkupni_count %}
-<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-    <div style="font-weight:700;font-size:.95rem">📦 Grosmarkt dokumenti</div>
-    <a href="/documents/otpremnica/" style="font-size:.78rem;color:var(--gold);text-decoration:none">Svi dokumenti →</a>
+<div class="fx-rounded-lg fx-b fx-mb-6 fx-p-125 fx-bg-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="fx-fw-bold fx-fs-normal">📦 Grosmarkt dokumenti</div>
+    <a href="/documents/otpremnica/" class="fx-fs-body-sm fx-no-underline fx-text-gold">Svi dokumenti →</a>
   </div>
 
   <!-- Brojevi -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
-    <a href="/documents/otpremnica/" style="text-decoration:none">
-      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:.875rem;text-align:center">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">{{ grosmarkt_stats.otpremnice_count }}</div>
-        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Otpremnice</div>
+  <div class="d-grid fx-gap-3 mb-3 fx-grid-2-equal">
+    <a href="/documents/otpremnica/" class="fx-no-underline">
+      <div class="fx-rounded text-center" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);padding:.875rem">
+        <div class="fx-fw-800 fx-text-gold fx-fs-6xl">{{ grosmarkt_stats.otpremnice_count }}</div>
+        <div class="fx-fs-sm fx-text-muted fx-uppercase" style="letter-spacing:.06em">Otpremnice</div>
       </div>
     </a>
-    <a href="/documents/otkupni/" style="text-decoration:none">
-      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:10px;padding:.875rem;text-align:center">
-        <div style="font-size:1.8rem;font-weight:800;color:#22c55e">{{ grosmarkt_stats.otkupni_count }}</div>
-        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Otkupni blokovi</div>
+    <a href="/documents/otkupni/" class="fx-no-underline">
+      <div class="fx-rounded text-center" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);padding:.875rem">
+        <div class="fx-fw-800 fx-text-green fx-fs-6xl">{{ grosmarkt_stats.otkupni_count }}</div>
+        <div class="fx-fs-sm fx-text-muted fx-uppercase" style="letter-spacing:.06em">Otkupni blokovi</div>
       </div>
     </a>
   </div>
 
   <!-- Zadnje otpremnice -->
   {% if grosmarkt_stats.recent_otpremnice %}
-  <div style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em">Zadnje otpremnice</div>
+  <div class="fx-fs-caption fx-text-muted fx-uppercase" style="margin-bottom:.4rem;letter-spacing:.05em">Zadnje otpremnice</div>
   {% for o in grosmarkt_stats.recent_otpremnice %}
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.82rem">
-    <a href="/documents/otpremnica/{{ o.pk }}/" style="color:var(--gold);text-decoration:none;font-weight:600">OTP-{{ o.doc_number }}</a>
-    <span style="color:var(--muted);font-size:.75rem">{{ o.date_issued|date:"d.m.Y" }}</span>
-    <span style="font-size:.72rem;padding:.15rem .5rem;border-radius:4px;
-      {% if o.status == 'confirmed' %}background:#14532d;color:#4ade80
-      {% elif o.status == 'cancelled' %}background:#450a0a;color:#f87171
+  <div class="d-flex fx-fs-note justify-content-between align-items-center fx-bb" style="padding:.35rem 0">
+    <a href="/documents/otpremnica/{{ o.pk }}/" class="fx-no-underline fx-fw-semibold fx-text-gold">OTP-{{ o.doc_number }}</a>
+    <span class="fx-fs-caption fx-text-muted">{{ o.date_issued|date:"d.m.Y" }}</span>
+    <span class="fx-fs-sm fx-rounded-sm" style="padding:.15rem .5rem;{% if o.status == 'confirmed' %}background:#14532d;color:#4ade80
+      {% elif o.status == 'cancelled' %}background:#450a0a;color:var(--red)
       {% else %}background:#1c1917;color:#a8a29e{% endif %}">
       {{ o.get_status_display }}
     </span>
@@ -751,14 +746,13 @@ function dismissPushBanner(){
 
   <!-- Zadnji otkupni blokovi -->
   {% if grosmarkt_stats.recent_otkupni %}
-  <div style="font-size:.75rem;color:var(--muted);margin:.75rem 0 .4rem;text-transform:uppercase;letter-spacing:.05em">Zadnji otkupni blokovi</div>
+  <div class="fx-fs-caption fx-text-muted fx-uppercase" style="margin:.75rem 0 .4rem;letter-spacing:.05em">Zadnji otkupni blokovi</div>
   {% for b in grosmarkt_stats.recent_otkupni %}
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.82rem">
-    <a href="/documents/otkupni/{{ b.pk }}/" style="color:#22c55e;text-decoration:none;font-weight:600">OTK-{{ b.doc_number }}</a>
-    <span style="color:var(--muted);font-size:.75rem">{{ b.date_issued|date:"d.m.Y" }} &mdash; {{ b.farmer_name|truncatechars:20 }}</span>
-    <span style="font-size:.72rem;padding:.15rem .5rem;border-radius:4px;
-      {% if b.status == 'confirmed' %}background:#14532d;color:#4ade80
-      {% elif b.status == 'cancelled' %}background:#450a0a;color:#f87171
+  <div class="d-flex fx-fs-note justify-content-between align-items-center fx-bb" style="padding:.35rem 0">
+    <a href="/documents/otkupni/{{ b.pk }}/" class="fx-text-green fx-no-underline fx-fw-semibold">OTK-{{ b.doc_number }}</a>
+    <span class="fx-fs-caption fx-text-muted">{{ b.date_issued|date:"d.m.Y" }} &mdash; {{ b.farmer_name|truncatechars:20 }}</span>
+    <span class="fx-fs-sm fx-rounded-sm" style="padding:.15rem .5rem;{% if b.status == 'confirmed' %}background:#14532d;color:#4ade80
+      {% elif b.status == 'cancelled' %}background:#450a0a;color:var(--red)
       {% else %}background:#1c1917;color:#a8a29e{% endif %}">
       {{ b.get_status_display }}
     </span>
@@ -766,9 +760,9 @@ function dismissPushBanner(){
   {% endfor %}
   {% endif %}
 
-  <div style="display:flex;gap:.5rem;margin-top:.875rem">
-    <a href="/documents/otpremnica/nova/" style="flex:1;text-align:center;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:var(--gold);padding:.45rem;border-radius:7px;font-size:.78rem;font-weight:600;text-decoration:none">+ Nova otpremnica</a>
-    <a href="/documents/otkupni/novi/" style="flex:1;text-align:center;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#22c55e;padding:.45rem;border-radius:7px;font-size:.78rem;font-weight:600;text-decoration:none">+ Novi otkupni blok</a>
+  <div class="d-flex fx-gap-2" style="margin-top:.875rem">
+    <a href="/documents/otpremnica/nova/" class="text-center fx-fs-body-sm fx-fw-semibold fx-no-underline fx-text-gold fx-flex-1" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);padding:.45rem;border-radius:7px">+ Nova otpremnica</a>
+    <a href="/documents/otkupni/novi/" class="text-center fx-text-green fx-fs-body-sm fx-fw-semibold fx-no-underline fx-flex-1" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);padding:.45rem;border-radius:7px">+ Novi otkupni blok</a>
   </div>
 </div>
 {% endif %}

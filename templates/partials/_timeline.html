@@ -6,23 +6,23 @@
     <div class="timeline-dot flex-shrink-0 d-flex align-items-start pt-1">
       <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
            style="width:28px;height:28px">
-        <i class="fas fa-circle-dot text-primary" style="font-size:.6rem"></i>
+        <i class="fas fa-circle-dot text-primary fx-fs-2xs"></i>
       </div>
     </div>
     <div class="flex-grow-1">
       <div class="card bg-dark border-secondary p-2">
         <div class="d-flex justify-content-between align-items-start">
           <span class="small text-white">{{ act.action }}</span>
-          <span class="text-muted" style="font-size:.7rem;white-space:nowrap">{{ act.created_at|timesince }} ago</span>
+          <span class="text-muted fx-fs-sm text-nowrap">{{ act.created_at|timesince }} ago</span>
         </div>
         {% if act.old_value or act.new_value %}
-        <div class="mt-1" style="font-size:.75rem">
+        <div class="mt-1 fx-fs-caption">
           {% if act.old_value %}<span class="text-danger text-decoration-line-through">{{ act.old_value }}</span> → {% endif %}
           {% if act.new_value %}<span class="text-success">{{ act.new_value }}</span>{% endif %}
         </div>
         {% endif %}
-        {% if act.note %}<div class="text-muted mt-1" style="font-size:.75rem">{{ act.note }}</div>{% endif %}
-        {% if act.user %}<div class="text-muted mt-1" style="font-size:.7rem"><i class="fas fa-user me-1"></i>{{ act.user.get_full_name|default:act.user.username }}</div>{% endif %}
+        {% if act.note %}<div class="text-muted mt-1 fx-fs-caption">{{ act.note }}</div>{% endif %}
+        {% if act.user %}<div class="text-muted mt-1 fx-fs-sm"><i class="fas fa-user me-1"></i>{{ act.user.get_full_name|default:act.user.username }}</div>{% endif %}
       </div>
     </div>
   </div>

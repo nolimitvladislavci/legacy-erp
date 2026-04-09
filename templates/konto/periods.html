@@ -17,15 +17,15 @@
 .period-table tr:hover { background: rgba(201,168,76,0.04); }
 .locked-row { background: rgba(239,68,68,0.05); }
 .badge-locked {
-    background: #ef4444; color: #fff; padding: 2px 10px;
+    background:var(--red); color:var(--white); padding: 2px 10px;
     border-radius: 10px; font-size: 0.75em; font-weight: 700;
 }
 .badge-open {
-    background: #10b981; color: #fff; padding: 2px 10px;
+    background: #10b981; color:var(--white); padding: 2px 10px;
     border-radius: 10px; font-size: 0.75em; font-weight: 700;
 }
 .btn-lock {
-    background: #ef4444; color: #fff; border: none; padding: 5px 14px;
+    background:var(--red); color:var(--white); border: none; padding: 5px 14px;
     border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600;
 }
 .btn-lock:hover { opacity: 0.85; }
@@ -35,7 +35,7 @@
     font-size: 0.78rem; font-weight: 600;
 }
 .btn-unlock:hover { background: rgba(201,168,76,0.1); }
-.info-text { font-size: 0.72rem; color: #666; }
+.info-text { font-size: 0.72rem; color:var(--text-dim); }
 </style>
 
 <div class="period-wrap">
@@ -43,7 +43,7 @@
         <i class="fas fa-lock"></i> {% trans "Obracunska razdoblja" %}
     </div>
 
-    <p style="color:#999; font-size:0.85rem; margin-bottom:20px;">
+    <p class="fx-text-muted fx-fs-base mb-4">
         Zakljucano razdoblje sprecava knjizenje novih temeljnica u tom mjesecu.
     </p>
 
@@ -54,13 +54,13 @@
                 <th>Temeljnice</th>
                 <th>Status</th>
                 <th>Zakljucao</th>
-                <th style="text-align:right;">Akcija</th>
+                <th class="text-end">Akcija</th>
             </tr>
         </thead>
         <tbody>
             {% for p in periods %}
             <tr class="{% if p.is_locked %}locked-row{% endif %}">
-                <td style="font-weight:600;">{{ p.month_name }}</td>
+                <td class="fx-fw-semibold">{{ p.month_name }}</td>
                 <td>{{ p.entry_count }}</td>
                 <td>
                     {% if p.is_locked %}
@@ -73,8 +73,8 @@
                     {% if p.locked_by %}{{ p.locked_by.get_full_name|default:p.locked_by.username }}
                     <br>{{ p.locked_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}
                 </td>
-                <td style="text-align:right;">
-                    <form method="post" style="display:inline;">
+                <td class="text-end">
+                    <form method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="year" value="{{ p.year }}">
                         <input type="hidden" name="month" value="{{ p.month }}">

@@ -39,7 +39,7 @@
       &#127760; /site/{{ site.slug }}/
     </a>
   </div>
-  <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+  <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center">
     {% if site.is_published %}
       <span class="ws-badge published">&#9679; Objavljeno</span>
     {% else %}
@@ -95,12 +95,12 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Logo</label>
-            {% if site.logo %}<img src="{{ site.logo.url }}" style="height:40px;margin-bottom:.5rem" alt="Logo">{% endif %}
+            {% if site.logo %}<img src="{{ site.logo.url }}" class="mb-2" style="height:40px" alt="Logo">{% endif %}
             <input type="file" name="logo" class="form-control" accept="image/*">
           </div>
           <div class="form-group">
             <label class="form-label">Hero slika</label>
-            {% if site.hero_image %}<img src="{{ site.hero_image.url }}" style="height:40px;margin-bottom:.5rem" alt="Hero">{% endif %}
+            {% if site.hero_image %}<img src="{{ site.hero_image.url }}" class="mb-2" style="height:40px" alt="Hero">{% endif %}
             <input type="file" name="hero_image" class="form-control" accept="image/*">
           </div>
         </div>
@@ -137,26 +137,26 @@
           </div>
           <div class="form-group">
             <label class="form-label">Primarna boja</label>
-            <div style="display:flex;gap:.5rem;align-items:center">
+            <div class="d-flex fx-gap-2 align-items-center">
               <input type="color" name="primary_color" value="{{ site.primary_color }}" class="form-control" style="width:60px;padding:.2rem">
               <span id="color-val">{{ site.primary_color }}</span>
             </div>
           </div>
         </div>
 
-        <div style="margin-top:1rem;padding:1rem;background:var(--bg2);border-radius:6px">
-          <p style="font-size:.875rem;margin-bottom:.5rem"><strong>Pregled tema:</strong></p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem">
+        <div class="fx-rounded-sm mt-3 fx-p-4" style="background:var(--bg2)">
+          <p class="mb-2" style="font-size:.875rem"><strong>Pregled tema:</strong></p>
+          <div class="d-grid fx-gap-3" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
             {% for val, label in site.THEME_CHOICES %}
-            <div style="border:2px solid {% if site.theme == val %}var(--primary){% else %}var(--border){% endif %};border-radius:6px;padding:.75rem;text-align:center;cursor:pointer" onclick="document.querySelector('[name=theme]').value='{{ val }}'">
-              <div style="font-weight:600;font-size:.9rem">{{ label }}</div>
-              <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ val }}.html</div>
+            <div class="fx-rounded-sm text-center fx-pointer" style="border:2px solid {% if site.theme == val %}var(--primary){% else %}var(--border){% endif %};padding:.75rem" onclick="document.querySelector('[name=theme]').value='{{ val }}'">
+              <div class="fx-fw-semibold fx-fs-md">{{ label }}</div>
+              <div class="fx-fs-caption fx-text-muted" style="margin-top:.2rem">{{ val }}.html</div>
             </div>
             {% endfor %}
           </div>
         </div>
 
-        <div style="margin-top:1rem">
+        <div class="mt-3">
           <button type="submit" class="btn btn-primary">Spremi temu</button>
         </div>
       </div>
@@ -221,14 +221,14 @@
 <div id="pane-galerija" class="ws-pane">
   <div class="card">
     <div class="card-body">
-      <div id="gal-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1rem">
+      <div id="gal-list" class="d-grid fx-gap-4 mb-3" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
         {% for img in gallery %}
-        <div class="gal-item" id="gal-{{ img.pk }}" style="position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden">
-          <img src="{{ img.image.url }}" alt="{{ img.caption }}" style="width:100%;height:140px;object-fit:cover">
-          <div style="padding:.5rem">
-            <div style="font-size:.825rem;color:var(--muted)">{{ img.caption|default:"Bez opisa" }}</div>
+        <div class="gal-item fx-rounded-sm fx-b fx-overflow-hidden fx-relative" id="gal-{{ img.pk }}">
+          <img src="{{ img.image.url }}" alt="{{ img.caption }}" class="fx-w-full" style="height:140px;object-fit:cover">
+          <div class="fx-p-2">
+            <div class="fx-text-muted" style="font-size:.825rem">{{ img.caption|default:"Bez opisa" }}</div>
           </div>
-          <button onclick="galDelete({{ img.pk }}, this)" style="position:absolute;top:.4rem;right:.4rem;background:#dc2626;color:#fff;border:none;border-radius:4px;padding:.2rem .5rem;cursor:pointer;font-size:.8rem">&#10005;</button>
+          <button onclick="galDelete({{ img.pk }}, this)" class="fx-bg-red fx-text-white fx-border-none fx-rounded-sm fx-pointer fx-fs-compact" style="position:absolute;top:.4rem;right:.4rem;padding:.2rem .5rem">&#10005;</button>
         </div>
         {% endfor %}
       </div>
@@ -395,8 +395,8 @@ function galUpload() {
         const div = document.createElement('div');
         div.className = 'gal-item'; div.id = 'gal-'+d.pk;
         div.style.cssText = 'position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden';
-        div.innerHTML = '<img src="'+d.url+'" style="width:100%;height:140px;object-fit:cover">'
-          + '<button onclick="galDelete('+d.pk+', this)" style="position:absolute;top:.4rem;right:.4rem;background:#dc2626;color:#fff;border:none;border-radius:4px;padding:.2rem .5rem;cursor:pointer;font-size:.8rem">&#10005;</button>';
+        div.innerHTML = '<img src="'+d.url+'" class="fx-w-full" style="height:140px;object-fit:cover">'
+          + '<button onclick="galDelete('+d.pk+', this)" class="fx-bg-red fx-text-white fx-border-none fx-rounded-sm fx-pointer fx-fs-compact" style="position:absolute;top:.4rem;right:.4rem;padding:.2rem .5rem">&#10005;</button>';
         document.getElementById('gal-list').appendChild(div);
         document.getElementById('gal-file').value = '';
         document.getElementById('gal-caption').value = '';

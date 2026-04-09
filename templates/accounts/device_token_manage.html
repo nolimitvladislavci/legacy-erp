@@ -42,52 +42,52 @@
 
 <!-- Postojeći tokeni -->
 {% if tokens %}
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+<div class="fx-gap-4 d-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
   {% for t in tokens %}
-  <div style="background:var(--card-bg,#1a1a2e);border:1px solid {% if t.is_active %}var(--gold,#c9a84c){% else %}#333{% endif %};border-radius:12px;padding:20px;text-align:center;{% if not t.is_active %}opacity:0.5{% endif %}">
+  <div class="fx-rounded text-center" style="background:var(--card-bg,#1a1a2e);border:1px solid {% if t.is_active %}var(--gold,#c9a84c){% else %}#333{% endif %};padding:20px;{% if not t.is_active %}opacity:0.5{% endif %}">
     <!-- QR Code inline -->
-    <div style="margin-bottom:12px">
+    <div class="mb-3">
       <img src="{% url 'device_token_qr_image' token_id=t.pk %}" alt="QR"
-           style="width:160px;height:160px;border-radius:8px;border:2px solid #222"
+           class="fx-rounded" style="width:160px;height:160px;border:2px solid #222"
            onerror="this.style.display='none'">
     </div>
     <!-- Device info -->
-    <div style="font-weight:700;font-size:1rem;color:{% if t.is_active %}var(--gold,#c9a84c){% else %}#666{% endif %};margin-bottom:4px">
+    <div class="fx-fw-bold fx-fs-lg" style="color:{% if t.is_active %}var(--gold,#c9a84c){% else %}#666{% endif %};margin-bottom:4px">
       <i class="fas fa-mobile-alt me-1"></i>{{ t.device_name|default:"Uređaj" }}
     </div>
-    <div style="font-family:monospace;font-size:.75rem;color:#666;margin-bottom:8px;word-break:break-all">
+    <div class="fx-fs-caption fx-text-dim mb-2 fx-font-mono text-break">
       {{ t.barcode_data }}
     </div>
     {% if t.cashier %}
-    <div style="font-size:.8rem;color:#888;margin-bottom:4px">
+    <div class="fx-fs-compact fx-text-muted mb-1">
       <i class="fas fa-user me-1"></i>{{ t.cashier.name }}
     </div>
     {% endif %}
-    <div style="font-size:.75rem;color:#555;margin-bottom:12px">
+    <div class="fx-fs-caption fx-text-dim mb-3">
       {% if t.is_active %}
-        <span style="color:#22c55e">● {% trans "Aktivan" %}</span>
+        <span class="fx-text-green">● {% trans "Aktivan" %}</span>
       {% else %}
-        <span style="color:#666">○ {% trans "Deaktiviran" %}</span>
+        <span class="fx-text-dim">○ {% trans "Deaktiviran" %}</span>
       {% endif %}
       {% if t.last_used_at %} · {{ t.last_used_at|date:"d.m.Y H:i" }}{% endif %}
     </div>
     <!-- Actions -->
-    <div style="display:flex;gap:6px;justify-content:center">
-      <a href="{% url 'device_token_detail' token_id=t.pk %}" style="padding:6px 14px;border:1px solid #333;border-radius:6px;color:#aaa;font-size:.8rem;text-decoration:none">
+    <div class="d-flex fx-gap-2 justify-content-center">
+      <a href="{% url 'device_token_detail' token_id=t.pk %}" class="fx-rounded-sm fx-text-muted fx-fs-compact fx-no-underline fx-b2" style="padding:6px 14px">
         <i class="fas fa-expand me-1"></i>{% trans "Puni ekran" %}
       </a>
-      <form method="post" style="display:inline">
+      <form method="post" class="d-inline">
         {% csrf_token %}
         <input type="hidden" name="token_id" value="{{ t.pk }}">
         {% if t.is_active %}
         <input type="hidden" name="action" value="deactivate">
-        <button style="padding:6px 14px;border:1px solid #e74c3c33;border-radius:6px;background:none;color:#e74c3c;font-size:.8rem;cursor:pointer"
+        <button class="fx-rounded-sm fx-text-red fx-fs-compact fx-pointer fx-bg-transparent" style="padding:6px 14px;border:1px solid #e74c3c33"
                 onclick="return confirm('Deaktivirati?')">
           <i class="fas fa-ban me-1"></i>{% trans "Deaktiviraj" %}
         </button>
         {% else %}
         <input type="hidden" name="action" value="activate">
-        <button style="padding:6px 14px;border:1px solid #22c55e33;border-radius:6px;background:none;color:#22c55e;font-size:.8rem;cursor:pointer">
+        <button class="fx-rounded-sm fx-text-green fx-fs-compact fx-pointer fx-bg-transparent" style="padding:6px 14px;border:1px solid #22c55e33">
           <i class="fas fa-check me-1"></i>{% trans "Aktiviraj" %}
         </button>
         {% endif %}

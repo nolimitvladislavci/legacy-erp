@@ -20,8 +20,8 @@
   {% csrf_token %}
 
   <!-- ═══ DRŽAVA ═══ -->
-  <div class="reg-field" style="margin-bottom:20px">
-    <div style="display:flex;gap:1rem;flex-wrap:wrap">
+  <div class="reg-field mb-4">
+    <div class="d-flex fx-flex-wrap fx-gap-4">
       <label class="country-opt">
         <input type="radio" name="country" value="HR" {% if company.country == 'HR' or not company.country %}checked{% endif %}>
         <span class="country-flag">&#x1F1ED;&#x1F1F7;</span> Hrvatska
@@ -38,20 +38,20 @@
   </div>
 
   <!-- ═══ POLJE 1: OIB MAGIC FILL ═══ -->
-  <div class="reg-field primary-field" style="position:relative">
+  <div class="reg-field primary-field fx-relative">
     <label id="oibLabel">
-      <i class="fas fa-fingerprint" style="color:var(--gold);margin-right:6px"></i> OIB *
-      <span id="oibStatus" style="margin-left:.5rem;font-size:.75rem"></span>
+      <i class="fas fa-fingerprint fx-text-gold fx-mr-2"></i> OIB *
+      <span id="oibStatus" class="fx-fs-caption" style="margin-left:.5rem"></span>
     </label>
-    <div style="display:flex;gap:8px;align-items:stretch">
-      <div style="flex:1;position:relative">
+    <div class="d-flex fx-gap-2 align-items-stretch">
+      <div class="fx-flex-1 fx-relative">
         <input type="text" name="oib" id="oib-input" value="{{ company.oib }}" class="reg-input reg-input-lg"
                placeholder="12345678901" required autofocus inputmode="numeric"
                maxlength="13" autocomplete="off" style="padding-right:2.5rem">
-        <span id="oibSpinner" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);display:none;font-size:1rem">
-          <i class="fas fa-spinner fa-spin" style="color:var(--gold)"></i>
+        <span id="oibSpinner" class="fx-hidden fx-fs-lg" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%)">
+          <i class="fas fa-spinner fa-spin fx-text-gold"></i>
         </span>
-        <span id="oibCheck" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);display:none;color:#22c55e;font-size:1.1rem">
+        <span id="oibCheck" class="fx-hidden fx-text-green fx-fs-xl" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%)">
           <i class="fas fa-check-circle"></i>
         </span>
       </div>
@@ -66,36 +66,34 @@
       </button>
     </div>
     <!-- OIB Preview Card -->
-    <div id="oibPreview" style="display:none;margin-top:.5rem;background:rgba(34,197,94,.06);
-      border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:.75rem 1rem;
-      animation:fadeSlideIn .3s ease">
-      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem">
-        <i class="fas fa-check-circle" style="color:#22c55e;font-size:.85rem"></i>
-        <span style="font-size:.75rem;color:#22c55e;font-weight:600;text-transform:uppercase;letter-spacing:.05em">
+    <div id="oibPreview" class="fx-hidden fx-rounded mt-2" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.25);padding:.75rem 1rem;animation:fadeSlideIn .3s ease">
+      <div class="d-flex align-items-center fx-gap-2 fx-mb-1">
+        <i class="fas fa-check-circle fx-text-green fx-fs-base"></i>
+        <span class="fx-fs-caption fx-text-green fx-fw-semibold fx-uppercase" style="letter-spacing:.05em">
           {% trans "Nađeno u sudskom registru" %}
         </span>
       </div>
-      <strong id="previewName" style="color:var(--text,#eee);display:block;font-size:.9rem"></strong>
-      <span id="previewAddr" style="color:var(--muted,#94a3b8);font-size:.82rem"></span>
+      <strong id="previewName" class="fx-fs-md d-block" style="color:var(--text,#eee)"></strong>
+      <span id="previewAddr" class="fx-fs-note fx-text-muted"></span>
     </div>
-    <div id="oib-status" style="font-size:0.85rem;margin-top:4px;display:none"></div>
+    <div id="oib-status" class="fx-fs-base fx-hidden mt-1"></div>
     {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
   </div>
 
   <!-- ═══ POLJE 2: EMAIL ═══ -->
   <div class="reg-field primary-field">
-    <label><i class="fas fa-envelope" style="color:var(--gold);margin-right:6px"></i> Email *</label>
+    <label><i class="fas fa-envelope fx-text-gold fx-mr-2"></i> Email *</label>
     <input type="email" name="email" value="{{ user.email }}" class="reg-input reg-input-lg" placeholder="vas@email.com" required autocomplete="email">
     {% if errors.email %}<div class="error-msg">{{ errors.email|safe }}</div>{% endif %}
   </div>
 
   <!-- ═══ POLJE 3: LOZINKA ═══ -->
   <div class="reg-field primary-field">
-    <label><i class="fas fa-lock" style="color:var(--gold);margin-right:6px"></i> {% trans "Lozinka" %} *</label>
+    <label><i class="fas fa-lock fx-text-gold fx-mr-2"></i> {% trans "Lozinka" %} *</label>
     <input type="password" name="password1" id="pw1" class="reg-input reg-input-lg" minlength="8" required autocomplete="new-password"
            placeholder="{% trans 'Min. 8 znakova, 1 veliko slovo, 1 broj' %}">
     {% if errors.password1 %}<div class="error-msg">{{ errors.password1 }}</div>{% endif %}
-    <div id="pw-strength" style="height:4px;border-radius:2px;margin-top:4px;background:var(--border,#333);overflow:hidden">
+    <div id="pw-strength" class="mt-1 fx-overflow-hidden" style="height:4px;border-radius:2px;background:var(--border,#333)">
       <div id="pw-bar" style="height:100%;width:0;transition:all .3s;border-radius:2px"></div>
     </div>
   </div>
@@ -107,14 +105,14 @@
   </div>
 
   <!-- ═══ AUTO-FILLED DETALJI ═══ -->
-  <div id="details-section" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(201,168,76,.15)">
-    <div class="details-header" onclick="toggleDetails()" style="cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <i class="fas fa-chevron-down" id="details-chevron" style="color:var(--gold,#c9a84c);font-size:.75rem;transition:transform .2s"></i>
-      <span style="color:var(--gold,#c9a84c);font-size:.85rem;font-weight:600">{% trans "Podaci popunjeni iz registra" %}</span>
-      <span id="edit-hint" style="color:#666;font-size:.75rem;margin-left:auto">{% trans "kliknite za izmjenu" %}</span>
+  <div id="details-section" class="fx-hidden mt-3" style="padding-top:16px;border-top:1px solid rgba(201,168,76,.15)">
+    <div class="details-header fx-pointer d-flex fx-gap-2 align-items-center mb-3" onclick="toggleDetails()">
+      <i class="fas fa-chevron-down fx-fs-caption fx-text-gold" id="details-chevron" style="transition:transform .2s"></i>
+      <span class="fx-fs-base fx-fw-semibold fx-text-gold">{% trans "Podaci popunjeni iz registra" %}</span>
+      <span id="edit-hint" class="fx-text-dim fx-fs-caption fx-ml-auto">{% trans "kliknite za izmjenu" %}</span>
     </div>
 
-    <div id="details-fields" style="display:none">
+    <div id="details-fields" class="fx-hidden">
       <div class="reg-field">
         <label>{% trans "Naziv tvrtke" %} *</label>
         <input type="text" name="name" id="nameInput" value="{{ company.name }}" class="reg-input"
@@ -167,11 +165,11 @@
     </div>
 
     <div id="details-summary" class="auto-fill-summary">
-      <div id="summary-content" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div id="summary-content" class="d-flex fx-flex-wrap fx-gap-2"></div>
     </div>
   </div>
 
-  <div class="reg-actions" style="margin-top:24px">
+  <div class="reg-actions mt-4">
     <a href="{% url 'registration:register_step1' %}" class="reg-btn-outline">&larr; {% trans "Natrag" %}</a>
     <button type="submit" class="reg-btn" id="submitBtn">{% trans "Registriraj se" %} &rarr;</button>
   </div>
@@ -189,7 +187,7 @@
 .country-opt input{display:none}
 .country-flag{font-size:1.2rem}
 .auto-fill-summary{font-size:.85rem;color:#999;line-height:1.6}
-.auto-fill-chip{display:inline-block;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 10px;font-size:.8rem;color:#ccc}
+.auto-fill-chip{display:inline-block;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 10px;font-size:.8rem;color:var(--text-muted)}
 @keyframes fadeSlideIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 </style>
 
@@ -260,9 +258,9 @@
 
           } else if(d.found && d.existing){
             statusEl.style.display = 'block';
-            statusEl.innerHTML = '<span style="color:#f59e0b"><i class="fas fa-info-circle"></i> '+d.message+'</span>';
+            statusEl.innerHTML = '<span class="fx-text-amber"><i class="fas fa-info-circle"></i> '+d.message+'</span>';
             if(d.can_claim && d.claim_url){
-              statusEl.innerHTML += ' <a href="'+d.claim_url+'" style="color:var(--gold);font-weight:600">{% trans "Zatraži pristup" %} &rarr;</a>';
+              statusEl.innerHTML += ' <a href="'+d.claim_url+'" class="fx-fw-semibold fx-text-gold">{% trans "Zatraži pristup" %} &rarr;</a>';
             }
           } else {
             oibStatus.innerHTML = '{% trans "OIB nije nađen — unesite ručno" %}';
@@ -330,10 +328,10 @@ document.querySelectorAll('input[name="country"]').forEach(function(r){
   r.addEventListener('change', function(){
     var lbl=document.getElementById('oibLabel'), inp=document.getElementById('oib-input');
     if(this.value==='DE'||this.value==='AT'){
-      lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> Steuernummer / USt-IdNr * <span id="oibStatus" style="margin-left:.5rem;font-size:.75rem"></span>';
+      lbl.innerHTML='<i class="fas fa-fingerprint fx-text-gold fx-mr-2"></i> Steuernummer / USt-IdNr * <span id="oibStatus" class="fx-fs-caption" style="margin-left:.5rem"></span>';
       inp.placeholder='DE123456789';
     } else {
-      lbl.innerHTML='<i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);margin-right:6px"></i> OIB * <span id="oibStatus" style="margin-left:.5rem;font-size:.75rem"></span>';
+      lbl.innerHTML='<i class="fas fa-fingerprint fx-text-gold fx-mr-2"></i> OIB * <span id="oibStatus" class="fx-fs-caption" style="margin-left:.5rem"></span>';
       inp.placeholder='12345678901';
     }
   });

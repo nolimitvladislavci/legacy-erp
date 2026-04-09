@@ -4,7 +4,7 @@
 {% block content %}
 <style>
 .mk{max-width:700px;margin:0 auto}
-.mk h1{font-size:1.2rem;font-weight:700;color:var(--gold,#c9a84c);margin-bottom:4px}
+.mk h1{font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:4px}
 .mk .sub{color:var(--text-muted);font-size:.82rem;margin-bottom:16px}
 .mk-search{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);color:var(--text);font-size:.85rem;margin-bottom:12px}
 .mk-search:focus{outline:none;border-color:var(--gold)}
@@ -20,8 +20,8 @@
 .mk-card-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mk-card-meta{font-size:.72rem;color:var(--text-muted);margin-top:2px}
 .mk-card-actions{display:flex;gap:6px;flex-shrink:0}
-.mk-btn{padding:8px 14px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.mk-btn-gold{background:var(--gold);color:#0a0a0a}
+.mk-btn{padding:8px 14px;border-radius:8px;font-size:var(--font-size-sm);font-weight:600;cursor:pointer;border:none;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.mk-btn-gold{background:var(--gold);color:var(--text)}
 .mk-btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
 .mk-btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .mk-empty{text-align:center;padding:40px;color:var(--text-muted);font-size:.9rem}
@@ -48,7 +48,7 @@
         <div class="mk-card-meta">
           {% if k.oib %}OIB: {{ k.oib }} &middot; {% endif %}
           {{ k.entry_count }} dok.
-          {% if k.pending_count %} &middot; <span style="color:var(--gold)">{{ k.pending_count }} za knjizenje</span>{% endif %}
+          {% if k.pending_count %} &middot; <span class="fx-text-gold">{{ k.pending_count }} za knjizenje</span>{% endif %}
         </div>
       </div>
       <div class="mk-card-actions">

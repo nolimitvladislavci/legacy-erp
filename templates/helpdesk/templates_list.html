@@ -3,45 +3,28 @@
 {% block title %}Predlosci odgovora{% endblock %}
 {% block page_title %}Predlosci odgovora{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
-.stat-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.stat-card{background:var(--bg-card);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:16px}
 .hd-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.hd-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
-.hd-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}.hd-table tr:hover{background:#f8fafc}
+.hd-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.7rem;text-transform:uppercase;color:var(--text-dim)}
+.hd-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}.hd-table tr:hover{background:var(--surface2)}
 </style>
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+<div class="d-flex align-items-center justify-content-between mb-3">
   <div>
-    <a href="{% url 'helpdesk:dashboard' %}" style="font-size:.8rem;color:#64748b;text-decoration:none"><i class="fas fa-arrow-left"></i> Dashboard</a>
-    <div style="font-weight:700;font-size:1.1rem;color:#0f172a;margin-top:4px"><i class="fas fa-file-alt" style="color:var(--gold,#c9a84c)"></i> Predlosci odgovora</div>
+    <a href="{% url 'helpdesk:dashboard' %}" class="fx-fs-compact fx-text-dim fx-no-underline"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    <div class="fx-fw-bold fx-fs-xl fx-text-dark mt-1"><i class="fas fa-file-alt fx-text-gold"></i> Predlosci odgovora</div>
   </div>
   <a href="{% url 'helpdesk:create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novi predlozak</a>
 </div>
-<div class="stat-card">
+<div class="fenix-stat">
   <table class="hd-table">
     <thead><tr><th>Naziv</th><th>Kategorija</th><th>Tekst</th><th>Aktivan</th></tr></thead>
     <tbody>
-    {% for tpl in templates %}<tr><td><strong>{{ tpl.name }}</strong></td><td>{{ tpl.get_category_display }}</td><td>{{ tpl.body|truncatechars:80 }}</td><td>{% if tpl.is_active %}<span style="color:#166534"><i class="fas fa-check-circle"></i></span>{% else %}<span style="color:#94a3b8"><i class="fas fa-minus-circle"></i></span>{% endif %}</td></tr>
-    {% empty %}<tr><td colspan="4" class="text-center py-4" style="color:#94a3b8">Nema predlozaka.</td></tr>{% endfor %}
+    {% for tpl in templates %}<tr><td><strong>{{ tpl.name }}</strong></td><td>{{ tpl.get_category_display }}</td><td>{{ tpl.body|truncatechars:80 }}</td><td>{% if tpl.is_active %}<span class="fx-text-green"><i class="fas fa-check-circle"></i></span>{% else %}<span class="fx-text-dim"><i class="fas fa-minus-circle"></i></span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-center py-4 fx-text-dim">Nema predlozaka.</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>

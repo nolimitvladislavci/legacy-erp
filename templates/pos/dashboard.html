@@ -3,24 +3,7 @@
 {% load tax_wizard_tags %}
 {% block title %}POS Terminali{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .page{padding:1.5rem}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
@@ -33,8 +16,8 @@
 .tc-name{font-size:1rem;font-weight:700}.tc-code{font-size:.75rem;color:var(--muted);margin-top:.1rem}
 .tc-desc{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
 .tc-type-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .55rem;border-radius:20px;margin-bottom:.75rem}
-.tc-type-quick{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
-.tc-type-retail{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.tc-type-quick{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.tc-type-retail{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
 .tc-type-restaurant{background:rgba(249,115,22,.12);color:#fb923c;border:1px solid rgba(249,115,22,.3)}
 .tc-session{background:var(--dark);border-radius:6px;padding:.65rem .875rem;margin-bottom:.875rem;font-size:.82rem}
 .tc-session-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.25rem}
@@ -61,16 +44,16 @@
   </div>
 
   <!-- Brzi pristup: ako nema otvorene sesije, pokaži upute -->
-  <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <div style="font-weight:700;color:var(--gold,#c9a84c);margin-bottom:4px">Kako početi?</div>
-      <div style="font-size:.85rem;color:var(--muted,#888)">1. Klikni terminal → 2. Otvori smjenu → 3. Prodaji!</div>
-      <div style="font-size:.8rem;color:var(--muted,#888);margin-top:4px">Ili se prijavi PIN-om direktno na blagajni.</div>
+  <div class="fx-rounded d-flex fx-gap-4 fx-flex-wrap mb-3 align-items-center fx-p-16" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3)">
+    <div class="fx-flex-1" style="min-width:200px">
+      <div class="fx-fw-bold fx-text-gold mb-1">Kako početi?</div>
+      <div class="fx-fs-base" style="color:var(--muted,#888)">1. Klikni terminal → 2. Otvori smjenu → 3. Prodaji!</div>
+      <div class="fx-fs-compact mt-1" style="color:var(--muted,#888)">Ili se prijavi PIN-om direktno na blagajni.</div>
     </div>
-    <a href="{% url 'pos:quick_pos_redirect' %}" style="background:var(--gold,#c9a84c);color:#000;padding:12px 24px;border-radius:10px;font-weight:800;text-decoration:none;font-size:1rem;white-space:nowrap">
+    <a href="{% url 'pos:quick_pos_redirect' %}" class="fx-text-dark fx-rounded fx-fw-800 fx-no-underline fx-fs-lg text-nowrap fx-bg-gold" style="padding:12px 24px">
       &#9889; OTVORI BLAGAJNU
     </a>
-    <a href="/hr/auth/device-tokens/" style="background:transparent;border:1px solid var(--gold,#c9a84c);color:var(--gold,#c9a84c);padding:10px 18px;border-radius:10px;font-weight:700;text-decoration:none;font-size:.9rem;white-space:nowrap">
+    <a href="/hr/auth/device-tokens/" class="fx-rounded fx-fw-bold fx-no-underline fx-fs-md fx-text-gold text-nowrap fx-bg-transparent" style="border:1px solid var(--gold,#c9a84c);padding:10px 18px">
       &#128241; Mobilni pristup
     </a>
   </div>
@@ -98,8 +81,8 @@
       <div class="tc-session">
         <div class="tc-session-lbl">{% trans "Tekuća smjena" %}</div>
         {% if t.active_session %}
-        Smjena #{{ t.active_session.session_number }} &mdash; {{ t.active_session.opened_at|date:"d.m H:i" }} &mdash; <strong style="color:var(--green)">&euro;{{ t.active_session.total_sales|floatformat:2 }}</strong>
-        {% else %}<span style="color:var(--muted)">{% trans "Nema aktivne smjene" %}</span>{% endif %}
+        Smjena #{{ t.active_session.session_number }} &mdash; {{ t.active_session.opened_at|date:"d.m H:i" }} &mdash; <strong class="fx-text-green">&euro;{{ t.active_session.total_sales|floatformat:2 }}</strong>
+        {% else %}<span class="fx-text-muted">{% trans "Nema aktivne smjene" %}</span>{% endif %}
       </div>
       <div class="tc-actions">
         <a href="{% url 'pos:terminal_detail' t.id %}" class="btn btn-ghost btn-sm">{% trans "Detalji" %}</a>
@@ -112,7 +95,7 @@
           <a href="{% url 'pos:session_detail' t.active_session.id %}" class="btn btn-gold btn-sm">{% trans "Blagajna &rarr;" %}</a>
           {% endif %}
         {% else %}
-        <form method="post" action="{% url 'pos:open_session' t.id %}" style="display:inline">{% csrf_token %}
+        <form method="post" action="{% url 'pos:open_session' t.id %}" class="d-inline">{% csrf_token %}
           <button class="btn btn-green btn-sm">{% trans "Početak rada" %}</button></form>
         {% endif %}
       </div>

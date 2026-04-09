@@ -2,14 +2,14 @@
 {% load i18n %}
 {% block title %}{% trans "Konverzija računa" %} | LIMIT Connect
 <!-- LIVE KAMERA MODAL -->
-<div id="liveCamModal" style="display:none;position:fixed;inset:0;z-index:10000;background:#000">
-  <video id="liveCamVideo" autoplay playsinline style="width:100%;height:calc(100% - 60px);object-fit:cover"></video>
-  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:#111;display:flex;align-items:center;justify-content:center;gap:20px">
-    <button onclick="liveCamSnap()" style="width:50px;height:50px;border-radius:50%;background:var(--gold,#c9a84c);border:3px solid #fff;cursor:pointer"></button>
-    <button onclick="liveCamClose()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;position:absolute;right:16px">&times;</button>
+<div id="liveCamModal" class="fx-hidden" style="position:fixed;inset:0;z-index:10000;background:var(--black)">
+  <video id="liveCamVideo" autoplay playsinline class="fx-w-full" style="height:calc(100% - 60px);object-fit:cover"></video>
+  <div class="fx-bg-card d-flex fx-gap-5 align-items-center justify-content-center" style="position:absolute;bottom:0;left:0;right:0;height:60px">
+    <button onclick="liveCamSnap()" class="fx-rounded-circle fx-pointer fx-bg-gold" style="width:50px;height:50px;border:3px solid var(--white)"></button>
+    <button onclick="liveCamClose()" class="fx-border-none fx-text-white fx-fs-5xl fx-pointer fx-bg-transparent" style="position:absolute;right:16px">&times;</button>
   </div>
 </div>
-<canvas id="liveCamCanvas" style="display:none"></canvas>
+<canvas id="liveCamCanvas" class="fx-hidden"></canvas>
 <script>
 var _camStream=null;
 function openLiveCamera(){
@@ -53,8 +53,8 @@ function liveCamClose(){
 .cv-header h2 i { color:var(--gold); margin-right:8px; }
 .cv-header p { color:var(--text-muted); margin:0; font-size:.85rem; }
 .header-actions { display:flex; gap:8px; flex-wrap:wrap; }
-.btn-gold { background:var(--gold); color:#0a0a0a; font-weight:700; border:none; padding:8px 16px; border-radius:8px; font-size:.85rem; transition:opacity .2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
-.btn-gold:hover { opacity:.85; color:#0a0a0a; }
+.btn-gold { background:var(--gold); color:var(--black); font-weight:700; border:none; padding:8px 16px; border-radius:8px; font-size:.85rem; transition:opacity .2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+.btn-gold:hover { opacity:.85; color:var(--black); }
 .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text-secondary); padding:8px 16px; border-radius:8px; font-size:.85rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer; transition:all .15s; }
 .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
 
@@ -70,7 +70,7 @@ function liveCamClose(){
 .photo-grid { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin-bottom:.75rem; }
 .photo-grid .thumb { position:relative; display:inline-block; }
 .photo-grid .thumb img { width:80px; height:80px; object-fit:cover; border-radius:6px; border:2px solid var(--border); display:block; }
-.photo-grid .thumb .rm { position:absolute; top:-5px; right:-5px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:.75rem; cursor:pointer; line-height:18px; text-align:center; padding:0; }
+.photo-grid .thumb .rm { position:absolute; top:-5px; right:-5px; background:var(--red); color:var(--white); border:none; border-radius:50%; width:18px; height:18px; font-size:var(--font-size-sm); cursor:pointer; line-height:18px; text-align:center; padding:0; }
 .preview-info { text-align:center; font-size:.78rem; color:var(--text-muted); margin-bottom:.75rem; }
 .preview-actions { display:flex; justify-content:center; gap:.5rem; flex-wrap:wrap; }
 
@@ -79,27 +79,27 @@ function liveCamClose(){
 .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),#e8c84a); border-radius:8px; width:0%; transition:width .5s ease; }
 
 .cv-result { display:none; margin-top:1rem; padding:1.5rem; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; }
-.cv-result.ok { border-color:#10b981; }
-.cv-result.warn { border-color:#f59e0b; }
-.cv-result.err { border-color:#ef4444; }
+.cv-result.ok { border-color:var(--green); }
+.cv-result.warn { border-color:var(--amber); }
+.cv-result.err { border-color:var(--red); }
 .result-header { display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; flex-wrap:wrap; }
 .badge { padding:.3rem .75rem; border-radius:20px; font-size:.78rem; font-weight:600; }
-.badge-ok { background:rgba(16,185,129,.12); color:#10b981; }
-.badge-warn { background:rgba(245,158,11,.12); color:#f59e0b; }
-.badge-err { background:rgba(239,68,68,.12); color:#ef4444; }
+.badge-ok { background:rgba(16,185,129,.12); color:var(--green); }
+.badge-warn { background:rgba(245,158,11,.12); color:var(--amber); }
+.badge-err { background:rgba(239,68,68,.12); color:var(--red); }
 .result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:.75rem; margin-bottom:1rem; }
 .result-stat { padding:.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-align:center; }
 .result-stat .lbl { color:var(--text-muted); font-size:.68rem; display:block; margin-bottom:.2rem; text-transform:uppercase; letter-spacing:.5px; }
 .result-stat .val { color:var(--gold); font-size:1.1rem; font-weight:700; }
 .result-extras details summary { cursor:pointer; color:var(--gold); font-size:.85rem; padding:.35rem 0; }
-.result-extras details pre { background:var(--input-bg); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:.75rem; font-size:.75rem; overflow-x:auto; max-height:280px; margin:.4rem 0 0; }
+.result-extras details pre { background:var(--input-bg); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:.75rem; font-size:var(--font-size-sm); overflow-x:auto; max-height:280px; margin:.4rem 0 0; }
 .result-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); }
 
 .stages { display:flex; gap:0; margin-bottom:1.5rem; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
 .stage { flex:1; padding:.6rem .5rem; text-align:center; font-size:.72rem; font-weight:600; color:var(--text-muted); background:var(--bg-card); border-right:1px solid var(--border); transition:all .3s; }
 .stage:last-child { border-right:none; }
 .stage.active { background:rgba(201,168,76,.12); color:var(--gold); }
-.stage.done { background:rgba(16,185,129,.08); color:#10b981; }
+.stage.done { background:rgba(16,185,129,.08); color:var(--green); }
 .stage .si { display:block; font-size:1rem; margin-bottom:.15rem; }
 
 .recent-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
@@ -110,9 +110,9 @@ function liveCamClose(){
 .tbl td { padding:.5rem .75rem; border-bottom:1px solid var(--border); color:var(--text); }
 .tbl tbody tr:hover td { background:var(--table-row-hover); cursor:pointer; }
 .st-badge { padding:.2rem .5rem; border-radius:10px; font-size:.72rem; font-weight:500; }
-.st-validated { background:rgba(16,185,129,.12); color:#10b981; }
-.st-failed { background:rgba(239,68,68,.12); color:#ef4444; }
-.st-pending,.st-extracted,.st-xml_generated { background:rgba(245,158,11,.12); color:#f59e0b; }
+.st-validated { background:rgba(16,185,129,.12); color:var(--green); }
+.st-failed { background:rgba(239,68,68,.12); color:var(--red); }
+.st-pending,.st-extracted,.st-xml_generated { background:rgba(245,158,11,.12); color:var(--amber); }
 .cbar { display:inline-block; width:44px; height:5px; background:var(--border); border-radius:3px; overflow:hidden; vertical-align:middle; margin-right:.3rem; }
 .cbar-fill { height:100%; border-radius:3px; background:#10b981; }
 
@@ -127,7 +127,7 @@ function liveCamClose(){
 {% endblock %}
 
 {% block content %}
-<div style="max-width:960px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:960px">
 
   <div class="cv-header">
     <div>
@@ -149,8 +149,8 @@ function liveCamClose(){
   </div>
 
   <!-- Skriveni inputi -->
-  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-  <input type="file" id="cameraInput" accept="image/*;capture=camera" capture="environment" style="display:none">
+  <input type="file" id="fileInput" accept="image/*" multiple class="fx-hidden">
+  <input type="file" id="cameraInput" accept="image/*;capture=camera" capture="environment" class="fx-hidden">
 
   <!-- Upload -->
   <div id="uploadArea">
@@ -163,18 +163,18 @@ function liveCamClose(){
       </button>
     </div>
     <!-- QR scan modal (sakriveno — koristiti samo desktop) -->
-    <div id="qrModal" style="display:none;margin-top:1rem;padding:1.5rem;background:var(--bg-card);border:1px solid var(--gold);border-radius:12px;text-align:center">
-      <div style="font-size:.9rem;font-weight:600;color:var(--gold);margin-bottom:.75rem"><i class="fas fa-qrcode"></i> Skenirajte QR kod mobitelom</div>
-      <img id="qrImage" style="max-width:200px;border-radius:8px;margin-bottom:.75rem" alt="QR">
-      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.5rem">Otvorite kameru mobitela i skenirajte ovaj kod</div>
-      <div id="qrTimer" style="font-size:.82rem;color:var(--text-muted)"></div>
-      <div id="qrStatus" style="font-size:.85rem;margin-top:.5rem;color:var(--text-muted)"><i class="fas fa-circle-notch fa-spin"></i> Cekam sliku s mobitela...</div>
-      <button type="button" onclick="cancelQRScan()" class="btn-ghost" style="margin-top:.75rem;font-size:.78rem"><i class="fas fa-times"></i> Odustani</button>
+    <div id="qrModal" class="fx-hidden fx-rounded text-center mt-3 fx-bg-card fx-p-5" style="border:1px solid var(--gold)">
+      <div class="fx-fs-md fx-fw-semibold fx-text-gold fx-mb-4"><i class="fas fa-qrcode"></i> Skenirajte QR kod mobitelom</div>
+      <img id="qrImage" class="fx-rounded fx-mb-4" style="max-width:200px" alt="QR">
+      <div class="fx-fs-body-sm fx-text-muted mb-2">Otvorite kameru mobitela i skenirajte ovaj kod</div>
+      <div id="qrTimer" class="fx-fs-note fx-text-muted"></div>
+      <div id="qrStatus" class="fx-fs-base mt-2 fx-text-muted"><i class="fas fa-circle-notch fa-spin"></i> Cekam sliku s mobitela...</div>
+      <button type="button" onclick="cancelQRScan()" class="btn-ghost fx-fs-body-sm fx-mt-4"><i class="fas fa-times"></i> Odustani</button>
     </div>
     <div class="upload-zone" id="uploadZone">
       <div class="dz-icon">📂</div>
       <p>{% trans "ili povucite sliku ovdje" %}</p>
-      <p style="font-size:.72rem">JPG, PNG, WebP — maks 10MB</p>
+      <p class="fx-fs-sm">JPG, PNG, WebP — maks 10MB</p>
     </div>
   </div>
 
@@ -192,19 +192,19 @@ function liveCamClose(){
 
   <!-- Progress -->
   <div class="cv-progress" id="cvProgress">
-    <div style="display:flex;align-items:center;gap:.6rem">
-      <div style="width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0"></div>
-      <span id="progressLabel" style="color:var(--text);font-size:.88rem;font-weight:500">{% trans "Obrada..." %}</span>
+    <div class="d-flex align-items-center" style="gap:.6rem">
+      <div class="fx-rounded-circle flex-shrink-0" style="width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);animation:spin 1s linear infinite"></div>
+      <span id="progressLabel" class="fx-fs-body fx-fw-medium fx-text-body">{% trans "Obrada..." %}</span>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
-    <div id="progressDetail" style="color:var(--text-muted);font-size:.78rem">{% trans "Slanje slike..." %}</div>
+    <div id="progressDetail" class="fx-fs-body-sm fx-text-muted">{% trans "Slanje slike..." %}</div>
   </div>
 
   <!-- Rezultat -->
   <div class="cv-result" id="cvResult">
     <div class="result-header">
       <span id="resultBadge" class="badge"></span>
-      <span id="resultMsg" style="font-size:.92rem;color:var(--text)"></span>
+      <span id="resultMsg" class="fx-text-body" style="font-size:.92rem"></span>
     </div>
     <div class="result-grid" id="resultGrid"></div>
     <div class="result-extras" id="resultExtras"></div>
@@ -213,21 +213,21 @@ function liveCamClose(){
 
   <!-- Nedavne -->
   {% if recent_conversions %}
-  <div class="stat-card" style="padding:1.25rem;margin-top:1.5rem">
+  <div class="fenix-stat fx-p-125 fx-mt-6">
     <div class="recent-header">
       <h3><i class="fas fa-history"></i> {% trans "Nedavne konverzije" %}</h3>
-      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost" style="padding:5px 12px;font-size:.78rem">{% trans "Sve" %} →</a>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost fx-fs-body-sm" style="padding:5px 12px">{% trans "Sve" %} →</a>
     </div>
-    <div style="overflow-x:auto">
+    <div class="fx-scroll-x">
       <table class="tbl">
         <thead><tr><th>{% trans "Datoteka" %}</th><th>{% trans "Status" %}</th><th>{% trans "Pouzdanost" %}</th><th>{% trans "Datum" %}</th></tr></thead>
         <tbody>
           {% for c in recent_conversions %}
           <tr onclick="location.href='{% url 'documents:arhiva_list' %}?q={{ c.original_filename|urlencode }}'">
-            <td><i class="fas fa-file-image" style="color:var(--gold);margin-right:.4rem"></i>{{ c.original_filename|truncatechars:32 }}</td>
+            <td><i class="fas fa-file-image fx-text-gold" style="margin-right:.4rem"></i>{{ c.original_filename|truncatechars:32 }}</td>
             <td><span class="st-badge st-{{ c.status }}">{{ c.get_status_display }}</span></td>
             <td><span class="cbar"><span class="cbar-fill" style="width:{{ c.ai_confidence_score|floatformat:0 }}%"></span></span> {{ c.ai_confidence_score|floatformat:0 }}%</td>
-            <td style="color:var(--text-muted)">{{ c.created_at|date:"d.m.Y H:i" }}</td>
+            <td class="fx-text-muted">{{ c.created_at|date:"d.m.Y H:i" }}</td>
           </tr>
           {% endfor %}
         </tbody>

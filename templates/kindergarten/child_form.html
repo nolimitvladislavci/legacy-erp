@@ -4,17 +4,17 @@
 {% block page_title %}{% if mode == "create" %}Upis djeteta{% else %}Uredi dijete{% endif %}{% endblock %}
 {% block extra_css %}
 <style>
-.kg-form{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
-.kg-form label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.3rem}
-.kg-form input,.kg-form select,.kg-form textarea{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:.5rem .8rem;width:100%}
-.kg-form input:focus,.kg-form select:focus,.kg-form textarea:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 2px #c8a24e22}
+.kg-form{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
+.kg-form label{color:var(--gold);font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.kg-form input,.kg-form select,.kg-form textarea{background:var(--surface-deep);color:var(--text);border:1px solid rgba(200,162,78,0.2);border-radius:6px;padding:.5rem .8rem;width:100%}
+.kg-form input:focus,.kg-form select:focus,.kg-form textarea:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 2px #c8a24e22}
 .kg-form .form-check-input{width:1.2em;height:1.2em}
-.section-title{color:#c8a24e;font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.4rem;margin:1.5rem 0 1rem}
+.section-title{color:var(--gold);font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.4rem;margin:1.5rem 0 1rem}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'kindergarten:child_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Natrag</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{% if mode == "create" %}Upis novog djeteta{% else %}Uredi dijete{% endif %}</h2>
+<a href="{% url 'kindergarten:child_list' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Natrag</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{% if mode == "create" %}Upis novog djeteta{% else %}Uredi dijete{% endif %}</h2>
 
 <form method="post" class="kg-form">
   {% csrf_token %}
@@ -84,19 +84,19 @@
     <div class="col-md-6">
       <div class="form-check">
         <input type="checkbox" name="gdpr_consent" class="form-check-input" id="gdpr">
-        <label for="gdpr" style="color:#f0e6d3;font-weight:400">Pristanak roditelja za obradu podataka (čl.8 GDPR) *</label>
+        <label for="gdpr" class="fx-fw-normal fx-text-body">Pristanak roditelja za obradu podataka (čl.8 GDPR) *</label>
       </div>
     </div>
     <div class="col-md-6">
       <div class="form-check">
         <input type="checkbox" name="photo_consent" class="form-check-input" id="photo">
-        <label for="photo" style="color:#f0e6d3;font-weight:400">Pristanak za fotografije na portalu</label>
+        <label for="photo" class="fx-fw-normal fx-text-body">Pristanak za fotografije na portalu</label>
       </div>
     </div>
   </div>
 
   <div class="mt-4">
-    <button type="submit" class="btn" style="background:#c8a24e;color:#1a1a2e;font-weight:600;padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Spremi</button>
+    <button type="submit" class="btn fx-bg-gold fx-fw-semibold fx-text-dark" style="padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Spremi</button>
     <a href="{% url 'kindergarten:child_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
   </div>
 </form>

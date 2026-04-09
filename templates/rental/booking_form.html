@@ -32,24 +32,7 @@ FenixScan.create({
 </script>
 {% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .page{padding:1.5rem;max-width:600px}
@@ -76,7 +59,7 @@ FenixScan.create({
       </div>
       <!-- FenixScan: ID Card → auto-fill gost -->
       <div class="field">
-        <label style="color:var(--gold);font-weight:700"><i class="fas fa-id-card" style="margin-right:4px"></i> Skeniraj osobnu / putovnicu</label>
+        <label class="fx-fw-bold fx-text-gold"><i class="fas fa-id-card" style="margin-right:4px"></i> Skeniraj osobnu / putovnicu</label>
         <div id="scan-id-card"></div>
       </div>
       <div class="field"><label>Ime gosta *</label><input name="guest_name" id="guest_name" value="{{ booking.guest_name|default:'' }}" required></div>
@@ -85,7 +68,7 @@ FenixScan.create({
         <div class="field"><label>Telefon</label><input name="guest_phone" value="{{ booking.guest_phone|default:'' }}"></div>
       </div>
       <div class="row">
-        <div class="field"><label>Drzava</label><input name="guest_country" value="{{ booking.guest_country|default:'HR' }}" maxlength="3" style="text-transform:uppercase"></div>
+        <div class="field"><label>Drzava</label><input name="guest_country" value="{{ booking.guest_country|default:'HR' }}" maxlength="3" class="fx-uppercase"></div>
         <div class="field"><label>Broj gostiju</label><input name="guest_count" type="number" min="1" value="{{ booking.guest_count|default:1 }}"></div>
       </div>
       <div class="row">
@@ -106,8 +89,8 @@ FenixScan.create({
         </div>
       </div>
       <div class="field"><label>Napomene</label><textarea name="notes">{{ booking.notes|default:'' }}</textarea></div>
-      <div style="display:flex;gap:.5rem;margin-top:1rem">
-        <button type="submit" class="btn btn-gold" style="flex:1">Spremi</button>
+      <div class="d-flex fx-gap-2 mt-3">
+        <button type="submit" class="btn btn-gold fx-flex-1">Spremi</button>
         <a href="{% url 'rental:dashboard' %}" class="btn btn-ghost">Odustani</a>
       </div>
     </form>

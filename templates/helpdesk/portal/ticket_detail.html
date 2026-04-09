@@ -9,51 +9,51 @@
 <style>
 :root{--primary:#0f172a;--accent: #c9a84c;--bg:#f8fafc}
 body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;margin:0;min-height:100vh}
-.portal-header{background:var(--primary);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.portal-header{background:var(--primary);color:var(--white);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 .portal-header h1{font-size:1rem;margin:0;font-weight:700}.portal-header .accent{color:var(--accent)}
 .portal-body{max-width:700px;margin:0 auto;padding:20px}
-.card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:16px;margin-bottom:16px}
+.card{background:var(--bg-card);border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:16px}
 .hd-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.hd-badge.open{background:#dbeafe;color:#1e40af}.hd-badge.in_progress{background:#fef3c7;color:#92400e}.hd-badge.waiting_client{background:#fce4ec;color:#880e4f}.hd-badge.resolved{background:#dcfce7;color:#166534}.hd-badge.closed{background:#f1f5f9;color:#475569}
+.hd-badge.open{background:var(--blue-dim);color:var(--blue)}.hd-badge.in_progress{background:var(--amber-dim);color:var(--amber)}.hd-badge.waiting_client{background:#fce4ec;color:#880e4f}.hd-badge.resolved{background:#dcfce7;color:var(--green)}.hd-badge.closed{background:var(--surface3);color:var(--text-dim)}
 .msg-bubble{padding:12px 14px;border-radius:10px;font-size:.85rem;line-height:1.5;margin-bottom:8px}
-.msg-staff{background:#eff6ff;border-left:3px solid #3b82f6}.msg-client{background:#f0fdf4;border-left:3px solid #22c55e}
-.msg-meta{font-size:.7rem;color:#64748b;margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.msg-staff{background:#eff6ff;border-left:3px solid #3b82f6}.msg-client{background:var(--green-dim);border-left:3px solid #22c55e}
+.msg-meta{font-size:.7rem;color:var(--text-dim);margin-bottom:4px;display:flex;gap:8px;align-items:center}
 .msg-body{white-space:pre-wrap;word-break:break-word}
-.rating-stars{display:flex;gap:4px}.rating-stars .star{font-size:1.4rem;cursor:pointer;color:#e2e8f0;transition:color .15s}.rating-stars .star.active,.rating-stars .star:hover{color:#f59e0b}
+.rating-stars{display:flex;gap:4px}.rating-stars .star{font-size:1.4rem;cursor:pointer;color:var(--text);transition:color .15s}.rating-stars .star.active,.rating-stars .star:hover{color:var(--amber)}
 </style>
 </head>
 <body>
 <div class="portal-header">
   <h1><i class="fas fa-headset"></i> <span class="accent">Podrska</span> - {{ partner.name }}</h1>
-  <a href="{% url 'helpdesk_portal' token=token %}" class="btn btn-sm btn-outline-light" style="font-size:.78rem"><i class="fas fa-arrow-left"></i> Moji tiketi</a>
+  <a href="{% url 'helpdesk_portal' token=token %}" class="btn btn-sm btn-outline-light fx-fs-body-sm"><i class="fas fa-arrow-left"></i> Moji tiketi</a>
 </div>
 <div class="portal-body">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px">
-      <div><div style="font-weight:700;font-size:1rem">{{ ticket.ticket_number }}</div><div style="font-size:.9rem;color:#0f172a;margin-top:2px">{{ ticket.subject }}</div><div style="font-size:.72rem;color:#64748b;margin-top:4px">{{ ticket.get_category_display }} | {{ ticket.created_at|date:"d.m.Y H:i" }}</div></div>
+    <div class="d-flex fx-flex-wrap fx-gap-2 justify-content-between" style="align-items:start">
+      <div><div class="fx-fw-bold fx-fs-lg">{{ ticket.ticket_number }}</div><div class="fx-fs-md fx-text-dark fx-mt-1">{{ ticket.subject }}</div><div class="fx-fs-sm fx-text-dim mt-1">{{ ticket.get_category_display }} | {{ ticket.created_at|date:"d.m.Y H:i" }}</div></div>
       <span class="hd-badge {{ ticket.status }}">{{ ticket.get_status_display }}</span>
     </div>
-    {% if ticket.description %}<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;font-size:.85rem;line-height:1.6;white-space:pre-wrap">{{ ticket.description }}</div>{% endif %}
+    {% if ticket.description %}<div class="fx-fs-base fx-bt fx-lh-normal fx-mt-10" style="padding-top:10px;white-space:pre-wrap">{{ ticket.description }}</div>{% endif %}
   </div>
 
-  {% if messages %}<div style="font-weight:600;font-size:.85rem;margin-bottom:8px">Komunikacija</div>
-  {% for msg in messages %}<div class="msg-bubble {% if msg.is_from_client %}msg-client{% else %}msg-staff{% endif %}"><div class="msg-meta"><strong>{{ msg.sender_name|default:"Podrska" }}</strong><span>{{ msg.created_at|date:"d.m.Y H:i" }}</span></div><div class="msg-body">{{ msg.body }}</div>{% if msg.attachment %}<div style="margin-top:6px"><a href="{{ msg.attachment.url }}" target="_blank" style="font-size:.75rem"><i class="fas fa-paperclip"></i> Prilog</a></div>{% endif %}</div>{% endfor %}{% endif %}
+  {% if messages %}<div class="fx-fw-semibold fx-fs-base mb-2">Komunikacija</div>
+  {% for msg in messages %}<div class="msg-bubble {% if msg.is_from_client %}msg-client{% else %}msg-staff{% endif %}"><div class="msg-meta"><strong>{{ msg.sender_name|default:"Podrska" }}</strong><span>{{ msg.created_at|date:"d.m.Y H:i" }}</span></div><div class="msg-body">{{ msg.body }}</div>{% if msg.attachment %}<div class="mt-1"><a href="{{ msg.attachment.url }}" target="_blank" class="fx-fs-caption"><i class="fas fa-paperclip"></i> Prilog</a></div>{% endif %}</div>{% endfor %}{% endif %}
 
-  {% if ticket.status != 'closed' %}<div class="card"><div style="font-weight:600;font-size:.85rem;margin-bottom:8px">Odgovorite</div>
+  {% if ticket.status != 'closed' %}<div class="card"><div class="fx-fw-semibold fx-fs-base mb-2">Odgovorite</div>
     <form method="post" action="{% url 'helpdesk_portal_reply' token=token pk=ticket.pk %}" enctype="multipart/form-data">{% csrf_token %}
       <input type="hidden" name="sender_name" value="{{ partner.name }}">
-      <textarea name="body" rows="4" required style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:.85rem;resize:vertical" placeholder="Napisite poruku..."></textarea>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><input type="file" name="attachment" style="font-size:.75rem;max-width:200px"><button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i> Posalji</button></div>
+      <textarea name="body" rows="4" required class="fx-w-full fx-rounded fx-fs-base fx-b fx-p-10" style="resize:vertical" placeholder="Napisite poruku..."></textarea>
+      <div class="d-flex justify-content-between align-items-center mt-2"><input type="file" name="attachment" class="fx-fs-caption" style="max-width:200px"><button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i> Posalji</button></div>
     </form>
   </div>{% endif %}
 
   {% if ticket.status == 'resolved' or ticket.status == 'closed' %}<div class="card">
-    {% if ticket.satisfaction_rating %}<div style="text-align:center"><div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Vasa ocjena</div><div class="rating-stars" style="justify-content:center">{% for i in "12345" %}<span class="star {% if forloop.counter <= ticket.satisfaction_rating %}active{% endif %}"><i class="fas fa-star"></i></span>{% endfor %}</div>{% if ticket.satisfaction_comment %}<div style="font-size:.8rem;color:#64748b;margin-top:6px">{{ ticket.satisfaction_comment }}</div>{% endif %}</div>
-    {% else %}<div style="text-align:center"><div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Ocijenite podrsku</div>
+    {% if ticket.satisfaction_rating %}<div class="text-center"><div class="fx-fw-semibold fx-fs-base mb-1">Vasa ocjena</div><div class="rating-stars justify-content-center">{% for i in "12345" %}<span class="star {% if forloop.counter <= ticket.satisfaction_rating %}active{% endif %}"><i class="fas fa-star"></i></span>{% endfor %}</div>{% if ticket.satisfaction_comment %}<div class="fx-fs-compact fx-text-dim mt-1">{{ ticket.satisfaction_comment }}</div>{% endif %}</div>
+    {% else %}<div class="text-center"><div class="fx-fw-semibold fx-fs-base mb-1">Ocijenite podrsku</div>
       <form method="post" action="{% url 'helpdesk_portal_rate' token=token pk=ticket.pk %}">{% csrf_token %}
-        <div class="rating-stars" style="justify-content:center;margin-bottom:8px" id="rating-stars">{% for i in "12345" %}<span class="star" data-value="{{ forloop.counter }}" onclick="setRating({{ forloop.counter }})"><i class="fas fa-star"></i></span>{% endfor %}</div>
+        <div class="rating-stars justify-content-center mb-2" id="rating-stars">{% for i in "12345" %}<span class="star" data-value="{{ forloop.counter }}" onclick="setRating({{ forloop.counter }})"><i class="fas fa-star"></i></span>{% endfor %}</div>
         <input type="hidden" name="rating" id="rating-input" value="">
-        <textarea name="comment" rows="2" style="width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:8px;font-size:.82rem;resize:vertical;margin-bottom:8px" placeholder="Komentar (opcionalno)"></textarea>
+        <textarea name="comment" rows="2" class="fx-w-full fx-rounded-sm fx-fs-note mb-2 fx-b fx-p-8" style="resize:vertical" placeholder="Komentar (opcionalno)"></textarea>
         <button type="submit" class="btn btn-sm btn-primary" id="rate-btn" disabled><i class="fas fa-check"></i> Ocijeni</button>
       </form></div>
     <script>function setRating(val){document.getElementById('rating-input').value=val;document.getElementById('rate-btn').disabled=false;document.querySelectorAll('#rating-stars .star').forEach(function(s,i){s.classList.toggle('active',i<val);});}</script>

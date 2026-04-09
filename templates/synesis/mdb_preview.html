@@ -10,7 +10,7 @@
 .prev-sub { color: #999; font-size: 0.82rem; margin-bottom: 20px; }
 .prev-stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .prev-stat {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    background:var(--surface-deep); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 140px; text-align: center;
 }
 .prev-stat .val { font-size: 1.4rem; font-weight: 800; color: var(--gold,#c9a84c); }
@@ -18,13 +18,13 @@
 .prev-tabs { display: flex; gap: 4px; margin-bottom: 0; }
 .prev-tab {
     padding: 10px 20px; cursor: pointer; border-radius: 8px 8px 0 0;
-    background: #111; color: #999; font-size: 0.82rem; font-weight: 600;
+    background:var(--bg-card); color: #999; font-size: 0.82rem; font-weight: 600;
     border: 1px solid #222; border-bottom: none; transition: all 0.2s;
 }
-.prev-tab.active { background: #0f172a; color: var(--gold,#c9a84c); border-color: rgba(201,168,76,0.3); }
+.prev-tab.active { background:var(--surface-deep); color: var(--gold,#c9a84c); border-color: rgba(201,168,76,0.3); }
 .prev-tab:hover { color: #e0e0e0; }
 .prev-panel {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    background:var(--surface-deep); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 0 10px 10px 10px; padding: 16px; display: none;
 }
 .prev-panel.active { display: block; }
@@ -34,20 +34,20 @@
     letter-spacing: 1px; padding: 8px 8px; text-align: left;
     border-bottom: 1px solid #333;
 }
-.prev-table td { padding: 7px 8px; border-bottom: 1px solid #1a1a1a; font-size: 0.82rem; color: #ccc; }
+.prev-table td { padding: 7px 8px; border-bottom: 1px solid #1a1a1a; font-size: 0.82rem; color:var(--text-muted); }
 .prev-table tr:hover { background: rgba(201,168,76,0.04); }
 .prev-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .oib-badge {
-    background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 6px;
+    background: rgba(16,185,129,0.15); color:var(--green); padding: 1px 6px;
     border-radius: 4px; font-size: 0.72em; font-family: monospace;
 }
 .import-bar {
-    background: #111; border: 1px solid #333; border-radius: 10px;
+    background:var(--bg-card); border: 1px solid #333; border-radius: 10px;
     padding: 14px 20px; margin-top: 20px; display: flex;
     align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 .import-btn {
-    background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 9px 22px;
+    background: var(--gold,#c9a84c); color:var(--text); border: none; padding: 9px 22px;
     border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;
 }
 .import-btn:hover { background: #e0c068; }
@@ -61,15 +61,15 @@
     display: none; padding: 12px 16px; border-radius: 8px; margin-top: 12px;
     font-size: 0.85rem;
 }
-.import-result.success { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-.import-result.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
-.more-info { color: #666; font-size: 0.78rem; }
+.import-result.success { background: rgba(16,185,129,0.12); color:var(--green); border: 1px solid rgba(16,185,129,0.3); }
+.import-result.error { background: rgba(239,68,68,0.12); color:var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.more-info { color:var(--text-dim); font-size: 0.78rem; }
 .back-link { color: var(--gold,#c9a84c); text-decoration: none; font-size: 0.85rem; }
 .back-link:hover { text-decoration: underline; }
 </style>
 
 <div class="prev-wrap">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+    <div class="d-flex justify-content-between align-items-center mb-1">
         <div class="prev-title"><i class="fas fa-database"></i> {{ mdb_name }}</div>
         <a href="{% url 'synesis:mdb_upload' %}" class="back-link"><i class="fas fa-arrow-left"></i> Nova datoteka</a>
     </div>
@@ -122,7 +122,7 @@
                 {% for p in partners %}
                 <tr>
                     <td>{{ p.synesis_id }}</td>
-                    <td style="font-weight:600;">{{ p.name }}</td>
+                    <td class="fx-fw-semibold">{{ p.name }}</td>
                     <td>{% if p.oib %}<span class="oib-badge">{{ p.oib }}</span>{% else %}-{% endif %}</td>
                     <td>{{ p.city|default:"-" }}</td>
                     <td>{{ p.street|default:"-" }}</td>
@@ -133,7 +133,7 @@
             </tbody>
         </table>
         {% if partners_total > 50 %}
-        <div class="more-info" style="margin-top:10px;">Prikazano prvih 50 od {{ partners_total }} partnera</div>
+        <div class="more-info fx-mt-10">Prikazano prvih 50 od {{ partners_total }} partnera</div>
         {% endif %}
     </div>
 
@@ -156,7 +156,7 @@
                 {% for i in items %}
                 <tr>
                     <td><code>{{ i.code }}</code></td>
-                    <td style="font-weight:600;">{{ i.name }}</td>
+                    <td class="fx-fw-semibold">{{ i.name }}</td>
                     <td>{{ i.unit|default:"KOM" }}</td>
                     <td>{{ i.barcode|default:"-" }}</td>
                     <td class="num">{{ i.vat_rate|default:"-" }}</td>
@@ -168,7 +168,7 @@
             </tbody>
         </table>
         {% if items_total > 50 %}
-        <div class="more-info" style="margin-top:10px;">Prikazano prvih 50 od {{ items_total }} artikala</div>
+        <div class="more-info fx-mt-10">Prikazano prvih 50 od {{ items_total }} artikala</div>
         {% endif %}
     </div>
 
@@ -188,27 +188,27 @@
             <tbody>
                 {% for inv in invoices %}
                 <tr>
-                    <td style="font-weight:600;">{{ inv.number }}</td>
+                    <td class="fx-fw-semibold">{{ inv.number }}</td>
                     <td>{{ inv.date }}</td>
                     <td>{{ inv.customer_name|default:"-" }}</td>
                     <td>{% if inv.customer_oib %}<span class="oib-badge">{{ inv.customer_oib }}</span>{% else %}-{% endif %}</td>
                     <td class="num">{{ inv.lines|length }}</td>
-                    <td class="num" style="color:var(--gold,#c9a84c); font-weight:600;">{{ inv.total|floatformat:2 }}</td>
+                    <td class="num fx-fw-semibold fx-text-gold">{{ inv.total|floatformat:2 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% if invoices_total > 30 %}
-        <div class="more-info" style="margin-top:10px;">Prikazano prvih 30 od {{ invoices_total }} racuna</div>
+        <div class="more-info fx-mt-10">Prikazano prvih 30 od {{ invoices_total }} racuna</div>
         {% endif %}
     </div>
 
     <!-- IMPORT BAR -->
     <div class="import-bar">
-        <div style="color:#999; font-size:0.82rem;">
+        <div class="fx-text-muted fx-fs-note">
             <i class="fas fa-download"></i> Uvezi podatke u ERP:
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="d-flex fx-gap-3 fx-flex-wrap">
             <button class="import-btn-outline" onclick="doImport('partners')">
                 <i class="fas fa-users"></i> Uvezi partnere
             </button>

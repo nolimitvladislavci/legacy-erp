@@ -4,50 +4,50 @@
 
 {% block extra_css %}
 <style>
-.ts-card { background:#0d1117; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1rem; }
-.ts-pending  { border-left:4px solid #f59e0b; }
-.ts-agreed   { border-left:4px solid #4ade80; }
-.ts-conflict { border-left:4px solid #f87171; }
-.ts-error    { border-left:4px solid #6b7280; }
-.ts-new      { border-left:4px solid #64748b; }
+.ts-card { background:var(--bg-card); border-radius:12px; padding:1rem 1.25rem; margin-bottom:1rem; }
+.ts-pending  { border-left:4px solid var(--amber); }
+.ts-agreed   { border-left:4px solid var(--green); }
+.ts-conflict { border-left:4px solid var(--red); }
+.ts-error    { border-left:4px solid var(--muted2); }
+.ts-new      { border-left:4px solid var(--muted2); }
 .ts-badge {
   display:inline-block; padding:.25rem .7rem;
   border-radius:20px; font-size:.72rem; font-weight:700;
   margin-bottom:.5rem;
 }
-.ts-pending-b  { background:#78350f; color:#fbbf24; }
-.ts-agreed-b   { background:#065f46; color:#4ade80; }
-.ts-conflict-b { background:#7f1d1d; color:#f87171; }
-.ts-new-b      { background:#1e293b; color:#94a3b8; }
-.ts-proposal { background:#111827; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; }
+.ts-pending-b  { background:var(--amber-dim); color:var(--amber); }
+.ts-agreed-b   { background:var(--green-dim); color:var(--green); }
+.ts-conflict-b { background:var(--red-dim); color:var(--red); }
+.ts-new-b      { background:var(--surface2); color:var(--text-dim); }
+.ts-proposal { background:var(--surface); border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; }
 .ts-proposal h5 { color:var(--gold,#c9a84c); font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; margin:0 0 .5rem; }
-.ts-resolution { background:#0f2218; border:1px solid #165534; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.88rem; color:#d1fae5; }
-.ts-conflict-box { background:#200d0d; border:1px solid #7f1d1d; border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; color:#fecaca; }
-.spinner { display:inline-block; width:14px; height:14px; border:2px solid #f59e0b; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-right:6px; }
+.ts-resolution { background:var(--green-dim); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.88rem; color:var(--green); }
+.ts-conflict-box { background:var(--red-dim); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:.75rem 1rem; margin-top:.75rem; font-size:.85rem; color:var(--red); }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--amber); border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-right:6px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 @media(max-width:600px) { .ts-card { padding:.75rem; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="max-width:900px;margin:0 auto;padding:1.5rem">
-  <h2 style="color:var(--gold,#c9a84c);margin-bottom:.25rem">⭐ Knjiga boljitaka</h2>
-  <p style="color:#94a3b8;font-size:.85rem;margin-bottom:1.5rem">Prijavljeni problemi → Haiku + Gemini analiziraju → Ivan odlučuje</p>
+<div class="fx-m-auto fx-p-5" style="max-width:900px">
+  <h2 class="fx-text-gold fx-mb-1">⭐ Knjiga boljitaka</h2>
+  <p class="fx-text-muted fx-fs-base fx-mb-6">Prijavljeni problemi → Haiku + Gemini analiziraju → Ivan odlučuje</p>
 
   <!-- Forma -->
-  <form method="post" style="background:#1a1a2e;border-radius:12px;padding:1.25rem;margin-bottom:2rem;border:1px solid rgba(201,168,76,.2)">
+  <form method="post" class="fx-bg-surface2 fx-rounded fx-p-125" style="margin-bottom:2rem;border:1px solid rgba(201,168,76,.2)">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 130px 80px;gap:.75rem;margin-bottom:.75rem">
+    <div class="d-grid fx-gap-3 fx-mb-4" style="grid-template-columns:1fr 130px 80px">
       <input name="title" placeholder="Kratki naslov problema..." required
-             style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit;font-size:.9rem">
-      <select name="category" style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit">
+             class="fx-rounded fx-bg-deep fx-text-white fx-fs-md fx-b2" style="padding:.65rem;font-family:inherit">
+      <select name="category" class="fx-rounded fx-bg-deep fx-text-white fx-b2" style="padding:.65rem;font-family:inherit">
         <option value="pos">POS</option>
         <option value="ux">UX</option>
         <option value="workflow">Workflow</option>
         <option value="inventory">Skladište</option>
         <option value="other">Ostalo</option>
       </select>
-      <select name="priority" style="padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-family:inherit">
+      <select name="priority" class="fx-rounded fx-bg-deep fx-text-white fx-b2" style="padding:.65rem;font-family:inherit">
         <option value="1">🔴 P1</option>
         <option value="2">🟠 P2</option>
         <option value="3" selected>🟡 P3</option>
@@ -55,15 +55,15 @@
       </select>
     </div>
     <textarea name="description" placeholder="Detaljan opis — što se događa, kad, gdje..." rows="3" required
-              style="width:100%;box-sizing:border-box;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;margin-bottom:.75rem;font-family:inherit;font-size:.9rem;resize:vertical"></textarea>
-    <button type="submit" style="padding:.7rem 2rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">
+              class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-md fx-b2 fx-mb-4" style="box-sizing:border-box;padding:.65rem;font-family:inherit;resize:vertical"></textarea>
+    <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer" style="padding:.7rem 2rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);font-family:inherit">
       ⭐ Prijavi → Trojstvo analizira
     </button>
   </form>
 
   {% if messages %}
     {% for msg in messages %}
-    <div style="background:rgba(74,222,128,.1);border:1px solid #4ade80;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;color:#4ade80;font-size:.9rem">
+    <div class="fx-rounded fx-fs-md mb-3 fx-text-green" style="background:rgba(74,222,128,.1);border:1px solid var(--green);padding:.75rem 1rem">
       {{ msg }}
     </div>
     {% endfor %}
@@ -74,10 +74,10 @@
   <div class="ts-card ts-{{ s.trojstvo_status|default:'new' }}">
 
     <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.25rem">
-          <span style="color:#64748b;font-size:.75rem">P{{ s.priority }} · {{ s.category|default:"pos"|upper }}</span>
+    <div class="d-flex justify-content-between align-items-start fx-gap-4">
+      <div class="fx-flex-1 min-w-0">
+        <div class="d-flex fx-flex-wrap fx-gap-2 align-items-center fx-mb-1">
+          <span class="fx-text-dim fx-fs-caption">P{{ s.priority }} · {{ s.category|default:"pos"|upper }}</span>
           {% if s.trojstvo_status == 'pending' %}
             <span class="ts-badge ts-pending-b"><span class="spinner"></span>Trojstvo analizira...</span>
           {% elif s.trojstvo_status == 'agreed' %}
@@ -85,61 +85,61 @@
           {% elif s.trojstvo_status == 'conflict' %}
             <span class="ts-badge ts-conflict-b">⚡ Conflict</span>
           {% elif s.trojstvo_status == 'error' %}
-            <span class="ts-badge" style="background:#1f2937;color:#9ca3af;">⚠ Greška</span>
+            <span class="ts-badge fx-bg-surface2 fx-text-dim">⚠ Greška</span>
           {% else %}
             <span class="ts-badge ts-new-b">Novo</span>
           {% endif %}
         </div>
-        <h4 style="color:#fff;margin:0 0 .25rem;font-size:.95rem">{{ s.title }}</h4>
-        <p style="color:#94a3b8;font-size:.85rem;margin:0">{{ s.description|truncatechars:250 }}</p>
+        <h4 class="fx-text-white fx-fs-normal" style="margin:0 0 .25rem">{{ s.title }}</h4>
+        <p class="fx-text-muted fx-fs-base fx-m-0">{{ s.description|truncatechars:250 }}</p>
       </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="color:#555;font-size:.72rem">{{ s.created_at|date:"d.m.Y" }}</div>
-        <div style="color:#555;font-size:.72rem">{{ s.author.get_full_name|default:"Anonimno" }}</div>
+      <div class="text-end flex-shrink-0">
+        <div class="fx-text-dim fx-fs-sm">{{ s.created_at|date:"d.m.Y" }}</div>
+        <div class="fx-text-dim fx-fs-sm">{{ s.author.get_full_name|default:"Anonimno" }}</div>
       </div>
     </div>
 
     <!-- Trojstvo rezultat -->
     {% if s.trojstvo_status == 'agreed' and s.ai_resolution %}
     <div class="ts-resolution">
-      <strong style="display:block;color:#4ade80;margin-bottom:.4rem">🤝 Haiku + Gemini su se dogovorili:</strong>
+      <strong class="d-block fx-text-green" style="margin-bottom:.4rem">🤝 Haiku + Gemini su se dogovorili:</strong>
       {{ s.ai_resolution|linebreaksbr }}
     </div>
     {% endif %}
 
     {% if s.trojstvo_status == 'conflict' and s.ai_resolution %}
     <div class="ts-conflict-box">
-      <strong style="display:block;color:#f87171;margin-bottom:.4rem">⚡ Različiti prijedlozi — Ivan odlučuje:</strong>
+      <strong class="d-block fx-text-red" style="margin-bottom:.4rem">⚡ Različiti prijedlozi — Ivan odlučuje:</strong>
       {{ s.ai_resolution|linebreaksbr }}
     </div>
     {% endif %}
 
     {% if s.haiku_proposal and s.gemini_proposal and request.user.is_staff %}
-    <details style="margin-top:.5rem">
-      <summary style="color:#64748b;font-size:.78rem;cursor:pointer;user-select:none">Prikaži individualne analize (admin)</summary>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.5rem">
+    <details class="mt-2">
+      <summary class="fx-text-dim fx-fs-body-sm fx-pointer user-select-none">Prikaži individualne analize (admin)</summary>
+      <div class="d-grid fx-gap-3 mt-2 fx-grid-2-equal">
         <div class="ts-proposal">
           <h5>🤖 Haiku</h5>
-          <div style="color:#cbd5e1;white-space:pre-wrap;line-height:1.5">{{ s.haiku_proposal|truncatechars:800 }}</div>
+          <div class="fx-text-body" style="white-space:pre-wrap;line-height:1.5">{{ s.haiku_proposal|truncatechars:800 }}</div>
         </div>
         <div class="ts-proposal">
           <h5>♊ Gemini</h5>
-          <div style="color:#cbd5e1;white-space:pre-wrap;line-height:1.5">{{ s.gemini_proposal|truncatechars:800 }}</div>
+          <div class="fx-text-body" style="white-space:pre-wrap;line-height:1.5">{{ s.gemini_proposal|truncatechars:800 }}</div>
         </div>
       </div>
     </details>
     {% endif %}
 
     {% if s.admin_note %}
-    <p style="color:#fbbf24;font-size:.85rem;margin-top:.5rem;padding:.5rem .75rem;background:rgba(251,191,36,.08);border-radius:6px">
+    <p class="fx-fs-base fx-rounded-sm fx-text-amber mt-2 fx-p-5-75" style="background:rgba(251,191,36,.08)">
       💬 Ivan: {{ s.admin_note }}
     </p>
     {% endif %}
 
   </div>
   {% empty %}
-  <div style="text-align:center;padding:3rem;color:#64748b">
-    <div style="font-size:2.5rem;margin-bottom:.5rem">⭐</div>
+  <div class="text-center fx-text-muted fx-p-7">
+    <div class="mb-2 fx-fs-7xl">⭐</div>
     <div>Nema prijavljenih problema. Koristi zlatno dugme u POS-u.</div>
   </div>
   {% endfor %}

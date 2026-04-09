@@ -28,7 +28,7 @@
 .soba-formats { color: var(--soba-muted); font-size: 0.75rem; margin-top: 12px; }
 
 .soba-btn-gold {
-    background: linear-gradient(135deg, var(--gold,#c9a84c), #b8963e); color: #0a0a0a; border: none;
+    background: linear-gradient(135deg, var(--gold,#c9a84c), #b8963e); color:var(--text); border: none;
     padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
     cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
 }
@@ -40,7 +40,7 @@
 }
 .soba-btn-ghost:hover { border-color: var(--soba-gold); color: var(--soba-gold); }
 .soba-btn-camera {
-    background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none;
+    background: linear-gradient(135deg, #22c55e, #16a34a); color:var(--text); border: none;
     padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
     cursor: pointer; display: none; align-items: center; gap: 8px;
 }
@@ -51,9 +51,9 @@
 .soba-preview-item img { width: 100%; height: 100%; object-fit: cover; }
 .soba-preview-item .soba-file-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .soba-preview-item .soba-file-icon i { font-size: 2rem; }
-.soba-preview-item .soba-num { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
-.soba-preview-item .soba-remove { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.soba-preview-item .soba-fname { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); color: white; font-size: 0.6rem; padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.soba-preview-item .soba-num { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color:var(--text); font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+.soba-preview-item .soba-remove { position: absolute; top: 4px; right: 4px; background:var(--red); color:var(--text); border: none; width: 20px; height: 20px; border-radius: 50%; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.soba-preview-item .soba-fname { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); color:var(--text); font-size: 0.6rem; padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .soba-preview-actions { display: flex; gap: 10px; align-items: center; }
 
 .soba-card { background: var(--soba-card); border: 1px solid var(--soba-border); border-radius: 12px; padding: 18px; color: var(--soba-text); }
@@ -78,9 +78,9 @@
 .soba-batch-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .soba-batch-right { color: var(--soba-muted); font-size: 0.72rem; white-space: nowrap; }
 .soba-badge { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.soba-badge-ready { background: rgba(34,197,94,0.15); color: #22c55e; }
-.soba-badge-confirmed { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.soba-badge-error { background: rgba(239,68,68,0.15); color: #ef4444; }
+.soba-badge-ready { background: rgba(34,197,94,0.15); color:var(--green); }
+.soba-badge-confirmed { background: rgba(59,130,246,0.15); color:var(--blue); }
+.soba-badge-error { background: rgba(239,68,68,0.15); color:var(--red); }
 .soba-badge-pending, .soba-badge-processing { background: rgba(234,179,8,0.15); color: #eab308; animation: sobaPulse 1.5s infinite; }
 @keyframes sobaPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
@@ -106,7 +106,7 @@
 .soba-ai-input input:focus { border-color: var(--soba-gold); }
 .soba-ai-input input::placeholder { color: var(--soba-muted); }
 .soba-ai-input button {
-    background: var(--soba-gold); color: #0a0a0a; border: none; width: 36px; height: 36px;
+    background: var(--soba-gold); color:var(--text); border: none; width: 36px; height: 36px;
     border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
 }
 
@@ -158,18 +158,18 @@
                             <i class="fas fa-folder-open"></i> Odaberi datoteke
                             <input type="file" id="sobaFileInput" name="files" multiple
                                    accept=".pdf,.xml,.jpg,.jpeg,.png,.webp,.heic,.heif"
-                                   style="display:none" onchange="sobaAddFiles(this.files)">
+                                   class="fx-hidden" onchange="sobaAddFiles(this.files)">
                         </label>
                         <button type="button" class="soba-btn-camera" id="cameraBtn" onclick="event.stopPropagation(); document.getElementById('sobaCameraInput').click()">
                             <i class="fas fa-camera"></i> Slikaj racun
                         </button>
                         <input type="file" id="sobaCameraInput" accept="image/*" capture="environment"
-                               style="display:none" onchange="sobaAddFiles(this.files); this.value='';">
+                               class="fx-hidden" onchange="sobaAddFiles(this.files); this.value='';">
                     </div>
                     <p class="soba-formats">PDF, XML (e-Racun UBL), JPG, PNG, HEIC</p>
                 </div>
 
-                <div class="soba-preview" id="sobaPreview" style="display:none">
+                <div class="soba-preview fx-hidden" id="sobaPreview">
                     <div class="soba-preview-grid" id="sobaPreviewGrid"></div>
                     <div class="soba-preview-actions">
                         <button type="submit" class="soba-btn-gold" id="sobaUploadBtn">
@@ -190,7 +190,7 @@
                     <a href="/smart-import/{{ b.pk }}/" class="soba-batch-item">
                         <div class="soba-batch-left">
                             <span class="soba-badge soba-badge-{{ b.status }}">{{ b.status }}</span>
-                            <span style="color:var(--soba-muted);font-size:0.75rem">{{ b.file_type|default:"file"|upper }}</span>
+                            <span class="fx-fs-caption" style="color:var(--soba-muted)">{{ b.file_type|default:"file"|upper }}</span>
                             {% if b.items.count %}<span style="color:var(--soba-muted)">({{ b.items.count }} stavki)</span>{% endif %}
                         </div>
                         <div class="soba-batch-right">{{ b.created_at|date:"d.m.Y H:i" }}</div>
@@ -198,9 +198,9 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="soba-card" style="text-align:center;padding:30px">
-                    <i class="fas fa-inbox" style="font-size:2rem;color:var(--soba-muted);margin-bottom:8px;display:block"></i>
-                    <p style="color:var(--soba-muted);font-size:0.85rem;margin:0">Nema nedavnih obrada. Ucitajte prvi dokument!</p>
+                <div class="soba-card text-center" style="padding:30px">
+                    <i class="fas fa-inbox fx-fs-icon mb-2 d-block" style="color:var(--soba-muted)"></i>
+                    <p class="fx-fs-base fx-m-0" style="color:var(--soba-muted)">Nema nedavnih obrada. Ucitajte prvi dokument!</p>
                 </div>
                 {% endif %}
             </div>
@@ -219,7 +219,7 @@
                         <div class="soba-stat-label">Potvrdeno</div>
                     </div>
                     <div class="soba-stat">
-                        <div class="soba-stat-num" style="{% if pending_batches %}color:#eab308{% endif %}">{{ pending_batches|default:"0" }}</div>
+                        <div class="soba-stat-num" style="{% if pending_batches %}color:var(--amber){% endif %}">{{ pending_batches|default:"0" }}</div>
                         <div class="soba-stat-label">Na cekanju</div>
                     </div>
                     <div class="soba-stat">
@@ -232,17 +232,17 @@
             <div class="soba-card">
                 <h4><i class="fas fa-calendar-alt"></i> Tekuci period</h4>
                 {% if current_period %}
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                    <span style="font-size:0.9rem;font-weight:700">{{ current_period.year }}/{{ current_period.month|stringformat:"02d" }}</span>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fx-fs-md fx-fw-bold">{{ current_period.year }}/{{ current_period.month|stringformat:"02d" }}</span>
                     <span class="soba-badge {% if current_period.status == 'open' %}soba-badge-ready{% elif current_period.status == 'closed' %}soba-badge-confirmed{% else %}soba-badge-pending{% endif %}">{{ current_period.get_status_display }}</span>
                 </div>
-                <div style="font-size:0.78rem;color:var(--soba-muted)">
-                    <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Otpremnice:</span><span style="color:var(--soba-text)">{{ current_period.otpremnica_count }}</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Ukupno s PDV:</span><span style="color:var(--soba-gold);font-weight:700">{{ current_period.total_with_tax }} EUR</span></div>
+                <div class="fx-fs-body-sm" style="color:var(--soba-muted)">
+                    <div class="d-flex justify-content-between" style="padding:3px 0"><span>Otpremnice:</span><span style="color:var(--soba-text)">{{ current_period.otpremnica_count }}</span></div>
+                    <div class="d-flex justify-content-between" style="padding:3px 0"><span>Ukupno s PDV:</span><span class="fx-fw-bold" style="color:var(--soba-gold)">{{ current_period.total_with_tax }} EUR</span></div>
                 </div>
-                <a href="{% url 'propter:period_detail' current_period.pk %}" style="display:block;margin-top:8px;font-size:0.75rem;color:var(--soba-gold);text-decoration:none">Detalji perioda <i class="fas fa-arrow-right" style="font-size:0.6rem"></i></a>
+                <a href="{% url 'propter:period_detail' current_period.pk %}" class="fx-fs-caption fx-no-underline d-block mt-2" style="color:var(--soba-gold)">Detalji perioda <i class="fas fa-arrow-right fx-fs-2xs"></i></a>
                 {% else %}
-                <p style="color:var(--soba-muted);font-size:0.8rem;margin:0">Nema otvorenog perioda za tekuci mjesec.</p>
+                <p class="fx-fs-compact fx-m-0" style="color:var(--soba-muted)">Nema otvorenog perioda za tekuci mjesec.</p>
                 {% endif %}
             </div>
 
@@ -252,20 +252,20 @@
                 {% for otp in recent_otpremnice %}
                 <div class="soba-otp-item">
                     <span class="soba-otp-num">OTP-{{ otp.number }}</span>
-                    <span style="color:var(--soba-muted);font-size:0.7rem">{{ otp.recipient_name|truncatechars:18 }}</span>
+                    <span class="fx-fs-sm" style="color:var(--soba-muted)">{{ otp.recipient_name|truncatechars:18 }}</span>
                     <span>{{ otp.total }} EUR</span>
                 </div>
                 {% endfor %}
-                <a href="{% url 'propter:otpremnica_list' %}" style="display:block;margin-top:8px;font-size:0.75rem;color:var(--soba-gold);text-decoration:none">Sve otpremnice <i class="fas fa-arrow-right" style="font-size:0.6rem"></i></a>
+                <a href="{% url 'propter:otpremnica_list' %}" class="fx-fs-caption fx-no-underline d-block mt-2" style="color:var(--soba-gold)">Sve otpremnice <i class="fas fa-arrow-right fx-fs-2xs"></i></a>
             </div>
             {% endif %}
 
             {% if eko %}
             <div class="soba-card" style="background:linear-gradient(135deg,rgba(34,197,94,0.05),rgba(34,197,94,0.1));border-color:rgba(34,197,94,0.2)">
-                <h4><i class="fas fa-leaf" style="color:#22c55e"></i> Eko status</h4>
-                <div style="text-align:center">
-                    <div style="font-size:0.78rem;color:var(--soba-muted);margin-top:6px">{{ eko.co2_saved_grams }}g CO2 usteda</div>
-                    <div style="font-size:0.72rem;color:var(--soba-muted)">{{ eko.paper_saved_sheets }} listova papira</div>
+                <h4><i class="fas fa-leaf fx-text-green"></i> Eko status</h4>
+                <div class="text-center">
+                    <div class="fx-fs-body-sm mt-1" style="color:var(--soba-muted)">{{ eko.co2_saved_grams }}g CO2 usteda</div>
+                    <div class="fx-fs-sm" style="color:var(--soba-muted)">{{ eko.paper_saved_sheets }} listova papira</div>
                 </div>
             </div>
             {% endif %}
@@ -309,9 +309,9 @@ function sobaRenderFiles() {
         var isImage = file.type.startsWith('image/'), isPdf = file.name.toLowerCase().endsWith('.pdf'), isXml = file.name.toLowerCase().endsWith('.xml');
         var inner = '';
         if (isImage) inner = '<img src="' + URL.createObjectURL(file) + '">';
-        else if (isPdf) inner = '<div class="soba-file-icon"><i class="fas fa-file-pdf" style="color:#ef4444"></i></div>';
-        else if (isXml) inner = '<div class="soba-file-icon"><i class="fas fa-file-code" style="color:#3b82f6"></i></div>';
-        else inner = '<div class="soba-file-icon"><i class="fas fa-file" style="color:#94a3b8"></i></div>';
+        else if (isPdf) inner = '<div class="soba-file-icon"><i class="fas fa-file-pdf fx-text-red"></i></div>';
+        else if (isXml) inner = '<div class="soba-file-icon"><i class="fas fa-file-code fx-text-blue"></i></div>';
+        else inner = '<div class="soba-file-icon"><i class="fas fa-file fx-text-dim"></i></div>';
         var sizeMB = (file.size / 1024 / 1024).toFixed(1);
         item.innerHTML = inner + '<span class="soba-num">' + (idx+1) + '</span><button type="button" class="soba-remove" onclick="sobaRemoveFile(' + idx + ')"><i class="fas fa-times"></i></button><span class="soba-fname">' + file.name.substring(0,20) + ' (' + sizeMB + 'MB)</span>';
         grid.appendChild(item);

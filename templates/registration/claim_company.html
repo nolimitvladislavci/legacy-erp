@@ -3,54 +3,53 @@
 {% block title %}Preuzmite svoju firmu — LIMIT Connect{% endblock %}
 {% block content %}
 <div style="max-width:520px;margin:60px auto;padding:0 20px">
-  <div style="text-align:center;margin-bottom:32px">
-    <h1 style="font-family:'Cormorant Garamond',serif;color:var(--gold,#c9a84c);font-size:1.8rem;margin-bottom:8px">
+  <div class="text-center mb-5">
+    <h1 class="fx-text-gold mb-2 fx-fs-6xl" style="font-family:'Cormorant Garamond',serif">
       Preuzmite pristup
     </h1>
-    <p style="color:#94a3b8;font-size:.9rem">Vaša firma je već u LIMIT Connect sustavu</p>
+    <p class="fx-text-muted fx-fs-md">Vaša firma je već u LIMIT Connect sustavu</p>
   </div>
 
-  <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;margin-bottom:24px">
-    <h2 style="color:#e2e8f0;font-size:1.1rem;margin:0 0 12px">{{ company.name }}</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.85rem">
-      <span style="color:#94a3b8">OIB:</span><span style="color:#e2e8f0">{{ company.oib }}</span>
-      {% if company.address %}<span style="color:#94a3b8">Adresa:</span><span style="color:#e2e8f0">{{ company.address }}</span>{% endif %}
+  <div class="fx-bg-card fx-rounded mb-4" style="border:1px solid #333;padding:24px">
+    <h2 class="fx-text-body fx-fs-xl" style="margin:0 0 12px">{{ company.name }}</h2>
+    <div class="fx-gap-2 fx-fs-base d-grid fx-grid-2-equal">
+      <span class="fx-text-dim">OIB:</span><span class="fx-text-body">{{ company.oib }}</span>
+      {% if company.address %}<span class="fx-text-dim">Adresa:</span><span class="fx-text-body">{{ company.address }}</span>{% endif %}
     </div>
 
     {% if stats.invoices or stats.partners or stats.journals %}
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #333;display:flex;gap:16px;font-size:.8rem">
-      {% if stats.invoices %}<span style="color:var(--gold,#c9a84c)">{{ stats.invoices }} faktura</span>{% endif %}
-      {% if stats.partners %}<span style="color:var(--gold,#c9a84c)">{{ stats.partners }} partnera</span>{% endif %}
-      {% if stats.journals %}<span style="color:var(--gold,#c9a84c)">{{ stats.journals }} temeljnica</span>{% endif %}
+    <div class="d-flex fx-gap-4 fx-fs-compact mt-3" style="padding-top:12px;border-top:1px solid #333">
+      {% if stats.invoices %}<span class="fx-text-gold">{{ stats.invoices }} faktura</span>{% endif %}
+      {% if stats.partners %}<span class="fx-text-gold">{{ stats.partners }} partnera</span>{% endif %}
+      {% if stats.journals %}<span class="fx-text-gold">{{ stats.journals }} temeljnica</span>{% endif %}
     </div>
     {% endif %}
   </div>
 
   {% if pending %}
-  <div style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);border-radius:8px;padding:16px;text-align:center;color:#facc15;font-size:.9rem">
+  <div class="fx-rounded text-center fx-fs-md fx-p-16" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#facc15">
     Zahtjev za pristup je već poslan. Čekajte odobrenje administratora.
   </div>
   {% else %}
-  <form method="post" action="{% url 'submit_claim' company_id=company.id %}" style="display:flex;flex-direction:column;gap:12px">
+  <form method="post" action="{% url 'submit_claim' company_id=company.id %}" class="d-flex fx-gap-3 fx-flex-col">
     {% csrf_token %}
-    <input name="email" type="email" required placeholder="Vaš email" style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <input name="first_name" required placeholder="Ime" style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
-      <input name="last_name" placeholder="Prezime" style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
+    <input name="email" type="email" required placeholder="Vaš email" class="fx-bg-card fx-text-body fx-rounded fx-fs-normal fx-p-12" style="border:1px solid #333">
+    <div class="fx-gap-2 d-grid fx-grid-2-equal">
+      <input name="first_name" required placeholder="Ime" class="fx-bg-card fx-text-body fx-rounded fx-fs-normal fx-p-12" style="border:1px solid #333">
+      <input name="last_name" placeholder="Prezime" class="fx-bg-card fx-text-body fx-rounded fx-fs-normal fx-p-12" style="border:1px solid #333">
     </div>
-    <input name="phone" type="tel" placeholder="Telefon (opcija)" style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
-    <button type="submit" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px">
+    <input name="phone" type="tel" placeholder="Telefon (opcija)" class="fx-bg-card fx-text-body fx-rounded fx-fs-normal fx-p-12" style="border:1px solid #333">
+    <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-pointer mt-2 fx-bg-gold" style="padding:14px">
       Zatražite pristup
     </button>
-    <p style="color:#64748b;font-size:.75rem;text-align:center;margin:0">
+    <p class="fx-text-dim fx-fs-caption text-center fx-m-0">
       Administrator će pregledati vaš zahtjev i poslati login podatke na email.
     </p>
   </form>
   {% endif %}
 
   {% for msg in messages %}
-  <div style="margin-top:16px;padding:12px;border-radius:8px;font-size:.85rem;
-    {% if msg.tags == 'error' %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171{% elif msg.tags == 'success' %}background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80{% else %}background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);color:#60a5fa{% endif %}">
+  <div class="fx-rounded fx-fs-base" style="margin-top:16px;padding:12px;{% if msg.tags == 'error' %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red){% elif msg.tags == 'success' %}background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80{% else %}background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);color:#60a5fa{% endif %}">
     {{ msg }}
   </div>
   {% endfor %}

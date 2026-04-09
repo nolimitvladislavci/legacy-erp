@@ -8,7 +8,7 @@
 :root{--bg:#faf7f2;--accent: #c9a84c;--card:#fff;--text:#2d2d2d;--muted:#888;--star-on:#fbbf24;--star-off:#d1d5db;--shadow:0 2px 12px rgba(0,0,0,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:2rem 1rem;overflow-x:hidden}
-body.tv{background:#0a0a0a;color:#e8e8e8;--bg:#0a0a0a;--card:#1a1a1a;--text:#e8e8e8;--muted:#666}
+body.tv{background:var(--bg);color:var(--text);--bg:#0a0a0a;--card:#1a1a1a;--text:#e8e8e8;--muted:#666}
 .wrap{max-width:600px;margin:0 auto}
 body.tv .wrap{max-width:900px}
 .company-header{text-align:center;margin-bottom:2rem}
@@ -112,7 +112,7 @@ body.tv .footer{display:none}
   </div>
   {% else %}
   <div class="no-reviews">
-    <p style="font-size:2rem;margin-bottom:.5rem">&#9734;</p>
+    <p class="fx-fs-icon mb-2">&#9734;</p>
     <p>Jos nema recenzija.</p>
   </div>
   {% endif %}

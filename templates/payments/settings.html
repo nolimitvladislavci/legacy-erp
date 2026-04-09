@@ -9,8 +9,8 @@
 .gateway-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
 .gateway-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
 .gateway-badge{font-size:.6rem;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase}
-.gateway-badge.on{background:#0a1a0a;color:var(--green)}
-.gateway-badge.off{background:#1a0a0a;color:var(--red)}
+.gateway-badge.on{background:var(--surface-deep);color:var(--green)}
+.gateway-badge.off{background:var(--surface-deep);color:var(--red)}
 .field{margin-bottom:.8rem}
 .field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem}
 .field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.82rem;font-family:monospace}
@@ -21,9 +21,9 @@
 .payments-table th{text-align:left;padding:.4rem .5rem;font-size:.65rem;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
 .payments-table td{padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)}
 .status-badge{font-size:.6rem;padding:2px 6px;border-radius:8px;font-weight:700}
-.status-badge.completed{background:#0a1a0a;color:var(--green)}
+.status-badge.completed{background:var(--surface-deep);color:var(--green)}
 .status-badge.pending,.status-badge.processing{background:#1a1a00;color:var(--gold)}
-.status-badge.failed,.status-badge.cancelled{background:#1a0a0a;color:var(--red)}
+.status-badge.failed,.status-badge.cancelled{background:var(--surface-deep);color:var(--red)}
 </style>
 {% endblock %}
 {% block content %}
@@ -62,7 +62,7 @@
     <div class="field"><label>Client ID</label><input name="paypal_client_id" value="{{ config.paypal_client_id }}" placeholder="A..."></div>
     <div class="field"><label>Secret</label><input name="paypal_secret" value="{{ config.paypal_secret }}" placeholder="E..." type="password"></div>
     <div class="field"><label>Mode</label>
-      <select name="paypal_mode" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.82rem">
+      <select name="paypal_mode" class="fx-w-full fx-rounded-sm fx-fs-note fx-text-body fx-bg-body fx-b" style="padding:.5rem .7rem">
         <option value="live" {% if config.paypal_mode == 'live' %}selected{% endif %}>Live</option>
         <option value="sandbox" {% if config.paypal_mode == 'sandbox' %}selected{% endif %}>Sandbox (Test)</option>
       </select>
@@ -73,12 +73,12 @@
     <div class="field"><label>Zadana valuta</label><input name="default_currency" value="{{ config.default_currency|default:'EUR' }}" style="max-width:100px"></div>
   </div>
 
-  <button type="submit" class="btn btn-gold" style="width:100%">Spremi postavke</button>
+  <button type="submit" class="btn btn-gold fx-w-full">Spremi postavke</button>
   </form>
 
   {% if payments %}
   <div style="margin-top:2rem">
-    <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem">Zadnjih 20 transakcija</div>
+    <div class="fx-fw-semibold fx-fs-base mb-2">Zadnjih 20 transakcija</div>
     <table class="payments-table">
       <thead><tr><th>Datum</th><th>Izvor</th><th>Nacin</th><th>Iznos</th><th>Status</th></tr></thead>
       <tbody>
@@ -87,7 +87,7 @@
         <td>{{ p.created_at|date:"d.m H:i" }}</td>
         <td>{{ p.get_source_display }}</td>
         <td>{{ p.get_method_display }}</td>
-        <td style="color:var(--green);font-weight:600">&euro;{{ p.amount|floatformat:2 }}</td>
+        <td class="fx-fw-semibold fx-text-green">&euro;{{ p.amount|floatformat:2 }}</td>
         <td><span class="status-badge {{ p.status }}">{{ p.get_status_display }}</span></td>
       </tr>
       {% endfor %}

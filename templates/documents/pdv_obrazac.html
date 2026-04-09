@@ -10,7 +10,7 @@
 .pdv-header h2 i{color:var(--gold);margin-right:8px}
 .pdv-header p{color:var(--text-muted);margin:0;font-size:.82rem}
 .pdv-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.btn-gold{background:var(--gold);color:var(--black);font-weight:700;border:none;padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:all .15s}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 
@@ -18,18 +18,18 @@
 .pdv-filters select,.pdv-filters input{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:.82rem}
 
 .pdv-result{background:var(--bg-card);border:2px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;text-align:center}
-.pdv-result.positive{border-color:#ef4444}
-.pdv-result.negative{border-color:#10b981}
-.pdv-result .label{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+.pdv-result.positive{border-color:var(--red)}
+.pdv-result.negative{border-color:var(--green)}
+.pdv-result .label{font-size:var(--font-size-sm);text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
 .pdv-result .amount{font-size:2.2rem;font-weight:800;margin:.25rem 0}
-.pdv-result .amount.pay{color:#ef4444}
-.pdv-result .amount.refund{color:#10b981}
+.pdv-result .amount.pay{color:var(--red)}
+.pdv-result .amount.refund{color:var(--green)}
 .pdv-result .sublabel{font-size:.82rem;color:var(--text-muted)}
 
 .pdv-section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
 .pdv-section h3{font-size:1rem;font-weight:600;color:var(--text);margin:0 0 1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
 .pdv-section h3 i{color:var(--gold);margin-right:.4rem}
-.pdv-section h3 .count{font-size:.75rem;color:var(--text-muted);font-weight:400;margin-left:.5rem}
+.pdv-section h3 .count{font-size:var(--font-size-sm);color:var(--text-muted);font-weight:400;margin-left:.5rem}
 
 .pdv-grid{display:grid;grid-template-columns:1fr auto auto;gap:0;font-size:.85rem}
 .pdv-row{display:contents}
@@ -48,7 +48,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="max-width:800px;margin:0 auto">
+<div class="fx-m-auto fx-max-800">
 
   <div class="pdv-header">
     <div>
@@ -136,8 +136,8 @@
   </div>
 
   {% elif not company %}
-  <div style="text-align:center;padding:3rem;color:var(--text-muted)">
-    <i class="fas fa-building" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.3"></i>
+  <div class="text-center fx-text-muted fx-p-7">
+    <i class="fas fa-building fx-fs-icon d-block mb-2 fx-opacity-50"></i>
     Odaberite firmu i razdoblje
   </div>
   {% endif %}

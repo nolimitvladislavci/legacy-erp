@@ -4,24 +4,7 @@
 {% block page_title %}QR kodovi za Knjigu prigovora{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
@@ -30,14 +13,14 @@
     padding: 1.5rem; text-align: center;
 }
 .qr-item h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold,#c9a84c); margin-bottom: 0.5rem; }
-.qr-item .code { font-size: 0.85rem; color: #888; margin-bottom: 1rem; }
-.qr-item img { width: 160px; height: 160px; border-radius: 8px; background: #fff; padding: 8px; }
+.qr-item .code { font-size: 0.85rem; color:var(--text-muted); margin-bottom: 1rem; }
+.qr-item img { width: 160px; height: 160px; border-radius: 8px; background:var(--bg-card); padding: 8px; }
 .qr-actions { margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
 .qr-actions a {
     padding: 6px 14px; border-radius: 8px; font-size: 0.85rem;
     text-decoration: none; border: 1px solid var(--gold,#c9a84c)44;
 }
-.qr-actions a.primary { background: var(--gold,#c9a84c); color: #1a1a2e; }
+.qr-actions a.primary { background: var(--gold,#c9a84c); color:var(--text); }
 .qr-actions a.secondary { background: transparent; color: var(--gold,#c9a84c); }
 .top-actions { margin-bottom: 1.5rem; }
 .top-actions a { margin-right: 1rem; }
@@ -66,6 +49,6 @@
     {% endfor %}
 </div>
 {% else %}
-<p style="color:#888;">Nema aktivnih terminala. Dodajte terminal u POS postavkama.</p>
+<p class="fx-text-muted">Nema aktivnih terminala. Dodajte terminal u POS postavkama.</p>
 {% endif %}
 {% endblock %}

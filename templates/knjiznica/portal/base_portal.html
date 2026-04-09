@@ -15,7 +15,7 @@ a{color:var(--lib-accent);text-decoration:none}
 a:hover{text-decoration:underline}
 
 /* Nav */
-.lib-nav{background:#fff;border-bottom:2px solid var(--lib-warm);padding:12px 0;position:sticky;top:0;z-index:100}
+.lib-nav{background:var(--bg-card);border-bottom:2px solid var(--lib-warm);padding:12px 0;position:sticky;top:0;z-index:100}
 .lib-nav-inner{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .lib-brand{font-size:1.2rem;font-weight:700;color:var(--lib-text);display:flex;align-items:center;gap:10px}
 .lib-brand i{color:var(--lib-gold);font-size:1.4rem}
@@ -32,7 +32,7 @@ a:hover{text-decoration:underline}
 
 /* Book grid */
 .book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
-.book-card{background:#fff;border-radius:10px;padding:12px;text-align:center;border:1px solid #e8e4de;transition:transform .15s}
+.book-card{background:var(--bg-card);border-radius:10px;padding:12px;text-align:center;border:1px solid #e8e4de;transition:transform .15s}
 .book-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .book-cover{width:80px;height:110px;background:linear-gradient(135deg,var(--lib-warm),#e8ddd0);border-radius:4px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--lib-gold)}
 .book-card .title{font-weight:600;font-size:.85rem;line-height:1.3;margin-bottom:4px}
@@ -56,17 +56,17 @@ a:hover{text-decoration:underline}
 
 /* Child card */
 .child-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--lib-warm);border-radius:12px;margin-bottom:12px}
-.child-avatar{width:60px;height:60px;border-radius:50%;background:var(--lib-accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff}
+.child-avatar{width:60px;height:60px;border-radius:50%;background:var(--lib-accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--white)}
 .child-info .child-name{font-weight:700;font-size:1.1rem}
 .child-info .child-tier{font-size:.8rem;color:var(--lib-muted)}
 
 /* Progress */
-.progress-bar-lib{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.progress-bar-lib{height:8px;background:var(--surface-deep);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--lib-accent),var(--lib-gold));border-radius:4px;transition:width .5s}
 
 /* Media */
 .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
-.media-card{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8e4de}
+.media-card{background:var(--bg-card);border-radius:10px;overflow:hidden;border:1px solid #e8e4de}
 .media-thumb{height:140px;background:var(--lib-warm);display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--lib-gold)}
 .media-body{padding:12px}
 .media-body .title{font-weight:600;font-size:.9rem}
@@ -100,10 +100,10 @@ a:hover{text-decoration:underline}
       <a href="{% url 'knjiznica:portal_media' slug %}"><i class="fas fa-play-circle me-1"></i>Knjižnična TV</a>
       <a href="{% url 'knjiznica:portal_badges' slug %}"><i class="fas fa-trophy me-1"></i>Bedževi</a>
       {% if member %}
-      <a href="{% url 'knjiznica:portal_family' slug %}" style="background:var(--lib-accent);color:#fff;border-radius:20px"><i class="fas fa-users me-1"></i>Obitelj</a>
-      <a href="{% url 'knjiznica:portal_logout' slug %}" style="font-size:.75rem;color:var(--lib-danger)">Odjava</a>
+      <a href="{% url 'knjiznica:portal_family' slug %}" class="fx-text-white fx-rounded-xl" style="background:var(--lib-accent)"><i class="fas fa-users me-1"></i>Obitelj</a>
+      <a href="{% url 'knjiznica:portal_logout' slug %}" class="fx-fs-caption" style="color:var(--lib-danger)">Odjava</a>
       {% else %}
-      <a href="{% url 'knjiznica:portal_login' slug %}" style="background:var(--lib-accent);color:#fff;border-radius:20px"><i class="fas fa-sign-in-alt me-1"></i>Prijava</a>
+      <a href="{% url 'knjiznica:portal_login' slug %}" class="fx-text-white fx-rounded-xl" style="background:var(--lib-accent)"><i class="fas fa-sign-in-alt me-1"></i>Prijava</a>
       {% endif %}
     </div>
   </div>

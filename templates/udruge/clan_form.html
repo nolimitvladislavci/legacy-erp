@@ -11,81 +11,81 @@
 }
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <h4 style="margin:0;color:var(--gold)">Novi clan udruge</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fx-text-gold fx-m-0">Novi clan udruge</h4>
   <a href="{% url 'udruge:clan_list' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
 </div>
 
-<form method="post" class="card" style="padding:1.25rem;max-width:700px"
+<form method="post" class="card fx-p-125 fx-max-700"
       hx-post=""
       hx-target="body"
       hx-swap="outerHTML"
       hx-indicator="#clan-spinner">
   {% csrf_token %}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+  <div class="d-grid fx-gap-3 fx-grid-2-equal">
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Ime *</label>
-      <input type="text" name="first_name" required class="form-input" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Ime *</label>
+      <input type="text" name="first_name" required class="form-input fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Prezime *</label>
-      <input type="text" name="last_name" required style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Prezime *</label>
+      <input type="text" name="last_name" required class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">OIB</label>
-      <input type="text" name="oib" maxlength="11" pattern="\d{11}" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">OIB</label>
+      <input type="text" name="oib" maxlength="11" pattern="\d{11}" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
 <button type="button" class="dsm-scan-btn" title="Skeniraj dokument"
   onclick="DocScan.open({fields:{ oib:'oib',first_name:'first_name',last_name:'last_name' }})">
   <i class="fas fa-camera"></i>
 </button>
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Telefon</label>
-      <input type="tel" name="phone" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Telefon</label>
+      <input type="tel" name="phone" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Email</label>
-      <input type="email" name="email" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Email</label>
+      <input type="email" name="email" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Grad</label>
-      <input type="text" name="city" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Grad</label>
+      <input type="text" name="city" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Tip clanstva</label>
-      <select name="membership_type" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Tip clanstva</label>
+      <select name="membership_type" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
         {% for val, lbl in membership_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
       </select>
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Datum uclanjenja</label>
-      <input type="date" name="date_joined" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Datum uclanjenja</label>
+      <input type="date" name="date_joined" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Clanstvo vrijedi do</label>
-      <input type="date" name="membership_expires" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Clanstvo vrijedi do</label>
+      <input type="date" name="membership_expires" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
     </div>
     <div>
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Poslovni interes</label>
-      <select name="business_interest" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Poslovni interes</label>
+      <select name="business_interest" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem">
         {% for val, lbl in interest_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
       </select>
     </div>
   </div>
-  <div style="margin-top:.75rem;display:flex;gap:1rem;font-size:.82rem">
+  <div class="d-flex fx-fs-note fx-gap-4 fx-mt-4">
     <label><input type="checkbox" name="has_opg"> Ima OPG</label>
     <label><input type="checkbox" name="whatsapp_opt_in"> WhatsApp pristanak</label>
   </div>
-  <div style="margin-top:.75rem">
-    <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Napomene</label>
-    <textarea name="notes" rows="2" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem"></textarea>
+  <div class="fx-mt-4">
+    <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.2rem">Napomene</label>
+    <textarea name="notes" rows="2" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-bg-dark fx-b" style="padding:.45rem .6rem"></textarea>
   </div>
-  <div style="margin-top:1rem">
-    <label style="color:var(--gold);font-weight:600;font-size:.85rem">Fotografija iskaznice / dokumenta</label>
-    <div id="clan-photo-preview" style="display:none;margin:.5rem 0"></div>
-    <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('clan-photo-preview',{onReady:function(r){document.getElementById('clan_photo_b64').value=r.b64}})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">📷 Fotografiraj dokument</button>
+  <div class="mt-3">
+    <label class="fx-fw-semibold fx-fs-base fx-text-gold">Fotografija iskaznice / dokumenta</label>
+    <div id="clan-photo-preview" class="fx-hidden" style="margin:.5rem 0"></div>
+    <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('clan-photo-preview',{onReady:function(r){document.getElementById('clan_photo_b64').value=r.b64}})" class="fx-rounded fx-pointer fx-fs-base fx-text-gold" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:.5rem 1rem">📷 Fotografiraj dokument</button>
     <input type="hidden" name="photo_b64" id="clan_photo_b64">
   </div>
-  <button type="submit" class="btn btn-gold" style="margin-top:1rem;width:100%"><span id="clan-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>Spremi clana</button>
+  <button type="submit" class="btn btn-gold fx-w-full mt-3"><span id="clan-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>Spremi clana</button>
 </form>
 {% endblock %}

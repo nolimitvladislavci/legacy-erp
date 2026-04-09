@@ -4,19 +4,19 @@
 {% block page_title %}{{ resident }}{% endblock %}
 {% block extra_css %}
 <style>
-.ec-detail{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem;margin-bottom:1rem}
-.ec-detail h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.5rem;margin-bottom:1rem}
+.ec-detail{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem;margin-bottom:1rem}
+.ec-detail h5{color:var(--gold);font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.5rem;margin-bottom:1rem}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem}
-.detail-item .label{font-size:.75rem;color:#888;text-transform:uppercase}
-.detail-item .value{color:#f0e6d3;font-weight:500}
-.rel-card{background:#16213e;border:1px solid #c8a24e15;border-radius:8px;padding:1rem;margin-bottom:.5rem}
-.rel-card .name{color:#c8a24e;font-weight:600}
+.detail-item .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase}
+.detail-item .value{color:var(--text);font-weight:500}
+.rel-card{background:var(--surface-deep);border:1px solid #c8a24e15;border-radius:8px;padding:1rem;margin-bottom:.5rem}
+.rel-card .name{color:var(--gold);font-weight:600}
 .charge-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #ffffff08}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'eldercare:resident_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Natrag</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{{ resident.first_name }} {{ resident.last_name }}</h2>
+<a href="{% url 'eldercare:resident_list' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Natrag</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{{ resident.first_name }} {{ resident.last_name }}</h2>
 
 <div class="ec-detail">
   <h5><i class="bi bi-person"></i> Osobni podaci</h5>
@@ -41,17 +41,17 @@
   {% for rel in relatives %}
   <div class="rel-card">
     <div class="name">{{ rel.first_name }} {{ rel.last_name }}
-      <span style="font-size:.75rem;color:#888">— {{ rel.get_relation_display }}</span>
-      {% if rel.is_primary_contact %}<span style="font-size:.7rem;background:#c8a24e33;color:#c8a24e;padding:1px 6px;border-radius:8px;margin-left:5px">Primarni</span>{% endif %}
+      <span class="fx-fs-caption fx-text-muted">— {{ rel.get_relation_display }}</span>
+      {% if rel.is_primary_contact %}<span class="fx-fs-sm fx-text-gold fx-rounded" style="background:var(--gold)33;padding:1px 6px;margin-left:5px">Primarni</span>{% endif %}
     </div>
-    <div style="font-size:.85rem;color:#aaa;margin-top:.3rem">
+    <div class="fx-fs-base fx-text-muted fx-mt-sm">
       Tel: {{ rel.phone }}
       {% if rel.email %} · {{ rel.email }}{% endif %}
-      {% if rel.is_billing_contact %} · <span style="color:#c8a24e">Racuni</span>{% endif %}
+      {% if rel.is_billing_contact %} · <span class="fx-text-gold">Racuni</span>{% endif %}
     </div>
   </div>
   {% empty %}
-  <p style="color:#666">Nema unesenih srodnika.</p>
+  <p class="fx-text-dim">Nema unesenih srodnika.</p>
   {% endfor %}
 </div>
 
@@ -59,16 +59,15 @@
   <h5><i class="bi bi-receipt"></i> Naplate</h5>
   {% for c in charges %}
   <div class="charge-row">
-    <span style="color:#f0e6d3">{{ c.month }}/{{ c.year }}</span>
+    <span class="fx-text-body">{{ c.month }}/{{ c.year }}</span>
     <span>{{ c.total_amount }} EUR
-      <span style="font-size:.75rem;padding:2px 8px;border-radius:10px;
-        {% if c.status == 'paid' %}background:#22c55e22;color:#22c55e{% elif c.status == 'overdue' %}background:#ef444422;color:#ef4444{% else %}background:#3b82f622;color:#3b82f6{% endif %}">
+      <span class="fx-fs-caption fx-rounded" style="padding:2px 8px;{% if c.status == 'paid' %}background:var(--green)22;color:var(--green){% elif c.status == 'overdue' %}background:var(--red)22;color:var(--red){% else %}background:rgba(59,130,246,0.13);color:#3b82f6{% endif %}">
         {{ c.get_status_display }}
       </span>
     </span>
   </div>
   {% empty %}
-  <p style="color:#666">Nema naplata.</p>
+  <p class="fx-text-dim">Nema naplata.</p>
   {% endfor %}
 </div>
 
@@ -77,8 +76,8 @@
   <h5><i class="bi bi-calendar-event"></i> Aktivnosti</h5>
   {% for a in activities %}
   <div style="padding:.4rem 0;border-bottom:1px solid #ffffff08">
-    <span style="color:#f0e6d3">{{ a.title }}</span>
-    <span style="float:right;font-size:.8rem;color:#888">{{ a.date|date:"d.m.Y" }}</span>
+    <span class="fx-text-body">{{ a.title }}</span>
+    <span class="fx-fs-compact fx-text-muted" style="float:right">{{ a.date|date:"d.m.Y" }}</span>
   </div>
   {% endfor %}
 </div>
@@ -87,7 +86,7 @@
 {% if resident.notes %}
 <div class="ec-detail">
   <h5><i class="bi bi-sticky"></i> Biljeske</h5>
-  <p style="color:#ccc">{{ resident.notes }}</p>
+  <p class="fx-text-muted">{{ resident.notes }}</p>
 </div>
 {% endif %}
 {% endblock %}

@@ -6,30 +6,30 @@
 <style>
 .billing-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
 .month-nav{display:flex;align-items:center;gap:.8rem}
-.month-nav a{color:#c8a24e;text-decoration:none;font-size:1.2rem}
-.month-nav .current{font-size:1.3rem;color:#f0e6d3;font-weight:600;font-family:"Cormorant Garamond",serif}
-.bill-card{background:#1a1a2e;border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-.bill-child{color:#f0e6d3;font-weight:600}
-.bill-meta{font-size:.8rem;color:#888}
-.bill-amount{font-size:1.1rem;font-weight:700;color:#c8a24e}
+.month-nav a{color:var(--gold);text-decoration:none;font-size:1.2rem}
+.month-nav .current{font-size:1.3rem;color:var(--text);font-weight:600;font-family:"Cormorant Garamond",serif}
+.bill-card{background:var(--surface);border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.bill-child{color:var(--text);font-weight:600}
+.bill-meta{font-size:.8rem;color:var(--text-muted)}
+.bill-amount{font-size:1.1rem;font-weight:700;color:var(--gold)}
 .bill-status{font-size:.75rem;padding:2px 10px;border-radius:12px}
-.bill-status.paid{background:#22c55e22;color:#22c55e}
-.bill-status.sent{background:#3b82f622;color:#3b82f6}
-.bill-status.overdue{background:#ef444422;color:#ef4444}
-.bill-status.draft{background:#64748b22;color:#64748b}
+.bill-status.paid{background:var(--green)22;color:var(--green)}
+.bill-status.sent{background:rgba(59,130,246,0.13);color:var(--blue)}
+.bill-status.overdue{background:var(--red)22;color:var(--red)}
+.bill-status.draft{background:#64748b22;color:var(--text-dim)}
 .total-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #c8a24e44;border-radius:10px;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
-.total-bar .total-label{color:#888;font-size:.9rem}
-.total-bar .total-val{font-size:1.5rem;font-weight:700;color:#c8a24e;font-family:"Cormorant Garamond",serif}
+.total-bar .total-label{color:var(--text-dim);font-size:.9rem}
+.total-bar .total-val{font-size:1.5rem;font-weight:700;color:var(--gold);font-family:"Cormorant Garamond",serif}
 </style>
 {% endblock %}
 {% block content %}
 <div class="billing-header">
-  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif"><i class="bi bi-receipt"></i> Mjesečna naplata</h2>
+  <h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif"><i class="bi bi-receipt"></i> Mjesečna naplata</h2>
   <form method="post" action="{% url 'kindergarten:billing_generate' %}">
     {% csrf_token %}
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
-    <button type="submit" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-calculator"></i> Generiraj naplate</button>
+    <button type="submit" class="btn btn-sm fx-bg-gold fx-fw-semibold fx-text-dark"><i class="bi bi-calculator"></i> Generiraj naplate</button>
   </form>
 </div>
 
@@ -56,10 +56,10 @@
   </div>
 </div>
 {% empty %}
-<div style="text-align:center;padding:3rem;color:#666">
-  <i class="bi bi-receipt-cutoff" style="font-size:3rem;color:#c8a24e44"></i>
+<div class="text-center fx-text-dim fx-p-7">
+  <i class="bi bi-receipt-cutoff fx-fs-hero" style="color:var(--gold)44"></i>
   <p class="mt-2">Nema naplata za ovaj mjesec.</p>
-  <p style="font-size:.85rem">Klikni "Generiraj naplate" za automatski izračun.</p>
+  <p class="fx-fs-base">Klikni "Generiraj naplate" za automatski izračun.</p>
 </div>
 {% endfor %}
 

@@ -5,23 +5,23 @@
 {% block extra_css %}
 <style>
 .week-nav{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
-.week-nav a{color:#c8a24e;text-decoration:none;font-size:1.2rem}
-.week-nav .label{color:#f0e6d3;font-size:1.1rem;font-weight:600;font-family:"Cormorant Garamond",serif}
-.shift-table{width:100%;border-collapse:separate;border-spacing:0;background:#1a1a2e;border-radius:10px;overflow:hidden}
-.shift-table th{background:#16213e;color:#888;font-size:.75rem;text-transform:uppercase;padding:.6rem .8rem;text-align:center}
-.shift-table td{padding:.5rem;text-align:center;border-bottom:1px solid #ffffff08;color:#f0e6d3;font-size:.85rem}
+.week-nav a{color:var(--gold);text-decoration:none;font-size:1.2rem}
+.week-nav .label{color:var(--text);font-size:1.1rem;font-weight:600;font-family:"Cormorant Garamond",serif}
+.shift-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border-radius:10px;overflow:hidden}
+.shift-table th{background:var(--surface-deep);color:var(--text-dim);font-size:.75rem;text-transform:uppercase;padding:.6rem .8rem;text-align:center}
+.shift-table td{padding:.5rem;text-align:center;border-bottom:1px solid #ffffff08;color:var(--text);font-size:.85rem}
 .shift-cell{min-height:40px}
 .shift-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;margin:2px}
-.shift-tag.morning{background:#f59e0b22;color:#f59e0b}
-.shift-tag.afternoon{background:#3b82f622;color:#3b82f6}
-.shift-tag.night{background:#8b5cf622;color:#8b5cf6}
-.shift-tag.day{background:#22c55e22;color:#22c55e}
-.today-col{background:#c8a24e0a}
+.shift-tag.morning{background:var(--amber)22;color:var(--amber)}
+.shift-tag.afternoon{background:rgba(59,130,246,0.13);color:var(--blue)}
+.shift-tag.night{background:var(--purple)22;color:#8b5cf6}
+.shift-tag.day{background:var(--green)22;color:var(--green)}
+.today-col{background:var(--gold)0a}
 @media(max-width:768px){.shift-table{font-size:.75rem}.shift-table th,.shift-table td{padding:.3rem}}
 </style>
 {% endblock %}
 {% block content %}
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:.5rem"><i class="bi bi-calendar3"></i> Raspored smjena</h2>
+<h2 class="fx-text-gold mb-2" style="font-family:Cormorant Garamond,serif"><i class="bi bi-calendar3"></i> Raspored smjena</h2>
 
 <div class="week-nav">
   <a href="?date={{ prev_week }}"><i class="bi bi-chevron-left"></i></a>
@@ -54,5 +54,5 @@
   </tbody>
 </table>
 
-<p style="margin-top:1rem;font-size:.8rem;color:#666">Smjene se unose u Django Admin panelu ili API-jem.</p>
+<p class="fx-fs-compact fx-text-dim mt-3">Smjene se unose u Django Admin panelu ili API-jem.</p>
 {% endblock %}

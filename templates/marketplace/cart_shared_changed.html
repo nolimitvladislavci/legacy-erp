@@ -2,16 +2,16 @@
 {% load i18n %}
 {% block title %}Kosrica promijenjena{% endblock %}
 {% block content %}
-<div style="max-width:500px;margin:80px auto;text-align:center;padding:20px;">
-  <div style="font-size:4rem;margin-bottom:16px;">&#9888;</div>
-  <h2 style="font-weight:900;color:#eab308;margin-bottom:12px;">{% trans "Stanje kosrice se promijenilo" %}</h2>
-  <p style="color:var(--text-muted, #94a3b8);font-size:.95rem;margin-bottom:8px;">
+<div class="text-center fx-p-20" style="max-width:500px;margin:80px auto">
+  <div class="mb-3" style="font-size:4rem">&#9888;</div>
+  <h2 class="fx-text-amber mb-3" style="font-weight:900">{% trans "Stanje kosrice se promijenilo" %}</h2>
+  <p class="fx-fs-normal mb-2" style="color:var(--text-muted, #94a3b8)">
     {% trans "Dispecer je azurirao kosaricu nakon sto je link poslan." %}
   </p>
-  <p style="color:var(--text-muted, #94a3b8);font-size:.88rem;">
+  <p class="fx-fs-body" style="color:var(--text-muted, #94a3b8)">
     {% trans "Kontaktirajte dispecera za novi, azurirani link." %}
   </p>
-  <div style="margin-top:24px;padding:16px;background:rgba(234,179,8,0.08);border-radius:12px;font-size:.82rem;color:var(--text-muted);">
+  <div class="fx-rounded fx-fs-note mt-4 fx-text-muted fx-p-16" style="background:rgba(234,179,8,0.08)">
     {% trans "Originalni iznos" %}: {{ snapshot.total|floatformat:2 }}&euro;<br>
     {% trans "Hash" %}: {{ snapshot.cart_hash|truncatechars:16 }}
   </div>

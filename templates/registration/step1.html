@@ -10,41 +10,36 @@
 </div>
 
 {% if pet_name %}
-<div style="display:flex;align-items:center;gap:16px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:16px 20px;margin-bottom:24px">
-  <span style="font-size:2rem">&#128062;</span>
+<div class="d-flex fx-gap-4 fx-rounded align-items-center mb-4" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);padding:16px 20px">
+  <span class="fx-fs-icon">&#128062;</span>
   <div>
-    <strong style="color:var(--gold)">{{ pet_name }}</strong> {% trans "zaslužuje digitalni identitet." %}
-    <span style="display:block;font-size:.78rem;color:var(--muted);margin-top:2px">{% trans "Kreiraj profil — besplatno, za 30 sekundi." %}</span>
+    <strong class="fx-text-gold">{{ pet_name }}</strong> {% trans "zaslužuje digitalni identitet." %}
+    <span class="fx-fs-body-sm d-block fx-text-muted fx-mt-1">{% trans "Kreiraj profil — besplatno, za 30 sekundi." %}</span>
   </div>
 </div>
 {% endif %}
 
-<div style="text-align:center;margin-bottom:2rem">
-  <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--text);margin-bottom:.5rem">{% trans "Odaberite plan" %}</h1>
-  <p style="color:var(--muted);font-size:.95rem">{% trans "Fiskalizacija u džepu. Bez kreditne kartice." %}</p>
+<div class="text-center" style="margin-bottom:2rem">
+  <h1 class="fx-fs-icon fx-text-body mb-2" style="font-family:'Cormorant Garamond',serif">{% trans "Odaberite plan" %}</h1>
+  <p class="fx-fs-normal fx-text-muted">{% trans "Fiskalizacija u džepu. Bez kreditne kartice." %}</p>
 </div>
 
 <!-- ═══ AI BORG ADVISOR WIDGET ═══ -->
-<div id="advisorBox" style="display:none;max-width:600px;margin:0 auto 1.5rem;
-  background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);
-  border-radius:12px;padding:1.25rem 1.5rem;animation:fadeSlideIn .4s ease">
-  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
-    <span style="font-size:1.5rem">&#129302;</span>
-    <strong style="color:var(--gold);font-size:.95rem">Fenix {% trans "preporučuje" %}</strong>
+<div id="advisorBox" class="fx-hidden fx-rounded" style="max-width:600px;margin:0 auto 1.5rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);padding:1.25rem 1.5rem;animation:fadeSlideIn .4s ease">
+  <div class="d-flex align-items-center fx-gap-3 mb-2">
+    <span class="fx-fs-5xl">&#129302;</span>
+    <strong class="fx-fs-normal fx-text-gold">Fenix {% trans "preporučuje" %}</strong>
   </div>
-  <p id="advisorReason" style="color:var(--text,#eee);font-size:.9rem;margin:0 0 .75rem"></p>
+  <p id="advisorReason" class="fx-fs-md" style="color:var(--text,#eee);margin:0 0 .75rem"></p>
   <button type="button" id="advisorBtn" onclick="applyAdvisorPlan()"
-    style="background:var(--gold);color:#0f172a;border:none;padding:.5rem 1.25rem;
-    border-radius:6px;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s">
+    class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-bold fx-fs-note fx-pointer fx-bg-gold" style="padding:.5rem 1.25rem;transition:all .15s">
     {% trans "Prihvati preporuku" %} &rarr;
   </button>
 </div>
 
 <!-- ═══ PLAN SELECTED BANNER (skriveno, animira se) ═══ -->
-<div id="planBanner" style="display:none;max-width:500px;margin:0 auto 1.5rem;padding:12px 20px;
-  background:rgba(201,168,76,.1);border:1px solid var(--gold);border-radius:10px;
-  text-align:center;font-size:.95rem;color:var(--gold);animation:fadeSlideIn .4s ease">
-  <i class="fas fa-check-circle" style="margin-right:6px"></i>
+<div id="planBanner" class="fx-hidden fx-rounded text-center fx-fs-normal fx-text-gold" style="max-width:500px;margin:0 auto 1.5rem;padding:12px 20px;background:rgba(201,168,76,.1);border:1px solid var(--gold);animation:fadeSlideIn .4s ease">
+  <i class="fas fa-check-circle fx-mr-2"></i>
   <strong id="planBannerName"></strong> {% trans "odabran" %}
 </div>
 
@@ -54,25 +49,25 @@
       <label class="form-label text-muted"><i class="fas fa-ticket-alt me-1"></i>{% trans "Imate pozivni kod?" %}</label>
       <input type="text" name="invite_code" class="form-control" placeholder="UC-XXXXXXXX">
     </div>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;max-width:900px;margin:0 auto">
+<div class="d-grid fx-m-auto" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;max-width:900px">
 {% for plan in plans %}
-  <label style="cursor:pointer;display:block">
-    <input type="radio" name="plan" value="{{ plan.slug }}" {% if plan.is_popular %}checked{% elif forloop.first %}checked{% endif %} style="display:none" class="plan-radio-input"
+  <label class="fx-pointer d-block">
+    <input type="radio" name="plan" value="{{ plan.slug }}" {% if plan.is_popular %}checked{% elif forloop.first %}checked{% endif %} class="plan-radio-input fx-hidden"
            data-plan-name="{{ plan.name }}" data-plan-price="{{ plan.price_monthly|floatformat:0 }}">
-    <div class="plan-card" data-plan="{{ plan.slug }}" style="background:var(--card);border:2px solid {% if plan.is_popular %}var(--gold){% else %}var(--border){% endif %};border-radius:12px;padding:2rem 1.5rem;text-align:center;transition:all .2s;position:relative">
+    <div class="plan-card fx-rounded text-center" data-plan="{{ plan.slug }}" style="background:var(--card);border:2px solid {% if plan.is_popular %}var(--gold){% else %}var(--border){% endif %};padding:2rem 1.5rem;transition:all .2s;position:relative">
       {% if plan.is_popular %}
-      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:.7rem;font-weight:700;padding:3px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">{% trans "Popularno" %}</div>
+      <div class="fx-fs-sm fx-fw-bold fx-rounded-xl fx-uppercase fx-bg-gold fx-ls-2" style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:var(--black);padding:3px 14px">{% trans "Popularno" %}</div>
       {% endif %}
-      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin-bottom:.25rem">{{ plan.name }}</h3>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:1rem">{{ plan.tagline }}</p>
+      <h3 class="fx-fs-4xl fx-text-body fx-mb-1" style="font-family:'Cormorant Garamond',serif">{{ plan.name }}</h3>
+      <p class="fx-fs-compact fx-text-muted mb-3">{{ plan.tagline }}</p>
       <div style="margin-bottom:1.25rem">
-        <span style="font-size:2.2rem;font-weight:700;color:var(--gold)">{{ plan.price_monthly|floatformat:0 }}€</span>
-        <span style="color:var(--muted);font-size:.85rem">/{% trans "mj" %}</span>
+        <span class="fx-fw-bold fx-text-gold" style="font-size:2.2rem">{{ plan.price_monthly|floatformat:0 }}€</span>
+        <span class="fx-fs-base fx-text-muted">/{% trans "mj" %}</span>
       </div>
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">
+      <div class="fx-fs-compact fx-text-muted mb-3">
         {% trans "ili" %} {{ plan.price_yearly|floatformat:0 }}€/{% trans "god" %}
       </div>
-      <ul style="text-align:left;list-style:none;padding:0;font-size:.85rem;color:var(--text);line-height:2">
+      <ul class="fx-fs-base text-start fx-text-body fx-p-0" style="list-style:none;line-height:2">
         <li>✓ {{ plan.max_users }} {% trans "korisnika" %}</li>
         <li>✓ {{ plan.max_locations }} {% trans "lokacija" %}</li>
         <li>✓ {{ plan.max_invoices_per_month }} {% trans "računa/mj" %}</li>
@@ -88,30 +83,26 @@
 
 <!-- Promo kod -->
 <div style="margin:2rem auto 0;max-width:500px;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.08)">
-  <label style="color:#94a3b8;font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">
-    {% trans "Promotivni kod" %} <span style="font-weight:400;text-transform:none">({% trans "opcionalno" %})</span>
+  <label class="fx-text-muted fx-fs-note fx-fw-semibold d-block mb-1 fx-uppercase fx-ls-1">
+    {% trans "Promotivni kod" %} <span class="fx-fw-normal" style="text-transform:none">({% trans "opcionalno" %})</span>
   </label>
-  <div style="display:flex;gap:8px">
+  <div class="d-flex fx-gap-2">
     <input type="text" name="promo_code" id="promoCode"
            placeholder="{% trans 'npr. TRIAL30' %}"
            value="{{ request.session.reg_promo_code|default:'' }}"
-           style="flex:1;padding:10px 14px;background:#0f172a;border:1px solid #334155;
-                  border-radius:8px;color:#e2e8f0;font-size:.9rem;font-family:monospace;
-                  text-transform:uppercase;outline:none"
+           class="fx-bg-deep fx-rounded fx-text-body fx-fs-md fx-uppercase fx-flex-1 fx-font-mono fx-p-10-14" style="border:1px solid #334155;outline:none"
            oninput="this.value=this.value.toUpperCase()">
     <button type="button" onclick="checkPromoCode()"
-            style="padding:10px 18px;background:transparent;border:1.5px solid var(--gold);
-                   border-radius:8px;color:var(--gold);font-weight:700;cursor:pointer;
-                   font-size:.82rem;white-space:nowrap;transition:all .2s"
+            class="fx-rounded fx-fw-bold fx-pointer fx-fs-note fx-text-gold text-nowrap fx-bg-transparent" style="padding:10px 18px;border:1.5px solid var(--gold);transition:all .2s"
             onmouseover="this.style.background='rgba(201,168,76,.12)'"
             onmouseout="this.style.background='transparent'">
       {% trans "Provjeri" %}
     </button>
   </div>
-  <div id="promoStatus" style="font-size:.78rem;margin-top:6px;min-height:18px"></div>
+  <div id="promoStatus" class="fx-fs-body-sm mt-1" style="min-height:18px"></div>
 </div>
 
-<div style="text-align:center;margin-top:2rem" id="submitArea">
+<div class="text-center" style="margin-top:2rem" id="submitArea">
   <button type="submit" class="reg-btn" id="btnContinue">{% trans "Nastavi" %} &rarr;</button>
 </div>
 </form>
@@ -189,17 +180,17 @@ async function checkPromoCode() {
   const code = document.getElementById('promoCode').value.trim().toUpperCase();
   const status = document.getElementById('promoStatus');
   if (!code) { status.innerHTML = ''; return; }
-  status.innerHTML = '<span style="color:#94a3b8">{% trans "Provjera" %}...</span>';
+  status.innerHTML = '<span class="fx-text-dim">{% trans "Provjera" %}...</span>';
   try {
     const resp = await fetch('/register/api/check-promo/?code=' + encodeURIComponent(code));
     const data = await resp.json();
     if (data.valid) {
-      status.innerHTML = '<span style="color:#22c55e">✓ ' + data.description + '</span>';
+      status.innerHTML = '<span class="fx-text-green">✓ ' + data.description + '</span>';
     } else {
-      status.innerHTML = '<span style="color:#ef4444">✗ ' + (data.error || 'Nevažeći kod') + '</span>';
+      status.innerHTML = '<span class="fx-text-red">✗ ' + (data.error || 'Nevažeći kod') + '</span>';
     }
   } catch(e) {
-    status.innerHTML = '<span style="color:#ef4444">{% trans "Greška pri provjeri" %}</span>';
+    status.innerHTML = '<span class="fx-text-red">{% trans "Greška pri provjeri" %}</span>';
   }
 }
 var prefilled = document.getElementById('promoCode').value.trim();

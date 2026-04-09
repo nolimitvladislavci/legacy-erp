@@ -3,24 +3,7 @@
 {% block title %}Device token — {{ token.device_name }}{% endblock %}
 {% block page_title %}{{ token.device_name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 
@@ -37,7 +20,7 @@
       <img src="data:image/png;base64,{{ barcode_b64 }}" alt="Barcode" class="img-fluid mb-3" style="max-width:350px">
       {% endif %}
       <div class="mb-2">
-        <code style="font-size:1.5rem; letter-spacing:3px">{{ token.barcode_data }}</code>
+        <code class="fx-fs-5xl" style="letter-spacing:3px">{{ token.barcode_data }}</code>
       </div>
       <small class="text-muted">{% trans "Skeniraj ovaj barcode na POS terminalu za instant prijavu" %}</small>
 
@@ -53,14 +36,14 @@
 
   <!-- Info + Auto-login link -->
   <div class="col-md-6">
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <h5><i class="fas fa-mobile-alt me-2 text-info"></i>{% trans "Detalji tokena" %}</h5>
       <table class="table table-sm">
         <tr><td class="text-muted">{% trans "Uređaj" %}</td><td class="fw-bold">{{ token.device_name }}</td></tr>
         <tr><td class="text-muted">{% trans "Korisnik" %}</td><td>{{ token.user.get_full_name|default:token.user.username }}</td></tr>
         <tr><td class="text-muted">{% trans "Tvrtka" %}</td><td>{{ token.company.name }}</td></tr>
         <tr><td class="text-muted">{% trans "Blagajnik" %}</td><td>{{ token.cashier.name|default:"—" }}</td></tr>
-        <tr><td class="text-muted">{% trans "Status" %}</td><td>{% if token.is_active %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-secondary">Deaktiviran</span>{% endif %}</td></tr>
+        <tr><td class="text-muted">{% trans "Status" %}</td><td>{% if token.is_active %}<span class="fenix-badge fenix-badge-success">Aktivan</span>{% else %}<span class="fenix-badge fenix-badge-muted">Deaktiviran</span>{% endif %}</td></tr>
         <tr><td class="text-muted">{% trans "Kreiran" %}</td><td>{{ token.created_at|date:"d.m.Y H:i" }}</td></tr>
         <tr><td class="text-muted">{% trans "Zadnje korištenje" %}</td><td>{{ token.last_used_at|date:"d.m.Y H:i"|default:"—" }}</td></tr>
         <tr><td class="text-muted">{% trans "Zadnji IP" %}</td><td><code>{{ token.last_ip|default:"—" }}</code></td></tr>
@@ -68,7 +51,7 @@
     </div>
 
     <!-- Auto-login link za mobitel -->
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <h5><i class="fas fa-link me-2 text-warning"></i>{% trans "Auto-login link" %}</h5>
       <p class="small text-muted">{% trans "Otvori ovaj link na mobitelu za direktan pristup POS-u bez lozinke:" %}</p>
       <div class="input-group mb-2">
@@ -82,7 +65,7 @@
     </div>
 
     <!-- Upute -->
-    <div class="stat-card">
+    <div class="fenix-stat">
       <h5><i class="fas fa-info-circle me-2"></i>{% trans "Kako spremiti u mobitel" %}</h5>
       <div class="small">
         <p class="fw-bold mb-1">iPhone:</p>

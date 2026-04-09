@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="flex-between mb-3">
-  <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
-    <i class="fas fa-truck" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+  <h1 class="fx-fs-4xl fx-fw-bold fx-text-gold" style="font-family:var(--font-heading)">
+    <i class="fas fa-truck fx-fs-lg fx-mr-3" style="opacity:.6"></i>
     Dostave
   </h1>
   <a href="{% url 'client_portal:dashboard' token %}" class="btn btn-ghost btn-sm">
@@ -47,7 +47,7 @@
           </span>
         </td>
         <td>{{ d.delivery_method|default:"-" }}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        <td class="text-nowrap fx-overflow-hidden" style="max-width:200px;text-overflow:ellipsis">
           {{ d.delivery_address|default:"-" }}
         </td>
         <td>{{ d.eta|date:"d.m.Y H:i"|default:"-" }}</td>

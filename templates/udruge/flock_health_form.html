@@ -2,30 +2,13 @@
 {% load i18n %}
 {% block title %}Zdravstveni zapis — {{ flock.naziv }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:560px;margin:0 auto">
+<div class="fx-m-auto" style="max-width:560px">
 
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:flock_detail' flock.pk %}">{{ flock.naziv }}</a></li>
     <li class="breadcrumb-item active">Zdravstveni zapis</li>
@@ -33,66 +16,66 @@
 </nav>
 
 <div class="d-flex align-items-center gap-3 mb-3">
-  <div style="width:48px;height:48px;border-radius:12px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-heartbeat" style="font-size:1.2rem;color:#3b82f6"></i>
+  <div class="fx-rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:rgba(59,130,246,.1)">
+    <i class="fas fa-heartbeat fx-fs-2xl fx-text-blue"></i>
   </div>
   <div>
-    <h4 style="font-weight:800;margin:0">Zdravstveni zapis</h4>
-    <small style="color:var(--text-dim)">{{ flock.naziv }} | {{ flock.aktivnih_komada }} kom</small>
+    <h4 class="fx-fw-800 fx-m-0">Zdravstveni zapis</h4>
+    <small class="fx-text-dim">{{ flock.naziv }} | {{ flock.aktivnih_komada }} kom</small>
   </div>
 </div>
 
 <form method="post">
 {% csrf_token %}
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+<div class="fx-rounded-lg fx-bg-surface fx-b fx-p-5">
 
   <div class="row g-3 mb-3">
     <div class="col-6">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Vrsta tretmana *</label>
-      <select name="vrsta_tretmana" required class="form-select" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Vrsta tretmana *</label>
+      <select name="vrsta_tretmana" required class="form-select fx-rounded fx-text-body fx-bg-dark fx-bc">
         {% for code, label in vrsta_choices %}
         <option value="{{ code }}">{{ label }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="col-6">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Datum *</label>
-      <input type="date" name="datum" required class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Datum *</label>
+      <input type="date" name="datum" required class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc">
     </div>
   </div>
 
   <div class="row g-3 mb-3">
     <div class="col-8">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Lijek / preparat</label>
-      <input type="text" name="lijek" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Naziv lijeka">
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Lijek / preparat</label>
+      <input type="text" name="lijek" class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc" placeholder="Naziv lijeka">
     </div>
     <div class="col-4">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Doza</label>
-      <input type="text" name="doza" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Npr. 2ml/L">
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Doza</label>
+      <input type="text" name="doza" class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc" placeholder="Npr. 2ml/L">
     </div>
   </div>
 
   <div class="row g-3 mb-3">
     <div class="col-8">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Veterinar</label>
-      <input type="text" name="veterinar" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Ime veterinara">
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Veterinar</label>
+      <input type="text" name="veterinar" class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc" placeholder="Ime veterinara">
     </div>
     <div class="col-4">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Karenca (dana)</label>
-      <input type="number" name="karenca_dana" min="0" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="0">
-      <small style="font-size:.65rem;color:var(--red)">Jaja nisu za prodaju za vrijeme karence</small>
+      <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Karenca (dana)</label>
+      <input type="number" name="karenca_dana" min="0" class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc" placeholder="0">
+      <small class="fx-fs-xs fx-text-red">Jaja nisu za prodaju za vrijeme karence</small>
     </div>
   </div>
 
   <div>
-    <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Napomena</label>
-    <textarea name="napomena" rows="2" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px"></textarea>
+    <label class="fx-fs-body-sm fx-fw-semibold fx-text-dim d-block fx-mb-2">Napomena</label>
+    <textarea name="napomena" rows="2" class="form-control fx-rounded fx-text-body fx-bg-dark fx-bc"></textarea>
   </div>
 </div>
 
 <div class="d-flex justify-content-between mt-3 mb-4">
-  <a href="{% url 'udruge:flock_detail' flock.pk %}" class="btn btn-outline-secondary" style="border-radius:8px"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
-  <button type="submit" class="btn" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;border-radius:10px;padding:.6rem 2rem">
+  <a href="{% url 'udruge:flock_detail' flock.pk %}" class="btn btn-outline-secondary fx-rounded"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+  <button type="submit" class="btn fx-text-white fx-fw-bold fx-rounded" style="background:linear-gradient(135deg,#3b82f6,#2563eb);padding:.6rem 2rem">
     <i class="fas fa-heartbeat me-1"></i>Spremi
   </button>
 </div>

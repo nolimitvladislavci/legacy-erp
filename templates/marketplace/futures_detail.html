@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{{ listing.name }} — Futures{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <nav aria-label="breadcrumb">
@@ -35,11 +18,11 @@
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <div>
-                    <span class="badge bg-success">{{ listing.category }}</span>
-                    {% if listing.is_organic %}<span class="badge bg-info">BIO</span>{% endif %}
-                    {% if listing.requires_cold_chain %}<span class="badge bg-primary"><i class="fas fa-snowflake"></i> Hladni lanac</span>{% endif %}
+                    <span class="fenix-badge fenix-badge-success">{{ listing.category }}</span>
+                    {% if listing.is_organic %}<span class="fenix-badge fenix-badge-info">BIO</span>{% endif %}
+                    {% if listing.requires_cold_chain %}<span class="fenix-badge fenix-badge-info"><i class="fas fa-snowflake"></i> Hladni lanac</span>{% endif %}
                 </div>
-                <span class="badge bg-secondary">{{ listing.get_status_display }}</span>
+                <span class="fenix-badge fenix-badge-muted">{{ listing.get_status_display }}</span>
             </div>
             <h3 class="mt-2">{{ listing.name }}</h3>
             <p class="text-muted"><i class="fas fa-store"></i> {{ listing.seller_company.name }} &bull; <i class="fas fa-map-marker-alt"></i> {{ listing.origin_region }}</p>
@@ -96,8 +79,8 @@
                 <tr>
                     <td>{{ r.buyer_company.name }}</td>
                     <td>{{ r.quantity }} {{ listing.unit }}</td>
-                    <td>{{ r.deposit_amount|floatformat:2 }} EUR {% if r.deposit_paid %}<span class="badge bg-success">Placen</span>{% endif %}</td>
-                    <td><span class="badge bg-info">{{ r.get_status_display }}</span></td>
+                    <td>{{ r.deposit_amount|floatformat:2 }} EUR {% if r.deposit_paid %}<span class="fenix-badge fenix-badge-success">Placen</span>{% endif %}</td>
+                    <td><span class="fenix-badge fenix-badge-info">{{ r.get_status_display }}</span></td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -117,11 +100,11 @@
             {% if my_reservation.discount_percent > 0 %}<p><strong>Rabat:</strong> -{{ my_reservation.discount_percent }}%</p>{% endif %}
             <p><strong>Ukupno:</strong> {{ my_reservation.total_price|floatformat:2 }} EUR</p>
             <p><strong>Avans:</strong> {{ my_reservation.deposit_amount|floatformat:2 }} EUR
-                {% if my_reservation.deposit_paid %}<span class="badge bg-success">Placen</span>{% else %}<span class="badge bg-warning">Nije placen</span>{% endif %}
+                {% if my_reservation.deposit_paid %}<span class="fenix-badge fenix-badge-success">Placen</span>{% else %}<span class="fenix-badge fenix-badge-warning">Nije placen</span>{% endif %}
             </p>
             <p><strong>Dostava:</strong> {{ my_reservation.get_delivery_preference_display }}</p>
-            <p><strong>Status:</strong> <span class="badge bg-info">{{ my_reservation.get_status_display }}</span></p>
-            {% if my_reservation.recurring_weekly %}<p><span class="badge bg-primary">Tjedna isporuka</span> ({{ my_reservation.delivery_slots.count }} slotova)</p>{% endif %}
+            <p><strong>Status:</strong> <span class="fenix-badge fenix-badge-info">{{ my_reservation.get_status_display }}</span></p>
+            {% if my_reservation.recurring_weekly %}<p><span class="fenix-badge fenix-badge-info">Tjedna isporuka</span> ({{ my_reservation.delivery_slots.count }} slotova)</p>{% endif %}
         </div>
     </div>
     {% elif listing.is_bookable %}

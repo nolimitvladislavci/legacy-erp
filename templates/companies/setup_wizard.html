@@ -17,7 +17,7 @@
 .wiz-title{font-weight:700;font-size:.9rem}
 .wiz-desc{font-size:.78rem;color:var(--muted,#64748b);margin-bottom:.75rem}
 .wiz-btn{display:inline-block;padding:.5rem 1.25rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .15s;min-height:40px;border:none;cursor:pointer;font-family:inherit}
-.wiz-btn-gold{background:var(--gold);color:#0f172a}
+.wiz-btn-gold{background:var(--gold);color:var(--text)}
 .wiz-btn-gold:hover{background:var(--gold2,#e8c96a)}
 .wiz-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
 .wiz-btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
@@ -34,14 +34,14 @@
 {% endblock %}
 
 {% block content %}
-<div style="max-width:800px;margin:0 auto">
+<div class="fx-m-auto fx-max-800">
 
 <!-- ═══ HERO WELCOME ═══ -->
-<div style="text-align:center;padding:1.5rem 0 1rem">
-  <div style="font-size:3rem;margin-bottom:.5rem">
+<div class="text-center" style="padding:1.5rem 0 1rem">
+  <div class="fx-fs-hero mb-2">
     {% if completion == 100 %}&#127881;{% elif completion > 60 %}&#128640;{% else %}&#128075;{% endif %}
   </div>
-  <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.25rem;color:var(--text,#eee)">
+  <h2 class="fx-fs-4xl fx-fw-800 fx-mb-1" style="color:var(--text,#eee)">
     {% if completion == 100 %}
       {% trans "Sve je postavljeno! Dobrodošli u LIMIT Connect." %}
     {% elif completion > 60 %}
@@ -50,7 +50,7 @@
       {% trans "Postavimo vaš profil za 5 minuta." %}
     {% endif %}
   </h2>
-  <p style="color:var(--muted,#94a3b8);font-size:.88rem">
+  <p class="fx-fs-body fx-text-muted">
     {{ completion }}% {% trans "postavljeno" %}
     {% if completion < 100 %}&mdash; {% trans "još malo do potpunog otključavanja" %}{% endif %}
   </p>
@@ -63,13 +63,11 @@
 
 <!-- ═══ MODULE UNLOCK HINT ═══ -->
 {% if completion < 80 %}
-<div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);
-  border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:.82rem;
-  display:flex;align-items:center;gap:.75rem">
-  <span style="font-size:1.2rem">&#128275;</span>
-  <span style="color:var(--muted,#94a3b8)">
+<div class="fx-rounded fx-fs-note d-flex align-items-center fx-gap-3 fx-mb-6" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);padding:.75rem 1rem">
+  <span class="fx-fs-2xl">&#128275;</span>
+  <span class="fx-text-muted">
     {% trans "Dovršite postavljanje i otključajte:" %}
-    <strong style="color:var(--gold,#c9a84c)">{% trans "POS blagajnu, AI asistenta i WhatsApp upozorenja" %}</strong>
+    <strong class="fx-text-gold">{% trans "POS blagajnu, AI asistenta i WhatsApp upozorenja" %}</strong>
   </span>
 </div>
 {% endif %}
@@ -89,7 +87,7 @@
     <form method="post" action="{% url 'companies:setup_wizard_company' %}" class="wiz-form">{% csrf_token %}
       <div class="wiz-field"><label>{% trans "Naziv tvrtke" %} *</label><input name="name" value="{{ company.name }}" required placeholder="Tvrtka d.o.o."></div>
       <div class="wiz-field"><label>OIB *</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" required placeholder="12345678901" maxlength="11"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <div class="d-grid fx-gap-2 fx-grid-2-equal">
         <div class="wiz-field"><label>{% trans "Grad" %}</label><input name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb"></div>
         <div class="wiz-field"><label>{% trans "Poštanski broj" %}</label><input name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000"></div>
       </div>
@@ -98,7 +96,7 @@
       <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči za sada" %}</a>
     </form>
     {% else %}
-    <div style="font-size:.82rem;color:var(--green);margin-bottom:.5rem">{{ company.name }} | {{ company.oib }}</div>
+    <div class="fx-fs-note fx-text-green mb-2">{{ company.name }} | {{ company.oib }}</div>
     <a href="{% url 'companies:setup_wizard_company' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
@@ -120,7 +118,7 @@
       <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči" %}</a>
     </form>
     {% else %}
-    <div style="font-size:.82rem;color:var(--green)">{{ company.phone|default:company.email }}</div>
+    <div class="fx-fs-note fx-text-green">{{ company.phone|default:company.email }}</div>
     <a href="{% url 'companies:setup_wizard_contact' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
@@ -141,7 +139,7 @@
       <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči" %}</a>
     </form>
     {% else %}
-    <div style="font-size:.82rem;color:var(--green)">OIB: {{ company.oib }}</div>
+    <div class="fx-fs-note fx-text-green">OIB: {{ company.oib }}</div>
     <a href="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-btn wiz-btn-ghost">{% trans "Uredi" %}</a>
     {% endif %}
   </div>
@@ -171,8 +169,8 @@
 </div>
 
 <!-- CTA -->
-<div style="text-align:center;margin-top:2rem">
-  <a href="/hr/dashboard/" class="wiz-btn wiz-btn-gold" style="font-size:1rem;padding:.75rem 2rem">
+<div class="text-center" style="margin-top:2rem">
+  <a href="/hr/dashboard/" class="wiz-btn wiz-btn-gold fx-fs-lg" style="padding:.75rem 2rem">
     {% if completion >= 60 %}{% trans "Idi na Dashboard" %} &rarr;{% else %}{% trans "Preskoči i idi na Dashboard" %} &rarr;{% endif %}
   </a>
 </div>

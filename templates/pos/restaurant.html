@@ -20,7 +20,7 @@
 .tbl-card{border-radius:10px;border:2px solid var(--border);padding:.875rem .75rem;text-align:center;cursor:pointer;transition:all .18s;position:relative;user-select:none;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem}
 .tbl-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .tbl-free{background:var(--card)}
-.tbl-occupied{background:rgba(239,68,68,.08);border-color:#ef4444}
+.tbl-occupied{background:rgba(239,68,68,.08);border-color:var(--red)}
 .tbl-paying{background:rgba(250,204,21,.08);border-color:#facc15}
 .tbl-selected{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(201,168,76,.3)!important}
 .tbl-num{font-size:1.5rem;font-weight:800;line-height:1}
@@ -28,7 +28,7 @@
 .tbl-total{font-size:.72rem;font-weight:700;color:var(--gold)}
 .tbl-items{font-size:.62rem;color:var(--muted)}
 .dot-badge{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%}
-.dot-free{background:#22c55e}.dot-occ{background:#ef4444}.dot-pay{background:#facc15}
+.dot-free{background:var(--green)}.dot-occ{background:var(--red)}.dot-pay{background:#facc15}
 
 /* ── Add btn ─────────────────────────────────────────────────────────────── */
 .tbl-add{border-style:dashed;opacity:.5;font-size:1.5rem}
@@ -90,7 +90,7 @@
 
 /* ── Success overlay ─────────────────────────────────────────────────────── */
 .ok-box{text-align:center;background:var(--card);border:1px solid #22c55e;border-radius:14px;padding:2rem 2.5rem;max-width:320px;width:95vw}
-.ok-icon{font-size:2.8rem;color:#22c55e;margin-bottom:.75rem}
+.ok-icon{font-size:2.8rem;color:var(--green);margin-bottom:.75rem}
 .ok-num{font-size:1.4rem;font-weight:900;color:var(--gold);margin-bottom:.25rem}
 .ok-total{font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
 .ok-chg{font-size:.9rem;color:var(--muted);margin-bottom:1rem}
@@ -113,18 +113,18 @@
         <div class="rbar-title">{{ terminal.name }}</div>
         <div class="rbar-sub">
           {% if session %}Smjena #{{ session.session_number }} &mdash; {{ open_receipts|length }} aktivni bon{{ open_receipts|length|pluralize:",ovi" }}
-          {% else %}<span style="color:#ef4444">{% trans "Nema aktivne smjene" %}</span>{% endif %}
+          {% else %}<span class="fx-text-red">{% trans "Nema aktivne smjene" %}</span>{% endif %}
         </div>
       </div>
-      <div style="display:flex;gap:.5rem;align-items:center">
+      <div class="d-flex fx-gap-2 align-items-center">
         {% if session %}<a href="{% url 'pos:session_detail' session.id %}" class="btn btn-ghost btn-sm">{% trans "Smjena &rarr;" %}</a>{% endif %}
         <a href="{% url 'pos:dashboard' %}" class="btn btn-ghost btn-sm">{% trans "&#8592; POS" %}</a>
       </div>
     </div>
 
     {% if not session %}
-    <div style="text-align:center;padding:3rem;color:var(--muted)">
-      <div style="font-size:1.1rem;margin-bottom:1rem">{% trans "Terminal nema aktivnu smjenu" %}</div>
+    <div class="text-center fx-text-muted fx-p-7">
+      <div class="fx-fs-xl mb-3">{% trans "Terminal nema aktivnu smjenu" %}</div>
       <form method="post" action="{% url 'pos:open_session' terminal.id %}">{% csrf_token %}
         <button class="btn btn-gold">{% trans "Pokreni smjenu" %}</button>
       </form>
@@ -161,7 +161,7 @@
         {% for r in open_receipts %}{% if not r.table_number %}
         <div class="tbl-card tbl-occupied" data-table="" data-rid="{{ r.id }}" onclick="selectTable(this)">
           <div class="dot-badge dot-occ"></div>
-          <div class="tbl-num" style="font-size:1rem">Bon #{{ r.receipt_number }}</div>
+          <div class="tbl-num fx-fs-lg">Bon #{{ r.receipt_number }}</div>
           <div class="tbl-total">&euro;{{ r.total|floatformat:2 }}</div>
         </div>
         {% endif %}{% endfor %}
@@ -174,8 +174,8 @@
       </div>
 
       <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#22c55e"></div>{% trans "Slobodan" %}</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#ef4444"></div>{% trans "Zauzet" %}</div>
+        <div class="leg-item"><div class="leg-dot fx-bg-green"></div>{% trans "Slobodan" %}</div>
+        <div class="leg-item"><div class="leg-dot fx-bg-red"></div>{% trans "Zauzet" %}</div>
         <div class="leg-item"><div class="leg-dot" style="background:#facc15"></div>{% trans "Plaća" %}</div>
       </div>
     </div>
@@ -191,16 +191,16 @@
 
     <div class="side-body">
       <div class="side-empty" id="emptyHint">
-        <div style="font-size:2rem;margin-bottom:.5rem">{% trans "&#x1F374;" %}</div>
+        <div class="fx-fs-icon mb-2">{% trans "&#x1F374;" %}</div>
         {% trans "Kliknite na stol za prikaz narudžbe" %}
       </div>
 
-      <div id="itemsZone" style="display:none">
+      <div id="itemsZone" class="fx-hidden">
         <div class="r-items" id="itemsList"></div>
 
         {% if session %}
         <div class="add-item-zone">
-          <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem">{% trans "Dodaj stavku" %}</div>
+          <div class="fx-fs-xs fx-text-muted fx-uppercase" style="letter-spacing:.07em;margin-bottom:.4rem">{% trans "Dodaj stavku" %}</div>
           <div class="ac-wrap">
             <input class="ac-input" type="text" id="acInput" placeholder="{% trans "Pretraži artikal…" %}" autocomplete="off">
             <div class="ac-list" id="acList"></div>
@@ -208,23 +208,23 @@
           <div class="qty-row">
             <label>{% trans "Kol:" %}</label>
             <input class="qty-inp" type="number" id="acQty" value="1" min="0.1" step="0.1">
-            <button class="btn btn-gold btn-sm" onclick="addItemToReceipt()" style="flex:1">{% trans "Dodaj +" %}</button>
+            <button class="btn btn-gold btn-sm fx-flex-1" onclick="addItemToReceipt()">{% trans "Dodaj +" %}</button>
           </div>
         </div>
         {% endif %}
       </div>
     </div>
 
-    <div class="side-footer" id="sideFooter" style="display:none">
+    <div class="side-footer fx-hidden" id="sideFooter">
       <div class="totals-box">
         <div class="tot-row"><span>{% trans "Neto:" %}</span><span id="fNeto">{% trans "&euro;0.00" %}</span></div>
         <div class="tot-row"><span>{% trans "PDV:" %}</span><span id="fPdv">{% trans "&euro;0.00" %}</span></div>
         <div class="tot-row grand"><span>{% trans "UKUPNO:" %}</span><span id="fTotal">{% trans "&euro;0.00" %}</span></div>
       </div>
-      <div style="display:flex;gap:.5rem">
+      <div class="d-flex fx-gap-2">
         <button class="btn btn-ghost" onclick="closePanel()">✕</button>
-        <button class="btn btn-green" onclick="openPay('CASH')" style="flex:1">{% trans "Gotovina" %}</button>
-        <button class="btn btn-gold" onclick="openPay('CARD')" style="flex:1">{% trans "Kartica" %}</button>
+        <button class="btn btn-green fx-flex-1" onclick="openPay('CASH')">{% trans "Gotovina" %}</button>
+        <button class="btn btn-gold fx-flex-1" onclick="openPay('CARD')">{% trans "Kartica" %}</button>
       </div>
     </div>
   </div>
@@ -245,27 +245,27 @@
     </div>
     <div class="chg-lbl" id="chgLbl"></div>
 
-    <div style="margin-top:.5rem;margin-bottom:.5rem">
-          <button class="btn btn-ghost btn-sm" onclick="openPfandReturn()" style="width:100%;font-size:.72rem">&#8617; Povratna ambalaza</button>
+    <div class="mt-2 mb-2">
+          <button class="btn btn-ghost btn-sm fx-w-full fx-fs-sm" onclick="openPfandReturn()">&#8617; Povratna ambalaza</button>
         </div>
     <!-- ── Napojnica (samo kartica) ── -->
-    <div id="tipSection" style="display:none;margin-top:.75rem;border-top:1px solid rgba(255,255,255,.08);padding-top:.75rem">
-      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em">
+    <div id="tipSection" class="fx-hidden fx-mt-4" style="border-top:1px solid rgba(255,255,255,.08);padding-top:.75rem">
+      <div class="fx-fs-sm fx-text-muted mb-2 fx-uppercase" style="letter-spacing:.05em">
         Napojnica (Trinkgeld)
       </div>
-      <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
+      <div class="d-flex fx-gap-2 mb-2">
         <button class="qc" onclick="setTip(0)" id="tipBtn0" style="background:rgba(201,168,76,.2);border-color:var(--gold)">Bez</button>
         <button class="qc" onclick="setTip(1)">+€1</button>
         <button class="qc" onclick="setTip(2)">+€2</button>
         <button class="qc" onclick="setTip(5)">+€5</button>
         <button class="qc" onclick="setTip(10)">+€10</button>
       </div>
-      <div style="display:flex;align-items:center;gap:.5rem">
-        <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">Vlastiti iznos €</span>
-        <input class="cash-inp" type="number" id="tipCustom" placeholder="0.00" min="0" step="0.50"
-               oninput="setCustomTip()" style="font-size:.9rem;padding:.4rem .6rem;">
+      <div class="d-flex align-items-center fx-gap-2">
+        <span class="fx-fs-sm fx-text-muted text-nowrap">Vlastiti iznos €</span>
+        <input class="cash-inp fx-fs-md fx-p-tag" type="number" id="tipCustom" placeholder="0.00" min="0" step="0.50"
+               oninput="setCustomTip()">
       </div>
-      <div id="tipDisplay" style="font-size:.8rem;color:var(--gold);margin-top:.4rem;min-height:1.2rem"></div>
+      <div id="tipDisplay" class="fx-fs-compact fx-text-gold" style="margin-top:.4rem;min-height:1.2rem"></div>
     </div>
 
     <div class="modal-btns">
@@ -282,7 +282,7 @@
     <div class="ok-num" id="okNum">{% trans "Bon #–" %}</div>
     <div class="ok-total" id="okTotal">{% trans "&euro;0.00" %}</div>
     <div class="ok-chg" id="okChg"></div>
-    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.75rem">
+    <div class="d-flex fx-gap-2 justify-content-center fx-mt-4">
       <a id="okPrint" href="#" target="_blank" class="btn btn-ghost btn-sm">{% trans "Ispiši" %}</a>
       <button class="btn btn-gold btn-sm" onclick="closeOk()">{% trans "OK" %}</button>
     </div>
@@ -293,9 +293,9 @@
 <div class="overlay" id="newBonOverlay">
   <div class="modal">
     <h3>{% trans "Novi bon" %}</h3>
-    <div style="margin-bottom:.75rem">
-      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.35rem">{% trans "Broj stola (ostavite prazno za šank / dostavu)" %}</label>
-      <input class="cash-inp" type="number" id="newBonTable" placeholder="{% trans "npr. 7" %}" min="1" max="200" style="font-size:.95rem">
+    <div class="fx-mb-4">
+      <label class="fx-fs-sm fx-text-muted d-block" style="margin-bottom:.35rem">{% trans "Broj stola (ostavite prazno za šank / dostavu)" %}</label>
+      <input class="cash-inp fx-fs-normal" type="number" id="newBonTable" placeholder="{% trans "npr. 7" %}" min="1" max="200">
     </div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeNewBon()">{% trans "Odustani" %}</button>

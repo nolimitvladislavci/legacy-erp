@@ -4,16 +4,16 @@
 <html><head><meta charset="utf-8"><style>
 @page { margin: 10mm; size: A4 landscape; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:8pt; color:#1a1a1a; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:8pt; color:var(--text); }
 
 .header { border-bottom:2pt solid #0f172a; padding-bottom:10pt; margin-bottom:12pt; }
-.header h1 { font-size:14pt; color:#0f172a; margin-bottom:2pt; }
-.header .sub { font-size:9pt; color:#475569; }
-.header .company { font-size:8pt; color:#475569; margin-top:4pt; }
-.header .period { float:right; font-size:10pt; font-weight:700; color:#c9a84c; margin-top:-20pt; }
+.header h1 { font-size:14pt; color:var(--text); margin-bottom:2pt; }
+.header .sub { font-size:9pt; color:var(--text-dim); }
+.header .company { font-size:8pt; color:var(--text-dim); margin-top:4pt; }
+.header .period { float:right; font-size:10pt; font-weight:700; color:var(--gold); margin-top:-20pt; }
 
 table { width:100%; border-collapse:collapse; margin-bottom:10pt; }
-thead tr { background:#0f172a; color:white; }
+thead tr { background:var(--surface-deep); color:var(--text); }
 th { padding:4pt 4pt; font-size:6.5pt; text-transform:uppercase; letter-spacing:.3px; text-align:left; }
 th.r { text-align:right; }
 td { padding:3pt 4pt; font-size:7.5pt; border-bottom:.3pt solid #e2e8f0; }
@@ -21,7 +21,7 @@ td.r { text-align:right; font-variant-numeric:tabular-nums; }
 tr:nth-child(even) td { background:#fafafa; }
 tfoot td { font-weight:700; border-top:1.5pt solid #0f172a; padding:5pt 4pt; font-size:8pt; }
 
-.footer { position:static; margin-top:10mm; text-align:center; font-size:6pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:3pt; }
+.footer { position:static; margin-top:10mm; text-align:center; font-size:6pt; color:var(--text-muted); border-top:.5pt solid #e2e8f0; padding-top:3pt; }
 </style></head>
 <body>
 
@@ -92,11 +92,11 @@ tfoot td { font-weight:700; border-top:1.5pt solid #0f172a; padding:5pt 4pt; fon
   </tfoot>
 </table>
 
-<div style="margin-top:16pt;font-size:7pt;color:#475569">
+<div class="fx-text-dim" style="margin-top:16pt;font-size:7pt">
   Sastavio/la: __________________________________ &nbsp;&nbsp;&nbsp; Potpis: __________________________________ &nbsp;&nbsp;&nbsp; Datum: {% now "d.m.Y" %}
 </div>
 
-<div class="footer" style="display:flex;justify-content:space-between;align-items:center">
+<div class="footer d-flex justify-content-between align-items-center">
   <div>
     {{ company.name }}{% if company.oib %} · OIB: {{ company.oib }}{% endif %} · {% now "d.m.Y H:i" %}<br>
     <span style="font-size:6pt">Fiskalizacija u džepu · SHA-256 · limit-connect.com</span>

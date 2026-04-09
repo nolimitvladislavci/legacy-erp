@@ -4,24 +4,7 @@
 {% block title %}{{ vehicle }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
@@ -50,7 +33,7 @@
       <div class="card bg-dark border-secondary">
         <div class="card-header text-info fw-bold">Podaci vozila</div>
         <div class="card-body">
-          <dl class="row mb-0" style="font-size:.9rem">
+          <dl class="row mb-0 fx-fs-md">
             <dt class="col-5 text-muted">Vlasnik</dt>
             <dd class="col-7">{{ vehicle.client.name }}</dd>
             <dt class="col-5 text-muted">Marka/Model</dt>

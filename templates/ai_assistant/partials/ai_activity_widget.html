@@ -1,21 +1,17 @@
 {% load i18n %}
 {% load fenix_ai i18n %}
-<div class="fenix-ai-widget" style="background:var(--bg-card);border:1px solid var(--border);
-     border-left:3px solid rgba(139,92,246,.5);border-radius:12px;overflow:hidden;">
+<div class="fenix-ai-widget fx-rounded fx-bg-card fx-b fx-overflow-hidden" style="border-left:3px solid rgba(139,92,246,.5)">
 
-  <div style="display:flex;justify-content:space-between;align-items:center;
-              padding:.75rem 1rem;border-bottom:1px solid var(--border);">
-    <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;
-                 letter-spacing:1.5px;color:#7c3aed;">
+  <div class="d-flex justify-content-between align-items-center fx-bb" style="padding:.75rem 1rem">
+    <span class="fx-fs-sm fx-fw-semibold fx-text-purple fx-uppercase fx-ls-3">
       &#x1F916; BORG AI aktivnost
     </span>
     {% if unreviewed > 0 %}
-    <span style="background:rgba(139,92,246,.15);color:#7c3aed;padding:.15rem .55rem;
-                 border-radius:12px;font-size:.7rem;font-weight:700;">
+    <span class="fx-text-purple fx-rounded fx-fs-sm fx-fw-bold" style="background:rgba(139,92,246,.15);padding:.15rem .55rem">
       {{ unreviewed }} na čekanju
     </span>
     {% else %}
-    <span style="font-size:.72rem;color:var(--text-muted);">Sve pregledano ✓</span>
+    <span class="fx-fs-sm fx-text-muted">Sve pregledano ✓</span>
     {% endif %}
   </div>
 
@@ -23,11 +19,9 @@
   <div>
     {% for action in actions %}
     <div id="ai-action-{{ action.id }}"
-         style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 1rem;
-                border-bottom:1px solid var(--border-light);
-                {% if not action.is_reviewed %}background:rgba(139,92,246,.03);{% endif %}">
+         class="d-flex" style="align-items:flex-start;gap:.75rem;padding:.65rem 1rem;border-bottom:1px solid var(--border-light);{% if not action.is_reviewed %}background:rgba(139,92,246,.03);{% endif %}">
 
-      <div style="margin-top:.1rem;font-size:1rem;flex-shrink:0;">
+      <div class="fx-fs-lg flex-shrink-0" style="margin-top:.1rem">
         {% if action.action_type == "booking" %}&#x1F4D2;
         {% elif action.action_type == "classification" %}&#x1F3F7;
         {% elif action.action_type == "ocr" %}&#x1F4F7;
@@ -37,31 +31,29 @@
         {% else %}&#x1F916;{% endif %}
       </div>
 
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:.82rem;color:var(--text);line-height:1.3;">
+      <div class="fx-flex-1 min-w-0">
+        <div class="fx-fs-note fx-text-body" style="line-height:1.3">
           {{ action.description }}
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem;flex-wrap:wrap;">
-          <span style="font-size:.7rem;color:var(--text-muted);">
+        <div class="d-flex fx-flex-wrap align-items-center fx-gap-2 fx-mt-2">
+          <span class="fx-fs-sm fx-text-muted">
             {{ action.created_at|timesince }} ago &middot;
             {{ action.get_ai_model_display }}
           </span>
           {% if action.confidence %}
-          <span style="font-size:.68rem;font-weight:700;
-                       color:{{ action.confidence|ai_confidence_color }};">
+          <span class="fx-fs-tiny fx-fw-bold" style="color:{{ action.confidence|ai_confidence_color }}">
             {{ action.confidence }}%
           </span>
           {% endif %}
           {% if action.source_object %}
-          <span style="font-size:.68rem;color:var(--text-muted);
-                       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">
+          <span class="fx-fs-tiny fx-text-muted text-nowrap fx-overflow-hidden" style="text-overflow:ellipsis;max-width:120px">
             ← {{ action.source_object }}
           </span>
           {% endif %}
         </div>
       </div>
 
-      <div style="flex-shrink:0;display:flex;align-items:center;gap:.4rem;">
+      <div class="d-flex align-items-center flex-shrink-0 fx-gap-1">
         {% if action.is_reviewed %}
         {% ai_status_pill "done" %}
         {% else %}
@@ -69,10 +61,7 @@
                 hx-target="#ai-action-{{ action.id }}"
                 hx-swap="outerHTML"
                 hx-headers='{"X-CSRFToken": "{{ request.META.CSRF_COOKIE }}"}'
-                style="background:transparent;border:1px solid rgba(139,92,246,.3);
-                       color:#7c3aed;padding:.2rem .6rem;border-radius:6px;
-                       font-size:.7rem;font-weight:600;cursor:pointer;
-                       transition:background .15s;"
+                class="fx-text-purple fx-rounded-sm fx-fs-sm fx-fw-semibold fx-pointer fx-bg-transparent" style="border:1px solid rgba(139,92,246,.3);padding:.2rem .6rem;transition:background .15s"
                 onmouseover="this.style.background='rgba(139,92,246,.1)'"
                 onmouseout="this.style.background='transparent'">
           Pregledaj
@@ -83,8 +72,8 @@
     {% endfor %}
   </div>
   {% else %}
-  <div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.82rem;">
-    <div style="font-size:1.5rem;margin-bottom:.5rem;opacity:.3;">&#x1F916;</div>
+  <div class="text-center fx-fs-note fx-text-muted fx-p-5">
+    <div class="fx-fs-5xl mb-2 fx-opacity-50">&#x1F916;</div>
     AI još nije poduzeo akciju za ovaj zapis.
   </div>
   {% endif %}

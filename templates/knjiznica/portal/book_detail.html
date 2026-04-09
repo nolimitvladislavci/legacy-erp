@@ -3,12 +3,12 @@
 {% block title %}{{ book.name }}{% endblock %}
 {% block content %}
 
-<div style="display:flex;gap:24px;flex-wrap:wrap">
+<div class="d-flex fx-gap-6 fx-flex-wrap">
   <!-- Cover -->
-  <div style="flex-shrink:0">
+  <div class="flex-shrink-0">
     <div class="book-cover" style="width:160px;height:220px;font-size:4rem">
       {% if meta and meta.cover_image %}
-      <img src="{{ meta.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:8px" alt="">
+      <img src="{{ meta.cover_image.url }}" class="fx-w-full fx-rounded" style="height:100%;object-fit:cover" alt="">
       {% else %}
       <i class="fas fa-book"></i>
       {% endif %}
@@ -16,34 +16,34 @@
   </div>
 
   <!-- Info -->
-  <div style="flex:1;min-width:250px">
-    <h2 style="font-size:1.5rem;margin-bottom:4px">{{ book.name }}</h2>
+  <div class="fx-flex-1" style="min-width:250px">
+    <h2 class="fx-fs-5xl mb-1">{{ book.name }}</h2>
     {% if meta %}
-    <div style="color:var(--lib-muted);margin-bottom:12px">
+    <div class="mb-3 fx-text-muted">
       {{ meta.author|default:"Nepoznati autor" }}
       {% if meta.pub_year %} · {{ meta.pub_year }}{% endif %}
       {% if meta.publisher %} · {{ meta.publisher }}{% endif %}
     </div>
 
     {% if meta.age_tier %}
-    <span style="background:var(--lib-warm);padding:4px 12px;border-radius:12px;font-size:.8rem;font-weight:600">
+    <span class="fx-rounded fx-fs-compact fx-fw-semibold" style="background:var(--lib-warm);padding:4px 12px">
       {{ meta.get_age_tier_display }}
     </span>
     {% endif %}
     {% if meta.genre %}
-    <span style="background:var(--lib-warm);padding:4px 12px;border-radius:12px;font-size:.8rem;margin-left:4px">
+    <span class="fx-rounded fx-fs-compact" style="background:var(--lib-warm);padding:4px 12px;margin-left:4px">
       {{ meta.genre }}
     </span>
     {% endif %}
 
-    <table style="margin-top:16px;font-size:.9rem">
-      {% if meta.isbn %}<tr><td style="color:var(--lib-muted);padding-right:16px">ISBN</td><td>{{ meta.isbn }}</td></tr>{% endif %}
-      {% if meta.shelf_location %}<tr><td style="color:var(--lib-muted);padding-right:16px">Polica</td><td>{{ meta.shelf_location }}</td></tr>{% endif %}
+    <table class="fx-fs-md mt-3">
+      {% if meta.isbn %}<tr><td class="fx-text-muted" style="padding-right:16px">ISBN</td><td>{{ meta.isbn }}</td></tr>{% endif %}
+      {% if meta.shelf_location %}<tr><td class="fx-text-muted" style="padding-right:16px">Polica</td><td>{{ meta.shelf_location }}</td></tr>{% endif %}
       <tr>
-        <td style="color:var(--lib-muted);padding-right:16px">Dostupnost</td>
+        <td class="fx-text-muted" style="padding-right:16px">Dostupnost</td>
         <td>
           {% if meta.is_reference %}
-          <span style="color:#b8860b"><i class="fas fa-lock me-1"></i>Referentna — ne posuđuje se</span>
+          <span class="fx-text-gold"><i class="fas fa-lock me-1"></i>Referentna — ne posuđuje se</span>
           {% elif active_loan %}
           <span style="color:var(--lib-danger)"><i class="fas fa-times-circle me-1"></i>Posuđena do {{ active_loan.due_date }}</span>
           {% else %}
@@ -54,7 +54,7 @@
     </table>
 
     {% if meta.description %}
-    <div style="margin-top:16px;line-height:1.6">{{ meta.description }}</div>
+    <div class="mt-3 fx-lh-normal">{{ meta.description }}</div>
     {% endif %}
     {% endif %}
   </div>
@@ -62,13 +62,13 @@
 
 <!-- Related media -->
 {% if media %}
-<div class="lib-card" style="margin-top:24px">
+<div class="lib-card mt-4">
   <h3><i class="fas fa-play-circle" style="color:var(--lib-accent)"></i> Povezani sadržaji</h3>
   <div class="media-grid">
     {% for m in media %}
-    <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card" style="text-decoration:none;color:inherit">
+    <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card fx-no-underline" style="color:inherit">
       <div class="media-thumb" style="height:100px">
-        <i class="fas fa-play" style="font-size:2rem"></i>
+        <i class="fas fa-play fx-fs-icon"></i>
       </div>
       <div class="media-body">
         <div class="title">{{ m.title }}</div>
@@ -82,24 +82,24 @@
 
 <!-- Reviews -->
 {% if reviews %}
-<div class="lib-card" style="margin-top:16px">
-  <h3><i class="fas fa-comments" style="color:var(--lib-gold)"></i> Recenzije mladih čitača</h3>
+<div class="lib-card mt-3">
+  <h3><i class="fas fa-comments fx-text-gold"></i> Recenzije mladih čitača</h3>
   {% for r in reviews %}
   <div style="padding:10px 0;border-bottom:1px solid #f0ebe4">
-    <div style="display:flex;align-items:center;gap:8px">
+    <div class="d-flex fx-gap-2 align-items-center">
       <strong>{{ r.child.first_name }}</strong>
-      <span style="font-size:.75rem;color:var(--lib-muted)">{{ r.child.get_tier_display }}</span>
+      <span class="fx-fs-caption fx-text-muted">{{ r.child.get_tier_display }}</span>
       {% if r.rating %}
-      <span class="stars" style="font-size:.75rem">{% for i in "12345" %}{% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}{% endfor %}</span>
+      <span class="stars fx-fs-caption">{% for i in "12345" %}{% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}{% endfor %}</span>
       {% endif %}
     </div>
-    <div style="margin-top:4px">{{ r.short_review }}</div>
+    <div class="mt-1">{{ r.short_review }}</div>
   </div>
   {% endfor %}
 </div>
 {% endif %}
 
-<div class="text-center" style="margin-top:24px">
+<div class="text-center mt-4">
   <a href="{% url 'knjiznica:portal_catalog' slug %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Natrag na katalog</a>
 </div>
 

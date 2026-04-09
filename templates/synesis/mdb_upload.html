@@ -19,28 +19,28 @@
 .upload-zone.uploading { pointer-events: none; opacity: 0.7; }
 .upload-zone i.upload-icon { font-size: 2.5rem; color: var(--gold,#c9a84c); margin-bottom: 14px; display: block; }
 .upload-zone h3 { color: #e0e0e0; margin: 0 0 8px; font-size: 1rem; }
-.upload-zone p { color: #666; font-size: 0.82rem; margin: 0; }
+.upload-zone p { color:var(--text-dim); font-size: 0.82rem; margin: 0; }
 .upload-zone input[type="file"] {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     opacity: 0; cursor: pointer;
 }
 .mdb-btn {
-    background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 10px 28px;
+    background: var(--gold,#c9a84c); color:var(--text); border: none; padding: 10px 28px;
     border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem;
     margin-top: 20px; display: none;
 }
 .mdb-btn:hover { background: #e0c068; }
 .mdb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .file-info {
-    background: #0f172a; border: 1px solid rgba(201,168,76,0.2);
+    background:var(--surface-deep); border: 1px solid rgba(201,168,76,0.2);
     border-radius: 8px; padding: 12px 16px; margin-top: 16px;
     display: none; align-items: center; gap: 12px;
 }
 .file-info .fname { color: var(--gold,#c9a84c); font-weight: 600; font-size: 0.9rem; }
-.file-info .fsize { color: #666; font-size: 0.78rem; }
-.file-info .fcheck { color: #10b981; font-size: 1.1rem; }
+.file-info .fsize { color:var(--text-dim); font-size: 0.78rem; }
+.file-info .fcheck { color:var(--green); font-size: 1.1rem; }
 .progress-wrap {
-    display: none; margin-top: 20px; background: #0f172a;
+    display: none; margin-top: 20px; background:var(--surface-deep);
     border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 16px 20px;
 }
 .progress-bar-outer {
@@ -55,10 +55,10 @@
 .status-msg {
     margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; display: none;
 }
-.status-msg.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
-.status-msg.success { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.status-msg.error { background: rgba(239,68,68,0.12); color:var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.status-msg.success { background: rgba(16,185,129,0.12); color:var(--green); border: 1px solid rgba(16,185,129,0.3); }
 .help-box {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    background:var(--surface-deep); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 18px 22px; margin-top: 30px;
 }
 .help-box h4 { color: var(--gold,#c9a84c); font-size: 0.85rem; margin: 0 0 10px; }

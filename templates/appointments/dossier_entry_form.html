@@ -3,24 +3,7 @@
 {% block title %}{% if entry %}Uredi unos{% else %}Novi unos — {{ client.name }}{% endif %}{% endblock %}
 {% block page_title %}{% if entry %}Uredi unos{% else %}Novi unos u kartonu{% endif %}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -28,7 +11,7 @@
     <a href="{% url 'appointments:dossier_detail' client.pk %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Karton: {{ client.name }}</a>
   </div>
 </div>
-<div class="stat-card" style="max-width:760px">
+<div class="fenix-stat" style="max-width:760px">
   <form method="post" enctype="multipart/form-data" id="entryForm">
     {% csrf_token %}
     <input type="hidden" name="structured_data" id="structuredDataInput" value="{{ sd_json|default:'{}' }}">
@@ -63,61 +46,61 @@
       </div>
 
       <!-- FINDING -->
-      <div id="fields-finding" class="col-12 type-fields" style="display:none">
+      <div id="fields-finding" class="col-12 type-fields fx-hidden">
         <label class="form-label fw-bold">Nalaz / Opis</label>
         <textarea name="content" class="form-control" rows="5" placeholder="Opis nalaza, klinicka slika...">{{ entry.content|default:'' }}</textarea>
       </div>
 
       <!-- PRESCRIPTION OPTIC -->
-      <div id="fields-prescription-optic" class="col-12 type-fields" style="display:none">
-        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-eye me-2"></i>Dioptrijski recept</h6>
+      <div id="fields-prescription-optic" class="col-12 type-fields fx-hidden">
+        <h6 class="fx-text-gold mb-3"><i class="fas fa-eye me-2"></i>Dioptrijski recept</h6>
         <table class="table table-dark table-sm mb-3">
           <thead><tr><th></th><th>Sfera</th><th>Cilindar</th><th>Os (&deg;)</th><th>Adicija</th></tr></thead>
           <tbody>
             <tr>
               <td><strong>OD (desno)</strong></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_sphere" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_cylinder" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
-              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm" id="od_axis" style="background:#111;border-color:#333;color:var(--text)" placeholder="0"></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_addition" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="od_sphere" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="od_cylinder" placeholder="0.00"></td>
+              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="od_axis" placeholder="0"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="od_addition" placeholder="0.00"></td>
             </tr>
             <tr>
               <td><strong>OS (lijevo)</strong></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_sphere" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_cylinder" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
-              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm" id="os_axis" style="background:#111;border-color:#333;color:var(--text)" placeholder="0"></td>
-              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_addition" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="os_sphere" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="os_cylinder" placeholder="0.00"></td>
+              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="os_axis" placeholder="0"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm fx-bg-card fx-text-body fx-bc2" id="os_addition" placeholder="0.00"></td>
             </tr>
           </tbody>
         </table>
         <div class="row g-2 mb-3">
-          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">PD (mm)</label><input type="number" step="0.5" id="pd_val" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="64"></div>
-          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Vidna ostrina OD</label><input type="text" id="va_od" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="1.0"></div>
-          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Vidna ostrina OS</label><input type="text" id="va_os" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="1.0"></div>
-          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">IOP (mmHg)</label><input type="number" step="0.5" id="iop" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="16"></div>
+          <div class="col-3"><label class="form-label fx-fs-compact fx-text-muted">PD (mm)</label><input type="number" step="0.5" id="pd_val" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="64"></div>
+          <div class="col-3"><label class="form-label fx-fs-compact fx-text-muted">Vidna ostrina OD</label><input type="text" id="va_od" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="1.0"></div>
+          <div class="col-3"><label class="form-label fx-fs-compact fx-text-muted">Vidna ostrina OS</label><input type="text" id="va_os" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="1.0"></div>
+          <div class="col-3"><label class="form-label fx-fs-compact fx-text-muted">IOP (mmHg)</label><input type="number" step="0.5" id="iop" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="16"></div>
         </div>
-        <label class="form-label" style="font-size:.8rem;color:var(--muted)">Napomene uz recept</label>
-        <textarea class="form-control" id="presc_notes" rows="3" style="background:#111;border-color:#333;color:var(--text)"></textarea>
+        <label class="form-label fx-fs-compact fx-text-muted">Napomene uz recept</label>
+        <textarea class="form-control fx-bg-card fx-text-body fx-bc2" id="presc_notes" rows="3"></textarea>
       </div>
 
       <!-- PRESCRIPTION HAIR/BEAUTY -->
-      <div id="fields-prescription-hair" class="col-12 type-fields" style="display:none">
-        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-cut me-2"></i>Recept / Tretman formula</h6>
+      <div id="fields-prescription-hair" class="col-12 type-fields fx-hidden">
+        <h6 class="fx-text-gold mb-3"><i class="fas fa-cut me-2"></i>Recept / Tretman formula</h6>
         <div class="row g-2">
-          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Tip kose</label><input type="text" id="hair_type" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="suha, masna, obicna..."></div>
-          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Baza boje</label><input type="text" id="hair_base" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="6.3, 7.0..."></div>
-          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Formula boje</label><input type="text" id="hair_formula" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="npr. Wella 7/0 + 7/43"></div>
-          <div class="col-12"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Opis tretmana</label><textarea class="form-control" id="hair_treatment" rows="3" style="background:#111;border-color:#333;color:var(--text)"></textarea></div>
+          <div class="col-md-4"><label class="form-label fx-fs-compact fx-text-muted">Tip kose</label><input type="text" id="hair_type" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="suha, masna, obicna..."></div>
+          <div class="col-md-4"><label class="form-label fx-fs-compact fx-text-muted">Baza boje</label><input type="text" id="hair_base" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="6.3, 7.0..."></div>
+          <div class="col-md-4"><label class="form-label fx-fs-compact fx-text-muted">Formula boje</label><input type="text" id="hair_formula" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="npr. Wella 7/0 + 7/43"></div>
+          <div class="col-12"><label class="form-label fx-fs-compact fx-text-muted">Opis tretmana</label><textarea class="form-control fx-bg-card fx-text-body fx-bc2" id="hair_treatment" rows="3"></textarea></div>
         </div>
       </div>
 
       <!-- MEASUREMENT -->
-      <div id="fields-measurement" class="col-12 type-fields" style="display:none">
-        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-ruler me-2"></i>Mjerenja</h6>
+      <div id="fields-measurement" class="col-12 type-fields fx-hidden">
+        <h6 class="fx-text-gold mb-3"><i class="fas fa-ruler me-2"></i>Mjerenja</h6>
         <div id="measureRows">
           <div class="row g-2 mb-2 measure-row">
-            <div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" placeholder="Naziv (npr. tezina)"></div>
-            <div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" placeholder="Vrijednost (npr. 82 kg)"></div>
+            <div class="col-5"><input type="text" class="form-control meas-key fx-bg-card fx-text-body fx-bc2" placeholder="Naziv (npr. tezina)"></div>
+            <div class="col-5"><input type="text" class="form-control meas-val fx-bg-card fx-text-body fx-bc2" placeholder="Vrijednost (npr. 82 kg)"></div>
             <div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest('.measure-row').remove()"><i class="fas fa-times"></i></button></div>
           </div>
         </div>
@@ -125,9 +108,9 @@
       </div>
 
       <!-- DOCUMENT / IMAGE -->
-      <div id="fields-file" class="col-12 type-fields" style="display:none">
+      <div id="fields-file" class="col-12 type-fields fx-hidden">
         <label class="form-label fw-bold">Datoteka</label>
-        <input type="file" name="file" class="form-control" style="background:#111;border-color:#333;color:var(--text)">
+        <input type="file" name="file" class="form-control fx-bg-card fx-text-body fx-bc2">
         {% if entry and entry.file %}
         <small class="text-muted">Trenutna datoteka: <a href="{{ entry.file.url }}" target="_blank">{{ entry.file.name }}</a></small>
         {% endif %}
@@ -136,11 +119,11 @@
       </div>
 
       <!-- TREATMENT -->
-      <div id="fields-treatment" class="col-12 type-fields" style="display:none">
+      <div id="fields-treatment" class="col-12 type-fields fx-hidden">
         <label class="form-label fw-bold">Opis tretmana</label>
         <textarea name="content" class="form-control" rows="5" placeholder="Detalji tretmana...">{{ entry.content|default:'' }}</textarea>
         <label class="form-label fw-bold mt-3">Kori&#353;teni proizvodi</label>
-        <input type="text" id="products_used" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="npr. Olaplex 3, Wella SP...">
+        <input type="text" id="products_used" class="form-control fx-bg-card fx-text-body fx-bc2" placeholder="npr. Olaplex 3, Wella SP...">
       </div>
 
       <div class="col-12">
@@ -170,7 +153,7 @@ function switchType(val) {
 function addMeasRow() {
   const row = document.createElement('div');
   row.className = 'row g-2 mb-2 measure-row';
-  row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" placeholder="Naziv"></div><div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" placeholder="Vrijednost"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
+  row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key fx-bg-card fx-text-body fx-bc2" placeholder="Naziv"></div><div class="col-5"><input type="text" class="form-control meas-val fx-bg-card fx-text-body fx-bc2" placeholder="Vrijednost"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
   document.getElementById('measureRows').appendChild(row);
 }
 
@@ -230,7 +213,7 @@ if (Object.keys(SD_INIT).length) {
     Object.entries(SD_INIT).forEach(([k, v]) => {
       const row = document.createElement('div');
       row.className = 'row g-2 mb-2 measure-row';
-      row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" value="'+k+'"></div><div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" value="'+v+'"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
+      row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key fx-bg-card fx-text-body fx-bc2" value="'+k+'"></div><div class="col-5"><input type="text" class="form-control meas-val fx-bg-card fx-text-body fx-bc2" value="'+v+'"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
       rows.appendChild(row);
     });
   }

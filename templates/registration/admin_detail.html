@@ -26,7 +26,7 @@ h1 { font-size:1.5rem; }
 .doc-link:hover { text-decoration:underline; }
 .actions { display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap; }
 .btn { padding:0.75rem 1.5rem; border-radius:6px; font-size:0.875rem; font-weight:600; border:none; cursor:pointer; font-family:inherit; text-decoration:none; display:inline-block; }
-.btn-approve { background:var(--success); color:#fff; }
+.btn-approve { background:var(--success); color:var(--white); }
 .btn-approve:hover { background:#3d9c68; }
 .btn-reject { background:transparent; border:1px solid var(--error); color:var(--error); }
 .btn-reject:hover { background:rgba(224,92,92,0.1); }
@@ -66,7 +66,7 @@ h1 { font-size:1.5rem; }
 <div class="card">
   <div class="card-title">{% trans "Registration Details" %}</div>
   <div class="grid">
-    <div class="field"><label>{% trans "Selected Plan" %}</label><span style="color:var(--gold);font-weight:600;text-transform:uppercase">{{ reg.selected_plan }}</span></div>
+    <div class="field"><label>{% trans "Selected Plan" %}</label><span class="fx-fw-semibold fx-text-gold fx-uppercase">{{ reg.selected_plan }}</span></div>
     <div class="field"><label>{% trans "Status" %}</label><span class="status status-{{ reg.status }}">{{ reg.status }}</span></div>
     <div class="field"><label>{% trans "Submitted" %}</label><span>{{ reg.created_at|date:"d M Y H:i" }}</span></div>
     {% if reg.approved_at %}<div class="field"><label>{% trans "Reviewed" %}</label><span>{{ reg.approved_at|date:"d M Y H:i" }}</span></div>{% endif %}
@@ -78,7 +78,7 @@ h1 { font-size:1.5rem; }
 <div class="card">
   <div class="card-title">{% trans "Actions" %}</div>
   <div class="actions">
-    <form method="post" action="{% url 'registration:admin_approve' reg.pk %}" style="display:inline">
+    <form method="post" action="{% url 'registration:admin_approve' reg.pk %}" class="d-inline">
       {% csrf_token %}
       <button type="submit" class="btn btn-approve" onclick="return confirm('Approve {{ reg.name }} and create account?')">{% trans "✓ Approve & Create Account" %}</button>
     </form>

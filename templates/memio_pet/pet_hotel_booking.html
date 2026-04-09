@@ -27,7 +27,7 @@
 {% endblock %}
 {% block content %}
 <div class="hotel-hero">
-  <div style="font-size:3rem">&#128054;</div>
+  <div class="fx-fs-hero">&#128054;</div>
   <h1>{% trans "Rezervirajte smještaj za ljubimca" %}</h1>
   <p>{% trans "3 koraka — 2 minute — potvrda odmah" %}</p>
 </div>
@@ -59,7 +59,7 @@
   </div>
 
   <!-- KORAK 2: Datumi + soba -->
-  <div class="booking-step" style="margin-top:1.5rem">{% trans "Korak 2 — Datumi i soba" %}</div>
+  <div class="booking-step fx-mt-6">{% trans "Korak 2 — Datumi i soba" %}</div>
   <div class="booking-grid">
     <div class="bf">
       <label>{% trans "Prijava" %} *</label>
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <label style="font-size:.78rem;color:var(--muted);font-weight:600;display:block;margin-bottom:.5rem">{% trans "Tip sobe" %}</label>
+  <label class="fx-fs-body-sm fx-fw-semibold fx-text-muted d-block mb-2">{% trans "Tip sobe" %}</label>
   <div class="room-grid">
     <label class="room-opt">
       <input type="radio" name="room_type" value="standard" checked>
@@ -100,9 +100,9 @@
   </div>
 
   <!-- Ukupna cijena -->
-  <div id="pricePreview" style="display:none;text-align:center;padding:.75rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;margin-bottom:1.25rem">
-    <span style="color:var(--muted);font-size:.82rem">{% trans "Ukupno" %}:</span>
-    <strong id="totalPrice" style="color:var(--gold);font-size:1.3rem;margin-left:.5rem"></strong>
+  <div id="pricePreview" class="fx-hidden text-center fx-rounded fx-p-3" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);margin-bottom:1.25rem">
+    <span class="fx-fs-note fx-text-muted">{% trans "Ukupno" %}:</span>
+    <strong id="totalPrice" class="fx-fs-3xl fx-text-gold" style="margin-left:.5rem"></strong>
   </div>
 
   {% if hotels %}
@@ -115,7 +115,7 @@
   {% endif %}
 
   <!-- KORAK 3: Vaši podaci -->
-  <div class="booking-step" style="margin-top:1.5rem">{% trans "Korak 3 — Vaši podaci" %}</div>
+  <div class="booking-step fx-mt-6">{% trans "Korak 3 — Vaši podaci" %}</div>
   <div class="booking-grid">
     <div class="bf">
       <label>{% trans "Vaše ime" %} *</label>
@@ -143,7 +143,7 @@
     <input type="text" name="emergency_contact" placeholder="{% trans 'Ime + telefon' %}">
   </div>
 
-  <button type="submit" style="width:100%;padding:.85rem;background:var(--gold);color:#0f172a;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.5rem">
+  <button type="submit" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fs-lg fx-fw-bold fx-pointer mt-2 fx-bg-gold" style="padding:.85rem">
     {% trans "Rezerviraj" %} &rarr;
   </button>
   </form>
@@ -151,7 +151,7 @@
 
 <div class="hotel-trust">
   &#128274; {% trans "Vaši podaci su sigurni. Koristimo ih isključivo za rezervaciju." %}
-  <br>{% trans "Powered by" %} <a href="https://memio.pet" style="color:var(--gold)">memio.pet</a> + <a href="https://limit-connect.com" style="color:var(--gold)">LIMIT Connect</a>
+  <br>{% trans "Powered by" %} <a href="https://memio.pet" class="fx-text-gold">memio.pet</a> + <a href="https://limit-connect.com" class="fx-text-gold">LIMIT Connect</a>
 </div>
 
 <script>

@@ -10,7 +10,7 @@
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 0.9rem; }
     .form-group textarea { min-height: 80px; resize: vertical; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .btn-gold { background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; width: 100%; }
+    .btn-gold { background: var(--gold,#c9a84c); color:var(--text); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; width: 100%; }
     .btn-gold:hover { background: #b8943f; }
     .btn-back { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
     @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
@@ -61,10 +61,10 @@
             <label>Napomena</label>
             <textarea name="napomena" placeholder="Dodatne napomene..."></textarea>
         </div>
-        <div style="margin-top:1rem">
-          <label style="color:var(--gold);font-weight:600;font-size:.85rem">Prilog (fotografija)</label>
-          <div id="knjiga-photo-preview" style="display:none;margin:.5rem 0"></div>
-          <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('knjiga-photo-preview',{onReady:function(r){document.getElementById('knjiga_photo_b64').value=r.b64}})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">📷 Fotografiraj dokument</button>
+        <div class="mt-3">
+          <label class="fx-fw-semibold fx-fs-base fx-text-gold">Prilog (fotografija)</label>
+          <div id="knjiga-photo-preview" class="fx-hidden" style="margin:.5rem 0"></div>
+          <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('knjiga-photo-preview',{onReady:function(r){document.getElementById('knjiga_photo_b64').value=r.b64}})" class="fx-rounded fx-pointer fx-fs-base fx-text-gold" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:.5rem 1rem">📷 Fotografiraj dokument</button>
           <input type="hidden" name="photo_b64" id="knjiga_photo_b64">
         </div>
         <button type="submit" class="btn-gold"><i class="fas fa-save"></i> Spremi stavku</button>

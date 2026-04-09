@@ -4,31 +4,14 @@
 {% block title %}Porezni Savjetnik — Računovođa Dashboard{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid px-2 px-md-4 py-3" style="max-width:1000px;">
 
   <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-      <h4 class="mb-0" style="color:var(--gold);font-family:'Cormorant Garamond',serif;">
+      <h4 class="mb-0 fx-text-gold" style="font-family:'Cormorant Garamond',serif">
         <i class="fas fa-user-tie me-2"></i>Moji klijenti — Porezne prijave
       </h4>
       <small class="text-muted">Obrasci koje su klijenti ispunili putem vašeg linka</small>
@@ -38,26 +21,26 @@
   {# ── Statistike ─────────────────────────────────────── #}
   <div class="row g-2 mb-4">
     <div class="col-6 col-md-3">
-      <div class="card text-center p-3" style="background:var(--bg-card);border:1px solid var(--border);">
-        <div style="font-size:1.5rem;font-weight:bold;color:var(--gold);">{{ stats.total }}</div>
+      <div class="card text-center p-3 fx-bg-card fx-b">
+        <div class="fx-fs-5xl fx-fw-bold fx-text-gold">{{ stats.total }}</div>
         <small class="text-muted">Ukupno</small>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card text-center p-3" style="background:var(--bg-card);border:1px solid var(--border);">
-        <div style="font-size:1.5rem;font-weight:bold;color:#f59e0b;">{{ stats.review }}</div>
+      <div class="card text-center p-3 fx-bg-card fx-b">
+        <div class="fx-fs-5xl fx-fw-bold fx-text-amber">{{ stats.review }}</div>
         <small class="text-muted">Čeka pregled</small>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card text-center p-3" style="background:var(--bg-card);border:1px solid var(--border);">
-        <div style="font-size:1.5rem;font-weight:bold;color:#3b82f6;">{{ stats.finalized }}</div>
+      <div class="card text-center p-3 fx-bg-card fx-b">
+        <div class="fx-fs-5xl fx-fw-bold fx-text-blue">{{ stats.finalized }}</div>
         <small class="text-muted">Finalizirano</small>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card text-center p-3" style="background:var(--bg-card);border:1px solid var(--border);">
-        <div style="font-size:1.5rem;font-weight:bold;color:#10b981;">{{ stats.submitted }}</div>
+      <div class="card text-center p-3 fx-bg-card fx-b">
+        <div class="fx-fs-5xl fx-fw-bold fx-text-green">{{ stats.submitted }}</div>
         <small class="text-muted">Predano</small>
       </div>
     </div>
@@ -65,10 +48,10 @@
 
   {# ── Lista sesija ───────────────────────────────────── #}
   {% if sessions %}
-  <div class="card" style="background:var(--bg-card);border:1px solid var(--border);">
+  <div class="card fx-bg-card fx-b">
     <div class="table-responsive">
-      <table class="table table-sm mb-0" style="color:var(--text);">
-        <thead><tr style="background:var(--table-header-bg);">
+      <table class="table table-sm mb-0 fx-text-body">
+        <thead><tr class="fx-bg-surface2">
           <th>Klijent</th><th>Obrazac</th><th>Godina</th><th>Primitci</th><th>Status</th><th></th>
         </tr></thead>
         <tbody>
@@ -87,13 +70,13 @@
           </td>
           <td>
             {% if s.status == 'review' %}
-              <span class="badge bg-warning text-dark">Čeka pregled</span>
+              <span class="fenix-badge fenix-badge-warning">Čeka pregled</span>
             {% elif s.status == 'draft' %}
-              <span class="badge bg-secondary">Nacrt</span>
+              <span class="fenix-badge fenix-badge-muted">Nacrt</span>
             {% elif s.status == 'final' %}
-              <span class="badge bg-primary">Finalizirano</span>
+              <span class="fenix-badge fenix-badge-info">Finalizirano</span>
             {% elif s.status == 'submitted' %}
-              <span class="badge bg-success">Predano</span>
+              <span class="fenix-badge fenix-badge-success">Predano</span>
             {% endif %}
           </td>
           <td>
@@ -108,7 +91,7 @@
     </div>
   </div>
   {% else %}
-  <div class="card p-5 text-center" style="background:var(--bg-card);border:1px solid var(--border);">
+  <div class="card p-5 text-center fx-bg-card fx-b">
     <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
     <p class="text-muted">Nema klijentskih obrazaca. Pošaljite link klijentima da započnu popunjavanje.</p>
   </div>

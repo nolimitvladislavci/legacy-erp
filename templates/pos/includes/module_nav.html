@@ -6,16 +6,16 @@ Otvara module u novom tabu. Compliance dot desno.
 <style>
 .pos-module-nav{display:flex;align-items:center;height:38px;background:#0d0d12;border-bottom:1px solid rgba(255,255,255,.06);padding:0 8px;gap:2px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .pos-module-nav::-webkit-scrollbar{display:none}
-.mn-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;color:#64748b;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:5px;white-space:nowrap;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.mn-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;color:var(--text-dim);font-size:.7rem;font-weight:600;text-decoration:none;border-radius:5px;white-space:nowrap;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .mn-btn:hover{background:rgba(201,168,76,.08);color:var(--gold,#c9a84c)}
 .mn-btn i{font-size:.82rem}
 .mn-spacer{flex:1}
 .mn-compliance{position:relative;cursor:pointer;padding:4px 10px;display:flex;align-items:center;gap:5px}
-.mn-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;transition:background .3s}
-.mn-dot.warn{background:#f59e0b;animation:compBlink 1.5s infinite}
-.mn-dot.critical{background:#ef4444;animation:compBlink .7s infinite}
+.mn-dot{width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;transition:background .3s}
+.mn-dot.warn{background:var(--amber);animation:compBlink 1.5s infinite}
+.mn-dot.critical{background:var(--red);animation:compBlink .7s infinite}
 @keyframes compBlink{0%,100%{opacity:1}50%{opacity:.3}}
-.mn-label{font-size:.65rem;color:#64748b;font-weight:600}
+.mn-label{font-size:.65rem;color:var(--text-dim);font-weight:600}
 </style>
 
 <div class="pos-module-nav">

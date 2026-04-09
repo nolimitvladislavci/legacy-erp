@@ -18,18 +18,18 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="reg-card" style="text-align:center; margin-bottom:2rem;">
+<div class="reg-card text-center" style="margin-bottom:2rem">
   <div class="lock-icon">🔒</div>
-  <h1 class="reg-card-title" style="text-align:center">{% trans "Modul nije uključen u vaš plan" %}</h1>
+  <h1 class="reg-card-title text-center">{% trans "Modul nije uključen u vaš plan" %}</h1>
   {% if module %}
-  <p class="reg-card-subtitle" style="text-align:center">Modul <strong style="color:var(--gold)">{{ module|capfirst }}</strong> nije dostupan na vašem trenutnom planu. Nadogradite za pristup.</p>
+  <p class="reg-card-subtitle text-center">Modul <strong class="fx-text-gold">{{ module|capfirst }}</strong> nije dostupan na vašem trenutnom planu. Nadogradite za pristup.</p>
   {% else %}
-  <p class="reg-card-subtitle" style="text-align:center">{% trans "Nadogradite svoj plan za pristup ovoj značajki." %}</p>
+  <p class="reg-card-subtitle text-center">{% trans "Nadogradite svoj plan za pristup ovoj značajki." %}</p>
   {% endif %}
-  <a href="javascript:history.back()" class="reg-btn-outline" style="margin-top:1rem; display:inline-block">{% trans "← Natrag" %}</a>
+  <a href="javascript:history.back()" class="reg-btn-outline mt-3 d-inline-block">{% trans "← Natrag" %}</a>
 </div>
-<h2 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; margin-bottom:0.5rem; text-align:center">{% trans "Dostupni planovi" %}</h2>
-<p style="text-align:center; color:var(--muted); font-size:0.875rem; margin-bottom:1.5rem">{% trans "Kontaktirajte podršku za nadogradnju pretplate." %}</p>
+<h2 class="fx-fs-5xl text-center fx-mb-3" style="font-family:'Cormorant Garamond',serif">{% trans "Dostupni planovi" %}</h2>
+<p class="text-center fx-text-muted fx-mb-6" style="font-size:0.875rem">{% trans "Kontaktirajte podršku za nadogradnju pretplate." %}</p>
 <div class="plans-grid">
   {% for plan_key, plan in plans.items %}
   <div class="plan-card {% if plan.highlight %}highlight{% endif %}">
@@ -46,7 +46,7 @@
   </div>
   {% endfor %}
 </div>
-<div style="text-align:center; margin-top:2rem;">
+<div class="text-center" style="margin-top:2rem">
   <a href="mailto:info@limit-connect.com?subject=Upgrade request" class="reg-btn">{% trans "Zatraži nadogradnju" %}</a>
 </div>
 {% endblock %}

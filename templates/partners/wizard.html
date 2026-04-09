@@ -21,7 +21,7 @@
 </div>
 
 {% if resume %}
-<div class="alert alert-info py-2 mb-3" style="font-size:.85rem">
+<div class="alert alert-info py-2 mb-3 fx-fs-base">
   <i class="fas fa-info-circle me-1"></i>
   Nastavljaš gdje si stao/la — korak <strong>{{ draft.current_step }}</strong>.
   Podaci su sačuvani.
@@ -31,12 +31,12 @@
 <!-- Progres -->
 <div class="stat-card p-3 mb-3">
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <span id="stepLabel" class="fw-semibold small" style="color:#6366f1"></span>
+    <span id="stepLabel" class="fw-semibold small fx-text-purple"></span>
     <span id="stepTitle" class="text-muted small"></span>
   </div>
   <div class="progress" style="height:6px;border-radius:3px">
     <div id="progressBar" class="progress-bar"
-         style="background:#6366f1;width:0%;transition:width .35s ease"></div>
+         style="background:var(--purple);width:0%;transition:width .35s ease"></div>
   </div>
 </div>
 
@@ -50,7 +50,7 @@
       Trebamo prikupiti i pohraniti tvoje podatke kako bismo proveli ovaj proces.
       Molimo potvrdi da se slažeš s uvjetima.
     </p>
-    <div class="p-3 mb-3" style="background:#f8fafc;border-radius:8px;font-size:.83rem;max-height:200px;overflow-y:auto;border:1px solid #e2e8f0">
+    <div class="p-3 mb-3 fx-bg-surface2 fx-rounded fx-scroll-y fx-b" style="font-size:.83rem;max-height:200px">
       <strong>Uvjeti korištenja — Ured u džepu</strong><br><br>
       Korištenjem ovog alata ovlašćuješ <strong>{{ company_name }}</strong> da u tvoje ime
       prikupi i pohrani podatke potrebne za osnivanje društva u Republici Hrvatskoj.<br><br>
@@ -62,10 +62,10 @@
       Ova suglasnost bilježi se s IP adresom i timestampom te ima dokaznu snagu za potrebe
       GDPR evidencije obrade podataka.
     </div>
-    <label class="d-flex align-items-start gap-3 p-3 rounded"
-           style="cursor:pointer;background:#f0fdf4;border:2px solid #86efac">
+    <label class="d-flex align-items-start gap-3 p-3 rounded fx-pointer fx-bg-green-dim"
+           style="border:2px solid #86efac">
       <input type="checkbox" id="tcCheckbox" style="margin-top:3px;transform:scale(1.3)">
-      <span style="font-size:.88rem">
+      <span class="fx-fs-body">
         <strong>Prihvaćam uvjete</strong> i slažem se s prikupljanjem i obradom navedenih podataka
         u svrhu osnivanja društva putem LIMIT Connect platforme.
       </span>
@@ -79,15 +79,15 @@
     <p class="text-muted small mb-3">
       Opiši slobodnim riječima — AI pronalazi točne djelatnosti (NKD šifre).
     </p>
-    <div style="position:relative">
+    <div class="fx-relative">
       <input type="text" id="nkdFreeText" class="form-control"
              placeholder='npr. "prodaja kave i kolača" ili "IT konzultacije i web razvoj"'
              autocomplete="off">
-      <div id="nkdDropdown" class="position-absolute bg-white border rounded shadow-sm"
-           style="width:100%;max-height:280px;overflow-y:auto;z-index:1050;display:none"></div>
+      <div id="nkdDropdown" class="position-absolute bg-white border rounded shadow-sm fx-w-full fx-hidden fx-scroll-y"
+           style="max-height:280px;z-index:1050"></div>
     </div>
     <div id="selectedNkdBox" class="mt-3 d-flex flex-wrap gap-2"></div>
-    <p class="mt-2 text-muted" style="font-size:.78rem">
+    <p class="mt-2 text-muted fx-fs-body-sm">
       <i class="fas fa-info-circle"></i>
       Odaberi 1–5 djelatnosti. Preporučamo sve s kojima planiraš raditi — dodavanje kasnije košta.
     </p>
@@ -103,13 +103,13 @@
     </p>
     <input type="text" id="firmaIme" class="form-control form-control-lg"
            placeholder='npr. "Moja Firma d.o.o."' value="{{ draft.firma_ime }}">
-    <p class="mt-2 text-muted" style="font-size:.78rem">
+    <p class="mt-2 text-muted fx-fs-body-sm">
       <i class="fas fa-info-circle"></i>
       Naziv bez nastavka d.o.o. / j.d.o.o. — oblik biramo u sljedećem koraku.
     </p>
     <p id="firmaError" class="text-danger small d-none">Unesite ime firme (min. 3 znaka).</p>
     <div id="pendingCompanyBadge" class="mt-3 d-none">
-      <span class="badge" style="background:#eef2ff;color:#4338ca;font-size:.78rem;padding:6px 10px">
+      <span class="badge fx-fs-body-sm fx-text-purple fx-bg-purple-dim" style="padding:6px 10px">
         <i class="fas fa-building me-1"></i>
         Tvrtka <span id="pendingCompanyName"></span> je rezervirana u sustavu ✓
       </span>
@@ -154,7 +154,7 @@
     <p class="text-muted small mb-3">Za početak preporučamo j.d.o.o. — jeftinije, brže, isti zakonski okvir.</p>
     <div class="row g-3">
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block kapital-card" data-val="jdoo" style="cursor:pointer">
+        <label class="p-3 border rounded d-block kapital-card fx-pointer" data-val="jdoo">
           <input type="radio" name="kapital" value="jdoo"
                  {% if draft.kapital_tip == 'jdoo' %}checked{% endif %} class="me-2">
           <strong>j.d.o.o.</strong>
@@ -162,7 +162,7 @@
         </label>
       </div>
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block kapital-card" data-val="doo" style="cursor:pointer">
+        <label class="p-3 border rounded d-block kapital-card fx-pointer" data-val="doo">
           <input type="radio" name="kapital" value="doo"
                  {% if draft.kapital_tip == 'doo' %}checked{% endif %} class="me-2">
           <strong>d.o.o.</strong>
@@ -170,7 +170,7 @@
         </label>
       </div>
     </div>
-    <div class="alert alert-info mt-3 py-2" style="font-size:.82rem">
+    <div class="alert alert-info mt-3 py-2 fx-fs-note">
       <i class="fas fa-info-circle me-1"></i>
       j.d.o.o. može prerasti u d.o.o. — promjena je jednostavna kada to treba.
     </div>
@@ -182,7 +182,7 @@
     <p class="text-muted small mb-3">Sjedište mora biti fizička adresa u RH — ali ne mora biti tvoja.</p>
     <div class="row g-3">
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block sjediste-opt" data-val="vlastita" style="cursor:pointer">
+        <label class="p-3 border rounded d-block sjediste-opt fx-pointer" data-val="vlastita">
           <input type="radio" name="sjediste" value="vlastita" class="me-2"
                  {% if not draft.koristi_konjik %}checked{% endif %}>
           <strong>Vlastita adresa</strong>
@@ -190,14 +190,14 @@
         </label>
       </div>
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block sjediste-opt" data-val="konjik" style="cursor:pointer">
+        <label class="p-3 border rounded d-block sjediste-opt fx-pointer" data-val="konjik">
           <input type="radio" name="sjediste" value="konjik" class="me-2"
                  {% if draft.koristi_konjik %}checked{% endif %}>
-          <strong style="color:#166534">Ured u džepu</strong>
+          <strong class="fx-text-green">Ured u džepu</strong>
           <div class="text-muted small mt-1">
-            <span style="color:#166534;font-weight:500">{{ company_name }}</span><br>
+            <span class="fx-fw-medium fx-text-green">{{ company_name }}</span><br>
             {{ company_address }}, {{ company_zip }} {{ company_city }}<br>
-            <span style="font-size:.72rem">Legalno po ZTD čl.36 uz suglasnost ✓</span>
+            <span class="fx-fs-sm">Legalno po ZTD čl.36 uz suglasnost ✓</span>
           </div>
         </label>
       </div>
@@ -224,7 +224,7 @@
   <div class="wizard-step d-none" data-step="6">
     <h6 class="fw-bold mb-1">Pregled — sve u redu?</h6>
     <p class="text-muted small mb-3">Provjeri podatke prije nego generiramo dokumente.</p>
-    <div id="previewBox" class="p-3" style="background:#f8fafc;border-radius:8px;font-size:.88rem">
+    <div id="previewBox" class="p-3 fx-bg-surface2 fx-rounded fx-fs-body">
       <div class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Učitavanje...</div>
     </div>
     <div id="previewErrors" class="mt-2"></div>
@@ -235,8 +235,8 @@
     <h6 class="fw-bold mb-1"><i class="fas fa-check-circle text-success me-2"></i>Dokumenti su spremni!</h6>
     <p class="text-muted small mb-3">Odaberi put registracije.</p>
 
-    <div id="registrationPath" class="mb-3 p-3 rounded"
-         style="background:#f0fdf4;border:1px solid #86efac">
+    <div id="registrationPath" class="mb-3 p-3 rounded fx-bg-green-dim"
+         style="border:1px solid #86efac">
       <div class="fw-semibold text-success" id="pathTitle"></div>
       <div class="text-muted small mt-1" id="pathNote"></div>
     </div>
@@ -260,11 +260,11 @@
       </div>
     </div>
 
-    <div class="mt-3 p-3" style="background:#eef2ff;border-radius:8px;font-size:.82rem">
-      <div class="fw-semibold" style="color:#4338ca">
+    <div class="mt-3 p-3 fx-rounded fx-fs-note fx-bg-purple-dim">
+      <div class="fw-semibold fx-text-purple">
         <i class="fas fa-rocket me-1"></i>Sljedeći koraci nakon registracije
       </div>
-      <ul class="mt-2 mb-0 ps-3" style="color:#4338ca">
+      <ul class="mt-2 mb-0 ps-3 fx-text-purple">
         <li>eRačun sustav se automatski aktivira u LIMIT Connect</li>
         <li>Fiskalizacija je postavljena od dana 1</li>
         <li>Računovodstvo preuzima sve tekuće obveze</li>
@@ -595,12 +595,12 @@ var Wizard = (function() {
     if (!items || !items.length) { box.style.display='none'; return; }
     box.innerHTML = items.map(function(item) {
       var ai = item.ai_reason
-        ? '<div style="font-size:.72rem;color:#6366f1;margin-top:2px">' + item.ai_reason + '</div>'
+        ? '<div class="fx-fs-sm fx-text-purple fx-mt-1">' + item.ai_reason + '</div>'
         : '';
-      return '<div class="px-3 py-2 nkd-drop-opt" style="cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:.84rem"'
+      return '<div class="px-3 py-2 nkd-drop-opt fx-pointer" style="border-bottom:1px solid #f0f0f0;font-size:.84rem"'
         + ' data-id="' + item.id + '" data-code="' + item.code
         + '" data-name="' + (item.name_hr||'').replace(/"/g,'') + '">'
-        + '<span class="badge bg-secondary me-1" style="font-size:.7rem">' + item.code + '</span>'
+        + '<span class="badge bg-secondary me-1 fx-fs-sm">' + item.code + '</span>'
         + (item.name_hr || item.name_en || '') + ai + '</div>';
     }).join('');
     box.style.display = 'block';
@@ -636,11 +636,11 @@ var Wizard = (function() {
     var box = document.getElementById('selectedNkdBox');
     if (!box) return;
     box.innerHTML = nkdSelected.map(function(n) {
-      return '<span class="badge d-inline-flex align-items-center gap-1"'
-        + ' style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-size:.8rem;padding:6px 10px">'
+      return '<span class="badge d-inline-flex align-items-center gap-1 fx-fs-compact fx-text-purple fx-bg-purple-dim"'
+        + ' style="border:1px solid #c7d2fe;padding:6px 10px">'
         + '<span class="fw-bold">' + n.code + '</span> ' + n.name
         + '<button type="button" onclick="Wizard._removeNkd(\'' + n.id + '\')"'
-        + ' style="background:none;border:none;color:#6366f1;cursor:pointer;padding:0 0 0 6px;font-size:1rem">&times;</button>'
+        + ' class="fx-border-none fx-pointer fx-fs-lg fx-text-purple fx-bg-transparent" style="padding:0 0 0 6px">&times;</button>'
         + '</span>';
     }).join('');
   }

@@ -7,33 +7,33 @@
   @page { size: A4 landscape; margin: 15mm; }
   body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #222; }
   h1 { font-size: 16px; margin-bottom: 4px; }
-  h2 { font-size: 12px; margin-bottom: 2px; color: #555; }
+  h2 { font-size: 12px; margin-bottom: 2px; color:var(--text-dim); }
   .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
-  .meta { font-size: 8px; color: #666; }
+  .meta { font-size: 8px; color:var(--text-dim); }
   table { width: 100%; border-collapse: collapse; margin-top: 8px; }
   th, td { border: 1px solid #999; padding: 3px 5px; font-size: 8px; }
   th { background: #e8e8e8; font-weight: bold; text-align: center; }
   .text-right { text-align: right; }
   .text-center { text-align: center; }
-  .shortage { color: #dc2626; font-weight: bold; }
-  .surplus { color: #16a34a; font-weight: bold; }
+  .shortage { color:var(--red); font-weight: bold; }
+  .surplus { color:var(--green); font-weight: bold; }
   .totals td { font-weight: bold; background: #f0f0f0; }
   .footer { margin-top: 20px; font-size: 8px; }
   .signatures { margin-top: 30px; }
   .sig-line { display: inline-block; width: 200px; border-bottom: 1px solid #333; text-align: center; margin-right: 30px; padding-top: 40px; }
-  .legal { font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+  .legal { font-size: 7px; color:var(--text-muted); margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <table style="border:none; margin:0">
+  <table class="fx-border-none fx-m-0">
     <tr>
-      <td style="border:none; width:60%">
+      <td class="fx-border-none" style="width:60%">
         <h1>INVENTURNI LIST / POPISNA LISTA</h1>
         <h2>{{ inv.inventura_number }} — {{ inv.get_inventura_type_display }}</h2>
       </td>
-      <td style="border:none; text-align:right; vertical-align:top">
+      <td class="fx-border-none text-end" style="vertical-align:top">
         <strong>{{ company.name }}</strong><br>
         OIB: {{ company.oib|default:"—" }}<br>
         {{ company.address|default:"" }}<br>

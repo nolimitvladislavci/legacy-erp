@@ -31,11 +31,11 @@
 {% block content %}
 <div class="flex-between mb-3">
   <div>
-    <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
-      <i class="fas fa-ticket-alt" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+    <h1 class="fx-fs-4xl fx-fw-bold fx-text-gold" style="font-family:var(--font-heading)">
+      <i class="fas fa-ticket-alt fx-fs-lg fx-mr-3" style="opacity:.6"></i>
       {{ ticket.ticket_number }}
     </h1>
-    <p class="text-muted" style="font-size:.85rem;margin-top:4px">{{ ticket.subject }}</p>
+    <p class="text-muted fx-fs-base mt-1">{{ ticket.subject }}</p>
   </div>
   <a href="{% url 'client_portal:dashboard' token %}" class="btn btn-ghost btn-sm">
     <i class="fas fa-arrow-left"></i> Natrag
@@ -75,7 +75,7 @@
 <!-- Original Description -->
 <div class="b2b-card">
   <div class="b2b-card-header"><i class="fas fa-align-left"></i> Opis problema</div>
-  <div style="font-size:.88rem;line-height:1.6;white-space:pre-wrap">{{ ticket.description }}</div>
+  <div class="fx-fs-body fx-lh-normal" style="white-space:pre-wrap">{{ ticket.description }}</div>
 </div>
 
 <!-- Messages -->
@@ -96,25 +96,25 @@
       </div>
       {% endfor %}
     {% else %}
-      <p class="text-muted" style="text-align:center;font-size:.85rem">Još nema poruka u ovom tiketu.</p>
+      <p class="text-muted text-center fx-fs-base">Još nema poruka u ovom tiketu.</p>
     {% endif %}
   </div>
 
   {% if ticket.status != 'closed' and ticket.status != 'resolved' %}
-  <form method="post" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+  <form method="post" class="mt-3 fx-bt" style="padding-top:16px">
     {% csrf_token %}
     <label class="b2b-label" for="message">Vaša poruka</label>
     <textarea name="message" id="message" class="b2b-textarea" required
               placeholder="Upišite odgovor..." style="min-height:100px"></textarea>
-    <div style="margin-top:12px">
+    <div class="mt-3">
       <button type="submit" class="btn btn-gold">
         <i class="fas fa-paper-plane"></i> Pošalji
       </button>
     </div>
   </form>
   {% else %}
-  <div style="margin-top:16px;text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border)">
-    <i class="fas fa-check-circle" style="color:var(--success);margin-right:6px"></i>
+  <div class="text-center fx-fs-base mt-3 fx-text-muted fx-p-20 fx-bt">
+    <i class="fas fa-check-circle fx-mr-2" style="color:var(--success)"></i>
     Ovaj tiket je zatvoren.
   </div>
   {% endif %}

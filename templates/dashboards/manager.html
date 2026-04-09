@@ -3,33 +3,19 @@
 {% block title %}{% trans "Voditelj projekta" %} – LIMIT CONNECT{% endblock %}
 {% block page_title %}{% trans "Moji projekti i tim" %}{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
+<!-- lang: see topbar -->
 
 <div class="row g-3 mb-4">
-  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Moji projekti" %}</div><div class="value">{{ my_projects.count|default:0 }}</div></div><div class="icon" style="background:#ede9fe;color:#8b5cf6"><i class="fas fa-hard-hat"></i></div></div></div>
-  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Sati tima (tjedan)" %}</div><div class="value">{{ team_hours_week|floatformat:1 }} h</div></div><div class="icon" style="background:#fef3c7;color:#f59e0b"><i class="fas fa-clock"></i></div></div></div>
-  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Na odobrenju" %}</div><div class="value text-warning">{{ pending_timesheets }}</div></div><div class="icon" style="background:#fee2e2;color:#ef4444"><i class="fas fa-hourglass-half"></i></div></div></div>
+  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Moji projekti" %}</div><div class="value">{{ my_projects.count|default:0 }}</div></div><div class="icon fx-text-purple fx-bg-purple-dim"><i class="fas fa-hard-hat"></i></div></div></div>
+  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Sati tima (tjedan)" %}</div><div class="value">{{ team_hours_week|floatformat:1 }} h</div></div><div class="icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-clock"></i></div></div></div>
+  <div class="col-md-4"><div class="stat-card d-flex justify-content-between align-items-start"><div><div class="label">{% trans "Na odobrenju" %}</div><div class="value text-warning">{{ pending_timesheets }}</div></div><div class="icon fx-text-red fx-bg-red-dim"><i class="fas fa-hourglass-half"></i></div></div></div>
 </div>
 <div class="row g-3">
   {% for p in my_projects %}
-  <div class="col-md-6"><div class="stat-card">
+  <div class="col-md-6"><div class="fenix-stat">
     <div class="d-flex justify-content-between mb-2">
       <h6 class="fw-bold mb-0">{{ p.name }}</h6>
-      <span class="badge bg-success">{{ p.get_status_display }}</span>
+      <span class="fenix-badge fenix-badge-success">{{ p.get_status_display }}</span>
     </div>
     <p class="text-muted small mb-3">{{ p.description|truncatechars:80 }}</p>
     <a href="/projects/{{ p.id }}/" class="btn btn-outline-primary btn-sm">{% trans "Otvori projekt" %}</a>

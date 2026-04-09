@@ -32,7 +32,7 @@
             </tr>
             <tr>
                 <td class="opacity-70">Količina</td>
-                <td class="fw-bold text-end" style="font-size: 1.5rem; color: var(--kiosk-green);">
+                <td class="fw-bold text-end fx-fs-5xl" style="color:var(--kiosk-green)">
                     {{ delivery.quantity }} {{ delivery.unit }}
                     {% if delivery.weight_source == 'scale' %}
                     <i class="fas fa-weight-hanging ms-1" title="Izvagano"></i>
@@ -46,7 +46,7 @@
             </tr>
             <tr style="color: var(--kiosk-red);">
                 <td>Naknada</td>
-                <td class="fw-bold text-end" style="font-size: 1.3rem;">{{ delivery.charge_amount }} EUR</td>
+                <td class="fw-bold text-end fx-fs-3xl">{{ delivery.charge_amount }} EUR</td>
             </tr>
             {% endif %}
             {% if remaining_after is not None %}

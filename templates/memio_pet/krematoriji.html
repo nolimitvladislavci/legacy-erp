@@ -18,18 +18,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .page-hero{text-align:center;padding:40px 0 24px}
 .page-hero h1{font-family:var(--serif);font-size:2.2rem;font-weight:700;margin-bottom:10px}
 .page-hero p{color:var(--ink2);font-size:.92rem;line-height:1.7;max-width:500px;margin:0 auto}
-.urgent-box{background:#fff;border:2px solid var(--gold);border-radius:14px;padding:24px;margin:24px 0 32px;text-align:center}
+.urgent-box{background:var(--bg-card);border:2px solid var(--gold);border-radius:14px;padding:24px;margin:24px 0 32px;text-align:center}
 .urgent-box h2{font-family:var(--serif);font-size:1.3rem;margin-bottom:8px;color:var(--ink)}
 .urgent-box p{font-size:.88rem;color:var(--ink2);line-height:1.6;margin-bottom:16px}
 .urgent-phones{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.urgent-phone{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--gold);color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;transition:opacity .15s}
+.urgent-phone{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--gold);color:var(--white);border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;transition:opacity .15s}
 .urgent-phone:hover{opacity:.85}
 .urgent-phone-alt{background:var(--ink)}
 .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:32px 0 14px;padding-left:4px}
 .filter-form{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
-.filter-form input{flex:1;min-width:180px;padding:10px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.9rem;color:var(--ink);background:#fff;outline:none}
+.filter-form input{flex:1;min-width:180px;padding:10px 16px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.9rem;color:var(--ink);background:var(--bg-card);outline:none}
 .filter-form input:focus{border-color:var(--gold)}
-.filter-form button{padding:10px 20px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-weight:700;cursor:pointer;color:#fff;font-size:.9rem}
+.filter-form button{padding:10px 20px;background:var(--gold);border:none;border-radius:8px;font-family:var(--sans);font-weight:700;cursor:pointer;color:var(--white);font-size:.9rem}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:14px;display:flex;gap:20px;align-items:flex-start;transition:border-color .15s}
 .card:hover{border-color:var(--gold)}
 .card-avatar{width:52px;height:52px;border-radius:12px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
@@ -40,19 +40,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .badge{font-size:.68rem;padding:3px 10px;border-radius:20px;font-weight:600}
 .badge-verified{background:rgba(40,167,69,.1);color:#1a6b30}
-.badge-nationwide{background:rgba(59,130,246,.1);color:#2563eb}
+.badge-nationwide{background:rgba(59,130,246,.1);color:var(--blue)}
 .badge-gold{background:rgba(201,168,76,.15);color:#8a6820}
 .card-contact{display:flex;gap:8px;flex-wrap:wrap}
 .contact-btn{padding:7px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;color:var(--ink);transition:all .15s}
 .contact-btn:hover{border-color:var(--gold);color:var(--gold)}
-.contact-btn-primary{background:var(--gold);color:#fff;border-color:var(--gold)}
-.contact-btn-primary:hover{opacity:.85;color:#fff}
+.contact-btn-primary{background:var(--gold);color:var(--white);border-color:var(--gold)}
+.contact-btn-primary:hover{opacity:.85;color:var(--white)}
 .info-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:14px}
 .info-card h3{font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:12px}
 .info-card ul{list-style:none;padding:0}
 .info-card li{padding:8px 0;font-size:.88rem;line-height:1.6;border-bottom:1px solid rgba(0,0,0,.04)}
 .info-card li:last-child{border:none}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;font-size:.7rem;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--white);font-size:.7rem;font-weight:700;margin-right:8px;flex-shrink:0}
 .no-results{text-align:center;padding:24px 20px}
 .no-results h3{font-family:var(--serif);font-size:1.2rem;margin-bottom:8px;color:var(--ink2)}
 .no-results p{font-size:.88rem;color:var(--dim);margin-bottom:4px}
@@ -70,7 +70,7 @@ footer a{color:var(--gold);text-decoration:none}
 
 <div class="container">
   <div class="page-hero">
-    <div style="font-size:2.5rem;margin-bottom:16px">🌈</div>
+    <div class="mb-3 fx-fs-7xl">🌈</div>
     <h1>Krematoriji za kucne ljubimce</h1>
     <p>Verificirani pružatelji usluge kremacije u Hrvatskoj. Dostojanstven ispraćaj — jer zaslužuju više od zaborava.</p>
   </div>
@@ -133,7 +133,7 @@ footer a{color:var(--gold);text-decoration:none}
       <li><span class="step-num">2</span> <strong>Odaberite krematorij</strong> — nazovite i dogovorite preuzimanje. Većina dolazi na adresu. Tijelo držite na hladnom mjestu.</li>
       <li><span class="step-num">3</span> <strong>Individualna ili skupna kremacija</strong> — individualna: dobijete pepeo svog ljubimca natrag u urni. Skupna: povoljnija, bez pepela.</li>
       <li><span class="step-num">4</span> <strong>Odjava iz Upisnika</strong> — u roku <strong>14 dana</strong> odjaviti ljubimca iz Upisnika kućnih ljubimaca (ordinacija koja je čipirala ili HAPIH).</li>
-      <li><span class="step-num">5</span> <strong>Sjećanje</strong> — kreirajte <a href="https://memio.pet" style="color:var(--gold);font-weight:600">memorijalni profil na Memio.pet</a> — digitalni spomenik koji čuva uspomene zauvijek.</li>
+      <li><span class="step-num">5</span> <strong>Sjećanje</strong> — kreirajte <a href="https://memio.pet" class="fx-fw-semibold fx-text-gold">memorijalni profil na Memio.pet</a> — digitalni spomenik koji čuva uspomene zauvijek.</li>
     </ul>
   </div>
 
@@ -143,9 +143,9 @@ footer a{color:var(--gold);text-decoration:none}
   </div>
 
   <!-- PRIJAVA -->
-  <div class="info-card" style="text-align:center;border-color:rgba(201,168,76,.3)">
-    <p style="color:var(--dim);font-size:.88rem;margin-bottom:12px">Ste li ovlašteni krematorij koji nedostaje na popisu?</p>
-    <a href="mailto:ivan@limit-connect.com?subject=Prijava krematorija — Memio.pet" style="display:inline-block;padding:10px 24px;background:var(--gold);border-radius:8px;font-weight:700;text-decoration:none;color:#fff;font-size:.88rem">Prijavite se — besplatno</a>
+  <div class="info-card text-center" style="border-color:rgba(201,168,76,.3)">
+    <p class="fx-fs-body mb-3 fx-text-dim">Ste li ovlašteni krematorij koji nedostaje na popisu?</p>
+    <a href="mailto:ivan@limit-connect.com?subject=Prijava krematorija — Memio.pet" class="fx-rounded fx-fw-bold fx-no-underline fx-text-white fx-fs-body d-inline-block fx-bg-gold" style="padding:10px 24px">Prijavite se — besplatno</a>
   </div>
 </div>
 

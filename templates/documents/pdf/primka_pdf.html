@@ -2,29 +2,29 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>@page { margin: 15mm; size: A4; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:10pt; color:#1a1a1a; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:10pt; color:var(--text); }
 .header { display:flex; justify-content:space-between; border-bottom:2pt solid #0f172a; padding-bottom:12pt; margin-bottom:16pt; }
-.header h1 { font-size:16pt; color:#0f172a; }
-.header .number { font-size:12pt; color:#c9a84c; font-weight:600; }
+.header h1 { font-size:16pt; color:var(--text); }
+.header .number { font-size:12pt; color:var(--gold); font-weight:600; }
 .parties { display:flex; gap:16pt; margin-bottom:16pt; }
-.party { flex:1; background:#f8fafc; padding:10pt; border-left:3pt solid #c9a84c; }
-.party h3 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:4pt; }
+.party { flex:1; background:var(--surface2); padding:10pt; border-left:3pt solid #c9a84c; }
+.party h3 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:4pt; }
 .party .name { font-size:10pt; font-weight:700; }
-.party .detail { font-size:8pt; color:#475569; }
+.party .detail { font-size:8pt; color:var(--text-dim); }
 table { width:100%; border-collapse:collapse; margin-bottom:12pt; }
-thead tr { background:#0f172a; color:white; }
+thead tr { background:var(--surface-deep); color:var(--text); }
 th { padding:6pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:.5px; text-align:left; }
 th.r { text-align:right; }
 td { padding:6pt 8pt; font-size:9pt; border-bottom:.5pt solid #e2e8f0; }
 td.r { text-align:right; }
-.total-row { background:#0f172a; color:white; font-weight:700; }
-.notes { margin-top:12pt; padding:8pt; background:#fffbeb; border-left:3pt solid #c9a84c; font-size:9pt; }
+.total-row { background:var(--surface-deep); color:var(--text); font-weight:700; }
+.notes { margin-top:12pt; padding:8pt; background:var(--amber-dim); border-left:3pt solid #c9a84c; font-size:9pt; }
 .signatures { display:flex; justify-content:space-between; margin-top:40pt; }
 .sig-box { width:40%; border-top:1pt solid #000; padding-top:4pt; font-size:8pt; text-align:center; }
-.footer { position:fixed; bottom:10mm; left:15mm; right:15mm; text-align:center; font-size:7pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:4pt; }</style></head><body>
+.footer { position:fixed; bottom:10mm; left:15mm; right:15mm; text-align:center; font-size:7pt; color:var(--text-muted); border-top:.5pt solid #e2e8f0; padding-top:4pt; }</style></head><body>
 <div class="header">
-  <div><h1>{{ doc.company.name }}</h1><div style="font-size:8pt;color:#475569">OIB: {{ doc.company.oib|default:"—" }}<br>{{ doc.company.address|default:"" }}</div></div>
-  <div style="text-align:right"><div class="number">PRIMKA</div><div style="font-size:14pt;font-weight:700">{{ doc.doc_number }}</div><div style="font-size:8pt;color:#475569">Datum: {{ doc.date_issued|date:"d.m.Y" }}</div></div>
+  <div><h1>{{ doc.company.name }}</h1><div class="fx-text-dim" style="font-size:8pt">OIB: {{ doc.company.oib|default:"—" }}<br>{{ doc.company.address|default:"" }}</div></div>
+  <div class="text-end"><div class="number">PRIMKA</div><div class="fx-fw-bold" style="font-size:14pt">{{ doc.doc_number }}</div><div class="fx-text-dim" style="font-size:8pt">Datum: {{ doc.date_issued|date:"d.m.Y" }}</div></div>
 </div>
 <div class="parties">
   <div class="party"><h3>Izdavatelj</h3><div class="name">{{ doc.company.name }}</div><div class="detail">OIB: {{ doc.company.oib|default:"—" }}<br>{{ doc.company.address|default:"" }}</div></div>

@@ -64,10 +64,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <tr>
       <td><strong>{{ reg.name }}</strong></td>
       <td>{{ reg.oib }}</td>
-      <td>{{ reg.contact_name }}<br><small style="color:var(--muted)">{{ reg.contact_email }}</small></td>
+      <td>{{ reg.contact_name }}<br><small class="fx-text-muted">{{ reg.contact_email }}</small></td>
       <td><span class="plan">{{ reg.selected_plan }}</span></td>
       <td><span class="status status-{{ reg.status }}">{{ reg.status }}</span></td>
-      <td style="color:var(--muted)">{{ reg.created_at|date:"d M Y" }}</td>
+      <td class="fx-text-muted">{{ reg.created_at|date:"d M Y" }}</td>
       <td><a href="{% url 'registration:admin_detail' reg.pk %}" class="btn-sm btn-view">{% trans "View →" %}</a></td>
     </tr>
     {% endfor %}

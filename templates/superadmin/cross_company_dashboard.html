@@ -2,27 +2,7 @@
 {% load i18n %}
 {% block title %}Cross-Company Dashboard{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val{font-size:1.2rem}
-}
-.aging-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;min-width:80px}
-.aging-bar .a0{background:#10b981}.aging-bar .a31{background:#f59e0b}
-.aging-bar .a61{background:#f97316}.aging-bar .a90{background:#ef4444}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
@@ -40,11 +20,11 @@
   <div class="card mb-3" style="background:var(--bg-card,#1a1a2e)">
     <div class="card-body py-2">
       <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
-        <label class="text-muted" style="font-size:.8rem">Min dug (EUR):</label>
-        <input type="number" name="min_debt" value="{{ min_debt|floatformat:0 }}" class="form-control form-control-sm" style="max-width:120px;background:var(--bg-card);color:var(--text);border-color:var(--border)" step="100" min="0">
+        <label class="text-muted fx-fs-compact">Min dug (EUR):</label>
+        <input type="number" name="min_debt" value="{{ min_debt|floatformat:0 }}" class="form-control form-control-sm fx-text-body fx-bg-card fx-bc" style="max-width:120px" step="100" min="0">
         <div class="form-check">
           <input type="checkbox" name="multi_only" value="1" class="form-check-input" id="multiOnly" {% if multi_only %}checked{% endif %}>
-          <label for="multiOnly" class="form-check-label text-muted" style="font-size:.8rem">Samo multi-company</label>
+          <label for="multiOnly" class="form-check-label text-muted fx-fs-compact">Samo multi-company</label>
         </div>
         <button type="submit" class="btn btn-sm btn-outline-warning">Filtriraj</button>
         <a href="?" class="btn btn-sm btn-outline-secondary">Reset</a>
@@ -57,36 +37,36 @@
     <div class="col-md-3">
       <div class="card h-100" style="border-left:4px solid #ef4444;background:var(--bg-card,#1a1a2e)">
         <div class="card-body">
-          <div class="text-muted" style="font-size:.75rem;text-transform:uppercase">Ukupno nepodmireno</div>
-          <div style="font-size:1.8rem;font-weight:700;color:#ef4444">{{ total_outstanding|floatformat:2 }} EUR</div>
+          <div class="text-muted fx-fs-caption fx-uppercase">Ukupno nepodmireno</div>
+          <div class="fx-fw-bold fx-text-red fx-fs-6xl">{{ total_outstanding|floatformat:2 }} EUR</div>
         </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card h-100" style="border-left:4px solid var(--gold,#d4a843);background:var(--bg-card,#1a1a2e)">
         <div class="card-body">
-          <div class="text-muted" style="font-size:.75rem;text-transform:uppercase">Dužnici</div>
-          <div style="font-size:1.8rem;font-weight:700;color:var(--gold)">{{ total_debtors }}</div>
+          <div class="text-muted fx-fs-caption fx-uppercase">Dužnici</div>
+          <div class="fx-fw-bold fx-text-gold fx-fs-6xl">{{ total_debtors }}</div>
         </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card h-100" style="border-left:4px solid #f59e0b;background:var(--bg-card,#1a1a2e)">
         <div class="card-body">
-          <div class="text-muted" style="font-size:.75rem;text-transform:uppercase">Multi-company</div>
-          <div style="font-size:1.8rem;font-weight:700;color:#f59e0b">{{ multi_company_count }}</div>
-          <div style="font-size:.75rem;color:var(--text-muted)">Duguju kod 2+ firmi</div>
+          <div class="text-muted fx-fs-caption fx-uppercase">Multi-company</div>
+          <div class="fx-fw-bold fx-text-amber fx-fs-6xl">{{ multi_company_count }}</div>
+          <div class="fx-fs-caption fx-text-muted">Duguju kod 2+ firmi</div>
         </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card h-100" style="border-left:4px solid #10b981;background:var(--bg-card,#1a1a2e)">
         <div class="card-body">
-          <div class="text-muted" style="font-size:.75rem;text-transform:uppercase">VIES status</div>
-          <div style="font-size:1rem;font-weight:600">
-            <span style="color:#10b981">{{ vies_stats.valid }} OK</span> /
-            <span style="color:#ef4444">{{ vies_stats.invalid }} !</span> /
-            <span style="color:#64748b">{{ vies_stats.pending }} ?</span>
+          <div class="text-muted fx-fs-caption fx-uppercase">VIES status</div>
+          <div class="fx-fs-lg fx-fw-semibold">
+            <span class="fx-text-green">{{ vies_stats.valid }} OK</span> /
+            <span class="fx-text-red">{{ vies_stats.invalid }} !</span> /
+            <span class="fx-text-muted">{{ vies_stats.pending }} ?</span>
           </div>
         </div>
       </div>
@@ -97,19 +77,19 @@
   {% if multi_company and not multi_only %}
   <div class="card mb-4" style="border:2px solid #f59e0b;background:var(--bg-card,#1a1a2e)">
     <div class="card-header" style="background:rgba(245,158,11,.1)">
-      <h6 class="mb-0" style="color:#f59e0b"><i class="fas fa-exclamation-triangle me-2"></i>Dužnici kod više firmi</h6>
+      <h6 class="mb-0 fx-text-amber"><i class="fas fa-exclamation-triangle me-2"></i>Dužnici kod više firmi</h6>
     </div>
     <div class="card-body p-0">
-      <table class="table table-sm table-hover mb-0" style="color:var(--text,#e0e0e0);font-size:.82rem">
+      <table class="table table-sm table-hover mb-0 fx-fs-note" style="color:var(--text,#e0e0e0)">
         <thead style="background:var(--table-header-bg,#16213e)"><tr><th>OIB</th><th>Naziv</th><th class="text-end">Ukupan dug</th><th class="text-end">Faktura</th><th>Firme</th></tr></thead>
         <tbody>
           {% for d in multi_company %}
           <tr>
             <td class="text-mono">{{ d.oib }}</td>
             <td>{{ d.name }}</td>
-            <td class="text-end fw-bold" style="color:#ef4444">{{ d.total_debt|floatformat:2 }} EUR</td>
+            <td class="text-end fw-bold fx-text-red">{{ d.total_debt|floatformat:2 }} EUR</td>
             <td class="text-end">{{ d.invoice_count }}</td>
-            <td>{% for c in d.companies %}<span class="badge" style="background:var(--gold,#d4a843);color:#000;font-size:.65rem;margin:1px">{{ c }}</span>{% endfor %}</td>
+            <td>{% for c in d.companies %}<span class="badge fx-text-dark fx-fs-xs" style="background:var(--gold,#d4a843);margin:1px">{{ c }}</span>{% endfor %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -122,18 +102,18 @@
   <div class="card" style="background:var(--bg-card,#1a1a2e)">
     <div class="card-header d-flex justify-content-between align-items-center" style="background:var(--table-header-bg,#16213e)">
       <h6 class="mb-0"><i class="fas fa-list me-2"></i>Top 200 dužnika — aging analiza</h6>
-      <input type="text" id="search-debt" class="form-control form-control-sm" placeholder="Traži OIB ili naziv..." style="max-width:250px;background:var(--bg-card);color:var(--text);border-color:var(--border)">
+      <input type="text" id="search-debt" class="form-control form-control-sm fx-text-body fx-bg-card fx-bc" placeholder="Traži OIB ili naziv..." style="max-width:250px">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0" id="debt-table" style="color:var(--text,#e0e0e0);font-size:.82rem">
+        <table class="table table-sm table-hover mb-0 fx-fs-note" id="debt-table" style="color:var(--text,#e0e0e0)">
           <thead style="background:var(--table-header-bg,#16213e)">
             <tr>
               <th>#</th><th>OIB</th><th>Naziv</th><th class="text-end">Dug</th>
-              <th class="text-end" style="color:#10b981">0-30d</th>
-              <th class="text-end" style="color:#f59e0b">31-60d</th>
-              <th class="text-end" style="color:#f97316">61-90d</th>
-              <th class="text-end" style="color:#ef4444">90d+</th>
+              <th class="text-end fx-text-green">0-30d</th>
+              <th class="text-end fx-text-amber">31-60d</th>
+              <th class="text-end fx-text-amber">61-90d</th>
+              <th class="text-end fx-text-red">90d+</th>
               <th>Aging</th>
               <th class="text-end">Fkt</th><th>Firme</th>
             </tr>
@@ -145,10 +125,10 @@
               <td class="text-mono">{{ d.oib }}</td>
               <td>{{ d.name }}</td>
               <td class="text-end fw-bold" style="color:{% if d.total_debt > 5000 %}#ef4444{% elif d.total_debt > 1000 %}#f59e0b{% else %}var(--text){% endif %}">{{ d.total_debt|floatformat:2 }}</td>
-              <td class="text-end" style="font-size:.75rem">{% if d.aging_0_30 %}{{ d.aging_0_30|floatformat:0 }}{% endif %}</td>
-              <td class="text-end" style="font-size:.75rem">{% if d.aging_31_60 %}{{ d.aging_31_60|floatformat:0 }}{% endif %}</td>
-              <td class="text-end" style="font-size:.75rem">{% if d.aging_61_90 %}{{ d.aging_61_90|floatformat:0 }}{% endif %}</td>
-              <td class="text-end" style="font-size:.75rem">{% if d.aging_90_plus %}{{ d.aging_90_plus|floatformat:0 }}{% endif %}</td>
+              <td class="text-end fx-fs-caption">{% if d.aging_0_30 %}{{ d.aging_0_30|floatformat:0 }}{% endif %}</td>
+              <td class="text-end fx-fs-caption">{% if d.aging_31_60 %}{{ d.aging_31_60|floatformat:0 }}{% endif %}</td>
+              <td class="text-end fx-fs-caption">{% if d.aging_61_90 %}{{ d.aging_61_90|floatformat:0 }}{% endif %}</td>
+              <td class="text-end fx-fs-caption">{% if d.aging_90_plus %}{{ d.aging_90_plus|floatformat:0 }}{% endif %}</td>
               <td>
                 {% if d.total_debt > 0 %}
                 <div class="aging-bar" title="0-30d: {{ d.aging_0_30|floatformat:0 }} | 31-60d: {{ d.aging_31_60|floatformat:0 }} | 61-90d: {{ d.aging_61_90|floatformat:0 }} | 90d+: {{ d.aging_90_plus|floatformat:0 }}">
@@ -162,7 +142,7 @@
                 {% endif %}
               </td>
               <td class="text-end">{{ d.invoice_count }}</td>
-              <td>{% for c in d.companies %}<span class="badge" style="background:var(--gold,#d4a843);color:#000;font-size:.65rem;margin:1px">{{ c }}</span>{% endfor %}</td>
+              <td>{% for c in d.companies %}<span class="badge fx-text-dark fx-fs-xs" style="background:var(--gold,#d4a843);margin:1px">{{ c }}</span>{% endfor %}</td>
             </tr>
             {% empty %}
             <tr><td colspan="11" class="text-center text-muted py-4">Nema nepodmirenih dugova</td></tr>

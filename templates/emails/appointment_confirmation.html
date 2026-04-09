@@ -2,21 +2,21 @@
 {% load i18n %}
 {% block title %}Potvrda rezervacije{% endblock %}
 {% block content %}
-<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">Potvrda rezervacije</h2>
-<p style="color:#333;line-height:1.6;">Poštovani/a {{ client_name }},</p>
-<p style="color:#333;line-height:1.6;">Vaša rezervacija je uspješno kreirana.</p>
-<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
-  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Usluga</td>
-      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;font-weight:600;">{{ service_name }}</td></tr>
-  <tr><td style="padding:8px 12px;color:#555;">Termin</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ datetime }}</td></tr>
-  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Trajanje</td>
-      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;">{{ duration }} min</td></tr>
+<h2 class="fx-text-dark" style="margin:0 0 16px;font-family:'Cormorant Garamond',Georgia,serif">Potvrda rezervacije</h2>
+<p class="fx-text-dark fx-lh-normal">Poštovani/a {{ client_name }},</p>
+<p class="fx-text-dark fx-lh-normal">Vaša rezervacija je uspješno kreirana.</p>
+<table role="presentation" width="100%" class="fx-b-collapse" style="margin:20px 0">
+  <tr><td class="fx-bg-card fx-text-dim fx-p-8-12" style="border-left:3px solid #c9a84c">Usluga</td>
+      <td class="fx-bg-card fx-text-dark fx-fw-semibold fx-p-8-12">{{ service_name }}</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">Termin</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ datetime }}</td></tr>
+  <tr><td class="fx-bg-card fx-text-dim fx-p-8-12" style="border-left:3px solid #c9a84c">Trajanje</td>
+      <td class="fx-bg-card fx-text-dark fx-p-8-12">{{ duration }} min</td></tr>
   {% if price %}
-  <tr><td style="padding:8px 12px;color:#555;">Cijena</td>
-      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ price }} EUR</td></tr>
+  <tr><td class="fx-text-dim fx-p-8-12">Cijena</td>
+      <td class="fx-text-dark fx-fw-semibold fx-p-8-12">{{ price }} EUR</td></tr>
   {% endif %}
 </table>
-<p style="color:#333;line-height:1.6;">Ako trebate otkazati ili promijeniti termin, kontaktirajte nas.</p>
-<p style="color:#555;">Hvala na povjerenju!</p>
+<p class="fx-text-dark fx-lh-normal">Ako trebate otkazati ili promijeniti termin, kontaktirajte nas.</p>
+<p class="fx-text-dim">Hvala na povjerenju!</p>
 {% endblock %}

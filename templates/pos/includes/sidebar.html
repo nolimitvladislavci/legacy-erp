@@ -3,7 +3,7 @@
 <style>
 .pos-sidebar-toggle {
     position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-    z-index: var(--z-sidebar, 10001); background: var(--gold, var(--gold,#c9a84c)); color: #0a0a0a;
+    z-index: var(--z-sidebar, 10001); background: var(--gold, var(--gold,#c9a84c)); color:var(--text);
     border: none; border-radius: 0 8px 8px 0;
     padding: 14px 10px; cursor: pointer; font-size: 18px;
     touch-action: manipulation;
@@ -12,7 +12,7 @@
 .pos-sidebar-toggle:active { transform: translateY(-50%) scale(0.95); }
 .pos-sidebar {
     position: fixed; left: -270px; top: 0; bottom: 0; width: 260px;
-    background: #111214; border-right: 2px solid rgba(201,168,76,0.35);
+    background:var(--bg-card); border-right: 2px solid rgba(201,168,76,0.35);
     box-shadow: 4px 0 20px rgba(0,0,0,.6);
     z-index: var(--z-sidebar-panel, 10000); transition: left 0.3s ease;
     padding: 20px 0; overflow-y: auto;
@@ -67,7 +67,7 @@
     <a href="{% url 'companies:tax_rates' %}" class="ps-link"><i class="fas fa-percentage"></i> Porezne stope</a>
     <a href="{% url 'companies:settings' %}" class="ps-link"><i class="fas fa-building"></i> Postavke firme</a>
     <hr class="ps-divider">
-    <a href="{% url 'logout' %}" class="ps-link" style="color:#e74c3c;"><i class="fas fa-sign-out-alt" style="color:#e74c3c;"></i> Odjava</a>
+    <a href="{% url 'logout' %}" class="ps-link fx-text-red"><i class="fas fa-sign-out-alt fx-text-red"></i> Odjava</a>
 </nav>
 
 <script>

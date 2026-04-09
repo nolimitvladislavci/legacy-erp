@@ -1,100 +1,30 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 {% endblock %}
 
 {% block page_title %}Hitne intervencije{% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<style>
-.iv-wrap{display:flex;flex-direction:column;height:calc(100vh - 60px);overflow:hidden}
-.iv-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0}
-.iv-title{font-size:1.1rem;font-weight:700;color:#0f172a}
-.iv-stats{display:flex;gap:1.5rem;font-size:.8rem;color:#64748b}
-.iv-stat-val{font-weight:700;color:#0f172a}
-.iv-board{display:flex;gap:0;overflow-x:auto;flex:1;background:#f1f5f9}
-.iv-col{min-width:280px;max-width:280px;display:flex;flex-direction:column;border-right:1px solid #e2e8f0;background:#f8fafc}
-.iv-col-header{padding:.75rem 1rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:.5rem;background:#fff;border-bottom:1px solid #e2e8f0}
-.iv-col-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.iv-col-count{margin-left:auto;background:#e2e8f0;color:#64748b;padding:.1rem .45rem;border-radius:10px;font-size:.65rem}
-.iv-col-body{flex:1;overflow-y:auto;padding:.5rem}
-.iv-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:.875rem;margin-bottom:.5rem;transition:box-shadow .15s}
-.iv-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.iv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
-.iv-card-title{font-weight:600;font-size:.875rem;color:#0f172a;line-height:1.3}
-.iv-card-cat{font-size:.65rem;padding:.15rem .45rem;border-radius:10px;background:#f1f5f9;color:#64748b;white-space:nowrap}
-.iv-card-addr{font-size:.775rem;color:#64748b;margin-bottom:.35rem}
-.iv-card-client{font-size:.775rem;display:flex;align-items:center;gap:.35rem;margin-bottom:.5rem}
-.iv-card-client a{color:#3b82f6;text-decoration:none}
-.iv-card-footer{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.iv-card-time{font-size:.7rem;color:#94a3b8}
-.iv-card-assigned{font-size:.72rem;padding:.15rem .5rem;border-radius:10px;background:#fef3c7;color:#92400e;font-weight:600}
-.iv-assign-form{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
-.iv-assign-form select{font-size:.72rem;padding:.2rem .4rem;border:1px solid #e2e8f0;border-radius:4px;flex:1;min-width:120px}
-.iv-btn-field{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#0f172a;color:#fff;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem}
-.iv-btn-assign{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:var(--gold,#c9a84c);color:#000;border:none;cursor:pointer;font-weight:700}
-.iv-btn-escalate{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#ec4899;color:#fff;border:none;cursor:pointer}
-.iv-empty{text-align:center;padding:2rem .5rem;color:#cbd5e1;font-size:.8rem}
-.csrf-token-val{display:none}
-</style>
-
-<div class="iv-wrap">
-  <!-- Header -->
-  <div class="iv-header">
-    <div>
-      <div class="iv-title">{% trans "🚨 Hitne intervencije" %}</div>
-    </div>
+<!-- lang: topbar -->
     <div class="iv-stats">
       <div><span class="iv-stat-val">{{ total }}</span> {% trans "ukupno" %}</div>
       <div><span class="iv-stat-val">{{ active }}</span> {% trans "aktivnih" %}</div>
     </div>
-    <a href="{% url 'interventions:new' %}" style="background:#0f172a;color:#fff;padding:.5rem 1.25rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none">{% trans "+ Nova intervencija" %}</a>
+    <a href="{% url 'interventions:new' %}" class="fx-bg-deep fx-text-white fx-rounded-sm fx-fs-note fx-fw-semibold fx-no-underline" style="padding:.5rem 1.25rem">{% trans "+ Nova intervencija" %}</a>
   </div>
 
 
 <!-- GPS Map Widget – active workers -->
-<div id="kanban-gps-wrap" style="display:none;margin:0 0 16px;padding:0 1.5rem">
-  <div style="background:#0f172a;border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:12px 16px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <span style="font-size:.8rem;font-weight:700;color:var(--gold,#c9a84c);letter-spacing:.05em">{% trans "&#128270; GPS RADNICI" %}</span>
-      <span id="kanban-gps-count" style="font-size:.72rem;color:#94a3b8;background:rgba(255,255,255,.06);padding:.1rem .5rem;border-radius:8px"></span>
+<div id="kanban-gps-wrap" class="fx-hidden" style="margin:0 0 16px;padding:0 1.5rem">
+  <div class="fx-bg-deep fx-rounded" style="border:1px solid rgba(201,168,76,.25);padding:12px 16px">
+    <div class="d-flex fx-gap-3 align-items-center mb-2">
+      <span class="fx-fs-compact fx-fw-bold fx-text-gold" style="letter-spacing:.05em">{% trans "&#128270; GPS RADNICI" %}</span>
+      <span id="kanban-gps-count" class="fx-fs-sm fx-text-muted fx-rounded" style="background:rgba(255,255,255,.06);padding:.1rem .5rem"></span>
     </div>
-    <div id="kanban-map" style="height:240px;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.15)"></div>
+    <div id="kanban-map" class="fx-rounded fx-overflow-hidden" style="height:240px;border:1px solid rgba(201,168,76,.15)"></div>
   </div>
 </div>
 
@@ -129,7 +59,7 @@
               {% endif %}
             </div>
             <!-- Actions -->
-            <div style="display:flex;gap:.35rem;margin-top:.6rem;flex-wrap:wrap">
+            <div class="d-flex fx-flex-wrap" style="gap:.35rem;margin-top:.6rem">
               <a href="{% url 'interventions:field' interv.pk %}" class="iv-btn-field">{% trans "Terenska karta" %}</a>
               {% if col.status in 'RIJESENO,NA_LOKACIJI' %}
               <button class="iv-btn-escalate" onclick="doEscalate({{ interv.pk }})">{% trans "Eskaliraj" %}</button>
@@ -244,8 +174,8 @@ async function doEscalate(pk) {
       .addTo(map)
       .bindPopup(
         '<b>' + w.name + '</b><br>' +
-        '<span style="color:#64748b;font-size:.8rem">' + w.title + '</span><br>' +
-        '<span style="color:#94a3b8;font-size:.75rem">' + w.status +
+        '<span class="fx-text-dim fx-fs-compact">' + w.title + '</span><br>' +
+        '<span class="fx-text-muted fx-fs-caption">' + w.status +
         (w.updated ? ' · ' + w.updated : '') + '</span>'
       );
     bounds.push([w.lat, w.lng]);

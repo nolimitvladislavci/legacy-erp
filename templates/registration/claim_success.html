@@ -2,16 +2,16 @@
 {% load i18n %}
 {% block title %}Zahtjev poslan — LIMIT Connect{% endblock %}
 {% block content %}
-<div style="max-width:480px;margin:80px auto;text-align:center;padding:0 20px">
-  <div style="font-size:3rem;margin-bottom:16px">✅</div>
-  <h1 style="font-family:'Cormorant Garamond',serif;color:var(--gold,#c9a84c);font-size:1.6rem;margin-bottom:12px">
+<div class="text-center" style="max-width:480px;margin:80px auto;padding:0 20px">
+  <div class="fx-fs-hero mb-3">✅</div>
+  <h1 class="fx-text-gold mb-3 fx-fs-5xl" style="font-family:'Cormorant Garamond',serif">
     Zahtjev poslan!
   </h1>
-  <p style="color:#94a3b8;font-size:.9rem;line-height:1.6;margin-bottom:24px">
-    Vaš zahtjev za pristup firmi <strong style="color:#e2e8f0">{{ company.name }}</strong> je zaprimljen.<br>
-    Login podaci bit će poslani na <strong style="color:var(--gold,#c9a84c)">{{ email }}</strong> nakon odobrenja.
+  <p class="fx-text-muted fx-fs-md mb-4 fx-lh-normal">
+    Vaš zahtjev za pristup firmi <strong class="fx-text-body">{{ company.name }}</strong> je zaprimljen.<br>
+    Login podaci bit će poslani na <strong class="fx-text-gold">{{ email }}</strong> nakon odobrenja.
   </p>
-  <p style="color:#64748b;font-size:.8rem">Očekivano vrijeme: do 24 sata.</p>
-  <a href="/" style="display:inline-block;margin-top:24px;color:var(--gold,#c9a84c);text-decoration:none;font-size:.9rem">← Natrag na početnu</a>
+  <p class="fx-text-dim fx-fs-compact">Očekivano vrijeme: do 24 sata.</p>
+  <a href="/" class="fx-no-underline fx-fs-md d-inline-block mt-4 fx-text-gold">← Natrag na početnu</a>
 </div>
 {% endblock %}

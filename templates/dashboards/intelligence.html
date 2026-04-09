@@ -4,52 +4,52 @@
 {% block extra_css %}<link rel="stylesheet" href="/static/css/apps/dashboard.css">{% endblock %}
 {% block content %}
 
-<div style="max-width:1200px;margin:0 auto;padding:1rem">
+<div class="fx-m-auto fx-p-4" style="max-width:1200px">
 
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-4 fx-mb-6">
     <div>
-      <h4 style="margin:0;font-weight:700;color:var(--text,#0f172a)">
-        <i class="fas fa-brain" style="color:var(--gold,#c9a84c)"></i> Intelligence Dashboard
+      <h4 class="fx-fw-bold fx-text-body fx-m-0">
+        <i class="fas fa-brain fx-text-gold"></i> Intelligence Dashboard
       </h4>
-      <p style="color:var(--text-muted,#64748b);font-size:.82rem;margin:4px 0 0">
+      <p class="fx-fs-note fx-text-muted" style="margin:4px 0 0">
         {{ company.name }} &middot; {{ children_count }} tvrtk{{ children_count|pluralize:"a,e,i" }} &middot; Cross-company partner analytics
       </p>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center">
+    <div class="d-flex fx-gap-2 align-items-center">
       {% if all_umbrellas %}
       <form method="get">
-        <select name="umbrella" onchange="this.form.submit()" style="padding:6px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.82rem">
+        <select name="umbrella" onchange="this.form.submit()" class="fx-rounded-sm fx-fs-note fx-text-body" style="padding:6px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           {% for u in all_umbrellas %}
           <option value="{{ u.id }}" {% if u.id == company.id %}selected{% endif %}>{{ u.name }}</option>
           {% endfor %}
         </select>
       </form>
       {% endif %}
-      <a href="{% url 'umbrella_dashboard' %}" class="ig-badge ig-badge-gray" style="text-decoration:none;padding:6px 12px;font-size:.78rem">
+      <a href="{% url 'umbrella_dashboard' %}" class="ig-badge ig-badge-gray fx-no-underline fx-fs-body-sm" style="padding:6px 12px">
         <i class="fas fa-arrow-left"></i> Umbrella
       </a>
     </div>
   </div>
 
   <!-- KPI Cards -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-bottom:1.5rem">
+  <div class="d-grid fx-mb-6" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem">
     {% with vat=vat_overview dq=data_quality %}
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">Jedinstveni OIB</div><div class="value">{{ vat.total_unique_oib|default:"0" }}</div></div>
-      <div class="icon" style="background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)"><i class="fas fa-fingerprint"></i></div>
+      <div class="icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-fingerprint"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">U PDV sustavu</div><div class="value">{{ vat.vat_registered|default:"0" }}</div></div>
-      <div class="icon" style="background:rgba(40,167,69,.1);color:#28a745"><i class="fas fa-check-circle"></i></div>
+      <div class="icon fx-text-green" style="background:rgba(40,167,69,.1)"><i class="fas fa-check-circle"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
-      <div><div class="label">Anomalije</div><div class="value" style="color:#dc3545">{{ type_mismatch_count|default:"0" }}</div></div>
-      <div class="icon" style="background:rgba(220,53,69,.1);color:#dc3545"><i class="fas fa-exclamation-triangle"></i></div>
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
+      <div><div class="label">Anomalije</div><div class="value fx-text-red">{{ type_mismatch_count|default:"0" }}</div></div>
+      <div class="icon fx-text-red" style="background:rgba(220,53,69,.1)"><i class="fas fa-exclamation-triangle"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">Kvaliteta podataka</div><div class="value">{{ dq.oib_pct|default:"0" }}%</div></div>
-      <div class="icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-chart-bar"></i></div>
+      <div class="icon fx-text-blue" style="background:rgba(59,130,246,.1)"><i class="fas fa-chart-bar"></i></div>
     </div>
     {% endwith %}
   </div>
@@ -65,13 +65,13 @@
 
   <!-- Tab: Overview -->
   <div class="ig-panel active" id="ig-overview">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <!-- Buyer Type Distribution -->
       <div class="ig-card">
         <h6><i class="fas fa-tags"></i> Distribucija tipova kupaca</h6>
         {% for bt in buyer_types %}
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0">
-          <div style="display:flex;align-items:center;gap:.5rem">
+        <div class="d-flex justify-content-between align-items-center" style="padding:.4rem 0">
+          <div class="d-flex align-items-center fx-gap-2">
             {% if bt.buyer_type == 'b2c' %}
               <span class="ig-badge ig-badge-gray">B2C</span>
             {% elif bt.buyer_type == 'b2g' %}
@@ -83,9 +83,9 @@
             {% else %}
               <span class="ig-badge ig-badge-gold">{{ bt.buyer_type|upper }}</span>
             {% endif %}
-            <span style="font-size:.82rem">{{ bt.cnt }}</span>
+            <span class="fx-fs-note">{{ bt.cnt }}</span>
           </div>
-          <span style="font-size:.78rem;color:var(--text-muted,#64748b)">{{ bt.pct }}%</span>
+          <span class="fx-fs-body-sm fx-text-muted">{{ bt.pct }}%</span>
         </div>
         <div class="ig-meter">
           <div class="ig-meter-fill" style="width:{{ bt.pct }}%;background:var(--gold,#c9a84c)"></div>
@@ -97,22 +97,22 @@
       <div class="ig-card">
         <h6><i class="fas fa-percentage"></i> PDV pregled (po OIB-u)</h6>
         {% with v=vat_overview %}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
-          <div style="text-align:center;padding:.8rem;background:rgba(40,167,69,.05);border-radius:6px">
-            <div style="font-size:1.5rem;font-weight:700;color:#28a745">{{ v.vat_registered|default:"0" }}</div>
-            <div style="font-size:.72rem;color:var(--text-muted,#64748b)">U PDV sustavu</div>
+        <div class="d-grid fx-grid-2-equal" style="gap:.8rem">
+          <div class="text-center fx-rounded-sm" style="padding:.8rem;background:rgba(40,167,69,.05)">
+            <div class="fx-fs-5xl fx-fw-bold fx-text-green">{{ v.vat_registered|default:"0" }}</div>
+            <div class="fx-fs-sm fx-text-muted">U PDV sustavu</div>
           </div>
-          <div style="text-align:center;padding:.8rem;background:rgba(220,53,69,.05);border-radius:6px">
-            <div style="font-size:1.5rem;font-weight:700;color:#dc3545">{{ v.not_vat_registered|default:"0" }}</div>
-            <div style="font-size:.72rem;color:var(--text-muted,#64748b)">Nije u PDV-u</div>
+          <div class="text-center fx-rounded-sm" style="padding:.8rem;background:rgba(220,53,69,.05)">
+            <div class="fx-fs-5xl fx-fw-bold fx-text-red">{{ v.not_vat_registered|default:"0" }}</div>
+            <div class="fx-fs-sm fx-text-muted">Nije u PDV-u</div>
           </div>
-          <div style="text-align:center;padding:.8rem;background:rgba(168,85,247,.05);border-radius:6px">
-            <div style="font-size:1.5rem;font-weight:700;color:#a855f7">{{ v.budget_users|default:"0" }}</div>
-            <div style="font-size:.72rem;color:var(--text-muted,#64748b)">Proracunski (B2G)</div>
+          <div class="text-center fx-rounded-sm" style="padding:.8rem;background:rgba(168,85,247,.05)">
+            <div class="fx-fs-5xl fx-fw-bold fx-text-purple">{{ v.budget_users|default:"0" }}</div>
+            <div class="fx-fs-sm fx-text-muted">Proracunski (B2G)</div>
           </div>
-          <div style="text-align:center;padding:.8rem;background:rgba(59,130,246,.05);border-radius:6px">
-            <div style="font-size:1.5rem;font-weight:700;color:#3b82f6">{{ v.b2b_total|default:"0" }}</div>
-            <div style="font-size:.72rem;color:var(--text-muted,#64748b)">B2B ukupno</div>
+          <div class="text-center fx-rounded-sm" style="padding:.8rem;background:rgba(59,130,246,.05)">
+            <div class="fx-fs-5xl fx-fw-bold fx-text-blue">{{ v.b2b_total|default:"0" }}</div>
+            <div class="fx-fs-sm fx-text-muted">B2B ukupno</div>
           </div>
         </div>
         {% endwith %}
@@ -122,52 +122,52 @@
 
   <!-- Tab: Top Partners -->
   <div class="ig-panel" id="ig-debtors">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <!-- Top Debtors (unpaid) -->
       <div class="ig-card">
-        <h6><i class="fas fa-exclamation-circle" style="color:#dc3545"></i> Top duznici (neplaceno)</h6>
+        <h6><i class="fas fa-exclamation-circle fx-text-red"></i> Top duznici (neplaceno)</h6>
         {% if top_debtors %}
         <table class="ig-table">
           <thead>
-            <tr><th>Partner</th><th>OIB</th><th>Firme</th><th style="text-align:right">Neplaceno</th></tr>
+            <tr><th>Partner</th><th>OIB</th><th>Firme</th><th class="text-end">Neplaceno</th></tr>
           </thead>
           <tbody>
             {% for d in top_debtors %}
             <tr>
               <td><strong>{{ d.name|truncatechars:30 }}</strong></td>
-              <td><code style="font-size:.72rem">{{ d.oib }}</code></td>
+              <td><code class="fx-fs-sm">{{ d.oib }}</code></td>
               <td><span class="ig-badge ig-badge-blue">{{ d.in_companies }}</span></td>
-              <td style="text-align:right;font-weight:600;color:#dc3545">&euro;{{ d.total_unpaid|floatformat:2 }}</td>
+              <td class="text-end fx-fw-semibold fx-text-red">&euro;{{ d.total_unpaid|floatformat:2 }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-        <p style="text-align:center;color:var(--text-muted,#64748b);padding:2rem">Nema neplacenih faktura.</p>
+        <p class="text-center fx-text-muted fx-p-6">Nema neplacenih faktura.</p>
         {% endif %}
       </div>
 
       <!-- Top by Volume -->
       <div class="ig-card">
-        <h6><i class="fas fa-trophy" style="color:var(--gold,#c9a84c)"></i> Top partneri (ukupni promet)</h6>
+        <h6><i class="fas fa-trophy fx-text-gold"></i> Top partneri (ukupni promet)</h6>
         {% if top_by_volume %}
         <table class="ig-table">
           <thead>
-            <tr><th>Partner</th><th>OIB</th><th>Firme</th><th style="text-align:right">Ukupno</th></tr>
+            <tr><th>Partner</th><th>OIB</th><th>Firme</th><th class="text-end">Ukupno</th></tr>
           </thead>
           <tbody>
             {% for d in top_by_volume %}
             <tr>
               <td><strong>{{ d.name|truncatechars:30 }}</strong></td>
-              <td><code style="font-size:.72rem">{{ d.oib }}</code></td>
+              <td><code class="fx-fs-sm">{{ d.oib }}</code></td>
               <td><span class="ig-badge ig-badge-blue">{{ d.in_companies }}</span></td>
-              <td style="text-align:right;font-weight:600;color:var(--gold,#c9a84c)">&euro;{{ d.total_invoiced|floatformat:2 }}</td>
+              <td class="text-end fx-fw-semibold fx-text-gold">&euro;{{ d.total_invoiced|floatformat:2 }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-        <p style="text-align:center;color:var(--text-muted,#64748b);padding:2rem">Nema fakturiranih partnera.</p>
+        <p class="text-center fx-text-muted fx-p-6">Nema fakturiranih partnera.</p>
         {% endif %}
       </div>
     </div>
@@ -175,10 +175,10 @@
 
   <!-- Tab: Anomalies -->
   <div class="ig-panel" id="ig-anomalies">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <!-- Type Mismatches -->
       <div class="ig-card">
-        <h6><i class="fas fa-random" style="color:#dc3545"></i> Razliciti buyer_type za isti OIB</h6>
+        <h6><i class="fas fa-random fx-text-red"></i> Razliciti buyer_type za isti OIB</h6>
         {% if type_mismatches %}
         <table class="ig-table">
           <thead>
@@ -187,10 +187,10 @@
           <tbody>
             {% for a in type_mismatches %}
             <tr>
-              <td><code style="font-size:.72rem">{{ a.oib }}</code></td>
+              <td><code class="fx-fs-sm">{{ a.oib }}</code></td>
               <td style="max-width:200px">
                 {% for n in a.names %}
-                <div style="font-size:.78rem">{{ n|truncatechars:35 }}</div>
+                <div class="fx-fs-body-sm">{{ n|truncatechars:35 }}</div>
                 {% endfor %}
               </td>
               <td>
@@ -204,8 +204,8 @@
           </tbody>
         </table>
         {% else %}
-        <div style="text-align:center;padding:2rem;color:var(--text-muted,#64748b)">
-          <i class="fas fa-check-circle" style="font-size:2rem;color:#28a745;display:block;margin-bottom:.5rem"></i>
+        <div class="text-center fx-text-muted fx-p-6">
+          <i class="fas fa-check-circle fx-fs-icon fx-text-green d-block mb-2"></i>
           Nema nekonzistentnosti u tipovima kupaca.
         </div>
         {% endif %}
@@ -213,7 +213,7 @@
 
       <!-- Name Mismatches -->
       <div class="ig-card">
-        <h6><i class="fas fa-spell-check" style="color:#fd7e14"></i> Razliciti nazivi za isti OIB</h6>
+        <h6><i class="fas fa-spell-check fx-text-amber"></i> Razliciti nazivi za isti OIB</h6>
         {% if name_mismatches %}
         <table class="ig-table">
           <thead>
@@ -222,10 +222,10 @@
           <tbody>
             {% for a in name_mismatches %}
             <tr>
-              <td><code style="font-size:.72rem">{{ a.oib }}</code></td>
+              <td><code class="fx-fs-sm">{{ a.oib }}</code></td>
               <td style="max-width:250px">
                 {% for n in a.names %}
-                <div style="font-size:.75rem;{% if not forloop.first %}color:var(--text-muted,#64748b){% endif %}">{{ n|truncatechars:40 }}</div>
+                <div class="fx-fs-caption" style="{% if not forloop.first %}color:var(--text-muted,#64748b){% endif %}">{{ n|truncatechars:40 }}</div>
                 {% endfor %}
               </td>
               <td><span class="ig-badge ig-badge-gold">{{ a.name_count }}</span></td>
@@ -235,8 +235,8 @@
           </tbody>
         </table>
         {% else %}
-        <div style="text-align:center;padding:2rem;color:var(--text-muted,#64748b)">
-          <i class="fas fa-check-circle" style="font-size:2rem;color:#28a745;display:block;margin-bottom:.5rem"></i>
+        <div class="text-center fx-text-muted fx-p-6">
+          <i class="fas fa-check-circle fx-fs-icon fx-text-green d-block mb-2"></i>
           Svi nazivi su konzistentni.
         </div>
         {% endif %}
@@ -249,51 +249,51 @@
     <div class="ig-card">
       <h6><i class="fas fa-heartbeat"></i> Kvaliteta podataka partnera</h6>
       {% with dq=data_quality %}
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem">
+      <div class="d-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem">
         <!-- OIB -->
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:.82rem">
+          <div class="d-flex fx-fs-note justify-content-between">
             <span>Validni OIB</span>
             <strong>{{ dq.has_valid_oib|default:"0" }} / {{ dq.total|default:"0" }}</strong>
           </div>
-          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.oib_pct }}%;background:#28a745"></div></div>
-          <div style="font-size:.7rem;color:var(--text-muted,#64748b);margin-top:2px">{{ dq.oib_pct }}% &middot; {{ dq.synesis_oib|default:"0" }} SYN- zapisa</div>
+          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.oib_pct }}%;background:var(--green)"></div></div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">{{ dq.oib_pct }}% &middot; {{ dq.synesis_oib|default:"0" }} SYN- zapisa</div>
         </div>
         <!-- Address -->
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:.82rem">
+          <div class="d-flex fx-fs-note justify-content-between">
             <span>Adresa</span>
             <strong>{{ dq.has_address|default:"0" }} / {{ dq.total|default:"0" }}</strong>
           </div>
-          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.address_pct }}%;background:#3b82f6"></div></div>
-          <div style="font-size:.7rem;color:var(--text-muted,#64748b);margin-top:2px">{{ dq.address_pct }}%</div>
+          <div class="ig-meter"><div class="ig-meter-fill fx-bg-blue" style="width:{{ dq.address_pct }}%"></div></div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">{{ dq.address_pct }}%</div>
         </div>
         <!-- Email -->
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:.82rem">
+          <div class="d-flex fx-fs-note justify-content-between">
             <span>Email</span>
             <strong>{{ dq.has_email|default:"0" }} / {{ dq.total|default:"0" }}</strong>
           </div>
           <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.email_pct }}%;background:var(--gold,#c9a84c)"></div></div>
-          <div style="font-size:.7rem;color:var(--text-muted,#64748b);margin-top:2px">{{ dq.email_pct }}%</div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">{{ dq.email_pct }}%</div>
         </div>
         <!-- Phone -->
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:.82rem">
+          <div class="d-flex fx-fs-note justify-content-between">
             <span>Telefon</span>
             <strong>{{ dq.has_phone|default:"0" }} / {{ dq.total|default:"0" }}</strong>
           </div>
-          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.phone_pct }}%;background:#a855f7"></div></div>
-          <div style="font-size:.7rem;color:var(--text-muted,#64748b);margin-top:2px">{{ dq.phone_pct }}%</div>
+          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.phone_pct }}%;background:var(--purple)"></div></div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">{{ dq.phone_pct }}%</div>
         </div>
         <!-- IBAN -->
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:.82rem">
+          <div class="d-flex fx-fs-note justify-content-between">
             <span>IBAN</span>
             <strong>{{ dq.has_iban|default:"0" }} / {{ dq.total|default:"0" }}</strong>
           </div>
-          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.iban_pct }}%;background:#fd7e14"></div></div>
-          <div style="font-size:.7rem;color:var(--text-muted,#64748b);margin-top:2px">{{ dq.iban_pct }}%</div>
+          <div class="ig-meter"><div class="ig-meter-fill" style="width:{{ dq.iban_pct }}%;background:var(--amber)"></div></div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">{{ dq.iban_pct }}%</div>
         </div>
       </div>
       {% endwith %}
@@ -327,19 +327,19 @@ function searchOIB() {
   var oib = document.getElementById('oibSearch').value.trim();
   var box = document.getElementById('searchResults');
   if (!oib || oib.length < 5) {
-    box.innerHTML = '<p style="color:var(--text-muted,#64748b);text-align:center;padding:1rem">Unesite barem 5 znamenki OIB-a.</p>';
+    box.innerHTML = '<p class="text-center fx-text-muted fx-p-4">Unesite barem 5 znamenki OIB-a.</p>';
     return;
   }
-  box.innerHTML = '<p style="text-align:center;padding:1rem"><i class="fas fa-spinner fa-spin"></i> Pretrazujem...</p>';
+  box.innerHTML = '<p class="text-center fx-p-4"><i class="fas fa-spinner fa-spin"></i> Pretrazujem...</p>';
   fetch('{% url "intelligence_search" %}?oib=' + encodeURIComponent(oib))
     .then(function(r){return r.json()})
     .then(function(data){
       if (!data.results || data.results.length === 0) {
-        box.innerHTML = '<p style="color:var(--text-muted,#64748b);text-align:center;padding:1rem">Nema rezultata za OIB: <code>' + oib + '</code></p>';
+        box.innerHTML = '<p class="text-center fx-text-muted fx-p-4">Nema rezultata za OIB: <code>' + oib + '</code></p>';
         return;
       }
       var html = '<table class="ig-table"><thead><tr>';
-      html += '<th>Tvrtka</th><th>Naziv</th><th>Grad</th><th>Tip</th><th>PDV</th><th>Email</th><th>Fakture</th><th style="text-align:right">Neplaceno</th>';
+      html += '<th>Tvrtka</th><th>Naziv</th><th>Grad</th><th>Tip</th><th>PDV</th><th>Email</th><th>Fakture</th><th class="text-end">Neplaceno</th>';
       html += '</tr></thead><tbody>';
       data.results.forEach(function(r){
         html += '<tr>';
@@ -347,17 +347,17 @@ function searchOIB() {
         html += '<td><strong>' + (r.name||'-') + '</strong></td>';
         html += '<td>' + (r.city||'-') + '</td>';
         html += '<td><span class="ig-badge ig-badge-gold">' + (r.buyer_type||'-') + '</span></td>';
-        html += '<td>' + (r.is_vat_registered ? '<i class="fas fa-check-circle" style="color:#28a745"></i>' : '<i class="fas fa-times-circle" style="color:#dc3545"></i>') + '</td>';
-        html += '<td style="font-size:.75rem">' + (r.email||'-') + '</td>';
+        html += '<td>' + (r.is_vat_registered ? '<i class="fas fa-check-circle fx-text-green"></i>' : '<i class="fas fa-times-circle fx-text-red"></i>') + '</td>';
+        html += '<td class="fx-fs-caption">' + (r.email||'-') + '</td>';
         html += '<td>' + (r.invoice_count||0) + '</td>';
-        html += '<td style="text-align:right;font-weight:600;color:' + (r.unpaid_total > 0 ? '#dc3545' : 'inherit') + '">&euro;' + (r.unpaid_total||0).toFixed(2) + '</td>';
+        html += '<td class="text-end fx-fw-semibold" style="color:' + (r.unpaid_total > 0 ? '#dc3545' : 'inherit') + '">&euro;' + (r.unpaid_total||0).toFixed(2) + '</td>';
         html += '</tr>';
       });
       html += '</tbody></table>';
       box.innerHTML = html;
     })
     .catch(function(e){
-      box.innerHTML = '<p style="color:#dc3545;text-align:center">Greska: ' + e.message + '</p>';
+      box.innerHTML = '<p class="text-center fx-text-red">Greska: ' + e.message + '</p>';
     });
 }
 </script>

@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
 <title>{% block title %}POS{% endblock %} -- LIMIT Connect</title>
 <style>
 /* WCAG 2.1 AA */
-.wcag-skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:#c9a84c;color:#0a0a0a;padding:12px 24px;font-size:16px;font-weight:700;text-decoration:none;z-index:99999;border-radius:0 0 8px 8px;transition:top .2s;}
+.wcag-skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--text);padding:12px 24px;font-size:16px;font-weight:700;text-decoration:none;z-index:99999;border-radius:0 0 8px 8px;transition:top .2s;}
 .wcag-skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px;}
 *:focus-visible{outline:3px solid #c9a84c!important;outline-offset:2px!important;}
 button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{box-shadow:0 0 0 6px rgba(201,168,76,.25)!important;}
@@ -32,7 +32,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 <a href="#main-content" class="wcag-skip-link">Preskoči na sadržaj</a>
 
 <div class="topbar">
-  <a href="{% url 'dashboard' %}" class="topbar-brand" style="text-decoration:none">LIMIT<span> POS</span></a>
+  <a href="{% url 'dashboard' %}" class="topbar-brand fx-no-underline">LIMIT<span> POS</span></a>
   <!-- Hamburger toggle for mobile -->
   <button class="pos-hamburger" id="posHamburger" onclick="document.getElementById('posNavMenu').classList.toggle('open')" aria-label="Otvori navigaciju">
     <span></span><span></span><span></span>
@@ -57,24 +57,24 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <a href="{% url 'pos:pos_settings' %}" {% if '/settings/' in request.path %}class="active"{% endif %}>
       {% trans "Postavke" %}</a>
     <span class="nav-sep"></span>
-    <a href="{% url 'pos:prigovori_list' %}" style="color:#ef4444" title="Inspekcija">
+    <a href="{% url 'pos:prigovori_list' %}" class="fx-text-red" title="Inspekcija">
       {% trans "Inspekcija" %}</a>
   </nav>
 {% endblock %}
   <div class="topbar-right">
     <button class="theme-btn" onclick="togglePosTheme()" title="Tamna/Svijetla tema" id="pos-theme-btn">&#9790;</button>
     {% if has_multiple_companies %}
-    <div style="position:relative;display:inline-block">
+    <div class="d-inline-block fx-relative">
       <button onclick="this.nextElementSibling.classList.toggle('show')"
-              style="background:none;border:1px solid #333;color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:inherit">
+              class="fx-rounded-sm fx-fs-caption fx-pointer fx-text-gold fx-bg-transparent" style="border:1px solid #333;padding:3px 10px;font-family:inherit">
         {{ request.user.get_full_name|default:request.user.username }} ▾
       </button>
-      <div class="pos-company-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #333;border-radius:8px;min-width:200px;z-index:var(--z-company-menu);padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+      <div class="pos-company-menu fx-hidden fx-bg-card fx-rounded mt-1" style="position:absolute;right:0;top:100%;border:1px solid #333;min-width:200px;z-index:var(--z-company-menu);padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
         {% for mem in user_memberships %}
-        <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
+        <form method="post" action="{% url 'accounts:switch_company' %}" class="fx-m-0">
           {% csrf_token %}
           <input type="hidden" name="membership_id" value="{{ mem.id }}">
-          <button type="submit" style="width:100%;text-align:left;background:transparent;border:none;color:#ccc;padding:8px 12px;font-size:.8rem;cursor:pointer;border-radius:6px;font-family:inherit"
+          <button type="submit" class="fx-w-full fx-border-none fx-fs-compact fx-pointer fx-rounded-sm text-start fx-bg-transparent fx-text-muted fx-p-8-12" style="font-family:inherit"
                   onmouseover="this.style.background='rgba(201,168,76,.1)'" onmouseout="this.style.background='transparent'">
             {{ mem.company.name }}
           </button>
@@ -85,7 +85,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     {% else %}
     <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
     {% endif %}
-    <a href="{% url 'company_dashboard' %}" style="color:var(--gold);font-size:.8rem;text-decoration:none;border:1px solid var(--gold);padding:3px 8px;border-radius:5px">&larr; Izlaz iz POS-a</a>
+    <a href="{% url 'company_dashboard' %}" class="fx-fs-compact fx-no-underline fx-rounded-sm fx-text-gold" style="border:1px solid var(--gold);padding:3px 8px">&larr; Izlaz iz POS-a</a>
   </div>
 </div>
 {% if messages %}<div class="messages">{% for msg in messages %}<div class="msg {{ msg.tags }}">{{ msg }}</div>{% endfor %}</div>{% endif %}

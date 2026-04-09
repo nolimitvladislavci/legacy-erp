@@ -4,24 +4,7 @@
 {% block title %}{{ cd.delivery_number }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -104,7 +87,7 @@
                 <td>{{ order.buyer_company.name }}</td>
                 <td>{{ order.items.count }} artikala</td>
                 <td>{{ order.total }} &euro;</td>
-                <td><span class="badge bg-secondary">{{ order.get_status_display }}</span></td>
+                <td><span class="fenix-badge fenix-badge-muted">{{ order.get_status_display }}</span></td>
               </tr>
               {% empty %}
               <tr><td colspan="5" class="text-center text-muted">Nema spojenih narudzbi</td></tr>
@@ -120,7 +103,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <span class="text-gold"><i class="fas fa-temperature-low me-2"></i>Hladni lanac</span>
           {% if cd.cold_chain_zone %}
-          <span class="badge bg-secondary">{{ cd.cold_chain_zone.name }} ({{ cd.cold_chain_zone.target_min_temp }}&deg; - {{ cd.cold_chain_zone.target_max_temp }}&deg;C)</span>
+          <span class="fenix-badge fenix-badge-muted">{{ cd.cold_chain_zone.name }} ({{ cd.cold_chain_zone.target_min_temp }}&deg; - {{ cd.cold_chain_zone.target_max_temp }}&deg;C)</span>
           {% endif %}
         </div>
         <div class="table-responsive">
@@ -246,7 +229,7 @@
         <div class="card-header text-gold"><i class="fas fa-qrcode me-2"></i>Tracking</div>
         <div class="card-body text-center">
           <div class="mb-2">
-            <code class="text-gold" style="font-size:1.1rem">{{ cd.tracked_item.public_token }}</code>
+            <code class="text-gold fx-fs-xl">{{ cd.tracked_item.public_token }}</code>
           </div>
           <a href="{% url 'tracking:public' cd.tracked_item.public_token %}" target="_blank" class="btn btn-outline-gold btn-sm">
             <i class="fas fa-external-link-alt me-1"></i> Otvori javni link

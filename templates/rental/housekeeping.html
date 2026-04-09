@@ -10,25 +10,25 @@
 </style>{% endblock %}
 {% block content %}
 <div class="page">
-  <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:1rem">&#129529; Housekeeping</h2>
+  <h2 class="fx-fs-xl fx-text-gold mb-3">&#129529; Housekeeping</h2>
   {% for log in logs %}
   <div class="hk-card {{ log.status }}">
     <div>
-      <div style="font-weight:700;font-size:.9rem">{{ log.rental_property.name }}</div>
-      <div style="font-size:.7rem;color:var(--muted)">{{ log.created_at|date:"d.m H:i" }}{% if log.assigned_to %} &middot; {{ log.assigned_to.get_full_name|default:log.assigned_to.username }}{% endif %}</div>
+      <div class="fx-fw-bold fx-fs-md">{{ log.rental_property.name }}</div>
+      <div class="fx-fs-sm fx-text-muted">{{ log.created_at|date:"d.m H:i" }}{% if log.assigned_to %} &middot; {{ log.assigned_to.get_full_name|default:log.assigned_to.username }}{% endif %}</div>
     </div>
-    <div style="display:flex;gap:.3rem">
+    <div class="d-flex" style="gap:.3rem">
       {% if log.status == 'pending' %}
-      <form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="log_id" value="{{ log.pk }}"><input type="hidden" name="status" value="in_progress"><button class="btn btn-gold btn-sm" type="submit">Pocni</button></form>
+      <form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="log_id" value="{{ log.pk }}"><input type="hidden" name="status" value="in_progress"><button class="btn btn-gold btn-sm" type="submit">Pocni</button></form>
       {% elif log.status == 'in_progress' %}
-      <form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="log_id" value="{{ log.pk }}"><input type="hidden" name="status" value="done"><button class="btn btn-green btn-sm" type="submit">&#9989; Gotovo</button></form>
+      <form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="log_id" value="{{ log.pk }}"><input type="hidden" name="status" value="done"><button class="btn btn-green btn-sm" type="submit">&#9989; Gotovo</button></form>
       {% else %}
-      <span style="font-size:.7rem;color:var(--green);font-weight:700">&#9989;</span>
+      <span class="fx-fs-sm fx-fw-bold fx-text-green">&#9989;</span>
       {% endif %}
     </div>
   </div>
   {% empty %}
-  <div style="text-align:center;color:var(--muted);padding:2rem">Sve cisto! &#10024;</div>
+  <div class="text-center fx-text-muted fx-p-6">Sve cisto! &#10024;</div>
   {% endfor %}
 </div>
 {% endblock %}

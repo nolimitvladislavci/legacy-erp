@@ -2,25 +2,25 @@
 {% load i18n %}
 {% block title %}Nemate pristup{% endblock %}
 {% block content %}
-<div style="max-width:480px;margin:40px auto;text-align:center;padding:0 16px">
-  <div style="width:64px;height:64px;border-radius:50%;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px"><i class="fas fa-lock" style="color:var(--gold,#c9a84c)"></i></div>
-  <h3 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif">Nemate pristup ovoj stranici</h3>
-  <p style="color:var(--text-muted,#94a3b8);font-size:.9rem;margin:12px 0 8px">
+<div class="text-center" style="max-width:480px;margin:40px auto;padding:0 16px">
+  <div class="fx-rounded-circle d-flex align-items-center justify-content-center" style="width:64px;height:64px;background:rgba(201,168,76,.12);margin:0 auto 20px;font-size:28px"><i class="fas fa-lock fx-text-gold"></i></div>
+  <h3 class="fx-text-gold" style="font-family:'Cormorant Garamond',serif">Nemate pristup ovoj stranici</h3>
+  <p class="fx-fs-md" style="color:var(--text-muted,#94a3b8);margin:12px 0 8px">
     Ova stranica pripada drugoj firmi ili nemate dovoljna prava.
   </p>
   {% if request.user.is_authenticated %}
-  <p style="color:var(--text-muted,#94a3b8);font-size:.82rem;margin:0 0 20px">
+  <p class="fx-fs-note" style="color:var(--text-muted,#94a3b8);margin:0 0 20px">
     Prijavljeni ste kao <strong style="color:var(--text,#e2e8f0)">{{ request.user.get_full_name|default:request.user.username }}</strong>
-    {% if request.current_company %} u firmi <strong style="color:var(--gold)">{{ request.current_company.name }}</strong>{% endif %}.
+    {% if request.current_company %} u firmi <strong class="fx-text-gold">{{ request.current_company.name }}</strong>{% endif %}.
     <br>Za pristup drugoj firmi — prebacite se u Superadmin modu.
   </p>
   {% endif %}
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <a href="{% url 'dashboard' %}" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.9rem">
+  <div class="d-flex fx-gap-3 fx-flex-wrap justify-content-center">
+    <a href="{% url 'dashboard' %}" class="fx-text-dark fx-fw-bold fx-rounded fx-no-underline fx-fs-md fx-bg-gold" style="padding:10px 24px">
       <i class="fas fa-home"></i> Radna povrsina
     </a>
     {% if request.user.is_superuser %}
-    <a href="/superadmin/" style="background:transparent;border:1px solid var(--border,#2a2a2a);color:var(--gold,#c9a84c);padding:10px 20px;border-radius:8px;text-decoration:none;font-size:.85rem">
+    <a href="/superadmin/" class="fx-rounded fx-no-underline fx-fs-base fx-text-gold fx-bg-transparent" style="border:1px solid var(--border,#2a2a2a);padding:10px 20px">
       <i class="fas fa-user-shield"></i> Superadmin
     </a>
     {% endif %}

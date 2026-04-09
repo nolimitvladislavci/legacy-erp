@@ -3,76 +3,58 @@
 {% block title %}POS Setup Wizard{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:700px;margin:2rem auto;padding:1.5rem">
-  <h2 style="color:var(--gold,#c9a84c);text-align:center;margin-bottom:.5rem">POS Setup Wizard</h2>
-  <p style="color:#888;text-align:center;margin-bottom:2rem">{{ completed }}/{{ total }} koraka zavrseno</p>
+<div class="fx-p-5 fx-max-700" style="margin:2rem auto">
+  <h2 class="text-center fx-text-gold mb-2">POS Setup Wizard</h2>
+  <p class="fx-text-muted text-center" style="margin-bottom:2rem">{{ completed }}/{{ total }} koraka zavrseno</p>
 
   <!-- Progress bar -->
-  <div style="background:#1a1a2e;border-radius:20px;height:12px;margin-bottom:2rem;overflow:hidden">
-    <div style="background:linear-gradient(90deg,var(--gold,#c9a84c),#4ade80);height:100%;width:{{ progress }}%;border-radius:20px;transition:width .5s"></div>
+  <div class="fx-bg-surface2 fx-rounded-xl fx-overflow-hidden" style="height:12px;margin-bottom:2rem">
+    <div class="fx-rounded-xl" style="background:linear-gradient(90deg,var(--gold,#c9a84c),#4ade80);height:100%;width:{{ progress }}%;transition:width .5s"></div>
   </div>
 
   <!-- Steps -->
   {% for step in steps %}
-  <a href="{{ step.url }}" style="text-decoration:none;display:block;background:#0d1117;border-radius:12px;padding:1.25rem;margin-bottom:.75rem;border-left:4px solid {% if step.done %}#4ade80{% else %}#444{% endif %}">
-    <div style="display:flex;align-items:center;gap:1rem">
-      <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;
-        background:{% if step.done %}#065f46{% else %}#1e293b{% endif %};flex-shrink:0;color:{% if step.done %}#4ade80{% else %}#fff{% endif %}">
+  <a href="{{ step.url }}" class="fx-no-underline fx-bg-deep fx-rounded" style="display:block;padding:1.25rem;margin-bottom:.75rem;border-left:4px solid {% if step.done %}#4ade80{% else %}#444{% endif %}">
+    <div class="d-flex align-items-center fx-gap-4">
+      <div class="fx-rounded-circle d-flex fx-fs-2xl" style="width:36px;height:36px;align-items:center;justify-content:center;background:{% if step.done %}#065f46{% else %}#1e293b{% endif %};flex-shrink:0;color:{% if step.done %}#4ade80{% else %}#fff{% endif %}">
         {% if step.done %}&#10003;{% else %}{{ forloop.counter }}{% endif %}
       </div>
       <div>
-        <div style="font-weight:700;color:{% if step.done %}#4ade80{% else %}#fff{% endif %}">{{ step.name }}</div>
-        <div style="font-size:.85rem;color:#888">{{ step.desc }}</div>
+        <div class="fx-fw-bold" style="color:{% if step.done %}#4ade80{% else %}#fff{% endif %}">{{ step.name }}</div>
+        <div class="fx-fs-base fx-text-muted">{{ step.desc }}</div>
       </div>
     </div>
   </a>
   {% endfor %}
 
   {% if completed >= 1 and completed < total %}
-  <div style="background:#0d1117;border-radius:12px;padding:1.25rem;margin-bottom:.75rem;border-left:4px solid var(--gold,#c9a84c)">
-    <div style="font-weight:700;color:var(--gold,#c9a84c);margin-bottom:.75rem">Brzo dodaj artikl (bez napustanja stranice)</div>
-    <div style="display:grid;grid-template-columns:1fr 100px 100px;gap:8px">
-      <input type="text" id="oiName" placeholder="Naziv artikla" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:8px;border-radius:6px">
-      <input type="number" id="oiPrice" placeholder="Cijena" step="0.01" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:8px;border-radius:6px">
-      <select id="oiVat" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:8px;border-radius:6px">
+  <div class="fx-bg-deep fx-rounded fx-mb-4 fx-p-125" style="border-left:4px solid var(--gold,#c9a84c)">
+    <div class="fx-fw-bold fx-text-gold fx-mb-4">Brzo dodaj artikl (bez napustanja stranice)</div>
+    <div class="fx-gap-2 d-grid" style="grid-template-columns:1fr 100px 100px">
+      <input type="text" id="oiName" placeholder="Naziv artikla" class="fx-bg-surface2 fx-text-white fx-rounded-sm fx-b2 fx-p-8">
+      <input type="number" id="oiPrice" placeholder="Cijena" step="0.01" class="fx-bg-surface2 fx-text-white fx-rounded-sm fx-b2 fx-p-8">
+      <select id="oiVat" class="fx-bg-surface2 fx-text-white fx-rounded-sm fx-b2 fx-p-8">
         <option value="25">25%</option><option value="13">13%</option><option value="5">5%</option><option value="0">0%</option>
       </select>
     </div>
-    <button onclick="quickAddItem()" id="oiBtn" style="margin-top:8px;background:var(--gold,#c9a84c);color:#000;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer">Dodaj artikl</button>
-    <span id="oiStatus" style="margin-left:10px;font-size:.85rem"></span>
+    <button onclick="quickAddItem()" id="oiBtn" class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-bold fx-pointer mt-2 fx-bg-gold" style="padding:8px 20px">Dodaj artikl</button>
+    <span id="oiStatus" class="fx-fs-base" style="margin-left:10px"></span>
   </div>
   {% endif %}
 
   {% if progress == 100 %}
-  <div style="text-align:center;margin-top:2rem;padding:2rem;background:#065f46;border-radius:12px">
-    <h3 style="color:#4ade80">Sve spremno!</h3>
+  <div class="text-center fx-rounded fx-p-6" style="margin-top:2rem;background:#065f46">
+    <h3 class="fx-text-green">Sve spremno!</h3>
     <p style="color:#a7f3d0">Vas POS je konfiguriran. Mozete poceti s radom.</p>
-    <a href="{% url 'pos:dashboard' %}" style="display:inline-block;margin-top:1rem;padding:.75rem 2rem;background:var(--gold,#c9a84c);color:#000;border-radius:8px;font-weight:700;text-decoration:none">Otvori POS</a>
+    <a href="{% url 'pos:dashboard' %}" class="fx-text-dark fx-rounded fx-fw-bold fx-no-underline d-inline-block mt-3 fx-bg-gold" style="padding:.75rem 2rem">Otvori POS</a>
   </div>
   {% endif %}
 
-  <div style="text-align:center;margin-top:1.5rem">
-    <a href="{% url 'pos:dashboard' %}" style="color:#555;font-size:.85rem;text-decoration:none">Preskoci Onboarding</a>
+  <div class="text-center fx-mt-6">
+    <a href="{% url 'pos:dashboard' %}" class="fx-text-dim fx-fs-base fx-no-underline">Preskoci Onboarding</a>
   </div>
 </div>
 
@@ -92,14 +74,14 @@ async function quickAddItem() {
     });
     var data = await res.json();
     if (data.id) {
-      document.getElementById('oiStatus').innerHTML = '<b style="color:#4ade80">Dodano!</b>';
+      document.getElementById('oiStatus').innerHTML = '<b class="fx-text-green">Dodano!</b>';
       document.getElementById('oiName').value = '';
       document.getElementById('oiPrice').value = '';
       setTimeout(function(){ location.reload(); }, 1000);
     } else {
-      document.getElementById('oiStatus').innerHTML = '<b style="color:#ef4444">' + (data.error || 'Greska') + '</b>';
+      document.getElementById('oiStatus').innerHTML = '<b class="fx-text-red">' + (data.error || 'Greska') + '</b>';
     }
-  } catch(e) { document.getElementById('oiStatus').innerHTML = '<b style="color:#ef4444">Greska mreze</b>'; }
+  } catch(e) { document.getElementById('oiStatus').innerHTML = '<b class="fx-text-red">Greska mreze</b>'; }
   finally { btn.disabled = false; btn.textContent = 'Dodaj artikl'; }
 }
 </script>

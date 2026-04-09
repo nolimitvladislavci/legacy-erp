@@ -28,7 +28,7 @@ body {
   margin: 0;
 }
 .wrap {
-  background: #fff;
+  background:var(--bg-card);
   width: 80mm;
   padding: 6mm 5mm;
   box-shadow: 0 2px 12px rgba(0,0,0,.15);
@@ -71,8 +71,8 @@ td      { padding: 2px 0; vertical-align: top; }
 .tr     { display: flex; justify-content: space-between; margin: 2px 0; font-size: 8.5pt; }
 .tr.gr  { font-size: 11pt; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 3px; }
 .pay-ln { font-size: 8.5pt; margin: 1px 0; display: flex; justify-content: space-between; }
-.footer { text-align: center; font-size: 7.5pt; color: #666; margin-top: 8px; }
-.fis    { font-size: 7pt; color: #555; margin-top: 6px; word-break: break-all; }
+.footer { text-align: center; font-size: 7.5pt; color:var(--text-dim); margin-top: 8px; }
+.fis    { font-size: 7pt; color:var(--text-dim); margin-top: 6px; word-break: break-all; }
 
 /* ── Print overrides ───────────────────────────────────────── */
 @media print {
@@ -99,8 +99,8 @@ td      { padding: 2px 0; vertical-align: top; }
 
   <hr class="div">
   {% if receipt.status == "cancelled" %}
-  <div class="bon-t" style="color:#c00">*** STORNIRANO ***</div>
-  {% if receipt.cancel_reason %}<div class="meta" style="text-align:center;color:#c00">Razlog: {{ receipt.cancel_reason }}</div>{% endif %}
+  <div class="bon-t fx-text-red">*** STORNIRANO ***</div>
+  {% if receipt.cancel_reason %}<div class="meta text-center fx-text-red">Razlog: {{ receipt.cancel_reason }}</div>{% endif %}
   {% else %}
   <div class="bon-t">RAČUN / BON</div>
   {% endif %}
@@ -118,19 +118,19 @@ td      { padding: 2px 0; vertical-align: top; }
     <thead>
       <tr>
         <th style="width:42mm">Naziv</th>
-        <th style="text-align:center">Kol</th>
-        <th style="text-align:right">Ukupno</th>
+        <th class="text-center">Kol</th>
+        <th class="text-end">Ukupno</th>
       </tr>
     </thead>
     <tbody>
       {% for item in items %}
-      <tr{% if item.is_tip %} style="font-style:italic"{% elif item.is_pfand_return %} style="color:#c00"{% endif %}>
+      <tr{% if item.is_tip %} style="font-style:italic"{% elif item.is_pfand_return %} style="color:var(--red)"{% endif %}>
         <td class="it-nm">{% if item.is_tip %}* {% endif %}{{ item.description }}</td>
-        <td style="text-align:center">{{ item.quantity|floatformat:"-2" }}</td>
+        <td class="text-center">{{ item.quantity|floatformat:"-2" }}</td>
         <td class="it-tot">&euro;{{ item.total_price|floatformat:2 }}</td>
       </tr>
       <tr>
-        <td style="font-size:7.5pt;color:#555" colspan="2">
+        <td class="fx-text-dim" style="font-size:7.5pt" colspan="2">
           &euro;{{ item.unit_price|floatformat:2 }} &times; {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%{% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}{% if item.lot_number %}<br>LOT: {{ item.lot_number }}{% if item.expiry_date %} | Rok: {{ item.expiry_date|date:"d.m.Y" }}{% endif %}{% endif %}
         </td>
         <td></td>
@@ -166,7 +166,7 @@ td      { padding: 2px 0; vertical-align: top; }
   {# ── R1: Kupac (poslovna vecera / reprezentacija) ── #}
   {% if receipt.is_r1 and receipt.buyer_name %}
   <div style="margin:6px 0;padding:4px;border:1px solid #000;font-size:9pt">
-    <div style="font-weight:bold">R1 — KUPAC:</div>
+    <div class="fx-fw-bold">R1 — KUPAC:</div>
     <div>{{ receipt.buyer_name }}</div>
     {% if receipt.buyer_oib %}<div>OIB: {{ receipt.buyer_oib }}</div>{% endif %}
     {% if receipt.buyer_address %}<div>{{ receipt.buyer_address }}</div>{% endif %}
@@ -175,13 +175,13 @@ td      { padding: 2px 0; vertical-align: top; }
 
   {# ── DE: TSE Ausfall Klausel ── #}
   {% if receipt.tse_error and 'TSE_AUSFALL' in receipt.tse_error %}
-  <div style="border:2px solid #000;padding:4px;margin:6px 0;text-align:center;font-weight:bold;font-size:8pt">
+  <div class="text-center fx-fw-bold" style="border:2px solid #000;padding:4px;margin:6px 0;font-size:8pt">
     TSE AUSGEFALLEN<br>
-    <span style="font-weight:normal;font-size:6pt">Nacherfassung erfolgt automatisch gem. KassenSichV.<br>
+    <span class="fx-fw-normal" style="font-size:6pt">Nacherfassung erfolgt automatisch gem. KassenSichV.<br>
     Beleg-ID: {{ receipt.uuid }}</span>
   </div>
   {% elif receipt.tse_hash %}
-  <div class="fis" style="font-size:6pt;word-break:break-all">
+  <div class="fis text-break" style="font-size:6pt">
     <div>TSE-Sig: {{ receipt.tse_hash|truncatechars:40 }}</div>
     <div>TSE-TxNr: {{ receipt.tse_transaction_number }}</div>
     <div>TSE-SigZ: {{ receipt.tse_signature_counter }}</div>
@@ -197,9 +197,9 @@ td      { padding: 2px 0; vertical-align: top; }
     {% if receipt.jir %}
     <div>JIR: {{ receipt.jir }}</div>
     {% else %}
-    <div style="border:2px solid #c00;padding:4px;margin:4px 0;text-align:center">
-      <div style="color:#c00;font-weight:bold;font-size:9pt">VEZA S CIS-om NIJE OSTVARENA</div>
-      <div style="font-size:6.5pt;color:#c00">Obveznik fiskalizacije će naknadno dostaviti<br>račun Poreznoj upravi u zakonskom roku od 48h<br>(čl. 41. st. 3. Zakona o fiskalizaciji)</div>
+    <div class="text-center" style="border:2px solid #c00;padding:4px;margin:4px 0">
+      <div class="fx-fw-bold fx-text-red" style="font-size:9pt">VEZA S CIS-om NIJE OSTVARENA</div>
+      <div class="fx-text-red" style="font-size:6.5pt">Obveznik fiskalizacije će naknadno dostaviti<br>račun Poreznoj upravi u zakonskom roku od 48h<br>(čl. 41. st. 3. Zakona o fiskalizaciji)</div>
     </div>
     {% endif %}
     {% if receipt.fiscal_datetime %}<div>Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>{% endif %}
@@ -210,15 +210,15 @@ td      { padding: 2px 0; vertical-align: top; }
   {% if fina_qr_b64 %}
   <div class="center" style="margin:6px 0">
     <img src="data:image/png;base64,{{ fina_qr_b64 }}" alt="FINA QR"
-         style="display:block;margin:4px auto;width:40mm;height:40mm;image-rendering:pixelated;image-rendering:crisp-edges">
-    <div style="font-size:6pt;color:#888">Skeniraj za provjeru na porezna.gov.hr</div>
+         class="d-block" style="margin:4px auto;width:40mm;height:40mm;image-rendering:pixelated;image-rendering:crisp-edges">
+    <div class="fx-text-muted" style="font-size:6pt">Skeniraj za provjeru na porezna.gov.hr</div>
   </div>
   {% endif %}
   <hr class="div">
   {% endif %}
 
   {% if items|dictsort:"is_tip" %}{% for item in items %}{% if item.is_tip %}
-  <div class="footer" style="border-top:none;margin-top:2px">* Napojnica (PDV 0%)</div>
+  <div class="footer fx-mt-1" style="border-top:none">* Napojnica (PDV 0%)</div>
   {% endif %}{% endfor %}{% endif %}
   <div class="footer">
     Hvala na posjetu!<br>

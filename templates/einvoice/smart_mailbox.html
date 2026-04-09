@@ -9,16 +9,16 @@
 .sm-stat .val{font-size:1.5rem;font-weight:700;color:var(--text)}
 .sm-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-top:2px}
 .conf-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700}
-.conf-high{background:#dcfce7;color:#166534}
-.conf-mid{background:#fef3c7;color:#92400e}
-.conf-low{background:#fef2f2;color:#991b1b}
+.conf-high{background:var(--green-dim);color:var(--green)}
+.conf-mid{background:var(--amber-dim);color:var(--amber)}
+.conf-low{background:var(--red-dim);color:var(--red)}
 .conf-none{background:var(--badge-bg);color:var(--text-muted)}
 .sm-status{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.sm-status.PENDING,.sm-status.AUTO{background:#fef3c7;color:#92400e}
-.sm-status.BOOKED{background:#dcfce7;color:#166534}
-.sm-status.APPROVED{background:#dbeafe;color:#1e40af}
-.sm-status.REJECTED{background:#fef2f2;color:#991b1b}
-.sm-status.DUPLICATE{background:#f3e8ff;color:#7c3aed}
+.sm-status.PENDING,.sm-status.AUTO{background:var(--amber-dim);color:var(--amber)}
+.sm-status.BOOKED{background:var(--green-dim);color:var(--green)}
+.sm-status.APPROVED{background:var(--blue-dim);color:var(--blue)}
+.sm-status.REJECTED{background:var(--red-dim);color:var(--red)}
+.sm-status.DUPLICATE{background:#f3e8ff;color:var(--purple)}
 .sm-table{width:100%;border-collapse:collapse;font-size:.82rem}
 .sm-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.68rem;text-transform:uppercase;color:var(--text-muted)}
 .sm-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
@@ -26,7 +26,7 @@
 .sm-konto{font-family:monospace;font-size:.78rem;padding:2px 6px;background:var(--badge-bg);border-radius:4px}
 .sm-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .sm-filter a{padding:4px 12px;border-radius:6px;font-size:.75rem;text-decoration:none;border:1px solid var(--border);color:var(--text-muted)}
-.sm-filter a.active,.sm-filter a:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sm-filter a.active,.sm-filter a:hover{background:var(--accent);color:var(--white);border-color:var(--accent)}
 @media(max-width:768px){
   .sm-grid{grid-template-columns:repeat(3,1fr);gap:6px}
   .sm-stat .val{font-size:1.1rem}
@@ -43,10 +43,10 @@
 }
 </style>
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+<div class="d-flex fx-gap-3 align-items-center mb-3">
   <div>
-    <div style="font-weight:700;font-size:1.1rem;color:var(--text)"><i class="fas fa-brain" style="color:var(--gold)"></i> Smart Mailbox</div>
-    <div style="font-size:.7rem;color:var(--text-muted)">AI-klasificirani ulazni racuni | PROPTER e-Invoice</div>
+    <div class="fx-fw-bold fx-fs-xl fx-text-body"><i class="fas fa-brain fx-text-gold"></i> Smart Mailbox</div>
+    <div class="fx-fs-sm fx-text-muted">AI-klasificirani ulazni racuni | PROPTER e-Invoice</div>
   </div>
   <div class="ms-auto d-flex gap-2">
     <a href="{% url 'einvoice:outbound_messages' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paper-plane"></i> Izlazni</a>
@@ -55,20 +55,20 @@
 
 <!-- Stats -->
 <div class="sm-grid">
-  <div class="sm-stat"><div class="val" style="color:#92400e">{{ stats.pending }}</div><div class="lbl">Ceka pregled</div></div>
-  <div class="sm-stat"><div class="val" style="color:#166534">{{ stats.booked }}</div><div class="lbl">Proknjizeno</div></div>
-  <div class="sm-stat"><div class="val" style="color:#991b1b">{{ stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
-  <div class="sm-stat"><div class="val" style="color:#7c3aed">{{ stats.duplicates }}</div><div class="lbl">Duplikati</div></div>
+  <div class="sm-stat"><div class="val fx-text-amber">{{ stats.pending }}</div><div class="lbl">Ceka pregled</div></div>
+  <div class="sm-stat"><div class="val fx-text-green">{{ stats.booked }}</div><div class="lbl">Proknjizeno</div></div>
+  <div class="sm-stat"><div class="val fx-text-red">{{ stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="sm-stat"><div class="val fx-text-purple">{{ stats.duplicates }}</div><div class="lbl">Duplikati</div></div>
   <div class="sm-stat"><div class="val">{{ stats.total }}</div><div class="lbl">Ukupno</div></div>
   <div class="sm-stat"><div class="val">&euro;{{ stats.pending_amount|floatformat:2 }}</div><div class="lbl">Ceka (iznos)</div></div>
 </div>
 
 <!-- AS4 Pipeline -->
-<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#dbeafe;color:#1e40af"><i class="fas fa-paper-plane"></i> {{ as4_stats.outbound_queued }} u redu</span>
-  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#dcfce7;color:#166534"><i class="fas fa-check-circle"></i> {{ as4_stats.outbound_delivered }} dostavljeno</span>
+<div class="d-flex fx-gap-2 fx-flex-wrap mb-3">
+  <span class="fx-fs-sm fx-rounded-sm fx-text-blue fx-bg-blue-dim" style="padding:4px 10px"><i class="fas fa-paper-plane"></i> {{ as4_stats.outbound_queued }} u redu</span>
+  <span class="fx-fs-sm fx-rounded-sm fx-text-green fx-bg-green-dim" style="padding:4px 10px"><i class="fas fa-check-circle"></i> {{ as4_stats.outbound_delivered }} dostavljeno</span>
   {% if as4_stats.dlq > 0 %}
-  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#fef2f2;color:#991b1b"><i class="fas fa-skull-crossbones"></i> {{ as4_stats.dlq }} DLQ</span>
+  <span class="fx-fs-sm fx-rounded-sm fx-bg-red-dim fx-text-red" style="padding:4px 10px"><i class="fas fa-skull-crossbones"></i> {{ as4_stats.dlq }} DLQ</span>
   {% endif %}
 </div>
 
@@ -83,7 +83,7 @@
 </div>
 
 <!-- Table -->
-<div class="stat-card" style="overflow-x:auto">
+<div class="fenix-stat fx-scroll-x">
 {% if invoices %}
 <table class="sm-table">
   <thead>
@@ -101,20 +101,20 @@
   <tbody>
     {% for inv in invoices %}
     <tr>
-      <td><a href="{% url 'einvoice:mailbox_detail' inv.pk %}" style="color:var(--accent);font-weight:600">{{ inv.invoice_number }}</a></td>
+      <td><a href="{% url 'einvoice:mailbox_detail' inv.pk %}" class="fx-fw-semibold fx-text-cyan">{{ inv.invoice_number }}</a></td>
       <td>
         {{ inv.supplier_name|truncatechars:30 }}
-        <br><small style="color:var(--text-muted)">{{ inv.supplier_tax_id }}</small>
+        <br><small class="fx-text-muted">{{ inv.supplier_tax_id }}</small>
       </td>
       <td class="text-end fw-bold">&euro;{{ inv.gross_amount|floatformat:2 }}</td>
       <td>
         {% if inv.final_konto %}
           <span class="sm-konto">{{ inv.final_konto }}</span>
         {% elif inv.suggested_konto %}
-          <span class="sm-konto" style="opacity:.7">{{ inv.suggested_konto }}</span>
-          <br><small style="color:var(--text-muted);font-size:.65rem">{{ inv.suggested_konto_name|truncatechars:20 }}</small>
+          <span class="sm-konto fx-opacity-70">{{ inv.suggested_konto }}</span>
+          <br><small class="fx-fs-xs fx-text-muted">{{ inv.suggested_konto_name|truncatechars:20 }}</small>
         {% else %}
-          <span style="color:var(--text-muted);font-size:.7rem">—</span>
+          <span class="fx-fs-sm fx-text-muted">—</span>
         {% endif %}
       </td>
       <td>
@@ -147,9 +147,9 @@
 </table>
 {% else %}
 <div class="text-center py-5">
-  <div style="font-size:2.5rem;margin-bottom:10px"><i class="fas fa-inbox" style="color:var(--text-muted)"></i></div>
-  <h5 style="color:var(--text)">Nema ulaznih racuna</h5>
-  <p style="color:var(--text-muted);font-size:.85rem">Ulazni racuni stizu automatski iz FINA posrednika ili uploada.</p>
+  <div class="mb-2 fx-fs-7xl"><i class="fas fa-inbox fx-text-muted"></i></div>
+  <h5 class="fx-text-body">Nema ulaznih racuna</h5>
+  <p class="fx-fs-base fx-text-muted">Ulazni racuni stizu automatski iz FINA posrednika ili uploada.</p>
 </div>
 {% endif %}
 </div>

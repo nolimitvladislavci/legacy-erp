@@ -33,8 +33,8 @@
 
 <!-- Top books -->
 {% if top_books %}
-<div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
-  <h5 style="color:#c8a24e"><i class="fas fa-trophy me-2"></i>Najčitanije knjige ({{ stats.year }})</h5>
+<div class="fx-bg-surface2 fx-rounded fx-p-5" style="border:1px solid #c8a24e22">
+  <h5 class="fx-text-gold"><i class="fas fa-trophy me-2"></i>Najčitanije knjige ({{ stats.year }})</h5>
   <div class="table-responsive">
     <table class="table table-dark table-sm">
       <thead><tr><th>#</th><th>Naslov</th><th>Posudbi</th></tr></thead>
@@ -43,7 +43,7 @@
         <tr>
           <td class="text-muted">{{ forloop.counter }}</td>
           <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="text-white text-decoration-none">{{ book.name }}</a></td>
-          <td style="color:#c8a24e;font-weight:600">{{ book.loan_count }}</td>
+          <td class="fx-text-gold fx-fw-semibold">{{ book.loan_count }}</td>
         </tr>
         {% endfor %}
       </tbody>

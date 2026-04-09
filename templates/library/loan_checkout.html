@@ -4,21 +4,21 @@
 {% block page_title %}Posudba{% endblock %}
 {% block extra_css %}
 <style>
-.checkout-box{background:#1a1a2e;border:2px solid #c8a24e44;border-radius:16px;padding:2rem;max-width:600px;margin:0 auto}
-.checkout-box h3{color:#c8a24e;font-family:"Cormorant Garamond",serif;text-align:center;margin-bottom:1.5rem}
+.checkout-box{background:var(--surface);border:2px solid #c8a24e44;border-radius:16px;padding:2rem;max-width:600px;margin:0 auto}
+.checkout-box h3{color:var(--gold);font-family:"Cormorant Garamond",serif;text-align:center;margin-bottom:1.5rem}
 .scan-field{position:relative;margin-bottom:1.2rem}
-.scan-field label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.4rem;display:block}
-.scan-field input{background:#16213e;color:#f0e6d3;border:2px solid #c8a24e33;border-radius:10px;padding:.8rem 1rem .8rem 3rem;width:100%;font-size:1.1rem;transition:border-color .2s}
-.scan-field input:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 3px #c8a24e22}
-.scan-field .icon{position:absolute;left:1rem;top:2.4rem;color:#c8a24e;font-size:1.2rem}
-.scan-hint{text-align:center;color:#666;font-size:.85rem;margin:1.5rem 0}
-.scan-hint i{font-size:2rem;color:#c8a24e33;display:block;margin-bottom:.5rem}
-.member-preview{background:#16213e;border:1px solid #c8a24e33;border-radius:10px;padding:1rem;margin-bottom:1rem;display:none}
+.scan-field label{color:var(--gold);font-size:.85rem;font-weight:600;margin-bottom:.4rem;display:block}
+.scan-field input{background:var(--surface-deep);color:var(--text);border:2px solid #c8a24e33;border-radius:10px;padding:.8rem 1rem .8rem 3rem;width:100%;font-size:1.1rem;transition:border-color .2s}
+.scan-field input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px #c8a24e22}
+.scan-field .icon{position:absolute;left:1rem;top:2.4rem;color:var(--gold);font-size:1.2rem}
+.scan-hint{text-align:center;color:var(--text-muted);font-size:.85rem;margin:1.5rem 0}
+.scan-hint i{font-size:2rem;color:var(--gold)33;display:block;margin-bottom:.5rem}
+.member-preview{background:var(--surface-deep);border:1px solid rgba(200,162,78,0.2);border-radius:10px;padding:1rem;margin-bottom:1rem;display:none}
 .member-preview.show{display:block}
-.member-preview .name{color:#c8a24e;font-weight:700;font-size:1.1rem}
-.member-preview .meta{color:#888;font-size:.85rem;margin-top:.3rem}
-.member-preview .status-ok{color:#22c55e}
-.member-preview .status-bad{color:#ef4444}
+.member-preview .name{color:var(--gold);font-weight:700;font-size:1.1rem}
+.member-preview .meta{color:var(--text-dim);font-size:.85rem;margin-top:.3rem}
+.member-preview .status-ok{color:var(--green)}
+.member-preview .status-bad{color:var(--red)}
 </style>
 {% endblock %}
 {% block content %}
@@ -54,15 +54,15 @@
              autocomplete="off">
     </div>
 
-    <button type="submit" class="btn w-100" style="background:#c8a24e;color:#1a1a2e;font-weight:700;padding:.8rem;font-size:1.1rem;border-radius:10px;margin-top:.5rem">
+    <button type="submit" class="btn w-100 fx-bg-gold fx-fw-bold fx-fs-xl fx-rounded mt-2 fx-text-dark" style="padding:.8rem">
       <i class="bi bi-check-circle"></i> Posudi
     </button>
   </form>
 
   <div class="text-center mt-3">
-    <a href="{% url 'library:loan_return' %}" style="color:#c8a24e;font-size:.9rem"><i class="bi bi-arrow-left-circle"></i> Vracanje knjige</a>
+    <a href="{% url 'library:loan_return' %}" class="fx-text-gold fx-fs-md"><i class="bi bi-arrow-left-circle"></i> Vracanje knjige</a>
     &nbsp;&middot;&nbsp;
-    <a href="{% url 'library:dashboard' %}" style="color:#888;font-size:.9rem">Dashboard</a>
+    <a href="{% url 'library:dashboard' %}" class="fx-text-muted fx-fs-md">Dashboard</a>
   </div>
 </div>
 

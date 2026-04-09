@@ -53,7 +53,7 @@
         </div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead >
                     <tr>
                         <th>{% trans "Firma" %}</th>
                         <th class="text-center">{% trans "Ocjena" %}</th>
@@ -94,7 +94,7 @@
                         <td class="{% if r.score_gdpr < 60 %}text-danger fw-bold{% endif %}">{{ r.score_gdpr }}</td>
                         <td>
                             {% for rec in r.red_recommendations %}
-                            <span class="badge bg-danger">{{ rec.title|truncatechars:25 }}</span>
+                            <span class="fenix-badge fenix-badge-danger">{{ rec.title|truncatechars:25 }}</span>
                             {% endfor %}
                         </td>
                         <td>

@@ -5,32 +5,32 @@
 <meta charset="utf-8">
 <style>
   @page { size: A4; margin: 18mm 15mm; }
-  body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5px; color: #1a1a1a; line-height: 1.5; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5px; color:var(--text); line-height: 1.5; }
   h1 { font-size: 22px; color: var(--gold,#c9a84c); margin-bottom: 4px; font-weight: 800; letter-spacing: 1px; }
   h2 { font-size: 14px; color: #1d4ed8; margin: 16px 0 6px; border-bottom: 2px solid #1d4ed8; padding-bottom: 3px; }
   h3 { font-size: 11px; color: var(--gold,#c9a84c); margin: 10px 0 4px; }
   .header { text-align: center; border-bottom: 3px solid var(--gold,#c9a84c); padding-bottom: 12px; margin-bottom: 15px; }
-  .header .sub { font-size: 11px; color: #666; letter-spacing: 2px; }
+  .header .sub { font-size: 11px; color:var(--text-dim); letter-spacing: 2px; }
   .header .date { font-size: 8px; color: #999; margin-top: 4px; }
   .section { margin-bottom: 12px; }
-  .feature { background: #f8f9fa; border-left: 3px solid var(--gold,#c9a84c); padding: 6px 10px; margin-bottom: 6px; }
-  .feature .title { font-weight: 700; font-size: 10px; color: #1a1a1a; }
-  .feature .desc { font-size: 8.5px; color: #555; }
+  .feature { background:var(--surface2); border-left: 3px solid var(--gold,#c9a84c); padding: 6px 10px; margin-bottom: 6px; }
+  .feature .title { font-weight: 700; font-size: 10px; color:var(--text); }
+  .feature .desc { font-size: 8.5px; color:var(--text-dim); }
   .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 7px; font-weight: 700; }
-  .badge-new { background: #dcfce7; color: #166534; }
+  .badge-new { background: #dcfce7; color:var(--green); }
   .badge-improved { background: #dbeafe; color: #1e40af; }
   .badge-security { background: #fef3c7; color: #92400e; }
   .badge-legal { background: #fce7f3; color: #9d174d; }
   table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-  th, td { border: 1px solid #ddd; padding: 4px 6px; font-size: 8.5px; }
-  th { background: #1a1a2e; color: #fff; font-weight: 700; text-align: left; }
+  th, td { border:1px solid var(--border); padding: 4px 6px; font-size: 8.5px; }
+  th { background: #1a1a2e; color:var(--white); font-weight: 700; text-align: left; }
   .stat-box { display: inline-block; text-align: center; padding: 8px 16px; background: #f0f4ff; border-radius: 8px; margin: 4px; }
   .stat-box .num { font-size: 18px; font-weight: 800; color: #1d4ed8; }
-  .stat-box .lbl { font-size: 7px; color: #666; }
+  .stat-box .lbl { font-size: 7px; color:var(--text-dim); }
   .comparison td:first-child { font-weight: 700; }
-  .yes { color: #16a34a; font-weight: 700; }
-  .no { color: #dc2626; }
-  .partial { color: #f59e0b; }
+  .yes { color:var(--green); font-weight: 700; }
+  .no { color:var(--red); }
+  .partial { color:var(--amber); }
   .footer { text-align: center; font-size: 7px; color: #999; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; }
   .page-break { page-break-before: always; }
 </style>
@@ -44,7 +44,7 @@
 </div>
 
 <!-- ═══ STATISTIKE ═══ -->
-<div style="text-align:center; margin-bottom:15px">
+<div class="text-center" style="margin-bottom:15px">
   <div class="stat-box"><div class="num">67</div><div class="lbl">Django modula</div></div>
   <div class="stat-box"><div class="num">{{ total_models|default:"150+" }}</div><div class="lbl">Modela u bazi</div></div>
   <div class="stat-box"><div class="num">{{ total_views|default:"400+" }}</div><div class="lbl">View funkcija</div></div>
@@ -405,7 +405,7 @@
   <tr><td>Infrastruktura</td><td>PWA, offline, Sentry, streaming ZIP, revizorski paket, Celery (5 taskova), DeviceToken login</td><td>PASS</td></tr>
 </table>
 
-<div class="footer" style="margin-top:20px">
+<div class="footer mt-4">
   <strong>LIMIT CONNECT</strong> &copy; 2026 Visković Group | limit-connect.com<br>
   Generirano: {% now "d.m.Y H:i" %} | Verzija: 2026.03.18-final<br>
   Ukupno nadogradnji: 50 | Testovi: 39/39 (100%) | Ocjena: 10/10 PRODUKCIJA

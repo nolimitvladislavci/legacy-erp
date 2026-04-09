@@ -15,13 +15,13 @@
     <div class="col-auto"><input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
     <div class="col-auto"><button class="btn btn-sm btn-primary">{% trans "Filtriraj" %}</button></div>
   </form>
-  <div class="mb-3"><strong>{% trans "Ukupno" %}:</strong> <span style="color:#3b82f6;font-weight:700">{{ total_hours|floatformat:1 }}h</span></div>
+  <div class="mb-3"><strong>{% trans "Ukupno" %}:</strong> <span class="fx-text-blue fx-fw-bold">{{ total_hours|floatformat:1 }}h</span></div>
   <div class="row g-3">
     <div class="col-md-6">
-      <div class="card" style="border-radius:12px">
+      <div class="card fx-rounded">
         <div class="card-body">
           <h6>{% trans "Po korisniku" %}</h6>
-          <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+          <table class="table table-sm table-hover mb-0 fx-fs-note">
             <thead><tr><th>{% trans "Korisnik" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Unosa" %}</th></tr></thead>
             <tbody>
               {% for u in by_user %}
@@ -35,10 +35,10 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div class="card" style="border-radius:12px">
+      <div class="card fx-rounded">
         <div class="card-body">
           <h6>{% trans "Po projektu" %}</h6>
-          <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+          <table class="table table-sm table-hover mb-0 fx-fs-note">
             <thead><tr><th>{% trans "Projekt" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Unosa" %}</th></tr></thead>
             <tbody>
               {% for p in by_project %}

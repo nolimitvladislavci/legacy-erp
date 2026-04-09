@@ -9,14 +9,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --dark: #0f172a; --gold: #c9a84c; --gray: #64748b; }
-        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; color: #1e293b; }
-        .portal-header { background: var(--dark); color: white; padding: 16px 0; }
+        body { background:var(--surface2); font-family: 'Segoe UI', sans-serif; color: #1e293b; }
+        .portal-header { background: var(--dark); color:var(--text); padding: 16px 0; }
         .portal-header .brand { font-weight: 700; font-size: 1.1rem; }
         .portal-header .brand span { color: var(--gold); }
-        .portal-nav a { color: #94a3b8; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: .85rem; transition: all .15s; }
-        .portal-nav a:hover, .portal-nav a.active { color: white; background: rgba(255,255,255,.1); }
+        .portal-nav a { color:var(--text-muted); text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: .85rem; transition: all .15s; }
+        .portal-nav a:hover, .portal-nav a.active { color:var(--text); background: rgba(255,255,255,.1); }
         .portal-footer { text-align: center; padding: 24px; color: var(--gray); font-size: .75rem; margin-top: 40px; }
-        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .stat-card { background:var(--bg-card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
         .stat-card .label { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
         .stat-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
     </style>
@@ -25,8 +25,8 @@
     <div class="portal-header">
         <div class="container-fluid" style="max-width:1000px">
             <div class="d-flex justify-content-between align-items-center">
-                <div class="brand">LIMIT <span>CONNECT</span> <small style="color:#64748b;font-size:.7rem;margin-left:8px">Portal</small></div>
-                <div class="text-end" style="font-size:.8rem;color:#94a3b8">
+                <div class="brand">LIMIT <span>CONNECT</span> <small class="fx-text-dim fx-fs-sm" style="margin-left:8px">Portal</small></div>
+                <div class="text-end fx-fs-compact fx-text-dim">
                     <i class="fas fa-user-circle"></i> {{ partner.name }}
                 </div>
             </div>

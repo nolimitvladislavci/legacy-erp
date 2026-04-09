@@ -18,64 +18,64 @@
 * { font-family: 'DejaVu', sans-serif !important; }
 
 @page { size: A4; margin: 18mm 18mm 22mm 18mm; }
-body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; background: #fff; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color:var(--text); background:var(--bg-card); margin: 0; padding: 0; }
 
 /* Header */
 .hdr { display: table; width: 100%; border-bottom: 2px solid #c9a84c; padding-bottom: 10px; margin-bottom: 14px; }
 .hdr-left  { display: table-cell; vertical-align: top; }
 .hdr-right { display: table-cell; vertical-align: top; text-align: right; width: 150px; }
-.co-name   { font-size: 16pt; font-weight: bold; color: #0a0a0a; }
-.co-sub    { font-size: 8pt; color: #555; margin-top: 2px; }
-.doc-title { font-size: 13pt; font-weight: bold; color: #c9a84c; }
+.co-name   { font-size: 16pt; font-weight: bold; color:var(--text); }
+.co-sub    { font-size: 8pt; color:var(--text-dim); margin-top: 2px; }
+.doc-title { font-size: 13pt; font-weight: bold; color:var(--gold); }
 .doc-sub   { font-size: 8.5pt; color: #444; margin-top: 3px; }
 
 /* Client box */
 .client-box { background: #f8f4e8; border: 1px solid #e8d9a0; border-radius: 4px; padding: 8px 10px; margin-bottom: 12px; display: table; width: 100%; box-sizing: border-box; }
 .cl-left { display: table-cell; vertical-align: top; }
 .cl-right { display: table-cell; vertical-align: top; text-align: right; width: 160px; }
-.cl-name { font-size: 12pt; font-weight: bold; color: #0a0a0a; }
-.cl-sub  { font-size: 8.5pt; color: #555; margin-top: 3px; }
+.cl-name { font-size: 12pt; font-weight: bold; color:var(--text); }
+.cl-sub  { font-size: 8.5pt; color:var(--text-dim); margin-top: 3px; }
 
 /* Section */
 .sec { margin-bottom: 10px; }
-.sec-title { font-size: 9pt; font-weight: bold; text-transform: uppercase; letter-spacing: .05em; color: #c9a84c; border-bottom: 1px solid #e8d9a0; padding-bottom: 3px; margin-bottom: 6px; }
+.sec-title { font-size: 9pt; font-weight: bold; text-transform: uppercase; letter-spacing: .05em; color:var(--gold); border-bottom: 1px solid #e8d9a0; padding-bottom: 3px; margin-bottom: 6px; }
 
 /* KV table */
 .kv-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
 .kv-table td { padding: 3px 6px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-.kv-table .lbl { color: #666; width: 38%; font-weight: bold; }
-.kv-table .val { color: #1a1a1a; }
+.kv-table .lbl { color:var(--text-dim); width: 38%; font-weight: bold; }
+.kv-table .val { color:var(--text); }
 .kv-table .val.gold { color: #b38a20; font-weight: bold; }
-.kv-table .val.red  { color: #c0392b; }
-.kv-table .val.grn  { color: #16a34a; }
+.kv-table .val.red  { color:var(--red); }
+.kv-table .val.grn  { color:var(--green); }
 
 /* Expert box */
-.expert { background: #fffbf0; border-left: 3px solid #c9a84c; padding: 8px 10px; font-size: 9pt; color: #1a1a1a; margin: 6px 0 10px; border-radius: 0 4px 4px 0; }
+.expert { background: #fffbf0; border-left: 3px solid #c9a84c; padding: 8px 10px; font-size: 9pt; color:var(--text); margin: 6px 0 10px; border-radius: 0 4px 4px 0; }
 
 /* Tags inline */
-.tags { font-size: 8pt; color: #555; }
+.tags { font-size: 8pt; color:var(--text-dim); }
 .tag-item { display: inline-block; background: #f8f4e8; border: 1px solid #e8d9a0; color: #6b5a1e; border-radius: 3px; padding: 1px 5px; margin: 1px 2px 1px 0; font-size: 7.5pt; }
-.tag-warn { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+.tag-warn { background: #fef2f2; border-color:var(--red); color:var(--red); }
 
 /* Price block */
 .price-block { background: #fffbf0; border: 1px solid #e8d9a0; border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; text-align: center; }
 .price-range { font-size: 15pt; font-weight: bold; color: #b38a20; }
-.price-lbl   { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .05em; color: #888; }
+.price-lbl   { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .05em; color:var(--text-muted); }
 
 /* Photos grid (max 3 per row for A4) */
 .photo-grid { display: table; width: 100%; border-collapse: collapse; margin-top: 6px; }
 .photo-cell { display: table-cell; width: 31%; padding: 3px; vertical-align: top; }
-.photo-cell img { width: 100%; border-radius: 3px; border: 1px solid #ddd; }
-.photo-cap  { font-size: 7pt; color: #888; text-align: center; margin-top: 2px; }
+.photo-cell img { width: 100%; border-radius: 3px; border:1px solid var(--border); }
+.photo-cap  { font-size: 7pt; color:var(--text-muted); text-align: center; margin-top: 2px; }
 
 /* Footer */
 .footer { border-top: 1px solid #ddd; padding-top: 8px; margin-top: 16px; display: table; width: 100%; }
-.footer-left  { display: table-cell; font-size: 8pt; color: #888; vertical-align: bottom; }
+.footer-left  { display: table-cell; font-size: 8pt; color:var(--text-muted); vertical-align: bottom; }
 .footer-right { display: table-cell; text-align: right; vertical-align: bottom; width: 100px; }
 .qr-img { width: 72px; height: 72px; }
 
 /* Signature */
-.sig-line { border-top: 1px solid #aaa; margin-top: 24px; width: 180px; padding-top: 4px; font-size: 8pt; color: #555; }
+.sig-line { border-top: 1px solid #aaa; margin-top: 24px; width: 180px; padding-top: 4px; font-size: 8pt; color:var(--text-dim); }
 
 /* Page break */
 .pb { page-break-before: always; }
@@ -87,7 +87,7 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a
 <div class="hdr">
   <div class="hdr-left">
     {% if logo_b64 %}
-    <img src="data:{{ logo_mime }};base64,{{ logo_b64 }}" style="height:40px;margin-bottom:4px;display:block">
+    <img src="data:{{ logo_mime }};base64,{{ logo_b64 }}" class="mb-1 d-block" style="height:40px">
     {% endif %}
     <div class="co-name">{{ company.name }}</div>
     {% if company.address %}<div class="co-sub">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
@@ -241,12 +241,12 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a
   <div class="footer-left">
     <div>Generirano: {{ generated_at|date:"d.m.Y H:i" }}</div>
     <div>limit-connect.com – {{ company.name }}</div>
-    <div style="margin-top:20px"><div class="sig-line">{% trans "Potpis stručnjaka" %}</div></div>
+    <div class="mt-4"><div class="sig-line">{% trans "Potpis stručnjaka" %}</div></div>
   </div>
   <div class="footer-right">
     {% if qr_b64 %}
     <img class="qr-img" src="data:image/png;base64,{{ qr_b64 }}" alt="QR online">
-    <div style="font-size:7pt;color:#888;text-align:center;margin-top:2px">{% trans "Online verzija" %}</div>
+    <div class="fx-text-muted text-center fx-mt-1" style="font-size:7pt">{% trans "Online verzija" %}</div>
     {% endif %}
   </div>
 </div>

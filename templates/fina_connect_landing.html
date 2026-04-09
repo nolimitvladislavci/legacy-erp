@@ -19,7 +19,7 @@ a { color: var(--gold); text-decoration: none; }
 .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--gold); }
 .nav-logo i { margin-right: 6px; }
 .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-.nav-links a { color: #bbb; font-size: 0.9rem; transition: color 0.2s; }
+.nav-links a { color:var(--text-muted); font-size: 0.9rem; transition: color 0.2s; }
 .nav-links a:hover { color: var(--gold); }
 .btn-nav { padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
 .btn-nav-outline { border: 1px solid var(--gold); color: var(--gold); background: transparent; }
@@ -30,7 +30,7 @@ a { color: var(--gold); text-decoration: none; }
 /* ── HERO ───────────────────────────────────────── */
 .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 6rem 1.5rem 4rem; position: relative; }
 .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%); }
-.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; color: #fff; line-height: 1.15; margin-bottom: 0.8rem; position: relative; }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; color:var(--white); line-height: 1.15; margin-bottom: 0.8rem; position: relative; }
 .hero h1 span { color: var(--gold); }
 .hero .subtitle { font-size: 1.3rem; color: #999; max-width: 600px; margin-bottom: 2rem; position: relative; }
 .hero .slogan { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.4rem; color: var(--gold); margin-bottom: 2.5rem; position: relative; }
@@ -40,33 +40,33 @@ a { color: var(--gold); text-decoration: none; }
 .btn-hero-primary:hover { background: #d4b55a; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201,168,76,0.3); }
 .btn-hero-ghost { background: transparent; color: var(--gold); border: 2px solid rgba(201,168,76,0.4); }
 .btn-hero-ghost:hover { border-color: var(--gold); background: rgba(201,168,76,0.1); }
-.eco-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); border-radius: 20px; padding: 6px 16px; color: #4ade80; font-size: 0.85rem; margin-top: 2rem; position: relative; }
+.eco-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); border-radius: 20px; padding: 6px 16px; color:var(--green); font-size: 0.85rem; margin-top: 2rem; position: relative; }
 
 /* ── FEATURES ───────────────────────────────────── */
 .section { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; }
 .section-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--gold); text-align: center; margin-bottom: 0.5rem; }
-.section-sub { text-align: center; color: #888; margin-bottom: 3rem; font-size: 1.05rem; }
+.section-sub { text-align: center; color:var(--text-muted); margin-bottom: 3rem; font-size: 1.05rem; }
 
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 .feature-card { background: var(--dark); border: 1px solid #2a2a3e; border-radius: 14px; padding: 1.8rem; transition: all 0.3s; }
 .feature-card:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 8px 25px rgba(201,168,76,0.1); }
 .feature-card .icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(201,168,76,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
 .feature-card .icon i { font-size: 1.3rem; color: var(--gold); }
-.feature-card h3 { font-size: 1.15rem; color: #fff; margin-bottom: 0.5rem; }
+.feature-card h3 { font-size: 1.15rem; color:var(--white); margin-bottom: 0.5rem; }
 .feature-card p { color: #999; font-size: 0.9rem; line-height: 1.5; }
 
 /* ── STATS ──────────────────────────────────────── */
 .stats { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; padding: 3rem 1rem; border-top: 1px solid #1a1a2e; border-bottom: 1px solid #1a1a2e; }
 .stat { text-align: center; }
 .stat .num { font-size: 2.5rem; font-weight: 700; color: var(--gold); font-family: 'Cormorant Garamond', serif; }
-.stat .label { color: #888; font-size: 0.85rem; margin-top: 4px; }
+.stat .label { color:var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
 
 /* ── DOMAINS ────────────────────────────────────── */
 .domains { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
 .domain-card { background: var(--dark); border: 1px solid #2a2a3e; border-radius: 14px; padding: 1.5rem; text-align: center; transition: all 0.3s; }
 .domain-card:hover { border-color: var(--gold); }
 .domain-card h4 { color: var(--gold); font-size: 1.1rem; margin-bottom: 0.3rem; }
-.domain-card .url { color: #666; font-size: 0.85rem; margin-bottom: 0.8rem; }
+.domain-card .url { color:var(--text-dim); font-size: 0.85rem; margin-bottom: 0.8rem; }
 .domain-card p { color: #999; font-size: 0.9rem; }
 
 /* ── PRICING PREVIEW ────────────────────────────── */
@@ -76,20 +76,20 @@ a { color: var(--gold); text-decoration: none; }
 .price-mini.pop { border-color: var(--gold); position: relative; }
 .price-mini.pop::before { content: 'TOP'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--black); padding: 2px 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
 .price-mini h4 { color: var(--gold); font-size: 1rem; }
-.price-mini .price { font-size: 2rem; font-weight: 700; color: #fff; margin: 0.5rem 0; }
-.price-mini .price span { font-size: 0.85rem; color: #888; font-weight: 400; }
+.price-mini .price { font-size: 2rem; font-weight: 700; color:var(--white); margin: 0.5rem 0; }
+.price-mini .price span { font-size: 0.85rem; color:var(--text-muted); font-weight: 400; }
 .price-mini ul { list-style: none; text-align: left; margin: 1rem 0; }
 .price-mini li { color: #999; font-size: 0.8rem; padding: 3px 0; }
 .price-mini li i { color: var(--gold); margin-right: 6px; font-size: 0.7rem; }
 
 /* ── CTA ────────────────────────────────────────── */
 .cta-section { text-align: center; padding: 5rem 1.5rem; background: linear-gradient(180deg, transparent, rgba(201,168,76,0.05)); }
-.cta-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: #fff; margin-bottom: 0.8rem; }
+.cta-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color:var(--white); margin-bottom: 0.8rem; }
 .cta-section p { color: #999; margin-bottom: 2rem; font-size: 1.1rem; }
 
 /* ── FOOTER ─────────────────────────────────────── */
 .footer { text-align: center; padding: 2.5rem 1rem; border-top: 1px solid #1a1a2e; }
-.footer p { color: #555; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.footer p { color:var(--text-dim); font-size: 0.85rem; margin-bottom: 0.5rem; }
 .footer .slogan-footer { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold); font-size: 1rem; }
 
 /* ── CONNECT WIDGET ─────────────────────────────── */
@@ -204,7 +204,7 @@ a { color: var(--gold); text-decoration: none; }
         <li><i class="fas fa-check"></i>1 korisnik</li>
         <li><i class="fas fa-check"></i>Email podrska</li>
       </ul>
-      <a href="/register/?plan=micro" class="btn-hero btn-hero-ghost" style="font-size:0.85rem;padding:8px 16px;width:100%;justify-content:center">Zapocni</a>
+      <a href="/register/?plan=micro" class="btn-hero btn-hero-ghost fx-fs-base fx-w-full justify-content-center fx-p-8-16">Zapocni</a>
     </div>
     <div class="price-mini">
       <h4>Starter</h4>
@@ -214,7 +214,7 @@ a { color: var(--gold); text-decoration: none; }
         <li><i class="fas fa-check"></i>Do 3 korisnika</li>
         <li><i class="fas fa-check"></i>Email podrska</li>
       </ul>
-      <a href="/register/?plan=starter" class="btn-hero btn-hero-ghost" style="font-size:0.85rem;padding:8px 16px;width:100%;justify-content:center">Odaberi</a>
+      <a href="/register/?plan=starter" class="btn-hero btn-hero-ghost fx-fs-base fx-w-full justify-content-center fx-p-8-16">Odaberi</a>
     </div>
     <div class="price-mini pop">
       <h4>Professional</h4>
@@ -224,7 +224,7 @@ a { color: var(--gold); text-decoration: none; }
         <li><i class="fas fa-check"></i>Do 15 korisnika</li>
         <li><i class="fas fa-check"></i>Prioritetna podrska</li>
       </ul>
-      <a href="/register/?plan=professional" class="btn-hero btn-hero-primary" style="font-size:0.85rem;padding:8px 16px;width:100%;justify-content:center">Odaberi</a>
+      <a href="/register/?plan=professional" class="btn-hero btn-hero-primary fx-fs-base fx-w-full justify-content-center fx-p-8-16">Odaberi</a>
     </div>
     <div class="price-mini">
       <h4>Enterprise</h4>
@@ -234,11 +234,11 @@ a { color: var(--gold); text-decoration: none; }
         <li><i class="fas fa-check"></i>Neograniceno korisnika</li>
         <li><i class="fas fa-check"></i>API + Premium podrska</li>
       </ul>
-      <a href="/register/?plan=enterprise" class="btn-hero btn-hero-ghost" style="font-size:0.85rem;padding:8px 16px;width:100%;justify-content:center">Odaberi</a>
+      <a href="/register/?plan=enterprise" class="btn-hero btn-hero-ghost fx-fs-base fx-w-full justify-content-center fx-p-8-16">Odaberi</a>
     </div>
   </div>
-  <p style="text-align:center;margin-top:1rem;color:#888;font-size:0.85rem">+5&euro;/mj. po dodatnom korisniku iznad limita plana</p>
-  <p style="text-align:center;margin-top:0.5rem"><a href="/pricing/" style="color:var(--gold)">Detaljne cijene i usporedba planova &rarr;</a></p>
+  <p class="text-center fx-text-muted fx-fs-base mt-3">+5&euro;/mj. po dodatnom korisniku iznad limita plana</p>
+  <p class="text-center fx-mt-3"><a href="/pricing/" class="fx-text-gold">Detaljne cijene i usporedba planova &rarr;</a></p>
 </section>
 
 <!-- DOMAINS -->
@@ -276,7 +276,7 @@ a { color: var(--gold); text-decoration: none; }
 <footer class="footer">
   <p>&copy; 2026 LIMIT Connect | <a href="/pricing/">Cijene</a> | <a href="{% url 'accounts:quick_register' %}">Registracija</a> | <a href="{% url 'login' %}">Prijava</a></p>
   <p class="slogan-footer">Bez papira. Bez brige. Bez granica.</p>
-  <p style="color:#444;font-size:0.75rem;margin-top:0.5rem">Ekolosko. Digitalno. Jednostavno.</p>
+  <p class="fx-fs-caption fx-mt-3" style="color:#444">Ekolosko. Digitalno. Jednostavno.</p>
 </footer>
 
 <!-- Connect Widget -->

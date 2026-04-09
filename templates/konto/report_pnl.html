@@ -4,37 +4,37 @@
 {% block page_title %}{% trans "Račun dobiti i gubitka" %}{% endblock %}
 {% block content %}
 <style>
-.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
-.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
-.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-stat{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.k-card{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;overflow:hidden}
+.k-card-head{padding:12px 16px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
 .k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:var(--text-muted);transition:all .15s}
 .k-nav a:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
-.k-nav a.active{background:var(--gold,#c9a84c);color:#0f172a;border-color:var(--gold,#c9a84c)}
+.k-nav a.active{background:var(--gold,#c9a84c);color:var(--text);border-color:var(--gold,#c9a84c)}
 .k-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
-.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table th{padding:8px 12px;text-align:left;color:var(--text-dim);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border2)}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:var(--text)}
 .k-table tr:hover{background:rgba(59,130,246,.05)}
 .k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
 .k-table .right{text-align:right}
 .k-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;display:inline-block}
 .k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
 .k-filter .fld{display:flex;flex-direction:column;gap:3px}
-.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
-.k-filter .fld input,.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim)}
+.k-filter .fld input,.k-filter .fld select{padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface-deep);color:var(--text);font-size:.82rem}
 .k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
-.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
-.k-btn-blue{background:#1e40af;color:#fff}.k-btn-blue:hover{background:#2563eb}
-.k-btn-outline{background:transparent;border:1.5px solid #334155;color:#94a3b8}.k-btn-outline:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
+.k-btn-gold{background:var(--gold,#c9a84c);color:var(--text)}.k-btn-gold:hover{background:var(--gold)}
+.k-btn-blue{background:#1e40af;color:var(--white)}.k-btn-blue:hover{background:var(--blue)}
+.k-btn-outline{background:transparent;border:1.5px solid #334155;color:var(--text-muted)}.k-btn-outline:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
 .qf{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:600;border:1.5px solid transparent;transition:all .15s}
-.qf.active{background:var(--gold,#c9a84c);color:#0f172a;border-color:var(--gold,#c9a84c)}
-.qf:not(.active){background:transparent;border-color:#334155;color:#94a3b8}
+.qf.active{background:var(--gold,#c9a84c);color:var(--text);border-color:var(--gold,#c9a84c)}
+.qf:not(.active){background:transparent;border-color:var(--border2);color:var(--text-muted)}
 .qf:not(.active):hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
 </style>
 
-<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">← {% trans "Dashboard" %}</a></div>
+<div class="fx-mb-3"><a href="{% url 'konto:dashboard' %}" class="fx-text-muted fx-no-underline fx-fs-note">← {% trans "Dashboard" %}</a></div>
 
 <form method="get" class="k-filter">
   <div class="fld"><label>OD</label><input type="date" name="from" value="{{ date_from }}"></div>
@@ -42,29 +42,29 @@
   <button type="submit" class="k-btn k-btn-outline">{% trans "Prikaži" %}</button>
 </form>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+<div class="fx-gap-4 d-grid mb-3 fx-grid-2-equal">
   <!-- PRIHODI -->
   <div class="k-card">
-    <div class="k-card-head"><h3>{% trans "Prihodi" %}</h3><span style="color:#22c55e;font-weight:700;font-family:'IBM Plex Mono',monospace">{{ report.income.total|floatformat:2 }} €</span></div>
+    <div class="k-card-head"><h3>{% trans "Prihodi" %}</h3><span class="fx-text-green fx-fw-bold" style="font-family:'IBM Plex Mono',monospace">{{ report.income.total|floatformat:2 }} €</span></div>
     <table class="k-table">
       <tbody>
       {% for item in report.income.detail %}
-      <tr><td class="mono" style="color:var(--gold,#c9a84c)">{{ item.code }}</td><td>{{ item.name }}</td><td class="right mono" style="color:#22c55e">{{ item.amount|floatformat:2 }}</td></tr>
+      <tr><td class="mono fx-text-gold">{{ item.code }}</td><td>{{ item.name }}</td><td class="right mono fx-text-green">{{ item.amount|floatformat:2 }}</td></tr>
       {% empty %}
-      <tr><td colspan="3" style="text-align:center;color:#64748b;padding:16px">{% trans "Nema prihoda u periodu" %}</td></tr>
+      <tr><td colspan="3" class="text-center fx-text-dim fx-p-16">{% trans "Nema prihoda u periodu" %}</td></tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
   <!-- RASHODI -->
   <div class="k-card">
-    <div class="k-card-head"><h3>{% trans "Rashodi" %}</h3><span style="color:#ef4444;font-weight:700;font-family:'IBM Plex Mono',monospace">{{ report.expenses.total|floatformat:2 }} €</span></div>
+    <div class="k-card-head"><h3>{% trans "Rashodi" %}</h3><span class="fx-text-red fx-fw-bold" style="font-family:'IBM Plex Mono',monospace">{{ report.expenses.total|floatformat:2 }} €</span></div>
     <table class="k-table">
       <tbody>
       {% for item in report.expenses.detail %}
-      <tr><td class="mono" style="color:var(--gold,#c9a84c)">{{ item.code }}</td><td>{{ item.name }}</td><td class="right mono" style="color:#ef4444">{{ item.amount|floatformat:2 }}</td></tr>
+      <tr><td class="mono fx-text-gold">{{ item.code }}</td><td>{{ item.name }}</td><td class="right mono fx-text-red">{{ item.amount|floatformat:2 }}</td></tr>
       {% empty %}
-      <tr><td colspan="3" style="text-align:center;color:#64748b;padding:16px">{% trans "Nema rashoda u periodu" %}</td></tr>
+      <tr><td colspan="3" class="text-center fx-text-dim fx-p-16">{% trans "Nema rashoda u periodu" %}</td></tr>
       {% endfor %}
       </tbody>
     </table>
@@ -73,10 +73,10 @@
 
 <!-- REZULTAT -->
 <div class="k-card">
-  <div style="padding:20px;text-align:center">
-    <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">{% trans "Dobit / Gubitak" %}</div>
-    <div style="font-size:2rem;font-weight:800;color:{% if report.profit_loss >= 0 %}var(--gold,#c9a84c){% else %}#ef4444{% endif %}">{{ report.profit_loss|floatformat:2 }} €</div>
-    <div style="font-size:.8rem;color:#64748b;margin-top:4px">{{ report.period.from }} – {{ report.period.to }}</div>
+  <div class="text-center fx-p-20">
+    <div class="fx-fs-sm fx-text-dim mb-2 fx-uppercase" style="letter-spacing:2px">{% trans "Dobit / Gubitak" %}</div>
+    <div class="fx-fs-icon fx-fw-800" style="color:{% if report.profit_loss >= 0 %}var(--gold,#c9a84c){% else %}#ef4444{% endif %}">{{ report.profit_loss|floatformat:2 }} €</div>
+    <div class="fx-fs-compact fx-text-dim mt-1">{{ report.period.from }} – {{ report.period.to }}</div>
   </div>
 </div>
 {% endblock %}

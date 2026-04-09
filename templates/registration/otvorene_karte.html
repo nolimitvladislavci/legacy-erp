@@ -1,36 +1,30 @@
 {% load i18n %}
 <!-- OTVORENE KARTE — Trust signal -->
-<div style="max-width:600px;margin:2rem auto 0;
-  background:var(--card,#1e293b);border:1px solid var(--border,#252830);
-  border-radius:14px;padding:1.5rem">
+<div class="fx-rounded-lg fx-p-5" style="max-width:600px;margin:2rem auto 0;background:var(--card,#1e293b);border:1px solid var(--border,#252830)">
 
-  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
-    <span style="font-size:1.4rem">&#127183;</span>
+  <div class="d-flex align-items-center fx-gap-3 mb-3">
+    <span class="fx-fs-4xl">&#127183;</span>
     <div>
       <strong style="color:var(--text,#eee)">{% trans "Otvorene karte" %}</strong>
-      <div style="font-size:.78rem;color:var(--muted,#64748b)">
+      <div class="fx-fs-body-sm" style="color:var(--muted,#64748b)">
         {% trans "Što LIMIT Connect vidi — i što ne vidi" %}
       </div>
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-    <div style="background:rgba(39,174,96,.06);border:1px solid rgba(39,174,96,.2);
-      border-radius:8px;padding:1rem">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;
-        color:#27ae60;margin-bottom:.5rem;font-weight:700">&#10003; {% trans "Vidimo" %}</div>
-      <ul style="list-style:none;font-size:.8rem;color:var(--muted,#94a3b8);margin:0;padding:0">
+  <div class="d-grid fx-gap-3 fx-grid-2-equal">
+    <div class="fx-rounded fx-p-4" style="background:rgba(39,174,96,.06);border:1px solid rgba(39,174,96,.2)">
+      <div class="fx-fs-sm fx-fw-bold mb-2 fx-uppercase" style="letter-spacing:.1em;color:#27ae60">&#10003; {% trans "Vidimo" %}</div>
+      <ul class="fx-fs-compact fx-text-muted fx-m-0 fx-p-0" style="list-style:none">
         <li style="padding:.2rem 0">&#128203; {% trans "OIB i naziv tvrtke (javni registar)" %}</li>
         <li style="padding:.2rem 0">&#129534; {% trans "Vaše fakture koje vi kreirate" %}</li>
         <li style="padding:.2rem 0">&#9200; {% trans "Radni sati koje vi unosite" %}</li>
         <li style="padding:.2rem 0">&#128202; {% trans "Statistike vašeg poslovanja" %}</li>
       </ul>
     </div>
-    <div style="background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);
-      border-radius:8px;padding:1rem">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;
-        color:#e74c3c;margin-bottom:.5rem;font-weight:700">&#10007; {% trans "Ne vidimo" %}</div>
-      <ul style="list-style:none;font-size:.8rem;color:var(--muted,#94a3b8);margin:0;padding:0">
+    <div class="fx-rounded fx-p-4" style="background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2)">
+      <div class="fx-fs-sm fx-text-red fx-fw-bold mb-2 fx-uppercase" style="letter-spacing:.1em">&#10007; {% trans "Ne vidimo" %}</div>
+      <ul class="fx-fs-compact fx-text-muted fx-m-0 fx-p-0" style="list-style:none">
         <li style="padding:.2rem 0">&#128176; {% trans "Vaš bankovni račun" %}</li>
         <li style="padding:.2rem 0">&#128101; {% trans "Vaše privatne kontakte" %}</li>
         <li style="padding:.2rem 0">&#128274; {% trans "Vaše lozinke (SHA-256 hash)" %}</li>
@@ -39,10 +33,9 @@
     </div>
   </div>
 
-  <div style="margin-top:1rem;font-size:.78rem;color:var(--muted,#94a3b8);
-    border-top:1px solid var(--border,#252830);padding-top:.75rem">
+  <div class="fx-fs-body-sm mt-3 fx-text-muted" style="border-top:1px solid var(--border,#252830);padding-top:.75rem">
     &#128274; {% trans "Vaši podaci su na" %} <strong>Hetzner EU</strong> {% trans "serverima." %}
     {% trans "Možete ih" %} <strong>{% trans "exportirati ili obrisati" %}</strong> {% trans "u bilo koje doba." %}
-    <a href="/hr/gdpr/" style="color:var(--gold,#c9a84c);margin-left:.25rem">{% trans "Saznajte više" %} &rarr;</a>
+    <a href="/hr/gdpr/" class="fx-text-gold" style="margin-left:.25rem">{% trans "Saznajte više" %} &rarr;</a>
   </div>
 </div>

@@ -51,7 +51,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,26,20,.95
 .ent-card:hover{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.04);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
 .ent-card-top{padding:2rem 2rem 1.2rem;flex:1}
 .ent-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem}
-.ent-icon.green{background:rgba(45,106,71,.2);color:#4ade80}
+.ent-icon.green{background:rgba(45,106,71,.2);color:var(--green)}
 .ent-icon.amber{background:rgba(201,100,30,.2);color:#fb923c}
 .ent-icon.earth{background:rgba(101,163,13,.15);color:#a3e635}
 .ent-icon.blue{background:rgba(99,102,241,.15);color:#818cf8}
@@ -66,12 +66,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,26,20,.95
 /* VALIDATOR BANNER */
 .validator-banner{max-width:1100px;margin:0 auto 5rem;padding:0 1.5rem}
 .validator-inner{background:rgba(15,23,42,.6);border:1px solid rgba(34,197,94,.15);border-radius:16px;padding:1.75rem 2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
-.validator-icon{width:48px;height:48px;border-radius:12px;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center;color:#22c55e;font-size:1.3rem;flex-shrink:0}
+.validator-icon{width:48px;height:48px;border-radius:12px;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.3rem;flex-shrink:0}
 .validator-text{flex:1;min-width:200px}
 .validator-text h3{font-size:.95rem;font-weight:700;margin-bottom:.25rem}
 .validator-text p{font-size:.8rem;color:rgba(255,255,255,.5)}
-.validator-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;padding:.65rem 1.4rem;border-radius:10px;font-size:.8rem;font-weight:700;transition:all .2s;white-space:nowrap}
-.validator-btn:hover{background:rgba(34,197,94,.2);color:#4ade80}
+.validator-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);padding:.65rem 1.4rem;border-radius:10px;font-size:.8rem;font-weight:700;transition:all .2s;white-space:nowrap}
+.validator-btn:hover{background:rgba(34,197,94,.2);color:var(--green)}
 
 /* FOOTER */
 footer{border-top:1px solid rgba(255,255,255,.06);padding:3rem 1.5rem;text-align:center}
@@ -199,7 +199,7 @@ footer .foot-copy{font-size:.72rem;color:rgba(255,255,255,.25)}
       <a href="/validator/">CroXML Verify</a>
     </div>
     <iframe class="gmap" src="https://maps.google.com/maps?q=Vladislavci,Croatia&z=13&output=embed" allowfullscreen loading="lazy"></iframe>
-    <div class="foot-copy">© 2026 Korpaš Grupa · Digitalno rješenje: <a href="https://limit-connect.com" style="color:var(--gold)">LIMIT Connect</a></div>
+    <div class="foot-copy">© 2026 Korpaš Grupa · Digitalno rješenje: <a href="https://limit-connect.com" class="fx-text-gold">LIMIT Connect</a></div>
   </div>
 </footer>
 

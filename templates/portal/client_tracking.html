@@ -25,12 +25,12 @@
 {% block content %}
 <div class="flex-between mb-3">
   <div>
-    <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
-      <i class="fas fa-satellite-dish" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+    <h1 class="fx-fs-4xl fx-fw-bold fx-text-gold" style="font-family:var(--font-heading)">
+      <i class="fas fa-satellite-dish fx-fs-lg fx-mr-3" style="opacity:.6"></i>
       Pracenje dostave
     </h1>
     {% if delivery %}
-    <p class="text-muted" style="font-size:.85rem;margin-top:4px">
+    <p class="text-muted fx-fs-base mt-1">
       {{ delivery.delivery_number }} &mdash;
       <span class="badge badge-{% if delivery.status == 'in_transit' %}sent{% elif delivery.status == 'delivered' %}paid{% else %}draft{% endif %}">
         {{ delivery.status }}
@@ -82,8 +82,8 @@
   <div class="b2b-card">
     <div class="b2b-card-header"><i class="fas fa-map-marked-alt"></i> Lokacija</div>
     <div class="track-map" id="mapArea">
-      <div style="text-align:center">
-        <i class="fas fa-map-marker-alt" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--gold)"></i>
+      <div class="text-center">
+        <i class="fas fa-map-marker-alt fx-fs-icon mb-2 d-block fx-text-gold"></i>
         <span id="coordsDisplay">Ucitavanje koordinata...</span>
       </div>
     </div>
@@ -111,7 +111,7 @@
           <td class="text-mono text-gold">{{ box.box_id }}</td>
           <td>
             {% if box.last_temp %}
-              <span style="color:{% if box.is_temp_ok %}var(--success){% else %}var(--error){% endif %};font-weight:600">
+              <span class="fx-fw-semibold" style="color:{% if box.is_temp_ok %}var(--success){% else %}var(--error){% endif %}">
                 {{ box.last_temp }}&deg;C
               </span>
             {% else %}-{% endif %}
@@ -205,7 +205,7 @@
   if (last) {
     el.innerHTML = 'Lat: ' + last.lat.toFixed(5) + ', Lng: ' + last.lng.toFixed(5) +
       '<br><a href="https://www.google.com/maps?q=' + last.lat + ',' + last.lng +
-      '" target="_blank" style="color:var(--gold);font-size:.82rem">Otvori u Google Maps &rarr;</a>';
+      '" target="_blank" class="fx-fs-note fx-text-gold">Otvori u Google Maps &rarr;</a>';
   } else {
     el.textContent = 'Nema GPS podataka';
   }

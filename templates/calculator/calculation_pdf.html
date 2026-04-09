@@ -16,20 +16,20 @@
 * { font-family: 'DejaVu', sans-serif !important; }
 
         @page { size: a4; margin: 2cm; }
-        body { font-family: Helvetica, Arial, sans-serif; color: #333; }
+        body { font-family: Helvetica, Arial, sans-serif; color:var(--text); }
         .header { text-align: right; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
         .title { font-size: 24px; color: #0056b3; margin-top: 20px; }
         .details { margin-top: 30px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 10px; text-align: left; font-size: 12px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+        td { padding: 10px; border-bottom:1px solid var(--border); font-size: 11px; }
         .totals { margin-top: 30px; text-align: right; }
         .total-row { font-size: 14px; font-weight: bold; color: #0056b3; }
     </style>
 </head>
 <body>
     <div class="header">
-        <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" style="height:40px;width:auto;display:block;margin-bottom:4px"><br>
+        <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" class="d-block mb-1" style="height:40px;width:auto"><br>
         Datum: {{ calculation.created_at|date:"d.m.Y." }}
     </div>
 
@@ -44,20 +44,20 @@
         <thead>
             <tr>
                 <th>Opis normativa</th>
-                <th style="text-align: center;">Kol.</th>
-                <th style="text-align: right;">Materijal</th>
-                <th style="text-align: right;">Rad</th>
-                <th style="text-align: right;">Ukupno</th>
+                <th class="text-center">Kol.</th>
+                <th class="text-end">Materijal</th>
+                <th class="text-end">Rad</th>
+                <th class="text-end">Ukupno</th>
             </tr>
         </thead>
         <tbody>
             {% for item in items %}
             <tr>
                 <td>{{ item.description }}</td>
-                <td style="text-align: center;">{{ item.quantity }}</td>
-                <td style="text-align: right;">{{ item.unit_price_material }} €</td>
-                <td style="text-align: right;">{{ item.labor_rate_applied }} €</td>
-                <td style="text-align: right;"><strong>{{ item.quantity }}</strong></td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-end">{{ item.unit_price_material }} €</td>
+                <td class="text-end">{{ item.labor_rate_applied }} €</td>
+                <td class="text-end"><strong>{{ item.quantity }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>

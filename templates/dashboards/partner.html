@@ -4,7 +4,7 @@
 {% block title %}Portal za partnere – Visković Group{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/global_themes.css">
+<link rel="stylesheet" href="/static/css/fenix-tokens.css?v=4000">
 <style>
     .partner-wrap { font-family: var(--font-body); color: var(--text); padding: 24px 0; max-width: 1400px; margin: 0 auto; }
     .p-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
@@ -85,7 +85,7 @@
             <div class="kpi-value">€ {{ total_budget|default:"0.00" }}</div>
             <div class="progress-container">
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: 100%; opacity: 0.3;"></div>
+                    <div class="progress-bar-fill fx-w-full fx-opacity-50"></div>
                 </div>
                 <div class="progress-text">
                     <span>Prema ponudi</span>
@@ -113,7 +113,7 @@
             <div class="kpi-value {% if unpaid_count > 0 %}red{% endif %}" style="color: {% if unpaid_count > 0 %}var(--red){% else %}var(--text){% endif %};">
                 {{ unpaid_count|default:"0" }}
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 16px;">
+            <div class="fx-fs-compact fx-text-dim mt-3">
                 {% if unpaid_count > 0 %}Molimo provjerite karticu "Računi".{% else %}Sve je plaćeno. Hvala!{% endif %}
             </div>
         </div>
@@ -125,7 +125,7 @@
             <div class="section-box">
                 <div class="box-header">
                     <h2 class="box-title"><i class="fas fa-history"></i> Građevinski dnevnik i evidencija rada (Uživo)</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px;">Zadnje ažurirano: Danas</span>
+                    <span class="fx-fs-sm fx-rounded-sm fx-text-dim fx-b" style="padding:4px 8px">Zadnje ažurirano: Danas</span>
                 </div>
                 
                 <table class="feed-table">
@@ -135,7 +135,7 @@
                             <th>Aktivnost</th>
                             <th>Datum</th>
                             <th>Sati</th>
-                            <th style="text-align: right;">Troškovi</th>
+                            <th class="text-end">Troškovi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -167,45 +167,45 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-dim); padding: 40px 0;">
+                                <td colspan="5" class="text-center fx-text-dim" style="padding:40px 0">
                                     Još nema evidentiranih radnih sati za vaš projekt.
                                 </td>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
-                <div style="padding: 16px; text-align: center; border-top: 1px solid var(--border);">
-                    <a href="#" style="color: var(--gold); font-size: 0.8rem; text-decoration: none; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Prikaži sve zapise ↓</a>
+                <div class="text-center fx-p-16 fx-bt">
+                    <a href="#" class="fx-fs-compact fx-no-underline fx-fw-semibold fx-text-gold fx-uppercase fx-ls-2">Prikaži sve zapise ↓</a>
                 </div>
 
-            </div> <div class="section-box" style="margin-top: 24px;">
+            </div> <div class="section-box mt-4">
                 <div class="box-header">
                     <h2 class="box-title"><i class="fas fa-camera"></i> Fotografije s gradilišta uživo</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px;">Zadnje ažurirano: Danas</span>
+                    <span class="fx-fs-sm fx-rounded-sm fx-text-dim fx-b" style="padding:4px 8px">Zadnje ažurirano: Danas</span>
                 </div>
                 
                 <div style="padding: 24px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+                    <div class="fx-gap-4 d-grid" style="grid-template-columns:repeat(auto-fill, minmax(180px, 1fr))">
                         {% if site_photos %}
                             {% for foto in site_photos %}
-                            <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface2);">
-                                <div style="aspect-ratio: 1; overflow: hidden; position: relative;">
+                            <div class="fx-rounded fx-bg-surface2 fx-b fx-overflow-hidden">
+                                <div class="fx-overflow-hidden fx-relative" style="aspect-ratio:1">
                                     <a href="{{ foto.image.url }}" target="_blank">
-                                        <img src="{{ foto.image.url }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                        <img src="{{ foto.image.url }}" class="fx-w-full" style="height:100%;object-fit:cover;transition:transform 0.3s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                                     </a>
                                 </div>
-                                <div style="padding: 12px; font-size: 0.75rem;">
-                                    <div style="color: var(--gold); font-weight: 700; margin-bottom: 4px;">{{ foto.created_at|date:"d.m.Y H:i" }}</div>
-                                    <div style="color: var(--text);"><i class="fas fa-hard-hat" style="color: var(--text-dim);"></i> {{ foto.user.first_name|default:foto.user.username }}</div>
+                                <div class="fx-fs-caption fx-p-12">
+                                    <div class="fx-fw-bold fx-text-gold mb-1">{{ foto.created_at|date:"d.m.Y H:i" }}</div>
+                                    <div class="fx-text-body"><i class="fas fa-hard-hat fx-text-dim"></i> {{ foto.user.first_name|default:foto.user.username }}</div>
                                     {% if foto.note %}
-                                    <div style="color: var(--text-dim); margin-top: 6px; font-style: italic;">"{{ foto.note }}"</div>
+                                    <div class="fx-text-dim mt-1" style="font-style:italic">"{{ foto.note }}"</div>
                                     {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
                         {% else %}
-                            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 20px 0;">
-                                <i class="fas fa-image fa-2x" style="opacity: 0.2; margin-bottom: 10px;"></i>
+                            <div class="text-center fx-text-dim fx-col-full" style="padding:20px 0">
+                                <i class="fas fa-image fa-2x mb-2" style="opacity:0.2"></i>
                                 <p>Još nema učitanih fotografija s projekta.</p>
                             </div>
                         {% endif %}
@@ -278,11 +278,11 @@
                 {% endif %}
             </div>
             
-            <div class="section-box" style="background: var(--gold-dim); border-color: var(--gold-border);">
-                <div style="padding: 24px; text-align: center;">
-                    <h3 style="color: var(--gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0;">Pitanja o projektu?</h3>
-                    <p style="font-size: 0.85rem; color: var(--text); line-height: 1.6; margin: 12px 0 20px;">Vaš osobni voditelj gradilišta je uvijek na raspolaganju.</p>
-                    <a href="tel:+4915234209056" style="display: block; width: 100%; padding: 12px; background: var(--gold); color: var(--black); text-decoration: none; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px;">📞 Nazovite</a>
+            <div class="section-box fx-bg-gold-dim" style="border-color:var(--gold-border)">
+                <div class="text-center" style="padding:24px">
+                    <h3 class="fx-fs-md fx-text-gold mt-0 fx-uppercase fx-ls-2">Pitanja o projektu?</h3>
+                    <p class="fx-fs-base fx-text-body fx-lh-normal" style="margin:12px 0 20px">Vaš osobni voditelj gradilišta je uvijek na raspolaganju.</p>
+                    <a href="tel:+4915234209056" class="fx-w-full fx-no-underline fx-fw-bold fx-rounded-sm d-block fx-uppercase fx-p-12 fx-bg-gold fx-ls-2" style="color:var(--black)">📞 Nazovite</a>
                 </div>
             </div>
 

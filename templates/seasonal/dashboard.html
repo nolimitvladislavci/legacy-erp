@@ -8,14 +8,14 @@
   {% include "partials/_page_header.html" with title="Sezonski radnici" subtitle="Upravljanje ugovorima, HZMO rokovima i isplatama" icon="fas fa-umbrella-beach" %}
 
   {% if hzmo_alerts %}
-  <div class="alert alert-danger border-0 mb-4" style="background:#2d0a0a">
+  <div class="alert alert-danger border-0 mb-4 fx-bg-surface">
     <div class="d-flex align-items-center gap-2 mb-2">
       <i class="fas fa-exclamation-triangle text-danger"></i>
       <strong class="text-danger">{{ hzmo_alerts|length }} HZMO rok{{ hzmo_alerts|length|pluralize:",ova" }} zahtijeva pažnju</strong>
     </div>
     {% for a in hzmo_alerts %}
     <div class="d-flex align-items-center gap-2 small mt-1">
-      {% if a.urgent %}<span class="badge bg-danger">HITNO</span>{% else %}<span class="badge bg-warning text-dark">{{ a.days_left }}d</span>{% endif %}
+      {% if a.urgent %}<span class="fenix-badge fenix-badge-danger">HITNO</span>{% else %}<span class="fenix-badge fenix-badge-warning">{{ a.days_left }}d</span>{% endif %}
       <span class="text-white">{{ a.type }} — <strong>{{ a.contract.worker.full_name }}</strong></span>
       <span class="text-muted">rok {{ a.deadline }}</span>
       <a href="{% url 'seasonal:contract_detail' a.contract.pk %}" class="ms-auto btn btn-sm btn-outline-danger py-0">Otvori</a>

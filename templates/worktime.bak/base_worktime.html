@@ -59,14 +59,14 @@
             </div>
         </div>
     
-    <div style="display:inline-flex; gap:10px; align-items:center; margin-left:auto; padding:0 20px; z-index:9999;">
-        <form action="/i18n/setlang/" method="post" style="margin:0; display:flex; gap:10px;">
+    <div class="fx-gap-3 d-inline-flex align-items-center fx-ml-auto" style="padding:0 20px;z-index:9999">
+        <form action="/i18n/setlang/" method="post" class="d-flex fx-gap-3 fx-m-0">
             {% csrf_token %}
             <input name="next" type="hidden" value="{{ request.get_full_path }}">
             {% get_current_language as CURRENT_LANG %}
             {% for lang in LANGUAGES %}
                 <button type="submit" name="language" value="{{ lang.0 }}" 
-                style="background:none; border:none; padding:0; cursor:pointer; font-family:'Barlow', sans-serif; font-size:14px; font-weight:bold; text-transform:uppercase; transition:0.3s; color:{% if CURRENT_LANG == lang.0 %}var(--gold,#c9a84c){% else %}#888{% endif %};">
+                class="fx-border-none fx-pointer fx-fw-bold" style="background:none;padding:0;font-family:'Barlow', sans-serif;font-size:14px;text-transform:uppercase;transition:0.3s;color:{% if CURRENT_LANG == lang.0 %}var(--gold,#c9a84c){% else %}#888{% endif %}">
                 {{ lang.0 }}
                 </button>
             {% endfor %}

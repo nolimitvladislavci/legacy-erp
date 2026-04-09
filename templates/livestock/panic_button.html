@@ -6,7 +6,7 @@
 <style>
 .panic-header {
     background: linear-gradient(135deg, #b91c1c, #dc2626);
-    color: #fff;
+    color:var(--white);
     padding: 2rem;
     border-radius: 12px;
     text-align: center;
@@ -43,7 +43,7 @@
     font-weight: 700;
     border: none;
     border-radius: 12px;
-    color: #fff;
+    color:var(--white);
     cursor: pointer;
     padding: 1rem 1.5rem;
     transition: transform 0.15s, box-shadow 0.15s;
@@ -72,7 +72,7 @@
 {% block content %}
 <div class="container py-4" style="max-width: 600px;">
     <div class="panic-header">
-        <i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:0.5rem;"></i>
+        <i class="fas fa-exclamation-triangle fx-fs-icon fx-mb-3"></i>
         <h1>INSPEKCIJA</h1>
         <div class="subtitle">Brzi pristup — generiraj QR za inspektora</div>
     </div>

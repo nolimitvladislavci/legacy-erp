@@ -10,7 +10,7 @@
   :root { --gold: #c9a84c; --black: #0a0a0a; --dark: #1a1a1a; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--black); color: #fff;
+    background: var(--black); color:var(--white);
     font-family: 'Segoe UI', sans-serif;
     height: 100vh; overflow: hidden;
     display: flex; flex-direction: column;
@@ -25,7 +25,7 @@
     font-family: 'Cormorant Garamond', serif;
     letter-spacing: 3px; text-transform: uppercase;
   }
-  .header .terminal { font-size: 13px; color: #888; margin-top: 4px; }
+  .header .terminal { font-size: 13px; color:var(--text-muted); margin-top: 4px; }
 
   .content { flex: 1; display: flex; flex-direction: column; padding: 20px 30px; }
 
@@ -39,7 +39,7 @@
     font-family: 'Cormorant Garamond', serif;
     animation: pulse 3s ease-in-out infinite;
   }
-  .state-idle .sub { font-size: 16px; color: #666; margin-top: 10px; }
+  .state-idle .sub { font-size: 16px; color:var(--text-dim); margin-top: 10px; }
 
   /* ACTIVE state — items flowing in */
   .items-table { flex: 1; overflow-y: auto; margin: 10px 0; }
@@ -108,7 +108,7 @@
 <body>
 
 <div class="header">
-  {% if company.logo %}<img src="{{ company.logo.url }}" alt="{{ company.name }}" style="max-height:50px;margin-bottom:8px">{% endif %}
+  {% if company.logo %}<img src="{{ company.logo.url }}" alt="{{ company.name }}" class="mb-2" style="max-height:50px">{% endif %}
   <h1>{{ company.name }}</h1>
   <div class="terminal">{{ terminal.name }}</div>
 </div>
@@ -152,7 +152,7 @@ function render(data) {
       <div class="state-paid">
         <div class="check">✓</div>
         <div class="thanks">Hvala na kupnji!</div>
-        <div style="margin-top:20px;font-size:14px;color:#666">Skenirajte za loyalty bodove</div>
+        <div class="fx-text-dim mt-4" style="font-size:14px">Skenirajte za loyalty bodove</div>
         ${parseFloat(data.change) > 0 ? '<div class="change">Povrat: ' + parseFloat(data.change).toFixed(2) + ' €</div>' : ''}
       </div>`;
     lastState = 'paid';
@@ -170,7 +170,7 @@ function render(data) {
   el.innerHTML = `
     <div class="items-table">
       <table>
-        <thead><tr><th>#</th><th>Artikl</th><th>Kol.</th><th style="text-align:right">Cijena</th></tr></thead>
+        <thead><tr><th>#</th><th>Artikl</th><th>Kol.</th><th class="text-end">Cijena</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>

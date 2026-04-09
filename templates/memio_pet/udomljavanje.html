@@ -4,26 +4,26 @@
 {% block meta %}<meta name="description" content="Životinje iz azila koje čekaju dom. Pronađi svog novog prijatelja.">{% endblock %}
 
 {% block content %}
-<div style="text-align:center;padding:48px 24px 32px;max-width:600px;margin:0 auto">
-  <h1>Svaki ljubimac zaslužuje <em style="color:var(--gold);font-style:italic">dom</em></h1>
-  <p style="color:var(--ink2);font-size:.95rem;line-height:1.6;margin-top:8px">
+<div class="text-center fx-m-auto" style="padding:48px 24px 32px;max-width:600px">
+  <h1>Svaki ljubimac zaslužuje <em class="fx-text-gold" style="font-style:italic">dom</em></h1>
+  <p class="fx-fs-normal mt-2 fx-text-dim fx-lh-normal">
     Životinje iz azila diljem Hrvatske koje čekaju svoju obitelj.
   </p>
 </div>
 
-<form style="max-width:700px;margin:0 auto 24px;padding:0 24px;display:flex;gap:12px;flex-wrap:wrap" method="get">
-  <select name="vrsta" class="mp-field" style="flex:1;min-width:120px;margin:0;padding:10px 14px">
+<form class="d-flex fx-gap-3 fx-flex-wrap fx-max-700" style="margin:0 auto 24px;padding:0 24px" method="get">
+  <select name="vrsta" class="mp-field fx-flex-1 fx-m-0 fx-p-10-14" style="min-width:120px">
     <option value="">Sve vrste</option>
     {% for val, label in vrsta_choices %}
     <option value="{{ val }}" {% if vrsta_filter == val %}selected{% endif %}>{{ label }}</option>
     {% endfor %}
   </select>
-  <input type="text" name="grad" value="{{ grad_filter }}" placeholder="Grad..." style="flex:1;min-width:120px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-family:var(--sans);background:var(--surface);color:var(--ink)">
+  <input type="text" name="grad" value="{{ grad_filter }}" placeholder="Grad..." class="fx-rounded fx-bg-surface fx-flex-1 fx-p-10-14" style="min-width:120px;border:1px solid var(--line);font-family:var(--sans);color:var(--ink)">
   <button type="submit" class="mp-btn mp-btn-gold" style="padding:10px 20px">Filtriraj</button>
 </form>
 
-<div style="text-align:center;margin-bottom:24px;font-size:.85rem;color:var(--dim)">
-  <strong style="color:var(--gold)">{{ total }}</strong> životinja čeka dom
+<div class="text-center fx-fs-base mb-4 fx-text-dim">
+  <strong class="fx-text-gold">{{ total }}</strong> životinja čeka dom
 </div>
 
 <div class="mp-container-wide">
@@ -44,14 +44,14 @@
           {% if animal.spol != 'N' %} · {{ animal.get_spol_display }}{% endif %}
         </div>
         {% if animal.breeder %}
-        <div style="font-size:.75rem;color:var(--green);font-weight:500;margin-top:4px">
+        <div class="fx-fs-caption fx-fw-medium fx-text-green mt-1">
           🏠 {{ animal.breeder.name }}{% if animal.breeder.city %}, {{ animal.breeder.city }}{% endif %}
         </div>
         {% endif %}
       </div>
     </a>
     {% empty %}
-    <div style="text-align:center;padding:60px 24px;color:var(--dim);grid-column:1/-1">
+    <div class="text-center fx-text-dim fx-col-full" style="padding:60px 24px">
       Trenutno nema životinja za udomljavanje.<br>
       Provjerite ponovno uskoro ili kontaktirajte lokalni azil.
     </div>

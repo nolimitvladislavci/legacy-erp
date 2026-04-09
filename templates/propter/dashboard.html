@@ -3,50 +3,33 @@
 {% load static i18n %}
 {% block title %}Propter Digitalna Soba
 <!-- Upload & AI Inbox shortcut -->
-<div id="upload-shortcut" style="margin-top:1.5rem;padding:1rem;background:#111827;border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-  <span style="color:#94a3b8;font-size:.85rem">Brze akcije:</span>
-  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+<div id="upload-shortcut" class="fx-bg-card fx-rounded d-flex fx-flex-wrap fx-gap-4 align-items-center fx-p-4 fx-mt-6" style="border:1px solid rgba(201,168,76,.2)">
+  <span class="fx-text-muted fx-fs-base">Brze akcije:</span>
+  <a href="/hr/documents/arhiva/upload/" class="fx-text-dark fx-fw-bold fx-rounded fx-no-underline fx-fs-base d-inline-flex align-items-center fx-gap-1" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#b8963c);padding:.5rem 1rem">
     <i class="fas fa-cloud-upload-alt"></i> Upload racuna
   </a>
-  <a href="/hr/documents/ai-inbox/" style="background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+  <a href="/hr/documents/ai-inbox/" class="fx-rounded fx-no-underline fx-fs-base fx-text-blue d-inline-flex align-items-center fx-bg-deep fx-gap-1" style="border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem">
     <i class="fas fa-robot"></i> AI Inbox
   </a>
-  <a href="/hr/documents/" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+  <a href="/hr/documents/" class="fx-text-muted fx-rounded fx-no-underline fx-fs-base d-inline-flex align-items-center fx-bg-surface2 fx-b2 fx-gap-1" style="padding:.5rem 1rem">
     <i class="fas fa-archive"></i> Arhiva
   </a>
 </div>
 
 {% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div class="container-fluid py-4" style="background-color: #0a0a0a; min-height: 100vh; color: #e0e0e0;">
+<div class="container-fluid py-4 fx-bg-body fx-text-body" style="min-height:100vh">
 
   <!-- ZAGLAVLJE -->
   <div class="row mb-4 align-items-center">
     <div class="col-md-7">
-      <h2 class="fw-bold mb-1" style="color: var(--gold,#c9a84c); letter-spacing: 1px;">
+      <h2 class="fw-bold mb-1 fx-text-gold fx-ls-2">
         <i class="fas fa-layer-group me-2"></i> PROPTER DIGITALNA SOBA
       </h2>
-      <p class="text-muted mb-0" style="font-size:.95rem;">
+      <p class="text-muted mb-0 fx-fs-normal">
         Pristupna tocka prije pristupne tocke &bull;
         Zbirna obrada otpremnica (Sammelrechnung)
         {% if current_period %}
@@ -67,8 +50,8 @@
       {% endif %}
       {% if current_period and current_period.status == 'closed' %}
       <button id="btn-kuhaj"
-              class="btn btn-lg px-4 fw-bold"
-              style="background: linear-gradient(135deg, var(--gold,#c9a84c) 0%, #a08530 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(201,168,76,0.3);"
+              class="btn btn-lg px-4 fw-bold fx-text-dark fx-border-none"
+              style="background:linear-gradient(135deg, var(--gold,#c9a84c) 0%, #a08530 100%);box-shadow:0 4px 15px rgba(201,168,76,0.3)"
               onclick="kuhajRacun({{ current_period.pk }})">
         <i class="fas fa-fire me-2"></i> KUHAJ ZBIRNI RACUN
       </button>
@@ -110,21 +93,21 @@
   <!-- STATISTIKA KARTICE -->
   <div class="row mb-4 g-3">
     <div class="col-md-3">
-      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+      <div class="card h-100 fx-bg-surface" style="border:1px solid #333">
         <div class="card-body text-center">
-          <i class="fas fa-file-alt fa-2x mb-2" style="color: var(--gold,#c9a84c);"></i>
-          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Otpremnice u baferu</h6>
-          <h2 class="mb-0" style="color: var(--gold,#c9a84c);">
+          <i class="fas fa-file-alt fa-2x mb-2 fx-text-gold"></i>
+          <h6 class="text-uppercase text-muted fw-bold mb-1 fx-fs-caption">Otpremnice u baferu</h6>
+          <h2 class="mb-0 fx-text-gold">
             {% if current_period %}{{ current_period.otpremnica_count }}{% else %}0{% endif %}
           </h2>
         </div>
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+      <div class="card h-100 fx-bg-surface" style="border:1px solid #333">
         <div class="card-body text-center">
           <i class="fas fa-euro-sign fa-2x mb-2 text-white"></i>
-          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Ukupna vrijednost</h6>
+          <h6 class="text-uppercase text-muted fw-bold mb-1 fx-fs-caption">Ukupna vrijednost</h6>
           <h2 class="mb-0 text-white">
             {% if current_period %}{{ current_period.total_with_tax }}{% else %}0.00{% endif %}
             <small class="text-muted" style="font-size:.5em;">EUR</small>
@@ -133,10 +116,10 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333; border-left: 3px solid #22c55e;">
+      <div class="card h-100 fx-bg-surface" style="border:1px solid #333;border-left:3px solid #22c55e">
         <div class="card-body text-center">
           <i class="fas fa-leaf fa-2x mb-2 text-success"></i>
-          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">CO2 usteda (YTD)</h6>
+          <h6 class="text-uppercase text-muted fw-bold mb-1 fx-fs-caption">CO2 usteda (YTD)</h6>
           <h2 class="mb-0 text-success">
             {% if eko %}{{ eko.co2_saved_ytd|floatformat:0 }}g{% else %}&mdash;{% endif %}
           </h2>
@@ -147,10 +130,10 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+      <div class="card h-100 fx-bg-surface" style="border:1px solid #333">
         <div class="card-body text-center">
           <i class="fas fa-certificate fa-2x mb-2 text-warning"></i>
-          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Pretplata</h6>
+          <h6 class="text-uppercase text-muted fw-bold mb-1 fx-fs-caption">Pretplata</h6>
           {% if tenant %}
           <h5 class="mb-0 text-white">{{ tenant.get_tier_display }}</h5>
           <small class="text-muted">{{ tenant.monthly_fee }} EUR/mj</small>
@@ -165,14 +148,14 @@
   <!-- TIJEK PROCESA (Pipeline vizualizacija) -->
   <div class="row mb-4">
     <div class="col-12">
-      <div class="card" style="background-color: #1e1e1e; border: 1px solid #333;">
-        <div class="card-header py-3" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
-          <h5 class="mb-0 text-white"><i class="fas fa-project-diagram me-2" style="color:var(--gold,#c9a84c);"></i> Tijek procesa</h5>
+      <div class="card fx-bg-surface" style="border:1px solid #333">
+        <div class="card-header py-3 fx-bg-card" style="border-bottom:1px solid #333">
+          <h5 class="mb-0 text-white"><i class="fas fa-project-diagram me-2 fx-text-gold"></i> Tijek procesa</h5>
         </div>
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div class="text-center px-3">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#22c55e33;border:2px solid #22c55e;">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:rgba(34,197,94,0.2);border:2px solid #22c55e;">
                 <i class="fas fa-cash-register fa-lg text-success"></i>
               </div>
               <div class="small text-muted">POS / Faktura</div>
@@ -180,7 +163,7 @@
             </div>
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#3b82f633;border:2px solid #3b82f6;">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:rgba(59,130,246,0.2);border:2px solid #3b82f6;">
                 <i class="fas fa-file-alt fa-lg text-primary"></i>
               </div>
               <div class="small text-muted">Otpremnica</div>
@@ -189,22 +172,22 @@
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
               <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:var(--gold,#c9a84c)33;border:2px solid var(--gold,#c9a84c);">
-                <i class="fas fa-layer-group fa-lg" style="color:var(--gold,#c9a84c);"></i>
+                <i class="fas fa-layer-group fa-lg fx-text-gold"></i>
               </div>
               <div class="small text-muted">Propter Soba</div>
-              <div class="small" style="color:var(--gold,#c9a84c);">Bafer (30 dana)</div>
+              <div class="small fx-text-gold">Bafer (30 dana)</div>
             </div>
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#f5922033;border:2px solid #f59220;">
-                <i class="fas fa-fire fa-lg" style="color:#f59220;"></i>
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:rgba(245,146,32,0.2);border:2px solid #f59220;">
+                <i class="fas fa-fire fa-lg fx-text-amber"></i>
               </div>
               <div class="small text-muted">Agregacija</div>
               <div class="small text-warning">Kuhaj!</div>
             </div>
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#ef444433;border:2px solid #ef4444;">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:rgba(239,68,68,0.2);border:2px solid #ef4444;">
                 <i class="fas fa-file-invoice fa-lg text-danger"></i>
               </div>
               <div class="small text-muted">Zbirni e-Racun</div>
@@ -217,15 +200,15 @@
   </div>
 
   <!-- TABLICA OTPREMNICA -->
-  <div class="card" style="background-color: #1e1e1e; border: 1px solid #333;">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
+  <div class="card fx-bg-surface" style="border:1px solid #333">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center fx-bg-card" style="border-bottom:1px solid #333">
       <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Otpremnice u baferu</h5>
       <a href="{% url 'propter:otpremnica_list' %}" class="btn btn-sm btn-outline-light">Sve otpremnice</a>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-dark table-hover mb-0" style="background-color: transparent;">
-          <thead style="background-color: #252525;">
+        <table class="table table-dark table-hover mb-0 fx-bg-transparent">
+          <thead class="fx-bg-surface">
             <tr>
               <th class="text-muted">Broj</th>
               <th class="text-muted">Datum</th>
@@ -240,7 +223,7 @@
             {% for otp in recent_otpremnice %}
             <tr>
               <td class="align-middle">
-                <a href="{% url 'propter:otpremnica_detail' otp.pk %}" class="fw-bold" style="color:var(--gold,#c9a84c);">
+                <a href="{% url 'propter:otpremnica_detail' otp.pk %}" class="fw-bold fx-text-gold">
                   OTP-{{ otp.number }}
                 </a>
               </td>
@@ -248,18 +231,18 @@
               <td class="align-middle">{{ otp.recipient_name }}</td>
               <td class="align-middle">{{ otp.recipient_oib|default:"-" }}</td>
               <td class="align-middle">
-                <span class="badge bg-secondary">{{ otp.get_source_display }}</span>
+                <span class="fenix-badge fenix-badge-muted">{{ otp.get_source_display }}</span>
               </td>
               <td class="align-middle text-end fw-bold text-white">{{ otp.total }}</td>
               <td class="align-middle text-center">
                 {% if otp.status == 'draft' %}
-                <span class="badge bg-secondary">Nacrt</span>
+                <span class="fenix-badge fenix-badge-muted">Nacrt</span>
                 {% elif otp.status == 'issued' %}
-                <span class="badge bg-primary">Spremno</span>
+                <span class="fenix-badge fenix-badge-info">Spremno</span>
                 {% elif otp.status == 'aggregated' %}
-                <span class="badge bg-success">Fakturirano</span>
+                <span class="fenix-badge fenix-badge-success">Fakturirano</span>
                 {% elif otp.status == 'cancelled' %}
-                <span class="badge bg-danger">Stornirano</span>
+                <span class="fenix-badge fenix-badge-danger">Stornirano</span>
                 {% endif %}
               </td>
             </tr>
@@ -280,13 +263,13 @@
 
   <!-- ARHIVA PERIODA -->
   {% if recent_periods %}
-  <div class="card mt-4" style="background-color: #1e1e1e; border: 1px solid #333;">
-    <div class="card-header py-3" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
+  <div class="card mt-4 fx-bg-surface" style="border:1px solid #333">
+    <div class="card-header py-3 fx-bg-card" style="border-bottom:1px solid #333">
       <h5 class="mb-0 text-white"><i class="fas fa-archive me-2"></i> Arhiva perioda</h5>
     </div>
     <div class="card-body p-0">
-      <table class="table table-dark table-hover mb-0" style="background-color: transparent;">
-        <thead style="background-color: #252525;">
+      <table class="table table-dark table-hover mb-0 fx-bg-transparent">
+        <thead class="fx-bg-surface">
           <tr>
             <th class="text-muted">Period</th>
             <th class="text-muted">Otpremnica</th>
@@ -324,15 +307,15 @@
   <!-- BRZI LINKOVI -->
   <div class="row mt-4 g-3">
     <div class="col-md-3">
-      <a href="{% url 'propter:period_list' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#333'">
+      <a href="{% url 'propter:period_list' %}" class="card text-decoration-none h-100 fx-bg-surface" style="border:1px solid #333;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#333'">
         <div class="card-body text-center py-4">
-          <i class="fas fa-calendar fa-2x mb-2" style="color:var(--gold,#c9a84c);"></i>
+          <i class="fas fa-calendar fa-2x mb-2 fx-text-gold"></i>
           <div class="text-white">Svi periodi</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'propter:eko_dashboard' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#333'">
+      <a href="{% url 'propter:eko_dashboard' %}" class="card text-decoration-none h-100 fx-bg-surface" style="border:1px solid #333;transition:border-color .2s" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#333'">
         <div class="card-body text-center py-4">
           <i class="fas fa-leaf fa-2x mb-2 text-success"></i>
           <div class="text-white">Eko izvjestaj</div>
@@ -340,7 +323,7 @@
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'propter:tenant_settings' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#333'">
+      <a href="{% url 'propter:tenant_settings' %}" class="card text-decoration-none h-100 fx-bg-surface" style="border:1px solid #333;transition:border-color .2s" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#333'">
         <div class="card-body text-center py-4">
           <i class="fas fa-cog fa-2x mb-2 text-primary"></i>
           <div class="text-white">Postavke</div>
@@ -348,7 +331,7 @@
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'propter:landing' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='#333'">
+      <a href="{% url 'propter:landing' %}" class="card text-decoration-none h-100 fx-bg-surface" style="border:1px solid #333;transition:border-color .2s" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='#333'">
         <div class="card-body text-center py-4">
           <i class="fas fa-rocket fa-2x mb-2 text-danger"></i>
           <div class="text-white">SaaS Landing</div>

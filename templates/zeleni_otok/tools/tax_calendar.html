@@ -9,14 +9,14 @@
 </section>
 
 <section class="py-5">
-    <div class="container" style="max-width: 700px;">
+    <div class="container fx-max-700">
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <div class="list-group list-group-flush">
                     {% for deadline in deadlines %}
                     <div class="list-group-item d-flex align-items-center px-0">
                         <div class="me-3 text-center" style="min-width: 50px;">
-                            <div class="fw-bold text-primary" style="font-size: 1.3rem;">{{ deadline.date|slice:"8:" }}</div>
+                            <div class="fw-bold text-primary fx-fs-3xl">{{ deadline.date|slice:"8:" }}</div>
                             <small class="text-muted">{{ deadline.date|slice:"5:7" }}.</small>
                         </div>
                         <div class="flex-grow-1">
@@ -24,15 +24,15 @@
                         </div>
                         <div>
                             {% if deadline.type == 'vat' %}
-                                <span class="badge bg-primary">PDV</span>
+                                <span class="fenix-badge fenix-badge-info">PDV</span>
                             {% elif deadline.type == 'payroll' %}
-                                <span class="badge bg-info">Plaće</span>
+                                <span class="fenix-badge fenix-badge-info">Plaće</span>
                             {% elif deadline.type == 'tax' %}
-                                <span class="badge bg-warning text-dark">Porez</span>
+                                <span class="fenix-badge fenix-badge-warning">Porez</span>
                             {% elif deadline.type == 'annual' %}
-                                <span class="badge bg-danger">Godišnje</span>
+                                <span class="fenix-badge fenix-badge-danger">Godišnje</span>
                             {% elif deadline.type == 'eu' %}
-                                <span class="badge bg-secondary">EU</span>
+                                <span class="fenix-badge fenix-badge-muted">EU</span>
                             {% endif %}
                         </div>
                     </div>

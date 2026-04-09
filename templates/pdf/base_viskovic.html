@@ -14,26 +14,26 @@ Koristi: {% extends "pdf/base_viskovic.html" %}
 @font-face{font-family:DejaVu;src:url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');font-weight:bold}
 @page{size:A4;margin:18mm 20mm 22mm 20mm}
 *{font-family:DejaVu,Helvetica,sans-serif!important;box-sizing:border-box}
-body{font-size:9.5pt;color:#1a1a1a;margin:0;padding:0}
+body{font-size:9.5pt;color:var(--text);margin:0;padding:0}
 
 /* ═══ ZAGLAVLJE ═══ */
 .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #c9a84c;padding-bottom:12px;margin-bottom:16px}
-.pdf-header .company-name{font-size:16pt;font-weight:bold;color:#0a0a0a}
-.pdf-header .company-sub{font-size:8pt;color:#555;margin-top:2px}
+.pdf-header .company-name{font-size:16pt;font-weight:bold;color:var(--text)}
+.pdf-header .company-sub{font-size:8pt;color:var(--text-dim);margin-top:2px}
 .pdf-header .doc-type{text-align:right}
-.pdf-header .doc-title{font-size:13pt;font-weight:bold;color:#c9a84c}
-.pdf-header .doc-meta{font-size:8pt;color:#666;margin-top:3px}
+.pdf-header .doc-title{font-size:13pt;font-weight:bold;color:var(--gold)}
+.pdf-header .doc-meta{font-size:8pt;color:var(--text-dim);margin-top:3px}
 
 /* ═══ INFO GRID ═══ */
 .pdf-info{display:flex;justify-content:space-between;margin-bottom:14px;gap:12px}
 .pdf-info-box{flex:1;background:#fafaf5;border:1px solid #e8e0c8;border-radius:6px;padding:10px 12px}
-.pdf-info-box .label{font-size:7pt;color:#888;text-transform:uppercase;letter-spacing:.5px}
-.pdf-info-box .value{font-size:10pt;font-weight:bold;color:#1a1a1a;margin-top:2px}
+.pdf-info-box .label{font-size:7pt;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.pdf-info-box .value{font-size:10pt;font-weight:bold;color:var(--text);margin-top:2px}
 
 /* ═══ TABLICA ═══ */
 table.pdf-table{width:100%;border-collapse:collapse;margin:12px 0}
-table.pdf-table thead th{background:#0a0a0a;color:#c9a84c;padding:7px 8px;text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.5px}
-table.pdf-table tbody td{padding:5px 8px;border-bottom:1px solid #eee;font-size:9pt}
+table.pdf-table thead th{background:var(--bg);color:var(--gold);padding:7px 8px;text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.5px}
+table.pdf-table tbody td{padding:5px 8px;border-bottom:1px solid var(--border);font-size:9pt}
 table.pdf-table tbody tr:hover{background:#fafaf5}
 table.pdf-table .r{text-align:right}
 table.pdf-table .gold{color:#b38a20;font-weight:bold}
@@ -42,21 +42,21 @@ table.pdf-table tfoot td{border-top:2px solid #0a0a0a;font-weight:bold;padding:8
 /* ═══ TOTALI ═══ */
 .pdf-totals{display:flex;justify-content:flex-end;gap:12px;margin:12px 0}
 .pdf-total-box{background:#fafaf5;border:1px solid #e8e0c8;border-radius:6px;padding:10px 16px;text-align:center;min-width:100px}
-.pdf-total-box .label{font-size:7pt;color:#888;text-transform:uppercase}
+.pdf-total-box .label{font-size:7pt;color:var(--text-muted);text-transform:uppercase}
 .pdf-total-box .value{font-size:14pt;font-weight:bold;color:#b38a20;margin-top:2px}
 
 /* ═══ PODNOŽJE ═══ */
-.pdf-footer{position:fixed;bottom:0;left:0;right:0;padding:8px 20mm;border-top:2px solid #c9a84c;font-size:7pt;color:#888;display:flex;justify-content:space-between}
+.pdf-footer{position:fixed;bottom:0;left:0;right:0;padding:8px 20mm;border-top:2px solid #c9a84c;font-size:7pt;color:var(--text-muted);display:flex;justify-content:space-between}
 .pdf-footer .legal{max-width:60%}
-.pdf-footer .branding{text-align:right;color:#c9a84c;font-weight:bold}
+.pdf-footer .branding{text-align:right;color:var(--gold);font-weight:bold}
 
 /* ═══ HELPERS ═══ */
-.section-title{font-size:10pt;font-weight:bold;color:#c9a84c;border-bottom:1px solid #e8e0c8;padding-bottom:4px;margin:16px 0 8px}
+.section-title{font-size:10pt;font-weight:bold;color:var(--gold);border-bottom:1px solid #e8e0c8;padding-bottom:4px;margin:16px 0 8px}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:7pt;font-weight:bold}
-.badge-ok{background:#dcfce7;color:#166534}
-.badge-warn{background:#fef3c7;color:#92400e}
-.badge-err{background:#fee2e2;color:#991b1b}
-.note{background:#f8f8f0;border-left:3px solid #c9a84c;padding:8px 12px;font-size:8.5pt;color:#555;margin:10px 0}
+.badge-ok{background:#dcfce7;color:var(--green)}
+.badge-warn{background:var(--amber-dim);color:var(--amber)}
+.badge-err{background:#fee2e2;color:var(--red)}
+.note{background:#f8f8f0;border-left:3px solid #c9a84c;padding:8px 12px;font-size:8.5pt;color:var(--text-dim);margin:10px 0}
 </style>
 </head>
 <body>

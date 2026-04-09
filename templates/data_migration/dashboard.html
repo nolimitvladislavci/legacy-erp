@@ -5,37 +5,20 @@
 {% block title %}Migracija podataka — LIMIT Connect{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid px-3 py-3" style="max-width:960px">
 
   <div class="d-flex align-items-center justify-content-between mb-3">
-    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2" style="color:var(--gold)"></i>Migracija podataka</h4>
+    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2 fx-text-gold"></i>Migracija podataka</h4>
     <a href="{% url 'data_migration:upload' %}" class="btn btn-warning fw-bold">
       <i class="fas fa-plus me-1"></i>Novi uvoz
     </a>
   </div>
 
-  <div class="alert alert-info d-flex align-items-start gap-2 mb-4" style="background:var(--bg-card);border-color:var(--border);color:var(--text)">
-    <i class="fas fa-info-circle mt-1" style="color:var(--accent)"></i>
+  <div class="alert alert-info d-flex align-items-start gap-2 mb-4 fx-text-body fx-bg-card fx-bc">
+    <i class="fas fa-info-circle mt-1 fx-text-cyan"></i>
     <div>
       <strong>LIMIT Connect nije arhiva.</strong> Uploadane datoteke se automatski brisu nakon 24 sata.
       Zadrzite vlastite originale u sigurnoj pohrani.
@@ -44,35 +27,35 @@
 
   {% if projects %}
   <div class="table-responsive">
-    <table class="table table-hover" style="background:var(--bg-card);border-radius:12px;overflow:hidden">
-      <thead style="background:var(--table-header-bg)">
+    <table class="table table-hover fx-rounded fx-bg-card fx-overflow-hidden">
+      <thead class="fx-bg-surface2">
         <tr>
-          <th style="color:var(--text-secondary)">Projekt</th>
-          <th style="color:var(--text-secondary)">Izvor</th>
-          <th style="color:var(--text-secondary)">Tip</th>
-          <th style="color:var(--text-secondary)">Status</th>
-          <th style="color:var(--text-secondary)">Redova</th>
-          <th style="color:var(--text-secondary)">Kreiran</th>
+          <th class="fx-text-dim">Projekt</th>
+          <th class="fx-text-dim">Izvor</th>
+          <th class="fx-text-dim">Tip</th>
+          <th class="fx-text-dim">Status</th>
+          <th class="fx-text-dim">Redova</th>
+          <th class="fx-text-dim">Kreiran</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         {% for p in projects %}
-        <tr style="color:var(--text)">
+        <tr class="fx-text-body">
           <td class="fw-semibold">{{ p.name }}</td>
           <td><span class="text-muted">{{ p.source_program|default:"—" }}</span></td>
           <td>{{ p.get_entity_type_display }}</td>
           <td>
             {% if p.status == 'completed' %}
-              <span class="badge" style="background:#059669;color:#fff">Zavrseno</span>
+              <span class="badge fx-text-white" style="background:var(--green)">Zavrseno</span>
             {% elif p.status == 'failed' %}
-              <span class="badge" style="background:#dc2626;color:#fff">Neuspjelo</span>
+              <span class="badge fx-bg-red fx-text-white">Neuspjelo</span>
             {% elif p.status == 'importing' %}
-              <span class="badge" style="background:#d97706;color:#fff"><i class="fas fa-spinner fa-spin me-1"></i>U tijeku</span>
+              <span class="badge fx-text-white" style="background:var(--amber)"><i class="fas fa-spinner fa-spin me-1"></i>U tijeku</span>
             {% elif p.status == 'draft' %}
-              <span class="badge" style="background:var(--badge-bg);color:var(--text-muted)">Nacrt</span>
+              <span class="badge fx-text-muted" style="background:var(--badge-bg)">Nacrt</span>
             {% else %}
-              <span class="badge" style="background:var(--accent);color:#fff">{{ p.get_status_display }}</span>
+              <span class="badge fx-text-white" style="background:var(--accent)">{{ p.get_status_display }}</span>
             {% endif %}
           </td>
           <td>{{ p.total_rows|default:"—" }}</td>
@@ -99,8 +82,8 @@
     </table>
   </div>
   {% else %}
-  <div class="text-center py-5" style="color:var(--text-muted)">
-    <i class="fas fa-database fa-3x mb-3" style="color:var(--border)"></i>
+  <div class="text-center py-5 fx-text-muted">
+    <i class="fas fa-database fa-3x mb-3 fx-text-muted"></i>
     <p class="mb-1">Nemate migracijskih projekata.</p>
     <p>Kliknite <strong>"Novi uvoz"</strong> za prijenos podataka iz starog programa.</p>
   </div>

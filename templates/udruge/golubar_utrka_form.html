@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .uf-container { max-width: 800px; margin: 0 auto; }
@@ -59,7 +42,7 @@
 }
 .uf-btn-submit {
   background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
-  color: #0a0a0a !important; border: none !important;
+  color:var(--text) !important; border: none !important;
   font-weight: 700 !important; padding: .6rem 2rem !important;
   border-radius: 10px !important; font-size: .88rem !important;
   transition: all .2s !important;
@@ -86,7 +69,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_list' %}">Utrke</a></li>
     <li class="breadcrumb-item active">{% if utrka %}Uredi{% else %}Nova utrka{% endif %}</li>
@@ -95,12 +78,12 @@
 
 <!-- Header -->
 <div class="d-flex align-items-center gap-3 mb-4">
-  <div style="width:52px;height:52px;background:rgba(239,68,68,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-flag-checkered" style="font-size:1.3rem;color:#ef4444"></i>
+  <div class="fx-rounded-lg d-flex align-items-center justify-content-center" style="width:52px;height:52px;background:rgba(239,68,68,.1)">
+    <i class="fas fa-flag-checkered fx-fs-3xl fx-text-red"></i>
   </div>
   <div>
-    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}</h2>
-    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Evidentirajte podatke o natjecanju</p>
+    <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}</h2>
+    <p class="fx-fs-note fx-text-muted fx-m-0">Evidentirajte podatke o natjecanju</p>
   </div>
 </div>
 
@@ -182,7 +165,7 @@
 </div>
 
 <div class="uf-footer">
-  <a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+  <a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary fx-rounded" style="padding:.6rem 1.5rem">
     <i class="fas fa-arrow-left me-1"></i>Odustani
   </a>
   <button type="submit" class="uf-btn-submit">

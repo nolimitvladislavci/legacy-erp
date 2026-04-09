@@ -3,34 +3,17 @@
 {% block title %}AS4 {{ message.invoice_number }} — PROPTER{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <style>
 .as4-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
 .as4-badge.DRAFT{background:var(--badge-bg);color:var(--text-muted)}
-.as4-badge.QUEUED,.as4-badge.SUBMITTED,.as4-badge.SENT{background:#fef3c7;color:#92400e}
-.as4-badge.DELIVERED,.as4-badge.ACK,.as4-badge.ARCHIVED{background:#dcfce7;color:#166534}
-.as4-badge.SEND_FAIL,.as4-badge.VAL_FAIL,.as4-badge.REJECTED{background:#fef2f2;color:#991b1b}
-.as4-badge.RETRY{background:#fff7ed;color:#c2410c}
-.as4-badge.CANCELLED{background:#f3e8ff;color:#7c3aed}
+.as4-badge.QUEUED,.as4-badge.SUBMITTED,.as4-badge.SENT{background:var(--amber-dim);color:var(--amber)}
+.as4-badge.DELIVERED,.as4-badge.ACK,.as4-badge.ARCHIVED{background:var(--green-dim);color:var(--green)}
+.as4-badge.SEND_FAIL,.as4-badge.VAL_FAIL,.as4-badge.REJECTED{background:var(--red-dim);color:var(--red)}
+.as4-badge.RETRY{background:var(--amber-dim);color:#c2410c}
+.as4-badge.CANCELLED{background:#f3e8ff;color:var(--purple)}
 .detail-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
 .detail-card .header{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem}
 .detail-card .body{padding:16px}
@@ -40,13 +23,13 @@
 .event-item{position:relative;padding-bottom:12px}
 </style>
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+<div class="d-flex fx-gap-3 fx-flex-wrap align-items-center mb-3">
   <div>
-    <div style="font-weight:700;font-size:1.1rem">
+    <div class="fx-fw-bold fx-fs-xl">
       {{ message.invoice_number|default:"N/A" }}
       <span class="as4-badge {{ message.status }}">{{ message.get_status_display }}</span>
     </div>
-    <div style="font-size:.75rem;color:var(--text-muted)">{{ message.get_direction_display }} | {{ message.get_transport_display }}</div>
+    <div class="fx-fs-caption fx-text-muted">{{ message.get_direction_display }} | {{ message.get_transport_display }}</div>
   </div>
   <div class="ms-auto">
     <a href="{% url 'einvoice:outbound_messages' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Natrag</a>
@@ -57,7 +40,7 @@
   <div class="col-md-6">
     <div class="detail-card">
       <div class="header">Poruka</div>
-      <div class="body" style="font-size:.82rem">
+      <div class="body fx-fs-note">
         <p class="mb-1">Od: <strong>{{ message.sender_name }}</strong> ({{ message.sender_participant_id }})</p>
         <p class="mb-1">Za: <strong>{{ message.receiver_name }}</strong> ({{ message.receiver_participant_id }})</p>
         <p class="mb-1">Iznos: <strong>&euro;{{ message.invoice_amount|floatformat:2|default:"—" }}</strong></p>
@@ -70,7 +53,7 @@
   <div class="col-md-6">
     <div class="detail-card">
       <div class="header">Vremenski okvir</div>
-      <div class="body" style="font-size:.82rem">
+      <div class="body fx-fs-note">
         <p class="mb-1">Kreirano: {{ message.created_at|date:"d.m.Y H:i:s" }}</p>
         {% if message.validated_at %}<p class="mb-1">Validirano: {{ message.validated_at|date:"d.m.Y H:i:s" }}</p>{% endif %}
         {% if message.submitted_at %}<p class="mb-1">Predano: {{ message.submitted_at|date:"d.m.Y H:i:s" }}</p>{% endif %}
@@ -84,9 +67,9 @@
 
 {% if message.validation_errors %}
 <div class="detail-card" style="border-left:4px solid #ef4444">
-  <div class="header" style="color:#991b1b"><i class="fas fa-exclamation-triangle"></i> Greske validacije</div>
+  <div class="header fx-text-red"><i class="fas fa-exclamation-triangle"></i> Greske validacije</div>
   <div class="body">
-    <ul class="mb-0" style="font-size:.82rem">
+    <ul class="mb-0 fx-fs-note">
       {% for err in message.validation_errors %}<li>{{ err }}</li>{% endfor %}
     </ul>
   </div>
@@ -100,12 +83,12 @@
     <div class="event-timeline">
       {% for event in events %}
       <div class="event-item">
-        <div class="event-dot" {% if event.to_status == "DELIVERED" or event.to_status == "ACK" %}style="background:#22c55e"{% elif "FAIL" in event.to_status or event.to_status == "REJECTED" %}style="background:#ef4444"{% endif %}></div>
-        <div style="font-size:.78rem">
+        <div class="event-dot fx-bg-green" {% if event.to_status == "DELIVERED" or event.to_status == "ACK" %}{% elif "FAIL" in event.to_status or event.to_status == "REJECTED" %}{% endif %}></div>
+        <div class="fx-fs-body-sm">
           <strong>{{ event.from_status }} → {{ event.to_status }}</strong>
-          <span style="color:var(--text-muted);margin-left:8px">{{ event.created_at|date:"d.m.Y H:i:s" }}</span>
+          <span class="fx-text-muted" style="margin-left:8px">{{ event.created_at|date:"d.m.Y H:i:s" }}</span>
         </div>
-        {% if event.detail %}<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">{{ event.detail|truncatechars:200 }}</div>{% endif %}
+        {% if event.detail %}<div class="fx-fs-sm fx-text-muted fx-mt-1">{{ event.detail|truncatechars:200 }}</div>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -116,7 +99,7 @@
 {% if message.archive_sha256 %}
 <div class="detail-card">
   <div class="header"><i class="fas fa-shield-alt"></i> Arhiva</div>
-  <div class="body" style="font-size:.78rem">
+  <div class="body fx-fs-body-sm">
     <p class="mb-1">SHA-256: <code>{{ message.archive_sha256 }}</code></p>
     <a href="/api/einvoice/archive/verify/{{ message.archive_sha256 }}/" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-check-double"></i> Verificiraj</a>
   </div>

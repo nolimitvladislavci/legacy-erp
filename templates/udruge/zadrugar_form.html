@@ -2,27 +2,10 @@
 {% load i18n %}
 {% block title %}Novi zadrugar{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
+<div class="container-fluid fx-max-700">
 <h2 class="mb-3"><i class="fas fa-handshake"></i> Novi zadrugar</h2>
 <form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
 <div class="row mb-3"><div class="col-md-5"><label>Ime</label><input type="text" name="first_name" required class="form-control bg-dark text-light border-secondary"></div>

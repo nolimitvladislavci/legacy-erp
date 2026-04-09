@@ -6,21 +6,21 @@
 {% block doc_meta %}{{ today|date:"d.m.Y." }} | {{ company.name }} | OIB: {{ company.oib }}{% endblock %}
 
 {% block content %}
-<div style="font-size:8pt;color:#666;margin-bottom:10pt">
+<div class="fx-text-dim" style="font-size:8pt;margin-bottom:10pt">
   Pravni temelj: EU Regulation 2019/6, cl. 108 Zakona o veterinarstvu
 </div>
 
 {% if blocked %}
-<h3 style="color:#dc2626;margin:12pt 0 6pt;font-size:11pt">AKTIVNE KARENCIJE ({{ blocked|length }})</h3>
+<h3 class="fx-text-red" style="margin:12pt 0 6pt;font-size:11pt">AKTIVNE KARENCIJE ({{ blocked|length }})</h3>
 <table>
   <thead>
-    <tr style="background:#fef2f2">
+    <tr class="fx-bg-red-dim">
       <th>Usna markica</th><th>Vrsta</th><th>Lijek</th><th>Karencija do</th><th>Preostalo dana</th>
     </tr>
   </thead>
   <tbody>
     {% for r in blocked %}
-    <tr style="color:#dc2626">
+    <tr class="fx-text-red">
       <td>{{ r.animal.ear_tag }}</td>
       <td>{{ r.animal.get_vrsta_display }}</td>
       <td><strong>{{ r.lijek }}</strong></td>
@@ -31,7 +31,7 @@
   </tbody>
 </table>
 {% else %}
-<div style="background:#f0fdf4;padding:8pt;border-radius:4pt;color:#16a34a;font-weight:bold;margin:10pt 0">
+<div class="fx-text-green fx-fw-bold" style="background:var(--green-dim);padding:8pt;border-radius:4pt;margin:10pt 0">
   NEMA AKTIVNIH KARENCIJA — sva grla su dozvoljena za prodaju mlijeka/mesa.
 </div>
 {% endif %}
@@ -63,7 +63,7 @@
   </thead>
   <tbody>
     {% for r in records %}
-    <tr{% if r.u_karenciji %} style="color:#dc2626;font-weight:bold"{% endif %}>
+    <tr{% if r.u_karenciji %} class="fx-text-red fx-fw-bold"{% endif %}>
       <td>{{ r.datum|date:"d.m.Y." }}</td>
       <td>{{ r.animal.ear_tag }}</td>
       <td>{{ r.get_tip_display }}</td>

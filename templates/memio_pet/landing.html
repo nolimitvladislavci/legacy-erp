@@ -83,7 +83,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="top-bar">
   <a href="/" class="top-bar-logo">Memio<span>.pet</span></a>
   <div class="top-bar-right">
-    <a href="/prijava/" style="border-color:var(--gold);color:var(--gold)">Prijava</a>
+    <a href="/prijava/" class="fx-text-gold" style="border-color:var(--gold)">Prijava</a>
     <a href="/registracija/">Registracija</a>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
   </div>
@@ -95,21 +95,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   <p>Besplatni QR profil, zdravstveni karton, lanac vlasništva i Trust Score — sve verificirano, sve na jednom mjestu.</p>
 
   <!-- SKENIRAJ QR — prominentno dugme -->
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
-    <button onclick="document.getElementById('qrSection').style.display='block';startLandingQr()" style="padding:14px 28px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-family:var(--sans);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">📷 Skeniraj QR kod</button>
-    <label style="padding:14px 28px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;font-family:var(--sans);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">
+  <div class="d-flex fx-gap-3 fx-flex-wrap justify-content-center mt-2">
+    <button onclick="document.getElementById('qrSection').style.display='block';startLandingQr()" class="fx-text-white fx-border-none fx-rounded fx-fs-lg fx-fw-bold fx-pointer d-flex fx-gap-2 align-items-center fx-bg-gold" style="padding:14px 28px;font-family:var(--sans)">📷 Skeniraj QR kod</button>
+    <label class="fx-rounded fx-fs-lg fx-fw-bold fx-pointer d-flex fx-gap-2 align-items-center fx-bg-surface" style="padding:14px 28px;color:var(--ink);border:1.5px solid var(--line);font-family:var(--sans)">
       📸 Uslikaj QR
-      <input type="file" accept="image/*" capture="environment" onchange="scanLandingPhoto(this)" style="display:none">
+      <input type="file" accept="image/*" capture="environment" onchange="scanLandingPhoto(this)" class="fx-hidden">
     </label>
   </div>
 
   <!-- QR scanner area (skriveno dok se ne klikne) -->
-  <div id="qrSection" style="display:none;margin-top:20px">
-    <div id="landingQrReader" style="width:100%;max-width:350px;margin:0 auto;border-radius:12px;overflow:hidden"></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-      <button onclick="stopLandingQr()" style="padding:8px 20px;background:transparent;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:.85rem;cursor:pointer;color:var(--dim)">Zatvori</button>
+  <div id="qrSection" class="fx-hidden mt-4">
+    <div id="landingQrReader" class="fx-w-full fx-rounded fx-m-auto fx-overflow-hidden" style="max-width:350px"></div>
+    <div class="d-flex fx-gap-2 justify-content-center fx-mt-10">
+      <button onclick="stopLandingQr()" class="fx-rounded fx-fs-base fx-pointer fx-bg-transparent fx-text-dim" style="padding:8px 20px;border:1.5px solid var(--line);font-family:var(--sans)">Zatvori</button>
     </div>
-    <p id="landingQrStatus" style="display:none;text-align:center;margin-top:8px;font-size:.85rem"></p>
+    <p id="landingQrStatus" class="fx-hidden text-center fx-fs-base mt-2"></p>
   </div>
 </div>
 
@@ -164,7 +164,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <div class="page-footer">
   <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
-  © 2026 <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">Konjik d.o.o.</a> & NO LIMIT udruga
+  © 2026 <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold">Konjik d.o.o.</a> & NO LIMIT udruga
 </div>
 
 <script>
@@ -203,7 +203,7 @@ function startLandingQr(){
     function(){}
   ).catch(function(err){
     document.getElementById('landingQrReader').innerHTML=
-      '<p style="color:#e05252;font-size:.85rem;padding:20px;text-align:center">Kamera: '+err+'</p>';
+      '<p class="fx-fs-base text-center fx-p-20" style="color:#e05252">Kamera: '+err+'</p>';
   });
 }
 

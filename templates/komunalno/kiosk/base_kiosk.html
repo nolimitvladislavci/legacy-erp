@@ -23,7 +23,7 @@
         
         body {
             background: var(--kiosk-bg);
-            color: white;
+            color:var(--text);
             font-family: system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
@@ -63,7 +63,7 @@
             border-radius: 16px;
             font-size: 1.1rem;
             font-weight: 800;
-            color: white;
+            color:var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -114,7 +114,7 @@
             text-align: center;
             background: var(--kiosk-surface);
             border: 3px solid var(--kiosk-accent);
-            color: white;
+            color:var(--text);
             border-radius: 12px;
             letter-spacing: 3px;
             font-weight: 700;
@@ -223,7 +223,7 @@
         
         .confirm-check.warning {
             background: var(--kiosk-yellow);
-            color: #333;
+            color:var(--text);
         }
         
         @keyframes popIn {
@@ -233,7 +233,7 @@
         
         /* Receipt print */
         @media print {
-            body { background: white; color: black; }
+            body { background:var(--bg-card); color: black; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
         }

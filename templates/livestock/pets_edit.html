@@ -8,7 +8,7 @@
     <a href="{% url 'livestock:pet_detail' pet.pk %}" class="text-muted text-decoration-none small">
       ← {{ pet.name|default:pet.ear_tag }}
     </a>
-    <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold,#c9a84c);margin-top:.5rem">
+    <h1 class="fx-text-gold mt-2 fx-fs-6xl" style="font-family:'Cormorant Garamond',serif">
       Uredi ljubimca
     </h1>
   </div>
@@ -107,9 +107,9 @@
         <label class="form-label fw-semibold text-light">Trenutna fotografija</label>
         <div class="mb-2">
           <img src="{{ pet.photo.url }}" alt="{{ pet.name }}"
-               style="max-height:160px;border-radius:8px;border:1px solid #334155">
+               class="fx-rounded fx-b2" style="max-height:160px">
         </div>
-        <label style="color:#94a3b8;font-size:.85rem">
+        <label class="fx-text-muted fx-fs-base">
           <input type="checkbox" name="photo_clear" value="1"> Ukloni fotografiju
         </label>
       </div>

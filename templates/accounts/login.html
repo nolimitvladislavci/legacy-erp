@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% trans "Prijava – LIMIT CONNECT" %}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 
 
@@ -31,12 +31,12 @@
 
     <!-- Role badges -->
     <div class="role-badges">
-      <span class="role-badge" style="color:#60a5fa;border-color:var(--accent)">{% trans "Superadmin" %}</span>
+      <span class="role-badge fx-text-blue" style="border-color:var(--accent)">{% trans "Superadmin" %}</span>
       <span class="role-badge" style="color:#a78bfa;border-color:#7c3aed">{% trans "Admin" %}</span>
       <span class="role-badge" style="color:#34d399;border-color:#059669">{% trans "Voditelj" %}</span>
-      <span class="role-badge" style="color:#fbbf24;border-color:#d97706">{% trans "Radnik" %}</span>
+      <span class="role-badge fx-text-amber" style="border-color:#d97706">{% trans "Radnik" %}</span>
       <span class="role-badge" style="color:#f472b6;border-color:#db2777">{% trans "Investitor" %}</span>
-      <span class="role-badge" style="color:#94a3b8;border-color:#475569">{% trans "Partner" %}</span>
+      <span class="role-badge fx-text-muted" style="border-color:#475569">{% trans "Partner" %}</span>
     </div>
 
     <!-- TABS -->
@@ -85,7 +85,7 @@
 
     <!-- MAGIC LINK -->
     <div class="form-section" id="tab-magic">
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+      <p class="fx-fs-note fx-text-muted mb-4 fx-lh-normal">
         {% trans "Unesite vaš email i poslat ćemo vam link za pristup bez lozinke. Vrijedi 24 sata." %}
       </p>
       <form method="post" action="{% url 'dashboard' %}">
@@ -96,32 +96,32 @@
         </div>
         <button type="submit" class="btn-primary">{% trans "Pošalji magic link →" %}</button>
       </form>
-      <div class="link-row" style="margin-top:16px">
+      <div class="link-row mt-3">
         {% trans "Za pristup projektima, fakturama ili upload slika –" %}<br>{% trans "bez lozinke!" %}
       </div>
     </div>
 
     <!-- DEVICE TOKEN LOGIN (mobitel = čip) -->
     <div class="form-section" id="tab-device">
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+      <p class="fx-fs-note fx-text-muted mb-3 fx-lh-normal">
         {% trans "Skeniraj svoj device barcode kamerom ili USB skenerom za instant prijavu." %}
       </p>
-      <div style="text-align:center;margin-bottom:16px">
+      <div class="text-center mb-3">
         <button onclick="startDeviceScan()" id="btnDeviceScan" class="btn-primary" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#d97706)">
           {% trans "📷 Pokreni kameru" %}
         </button>
-        <button onclick="stopDeviceScan()" id="btnDeviceStop" class="btn-primary" style="display:none;background:#374151">
+        <button onclick="stopDeviceScan()" id="btnDeviceStop" class="btn-primary fx-hidden" style="background:#374151">
           {% trans "⏹ Zaustavi" %}
         </button>
       </div>
-      <div id="deviceReader" style="max-width:320px;margin:0 auto;border-radius:8px;overflow:hidden"></div>
-      <div style="margin-top:12px">
+      <div id="deviceReader" class="fx-rounded fx-m-auto fx-overflow-hidden" style="max-width:320px"></div>
+      <div class="mt-3">
         <input type="text" id="deviceBarcodeInput" placeholder="{% trans 'Ili upiši/skeniraj barcode ovdje...' %}"
-               style="width:100%;padding:10px 14px;background:var(--ink);border:1px solid var(--border);border-radius:8px;color:white;font-size:0.9rem"
+               class="fx-w-full fx-rounded fx-fs-md fx-text-body fx-b fx-p-10-14" style="background:var(--ink)"
                autocomplete="off" autofocus>
       </div>
-      <div id="deviceStatus" style="margin-top:10px;font-size:0.82rem;text-align:center"></div>
-      <div class="link-row" style="margin-top:16px">
+      <div id="deviceStatus" class="fx-fs-note text-center fx-mt-10"></div>
+      <div class="link-row mt-3">
         <a href="{% url 'device_token_manage' %}">{% trans "Generiraj device token →" %}</a>
       </div>
     </div>
@@ -129,7 +129,7 @@
 
     <!-- TRIKEY PIN LOGIN -->
     <div class="form-section" id="tab-trikey">
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+      <p class="fx-fs-note fx-text-muted mb-3 fx-lh-normal">
         {% trans "Brza prijava PIN-om — kao mBanking. 6 znamenki." %}
       </p>
       <form method="post" action="{% url 'trikey_login' %}">
@@ -140,11 +140,11 @@
         </div>
         <div class="field">
           <label>{% trans "PIN (6 znamenki)" %}</label>
-          <input type="password" name="pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" required autocomplete="off" style="letter-spacing:.3em;text-align:center;font-size:1.2rem">
+          <input type="password" name="pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" required autocomplete="off" class="text-center fx-fs-2xl" style="letter-spacing:.3em">
         </div>
         <button type="submit" class="btn-primary">{% trans "Prijava PIN-om →" %}</button>
       </form>
-      <div class="link-row" style="margin-top:16px">
+      <div class="link-row mt-3">
         <a href="{% url 'pin_setup' %}">{% trans "Postavi PIN →" %}</a>
       </div>
     </div>
@@ -171,7 +171,7 @@ function startDeviceScan() {
                        Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_39]},
     onDeviceScanSuccess, ()=>{}
   ).catch(e => {
-    document.getElementById('deviceStatus').innerHTML = '<span style="color:#fca5a5">Kamera: '+e+'</span>';
+    document.getElementById('deviceStatus').innerHTML = '<span class="fx-text-red">Kamera: '+e+'</span>';
     stopDeviceScan();
   });
 }
@@ -195,7 +195,7 @@ document.getElementById('deviceBarcodeInput').addEventListener('keydown', functi
 function attemptDeviceLogin(barcode) {
   barcode = barcode.trim();
   if(!barcode) return;
-  document.getElementById('deviceStatus').innerHTML = '<span style="color:#fbbf24">Provjera...</span>';
+  document.getElementById('deviceStatus').innerHTML = '<span class="fx-text-amber">Provjera...</span>';
   fetch('/api/device-login/', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -209,11 +209,11 @@ function attemptDeviceLogin(barcode) {
       if(data.token) localStorage.setItem('fina_device_token', data.token);
       setTimeout(()=>{ window.location.href = data.redirect_url; }, 500);
     } else {
-      document.getElementById('deviceStatus').innerHTML = '<span style="color:#fca5a5">'+(data.error||'Greška')+'</span>';
+      document.getElementById('deviceStatus').innerHTML = '<span class="fx-text-red">'+(data.error||'Greška')+'</span>';
     }
   })
   .catch(e=>{
-    document.getElementById('deviceStatus').innerHTML = '<span style="color:#fca5a5">Greška: '+e+'</span>';
+    document.getElementById('deviceStatus').innerHTML = '<span class="fx-text-red">Greška: '+e+'</span>';
   });
 }
 
@@ -247,8 +247,8 @@ function showTab(tab, btn) {
 <script>
 /* pw-toggle: auto-add show/hide eye icon to all password inputs */
 (function(){
-  var EO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var EC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  var EO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-block"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-block"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
   function addToggle(inp){
     if(inp._pwDone) return; inp._pwDone=true;
     var w=document.createElement('div');

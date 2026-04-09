@@ -4,18 +4,18 @@
 {% block page_title %}Revizorski paket{% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
+<div class="container-fluid fx-max-700">
 
-  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:2rem;border:1px solid rgba(201,168,76,.2)">
-    <h2 style="color:var(--gold,#c9a84c);margin:0 0 .5rem">Revizorski paket</h2>
-    <p style="color:#888;margin:0 0 1.5rem">Generiraj kompletni ZIP za reviziju s INDEX-om, URA, IRA, PDV pregledom i svim PDF fakturama.</p>
+  <div class="fx-rounded-lg fx-p-6" style="background:linear-gradient(135deg,var(--surface),var(--surface-deep));border:1px solid var(--gold-border)">
+    <h2 class="fx-text-gold" class="fx-mb-2">Revizorski paket</h2>
+    <p class="fx-text-muted" class="fx-mb-6">Generiraj kompletni ZIP za reviziju s INDEX-om, URA, IRA, PDV pregledom i svim PDF fakturama.</p>
 
     <form method="post" action="{% url 'documents:revizija_export' %}" id="revForm">
       {% csrf_token %}
 
-      <div style="margin-bottom:1.25rem">
-        <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Tvrtka:</label>
-        <select name="company_id" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+      <div class="fx-mb-5">
+        <label class="fx-fw-semibold fx-fs-base fx-text-muted d-block" class="fx-mb-1">Tvrtka:</label>
+        <select name="company_id" required class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-normal fx-b2" class="fx-p-3">
           <option value="">— Odaberi tvrtku —</option>
           {% for c in companies %}
           <option value="{{ c.pk }}">{{ c.name }}{% if c.oib %} ({{ c.oib }}){% endif %}</option>
@@ -23,20 +23,20 @@
         </select>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+      <div class="d-grid fx-gap-4 fx-grid-2-equal" class="fx-mb-5">
         <div>
-          <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Od:</label>
-          <input type="date" name="date_from" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+          <label class="fx-fw-semibold fx-fs-base fx-text-muted d-block" class="fx-mb-1">Od:</label>
+          <input type="date" name="date_from" required class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-normal fx-b2" class="fx-p-3">
         </div>
         <div>
-          <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Do:</label>
-          <input type="date" name="date_to" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+          <label class="fx-fw-semibold fx-fs-base fx-text-muted d-block" class="fx-mb-1">Do:</label>
+          <input type="date" name="date_to" required class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-normal fx-b2" class="fx-p-3">
         </div>
       </div>
 
-      <div style="background:rgba(201,168,76,.06);border-radius:10px;padding:1rem;margin-bottom:1.5rem;border:1px solid rgba(201,168,76,.15)">
-        <div style="font-weight:600;color:var(--gold,#c9a84c);margin-bottom:.5rem">ZIP paket sadrzi:</div>
-        <ul style="color:#aaa;font-size:.85rem;margin:0;padding-left:1.2rem;line-height:1.8">
+      <div class="fx-rounded fx-p-4 fx-mb-6" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15)">
+        <div class="fx-fw-semibold fx-text-gold mb-2">ZIP paket sadrzi:</div>
+        <ul class="fx-text-muted fx-fs-base fx-m-0" style="padding-left:1.2rem;line-height:1.8">
           <li><b>INDEX.csv</b> — kompletni popis svih dokumenata</li>
           <li><b>KNJIGA_URA.csv</b> — ulazni racuni (dobavljaci)</li>
           <li><b>KNJIGA_IRA.csv</b> — izlazni racuni (kupci)</li>
@@ -46,27 +46,27 @@
         </ul>
       </div>
 
-      <div style="margin-bottom:1rem;padding:1rem;background:rgba(59,130,246,.08);border-radius:10px;border:1px solid rgba(59,130,246,.2)">
-        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:#ccc;font-size:.9rem">
+      <div class="fx-rounded mb-3 fx-p-4" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2)">
+        <label class="d-flex fx-pointer fx-fs-md align-items-center fx-gap-2 fx-text-muted">
           <input type="checkbox" name="send_email" value="1" id="sendEmailCb" onchange="document.getElementById('emailToRow').style.display=this.checked?'block':'none'">
           Posalji ZIP i na email
         </label>
-        <div id="emailToRow" style="display:none;margin-top:.75rem">
-          <input type="email" name="email_to" placeholder="racunovodstvo@firma.hr" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.9rem">
+        <div id="emailToRow" class="fx-hidden fx-mt-4">
+          <input type="email" name="email_to" placeholder="racunovodstvo@firma.hr" class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-md fx-b2" style="padding:.55rem">
         </div>
       </div>
 
-      <button type="submit" id="genBtn" style="width:100%;padding:.85rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:10px;font-weight:700;font-size:1.1rem;cursor:pointer"
+      <button type="submit" id="genBtn" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-xl fx-pointer fx-bg-gold" style="padding:.85rem"
               onclick="this.disabled=true;this.textContent='Generiranje ZIP...';document.getElementById('revForm').submit();">
         Generiraj revizorski paket
       </button>
     </form>
   </div>
 
-  <div style="margin-top:1.5rem;text-align:center">
-    <a href="{% url 'documents:arhiva_list' %}" style="color:#888;font-size:.85rem">Natrag na arhivu</a>
-    <span style="color:#444;margin:0 .5rem">|</span>
-    <a href="{% url 'documents:ai_inbox' %}" style="color:var(--gold,#c9a84c);font-size:.85rem">AI Inbox ({{ pending_count }} pending)</a>
+  <div class="text-center fx-mt-6">
+    <a href="{% url 'documents:arhiva_list' %}" class="fx-text-muted fx-fs-base">Natrag na arhivu</a>
+    <span class="fx-text-muted" style="margin:0 .5rem">|</span>
+    <a href="{% url 'documents:ai_inbox' %}" class="fx-fs-base fx-text-gold">AI Inbox ({{ pending_count }} pending)</a>
   </div>
 
 </div>

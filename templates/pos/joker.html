@@ -23,41 +23,41 @@
   top:50%; left:50%; transform:translate(-50%,-50%);
   width:min(320px,92vw);
   z-index:var(--z-numpad,9500);
-  background:#111827; border:1px solid rgba(201,168,76,.3);
+  background:var(--bg-card); border:1px solid rgba(201,168,76,.3);
   border-radius:16px;
   flex-direction:column; align-items:center; padding:16px 20px 20px;
   box-shadow:0 8px 40px rgba(0,0,0,.7);
 }
-.numpad-overlay .numpad-label { color:#94a3b8 !important; font-size:.75rem; margin-bottom:6px; }
+.numpad-overlay .numpad-label { color:var(--text-muted) !important; font-size:.75rem; margin-bottom:6px; }
 .numpad-overlay .numpad-display { color:var(--gold,#c9a84c) !important; font-size:2.2rem !important; margin-bottom:10px; }
-.numpad-overlay .numpad-btn { color:#e2e8f0 !important; background:rgba(255,255,255,.08) !important; min-height:48px !important; font-size:1.2rem !important; }
+.numpad-overlay .numpad-btn { color:var(--text) !important; background:rgba(255,255,255,.08) !important; min-height:48px !important; font-size:1.2rem !important; }
 .numpad-overlay .numpad-actions button { min-height:44px !important; }
 .numpad-display {
   font-size:3.5rem; font-weight:800; color:var(--gold,#c9a84c); margin-bottom:8px;
   font-variant-numeric:tabular-nums; min-width:120px; text-align:center;
 }
-.numpad-label { font-size:.9rem; color:#94a3b8; margin-bottom:24px; }
+.numpad-label { font-size:.9rem; color:var(--text-muted); margin-bottom:24px; }
 .numpad-grid {
   display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
   width:100%; max-width:300px;
 }
 .numpad-btn {
   background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
-  color:#e2e8f0; font-size:1.5rem; font-weight:700; border-radius:12px;
+  color:var(--text); font-size:1.5rem; font-weight:700; border-radius:12px;
   min-height:64px; cursor:pointer; font-family:inherit; transition:all .1s;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .numpad-btn:active { background:rgba(201,168,76,.2); transform:scale(.95); }
 .numpad-btn.gold { background:rgba(201,168,76,.2); border-color:rgba(201,168,76,.4); color:var(--gold,#c9a84c); }
-.numpad-btn.red { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.3); color:#f87171; }
-.numpad-btn.green { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); color:#4ade80; font-size:1.1rem; }
+.numpad-btn.red { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.3); color:var(--red); }
+.numpad-btn.green { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); color:var(--green); font-size:1.1rem; }
 .numpad-actions { display:flex; gap:12px; margin-top:16px; width:100%; max-width:300px; }
 .numpad-actions button { flex:1; min-height:52px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer; border:none; font-family:inherit; }
 
 /* ── Swipe to delete ──────────────────────────── */
 .b-row .swipe-delete {
   position:absolute; right:0; top:0; bottom:0; width:80px;
-  background:#ef4444; color:#fff; display:flex; align-items:center; justify-content:center;
+  background:var(--red); color:var(--white); display:flex; align-items:center; justify-content:center;
   font-weight:700; font-size:.85rem; transform:translateX(100%); transition:transform 0.2s;
 }
 .b-row.swiped .swipe-delete { transform:translateX(0); }
@@ -66,7 +66,7 @@
 /* ── Payment fullscreen (mobile) ──────────────── */
 @media(max-width:900px) {
   .pay-zone.expanded {
-    position:fixed; inset:0; z-index:8500; background:#0a0a0a;
+    position:fixed; inset:0; z-index:8500; background:var(--bg);
     display:flex; flex-direction:column; justify-content:center; padding:24px;
     animation: payFadeIn 0.2s ease;
   }
@@ -95,7 +95,7 @@
 .ai-suggest-item {
   display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
   background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.2);
-  border-radius:20px; font-size:.78rem; color:#e2e8f0; cursor:pointer;
+  border-radius:20px; font-size:.78rem; color:var(--text); cursor:pointer;
   transition:all .15s; white-space:nowrap; flex-shrink:0;
 }
 .ai-suggest-item:hover { background:rgba(201,168,76,.15); border-color:var(--gold,#c9a84c); }
@@ -134,7 +134,7 @@
 
 .mode-btn {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: none; border: none; color: #64748b;
+  background: none; border: none; color:var(--text-dim);
   font-size: 10px; font-weight: 600; padding: 4px 6px;
   cursor: pointer; font-family: inherit; transition: color 0.15s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
@@ -151,7 +151,7 @@
   display: flex; align-items: center; justify-content: center;
   border: 3px solid var(--dark, #0a0a0a);
   box-shadow: 0 4px 16px rgba(201,168,76,0.4);
-  margin-top: -16px; color: #000; font-size: 20px;
+  margin-top: -16px; color:var(--text); font-size: 20px;
   cursor: pointer; transition: transform 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -160,7 +160,7 @@
 /* Badge na hamburger gumbu */
 .mode-badge {
   position: absolute; top: 2px; right: 4px;
-  background: #ef4444; color: #fff;
+  background:var(--red); color:var(--white);
   font-size: 9px; font-weight: 800;
   border-radius: 50%; width: 16px; height: 16px;
   display: none; align-items: center; justify-content: center;
@@ -189,7 +189,7 @@
 .qk-overlay.show { display: block; }
 .qk-overlay-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .qk-overlay-title { font-size: 1rem; font-weight: 700; color: var(--gold,#c9a84c); }
-.qk-overlay-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 4px 8px; }
+.qk-overlay-close { background: none; border: none; color:var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 4px 8px; }
 .qk-overlay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .qk-overlay-grid .prod-btn { min-height: 64px; }
 @media(max-width:500px) { .qk-overlay-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -272,12 +272,12 @@
   font-size: .82rem; cursor: pointer; font-family: inherit;
 }
 .hb-q-btn:active { background: rgba(201,168,76,.15); }
-.hb-q-btn.cancel { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.3); color: #f87171; }
+.hb-q-btn.cancel { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.3); color:var(--red); }
 #hbChange {
   display: none; background: rgba(34,197,94,.08);
   border: 1px solid rgba(34,197,94,.3); border-radius: 6px;
   padding: 5px 10px; text-align: center; margin-bottom: 4px;
-  font-size: .85rem; color: #4ade80;
+  font-size: .85rem; color:var(--green);
 }
 
 /* Split u panelu */
@@ -306,7 +306,7 @@
 }
 .hb-split-del {
   background: rgba(239,68,68,.1); border: none; border-radius: 5px;
-  padding: 6px 8px; color: #f87171; cursor: pointer; font-size: .9rem;
+  padding: 6px 8px; color:var(--red); cursor: pointer; font-size: .9rem;
 }
 #hbSplitRem {
   display: flex; justify-content: space-between;
@@ -323,7 +323,7 @@
 }
 #hbPaySplit {
   width: 100%; padding: 11px;
-  background: var(--gold,#c9a84c); color: #000;
+  background: var(--gold,#c9a84c); color:var(--text);
   border: none; border-radius: 8px;
   font-weight: 700; font-size: .95rem; cursor: pointer; font-family: inherit;
 }
@@ -337,7 +337,7 @@
 }
 .hb-pay-btn {
   padding: 14px 8px; border: none; border-radius: 10px;
-  color: #fff; font-weight: 700; font-size: .95rem;
+  color:var(--white); font-weight: 700; font-size: .95rem;
   cursor: pointer; font-family: inherit;
   opacity: .4; pointer-events: none; transition: opacity .15s;
 }
@@ -369,13 +369,13 @@
           {% if terminal.company.logo %}
           <a href="/hr/companies/settings/#logo" title="Promijeni logo">
             <img src="{{ terminal.company.logo.url }}" alt="{{ terminal.company.name }}"
-                 style="height:28px;max-width:80px;object-fit:contain;border-radius:4px;margin-bottom:2px;display:block">
+                 class="fx-rounded-sm mb-1 d-block" style="height:28px;max-width:80px;object-fit:contain">
           </a>
           {% else %}
           <div class="qp-company">{{ terminal.company.name|default:"POS" }}</div>
           {% endif %}
           <div class="qp-terminal">{{ terminal.name }}</div>
-          <div id="active-cashier-name" style="font-size:.65rem;color:var(--gold);opacity:.7;margin-top:1px">
+          <div id="active-cashier-name" class="fx-fs-xs fx-opacity-70 fx-text-gold" style="margin-top:1px">
             👤 {{ request.user.get_full_name|default:request.user.username }}
           </div>
         </div>
@@ -384,11 +384,11 @@
           <div id="pos-date"></div>
         </div>
         <div class="qp-actions">
-          <a href="/hr/pos/receipts/" title="Svi računi" class="qp-action-btn" style="font-weight:900;color:var(--gold);">R</a>
+          <a href="/hr/pos/receipts/" title="Svi računi" class="qp-action-btn fx-text-gold" style="font-weight:900">R</a>
           <a href="/hr/pos/settings/" title="Postavke" class="qp-action-btn">⚙️</a>
           <a href="{{ session_report_url }}" title="Izvještaj smjene" class="qp-action-btn" target="_blank">📊</a>
           <button onclick="togglePosTheme()" title="Tema" aria-label="Prebaci temu (tamno/svijetlo)" class="qp-action-btn">&#9790;</button>
-          <button onclick="openShiftModal()" title="Z ispis / Zaključak smjene" aria-label="Z ispis — zaključak smjene" class="qp-action-btn" id="btnShiftClose" style="border-color:var(--gold);color:var(--gold)">Z</button>
+          <button onclick="openShiftModal()" title="Z ispis / Zaključak smjene" aria-label="Z ispis — zaključak smjene" class="qp-action-btn fx-text-gold" id="btnShiftClose" style="border-color:var(--gold)">Z</button>
         </div>
       </div>
       <!-- Red 2: blagajnici (horizontalni scroll) -->
@@ -400,11 +400,11 @@
                   data-has-pin="{% if c.pin_hash %}1{% else %}0{% endif %}"
                   onclick="onCashierClick(this)"
                   title="{% if c.pin_hash %}PIN zaštićen{% else %}Bez PIN-a{% endif %}">
-            {% if c.pin_hash %}<span style="font-size:.6rem;opacity:.6">🔐</span>{% endif %}{{ c.name }}
+            {% if c.pin_hash %}<span class="fx-fs-2xs" style="opacity:.6">🔐</span>{% endif %}{{ c.name }}
           </button>
           {% endfor %}
         {% else %}
-          <a href="/pos/settings/#cashiers" style="font-size:.72rem;color:var(--gold);text-decoration:none;border:1px solid var(--gold);border-radius:5px;padding:.2rem .5rem">⚙️ Dodaj blagajnika</a>
+          <a href="/pos/settings/#cashiers" class="fx-fs-sm fx-no-underline fx-rounded-sm fx-text-gold" style="border:1px solid var(--gold);padding:.2rem .5rem">⚙️ Dodaj blagajnika</a>
         {% endif %}
       </div>
     </div>
@@ -413,15 +413,15 @@
     <div class="active-cashier-bar" id="activeCashierBar"></div>
     <div class="offline-banner" id="offlineBanner">
       <span>&#9889; OFFLINE MOD &mdash; bonovi se čuvaju lokalno</span>
-      <span class="offline-badge" id="offlineSyncBadge" style="display:none"></span>
+      <span class="offline-badge fx-hidden" id="offlineSyncBadge"></span>
     </div>
     <div class="offline-critical" id="offline48hBanner">
       &#9888;&#65039; UPOZORENJE: Bon bez JIR-a &gt;36h! Uspostavi vezu odmah.
     </div>
 {% if show_upgrade_banner %}
-<div style="background:linear-gradient(90deg,#1a1a2e,#16213e);border-bottom:2px solid var(--gold);padding:.4rem 1rem;text-align:center;font-size:.78rem;color:#e2e8f0">
+<div class="text-center fx-fs-body-sm fx-text-body" style="background:linear-gradient(90deg,#1a1a2e,#16213e);border-bottom:2px solid var(--gold);padding:.4rem 1rem">
   ⚡ Besplatni plan podržava 1 blagajnu.
-  <a href="/register/upgrade/?module=pos" style="color:var(--gold);font-weight:700;text-decoration:underline;margin-left:.5rem">Nadoplati →</a>
+  <a href="/register/upgrade/?module=pos" class="fx-fw-bold fx-text-gold" style="text-decoration:underline;margin-left:.5rem">Nadoplati →</a>
 </div>
 {% endif %}
 
@@ -429,29 +429,29 @@
 {% if is_gastro %}
 <!-- ═══ GASTRO: Table Grid ════════════════════════════════════════════════ -->
 <div id="gastro-tables" style="padding:.6rem;border-bottom:2px solid var(--gold)">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-    <div style="font-size:.85rem;font-weight:700;color:var(--gold)">
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="fx-fs-base fx-fw-bold fx-text-gold">
       <i class="fas fa-utensils"></i> {% trans "Raspored stolova" %}
-      {% if open_receipts %}<span style="font-size:.7rem;color:var(--muted);margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
+      {% if open_receipts %}<span class="fx-fs-sm fx-text-muted" style="margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ {% trans "Novi bon" %}</button>
+    <button class="btn btn-ghost btn-sm fx-fs-caption" onclick="openGastroNewBon()">+ {% trans "Novi bon" %}</button>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.4rem">
+  <div class="d-grid fx-gap-1" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr))">
     {% for t in tables %}
     {% if t.receipt %}
-    <div class="gastro-tbl gastro-tbl-occ" data-table="{{ t.num }}" data-rid="{{ t.receipt.id }}" onclick="selectGastroTable(this)"
-         style="background:rgba(239,68,68,.08);border:2px solid #ef4444;border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;position:relative;transition:all .15s">
-      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#ef4444"></div>
-      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">{% trans "stol" %}</div>
-      <div style="font-size:.7rem;font-weight:700;color:var(--gold)">&euro;{{ t.receipt.total|floatformat:2 }}</div>
+    <div class="gastro-tbl gastro-tbl-occ fx-rounded text-center fx-pointer fx-p-2 fx-relative" data-table="{{ t.num }}" data-rid="{{ t.receipt.id }}" onclick="selectGastroTable(this)"
+         style="background:rgba(239,68,68,.08);border:2px solid #ef4444;transition:all .15s">
+      <div class="fx-rounded-circle fx-bg-red" style="position:absolute;top:4px;right:4px;width:7px;height:7px"></div>
+      <div class="fx-fs-2xl fx-fw-800">{{ t.num }}</div>
+      <div class="fx-fs-2xs fx-text-muted fx-uppercase">{% trans "stol" %}</div>
+      <div class="fx-fs-sm fx-fw-bold fx-text-gold">&euro;{{ t.receipt.total|floatformat:2 }}</div>
     </div>
     {% else %}
-    <div class="gastro-tbl gastro-tbl-free" data-table="{{ t.num }}" data-rid="" onclick="selectGastroTable(this)"
-         style="background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:all .15s">
-      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;position:relative;display:inline-block"></div>
-      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">{% trans "slobodan" %}</div>
+    <div class="gastro-tbl gastro-tbl-free fx-rounded text-center fx-pointer fx-p-2 fx-bg-card" data-table="{{ t.num }}" data-rid="" onclick="selectGastroTable(this)"
+         style="border:2px solid var(--border);transition:all .15s">
+      <div class="fx-rounded-circle fx-bg-green d-inline-block fx-relative" style="position:absolute;top:4px;right:4px;width:7px;height:7px"></div>
+      <div class="fx-fs-2xl fx-fw-800">{{ t.num }}</div>
+      <div class="fx-fs-2xs fx-text-muted fx-uppercase">{% trans "slobodan" %}</div>
     </div>
     {% endif %}
     {% endfor %}
@@ -462,13 +462,13 @@
 
 
     <!-- Search + Scanner -->
-    <div class="prod-search" style="display:flex;gap:6px;align-items:center">
-      <input type="search" id="prodSearch" aria-label="Pretraga proizvoda" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
-      <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
+    <div class="prod-search d-flex fx-gap-2 align-items-center">
+      <input type="search" id="prodSearch" aria-label="Pretraga proizvoda" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" class="fx-flex-1">
+      <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" class="fx-bg-green fx-text-white fx-border-none fx-rounded-sm fx-fs-xl fx-pointer fx-fw-bold flex-shrink-0 fx-lh-tight" style="padding:6px 12px">+</button>
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Glasovni unos">
         <i class="fas fa-microphone"></i>
       </button>
-      <button type="button" onclick="openScanner()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 10px;font-size:1rem;cursor:pointer;flex-shrink:0" title="Skeniraj barkod">📷</button>
+      <button type="button" onclick="openScanner()" class="fx-text-dark fx-border-none fx-rounded-sm fx-fs-lg fx-pointer fx-bg-gold flex-shrink-0" style="padding:6px 10px" title="Skeniraj barkod">📷</button>
     </div>
 
 
@@ -485,7 +485,7 @@
 
     <!-- CONTEXT QUICKACTIONS — POS kao Centar Svijeta -->
     {% if quick_actions_json %}
-    <div id="qa-panel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;padding:4px 6px 8px;border-bottom:2px solid var(--gold,#c9a84c);margin-bottom:6px">
+    <div id="qa-panel" class="d-grid mb-1" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;padding:4px 6px 8px;border-bottom:2px solid var(--gold,#c9a84c)">
     </div>
     <script>
     (function(){
@@ -515,7 +515,7 @@
         const btn = document.createElement('button');
         btn.className = 'prod-btn';
         btn.style.cssText = 'background:'+a.color+'22;border:1px solid '+a.color+'44;min-height:46px;font-size:.78rem;cursor:pointer';
-        btn.innerHTML = '<i class="fas '+a.icon+'" style="font-size:1.1rem;color:'+a.color+'"></i><div style="font-size:.68rem;margin-top:2px;color:var(--text)">'+a.label+'</div>';
+        btn.innerHTML = '<i class="fas '+a.icon+' fx-fs-xl" style="color:'+a.color+'"></i><div class="fx-fs-tiny fx-text-body fx-mt-1">'+a.label+'</div>';
         btn.onclick = () => {
           const handler = ACTION_HANDLERS[a.action];
           if (handler) handler(a);
@@ -528,9 +528,9 @@
     {% endif %}
 
     {% if quick_items %}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 6px 8px;border-bottom:2px solid var(--border,#2a2f45);margin-bottom:6px">
+    <div class="fx-gap-2 d-grid mb-1 fx-grid-4-cols" style="padding:0 6px 8px;border-bottom:2px solid var(--border,#2a2f45)">
       {% for qi in quick_items %}
-      <button class="prod-btn" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);min-height:52px;font-size:.85rem"
+      <button class="prod-btn fx-fs-base" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);min-height:52px"
               data-id="{{ qi.id }}"
               data-name="{{ qi.name|escapejs }}"
               data-price="{{ qi.unit_price|stringformat:".2f" }}"
@@ -540,7 +540,7 @@
               data-unit="{{ qi.unit }}"
               onclick="addProduct(this)"
               title="{{ qi.name }}">
-        <div class="prod-name" style="font-weight:800;color:var(--gold,#c9a84c)">{{ qi.name|truncatechars:20 }}</div>
+        <div class="prod-name fx-fw-800 fx-text-gold">{{ qi.name|truncatechars:20 }}</div>
         <div class="prod-price">&euro;{{ qi.unit_price|floatformat:2 }}</div>
         <div class="prod-qty-badge" id="qb-{{ qi.id }}">0</div>
       </button>
@@ -580,17 +580,17 @@
           {% endif %}
         </button>
         {% empty %}
-        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">
-          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="{% url 'inventory:list' %}" style="color:var(--gold)">{% trans "Skladištu →" %}</a>
+        <div class="text-center fx-text-muted fx-p-6 fx-col-full">
+          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="{% url 'inventory:list' %}" class="fx-text-gold">{% trans "Skladištu →" %}</a>
         </div>
         {% endfor %}
       </div>
 
       {% else %}
       <div class="no-session">
-        <div style="font-size:2.5rem;margin-bottom:.75rem">⏸</div>
+        <div class="fx-mb-4 fx-fs-7xl">⏸</div>
         <p>{% trans "Nema aktivne smjene." %}</p>
-        <a href="{% url 'pos:terminal_detail' terminal.id %}" class="btn btn-gold" style="margin-top:1rem;display:inline-flex">{% trans "Pokreni smjenu →" %}</a>
+        <a href="{% url 'pos:terminal_detail' terminal.id %}" class="btn btn-gold mt-3 d-inline-flex">{% trans "Pokreni smjenu →" %}</a>
       </div>
       {% endif %}
     </div>
@@ -606,7 +606,7 @@
     <div class="drawer-handle" id="drawerHandle"></div>
     <div class="basket-head">
       {% trans "🛒 Košarica" %}
-      <button onclick="clearBasket()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem" title="{% trans "Isprazni" %}">{% trans "🗑 Isprazni" %}</button>
+      <button onclick="clearBasket()" class="fx-border-none fx-pointer fx-fs-sm fx-text-muted fx-bg-transparent" title="{% trans "Isprazni" %}">{% trans "🗑 Isprazni" %}</button>
     </div>
     <div class="basket-items" id="basketList">
       <div class="basket-empty" id="basketEmpty">{% trans "Dodajte artiklе klikom ↑" %}</div>
@@ -622,7 +622,7 @@
     <div class="extras-bar" id="extrasBar">
       <button class="ex-btn" id="tipToggleBtn" onclick="toggleTip()" disabled>💰 Napojnica</button>
       <button class="ex-btn" onclick="openPfandModal()" id="pfandBtn" disabled>↩ Ambalaža</button>
-      <a href="/pos/vouchers/" class="ex-btn" target="_blank" title="Upravljanje vaučerima" style="text-decoration:none">🎫 Vaučeri ↗</a>
+      <a href="/pos/vouchers/" class="ex-btn fx-no-underline" target="_blank" title="Upravljanje vaučerima">🎫 Vaučeri ↗</a>
     </div>
     <!-- Tip row -->
     <div class="tip-row hidden" id="tipRow">
@@ -638,19 +638,17 @@
     <div class="pay-zone" id="payZone" role="region" aria-label="Zona plaćanja">
       <!-- DARK/LIGHT TOGGLE -->
       <button id="themeToggle" onclick="toggleTheme()" title="Tamni/Svijetli mod"
-        style="position:fixed;top:8px;right:8px;z-index:300;background:var(--card,#1e293b);
-        border:1px solid var(--border,#333);border-radius:6px;padding:4px 8px;cursor:pointer;
-        color:var(--muted,#888);font-size:.75rem">&#9788;/&#9790;</button>
-      <button onclick="togglePayExpand()" class="qp-action-btn" style="float:right;margin-bottom:4px;font-size:.7rem;display:none" id="payExpandBtn" title="Proširi">⛶</button>
+        class="fx-rounded-sm fx-pointer fx-fs-caption" style="position:fixed;top:8px;right:8px;z-index:300;background:var(--card,#1e293b);border:1px solid var(--border,#333);padding:4px 8px;color:var(--muted,#888)">&#9788;/&#9790;</button>
+      <button onclick="togglePayExpand()" class="qp-action-btn fx-fs-sm fx-hidden mb-1" style="float:right" id="payExpandBtn" title="Proširi">⛶</button>
       <div class="cashier-required-hint" id="cashierHint">⚠️ Odaberite blagajnika prije naplate</div>
       <!-- Cash amount input (visible only for CASH) -->
       <div id="cashSection">
         <div class="cash-input-row">
-          <span style="font-size:.75rem;color:var(--muted);white-space:nowrap">{% trans "Primljeno (€):" %}</span>
+          <span class="fx-fs-caption fx-text-muted text-nowrap">{% trans "Primljeno (€):" %}</span>
           <input type="number" class="cash-input" id="cashAmt" min="0" step="0.01" placeholder="0.00" oninput="calcChange()">
         </div>
         <div class="cash-quick">
-          <button class="cash-q-btn" onclick="setCash(0)" style="background:#ef4444;color:#fff;font-weight:800">✕</button>
+          <button class="cash-q-btn fx-bg-red fx-text-white fx-fw-800" onclick="setCash(0)">✕</button>
           <button class="cash-q-btn" onclick="setExact()">{% trans "Točno" %}</button>
           <button class="cash-q-btn" onclick="setCash(10)">10</button>
           <button class="cash-q-btn" onclick="setCash(20)">20</button>
@@ -663,32 +661,29 @@
         </div>
       </div>
       <!-- SPLIT PAYMENT WIDGET -->
-      <div id="splitToggle" style="margin-bottom:6px">
+      <div id="splitToggle" class="mb-1">
         <button type="button" onclick="toggleSplit()"
-          style="width:100%;padding:8px;background:rgba(201,168,76,.08);border:1px dashed rgba(201,168,76,.35);
-          border-radius:8px;color:var(--gold,#c9a84c);font-size:.82rem;font-weight:600;cursor:pointer;min-height:44px">
+          class="fx-w-full fx-rounded fx-fs-note fx-fw-semibold fx-pointer fx-text-gold fx-p-8" style="background:rgba(201,168,76,.08);border:1px dashed rgba(201,168,76,.35);min-height:44px">
           ⚡ {% trans "Podijeli plaćanje" %}
         </button>
       </div>
-      <div id="splitWidget" style="display:none;margin-bottom:8px">
-        <div id="splitLines" style="display:flex;flex-direction:column;gap:4px"></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 10px;background:rgba(201,168,76,.05);border-radius:6px;margin:6px 0;font-size:.82rem">
-          <span style="color:var(--muted)">{% trans "Preostalo" %}:</span>
-          <strong id="splitRem" style="color:var(--gold)">0.00 EUR</strong>
+      <div id="splitWidget" class="fx-hidden mb-2">
+        <div id="splitLines" class="d-flex fx-gap-1 fx-flex-col"></div>
+        <div class="d-flex fx-rounded-sm fx-fs-note justify-content-between" style="padding:6px 10px;background:rgba(201,168,76,.05);margin:6px 0">
+          <span class="fx-text-muted">{% trans "Preostalo" %}:</span>
+          <strong id="splitRem" class="fx-text-gold">0.00 EUR</strong>
         </div>
         <button type="button" onclick="addSplitLine()"
-          style="width:100%;padding:6px;background:transparent;border:1px solid var(--border,#333);
-          border-radius:6px;color:var(--muted);font-size:.78rem;cursor:pointer;min-height:40px">
+          class="fx-w-full fx-rounded-sm fx-fs-body-sm fx-pointer fx-text-muted fx-bg-transparent fx-p-sm" style="border:1px solid var(--border,#333);min-height:40px">
           + {% trans "Dodaj način" %}
         </button>
         <button type="button" onclick="paySplit()" id="paySplitBtn"
-          style="width:100%;padding:10px;margin-top:8px;background:var(--gold,#c9a84c);color:#0f172a;
-          border:none;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:48px">
+          class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-normal fx-pointer mt-2 fx-p-10 fx-bg-gold" style="min-height:48px">
           ⚡ {% trans "Naplati split" %}
         </button>
       </div>
 
-      <div class="pay-btns-3" style="grid-template-columns:1fr 1fr">
+      <div class="pay-btns-3 fx-grid-2-equal">
         <button class="pay-cash" id="payCash" onclick="pay('CASH')" disabled>
           💵 GOTOVINA
         </button>
@@ -704,14 +699,14 @@
       </div>
 
       <!-- Revolut QR modal -->
-      <div id="revolutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center">
-        <div style="background:#1a1a2e;border:2px solid #0075EB;border-radius:16px;padding:24px;max-width:350px;width:90%;text-align:center">
-          <h3 style="color:#0075EB;margin-bottom:8px">📱 Revolut plaćanje</h3>
-          <p style="color:#888;font-size:.85rem;margin-bottom:16px">Gost skenira QR ili otvori link</p>
-          <div id="revolutQR" style="margin-bottom:12px"></div>
-          <div id="revolutStatus" style="font-size:.9rem;margin-bottom:12px;color:#0075EB">Čekam plaćanje...</div>
-          <div style="font-size:1.5rem;font-weight:800;color:#0075EB;margin-bottom:12px" id="revolutAmount"></div>
-          <button onclick="closeRevolutModal()" style="background:#333;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer">Zatvori</button>
+      <div id="revolutModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9)">
+        <div class="fx-bg-surface2 fx-rounded-lg text-center" style="border:2px solid #0075EB;padding:24px;max-width:350px;width:90%">
+          <h3 class="mb-2" style="color:#0075EB">📱 Revolut plaćanje</h3>
+          <p class="fx-text-muted fx-fs-base mb-3">Gost skenira QR ili otvori link</p>
+          <div id="revolutQR" class="mb-3"></div>
+          <div id="revolutStatus" class="fx-fs-md mb-3" style="color:#0075EB">Čekam plaćanje...</div>
+          <div class="fx-fs-5xl fx-fw-800 mb-3" style="color:#0075EB" id="revolutAmount"></div>
+          <button onclick="closeRevolutModal()" class="fx-text-white fx-border-none fx-rounded fx-pointer" style="background:#333;padding:8px 20px">Zatvori</button>
         </div>
       </div>
     </div>
@@ -735,11 +730,11 @@
 
 <!-- Voice Result Overlay -->
 <div class="voice-result" id="voiceResult">
-  <div style="font-size:2rem;margin-bottom:8px">🎤</div>
-  <canvas id="voiceWave" style="width:100%;height:48px;margin-bottom:8px;border-radius:8px"></canvas>
+  <div class="fx-fs-icon mb-2">🎤</div>
+  <canvas id="voiceWave" class="fx-w-full fx-rounded mb-2" style="height:48px"></canvas>
   <div class="voice-text" id="voiceText">Slušam...</div>
-  <div id="voiceNoise" style="display:none;font-size:.78rem;margin:4px 0"></div>
-  <div id="voiceConfidence" style="display:none;font-size:.72rem;font-weight:700;margin:4px 0"></div>
+  <div id="voiceNoise" class="fx-hidden fx-fs-body-sm" style="margin:4px 0"></div>
+  <div id="voiceConfidence" class="fx-hidden fx-fs-sm fx-fw-bold" style="margin:4px 0"></div>
   <div class="voice-status" id="voiceStatus">Govorite jasno</div>
 </div>
 
@@ -768,22 +763,22 @@
 
 <!-- PIN Modal -->
 <div class="qmodal" id="pinModal">
-  <div class="qmodal-box" style="text-align:center">
+  <div class="qmodal-box text-center">
     <div class="qmodal-title" id="pinModalTitle">🔐 Unesite PIN</div>
-    <div style="font-size:2rem;letter-spacing:.4em;color:var(--gold);margin:.75rem 0;min-height:2.5rem" id="pinDots"></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem">
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('1')">1</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('2')">2</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('3')">3</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('4')">4</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('5')">5</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('6')">6</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('7')">7</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('8')">8</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('9')">9</button>
-      <button class="qmodal-btn" style="font-size:1.1rem" onclick="pinKey('clear')">✕</button>
-      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('0')">0</button>
-      <button class="qmodal-btn qmodal-btn-ok" style="font-size:1.1rem" onclick="pinKey('ok')">✓</button>
+    <div class="fx-fs-icon fx-text-gold" style="letter-spacing:.4em;margin:.75rem 0;min-height:2.5rem" id="pinDots"></div>
+    <div class="d-grid fx-gap-2 fx-mb-4 fx-grid-3">
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('1')">1</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('2')">2</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('3')">3</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('4')">4</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('5')">5</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('6')">6</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('7')">7</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('8')">8</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('9')">9</button>
+      <button class="qmodal-btn fx-fs-xl" onclick="pinKey('clear')">✕</button>
+      <button class="qmodal-btn fx-fs-3xl fx-fw-bold fx-p-3" onclick="pinKey('0')">0</button>
+      <button class="qmodal-btn qmodal-btn-ok fx-fs-xl" onclick="pinKey('ok')">✓</button>
     </div>
     <button class="qmodal-btn qmodal-btn-cancel" onclick="closePinModal()">Odustani</button>
   </div>
@@ -794,8 +789,8 @@
 <div class="qmodal" id="pfandModal">
   <div class="qmodal-box">
     <div class="qmodal-title">↩ Povrat ambalaže (Pfand)</div>
-    <div id="pfandList" style="max-height:240px;overflow-y:auto;margin-bottom:1rem">
-      <div style="color:var(--muted);font-size:.85rem">Učitavanje...</div>
+    <div id="pfandList" class="mb-3 fx-scroll-y" style="max-height:240px">
+      <div class="fx-fs-base fx-text-muted">Učitavanje...</div>
     </div>
     <div class="qmodal-btns">
       <button class="qmodal-btn qmodal-btn-cancel" onclick="closePfandModal()">Zatvori</button>
@@ -807,21 +802,21 @@
 <div class="qmodal" id="voucherModal">
   <div class="qmodal-box">
     <div class="qmodal-title">🎫 Plaćanje vaučerom</div>
-    <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Kod vaučera</label>
+    <label class="fx-fs-body-sm fx-text-muted d-block fx-mb-2">Kod vaučera</label>
     <input type="text" class="qmodal-input" id="voucherCodeInput" placeholder="BON-2026-XXXXXX"
            oninput="this.value=this.value.toUpperCase()" onkeyup="if(event.key==='Enter')checkVoucher()">
     <div class="qmodal-info" id="voucherInfo"></div>
-    <div style="margin-bottom:.75rem" id="voucherSplitSection" style="display:none">
-      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">
+    <div class="fx-mb-4" id="voucherSplitSection">
+      <label class="fx-fs-body-sm fx-text-muted d-block fx-mb-2">
         Iznos vaučera (ostatak gotovinom):
       </label>
       <input type="number" class="qmodal-input" id="voucherAmountInput" step="0.01" min="0" placeholder="0.00">
     </div>
     <div class="qmodal-btns">
       <button class="qmodal-btn qmodal-btn-cancel" onclick="closeVoucherModal()">Odustani</button>
-      <button class="qmodal-btn" id="voucherCheckBtn" onclick="checkVoucher()"
-              style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Provjeri</button>
-      <button class="qmodal-btn qmodal-btn-ok" id="voucherPayBtn" onclick="payWithVoucher()" style="display:none">Plati</button>
+      <button class="qmodal-btn fx-text-gold" id="voucherCheckBtn" onclick="checkVoucher()"
+              style="background:rgba(201,168,76,.2);border:1px solid var(--gold)">Provjeri</button>
+      <button class="qmodal-btn qmodal-btn-ok fx-hidden" id="voucherPayBtn" onclick="payWithVoucher()">Plati</button>
     </div>
   </div>
 </div>
@@ -846,9 +841,9 @@
   <div class="success-total" id="sucTotal"></div>
   <div class="success-change" id="sucChange"></div>
   <div class="success-num" id="sucNum"></div>
-  <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;width:100%">
-    <button class="success-close" id="btnShareReceipt" onclick="shareLastReceipt()" style="background:var(--gold,#c9a84c);border:1px solid var(--gold,#c9a84c);color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Spremi i podijeli</button>
-    <button class="success-close" onclick="closeSuccess()" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.9rem;border-radius:10px;width:100%">Završi</button>
+  <div class="d-flex fx-w-full fx-flex-col fx-gap-2" style="max-width:300px">
+    <button class="success-close fx-text-dark fx-fw-bold fx-rounded fx-w-full fx-bg-gold" id="btnShareReceipt" onclick="shareLastReceipt()" style="border:1px solid var(--gold,#c9a84c);padding:.85rem;font-size:1.05rem">📤 Spremi i podijeli</button>
+    <button class="success-close fx-fs-md fx-rounded fx-w-full fx-text-body fx-b fx-p-3 fx-bg-card" onclick="closeSuccess()">Završi</button>
   </div>
 </div>
 
@@ -858,7 +853,7 @@
 @keyframes pulse-gold{0%,100%{opacity:.5}50%{opacity:1}}
 @keyframes pulse-red{0%,100%{opacity:.6}50%{opacity:1}}
 .shield-ok{animation:pulse-gold 3s infinite}
-.shield-warn{animation:pulse-red .6s infinite;background:#ef4444 !important;box-shadow:0 0 16px rgba(239,68,68,.6) !important}
+.shield-warn{animation:pulse-red .6s infinite;background:var(--red) !important;box-shadow:0 0 16px rgba(239,68,68,.6) !important}
 #fiscal-shield{
   position:fixed; top:8px; right:130px; z-index:2001;
   display:flex; align-items:center; gap:6px;
@@ -870,12 +865,12 @@
   display:flex;align-items:center;gap:5px;
   text-decoration:none;color:var(--gold,#c9a84c);font-size:.72rem;font-weight:700;
 }
-#fiscal-shield a.fs-link:hover{color:#fff}
+#fiscal-shield a.fs-link:hover{color:var(--white)}
 #shield-badge-text{font-size:.7rem;font-weight:800;color:var(--gold,#c9a84c)}
 </style>
 <div id="fiscal-shield">
-  <div id="shield-ring" style="width:20px;height:20px;border:2px solid var(--gold,#c9a84c);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s">
-    <span id="shield-dot" style="width:8px;height:8px;background:var(--gold,#c9a84c);border-radius:50%;display:block"></span>
+  <div id="shield-ring" class="fx-rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:20px;height:20px;border:2px solid var(--gold,#c9a84c);transition:all .3s">
+    <span id="shield-dot" class="fx-rounded-circle d-block fx-bg-gold" style="width:8px;height:8px"></span>
   </div>
   <a href="/pos/fiscal/room/" class="fs-link" title="Fiskalna soba">
     <span id="shield-badge-text">Fiskal</span>
@@ -884,47 +879,47 @@
 
 
 <!-- Barcode Scanner Overlay -->
-<div id="scannerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);overflow-y:auto">
-  <div style="max-width:500px;margin:0 auto;padding:20px;text-align:center">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <span style="color:var(--gold,#c9a84c);font-weight:800;font-size:1.1rem">Skeniraj barkod</span>
-      <button onclick="closeScanner()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer">&times;</button>
+<div id="scannerOverlay" class="fx-hidden fx-scroll-y" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95)">
+  <div class="text-center fx-m-auto fx-p-20" style="max-width:500px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="fx-fw-800 fx-fs-xl fx-text-gold">Skeniraj barkod</span>
+      <button onclick="closeScanner()" class="fx-border-none fx-text-white fx-fs-5xl fx-pointer fx-bg-transparent">&times;</button>
     </div>
-    <div id="scannerVideo" style="width:100%;border-radius:12px;overflow:hidden;border:3px solid var(--gold,#c9a84c)"></div>
-    <div id="scannerResult" style="margin-top:12px;color:#22c55e;font-weight:700;font-size:1rem"></div>
+    <div id="scannerVideo" class="fx-w-full fx-rounded fx-overflow-hidden" style="border:3px solid var(--gold,#c9a84c)"></div>
+    <div id="scannerResult" class="fx-text-green fx-fw-bold fx-fs-lg mt-3"></div>
     <!-- Novi artikl panel -->
-    <div id="newItemPanel" style="display:none;margin-top:12px;background:#1a1a1a;border:1px solid var(--gold,#c9a84c);border-radius:10px;padding:12px;text-align:left">
-      <div style="font-size:.85rem;font-weight:700;color:var(--gold,#c9a84c);margin-bottom:8px">Novi artikl — barkod: <span id="newItemBarcode"></span></div>
-      <div id="newItemLoading" style="text-align:center;padding:8px;color:#888;display:none">
-        <span style="display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:var(--gold,#c9a84c);border-radius:50%;animation:spin 1s linear infinite"></span> AI prepoznaje proizvod...
+    <div id="newItemPanel" class="fx-hidden fx-bg-card fx-rounded mt-3 text-start fx-p-12" style="border:1px solid var(--gold,#c9a84c)">
+      <div class="fx-fs-base fx-fw-bold fx-text-gold mb-2">Novi artikl — barkod: <span id="newItemBarcode"></span></div>
+      <div id="newItemLoading" class="text-center fx-text-muted fx-hidden fx-p-8">
+        <span class="fx-rounded-circle d-inline-block" style="width:14px;height:14px;border:2px solid #333;border-top-color:var(--gold,#c9a84c);animation:spin 1s linear infinite"></span> AI prepoznaje proizvod...
       </div>
-      <div id="newItemForm" style="display:none">
-        <div style="margin-bottom:6px"><input id="niName" placeholder="Naziv artikla" style="width:100%;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem"></div>
-        <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input id="niPrice" type="number" step="0.01" placeholder="Cijena EUR" style="flex:1;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
-          <select id="niCategory" style="flex:1;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
+      <div id="newItemForm" class="fx-hidden">
+        <div class="mb-1"><input id="niName" placeholder="Naziv artikla" class="fx-w-full fx-bg-card fx-text-white fx-rounded-sm fx-fs-body fx-b2" style="padding:8px 10px"></div>
+        <div class="d-flex fx-gap-2 mb-1">
+          <input id="niPrice" type="number" step="0.01" placeholder="Cijena EUR" class="fx-bg-card fx-text-white fx-rounded-sm fx-fs-body fx-flex-1 fx-b2" style="padding:8px 10px">
+          <select id="niCategory" class="fx-bg-card fx-text-white fx-rounded-sm fx-fs-body fx-flex-1 fx-b2" style="padding:8px 10px">
             <option value="food">Hrana</option><option value="drink">Pice</option><option value="dessert">Slatkisi</option><option value="special">Ostalo</option>
           </select>
-          <select id="niVat" style="flex:0 0 70px;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
+          <select id="niVat" class="fx-bg-card fx-text-white fx-rounded-sm fx-fs-body fx-b2" style="flex:0 0 70px;padding:8px 10px">
             <option value="25">25%</option><option value="13">13%</option><option value="5">5%</option><option value="0">0%</option>
           </select>
         </div>
-        <div id="niAiHint" style="font-size:.72rem;color:#888;margin-bottom:8px"></div>
-        <div style="display:flex;gap:6px">
-          <button type="button" onclick="confirmNewItem()" style="flex:1;background:var(--gold,#c9a84c);color:#000;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer">Potvrdi i dodaj</button>
-          <button type="button" onclick="cancelNewItem()" style="background:transparent;border:1px solid #333;color:#888;padding:10px 16px;border-radius:8px;font-size:.88rem;cursor:pointer">Odustani</button>
+        <div id="niAiHint" class="fx-fs-sm fx-text-muted mb-2"></div>
+        <div class="d-flex fx-gap-2">
+          <button type="button" onclick="confirmNewItem()" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-fs-body fx-pointer fx-flex-1 fx-bg-gold fx-p-10">Potvrdi i dodaj</button>
+          <button type="button" onclick="cancelNewItem()" class="fx-text-muted fx-rounded fx-fs-body fx-pointer fx-bg-transparent fx-b2" style="padding:10px 16px">Odustani</button>
         </div>
       </div>
     </div>
-    <div style="margin-top:8px;color:#94a3b8;font-size:.8rem">Usmjeri kameru na barkod artikla</div>
-    <div style="margin-top:10px;text-align:center">
-      <button onclick="aiSnapAndRecognize()" id="btnAiSnap" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:14px 20px;font-weight:700;font-size:.95rem;cursor:pointer;width:100%">
+    <div class="fx-text-muted fx-fs-compact mt-2">Usmjeri kameru na barkod artikla</div>
+    <div class="text-center fx-mt-10">
+      <button onclick="aiSnapAndRecognize()" id="btnAiSnap" class="fx-text-white fx-border-none fx-rounded fx-fw-bold fx-fs-normal fx-pointer fx-w-full" style="background:#7c3aed;padding:14px 20px">
         <span id="aiSnapLabel">Slikaj i prepoznaj (AI)</span>
       </button>
     </div>
-    <div style="margin-top:8px;display:flex;gap:6px">
-      <input type="text" id="manualBarcode" placeholder="Ili unesi barkod rucno..." style="flex:1;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:.85rem;text-align:center" onkeydown="if(event.key==='Enter')manualLookup()">
-      <button onclick="manualLookup()" style="background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:.85rem">OK</button>
+    <div class="d-flex fx-gap-2 mt-2">
+      <input type="text" id="manualBarcode" placeholder="Ili unesi barkod rucno..." class="fx-bg-card fx-rounded fx-text-white fx-fs-base text-center fx-flex-1 fx-p-8 fx-b2" onkeydown="if(event.key==='Enter')manualLookup()">
+      <button onclick="manualLookup()" class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-bold fx-pointer fx-fs-base fx-bg-gold fx-p-8-12">OK</button>
     </div>
   </div>
 </div>
@@ -986,38 +981,38 @@ function openGastroNewBon() {
   <div class="shift-box" style="max-width:400px;width:95%">
     <div class="shift-head">
       <span class="shift-head-title">Zatvaranje smjene</span>
-      <button onclick="closeShiftModal()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">&times;</button>
+      <button onclick="closeShiftModal()" class="fx-border-none fx-fs-4xl fx-pointer fx-text-muted fx-bg-transparent" style="line-height:1">&times;</button>
     </div>
 
     <!-- KORAK 1: Prebroji gotovinu -->
     <div id="shiftStep1">
       <div class="shift-body" id="shiftBody">
-        <div style="text-align:center;padding:1rem;color:var(--muted)">Učitavam...</div>
+        <div class="text-center fx-text-muted fx-p-4">Učitavam...</div>
       </div>
-      <div style="padding:12px 16px;border-top:1px solid var(--border)">
-        <label style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Prebrojana gotovina (€)</label>
+      <div class="fx-bt" style="padding:12px 16px">
+        <label class="fx-fs-caption fx-text-muted d-block mb-1 fx-uppercase fx-ls-1">Prebrojana gotovina (€)</label>
         <input type="number" id="shiftCashInput" step="0.01" placeholder="0.00"
-               style="width:100%;padding:12px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:1.5rem;font-weight:800;text-align:center;font-family:inherit">
-        <div id="shiftCashDiff" style="text-align:center;font-size:.85rem;margin-top:6px;min-height:20px"></div>
+               class="fx-w-full fx-rounded fx-fs-5xl fx-fw-800 text-center fx-text-gold fx-p-12 fx-bg-dark fx-b" style="font-family:inherit">
+        <div id="shiftCashDiff" class="text-center fx-fs-base mt-1" style="min-height:20px"></div>
       </div>
-      <div class="shift-foot" style="flex-wrap:wrap;gap:6px">
+      <div class="shift-foot fx-flex-wrap fx-gap-2">
         <button class="shift-btn-cancel" onclick="closeShiftModal()">Odustani</button>
-        <button class="shift-btn-cancel" onclick="shiftSkipCash()" style="color:var(--gold)">Preskoči</button>
+        <button class="shift-btn-cancel fx-text-gold" onclick="shiftSkipCash()">Preskoči</button>
         <button class="shift-btn-close" onclick="shiftGoStep2()" style="flex:2">Zatvori smjenu →</button>
       </div>
     </div>
 
     <!-- KORAK 2: Z-izvješće + dijeljenje -->
-    <div id="shiftStep2" style="display:none">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2rem;margin-bottom:8px">✅</div>
-        <div style="font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:4px">Smjena zatvorena!</div>
-        <div id="shiftCloseSummary" style="font-size:.85rem;color:var(--muted)"></div>
+    <div id="shiftStep2" class="fx-hidden">
+      <div class="text-center fx-p-16">
+        <div class="fx-fs-icon mb-2">✅</div>
+        <div class="fx-fs-xl fx-fw-bold fx-text-gold mb-1">Smjena zatvorena!</div>
+        <div id="shiftCloseSummary" class="fx-fs-base fx-text-muted"></div>
       </div>
-      <div class="shift-foot" style="flex-direction:column;gap:8px">
-        <button class="shift-btn-close" onclick="shiftZReport()" style="width:100%">📋 Z-izvješće (PDF)</button>
-        <button class="shift-btn-close" onclick="shiftShare()" style="width:100%;background:#22c55e">📤 Podijeli Z-izvješće</button>
-        <button class="shift-btn-cancel" onclick="shiftFinish()" style="width:100%">Završi</button>
+      <div class="shift-foot fx-gap-2 fx-flex-col">
+        <button class="shift-btn-close fx-w-full" onclick="shiftZReport()">📋 Z-izvješće (PDF)</button>
+        <button class="shift-btn-close fx-w-full fx-bg-green" onclick="shiftShare()">📤 Podijeli Z-izvješće</button>
+        <button class="shift-btn-cancel fx-w-full" onclick="shiftFinish()">Završi</button>
       </div>
     </div>
   </div>
@@ -1094,26 +1089,26 @@ function shareLastReceipt() {
 
 <!-- Rental Check-in Modal -->
 <div class="qmodal" id="rentalCheckinModal">
-  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
-    <div class="qmodal-title"><i class="fas fa-door-open" style="color:#10b981"></i> Danas dolasci</div>
-    <div id="rcm-list" style="margin-bottom:1rem">
-      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+  <div class="qmodal-box fx-scroll-y" style="max-width:420px;max-height:80vh">
+    <div class="qmodal-title"><i class="fas fa-door-open fx-text-green"></i> Danas dolasci</div>
+    <div id="rcm-list" class="mb-3">
+      <div class="fx-fs-base text-center fx-text-muted fx-p-4">
         <i class="fas fa-spinner fa-spin"></i> Učitavanje...
       </div>
     </div>
     <div class="qmodal-btns">
       <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('rentalCheckinModal').style.display='none'">Zatvori</button>
-      <button class="qmodal-btn" onclick="window.location.href='/hr/rental/'" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Svi bookings</button>
+      <button class="qmodal-btn fx-text-gold" onclick="window.location.href='/hr/rental/'" style="background:rgba(201,168,76,.2);border:1px solid var(--gold)">Svi bookings</button>
     </div>
   </div>
 </div>
 
 <!-- Rental Check-out Modal -->
 <div class="qmodal" id="rentalCheckoutModal">
-  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
-    <div class="qmodal-title"><i class="fas fa-sign-out-alt" style="color:#f59e0b"></i> Danas odlasci</div>
-    <div id="rco-list" style="margin-bottom:1rem">
-      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+  <div class="qmodal-box fx-scroll-y" style="max-width:420px;max-height:80vh">
+    <div class="qmodal-title"><i class="fas fa-sign-out-alt fx-text-amber"></i> Danas odlasci</div>
+    <div id="rco-list" class="mb-3">
+      <div class="fx-fs-base text-center fx-text-muted fx-p-4">
         <i class="fas fa-spinner fa-spin"></i> Učitavanje...
       </div>
     </div>
@@ -1125,11 +1120,11 @@ function shareLastReceipt() {
 
 <!-- eVisitor Export Modal -->
 <div class="qmodal" id="evisitorModal">
-  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
-    <div class="qmodal-title"><i class="fas fa-passport" style="color:#3b82f6"></i> eVisitor prijava</div>
-    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem">Bookings bez eVisitor prijave:</p>
-    <div id="evm-list" style="margin-bottom:1rem">
-      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+  <div class="qmodal-box fx-scroll-y" style="max-width:420px;max-height:80vh">
+    <div class="qmodal-title"><i class="fas fa-passport fx-text-blue"></i> eVisitor prijava</div>
+    <p class="fx-fs-compact fx-text-muted fx-mb-4">Bookings bez eVisitor prijave:</p>
+    <div id="evm-list" class="mb-3">
+      <div class="fx-fs-base text-center fx-text-muted fx-p-4">
         <i class="fas fa-spinner fa-spin"></i> Učitavanje...
       </div>
     </div>
@@ -1142,23 +1137,23 @@ function shareLastReceipt() {
 <!-- OCR Document Modal -->
 <div class="qmodal" id="ocrModal">
   <div class="qmodal-box" style="max-width:440px">
-    <div class="qmodal-title"><i class="fas fa-id-card" style="color:#8b5cf6"></i> Skeniranje dokumenta</div>
-    <div id="ocr-booking-select" style="margin-bottom:1rem">
-      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Odaberi booking:</label>
-      <select id="ocr-booking-id" class="qmodal-input" style="width:100%;padding:8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px">
+    <div class="qmodal-title"><i class="fas fa-id-card fx-text-purple"></i> Skeniranje dokumenta</div>
+    <div id="ocr-booking-select" class="mb-3">
+      <label class="fx-fs-body-sm fx-text-muted d-block fx-mb-2">Odaberi booking:</label>
+      <select id="ocr-booking-id" class="qmodal-input fx-w-full fx-rounded-sm fx-text-body fx-p-8 fx-b fx-bg-card">
         <option value="">Učitavanje...</option>
       </select>
     </div>
-    <div style="border:2px dashed var(--border);border-radius:8px;padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer" id="ocr-dropzone" onclick="document.getElementById('ocr-file-input').click()">
-      <i class="fas fa-camera" style="font-size:2rem;color:var(--gold);margin-bottom:.5rem;display:block"></i>
-      <div style="font-size:.85rem;color:var(--muted)">Klikni za slikanje ili odabir dokumenta</div>
-      <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display:none" onchange="_processOcrFile(this)">
+    <div class="fx-rounded text-center fx-pointer mb-3 fx-p-5" style="border:2px dashed var(--border)" id="ocr-dropzone" onclick="document.getElementById('ocr-file-input').click()">
+      <i class="fas fa-camera fx-fs-icon fx-text-gold mb-2 d-block"></i>
+      <div class="fx-fs-base fx-text-muted">Klikni za slikanje ili odabir dokumenta</div>
+      <input type="file" id="ocr-file-input" accept="image/*" capture="environment" class="fx-hidden" onchange="_processOcrFile(this)">
     </div>
-    <div id="ocr-result" style="display:none;margin-bottom:1rem">
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">AI rezultat:</div>
-      <div id="ocr-result-data" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem;font-size:.82rem"></div>
+    <div id="ocr-result" class="fx-hidden mb-3">
+      <div class="fx-fs-compact fx-text-muted mb-2">AI rezultat:</div>
+      <div id="ocr-result-data" class="fx-rounded-sm fx-fs-note fx-bg-body fx-b fx-p-3"></div>
     </div>
-    <div id="ocr-status" style="display:none;text-align:center;padding:.5rem;font-size:.85rem"></div>
+    <div id="ocr-status" class="fx-hidden text-center fx-fs-base fx-p-2"></div>
     <div class="qmodal-btns">
       <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('ocrModal').style.display='none'">Zatvori</button>
     </div>
@@ -1168,17 +1163,17 @@ function shareLastReceipt() {
 <!-- Membership Scan Modal -->
 <div class="qmodal" id="membershipModal">
   <div class="qmodal-box" style="max-width:400px">
-    <div class="qmodal-title"><i class="fas fa-id-badge" style="color:#10b981"></i> Iskaznica člana</div>
-    <div style="margin-bottom:1rem">
-      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Broj iskaznice ili OIB:</label>
+    <div class="qmodal-title"><i class="fas fa-id-badge fx-text-green"></i> Iskaznica člana</div>
+    <div class="mb-3">
+      <label class="fx-fs-body-sm fx-text-muted d-block fx-mb-2">Broj iskaznice ili OIB:</label>
       <input type="text" id="membership-code" class="qmodal-input" placeholder="Skeniraj ili upiši..." autofocus
              onkeyup="if(event.key==='Enter')_lookupMember()">
     </div>
-    <div id="member-result" style="display:none;margin-bottom:1rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem">
+    <div id="member-result" class="fx-hidden fx-rounded-sm mb-3 fx-bg-body fx-b fx-p-3">
     </div>
     <div class="qmodal-btns">
       <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('membershipModal').style.display='none'">Zatvori</button>
-      <button class="qmodal-btn" onclick="_lookupMember()" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Traži</button>
+      <button class="qmodal-btn fx-text-gold" onclick="_lookupMember()" style="background:rgba(201,168,76,.2);border:1px solid var(--gold)">Traži</button>
     </div>
   </div>
 </div>
@@ -1205,30 +1200,30 @@ function _openRentalCheckinModal() {
   const modal = document.getElementById('rentalCheckinModal');
   const list = document.getElementById('rcm-list');
   modal.style.display = 'flex';
-  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+  list.innerHTML = '<div class="text-center fx-text-muted fx-p-4"><i class="fas fa-spinner fa-spin"></i></div>';
 
   fetch('/api/rental/today-arrivals/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
     .then(r => r.ok ? r.json() : Promise.reject(r))
     .then(data => {
       if (!data.bookings || !data.bookings.length) {
-        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema dolazaka danas.</div>';
+        list.innerHTML = '<div class="text-center fx-text-muted fx-p-4">Nema dolazaka danas.</div>';
         return;
       }
       list.innerHTML = data.bookings.map(b => `
-        <a href="/${_LANG}/rental/booking/${b.id}/checkin/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+        <a href="/${_LANG}/rental/booking/${b.id}/checkin/" class="d-flex fx-rounded-sm fx-no-underline justify-content-between align-items-center mb-1 fx-text-body fx-bg-body fx-p-10 fx-b">
           <div>
-            <div style="font-weight:600">${b.guest_name}</div>
-            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.nights} noći</div>
+            <div class="fx-fw-semibold">${b.guest_name}</div>
+            <div class="fx-fs-caption fx-text-muted">${b.property_name} · ${b.nights} noći</div>
           </div>
-          <div style="text-align:right">
-            <div style="color:var(--gold);font-weight:700">${b.total_price}€</div>
-            <div style="font-size:.7rem;color:var(--muted)">${b.guests_count} gostiju</div>
+          <div class="text-end">
+            <div class="fx-fw-bold fx-text-gold">${b.total_price}€</div>
+            <div class="fx-fs-sm fx-text-muted">${b.guests_count} gostiju</div>
           </div>
         </a>
       `).join('');
     })
     .catch(() => {
-      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+      list.innerHTML = '<div class="text-center fx-text-red fx-p-4">Greška pri dohvatu. <a href="/hr/rental/" class="fx-text-gold">Otvori rental →</a></div>';
     });
 }
 
@@ -1237,27 +1232,27 @@ function _openRentalCheckoutModal() {
   const modal = document.getElementById('rentalCheckoutModal');
   const list = document.getElementById('rco-list');
   modal.style.display = 'flex';
-  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+  list.innerHTML = '<div class="text-center fx-text-muted fx-p-4"><i class="fas fa-spinner fa-spin"></i></div>';
 
   fetch('/api/rental/today-departures/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
     .then(r => r.ok ? r.json() : Promise.reject(r))
     .then(data => {
       if (!data.bookings || !data.bookings.length) {
-        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema odlazaka danas.</div>';
+        list.innerHTML = '<div class="text-center fx-text-muted fx-p-4">Nema odlazaka danas.</div>';
         return;
       }
       list.innerHTML = data.bookings.map(b => `
-        <a href="/${_LANG}/rental/bookings/${b.id}/check-out/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+        <a href="/${_LANG}/rental/bookings/${b.id}/check-out/" class="d-flex fx-rounded-sm fx-no-underline justify-content-between align-items-center mb-1 fx-text-body fx-bg-body fx-p-10 fx-b">
           <div>
-            <div style="font-weight:600">${b.guest_name}</div>
-            <div style="font-size:.75rem;color:var(--muted)">${b.property_name}</div>
+            <div class="fx-fw-semibold">${b.guest_name}</div>
+            <div class="fx-fs-caption fx-text-muted">${b.property_name}</div>
           </div>
-          <div style="color:#f59e0b;font-weight:700">${b.is_paid ? '✅ Plaćeno' : '⏳ Neplaćeno'}</div>
+          <div class="fx-text-amber fx-fw-bold">${b.is_paid ? '✅ Plaćeno' : '⏳ Neplaćeno'}</div>
         </a>
       `).join('');
     })
     .catch(() => {
-      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu.</div>';
+      list.innerHTML = '<div class="text-center fx-text-red fx-p-4">Greška pri dohvatu.</div>';
     });
 }
 
@@ -1266,30 +1261,30 @@ function _openEvisitorModal() {
   const modal = document.getElementById('evisitorModal');
   const list = document.getElementById('evm-list');
   modal.style.display = 'flex';
-  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+  list.innerHTML = '<div class="text-center fx-text-muted fx-p-4"><i class="fas fa-spinner fa-spin"></i></div>';
 
   fetch('/api/rental/evisitor-pending/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
     .then(r => r.ok ? r.json() : Promise.reject(r))
     .then(data => {
       if (!data.bookings || !data.bookings.length) {
-        list.innerHTML = '<div style="text-align:center;padding:1rem;color:#10b981"><i class="fas fa-check-circle"></i> Svi gosti prijavljeni!</div>';
+        list.innerHTML = '<div class="text-center fx-text-green fx-p-4"><i class="fas fa-check-circle"></i> Svi gosti prijavljeni!</div>';
         return;
       }
       list.innerHTML = data.bookings.map(b => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px">
+        <div class="d-flex fx-rounded-sm justify-content-between align-items-center mb-1 fx-bg-body fx-p-10 fx-b">
           <div>
-            <div style="font-weight:600">${b.guest_name}</div>
-            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.check_in}</div>
-            <div style="font-size:.7rem;color:#ef4444">${b.hours_pending}h od check-ina</div>
+            <div class="fx-fw-semibold">${b.guest_name}</div>
+            <div class="fx-fs-caption fx-text-muted">${b.property_name} · ${b.check_in}</div>
+            <div class="fx-fs-sm fx-text-red">${b.hours_pending}h od check-ina</div>
           </div>
-          <a href="/${_LANG}/rental/booking/${b.id}/evisitor.xml" style="background:var(--gold);color:#000;padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap">
+          <a href="/${_LANG}/rental/booking/${b.id}/evisitor.xml" class="fx-text-dark fx-rounded-sm fx-fs-body-sm fx-fw-bold fx-no-underline text-nowrap fx-bg-gold" style="padding:6px 12px">
             <i class="fas fa-download"></i> XML
           </a>
         </div>
       `).join('');
     })
     .catch(() => {
-      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+      list.innerHTML = '<div class="text-center fx-text-red fx-p-4">Greška. <a href="/hr/rental/" class="fx-text-gold">Otvori rental →</a></div>';
     });
 }
 
@@ -1333,7 +1328,7 @@ function _processOcrFile(input) {
   const resultData = document.getElementById('ocr-result-data');
 
   status.style.display = 'block';
-  status.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:var(--gold)"></i> AI čita dokument...';
+  status.innerHTML = '<i class="fas fa-spinner fa-spin fx-text-gold"></i> AI čita dokument...';
   result.style.display = 'none';
 
   const fd = new FormData();
@@ -1351,32 +1346,32 @@ function _processOcrFile(input) {
     if (data.ok && data.confidence > 0.5) {
       const d = data.data;
       resultData.innerHTML = `
-        <div style="color:#10b981;font-weight:700;margin-bottom:.5rem">
+        <div class="fx-text-green fx-fw-bold mb-2">
           <i class="fas fa-check-circle"></i> Pouzdanost: ${Math.round(data.confidence * 100)}%
         </div>
         <div><strong>${d.first_name} ${d.last_name}</strong></div>
-        <div style="font-size:.78rem;color:var(--muted)">
+        <div class="fx-fs-body-sm fx-text-muted">
           ${d.nationality} · ${d.document_type} · ${d.document_number}<br>
           Rođen: ${d.date_of_birth || 'N/A'} · Spol: ${d.sex || 'N/A'}
         </div>
-        <div style="margin-top:.5rem;font-size:.78rem;color:#10b981">
+        <div class="fx-fs-body-sm fx-text-green mt-2">
           <i class="fas fa-check"></i> Gost dodan u booking
         </div>
       `;
     } else {
       resultData.innerHTML = `
-        <div style="color:#f59e0b">
+        <div class="fx-text-amber">
           <i class="fas fa-exclamation-triangle"></i> Niska pouzdanost (${Math.round((data.confidence||0) * 100)}%)
         </div>
-        <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">
-          Unesite podatke ručno na <a href="/${_LANG}/rental/booking/${bookingId}/checkin/" style="color:var(--gold)">check-in stranici</a>.
+        <div class="fx-fs-body-sm fx-text-muted fx-mt-sm">
+          Unesite podatke ručno na <a href="/${_LANG}/rental/booking/${bookingId}/checkin/" class="fx-text-gold">check-in stranici</a>.
         </div>
       `;
     }
   })
   .catch(err => {
     status.style.display = 'block';
-    status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> Greška: ' + err.message + '</span>';
+    status.innerHTML = '<span class="fx-text-red"><i class="fas fa-times-circle"></i> Greška: ' + err.message + '</span>';
   });
 
   input.value = '';
@@ -1398,7 +1393,7 @@ function _lookupMember() {
 
   const result = document.getElementById('member-result');
   result.style.display = 'block';
-  result.innerHTML = '<div style="text-align:center;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+  result.innerHTML = '<div class="text-center fx-text-muted"><i class="fas fa-spinner fa-spin"></i></div>';
 
   fetch(`/api/udruge/member-lookup/?code=${encodeURIComponent(code)}`, {
     headers: {'Accept':'application/json', 'X-CSRFToken': _CSRF},
@@ -1410,25 +1405,25 @@ function _lookupMember() {
       const statusColor = m.is_active ? '#10b981' : '#ef4444';
       const statusText = m.is_active ? 'Aktivno' : 'Isteklo';
       result.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:start">
+        <div class="d-flex justify-content-between" style="align-items:start">
           <div>
-            <div style="font-weight:700;font-size:1rem">${m.name}</div>
-            <div style="font-size:.78rem;color:var(--muted)">${m.membership_type || 'Član'}</div>
-            <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">
+            <div class="fx-fw-bold fx-fs-lg">${m.name}</div>
+            <div class="fx-fs-body-sm fx-text-muted">${m.membership_type || 'Član'}</div>
+            <div class="fx-fs-caption fx-text-muted fx-mt-sm">
               OIB: ${m.oib || 'N/A'}<br>
               Vrijedi do: ${m.valid_until || 'N/A'}
             </div>
           </div>
-          <span style="background:${statusColor}22;color:${statusColor};padding:4px 10px;border-radius:12px;font-size:.75rem;font-weight:700">${statusText}</span>
+          <span class="fx-rounded fx-fs-caption fx-fw-bold" style="background:${statusColor}22;color:${statusColor};padding:4px 10px">${statusText}</span>
         </div>
-        ${!m.is_active ? '<div style="margin-top:.5rem"><button class="qmodal-btn" onclick="_addMembershipRenewal(\''+m.id+'\',\''+m.name.replace(/'/g,"\\'")+'\')" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold);font-size:.8rem;width:100%"><i class="fas fa-sync"></i> Obnovi članstvo</button></div>' : ''}
+        ${!m.is_active ? '<div class="mt-2"><button class="qmodal-btn fx-fs-compact fx-w-full fx-text-gold" onclick="_addMembershipRenewal(\''+m.id+'\',\''+m.name.replace(/'/g,"\\'")+'\')" style="background:rgba(201,168,76,.2);border:1px solid var(--gold)"><i class="fas fa-sync"></i> Obnovi članstvo</button></div>' : ''}
       `;
     } else {
-      result.innerHTML = '<div style="color:#f59e0b;text-align:center"><i class="fas fa-user-slash"></i> Član nije pronađen</div>';
+      result.innerHTML = '<div class="fx-text-amber text-center"><i class="fas fa-user-slash"></i> Član nije pronađen</div>';
     }
   })
   .catch(() => {
-    result.innerHTML = '<div style="color:#ef4444;text-align:center">Greška pri pretrazi</div>';
+    result.innerHTML = '<div class="fx-text-red text-center">Greška pri pretrazi</div>';
   });
 }
 
@@ -1667,7 +1662,7 @@ function togglePayExpand() {
     </div>
 
     <div id="hbBasketList">
-      <div style="text-align:center;color:var(--muted,#64748b);padding:2rem;font-size:.9rem">Košarica je prazna</div>
+      <div class="text-center fx-fs-md fx-p-6" style="color:var(--muted,#64748b)">Košarica je prazna</div>
     </div>
 
     <div id="hbTotals">
@@ -1712,54 +1707,40 @@ function togglePayExpand() {
 </div>
 
 <!-- ══ ZLATNO DUGME MODAL ══ -->
-<div id="zdModal" style="display:none;position:fixed;inset:0;z-index:19000;
-  background:rgba(0,0,0,0.7);align-items:center;justify-content:center">
-  <div style="background:var(--card,#111);border:2px solid var(--gold,#c9a84c);
-    border-radius:16px;padding:1.5rem;width:92%;max-width:420px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:1.05rem">⭐ Prijavi problem</span>
-      <button onclick="zdClose()" style="background:none;border:none;color:var(--muted,#64748b);font-size:1.4rem;cursor:pointer">✕</button>
+<div id="zdModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:19000;background:rgba(0,0,0,0.7)">
+  <div class="fx-rounded-lg fx-p-5 fx-scroll-y" style="background:var(--card,#111);border:2px solid var(--gold,#c9a84c);width:92%;max-width:420px;max-height:90vh">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="fx-fw-bold fx-text-gold" style="font-size:1.05rem">⭐ Prijavi problem</span>
+      <button onclick="zdClose()" class="fx-border-none fx-fs-4xl fx-pointer fx-bg-transparent" style="color:var(--muted,#64748b)">✕</button>
     </div>
-    <p style="color:var(--muted,#94a3b8);font-size:.85rem;margin-bottom:1rem">Ivan prima WhatsApp odmah.</p>
+    <p class="fx-fs-base fx-text-muted mb-3">Ivan prima WhatsApp odmah.</p>
     <form id="zdForm" onsubmit="zdSubmit(event)">
-      <div style="margin-bottom:.75rem">
-        <label style="font-size:.75rem;color:var(--muted,#94a3b8);display:block;margin-bottom:.3rem">Naslov *</label>
+      <div class="fx-mb-4">
+        <label class="fx-fs-caption fx-text-muted d-block fx-mb-2">Naslov *</label>
         <input id="zdTitle" type="text" required maxlength="120" placeholder="Kratki opis..."
-          style="width:100%;box-sizing:border-box;background:var(--dark,#0d0d12);
-          border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;
-          color:var(--text,#e2e8f0);font-size:.9rem;outline:none">
+          class="fx-w-full fx-rounded fx-fs-md" style="box-sizing:border-box;background:var(--dark,#0d0d12);border:1px solid rgba(201,168,76,.3);padding:.6rem .8rem;color:var(--text,#e2e8f0);outline:none">
       </div>
-      <div style="margin-bottom:.75rem">
-        <label style="font-size:.75rem;color:var(--muted,#94a3b8);display:block;margin-bottom:.3rem">Detalji *</label>
+      <div class="fx-mb-4">
+        <label class="fx-fs-caption fx-text-muted d-block fx-mb-2">Detalji *</label>
         <textarea id="zdDesc" required maxlength="1000" rows="4" placeholder="Što se dogodilo?"
-          style="width:100%;box-sizing:border-box;background:var(--dark,#0d0d12);
-          border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;
-          color:var(--text,#e2e8f0);font-size:.9rem;resize:vertical;outline:none;
-          font-family:inherit"></textarea>
+          class="fx-w-full fx-rounded fx-fs-md" style="box-sizing:border-box;background:var(--dark,#0d0d12);border:1px solid rgba(201,168,76,.3);padding:.6rem .8rem;color:var(--text,#e2e8f0);resize:vertical;outline:none;font-family:inherit"></textarea>
       </div>
-      <div style="margin-bottom:1rem">
-        <label style="font-size:.75rem;color:var(--muted,#94a3b8);display:block;margin-bottom:.3rem">Prioritet</label>
-        <select id="zdPrio" style="width:100%;background:var(--dark,#0d0d12);
-          border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:.6rem .8rem;
-          color:var(--text,#e2e8f0);font-size:.9rem;font-family:inherit">
+      <div class="mb-3">
+        <label class="fx-fs-caption fx-text-muted d-block fx-mb-2">Prioritet</label>
+        <select id="zdPrio" class="fx-w-full fx-rounded fx-fs-md" style="background:var(--dark,#0d0d12);border:1px solid rgba(201,168,76,.3);padding:.6rem .8rem;color:var(--text,#e2e8f0);font-family:inherit">
           <option value="1">🔴 Kritično — ne mogu raditi</option>
           <option value="2">🟠 Visoko — otežava rad</option>
           <option value="3" selected>🟡 Srednje — prijedlog</option>
           <option value="5">⚪ Ideja</option>
         </select>
       </div>
-      <button type="submit" id="zdBtn" style="width:100%;padding:.9rem;
-        background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);
-        border:none;border-radius:10px;font-weight:700;font-size:1rem;
-        color:#000;cursor:pointer;font-family:inherit">⭐ Pošalji Ivanu</button>
+      <button type="submit" id="zdBtn" class="fx-w-full fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-text-dark fx-pointer" style="padding:.9rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);font-family:inherit">⭐ Pošalji Ivanu</button>
     </form>
-    <div id="zdOk" style="display:none;text-align:center;padding:1.5rem 0">
-      <div style="font-size:2.5rem;margin-bottom:.5rem">✅</div>
-      <div style="color:#4ade80;font-weight:700;font-size:1.05rem;margin-bottom:.5rem">Prijedlog poslan!</div>
-      <div style="color:var(--muted,#94a3b8);font-size:.85rem;margin-bottom:1rem">Ivan prima WhatsApp odmah.</div>
-      <button onclick="zdClose()" style="padding:.6rem 1.5rem;background:rgba(201,168,76,.15);
-        border:1px solid var(--gold,#c9a84c);border-radius:8px;
-        color:var(--gold,#c9a84c);cursor:pointer;font-family:inherit">Zatvori</button>
+    <div id="zdOk" class="fx-hidden text-center" style="padding:1.5rem 0">
+      <div class="mb-2 fx-fs-7xl">✅</div>
+      <div class="fx-fw-bold fx-text-green mb-2" style="font-size:1.05rem">Prijedlog poslan!</div>
+      <div class="fx-fs-base fx-text-muted mb-3">Ivan prima WhatsApp odmah.</div>
+      <button onclick="zdClose()" class="fx-rounded fx-pointer fx-text-gold" style="padding:.6rem 1.5rem;background:rgba(201,168,76,.15);border:1px solid var(--gold,#c9a84c);font-family:inherit">Zatvori</button>
     </div>
   </div>
 </div>
@@ -1788,7 +1769,7 @@ function _hbSync() {
   var dest = document.getElementById('hbBasketList');
   var rows = src ? src.querySelectorAll('.b-row') : [];
   if (!rows.length) {
-    dest.innerHTML = '<div style="text-align:center;color:var(--muted,#64748b);padding:2rem;font-size:.9rem">Košarica je prazna</div>';
+    dest.innerHTML = '<div class="text-center fx-fs-md fx-p-6" style="color:var(--muted,#64748b)">Košarica je prazna</div>';
   } else {
     dest.innerHTML = '';
     rows.forEach(function(r) {
@@ -1893,7 +1874,7 @@ function _hbRenderSplit() {
       '<select class="hb-split-sel" onchange="_hbSplit['+i+'].m=this.value;_hbUpdateRem()">'+opts+'</select>'+
       '<input class="hb-split-inp" type="number" step="0.01" min="0" value="'+line.a.toFixed(2)+
         '" onchange="_hbSplit['+i+'].a=parseFloat(this.value)||0;_hbUpdateRem()">'+
-      '<span style="color:var(--muted);font-size:.8rem">€</span>'+
+      '<span class="fx-fs-compact fx-text-muted">€</span>'+
       (_hbSplit.length>1
         ? '<button class="hb-split-del" onclick="_hbSplit.splice('+i+',1);_hbRenderSplit()">×</button>'
         : '');
@@ -1962,10 +1943,10 @@ function zdSubmit(e) {
       document.getElementById('zdOk').style.display = '';
       // Ažuriraj success text
       var okDiv = document.getElementById('zdOk');
-      if (okDiv) okDiv.innerHTML = '<div style="font-size:2.5rem;margin-bottom:.5rem">⭐</div>' +
-        '<div style="color:var(--gold,#c9a84c);font-weight:700;font-size:1.05rem;margin-bottom:.5rem">Haiku i Gemini analiziraju...</div>' +
-        '<div style="color:var(--muted,#94a3b8);font-size:.85rem;margin-bottom:1rem">Rješenje će biti gotovo za ~60s. Ivan vidi rezultat u superadmin panelu.</div>' +
-        '<button onclick="zdClose()" style="padding:.6rem 1.5rem;background:rgba(201,168,76,.15);border:1px solid var(--gold,#c9a84c);border-radius:8px;color:var(--gold,#c9a84c);cursor:pointer;font-family:inherit">Zatvori</button>';
+      if (okDiv) okDiv.innerHTML = '<div class="mb-2 fx-fs-7xl">⭐</div>' +
+        '<div class="fx-fw-bold fx-text-gold mb-2" style="font-size:1.05rem">Haiku i Gemini analiziraju...</div>' +
+        '<div class="fx-fs-base fx-text-muted mb-3">Rješenje će biti gotovo za ~60s. Ivan vidi rezultat u superadmin panelu.</div>' +
+        '<button onclick="zdClose()" class="fx-rounded fx-pointer fx-text-gold" style="padding:.6rem 1.5rem;background:rgba(201,168,76,.15);border:1px solid var(--gold,#c9a84c);font-family:inherit">Zatvori</button>';
     } else {
       btn.disabled=false; btn.textContent='⭐ Pošalji Ivanu';
       if(window.fenixToast) fenixToast('Greška pri slanju.','error');

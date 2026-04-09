@@ -8,7 +8,7 @@
 <style>
 :root{--accent:{{ menu.primary_color|default:"var(--gold,#c9a84c)" }}}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a1a;color:#f0f0f0;font-family:'Segoe UI',sans-serif;padding-bottom:80px}
+body{background:var(--bg-card);color:#f0f0f0;font-family:'Segoe UI',sans-serif;padding-bottom:80px}
 .header{background:linear-gradient(135deg,#2a1a0a,#1a0a00);padding:1.5rem;text-align:center}
 .header img{max-height:50px;margin-bottom:.5rem}
 .header h1{color:var(--accent);font-size:1.4rem;margin:0}
@@ -18,25 +18,25 @@ body{background:#1a1a1a;color:#f0f0f0;font-family:'Segoe UI',sans-serif;padding-
 .item{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid #333}
 .item-info{flex:1}
 .item-name{font-size:.95rem}
-.item-desc{font-size:.75rem;color:#888}
+.item-desc{font-size:.75rem;color:var(--text-muted)}
 .item-price{color:var(--accent);font-weight:700;white-space:nowrap;margin:0 .5rem}
-.btn-add{background:var(--accent);color:#1a1a1a;border:none;border-radius:50%;width:32px;height:32px;font-size:1.2rem;cursor:pointer;flex-shrink:0}
+.btn-add{background:var(--accent);color:var(--text);border:none;border-radius:50%;width:32px;height:32px;font-size:1.2rem;cursor:pointer;flex-shrink:0}
 .btn-add:active{transform:scale(.9)}
 /* Cart */
-.cart-btn{position:fixed;bottom:1rem;right:1rem;background:var(--accent);color:#1a1a1a;border:none;border-radius:50px;padding:.8rem 1.5rem;font-size:1rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.5rem;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:100}
-.cart-badge{background:#1a1a1a;color:var(--accent);border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem}
+.cart-btn{position:fixed;bottom:1rem;right:1rem;background:var(--accent);color:var(--text);border:none;border-radius:50px;padding:.8rem 1.5rem;font-size:1rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.5rem;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:100}
+.cart-badge{background:var(--bg-card);color:var(--accent);border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem}
 /* Modal */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-end;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:#222;border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal{background:var(--surface);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
 .modal h3{color:var(--accent);margin-bottom:1rem}
 .modal-item{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #333;font-size:.9rem}
 .modal-total{display:flex;justify-content:space-between;padding:.8rem 0;font-weight:700;font-size:1.1rem;color:var(--accent)}
-.modal input{width:100%;background:#333;border:1px solid #555;border-radius:8px;padding:.6rem;color:#fff;margin:.5rem 0;font-size:.9rem}
-.modal .btn-order{width:100%;padding:.8rem;background:var(--accent);color:#1a1a1a;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.5rem}
+.modal input{width:100%;background:#333;border:1px solid #555;border-radius:8px;padding:.6rem;color:var(--white);margin:.5rem 0;font-size:.9rem}
+.modal .btn-order{width:100%;padding:.8rem;background:var(--accent);color:var(--text);border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.5rem}
 .success-msg{display:none;text-align:center;padding:2rem}
 .success-msg h2{color:var(--accent)}
-footer{text-align:center;padding:1.5rem;color:#555;font-size:.7rem}
+footer{text-align:center;padding:1.5rem;color:var(--text-dim);font-size:.7rem}
 footer a{color:var(--accent);text-decoration:none}
 </style>
 </head>
@@ -77,14 +77,14 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="modal-total"><span>Ukupno</span><span id="modalTotal">0.00 &euro;</span></div>
   <input type="text" id="guestName" placeholder="Vase ime (opcionalno)">
   <button class="btn-order" onclick="submitOrder()">Posalji narudzbu</button>
-  <button style="width:100%;padding:.6rem;background:transparent;border:1px solid #555;border-radius:12px;color:#aaa;margin-top:.5rem;cursor:pointer" onclick="closeCart()">Odustani</button>
+  <button class="fx-w-full fx-rounded fx-text-muted fx-pointer mt-2 fx-bg-transparent" style="padding:.6rem;border:1px solid #555" onclick="closeCart()">Odustani</button>
 </div>
 </div>
 
 <div class="success-msg" id="successMsg">
   <h2>&#10003;</h2>
   <h3 id="successText"></h3>
-  <p style="color:#888;margin-top:.5rem">Narudzba je poslana u kuhinju.</p>
+  <p class="fx-text-muted mt-2">Narudzba je poslana u kuhinju.</p>
 </div>
 
 <footer>

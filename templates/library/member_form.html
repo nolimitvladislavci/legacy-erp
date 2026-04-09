@@ -4,15 +4,15 @@
 {% block page_title %}Novi clan{% endblock %}
 {% block extra_css %}
 <style>
-.lib-form{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
-.lib-form label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.3rem}
-.lib-form input,.lib-form select{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:.5rem .8rem;width:100%}
-.lib-form input:focus,.lib-form select:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 2px #c8a24e22}
+.lib-form{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
+.lib-form label{color:var(--gold);font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.lib-form input,.lib-form select{background:var(--surface-deep);color:var(--text);border:1px solid rgba(200,162,78,0.2);border-radius:6px;padding:.5rem .8rem;width:100%}
+.lib-form input:focus,.lib-form select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 2px #c8a24e22}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'library:member_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Clanovi</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem"><i class="bi bi-person-plus"></i> Novi clan</h2>
+<a href="{% url 'library:member_list' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Clanovi</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem"><i class="bi bi-person-plus"></i> Novi clan</h2>
 <form method="post" class="lib-form">
   {% csrf_token %}
   <div class="row g-3">
@@ -30,7 +30,7 @@
     <div class="col-md-4"><label>Tip clanarine</label><select name="membership_type"><option value="">—</option>{% for t in types %}<option value="{{ t.pk }}">{{ t.name }} ({{ t.max_books }} knjiga, {{ t.loan_days }}d)</option>{% endfor %}</select></div>
   </div>
   <div class="mt-4">
-    <button type="submit" class="btn" style="background:#c8a24e;color:#1a1a2e;font-weight:600;padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Upisi clana</button>
+    <button type="submit" class="btn fx-bg-gold fx-fw-semibold fx-text-dark" style="padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Upisi clana</button>
     <a href="{% url 'library:member_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
   </div>
 </form>

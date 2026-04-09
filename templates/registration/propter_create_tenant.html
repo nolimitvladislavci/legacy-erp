@@ -4,11 +4,11 @@
 {% block page_title %}Propter — Novi tenant{% endblock %}
 {% block content %}
 <style>
-.ct-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px;max-width:600px}
-.ct-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.ct-card{background:var(--bg-card);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:16px;max-width:600px}
+.ct-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:0 0 12px}
 .ct-field{margin-bottom:12px}
-.ct-field label{display:block;font-size:.78rem;font-weight:600;color:#334155;margin-bottom:4px}
-.ct-field input,.ct-field select{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.82rem}
+.ct-field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted2);margin-bottom:4px}
+.ct-field input,.ct-field select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem}
 </style>
 
 <a href="{% url 'registration:propter_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-3">&larr; Dashboard</a>
@@ -26,7 +26,7 @@
       {% endfor %}
     </select>
     {% if not available_companies %}
-    <div style="color:#64748b;font-size:.8rem;margin-top:4px">Sve tvrtke vec imaju Propter pretplatu.</div>
+    <div class="fx-text-dim fx-fs-compact mt-1">Sve tvrtke vec imaju Propter pretplatu.</div>
     {% endif %}
   </div>
   <div class="ct-field">

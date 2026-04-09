@@ -3,34 +3,34 @@
 {% block title %}QR za inspektora{% endblock %}
 
 {% block content %}
-<div style="max-width:550px;margin:2rem auto;text-align:center">
-  <div style="background:var(--bg-card,#1a1a1a);border:2px solid var(--gold,#c9a84c);border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+<div class="text-center" style="max-width:550px;margin:2rem auto">
+  <div class="fx-rounded-lg fx-p-6" style="background:var(--bg-card,#1a1a1a);border:2px solid var(--gold,#c9a84c);box-shadow:0 4px 20px rgba(0,0,0,.3)">
     
-    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:1rem;border-radius:10px;margin-bottom:1.5rem">
-      <h2 style="margin:0;font-size:1.5rem;letter-spacing:2px"><i class="fas fa-shield-halved"></i> INSPEKCIJA</h2>
+    <div class="fx-text-white fx-rounded fx-p-4 fx-mb-6" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">
+      <h2 class="fx-fs-5xl fx-m-0" style="letter-spacing:2px"><i class="fas fa-shield-halved"></i> INSPEKCIJA</h2>
       <p style="margin:4px 0 0;opacity:.9">{{ scope_label }}</p>
     </div>
     
-    <p style="color:var(--gold);font-weight:700;font-size:1.1rem;margin-bottom:1rem">
+    <p class="fx-fw-bold fx-fs-xl fx-text-gold mb-3">
       Pokazite ovaj QR kod inspektoru
     </p>
     
-    <div style="background:#fff;border-radius:12px;padding:1rem;display:inline-block;margin-bottom:1rem">
+    <div class="fx-rounded d-inline-block mb-3 fx-bg-card fx-p-4">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ qr_url|urlencode }}" 
-           alt="QR" width="300" height="300" style="display:block">
+           alt="QR" width="300" height="300" class="d-block">
     </div>
     
-    <div style="background:var(--bg,#0f0f0f);border:1px solid var(--border,#333);border-radius:8px;padding:.75rem;font-family:monospace;font-size:.75rem;word-break:break-all;color:var(--muted,#888);cursor:pointer;user-select:all;margin:1rem 0" onclick="navigator.clipboard.writeText('{{ qr_url }}')">
+    <div class="fx-rounded fx-fs-caption fx-pointer fx-p-3 fx-font-mono text-break" style="background:var(--bg,#0f0f0f);border:1px solid var(--border,#333);color:var(--muted,#888);user-select:all;margin:1rem 0" onclick="navigator.clipboard.writeText('{{ qr_url }}')">
       {{ qr_url }}
     </div>
     
-    <div style="color:var(--muted,#888);font-size:.9rem;margin:1rem 0">
-      <p><i class="fas fa-clock" style="color:#f59e0b"></i> Vrijedi do: <strong>{{ token.expires_at|date:"d.m.Y H:i" }}</strong></p>
+    <div class="fx-fs-md" style="color:var(--muted,#888);margin:1rem 0">
+      <p><i class="fas fa-clock fx-text-amber"></i> Vrijedi do: <strong>{{ token.expires_at|date:"d.m.Y H:i" }}</strong></p>
       <p><i class="fas fa-eye"></i> Max pregleda: {{ token.max_views }}</p>
       <p><i class="fas fa-calendar"></i> Period: {{ token.date_from|date:"d.m.Y" }} — {{ token.date_to|date:"d.m.Y" }}</p>
     </div>
     
-    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem" class="no-print">
+    <div class="no-print d-flex fx-flex-wrap fx-gap-3 justify-content-center fx-mt-6">
       <button onclick="window.print()" class="btn btn-outline-secondary"><i class="fas fa-print"></i> Print</button>
       <a href="{{ qr_url }}" target="_blank" class="btn btn-outline-primary"><i class="fas fa-external-link-alt"></i> Otvori</a>
       <a href="{% url 'panic_button' %}" class="btn btn-outline-dark"><i class="fas fa-arrow-left"></i> Natrag</a>

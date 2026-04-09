@@ -11,66 +11,66 @@
 }
 </style>
 {% block content %}
-<div style="max-width:900px;margin:0 auto;padding:1.5rem">
-  <h2 style="color:var(--gold,#c9a84c);margin-bottom:1.5rem">EU Fondovi & Volonterski Izvjestaji</h2>
+<div class="fx-m-auto fx-p-5" style="max-width:900px">
+  <h2 class="fx-text-gold fx-mb-6">EU Fondovi & Volonterski Izvjestaji</h2>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-bottom:2rem">
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.2rem">
-      <div style="font-size:.8rem;color:#888">Volonteri</div>
-      <div style="font-size:1.8rem;font-weight:700;color:var(--gold,#c9a84c)">{{ volunteers.count }}</div>
+  <div class="d-grid fx-gap-4" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-bottom:2rem">
+    <div class="fx-bg-card fx-rounded fx-b2" style="padding:1.2rem">
+      <div class="fx-fs-compact fx-text-muted">Volonteri</div>
+      <div class="fx-fw-bold fx-text-gold fx-fs-6xl">{{ volunteers.count }}</div>
     </div>
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.2rem">
-      <div style="font-size:.8rem;color:#888">S ugovorom</div>
-      <div style="font-size:1.8rem;font-weight:700;color:#4ade80">{% for v in volunteers %}{% if v.volunteer_contract_date %}1{% endif %}{% endfor %}</div>
+    <div class="fx-bg-card fx-rounded fx-b2" style="padding:1.2rem">
+      <div class="fx-fs-compact fx-text-muted">S ugovorom</div>
+      <div class="fx-fw-bold fx-text-green fx-fs-6xl">{% for v in volunteers %}{% if v.volunteer_contract_date %}1{% endif %}{% endfor %}</div>
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem">
+  <div class="d-grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem">
 
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.5rem">
-      <h3 style="color:var(--gold,#c9a84c);margin:0 0 .8rem">Volonterski Timesheet</h3>
-      <p style="color:#aaa;font-size:.85rem">EU-kompatibilan timesheet s potpisom, projektom i monetizacijom. Obavezan za reviziju.</p>
-      <form method="get" action="{% url 'udruge:volunteer_timesheet' %}" style="margin-top:1rem">
-        <select name="user_id" style="width:100%;padding:.5rem;margin-bottom:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
+    <div class="fx-bg-card fx-rounded fx-b2 fx-p-5">
+      <h3 class="fx-text-gold" style="margin:0 0 .8rem">Volonterski Timesheet</h3>
+      <p class="fx-text-muted fx-fs-base">EU-kompatibilan timesheet s potpisom, projektom i monetizacijom. Obavezan za reviziju.</p>
+      <form method="get" action="{% url 'udruge:volunteer_timesheet' %}" class="mt-3">
+        <select name="user_id" class="fx-w-full fx-bg-body fx-text-white fx-rounded-sm mb-2 fx-p-2 fx-b2">
           {% for v in volunteers %}<option value="{{ v.user_id }}">{{ v }}</option>{% endfor %}
         </select>
-        <div style="display:flex;gap:.5rem">
-          <input type="number" name="month" value="{{ current_month|default:3 }}" min="1" max="12" style="flex:1;padding:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
-          <select name="year" style="flex:1;padding:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
+        <div class="d-flex fx-gap-2">
+          <input type="number" name="month" value="{{ current_month|default:3 }}" min="1" max="12" class="fx-bg-body fx-text-white fx-rounded-sm fx-flex-1 fx-p-2 fx-b2">
+          <select name="year" class="fx-bg-body fx-text-white fx-rounded-sm fx-flex-1 fx-p-2 fx-b2">
             {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
           </select>
         </div>
-        <input type="text" name="project" placeholder="Sifra EU projekta (opcija)" style="width:100%;padding:.5rem;margin-top:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
-        <button type="submit" style="width:100%;margin-top:.8rem;padding:.7rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Preuzmi Timesheet</button>
+        <input type="text" name="project" placeholder="Sifra EU projekta (opcija)" class="fx-w-full fx-bg-body fx-text-white fx-rounded-sm mt-2 fx-p-2 fx-b2">
+        <button type="submit" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-bg-gold" style="margin-top:.8rem;padding:.7rem">Preuzmi Timesheet</button>
       </form>
     </div>
 
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.5rem">
-      <h3 style="color:var(--gold,#c9a84c);margin:0 0 .8rem">In-Kind Report (eKohezija)</h3>
-      <p style="color:#aaa;font-size:.85rem">Kvartalni izvjestaj monetiziranih volonterskih sati po projektu. Za EU sufinanciranje.</p>
-      <form method="get" action="{% url 'udruge:inkind_report' %}" style="margin-top:1rem">
-        <div style="display:flex;gap:.5rem">
-          <select name="year" style="flex:1;padding:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
+    <div class="fx-bg-card fx-rounded fx-b2 fx-p-5">
+      <h3 class="fx-text-gold" style="margin:0 0 .8rem">In-Kind Report (eKohezija)</h3>
+      <p class="fx-text-muted fx-fs-base">Kvartalni izvjestaj monetiziranih volonterskih sati po projektu. Za EU sufinanciranje.</p>
+      <form method="get" action="{% url 'udruge:inkind_report' %}" class="mt-3">
+        <div class="d-flex fx-gap-2">
+          <select name="year" class="fx-bg-body fx-text-white fx-rounded-sm fx-flex-1 fx-p-2 fx-b2">
             {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
           </select>
-          <select name="quarter" style="flex:1;padding:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
+          <select name="quarter" class="fx-bg-body fx-text-white fx-rounded-sm fx-flex-1 fx-p-2 fx-b2">
             <option value="">Cijela godina</option>
             <option value="1">Q1</option><option value="2">Q2</option>
             <option value="3">Q3</option><option value="4">Q4</option>
           </select>
         </div>
-        <button type="submit" style="width:100%;margin-top:.8rem;padding:.7rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Preuzmi In-Kind Report</button>
+        <button type="submit" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-bg-gold" style="margin-top:.8rem;padding:.7rem">Preuzmi In-Kind Report</button>
       </form>
     </div>
 
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.5rem">
-      <h3 style="color:var(--gold,#c9a84c);margin:0 0 .8rem">Godisnje izvjesce (Min. rada)</h3>
-      <p style="color:#aaa;font-size:.85rem">Godisnje izvjesce o volontiranju za Ministarstvo rada. Rok: 31.03. za prethodnu godinu.</p>
-      <form method="get" action="{% url 'udruge:annual_volunteer_report' %}" style="margin-top:1rem">
-        <select name="year" style="width:100%;padding:.5rem;background:#0a0a0a;color:#fff;border:1px solid #444;border-radius:6px">
+    <div class="fx-bg-card fx-rounded fx-b2 fx-p-5">
+      <h3 class="fx-text-gold" style="margin:0 0 .8rem">Godisnje izvjesce (Min. rada)</h3>
+      <p class="fx-text-muted fx-fs-base">Godisnje izvjesce o volontiranju za Ministarstvo rada. Rok: 31.03. za prethodnu godinu.</p>
+      <form method="get" action="{% url 'udruge:annual_volunteer_report' %}" class="mt-3">
+        <select name="year" class="fx-w-full fx-bg-body fx-text-white fx-rounded-sm fx-p-2 fx-b2">
           {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
         </select>
-        <button type="submit" style="width:100%;margin-top:.8rem;padding:.7rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Preuzmi Godisnje Izvjesce</button>
+        <button type="submit" class="fx-w-full fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer fx-bg-gold" style="margin-top:.8rem;padding:.7rem">Preuzmi Godisnje Izvjesce</button>
       </form>
     </div>
 

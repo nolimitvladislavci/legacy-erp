@@ -2,44 +2,27 @@
 {% load i18n %}
 {% block title %}Transakcije{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="padding:1.5rem;max-width:900px">
-  <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:1rem">Sve transakcije ({{ stats.total }})</h2>
-  <table style="width:100%;border-collapse:collapse">
+<div class="fx-p-5" style="max-width:900px">
+  <h2 class="fx-fs-xl fx-text-gold mb-3">Sve transakcije ({{ stats.total }})</h2>
+  <table class="fx-w-full fx-b-collapse">
     <thead><tr>
-      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Datum</th>
-      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Izvor</th>
-      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Nacin</th>
-      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Iznos</th>
-      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
+      <th class="fx-fs-xs text-start fx-text-muted fx-bb" style="padding:.4rem">Datum</th>
+      <th class="fx-fs-xs text-start fx-text-muted fx-bb" style="padding:.4rem">Izvor</th>
+      <th class="fx-fs-xs text-start fx-text-muted fx-bb" style="padding:.4rem">Nacin</th>
+      <th class="fx-fs-xs text-start fx-text-muted fx-bb" style="padding:.4rem">Iznos</th>
+      <th class="fx-fs-xs text-start fx-text-muted fx-bb" style="padding:.4rem">Status</th>
     </tr></thead>
     <tbody>
     {% for p in payments %}
     <tr>
-      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.created_at|date:"d.m.Y H:i" }}</td>
-      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_source_display }}</td>
-      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_method_display }}</td>
-      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--green);font-weight:600">&euro;{{ p.amount|floatformat:2 }}</td>
-      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_status_display }}</td>
+      <td class="fx-fs-compact fx-p-2 fx-bb-subtle">{{ p.created_at|date:"d.m.Y H:i" }}</td>
+      <td class="fx-fs-compact fx-p-2 fx-bb-subtle">{{ p.get_source_display }}</td>
+      <td class="fx-fs-compact fx-p-2 fx-bb-subtle">{{ p.get_method_display }}</td>
+      <td class="fx-fs-compact fx-fw-semibold fx-text-green fx-p-2 fx-bb-subtle">&euro;{{ p.amount|floatformat:2 }}</td>
+      <td class="fx-fs-compact fx-p-2 fx-bb-subtle">{{ p.get_status_display }}</td>
     </tr>
     {% endfor %}
     </tbody>

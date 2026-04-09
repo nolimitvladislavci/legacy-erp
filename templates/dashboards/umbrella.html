@@ -21,7 +21,7 @@
               </div>
               <hr>
             </div>
-            <div class="table-responsive" style="max-height:500px;overflow-y:auto">
+            <div class="table-responsive fx-scroll-y" style="max-height:500px">
               <table class="table table-sm table-hover">
                 <thead class="sticky-top" style="background:var(--card-bg,#fff)">
                   <tr>
@@ -54,7 +54,7 @@
           </form>
           {% else %}
           <div class="text-center text-muted py-4">
-            <i class="fas fa-check-circle fa-3x mb-3" style="color:var(--gold,#c9a84c)"></i>
+            <i class="fas fa-check-circle fa-3x mb-3 fx-text-gold"></i>
             <p>Svi partneri s OIB-om su već uvezeni ili nemaju OIB.</p>
           </div>
           {% endif %}
@@ -106,14 +106,14 @@
             <table class="table table-sm table-hover" id="reportTable">
               <thead>
                 <tr>
-                  <th onclick="sortTable(0)" style="cursor:pointer">Firma ↑↓</th>
+                  <th onclick="sortTable(0)" class="fx-pointer">Firma ↑↓</th>
                   <th>OIB</th>
                   <th>Tip</th>
                   <th>Plan</th>
-                  <th onclick="sortTable(4)" style="cursor:pointer">Korisnici ↑↓</th>
-                  <th onclick="sortTable(5)" style="cursor:pointer">Fakture ↑↓</th>
-                  <th onclick="sortTable(6)" style="cursor:pointer">POS ↑↓</th>
-                  <th onclick="sortTable(7)" style="cursor:pointer">Ukupno ↑↓</th>
+                  <th onclick="sortTable(4)" class="fx-pointer">Korisnici ↑↓</th>
+                  <th onclick="sortTable(5)" class="fx-pointer">Fakture ↑↓</th>
+                  <th onclick="sortTable(6)" class="fx-pointer">POS ↑↓</th>
+                  <th onclick="sortTable(7)" class="fx-pointer">Ukupno ↑↓</th>
                   <th>Synesis</th>
                   <th>Akcija</th>
                 </tr>
@@ -125,9 +125,9 @@
                   <td><code>{{ item.company.oib }}</code></td>
                   <td>
                     {% if item.company.umbrella_relation == 'subsidiary' %}
-                      <span class="badge bg-primary">PODR.</span>
+                      <span class="fenix-badge fenix-badge-info">PODR.</span>
                     {% else %}
-                      <span class="badge bg-info">KLIJENT</span>
+                      <span class="fenix-badge fenix-badge-info">KLIJENT</span>
                     {% endif %}
                   </td>
                   <td>{{ item.plan }}</td>
@@ -137,11 +137,11 @@
                   <td><strong>€ {{ item.total_revenue|floatformat:2 }}</strong></td>
                   <td>
                     {% if item.synesis == 'active' %}
-                      <span class="badge bg-success">DA</span>
+                      <span class="fenix-badge fenix-badge-success">DA</span>
                     {% elif item.synesis == 'inactive' %}
-                      <span class="badge bg-warning">Neaktivan</span>
+                      <span class="fenix-badge fenix-badge-warning">Neaktivan</span>
                     {% else %}
-                      <span class="badge bg-secondary">NE</span>
+                      <span class="fenix-badge fenix-badge-muted">NE</span>
                     {% endif %}
                   </td>
                   <td>
@@ -199,34 +199,28 @@
 .u-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem}
 .u-badge{font-size:.65rem;background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);padding:2px 8px;border-radius:10px;font-weight:700}
 </style>
-<div style="max-width:1200px;margin:0 auto;padding:1rem">
+<div class="fx-m-auto fx-p-4" style="max-width:1200px">
 
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <div class="d-flex fx-flex-wrap justify-content-between align-items-center fx-gap-4 fx-mb-6">
     <div>
-      <h4 style="margin:0;font-weight:700;color:var(--text,#0f172a)">
-        <i class="fas fa-sitemap" style="color:var(--gold,#c9a84c)"></i> {{ company.name }}
+      <h4 class="fx-fw-bold fx-text-body fx-m-0">
+        <i class="fas fa-sitemap fx-text-gold"></i> {{ company.name }}
       </h4>
-      <p style="color:var(--text-muted,#64748b);font-size:.82rem;margin:4px 0 0">Umbrella Dashboard</p>
+      <p class="fx-fs-note fx-text-muted" style="margin:4px 0 0">Umbrella Dashboard</p>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+    <div class="d-flex fx-flex-wrap fx-gap-2 align-items-center">
       <a href="{% url 'pos:dashboard' %}"
-         style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
-                background:linear-gradient(135deg,#166534,#14532d);color:#4ade80;
-                border:1px solid rgba(74,222,128,.3);border-radius:8px;
-                font-weight:700;font-size:.85rem;text-decoration:none;">
+         class="fx-gap-2 fx-rounded fx-fw-bold fx-fs-base fx-no-underline d-inline-flex align-items-center fx-text-green fx-p-8-16" style="background:linear-gradient(135deg,#166534,#14532d);border:1px solid rgba(74,222,128,.3)">
         <i class="fas fa-cash-register"></i> Otvori POS
       </a>
       <a href="{% url 'companies:settings' %}"
-         style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
-                background:var(--bg-card,#fff);color:var(--text-secondary,#475569);
-                border:1px solid var(--border,#e2e8f0);border-radius:8px;
-                font-weight:600;font-size:.85rem;text-decoration:none;">
+         class="fx-gap-2 fx-rounded fx-fw-semibold fx-fs-base fx-no-underline d-inline-flex align-items-center fx-p-8-16" style="background:var(--bg-card,#fff);color:var(--text-secondary,#475569);border:1px solid var(--border,#e2e8f0)">
         <i class="fas fa-cog"></i> Postavke
       </a>
       {% if all_umbrellas %}
       <form method="get">
-        <select name="umbrella" onchange="this.form.submit()" style="padding:6px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.82rem">
+        <select name="umbrella" onchange="this.form.submit()" class="fx-rounded-sm fx-fs-note fx-text-body" style="padding:6px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           {% for u in all_umbrellas %}
           <option value="{{ u.id }}" {% if u.id == company.id %}selected{% endif %}>{{ u.name }}</option>
           {% endfor %}
@@ -237,22 +231,22 @@
   </div>
 
   <!-- Stats -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-bottom:1.5rem">
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+  <div class="d-grid fx-mb-6" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">Podruznice</div><div class="value">{{ sub_count }}</div></div>
-      <div class="icon" style="background:rgba(168,85,247,.1);color:#a855f7"><i class="fas fa-code-branch"></i></div>
+      <div class="icon fx-text-purple" style="background:rgba(168,85,247,.1)"><i class="fas fa-code-branch"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">Klijenti</div><div class="value">{{ client_count }}</div></div>
-      <div class="icon" style="background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)"><i class="fas fa-briefcase"></i></div>
+      <div class="icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-briefcase"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
       <div><div class="label">Korisnici</div><div class="value">{{ total_users }}</div></div>
-      <div class="icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-users"></i></div>
+      <div class="icon fx-text-blue" style="background:rgba(59,130,246,.1)"><i class="fas fa-users"></i></div>
     </div>
-    <div class="stat-card" style="display:flex;align-items:center;justify-content:space-between">
-      <div><div class="label">Promet {{ month_label }}</div><div class="value" style="font-size:1.2rem">&euro;{{ total_revenue|floatformat:0 }}</div></div>
-      <div class="icon" style="background:rgba(76,175,125,.1);color:#4caf7d"><i class="fas fa-chart-line"></i></div>
+    <div class="fenix-stat d-flex align-items-center justify-content-between">
+      <div><div class="label">Promet {{ month_label }}</div><div class="value fx-fs-2xl">&euro;{{ total_revenue|floatformat:0 }}</div></div>
+      <div class="icon fx-text-green" style="background:rgba(76,175,125,.1)"><i class="fas fa-chart-line"></i></div>
     </div>
   </div>
 
@@ -274,19 +268,19 @@
   <div class="u-panel active" id="tab-all">
     {% if subsidiaries %}
     <div class="u-section">
-      <div class="u-section-title" style="color:#a855f7"><i class="fas fa-code-branch"></i> Podruznice <span class="u-badge">{{ sub_count }}</span></div>
+      <div class="u-section-title fx-text-purple"><i class="fas fa-code-branch"></i> Podruznice <span class="u-badge">{{ sub_count }}</span></div>
       {% include "dashboards/_umbrella_table.html" with items=subsidiaries %}
     </div>
     {% endif %}
     {% if clients %}
     <div class="u-section">
-      <div class="u-section-title" style="color:var(--gold,#c9a84c)"><i class="fas fa-briefcase"></i> Klijenti <span class="u-badge">{{ client_count }}</span></div>
+      <div class="u-section-title fx-text-gold"><i class="fas fa-briefcase"></i> Klijenti <span class="u-badge">{{ client_count }}</span></div>
       {% include "dashboards/_umbrella_table.html" with items=clients %}
     </div>
     {% endif %}
     {% if not subsidiaries and not clients %}
-    <div style="text-align:center;padding:3rem;color:var(--text-muted,#64748b)">
-      <i class="fas fa-sitemap" style="font-size:2rem;opacity:.3;margin-bottom:1rem;display:block"></i>
+    <div class="text-center fx-text-muted fx-p-7">
+      <i class="fas fa-sitemap fx-fs-icon mb-3 d-block fx-opacity-50"></i>
       Nema povezanih tvrtki. Kreirajte novu ili povezite postojecu.
     </div>
     {% endif %}
@@ -296,7 +290,7 @@
     {% if subsidiaries %}
     {% include "dashboards/_umbrella_table.html" with items=subsidiaries %}
     {% else %}
-    <div style="text-align:center;padding:2rem;color:var(--text-muted,#64748b)">Nema podruznica.</div>
+    <div class="text-center fx-text-muted fx-p-6">Nema podruznica.</div>
     {% endif %}
   </div>
 
@@ -304,58 +298,58 @@
     {% if clients %}
     {% include "dashboards/_umbrella_table.html" with items=clients %}
     {% else %}
-    <div style="text-align:center;padding:2rem;color:var(--text-muted,#64748b)">Nema klijenata.</div>
+    <div class="text-center fx-text-muted fx-p-6">Nema klijenata.</div>
     {% endif %}
   </div>
 
   <!-- Tab: Create -->
   <div class="u-panel" id="tab-create">
-    <div style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:1.5rem">
-      <h6 style="font-size:.82rem;font-weight:700;color:var(--gold,#c9a84c);margin:0 0 1rem"><i class="fas fa-plus-circle"></i> Kreiraj novu tvrtku</h6>
+    <div class="fx-rounded fx-p-5" style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0)">
+      <h6 class="fx-fs-note fx-fw-bold fx-text-gold" style="margin:0 0 1rem"><i class="fas fa-plus-circle"></i> Kreiraj novu tvrtku</h6>
       <form method="post">
         {% csrf_token %}
         <input type="hidden" name="action" value="create_child">
         <div class="u-create-grid">
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Naziv *</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Naziv *</label>
             <input type="text" name="name" required placeholder="npr. Pekara Sunce d.o.o."
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">OIB *</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">OIB *</label>
             <input type="text" name="oib" required placeholder="12345678901"
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Grad</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Grad</label>
             <input type="text" name="city" placeholder="Osijek"
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Adresa</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Adresa</label>
             <input type="text" name="address"
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Email</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Email</label>
             <input type="email" name="email"
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Telefon</label>
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Telefon</label>
             <input type="text" name="phone"
-              style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+              class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
           </div>
           <div>
-            <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Tip veze</label>
-            <select name="relation" style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+            <label class="fx-fs-sm fx-text-muted d-block mb-1">Tip veze</label>
+            <select name="relation" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
               <option value="client">Klijent (knjigovodstvo)</option>
               <option value="subsidiary">Podruznica / Sestrinska firma</option>
             </select>
           </div>
         </div>
-        <div style="margin-top:1.2rem;display:flex;gap:.5rem;justify-content:flex-end">
-          <button type="submit" style="padding:8px 24px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:600;font-size:.85rem;cursor:pointer"><i class="fas fa-plus"></i> Kreiraj</button>
+        <div class="d-flex fx-gap-2 justify-content-end" style="margin-top:1.2rem">
+          <button type="submit" class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-semibold fx-fs-base fx-pointer fx-bg-gold" style="padding:8px 24px"><i class="fas fa-plus"></i> Kreiraj</button>
         </div>
       </form>
     </div>
@@ -363,28 +357,28 @@
 
   <!-- Tab: Link existing -->
   <div class="u-panel" id="tab-link">
-    <div style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:1.5rem">
-      <h6 style="font-size:.82rem;font-weight:700;color:var(--gold,#c9a84c);margin:0 0 1rem"><i class="fas fa-link"></i> Povezi postojecu tvrtku</h6>
-      <form method="post" style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:end">
+    <div class="fx-rounded fx-p-5" style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0)">
+      <h6 class="fx-fs-note fx-fw-bold fx-text-gold" style="margin:0 0 1rem"><i class="fas fa-link"></i> Povezi postojecu tvrtku</h6>
+      <form method="post" class="d-flex fx-flex-wrap fx-gap-2" style="align-items:end">
         {% csrf_token %}
         <input type="hidden" name="action" value="add_child">
         <div style="flex:2;min-width:200px">
-          <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Tvrtka</label>
-          <select name="company_id" required style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+          <label class="fx-fs-sm fx-text-muted d-block mb-1">Tvrtka</label>
+          <select name="company_id" required class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
             <option value="">-- Odaberi --</option>
             {% for c in available %}
             <option value="{{ c.id }}">{{ c.name }} ({{ c.oib }})</option>
             {% endfor %}
           </select>
         </div>
-        <div style="flex:1;min-width:150px">
-          <label style="font-size:.7rem;color:var(--text-muted,#64748b);display:block;margin-bottom:4px">Tip veze</label>
-          <select name="relation" style="width:100%;padding:8px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.85rem">
+        <div class="fx-flex-1" style="min-width:150px">
+          <label class="fx-fs-sm fx-text-muted d-block mb-1">Tip veze</label>
+          <select name="relation" class="fx-w-full fx-rounded-sm fx-fs-base fx-text-body fx-p-8-12" style="background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0)">
             <option value="client">Klijent</option>
             <option value="subsidiary">Podruznica</option>
           </select>
         </div>
-        <button type="submit" style="padding:8px 20px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:600;font-size:.85rem;cursor:pointer"><i class="fas fa-link"></i> Povezi</button>
+        <button type="submit" class="fx-text-dark fx-border-none fx-rounded-sm fx-fw-semibold fx-fs-base fx-pointer fx-bg-gold" style="padding:8px 20px"><i class="fas fa-link"></i> Povezi</button>
       </form>
     </div>
   </div>
@@ -419,7 +413,7 @@ function showTab(name,btn){
               </div>
               <hr>
             </div>
-            <div class="table-responsive" style="max-height:500px;overflow-y:auto">
+            <div class="table-responsive fx-scroll-y" style="max-height:500px">
               <table class="table table-sm table-hover">
                 <thead class="sticky-top" style="background:var(--card-bg,#fff)">
                   <tr>
@@ -452,7 +446,7 @@ function showTab(name,btn){
           </form>
           {% else %}
           <div class="text-center text-muted py-4">
-            <i class="fas fa-check-circle fa-3x mb-3" style="color:var(--gold,#c9a84c)"></i>
+            <i class="fas fa-check-circle fa-3x mb-3 fx-text-gold"></i>
             <p>Svi partneri s OIB-om su već uvezeni ili nemaju OIB.</p>
           </div>
           {% endif %}
@@ -504,14 +498,14 @@ function showTab(name,btn){
             <table class="table table-sm table-hover" id="reportTable">
               <thead>
                 <tr>
-                  <th onclick="sortTable(0)" style="cursor:pointer">Firma ↑↓</th>
+                  <th onclick="sortTable(0)" class="fx-pointer">Firma ↑↓</th>
                   <th>OIB</th>
                   <th>Tip</th>
                   <th>Plan</th>
-                  <th onclick="sortTable(4)" style="cursor:pointer">Korisnici ↑↓</th>
-                  <th onclick="sortTable(5)" style="cursor:pointer">Fakture ↑↓</th>
-                  <th onclick="sortTable(6)" style="cursor:pointer">POS ↑↓</th>
-                  <th onclick="sortTable(7)" style="cursor:pointer">Ukupno ↑↓</th>
+                  <th onclick="sortTable(4)" class="fx-pointer">Korisnici ↑↓</th>
+                  <th onclick="sortTable(5)" class="fx-pointer">Fakture ↑↓</th>
+                  <th onclick="sortTable(6)" class="fx-pointer">POS ↑↓</th>
+                  <th onclick="sortTable(7)" class="fx-pointer">Ukupno ↑↓</th>
                   <th>Synesis</th>
                   <th>Akcija</th>
                 </tr>
@@ -523,9 +517,9 @@ function showTab(name,btn){
                   <td><code>{{ item.company.oib }}</code></td>
                   <td>
                     {% if item.company.umbrella_relation == 'subsidiary' %}
-                      <span class="badge bg-primary">PODR.</span>
+                      <span class="fenix-badge fenix-badge-info">PODR.</span>
                     {% else %}
-                      <span class="badge bg-info">KLIJENT</span>
+                      <span class="fenix-badge fenix-badge-info">KLIJENT</span>
                     {% endif %}
                   </td>
                   <td>{{ item.plan }}</td>
@@ -535,11 +529,11 @@ function showTab(name,btn){
                   <td><strong>€ {{ item.total_revenue|floatformat:2 }}</strong></td>
                   <td>
                     {% if item.synesis == 'active' %}
-                      <span class="badge bg-success">DA</span>
+                      <span class="fenix-badge fenix-badge-success">DA</span>
                     {% elif item.synesis == 'inactive' %}
-                      <span class="badge bg-warning">Neaktivan</span>
+                      <span class="fenix-badge fenix-badge-warning">Neaktivan</span>
                     {% else %}
-                      <span class="badge bg-secondary">NE</span>
+                      <span class="fenix-badge fenix-badge-muted">NE</span>
                     {% endif %}
                   </td>
                   <td>

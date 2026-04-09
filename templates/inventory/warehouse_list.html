@@ -3,52 +3,35 @@
 {% block title %}Skladista | LIMIT Connect{% endblock %}
 {% block page_title %}Skladista{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:700px;margin:0 auto">
-  <h2 style="margin:0 0 1rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
-    <i class="fas fa-warehouse" style="color:var(--gold);margin-right:8px"></i>Skladista
+<div class="fx-m-auto fx-max-700">
+  <h2 class="fx-fw-bold fx-fs-4xl fx-text-body" style="margin:0 0 1rem;font-family:'Cormorant Garamond',Georgia,serif">
+    <i class="fas fa-warehouse fx-text-gold fx-mr-3"></i>Skladista
   </h2>
-  <div class="stat-card" style="padding:1.25rem">
-    <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+  <div class="fenix-stat fx-p-125">
+    <table class="fx-w-full fx-fs-base fx-b-collapse">
       <thead>
         <tr>
-          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Naziv</th>
-          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Sifra</th>
-          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Tip</th>
-          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Adresa</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-uppercase fx-bb fx-p-5-75">Naziv</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-uppercase fx-bb fx-p-5-75">Sifra</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-uppercase fx-bb fx-p-5-75">Tip</th>
+          <th class="fx-fs-sm text-start fx-text-muted fx-uppercase fx-bb fx-p-5-75">Adresa</th>
         </tr>
       </thead>
       <tbody>
         {% for w in warehouses %}
         <tr>
-          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);font-weight:600">
-            {{ w.name }}{% if w.is_default %} <span style="color:var(--gold);font-size:.72rem">★</span>{% endif %}
+          <td class="fx-fw-semibold fx-bb fx-p-5-75">
+            {{ w.name }}{% if w.is_default %} <span class="fx-fs-sm fx-text-gold">★</span>{% endif %}
           </td>
-          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ w.code }}</td>
-          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border)">{{ w.get_warehouse_type_display }}</td>
-          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:.82rem">{{ w.address }}</td>
+          <td class="fx-text-muted fx-bb fx-p-5-75">{{ w.code }}</td>
+          <td class="fx-bb fx-p-5-75">{{ w.get_warehouse_type_display }}</td>
+          <td class="fx-fs-note fx-text-muted fx-bb fx-p-5-75">{{ w.address }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema skladista za ovu firmu</td></tr>
+        <tr><td colspan="4" class="text-center fx-text-muted fx-p-6">Nema skladista za ovu firmu</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -3,32 +3,32 @@
 {% block title %}Dnevna izvjesca{% endblock %}
 
 {% block content %}
-<div style="max-width:1100px;margin:0 auto;padding:1.5rem">
+<div class="fx-m-auto fx-p-5" style="max-width:1100px">
 
-  <h2 style="color:var(--gold,#c9a84c);margin-bottom:1rem"><i class="fas fa-chart-bar me-2"></i>Dnevna izvjesca</h2>
+  <h2 class="fx-text-gold mb-3"><i class="fas fa-chart-bar me-2"></i>Dnevna izvjesca</h2>
 
   <!-- Filter po mjesecu -->
-  <form method="get" style="margin-bottom:1.5rem;display:flex;gap:.5rem;align-items:center">
+  <form method="get" class="d-flex fx-gap-2 align-items-center fx-mb-6">
     <input type="month" name="month" value="{{ current_month }}"
-           style="padding:.5rem;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff">
-    <button type="submit" style="padding:.5rem 1rem;border-radius:8px;background:var(--gold,#c9a84c);color:#000;border:none;font-weight:600;cursor:pointer">
+           class="fx-rounded fx-bg-surface2 fx-text-white fx-p-2" style="border:1px solid #333">
+    <button type="submit" class="fx-rounded fx-text-dark fx-border-none fx-fw-semibold fx-pointer fx-bg-gold" style="padding:.5rem 1rem">
       Filtriraj
     </button>
     {% if current_month %}
-    <a href="?" style="color:#aaa;margin-left:.5rem">&times; Ocisti</a>
+    <a href="?" class="fx-text-muted" style="margin-left:.5rem">&times; Ocisti</a>
     {% endif %}
   </form>
 
   <!-- Mjesecni summary -->
   {% if monthly %}
   <div style="margin-bottom:2rem">
-    <h3 style="color:#ccc;margin-bottom:.75rem">Mjesecni pregled</h3>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem">
+    <h3 class="fx-text-muted fx-mb-4">Mjesecni pregled</h3>
+    <div class="d-grid fx-gap-3" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
       {% for m in monthly %}
-      <div style="background:#1a1a2e;border-radius:10px;padding:1rem;border-left:3px solid var(--gold,#c9a84c)">
-        <div style="font-weight:700;color:var(--gold,#c9a84c);font-size:1.1rem">{{ m.month }}</div>
-        <div style="margin-top:.5rem;color:#ccc">
-          <div><i class="fas fa-coins me-1"></i> Ukupno: <b style="color:#fff">&euro;{{ m.total_revenue|floatformat:2 }}</b></div>
+      <div class="fx-bg-surface2 fx-rounded fx-p-4" style="border-left:3px solid var(--gold,#c9a84c)">
+        <div class="fx-fw-bold fx-fs-xl fx-text-gold">{{ m.month }}</div>
+        <div class="mt-2 fx-text-muted">
+          <div><i class="fas fa-coins me-1"></i> Ukupno: <b class="fx-text-white">&euro;{{ m.total_revenue|floatformat:2 }}</b></div>
           <div><i class="fas fa-money-bill me-1"></i> Gotovina: &euro;{{ m.total_cash|floatformat:2 }}</div>
           <div><i class="fas fa-credit-card me-1"></i> Kartica: &euro;{{ m.total_card|floatformat:2 }}</div>
           <div><i class="fas fa-receipt me-1"></i> Bonova: {{ m.receipt_count }}</div>
@@ -40,52 +40,52 @@
   {% endif %}
 
   <!-- Dnevna lista -->
-  <h3 style="color:#ccc;margin-bottom:.75rem">Dnevni izvjestaji</h3>
+  <h3 class="fx-text-muted fx-mb-4">Dnevni izvjestaji</h3>
   {% if reports %}
-  <div style="overflow-x:auto">
-  <table style="width:100%;border-collapse:collapse">
+  <div class="fx-scroll-x">
+  <table class="fx-w-full fx-b-collapse">
     <thead>
-      <tr style="border-bottom:2px solid var(--gold,#c9a84c);text-align:left">
-        <th style="padding:.5rem;color:var(--gold,#c9a84c)">Datum</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c)">Terminal</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:right">POS</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:right">Marketplace</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:right">Ukupno</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:right">Gotovina</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:right">Kartica</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:center">Bonova</th>
-        <th style="padding:.5rem;color:var(--gold,#c9a84c);text-align:center">MKT</th>
+      <tr class="text-start" style="border-bottom:2px solid var(--gold,#c9a84c)">
+        <th class="fx-text-gold fx-p-2">Datum</th>
+        <th class="fx-text-gold fx-p-2">Terminal</th>
+        <th class="text-end fx-text-gold fx-p-2">POS</th>
+        <th class="text-end fx-text-gold fx-p-2">Marketplace</th>
+        <th class="text-end fx-text-gold fx-p-2">Ukupno</th>
+        <th class="text-end fx-text-gold fx-p-2">Gotovina</th>
+        <th class="text-end fx-text-gold fx-p-2">Kartica</th>
+        <th class="text-center fx-text-gold fx-p-2">Bonova</th>
+        <th class="text-center fx-text-gold fx-p-2">MKT</th>
       </tr>
     </thead>
     <tbody>
       {% for r in reports %}
       <tr style="border-bottom:1px solid #222">
-        <td style="padding:.5rem;color:#fff">{{ r.date|date:"d.m.Y" }}</td>
-        <td style="padding:.5rem;color:#ccc">{{ r.terminal.name }}</td>
-        <td style="padding:.5rem;color:#4ade80;text-align:right;font-weight:600">&euro;{{ r.total_revenue|floatformat:2 }}</td>
-        <td style="padding:.5rem;text-align:right">
+        <td class="fx-text-white fx-p-2">{{ r.date|date:"d.m.Y" }}</td>
+        <td class="fx-text-muted fx-p-2">{{ r.terminal.name }}</td>
+        <td class="text-end fx-fw-semibold fx-text-green fx-p-2">&euro;{{ r.total_revenue|floatformat:2 }}</td>
+        <td class="text-end fx-p-2">
           {% if r.marketplace_revenue %}
-          <span style="color:#3b82f6;font-weight:600">&euro;{{ r.marketplace_revenue|floatformat:2 }}</span>
+          <span class="fx-text-blue fx-fw-semibold">&euro;{{ r.marketplace_revenue|floatformat:2 }}</span>
           {% if r.gastro_bridge_revenue %}
-          <br><span style="color:#f59e0b;font-size:.7rem">+&euro;{{ r.gastro_bridge_revenue|floatformat:2 }} gastro</span>
+          <br><span class="fx-text-amber fx-fs-sm">+&euro;{{ r.gastro_bridge_revenue|floatformat:2 }} gastro</span>
           {% endif %}
           {% else %}
-          <span style="color:#555">—</span>
+          <span class="fx-text-dim">—</span>
           {% endif %}
         </td>
-        <td style="padding:.5rem;text-align:right;font-weight:700;color:#fff">
+        <td class="text-end fx-fw-bold fx-text-white fx-p-2">
           {% with combined=r.total_revenue|add:r.marketplace_revenue %}
           &euro;{{ combined|floatformat:2 }}
           {% endwith %}
         </td>
-        <td style="padding:.5rem;color:#ccc;text-align:right">&euro;{{ r.total_cash|floatformat:2 }}</td>
-        <td style="padding:.5rem;color:#ccc;text-align:right">&euro;{{ r.total_card|floatformat:2 }}</td>
-        <td style="padding:.5rem;color:#ccc;text-align:center">{{ r.receipt_count }}</td>
-        <td style="padding:.5rem;text-align:center">
+        <td class="text-end fx-text-muted fx-p-2">&euro;{{ r.total_cash|floatformat:2 }}</td>
+        <td class="text-end fx-text-muted fx-p-2">&euro;{{ r.total_card|floatformat:2 }}</td>
+        <td class="text-center fx-text-muted fx-p-2">{{ r.receipt_count }}</td>
+        <td class="text-center fx-p-2">
           {% if r.marketplace_order_count %}
-          <span style="background:rgba(59,130,246,.15);color:#3b82f6;padding:2px 8px;border-radius:6px;font-size:.75rem;font-weight:700">{{ r.marketplace_order_count }}</span>
+          <span class="fx-text-blue fx-rounded-sm fx-fs-caption fx-fw-bold fx-p-btn" style="background:rgba(59,130,246,.15)">{{ r.marketplace_order_count }}</span>
           {% else %}
-          <span style="color:#555">—</span>
+          <span class="fx-text-dim">—</span>
           {% endif %}
         </td>
       </tr>
@@ -94,7 +94,7 @@
   </table>
   </div>
   {% else %}
-  <p style="color:#666;padding:2rem;text-align:center">Nema izvjesca za prikaz.</p>
+  <p class="fx-text-dim text-center fx-p-6">Nema izvjesca za prikaz.</p>
   {% endif %}
 
 </div>

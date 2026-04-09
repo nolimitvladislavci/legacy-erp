@@ -14,7 +14,7 @@
 .status-form{display:flex;gap:.4rem;align-items:center}
 .status-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.4rem .65rem;font-size:.82rem;outline:none}
 .status-select:focus{border-color:var(--gold)}
-.btn-status{background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;padding:.4rem .875rem;font-size:.78rem;font-weight:700;cursor:pointer;min-height:36px}
+.btn-status{background:var(--gold);color:var(--black);border:none;border-radius:6px;padding:.4rem .875rem;font-size:.78rem;font-weight:700;cursor:pointer;min-height:36px}
 
 /* Section cards */
 .s-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:.875rem;overflow:hidden}
@@ -55,33 +55,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="ad-wrap">
-  <div class="ad-header">
-    <div>
-      <div class="ad-client">{{ assessment.client_name }}</div>
-      <div class="ad-sub">
-        Nalaz #{{ assessment.pk }} &nbsp;·&nbsp;
-        {{ assessment.get_assessment_type_display }} &nbsp;·&nbsp;
-        {{ assessment.created_at|date:"d.m.Y H:i" }}
-        {% if assessment.created_by %}&nbsp;·&nbsp; {{ assessment.created_by.get_full_name|default:assessment.created_by.username }}{% endif %}
-      </div>
-    </div>
+<!-- lang: topbar -->
     <div class="ad-actions">
       <form method="post" action="{% url 'assessment:status_update' assessment.pk %}" class="status-form">
         {% csrf_token %}
@@ -92,13 +66,13 @@
         </select>
         <button type="submit" class="btn-status">{% trans "Spremi" %}</button>
       </form>
-      <a href="{% url 'assessment:pdf' assessment.pk %}" class="btn btn-gold" target="_blank" style="min-height:44px;display:flex;align-items:center">{% trans "📄 PDF" %}</a>
-      <a href="{% url 'assessment:list' %}" class="btn btn-ghost" style="min-height:44px;display:flex;align-items:center">{% trans "← Lista" %}</a>
+      <a href="{% url 'assessment:pdf' assessment.pk %}" class="btn btn-gold d-flex align-items-center" target="_blank" style="min-height:44px">{% trans "📄 PDF" %}</a>
+      <a href="{% url 'assessment:list' %}" class="btn btn-ghost d-flex align-items-center" style="min-height:44px">{% trans "← Lista" %}</a>
     </div>
   </div>
 
   {% if assessment.calculated_price_from %}
-  <div style="margin-bottom:1rem">
+  <div class="mb-3">
     <div class="price-badge">
       <div class="price-lbl">{% trans "Okvirna cijena" %}</div>
       <div class="price-range">{{ assessment.calculated_price_from|floatformat:0 }} – {{ assessment.calculated_price_to|floatformat:0 }} €</div>
@@ -164,8 +138,8 @@
         {% if s.complexity %}<div class="kv"><div class="kv-lbl">{% trans "Složenost" %}</div><div class="kv-val {% if s.complexity == 'challenging' %}red{% elif s.complexity == 'complex' %}amber{% else %}green{% endif %}">{{ s.complexity }}</div></div>{% endif %}
       </div>
       {% if s.hidden_risks %}
-      <div style="margin-top:.75rem">
-        <div class="kv-lbl" style="margin-bottom:.3rem">{% trans "Skriveni rizici" %}</div>
+      <div class="fx-mt-4">
+        <div class="kv-lbl fx-mb-2">{% trans "Skriveni rizici" %}</div>
         <div class="expert-box" style="border-left-color:var(--amber)">{{ s.hidden_risks }}</div>
       </div>
       {% endif %}
@@ -178,7 +152,7 @@
   {% for step_num, step_photos in photos_by_step.items %}
   <div class="s-card">
     <div class="s-card-header">📷 Fotografije – Korak {{ step_num }}
-      <span style="font-size:.72rem;color:var(--muted)">{{ step_photos|length }} foto</span>
+      <span class="fx-fs-sm fx-text-muted">{{ step_photos|length }} foto</span>
     </div>
     <div class="s-card-body">
       <div class="photo-gallery">
@@ -269,8 +243,8 @@
         {% if s.sanitarija_color %}<div class="kv"><div class="kv-lbl">{% trans "Boja sanitarije" %}</div><div class="kv-val">{{ s.sanitarija_color }}</div></div>{% endif %}
       </div>
       {% if s.client_notes %}
-      <div style="margin-top:.75rem">
-        <div class="kv-lbl" style="margin-bottom:.3rem">{% trans "Posebni zahtjevi klijenta" %}</div>
+      <div class="fx-mt-4">
+        <div class="kv-lbl fx-mb-2">{% trans "Posebni zahtjevi klijenta" %}</div>
         <div class="expert-box" style="border-left-color:var(--blue,#3b82f6)">{{ s.client_notes }}</div>
       </div>
       {% endif %}

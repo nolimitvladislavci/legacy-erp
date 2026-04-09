@@ -15,8 +15,8 @@ body { font-family:'Barlow',sans-serif; background:var(--black); color:#e0e0e0; 
 /* Header */
 .header { text-align:center; padding:3rem 1rem; border-bottom:1px solid var(--border); margin-bottom:3rem; }
 .header h1 { font-family:'Cormorant Garamond',serif; font-size:2.5rem; color:var(--gold); margin-bottom:.5rem; }
-.header .sub { color:#888; font-size:1rem; }
-.header .date { color:#555; font-size:.85rem; margin-top:.5rem; }
+.header .sub { color:var(--text-muted); font-size:1rem; }
+.header .date { color:var(--text-dim); font-size:.85rem; margin-top:.5rem; }
 .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
 .badge-conf { background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
 
@@ -24,11 +24,11 @@ body { font-family:'Barlow',sans-serif; background:var(--black); color:#e0e0e0; 
 .section { margin-bottom:3rem; }
 .section-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--gold); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); }
 .subsection { margin:1.5rem 0; }
-.subsection h3 { color:#fff; font-size:1.1rem; margin-bottom:.75rem; }
+.subsection h3 { color:var(--white); font-size:1.1rem; margin-bottom:.75rem; }
 
 /* Tables */
 table { width:100%; border-collapse:collapse; margin:1rem 0; }
-th { text-align:left; padding:10px 12px; background:#111; color:var(--gold); font-size:.8rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
+th { text-align:left; padding:10px 12px; background:var(--bg-card); color:var(--gold); font-size:.8rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
 td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:.9rem; }
 tr:hover { background:rgba(201,168,76,.03); }
 .num { text-align:right; font-family:'Barlow',monospace; }
@@ -41,7 +41,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin:1rem 0; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; }
 .card .num-big { font-size:2rem; font-weight:700; color:var(--gold); font-family:'Cormorant Garamond',serif; }
-.card .label { color:#888; font-size:.8rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
+.card .label { color:var(--text-muted); font-size:.8rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
 .card.positive { border-color:rgba(34,197,94,.3); }
 .card.positive .num-big { color:var(--green); }
 .card.negative { border-color:rgba(239,68,68,.3); }
@@ -52,36 +52,36 @@ tr:hover { background:rgba(201,168,76,.03); }
 .scenario { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:2rem; margin:1.5rem 0; }
 .scenario.gold { border-color:var(--gold); }
 .scenario h3 { color:var(--gold); font-size:1.2rem; margin-bottom:1rem; }
-.scenario p { color:#bbb; margin-bottom:.5rem; }
+.scenario p { color:var(--text-muted); margin-bottom:.5rem; }
 
 /* Progress bars */
 .progress-wrap { margin:.75rem 0; }
 .progress-label { display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:4px; }
-.progress-bar { height:8px; background:#222; border-radius:4px; overflow:hidden; }
+.progress-bar { height:8px; background:var(--surface); border-radius:4px; overflow:hidden; }
 .progress-fill { height:100%; border-radius:4px; transition:width .5s; }
 
 /* Comparison */
 .vs { display:grid; grid-template-columns:1fr auto 1fr; gap:1rem; align-items:start; margin:2rem 0; }
 .vs-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
 .vs-card.win { border-color:var(--gold); }
-.vs-divider { display:flex; align-items:center; color:#555; font-size:.9rem; font-weight:700; padding-top:2rem; }
+.vs-divider { display:flex; align-items:center; color:var(--text-dim); font-size:.9rem; font-weight:700; padding-top:2rem; }
 .vs-card h4 { color:var(--gold); margin-bottom:1rem; font-size:1rem; }
 .vs-card ul { list-style:none; padding:0; }
-.vs-card li { padding:4px 0; font-size:.9rem; color:#bbb; }
+.vs-card li { padding:4px 0; font-size:.9rem; color:var(--text-muted); }
 .vs-card li::before { content:'+ '; color:var(--green); font-weight:700; }
 .vs-card li.con::before { content:'- '; color:var(--red); }
 
 /* Key metric */
 .key-metric { background:linear-gradient(135deg, rgba(201,168,76,.08), rgba(201,168,76,.02)); border:2px solid var(--gold); border-radius:14px; padding:2rem; text-align:center; margin:2rem 0; }
 .key-metric .big { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:700; color:var(--gold); }
-.key-metric .desc { color:#bbb; font-size:1rem; margin-top:.5rem; }
+.key-metric .desc { color:var(--text-muted); font-size:1rem; margin-top:.5rem; }
 
 /* Footer */
-.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:#555; font-size:.85rem; }
+.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:var(--text-dim); font-size:.85rem; }
 
 /* Interactive */
 .calc-row { display:flex; align-items:center; gap:1rem; margin:.75rem 0; flex-wrap:wrap; }
-.calc-row label { color:#bbb; font-size:.9rem; min-width:180px; }
+.calc-row label { color:var(--text-muted); font-size:.9rem; min-width:180px; }
 .calc-row input[type=range] { flex:1; accent-color:var(--gold); }
 .calc-row .val { color:var(--gold); font-weight:600; min-width:60px; text-align:right; }
 #result-box { margin-top:1.5rem; }
@@ -122,7 +122,7 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><td>Starter</td><td>22€</td><td class="num">5</td><td class="num">90€</td><td class="num">3.8%</td></tr>
     <tr><td>Enterprise</td><td>189€</td><td class="num">1</td><td class="num">189€</td><td class="num">7.9%</td></tr>
     <tr><td>Micro</td><td>10€</td><td class="num">1</td><td class="num">8€</td><td class="num">0.3%</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td></td><td class="num">91</td><td class="num highlight">2.380€</td><td class="num">100%</td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO</td><td></td><td class="num">91</td><td class="num highlight">2.380€</td><td class="num">100%</td></tr>
   </table>
 
   <div class="subsection">
@@ -131,7 +131,7 @@ tr:hover { background:rgba(201,168,76,.03); }
       <div class="progress-label"><span>Konverzija: 15.4% (14/91)</span><span class="highlight">Industrija: 2-5%</span></div>
       <div class="progress-bar"><div class="progress-fill" style="width:15.4%;background:var(--green)"></div></div>
     </div>
-    <p style="color:#888;font-size:.85rem;margin-top:.5rem">Naša konverzija je 3-7x iznad prosjeka industrije. Distributor plan dominira MRR-om (87.9%).</p>
+    <p class="fx-text-muted fx-fs-base mt-2">Naša konverzija je 3-7x iznad prosjeka industrije. Distributor plan dominira MRR-om (87.9%).</p>
   </div>
 </div>
 
@@ -149,14 +149,14 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><td>Backup / monitoring</td><td>Automatski DB dump + Sentry</td><td class="num">15€</td></tr>
     <tr><td>Sentry (error tracking)</td><td>Developer plan</td><td class="num">0€</td></tr>
     <tr><td>Redis</td><td>Lokalni (na serveru)</td><td class="num">0€</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO infrastruktura</td><td></td><td class="num highlight">~45€</td></tr>
-    <tr><td colspan="3" style="border:none;height:8px"></td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO infrastruktura</td><td></td><td class="num highlight">~45€</td></tr>
+    <tr><td colspan="3" class="fx-border-none" style="height:8px"></td></tr>
     <tr><td>Claude Code (razvoj)</td><td>AI asistent za razvoj</td><td class="num">~200€</td></tr>
     <tr><td>Rad osnivača (2 osobe)</td><td>Opportunity cost (neplaćeno)</td><td class="num red">0€*</td></tr>
-    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO operativno</td><td></td><td class="num highlight">~245€</td></tr>
+    <tr class="fx-fw-bold" style="border-top:2px solid var(--gold)"><td>UKUPNO operativno</td><td></td><td class="num highlight">~245€</td></tr>
   </table>
 
-  <p style="color:#666;font-size:.8rem;margin-top:.5rem">* Rad osnivača se ne vrednuje u fazi 1 (bootstrapping). Pri skaliranju treba uračunati ~2×3.000€/mj.</p>
+  <p class="fx-text-dim fx-fs-compact mt-2">* Rad osnivača se ne vrednuje u fazi 1 (bootstrapping). Pri skaliranju treba uračunati ~2×3.000€/mj.</p>
 </div>
 
 <!-- 3. BREAK-EVEN SCENARIJ A -->
@@ -185,9 +185,9 @@ tr:hover { background:rgba(201,168,76,.03); }
       <tr><td>MRR</td><td class="num highlight">2.380€</td><td class="num highlight">2.550€</td><td class="num highlight">4.125€</td><td class="num highlight">10.125€</td></tr>
       <tr><td>ARR</td><td class="num">28.560€</td><td class="num">30.600€</td><td class="num">49.500€</td><td class="num green">121.500€</td></tr>
       <tr><td>Troškovi/mj</td><td class="num">245€</td><td class="num">350€</td><td class="num">600€</td><td class="num">1.200€</td></tr>
-      <tr style="font-weight:700"><td>Neto/mj</td><td class="num green">+2.135€</td><td class="num green">+2.200€</td><td class="num green">+3.525€</td><td class="num green">+8.925€</td></tr>
+      <tr class="fx-fw-bold"><td>Neto/mj</td><td class="num green">+2.135€</td><td class="num green">+2.200€</td><td class="num green">+3.525€</td><td class="num green">+8.925€</td></tr>
     </table>
-    <p style="color:#888;font-size:.85rem;margin-top:.5rem">Avg. cijena pada jer rast dolazi pretežno iz manjih planova (Starter, Micro). Troškovi rastu zbog servera, podrške.</p>
+    <p class="fx-text-muted fx-fs-base mt-2">Avg. cijena pada jer rast dolazi pretežno iz manjih planova (Starter, Micro). Troškovi rastu zbog servera, podrške.</p>
   </div>
 </div>
 
@@ -198,7 +198,7 @@ tr:hover { background:rgba(201,168,76,.03); }
   <div class="scenario gold">
     <h3>Što je digitalni posrednik?</h3>
     <p>Certificirani posrednik za razmjenu e-Računa putem <strong>Peppol mreže</strong> (pan-europski standard). FINA je trenutno jedini certificirani posrednik u HR. Postati posrednik znači:</p>
-    <ul style="margin:.75rem 0 0 1rem;color:#bbb;font-size:.9rem;line-height:2">
+    <ul class="fx-fs-md fx-text-muted" style="margin:.75rem 0 0 1rem;line-height:2">
       <li><strong>Zakonska obaveza:</strong> Od 2026. svi B2G računi moraju ići kroz Peppol. B2B slijedi 2027-2028.</li>
       <li><strong>Transakcijska naknada:</strong> 0.20-0.50€ po poslanom/primljenom e-Računu</li>
       <li><strong>Recurring revenue:</strong> Svaka faktura = prihod. Automatski, bez prodaje.</li>
@@ -243,13 +243,13 @@ tr:hover { background:rgba(201,168,76,.03); }
       <tr><td>Certifikacija (jednokratno)</td><td class="num">5.000€</td><td class="num">7.500€</td><td class="num">10.000€</td></tr>
       <tr><td>Dodatni server (HA)</td><td class="num">30€/mj</td><td class="num">50€/mj</td><td class="num">80€/mj</td></tr>
       <tr><td>Compliance / revizija</td><td class="num">500€/god</td><td class="num">1.000€/god</td><td class="num">2.000€/god</td></tr>
-      <tr><td colspan="4" style="border:none;height:8px;background:var(--border)"></td></tr>
+      <tr><td colspan="4" class="fx-border-none" style="height:8px;background:var(--border)"></td></tr>
       <tr><td>Korisnici posrednika (12 mj)</td><td class="num">100 tvrtki</td><td class="num">300 tvrtki</td><td class="num">800 tvrtki</td></tr>
       <tr><td>Avg. računa/mj po tvrtki</td><td class="num">20</td><td class="num">35</td><td class="num">50</td></tr>
       <tr><td>Ukupno računa/mj</td><td class="num">2.000</td><td class="num">10.500</td><td class="num">40.000</td></tr>
       <tr><td>Naknada po računu</td><td class="num">0.25€</td><td class="num">0.30€</td><td class="num">0.35€</td></tr>
-      <tr style="font-weight:700;color:var(--green)"><td>MRR od posredništva</td><td class="num">500€</td><td class="num">3.150€</td><td class="num">14.000€</td></tr>
-      <tr style="font-weight:700;color:var(--gold)"><td>ARR od posredništva</td><td class="num">6.000€</td><td class="num">37.800€</td><td class="num">168.000€</td></tr>
+      <tr class="fx-fw-bold fx-text-green"><td>MRR od posredništva</td><td class="num">500€</td><td class="num">3.150€</td><td class="num">14.000€</td></tr>
+      <tr class="fx-fw-bold fx-text-gold"><td>ARR od posredništva</td><td class="num">6.000€</td><td class="num">37.800€</td><td class="num">168.000€</td></tr>
       <tr><td>ROI certifikacije</td><td class="num">12 mj</td><td class="num">3 mj</td><td class="num">1 mj</td></tr>
     </table>
   </div>
@@ -268,13 +268,13 @@ tr:hover { background:rgba(201,168,76,.03); }
     <tr><th>Metrika</th><th class="num">Danas</th><th class="num">+12 mj (SaaS)</th><th class="num">+12 mj (SaaS+Posrednik)</th><th class="num">Razlika</th></tr>
     <tr><td>MRR SaaS</td><td class="num">2.380€</td><td class="num">4.125€</td><td class="num">4.125€</td><td class="num">—</td></tr>
     <tr><td>MRR Posrednik</td><td class="num">0€</td><td class="num">0€</td><td class="num green">3.150€</td><td class="num green">+3.150€</td></tr>
-    <tr style="font-weight:700"><td>MRR ukupno</td><td class="num">2.380€</td><td class="num">4.125€</td><td class="num highlight">7.275€</td><td class="num green">+76%</td></tr>
-    <tr style="font-weight:700"><td>ARR ukupno</td><td class="num">28.560€</td><td class="num">49.500€</td><td class="num highlight">87.300€</td><td class="num green">+76%</td></tr>
+    <tr class="fx-fw-bold"><td>MRR ukupno</td><td class="num">2.380€</td><td class="num">4.125€</td><td class="num highlight">7.275€</td><td class="num green">+76%</td></tr>
+    <tr class="fx-fw-bold"><td>ARR ukupno</td><td class="num">28.560€</td><td class="num">49.500€</td><td class="num highlight">87.300€</td><td class="num green">+76%</td></tr>
     <tr><td>Troškovi/mj</td><td class="num">245€</td><td class="num">600€</td><td class="num">750€</td><td class="num red">+150€</td></tr>
-    <tr style="font-weight:700"><td>Neto profit/mj</td><td class="num green">+2.135€</td><td class="num green">+3.525€</td><td class="num green">+6.525€</td><td class="num green">+85%</td></tr>
+    <tr class="fx-fw-bold"><td>Neto profit/mj</td><td class="num green">+2.135€</td><td class="num green">+3.525€</td><td class="num green">+6.525€</td><td class="num green">+85%</td></tr>
   </table>
 
-  <div class="card-grid" style="margin-top:1.5rem">
+  <div class="card-grid fx-mt-6">
     <div class="card special">
       <div class="num-big">+85%</div>
       <div class="label">Više profita s posrednikom</div>
@@ -299,29 +299,29 @@ tr:hover { background:rgba(201,168,76,.03); }
   <h2 class="section-title">6. Strateške dobrobiti digitalnog posrednika</h2>
 
   <div class="card-grid">
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">1. Regulatorni moat</h3>
-      <p style="font-size:.88rem">Certifikacija je barijera ulaska. Konkurencija ne može postati posrednik "sutra" — treba 3-6 mjeseci i audit. Svaka nova tvrtka koja koristi vaš Peppol endpoint je locked-in.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">1. Regulatorni moat</h3>
+      <p class="fx-fs-body">Certifikacija je barijera ulaska. Konkurencija ne može postati posrednik "sutra" — treba 3-6 mjeseci i audit. Svaka nova tvrtka koja koristi vaš Peppol endpoint je locked-in.</p>
     </div>
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">2. Transakcijski prihod</h3>
-      <p style="font-size:.88rem">Za razliku od SaaS-a (fiksni €/mj), posrednički prihod raste s volumenom. Više računa = više prihoda, bez dodavanja featurea ili podrške.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">2. Transakcijski prihod</h3>
+      <p class="fx-fs-body">Za razliku od SaaS-a (fiksni €/mj), posrednički prihod raste s volumenom. Više računa = više prihoda, bez dodavanja featurea ili podrške.</p>
     </div>
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">3. Cross-sell pipeline</h3>
-      <p style="font-size:.88rem">Tvrtka počne kao korisnik e-Račun posrednika → vidi ERP → konvertira u plaćajućeg SaaS korisnika. Posrednik postaje top-of-funnel.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">3. Cross-sell pipeline</h3>
+      <p class="fx-fs-body">Tvrtka počne kao korisnik e-Račun posrednika → vidi ERP → konvertira u plaćajućeg SaaS korisnika. Posrednik postaje top-of-funnel.</p>
     </div>
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">4. B2B obaveza 2027+</h3>
-      <p style="font-size:.88rem">EU Direktiva ViDA (VAT in the Digital Age) propisuje obavezno e-fakturiranje. HR implementacija 2027-2028. Tko je posrednik prije toga — ima first-mover advantage.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">4. B2B obaveza 2027+</h3>
+      <p class="fx-fs-body">EU Direktiva ViDA (VAT in the Digital Age) propisuje obavezno e-fakturiranje. HR implementacija 2027-2028. Tko je posrednik prije toga — ima first-mover advantage.</p>
     </div>
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">5. Premium pozicioniranje</h3>
-      <p style="font-size:.88rem">"FINA certificirani posrednik" na landing page-u odmah podiže perceived value. Računovođe i veće firme biraju certificirane partnere.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">5. Premium pozicioniranje</h3>
+      <p class="fx-fs-body">"FINA certificirani posrednik" na landing page-u odmah podiže perceived value. Računovođe i veće firme biraju certificirane partnere.</p>
     </div>
-    <div class="scenario" style="margin:0">
-      <h3 style="font-size:1rem">6. Podatkovni flywheel</h3>
-      <p style="font-size:.88rem">Svaki račun koji prođe kroz sustav = podatak. Agregirana analitika (anonimizirana) o industrijama, sezonalnosti, trendovima — premium feature za Enterprise korisnike.</p>
+    <div class="scenario fx-m-0">
+      <h3 class="fx-fs-lg">6. Podatkovni flywheel</h3>
+      <p class="fx-fs-body">Svaki račun koji prođe kroz sustav = podatak. Agregirana analitika (anonimizirana) o industrijama, sezonalnosti, trendovima — premium feature za Enterprise korisnike.</p>
     </div>
   </div>
 </div>
@@ -369,7 +369,7 @@ tr:hover { background:rgba(201,168,76,.03); }
         <div class="card special"><div class="num-big" id="rTotal">7.275€</div><div class="label">MRR Ukupno</div></div>
         <div class="card positive"><div class="num-big" id="rProfit">+6.675€</div><div class="label">Neto profit/mj</div></div>
       </div>
-      <div class="card-grid" style="margin-top:.75rem">
+      <div class="card-grid fx-mt-4">
         <div class="card"><div class="num-big" id="rArr">87.300€</div><div class="label">Projektirani ARR</div></div>
         <div class="card"><div class="num-big" id="rMargin">92%</div><div class="label">Profit margina</div></div>
       </div>
@@ -384,16 +384,16 @@ tr:hover { background:rgba(201,168,76,.03); }
     <h3>Faza 1 (sada — Q2 2026): Koristiti FINA kao posrednika</h3>
     <p>Integracija je gotova (PosrednikClient). Trošak: ~0.15€/račun. Fokus na akviziciju korisnika.</p>
 
-    <h3 style="margin-top:1.5rem">Faza 2 (Q3-Q4 2026): Pokrenuti certifikaciju</h3>
+    <h3 class="fx-mt-6">Faza 2 (Q3-Q4 2026): Pokrenuti certifikaciju</h3>
     <p>Kad baza prijeđe 200 tvrtki i 5.000 računa/mj — isplativo postati posrednik. Investicija: 7.500€. ROI: 3-6 mjeseci.</p>
 
-    <h3 style="margin-top:1.5rem">Faza 3 (2027+): Full posrednik + ViDA compliance</h3>
+    <h3 class="fx-mt-6">Faza 3 (2027+): Full posrednik + ViDA compliance</h3>
     <p>EU obavezno B2B e-fakturiranje. First-mover advantage. Ciljani ARR: 150.000€+.</p>
   </div>
 
   <div class="key-metric" style="margin-top:2rem">
     <div class="big" style="font-size:2.2rem">Minimumi za isplativost</div>
-    <table style="max-width:600px;margin:1.5rem auto 0;text-align:left">
+    <table class="text-start" style="max-width:600px;margin:1.5rem auto 0">
       <tr><th>Model</th><th class="num">Min. korisnika</th><th class="num">Min. MRR</th></tr>
       <tr><td>Samo infrastruktura (45€/mj)</td><td class="num highlight">2 × Starter</td><td class="num">44€</td></tr>
       <tr><td>Infra + Claude Code (245€/mj)</td><td class="num highlight">7 × avg 35€</td><td class="num">245€</td></tr>
@@ -405,7 +405,7 @@ tr:hover { background:rgba(201,168,76,.03); }
 
 <div class="footer">
   <p>&copy; 2026 LIMIT Connect &middot; Konjik d.o.o. &middot; Interno — Povjerljivo</p>
-  <p style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:.5rem">Bez papira. Bez brige. Bez granica.</p>
+  <p class="fx-text-gold mt-2" style="font-family:'Cormorant Garamond',serif;font-style:italic">Bez papira. Bez brige. Bez granica.</p>
 </div>
 
 </div>

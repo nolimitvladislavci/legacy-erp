@@ -5,20 +5,20 @@
 {% block extra_css %}
 <style>
 .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
-.room-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;text-align:center}
-.room-card .number{font-size:1.5rem;font-weight:700;color:#c8a24e;font-family:"Cormorant Garamond",serif}
-.room-card .type{font-size:.8rem;color:#888;margin-top:.2rem}
-.room-card .occupancy{margin-top:.5rem;font-size:.9rem;color:#f0e6d3}
-.occ-bar{height:6px;background:#16213e;border-radius:3px;overflow:hidden;margin-top:.5rem}
+.room-card{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;text-align:center}
+.room-card .number{font-size:1.5rem;font-weight:700;color:var(--gold);font-family:"Cormorant Garamond",serif}
+.room-card .type{font-size:.8rem;color:var(--text-dim);margin-top:.2rem}
+.room-card .occupancy{margin-top:.5rem;font-size:.9rem;color:var(--text)}
+.occ-bar{height:6px;background:var(--surface-deep);border-radius:3px;overflow:hidden;margin-top:.5rem}
 .occ-fill{height:100%;border-radius:3px;transition:width .3s}
-.occ-fill.full{background:#ef4444}
+.occ-fill.full{background:var(--red)}
 .occ-fill.partial{background:linear-gradient(90deg,#22c55e,#c8a24e)}
-.occ-fill.empty{background:#22c55e}
-.room-card .price{font-size:.85rem;color:#888;margin-top:.5rem}
+.occ-fill.empty{background:var(--green)}
+.room-card .price{font-size:.85rem;color:var(--text-dim);margin-top:.5rem}
 </style>
 {% endblock %}
 {% block content %}
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-door-open"></i> Sobe</h2>
+<h2 class="fx-text-gold mb-3" style="font-family:Cormorant Garamond,serif"><i class="bi bi-door-open"></i> Sobe</h2>
 
 <div class="room-grid">
   {% for r in rooms %}
@@ -33,7 +33,7 @@
     <div class="price">{{ r.monthly_price }} EUR/mj</div>
   </div>
   {% empty %}
-  <p style="color:#666;grid-column:1/-1;text-align:center;padding:2rem">Nema soba. Kreirajte sobe u admin panelu.</p>
+  <p class="fx-text-dim text-center fx-p-6 fx-col-full">Nema soba. Kreirajte sobe u admin panelu.</p>
   {% endfor %}
 </div>
 {% endblock %}

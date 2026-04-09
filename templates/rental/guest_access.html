@@ -18,7 +18,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .info-card h3{font-size:.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem}
 .info-item{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.85rem}
 .info-item .label{color:var(--muted)}
-.expired{background:#1a0a0a;border-color:var(--red)}
+.expired{background:var(--surface-deep);border-color:var(--red)}
 .expired .access-code{color:var(--red)}
 </style>
 </head><body>
@@ -31,13 +31,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 <div class="access-card">
   <div class="access-label">Kod za vrata</div>
   <div class="access-code">{{ booking.access_code }}</div>
-  <div style="font-size:.7rem;color:var(--muted)">Vrijedi do {{ booking.check_out|date:"d.m.Y" }} 12:00</div>
+  <div class="fx-fs-sm fx-text-muted">Vrijedi do {{ booking.check_out|date:"d.m.Y" }} 12:00</div>
 </div>
 {% else %}
 <div class="access-card expired">
   <div class="access-label">Pristup istekao</div>
   <div class="access-code">------</div>
-  <div style="font-size:.7rem;color:var(--red)">Check-out je zavrsen</div>
+  <div class="fx-fs-sm fx-text-red">Check-out je zavrsen</div>
 </div>
 {% endif %}
 
@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 <div class="info-card">
   <h3>&#128246; WiFi</h3>
   <div class="info-item"><span class="label">Mreza</span><span>{{ booking.rental_property.wifi_name }}</span></div>
-  <div class="info-item"><span class="label">Lozinka</span><span style="font-family:monospace;color:var(--gold)">{{ booking.rental_property.wifi_password }}</span></div>
+  <div class="info-item"><span class="label">Lozinka</span><span class="fx-text-gold fx-font-mono">{{ booking.rental_property.wifi_password }}</span></div>
 </div>
 {% endif %}
 
@@ -55,12 +55,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
   <div class="info-item"><span class="label">Check-in</span><span>{{ booking.check_in|date:"d.m.Y" }}</span></div>
   <div class="info-item"><span class="label">Check-out</span><span>{{ booking.check_out|date:"d.m.Y" }}</span></div>
   <div class="info-item"><span class="label">Noci</span><span>{{ booking.total_nights }}</span></div>
-  <div class="info-item"><span class="label">Ukupno</span><span style="color:var(--gold);font-weight:700">&euro;{{ booking.total_price|floatformat:2 }}</span></div>
+  <div class="info-item"><span class="label">Ukupno</span><span class="fx-fw-bold fx-text-gold">&euro;{{ booking.total_price|floatformat:2 }}</span></div>
 </div>
 
 <div class="info-card">
   <h3>&#128214; Pravila</h3>
-  <div style="font-size:.8rem;color:var(--muted);line-height:1.6">
+  <div class="fx-fs-compact fx-text-muted fx-lh-normal">
     &#8226; Check-out do 12:00<br>
     &#8226; Tisina od 22:00 do 07:00<br>
     &#8226; Zabranjeno pusenje u sobi<br>
@@ -69,6 +69,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 </div>
 
 {% if not booking.is_paid %}
-<a href="{% url 'rental:guest_pay' booking.access_qr %}" style="display:block;background:var(--gold);color:#000;text-align:center;padding:.8rem;border-radius:10px;font-weight:700;text-decoration:none;margin-top:1rem">&#128179; Plati online</a>
+<a href="{% url 'rental:guest_pay' booking.access_qr %}" class="fx-text-dark text-center fx-rounded fx-fw-bold fx-no-underline d-block mt-3 fx-bg-gold" style="padding:.8rem">&#128179; Plati online</a>
 {% endif %}
 </body></html>

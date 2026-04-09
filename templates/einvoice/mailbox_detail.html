@@ -4,15 +4,15 @@
 
 {% block content %}
 <style>
-.ai-panel{background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px}
+.ai-panel{background:linear-gradient(135deg,#0f172a,#1e293b);color:var(--text);border-radius:12px;padding:20px;margin-bottom:20px}
 .ai-panel h5{color:var(--gold);margin-bottom:12px}
 .ai-conf-big{font-size:2rem;font-weight:800;display:inline-flex;align-items:center;gap:8px}
-.ai-conf-big.high{color:#22c55e}
-.ai-conf-big.mid{color:#f59e0b}
-.ai-conf-big.low{color:#ef4444}
+.ai-conf-big.high{color:var(--green)}
+.ai-conf-big.mid{color:var(--amber)}
+.ai-conf-big.low{color:var(--red)}
 .ai-suggestion{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
 .ai-suggestion .item{background:rgba(255,255,255,.05);padding:10px;border-radius:8px}
-.ai-suggestion .item .label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8}
+.ai-suggestion .item .label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
 .ai-suggestion .item .value{font-size:1rem;font-weight:700;margin-top:2px}
 .detail-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
 .detail-card .header{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem}
@@ -25,11 +25,11 @@
 .event-dot{position:absolute;left:3px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg-card)}
 .event-item{position:relative;padding-bottom:12px}
 .sm-status{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
-.sm-status.PENDING,.sm-status.AUTO{background:#fef3c7;color:#92400e}
-.sm-status.BOOKED{background:#dcfce7;color:#166534}
-.sm-status.APPROVED{background:#dbeafe;color:#1e40af}
-.sm-status.REJECTED{background:#fef2f2;color:#991b1b}
-.sm-status.DUPLICATE{background:#f3e8ff;color:#7c3aed}
+.sm-status.PENDING,.sm-status.AUTO{background:var(--amber-dim);color:var(--amber)}
+.sm-status.BOOKED{background:var(--green-dim);color:var(--green)}
+.sm-status.APPROVED{background:var(--blue-dim);color:var(--blue)}
+.sm-status.REJECTED{background:var(--red-dim);color:var(--red)}
+.sm-status.DUPLICATE{background:#f3e8ff;color:var(--purple)}
 @media(max-width:768px){
   .ai-panel{padding:14px}
   .ai-conf-big{font-size:1.4rem}
@@ -40,13 +40,13 @@
 }
 </style>
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+<div class="d-flex fx-gap-3 fx-flex-wrap align-items-center mb-3">
   <div>
-    <div style="font-weight:700;font-size:1.1rem;color:var(--text)">
+    <div class="fx-fw-bold fx-fs-xl fx-text-body">
       URA {{ inbound.invoice_number }}
       <span class="sm-status {{ inbound.status }}" style="margin-left:8px">{{ inbound.get_status_display }}</span>
     </div>
-    <div style="font-size:.75rem;color:var(--text-muted)">{{ inbound.supplier_name }} | {{ inbound.issue_date|date:"d.m.Y" }}</div>
+    <div class="fx-fs-caption fx-text-muted">{{ inbound.supplier_name }} | {{ inbound.issue_date|date:"d.m.Y" }}</div>
   </div>
   <div class="ms-auto d-flex gap-2">
     {% if inbound.status == "AUTO" or inbound.status == "PENDING" %}
@@ -64,22 +64,22 @@
 <!-- AI Classification Panel -->
 <div class="ai-panel">
   <h5><i class="fas fa-brain"></i> AI Klasifikacija</h5>
-  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+  <div class="d-flex fx-gap-5 fx-flex-wrap align-items-center">
     <div>
       <div class="ai-conf-big {% if inbound.classification_confidence >= 0.8 %}high{% elif inbound.classification_confidence >= 0.4 %}mid{% else %}low{% endif %}">
         {% widthratio inbound.classification_confidence 1 100 %}%
       </div>
-      <div style="font-size:.7rem;color:#94a3b8">Pouzdanost klasifikacije</div>
+      <div class="fx-fs-sm fx-text-dim">Pouzdanost klasifikacije</div>
     </div>
-    <div style="flex:1;font-size:.82rem;color:#cbd5e1">
+    <div class="fx-fs-note fx-text-dim fx-flex-1">
       {{ inbound.classification_reason }}
     </div>
   </div>
   <div class="ai-suggestion">
     <div class="item">
       <div class="label">Predlozeni konto</div>
-      <div class="value" style="font-family:monospace">{{ inbound.suggested_konto|default:"—" }}</div>
-      <div style="font-size:.7rem;color:#94a3b8">{{ inbound.suggested_konto_name }}</div>
+      <div class="value fx-font-mono">{{ inbound.suggested_konto|default:"—" }}</div>
+      <div class="fx-fs-sm fx-text-dim">{{ inbound.suggested_konto_name }}</div>
     </div>
     <div class="item">
       <div class="label">PDV tretman</div>
@@ -91,7 +91,7 @@
     </div>
     <div class="item">
       <div class="label">Ukupno</div>
-      <div class="value" style="color:#22c55e">&euro;{{ inbound.gross_amount|floatformat:2 }}</div>
+      <div class="value fx-text-green">&euro;{{ inbound.gross_amount|floatformat:2 }}</div>
     </div>
   </div>
 </div>
@@ -105,15 +105,15 @@
       {% csrf_token %}
       <div class="row g-3">
         <div class="col-md-3">
-          <label class="form-label" style="font-size:.75rem">Konto</label>
+          <label class="form-label fx-fs-caption">Konto</label>
           <input type="text" name="konto" class="form-control" value="{{ inbound.suggested_konto }}" placeholder="4010" required>
         </div>
         <div class="col-md-3">
-          <label class="form-label" style="font-size:.75rem">Troskovno mjesto</label>
+          <label class="form-label fx-fs-caption">Troskovno mjesto</label>
           <input type="text" name="cost_center" class="form-control" value="{{ inbound.suggested_cost_center }}" placeholder="Opcionalno">
         </div>
         <div class="col-md-4">
-          <label class="form-label" style="font-size:.75rem">Biljeske</label>
+          <label class="form-label fx-fs-caption">Biljeske</label>
           <input type="text" name="notes" class="form-control" placeholder="Opcionalno">
         </div>
         <div class="col-md-2 d-flex align-items-end">
@@ -129,10 +129,10 @@
 {% if inbound.status == "BOOKED" %}
 <div class="detail-card" style="border-left:4px solid #22c55e">
   <div class="body">
-    <strong style="color:#166534"><i class="fas fa-check-circle"></i> Proknjizeno</strong>
-    <span class="ms-2">Konto: <span style="font-family:monospace;font-weight:700">{{ inbound.final_konto }}</span></span>
+    <strong class="fx-text-green"><i class="fas fa-check-circle"></i> Proknjizeno</strong>
+    <span class="ms-2">Konto: <span class="fx-fw-bold fx-font-mono">{{ inbound.final_konto }}</span></span>
     {% if inbound.final_cost_center %}<span class="ms-2">TM: {{ inbound.final_cost_center }}</span>{% endif %}
-    <span class="ms-2" style="color:var(--text-muted)">{{ inbound.approved_by }} | {{ inbound.approved_at|date:"d.m.Y H:i" }}</span>
+    <span class="ms-2 fx-text-muted">{{ inbound.approved_by }} | {{ inbound.approved_at|date:"d.m.Y H:i" }}</span>
   </div>
 </div>
 {% endif %}
@@ -144,8 +144,8 @@
       <div class="header">Dobavljac</div>
       <div class="body">
         <p class="fw-bold mb-1">{{ inbound.supplier_name }}</p>
-        <p class="mb-1" style="font-size:.82rem">OIB: {{ inbound.supplier_tax_id }}</p>
-        {% if inbound.supplier_address %}<p class="mb-0" style="font-size:.82rem">{{ inbound.supplier_address }}</p>{% endif %}
+        <p class="mb-1 fx-fs-note">OIB: {{ inbound.supplier_tax_id }}</p>
+        {% if inbound.supplier_address %}<p class="mb-0 fx-fs-note">{{ inbound.supplier_address }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -153,7 +153,7 @@
   <div class="col-md-6">
     <div class="detail-card">
       <div class="header">Dokument</div>
-      <div class="body" style="font-size:.82rem">
+      <div class="body fx-fs-note">
         <p class="mb-1">Broj: <strong>{{ inbound.invoice_number }}</strong></p>
         <p class="mb-1">Datum: {{ inbound.issue_date|date:"d.m.Y" }}</p>
         {% if inbound.due_date %}<p class="mb-1">Rok placanja: {{ inbound.due_date|date:"d.m.Y" }}</p>{% endif %}
@@ -219,12 +219,12 @@
     <div class="event-timeline">
       {% for event in events %}
       <div class="event-item">
-        <div class="event-dot" {% if event.to_status == "BOOKED" or event.to_status == "DELIVERED" %}style="background:#22c55e"{% elif event.to_status == "SEND_FAIL" or event.to_status == "REJECTED" %}style="background:#ef4444"{% endif %}></div>
-        <div style="font-size:.78rem">
+        <div class="event-dot fx-bg-green" {% if event.to_status == "BOOKED" or event.to_status == "DELIVERED" %}{% elif event.to_status == "SEND_FAIL" or event.to_status == "REJECTED" %}{% endif %}></div>
+        <div class="fx-fs-body-sm">
           <strong>{{ event.from_status }} → {{ event.to_status }}</strong>
-          <span style="color:var(--text-muted);margin-left:8px">{{ event.created_at|date:"d.m.Y H:i:s" }}</span>
+          <span class="fx-text-muted" style="margin-left:8px">{{ event.created_at|date:"d.m.Y H:i:s" }}</span>
         </div>
-        {% if event.detail %}<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">{{ event.detail|truncatechars:200 }}</div>{% endif %}
+        {% if event.detail %}<div class="fx-fs-sm fx-text-muted fx-mt-1">{{ event.detail|truncatechars:200 }}</div>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -236,8 +236,8 @@
 {% if inbound.as4_message.archive_sha256 %}
 <div class="detail-card">
   <div class="header"><i class="fas fa-shield-alt"></i> Arhivski integritet</div>
-  <div class="body" style="font-size:.78rem">
-    <p class="mb-1">SHA-256: <code style="font-size:.72rem">{{ inbound.as4_message.archive_sha256 }}</code></p>
+  <div class="body fx-fs-body-sm">
+    <p class="mb-1">SHA-256: <code class="fx-fs-sm">{{ inbound.as4_message.archive_sha256 }}</code></p>
     <a href="/api/einvoice/archive/verify/{{ inbound.as4_message.archive_sha256 }}/" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-check-double"></i> Verificiraj integritet</a>
   </div>
 </div>

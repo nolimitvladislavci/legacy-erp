@@ -8,36 +8,36 @@
 <style>
 :root{--gold: #c9a84c;--black:#0a0a0a;--green:#16a34a}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f8fafc;color:#1e293b;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:var(--surface2);color:#1e293b;font-family:'Segoe UI',system-ui,sans-serif}
 .top-bar{background:var(--black);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .top-bar .brand{color:var(--gold);font-weight:700;font-size:.9rem}
-.top-bar .cta{background:var(--gold);color:#000;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.82rem}
+.top-bar .cta{background:var(--gold);color:var(--text);padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.82rem}
 .container{max-width:700px;margin:0 auto;padding:2rem 1.5rem}
-.invoice-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.invoice-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
-.inv-from h2{font-size:1.2rem;color:#0f172a;margin-bottom:.3rem}
-.inv-from p{font-size:.82rem;color:#64748b}
+.inv-from h2{font-size:1.2rem;color:var(--text);margin-bottom:.3rem}
+.inv-from p{font-size:.82rem;color:var(--text-dim)}
 .inv-number{text-align:right}
 .inv-number .num{font-size:1.3rem;font-weight:700;color:var(--gold)}
-.inv-number .date{font-size:.82rem;color:#64748b}
-.inv-to{background:#f1f5f9;padding:1rem;border-radius:8px;margin-bottom:1.5rem}
-.inv-to .label{font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.inv-number .date{font-size:.82rem;color:var(--text-dim)}
+.inv-to{background:var(--surface3);padding:1rem;border-radius:8px;margin-bottom:1.5rem}
+.inv-to .label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
 .inv-to .name{font-size:1rem;font-weight:600}
 .inv-total{text-align:center;padding:1.5rem;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:10px;margin:1.5rem 0}
 .inv-total .amount{font-size:2rem;font-weight:700;color:var(--gold)}
-.inv-total .label{font-size:.75rem;color:#94a3b8}
+.inv-total .label{font-size:.75rem;color:var(--text-muted)}
 .download-btns{display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
 .dl-btn{flex:1;min-width:120px;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:700;font-size:.85rem}
-.dl-btn.pdf{background:#dc2626;color:#fff}
-.dl-btn.xml{background:#2563eb;color:#fff}
-.dl-btn.zugferd{background:#7c3aed;color:#fff}
+.dl-btn.pdf{background:var(--red);color:var(--white)}
+.dl-btn.xml{background:#2563eb;color:var(--white)}
+.dl-btn.zugferd{background:#7c3aed;color:var(--white)}
 .viral-box{background:linear-gradient(135deg,#0a0a0a,#1a1200);border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:2rem;text-align:center;margin-top:2rem}
 .viral-box h3{color:var(--gold);font-size:1.1rem;margin-bottom:.5rem}
-.viral-box p{color:#94a3b8;font-size:.88rem;margin-bottom:1rem;line-height:1.6}
-.viral-btn{display:inline-block;background:var(--gold);color:#000;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:.95rem}
+.viral-box p{color:var(--text-muted);font-size:.88rem;margin-bottom:1rem;line-height:1.6}
+.viral-btn{display:inline-block;background:var(--gold);color:var(--text);padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:.95rem}
 .viral-features{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1rem}
 .viral-feat{background:rgba(201,168,76,.1);color:var(--gold);padding:4px 10px;border-radius:20px;font-size:.72rem}
-.footer{text-align:center;padding:1.5rem;color:#94a3b8;font-size:.75rem}
+.footer{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.75rem}
 @media(max-width:600px){.inv-header{flex-direction:column}.inv-number{text-align:left}.dl-btn{min-width:100%}}
 </style>
 </head>
@@ -64,13 +64,13 @@ body{background:#f8fafc;color:#1e293b;font-family:'Segoe UI',system-ui,sans-seri
     <div class="inv-to">
       <div class="label">Primatelj</div>
       <div class="name">{{ eracun.recipient_name }}</div>
-      <p style="font-size:.82rem;color:#64748b">OIB: {{ eracun.recipient_oib }}</p>
+      <p class="fx-fs-note fx-text-muted">OIB: {{ eracun.recipient_oib }}</p>
     </div>
 
     <div class="inv-total">
       <div class="label">UKUPNO</div>
       <div class="amount">{{ eracun.total|floatformat:2 }} EUR</div>
-      <div class="label" style="margin-top:.3rem">PDV: {{ eracun.tax_amount|floatformat:2 }} EUR</div>
+      <div class="label fx-mt-sm">PDV: {{ eracun.tax_amount|floatformat:2 }} EUR</div>
     </div>
 
     <div class="download-btns">
@@ -97,13 +97,13 @@ body{background:#f8fafc;color:#1e293b;font-family:'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
-<div class="footer" style="padding:12px 20px;border-top:1px solid #222;font-size:11px;color:#666;display:flex;justify-content:space-between;align-items:center">
+<div class="footer fx-text-dim d-flex justify-content-between align-items-center" style="padding:12px 20px;border-top:1px solid #222;font-size:11px">
   <div>
-    Izrađeno u <strong style="color:var(--gold,#c9a84c)">LIMIT Connect</strong> &mdash; limit-connect.com<br>
+    Izrađeno u <strong class="fx-text-gold">LIMIT Connect</strong> &mdash; limit-connect.com<br>
     <span style="font-size:9px">Kriptografski zaštićeno (SHA-256 Hash Chain) &bull; EU ViDA 2028 &bull; EN 16931</span>
   </div>
-  <div style="text-align:right">
-    <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c);text-decoration:none;font-size:10px">
+  <div class="text-end">
+    <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold" style="font-size:10px">
       Besplatna e-Faktura za vaš obrt &rarr;
     </a>
   </div>

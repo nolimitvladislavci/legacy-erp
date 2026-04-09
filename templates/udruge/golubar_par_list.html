@@ -46,7 +46,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 1.1rem; margin-bottom: .4rem;
 }
-.par-bird-m .par-bird-icon { background: rgba(59,130,246,.12); color: #60a5fa; }
+.par-bird-m .par-bird-icon { background: rgba(59,130,246,.12); color:var(--blue); }
 .par-bird-f .par-bird-icon { background: rgba(236,72,153,.12); color: #ec4899; }
 .par-bird-name {
   font-size: .82rem; font-weight: 700;
@@ -86,7 +86,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item active">Uzgojni parovi</li>
   </ol>
@@ -95,15 +95,15 @@
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div class="d-flex align-items-center gap-3">
-    <div style="width:48px;height:48px;background:rgba(236,72,153,.1);border-radius:12px;display:flex;align-items:center;justify-content:center">
-      <i class="fas fa-heart" style="font-size:1.2rem;color:#ec4899"></i>
+    <div class="fx-rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:rgba(236,72,153,.1)">
+      <i class="fas fa-heart fx-fs-2xl" style="color:rgba(236,72,153,0.9)"></i>
     </div>
     <div>
-      <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Uzgojni parovi</h2>
-      <p style="font-size:.78rem;color:var(--text-muted);margin:0">{{ page_obj.paginator.count }} registrirani{{ page_obj.paginator.count|pluralize:"h" }} par{{ page_obj.paginator.count|pluralize:"a,ova" }}</p>
+      <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">Uzgojni parovi</h2>
+      <p class="fx-fs-body-sm fx-text-muted fx-m-0">{{ page_obj.paginator.count }} registrirani{{ page_obj.paginator.count|pluralize:"h" }} par{{ page_obj.paginator.count|pluralize:"a,ova" }}</p>
     </div>
   </div>
-  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:par_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded fx-fs-base" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);padding:.55rem 1.5rem">
     <i class="fas fa-plus me-1"></i>Novi par
   </a>
 </div>
@@ -126,24 +126,24 @@
       </div>
     </div>
     <div class="par-meta">
-      <span class="par-meta-item" style="background:rgba(201,168,76,.08);color:var(--gold,#c9a84c)">
+      <span class="par-meta-item fx-text-gold" style="background:rgba(201,168,76,.08)">
         <i class="fas fa-calendar"></i> Sezona {{ p.sezona|default:"--" }}
       </span>
       {% if p.aktivan %}
-      <span class="par-meta-item" style="background:rgba(34,197,94,.08);color:#22c55e">
+      <span class="par-meta-item fx-text-green" style="background:rgba(34,197,94,.08)">
         <i class="fas fa-check-circle"></i> Aktivan
       </span>
       {% else %}
-      <span class="par-meta-item" style="background:rgba(239,68,68,.08);color:#ef4444">
+      <span class="par-meta-item fx-text-red" style="background:rgba(239,68,68,.08)">
         <i class="fas fa-times-circle"></i> Neaktivan
       </span>
       {% endif %}
-      <span class="par-meta-item" style="background:rgba(59,130,246,.08);color:#60a5fa">
+      <span class="par-meta-item fx-text-blue" style="background:rgba(59,130,246,.08)">
         <i class="fas fa-egg"></i> {{ p.legla_count|default:"0" }} legla
       </span>
     </div>
     <div class="par-actions">
-      <a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-sm" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--gold,#c9a84c);font-weight:600;border-radius:8px;font-size:.75rem;flex:1">
+      <a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-sm fx-fw-semibold fx-rounded fx-fs-caption fx-text-gold fx-flex-1" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2)">
         <i class="fas fa-egg me-1"></i>Dodaj leglo
       </a>
     </div>
@@ -164,11 +164,11 @@
 {% endif %}
 
 {% else %}
-<div style="text-align:center;padding:5rem 2rem;background:var(--bg-card);border:1px solid var(--border);border-radius:14px">
-  <div style="font-size:3rem;color:#ec4899;opacity:.3;margin-bottom:1rem"><i class="fas fa-heart"></i></div>
-  <h3 style="font-weight:700;color:var(--text)">Stvorite prvi uzgojni par</h3>
-  <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Spojite mužjaka i ženku za praćenje uzgoja, legala i potomstva</p>
-  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+<div class="text-center fx-rounded-lg fx-bg-card fx-b" style="padding:5rem 2rem">
+  <div class="fx-fs-hero mb-3 fx-opacity-50" style="color:rgba(236,72,153,0.9)"><i class="fas fa-heart"></i></div>
+  <h3 class="fx-fw-bold fx-text-body">Stvorite prvi uzgojni par</h3>
+  <p class="fx-fs-base fx-text-muted" style="max-width:400px;margin:0 auto 1.5rem">Spojite mužjaka i ženku za praćenje uzgoja, legala i potomstva</p>
+  <a href="{% url 'udruge:par_create' %}" class="btn fx-text-dark fx-fw-bold fx-rounded" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);padding:10px 28px">
     <i class="fas fa-plus me-1"></i>Novi par
   </a>
 </div>

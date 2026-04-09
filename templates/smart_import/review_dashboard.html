@@ -6,10 +6,10 @@
   .review-container { display:flex; gap:0; height:calc(100vh - 140px); }
   .review-sidebar {
     width:280px; min-width:280px; border-right:1px solid #222;
-    overflow-y:auto; background:#0d0d0d;
+    overflow-y:auto; background:var(--bg);
   }
   .review-main { flex:1; display:flex; overflow:hidden; }
-  .review-image { flex:1; background:#111; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .review-image { flex:1; background:var(--dark); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
   .review-image img {
     max-width:100%; max-height:100%; object-fit:contain;
     transition: transform 0.3s; cursor:grab;
@@ -20,12 +20,12 @@
   }
   .review-image .pdf-notice {
     position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
-    background:rgba(0,0,0,0.7); color:#f39c12; padding:4px 12px;
+    background:rgba(0,0,0,0.7); color:var(--amber); padding:4px 12px;
     border-radius:6px; font-size:11px; z-index:5;
   }
   .review-form {
     width:380px; min-width:380px; overflow-y:auto;
-    padding:20px; border-left:1px solid #222; background:#0a0a0a;
+    padding:20px; border-left:1px solid #222; background:var(--bg);
   }
 
   /* Sidebar items */
@@ -33,23 +33,23 @@
     padding:12px 14px; border-bottom:1px solid #1a1a1a;
     cursor:pointer; transition:all 0.2s; position:relative;
   }
-  .review-item:hover { background:#1a1a1a; }
-  .review-item.active { background:#1a1a1a; border-left:3px solid var(--gold, var(--gold,#c9a84c)); }
+  .review-item:hover { background:var(--surface); }
+  .review-item.active { background:var(--surface); border-left:3px solid var(--gold, var(--gold,#c9a84c)); }
   .review-item.resolved { opacity:0.4; }
-  .review-item .name { font-size:13px; font-weight:500; color:#eee; }
-  .review-item .meta { font-size:11px; color:#666; margin-top:2px; }
+  .review-item .name { font-size:13px; font-weight:500; color:var(--text); }
+  .review-item .meta { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .review-item .badges { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
-  .review-item .badge-dup { background:#e74c3c; color:#fff; padding:1px 6px; border-radius:3px; font-size:10px; }
-  .review-item .badge-low { background:#f39c12; color:#fff; padding:1px 6px; border-radius:3px; font-size:10px; }
-  .review-item .badge-ok { background:#2ecc71; color:#fff; padding:1px 6px; border-radius:3px; font-size:10px; }
+  .review-item .badge-dup { background:#e74c3c; color:var(--white); padding:1px 6px; border-radius:3px; font-size:10px; }
+  .review-item .badge-low { background:var(--amber); color:var(--white); padding:1px 6px; border-radius:3px; font-size:10px; }
+  .review-item .badge-ok { background:var(--green); color:var(--white); padding:1px 6px; border-radius:3px; font-size:10px; }
 
   /* Image toolbar */
   .img-toolbar {
     position:absolute; top:10px; right:10px; display:flex; gap:6px; z-index:10;
   }
   .img-btn {
-    width:36px; height:36px; border-radius:8px; border:1px solid #333;
-    background:#1a1a1a; color:#aaa; display:flex; align-items:center;
+    width:36px; height:36px; border-radius:8px; border:1px solid var(--border2);
+    background:var(--surface); color:var(--text-dim); display:flex; align-items:center;
     justify-content:center; cursor:pointer; font-size:16px; transition:all 0.2s;
   }
   .img-btn:hover { border-color:var(--gold, var(--gold,#c9a84c)); color:var(--gold, var(--gold,#c9a84c)); }
@@ -57,56 +57,56 @@
   /* Form fields */
   .field-group { margin-bottom:14px; }
   .field-group label {
-    font-size:11px; color:#888; text-transform:uppercase; letter-spacing:0.5px;
+    font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px;
     margin-bottom:3px; display:block;
   }
   .field-group input, .field-group select {
-    width:100%; padding:8px 10px; border:1px solid #333; border-radius:6px;
-    background:#111; color:#eee; font-size:14px; transition:border 0.2s;
+    width:100%; padding:8px 10px; border:1px solid var(--border2); border-radius:6px;
+    background:var(--dark); color:var(--text); font-size:14px; transition:border 0.2s;
   }
   .field-group input:focus, .field-group select:focus {
     border-color:var(--gold, var(--gold,#c9a84c)); outline:none;
   }
   .field-group input.low-conf {
-    border-color:#f39c12; background:#1a1200;
+    border-color:var(--amber); background:#1a1200;
   }
   .field-group input.matched {
-    border-color:#2ecc71; background:#001a0d;
+    border-color:var(--green); background:#001a0d;
   }
-  .field-group .hint { font-size:10px; color:#555; margin-top:2px; }
+  .field-group .hint { font-size:10px; color:var(--text-dim); margin-top:2px; }
 
   .partner-match {
-    background:#0a1a0a; border:1px solid #2ecc71; border-radius:8px;
+    background:var(--surface-deep); border:1px solid #2ecc71; border-radius:8px;
     padding:10px; margin-bottom:14px; font-size:12px;
   }
-  .partner-match .name { color:#2ecc71; font-weight:bold; }
-  .partner-match .detail { color:#666; }
+  .partner-match .name { color:var(--green); font-weight:bold; }
+  .partner-match .detail { color:var(--text-muted); }
 
   .dup-warning {
-    background:#1a0a0a; border:1px solid #e74c3c; border-radius:8px;
-    padding:10px; margin-bottom:14px; font-size:12px; color:#e74c3c;
+    background:var(--surface-deep); border:1px solid #e74c3c; border-radius:8px;
+    padding:10px; margin-bottom:14px; font-size:12px; color:var(--red);
   }
 
   .action-btns { display:flex; gap:8px; margin-top:20px; }
   .btn-gold {
     flex:1; padding:12px; border:none; border-radius:8px; cursor:pointer;
     font-weight:bold; font-size:14px; transition:all 0.2s;
-    background:var(--gold, var(--gold,#c9a84c)); color:#000;
+    background:var(--gold, var(--gold,#c9a84c)); color:var(--black);
   }
   .btn-gold:hover { filter:brightness(1.1); }
   .btn-gold:disabled { opacity:0.5; cursor:not-allowed; }
   .btn-ghost {
-    padding:12px 16px; border:1px solid #444; border-radius:8px; cursor:pointer;
-    background:transparent; color:#aaa; font-size:13px; transition:all 0.2s;
+    padding:12px 16px; border:1px solid var(--border2); border-radius:8px; cursor:pointer;
+    background:transparent; color:var(--text-dim); font-size:13px; transition:all 0.2s;
   }
-  .btn-ghost:hover { border-color:#e74c3c; color:#e74c3c; }
+  .btn-ghost:hover { border-color:var(--red); color:var(--red); }
 
   /* Stats bar */
   .stats-bar {
     display:flex; gap:16px; padding:10px 14px; border-bottom:1px solid #222;
-    background:#0a0a0a; font-size:12px;
+    background:var(--bg); font-size:12px;
   }
-  .stats-bar .stat { color:#888; }
+  .stats-bar .stat { color:var(--text-dim); }
   .stats-bar .stat strong { color:var(--gold, var(--gold,#c9a84c)); }
 
   /* Responsive */
@@ -126,17 +126,17 @@
 <div class="stats-bar">
   <div class="stat">Ukupno: <strong id="statTotal">{{ items|length }}</strong></div>
   <div class="stat">Za pregled: <strong id="statPending">{{ pending_count }}</strong></div>
-  <div class="stat">Duplikati: <strong id="statDup" style="color:#e74c3c">{{ dup_count }}</strong></div>
-  <div class="stat">Nisko povjerenje: <strong id="statLow" style="color:#f39c12">{{ low_conf_count }}</strong></div>
-  <div class="stat">Riješeno: <strong id="statDone" style="color:#2ecc71">{{ resolved_count }}</strong></div>
-  <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
-    <span style="font-size:10px;color:#555">
-      <kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444">Ctrl+Enter</kbd> Proknjiži
-      <kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;margin-left:6px">Alt+→</kbd> Preskoči
-      <kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;margin-left:6px">Ctrl+Del</kbd> Odbaci
-      <kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;margin-left:6px">R</kbd> Rotiraj
+  <div class="stat">Duplikati: <strong id="statDup" class="fx-text-red">{{ dup_count }}</strong></div>
+  <div class="stat">Nisko povjerenje: <strong id="statLow" class="fx-text-amber">{{ low_conf_count }}</strong></div>
+  <div class="stat">Riješeno: <strong id="statDone" class="fx-text-green">{{ resolved_count }}</strong></div>
+  <div class="d-flex fx-gap-3 align-items-center fx-ml-auto">
+    <span class="fx-text-dim" style="font-size:10px">
+      <kbd class="fx-bg-surface fx-b2" style="padding:1px 4px;border-radius:3px">Ctrl+Enter</kbd> Proknjiži
+      <kbd class="fx-bg-surface fx-b2" style="padding:1px 4px;border-radius:3px;margin-left:6px">Alt+→</kbd> Preskoči
+      <kbd class="fx-bg-surface fx-b2" style="padding:1px 4px;border-radius:3px;margin-left:6px">Ctrl+Del</kbd> Odbaci
+      <kbd class="fx-bg-surface fx-b2" style="padding:1px 4px;border-radius:3px;margin-left:6px">R</kbd> Rotiraj
     </span>
-    <a href="{% url 'smart_import:staging_upload' %}" style="color:#888;font-size:12px"><i class="fas fa-arrow-left me-1"></i>Nazad</a>
+    <a href="{% url 'smart_import:staging_upload' %}" class="fx-text-muted" style="font-size:12px"><i class="fas fa-arrow-left me-1"></i>Nazad</a>
   </div>
 </div>
 
@@ -175,16 +175,16 @@
 
     <!-- Form -->
     <div class="review-form" id="formPane">
-      <h5 style="color:var(--gold,#c9a84c);margin-bottom:16px">
+      <h5 class="fx-text-gold mb-3">
         <i class="fas fa-file-invoice me-2"></i>Zaglavlje računa
       </h5>
 
-      <div id="partnerMatch" class="partner-match" style="display:none">
+      <div id="partnerMatch" class="partner-match fx-hidden">
         <div class="name"><i class="fas fa-check-circle me-1"></i><span id="matchedPartnerName"></span></div>
         <div class="detail">OIB: <span id="matchedPartnerOIB"></span></div>
       </div>
 
-      <div id="dupWarning" class="dup-warning" style="display:none">
+      <div id="dupWarning" class="dup-warning fx-hidden">
         <i class="fas fa-exclamation-triangle me-1"></i>
         <strong>Mogući duplikat!</strong> Račun s istim OIB-om, brojem i iznosom već postoji u sustavu.
       </div>
@@ -210,27 +210,27 @@
         <input type="date" id="fInvoiceDate">
       </div>
 
-      <div style="display:flex;gap:10px">
-        <div class="field-group" style="flex:1">
+      <div class="d-flex fx-gap-3">
+        <div class="field-group fx-flex-1">
           <label>Osnovica (€)</label>
           <input type="number" id="fBase" step="0.01" placeholder="0.00">
         </div>
-        <div class="field-group" style="flex:1">
+        <div class="field-group fx-flex-1">
           <label>PDV (€)</label>
           <input type="number" id="fVAT" step="0.01" placeholder="0.00">
         </div>
       </div>
       <div class="field-group">
         <label>Ukupan iznos (€)</label>
-        <input type="number" id="fTotal" step="0.01" placeholder="0.00" style="font-size:18px;font-weight:bold">
+        <input type="number" id="fTotal" step="0.01" placeholder="0.00" class="fx-fw-bold" style="font-size:18px">
       </div>
       <div class="field-group">
         <label>AI povjerenje</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden">
-            <div id="confBar" style="height:100%;background:#2ecc71;border-radius:3px;transition:width 0.3s"></div>
+        <div class="d-flex fx-gap-2 align-items-center">
+          <div class="fx-bg-surface fx-flex-1 fx-overflow-hidden" style="height:6px;border-radius:3px">
+            <div id="confBar" style="height:100%;background:var(--green);border-radius:3px;transition:width 0.3s"></div>
           </div>
-          <span id="confLabel" style="font-size:12px;color:#888">—</span>
+          <span id="confLabel" class="fx-text-muted" style="font-size:12px">—</span>
         </div>
       </div>
 
@@ -242,7 +242,7 @@
           <i class="fas fa-forward me-1"></i>Preskoči
         </button>
       </div>
-      <button class="btn-ghost" style="width:100%;margin-top:8px;border-color:#e74c3c33" onclick="discardItem()">
+      <button class="btn-ghost fx-w-full mt-2" style="border-color:var(--red)33" onclick="discardItem()">
         <i class="fas fa-trash me-1"></i>Odbaci (lažni duplikat / nečitljivo)
       </button>
     </div>

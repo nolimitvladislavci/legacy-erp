@@ -24,7 +24,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 /* Section */
 .section{margin-bottom:32px}
 .section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink2);margin-bottom:12px;padding-left:4px;display:flex;align-items:center;gap:8px}
-.section-title span{background:var(--gold);color:#000;padding:2px 8px;border-radius:4px;font-size:.65rem}
+.section-title span{background:var(--gold);color:var(--text);padding:2px 8px;border-radius:4px;font-size:.65rem}
 
 /* Table */
 .tbl{width:100%;border-collapse:collapse;font-size:.82rem}
@@ -88,11 +88,11 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
       <div class="stat-label">Životinje</div>
     </div>
     <div class="stat">
-      <div class="stat-num" style="color:var(--green)">{{ animal_stats.aktivno }}</div>
+      <div class="stat-num fx-text-green">{{ animal_stats.aktivno }}</div>
       <div class="stat-label">Aktivno</div>
     </div>
     <div class="stat">
-      <div class="stat-num" style="color:var(--ink2)">{{ animal_stats.uginulo }}</div>
+      <div class="stat-num fx-text-dim">{{ animal_stats.uginulo }}</div>
       <div class="stat-label">Memorial</div>
     </div>
     <div class="stat">
@@ -104,11 +104,11 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
       <div class="stat-label">Zdravlje zapisi</div>
     </div>
     <div class="stat">
-      <div class="stat-num" style="color:var(--blue)">{{ farm_stats.farms }}</div>
+      <div class="stat-num fx-text-blue">{{ farm_stats.farms }}</div>
       <div class="stat-label">Farme</div>
     </div>
     <div class="stat">
-      <div class="stat-num" style="color:var(--gold)">{{ farm_stats.beehives }}</div>
+      <div class="stat-num fx-text-gold">{{ farm_stats.beehives }}</div>
       <div class="stat-label">Košnice</div>
     </div>
   </div>
@@ -151,20 +151,20 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
           <td>
             <div class="actions-row">
               {% if not p.is_cro_validated %}
-              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline">
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="verify">
                 <button class="act act-green" type="submit">✓ Verificiraj</button>
               </form>
               {% endif %}
               {% if p.needs_parental_consent %}
-              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline">
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="grant_consent">
                 <button class="act" type="submit">🔓 Odobri GDPR</button>
               </form>
               {% endif %}
-              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" style="display:inline" onsubmit="return confirm('Obrisati profil {{ p.name }} i sve životinje?')">
+              <form method="post" action="{% url 'memio_admin_profile_action' p.pk %}" class="d-inline" onsubmit="return confirm('Obrisati profil {{ p.name }} i sve životinje?')">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete">
                 <button class="act act-red" type="submit">🗑</button>
@@ -196,10 +196,10 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
         {% for a in animals %}
         <tr>
           <td>
-            <a href="https://memio.pet/pas/{{ a.chip_number|default:a.ear_tag }}/" style="color:var(--gold);text-decoration:none;font-weight:600">{{ a.name|default:"—" }}</a>
+            <a href="https://memio.pet/pas/{{ a.chip_number|default:a.ear_tag }}/" class="fx-no-underline fx-fw-semibold fx-text-gold">{{ a.name|default:"—" }}</a>
           </td>
           <td>{{ a.get_vrsta_display }}</td>
-          <td style="font-family:monospace;font-size:.72rem">{{ a.chip_number|default:a.ear_tag }}</td>
+          <td class="fx-fs-sm fx-font-mono">{{ a.chip_number|default:a.ear_tag }}</td>
           <td>{{ a.breeder.name|default:"—" }}</td>
           <td>
             {% if a.status == 'aktivno' %}<span class="badge badge-green">{{ a.status }}</span>
@@ -207,10 +207,10 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
             {% elif a.status == 'u_azilu' %}<span class="badge badge-blue">azil</span>
             {% else %}<span class="badge badge-dim">{{ a.status }}</span>{% endif %}
           </td>
-          <td style="font-size:.75rem;color:var(--ink2)">{{ a.created_at|date:"d.m.Y. H:i" }}</td>
+          <td class="fx-fs-caption fx-text-dim">{{ a.created_at|date:"d.m.Y. H:i" }}</td>
           <td>
             <div class="actions-row">
-              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline">
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="change_status">
                 <select name="new_status" class="act-select" onchange="this.form.submit()">
@@ -222,7 +222,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
                   <option value="uginulo">🌈 Uginulo</option>
                 </select>
               </form>
-              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline">
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="transfer">
                 <select name="new_breeder_id" class="act-select" onchange="this.form.submit()">
@@ -234,7 +234,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
                   {% endfor %}
                 </select>
               </form>
-              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" style="display:inline" onsubmit="return confirm('Obrisati {{ a.name }}?')">
+              <form method="post" action="{% url 'memio_admin_animal_action' a.pk %}" class="d-inline" onsubmit="return confirm('Obrisati {{ a.name }}?')">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete">
                 <button class="act act-red" type="submit">🗑</button>
@@ -261,7 +261,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
           <td><strong>{{ f.name }}</strong></td>
           <td>{{ f.get_farm_type_display }}</td>
           <td>{{ f.city }}</td>
-          <td style="font-family:monospace;font-size:.72rem">{{ f.mibpg|default:"—" }}</td>
+          <td class="fx-fs-sm fx-font-mono">{{ f.mibpg|default:"—" }}</td>
           <td>{{ f.trust_score }}</td>
         </tr>
         {% endfor %}
@@ -270,7 +270,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
     {% else %}
     <div class="farm-empty">
       Nema farmi u bazi. <strong>memio.farm</strong> je spreman — čeka prvi OPG.<br>
-      {% if farm_stats.error %}<span style="color:var(--red);font-size:.78rem">{{ farm_stats.error }}</span>{% endif %}
+      {% if farm_stats.error %}<span class="fx-fs-body-sm fx-text-red">{{ farm_stats.error }}</span>{% endif %}
     </div>
     {% endif %}
   </div>
@@ -290,7 +290,7 @@ select.act-select{background:var(--surface);border:1px solid var(--line);color:v
 
 </div>
 
-<div style="text-align:center;padding:24px;font-size:.72rem;color:var(--ink2)">
+<div class="text-center fx-fs-sm fx-text-dim" style="padding:24px">
   Memio Admin — LIMIT Connect · {{ now|date:"d.m.Y. H:i" }}
 </div>
 </body>

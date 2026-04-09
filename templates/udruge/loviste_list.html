@@ -2,44 +2,27 @@
 {% load i18n %}
 {% block title %}Lovista{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid">
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="fas fa-tree"></i> Lovista</h2>
-  <div><a href="{% url 'udruge:loviste_create' %}" class="btn btn-warning btn-sm">+ Novo loviste</a>
+  <div><a href="{% url 'udruge:loviste_create' %}" class="btn-gold btn-sm">+ Novo loviste</a>
   <a href="{% url 'udruge:lov_dashboard' %}" class="btn btn-outline-secondary btn-sm ms-1"><i class="fas fa-arrow-left"></i></a></div>
 </div>
 <div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
 <table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Naziv</th><th style="font-size:.75rem">Broj</th><th style="font-size:.75rem">Povrsina</th>
-  <th style="font-size:.75rem">Vrsta</th><th style="font-size:.75rem">Zakup do</th><th style="font-size:.75rem"></th>
+  <th class="fx-fs-caption">Naziv</th><th class="fx-fs-caption">Broj</th><th class="fx-fs-caption">Povrsina</th>
+  <th class="fx-fs-caption">Vrsta</th><th class="fx-fs-caption">Zakup do</th><th class="fx-fs-caption"></th>
 </tr></thead><tbody>
 {% for l in lovista %}
 <tr>
-  <td style="font-size:.85rem"><strong>{{ l.naziv }}</strong></td>
-  <td style="font-size:.82rem">{{ l.broj_lovista|default:"-" }}</td>
-  <td style="font-size:.82rem">{{ l.povrsina_ha }} ha</td>
-  <td style="font-size:.82rem">{{ l.get_vrsta_display }}</td>
-  <td style="font-size:.82rem">{{ l.zakup_do|date:"d.m.Y"|default:"-" }}</td>
+  <td class="fx-fs-base"><strong>{{ l.naziv }}</strong></td>
+  <td class="fx-fs-note">{{ l.broj_lovista|default:"-" }}</td>
+  <td class="fx-fs-note">{{ l.povrsina_ha }} ha</td>
+  <td class="fx-fs-note">{{ l.get_vrsta_display }}</td>
+  <td class="fx-fs-note">{{ l.zakup_do|date:"d.m.Y"|default:"-" }}</td>
   <td><a href="{% url 'udruge:loviste_edit' l.pk %}" class="btn btn-sm btn-outline-warning">Uredi</a></td>
 </tr>
 {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nema lovista</td></tr>{% endfor %}

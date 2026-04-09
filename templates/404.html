@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}Stranica nije pronadena{% endblock %}
 {% block content %}
-<div style="max-width:480px;margin:40px auto;text-align:center;padding:0 16px">
-  <div style="width:64px;height:64px;border-radius:50%;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px">&#128269;</div>
-  <h3 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif">Stranica nije pronadena</h3>
-  <p style="color:var(--text-muted,#94a3b8);font-size:.9rem;margin:12px 0 24px">
+<div class="text-center" style="max-width:480px;margin:40px auto;padding:0 16px">
+  <div class="fx-rounded-circle d-flex align-items-center justify-content-center" style="width:64px;height:64px;background:rgba(201,168,76,.12);margin:0 auto 20px;font-size:28px">&#128269;</div>
+  <h3 class="fx-text-gold" style="font-family:'Cormorant Garamond',serif">Stranica nije pronadena</h3>
+  <p class="fx-fs-md" style="color:var(--text-muted,#94a3b8);margin:12px 0 24px">
     Trazena stranica ne postoji, premjestena je, ili nemate pristup.<br>
     {% if request.user.is_authenticated %}
     Ako bi trebali imati pristup, prijavite problem — BORG ce analizirati.
@@ -13,17 +13,17 @@
     Prijavite se ili provjerite URL.
     {% endif %}
   </p>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <a href="{% url 'dashboard' %}" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.9rem">
+  <div class="d-flex fx-gap-3 fx-flex-wrap justify-content-center">
+    <a href="{% url 'dashboard' %}" class="fx-text-dark fx-fw-bold fx-rounded fx-no-underline fx-fs-md fx-bg-gold" style="padding:10px 24px">
       <i class="fas fa-home"></i> Radna povrsina
     </a>
     {% if request.user.is_authenticated %}
-    <button onclick="borgReport404()" style="background:transparent;border:1px solid var(--border,#2a2a2a);color:var(--text-muted,#94a3b8);padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem">
-      <i class="fas fa-flag" style="color:var(--gold,#c9a84c)"></i> Prijavi problem
+    <button onclick="borgReport404()" class="fx-rounded fx-pointer fx-fs-base fx-bg-transparent" style="border:1px solid var(--border,#2a2a2a);color:var(--text-muted,#94a3b8);padding:10px 20px">
+      <i class="fas fa-flag fx-text-gold"></i> Prijavi problem
     </button>
     {% endif %}
   </div>
-  <div id="report-result" style="margin-top:12px;font-size:.8rem"></div>
+  <div id="report-result" class="fx-fs-compact mt-3"></div>
 </div>
 
 {% if request.user.is_authenticated %}
@@ -34,7 +34,7 @@ function borgReport404(){
     type:'bug',message:'404 na '+location.href,page_url:location.href,
     context:{referrer:document.referrer,viewport:innerWidth+'x'+innerHeight}
   })}).then(r=>r.json()).then(d=>{
-    document.getElementById('report-result').innerHTML=d.ok?'<span style="color:#22c55e">Signal poslan — BORG analizira.</span>':'<span style="color:#ef4444">'+(d.error||'Greska')+'</span>';
+    document.getElementById('report-result').innerHTML=d.ok?'<span class="fx-text-green">Signal poslan — BORG analizira.</span>':'<span class="fx-text-red">'+(d.error||'Greska')+'</span>';
     btn.textContent='Poslano';
   }).catch(()=>{document.getElementById('report-result').textContent='Greska mreze';btn.disabled=false;btn.textContent='Prijavi problem';});
 }

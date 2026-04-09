@@ -44,8 +44,8 @@
   </div>
 </div>
 
-<div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem">
-  <a href="{% url 'lovacki:record_create' %}" style="background:var(--gold);color:#0f172a;padding:.55rem 1.25rem;border-radius:6px;font-weight:700;font-size:.88rem;text-decoration:none">
+<div class="d-flex justify-content-end fx-mb-6">
+  <a href="{% url 'lovacki:record_create' %}" class="fx-text-dark fx-rounded-sm fx-fw-bold fx-fs-body fx-no-underline fx-bg-gold" style="padding:.55rem 1.25rem">
     + {% trans "Novi odstrjel" %}
   </a>
 </div>
@@ -58,7 +58,7 @@
     {% for q in quotas %}
     <div class="quota-card">
       <div class="quota-name">{{ q.species.name }}</div>
-      <div style="font-size:.75rem;color:var(--muted)">{{ q.ground.name }}</div>
+      <div class="fx-fs-caption fx-text-muted">{{ q.ground.name }}</div>
       <div class="quota-bar">
         <div class="quota-fill" style="width:{{ q.utilization_pct }}%;background:{% if q.utilization_pct > 90 %}#ef4444{% elif q.utilization_pct > 70 %}#f59e0b{% else %}var(--gold){% endif %}"></div>
       </div>
@@ -76,7 +76,7 @@
 {% if records %}
 <div class="hunt-section">
   <h3>&#127919; {% trans "Zadnji odstrjeli" %}</h3>
-  <div style="overflow-x:auto">
+  <div class="fx-scroll-x">
     <table class="hunt-table">
       <thead>
         <tr>
@@ -92,7 +92,7 @@
         {% for r in records %}
         <tr>
           <td>{{ r.datum|date:"d.m.Y" }}</td>
-          <td>{{ r.species.name }}{% if r.species.is_cites %} <span style="color:#ef4444;font-size:.7rem">[CITES]</span>{% endif %}</td>
+          <td>{{ r.species.name }}{% if r.species.is_cites %} <span class="fx-text-red fx-fs-sm">[CITES]</span>{% endif %}</td>
           <td>{{ r.ground.name }}</td>
           <td>{{ r.get_spol_display }}</td>
           <td>{% if r.weight_kg %}{{ r.weight_kg }} kg{% else %}—{% endif %}</td>
@@ -106,9 +106,9 @@
 {% endif %}
 
 {% if not quotas and not records %}
-<div style="text-align:center;padding:4rem 2rem;color:var(--muted)">
-  <div style="font-size:3rem;margin-bottom:1rem">&#127795;</div>
-  <h3 style="color:var(--text)">{% trans "Dobrodošli u lovački modul" %}</h3>
+<div class="text-center fx-text-muted" style="padding:4rem 2rem">
+  <div class="fx-fs-hero mb-3">&#127795;</div>
+  <h3 class="fx-text-body">{% trans "Dobrodošli u lovački modul" %}</h3>
   <p>{% trans "Dodajte lovište i počnite evidentirati odstrjele." %}</p>
 </div>
 {% endif %}

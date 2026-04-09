@@ -4,24 +4,7 @@
 {% block page_title %}Stado{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
@@ -62,7 +45,7 @@
     <div class="card mb-4" style="border: 1px solid var(--gold); background: rgba(201,168,76,0.05);">
         <div class="card-body d-flex flex-wrap align-items-center justify-content-between py-3">
             <div>
-                <h6 class="mb-1" style="color: var(--gold);"><i class="fas fa-syringe me-2"></i>Veterinarski portal</h6>
+                <h6 class="mb-1 fx-text-gold"><i class="fas fa-syringe me-2"></i>Veterinarski portal</h6>
                 <small class="text-muted" id="vet-link-text">https://limit-connect.com/livestock/vet/{{ booking_slug }}/</small>
             </div>
             <div class="mt-2 mt-md-0">
@@ -110,7 +93,7 @@
                 </thead>
                 <tbody>
                     {% for a in animals %}
-                    <tr onclick="window.location='{% url 'livestock:detail' a.pk %}'" style="cursor:pointer">
+                    <tr onclick="window.location='{% url 'livestock:detail' a.pk %}'" class="fx-pointer">
                         <td><strong>{{ a.ear_tag }}</strong></td>
                         <td>{{ a.name|default:"-" }}</td>
                         <td>{{ a.get_vrsta_display }}</td>

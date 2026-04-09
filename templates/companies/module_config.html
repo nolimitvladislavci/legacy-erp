@@ -6,7 +6,7 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2><i class="fas fa-puzzle-piece" style="color:var(--gold)"></i> Specijalizirani moduli</h2>
+            <h2><i class="fas fa-puzzle-piece fx-text-gold"></i> Specijalizirani moduli</h2>
             <small class="text-muted">
                 Aktivirajte module specifične za vašu djelatnost —
                 <strong>{{ company.name }}</strong>
@@ -37,14 +37,14 @@
     {% endif %}
 
     {% if ai_detected %}
-    <div class="alert border-0 mb-4" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#e2e8f0;border-left:4px solid var(--gold,#c9a84c)!important">
+    <div class="alert border-0 mb-4 fx-text-body" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-left:4px solid var(--gold,#c9a84c)!important">
         <div class="d-flex align-items-center gap-2 mb-2">
-            <i class="fas fa-brain" style="color:var(--gold,#c9a84c)"></i>
+            <i class="fas fa-brain fx-text-gold"></i>
             <strong>Auto-detekcija preporučuje:</strong>
         </div>
         <div class="d-flex flex-wrap gap-2">
             {% for mod_key in ai_detected %}
-            <span class="badge" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);font-size:.8rem">
+            <span class="badge fx-fs-compact fx-text-gold" style="background:rgba(201,168,76,.15)">
                 <i class="fas {% module_icon mod_key %}"></i> {% module_name mod_key %}
             </span>
             {% endfor %}
@@ -55,7 +55,7 @@
             {% for mod_key in ai_detected %}
             <input type="hidden" name="detected_modules" value="{{ mod_key }}">
             {% endfor %}
-            <button type="submit" class="btn btn-sm" style="background:var(--gold,#c9a84c);color:#000;font-weight:600">
+            <button type="submit" class="btn btn-sm fx-text-dark fx-fw-semibold fx-bg-gold">
                 <i class="fas fa-check"></i> Aktiviraj preporučene
             </button>
         </form>
@@ -67,33 +67,31 @@
         <input type="hidden" name="action" value="save">
 
         {% for cat_key, cat_data in categories.items %}
-        <div class="card mb-4" style="background:#0f172a;border:1px solid #1e293b;border-radius:12px">
-            <div class="card-header d-flex align-items-center gap-2" style="background:#1a2744;border-bottom:1px solid #1e293b;border-radius:12px 12px 0 0;padding:16px 20px">
-                <i class="fas {{ cat_data.info.icon }}" style="color:var(--gold,#c9a84c);font-size:1.1rem"></i>
-                <h5 class="mb-0" style="color:#e2e8f0">{{ cat_data.info.name }}</h5>
+        <div class="card mb-4 fx-bg-deep fx-rounded" style="border:1px solid #1e293b">
+            <div class="card-header d-flex align-items-center gap-2 fx-bg-surface2" style="border-bottom:1px solid #1e293b;border-radius:12px 12px 0 0;padding:16px 20px">
+                <i class="fas {{ cat_data.info.icon }} fx-fs-xl fx-text-gold"></i>
+                <h5 class="mb-0 fx-text-body">{{ cat_data.info.name }}</h5>
             </div>
             <div class="card-body p-0">
                 {% for mod in cat_data.modules %}
                 <div class="d-flex align-items-center justify-content-between px-4 py-3 module-row"
                      style="border-bottom:1px solid #1e293b{% if forloop.last %};border-bottom:none{% endif %}">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-                            {% if mod.key in active_keys %}background:rgba(201,168,76,.15){% else %}background:rgba(100,116,139,.1){% endif %}">
-                            <i class="fas {{ mod.icon }}" style="font-size:1.1rem;
-                                {% if mod.key in active_keys %}color:var(--gold,#c9a84c){% else %}color:#64748b{% endif %}"></i>
+                        <div class="fx-rounded d-flex" style="width:42px;height:42px;align-items:center;justify-content:center;{% if mod.key in active_keys %}background:rgba(201,168,76,.15){% else %}background:rgba(100,116,139,.1){% endif %}">
+                            <i class="fas {{ mod.icon }} fx-fs-xl" style="{% if mod.key in active_keys %}color:var(--gold,#c9a84c){% else %}color:#64748b{% endif %}"></i>
                         </div>
                         <div>
-                            <div style="font-weight:600;color:#e2e8f0;font-size:.95rem">{{ mod.name }}</div>
+                            <div class="fx-fw-semibold fx-text-body fx-fs-normal">{{ mod.name }}</div>
                             {% if mod.description %}
-                            <div style="font-size:.78rem;color:#64748b;margin-top:2px">{{ mod.description }}</div>
+                            <div class="fx-fs-body-sm fx-text-dim fx-mt-1">{{ mod.description }}</div>
                             {% endif %}
                             {% if mod.always_on and company.business_type in mod.auto_activate_for %}
-                            <span class="badge mt-1" style="background:rgba(34,197,94,.12);color:#22c55e;font-size:.65rem">
+                            <span class="badge mt-1 fx-text-green fx-fs-xs" style="background:rgba(34,197,94,.12)">
                                 <i class="fas fa-lock"></i> Obavezan za {{ company.get_business_type_display }}
                             </span>
                             {% endif %}
                             {% if mod.nkd_codes %}
-                            <span class="badge mt-1" style="background:rgba(59,130,246,.1);color:#60a5fa;font-size:.65rem">
+                            <span class="badge mt-1 fx-fs-xs fx-text-blue" style="background:rgba(59,130,246,.1)">
                                 NKD: {{ mod.nkd_codes|join:", " }}
                             </span>
                             {% endif %}
@@ -105,11 +103,11 @@
                                style="width:3rem;height:1.5rem;cursor:not-allowed">
                         <input type="hidden" name="modules" value="{{ mod.key }}">
                         {% else %}
-                        <input class="form-check-input module-toggle" type="checkbox"
+                        <input class="form-check-input module-toggle fx-pointer" type="checkbox"
                                name="modules" value="{{ mod.key }}"
                                {% if mod.key in active_keys %}checked{% endif %}
                                data-module="{{ mod.key }}"
-                               style="width:3rem;height:1.5rem;cursor:pointer">
+                               style="width:3rem;height:1.5rem">
                         {% endif %}
                     </div>
                 </div>
@@ -119,11 +117,11 @@
         {% endfor %}
 
         <div class="d-flex justify-content-between align-items-center mt-3 mb-5">
-            <div style="color:#64748b;font-size:.85rem">
+            <div class="fx-text-dim fx-fs-base">
                 <i class="fas fa-info-circle"></i>
                 Aktivni specijalizirani moduli: <strong id="activeCount">{{ active_keys|length }}</strong>
             </div>
-            <button type="submit" class="btn px-4 py-2" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;border-radius:8px">
+            <button type="submit" class="btn px-4 py-2 fx-text-dark fx-fw-bold fx-rounded fx-bg-gold">
                 <i class="fas fa-save"></i> Spremi konfiguraciju
             </button>
         </div>

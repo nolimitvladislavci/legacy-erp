@@ -10,7 +10,7 @@
 </div>
 
 {% if messages %}
-<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2 fx-fs-base">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
 {% endif %}
 
 <!-- Nefiskalizirani računi -->
@@ -20,7 +20,7 @@
   <form method="post" action="{% url 'invoicing:fiscal_batch_create' %}">
     {% csrf_token %}
     <div class="table-responsive mb-3">
-      <table class="table table-sm align-middle" style="font-size:.85rem">
+      <table class="table table-sm align-middle fx-fs-base">
         <thead>
           <tr>
             <th><input type="checkbox" id="selectAll" onclick="document.querySelectorAll('.inv-check').forEach(cb=>cb.checked=this.checked)"></th>
@@ -39,7 +39,7 @@
             <td>{{ inv.date|date:"d.m.Y" }}</td>
             <td>{{ inv.client_name|default:"-"|truncatechars:30 }}</td>
             <td class="text-end">{{ inv.total|default:"0.00" }} {{ inv.currency }}</td>
-            <td><span class="badge bg-secondary">{{ inv.get_status_display|default:inv.status }}</span></td>
+            <td><span class="fenix-badge fenix-badge-muted">{{ inv.get_status_display|default:inv.status }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -50,8 +50,8 @@
     </button>
   </form>
   {% else %}
-  <div class="text-center py-4 text-muted" style="font-size:.85rem">
-    <i class="fas fa-check-circle text-success" style="font-size:2rem"></i>
+  <div class="text-center py-4 text-muted fx-fs-base">
+    <i class="fas fa-check-circle text-success fx-fs-icon"></i>
     <p class="mt-2">Svi HR računi su fiskalizirani.</p>
   </div>
   {% endif %}
@@ -62,7 +62,7 @@
 <div class="stat-card p-4">
   <h6 class="mb-3"><i class="fas fa-history me-2"></i>Prošle batch fiskalizacije</h6>
   <div class="table-responsive">
-    <table class="table table-sm align-middle" style="font-size:.85rem">
+    <table class="table table-sm align-middle fx-fs-base">
       <thead>
         <tr>
           <th>#</th>
@@ -80,11 +80,11 @@
           <td>{{ batch.pk }}</td>
           <td>{{ batch.created_at|date:"d.m.Y H:i" }}</td>
           <td>
-            {% if batch.status == 'completed' %}<span class="badge bg-success">Završeno</span>
-            {% elif batch.status == 'partial' %}<span class="badge bg-warning text-dark">Djelomično</span>
-            {% elif batch.status == 'failed' %}<span class="badge bg-danger">Neuspješno</span>
-            {% elif batch.status == 'processing' %}<span class="badge bg-info">U tijeku</span>
-            {% else %}<span class="badge bg-secondary">{{ batch.get_status_display }}</span>
+            {% if batch.status == 'completed' %}<span class="fenix-badge fenix-badge-success">Završeno</span>
+            {% elif batch.status == 'partial' %}<span class="fenix-badge fenix-badge-warning">Djelomično</span>
+            {% elif batch.status == 'failed' %}<span class="fenix-badge fenix-badge-danger">Neuspješno</span>
+            {% elif batch.status == 'processing' %}<span class="fenix-badge fenix-badge-info">U tijeku</span>
+            {% else %}<span class="fenix-badge fenix-badge-muted">{{ batch.get_status_display }}</span>
             {% endif %}
           </td>
           <td>{{ batch.total_count }}</td>

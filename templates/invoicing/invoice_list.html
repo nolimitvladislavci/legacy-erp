@@ -1,162 +1,67 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load tax_wizard_tags %}
-{% block title %}Računi
-<script>
-document.getElementById('cam-input')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('source', 'camera');
-  
-  // Status feedback
-  const btn = document.querySelector('[onclick*="cam-input"]');
-  const origHTML = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
-  btn.disabled = true;
-  
-  fetch('/smart-import/api/upload/', {
-    method: 'POST',
-    body: fd,
-    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.ok || d.id) {
-      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
-      setTimeout(() => { location.reload(); }, 1500);
-    } else {
-      btn.innerHTML = origHTML; btn.disabled = false;
-      fenixToast(d.error || 'Greška pri uploadu', 'error');
-    }
-  })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
-});
-</script>
-{% endblock %}
-{% block page_title %}Računi
-<script>
-document.getElementById('cam-input')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('source', 'camera');
-  
-  // Status feedback
-  const btn = document.querySelector('[onclick*="cam-input"]');
-  const origHTML = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
-  btn.disabled = true;
-  
-  fetch('/smart-import/api/upload/', {
-    method: 'POST',
-    body: fd,
-    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.ok || d.id) {
-      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
-      setTimeout(() => { location.reload(); }, 1500);
-    } else {
-      btn.innerHTML = origHTML; btn.disabled = false;
-      fenixToast(d.error || 'Greška pri uploadu', 'error');
-    }
-  })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
-});
-</script>
-{% endblock %}
+{% block title %}{% trans "Računi" %}{% endblock %}
+{% block page_title %}{% trans "Računi" %}{% endblock %}
 {% block extra_css %}
 <style>
-.pos-badge{display:inline-flex;align-items:center;background:rgba(201,168,76,.1);border:1px solid var(--gold,#c9a84c);color:var(--gold,#c9a84c);border-radius:4px;padding:.15rem .45rem;font-size:.72rem;font-weight:600;text-decoration:none;margin-left:.4rem;transition:background .15s}
-.pos-badge:hover{background:rgba(201,168,76,.22);color:var(--gold,#c9a84c)}
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-.unified-today{border-left:3px solid var(--green,#22c55e);background:var(--card,#1e293b)}
+.pos-badge{display:inline-flex;align-items:center;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:.15rem .45rem;font-size:.72rem;font-weight:600;text-decoration:none;margin-left:.4rem;transition:background .15s}
+.pos-badge:hover{background:rgba(201,168,76,.22);color:var(--gold)}
+.unified-today{border-left:3px solid var(--green);background:var(--card)}
 .unified-breakdown{margin:.5rem 0}
-.ub-row{display:flex;justify-content:space-between;font-size:.78rem;padding:.2rem 0;color:var(--muted,#64748b)}
-.ub-val{font-weight:600;color:var(--text,#e2e8f0)}
+.ub-row{display:flex;justify-content:space-between;font-size:.78rem;padding:.2rem 0;color:var(--muted2)}
+.ub-val{font-weight:600;color:var(--text)}
 </style>
 {% endblock %}
 {% block content %}
 {% tax_wizard_widget "invoice" %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <h2 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>{% trans "Računi" %}</h2>
-    <small class="text-muted">{{ invoices.count }} ukupno</small>
+    <h2 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 fx-text-gold"></i>{% trans "Računi" %}</h2>
+    <small class="text-muted">{{ invoices.count }} {% trans "ukupno" %}</small>
   </div>
   <div class="d-flex gap-2">
-    <button onclick="document.getElementById('cam-input').click()" class="btn btn-outline-warning" title="Skeniraj račun kamerom">
-      <i class="fas fa-camera"></i><span class="d-none d-md-inline ms-1">Skeniraj</span>
+    <button onclick="document.getElementById('cam-input').click()" class="btn btn-ghost" title="{% trans 'Skeniraj račun kamerom' %}">
+      <i class="fas fa-camera"></i><span class="d-none d-md-inline ms-1">{% trans "Skeniraj" %}</span>
     </button>
-    <a href="{% url "invoicing:invoice_create" %}" class="btn btn-primary">
-      <i class="fas fa-plus me-2"></i><span class="d-none d-sm-inline">{% trans "Novi račun" %}</span><span class="d-sm-none">+</span>
+    <a href="{% url 'invoicing:invoice_create' %}" class="btn-gold">
+      <i class="fas fa-plus"></i><span class="d-none d-sm-inline">{% trans "Novi račun" %}</span><span class="d-sm-none">+</span>
     </a>
   </div>
-  <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
+  <input type="file" id="cam-input" accept="image/*" capture="environment" class="fx-hidden">
 </div>
 
 <div class="row g-2 mb-3">
-  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
-    <div class="label">{% trans "Ukupno" %}</div><div class="value">{{ total_eur|floatformat:2 }} €</div>
+  <div class="col-6 col-md-3"><div class="fenix-stat">
+    <div><div class="label">{% trans "Ukupno" %}</div><div class="value">{{ total_eur|floatformat:2 }} €</div></div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
-    <div class="label">{% trans "Plaćeno" %}</div><div class="value text-success">{{ paid_eur|floatformat:2 }} €</div>
+  <div class="col-6 col-md-3"><div class="fenix-stat">
+    <div><div class="label">{% trans "Plaćeno" %}</div><div class="value fx-text-green">{{ paid_eur|floatformat:2 }} €</div></div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
-    <div class="label">{% trans "Neplaćeno" %}</div><div class="value text-danger">{{ unpaid_eur|floatformat:2 }} €</div>
+  <div class="col-6 col-md-3"><div class="fenix-stat">
+    <div><div class="label">{% trans "Neplaćeno" %}</div><div class="value fx-text-red">{{ unpaid_eur|floatformat:2 }} €</div></div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
-    <div class="label">{% trans "Nacrti" %}</div><div class="value text-muted">{{ draft_count }}</div>
+  <div class="col-6 col-md-3"><div class="fenix-stat">
+    <div><div class="label">{% trans "Nacrti" %}</div><div class="value fx-text-dim">{{ draft_count }}</div></div>
   </div></div>
 </div>
 
 {% if combined_today %}
-<div class="stat-card fenix-card unified-today mb-3" style="padding:16px 20px">
-  <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted,#64748b);margin-bottom:.5rem;font-weight:700">&#128176; {% trans "Ukupno danas" %}</div>
-  <div class="unified-breakdown">
-    <div class="ub-row"><span>&#128196; {% trans "Fakturirano" %}</span><span class="ub-val">{{ inv_total_today|floatformat:2 }} EUR</span></div>
-    <div class="ub-row"><span>&#127978; {% trans "POS blagajna" %}</span><span class="ub-val">{{ pos_total_today|floatformat:2 }} EUR</span></div>
+<div class="fenix-stat unified-today mb-3" style="padding:16px 20px">
+  <div class="fx-w-full">
+    <div class="fx-fs-sm fx-fw-bold mb-2 fx-uppercase fx-ls-2" style="color:var(--muted2)">&#128176; {% trans "Ukupno danas" %}</div>
+    <div class="unified-breakdown">
+      <div class="ub-row"><span>&#128196; {% trans "Fakturirano" %}</span><span class="ub-val">{{ inv_total_today|floatformat:2 }} EUR</span></div>
+      <div class="ub-row"><span>&#127978; {% trans "POS blagajna" %}</span><span class="ub-val">{{ pos_total_today|floatformat:2 }} EUR</span></div>
+    </div>
+    <div class="fx-fs-4xl fx-fw-800 fx-text-green" style="margin-top:.4rem">{{ combined_today|floatformat:2 }} EUR</div>
+    <div class="fx-fs-sm" style="color:var(--muted2);margin-top:.2rem">{{ pos_count_today }} POS bona + {{ inv_count_today }} {% trans "racuna" %}</div>
   </div>
-  <div style="font-size:1.4rem;font-weight:800;color:var(--green,#22c55e);margin-top:.4rem">{{ combined_today|floatformat:2 }} EUR</div>
-  <div style="font-size:.72rem;color:var(--muted,#64748b);margin-top:.2rem">{{ pos_count_today }} POS bona + {{ inv_count_today }} {% trans "racuna" %}</div>
 </div>
 {% endif %}
 
-<div class="stat-card fenix-card mb-3">
+<div class="fenix-filters">
   <form method="get" class="row g-2"
         hx-get=""
         hx-target="#invoice-table"
@@ -165,7 +70,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
         hx-push-url="true"
         hx-indicator="#inv-search-spinner">
     <div class="col-md-4">
-      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Klijent, broj računa..." autocomplete="off">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="{% trans 'Klijent, broj računa...' %}" autocomplete="off">
     </div>
     <div class="col-md-2">
       <select name="status" class="form-select">
@@ -199,14 +104,14 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
     {% if synesis_years %}
     <div class="col-md-2">
       <select name="year" class="form-select">
-        <option value="">Synesis - sve god.</option>
+        <option value="">Synesis - {% trans "sve god." %}</option>
         {% for y in synesis_years %}<option value="{{ y }}" {% if year_filter == y %}selected{% endif %}>Synesis {{ y }}</option>{% endfor %}
       </select>
     </div>
     {% endif %}
     <div class="col-md-2 d-flex gap-2">
       <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
-      <a href="{% url "invoicing:index" %}" class="btn btn-outline-secondary">✕</a>
+      <a href="{% url 'invoicing:index' %}" class="btn btn-outline-secondary">✕</a>
     </div>
   </form>
 </div>
@@ -214,10 +119,10 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
 {% if not invoices %}
 {% include "partials/empty_state.html" with title="Izdajte prvi račun" subtitle="Kreirajte i pošaljite profesionalni račun u samo 3 minute." cta_text="Novi račun" cta_url="/hr/invoicing/create/" icon="fas fa-file-invoice-dollar" time_estimate="3 min" %}
 {% else %}
-<div class="stat-card fenix-card p-0">
+<div class="fenix-table-wrap">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead class="table-light">
+      <thead>
         <tr>
           <th>{% trans "Broj" %}</th><th>{% trans "Klijent" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Rok" %}</th>
           <th>{% trans "Vrsta" %}</th><th class="text-end">{% trans "Iznos" %}</th><th>{% trans "Status" %}</th><th>{% trans "Fisk." %}</th><th></th>
@@ -226,58 +131,58 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       <tbody>
         {% for inv in invoices %}
         <tr>
-          <td><a href="{% url "invoicing:invoice_edit" inv.pk %}" class="fw-bold text-decoration-none">{{ inv.number }}</a>{% if inv.is_locked %} <i class="fas fa-lock text-warning" title="Synesis arhiva {{ inv.synesis_year }}"></i>{% endif %}{% if inv.pos_receipt %}<a href="/pos/receipt/{{ inv.pos_receipt.pk }}/" class="pos-badge" title="POS bon #{{ inv.pos_receipt.receipt_number }}">&#127978; #{{ inv.pos_receipt.receipt_number }}</a>{% endif %}</td>
+          <td><a href="{% url 'invoicing:invoice_edit' inv.pk %}" class="fw-bold text-decoration-none">{{ inv.number }}</a>{% if inv.is_locked %} <i class="fas fa-lock fx-text-amber" title="Synesis arhiva {{ inv.synesis_year }}"></i>{% endif %}{% if inv.pos_receipt %}<a href="/pos/receipt/{{ inv.pos_receipt.pk }}/" class="pos-badge" title="POS bon #{{ inv.pos_receipt.receipt_number }}">&#127978; #{{ inv.pos_receipt.receipt_number }}</a>{% endif %}</td>
           <td>
-            <div class="fw-semibold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inv.client_name }}</div>
+            <div class="fw-semibold text-nowrap fx-overflow-hidden" style="max-width:180px;text-overflow:ellipsis">{{ inv.client_name }}</div>
             <small class="text-muted">{{ inv.country }}</small>
           </td>
-          <td style="white-space:nowrap">{{ inv.date_issued|date:"d.m.Y" }}</td>
-          <td style="white-space:nowrap">
+          <td class="text-nowrap">{{ inv.date_issued|date:"d.m.Y" }}</td>
+          <td class="text-nowrap">
             {% if inv.date_due %}
-              {% if inv.status == "OVERDUE" %}<span class="text-danger">{{ inv.date_due|date:"d.m.Y" }}</span>
+              {% if inv.status == "OVERDUE" %}<span class="fx-text-red">{{ inv.date_due|date:"d.m.Y" }}</span>
               {% else %}{{ inv.date_due|date:"d.m.Y" }}{% endif %}
             {% else %}-{% endif %}
           </td>
-          <td><span class="badge bg-secondary">{{ inv.get_doctype_display }}</span></td>
+          <td><span class="fenix-badge fenix-badge-muted">{{ inv.get_doctype_display }}</span></td>
           <td class="text-end fw-bold">{{ inv.total|floatformat:2 }} {{ inv.currency }}</td>
           <td>
-            {% if inv.status == "PAID" %}<span class="badge-success">{% trans "Plaćeno" %}</span>
-            {% elif inv.status == "OVERDUE" %}<span class="badge-danger">{% trans "Dospijelo" %}</span>
-            {% elif inv.status == "SENT" %}<span class="badge-info">{% trans "Poslano" %}</span>
-            {% elif inv.status == "UNPAID" %}<span class="badge-warning">{% trans "Neplaćeno" %}</span>
-            {% elif inv.status == "STORNO" %}<span class="badge-danger">{% trans "Storno" %}</span>
-            {% else %}<span class="badge-info" style="opacity:.6">{% trans "Nacrt" %}</span>{% endif %}
+            {% if inv.status == "PAID" %}<span class="fenix-badge fenix-badge-success">{% trans "Plaćeno" %}</span>
+            {% elif inv.status == "OVERDUE" %}<span class="fenix-badge fenix-badge-danger">{% trans "Dospijelo" %}</span>
+            {% elif inv.status == "SENT" %}<span class="fenix-badge fenix-badge-info">{% trans "Poslano" %}</span>
+            {% elif inv.status == "UNPAID" %}<span class="fenix-badge fenix-badge-warning">{% trans "Neplaćeno" %}</span>
+            {% elif inv.status == "STORNO" %}<span class="fenix-badge fenix-badge-danger">{% trans "Storno" %}</span>
+            {% else %}<span class="fenix-badge fenix-badge-muted">{% trans "Nacrt" %}</span>{% endif %}
           </td>
           <td class="text-center">
-            {% if inv.is_fiscalized %}<i class="fas fa-check-circle text-success" title="{{ inv.jir }}"></i>
-            {% elif inv.country == "HR" %}<i class="fas fa-circle text-muted" title="{% trans "Nije fiskalizirano" %}"></i>
+            {% if inv.is_fiscalized %}<i class="fas fa-check-circle fx-text-green" title="{{ inv.jir }}"></i>
+            {% elif inv.country == "HR" %}<i class="fas fa-circle fx-text-muted" title="{% trans 'Nije fiskalizirano' %}"></i>
             {% else %}<span class="text-muted">-</span>{% endif %}
           </td>
           <td>
             <div class="d-flex gap-1">
-              <a href="{% url "invoicing:generate_pdf" inv.pk %}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
-              <a href="{% url "invoicing:invoice_edit" inv.pk %}" class="btn btn-sm btn-outline-primary" title="Uredi"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'invoicing:generate_pdf' inv.pk %}" class="btn btn-sm btn-ghost" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
+              <a href="{% url 'invoicing:invoice_edit' inv.pk %}" class="btn btn-sm btn-ghost" title="{% trans 'Uredi' %}"><i class="fas fa-edit"></i></a>
               <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" style="font-size:.7rem"><i class="fas fa-ellipsis-v"></i></button>
-                <ul class="dropdown-menu dropdown-menu-end" style="font-size:.82rem">
+                <button class="btn btn-sm btn-ghost dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end fx-fs-note">
                   {% if inv.doctype == "PO" %}
-                  <li><a class="dropdown-item" href="{% url 'invoicing:to_predracun' inv.pk %}" onclick="return confirm('Pretvoriti ponudu u predračun?')"><i class="fas fa-file-alt text-primary"></i> Pretvori u predračun</a></li>
-                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('Pretvoriti ponudu u račun?')"><i class="fas fa-file-invoice-dollar text-success"></i> Pretvori u račun</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_predracun' inv.pk %}" onclick="return confirm('{% trans "Pretvoriti ponudu u predračun?" %}')"><i class="fas fa-file-alt fx-text-blue"></i> {% trans "Pretvori u predračun" %}</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('{% trans "Pretvoriti ponudu u račun?" %}')"><i class="fas fa-file-invoice-dollar fx-text-green"></i> {% trans "Pretvori u račun" %}</a></li>
                   <li><hr class="dropdown-divider"></li>
                   {% elif inv.doctype == "P" %}
-                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('Pretvoriti predračun u račun?')"><i class="fas fa-file-invoice-dollar text-success"></i> Pretvori u račun</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('{% trans "Pretvoriti predračun u račun?" %}')"><i class="fas fa-file-invoice-dollar fx-text-green"></i> {% trans "Pretvori u račun" %}</a></li>
                   <li><hr class="dropdown-divider"></li>
                   {% endif %}
                   {% if inv.doctype == "R" and not inv.is_fiscalized %}
-                  <li><a class="dropdown-item" href="{% url 'invoicing:fiscalize' inv.pk %}" onclick="return confirm('Fiskalizirati?')"><i class="fas fa-cash-register text-warning"></i> Fiskaliziraj</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:fiscalize' inv.pk %}" onclick="return confirm('{% trans "Fiskalizirati?" %}')"><i class="fas fa-cash-register fx-text-amber"></i> {% trans "Fiskaliziraj" %}</a></li>
                   {% endif %}
                   {% if inv.doctype == "R" %}
-                  <li><a class="dropdown-item" href="{% url 'invoicing:storno' inv.pk %}" onclick="return confirm('Stornirati račun?')"><i class="fas fa-ban text-danger"></i> Storno</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:storno' inv.pk %}" onclick="return confirm('{% trans "Stornirati račun?" %}')"><i class="fas fa-ban fx-text-red"></i> {% trans "Storno" %}</a></li>
                   {% endif %}
-                  <li><a class="dropdown-item" href="/eracun/from-invoice/{{ inv.pk }}/" onclick="return confirm('Kreirati e-Račun?')"><i class="fas fa-file-invoice text-info"></i> e-Račun</a></li>
-                  <li><a class="dropdown-item" href="{% url 'invoicing:invoice_clone' inv.pk %}"><i class="fas fa-copy text-muted"></i> Kloniraj</a></li>
-                  <li><a class="dropdown-item" href="{% url 'invoicing:send_email' inv.pk %}" onclick="return confirm('Poslati email?')"><i class="fas fa-envelope text-muted"></i> Email</a></li>
-                  <li><a class="dropdown-item" href="{% url 'invoicing:send_whatsapp' inv.pk %}" onclick="return confirm('Poslati WhatsApp?')"><i class="fab fa-whatsapp text-success"></i> WhatsApp</a></li>
+                  <li><a class="dropdown-item" href="/eracun/from-invoice/{{ inv.pk }}/" onclick="return confirm('{% trans "Kreirati e-Račun?" %}')"><i class="fas fa-file-invoice fx-text-blue"></i> e-Račun</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:invoice_clone' inv.pk %}"><i class="fas fa-copy fx-text-dim"></i> {% trans "Kloniraj" %}</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:send_email' inv.pk %}" onclick="return confirm('{% trans "Poslati email?" %}')"><i class="fas fa-envelope fx-text-dim"></i> Email</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:send_whatsapp' inv.pk %}" onclick="return confirm('{% trans "Poslati WhatsApp?" %}')"><i class="fab fa-whatsapp fx-text-green"></i> WhatsApp</a></li>
                 </ul>
               </div>
             </div>
@@ -299,38 +204,37 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
   </div>
 </div>
 {% endif %}
+{% endblock %}
 
+{% block extra_js %}
 <script>
 document.getElementById('cam-input')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
-  const fd = new FormData();
+  var fd = new FormData();
   fd.append('file', file);
   fd.append('source', 'camera');
-  
-  // Status feedback
-  const btn = document.querySelector('[onclick*="cam-input"]');
-  const origHTML = btn.innerHTML;
+  var btn = document.querySelector('[onclick*="cam-input"]');
+  var origHTML = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
   btn.disabled = true;
-  
   fetch('/smart-import/api/upload/', {
     method: 'POST',
     body: fd,
     headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
   })
-  .then(r => r.json())
-  .then(d => {
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
     if (d.ok || d.id) {
-      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
-      setTimeout(() => { location.reload(); }, 1500);
+      btn.innerHTML = '<i class="fas fa-check fx-text-green"></i> Spremljeno';
+      setTimeout(function() { location.reload(); }, 1500);
     } else {
       btn.innerHTML = origHTML; btn.disabled = false;
       fenixToast(d.error || 'Greška pri uploadu', 'error');
     }
   })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
+  .catch(function() { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
 });
 </script>
-{% endblock %}
 {% include 'includes/_share_modal.html' %}
+{% endblock %}

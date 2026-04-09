@@ -7,31 +7,31 @@
 <title>{{ company.name }} — Eko izvjestaj</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0fdf4;color:#0f172a;min-height:100vh}
-.hero{background:linear-gradient(135deg,#065f46,#047857,#059669);color:#fff;padding:60px 20px 50px;text-align:center}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--green-dim);color:var(--text);min-height:100vh}
+.hero{background:linear-gradient(135deg,#065f46,#047857,#059669);color:var(--white);padding:60px 20px 50px;text-align:center}
 .hero h1{font-size:2rem;font-weight:700;margin-bottom:8px}
 .hero .sub{font-size:1rem;opacity:.85}
 .badge-circle{display:inline-flex;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.15);font-size:3rem;margin:20px 0}
 .container{max-width:900px;margin:0 auto;padding:30px 20px}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:30px}
-.stat-card{background:#fff;border-radius:12px;padding:24px 16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.stat-card{background:var(--bg-card);border-radius:12px;padding:24px 16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .stat-card .val{font-size:2rem;font-weight:700;color:#065f46}
-.stat-card .lbl{font-size:.82rem;color:#64748b;margin-top:4px}
-.table-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:30px}
-.table-card h3{font-size:1rem;color:#065f46;margin-bottom:12px}
+.stat-card .lbl{font-size:.82rem;color:var(--text-dim);margin-top:4px}
+.table-card{background:var(--bg-card);border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:30px}
+.table-card h3{font-size:1rem;color:var(--green);margin-bottom:12px}
 table{width:100%;border-collapse:collapse;font-size:.88rem}
-th{text-align:left;padding:10px 8px;border-bottom:2px solid #d1fae5;color:#64748b;font-size:.75rem;text-transform:uppercase}
+th{text-align:left;padding:10px 8px;border-bottom:2px solid #d1fae5;color:var(--text-dim);font-size:.75rem;text-transform:uppercase}
 td{padding:10px 8px;border-bottom:1px solid #f0fdf4}
 .badge-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700}
-.badge-tag.bronze{background:#fef3c7;color:#92400e}
-.badge-tag.silver{background:#e2e8f0;color:#475569}
+.badge-tag.bronze{background:var(--amber-dim);color:var(--amber)}
+.badge-tag.silver{background:var(--surface-deep);color:var(--text-dim)}
 .badge-tag.gold{background:#fef9c3;color:#854d0e}
-.badge-tag.platinum{background:#dbeafe;color:#1e40af}
-.methodology{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:.85rem;color:#64748b}
-.methodology h4{color:#065f46;margin-bottom:8px}
-.footer{text-align:center;padding:30px;font-size:.8rem;color:#94a3b8}
-.footer a{color:#059669;text-decoration:none}
-.propter-badge{display:inline-block;background:linear-gradient(135deg,#065f46,#059669);color:#fff;padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;margin-top:16px;text-decoration:none}
+.badge-tag.platinum{background:var(--blue-dim);color:var(--blue)}
+.methodology{background:var(--bg-card);border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:.85rem;color:var(--text-dim)}
+.methodology h4{color:var(--green);margin-bottom:8px}
+.footer{text-align:center;padding:30px;font-size:.8rem;color:var(--text-muted)}
+.footer a{color:var(--green);text-decoration:none}
+.propter-badge{display:inline-block;background:linear-gradient(135deg,#065f46,#059669);color:var(--white);padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;margin-top:16px;text-decoration:none}
 </style>
 </head>
 <body>
@@ -42,25 +42,25 @@ td{padding:10px 8px;border-bottom:1px solid #f0fdf4}
   <h1>{{ company.name }}</h1>
   <div class="sub">Eko izvjestaj {{ year }} — digitalna transformacija poslovanja</div>
   {% if best_badge %}
-  <div style="margin-top:12px"><span class="badge-tag {{ best_badge }}" style="font-size:1rem;padding:6px 16px">{{ best_badge|capfirst }} razina</span></div>
+  <div class="mt-3"><span class="badge-tag {{ best_badge }} fx-fs-lg" style="padding:6px 16px">{{ best_badge|capfirst }} razina</span></div>
   {% endif %}
 </div>
 
 <div class="container">
   <div class="stats-grid">
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="val">{{ ytd.eracuni }}</div>
       <div class="lbl">e-Racuna poslano</div>
     </div>
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="val">{{ ytd.paper }}</div>
       <div class="lbl">listova papira ustedeno</div>
     </div>
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="val">{{ ytd.co2 }}g</div>
       <div class="lbl">CO&#8322; manje u atmosferi</div>
     </div>
-    <div class="stat-card">
+    <div class="fenix-stat">
       <div class="val">{{ ytd.trees|floatformat:3 }}</div>
       <div class="lbl">ekvivalent stabala</div>
     </div>
@@ -84,7 +84,7 @@ td{padding:10px 8px;border-bottom:1px solid #f0fdf4}
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Nema podataka</td></tr>
+        <tr><td colspan="5" class="text-center fx-text-muted fx-p-20">Nema podataka</td></tr>
       {% endfor %}
       </tbody>
     </table>
@@ -98,7 +98,7 @@ td{padding:10px 8px;border-bottom:1px solid #f0fdf4}
     Badge razine: Bronze 50+, Silver 200+, Gold 500+, Platinum 1000+ e-racuna mjesecno.</p>
   </div>
 
-  <div style="text-align:center;margin-top:24px">
+  <div class="text-center mt-4">
     <a href="https://limit-connect.com" class="propter-badge">Powered by Propter e-Racun</a>
   </div>
 </div>

@@ -12,11 +12,11 @@
         {% else %}
             <p>
                 {% if latest_patrol.critical_count > 0 %}
-                    <span class="badge bg-danger">{{ latest_patrol.critical_count }} kritično</span>
+                    <span class="fenix-badge fenix-badge-danger">{{ latest_patrol.critical_count }} kritično</span>
                 {% endif %}
-                <span class="badge bg-warning text-dark">{{ latest_patrol.finding_count }} ukupno nalaza</span>
+                <span class="fenix-badge fenix-badge-warning">{{ latest_patrol.finding_count }} ukupno nalaza</span>
             </p>
-            <div style="max-height:200px;overflow-y:auto;font-size:0.9em;">
+            <div class="fx-scroll-y" style="max-height:200px;font-size:0.9em">
                 {% for f in latest_patrol.findings %}
                 <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
                     {% if f.severity == 'critical' %}🔴{% elif f.severity == 'warning' %}🟡{% else %}ℹ️{% endif %}

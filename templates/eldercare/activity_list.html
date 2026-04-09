@@ -4,16 +4,16 @@
 {% block page_title %}Aktivnosti{% endblock %}
 {% block extra_css %}
 <style>
-.act-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.act-card h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
-.act-item{padding:.7rem .8rem;border-left:3px solid #c8a24e;background:#c8a24e0a;border-radius:0 8px 8px 0;margin-bottom:.5rem}
-.act-item .title{color:#f0e6d3;font-weight:600}
-.act-item .meta{font-size:.8rem;color:#888;margin-top:.2rem}
-.cat-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;background:#c8a24e22;color:#c8a24e}
+.act-card{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.act-card h5{color:var(--gold);font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
+.act-item{padding:.7rem .8rem;border-left:3px solid #c8a24e;background:var(--gold)0a;border-radius:0 8px 8px 0;margin-bottom:.5rem}
+.act-item .title{color:var(--text);font-weight:600}
+.act-item .meta{font-size:.8rem;color:var(--text-dim);margin-top:.2rem}
+.cat-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;background:var(--gold)22;color:var(--gold)}
 </style>
 {% endblock %}
 {% block content %}
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-calendar-event"></i> Aktivnosti</h2>
+<h2 class="fx-text-gold mb-3" style="font-family:Cormorant Garamond,serif"><i class="bi bi-calendar-event"></i> Aktivnosti</h2>
 
 <div class="act-card">
   <h5>Nadolazece</h5>
@@ -27,7 +27,7 @@
     </div>
   </div>
   {% empty %}
-  <p style="color:#666">Nema planiranih aktivnosti.</p>
+  <p class="fx-text-dim">Nema planiranih aktivnosti.</p>
   {% endfor %}
 </div>
 
@@ -35,7 +35,7 @@
 <div class="act-card">
   <h5>Prosle</h5>
   {% for a in past %}
-  <div class="act-item" style="border-left-color:#64748b;opacity:.7">
+  <div class="act-item fx-opacity-70" style="border-left-color:#64748b">
     <div class="title">{{ a.title }} <span class="cat-badge">{{ a.get_category_display }}</span></div>
     <div class="meta">{{ a.date|date:"d.m.Y" }}</div>
   </div>

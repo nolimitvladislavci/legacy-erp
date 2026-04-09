@@ -21,7 +21,7 @@
   border: 1px solid rgba(255,255,255,0.1);
 }
 .syn-logo { font-size: 2rem; }
-.syn-header-title { color: #fff; font-size: 1.2rem; font-weight: 700; }
+.syn-header-title { color:var(--white); font-size: 1.2rem; font-weight: 700; }
 .syn-header-sub { color: rgba(255,255,255,0.7); font-size: .8rem; margin-top: 2px; }
 .syn-header-stats { margin-left: auto; display: flex; gap: 1.5rem; text-align: center; }
 .syn-stat-val { color: var(--syn-gold); font-size: 1.4rem; font-weight: 700; display: block; }
@@ -44,7 +44,7 @@
   color: var(--text-muted, #94a3b8); transition: all .15s;
 }
 .syn-filter-btn.active {
-  background: var(--syn-blue); color: #fff; border-color: var(--syn-blue);
+  background: var(--syn-blue); color:var(--white); border-color: var(--syn-blue);
 }
 
 /* Grid knjiga */
@@ -99,10 +99,10 @@
   font-size: .58rem; font-weight: 700; padding: 2px 7px;
   border-radius: 20px; display: inline-flex; align-items: center; gap: 3px;
 }
-.syn-badge-aktivan { background: rgba(34,197,94,.15); color: #4ade80; }
-.syn-badge-arhiva  { background: rgba(100,116,139,.15); color: #94a3b8; }
+.syn-badge-aktivan { background: rgba(34,197,94,.15); color:var(--green); }
+.syn-badge-arhiva  { background: rgba(100,116,139,.15); color:var(--text-muted); }
 .syn-badge-sustav  { background: rgba(201,168,76,.15); color: var(--syn-gold); }
-.syn-badge-god     { background: rgba(59,130,246,.12); color: #60a5fa; }
+.syn-badge-god     { background: rgba(59,130,246,.12); color:var(--blue); }
 
 /* Footer */
 .syn-card-foot {
@@ -121,13 +121,13 @@
 }
 .syn-card-action-open:hover { background: rgba(201,168,76,.22); }
 .syn-card-action-add {
-  background: rgba(34,197,94,.1); color: #4ade80;
+  background: rgba(34,197,94,.1); color:var(--green);
 }
 .syn-card-action-add:hover { background: rgba(34,197,94,.2); }
 
 /* LIMIT Connect indikator */
 .syn-limit-tag {
-  font-size: .65rem; color: #94a3b8; margin-top: 2px;
+  font-size: .65rem; color:var(--text-muted); margin-top: 2px;
   display: flex; align-items: center; gap: 4px;
 }
 .syn-limit-tag .dot {
@@ -161,7 +161,7 @@
         <span class="syn-stat-lbl">Ukupno knjiga</span>
       </div>
       <div>
-        <span class="syn-stat-val" style="color:#4ade80">{{ aktivnih }}</span>
+        <span class="syn-stat-val fx-text-green">{{ aktivnih }}</span>
         <span class="syn-stat-lbl">Aktivnih</span>
       </div>
       <div>
@@ -218,7 +218,7 @@
 
       <div class="syn-card-foot">
         <span class="syn-card-size">{{ k.size_kb }} KB</span>
-        <div style="display:flex;gap:6px">
+        <div class="d-flex fx-gap-2">
           {% if k.u_sustavu and k.limit_id %}
             <a href="/hr/synesis/settings/?company={{ k.limit_id }}"
                class="syn-card-action syn-card-action-open">
@@ -235,15 +235,15 @@
 
     </div>
     {% empty %}
-    <div class="syn-empty" style="grid-column:1/-1">
-      <div style="font-size:2.5rem;margin-bottom:.5rem">📚</div>
+    <div class="syn-empty fx-col-full">
+      <div class="mb-2 fx-fs-7xl">📚</div>
       <div>Nema knjiga na serveru.</div>
     </div>
     {% endfor %}
   </div>
 
-  <div id="synEmpty" class="syn-empty" style="display:none">
-    <div style="font-size:2rem;margin-bottom:.5rem">🔍</div>
+  <div id="synEmpty" class="syn-empty fx-hidden">
+    <div class="fx-fs-icon mb-2">🔍</div>
     <div>Nema rezultata za vašu pretragu.</div>
   </div>
 

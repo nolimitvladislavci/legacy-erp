@@ -3,65 +3,15 @@
 {% block title %}{{ project.name }}{% endblock %}
 {% block page_title %}{{ project.name }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <span class="badge bg-dark me-2">{{ project.code }}</span>
-    <h2 class="d-inline mb-0">{{ project.name }}</h2>
-    <span class="badge ms-2
-      {% if project.status == 'active' %}bg-success
-      {% elif project.status == 'planning' %}bg-secondary
-      {% elif project.status == 'on_hold' %}bg-warning text-dark
-      {% elif project.status == 'completed' %}bg-primary
-      {% else %}bg-danger{% endif %}">
-      {{ project.status }}
-    </span>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'project_edit' project.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>{% trans "Uredi" %}</a>
-    <a href="{% url 'projects_index' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
-  </div>
-</div>
+<!-- lang: topbar -->
 
 <div class="row g-3">
   <!-- Info card -->
   <div class="col-md-5">
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <div class="row g-2 small">
         {% if project.client %}<div class="col-6"><div class="label">{% trans "Klijent" %}</div><div>{{ project.client.name }}</div></div>{% endif %}
         {% if project.company %}<div class="col-6"><div class="label">{% trans "Tvrtka" %}</div><div>{{ project.company.name }}</div></div>{% endif %}
@@ -90,7 +40,7 @@
     </div>
 
     <!-- Add update -->
-    <div class="stat-card">
+    <div class="fenix-stat">
       <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-primary"></i>{% trans "Dodaj ažuriranje" %}</h6>
       <form method="post" action="{% url 'project_update_add' project.pk %}">
         {% csrf_token %}
@@ -114,17 +64,17 @@
   <div class="col-md-7">
 
     <!-- Team members -->
-    <div class="stat-card mb-3">
-      <h6 class="fw-bold mb-3"><i class="fas fa-users me-2 text-primary"></i>{% trans "Tim projekta" %} <span class="badge bg-secondary" style="font-size:.7rem">{{ team_members.count }}</span></h6>
+    <div class="fenix-filters">
+      <h6 class="fw-bold mb-3"><i class="fas fa-users me-2 text-primary"></i>{% trans "Tim projekta" %} <span class="fenix-badge fenix-badge-muted fx-fs-sm">{{ team_members.count }}</span></h6>
       {% if team_members %}
       <div class="d-flex flex-wrap gap-2 mb-3">
         {% for member in team_members %}
-        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:8px;font-size:.82rem">
-          <span style="color:#e2e8f0">{{ member.get_full_name|default:member.username }}</span>
-          <form method="post" action="{% url 'project_team_remove' project.pk %}" style="display:inline">
+        <div class="fx-bg-surface2 fx-rounded d-flex fx-gap-2 fx-fs-note align-items-center fx-b2" style="padding:6px 12px">
+          <span class="fx-text-body">{{ member.get_full_name|default:member.username }}</span>
+          <form method="post" action="{% url 'project_team_remove' project.pk %}" class="d-inline">
             {% csrf_token %}
             <input type="hidden" name="user_id" value="{{ member.pk }}">
-            <button type="submit" style="background:none;border:none;color:#f87171;cursor:pointer;padding:0;font-size:.75rem;line-height:1" title="Ukloni">✕</button>
+            <button type="submit" class="fx-border-none fx-pointer fx-fs-caption fx-text-red fx-bg-transparent fx-p-0" style="line-height:1" title="Ukloni">✕</button>
           </form>
         </div>
         {% endfor %}
@@ -135,23 +85,23 @@
       {% if all_workers %}
       <form method="post" action="{% url 'project_team_add' project.pk %}" class="d-flex gap-2">
         {% csrf_token %}
-        <select name="user_id" class="form-select form-select-sm" style="flex:1">
+        <select name="user_id" class="form-select form-select-sm fx-flex-1">
           <option value="">{% trans "— Odaberi radnika —" %}</option>
           {% for w in all_workers %}
           <option value="{{ w.pk }}">{{ w.get_full_name|default:w.username }}</option>
           {% endfor %}
         </select>
-        <button type="submit" class="btn btn-sm btn-primary" style="white-space:nowrap"><i class="fas fa-plus me-1"></i>{% trans "Dodaj" %}</button>
+        <button type="submit" class="btn btn-sm btn-primary text-nowrap"><i class="fas fa-plus me-1"></i>{% trans "Dodaj" %}</button>
       </form>
       {% endif %}
     </div>
       <!-- Work entries -->
     {% if work_entries %}
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <h6 class="fw-bold mb-3"><i class="fas fa-clock me-2 text-info"></i>{% trans "Zadnji unosi radnih sati" %}</h6>
       <div class="table-responsive">
         <table class="table table-sm mb-0">
-          <thead class="table-light"><tr><th>{% trans "Datum" %}</th><th>{% trans "Radnik" %}</th><th>{% trans "Zadatak" %}</th><th class="text-end">{% trans "Sati" %}</th></tr></thead>
+          <thead ><tr><th>{% trans "Datum" %}</th><th>{% trans "Radnik" %}</th><th>{% trans "Zadatak" %}</th><th class="text-end">{% trans "Sati" %}</th></tr></thead>
           <tbody>
             {% for e in work_entries %}
             <tr>
@@ -172,7 +122,7 @@
 
     <!-- Updates -->
     {% if updates %}
-    <div class="stat-card mb-3">
+    <div class="fenix-filters">
       <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-success"></i>{% trans "Ažuriranja projekta" %}</h6>
       {% for upd in updates %}
       <div class="border-start border-3 border-primary ps-3 mb-3">
@@ -181,7 +131,7 @@
           <small class="text-muted">{{ upd.created_at|date:"d.m.Y" }} &middot; {{ upd.author.get_full_name|default:upd.author.username }}</small>
         </div>
         <p class="small text-muted mb-0 mt-1">{{ upd.content }}</p>
-        {% if upd.is_public %}<span class="badge bg-success" style="font-size:0.6rem">{% trans "Javno" %}</span>{% endif %}
+        {% if upd.is_public %}<span class="fenix-badge fenix-badge-success fx-fs-2xs">{% trans "Javno" %}</span>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -189,13 +139,13 @@
 
     <!-- Photos -->
     {% if photos %}
-    <div class="stat-card">
+    <div class="fenix-stat">
       <h6 class="fw-bold mb-3"><i class="fas fa-images me-2 text-warning"></i>Fotografije ({{ photos.count }})</h6>
       <div class="row g-2">
         {% for photo in photos %}
         <div class="col-4">
           <a href="{{ photo.image.url }}" target="_blank">
-            <img src="{{ photo.image.url }}" class="img-fluid rounded" style="height:80px;width:100%;object-fit:cover" alt="{{ photo.caption }}">
+            <img src="{{ photo.image.url }}" class="img-fluid rounded fx-w-full" style="height:80px;object-fit:cover" alt="{{ photo.caption }}">
           </a>
           {% if photo.caption %}<div class="small text-muted mt-1">{{ photo.caption|truncatechars:20 }}</div>{% endif %}
         </div>

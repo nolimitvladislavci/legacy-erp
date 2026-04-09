@@ -3,10 +3,10 @@
 {% block title %}{% trans "Nova BARF ponuda" %}{% endblock %}
 {% block page_title %}{% trans "Nova BARF ponuda" %}{% endblock %}
 {% block content %}
-<div style="max-width:600px;margin:0 auto">
-  <p style="color:var(--muted);margin-bottom:1.5rem">{% trans "Objavite svježu sirovinu za BARF prehranu kućnih ljubimaca." %}</p>
+<div class="fx-m-auto" style="max-width:600px">
+  <p class="fx-text-muted fx-mb-6">{% trans "Objavite svježu sirovinu za BARF prehranu kućnih ljubimaca." %}</p>
 
-  <form method="post" style="display:flex;flex-direction:column;gap:1rem">
+  <form method="post" class="d-flex fx-flex-col fx-gap-4">
     {% csrf_token %}
 
     <div class="wiz-field">
@@ -16,7 +16,7 @@
       </select>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <div class="wiz-field">
         <label>{% trans "Količina (kg)" %} *</label>
         <input type="number" name="quantity_kg" step="0.01" min="0.1" required class="reg-input" placeholder="10.00">
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="d-grid fx-gap-4 fx-grid-2-equal">
       <div class="wiz-field">
         <label>{% trans "Dostupno od" %} *</label>
         <input type="date" name="available_from" required class="reg-input">
@@ -43,11 +43,11 @@
       <input type="text" name="k3_cert_number" class="reg-input" placeholder="K3-2026-001">
     </div>
 
-    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text)">
+    <div class="d-flex fx-flex-wrap" style="gap:1.5rem">
+      <label class="d-flex fx-pointer align-items-center fx-gap-2 fx-text-body">
         <input type="checkbox" name="is_free_range"> {% trans "Slobodan uzgoj" %}
       </label>
-      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text)">
+      <label class="d-flex fx-pointer align-items-center fx-gap-2 fx-text-body">
         <input type="checkbox" name="is_antibiotic_free"> {% trans "Bez antibiotika" %}
       </label>
     </div>
@@ -57,7 +57,7 @@
       <textarea name="description" rows="3" class="reg-input" placeholder="{% trans 'Kratki opis proizvoda...' %}"></textarea>
     </div>
 
-    <div style="display:flex;gap:1rem;margin-top:.5rem">
+    <div class="d-flex fx-gap-4 mt-2">
       <a href="{% url 'memio_pet:barf_listings' %}" class="wiz-btn wiz-btn-ghost">&larr; {% trans "Natrag" %}</a>
       <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Objavi ponudu" %} &rarr;</button>
     </div>

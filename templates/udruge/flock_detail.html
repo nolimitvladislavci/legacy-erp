@@ -24,7 +24,7 @@
 <div class="fd-container">
 
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata peradi</a></li>
     <li class="breadcrumb-item active">{{ flock.naziv }}</li>
   </ol>
@@ -33,34 +33,34 @@
 <!-- Hero -->
 <div class="fd-hero">
   <div class="d-flex gap-3 align-items-center flex-wrap">
-    <div style="width:60px;height:60px;border-radius:14px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">
+    <div class="fx-rounded-lg d-flex fx-fs-icon align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;background:rgba(201,168,76,.1)">
       {% if flock.vrsta == 'kokos' %}&#x1F414;{% elif flock.vrsta == 'patka' %}&#x1F986;{% elif flock.vrsta == 'guska' %}&#x1FAB6;{% else %}&#x1F426;{% endif %}
     </div>
-    <div style="flex:1;min-width:0">
-      <h2 style="font-size:1.4rem;font-weight:800;color:#fff;margin:0 0 .25rem">{{ flock.naziv }}</h2>
+    <div class="fx-flex-1 min-w-0">
+      <h2 class="fx-fs-4xl fx-fw-800 fx-text-white" style="margin:0 0 .25rem">{{ flock.naziv }}</h2>
       <div class="d-flex flex-wrap gap-2">
-        <span style="background:rgba(201,168,76,.1);border:1px solid var(--gold-border);color:var(--gold);padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:600">{{ flock.get_vrsta_display }}</span>
-        <span style="background:rgba(100,116,139,.1);color:#94a3b8;padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:600">{{ flock.get_tip_uzgoja_display }}</span>
-        {% if flock.pasmina %}<span style="background:rgba(100,116,139,.1);color:#94a3b8;padding:3px 10px;border-radius:8px;font-size:.72rem">{{ flock.pasmina }}</span>{% endif %}
-        {% if not flock.aktivan %}<span style="background:rgba(239,68,68,.1);color:#ef4444;padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:700">Neaktivno</span>{% endif %}
+        <span class="fx-rounded fx-fs-sm fx-fw-semibold fx-text-gold" style="background:rgba(201,168,76,.1);border:1px solid var(--gold-border);padding:3px 10px">{{ flock.get_vrsta_display }}</span>
+        <span class="fx-text-muted fx-rounded fx-fs-sm fx-fw-semibold" style="background:rgba(100,116,139,.1);padding:3px 10px">{{ flock.get_tip_uzgoja_display }}</span>
+        {% if flock.pasmina %}<span class="fx-text-muted fx-rounded fx-fs-sm" style="background:rgba(100,116,139,.1);padding:3px 10px">{{ flock.pasmina }}</span>{% endif %}
+        {% if not flock.aktivan %}<span class="fx-text-red fx-rounded fx-fs-sm fx-fw-bold" style="background:rgba(239,68,68,.1);padding:3px 10px">Neaktivno</span>{% endif %}
       </div>
     </div>
     <div class="d-flex gap-2">
-      <a href="{% url 'udruge:flock_edit' flock.pk %}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px"><i class="fas fa-pen me-1"></i>Uredi</a>
+      <a href="{% url 'udruge:flock_edit' flock.pk %}" class="btn btn-sm btn-outline-secondary fx-rounded"><i class="fas fa-pen me-1"></i>Uredi</a>
     </div>
   </div>
 </div>
 
 <!-- Karenca brana -->
 {% if flock.has_active_karenca %}
-<div style="background:rgba(239,68,68,.08);border:2px solid rgba(239,68,68,.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem">
-  <div style="width:44px;height:44px;background:rgba(239,68,68,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-    <i class="fas fa-ban" style="color:#ef4444;font-size:1.1rem"></i>
+<div class="fx-rounded d-flex align-items-center fx-gap-4" style="background:rgba(239,68,68,.08);border:2px solid rgba(239,68,68,.3);padding:1rem 1.25rem;margin-bottom:1.25rem">
+  <div class="fx-rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;background:rgba(239,68,68,.15)">
+    <i class="fas fa-ban fx-text-red fx-fs-xl"></i>
   </div>
   <div>
-    <div style="font-weight:700;color:#ef4444;font-size:.9rem">KARENCA AKTIVNA — Prodaja zabranjena</div>
-    <div style="font-size:.78rem;color:var(--text-dim)">
-      Jato pod aktivnim tretmanom. Jaja nisu za prodaju do <strong style="color:#ef4444">{{ flock.karenca_end_date|date:"d.m.Y" }}</strong>.
+    <div class="fx-fw-bold fx-text-red fx-fs-md">KARENCA AKTIVNA — Prodaja zabranjena</div>
+    <div class="fx-fs-body-sm fx-text-dim">
+      Jato pod aktivnim tretmanom. Jaja nisu za prodaju do <strong class="fx-text-red">{{ flock.karenca_end_date|date:"d.m.Y" }}</strong>.
       Gumb "Burza" je onemogucen. Svi aktivni oglasi su povuceni.
     </div>
   </div>
@@ -70,19 +70,19 @@
 <!-- Stats (30 dana) -->
 <div class="fd-stats">
   <div class="fd-stat">
-    <div class="fd-stat-val" style="color:var(--gold)">{{ flock.aktivnih_komada }}</div>
+    <div class="fd-stat-val fx-text-gold">{{ flock.aktivnih_komada }}</div>
     <div class="fd-stat-lbl">Aktivnih</div>
   </div>
   <div class="fd-stat">
-    <div class="fd-stat-val" style="color:#f59e0b">{{ egg_stats.ukupno_jaja|default:0 }}</div>
+    <div class="fd-stat-val fx-text-amber">{{ egg_stats.ukupno_jaja|default:0 }}</div>
     <div class="fd-stat-lbl">Jaja (30d)</div>
   </div>
   <div class="fd-stat">
-    <div class="fd-stat-val" style="color:#ef4444">{{ egg_stats.ukupno_polomljenih|default:0 }}</div>
+    <div class="fd-stat-val fx-text-red">{{ egg_stats.ukupno_polomljenih|default:0 }}</div>
     <div class="fd-stat-lbl">Polomljena</div>
   </div>
   <div class="fd-stat">
-    <div class="fd-stat-val" style="color:#22c55e">{{ egg_stats.ukupno_prodanih|default:0 }}</div>
+    <div class="fd-stat-val fx-text-green">{{ egg_stats.ukupno_prodanih|default:0 }}</div>
     <div class="fd-stat-lbl">Prodano</div>
   </div>
   <div class="fd-stat">
@@ -96,8 +96,8 @@
 <!-- Dnevna jaja graf (zadnjih 14 dana) -->
 <div class="fd-section">
   <div class="fd-section-header">
-    <h3 class="fd-section-title" style="color:#f59e0b"><i class="fas fa-egg me-2"></i>Nesenje jaja</h3>
-    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0a;font-weight:700;border-radius:8px;padding:5px 14px;font-size:.78rem">
+    <h3 class="fd-section-title fx-text-amber"><i class="fas fa-egg me-2"></i>Nesenje jaja</h3>
+    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm fx-text-dark fx-fw-bold fx-rounded fx-fs-body-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:5px 14px">
       <i class="fas fa-plus me-1"></i>Unos jaja
     </a>
   </div>
@@ -105,15 +105,15 @@
   <div style="padding:1rem 1.25rem">
     <div class="d-flex align-items-end gap-1" style="height:80px">
       {% for e in egg_records reversed %}
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-        <div style="font-size:.6rem;color:var(--text-dim);margin-bottom:2px">{{ e.broj_jaja }}</div>
-        <div style="width:100%;max-width:30px;background:var(--gold);border-radius:4px 4px 0 0;min-height:4px;height:{% widthratio e.broj_jaja flock.broj_komada 60 %}px"></div>
-        <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">{{ e.datum|date:"d" }}</div>
+      <div class="d-flex fx-flex-col align-items-center justify-content-end fx-flex-1" style="height:100%">
+        <div class="fx-fs-2xs fx-text-dim mb-1">{{ e.broj_jaja }}</div>
+        <div class="fx-w-full" style="max-width:30px;background:var(--gold);border-radius:4px 4px 0 0;min-height:4px;height:{% widthratio e.broj_jaja flock.broj_komada 60 %}px"></div>
+        <div class="fx-text-dim fx-fs-2xs fx-mt-1">{{ e.datum|date:"d" }}</div>
       </div>
       {% endfor %}
     </div>
   </div>
-  <div style="overflow-x:auto">
+  <div class="fx-scroll-x">
     <table class="fd-table">
       <thead><tr>
         <th>Datum</th><th>Jaja</th><th>Polomljena</th><th>Prodano</th><th>Za burzu</th><th></th>
@@ -121,21 +121,21 @@
       <tbody>
         {% for e in egg_records %}
         <tr>
-          <td style="font-weight:600">{{ e.datum|date:"d.m.Y" }}</td>
-          <td><span style="font-weight:800;color:var(--gold)">{{ e.broj_jaja }}</span></td>
-          <td>{% if e.broken %}<span style="color:#ef4444">{{ e.broken }}</span>{% else %}-{% endif %}</td>
-          <td>{% if e.sold %}<span style="color:#22c55e">{{ e.sold }}</span>{% else %}-{% endif %}</td>
-          <td>{% if e.za_prodaju %}<i class="fas fa-check-circle" style="color:#22c55e"></i>{% else %}-{% endif %}</td>
-          <td style="text-align:right">
+          <td class="fx-fw-semibold">{{ e.datum|date:"d.m.Y" }}</td>
+          <td><span class="fx-fw-800 fx-text-gold">{{ e.broj_jaja }}</span></td>
+          <td>{% if e.broken %}<span class="fx-text-red">{{ e.broken }}</span>{% else %}-{% endif %}</td>
+          <td>{% if e.sold %}<span class="fx-text-green">{{ e.sold }}</span>{% else %}-{% endif %}</td>
+          <td>{% if e.za_prodaju %}<i class="fas fa-check-circle fx-text-green"></i>{% else %}-{% endif %}</td>
+          <td class="text-end">
             {% if e.za_prodaju %}
               {% if flock.has_active_karenca %}
-              <button type="button" class="btn btn-sm" disabled
-                style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:6px;padding:2px 8px;font-size:.68rem;font-weight:600;cursor:not-allowed"
+              <button type="button" class="btn btn-sm fx-text-red fx-rounded-sm fx-fs-tiny fx-fw-semibold fx-p-btn" disabled
+                style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);cursor:not-allowed"
                 title="ZABRANJENO: Jato pod aktivnom karencom do {{ flock.karenca_end_date|date:'d.m.Y' }}">
                 <i class="fas fa-ban me-1"></i>Karenca
               </button>
               {% else %}
-              <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:6px;padding:2px 8px;font-size:.68rem;font-weight:600" onclick="openBridgePublish({model:'EggRecord',id:{{ e.pk }},name:'Jaja {{ flock.get_vrsta_display|escapejs }} — {{ e.broj_jaja }} kom',price:'{{ e.cijena_eur|default:"" }}',qty:'{{ e.broj_jaja }}',unit:'kom'})">
+              <button type="button" class="btn btn-sm fx-rounded-sm fx-fs-tiny fx-fw-semibold fx-text-gold fx-bg-gold-dim fx-p-btn" style="border:1px solid var(--gold-border)" onclick="openBridgePublish({model:'EggRecord',id:{{ e.pk }},name:'Jaja {{ flock.get_vrsta_display|escapejs }} — {{ e.broj_jaja }} kom',price:'{{ e.cijena_eur|default:"" }}',qty:'{{ e.broj_jaja }}',unit:'kom'})">
                 <i class="fas fa-store me-1"></i>Burza
               </button>
               {% endif %}
@@ -147,10 +147,10 @@
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:3rem;color:var(--text-dim)">
-    <i class="fas fa-egg" style="font-size:2rem;opacity:.15;display:block;margin-bottom:.5rem"></i>
-    <div style="font-size:.85rem">Nema zapisa o nesenju</div>
-    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm mt-2" style="background:var(--gold);color:#0a0a0a;font-weight:600;border-radius:8px">
+  <div class="text-center fx-text-dim fx-p-7">
+    <i class="fas fa-egg fx-fs-icon d-block mb-2" style="opacity:.15"></i>
+    <div class="fx-fs-base">Nema zapisa o nesenju</div>
+    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm mt-2 fx-text-dark fx-fw-semibold fx-rounded fx-bg-gold">
       <i class="fas fa-plus me-1"></i>Prvi unos
     </a>
   </div>
@@ -160,26 +160,26 @@
 <!-- Zdravstveni zapisi -->
 <div class="fd-section">
   <div class="fd-section-header">
-    <h3 class="fd-section-title" style="color:#3b82f6"><i class="fas fa-heartbeat me-2"></i>Zdravstveni zapisi</h3>
-    <a href="{% url 'udruge:flock_health_create' flock.pk %}" class="btn btn-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:600;border-radius:8px;padding:5px 14px;font-size:.78rem">
+    <h3 class="fd-section-title fx-text-blue"><i class="fas fa-heartbeat me-2"></i>Zdravstveni zapisi</h3>
+    <a href="{% url 'udruge:flock_health_create' flock.pk %}" class="btn btn-sm fx-text-white fx-fw-semibold fx-rounded fx-fs-body-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);padding:5px 14px">
       <i class="fas fa-plus me-1"></i>Novi tretman
     </a>
   </div>
   {% if health_records %}
-  <div style="overflow-x:auto">
+  <div class="fx-scroll-x">
     <table class="fd-table">
       <thead><tr><th>Datum</th><th>Tretman</th><th>Lijek</th><th>Veterinar</th><th>Karenca</th></tr></thead>
       <tbody>
         {% for h in health_records %}
         <tr>
-          <td style="font-weight:600">{{ h.datum|date:"d.m.Y" }}</td>
-          <td><span style="font-size:.78rem;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(59,130,246,.1);color:#3b82f6">{{ h.get_vrsta_tretmana_display }}</span></td>
-          <td style="font-size:.82rem">{{ h.lijek|default:"-" }}</td>
-          <td style="font-size:.82rem">{{ h.veterinar|default:"-" }}</td>
+          <td class="fx-fw-semibold">{{ h.datum|date:"d.m.Y" }}</td>
+          <td><span class="fx-fs-body-sm fx-fw-bold fx-rounded-sm fx-text-blue fx-p-btn" style="background:rgba(59,130,246,.1)">{{ h.get_vrsta_tretmana_display }}</span></td>
+          <td class="fx-fs-note">{{ h.lijek|default:"-" }}</td>
+          <td class="fx-fs-note">{{ h.veterinar|default:"-" }}</td>
           <td>
             {% if h.karenca_dana %}
-              {% if h.karenca_aktivna %}<span style="color:#ef4444;font-weight:700;font-size:.78rem"><i class="fas fa-exclamation-triangle me-1"></i>{{ h.karenca_dana }}d</span>
-              {% else %}<span style="color:#22c55e;font-size:.78rem">Istekla</span>{% endif %}
+              {% if h.karenca_aktivna %}<span class="fx-text-red fx-fw-bold fx-fs-body-sm"><i class="fas fa-exclamation-triangle me-1"></i>{{ h.karenca_dana }}d</span>
+              {% else %}<span class="fx-text-green fx-fs-body-sm">Istekla</span>{% endif %}
             {% else %}-{% endif %}
           </td>
         </tr>
@@ -188,9 +188,9 @@
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:2.5rem;color:var(--text-dim)">
-    <i class="fas fa-heartbeat" style="font-size:1.5rem;opacity:.15;display:block;margin-bottom:.5rem"></i>
-    <div style="font-size:.85rem">Nema zdravstvenih zapisa</div>
+  <div class="text-center fx-text-dim" style="padding:2.5rem">
+    <i class="fas fa-heartbeat fx-fs-5xl d-block mb-2" style="opacity:.15"></i>
+    <div class="fx-fs-base">Nema zdravstvenih zapisa</div>
   </div>
   {% endif %}
 </div>
@@ -198,28 +198,28 @@
 <!-- Uginuca -->
 <div class="fd-section">
   <div class="fd-section-header">
-    <h3 class="fd-section-title" style="color:#ef4444"><i class="fas fa-skull-crossbones me-2"></i>Uginuca</h3>
-    <a href="{% url 'udruge:flock_mortality_create' flock.pk %}" class="btn btn-sm" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-weight:600;border-radius:8px;padding:5px 14px;font-size:.78rem">
+    <h3 class="fd-section-title fx-text-red"><i class="fas fa-skull-crossbones me-2"></i>Uginuca</h3>
+    <a href="{% url 'udruge:flock_mortality_create' flock.pk %}" class="btn btn-sm fx-text-red fx-fw-semibold fx-rounded fx-fs-body-sm" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);padding:5px 14px">
       <i class="fas fa-plus me-1"></i>Zapis
     </a>
   </div>
   {% if mortalities %}
-  <div style="overflow-x:auto">
+  <div class="fx-scroll-x">
     <table class="fd-table">
       <thead><tr><th>Datum</th><th>Broj</th><th>Razlog</th></tr></thead>
       <tbody>
         {% for m in mortalities %}
         <tr>
-          <td style="font-weight:600">{{ m.datum|date:"d.m.Y" }}</td>
-          <td><span style="font-weight:800;color:#ef4444">{{ m.broj_uginulih }}</span></td>
-          <td style="font-size:.82rem">{{ m.razlog|default:"-" }}</td>
+          <td class="fx-fw-semibold">{{ m.datum|date:"d.m.Y" }}</td>
+          <td><span class="fx-fw-800 fx-text-red">{{ m.broj_uginulih }}</span></td>
+          <td class="fx-fs-note">{{ m.razlog|default:"-" }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem">Nema zabilježenih uginuća</div>
+  <div class="text-center fx-fs-base fx-text-dim fx-p-6">Nema zabilježenih uginuća</div>
   {% endif %}
 </div>
 

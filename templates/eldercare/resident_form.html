@@ -4,16 +4,16 @@
 {% block page_title %}{% if mode == "create" %}Prijem korisnika{% else %}Uredi{% endif %}{% endblock %}
 {% block extra_css %}
 <style>
-.ec-form{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
-.ec-form label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.3rem}
-.ec-form input,.ec-form select,.ec-form textarea{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:.5rem .8rem;width:100%}
-.ec-form input:focus,.ec-form select:focus,.ec-form textarea:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 2px #c8a24e22}
-.section-title{color:#c8a24e;font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.4rem;margin:1.5rem 0 1rem}
+.ec-form{background:var(--surface);border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
+.ec-form label{color:var(--gold);font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.ec-form input,.ec-form select,.ec-form textarea{background:var(--surface-deep);color:var(--text);border:1px solid rgba(200,162,78,0.2);border-radius:6px;padding:.5rem .8rem;width:100%}
+.ec-form input:focus,.ec-form select:focus,.ec-form textarea:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 2px #c8a24e22}
+.section-title{color:var(--gold);font-family:"Cormorant Garamond",serif;border-bottom:1px solid #c8a24e22;padding-bottom:.4rem;margin:1.5rem 0 1rem}
 </style>
 {% endblock %}
 {% block content %}
-<a href="{% url 'eldercare:resident_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Natrag</a>
-<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{% if mode == "create" %}Prijem novog korisnika{% else %}Uredi korisnika{% endif %}</h2>
+<a href="{% url 'eldercare:resident_list' %}" class="fx-text-gold fx-fs-base"><i class="bi bi-arrow-left"></i> Natrag</a>
+<h2 class="fx-text-gold" style="font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem">{% if mode == "create" %}Prijem novog korisnika{% else %}Uredi korisnika{% endif %}</h2>
 
 <form method="post" class="ec-form">
   {% csrf_token %}
@@ -54,11 +54,11 @@
   <h5 class="section-title"><i class="bi bi-shield-check"></i> GDPR</h5>
   <div class="form-check">
     <input type="checkbox" name="gdpr_consent" class="form-check-input" id="gdpr">
-    <label for="gdpr" style="color:#f0e6d3;font-weight:400">GDPR pristanak za obradu podataka</label>
+    <label for="gdpr" class="fx-fw-normal fx-text-body">GDPR pristanak za obradu podataka</label>
   </div>
 
   <div class="mt-4">
-    <button type="submit" class="btn" style="background:#c8a24e;color:#1a1a2e;font-weight:600;padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Spremi</button>
+    <button type="submit" class="btn fx-bg-gold fx-fw-semibold fx-text-dark" style="padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Spremi</button>
     <a href="{% url 'eldercare:resident_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
   </div>
 </form>

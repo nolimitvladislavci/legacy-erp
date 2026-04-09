@@ -39,7 +39,7 @@ body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,
 .tab-btn.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold);font-weight:700}
 .tab-icon{font-size:1.05rem;width:20px;text-align:center;flex-shrink:0}
 .tab-num{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;font-size:.6rem;font-weight:800;margin-left:auto;background:rgba(255,255,255,.1);color:var(--text-dim);flex-shrink:0}
-.tab-btn.active .tab-num{background:var(--gold);color:#000}
+.tab-btn.active .tab-num{background:var(--gold);color:var(--text)}
 
 /* ── MAIN ───────────────────────────────────────────────────────── */
 .main{flex:1;padding:20px 24px 16px;overflow-y:auto;max-width:1080px}
@@ -85,7 +85,7 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
 .btn-add:hover{background:rgba(255,255,255,.1);color:var(--text)}
 .btn-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem;padding:3px 7px;opacity:.5;transition:opacity .15s}
 .btn-del:hover{opacity:1}
-.btn-gold{background:var(--gold);color:#000;font-weight:800;border-color:var(--gold)}
+.btn-gold{background:var(--gold);color:var(--text);font-weight:800;border-color:var(--gold)}
 .btn-gold:hover{background:var(--gold2)}
 .btn-outline{background:var(--gold-dim);color:var(--gold);border-color:var(--gold-border)}
 .btn-outline:hover{background:rgba(201,168,76,.22)}
@@ -217,10 +217,10 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
 
       <div class="card" style="border-color:var(--gold-border)">
         <div class="card-title">📋 Predlošci projekta <span>— Učitajte predefinirane kalkulacije</span></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-outline" onclick="loadPreset('bad')" style="padding:10px 18px;font-size:.82rem">🛁 Renovacija kupaonice (8m²)</button>
-          <button class="btn btn-outline" onclick="loadPreset('bad-premium')" style="padding:10px 18px;font-size:.82rem">⭐ Kupaonica Premium (10m²)</button>
-          <button class="btn btn-outline" onclick="loadPreset('leer')" style="padding:10px 18px;font-size:.82rem">🆕 Počni ispočetka</button>
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
+          <button class="btn btn-outline fx-fs-note" onclick="loadPreset('bad')" style="padding:10px 18px">🛁 Renovacija kupaonice (8m²)</button>
+          <button class="btn btn-outline fx-fs-note" onclick="loadPreset('bad-premium')" style="padding:10px 18px">⭐ Kupaonica Premium (10m²)</button>
+          <button class="btn btn-outline fx-fs-note" onclick="loadPreset('leer')" style="padding:10px 18px">🆕 Počni ispočetka</button>
         </div>
       </div>
 
@@ -231,10 +231,10 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
 
         <div id="workers-container"></div>
 
-        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+        <div class="d-flex fx-gap-2 fx-flex-wrap mt-1">
           <button class="btn btn-add" onclick="addWorker()">+ Dodaj zaposlenika</button>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
-            <span style="font-size:.68rem;color:var(--text-dim);align-self:center">Schnelleingabe:</span>
+          <div class="d-flex fx-gap-2 fx-flex-wrap fx-ml-auto">
+            <span class="fx-fs-tiny fx-text-dim" style="align-self:center">Schnelleingabe:</span>
             <button class="btn-preset" onclick="addWorkerPreset(0)">Pomoćnik</button>
             <button class="btn-preset" onclick="addWorkerPreset(2)">Kvalificirani radnik I</button>
             <button class="btn-preset" onclick="addWorkerPreset(4)">Majstor</button>
@@ -243,7 +243,7 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
         </div>
       </div>
 
-      <div id="workers-kpis" class="kpi-grid" style="display:none">
+      <div id="workers-kpis" class="kpi-grid fx-hidden">
         <div class="kpi">
           <div class="kpi-label">Ukupno zaposlenika</div>
           <div class="kpi-val" id="kpi-nradnika">0</div>
@@ -262,10 +262,10 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
         </div>
       </div>
 
-      <div style="font-size:.72rem;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.8">
-        <strong style="color:var(--text)">Formula izračuna po zaposleniku:</strong><br>
+      <div class="fx-fs-sm fx-rounded fx-text-dim fx-bg-surface2 fx-b" style="padding:12px 14px;line-height:1.8">
+        <strong class="fx-text-body">Formula izračuna po zaposleniku:</strong><br>
         Tatsächliche Kosten/Stunde = (Brutto + 17% LNK) × (1 + Überstunden%) + Fahrtkosten/Stunde<br>
-        <span style="color:var(--text-dim)">pri čemu: putni troškovi/sat = dnevnice/dan ÷ sati/dan (iz ponude)</span>
+        <span class="fx-text-dim">pri čemu: putni troškovi/sat = dnevnice/dan ÷ sati/dan (iz ponude)</span>
       </div>
     </div>
 
@@ -285,13 +285,13 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
           <tbody id="mat-body"></tbody>
           <tfoot>
             <tr>
-              <td colspan="2" style="font-size:.78rem;color:var(--text-dim)">Gesamt Material:</td>
+              <td colspan="2" class="fx-fs-body-sm fx-text-dim">Gesamt Material:</td>
               <td class="r"><span class="comp" id="mat-total">0,00 €</span></td>
               <td></td>
             </tr>
           </tfoot>
         </table>
-        <div style="margin-top:12px">
+        <div class="mt-3">
           <button class="btn btn-add" onclick="addMaterial()">+ Dodaj stavku</button>
         </div>
       </div>
@@ -312,13 +312,13 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
           <tbody id="stroj-body"></tbody>
           <tfoot>
             <tr>
-              <td colspan="4" style="font-size:.78rem;color:var(--text-dim)">Gesamt Verleih:</td>
+              <td colspan="4" class="fx-fs-body-sm fx-text-dim">Gesamt Verleih:</td>
               <td class="r"><span class="comp" id="stroj-total">0,00 €</span></td>
               <td></td>
             </tr>
           </tfoot>
         </table>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <div class="d-flex fx-gap-2 fx-flex-wrap mt-3">
           <button class="btn btn-add" onclick="addStroj()">+ Dodaj stroj</button>
           <button class="btn-preset" onclick="addStrojPreset('Mini bager',35)">Mini bager €35/dan</button>
           <button class="btn-preset" onclick="addStrojPreset('Bagger',65)">Bager €65/dan</button>
@@ -329,7 +329,7 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
 
       <div class="card">
         <div class="card-title">⚙️ Regiekosten & Gewinnmarge (Open-Book)</div>
-        <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:18px">
+        <p class="fx-fs-body-sm fx-text-dim" style="margin-bottom:18px">
           Režijski troškovi se dodaju na ukupne direktne troškove (rad + strojevi + materijal).<br>
           Die Gewinnmarge/Provision wird auf die Summe aus Kosten + Regiekosten berechnet.
         </p>
@@ -340,7 +340,7 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
                  oninput="syncSlider('rezije');recalc()">
           <span class="sl-val" id="sv-rezije">15%</span>
         </div>
-        <div style="font-size:.7rem;color:var(--text-dim);margin-bottom:18px;margin-top:-6px;margin-left:212px">
+        <div class="fx-fs-sm fx-text-dim" style="margin-bottom:18px;margin-top:-6px;margin-left:212px">
           Fahrzeuge, Werkzeuge, Büromiete, Verwaltung, Versicherungen...
         </div>
 
@@ -350,7 +350,7 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
                  oninput="syncSlider('zarada');recalc()">
           <span class="sl-val" id="sv-zarada">20%</span>
         </div>
-        <div style="font-size:.7rem;color:var(--text-dim);margin-bottom:8px;margin-top:-6px;margin-left:212px">
+        <div class="fx-fs-sm fx-text-dim mb-2" style="margin-top:-6px;margin-left:212px">
           Dobit poduzeća / naknada za upravljanje projektom
         </div>
 
@@ -387,29 +387,29 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
           <div class="param-card">
             <label>Anzahl radnih dana</label>
             <input type="number" id="p-dani" value="5" min="1" max="999" step="1"
-                   oninput="recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+                   oninput="recalc()" class="fx-fs-3xl fx-fw-800 text-center">
           </div>
           <div class="param-card">
             <label>Stunden pro Tag</label>
             <input type="number" id="p-sati" value="8" min="1" max="24" step="0.5"
-                   oninput="recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+                   oninput="recalc()" class="fx-fs-3xl fx-fw-800 text-center">
           </div>
           <div class="param-card">
             <label>Regiekosten %</label>
             <input type="number" id="p-rezije-inp" value="15" min="0" max="100" step="0.5"
-                   oninput="syncFromInput('rezije');recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+                   oninput="syncFromInput('rezije');recalc()" class="fx-fs-3xl fx-fw-800 text-center">
           </div>
           <div class="param-card">
             <label>Gewinnmarge %</label>
             <input type="number" id="p-zarada-inp" value="20" min="0" max="100" step="1"
-                   oninput="syncFromInput('zarada');recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+                   oninput="syncFromInput('zarada');recalc()" class="fx-fs-3xl fx-fw-800 text-center">
           </div>
         </div>
 
         <label class="pdv-toggle">
           <input type="checkbox" id="pdv-toggle" onchange="recalc()">
           <span>Prikaži izračun s PDV-om (19%)</span>
-          <span style="margin-left:auto;font-size:.72rem;color:var(--text-dim)">Für Privatkunden (B2C)</span>
+          <span class="fx-fs-sm fx-text-dim fx-ml-auto">Für Privatkunden (B2C)</span>
         </label>
       </div>
 
@@ -457,25 +457,25 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
             <tr class="section-hdr"><td colspan="2">KOSTENÜBERSICHT</td></tr>
             <tr class="sub-row"><td>Direkte Gesamtkosten</td><td id="bd-direktni">0,00 €</td></tr>
             <tr class="sub-row"><td>+ Regiekosten (<span id="bd-rezpct">15</span>%)</td><td id="bd-rezije">0,00 €</td></tr>
-            <tr><td style="font-weight:700">Kosten + Regiekosten</td><td id="bd-sbrez" style="font-weight:700">0,00 €</td></tr>
+            <tr><td class="fx-fw-bold">Kosten + Regiekosten</td><td id="bd-sbrez" class="fx-fw-bold">0,00 €</td></tr>
             <tr class="sub-row"><td>+ Gewinnmarge (<span id="bd-zpct">20</span>%)</td><td id="bd-zarada">0,00 €</td></tr>
 
             <tr class="total-row">
               <td>💰 GESAMT NETTO</td>
               <td id="bd-neto">0,00 €</td>
             </tr>
-            <tr id="brow-pdv" class="sub-row" style="display:none">
+            <tr id="brow-pdv" class="sub-row fx-hidden">
               <td>+ PDV 19%</td>
               <td id="bd-pdv">0,00 €</td>
             </tr>
-            <tr id="brow-bruto" class="bruto-row" style="display:none">
+            <tr id="brow-bruto" class="bruto-row fx-hidden">
               <td>💶 UKUPNO BRUTO (s PDV-om)</td>
               <td id="bd-bruto">0,00 €</td>
             </tr>
 
             <tr class="section-hdr"><td colspan="2">STUNDEN & TAGESÄTZE</td></tr>
             <tr class="sub-row"><td>Nettopreis pro Stunde</td><td id="bd-csat">0,00 €/h</td></tr>
-            <tr class="sub-row" id="brow-brutosat" style="display:none"><td>Bruto cijena po satu (s PDV-om)</td><td id="bd-bsat">0,00 €/h</td></tr>
+            <tr class="sub-row fx-hidden" id="brow-brutosat"><td>Bruto cijena po satu (s PDV-om)</td><td id="bd-bsat">0,00 €/h</td></tr>
             <tr class="sub-row"><td>Nettopreis pro Tag</td><td id="bd-cdan">0,00 €/dan</td></tr>
           </tbody>
         </table>
@@ -483,14 +483,14 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
 
       <div class="card" style="border-color:var(--gold-border)">
         <div class="card-title">📤 Pošalji upit za projekt</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-          <input type="text" id="upit-title" placeholder="Naziv projekta (npr. renovacija kupaonice)" style="font-size:.88rem">
+        <div class="d-flex fx-gap-2 fx-flex-col mb-3">
+          <input type="text" id="upit-title" placeholder="Naziv projekta (npr. renovacija kupaonice)" class="fx-fs-body">
           <input type="text" id="upit-location" placeholder="Standort (Stadt, Adresse)">
         </div>
-        <button class="btn btn-gold" onclick="sendToUpit()" style="width:100%;justify-content:center;padding:12px">
+        <button class="btn btn-gold fx-w-full justify-content-center fx-p-12" onclick="sendToUpit()">
           📤 Pošalji upit za projekt →
         </button>
-        <p style="font-size:.7rem;color:var(--text-dim);margin-top:8px;text-align:center">
+        <p class="fx-fs-sm text-center fx-text-dim mt-2">
           Öffnet ein Formular mit automatisch ausgefüllten Beträgen und einer Beschreibung der Berechnung.
         </p>
       </div>
@@ -520,9 +520,9 @@ input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:poin
   </div>
   <div class="bar-item">
     <span class="bar-lbl">💶 Bruto (s PDV-om)</span>
-    <span class="bar-val gold" id="bar-bruto" style="color:var(--text-dim)">—</span>
+    <span class="bar-val gold fx-text-dim" id="bar-bruto">—</span>
   </div>
-  <div style="margin-left:auto">
+  <div class="fx-ml-auto">
     <button class="btn btn-outline" onclick="switchTab('ponuda',document.querySelector('.tab-btn:last-child'))">
       Ponuda →
     </button>
@@ -611,7 +611,7 @@ function renderWorkers() {
   var satiDan = parseFloat(document.getElementById('p-sati').value) || 8;
 
   if (!S.workers.length) {
-    container.innerHTML = '<div style="color:var(--text-dim);font-size:.82rem;padding:10px 4px">Nema zaposlenika — kliknite "+ Dodaj zaposlenika" ili odaberite predložak.</div>';
+    container.innerHTML = '<div class="fx-fs-note fx-text-dim" style="padding:10px 4px">Nema zaposlenika — kliknite "+ Dodaj zaposlenika" ili odaberite predložak.</div>';
     document.getElementById('workers-kpis').style.display = 'none';
     return;
   }
@@ -669,17 +669,17 @@ function renderWorkers() {
       '<div class="wcard-result">' +
         '<div class="wres">' +
           '<span class="wres-lbl">Brutto + 17% LNK</span>' +
-          '<span class="wres-val" style="color:var(--text-dim)">'+fmt(brutoPlusDop)+' €/h</span>' +
+          '<span class="wres-val fx-text-dim">'+fmt(brutoPlusDop)+' €/h</span>' +
         '</div>' +
-        (w.overtime > 0 ? '<div class="wres"><span class="wres-lbl">Überstunden-Faktor</span><span class="wres-val" style="color:var(--text-dim)">×'+otFactor.toFixed(2)+'</span></div>' : '') +
-        (w.prijevoz > 0 ? '<div class="wres"><span class="wres-lbl">Fahrtkosten/Std. (amort.)</span><span class="wres-val" style="color:var(--blue)">+'+fmt(transport)+' €/h</span></div>' : '') +
-        '<div class="wres" style="margin-left:auto">' +
+        (w.overtime > 0 ? '<div class="wres"><span class="wres-lbl">Überstunden-Faktor</span><span class="wres-val fx-text-dim">×'+otFactor.toFixed(2)+'</span></div>' : '') +
+        (w.prijevoz > 0 ? '<div class="wres"><span class="wres-lbl">Fahrtkosten/Std. (amort.)</span><span class="wres-val fx-text-blue">+'+fmt(transport)+' €/h</span></div>' : '') +
+        '<div class="wres fx-ml-auto">' +
           '<span class="wres-lbl">⭐ Tatsächliche Kosten/h</span>' +
-          '<span class="wres-val" style="color:var(--gold);font-size:1rem">'+fmt(realH)+' €/h</span>' +
+          '<span class="wres-val fx-fs-lg fx-text-gold">'+fmt(realH)+' €/h</span>' +
         '</div>' +
         '<div class="wres">' +
           '<span class="wres-lbl">× '+w.count+' Pers. × '+satiDan+'h/dan</span>' +
-          '<span class="wres-val" style="color:var(--gold)">'+fmt(realDan)+' €/dan</span>' +
+          '<span class="wres-val fx-text-gold">'+fmt(realDan)+' €/dan</span>' +
         '</div>' +
       '</div>' +
 
@@ -710,17 +710,17 @@ function updateMaterial(i, field, val) {
 function renderMaterials() {
   var tbody = document.getElementById('mat-body');
   if (!S.materials.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim);font-size:.78rem;padding:10px 6px">Nema materijala — kliknite "+ Dodaj stavku"</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="fx-fs-body-sm fx-text-dim" style="padding:10px 6px">Nema materijala — kliknite "+ Dodaj stavku"</td></tr>';
     return;
   }
   tbody.innerHTML = S.materials.map(function(m, i) {
     return '<tr>'+
-      '<td style="color:var(--text-dim);font-size:.72rem">'+(i+1)+'</td>'+
+      '<td class="fx-fs-sm fx-text-dim">'+(i+1)+'</td>'+
       '<td><input type="text" value="'+esc(m.naziv)+'" placeholder="Naziv materijala / usluge"'+
           ' onchange="updateMaterial('+i+',\'naziv\',this.value)"></td>'+
       '<td><input type="number" min="0" step="0.01" value="'+m.iznos+'"'+
           ' onchange="updateMaterial('+i+',\'iznos\',parseFloat(this.value)||0)"'+
-          ' class="inp-md" style="text-align:right"></td>'+
+          ' class="inp-md text-end"></td>'+
       '<td><button class="btn-del" onclick="removeMaterial('+i+')">✕</button></td>'+
     '</tr>';
   }).join('');
@@ -754,21 +754,21 @@ function updateStroj(i, field, val) {
 function renderStrojevi() {
   var tbody = document.getElementById('stroj-body');
   if (!S.strojevi.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-dim);font-size:.78rem;padding:10px 6px">Nema strojeva — kliknite "+ Dodaj stroj" ili odaberite predložak</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="fx-fs-body-sm fx-text-dim" style="padding:10px 6px">Nema strojeva — kliknite "+ Dodaj stroj" ili odaberite predložak</td></tr>';
     return;
   }
   tbody.innerHTML = S.strojevi.map(function(s, i) {
     var total = s.rate * s.dani;
     return '<tr>'+
-      '<td style="color:var(--text-dim);font-size:.72rem">'+(i+1)+'</td>'+
+      '<td class="fx-fs-sm fx-text-dim">'+(i+1)+'</td>'+
       '<td><input type="text" value="'+esc(s.naziv)+'" placeholder="Stroj / oprema"'+
           ' onchange="updateStroj('+i+',\'naziv\',this.value)"></td>'+
       '<td><input type="number" min="0" step="0.5" value="'+s.rate+'"'+
           ' onchange="updateStroj('+i+',\'rate\',parseFloat(this.value)||0)"'+
-          ' class="inp-md" style="text-align:right"></td>'+
+          ' class="inp-md text-end"></td>'+
       '<td><input type="number" min="1" step="1" value="'+s.dani+'"'+
           ' onchange="updateStroj('+i+',\'dani\',parseInt(this.value)||1)"'+
-          ' class="inp-sm" style="text-align:right"></td>'+
+          ' class="inp-sm text-end"></td>'+
       '<td class="r"><span class="comp-dim">'+fmt(total)+' €</span></td>'+
       '<td><button class="btn-del" onclick="removeStroj('+i+')">✕</button></td>'+
     '</tr>';

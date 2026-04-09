@@ -3,19 +3,19 @@
 {% block title %}Nova intervencija{% endblock %}
 <style>
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-.form-grid label{display:block;font-size:.8rem;color:#999;margin-bottom:4px}
-.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee}
+.form-grid label{display:block;font-size:.8rem;color:var(--text-dim);margin-bottom:4px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:var(--surface);border:1px solid var(--border2);border-radius:4px;color:var(--text)}
 .form-grid input:focus,.form-grid select:focus{border-color:var(--gold);outline:none}
 .form-full{grid-column:1/-1}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr !important}.btn,button{width:100%;margin-bottom:6px}}
 </style>
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-  <h4 style="margin:0;color:var(--gold)">Nova terenska intervencija</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fx-text-gold fx-m-0">Nova terenska intervencija</h4>
   <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
 </div>
 
-<form method="post" class="card" style="padding:1.25rem;max-width:700px">
+<form method="post" class="card fx-p-125 fx-max-700">
   {% csrf_token %}
   <div class="form-grid">
     <div><label>Datum i vrijeme *</label>
@@ -26,7 +26,7 @@
       <input type="text" name="adresa" required placeholder="Lokacija intervencije"></div>
     <div><label>GPS koordinate</label>
       <input type="text" name="gps" placeholder="lat,lng" id="gpsInput">
-      <button type="button" onclick="getGPS()" style="margin-top:4px;font-size:.75rem;padding:2px 8px;background:var(--gold);border:none;border-radius:4px;cursor:pointer">Moja lokacija</button></div>
+      <button type="button" onclick="getGPS()" class="fx-fs-caption fx-border-none fx-rounded-sm fx-pointer mt-1 fx-p-btn fx-bg-gold">Moja lokacija</button></div>
     <div><label>Km prijedeno</label>
       <input type="number" name="km_prijedeno" step="0.1" value="0"></div>
     <div class="form-full"><label>Opis situacije *</label>
@@ -39,7 +39,7 @@
         <option value="veterinar">Upuceno veterinaru (hitno)</option>
       </select></div>
   </div>
-  <div style="margin-top:1.25rem;display:flex;gap:.5rem">
+  <div class="d-flex fx-gap-2" style="margin-top:1.25rem">
     <button type="submit" class="btn btn-gold">Evidentiraj intervenciju</button>
     <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost">Odustani</a>
   </div>

@@ -18,8 +18,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .nav-links{display:flex;gap:8px;align-items:center}
 .nav-link{padding:7px 14px;border-radius:7px;font-size:.82rem;font-weight:500;text-decoration:none;color:var(--muted);transition:all .2s}
 .nav-link:hover{color:var(--text)}
-.nav-link.primary{background:var(--gold);color:#000;font-weight:700}
-.nav-link.primary:hover{background:var(--gold2);color:#000}
+.nav-link.primary{background:var(--gold);color:var(--text);font-weight:700}
+.nav-link.primary:hover{background:var(--gold2);color:var(--text)}
 .nav-link.wa{color:var(--green)}
 .hero{padding:140px 40px 80px;text-align:center}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:.75rem;color:var(--muted);margin-bottom:32px;letter-spacing:.5px;text-transform:uppercase}
@@ -40,7 +40,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:300px;position:relative;transition:all .3s;display:flex;flex-direction:column}
 .plan-card:hover{border-color:rgba(201,168,76,.4);box-shadow:0 12px 40px rgba(0,0,0,.4);transform:translateY(-4px)}
 .plan-card.featured{border-color:var(--gold);border-width:2px;background:linear-gradient(145deg,#111316,#13110a)}
-.plan-card.featured::before{content:'PREPORUCENO';position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:3px 16px;border-radius:20px;font-size:.65rem;font-weight:800;letter-spacing:1.5px;white-space:nowrap}
+.plan-card.featured::before{content:'PREPORUCENO';position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--text);padding:3px 16px;border-radius:20px;font-size:.65rem;font-weight:800;letter-spacing:1.5px;white-space:nowrap}
 .plan-free-badge{display:inline-block;background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);border-radius:6px;font-size:.65rem;font-weight:700;padding:2px 8px;margin-bottom:12px}
 .plan-name{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:6px}
 .plan-desc{font-size:.8rem;color:var(--muted);margin-bottom:20px;line-height:1.5}
@@ -55,7 +55,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .plan-limits{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .plan-limit-chip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.68rem;color:var(--muted)}
 .btn-plan{display:block;width:100%;padding:13px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;text-decoration:none}
-.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:var(--gold2)}
+.btn-gold{background:var(--gold);color:var(--text)}.btn-gold:hover{background:var(--gold2)}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .btn-green{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}.btn-green:hover{background:rgba(34,197,94,.22)}
 #plans-placeholder{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -90,7 +90,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .cta-box p{color:var(--muted);margin-bottom:32px;line-height:1.6;font-size:.9rem}
 .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .cta-btn{padding:14px 28px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.92rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .2s;border:none}
-.cta-btn.primary{background:var(--gold);color:#000}.cta-btn.primary:hover{background:var(--gold2)}
+.cta-btn.primary{background:var(--gold);color:var(--text)}.cta-btn.primary:hover{background:var(--gold2)}
 .cta-btn.wa{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}
 .cta-btn.secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}.cta-btn.secondary:hover{border-color:var(--gold);color:var(--gold)}
 footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
@@ -151,7 +151,7 @@ footer small{color:var(--muted2);font-size:.75rem}
     <i class="fas fa-hand-pointer"></i>
     <p>Odaberi profil iznad &mdash; prikazat ćemo savršeni plan za tebe</p>
   </div>
-  <div class="plans-grid" id="plans-grid" style="display:none"></div>
+  <div class="plans-grid fx-hidden" id="plans-grid"></div>
 </section>
 
 <div class="trust-strip">
@@ -185,7 +185,7 @@ footer small{color:var(--muted2);font-size:.75rem}
 </section>
 
 <section class="compare-section" id="compare">
-  <div style="text-align:center">
+  <div class="text-center">
     <button class="compare-toggle-btn" id="compare-btn" onclick="toggleCompare()">
       <i class="fas fa-table"></i> Usporedi sve planove
     </button>
@@ -280,7 +280,7 @@ function selectProfile(key) {
     card.innerHTML=
       (isFree?'<div class="plan-free-badge">BESPLATNO</div>':'')+
       '<div class="plan-name">'+plan.name+'</div>'+
-      '<div class="plan-price" style="margin-bottom:16px">'+
+      '<div class="plan-price mb-3">'+
         '<div class="plan-amount">'+(isFree?'Besplatno':'<sup>&euro;</sup>'+plan.price)+'</div>'+
         (isFree?'':'<div class="plan-period">/ mjesec + PDV</div>')+
         (plan.yearly&&!isFree?'<div class="plan-yearly">Godišnje: ~'+Math.round(plan.yearly/12)+' EUR/mj</div>':'')+

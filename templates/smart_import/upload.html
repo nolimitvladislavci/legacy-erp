@@ -4,7 +4,7 @@
 {% block page_title %}Smart Import – Upload{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-3 py-3" style="max-width:700px">
+<div class="container-fluid px-3 py-3 fx-max-700">
   <h4 class="mb-3"><i class="fas fa-file-import me-2"></i>Smart Import — Automatizirani uvoz faktura</h4>
 
   {% if error %}
@@ -17,10 +17,10 @@
         {% csrf_token %}
 
         <!-- Drop zone -->
-        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3"
-             style="border-color:var(--gold,#c9a84c)!important;cursor:pointer;background:#fffdf5"
+        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3 fx-pointer fx-bg-card"
+             style="border-color:var(--gold,#c9a84c)!important"
              onclick="document.getElementById('fileInput').click()">
-          <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:var(--gold,#c9a84c)"></i>
+          <i class="fas fa-cloud-upload-alt fa-3x mb-2 fx-text-gold"></i>
           <p class="mb-1 fw-semibold">Povucite datoteke ovdje ili kliknite za odabir</p>
           <p class="text-muted small mb-0">XML, PDF, slike — jedna ili vise datoteka / stranica</p>
         </div>
@@ -83,15 +83,15 @@
       <hr>
       <div class="row text-center small text-muted">
         <div class="col-4">
-          <i class="fas fa-file-code fa-2x mb-1 d-block" style="color:#0d6efd"></i>
+          <i class="fas fa-file-code fa-2x mb-1 d-block fx-text-blue"></i>
           <strong>XML</strong><br>e-Racun UBL — 100%
         </div>
         <div class="col-4">
-          <i class="fas fa-file-pdf fa-2x mb-1 d-block" style="color:#dc3545"></i>
+          <i class="fas fa-file-pdf fa-2x mb-1 d-block fx-text-red"></i>
           <strong>PDF</strong><br>Digitalni + skenirani
         </div>
         <div class="col-4">
-          <i class="fas fa-camera fa-2x mb-1 d-block" style="color:#198754"></i>
+          <i class="fas fa-camera fa-2x mb-1 d-block fx-text-green"></i>
           <strong>Kamera</strong><br>Vise stranica
         </div>
       </div>
@@ -251,8 +251,8 @@ function renderFiles() {
         '<span class="position-absolute top-0 start-0 badge bg-dark m-1">' + (idx + 1) + '</span>' +
         '<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 px-1 py-0" ' +
           'onclick="removeFile(' + idx + ')" title="Ukloni"><i class="fas fa-times"></i></button>' +
-        '<span class="position-absolute bottom-0 start-0 end-0 text-center small bg-dark bg-opacity-75 text-white py-1" ' +
-          'style="font-size:0.65rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+        '<span class="position-absolute bottom-0 start-0 end-0 text-center small bg-dark bg-opacity-75 text-white py-1 fx-fs-xs text-nowrap fx-overflow-hidden" ' +
+          'style="text-overflow:ellipsis">' +
           file.name.substring(0, 20) + ' (' + sizeMB + 'MB)</span>' +
       '</div>';
     grid.appendChild(col);

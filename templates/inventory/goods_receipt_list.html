@@ -3,33 +3,16 @@
 {% block title %}Primke{% endblock %}
 {% block page_title %}Primke{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <h2 class="mb-0">
-    <i class="fas fa-file-invoice me-2" style="color:var(--gold)"></i>
+    <i class="fas fa-file-invoice me-2 fx-text-gold"></i>
     Primke robe
   </h2>
-  <a href="{% url 'inventory:receipt_create' %}" class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700">
+  <a href="{% url 'inventory:receipt_create' %}" class="btn btn-sm fx-text-dark fx-fw-bold fx-bg-gold">
     <i class="fas fa-plus me-1"></i>Nova primka
   </a>
 </div>
@@ -46,7 +29,7 @@
 
 {% if page_obj.object_list %}
 <div class="table-responsive">
-  <table class="table table-hover align-middle" style="font-size:.9rem">
+  <table class="table table-hover align-middle fx-fs-md">
     <thead>
       <tr style="border-bottom:2px solid rgba(201,168,76,.3)">
         <th>Broj primke</th>
@@ -64,26 +47,26 @@
       <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
         <td>
           <a href="{% url 'inventory:receipt_detail' r.pk %}"
-             style="color:var(--gold);font-weight:600;text-decoration:none">
-            <i class="fas fa-file-alt me-1" style="opacity:.5"></i>{{ r.receipt_number }}
+             class="fx-fw-semibold fx-no-underline fx-text-gold">
+            <i class="fas fa-file-alt me-1 fx-opacity-50"></i>{{ r.receipt_number }}
           </a>
         </td>
-        <td style="color:#aaa;white-space:nowrap">{{ r.date|date:"d.m.Y" }}</td>
+        <td class="fx-text-muted text-nowrap">{{ r.date|date:"d.m.Y" }}</td>
         <td>{{ r.supplier.name|default:"—" }}</td>
-        <td style="color:#888;font-size:.82rem">{{ r.document_number|default:"—" }}</td>
-        <td class="text-end" style="font-family:monospace;color:#aaa">
+        <td class="fx-text-muted fx-fs-note">{{ r.document_number|default:"—" }}</td>
+        <td class="text-end fx-text-muted fx-font-mono">
           {% if r.total_purchase %}{{ r.total_purchase }} EUR{% else %}—{% endif %}
         </td>
-        <td class="text-end" style="font-family:monospace;color:var(--gold)">
+        <td class="text-end fx-text-gold fx-font-mono">
           {% if r.total_selling %}{{ r.total_selling }} EUR{% else %}—{% endif %}
         </td>
         <td>
           {% if r.status == 'draft' %}
-            <span class="badge bg-warning text-dark">Nacrt</span>
+            <span class="fenix-badge fenix-badge-warning">Nacrt</span>
           {% elif r.status == 'confirmed' %}
-            <span class="badge bg-success">Potvrđena</span>
+            <span class="fenix-badge fenix-badge-success">Potvrđena</span>
           {% else %}
-            <span class="badge bg-secondary">Otkazana</span>
+            <span class="fenix-badge fenix-badge-muted">Otkazana</span>
           {% endif %}
         </td>
         <td>
@@ -119,8 +102,8 @@
 {% else %}
 <div class="stat-card text-center py-5" style="border:1px dashed rgba(201,168,76,.2)">
   <i class="fas fa-file-invoice fa-3x mb-3" style="color:rgba(201,168,76,.3)"></i>
-  <p class="mb-3" style="color:#888">Još nema primki.</p>
-  <a href="{% url 'inventory:receipt_create' %}" class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700">
+  <p class="mb-3 fx-text-muted">Još nema primki.</p>
+  <a href="{% url 'inventory:receipt_create' %}" class="btn btn-sm fx-text-dark fx-fw-bold fx-bg-gold">
     <i class="fas fa-plus me-1"></i>Kreiraj prvu primku
   </a>
 </div>

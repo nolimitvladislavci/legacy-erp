@@ -8,33 +8,33 @@
 <style>
     .si-wrap { max-width: 600px; margin: 0 auto; }
     .si-card {
-        background: #fff; border-radius: 12px; padding: 28px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        background:var(--bg-card); border-radius: 12px; padding: 28px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); border:1px solid var(--border);
         margin-bottom: 20px;
     }
     .si-header {
-        font-size: 1.15rem; font-weight: 700; color: #0f172a;
+        font-size: 1.15rem; font-weight: 700; color:var(--text);
         border-bottom: 2px solid var(--gold); padding-bottom: 12px;
         margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
         text-transform: uppercase; letter-spacing: 1px;
     }
     .si-header i { color: var(--gold); font-size: 1.2rem; }
     .si-label {
-        font-size: 0.75rem; font-weight: 700; color: #64748b;
+        font-size: 0.75rem; font-weight: 700; color:var(--text-dim);
         text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
         display: flex; align-items: center; gap: 6px;
     }
     .si-label .step {
-        background: var(--gold); color: #0f172a; width: 22px; height: 22px;
+        background: var(--gold); color:var(--text); width: 22px; height: 22px;
         border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.7rem; font-weight: 800;
     }
 
     /* Massive inputs — warehouse tablet, gloved hands */
     .si-input-big {
-        width: 100%; background: #f8fafc; border: 2px solid #e2e8f0;
+        width: 100%; background:var(--surface2); border: 2px solid #e2e8f0;
         border-radius: 10px; padding: 18px 16px; font-size: 1.6rem;
-        font-weight: 700; color: #0f172a; text-align: center;
+        font-weight: 700; color:var(--text); text-align: center;
         transition: border-color 0.2s;
         margin-bottom: 20px;
     }
@@ -48,7 +48,7 @@
     .si-btn {
         width: 100%; padding: 18px; border-radius: 10px;
         font-size: 1.1rem; font-weight: 700; border: 2px solid var(--gold);
-        background: var(--gold); color: #0f172a;
+        background: var(--gold); color:var(--text);
         cursor: pointer; transition: all 0.2s;
         display: flex; align-items: center; justify-content: center; gap: 10px;
         text-transform: uppercase; letter-spacing: 1px;
@@ -58,7 +58,7 @@
     .si-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .si-spinner {
         display: none; width: 22px; height: 22px;
-        border: 3px solid rgba(0,0,0,0.15); border-top-color: #0f172a;
+        border: 3px solid rgba(0,0,0,0.15); border-top-color:var(--text);
         border-radius: 50%; animation: sispin 0.7s linear infinite;
     }
     @keyframes sispin { to { transform: rotate(360deg); } }
@@ -70,29 +70,29 @@
         border-left: 5px solid;
     }
     .si-alert i { display: block; font-size: 1.8rem; margin-bottom: 8px; }
-    .si-alert-ok { background: #f0fdf4; color: #166534; border-color: #22c55e; }
-    .si-alert-ok i { color: #22c55e; }
+    .si-alert-ok { background:var(--green-dim); color:var(--green); border-color:var(--green); }
+    .si-alert-ok i { color:var(--green); }
     .si-alert-kalo { background: #fefce8; color: #854d0e; border-color: #eab308; }
     .si-alert-kalo i { color: #eab308; }
-    .si-alert-theft { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
-    .si-alert-theft i { color: #ef4444; }
+    .si-alert-theft { background: #fef2f2; color:var(--red); border-color:var(--red); }
+    .si-alert-theft i { color:var(--red); }
     .si-alert-quarantine { background: #fef2f2; color: #9a3412; border-color: #f97316; }
     .si-alert-quarantine i { color: #f97316; }
     .si-alert-info { background: #f0f9ff; color: #075985; border-color: #0ea5e9; }
 
     /* Batch info preview */
     .si-batch-info {
-        display: none; background: #f8fafc; border: 1px solid #e2e8f0;
+        display: none; background:var(--surface2); border:1px solid var(--border);
         border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
-        font-size: 0.85rem; color: #64748b;
+        font-size: 0.85rem; color:var(--text-dim);
     }
-    .si-batch-info strong { color: #0f172a; }
+    .si-batch-info strong { color:var(--text); }
     .si-batch-info .tag {
         display: inline-block; padding: 2px 8px; border-radius: 4px;
         font-size: 0.72rem; font-weight: 600;
     }
-    .tag-active { background: #dcfce7; color: #166534; }
-    .tag-expired { background: #fef2f2; color: #991b1b; }
+    .tag-active { background: #dcfce7; color:var(--green); }
+    .tag-expired { background: #fef2f2; color:var(--red); }
     .tag-quarantine { background: #fff7ed; color: #9a3412; }
 
     /* History card */
@@ -100,13 +100,13 @@
     .si-history-row {
         display: flex; justify-content: space-between; align-items: center;
         padding: 10px 14px; border-bottom: 1px solid #f1f5f9;
-        font-size: 0.82rem; color: #64748b;
+        font-size: 0.82rem; color:var(--text-dim);
     }
     .si-history-row:last-child { border-bottom: none; }
-    .si-history-row strong { color: #0f172a; }
-    .si-result-ok { color: #22c55e; }
+    .si-history-row strong { color:var(--text); }
+    .si-result-ok { color:var(--green); }
     .si-result-kalo { color: #eab308; }
-    .si-result-theft { color: #ef4444; }
+    .si-result-theft { color:var(--red); }
 
     @media (max-width: 768px) {
         .si-input-big { font-size: 1.3rem; padding: 14px; }
@@ -151,8 +151,8 @@
     </div>
 
     <!-- Recent counts -->
-    <div class="si-card" id="siHistoryCard" style="display:none;">
-        <div class="si-header" style="font-size:0.9rem;">
+    <div class="si-card fx-hidden" id="siHistoryCard">
+        <div class="si-header fx-fs-md">
             <i class="fa-solid fa-clock-rotate-left"></i> Zadnja Brojanja
         </div>
         <div id="siHistory" class="si-history"></div>

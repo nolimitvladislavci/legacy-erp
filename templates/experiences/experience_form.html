@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -39,9 +39,9 @@
 {% block content %}
 <div class="exp-container">
 <div class="mb-4">
-  <a href="{% url 'experiences:experience_list' %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
-  <h2 style="font-size:1.5rem;font-weight:800;margin:.5rem 0 0;color:var(--text)">
-    <i class="fas fa-{% if edit %}edit{% else %}plus-circle{% endif %} me-2" style="color:var(--gold)"></i>
+  <a href="{% url 'experiences:experience_list' %}" class="fx-fs-base fx-text-dim"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+  <h2 class="fx-fs-5xl fx-fw-800 fx-text-body" style="margin:.5rem 0 0">
+    <i class="fas fa-{% if edit %}edit{% else %}plus-circle{% endif %} me-2 fx-text-gold"></i>
     {% if edit %}Uredi: {{ exp.name }}{% else %}Novo iskustvo{% endif %}
   </h2>
 </div>
@@ -49,22 +49,22 @@
 <form method="POST" class="exp-form">
   {% csrf_token %}
   <div class="row g-3">
-    <div class="col-md-8"><label class="form-label small fw-bold" style="color:var(--text-dim)">Naziv</label><input type="text" name="name" value="{{ exp.name|default:'' }}" class="form-control exp-input" required></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Tip</label><select name="experience_type" class="form-select exp-input">{% for code,label in type_choices %}<option value="{{ code }}" {% if exp.experience_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-    <div class="col-12"><label class="form-label small fw-bold" style="color:var(--text-dim)">Opis</label><textarea name="description" rows="3" class="form-control exp-input">{{ exp.description|default:'' }}</textarea></div>
-    <div class="col-md-3"><label class="form-label small fw-bold" style="color:var(--text-dim)">Trajanje (min)</label><input type="number" name="duration_minutes" value="{{ exp.duration_minutes|default:'60' }}" class="form-control exp-input" required></div>
-    <div class="col-md-3"><label class="form-label small fw-bold" style="color:var(--text-dim)">Max gostiju</label><input type="number" name="capacity" value="{{ exp.capacity|default:'10' }}" class="form-control exp-input" required></div>
-    <div class="col-md-3"><label class="form-label small fw-bold" style="color:var(--text-dim)">Cijena/osobi (EUR)</label><input type="number" step="0.01" name="price_per_person" value="{{ exp.price_per_person|default:'0' }}" class="form-control exp-input" required></div>
-    <div class="col-md-3"><label class="form-label small fw-bold" style="color:var(--text-dim)">Depozit (%)</label><input type="number" name="deposit_pct" value="{{ exp.deposit_pct|default:'30' }}" class="form-control exp-input"></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Težina</label><select name="difficulty" class="form-select exp-input">{% for code,label in difficulty_choices %}<option value="{{ code }}" {% if exp.difficulty == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Popust djeca (%)</label><input type="number" name="child_discount_pct" value="{{ exp.child_discount_pct|default:'50' }}" class="form-control exp-input"></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Otkazivanje (sati)</label><input type="number" name="cancellation_hours" value="{{ exp.cancellation_hours|default:'12' }}" class="form-control exp-input"></div>
-    <div class="col-md-6"><label class="form-label small fw-bold" style="color:var(--text-dim)">Točka okupljanja</label><input type="text" name="meeting_point" value="{{ exp.meeting_point|default:'' }}" class="form-control exp-input"></div>
-    <div class="col-md-6"><label class="form-label small fw-bold" style="color:var(--text-dim)">Što ponijeti</label><input type="text" name="what_to_bring" value="{{ exp.what_to_bring|default:'' }}" class="form-control exp-input"></div>
+    <div class="col-md-8"><label class="form-label small fw-bold fx-text-dim">Naziv</label><input type="text" name="name" value="{{ exp.name|default:'' }}" class="form-control exp-input" required></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Tip</label><select name="experience_type" class="form-select exp-input">{% for code,label in type_choices %}<option value="{{ code }}" {% if exp.experience_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-12"><label class="form-label small fw-bold fx-text-dim">Opis</label><textarea name="description" rows="3" class="form-control exp-input">{{ exp.description|default:'' }}</textarea></div>
+    <div class="col-md-3"><label class="form-label small fw-bold fx-text-dim">Trajanje (min)</label><input type="number" name="duration_minutes" value="{{ exp.duration_minutes|default:'60' }}" class="form-control exp-input" required></div>
+    <div class="col-md-3"><label class="form-label small fw-bold fx-text-dim">Max gostiju</label><input type="number" name="capacity" value="{{ exp.capacity|default:'10' }}" class="form-control exp-input" required></div>
+    <div class="col-md-3"><label class="form-label small fw-bold fx-text-dim">Cijena/osobi (EUR)</label><input type="number" step="0.01" name="price_per_person" value="{{ exp.price_per_person|default:'0' }}" class="form-control exp-input" required></div>
+    <div class="col-md-3"><label class="form-label small fw-bold fx-text-dim">Depozit (%)</label><input type="number" name="deposit_pct" value="{{ exp.deposit_pct|default:'30' }}" class="form-control exp-input"></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Težina</label><select name="difficulty" class="form-select exp-input">{% for code,label in difficulty_choices %}<option value="{{ code }}" {% if exp.difficulty == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Popust djeca (%)</label><input type="number" name="child_discount_pct" value="{{ exp.child_discount_pct|default:'50' }}" class="form-control exp-input"></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Otkazivanje (sati)</label><input type="number" name="cancellation_hours" value="{{ exp.cancellation_hours|default:'12' }}" class="form-control exp-input"></div>
+    <div class="col-md-6"><label class="form-label small fw-bold fx-text-dim">Točka okupljanja</label><input type="text" name="meeting_point" value="{{ exp.meeting_point|default:'' }}" class="form-control exp-input"></div>
+    <div class="col-md-6"><label class="form-label small fw-bold fx-text-dim">Što ponijeti</label><input type="text" name="what_to_bring" value="{{ exp.what_to_bring|default:'' }}" class="form-control exp-input"></div>
   </div>
   <div class="mt-4 d-flex gap-2">
     <button type="submit" class="exp-btn-gold"><i class="fas fa-save me-1"></i>{% if edit %}Spremi{% else %}Kreiraj{% endif %}</button>
-    <a href="{% url 'experiences:experience_list' %}" class="btn btn-outline-secondary btn-sm" style="border-radius:10px">Odustani</a>
+    <a href="{% url 'experiences:experience_list' %}" class="btn btn-outline-secondary btn-sm fx-rounded">Odustani</a>
   </div>
 </form>
 </div>

@@ -32,20 +32,20 @@
         /* Prikaz odabrane slike */
         #previewContainer { display: none; margin-top: 20px; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
         #previewContainer img { width: 100%; display: block; }
-        .retake-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 8px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; }
+        .retake-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color:var(--white); border: none; padding: 8px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; }
         
         /* Glavni gumb za slanje */
         .submit-btn {
-            width: 100%; background: var(--gold); color: #000; border: none; padding: 16px;
+            width: 100%; background: var(--gold); color:var(--text); border: none; padding: 16px;
             font-size: 1.1rem; font-weight: 800; border-radius: 8px; text-transform: uppercase;
             letter-spacing: 2px; margin-top: auto; display: none; transition: all 0.2s;
         }
         .submit-btn:disabled { background: var(--surface); color: var(--text-dim); border: 1px solid var(--border); }
         
         /* Toast poruke (Feedback) */
-        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #22c55e; color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 600; opacity: 0; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; text-align: center; width: 90%; }
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background:var(--green); color:var(--white); padding: 12px 24px; border-radius: 8px; font-weight: 600; opacity: 0; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; text-align: center; width: 90%; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        #toast.error { background: #ef4444; }
+        #toast.error { background:var(--red); }
     </style>
 </head>
 <body>
@@ -68,13 +68,13 @@
         <textarea id="noteInput" rows="2" placeholder="Npr. Završeno gletanje prvog zida..."></textarea>
     </div>
 
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="fx-hidden">
 
     <div class="camera-btn" id="openCameraBtn" onclick="if(window.FenixCamera){FenixCamera.quick('worker-cam-preview',{onReady:function(r){var dt=new DataTransfer();fetch(r.dataUrl).then(function(res){return res.blob()}).then(function(blob){var f=new File([blob],r.filename,{type:'image/jpeg'});dt.items.add(f);document.getElementById('cameraInput').files=dt.files;document.getElementById('cameraInput').dispatchEvent(new Event('change'))})}})}else{document.getElementById('cameraInput').click()}">
         <i class="fas fa-camera"></i>
         <span>Slikaj Radove</span>
     </div>
-    <div id="worker-cam-preview" style="display:none;margin:.5rem 0"></div>
+    <div id="worker-cam-preview" class="fx-hidden" style="margin:.5rem 0"></div>
 
     <div id="previewContainer">
         <button class="retake-btn" onclick="document.getElementById('cameraInput').click()"><i class="fas fa-redo"></i> Ponovno slikaj</button>

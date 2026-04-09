@@ -15,7 +15,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:var(--gold,#c9a84c)"></i>{% trans "Knjiga boljitaka" %}</h2>
+    <h2 class="mb-0"><i class="fas fa-book me-2 fx-text-gold"></i>{% trans "Knjiga boljitaka" %}</h2>
     <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana (HR) / 14 dana (DE)" %}</small>
   </div>
   <div class="d-flex gap-2 flex-wrap">
@@ -28,7 +28,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
 
 <!-- Filters -->
 <div class="d-flex gap-2 mb-3 flex-wrap" id="filterBar">
-  <select id="filterType" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
+  <select id="filterType" class="form-select form-select-sm fx-bg-surface2 fx-text-muted" style="width:auto;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Sve vrste</option>
     <option value="prigovor">Prijedlog</option>
     <option value="reklamacija">Reklamacija</option>
@@ -36,7 +36,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
     <option value="utisak">Utisak</option>
     <option value="prijedlog">Prijedlog</option>
   </select>
-  <select id="filterSource" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
+  <select id="filterSource" class="form-select form-select-sm fx-bg-surface2 fx-text-muted" style="width:auto;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi izvori</option>
     <option value="pos">POS</option>
     <option value="qr">QR</option>
@@ -44,14 +44,14 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
     <option value="gastro">Gastro</option>
     <option value="general">Općenito</option>
   </select>
-  <select id="filterStatus" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
+  <select id="filterStatus" class="form-select form-select-sm fx-bg-surface2 fx-text-muted" style="width:auto;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi statusi</option>
     <option value="pending">Čeka odgovor</option>
     <option value="responded">Odgovoreno</option>
     <option value="overdue">Prekoračen rok</option>
     <option value="escalated">Eskalirano</option>
   </select>
-  <select id="filterPriority" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
+  <select id="filterPriority" class="form-select form-select-sm fx-bg-surface2 fx-text-muted" style="width:auto;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi prioriteti</option>
     <option value="5">Kritičan (5)</option>
     <option value="4">Visok (4)</option>
@@ -85,7 +85,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
   <div class="modal-dialog">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid var(--gold,#c9a84c)">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:var(--gold,#c9a84c)"><i class="fas fa-edit me-2"></i>{% trans "Novi zapis" %}</h5>
+        <h5 class="modal-title fx-text-gold"><i class="fas fa-edit me-2"></i>{% trans "Novi zapis" %}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -104,9 +104,9 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
             <div class="d-flex gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-outline-danger" id="btnVoice" onclick="toggleVoice()">
                 <i class="fas fa-microphone me-1"></i>{% trans "Govori</button>
-        <button type="button" id="audioRecBtn" onclick="startAudioRec()" style="background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:.4rem .8rem;border-radius:8px;cursor:pointer;font-size:.8rem">🎤 Snimi zvučni zapis</button>
-        <div id="audioStatus" style="font-size:.72rem;color:var(--muted);margin-top:4px"></div>
-        <span style="display:none">" %}
+        <button type="button" id="audioRecBtn" onclick="startAudioRec()" class="fx-text-red fx-rounded fx-pointer fx-fs-compact" style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3);padding:.4rem .8rem">🎤 Snimi zvučni zapis</button>
+        <div id="audioStatus" class="fx-fs-sm fx-text-muted mt-1"></div>
+        <span class="fx-hidden">" %}
               </button>
               <span id="voiceStatus" class="text-muted small align-self-center"></span>
             </div>
@@ -120,7 +120,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
         </div>
 
         <!-- Korak 2: Identifikacija + Potvrda -->
-        <div id="step2Create" style="display:none">
+        <div id="step2Create" class="fx-hidden">
           <div class="mb-3">
             <label class="form-label"><i class="fas fa-id-card me-2"></i>{% trans "Slika osobne iskaznice" %}</label>
             <p class="text-muted small mb-2">{% trans "Slikajte prednju stranu osobne iskaznice kamerom" %}</p>
@@ -130,18 +130,18 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
               </button>
               <label class="btn btn-sm btn-outline-secondary mb-0">
                 <i class="fas fa-upload me-1"></i>{% trans "Upload sliku" %}
-                <input type="file" accept="image/*" capture="environment" id="idFileInput" style="display:none" onchange="handleIdFile(this)">
+                <input type="file" accept="image/*" capture="environment" id="idFileInput" class="fx-hidden" onchange="handleIdFile(this)">
               </label>
             </div>
-            <div id="idCameraWrap" style="display:none">
-              <video id="idVideo" style="width:100%;max-height:200px;border-radius:8px;background:#000" autoplay playsinline></video>
+            <div id="idCameraWrap" class="fx-hidden">
+              <video id="idVideo" class="fx-w-full fx-rounded" style="max-height:200px;background:var(--black)" autoplay playsinline></video>
               <button type="button" class="btn btn-sm btn-danger mt-1" onclick="captureIdPhoto()">
                 <i class="fas fa-camera me-1"></i>{% trans "Slikaj" %}
               </button>
             </div>
-            <canvas id="idCanvas" style="display:none"></canvas>
-            <div id="idPreview" style="display:none" class="mt-2">
-              <img id="idImage" style="width:100%;max-height:150px;object-fit:contain;border-radius:8px;border:2px solid #22c55e">
+            <canvas id="idCanvas" class="fx-hidden"></canvas>
+            <div id="idPreview" class="mt-2 fx-hidden">
+              <img id="idImage" class="fx-w-full fx-rounded" style="max-height:150px;object-fit:contain;border:2px solid #22c55e">
               <div class="text-success small mt-1"><i class="fas fa-check me-1"></i>{% trans "Slika osobne spremljena" %}</div>
             </div>
           </div>
@@ -150,7 +150,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
             <label class="form-label"><i class="fas fa-signature me-2"></i>{% trans "Potpis potrošača" %}</label>
             <p class="text-muted small mb-2">{% trans "Potpišite prstom ili mišem" %}</p>
             <canvas id="sigCanvas" width="380" height="120"
-                    style="border:2px solid #2a2f45;border-radius:8px;background:#111;cursor:crosshair;touch-action:none;width:100%"></canvas>
+                    class="fx-rounded fx-bg-card fx-w-full" style="border:2px solid #2a2f45;cursor:crosshair;touch-action:none"></canvas>
             <div class="d-flex gap-2 mt-1">
               <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">
                 <i class="fas fa-eraser me-1"></i>{% trans "Obriši potpis" %}
@@ -167,10 +167,10 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
 
       <div class="modal-footer border-0">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Odustani" %}</button>
-        <button type="button" class="btn btn-outline-secondary" id="btnBack" onclick="goStep1()" style="display:none">
+        <button type="button" class="btn btn-outline-secondary fx-hidden" id="btnBack" onclick="goStep1()">
           <i class="fas fa-arrow-left me-1"></i>{% trans "Natrag" %}
         </button>
-        <button type="button" class="btn btn-primary" id="btnSave" onclick="savePrigovor()" style="display:none">
+        <button type="button" class="btn btn-primary fx-hidden" id="btnSave" onclick="savePrigovor()">
           <i class="fas fa-check-double me-1"></i>{% trans "Potvrdi i spremi" %}
         </button>
       </div>
@@ -183,21 +183,21 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
   <div class="modal-dialog modal-lg">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #22c55e">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:#22c55e"><i class="fas fa-reply me-2"></i>{% trans "Odgovor" %}</h5>
+        <h5 class="modal-title fx-text-green"><i class="fas fa-reply me-2"></i>{% trans "Odgovor" %}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="oId">
 
         <!-- AI Suggested Response -->
-        <div id="aiSuggestBox" class="mb-3 p-3" style="background:var(--gold,#c9a84c)11;border:1px solid var(--gold,#c9a84c)33;border-radius:8px;display:none">
+        <div id="aiSuggestBox" class="mb-3 p-3 fx-rounded fx-hidden" style="background:var(--gold,#c9a84c)11;border:1px solid var(--gold,#c9a84c)33">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <small style="color:var(--gold,#c9a84c)"><i class="fas fa-robot me-1"></i>AI prijedlog odgovora</small>
+            <small class="fx-text-gold"><i class="fas fa-robot me-1"></i>AI prijedlog odgovora</small>
             <button type="button" class="btn btn-sm btn-outline-warning" onclick="acceptAiSuggestion()">
               <i class="fas fa-check me-1"></i>Prihvati
             </button>
           </div>
-          <div id="aiSuggestText" style="font-size:0.85rem;color:#bbb;white-space:pre-wrap"></div>
+          <div id="aiSuggestText" class="fx-fs-base fx-text-dim" style="white-space:pre-wrap"></div>
         </div>
 
         <div class="mb-3">
@@ -219,7 +219,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
               <input type="radio" name="channel" value="both" class="d-none" id="bothChannelRadio"> <i class="fas fa-broadcast-tower me-1"></i>Oba
             </label>
           </div>
-          <div id="waConsentWarning" class="small text-danger mt-1" style="display:none;">
+          <div id="waConsentWarning" class="small text-danger mt-1 fx-hidden">
             <i class="fas fa-lock me-1"></i>{% trans "Potrošač nije dao pristanak za WhatsApp komunikaciju (Meta Business API compliance)" %}
           </div>
         </div>
@@ -247,7 +247,7 @@ label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !im
   <div class="modal-dialog">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid var(--gold,#c9a84c)">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:var(--gold,#c9a84c)"><i class="fas fa-shield-alt me-2"></i>SES Metadata (eIDAS)</h5>
+        <h5 class="modal-title fx-text-gold"><i class="fas fa-shield-alt me-2"></i>SES Metadata (eIDAS)</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="sesBody">
@@ -469,7 +469,7 @@ async function loadData() {
         <td class="fw-bold text-center">#${p.redni_broj}</td>
         <td>${p.datum_primitka}<br><small class="text-muted">${p.source_module}</small></td>
         <td><span class="badge bg-${typeColors[p.record_type]||'secondary'}"><i class="fas ${typeIcons[p.record_type]||'fa-file'} me-1"></i>${p.record_type}</span>
-          ${p.star_rating ? '<br><span style="color:var(--gold,#c9a84c)">' + '★'.repeat(p.star_rating) + '☆'.repeat(5-p.star_rating) + '</span>' : ''}
+          ${p.star_rating ? '<br><span class="fx-text-gold">' + '★'.repeat(p.star_rating) + '☆'.repeat(5-p.star_rating) + '</span>' : ''}
           ${p.language !== 'hr' ? '<br><small class="text-muted">' + p.language.toUpperCase() + '</small>' : ''}
         </td>
         <td>${p.ime}<br><small class="text-muted">${p.kontakt || ''}${p.consumer_email ? ' | '+p.consumer_email : ''}${p.consumer_phone ? ' | '+p.consumer_phone : ''}</small>
@@ -477,19 +477,19 @@ async function loadData() {
           ${p.has_audio ? '<i class="fas fa-microphone text-info ms-1" title="Zvucni zapis"></i>' : ''}
         </td>
         <td style="max-width:250px">${p.opis.substring(0,120)}${p.opis.length>120?'...':''}
-          ${p.is_escalated ? '<br><span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>ESKALIRANO</span>' : ''}
+          ${p.is_escalated ? '<br><span class="fenix-badge fenix-badge-danger"><i class="fas fa-exclamation-triangle me-1"></i>ESKALIRANO</span>' : ''}
         </td>
         <td>
           ${p.ai_category ? '<span class="badge" style="background:'+((sentColors[p.ai_sentiment]||'#666')+'33')+';color:'+(sentColors[p.ai_sentiment]||'#ccc')+'">P'+p.ai_priority+' '+p.ai_category+'</span>' : '<small class="text-muted">—</small>'}
         </td>
         <td>
           ${p.datum_odgovora
-            ? '<span class="badge bg-success">Odg. '+p.datum_odgovora+'</span>'
+            ? '<span class="fenix-badge fenix-badge-success">Odg. '+p.datum_odgovora+'</span>'
             : (p.rok_istekao
               ? '<span class="badge bg-danger blink">ROK ISTEKAO!</span>'
               : (p.needs_response
-                ? '<span class="badge bg-warning text-dark">'+p.dana_do_roka+'d</span>'
-                : '<span class="badge bg-secondary">—</span>'))
+                ? '<span class="fenix-badge fenix-badge-warning">'+p.dana_do_roka+'d</span>'
+                : '<span class="fenix-badge fenix-badge-muted">—</span>'))
           }
           ${p.integrity_hash ? '<br><small class="text-muted" title="'+p.integrity_hash+'">🔒 '+(p.integrity_valid?'✓':'✗')+' '+p.integrity_hash+'</small>' : ''}
         </td>
@@ -499,8 +499,8 @@ async function loadData() {
             : (p.odgovor ? '<small class="text-muted">'+p.odgovor.substring(0,40)+'...</small>' : '')
           }
           <br><a href="#" class="text-muted small" onclick="showSES('+p.id+');return false"><i class="fas fa-info-circle"></i> SES</a>
-          ${p.moderation_passed === true ? '<br><span class="badge bg-success" style="font-size:.6rem">MOD ✓</span>' : (p.moderation_passed === false ? '<br><span class="badge bg-warning text-dark" style="font-size:.6rem" title="'+(p.moderation_note||'')+'">MOD ✗</span>' : '')}
-          ${p.whatsapp_consent ? '<br><i class="fab fa-whatsapp text-success" style="font-size:.7rem" title="WA consent"></i>' : ''}
+          ${p.moderation_passed === true ? '<br><span class="fenix-badge fenix-badge-success fx-fs-2xs">MOD ✓</span>' : (p.moderation_passed === false ? '<br><span class="fenix-badge fenix-badge-warning fx-fs-2xs" title="'+(p.moderation_note||'')+'">MOD ✗</span>' : '')}
+          ${p.whatsapp_consent ? '<br><i class="fab fa-whatsapp text-success fx-fs-sm" title="WA consent"></i>' : ''}
         </td>
       </tr>
     `).join('');
@@ -635,12 +635,12 @@ function showSES(id) {
     body.innerHTML = '<p class="text-muted">Nema SES podataka.</p>';
   } else {
     var s = p.ses_metadata;
-    var html = '<table class="table table-sm" style="color:#ccc">';
-    if (s.gps) html += '<tr><td>GPS</td><td>' + s.gps.lat + ', ' + s.gps.lng + ' <a href="https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng+'" target="_blank" style="color:var(--gold,#c9a84c)"><i class="fas fa-map-marker-alt"></i> Mapa</a></td></tr>';
+    var html = '<table class="table table-sm fx-text-muted">';
+    if (s.gps) html += '<tr><td>GPS</td><td>' + s.gps.lat + ', ' + s.gps.lng + ' <a href="https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng+'" target="_blank" class="fx-text-gold"><i class="fas fa-map-marker-alt"></i> Mapa</a></td></tr>';
     if (s.ip) html += '<tr><td>IP</td><td>' + s.ip + '</td></tr>';
-    if (s.device) html += '<tr><td>Uređaj</td><td style="font-size:.8rem">' + s.device + '</td></tr>';
+    if (s.device) html += '<tr><td>Uređaj</td><td class="fx-fs-compact">' + s.device + '</td></tr>';
     if (s.signature_time) html += '<tr><td>Potpis</td><td>' + s.signature_time + '</td></tr>';
-    html += '<tr><td>Hash</td><td style="font-family:monospace;font-size:.75rem;word-break:break-all">' + (s.integrity_hash||'—') + '</td></tr>';
+    html += '<tr><td>Hash</td><td class="fx-fs-caption fx-font-mono text-break">' + (s.integrity_hash||'—') + '</td></tr>';
     html += '<tr><td>Potpis</td><td>' + (s.has_signature ? '✓ Prisutan' : '✗') + '</td></tr>';
     html += '<tr><td>ID foto</td><td>' + (s.has_id_photo ? '✓ Prisutan' : '✗') + '</td></tr>';
     html += '</table>';
@@ -688,7 +688,7 @@ function fenixIdCamera() {
         reader.onloadend = function() {
           audioB64 = reader.result;
           var el = document.getElementById('audioStatus');
-          if (el) el.innerHTML = '🎵 Snimljeno (' + Math.round(blob.size/1024) + ' KB) <button onclick="playAudioPreview()" style="background:var(--gold);color:#000;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.7rem">▶ Play</button>';
+          if (el) el.innerHTML = '🎵 Snimljeno (' + Math.round(blob.size/1024) + ' KB) <button onclick="playAudioPreview()" class="fx-text-dark fx-border-none fx-rounded-sm fx-pointer fx-fs-sm fx-bg-gold fx-p-btn">▶ Play</button>';
         };
         reader.readAsDataURL(blob);
         stream.getTracks().forEach(function(t){ t.stop(); });

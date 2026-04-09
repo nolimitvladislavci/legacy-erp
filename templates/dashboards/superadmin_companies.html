@@ -16,10 +16,10 @@
 .co-name{font-size:.9rem;color:var(--white);font-weight:600;min-width:180px}
 .co-oib{font-size:.72rem;color:var(--muted);font-family:monospace}
 .badge-plan{font-size:.62rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:2px}
-.badge-starter{background:rgba(71,85,105,.3);color:#94a3b8;border:1px solid #334155}
+.badge-starter{background:rgba(71,85,105,.3);color:var(--text-muted);border:1px solid var(--border2)}
 .badge-business{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
-.badge-enterprise{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.3)}
-.badge-none{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.badge-enterprise{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.badge-none{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3)}
 .btn-imp{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);color:var(--gold);padding:5px 14px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:background .15s;font-family:'Barlow Condensed',sans-serif;font-weight:600}
 .btn-imp:hover{background:rgba(201,168,76,.25);color:var(--gold2)}
 .btn-outline-g{background:transparent;border:1px solid var(--border);color:var(--light);padding:5px 14px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:all .15s;font-family:'Barlow Condensed',sans-serif}
@@ -45,55 +45,14 @@
 {% endblock %}
 
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-{% if error %}
-<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:12px 16px;margin-bottom:16px;font-size:.85rem">
-  ⚠ {{ error }}
-</div>
-{% endif %}
-
-<!-- ── Company table ─────────────────────────────────────────── -->
-<div class="sa-card">
-  {% if pending_reg_count %}
-  <div class="reg-alert">
-    <span style="color:var(--gold);font-size:.82rem;font-weight:600">
-      ⏳ {{ pending_reg_count }} zahtjev{% if pending_reg_count != 1 %}a{% endif %} za registraciju čeka odobrenje
-    </span>
-    <a href="/register/superadmin/registrations/" class="btn-imp" style="font-size:.68rem">{% trans "Pregled zahtjeva →" %}</a>
-  </div>
-  {% endif %}
-  <div class="sa-card-head">
-    <h6>Sve tvrtke ({{ rows|length }})</h6>
-    <div style="display:flex;gap:8px">
-      <a href="/register/superadmin/registrations/" class="btn-outline-g" style="font-size:.68rem;padding:5px 12px">{% trans "Registracije" %}</a>
-      <button onclick="document.getElementById('new-form').style.display=document.getElementById('new-form').style.display==='none'?'block':'none'"
-              class="btn-gold-fill" style="font-size:.7rem;padding:7px 16px">
-        {% trans "+ Nova tvrtka" %}
-      </button>
-    </div>
-  </div>
+<!-- lang: topbar -->
 
   <!-- New company form (hidden by default) -->
-  <div id="new-form" style="display:none;padding:20px;background:#0d0f11;border-bottom:1px solid var(--border)">
+  <div id="new-form" class="fx-hidden fx-bg-body fx-p-20 fx-bb">
     <form method="POST" class="form-dark">
       {% csrf_token %}
       <input type="hidden" name="action" value="create">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px">
+      <div class="fx-gap-3 d-grid mb-3" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
         <input name="name"     placeholder="{% trans "Naziv tvrtke *" %}" required>
         <input name="oib"      placeholder="{% trans "OIB (11 znakova) *" %}" required maxlength="11">
         <input name="address"  placeholder="{% trans "Adresa" %}">
@@ -128,7 +87,7 @@
   {% for row in rows %}
   <div class="co-row">
     <!-- Company name + OIB -->
-    <div style="flex:1;min-width:180px">
+    <div class="fx-flex-1" style="min-width:180px">
       <div class="co-name">{{ row.company.name }}</div>
       <div class="co-oib">OIB: {{ row.company.oib }} · {{ row.company.city }}{% if row.company.city and row.company.country %}, {% endif %}{{ row.company.country }}</div>
     </div>
@@ -153,17 +112,17 @@
     </div>
 
     <!-- Stats -->
-    <div style="text-align:right">
-      <div class="meta-pill"><i class="fas fa-users" style="font-size:.6rem"></i> {{ row.user_count }} kor.</div>
+    <div class="text-end">
+      <div class="meta-pill"><i class="fas fa-users fx-fs-2xs"></i> {{ row.user_count }} kor.</div>
       {% if row.last_login %}
       <div class="meta-pill">Zadnji: {{ row.last_login|date:"d.m H:i" }}</div>
       {% else %}
-      <div class="meta-pill" style="color:#2a2e38">{% trans "Nikad" %}</div>
+      <div class="meta-pill fx-text-muted">{% trans "Nikad" %}</div>
       {% endif %}
     </div>
 
     <!-- Action buttons -->
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="d-flex fx-gap-2 align-items-center">
       <a href="/superadmin/impersonate/{{ row.company.id }}/"
          class="btn-imp"
          title="Pristupite sustavu kao ova tvrtka"
@@ -177,7 +136,7 @@
     </div>
   </div>
   {% empty %}
-  <div style="padding:40px;text-align:center;color:var(--muted);font-size:.85rem">
+  <div class="text-center fx-fs-base fx-text-muted" style="padding:40px">
     {% trans "Nema tvrtki u sustavu." %}
   </div>
   {% endfor %}
@@ -191,25 +150,25 @@
   </div>
   {% for log in recent_logs %}
   <div class="log-row">
-    <span style="color:var(--gold);font-weight:600">{{ log.superadmin.username }}</span>
-    <span style="color:var(--muted)">→</span>
-    <span style="color:var(--white)">{{ log.company.name }}</span>
-    <span style="color:var(--muted)">|</span>
+    <span class="fx-fw-semibold fx-text-gold">{{ log.superadmin.username }}</span>
+    <span class="fx-text-muted">→</span>
+    <span class="fx-text-white">{{ log.company.name }}</span>
+    <span class="fx-text-muted">|</span>
     <span>{{ log.started_at|date:"d.m.Y H:i" }}</span>
     {% if log.ended_at %}
-    <span style="color:#34d399">Trajanje: {{ log.duration_display }}</span>
+    <span class="fx-text-green">Trajanje: {{ log.duration_display }}</span>
     {% else %}
-    <span style="color:var(--gold)">{% trans "● Aktivna" %}</span>
+    <span class="fx-text-gold">{% trans "● Aktivna" %}</span>
     {% endif %}
-    <span style="color:var(--muted)">{{ log.actions_count }} akcija</span>
-    <span style="color:var(--muted);font-family:monospace;font-size:.68rem">{{ log.ip_address }}</span>
+    <span class="fx-text-muted">{{ log.actions_count }} akcija</span>
+    <span class="fx-fs-tiny fx-text-muted fx-font-mono">{{ log.ip_address }}</span>
   </div>
   {% endfor %}
 </div>
 {% endif %}
 
-<div style="margin-top:8px">
-  <a href="/superadmin/" style="font-size:.78rem;color:var(--muted);text-decoration:none">
+<div class="mt-2">
+  <a href="/superadmin/" class="fx-fs-body-sm fx-no-underline fx-text-muted">
     {% trans "← Natrag na superadmin dashboard" %}
   </a>
 </div>

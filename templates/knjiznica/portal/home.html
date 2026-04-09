@@ -4,12 +4,12 @@
 {% block content %}
 
 <!-- Hero -->
-<div style="text-align:center;padding:32px 0 24px">
-  <h1 style="font-size:2rem;font-weight:800;color:var(--lib-text)">
-    <i class="fas fa-book-open" style="color:var(--lib-gold)"></i>
+<div class="text-center" style="padding:32px 0 24px">
+  <h1 class="fx-fs-icon fx-fw-800" style="color:var(--lib-text)">
+    <i class="fas fa-book-open fx-text-gold"></i>
     Dobrodošli u knjižnicu
   </h1>
-  <p style="color:var(--lib-muted);max-width:500px;margin:8px auto 0">
+  <p class="fx-text-muted" style="max-width:500px;margin:8px auto 0">
     Čitaj, istražuj, osvajaj bedževe. Tvoja knjižnica — na dlanu.
   </p>
 </div>
@@ -36,13 +36,13 @@
 <!-- Novi naslovi -->
 {% if new_books %}
 <div class="lib-card mb-4">
-  <h3><i class="fas fa-star" style="color:var(--lib-gold)"></i> Novi naslovi</h3>
+  <h3><i class="fas fa-star fx-text-gold"></i> Novi naslovi</h3>
   <div class="book-grid">
     {% for book in new_books %}
-    <a href="{% url 'knjiznica:portal_book_detail' slug book.pk %}" class="book-card" style="text-decoration:none;color:inherit">
+    <a href="{% url 'knjiznica:portal_book_detail' slug book.pk %}" class="book-card fx-no-underline" style="color:inherit">
       <div class="book-cover">
         {% if book.book_meta and book.book_meta.cover_image %}
-        <img src="{{ book.book_meta.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px" alt="">
+        <img src="{{ book.book_meta.cover_image.url }}" class="fx-w-full fx-rounded-sm" style="height:100%;object-fit:cover" alt="">
         {% else %}
         <i class="fas fa-book"></i>
         {% endif %}
@@ -61,10 +61,10 @@
   <h3><i class="fas fa-play-circle" style="color:var(--lib-accent)"></i> Knjižnična TV</h3>
   <div class="media-grid">
     {% for m in media %}
-    <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card" style="text-decoration:none;color:inherit">
+    <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card fx-no-underline" style="color:inherit">
       <div class="media-thumb">
         {% if m.thumbnail %}
-        <img src="{{ m.thumbnail.url }}" style="width:100%;height:100%;object-fit:cover" alt="">
+        <img src="{{ m.thumbnail.url }}" class="fx-w-full" style="height:100%;object-fit:cover" alt="">
         {% else %}
         <i class="fas fa-{% if m.content_type == 'audio_story' %}headphones{% elif m.content_type == 'video_read' %}book-reader{% elif m.content_type == 'quiz' %}question-circle{% else %}play{% endif %}"></i>
         {% endif %}
@@ -85,16 +85,15 @@
 <!-- Top čitači -->
 {% if top_readers %}
 <div class="lib-card">
-  <h3><i class="fas fa-trophy" style="color:var(--lib-gold)"></i> Naši prvaci čitanja</h3>
-  <div style="display:flex;gap:16px;flex-wrap:wrap">
+  <h3><i class="fas fa-trophy fx-text-gold"></i> Naši prvaci čitanja</h3>
+  <div class="d-flex fx-gap-4 fx-flex-wrap">
     {% for child in top_readers %}
-    <div style="text-align:center;min-width:80px">
-      <div class="child-avatar" style="width:50px;height:50px;font-size:1.2rem;margin:0 auto 4px;
-        {% if forloop.first %}background:var(--lib-gold){% endif %}">
+    <div class="text-center" style="min-width:80px">
+      <div class="child-avatar fx-fs-2xl" style="width:50px;height:50px;margin:0 auto 4px;{% if forloop.first %}background:var(--lib-gold){% endif %}">
         <i class="fas fa-{{ child.avatar }}"></i>
       </div>
-      <div style="font-weight:600;font-size:.85rem">{{ child.first_name }}</div>
-      <div style="font-size:.7rem;color:var(--lib-muted)">{{ child.books_read }} knjiga</div>
+      <div class="fx-fw-semibold fx-fs-base">{{ child.first_name }}</div>
+      <div class="fx-fs-sm fx-text-muted">{{ child.books_read }} knjiga</div>
     </div>
     {% endfor %}
   </div>

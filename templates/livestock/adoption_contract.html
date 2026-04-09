@@ -6,35 +6,35 @@
 <style>
   @page { size: A4; margin: 20mm 18mm 20mm 18mm; }
   * { box-sizing: border-box; }
-  body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; color: #1a1a2e; line-height: 1.6; }
+  body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; color:var(--text); line-height: 1.6; }
   h1 { font-size: 16pt; text-align: center; margin-bottom: 4mm; letter-spacing: .05em; }
-  .subtitle { text-align: center; font-size: 9pt; color: #475569; margin-bottom: 10mm; }
+  .subtitle { text-align: center; font-size: 9pt; color:var(--text-dim); margin-bottom: 10mm; }
   .gold-line { border: none; border-top: 1.5pt solid #c9a84c; margin: 6mm 0; }
   .parties { display: flex; gap: 8mm; margin-bottom: 8mm; }
   .party { flex: 1; padding: 4mm 5mm; border: 0.5pt solid #ddd; border-radius: 2mm; }
-  .party-title { font-size: 8pt; font-weight: bold; text-transform: uppercase; color: #c9a84c; letter-spacing: .1em; margin-bottom: 2mm; }
+  .party-title { font-size: 8pt; font-weight: bold; text-transform: uppercase; color:var(--gold); letter-spacing: .1em; margin-bottom: 2mm; }
   .party-name { font-size: 12pt; font-weight: bold; }
-  .party-detail { font-size: 9pt; color: #475569; }
+  .party-detail { font-size: 9pt; color:var(--text-dim); }
   table.pet-table { width: 100%; border-collapse: collapse; margin: 6mm 0; font-size: 10pt; }
-  table.pet-table th { background: #1a1a2e; color: #c9a84c; padding: 3mm 4mm; text-align: left; font-size: 9pt; }
+  table.pet-table th { background: #1a1a2e; color:var(--gold); padding: 3mm 4mm; text-align: left; font-size: 9pt; }
   table.pet-table td { padding: 2.5mm 4mm; border-bottom: 0.3pt solid #e2e8f0; }
-  table.pet-table tr:nth-child(even) td { background: #f8fafc; }
+  table.pet-table tr:nth-child(even) td { background:var(--surface2); }
   .clauses { margin: 8mm 0; }
   .clause { margin-bottom: 5mm; }
-  .clause-num { font-weight: bold; color: #c9a84c; }
+  .clause-num { font-weight: bold; color:var(--gold); }
   .sig-row { display: flex; gap: 20mm; margin-top: 20mm; }
   .sig-box { flex: 1; }
   .sig-line { border-top: 0.5pt solid #1a1a2e; margin-top: 12mm; margin-bottom: 2mm; }
-  .sig-label { font-size: 9pt; color: #475569; }
-  .qr-section { text-align: center; margin: 8mm 0; padding: 5mm; background: #f8fafc; border: 0.3pt solid #ddd; border-radius: 2mm; }
-  .footer { font-size: 8pt; color: #94a3b8; text-align: center; margin-top: 10mm; border-top: 0.3pt solid #e2e8f0; padding-top: 4mm; }
-  .shelter-badge { background: #c9a84c; color: #fff; padding: 2mm 4mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; display: inline-block; margin-bottom: 4mm; }
+  .sig-label { font-size: 9pt; color:var(--text-dim); }
+  .qr-section { text-align: center; margin: 8mm 0; padding: 5mm; background:var(--surface2); border: 0.3pt solid #ddd; border-radius: 2mm; }
+  .footer { font-size: 8pt; color:var(--text-muted); text-align: center; margin-top: 10mm; border-top: 0.3pt solid #e2e8f0; padding-top: 4mm; }
+  .shelter-badge { background:var(--gold); color:var(--white); padding: 2mm 4mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; display: inline-block; margin-bottom: 4mm; }
 </style>
 </head>
 <body>
 
   {% if company.is_shelter and company.shelter_sponsor %}
-  <div style="text-align:center;margin-bottom:4mm">
+  <div class="text-center" style="margin-bottom:4mm">
     <span class="shelter-badge">Sponzorirano od: {{ company.shelter_sponsor }}</span>
   </div>
   {% endif %}
@@ -118,10 +118,10 @@
   </div>
 
   <div class="qr-section">
-    <div style="font-size:9pt;color:#475569;margin-bottom:2mm">
+    <div class="fx-text-dim" style="font-size:9pt;margin-bottom:2mm">
       Digitalni profil ljubimca dostupan je skeniranjem QR koda:
     </div>
-    <div style="font-size:10pt;font-weight:bold;color:#1a1a2e">
+    <div class="fx-fw-bold fx-text-body" style="font-size:10pt">
       https://memio.pet/pas/{{ pet.chip_number|default:pet.ear_tag }}
     </div>
   </div>

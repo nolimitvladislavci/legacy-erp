@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -38,20 +38,20 @@
 {% endblock %}
 {% block content %}
 <div class="exp-container">
-<a href="{% url 'experiences:recall_list' %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>Recall</a>
-<h2 style="font-size:1.5rem;font-weight:800;margin:.5rem 0 1.5rem;color:#ef4444"><i class="fas fa-exclamation-triangle me-2"></i>Novi HACCP Recall</h2>
+<a href="{% url 'experiences:recall_list' %}" class="fx-fs-base fx-text-dim"><i class="fas fa-arrow-left me-1"></i>Recall</a>
+<h2 class="fx-fs-5xl fx-fw-800 fx-text-red" style="margin:.5rem 0 1.5rem"><i class="fas fa-exclamation-triangle me-2"></i>Novi HACCP Recall</h2>
 <form method="POST" class="exp-form">
   {% csrf_token %}
   <div class="row g-3">
-    <div class="col-md-8"><label class="form-label small fw-bold" style="color:var(--text-dim)">Naslov</label><input type="text" name="title" class="form-control exp-input" required placeholder="npr. Kontaminacija jaja — Salmonela"></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Ozbiljnost</label><select name="severity" class="form-select exp-input">{% for code,label in severity_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Izvorni model</label><input type="text" name="source_model" class="form-control exp-input" placeholder="EggRecord"></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">ID izvora</label><input type="number" name="source_id" class="form-control exp-input"></div>
-    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">LOT / Šarža</label><input type="text" name="lot_number" class="form-control exp-input"></div>
-    <div class="col-12"><label class="form-label small fw-bold" style="color:var(--text-dim)">Opis problema</label><textarea name="description" rows="3" class="form-control exp-input" required></textarea></div>
-    <div class="col-12"><label class="form-label small fw-bold" style="color:var(--text-dim)">Simptomi</label><textarea name="reported_symptoms" rows="2" class="form-control exp-input"></textarea></div>
+    <div class="col-md-8"><label class="form-label small fw-bold fx-text-dim">Naslov</label><input type="text" name="title" class="form-control exp-input" required placeholder="npr. Kontaminacija jaja — Salmonela"></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Ozbiljnost</label><select name="severity" class="form-select exp-input">{% for code,label in severity_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">Izvorni model</label><input type="text" name="source_model" class="form-control exp-input" placeholder="EggRecord"></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">ID izvora</label><input type="number" name="source_id" class="form-control exp-input"></div>
+    <div class="col-md-4"><label class="form-label small fw-bold fx-text-dim">LOT / Šarža</label><input type="text" name="lot_number" class="form-control exp-input"></div>
+    <div class="col-12"><label class="form-label small fw-bold fx-text-dim">Opis problema</label><textarea name="description" rows="3" class="form-control exp-input" required></textarea></div>
+    <div class="col-12"><label class="form-label small fw-bold fx-text-dim">Simptomi</label><textarea name="reported_symptoms" rows="2" class="form-control exp-input"></textarea></div>
   </div>
-  <div class="mt-4"><button type="submit" class="btn btn-danger" style="border-radius:10px;font-weight:700"><i class="fas fa-exclamation-circle me-1"></i>Pokreni Recall</button></div>
+  <div class="mt-4"><button type="submit" class="btn btn-danger fx-rounded fx-fw-bold"><i class="fas fa-exclamation-circle me-1"></i>Pokreni Recall</button></div>
 </form>
 </div>
 {% endblock %}

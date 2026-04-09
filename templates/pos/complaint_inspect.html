@@ -8,36 +8,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Barlow', sans-serif; background: #f8fafc; color: #1e293b; }
+body { font-family: 'Barlow', sans-serif; background:var(--surface2); color: #1e293b; }
 .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
 .header {
-    background: #1a1a2e; color: #fff; padding: 1.5rem 2rem; border-radius: 12px;
+    background: #1a1a2e; color:var(--white); padding: 1.5rem 2rem; border-radius: 12px;
     margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;
 }
 .header h1 { font-size: 1.3rem; }
-.header .scope { background: var(--gold,#c9a84c); color: #1a1a2e; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+.header .scope { background: var(--gold,#c9a84c); color:var(--text); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-.stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.5rem; flex: 1; text-align: center; }
-.stat-card .value { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
-.stat-card .label { font-size: 0.8rem; color: #64748b; }
+.stat-card { background:var(--bg-card); border:1px solid var(--border); border-radius: 10px; padding: 1rem 1.5rem; flex: 1; text-align: center; }
+.stat-card .value { font-size: 1.8rem; font-weight: 700; color:var(--text); }
+.stat-card .label { font-size: 0.8rem; color:var(--text-dim); }
 .toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
 .toolbar a { padding: 8px 16px; background: #1a1a2e; color: var(--gold,#c9a84c); border-radius: 8px; text-decoration: none; font-size: 0.85rem; }
 .toolbar a:hover { background: #2a2a4e; }
-table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+table { width: 100%; background:var(--bg-card); border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 th { background: #1a1a2e; color: var(--gold,#c9a84c); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; }
 td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
-tr:hover td { background: #f8fafc; }
+tr:hover td { background:var(--surface2); }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-.badge-prigovor { background: #fef2f2; color: #dc2626; }
-.badge-pohvala { background: #f0fdf4; color: #16a34a; }
+.badge-prigovor { background: #fef2f2; color:var(--red); }
+.badge-pohvala { background:var(--green-dim); color:var(--green); }
 .badge-reklamacija { background: #fff7ed; color: #ea580c; }
-.badge-utisak { background: #eff6ff; color: #2563eb; }
+.badge-utisak { background: #eff6ff; color:var(--blue); }
 .badge-prijedlog { background: #faf5ff; color: #7c3aed; }
-.badge-ok { background: #f0fdf4; color: #16a34a; }
+.badge-ok { background:var(--green-dim); color:var(--green); }
 .badge-pending { background: #fff7ed; color: #ea580c; }
-.badge-overdue { background: #fef2f2; color: #dc2626; }
+.badge-overdue { background: #fef2f2; color:var(--red); }
 .stars { color: var(--gold,#c9a84c); }
-.footer { text-align: center; margin-top: 2rem; font-size: 0.75rem; color: #94a3b8; }
+.footer { text-align: center; margin-top: 2rem; font-size: 0.75rem; color:var(--text-muted); }
 .footer .token-info { font-family: monospace; font-size: 0.7rem; }
 .read-only-banner {
     background: #fef3c7; border: 1px solid #fde68a; color: #92400e;
@@ -50,7 +50,7 @@ tr:hover td { background: #f8fafc; }
     <div class="header">
         <div>
             <h1>Knjiga boljitaka</h1>
-            <div style="font-size:0.85rem;color:#ccc;margin-top:4px;">{{ company.name }}</div>
+            <div class="fx-fs-base mt-1 fx-text-muted">{{ company.name }}</div>
         </div>
         <span class="scope">Inspekcija</span>
     </div>
@@ -61,9 +61,9 @@ tr:hover td { background: #f8fafc; }
     </div>
 
     <div class="stats">
-        <div class="stat-card"><div class="value">{{ total }}</div><div class="label">Ukupno zapisa</div></div>
-        <div class="stat-card"><div class="value">{{ prigovori_cnt }}</div><div class="label">Prigovori/Reklamacije</div></div>
-        <div class="stat-card"><div class="value">{{ pohvale_cnt }}</div><div class="label">Pohvale/Utisci</div></div>
+        <div class="fenix-stat"><div class="value">{{ total }}</div><div class="label">Ukupno zapisa</div></div>
+        <div class="fenix-stat"><div class="value">{{ prigovori_cnt }}</div><div class="label">Prigovori/Reklamacije</div></div>
+        <div class="fenix-stat"><div class="value">{{ pohvale_cnt }}</div><div class="label">Pohvale/Utisci</div></div>
     </div>
 
     <div class="toolbar">
@@ -106,7 +106,7 @@ tr:hover td { background: #f8fafc; }
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="8" style="text-align:center;color:#94a3b8;">Nema zapisa.</td></tr>
+            <tr><td colspan="8" class="text-center fx-text-muted">Nema zapisa.</td></tr>
             {% endfor %}
         </tbody>
     </table>

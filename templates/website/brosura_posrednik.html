@@ -34,8 +34,8 @@ a{color:var(--gold);text-decoration:none}
 .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:20px;font-size:.76rem;font-weight:600;letter-spacing:.03em}
 .badge-gold{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold)}
-.badge-green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
-.badge-blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+.badge-green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.badge-blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--blue)}
 
 /* ── SECTIONS ── */
 .section{padding:60px 0;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -45,7 +45,7 @@ a{color:var(--gold);text-decoration:none}
 /* ── ZAKON BOX ── */
 .law-box{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:28px 32px;margin:24px 0}
 .law-box .law-tag{font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
-.law-box h3{font-size:1.3rem;font-weight:700;color:#f1f5f9;margin-bottom:10px}
+.law-box h3{font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:10px}
 .law-box p{color:var(--muted);font-size:.92rem;line-height:1.7}
 .law-items{list-style:none;margin-top:12px}
 .law-items li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.88rem;color:var(--text)}
@@ -59,7 +59,7 @@ a{color:var(--gold);text-decoration:none}
 .schema-node .icon{font-size:1.8rem;margin-bottom:6px}
 .schema-node .label{font-size:.78rem;font-weight:700;color:var(--text);line-height:1.2}
 .schema-node .sublabel{font-size:.65rem;color:var(--muted);margin-top:3px}
-.schema-node .cert{font-size:.6rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#4ade80;border-radius:8px;padding:2px 8px;margin-top:6px;display:inline-block}
+.schema-node .cert{font-size:.6rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:var(--green);border-radius:8px;padding:2px 8px;margin-top:6px;display:inline-block}
 .schema-arrow{display:flex;flex-direction:column;align-items:center;padding:0 8px}
 .arrow-line{width:40px;height:2px;background:linear-gradient(90deg,var(--gold),rgba(201,168,76,.3));position:relative}
 .arrow-line::after{content:'▶';position:absolute;right:-6px;top:-7px;color:var(--gold);font-size:.7rem}
@@ -77,25 +77,25 @@ a{color:var(--gold);text-decoration:none}
 .model-c{background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)}
 .model-c::before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
 .model-letter{font-family:'Bebas Neue',sans-serif;font-size:4rem;line-height:1;margin-bottom:4px;opacity:.3}
-.model-a .model-letter{color:#22c55e}
+.model-a .model-letter{color:var(--green)}
 .model-b .model-letter{color:var(--gold)}
-.model-c .model-letter{color:#3b82f6}
+.model-c .model-letter{color:var(--blue)}
 .model-card h3{font-size:1.15rem;font-weight:700;margin-bottom:4px}
 .model-card .model-who{font-size:.78rem;color:var(--muted);margin-bottom:16px;font-style:italic}
 .model-steps{list-style:none}
 .model-steps li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.05)}
 .model-steps li:last-child{border:none}
 .step-num{width:20px;height:20px;border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.model-a .step-num{background:rgba(34,197,94,.15);color:#4ade80}
+.model-a .step-num{background:rgba(34,197,94,.15);color:var(--green)}
 .model-b .step-num{background:rgba(201,168,76,.15);color:var(--gold)}
-.model-c .step-num{background:rgba(59,130,246,.15);color:#60a5fa}
+.model-c .step-num{background:rgba(59,130,246,.15);color:var(--blue)}
 .model-footer{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)}
 .model-footer .cost{font-size:.8rem;color:var(--muted)}
 .model-footer .cost strong{color:var(--text)}
 .model-footer .tag{display:inline-block;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:10px;margin-top:8px;text-transform:uppercase;letter-spacing:.06em}
-.model-a .tag{background:rgba(34,197,94,.15);color:#4ade80}
+.model-a .tag{background:rgba(34,197,94,.15);color:var(--green)}
 .model-b .tag{background:rgba(201,168,76,.15);color:var(--gold)}
-.model-c .tag{background:rgba(59,130,246,.15);color:#60a5fa}
+.model-c .tag{background:rgba(59,130,246,.15);color:var(--blue)}
 
 /* ── UVJETI / CHECKLIST ── */
 .cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:24px 0}
@@ -104,7 +104,7 @@ a{color:var(--gold);text-decoration:none}
 .cert-item .cert-icon{font-size:1.4rem}
 .cert-item h4{font-size:.9rem;font-weight:700}
 .cert-item p{font-size:.78rem;color:var(--muted);line-height:1.6}
-.check-ok{color:#4ade80}.check-no{color:var(--red)}.check-wip{color:var(--gold)}
+.check-ok{color:var(--green)}.check-no{color:var(--red)}.check-wip{color:var(--gold)}
 
 /* ── TIMELINE ── */
 .timeline{position:relative;padding-left:36px;margin:28px 0}
@@ -186,19 +186,19 @@ a{color:var(--gold);text-decoration:none}
     <ul class="law-items">
       <li><i class="fas fa-check-circle"></i><span><strong>Od 01.01.2026.</strong> — obvezni e-Računi za sve PDV obveznike B2B</span></li>
       <li><i class="fas fa-check-circle"></i><span><strong>Od 01.01.2027.</strong> — obvezno za SVE subjekte bez iznimke</span></li>
-      <li><i class="fas fa-exclamation-triangle" style="color:var(--gold)"></i><span>Klijenti koji nemaju posrednika šalju e-Račune sami — ili snose kazne</span></li>
-      <li><i class="fas fa-lightbulb" style="color:var(--gold)"></i><span>Posrednik šalje <strong>u ime klijenta</strong> — klijent potpisuje jednokratnu punomoć</span></li>
+      <li><i class="fas fa-exclamation-triangle fx-text-gold"></i><span>Klijenti koji nemaju posrednika šalju e-Račune sami — ili snose kazne</span></li>
+      <li><i class="fas fa-lightbulb fx-text-gold"></i><span>Posrednik šalje <strong>u ime klijenta</strong> — klijent potpisuje jednokratnu punomoć</span></li>
     </ul>
   </div>
 
   <div class="law-box" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.04)">
-    <div class="law-tag" style="color:#60a5fa">EU — Ekvivalenti u susjednim državama</div>
-    <h3 style="color:#f1f5f9">Isto rješenje, različiti zakoni</h3>
+    <div class="law-tag fx-text-blue">EU — Ekvivalenti u susjednim državama</div>
+    <h3 class="fx-text-body">Isto rješenje, različiti zakoni</h3>
     <ul class="law-items">
-      <li><i class="fas fa-flag" style="color:#60a5fa"></i><span><strong>Njemačka:</strong> KassenSichV 2.0 + XRechnung — TSE certifikat obavezan</span></li>
-      <li><i class="fas fa-flag" style="color:#60a5fa"></i><span><strong>Austrija:</strong> RKSV (Registrierkassensicherheitsverordnung)</span></li>
-      <li><i class="fas fa-flag" style="color:#60a5fa"></i><span><strong>Slovenija:</strong> FURS eDavki — fiskalizacija aktivna od 2015.</span></li>
-      <li><i class="fas fa-flag" style="color:#60a5fa"></i><span><strong>EU standard:</strong> PEPPOL / EN 16931 / XRechnung — B2G od 2024.</span></li>
+      <li><i class="fas fa-flag fx-text-blue"></i><span><strong>Njemačka:</strong> KassenSichV 2.0 + XRechnung — TSE certifikat obavezan</span></li>
+      <li><i class="fas fa-flag fx-text-blue"></i><span><strong>Austrija:</strong> RKSV (Registrierkassensicherheitsverordnung)</span></li>
+      <li><i class="fas fa-flag fx-text-blue"></i><span><strong>Slovenija:</strong> FURS eDavki — fiskalizacija aktivna od 2015.</span></li>
+      <li><i class="fas fa-flag fx-text-blue"></i><span><strong>EU standard:</strong> PEPPOL / EN 16931 / XRechnung — B2G od 2024.</span></li>
     </ul>
   </div>
 </div>
@@ -231,7 +231,7 @@ a{color:var(--gold);text-decoration:none}
         <div class="icon">🤝</div>
         <div class="label">Distributer<br>(agent)</div>
         <div class="sublabel">Marija, Kruljac<br>Split, Zagreb...</div>
-        <div class="cert" style="background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.25);color:#60a5fa">Bez certifikata</div>
+        <div class="cert fx-text-blue" style="background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.25)">Bez certifikata</div>
       </div>
 
       <div class="schema-arrow">
@@ -257,15 +257,15 @@ a{color:var(--gold);text-decoration:none}
         <div class="icon">🏦</div>
         <div class="label">FINA &<br>Porezna uprava</div>
         <div class="sublabel">CIS sustav<br>eRačun mreža</div>
-        <div class="cert" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2);color:#f87171">Državni registar</div>
+        <div class="cert fx-text-red" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">Državni registar</div>
       </div>
 
     </div>
   </div>
 
-  <p style="font-size:.8rem;color:var(--muted);text-align:center;margin-top:12px">
-    <i class="fas fa-info-circle" style="color:var(--gold)"></i>&nbsp;
-    Distributer <strong style="color:var(--text)">ne treba vlastiti ISO 27001 ni PU licencu</strong> — operira pod LIMIT Connect certifikatom.
+  <p class="fx-fs-compact text-center fx-text-muted mt-3">
+    <i class="fas fa-info-circle fx-text-gold"></i>&nbsp;
+    Distributer <strong class="fx-text-body">ne treba vlastiti ISO 27001 ni PU licencu</strong> — operira pod LIMIT Connect certifikatom.
     Klijent potpisuje punomoć jednom, FINA evidentira, LIMIT Connect šalje za uvijek.
   </p>
 </div>
@@ -308,7 +308,7 @@ a{color:var(--gold);text-decoration:none}
       </ul>
       <div class="model-footer">
         <div class="cost">Cijena: <strong>Uključeno u Starter plan (22 EUR/mj)</strong></div>
-        <div class="cost" style="margin-top:4px">Certifikat: <strong>Nije potreban — koristite naš</strong></div>
+        <div class="cost mt-1">Certifikat: <strong>Nije potreban — koristite naš</strong></div>
         <span class="tag">Odmah dostupno</span>
       </div>
     </div>
@@ -342,7 +342,7 @@ a{color:var(--gold);text-decoration:none}
       </ul>
       <div class="model-footer">
         <div class="cost">Licenca: <strong>359–700 EUR/mj</strong> (Distributor plan)</div>
-        <div class="cost" style="margin-top:4px">Klijenti plaćaju vama ili direktno platformi</div>
+        <div class="cost mt-1">Klijenti plaćaju vama ili direktno platformi</div>
         <span class="tag">Aktivan Q2 2026</span>
       </div>
     </div>
@@ -376,7 +376,7 @@ a{color:var(--gold);text-decoration:none}
       </ul>
       <div class="model-footer">
         <div class="cost">Licenca: <strong>700 EUR/mj</strong> — pokriva neograničen broj klijenata</div>
-        <div class="cost" style="margin-top:4px">Break-even: ~35 klijenata (35×55=1.925 EUR)</div>
+        <div class="cost mt-1">Break-even: ~35 klijenata (35×55=1.925 EUR)</div>
         <span class="tag">Otvorene prijave</span>
       </div>
     </div>
@@ -436,9 +436,9 @@ a{color:var(--gold);text-decoration:none}
     </div>
   </div>
 
-  <div class="law-box" style="margin-top:16px">
-    <div class="law-tag" style="color:#4ade80">Ključna prednost</div>
-    <h3 style="color:#f1f5f9">Distributeri NE trebaju vlastiti certifikat</h3>
+  <div class="law-box mt-3">
+    <div class="law-tag fx-text-green">Ključna prednost</div>
+    <h3 class="fx-text-body">Distributeri NE trebaju vlastiti certifikat</h3>
     <p>Registracija kao informacijski posrednik vrijedi za <strong>Konjik d.o.o.</strong> s jednim OIB-om. Svaki distributer (Split, Zagreb, Rijeka...) operira <strong>pod ovim certifikatom</strong> kao agent. Klijenti daju punomoć Konjiku — ne distributeru. Distributer ne treba ISO 27001, ne treba PU licencu, ne treba cyber osiguranje.</p>
   </div>
 </div>
@@ -583,7 +583,7 @@ a{color:var(--gold);text-decoration:none}
 <!-- CTA -->
 <div class="container">
 <div class="cta">
-  <h2>Postanite distributer<br><span style="color:var(--gold)">u vašoj regiji</span></h2>
+  <h2>Postanite distributer<br><span class="fx-text-gold">u vašoj regiji</span></h2>
   <p>Split, Zagreb, Rijeka, Varaždin, Osijek — slobodna područja čekaju. Jednom agentskim ugovorom postajete prvi u svom gradu.</p>
   <div class="btn-row">
     <a href="/pocni/" class="btn-gold"><i class="fas fa-handshake"></i> Postanite distributer</a>
@@ -596,7 +596,7 @@ a{color:var(--gold);text-decoration:none}
 <footer class="page-footer">
   <div class="container">
     <p>LIMIT Connect — Konjik d.o.o. · OIB 37590751921 · <a href="/legal/opci-uvjeti/">Opći uvjeti</a> · <a href="/legal/dpa/">DPA</a> · <a href="/legal/privatnost/">Privatnost</a></p>
-    <p style="margin-top:6px;color:#475569">Informacijski posrednik po Zakonu o fiskalizaciji NN 89/25 — certifikacija u tijeku (Q3 2026)</p>
+    <p class="fx-text-dim mt-1">Informacijski posrednik po Zakonu o fiskalizaciji NN 89/25 — certifikacija u tijeku (Q3 2026)</p>
   </div>
 </footer>
 

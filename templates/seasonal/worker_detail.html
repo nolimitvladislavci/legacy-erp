@@ -18,7 +18,7 @@
             <dt class="col-5 text-muted">Email</dt>
             <dd class="col-7">{{ worker.email|default:"—" }}</dd>
             <dt class="col-5 text-muted">IBAN</dt>
-            <dd class="col-7 font-monospace" style="font-size:.75rem">{{ worker.iban|default:"—" }}</dd>
+            <dd class="col-7 font-monospace fx-fs-caption">{{ worker.iban|default:"—" }}</dd>
             <dt class="col-5 text-muted">Adresa</dt>
             <dd class="col-7">{{ worker.address|default:"—" }}</dd>
             <dt class="col-5 text-muted">Drž.</dt>
@@ -52,10 +52,10 @@
                   <td class="small text-muted">{{ c.start_date }} → {{ c.end_date }}<br>{{ c.duration_days }} dana</td>
                   <td class="text-warning">{{ c.gross_amount }} €</td>
                   <td>
-                    {% if c.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+                    {% if c.status == 'active' %}<span class="fenix-badge fenix-badge-success">Aktivan</span>
                     {% elif c.status == 'pending' %}<span class="badge bg-info text-dark">Na čekanju</span>
-                    {% elif c.status == 'completed' %}<span class="badge bg-secondary">Završen</span>
-                    {% else %}<span class="badge bg-danger">Otkazan</span>{% endif %}
+                    {% elif c.status == 'completed' %}<span class="fenix-badge fenix-badge-muted">Završen</span>
+                    {% else %}<span class="fenix-badge fenix-badge-danger">Otkazan</span>{% endif %}
                   </td>
                   <td><a href="{% url 'seasonal:contract_detail' c.pk %}" class="btn btn-sm btn-outline-secondary">Otvori</a></td>
                 </tr>

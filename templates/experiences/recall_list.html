@@ -12,16 +12,16 @@
 .exp-card:hover{border-color:var(--gold-border)}
 .exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
-.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
-.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:var(--black);font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:var(--text)}
 .exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
 .exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
 .exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
 .exp-section{margin-bottom:1.5rem}
 .exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
-.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
-.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
-.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+.severity-warning{background:var(--amber)22;color:var(--amber);border:1px solid #f59e0b44}
+.severity-recall{background:var(--red)22;color:var(--red);border:1px solid #ef444444}
+.severity-critical{background:var(--red)22;color:var(--red);border:1px solid #dc262644}
 </style>
 @media(max-width:768px){
   .exp-container{padding:0 .5rem}
@@ -39,8 +39,8 @@
 {% block content %}
 <div class="exp-container">
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <div><h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)"><i class="fas fa-exclamation-triangle me-2" style="color:#ef4444"></i>HACCP Recall</h2><small style="color:var(--text-dim)">Povlačenje proizvoda — obrnuta slijedivost</small></div>
-  <a href="{% url 'experiences:recall_create' %}" class="btn btn-danger btn-sm" style="border-radius:10px;font-weight:700"><i class="fas fa-plus me-1"></i>Novi recall</a>
+  <div><h2 class="fx-fs-5xl fx-fw-800 fx-text-body fx-m-0"><i class="fas fa-exclamation-triangle me-2 fx-text-red"></i>HACCP Recall</h2><small class="fx-text-dim">Povlačenje proizvoda — obrnuta slijedivost</small></div>
+  <a href="{% url 'experiences:recall_create' %}" class="btn btn-danger btn-sm fx-rounded fx-fw-bold"><i class="fas fa-plus me-1"></i>Novi recall</a>
 </div>
 {% if recalls %}
 <div class="row g-3">
@@ -49,11 +49,11 @@
     <a href="{% url 'experiences:recall_detail' r.pk %}" class="text-decoration-none">
     <div class="exp-card" style="border-left:4px solid {% if r.severity == 'critical' %}#dc2626{% elif r.severity == 'recall' %}#ef4444{% else %}#f59e0b{% endif %}">
       <div class="d-flex justify-content-between align-items-start">
-        <h6 style="font-weight:700;color:var(--text);margin:0">{{ r.title }}</h6>
+        <h6 class="fx-fw-bold fx-text-body fx-m-0">{{ r.title }}</h6>
         <span class="exp-badge severity-{{ r.severity }}">{{ r.get_severity_display }}</span>
       </div>
-      <p style="font-size:.8rem;color:var(--text-dim);margin:.5rem 0">LOT: {{ r.lot_number|default:"—" }} | {{ r.get_status_display }}</p>
-      <div style="font-size:.75rem;color:var(--text-dim)">Gostiju: {{ r.affected_guests_count }} | Narudžbi: {{ r.affected_orders_count }} | {{ r.created_at|date:"d.m.Y H:i" }}</div>
+      <p class="fx-fs-compact fx-text-dim" style="margin:.5rem 0">LOT: {{ r.lot_number|default:"—" }} | {{ r.get_status_display }}</p>
+      <div class="fx-fs-caption fx-text-dim">Gostiju: {{ r.affected_guests_count }} | Narudžbi: {{ r.affected_orders_count }} | {{ r.created_at|date:"d.m.Y H:i" }}</div>
     </div>
     </a>
   </div>

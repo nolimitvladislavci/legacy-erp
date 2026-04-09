@@ -12,8 +12,8 @@
 .ok-stat-val{font-size:1.4rem;font-weight:700;display:block}
 .ok-stat-lbl{font-size:.7rem;color:var(--text-muted,#94a3b8);margin-top:2px}
 .ok-stat-mine .ok-stat-val{color:var(--gold,#c9a84c)}
-.ok-stat-free .ok-stat-val{color:#22c55e}
-.ok-stat-taken .ok-stat-val{color:#64748b}
+.ok-stat-free .ok-stat-val{color:var(--green)}
+.ok-stat-taken .ok-stat-val{color:var(--text-dim)}
 
 /* Pretraga */
 .ok-search{width:100%;padding:10px 14px;border:1px solid var(--border,#333);border-radius:8px;
@@ -56,12 +56,12 @@
 .ok-oib{font-size:.68rem;color:var(--text-muted,#64748b);font-family:monospace}
 .ok-badge{font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px}
 .ok-badge-moja{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
-.ok-badge-free{background:rgba(34,197,94,.12);color:#4ade80}
+.ok-badge-free{background:rgba(34,197,94,.12);color:var(--green)}
 
 /* Sticky footer */
 .ok-footer{position:sticky;bottom:0;background:var(--bg,#0a0a0a);
   padding:12px 0;margin-top:16px;display:flex;gap:10px;border-top:1px solid var(--border,#333)}
-.ok-save{flex:1;padding:12px;background:var(--gold,#c9a84c);color:#000;
+.ok-save{flex:1;padding:12px;background:var(--gold,#c9a84c);color:var(--black);
   border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer}
 .ok-save:hover{filter:brightness(1.1)}
 .ok-count{text-align:center;font-size:.78rem;color:var(--gold,#c9a84c);
@@ -77,14 +77,14 @@
 {% block content %}
 <div class="ok-wrap">
 
-  <h2 style="color:var(--gold,#c9a84c);margin-bottom:4px">Moji komitenti</h2>
-  <p style="color:var(--text-muted,#94a3b8);font-size:.82rem;margin-bottom:16px">
+  <h2 class="fx-text-gold mb-1">Moji komitenti</h2>
+  <p class="fx-fs-note mb-3" style="color:var(--text-muted,#94a3b8)">
     Odaberite firme koje vi vodite. Svaka radnica vidi samo svoje i slobodne.
   </p>
 
   <!-- Privatnost info -->
   <div class="ok-privacy">
-    <span style="font-size:1rem">🔒</span>
+    <span class="fx-fs-lg">🔒</span>
     <span>Svaka radnica vidi samo <strong>svoje</strong> i <strong>slobodne</strong> komitente.
     {% if tudje_count %}Trenutno je <strong>{{ tudje_count }}</strong> komitent(a) raspoređeno na druge radnice — one su skrivene.{% endif %}
     </span>
@@ -120,7 +120,7 @@
     <div class="ok-section" id="sec-moji">
       <div class="ok-section-title">
         ⭐ Moji komitenti ({{ moje_count }})
-        <span style="margin-left:auto">
+        <span class="fx-ml-auto">
           <button type="button" class="ok-btn-sm" onclick="selectGroup('moja', true)">Sve ✓</button>
           <button type="button" class="ok-btn-sm" onclick="selectGroup('moja', false)">Ništa</button>
         </span>
@@ -129,7 +129,7 @@
         {% for c in companies %}{% if c.id in my_ids %}
         <label class="ok-item moja checked" data-name="{{ c.name|lower }}" data-group="moja">
           <input type="checkbox" name="company_ids" value="{{ c.id }}" checked>
-          <div style="flex:1;min-width:0">
+          <div class="fx-flex-1 min-w-0">
             <div class="ok-name">{{ c.name }}</div>
             {% if c.oib %}<div class="ok-oib">{{ c.oib }}</div>{% endif %}
           </div>
@@ -145,7 +145,7 @@
     <div class="ok-section" id="sec-slobodni">
       <div class="ok-section-title">
         🟢 Slobodni — možete preuzeti ({{ slobodne_count }})
-        <span style="margin-left:auto">
+        <span class="fx-ml-auto">
           <button type="button" class="ok-btn-sm" onclick="selectGroup('slobodna', true)">Sve ✓</button>
           <button type="button" class="ok-btn-sm" onclick="selectGroup('slobodna', false)">Ništa</button>
         </span>
@@ -154,7 +154,7 @@
         {% for c in companies %}{% if c.id not in my_ids %}
         <label class="ok-item slobodna" data-name="{{ c.name|lower }}" data-group="slobodna">
           <input type="checkbox" name="company_ids" value="{{ c.id }}">
-          <div style="flex:1;min-width:0">
+          <div class="fx-flex-1 min-w-0">
             <div class="ok-name">{{ c.name }}</div>
             {% if c.oib %}<div class="ok-oib">{{ c.oib }}</div>{% endif %}
           </div>
@@ -166,10 +166,10 @@
     {% endif %}
 
     {% if not moje_count and not slobodne_count %}
-    <div style="text-align:center;padding:3rem;color:var(--text-muted)">
-      <div style="font-size:2rem;margin-bottom:.5rem">📋</div>
+    <div class="text-center fx-text-muted fx-p-7">
+      <div class="fx-fs-icon mb-2">📋</div>
       <div>Nema komitenat za prikaz.</div>
-      <div style="font-size:.8rem;margin-top:.5rem">Obratite se administratoru.</div>
+      <div class="fx-fs-compact mt-2">Obratite se administratoru.</div>
     </div>
     {% endif %}
 

@@ -3,13 +3,13 @@
 {% block title %}Katalog{% endblock %}
 {% block content %}
 
-<h2 style="font-size:1.4rem;font-weight:700;margin-bottom:16px">
+<h2 class="fx-fs-4xl fx-fw-bold mb-3">
   <i class="fas fa-search" style="color:var(--lib-accent)"></i> Katalog knjiga
 </h2>
 
 <!-- Search + Filters -->
-<form method="get" style="margin-bottom:20px">
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<form method="get" class="mb-4">
+  <div class="d-flex fx-gap-2 fx-flex-wrap align-items-center">
     <input type="text" name="q" value="{{ q }}" class="form-control" style="max-width:300px" placeholder="Naslov, autor ili ISBN...">
     <select name="tier" class="form-select" style="max-width:180px">
       <option value="">Sve dobne grupe</option>
@@ -26,10 +26,10 @@
 
 <div class="book-grid">
   {% for book in books %}
-  <a href="{% url 'knjiznica:portal_book_detail' slug book.pk %}" class="book-card" style="text-decoration:none;color:inherit">
+  <a href="{% url 'knjiznica:portal_book_detail' slug book.pk %}" class="book-card fx-no-underline" style="color:inherit">
     <div class="book-cover">
       {% if book.book_meta and book.book_meta.cover_image %}
-      <img src="{{ book.book_meta.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px" alt="">
+      <img src="{{ book.book_meta.cover_image.url }}" class="fx-w-full fx-rounded-sm" style="height:100%;object-fit:cover" alt="">
       {% else %}
       <i class="fas fa-book"></i>
       {% endif %}
@@ -37,7 +37,7 @@
     <div class="title">{{ book.name|truncatechars:45 }}</div>
     <div class="author">{% if book.book_meta %}{{ book.book_meta.author|truncatechars:30 }}{% endif %}</div>
     {% if book.book_meta and book.book_meta.is_reference %}
-    <div style="color:#b8860b;font-size:.7rem"><i class="fas fa-lock"></i> Referentna</div>
+    <div class="fx-text-gold fx-fs-sm"><i class="fas fa-lock"></i> Referentna</div>
     {% elif book.is_loaned %}
     <div class="avail-no"><i class="fas fa-times-circle"></i> Posuđena</div>
     {% else %}
@@ -45,8 +45,8 @@
     {% endif %}
   </a>
   {% empty %}
-  <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--lib-muted)">
-    <i class="fas fa-search" style="font-size:2rem;margin-bottom:8px"></i>
+  <div class="text-center fx-text-muted fx-col-full" style="padding:40px">
+    <i class="fas fa-search fx-fs-icon mb-2"></i>
     <p>Nema rezultata{% if q %} za "{{ q }}"{% endif %}.</p>
   </div>
   {% endfor %}

@@ -3,23 +3,23 @@
 {% block title %}Dodaj prekretnicu — {{ animal.name }} — Memio.pet{% endblock %}
 
 {% block content %}
-<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:24px 16px">
-<div style="width:100%;max-width:480px">
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;padding:24px 16px">
+<div class="fx-w-full" style="max-width:480px">
 
   <div class="mp-card">
     <div class="mp-card-body">
-      <h1 style="font-size:1.6rem;margin-bottom:4px">Dodaj prekretnicu</h1>
-      <p style="color:var(--dim);font-size:.85rem;margin-bottom:24px">{{ animal.name }} — nova uspomena u životnom traku</p>
+      <h1 class="mb-1 fx-fs-5xl">Dodaj prekretnicu</h1>
+      <p class="fx-fs-base mb-4 fx-text-dim">{{ animal.name }} — nova uspomena u životnom traku</p>
 
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="hidden" name="chip" value="{{ chip }}">
 
         <div class="mp-field"><label>Tip prekretnice</label></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">
+        <div class="fx-gap-2 d-grid mb-4 fx-grid-2-equal">
           {% for val, label in milestone_types %}
-          <label style="padding:10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);font-size:.8rem;cursor:pointer;text-align:center;transition:all .2s{% if val == 'custom' %};border-color:var(--gold);background:rgba(201,168,76,.06){% endif %}">
-            <input type="radio" name="type" value="{{ val }}" {% if val == 'custom' %}checked{% endif %} style="display:none"
+          <label class="fx-rounded fx-fs-compact fx-pointer text-center" style="padding:10px;border:1.5px solid var(--line);background:var(--surface);transition:all .2s{% if val == 'custom' %};border-color:var(--gold);background:rgba(201,168,76,.06){% endif %}">
+            <input type="radio" name="type" value="{{ val }}" {% if val == 'custom' %}checked{% endif %} class="fx-hidden"
               onchange="this.closest('div').querySelectorAll('label').forEach(function(b){b.style.borderColor='var(--line)';b.style.background='var(--surface)'});this.closest('label').style.borderColor='var(--gold)';this.closest('label').style.background='rgba(201,168,76,.06)'">
             {{ label }}
           </label>
@@ -46,7 +46,7 @@
         <button type="submit" class="mp-btn mp-btn-gold mp-btn-full">Dodaj prekretnicu</button>
       </form>
 
-      <a href="/pas/{{ chip }}/" style="display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--dim)">← Natrag na profil</a>
+      <a href="/pas/{{ chip }}/" class="text-center fx-fs-note d-block mt-3 fx-text-dim">← Natrag na profil</a>
     </div>
   </div>
 

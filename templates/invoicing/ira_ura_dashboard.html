@@ -15,21 +15,21 @@
 .iu-big{font-size:1.6rem;font-weight:800;color:var(--gold);margin-bottom:.5rem}
 .iu-pdv{text-align:center;padding:1.5rem;background:var(--card);border:1.5px solid var(--border);border-radius:12px;margin-bottom:2rem}
 .iu-pdv-val{font-size:2rem;font-weight:800}
-.iu-pdv-pos{color:#22c55e}
-.iu-pdv-neg{color:#ef4444}
+.iu-pdv-pos{color:var(--green)}
+.iu-pdv-neg{color:var(--red)}
 .iu-table{width:100%;border-collapse:collapse}
 .iu-table th{text-align:left;font-size:.72rem;text-transform:uppercase;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border)}
 .iu-table td{padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem;color:var(--text)}
 .iu-table tr:hover td{background:rgba(201,168,76,.03)}
 .iu-badge{font-size:.7rem;padding:.15rem .4rem;border-radius:4px;font-weight:600}
-.iu-badge-paid{background:rgba(34,197,94,.12);color:#22c55e}
-.iu-badge-unpaid{background:rgba(245,158,11,.12);color:#f59e0b}
-.iu-badge-overdue{background:rgba(239,68,68,.12);color:#ef4444}
+.iu-badge-paid{background:rgba(34,197,94,.12);color:var(--green)}
+.iu-badge-unpaid{background:rgba(245,158,11,.12);color:var(--amber)}
+.iu-badge-overdue{background:rgba(239,68,68,.12);color:var(--red)}
 .iu-tabs{display:flex;gap:0;margin-bottom:1.5rem}
 .iu-tab{padding:.65rem 1.5rem;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s}
 .iu-tab:first-child{border-radius:8px 0 0 8px}
 .iu-tab:last-child{border-radius:0 8px 8px 0}
-.iu-tab.active{background:var(--gold);color:#0f172a;border-color:var(--gold)}
+.iu-tab.active{background:var(--gold);color:var(--text);border-color:var(--gold)}
 @media(max-width:768px){.iu-grid{grid-template-columns:1fr}}
 </style>
 {% endblock %}
@@ -37,7 +37,7 @@
 
 <!-- Period selector -->
 <div class="iu-period">
-  <form method="get" style="display:flex;gap:.5rem;align-items:center">
+  <form method="get" class="d-flex fx-gap-2 align-items-center">
     <select name="month" onchange="this.form.submit()">
       {% for m in "123456789" %}<option value="{{ m }}" {% if month == m|add:"0" %}selected{% endif %}>{{ m }}. {% trans "mj" %}</option>{% endfor %}
       <option value="10" {% if month == 10 %}selected{% endif %}>10. {% trans "mj" %}</option>
@@ -55,26 +55,26 @@
 <div class="iu-grid">
   <!-- IRA -->
   <div class="iu-card" style="border-color:rgba(34,197,94,.3)">
-    <h3 style="color:#22c55e">IRA — {% trans "Izdani računi" %}</h3>
+    <h3 class="fx-text-green">IRA — {% trans "Izdani računi" %}</h3>
     <div class="iu-big">{{ ira_stats.total|floatformat:2 }} EUR</div>
     <div class="iu-row"><span class="iu-row-lbl">{% trans "Računa" %}</span><span class="iu-row-val">{{ ira_stats.count }}</span></div>
-    <div class="iu-row"><span class="iu-row-lbl">{% trans "Plaćeno" %}</span><span class="iu-row-val" style="color:#22c55e">{{ ira_stats.paid|floatformat:2 }} EUR</span></div>
-    <div class="iu-row"><span class="iu-row-lbl">{% trans "Neplaćeno" %}</span><span class="iu-row-val" style="color:#f59e0b">{{ ira_stats.unpaid|floatformat:2 }} EUR</span></div>
-    {% if ira_stats.overdue %}<div class="iu-row"><span class="iu-row-lbl">{% trans "Dospjelo" %}</span><span class="iu-row-val" style="color:#ef4444">{{ ira_stats.overdue }}</span></div>{% endif %}
+    <div class="iu-row"><span class="iu-row-lbl">{% trans "Plaćeno" %}</span><span class="iu-row-val fx-text-green">{{ ira_stats.paid|floatformat:2 }} EUR</span></div>
+    <div class="iu-row"><span class="iu-row-lbl">{% trans "Neplaćeno" %}</span><span class="iu-row-val fx-text-amber">{{ ira_stats.unpaid|floatformat:2 }} EUR</span></div>
+    {% if ira_stats.overdue %}<div class="iu-row"><span class="iu-row-lbl">{% trans "Dospjelo" %}</span><span class="iu-row-val fx-text-red">{{ ira_stats.overdue }}</span></div>{% endif %}
   </div>
 
   <!-- URA -->
   <div class="iu-card" style="border-color:rgba(239,68,68,.3)">
-    <h3 style="color:#ef4444">URA — {% trans "Ulazni računi" %}</h3>
+    <h3 class="fx-text-red">URA — {% trans "Ulazni računi" %}</h3>
     <div class="iu-big">{{ ura_stats.total|floatformat:2 }} EUR</div>
     <div class="iu-row"><span class="iu-row-lbl">{% trans "Računa" %}</span><span class="iu-row-val">{{ ura_stats.count }}</span></div>
-    <div class="iu-row"><span class="iu-row-lbl">{% trans "Plaćeno" %}</span><span class="iu-row-val" style="color:#22c55e">{{ ura_stats.paid|floatformat:2 }} EUR</span></div>
-    <div class="iu-row"><span class="iu-row-lbl">{% trans "Neplaćeno" %}</span><span class="iu-row-val" style="color:#f59e0b">{{ ura_stats.unpaid|floatformat:2 }} EUR</span></div>
+    <div class="iu-row"><span class="iu-row-lbl">{% trans "Plaćeno" %}</span><span class="iu-row-val fx-text-green">{{ ura_stats.paid|floatformat:2 }} EUR</span></div>
+    <div class="iu-row"><span class="iu-row-lbl">{% trans "Neplaćeno" %}</span><span class="iu-row-val fx-text-amber">{{ ura_stats.unpaid|floatformat:2 }} EUR</span></div>
   </div>
 
   <!-- POS -->
   <div class="iu-card" style="border-color:rgba(201,168,76,.3)">
-    <h3 style="color:var(--gold)">POS — {% trans "Gotovinski promet" %}</h3>
+    <h3 class="fx-text-gold">POS — {% trans "Gotovinski promet" %}</h3>
     <div class="iu-big">{{ pos_total|floatformat:2 }} EUR</div>
     <div class="iu-row"><span class="iu-row-lbl">{% trans "Bonova" %}</span><span class="iu-row-val">{{ pos_count }}</span></div>
     <div class="iu-row"><span class="iu-row-lbl">{% trans "Prosj./bon" %}</span><span class="iu-row-val">{% if pos_count %}{{ pos_total|floatformat:2|divisibleby:pos_count }}{% else %}—{% endif %}</span></div>
@@ -83,28 +83,28 @@
 
 <!-- PDV Bilanca -->
 <div class="iu-pdv">
-  <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem">
+  <div class="fx-fs-caption fx-text-muted mb-2 fx-uppercase" style="letter-spacing:.1em">
     {% trans "PDV Bilanca" %} — {{ month|stringformat:"02d" }}/{{ year }}
   </div>
-  <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:.75rem;flex-wrap:wrap">
+  <div class="d-flex fx-flex-wrap justify-content-center fx-mb-4" style="gap:3rem">
     <div>
-      <div style="font-size:.78rem;color:var(--muted)">{% trans "Izlazni PDV" %} (IRA)</div>
-      <div style="font-size:1.2rem;font-weight:700;color:#22c55e">{{ pdv_out|floatformat:2 }} EUR</div>
+      <div class="fx-fs-body-sm fx-text-muted">{% trans "Izlazni PDV" %} (IRA)</div>
+      <div class="fx-fs-2xl fx-fw-bold fx-text-green">{{ pdv_out|floatformat:2 }} EUR</div>
     </div>
-    <div style="font-size:1.5rem;color:var(--muted);align-self:center">&minus;</div>
+    <div class="fx-fs-5xl fx-text-muted" style="align-self:center">&minus;</div>
     <div>
-      <div style="font-size:.78rem;color:var(--muted)">{% trans "Ulazni PDV" %} (URA)</div>
-      <div style="font-size:1.2rem;font-weight:700;color:#ef4444">{{ pdv_in|floatformat:2 }} EUR</div>
+      <div class="fx-fs-body-sm fx-text-muted">{% trans "Ulazni PDV" %} (URA)</div>
+      <div class="fx-fs-2xl fx-fw-bold fx-text-red">{{ pdv_in|floatformat:2 }} EUR</div>
     </div>
-    <div style="font-size:1.5rem;color:var(--muted);align-self:center">=</div>
+    <div class="fx-fs-5xl fx-text-muted" style="align-self:center">=</div>
     <div>
-      <div style="font-size:.78rem;color:var(--muted)">{% trans "Za uplatu" %}</div>
+      <div class="fx-fs-body-sm fx-text-muted">{% trans "Za uplatu" %}</div>
       <div class="iu-pdv-val {% if pdv_balance > 0 %}iu-pdv-neg{% else %}iu-pdv-pos{% endif %}">
         {{ pdv_balance|floatformat:2 }} EUR
       </div>
     </div>
   </div>
-  <div style="font-size:.72rem;color:var(--muted)">
+  <div class="fx-fs-sm fx-text-muted">
     {% if pdv_balance > 0 %}{% trans "Obveza uplate PDV-a do 20. u mjesecu" %}{% else %}{% trans "Pravo na povrat pretporeza" %}{% endif %}
   </div>
 </div>
@@ -118,16 +118,16 @@
 <!-- IRA Table -->
 <div id="tab-ira">
 {% if recent_ira %}
-<div style="overflow-x:auto">
+<div class="fx-scroll-x">
 <table class="iu-table">
   <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Partner" %}</th><th>{% trans "Iznos" %}</th><th>{% trans "Status" %}</th></tr></thead>
   <tbody>
   {% for inv in recent_ira %}
   <tr>
-    <td><a href="{% url 'invoicing:detail' inv.pk %}" style="color:var(--gold)">{{ inv.number }}</a></td>
+    <td><a href="{% url 'invoicing:detail' inv.pk %}" class="fx-text-gold">{{ inv.number }}</a></td>
     <td>{{ inv.issue_date|date:"d.m.Y" }}</td>
     <td>{{ inv.partner.name|default:"—" }}</td>
-    <td style="font-weight:600">{{ inv.total|floatformat:2 }} EUR</td>
+    <td class="fx-fw-semibold">{{ inv.total|floatformat:2 }} EUR</td>
     <td>
       {% if inv.status == 'PAID' %}<span class="iu-badge iu-badge-paid">{% trans "Plaćeno" %}</span>
       {% elif inv.status == 'OVERDUE' %}<span class="iu-badge iu-badge-overdue">{% trans "Dospjelo" %}</span>
@@ -139,23 +139,23 @@
 </table>
 </div>
 {% else %}
-<p style="color:var(--muted);text-align:center;padding:2rem">{% trans "Nema izdanih računa za ovaj period." %}</p>
+<p class="text-center fx-text-muted fx-p-6">{% trans "Nema izdanih računa za ovaj period." %}</p>
 {% endif %}
 </div>
 
 <!-- URA Table -->
-<div id="tab-ura" style="display:none">
+<div id="tab-ura" class="fx-hidden">
 {% if recent_ura %}
-<div style="overflow-x:auto">
+<div class="fx-scroll-x">
 <table class="iu-table">
   <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Dobavljač" %}</th><th>{% trans "Iznos" %}</th><th>{% trans "Status" %}</th></tr></thead>
   <tbody>
   {% for inv in recent_ura %}
   <tr>
-    <td><a href="{% url 'invoicing:detail' inv.pk %}" style="color:var(--gold)">{{ inv.number }}</a></td>
+    <td><a href="{% url 'invoicing:detail' inv.pk %}" class="fx-text-gold">{{ inv.number }}</a></td>
     <td>{{ inv.issue_date|date:"d.m.Y" }}</td>
     <td>{{ inv.partner.name|default:"—" }}</td>
-    <td style="font-weight:600">{{ inv.total|floatformat:2 }} EUR</td>
+    <td class="fx-fw-semibold">{{ inv.total|floatformat:2 }} EUR</td>
     <td>
       {% if inv.status == 'PAID' %}<span class="iu-badge iu-badge-paid">{% trans "Plaćeno" %}</span>
       {% else %}<span class="iu-badge iu-badge-unpaid">{{ inv.get_status_display }}</span>{% endif %}
@@ -166,7 +166,7 @@
 </table>
 </div>
 {% else %}
-<p style="color:var(--muted);text-align:center;padding:2rem">{% trans "Nema ulaznih računa za ovaj period." %}</p>
+<p class="text-center fx-text-muted fx-p-6">{% trans "Nema ulaznih računa za ovaj period." %}</p>
 {% endif %}
 </div>
 

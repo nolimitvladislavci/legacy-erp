@@ -7,7 +7,7 @@
 
 <div class="row">
   <div class="col-md-6">
-    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+    <div class="fx-bg-surface2 fx-rounded fx-p-5" style="border:1px solid #c8a24e22">
       <table class="table table-dark table-borderless mb-3">
         <tr><td class="text-muted">Knjiga</td><td class="text-white fw-bold">{{ loan.item.name }}</td></tr>
         <tr><td class="text-muted">Član</td><td class="text-white">{{ loan.member.partner.name }} [{{ loan.member.member_number }}]</td></tr>
@@ -17,16 +17,16 @@
           <td class="text-muted">Status</td>
           <td>
             {% if loan.status == 'overdue' %}
-            <span style="color:#ef4444;font-weight:600">Kasni {{ loan.days_overdue }} dana</span>
+            <span class="fx-text-red fx-fw-semibold">Kasni {{ loan.days_overdue }} dana</span>
             {% else %}
-            <span style="color:#3b82f6">Posuđeno</span>
+            <span class="fx-text-blue">Posuđeno</span>
             {% endif %}
           </td>
         </tr>
         {% if loan.days_overdue > 0 %}
         <tr>
           <td class="text-muted">Kazna</td>
-          <td style="color:#ef4444;font-weight:700;font-size:1.1rem">{{ loan.days_overdue }} x {{ loan.fine_per_day }}€ = {{ loan.fine_total }}€</td>
+          <td class="fx-text-red fx-fw-bold fx-fs-xl">{{ loan.days_overdue }} x {{ loan.fine_per_day }}€ = {{ loan.fine_total }}€</td>
         </tr>
         {% endif %}
       </table>

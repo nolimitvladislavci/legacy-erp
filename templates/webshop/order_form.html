@@ -3,72 +3,10 @@
 {% block title %}{{ action }}{% endblock %}
 {% block page_title %}{{ action }}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
-  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
-  {% for lang_code, lang_name in LANGUAGES %}
-  <form action="/i18n/setlang/" method="post" style="display:inline">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <input name="language" type="hidden" value="{{ lang_code }}">
-    {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{% if lang_code == "hr" %}&#127469;&#127479;{% elif lang_code == "de" %}&#127465;&#127466;{% elif lang_code == "en" %}&#127468;&#127463;{% elif lang_code == "tr" %}&#127481;&#127479;{% elif lang_code == "el" %}&#127468;&#127479;{% endif %} {{ lang_code|upper }}</button>
-    {% endif %}
-  </form>
-  {% endfor %}
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>{{ action }}</h2>
-  <a href="{% url 'webshop:order_list' %}" class="btn btn-outline-secondary">
-    <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
-  </a>
-</div>
-
-<form method="post">
-  {% csrf_token %}
-  <div class="row g-3">
-    <div class="col-md-8">
-      <div class="stat-card mb-3">
-        <h6 class="fw-bold mb-3">{% trans "Stavke narudžbe" %}</h6>
-        <div id="items-container">
-          <div class="row g-2 mb-2 item-row">
-            <div class="col-md-7">
-              <select name="product_id" class="form-select form-select-sm">
-                <option value="">{% trans "-- odaberi proizvod --" %}</option>
-                {% for p in products %}
-                <option value="{{ p.pk }}" data-price="{{ p.price }}">{{ p.name }} – {{ p.price|floatformat:2 }} €</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-md-3">
-              <input type="number" name="quantity" class="form-control form-control-sm" placeholder="{% trans "Kol." %}" value="1" min="1">
-            </div>
-            <div class="col-md-2">
-              <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeRow(this)">✕</button>
-            </div>
-          </div>
+<!-- lang: topbar -->
         </div>
         <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addRow()">
           <i class="fas fa-plus me-1"></i>{% trans "Dodaj stavku" %}
@@ -77,7 +15,7 @@
     </div>
 
     <div class="col-md-4">
-      <div class="stat-card mb-3">
+      <div class="fenix-filters">
         <h6 class="fw-bold mb-3">{% trans "Kupac i dostava" %}</h6>
         <div class="mb-2">
           <label class="form-label fw-bold">{% trans "Kupac *" %}</label>

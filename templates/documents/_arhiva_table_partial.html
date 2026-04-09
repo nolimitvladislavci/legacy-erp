@@ -40,7 +40,7 @@
             {% for e in entries %}
             <tr data-id="{{ e.id }}" tabindex="0" ondblclick="openDrawer({{ e.id }})" onkeydown="if(event.key==='Enter'&&!event.target.matches('input,button,a'))openDrawer({{ e.id }})">
                 <td><input type="checkbox" class="bulk-check row-check" value="{{ e.id }}" onchange="updateBulk()"></td>
-                <td style="white-space:nowrap">{{ e.doc_date|date:"d.m.Y" }}</td>
+                <td class="text-nowrap">{{ e.doc_date|date:"d.m.Y" }}</td>
                 {% if is_superadmin %}<td class="doc-company">{{ e.company.name|default:"-" }}</td>{% endif %}
                 <td><span class="badge-type">{{ e.get_source_type_display }}</span></td>
                 <td><a href="#" class="doc-link" onclick="openDrawer({{ e.id }});return false">{{ e.doc_number }}</a></td>
@@ -63,7 +63,7 @@
                     <span class="entry-labels" data-entry-id="{{ e.id }}"></span>
                 </td>
                 <td>
-                    <div style="display:flex; align-items:center; gap:4px;">
+                    <div class="d-flex fx-gap-1 align-items-center">
                     {% if e.has_pdf and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-pdf" title="Otvori PDF"><i class="fas fa-file-pdf"></i></a>{% elif e.has_pdf %}<span class="file-link file-pdf" style="cursor:default;opacity:0.4" title="PDF (nema datoteke)"><i class="fas fa-file-pdf"></i></span>{% endif %}
                     {% if e.has_xml and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-xml" title="Otvori XML"><i class="fas fa-file-code"></i></a>{% elif e.has_xml %}<span class="file-link file-xml" style="cursor:default;opacity:0.4" title="XML (nema datoteke)"><i class="fas fa-file-code"></i></span>{% endif %}
                     {% if e.has_image and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-img" title="Pogledaj sliku" onclick="event.preventDefault(); openPreviewModal('{% url 'documents:arhiva_file_serve' e.file_path %}', '{{ e.doc_number|escapejs }}', 'image')"><i class="fas fa-image"></i></a>{% elif e.has_image %}<span class="file-link file-img" style="cursor:default;opacity:0.4" title="Slika (nema datoteke)"><i class="fas fa-image"></i></span>{% endif %}
@@ -71,8 +71,8 @@
                     </div>
                 </td>
                 <td><button class="bookmark-btn{% if e.id in bookmarked_ids %} active{% endif %}" data-id="{{ e.id }}" onclick="toggleBookmark(this)" title="{% trans 'Oznaci' %}" style="{% if e.id in bookmarked_ids %}color:var(--gold){% endif %}"><i class="fas fa-bookmark"></i></button></td>
-                <td style="white-space:nowrap">
-                    <div style="display:flex; align-items:center; gap:6px;">
+                <td class="text-nowrap">
+                    <div class="d-flex fx-gap-2 align-items-center">
                     <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="Preuzmi PDF"><i class="fas fa-file-pdf"></i></a>
                     <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="Preuzmi XML"><i class="fas fa-file-code"></i></a>
                     </div>
@@ -83,8 +83,8 @@
             <tr><td colspan="{% if is_superadmin %}14{% else %}13{% endif %}">
                 <div class="arhiva-empty">
                 <i class="fas fa-search"></i>
-                <p style="font-size:1.1rem;font-weight:600">{% trans "Nema rezultata" %}</p>
-                <p style="font-size:.85rem;margin-top:8px">{% trans "Pokusajte promijeniti filtere ili pretrazivanje." %}</p>
+                <p class="fx-fs-xl fx-fw-semibold">{% trans "Nema rezultata" %}</p>
+                <p class="fx-fs-base mt-2">{% trans "Pokusajte promijeniti filtere ili pretrazivanje." %}</p>
               </div>
             </td></tr>
             {% endfor %}
@@ -92,12 +92,12 @@
     </table>
 </div>
 
-<div class="mobile-cards" style="padding:10px">
+<div class="mobile-cards fx-p-10">
     {% for e in entries %}
     <div class="mobile-card" onclick="openDrawer({{ e.id }})">
         <div class="mobile-card-header">
             <div>
-                <input type="checkbox" class="bulk-check row-check" value="{{ e.id }}" onchange="updateBulk()" onclick="event.stopPropagation()" style="accent-color:var(--gold);width:18px;height:18px;margin-right:8px;vertical-align:middle">
+                <input type="checkbox" class="bulk-check row-check fx-mr-3" value="{{ e.id }}" onchange="updateBulk()" onclick="event.stopPropagation()" style="accent-color:var(--gold);width:18px;height:18px;vertical-align:middle">
                 <span class="doc-link">{{ e.doc_number }}</span>
                 <span class="badge-type" style="margin-left:6px">{{ e.get_source_type_display }}</span>
             </div>
@@ -121,8 +121,8 @@
     {% empty %}
     <div class="arhiva-empty">
       <i class="fas fa-archive"></i>
-      <p style="font-size:1.1rem;font-weight:600;color:var(--gold)">{% trans "Arhiva je prazna" %}</p>
-      <p style="font-size:.85rem;margin-top:8px">{% trans "Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-racuna ili uploada." %}</p>
+      <p class="fx-fs-xl fx-fw-semibold fx-text-gold">{% trans "Arhiva je prazna" %}</p>
+      <p class="fx-fs-base mt-2">{% trans "Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-racuna ili uploada." %}</p>
     </div>
     {% endfor %}
 </div>

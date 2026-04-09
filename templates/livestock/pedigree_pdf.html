@@ -7,8 +7,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Georgia', serif;
-    background: #fff;
-    color: #1a1a2e;
+    background:var(--bg-card);
+    color:var(--text);
     padding: 0;
   }
   .page {
@@ -44,20 +44,20 @@
   }
   .header h1 {
     font-size: 28pt;
-    color: #c9a84c;
+    color:var(--gold);
     letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 4px;
   }
-  .header h2 { font-size: 14pt; color: #1a1a2e; font-weight: normal; }
-  .header .subtitle { font-size: 9pt; color: #666; margin-top: 4px; letter-spacing: 1px; }
+  .header h2 { font-size: 14pt; color:var(--text); font-weight: normal; }
+  .header .subtitle { font-size: 9pt; color:var(--text-dim); margin-top: 4px; letter-spacing: 1px; }
 
   .pet-name {
     text-align: center;
     margin: 16px 0;
   }
-  .pet-name .name { font-size: 22pt; color: #1a1a2e; font-weight: bold; }
-  .pet-name .breed { font-size: 12pt; color: #c9a84c; margin-top: 4px; }
+  .pet-name .name { font-size: 22pt; color:var(--text); font-weight: bold; }
+  .pet-name .breed { font-size: 12pt; color:var(--gold); margin-top: 4px; }
 
   .photo-box {
     float: right;
@@ -87,7 +87,7 @@
     font-size: 9pt;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #c9a84c;
+    color:var(--gold);
     border-bottom: 1px solid rgba(201,168,76,.3);
     padding-bottom: 3px;
     margin-bottom: 10px;
@@ -96,8 +96,8 @@
 
   table.data { width: 100%; border-collapse: collapse; font-size: 10pt; }
   table.data td { padding: 5px 4px; vertical-align: top; }
-  table.data td.lbl { color: #555; width: 40%; font-size: 9pt; }
-  table.data td.val { font-weight: bold; color: #1a1a2e; }
+  table.data td.lbl { color:var(--text-dim); width: 40%; font-size: 9pt; }
+  table.data td.val { font-weight: bold; color:var(--text); }
   table.data tr { border-bottom: 1px solid rgba(0,0,0,.06); }
 
   .pedigree-box {
@@ -112,11 +112,11 @@
     padding: 8px 12px;
     background: rgba(201,168,76,.03);
   }
-  .pedigree-card .role { font-size: 8pt; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; }
+  .pedigree-card .role { font-size: 8pt; color:var(--gold); text-transform: uppercase; letter-spacing: 1px; }
   .pedigree-card .pname { font-size: 10pt; font-weight: bold; margin-top: 2px; }
 
   table.vacc { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 6px; }
-  table.vacc th { background: rgba(201,168,76,.1); color: #c9a84c; font-size: 8pt; letter-spacing: .5px;
+  table.vacc th { background: rgba(201,168,76,.1); color:var(--gold); font-size: 8pt; letter-spacing: .5px;
                   text-transform: uppercase; padding: 5px 6px; text-align: left; }
   table.vacc td { padding: 5px 6px; border-bottom: 1px solid rgba(0,0,0,.06); }
   table.vacc tr:nth-child(even) td { background: rgba(0,0,0,.02); }
@@ -139,11 +139,11 @@
     align-items: center;
     justify-content: center;
     font-size: 7pt;
-    color: #c9a84c;
+    color:var(--gold);
     text-align: center;
     padding: 4px;
   }
-  .footer-text { font-size: 7.5pt; color: #888; line-height: 1.5; }
+  .footer-text { font-size: 7.5pt; color:var(--text-muted); line-height: 1.5; }
   .pedigree-hash {
     font-family: monospace;
     font-size: 7pt;
@@ -172,22 +172,22 @@
       {% else %}
       <div class="photo-placeholder">🐕</div>
       {% endif %}
-      <div style="font-size:7.5pt;color:#888;margin-top:4px">Fotografija</div>
+      <div class="fx-text-muted mt-1" style="font-size:7.5pt">Fotografija</div>
     </div>
 
-    <div class="pet-name" style="text-align:left">
+    <div class="pet-name text-start">
       <div class="name">{{ pet.name|default:"—" }}</div>
       <div class="breed">{{ pet.breed|default:"Pasmina nepoznata" }}</div>
     </div>
 
-    <div class="section-title" style="margin-top:12px">Osnovni podaci</div>
+    <div class="section-title mt-3">Osnovni podaci</div>
     <table class="data">
       <tr><td class="lbl">Vrsta</td><td class="val">{{ pet.get_vrsta_display }}</td></tr>
       <tr><td class="lbl">Spol</td><td class="val">{% if pet.spol == 'M' %}Mužjak{% elif pet.spol == 'F' %}Ženka{% else %}—{% endif %}</td></tr>
       {% if pet.date_of_birth %}<tr><td class="lbl">Datum rođenja</td><td class="val">{{ pet.date_of_birth|date:"d. m. Y." }}</td></tr>{% endif %}
       {% if pet.color_description %}<tr><td class="lbl">Boja / šara</td><td class="val">{{ pet.color_description }}</td></tr>{% endif %}
       {% if pet.weight_kg %}<tr><td class="lbl">Težina</td><td class="val">{{ pet.weight_kg }} kg</td></tr>{% endif %}
-      {% if pet.chip_number %}<tr><td class="lbl">Broj mikročipa</td><td class="val" style="font-family:monospace">{{ pet.chip_number }}</td></tr>{% endif %}
+      {% if pet.chip_number %}<tr><td class="lbl">Broj mikročipa</td><td class="val fx-font-mono">{{ pet.chip_number }}</td></tr>{% endif %}
       {% if pet.pedigree_number %}<tr><td class="lbl">Broj rodovnice</td><td class="val">{{ pet.pedigree_number }}</td></tr>{% endif %}
       <tr><td class="lbl">Uzgajivač</td><td class="val">{{ company.name }}</td></tr>
       {% if company.address %}<tr><td class="lbl">Adresa uzgajivača</td><td class="val">{{ company.address }}</td></tr>{% endif %}
@@ -225,7 +225,7 @@
       {% for r in records %}
       <tr>
         <td>{{ r.datum|date:"d.m.Y." }}</td>
-        <td>{{ r.opis }}{% if r.lijek %} <em style="color:#888">({{ r.lijek }})</em>{% endif %}</td>
+        <td>{{ r.opis }}{% if r.lijek %} <em class="fx-text-muted">({{ r.lijek }})</em>{% endif %}</td>
         <td>{{ r.veterinar|default:"—" }}</td>
       </tr>
       {% endfor %}

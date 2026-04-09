@@ -3,40 +3,40 @@
 {% block title %}Prijem — {{ appointment.service.name }} | LIMIT Connect{% endblock %}
 {% block page_title %}Prijem sirovine{% endblock %}
 {% block content %}
-<div style="max-width:500px;margin:0 auto">
-  <div style="margin-bottom:1.5rem">
-    <h2 style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
-      <i class="fas fa-clipboard-check" style="color:var(--gold);margin-right:8px"></i>Prijem sirovine
+<div class="fx-m-auto" style="max-width:500px">
+  <div class="fx-mb-6">
+    <h2 class="fx-fw-bold fx-fs-4xl fx-text-body" style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif">
+      <i class="fas fa-clipboard-check fx-text-gold fx-mr-3"></i>Prijem sirovine
     </h2>
-    <p style="color:var(--text-muted);margin:0;font-size:.82rem">{{ appointment.client.name }} — {{ appointment.service.name }} — {{ appointment.start_time|date:"d.m.Y H:i" }}</p>
+    <p class="fx-fs-note fx-text-muted fx-m-0">{{ appointment.client.name }} — {{ appointment.service.name }} — {{ appointment.start_time|date:"d.m.Y H:i" }}</p>
   </div>
 
-  <form method="post" class="stat-card" style="padding:1.5rem">
+  <form method="post" class="fenix-stat fx-p-5">
     {% csrf_token %}
 
     <!-- Limeni broj -->
-    <div style="text-align:center;margin-bottom:1.5rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:1px;display:block;margin-bottom:.5rem">Limeni broj</label>
+    <div class="text-center fx-mb-6">
+      <label class="fx-fs-sm fx-text-muted d-block mb-2 fx-uppercase fx-ls-2">Limeni broj</label>
       <input type="number" name="token_number" value="{{ next_token }}" min="1" max="99"
-        style="width:100px;height:100px;text-align:center;font-size:2.5rem;font-weight:900;background:var(--input-bg);border:3px solid var(--gold);border-radius:50%;color:var(--gold)">
+        class="text-center fx-rounded-circle fx-text-gold fx-fs-7xl" style="width:100px;height:100px;font-weight:900;background:var(--input-bg);border:3px solid var(--gold)">
     </div>
 
     <!-- Tezina -->
-    <div style="margin-bottom:1rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.3rem">Tezina sirovine (kg)</label>
+    <div class="mb-3">
+      <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-2">Tezina sirovine (kg)</label>
       <input type="number" name="weight_kg" step="0.1" min="0" placeholder="npr. 12.5"
-        style="width:100%;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1.1rem">
+        class="fx-w-full fx-rounded fx-fs-xl fx-text-body fx-p-12 fx-b" style="background:var(--input-bg)">
     </div>
 
     {% if needs_salt %}
     <!-- Soliti -->
-    <div style="margin-bottom:1rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.5rem">Soliti?</label>
-      <div style="display:flex;gap:.5rem">
-        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:12px;background:var(--input-bg);border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:.95rem;transition:all .15s">
+    <div class="mb-3">
+      <label class="fx-fs-sm fx-text-muted d-block mb-2 fx-uppercase fx-ls-1">Soliti?</label>
+      <div class="d-flex fx-gap-2">
+        <label class="d-flex fx-rounded fx-pointer fx-fs-normal align-items-center justify-content-center fx-gap-2 fx-flex-1 fx-p-12" style="background:var(--input-bg);border:2px solid var(--border);transition:all .15s">
           <input type="radio" name="should_salt" value="yes" style="accent-color:var(--gold)"> Da, posoliti
         </label>
-        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:12px;background:var(--input-bg);border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:.95rem;transition:all .15s">
+        <label class="d-flex fx-rounded fx-pointer fx-fs-normal align-items-center justify-content-center fx-gap-2 fx-flex-1 fx-p-12" style="background:var(--input-bg);border:2px solid var(--border);transition:all .15s">
           <input type="radio" name="should_salt" value="no" checked style="accent-color:var(--gold)"> Ne soliti
         </label>
       </div>
@@ -44,17 +44,17 @@
     {% endif %}
 
     <!-- Napomena -->
-    <div style="margin-bottom:1.5rem">
-      <label style="font-size:.72rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:.3rem">Napomena</label>
+    <div class="fx-mb-6">
+      <label class="fx-fs-sm fx-text-muted d-block fx-uppercase fx-ls-1 fx-mb-2">Napomena</label>
       <textarea name="intake_notes" rows="2" placeholder="Posebni zahtjevi kupca..."
-        style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+        class="fx-w-full fx-rounded fx-fs-body fx-text-body fx-p-10 fx-b" style="background:var(--input-bg);resize:vertical"></textarea>
     </div>
 
     <!-- Submit -->
-    <button type="submit" style="width:100%;padding:14px;background:var(--gold);color:#0a0a0a;font-weight:700;border:none;border-radius:10px;font-size:1rem;cursor:pointer">
+    <button type="submit" class="fx-w-full fx-text-dark fx-fw-bold fx-border-none fx-rounded fx-fs-lg fx-pointer fx-bg-gold" style="padding:14px">
       <i class="fas fa-check"></i> Zaprimi — dodijeli limeni broj {{ next_token }}
     </button>
-    <a href="{% url 'appointments:baking_board' %}" style="display:block;text-align:center;margin-top:.75rem;color:var(--text-muted);font-size:.85rem;text-decoration:none">Odustani</a>
+    <a href="{% url 'appointments:baking_board' %}" class="text-center fx-fs-base fx-no-underline d-block fx-text-muted fx-mt-4">Odustani</a>
   </form>
 </div>
 {% endblock %}

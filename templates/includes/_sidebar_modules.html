@@ -9,25 +9,25 @@ Kontekst varijable (iz context processora):
 {% endcomment %}
 
 <!-- Search -->
-<div style="padding:8px 12px;margin-top:4px">
-  <div onclick="openCmdPalette();closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;color:#64748b;font-size:.82rem;transition:.15s">
-    <i class="fas fa-search" style="font-size:.75rem"></i>
-    <span style="flex:1">Pretraži...</span>
-    <kbd style="font-size:.6rem;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;color:#475569">Ctrl+K</kbd>
+<div class="mt-1 fx-p-8-12">
+  <div onclick="openCmdPalette();closeSidebar()" class="d-flex fx-gap-2 fx-rounded fx-pointer fx-text-dim fx-fs-note align-items-center fx-p-8-12" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:.15s">
+    <i class="fas fa-search fx-fs-caption"></i>
+    <span class="fx-flex-1">Pretraži...</span>
+    <kbd class="fx-fs-2xs fx-text-dim" style="background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px">Ctrl+K</kbd>
   </div>
 </div>
 
 <!-- Favorites -->
 <div id="sidebarFavs" style="padding:4px 8px">
-  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>
+  <div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 2px">Favoriti</div>
 </div>
 
 <!-- Quick Actions -->
 {% if sidebar_quick_actions %}
 <div style="padding:2px 8px 4px">
-  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Brzi pristup</div>
-  <a href="{% url 'borg_ops:borg_hub' %}" class="nav-link" style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.2);border-radius:8px;margin:4px 8px;padding:8px 12px" onclick="closeSidebar()"><i class="fas fa-globe me-2" style="color:var(--gold)"></i><span style="color:var(--gold);font-weight:700">BORG Hub</span></a>
-  <a href="{% url 'dashboard' %}" onclick="closeSidebar()" style="color:#e2e8f0"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+  <div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 4px">Brzi pristup</div>
+  <a href="{% url 'borg_ops:borg_hub' %}" class="nav-link fx-rounded fx-p-8-12" style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.2);margin:4px 8px" onclick="closeSidebar()"><i class="fas fa-globe me-2 fx-text-gold"></i><span class="fx-fw-bold fx-text-gold">BORG Hub</span></a>
+  <a href="{% url 'dashboard' %}" onclick="closeSidebar()" class="fx-text-body"><i class="fas fa-home"></i> <span>Dashboard</span></a>
   {% for qa in sidebar_quick_actions %}
   <a href="{{ qa.url }}" onclick="closeSidebar()" style="color:{{ qa.color }}"><i class="fas {{ qa.icon }}"></i> <span>{{ qa.label }}</span></a>
   {% endfor %}
@@ -36,8 +36,8 @@ Kontekst varijable (iz context processora):
 
 <!-- Module Grid (2-kolumni tile view) -->
 <div style="padding:4px 8px">
-  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Moduli</div>
-  <div id="moduleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 4px">
+  <div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 4px">Moduli</div>
+  <div id="moduleGrid" class="d-grid fx-grid-2-equal" style="gap:3px;padding:0 4px">
     {% for group in sidebar_modules %}
       {% for mod in group.modules %}
         {% if mod.id in sidebar_enabled_ids or mod.always_visible %}
@@ -57,9 +57,9 @@ Kontekst varijable (iz context processora):
 {% for group in sidebar_modules %}
   {% with cat=group.info %}
   {% if group.has_enabled_modules %}
-  <div style="padding:2px 8px">
+  <div class="fx-p-btn">
     <button class="sidebar-group-toggle{% if cat.order > 4 %} collapsed{% endif %}" onclick="toggleGroup(this)" style="color:#475569">
-      <span><i class="fas {{ cat.icon }}" style="margin-right:6px;font-size:.55rem"></i>{{ cat.name }}</span>
+      <span><i class="fas {{ cat.icon }} fx-fs-2xs fx-mr-2"></i>{{ cat.name }}</span>
       <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
     </button>
     <div class="sidebar-group-links{% if cat.order > 4 %} collapsed{% endif %}">
@@ -79,16 +79,16 @@ Kontekst varijable (iz context processora):
 
 <!-- Superadmin -->
 {% if request.user.is_superuser %}
-<div style="padding:2px 8px">
-  <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:var(--gold)">
-    <span><i class="fas fa-crown" style="margin-right:6px;font-size:.55rem"></i>Admin</span>
+<div class="fx-p-btn">
+  <button class="sidebar-group-toggle fx-text-gold" onclick="toggleGroup(this)">
+    <span><i class="fas fa-crown fx-fs-2xs fx-mr-2"></i>Admin</span>
     <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
   </button>
   <div class="sidebar-group-links collapsed">
-    <a href="/hr/superadmin/ivan/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-fire"></i> <span>Fenix soba 🔥</span></a>
-    <a href="/hr/pos/improvements/" onclick="closeSidebar()" style="color:var(--gold);display:flex;align-items:center;justify-content:space-between">
+    <a href="/hr/superadmin/ivan/" onclick="closeSidebar()" class="fx-text-gold"><i class="fas fa-fire"></i> <span>Fenix soba 🔥</span></a>
+    <a href="/hr/pos/improvements/" onclick="closeSidebar()" class="d-flex fx-text-gold align-items-center justify-content-between">
       <span><i class="fas fa-lightbulb"></i> Poruke / Zlatno dugme</span>
-      <span id="sidebar-feedback-badge" style="background:#ef4444;color:#fff;border-radius:20px;font-size:.65rem;padding:1px 7px;font-weight:700;display:none">0</span>
+      <span id="sidebar-feedback-badge" class="fx-bg-red fx-text-white fx-rounded-xl fx-fs-xs fx-fw-bold fx-hidden" style="padding:1px 7px">0</span>
     </a>
     <a href="/hr/companies/komitenti/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Komitenti</span></a>
     <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Korisnici</span></a>

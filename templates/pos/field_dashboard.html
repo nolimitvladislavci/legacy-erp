@@ -3,80 +3,63 @@
 {% block title %}Teren — {{ session.route_name }}{% endblock %}
 
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<div style="max-width:900px;margin:0 auto;padding:20px">
+<div class="fx-m-auto fx-p-20" style="max-width:900px">
 
     <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 style="font-weight:800;color:var(--gold);margin-bottom:2px">{{ session.route_name }}</h4>
-            <span style="font-size:.8rem;color:var(--muted)">{{ session.vehicle_plate }} | Smjena #{{ session.session_number }} | {{ session.opened_at|date:"d.m.Y H:i" }}</span>
+            <h4 class="fx-fw-800 fx-text-gold mb-1">{{ session.route_name }}</h4>
+            <span class="fx-fs-compact fx-text-muted">{{ session.vehicle_plate }} | Smjena #{{ session.session_number }} | {{ session.opened_at|date:"d.m.Y H:i" }}</span>
         </div>
         {% if is_open %}
-        <span class="badge" style="background:#22c55e;color:#000;padding:6px 14px;border-radius:8px;font-weight:700">AKTIVNA</span>
+        <span class="badge fx-bg-green fx-text-dark fx-rounded fx-fw-bold" style="padding:6px 14px">AKTIVNA</span>
         {% else %}
-        <span class="badge" style="background:var(--muted);color:#000;padding:6px 14px;border-radius:8px;font-weight:700">ZATVORENA</span>
+        <span class="badge fx-text-dark fx-rounded fx-fw-bold" style="background:var(--muted);padding:6px 14px">ZATVORENA</span>
         {% endif %}
     </div>
 
     <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:.65rem;text-transform:uppercase;color:var(--muted);letter-spacing:1px">Utovareno</div>
-            <div style="font-size:1.6rem;font-weight:800">{{ total_loaded }}</div>
+    <div class="fx-gap-3 d-grid mb-4 fx-grid-4-cols">
+        <div class="fx-rounded text-center fx-b fx-bg-card" style="padding:14px">
+            <div class="fx-fs-xs fx-text-muted fx-uppercase fx-ls-2">Utovareno</div>
+            <div class="fx-fw-800 fx-fs-5xl">{{ total_loaded }}</div>
         </div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:.65rem;text-transform:uppercase;color:#22c55e;letter-spacing:1px">Prodano</div>
-            <div style="font-size:1.6rem;font-weight:800;color:#22c55e">{{ total_sold }}</div>
+        <div class="fx-rounded text-center fx-b fx-bg-card" style="padding:14px">
+            <div class="fx-fs-xs fx-text-green fx-uppercase fx-ls-2">Prodano</div>
+            <div class="fx-fw-800 fx-text-green fx-fs-5xl">{{ total_sold }}</div>
         </div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:.65rem;text-transform:uppercase;color:#f59e0b;letter-spacing:1px">Preostalo</div>
-            <div style="font-size:1.6rem;font-weight:800;color:#f59e0b">{{ total_remaining }}</div>
+        <div class="fx-rounded text-center fx-b fx-bg-card" style="padding:14px">
+            <div class="fx-fs-xs fx-text-amber fx-uppercase fx-ls-2">Preostalo</div>
+            <div class="fx-fw-800 fx-text-amber fx-fs-5xl">{{ total_remaining }}</div>
         </div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:.65rem;text-transform:uppercase;color:var(--gold);letter-spacing:1px">Promet</div>
-            <div style="font-size:1.6rem;font-weight:800;color:var(--gold)">{{ total_revenue|floatformat:2 }}</div>
+        <div class="fx-rounded text-center fx-b fx-bg-card" style="padding:14px">
+            <div class="fx-fs-xs fx-text-gold fx-uppercase fx-ls-2">Promet</div>
+            <div class="fx-fw-800 fx-text-gold fx-fs-5xl">{{ total_revenue|floatformat:2 }}</div>
         </div>
     </div>
 
     <!-- Items table -->
-    <table style="width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:20px">
+    <table class="fx-w-full fx-fs-base mb-4 fx-b-collapse">
         <thead>
-            <tr style="border-bottom:2px solid var(--border);text-align:left">
-                <th style="padding:8px">Artikl</th>
-                <th style="padding:8px;text-align:right">Utovareno</th>
-                <th style="padding:8px;text-align:right">Prodano</th>
-                <th style="padding:8px;text-align:right">Preostalo</th>
-                <th style="padding:8px;text-align:right">Promet</th>
+            <tr class="text-start" style="border-bottom:2px solid var(--border)">
+                <th class="fx-p-8">Artikl</th>
+                <th class="text-end fx-p-8">Utovareno</th>
+                <th class="text-end fx-p-8">Prodano</th>
+                <th class="text-end fx-p-8">Preostalo</th>
+                <th class="text-end fx-p-8">Promet</th>
             </tr>
         </thead>
         <tbody>
             {% for s in summary %}
-            <tr style="border-bottom:1px solid var(--border)">
-                <td style="padding:6px 8px;font-weight:600">{{ s.name }} <span style="color:var(--muted);font-size:.7rem">{{ s.sku }}</span></td>
-                <td style="padding:6px 8px;text-align:right">{{ s.loaded }}</td>
-                <td style="padding:6px 8px;text-align:right;color:#22c55e;font-weight:700">{{ s.sold }}</td>
-                <td style="padding:6px 8px;text-align:right;color:{% if s.remaining > 0 %}#f59e0b{% else %}var(--muted){% endif %};font-weight:700">{{ s.remaining }}</td>
-                <td style="padding:6px 8px;text-align:right;color:var(--gold)">{{ s.revenue|floatformat:2 }}</td>
+            <tr class="fx-bb">
+                <td class="fx-fw-semibold" style="padding:6px 8px">{{ s.name }} <span class="fx-fs-sm fx-text-muted">{{ s.sku }}</span></td>
+                <td class="text-end" style="padding:6px 8px">{{ s.loaded }}</td>
+                <td class="text-end fx-text-green fx-fw-bold" style="padding:6px 8px">{{ s.sold }}</td>
+                <td class="text-end fx-fw-bold" style="padding:6px 8px;color:{% if s.remaining > 0 %}#f59e0b{% else %}var(--muted){% endif %}">{{ s.remaining }}</td>
+                <td class="text-end fx-text-gold" style="padding:6px 8px">{{ s.revenue|floatformat:2 }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -84,32 +67,32 @@
 
     {% if is_open %}
     <!-- Actions -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-        <a href="{% url 'pos:quick_pos' session.terminal.pk %}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;background:var(--gold);color:#000;border-radius:10px;font-weight:800;font-size:1rem;text-decoration:none">
+    <div class="fx-gap-3 d-grid mb-4 fx-grid-2-equal">
+        <a href="{% url 'pos:quick_pos' session.terminal.pk %}" class="d-flex fx-gap-2 fx-text-dark fx-rounded fx-fw-800 fx-fs-lg fx-no-underline align-items-center justify-content-center fx-p-16 fx-bg-gold">
             PRODAJ
         </a>
-        <button onclick="document.getElementById('returnForm').style.display='block';this.style.display='none'" style="padding:16px;background:var(--dark);color:#f59e0b;border:2px solid #f59e0b;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer">
+        <button onclick="document.getElementById('returnForm').style.display='block';this.style.display='none'" class="fx-text-amber fx-rounded fx-fw-800 fx-fs-lg fx-pointer fx-p-16 fx-bg-dark" style="border:2px solid #f59e0b">
             ZAVRSI SMJENU + POVRAT
         </button>
     </div>
 
     <!-- Return form (hidden) -->
-    <form method="post" action="{% url 'pos:field_return' session.pk %}" id="returnForm" style="display:none">
+    <form method="post" action="{% url 'pos:field_return' session.pk %}" id="returnForm" class="fx-hidden">
         {% csrf_token %}
-        <div style="background:var(--card);border:2px solid #f59e0b;border-radius:12px;padding:20px;margin-bottom:16px">
-            <h5 style="color:#f59e0b;font-weight:700;margin-bottom:12px">Povratnica — neprodana roba</h5>
-            <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Za svaki artikl odaberite sto napraviti s neprodanim:</p>
+        <div class="fx-rounded mb-3 fx-p-20 fx-bg-card" style="border:2px solid #f59e0b">
+            <h5 class="fx-text-amber fx-fw-bold mb-3">Povratnica — neprodana roba</h5>
+            <p class="fx-fs-compact fx-text-muted mb-3">Za svaki artikl odaberite sto napraviti s neprodanim:</p>
 
             {% for s in summary %}
             {% if s.remaining > 0 %}
-            <div style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div class="fx-gap-2 d-grid align-items-center fx-bb" style="grid-template-columns:2fr 1fr 2fr;padding:8px 0">
                 <div>
                     <strong>{{ s.name }}</strong>
-                    <span style="color:#f59e0b;font-size:.8rem;margin-left:4px">ostalo: {{ s.remaining }}</span>
+                    <span class="fx-text-amber fx-fs-compact" style="margin-left:4px">ostalo: {{ s.remaining }}</span>
                 </div>
                 <input type="number" name="return_{{ s.id }}" value="{{ s.remaining }}" min="0" max="{{ s.remaining }}"
-                    style="width:80px;padding:6px;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-weight:700;text-align:center">
-                <select name="action_{{ s.id }}" style="padding:6px;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem">
+                    class="fx-rounded-sm fx-fw-bold text-center fx-text-gold fx-bg-dark fx-b fx-p-sm" style="width:80px">
+                <select name="action_{{ s.id }}" class="fx-rounded-sm fx-fs-compact fx-text-body fx-bg-dark fx-b fx-p-sm">
                     <option value="return">Vrati na zalihu (svjeze)</option>
                     <option value="discount">Vrati kao JUCERASNJE (-50%)</option>
                     <option value="writeoff">Otpisi (kalo/rastur)</option>
@@ -118,19 +101,19 @@
             {% endif %}
             {% endfor %}
 
-            <div style="margin-top:16px">
-                <label style="font-size:.75rem;font-weight:600;color:var(--muted)">Gotovina pri zavrsetku (EUR)</label>
+            <div class="mt-3">
+                <label class="fx-fs-caption fx-fw-semibold fx-text-muted">Gotovina pri zavrsetku (EUR)</label>
                 <input type="number" name="closing_cash" value="0" step="0.01" min="0"
-                    style="width:200px;padding:8px;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:1rem">
+                    class="fx-rounded-sm fx-fs-lg fx-text-body fx-p-8 fx-bg-dark fx-b" style="width:200px">
             </div>
 
-            <button type="submit" style="margin-top:16px;width:100%;padding:14px;background:#f59e0b;color:#000;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer">
+            <button type="submit" class="fx-w-full fx-bg-amber fx-text-dark fx-border-none fx-rounded fx-fs-lg fx-fw-800 fx-pointer mt-3" style="padding:14px">
                 ZAVRSI SMJENU I OBRADI POVRAT
             </button>
         </div>
     </form>
     {% else %}
-    <div style="text-align:center;padding:20px;color:var(--muted)">
+    <div class="text-center fx-text-muted fx-p-20">
         Smjena zatvorena {{ session.closed_at|date:"d.m.Y H:i" }}
         {% if session.returned_items_json %}
         | Vraceno {{ session.returned_items_json|length }} artikala

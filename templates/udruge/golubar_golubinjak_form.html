@@ -2,24 +2,7 @@
 {% load i18n %}
 {% block title %}{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}{% endblock %}
 {% block extra_css %}
-<style>
-@media(max-width:768px){
-  .container-fluid{padding-left:.5rem;padding-right:.5rem}
-  .table-responsive{font-size:.78rem}
-  .table th,.table td{padding:.4rem .5rem}
-  .btn-sm{font-size:.7rem;padding:3px 8px}
-  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
-  .stat-card,.card{margin-bottom:.5rem}
-  h2,.h2{font-size:1.2rem}
-  h4,.h4{font-size:1rem}
-  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
-}
-@media(max-width:480px){
-  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
-  .btn{font-size:.75rem}
-  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
-}
-</style>
+<!-- responsive: fenix-tokens.css -->
 
 <style>
 .gf-container { max-width: 800px; margin: 0 auto; }
@@ -81,7 +64,7 @@
 }
 .gf-btn-submit {
   background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
-  color: #0a0a0a !important;
+  color:var(--text) !important;
   border: none !important;
   font-weight: 700 !important;
   padding: .6rem 2rem !important;
@@ -105,7 +88,7 @@
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb" style="font-size:.78rem">
+  <ol class="breadcrumb fx-fs-body-sm">
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
     <li class="breadcrumb-item"><a href="{% url 'udruge:golubinjak_list' %}">Golubinjaci</a></li>
     <li class="breadcrumb-item active">{% if golubinjak %}Uredi{% else %}Novi golubinjak{% endif %}</li>
@@ -114,12 +97,12 @@
 
 <!-- Header -->
 <div class="d-flex align-items-center gap-3 mb-4">
-  <div style="width:52px;height:52px;background:rgba(20,184,166,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-home" style="font-size:1.3rem;color:#14b8a6"></i>
+  <div class="fx-rounded-lg d-flex align-items-center justify-content-center" style="width:52px;height:52px;background:rgba(20,184,166,.1)">
+    <i class="fas fa-home fx-fs-3xl fx-text-cyan"></i>
   </div>
   <div>
-    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}</h2>
-    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Registrirajte lokaciju za smještaj vaših golubova</p>
+    <h2 class="fx-fs-4xl fx-fw-800 fx-text-body fx-m-0">{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}</h2>
+    <p class="fx-fs-note fx-text-muted fx-m-0">Registrirajte lokaciju za smještaj vaših golubova</p>
   </div>
 </div>
 
@@ -135,7 +118,7 @@
         <label class="gf-label">Naziv golubinjaka *</label>
         <input type="text" name="naziv" value="{{ golubinjak.naziv|default:'' }}" required class="form-control gf-input" placeholder="Npr. Glavni golubinjak">
       </div>
-      <div class="col-md-4" style="position:relative">
+      <div class="col-md-4 fx-relative">
         <label class="gf-label">Kapacitet</label>
         <input type="number" name="kapacitet" value="{{ golubinjak.kapacitet|default:'' }}" class="form-control gf-input" placeholder="50" min="0" style="padding-right:70px !important">
         <span class="gf-unit">golubova</span>
@@ -180,7 +163,7 @@
   <div class="gf-section">
     <div class="form-check">
       <input type="checkbox" name="aktivan" id="aktivan" class="form-check-input" {% if golubinjak.aktivan or not golubinjak %}checked{% endif %} value="1">
-      <label for="aktivan" class="form-check-label" style="font-size:.88rem;font-weight:600;color:var(--text)">Aktivan golubinjak</label>
+      <label for="aktivan" class="form-check-label fx-fs-body fx-fw-semibold fx-text-body">Aktivan golubinjak</label>
     </div>
   </div>
 
@@ -190,7 +173,7 @@
   <div class="gf-section">
     <div class="gf-section-title"><i class="fas fa-camera"></i> Fotografija golubinjaka</div>
     {% if golubinjak.fotografija %}
-    <div class="mb-2"><img src="{{ golubinjak.fotografija.url }}" style="max-height:140px;border-radius:10px;border:1px solid rgba(201,168,76,.3)"></div>
+    <div class="mb-2"><img src="{{ golubinjak.fotografija.url }}" class="fx-rounded" style="max-height:140px;border:1px solid rgba(201,168,76,.3)"></div>
     {% endif %}
     <div id="scan-golubinjak"></div>
     <input type="file" id="foto-golubinjak-input" name="fotografija" accept="image/*" class="d-none">
@@ -198,8 +181,8 @@
   </div>
 
 <!-- Footer -->
-<div class="gf-footer mt-0" style="background:var(--bg-card);border:1px solid var(--border);border-top:none;border-radius:0 0 16px 16px;padding:1.25rem 1.5rem">
-  <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+<div class="gf-footer mt-0 fx-bg-card fx-b" style="border-top:none;border-radius:0 0 16px 16px;padding:1.25rem 1.5rem">
+  <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary fx-rounded" style="padding:.6rem 1.5rem">
     <i class="fas fa-arrow-left me-1"></i>Odustani
   </a>
   <button type="submit" class="gf-btn-submit">

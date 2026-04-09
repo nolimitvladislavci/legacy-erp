@@ -6,22 +6,22 @@
 {% block content %}
 <style>
 .sb{max-width:700px;margin:0 auto;padding:16px}
-.sb-drop{border:2px dashed #333;border-radius:12px;padding:40px;text-align:center;transition:all .2s;cursor:pointer;background:#0a0a0a}
-.sb-drop.dragover{border-color:var(--gold,#c9a84c);background:#1a1400}
+.sb-drop{border:2px dashed #333;border-radius:12px;padding:40px;text-align:center;transition:all .2s;cursor:pointer;background:var(--bg)}
+.sb-drop.dragover{border-color:var(--gold);background:#1a1400}
 .sb-drop-icon{font-size:3rem;margin-bottom:8px}
-.sb-drop-text{color:#94a3b8;font-size:.9rem}
+.sb-drop-text{color:var(--text-muted);font-size:.9rem}
 .sb-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
-.sb-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #222;background:#111}
+.sb-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #222;background:var(--bg-card)}
 .sb-thumb img{width:100%;height:100%;object-fit:cover}
-.sb-thumb .badge{position:absolute;top:4px;right:4px;background:var(--gold,#c9a84c);color:#000;font-size:.65rem;padding:1px 5px;border-radius:4px;font-weight:700}
-.sb-status{text-align:center;padding:12px;background:#111;border:1px solid #222;border-radius:8px;margin:12px 0;color:#94a3b8;font-size:.85rem}
-.sb-status b{color:var(--gold,#c9a84c)}
+.sb-thumb .badge{position:absolute;top:4px;right:4px;background:var(--gold);color:var(--black);font-size:.65rem;padding:1px 5px;border-radius:4px;font-weight:700}
+.sb-status{text-align:center;padding:12px;background:var(--dark);border:1px solid #222;border-radius:8px;margin:12px 0;color:var(--text-muted);font-size:.85rem}
+.sb-status b{color:var(--gold)}
 .sb-btn{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:1px}
-.sb-btn-primary{background:var(--gold,#c9a84c);color:#000}
-.sb-btn-secondary{background:#1a1a1a;border:1px solid #333;color:#94a3b8}
+.sb-btn-primary{background:var(--gold);color:var(--text)}
+.sb-btn-secondary{background:var(--surface);border:1px solid var(--border2);color:var(--text-muted)}
 .sb-btn:disabled{opacity:.4;cursor:not-allowed}
-.sb-progress{height:4px;background:#222;border-radius:2px;margin:12px 0;overflow:hidden}
-.sb-progress-bar{height:100%;background:var(--gold,#c9a84c);transition:width .3s;width:0}
+.sb-progress{height:4px;background:var(--surface);border-radius:2px;margin:12px 0;overflow:hidden}
+.sb-progress-bar{height:100%;background:var(--gold);transition:width .3s;width:0}
 .sb-row{display:flex;gap:8px}
 .sb-row .sb-btn{flex:1}
 </style>
@@ -34,12 +34,12 @@
   </div>
 
   <!-- FAZA 1: Upload -->
-  <div id="phase1" {% if batch.status != 'collecting' %}style="display:none"{% endif %}>
+  <div id="phase1" {% if batch.status != 'collecting' %}class="fx-hidden"{% endif %}>
     <div class="sb-drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
       <div class="sb-drop-icon">📄</div>
       <div class="sb-drop-text">Povuci slike ovdje ili klikni</div>
     </div>
-    <input type="file" id="fileInput" multiple accept="image/*" capture="environment" style="display:none">
+    <input type="file" id="fileInput" multiple accept="image/*" capture="environment" class="fx-hidden">
 
     <div class="sb-grid" id="thumbGrid"></div>
 
@@ -50,16 +50,16 @@
   </div>
 
   <!-- FAZA 2: Processing -->
-  <div id="phase2" style="display:none">
+  <div id="phase2" class="fx-hidden">
     <div class="sb-progress"><div class="sb-progress-bar" id="progressBar"></div></div>
-    <div style="text-align:center;color:#94a3b8;padding:20px">
-      <div style="font-size:2rem;margin-bottom:8px">⚙</div>
+    <div class="text-center fx-text-muted fx-p-20">
+      <div class="fx-fs-icon mb-2">⚙</div>
       OCR obrada u tijeku...
     </div>
   </div>
 
   <!-- FAZA 3: Ready -->
-  <div id="phase3" style="display:none">
+  <div id="phase3" class="fx-hidden">
     <div class="sb-grid" id="resultGrid"></div>
     <div class="sb-row">
       <button class="sb-btn sb-btn-primary" onclick="archiveBatch()">Spremi u arhivu</button>
@@ -156,14 +156,14 @@ function pollStatus() {
       data.images.forEach(function(img){
         var div = document.createElement('div');
         div.className = 'sb-thumb';
-        div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:.75rem">Dok.' + (img.document_group || '?') + '</div>';
+        div.innerHTML = '<div class="d-flex fx-text-muted fx-fs-caption align-items-center justify-content-center" style="height:100%">Dok.' + (img.document_group || '?') + '</div>';
         if (img.document_group) {
           div.innerHTML += '<span class="badge">D' + img.document_group + '</span>';
         }
         grid.appendChild(div);
       });
     } else if (data.status === 'error') {
-      document.getElementById('phase2').innerHTML = '<div style="text-align:center;color:#dc2626;padding:20px">Greška pri obradi</div>';
+      document.getElementById('phase2').innerHTML = '<div class="text-center fx-text-red fx-p-20">Greška pri obradi</div>';
     } else {
       setTimeout(pollStatus, 2000);
     }
@@ -179,7 +179,7 @@ function archiveBatch() {
   .then(function(data){
     if (data.ok) {
       document.getElementById('sbStatusText').textContent = 'Arhivirano';
-      document.getElementById('phase3').innerHTML = '<div style="text-align:center;color:#22c55e;padding:30px;font-size:1.2rem">✓ ' + data.archived + ' dokumenata arhivirano</div><a href="/documents/arhiva/" class="sb-btn sb-btn-primary" style="text-decoration:none;text-align:center;display:block">Otvori arhivu</a>';
+      document.getElementById('phase3').innerHTML = '<div class="text-center fx-text-green fx-fs-2xl" style="padding:30px">✓ ' + data.archived + ' dokumenata arhivirano</div><a href="/documents/arhiva/" class="sb-btn sb-btn-primary fx-no-underline text-center d-block">Otvori arhivu</a>';
     }
   });
 }

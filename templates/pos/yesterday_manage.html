@@ -9,10 +9,10 @@
 .ym-header h2{margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem}
 .ym-header h2 i{color:var(--gold);margin-right:8px}
 .ym-header p{color:var(--text-muted);margin:0;font-size:.82rem}
-.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:var(--black);font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.btn-danger{background:transparent;border:1px solid #ef4444;color:#ef4444;padding:5px 10px;border-radius:6px;font-size:.75rem;cursor:pointer}
+.btn-danger{background:transparent;border:1px solid #ef4444;color:var(--red);padding:5px 10px;border-radius:6px;font-size:.75rem;cursor:pointer}
 
 .add-form{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
 .add-form h3{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:1rem}
@@ -28,19 +28,19 @@
 .active-table table{width:100%;border-collapse:collapse;font-size:.83rem}
 .active-table th{text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase}
 .active-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border)}
-.exp-ok{color:#10b981}.exp-warn{color:#f59e0b}.exp-bad{color:#ef4444}
+.exp-ok{color:var(--green)}.exp-warn{color:var(--amber)}.exp-bad{color:var(--red)}
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="max-width:800px;margin:0 auto">
+<div class="fx-m-auto fx-max-800">
 
   <div class="ym-header">
     <div>
       <h2><i class="fas fa-fire"></i> Roba od jučer</h2>
       <p>Dodajte jučerašnje proizvode po sniženoj cijeni. Automatski rok trajanja i označavanje.</p>
     </div>
-    <div style="display:flex;gap:8px">
+    <div class="d-flex fx-gap-2">
       <a href="/pos/webshop/pekara-uvijek-frisko/" class="btn-ghost" target="_blank"><i class="fas fa-eye"></i> Webshop</a>
       <a href="/pos/quick/" class="btn-ghost"><i class="fas fa-cash-register"></i> POS</a>
     </div>
@@ -64,22 +64,22 @@
       </div>
     </div>
 
-    <button type="button" onclick="addRow()" style="background:transparent;border:1px solid var(--border);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:.78rem;cursor:pointer;margin-bottom:.75rem">
+    <button type="button" onclick="addRow()" class="fx-rounded-sm fx-fs-body-sm fx-pointer fx-text-gold fx-bg-transparent fx-b fx-mb-4" style="padding:5px 12px">
       <i class="fas fa-plus"></i> Još jedan artikl
     </button>
 
     <div class="form-options">
       <label><input type="range" name="discount_pct" value="50" min="10" max="80" step="5" oninput="this.nextElementSibling.textContent=this.value+'%'"> <span>50%</span> popust</label>
       <label><input type="checkbox" name="vacuum" checked> Vakumirano</label>
-      <label>Rok: <input type="number" name="shelf_days" value="3" min="1" max="7" style="width:50px;padding:4px 6px;border-radius:4px;background:var(--input-bg);border:1px solid var(--border);color:var(--text)"> dana</label>
+      <label>Rok: <input type="number" name="shelf_days" value="3" min="1" max="7" class="fx-rounded-sm fx-text-body fx-b" style="width:50px;padding:4px 6px;background:var(--input-bg)"> dana</label>
     </div>
 
     <button type="submit" class="btn-gold"><i class="fas fa-check"></i> Dodaj u ponudu</button>
   </form>
 
   <!-- Aktivni artikli -->
-  <div class="stat-card" style="padding:1.25rem">
-    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:0 0 .75rem"><i class="fas fa-list" style="color:var(--gold);margin-right:.4rem"></i> Trenutno u ponudi</h3>
+  <div class="fenix-stat fx-p-125">
+    <h3 class="fx-fs-lg fx-fw-semibold fx-text-body" style="margin:0 0 .75rem"><i class="fas fa-list fx-text-gold" style="margin-right:.4rem"></i> Trenutno u ponudi</h3>
     {% if active_items %}
     <div class="active-table">
       <table>
@@ -98,9 +98,9 @@
         <tbody>
           {% for item in active_items %}
           <tr>
-            <td style="font-weight:600">{{ item.name }}</td>
-            <td style="text-decoration:line-through;color:var(--text-muted)">{{ item.original_price|floatformat:2 }} €</td>
-            <td style="color:var(--gold);font-weight:700">{{ item.discount_price|floatformat:2 }} € <span style="font-size:.7rem;color:#ef4444">-{{ item.discount_pct }}%</span></td>
+            <td class="fx-fw-semibold">{{ item.name }}</td>
+            <td class="fx-text-muted" style="text-decoration:line-through">{{ item.original_price|floatformat:2 }} €</td>
+            <td class="fx-fw-bold fx-text-gold">{{ item.discount_price|floatformat:2 }} € <span class="fx-fs-sm fx-text-red">-{{ item.discount_pct }}%</span></td>
             <td>{{ item.quantity_available|floatformat:0 }}</td>
             <td>{{ item.production_date|date:"d.m." }}</td>
             <td>
@@ -110,9 +110,9 @@
               <span class="exp-bad">ISTEKAO {{ item.expiry_date|date:"d.m." }}</span>
               {% endif %}
             </td>
-            <td>{% if item.is_vacuum_packed %}<i class="fas fa-check" style="color:#10b981"></i>{% else %}-{% endif %}</td>
+            <td>{% if item.is_vacuum_packed %}<i class="fas fa-check fx-text-green"></i>{% else %}-{% endif %}</td>
             <td>
-              <form method="post" style="display:inline">
+              <form method="post" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="deactivate">
                 <input type="hidden" name="dd_id" value="{{ item.id }}">
@@ -125,16 +125,16 @@
       </table>
     </div>
     {% else %}
-    <div style="text-align:center;padding:2rem;color:var(--text-muted)">
-      <i class="fas fa-box-open" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.3"></i>
+    <div class="text-center fx-text-muted fx-p-6">
+      <i class="fas fa-box-open fx-fs-icon d-block mb-2 fx-opacity-50"></i>
       Nema artikala u ponudi "Roba od jučer"
     </div>
     {% endif %}
   </div>
 
   <!-- Info box -->
-  <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:1rem;margin-top:1rem;font-size:.78rem;color:var(--text-secondary);line-height:1.5">
-    <strong style="color:var(--gold)"><i class="fas fa-info-circle"></i> Zakonske napomene:</strong><br>
+  <div class="fx-rounded fx-fs-body-sm mt-3 fx-text-dim fx-p-4" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);line-height:1.5">
+    <strong class="fx-text-gold"><i class="fas fa-info-circle"></i> Zakonske napomene:</strong><br>
     Pekarski proizvodi s označenim rokom trajanja smiju se prodavati po sniženoj cijeni.<br>
     Obavezno: naziv, datum proizvodnje, rok trajanja, uvjeti čuvanja, neto količina, proizvođač.<br>
     Vakuumiranje produljuje rok (kruh 3-5 dana, peciva 2-3 dana). Mora biti u HACCP planu.<br>

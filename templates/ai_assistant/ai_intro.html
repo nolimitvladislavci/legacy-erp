@@ -4,11 +4,11 @@
 {% block page_title %}Connect{% endblock %}
 {% block content %}
 <style>
-.intro-card { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border-radius: 16px; padding: 2.5rem; margin-bottom: 2rem; }
+.intro-card { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color:var(--white); border-radius: 16px; padding: 2.5rem; margin-bottom: 2rem; }
 .intro-card h2 { color: var(--gold, var(--gold,#c9a84c)); margin-bottom: 1rem; }
 .intro-step { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; transition: all 0.3s; cursor: pointer; }
 .intro-step:hover { background: rgba(201,168,76,0.15); transform: translateX(5px); }
-.intro-step .step-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--gold, var(--gold,#c9a84c)); color: #0a0a0a; font-weight: 700; margin-right: 1rem; }
+.intro-step .step-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--gold, var(--gold,#c9a84c)); color:var(--text); font-weight: 700; margin-right: 1rem; }
 .intro-step h5 { color: var(--gold, var(--gold,#c9a84c)); display: inline; }
 .module-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; background: rgba(201,168,76,0.2); color: var(--gold, var(--gold,#c9a84c)); font-size: 0.8rem; margin: 3px; }
 </style>
@@ -18,7 +18,7 @@
   <p class="lead">Tvoj inteligentni poslovni pomocnik koji razumije tvoje podatke i pomaze ti donositi bolje odluke.</p>
 
   {% if company %}
-  <p class="text-muted mb-4">Tvrtka: <strong style="color:var(--gold)">{{ company.name }}</strong> | Plan: <strong style="color:var(--gold)">{{ plan|title }}</strong></p>
+  <p class="text-muted mb-4">Tvrtka: <strong class="fx-text-gold">{{ company.name }}</strong> | Plan: <strong class="fx-text-gold">{{ plan|title }}</strong></p>
   {% endif %}
 
   <div class="intro-step" onclick="document.getElementById('demo-chat').style.display='block'">
@@ -49,7 +49,7 @@
   {% endif %}
 </div>
 
-<div id="demo-chat" style="display:none" class="stat-card">
+<div id="demo-chat" class="fenix-stat fx-hidden">
   <h5><i class="fas fa-comments me-2 text-warning"></i>Probaj Connect chat</h5>
   <p class="text-muted">Primjeri pitanja:</p>
   <div class="d-flex flex-wrap gap-2 mb-3">
