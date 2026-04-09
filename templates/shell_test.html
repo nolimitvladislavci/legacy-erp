@@ -1,0 +1,57 @@
+{% extends "base_shell.html" %}
+{% load i18n %}
+{% block title %}Shell Test{% endblock %}
+{% block content %}
+<div class="fenix-page">
+    <div class="fenix-page-header">
+        <h2><i class="fas fa-flask"></i> Global Shell Test</h2>
+        <button class="btn-gold" onclick="openShellRight()"><i class="fas fa-columns"></i> Open Context</button>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="fenix-stat fenix-stat-blue"><div><div class="label">Test 1</div><div class="value">OK</div></div><div class="icon"><i class="fas fa-check"></i></div></div></div>
+        <div class="col-md-3"><div class="fenix-stat fenix-stat-green"><div><div class="label">Shell</div><div class="value">Active</div></div><div class="icon"><i class="fas fa-layer-group"></i></div></div></div>
+        <div class="col-md-3"><div class="fenix-stat fenix-stat-amber"><div><div class="label">Panels</div><div class="value">4</div></div><div class="icon"><i class="fas fa-columns"></i></div></div></div>
+        <div class="col-md-3"><div class="fenix-stat fenix-stat-purple"><div><div class="label">Mode</div><div class="value">Default</div></div><div class="icon"><i class="fas fa-cog"></i></div></div></div>
+    </div>
+    <div class="fenix-filters">
+        <h6>Test Controls</h6>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn-gold" onclick="setShellMode(default)">Default Mode</button>
+            <button class="btn-ghost" onclick="setShellMode(focus)">Focus Mode</button>
+            <button class="btn-ghost" onclick="setShellMode(fullscreen)">Fullscreen Mode</button>
+            <button class="btn-ghost" onclick="setShellMode(compact)">Compact Mode</button>
+            <button class="btn-ghost" onclick="toggleShellLeft()">Toggle Left</button>
+            <button class="btn-ghost" onclick="toggleShellRight()">Toggle Right</button>
+        </div>
+    </div>
+    <div class="fenix-table-wrap mt-3">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Top Panel</td><td><span class="fenix-badge fenix-badge-success">Active</span></td><td>Search, Camera, Theme, Notifications</td></tr>
+                <tr><td>Left Panel</td><td><span class="fenix-badge fenix-badge-success">Active</span></td><td>Navigation, Workspace, Modules</td></tr>
+                <tr><td>Right Panel</td><td><span class="fenix-badge fenix-badge-info">Collapsible</span></td><td>Context, AI, Details</td></tr>
+                <tr><td>Bottom Panel</td><td><span class="fenix-badge fenix-badge-success">Active</span></td><td>Status, Print, Theme</td></tr>
+                <tr><td>Swipe (Mobile)</td><td><span class="fenix-badge fenix-badge-warning">Test on device</span></td><td>Left edge → Nav, Right edge → Context</td></tr>
+                <tr><td>Keyboard</td><td><span class="fenix-badge fenix-badge-success">Active</span></td><td>Ctrl+B = Left, Ctrl+. = Right, Esc = Close</td></tr>
+                <tr><td>Auto-mode</td><td><span class="fenix-badge fenix-badge-success">Active</span></td><td>POS=fullscreen, Forms=focus</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block right_panel_title %}Test Context{% endblock %}
+{% block right_panel_content %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">Current Mode</div>
+    <div class="shell-detail-value" id="modeDisplay">default</div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-brain"></i> AI Assist</div>
+    <p class="fx-text-dim fx-fs-sm">Global Shell is working! This right panel shows contextual information based on what the user is doing.</p>
+</div>
+<div class="shell-detail-card">
+    <div class="shell-detail-label">Architecture</div>
+    <div class="shell-detail-value">4-Panel Cockpit</div>
+</div>
+{% endblock %}

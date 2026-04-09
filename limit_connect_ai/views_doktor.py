@@ -14,7 +14,12 @@ def doktor_dashboard(request, company_id=None):
     if company_id:
         company = get_object_or_404(Company, id=company_id)
     else:
-        company = Company.objects.filter(users__user=request.user).first()
+        # Pronađi company via UserProfile (pravi related_name)
+        from accounts.models import UserProfile
+        try:
+            company = UserProfile.objects.get(user=request.user).company
+        except UserProfile.DoesNotExist:
+            company = None
         if not company:
             return render(request, "limit_connect_ai/doktor_no_company.html")
     today = date.today()

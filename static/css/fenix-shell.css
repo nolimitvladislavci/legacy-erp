@@ -806,3 +806,117 @@ body.joker-active .shell-right { display: none !important; }
     from { opacity: 0; }
     to   { opacity: 1; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHELL MODE CLASSES — via data-shell-mode atribut (Faza 3)
+   app-layout.shell-mode-focus / .shell-mode-fullscreen
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* FOCUS MODE — forme, wizardi, kreiranje dokumenata */
+.app-layout.shell-mode-focus .shell-right {
+    display: none !important;
+}
+
+@media (min-width: 992px) {
+    .app-layout.shell-mode-focus .sidebar {
+        width: 56px;
+        overflow: hidden;
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .app-layout.shell-mode-focus .sidebar .sidebar-role,
+    .app-layout.shell-mode-focus .sidebar .fx-company-display,
+    .app-layout.shell-mode-focus .sidebar .shell-nav-item span,
+    .app-layout.shell-mode-focus .sidebar .nav-section-title {
+        display: none !important;
+    }
+    .app-layout.shell-mode-focus .sidebar:hover {
+        width: 260px;
+        overflow: visible;
+    }
+    .app-layout.shell-mode-focus .sidebar:hover .sidebar-role,
+    .app-layout.shell-mode-focus .sidebar:hover .fx-company-display,
+    .app-layout.shell-mode-focus .sidebar:hover .shell-nav-item span,
+    .app-layout.shell-mode-focus .sidebar:hover .nav-section-title {
+        display: initial !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEGACY COMPATIBILITY — .app-layout[data-shell-mode] selectors
+   Maps existing base.html .app-layout to shell panel behavior
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fullscreen mode (POS terminals) */
+.app-layout[data-shell-mode="fullscreen"] .sidebar,
+.app-layout[data-shell-mode="fullscreen"] .shell-right {
+    display: none !important;
+}
+.app-layout[data-shell-mode="fullscreen"] .main {
+    margin-left: 0;
+}
+.app-layout[data-shell-mode="fullscreen"] .topbar {
+    display: none;
+}
+.app-layout[data-shell-mode="fullscreen"] .content {
+    padding: 0;
+}
+
+/* Focus mode (forms, editing) */
+.app-layout[data-shell-mode="focus"] .shell-right {
+    display: none !important;
+}
+
+/* Compact mode (slim sidebar) */
+@media (min-width: 769px) {
+    .app-layout[data-shell-mode="compact"] .sidebar {
+        width: 60px;
+    }
+    .app-layout[data-shell-mode="compact"] .sidebar .sidebar-brand span,
+    .app-layout[data-shell-mode="compact"] .sidebar .sidebar-role,
+    .app-layout[data-shell-mode="compact"] .sidebar .sidebar-group-toggle span,
+    .app-layout[data-shell-mode="compact"] .sidebar .sidebar-group-links a span {
+        display: none;
+    }
+    .app-layout[data-shell-mode="compact"] .sidebar a {
+        justify-content: center;
+        padding: 12px 0;
+    }
+    .app-layout[data-shell-mode="compact"] .main {
+        margin-left: 60px;
+    }
+}
+
+/* Shell right panel positioning within .app-layout */
+.app-layout .shell-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.app-layout .shell-right.collapsed {
+    transform: translateX(100%);
+}
+
+.app-layout .shell-right.open {
+    transform: translateX(0);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+}
+
+/* When right panel is open, shift main content on desktop */
+@media (min-width: 1200px) {
+    .app-layout .shell-right.open ~ .main {
+        margin-right: 320px;
+        transition: margin-right 0.3s ease;
+    }
+}

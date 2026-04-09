@@ -1052,3 +1052,203 @@ class KonjikStol(models.Model):
     @property
     def slobodan(self):
         return self.referent is None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WORKSPACE — Radni prostor (zamjenjuje KonjikStol)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Univerzalni model za SVE tipove radnih prostora:
+#   DESK    — fizički stol u uredu (sadašnji stolovi)
+#   HOME    — rad od kuće (invalidi, remote radnici, rotacija)
+#   REMOTE  — mobilni/digitalni rad bez fiksne adrese
+#   PREMISE — POS poslovni prostor (zamjenjuje BusinessPremise u budućnosti)
+#
+# Svaki radnik ima 1+ workspace. Svaki workspace ima 0+ klijenata.
+# Radnik bira klijenta iz svog workspace-a → switch_company → radi.
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Workspace(models.Model):
+    """
+    Radni prostor — fizički ili virtualni kontekst u kojem radnik pristupa klijentima.
+
+    Primjeri:
+      - "Stol 1" (DESK) — Ljiljana sjedi u uredu, 14 komitenata
+      - "Kuća Ljiljana" (HOME) — ista Ljiljana radi od kuće ponedjeljkom
+      - "Remote Marko" (REMOTE) — freelancer, pristupa portalu odakle god
+      - "Poslovnica Centar" (PREMISE) — POS blagajna na fizičkoj adresi
+
+    Arhitekturna pravila:
+      1. Radnik UVIJEK radi UNUTAR workspace-a
+      2. Workspace definira KOJE KLIJENTE radnik vidi
+      3. Klik na klijenta → switch_company() → standardni portal flow
+      4. Admin raspodjeljuje klijente i radnike na workspace-e
+      5. Workspace NIKAD ne ograničava module — to radi CompanyMembership.role
+    """
+
+    class Type(models.TextChoices):
+        DESK    = 'desk',    'Stol u uredu'
+        HOME    = 'home',    'Rad od kuće'
+        REMOTE  = 'remote',  'Mobilni / Remote'
+        PREMISE = 'premise', 'Poslovni prostor (POS)'
+
+    COLORS = [
+        ('#c9a84c', 'Zlatna'),
+        ('#22c55e', 'Zelena'),
+        ('#3b82f6', 'Plava'),
+        ('#f97316', 'Narančasta'),
+        ('#ec4899', 'Ružičasta'),
+        ('#8b5cf6', 'Ljubičasta'),
+        ('#06b6d4', 'Tirkizna'),
+        ('#ef4444', 'Crvena'),
+        ('#84cc16', 'Vapno'),
+        ('#64748b', 'Siva'),
+    ]
+
+    # ── Vlasništvo ────────────────────────────────────────────
+    company = models.ForeignKey(
+        'Company',
+        on_delete=models.CASCADE,
+        related_name='workspaces',
+        verbose_name='Matica',
+        help_text='Firma kojoj workspace pripada (npr. Konjik d.o.o.)',
+    )
+
+    # ── Identifikacija ───────────────────────────────────────
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Naziv',
+        help_text='Npr. "Stol 1", "Home Office Ljiljana", "Poslovnica Centar"',
+    )
+    type = models.CharField(
+        max_length=10,
+        choices=Type.choices,
+        default=Type.DESK,
+        verbose_name='Tip',
+    )
+    color = models.CharField(
+        max_length=20,
+        choices=COLORS,
+        default='#c9a84c',
+        verbose_name='Boja',
+    )
+    position = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name='Redoslijed',
+        help_text='Za sortiranje u admin prikazu',
+    )
+
+    # ── Tko radi ──────────────────────────────────────────────
+    workers = models.ManyToManyField(
+        'auth.User',
+        blank=True,
+        related_name='workspaces',
+        verbose_name='Radnici',
+        help_text='Osobe koje rade u ovom prostoru',
+    )
+
+    # ── Na čemu se radi ───────────────────────────────────────
+    clients = models.ManyToManyField(
+        'Company',
+        blank=True,
+        related_name='workspace_assignments',
+        verbose_name='Klijenti',
+        help_text='Firme/komitenti dodijeljeni ovom prostoru',
+    )
+
+    # ── Lokacija (opcionalno) ─────────────────────────────────
+    address = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Adresa',
+        help_text='Fizička adresa (za HOME = kućna adresa, za PREMISE = adresa poslovnice)',
+    )
+    city = models.CharField(max_length=100, blank=True, verbose_name='Grad')
+    zip_code = models.CharField(max_length=10, blank=True, verbose_name='Poštanski broj')
+
+    # ── Vremensko ograničenje (studenti, volonteri) ───────────
+    valid_from = models.DateField(
+        null=True, blank=True,
+        verbose_name='Aktivan od',
+        help_text='Prazno = odmah aktivan',
+    )
+    valid_until = models.DateField(
+        null=True, blank=True,
+        verbose_name='Aktivan do',
+        help_text='Prazno = trajno. Za studente/volontere postaviti datum isteka.',
+    )
+
+    # ── Status ────────────────────────────────────────────────
+    is_active = models.BooleanField(default=True, verbose_name='Aktivan')
+    notes = models.TextField(blank=True, verbose_name='Napomena')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['position', 'name']
+        verbose_name = 'Radni prostor'
+        verbose_name_plural = 'Radni prostori'
+
+    def __str__(self):
+        workers = ', '.join(
+            w.get_full_name() or w.username
+            for w in self.workers.all()[:3]
+        )
+        return f'{self.name} ({workers or "—"})'
+
+    @property
+    def client_count(self):
+        return self.clients.count()
+
+    @property
+    def worker_count(self):
+        return self.workers.count()
+
+    @property
+    def is_valid(self):
+        """Provjeri je li workspace trenutno valjan (vremenski)."""
+        from django.utils import timezone
+        today = timezone.now().date()
+        if self.valid_from and today < self.valid_from:
+            return False
+        if self.valid_until and today > self.valid_until:
+            return False
+        return self.is_active
+
+    @property
+    def type_icon(self):
+        icons = {
+            'desk': 'fas fa-desktop',
+            'home': 'fas fa-home',
+            'remote': 'fas fa-wifi',
+            'premise': 'fas fa-store',
+        }
+        return icons.get(self.type, 'fas fa-briefcase')
+
+    @classmethod
+    def get_for_user(cls, user, company=None):
+        """Dohvati sve aktivne workspace-e za korisnika."""
+        from django.utils import timezone
+        today = timezone.now().date()
+        qs = cls.objects.filter(
+            workers=user,
+            is_active=True,
+        ).filter(
+            models.Q(valid_from__isnull=True) | models.Q(valid_from__lte=today),
+        ).filter(
+            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=today),
+        ).prefetch_related('clients', 'workers')
+
+        if company:
+            qs = qs.filter(company=company)
+        return qs
+
+    @classmethod
+    def get_clients_for_user(cls, user, company=None):
+        """Dohvati sve klijente kojima korisnik ima pristup kroz workspace-e."""
+        workspaces = cls.get_for_user(user, company)
+        client_ids = set()
+        for ws in workspaces:
+            client_ids.update(ws.clients.values_list('id', flat=True))
+        return Company.objects.filter(id__in=client_ids).order_by('name')

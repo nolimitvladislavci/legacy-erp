@@ -61,6 +61,10 @@ def api_oib_lookup(request):
 def trikey_login(request):
     """Login s PIN-om (Ključ 1) + opcionalno Passkey (Ključ 2)."""
     if request.user.is_authenticated:
+        # Ako ima workspace → tamo, inače arhiva
+        from companies.models import Workspace
+        if Workspace.get_for_user(request.user).exists():
+            return redirect('companies:workspace_home')
         return redirect('documents:arhiva_list')
 
     if request.method == 'POST':
@@ -320,6 +324,10 @@ def pin_recovery(request):
 def quick_login(request):
     """Brzi login: odaberi ime iz liste → unesu PIN → ulogirani."""
     if request.user.is_authenticated:
+        # Ako ima workspace → tamo, inače arhiva
+        from companies.models import Workspace
+        if Workspace.get_for_user(request.user).exists():
+            return redirect('companies:workspace_home')
         return redirect('documents:arhiva_list')
 
     # Dohvati firmu iz URL parametra ili default Konjik

@@ -1453,3 +1453,33 @@ html {
 @media (max-width: 480px) {
     .fx-grid-4-cols { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PULL-TO-REFRESH indicator
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ptr-indicator {
+    position: fixed;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    transition: top 0.2s ease;
+    color: var(--gold);
+    font-size: 1.1rem;
+}
+.ptr-indicator.visible {
+    top: 60px;
+}
+.ptr-indicator.loading i {
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

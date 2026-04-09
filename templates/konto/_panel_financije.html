@@ -1,0 +1,68 @@
+{% load i18n %}
+{# templates/konto/_panel_financije.html #}
+
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold,#c9a84c)">
+    {{ request.company.name|default:"Financije" }} — Sažetak
+  </div>
+
+  <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px;text-align:center">
+    <div style="font-size:1.55rem;font-weight:800;color:#22c55e">{{ total_bank|floatformat:2 }} €</div>
+    <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:3px">{% trans "Saldo žiro računa" %}</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Priljevi (mj.)</span>
+      <span style="font-weight:700;color:#22c55e">{{ month_inflow|floatformat:2 }} €</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Odljevi (mj.)</span>
+      <span style="font-weight:700;color:#ef4444">{{ month_outflow|floatformat:2 }} €</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Dobit/Gubitak</span>
+      <span style="font-weight:700;color:{% if pnl.profit_loss >= 0 %}#22c55e{% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Potraživanja</span>
+      <span style="font-weight:700;color:#c9a84c">{{ total_receivable|floatformat:2 }} €</span>
+    </div>
+    {% if overdue_count > 0 %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Dospjelo</span>
+      <span style="font-weight:700;color:#ef4444">{{ overdue_count }} stavki</span>
+    </div>
+    {% endif %}
+    {% if unmatched_count > 0 %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">
+      <span style="color:var(--text-dim,#94a3b8)">Nepariranih txn.</span>
+      <span style="font-weight:700;color:#f59e0b">{{ unmatched_count }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if audit_hashed > 0 %}
+  <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:.78rem;font-weight:600;
+    {% if audit_valid %}background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#22c55e
+    {% else %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#ef4444{% endif %}">
+    {% if audit_valid %}✅ Hash chain validan{% else %}⚠️ Hash chain prekinut{% endif %}
+    <span style="margin-left:auto;opacity:.6">{{ audit_hashed }} zap.</span>
+  </div>
+  {% endif %}
+
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:3px">Brze akcije</div>
+    <a href="{% url 'konto:transactions' %}"    class="panel-quick-btn"><i class="fas fa-exchange-alt" style="width:14px;color:var(--gold,#c9a84c)"></i> Transakcije</a>
+    <a href="{% url 'konto:journal_entries' %}" class="panel-quick-btn"><i class="fas fa-book"          style="width:14px;color:var(--gold,#c9a84c)"></i> Temeljnice</a>
+    <a href="{% url 'konto:report_pnl' %}"      class="panel-quick-btn"><i class="fas fa-chart-line"    style="width:14px;color:var(--gold,#c9a84c)"></i> RDG</a>
+    <a href="{% url 'konto:report_vat' %}"      class="panel-quick-btn"><i class="fas fa-percent"       style="width:14px;color:var(--gold,#c9a84c)"></i> PDV prijava</a>
+  </div>
+
+</div>
+
+<style>
+.panel-quick-btn{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--border,#334155);border-radius:7px;text-decoration:none;color:var(--text,#e2e8f0);font-size:.82rem;font-weight:600;transition:border-color .15s}
+.panel-quick-btn:hover{border-color:var(--gold,#c9a84c);color:var(--text,#e2e8f0)}
+</style>

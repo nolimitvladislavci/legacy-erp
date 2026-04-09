@@ -1,0 +1,91 @@
+{% load i18n %}
+{# templates/limit_connect_ai/_panel_doktor.html
+   Kontekst: company, report (DiagnosisReport | None) #}
+
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+{% if report and report.status == "done" %}
+
+  {# Score hero — boja po pragu #}
+  <div style="border-radius:12px;padding:16px;text-align:center;
+    {% if report.overall_score >= 80 %}background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)
+    {% elif report.overall_score >= 60 %}background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)
+    {% else %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25){% endif %}">
+    <div style="font-size:2.6rem;font-weight:900;line-height:1;
+      {% if report.overall_score >= 80 %}color:#22c55e
+      {% elif report.overall_score >= 60 %}color:#f59e0b
+      {% else %}color:#ef4444{% endif %}">{{ report.overall_score }}</div>
+    <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:3px">/ 100 — Zdravlje sustava</div>
+    {% if report.score_delta %}
+    <div style="margin-top:6px;font-size:.75rem;font-weight:700;color:{% if report.score_delta > 0 %}#22c55e{% else %}#ef4444{% endif %}">
+      {% if report.score_delta > 0 %}+{% endif %}{{ report.score_delta }} {% trans "od jučer" %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# AI sažetak #}
+  {% if report.ai_summary %}
+  <div style="font-size:.8rem;line-height:1.6;color:var(--text,#e2e8f0);padding:10px 12px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid var(--gold,#c9a84c)">
+    {{ report.ai_summary|truncatechars:220 }}
+  </div>
+  {% endif %}
+
+  {# Kategorije #}
+  {% if report.category_scores %}
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8)">Kategorije</div>
+    {% for cat, score in report.category_scores.items %}
+    <div style="display:flex;align-items:center;gap:8px;font-size:.78rem">
+      <span style="flex:1;color:var(--text,#e2e8f0)">{{ cat }}</span>
+      <div style="width:60px;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden">
+        <div style="width:{{ score }}%;height:100%;border-radius:3px;
+          {% if score >= 80 %}background:#22c55e{% elif score >= 60 %}background:#f59e0b{% else %}background:#ef4444{% endif %}">
+        </div>
+      </div>
+      <span style="width:28px;text-align:right;font-weight:700;
+        {% if score >= 80 %}color:#22c55e{% elif score >= 60 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">{{ score }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Top 3 preporuke #}
+  {% if report.recommendations %}
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8)">Top preporuke</div>
+    {% for rec in report.recommendations|slice:":3" %}
+    <div style="display:flex;gap:8px;font-size:.78rem;line-height:1.4;padding:6px 8px;background:rgba(239,68,68,.05);border-radius:6px;border-left:2px solid rgba(239,68,68,.25)">
+      <span style="color:#ef4444;font-weight:700;flex-shrink:0">{{ forloop.counter }}.</span>
+      <span style="color:var(--text,#e2e8f0)">{{ rec.message|default:rec|truncatechars:80 }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <a href="{% url 'limit_connect_ai:doktor_dashboard' %}"
+     style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:var(--gold,#c9a84c);color:#1a1a2e;border-radius:8px;text-decoration:none;font-weight:700;font-size:.82rem">
+    <i class="fas fa-stethoscope"></i> Puni izvještaj
+  </a>
+
+{% elif report and report.status == "pending" %}
+  <div style="text-align:center;padding:20px;color:var(--text-dim,#94a3b8)">
+    <div style="font-size:2rem;margin-bottom:10px">⏳</div>
+    <div style="font-weight:600;color:var(--gold,#c9a84c)">Dijagnoza u tijeku</div>
+    <div style="font-size:.8rem;margin-top:6px">Osvježite stranicu za par minuta.</div>
+  </div>
+
+{% else %}
+  <div style="text-align:center;padding:20px;color:var(--text-dim,#94a3b8)">
+    <div style="font-size:2rem;margin-bottom:10px">🩺</div>
+    <div style="font-weight:600;color:var(--text,#e2e8f0)">Nema dijagnoze danas</div>
+    <div style="font-size:.8rem;margin-top:6px">Generira se svako jutro automatski.</div>
+    {% if request.user.is_staff %}
+    <a href="{% url 'limit_connect_ai:doktor_trigger' company.id %}"
+       style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 16px;background:var(--gold,#c9a84c);color:#1a1a2e;border-radius:7px;text-decoration:none;font-weight:700;font-size:.8rem">
+      <i class="fas fa-play"></i> Pokreni sada
+    </a>
+    {% endif %}
+  </div>
+{% endif %}
+
+</div>

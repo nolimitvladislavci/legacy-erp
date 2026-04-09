@@ -660,3 +660,32 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 })();
+
+// === PULL-TO-REFRESH (mobile only) ===
+(function(){
+  if(window.innerWidth > 768) return;
+  var ptr = document.createElement("div");
+  ptr.className = "ptr-indicator";
+  ptr.innerHTML = '<i class="fas fa-arrow-down"></i>';
+  document.body.appendChild(ptr);
+  var startY = 0, pulling = false;
+  document.addEventListener("touchstart", function(e){
+    if(window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; }
+  }, {passive:true});
+  document.addEventListener("touchmove", function(e){
+    if(!pulling) return;
+    var dy = e.touches[0].clientY - startY;
+    if(dy > 60 && window.scrollY === 0){
+      ptr.classList.add("visible");
+      ptr.innerHTML = '<i class="fas fa-sync-alt"></i>';
+    }
+  }, {passive:true});
+  document.addEventListener("touchend", function(){
+    if(ptr.classList.contains("visible")){
+      ptr.classList.add("loading");
+      setTimeout(function(){ location.reload(); }, 300);
+    }
+    pulling = false;
+    if(!ptr.classList.contains("loading")) ptr.classList.remove("visible");
+  });
+})();

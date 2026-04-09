@@ -2466,7 +2466,13 @@ def smart_home(request):
     if user.is_superuser:
         return redirect('control_tower')
 
-    # Check profile role
+    # ── Workspace check — ako radnik ima workspace, ide tamo ──
+    from companies.models import Workspace
+    user_workspaces = Workspace.get_for_user(user)
+    if user_workspaces.exists():
+        return redirect('companies:workspace_home')
+
+    # Check profile role (korisnici bez workspace-a)
     role = getattr(getattr(user, 'profile', None), 'role', None)
 
     if role in ('company_admin', 'project_manager') or (user.is_staff and not user.is_superuser):

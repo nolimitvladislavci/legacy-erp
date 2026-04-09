@@ -1,0 +1,63 @@
+{% load i18n %}
+{# templates/pos/_panel_terminali.html
+   Kontekst: terminals (QuerySet<POSTerminal>, svaki ima .active_session) #}
+
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:10px">
+
+  <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold,#c9a84c)">
+    POS Terminali — Status
+  </div>
+
+  {% for t in terminals %}
+  <div style="background:var(--surface2,rgba(30,42,58,.7));border:1px solid var(--border,#334155);border-radius:10px;padding:10px 12px">
+
+    {# Naziv + status #}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+      <div style="font-weight:700;font-size:.88rem;color:var(--text,#e2e8f0)">{{ t.name }}</div>
+      {% if t.active_session %}
+      <div style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:#22c55e;font-weight:600">
+        <i class="fas fa-circle" style="font-size:.45rem"></i> Otvorena smjena
+      </div>
+      {% else %}
+      <div style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--text-dim,#94a3b8)">
+        <i class="fas fa-moon" style="font-size:.45rem"></i> Nema smjene
+      </div>
+      {% endif %}
+    </div>
+
+    {# Kod + tip #}
+    {% if t.terminal_code %}
+    <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);font-family:monospace;margin-bottom:4px">{{ t.terminal_code }}</div>
+    {% endif %}
+
+    {% if t.terminal_type %}
+    <span style="display:inline-block;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)">
+      {{ t.get_terminal_type_display|default:t.terminal_type }}
+    </span>
+    {% endif %}
+
+    {# Brzi link — otvori terminal #}
+    <div style="margin-top:8px">
+      <a href="{% url 'pos:pos_joker' t.pk %}"
+         style="display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:6px;text-decoration:none;color:var(--gold,#c9a84c);font-size:.78rem;font-weight:600">
+        <i class="fas fa-cash-register"></i> Otvori POS
+      </a>
+    </div>
+
+  </div>
+  {% empty %}
+  <div style="text-align:center;padding:20px;color:var(--text-dim,#94a3b8)">
+    <div style="font-size:1.8rem;margin-bottom:8px">🖥️</div>
+    <div style="font-size:.84rem">Nema konfiguriranih terminala</div>
+  </div>
+  {% endfor %}
+
+  {# Novi terminal gumb #}
+  <a href="{% url 'pos:new_terminal' %}"
+     style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border:1px dashed rgba(201,168,76,.3);border-radius:8px;text-decoration:none;color:var(--gold,#c9a84c);font-size:.82rem;font-weight:600;margin-top:2px"
+     onmouseover="this.style.background='rgba(201,168,76,.06)'"
+     onmouseout="this.style.background='transparent'">
+    <i class="fas fa-plus"></i> Novi terminal
+  </a>
+
+</div>

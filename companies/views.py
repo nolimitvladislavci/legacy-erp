@@ -902,3 +902,244 @@ def konjik_stolovi_api(request):
         return JsonResponse({'ok': True})
 
     return JsonResponse({'error': 'Nepoznata akcija'}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WORKSPACE — Radni prostor views
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def workspace_home(request):
+    """
+    HOME SCREEN radnika — lista klijenata iz njegovog workspace-a.
+    Klik na klijenta → switch_company → rad u kontekstu.
+    """
+    from companies.models import Workspace, Company
+    from documents.models import ArhivaEntry
+    from django.db.models import Count, Q
+
+    # Pronađi aktivne workspace-e korisnika
+    workspaces = Workspace.get_for_user(request.user)
+
+    if not workspaces.exists() and request.user.is_superuser:
+        # Superadmin bez workspace-a → admin view
+        return redirect('companies:workspace_admin')
+
+    # Ako ima točno 1 workspace, koristi ga. Inače prikaži izbor.
+    active_ws_id = request.session.get('active_workspace_id')
+    active_ws = None
+
+    if active_ws_id:
+        active_ws = workspaces.filter(id=active_ws_id).first()
+
+    if not active_ws and workspaces.count() == 1:
+        active_ws = workspaces.first()
+        request.session['active_workspace_id'] = active_ws.id
+
+    if not active_ws and workspaces.count() > 1:
+        # Prikaži izbor workspace-a
+        return render(request, 'companies/workspace_select.html', {
+            'workspaces': workspaces,
+        })
+
+    if not active_ws:
+        # Nema workspace-a — prikaži poruku
+        return render(request, 'companies/workspace_empty.html')
+
+    # Dohvati klijente iz aktivnog workspace-a s statistikama
+    clients_qs = active_ws.clients.all().order_by('name')
+    clients = []
+    total_docs = 0
+    total_pending = 0
+
+    for c in clients_qs:
+        try:
+            stats = ArhivaEntry.objects.filter(company=c).aggregate(
+                doc_count=Count('id'),
+                pending_count=Count('id', filter=Q(is_booked=False))
+            )
+        except Exception:
+            stats = {'doc_count': 0, 'pending_count': 0}
+        c.doc_count = stats['doc_count'] or 0
+        c.pending_count = stats['pending_count'] or 0
+        total_docs += c.doc_count
+        total_pending += c.pending_count
+        clients.append(c)
+
+    # Ostali workeri na istom workspace-u
+    coworkers = active_ws.workers.exclude(id=request.user.id)
+
+    return render(request, 'companies/workspace_home.html', {
+        'workspace': active_ws,
+        'workspaces': workspaces,
+        'clients': clients,
+        'coworkers': coworkers,
+        'total_docs': total_docs,
+        'total_pending': total_pending,
+    })
+
+
+@login_required
+def workspace_switch(request, ws_id):
+    """Prebaci se na drugi workspace."""
+    from companies.models import Workspace
+    ws = Workspace.objects.filter(id=ws_id, workers=request.user, is_active=True).first()
+    if ws:
+        request.session['active_workspace_id'] = ws.id
+    return redirect('companies:workspace_home')
+
+
+@login_required
+def workspace_enter_client(request, client_id):
+    """Uđi u kontekst klijenta iz workspace-a → switch_company."""
+    from companies.models import Workspace, Company
+    from accounts.models import CompanyMembership
+
+    # Provjeri da je klijent u nekom od korisnikovih workspace-a
+    user_client_ids = set()
+    for ws in Workspace.get_for_user(request.user):
+        user_client_ids.update(ws.clients.values_list('id', flat=True))
+
+    # Superadmin može svugdje
+    if not request.user.is_superuser and client_id not in user_client_ids:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Nemate pristup ovom klijentu.")
+
+    # Osiguraj CompanyMembership
+    company = Company.objects.filter(id=client_id).first()
+    if not company:
+        from django.http import Http404
+        raise Http404
+
+    mem, created = CompanyMembership.objects.get_or_create(
+        user=request.user, company=company,
+        defaults={'role': 'company_admin', 'is_active': True}
+    )
+    if not mem.is_active:
+        mem.is_active = True
+        mem.save(update_fields=['is_active'])
+
+    # Switch session
+    request.session['active_membership_id'] = mem.id
+    request.session['workspace_client_id'] = str(client_id)
+
+    # Redirect na dashboard klijenta ili arhivu
+    next_url = request.GET.get('next', '/hr/dashboard/')
+    return redirect(next_url)
+
+
+@login_required
+def workspace_admin(request):
+    """
+    Admin ploča — raspodjela klijenata i radnika na workspace-e.
+    Samo za admin/superadmin.
+    """
+    import json
+    from companies.models import Workspace, Company, CompanyPartnership
+    from accounts.models import CompanyMembership
+    from django.http import JsonResponse
+
+    # Pronađi maticu
+    if request.user.is_superuser:
+        matica = Company.objects.filter(name__icontains='konjik').first()
+        if not matica:
+            matica = request.company if hasattr(request, 'company') else None
+    else:
+        matica = getattr(request, 'company', None)
+
+    if not matica:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Nema matice.")
+
+    # API za CRUD
+    if request.method == 'POST' and request.headers.get('Content-Type', '').startswith('application/json'):
+        data = json.loads(request.body)
+        action = data.get('action')
+
+        if action == 'add_workspace':
+            count = Workspace.objects.filter(company=matica).count()
+            colors = ['#c9a84c','#22c55e','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#ef4444','#84cc16','#64748b']
+            ws = Workspace.objects.create(
+                company=matica,
+                name=data.get('name', f'Prostor {count + 1}'),
+                type=data.get('type', 'desk'),
+                color=colors[count % len(colors)],
+                position=count + 1,
+            )
+            return JsonResponse({'ok': True, 'id': ws.id, 'name': ws.name})
+
+        if action == 'rename_workspace':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            ws.name = data.get('name', ws.name)[:100]
+            ws.save(update_fields=['name', 'updated_at'])
+            return JsonResponse({'ok': True})
+
+        if action == 'set_type':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            ws.type = data.get('type', ws.type)
+            ws.save(update_fields=['type', 'updated_at'])
+            return JsonResponse({'ok': True})
+
+        if action == 'add_worker':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            from django.contrib.auth.models import User
+            user = User.objects.get(id=data['user_id'])
+            ws.workers.add(user)
+            return JsonResponse({'ok': True})
+
+        if action == 'remove_worker':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            ws.workers.remove(data['user_id'])
+            return JsonResponse({'ok': True})
+
+        if action == 'add_client':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            company = Company.objects.get(id=data['company_id'])
+            ws.clients.add(company)
+            return JsonResponse({'ok': True, 'client_count': ws.client_count})
+
+        if action == 'remove_client':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            ws.clients.remove(data['company_id'])
+            return JsonResponse({'ok': True, 'client_count': ws.client_count})
+
+        if action == 'delete_workspace':
+            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+            ws.clients.clear()
+            ws.workers.clear()
+            ws.delete()
+            return JsonResponse({'ok': True})
+
+        return JsonResponse({'error': 'Unknown action'}, status=400)
+
+    # GET — render admin page
+    workspaces = Workspace.objects.filter(
+        company=matica
+    ).prefetch_related('clients', 'workers').order_by('position')
+
+    # Slobodni klijenti (nisu na nijednom workspace-u)
+    assigned_ids = set()
+    for ws in workspaces:
+        assigned_ids.update(ws.clients.values_list('id', flat=True))
+
+    partner_ids = set(CompanyPartnership.objects.filter(
+        partner_company=matica, valid_until__isnull=True
+    ).values_list('managed_company_id', flat=True))
+
+    slobodni = Company.objects.filter(id__in=partner_ids - assigned_ids).order_by('name')
+
+    # Dostupni radnici
+    radnici = [
+        m.user for m in CompanyMembership.objects.filter(
+            company=matica, is_active=True
+        ).select_related('user').exclude(user__is_superuser=True)
+    ]
+
+    return render(request, 'companies/workspace_admin.html', {
+        'matica': matica,
+        'workspaces': workspaces,
+        'slobodni': slobodni,
+        'slobodni_count': slobodni.count(),
+        'radnici': radnici,
+        'ukupno_klijenata': len(partner_ids),
+    })

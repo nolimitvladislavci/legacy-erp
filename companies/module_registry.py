@@ -121,29 +121,29 @@ MODULES = [
         'quick_action': {'label': 'Upload dokumenta', 'url': '/hr/documents/arhiva/upload/', 'icon': 'fa-cloud-upload-alt', 'color': '#c9a84c'},
     },
 
-    # Stolovi (raspodjela komitenata) — sidebar shortcut
+    # Radni prostor (zamjenjuje Stolovi + Odaberi komitente)
     {
-        'id': 'stolovi',
-        'name': 'Stolovi',
-        'icon': 'fa-th-large',
-        'url': '/companies/stolovi/',
-        'url_name': 'companies:stolovi',
+        'id': 'workspace',
+        'name': 'Radni prostor',
+        'icon': 'fa-briefcase',
+        'url': '/companies/workspace/',
+        'url_name': 'companies:workspace_home',
         'category': 'dokumenti',
         'tier': TIER_FREE,
-        'description': 'Raspodjela komitenata po radnicama.',
+        'description': 'Vaši klijenti i radni kontekst.',
         'price_addon': 0,
     },
-    # Odabir komitenata — sidebar shortcut
     {
-        'id': 'komitenti',
-        'name': 'Komitenti',
-        'icon': 'fa-users',
-        'url': '/accounts/odaberi-komitente/',
-        'url_name': 'accounts:odaberi_komitente',
+        'id': 'workspace_admin',
+        'name': 'Raspodjela',
+        'icon': 'fa-th-large',
+        'url': '/companies/workspace/admin/',
+        'url_name': 'companies:workspace_admin',
         'category': 'dokumenti',
         'tier': TIER_FREE,
-        'description': 'Odaberite komitente koje vodite.',
+        'description': 'Admin: raspodjela klijenata i radnika.',
         'price_addon': 0,
+        'admin_only': True,
     },
 
     # ══════════════════════════════════════════════════════════════════════

@@ -53,6 +53,11 @@ def _bypass_login(request, token):
         return HttpResponse(str(e))
 
 # TEMP DEBUG — remove after fixing login
+
+def _shell_test(request):
+    from django.shortcuts import render
+    return render(request, 'shell_test.html')
+
 def _debug_session(request):
     from django.http import JsonResponse
     return JsonResponse({
@@ -63,6 +68,7 @@ def _debug_session(request):
     })
 
 urlpatterns = [
+    path('_shell_test/', _shell_test),
     path('_debug_session/', _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka
     path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),
