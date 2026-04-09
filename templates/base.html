@@ -17,6 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/fenix-tokens.css?v=4000">
+    <link rel="stylesheet" href="/static/css/fenix-shell.css?v=1001">
     <!-- global_themes.css DEPRECATED — all tokens in fenix-tokens.css -->
     <link rel="stylesheet" href="/static/css/base-layout.css?v=1775674575">
     <link rel="stylesheet" href="/static/css/fenix-ui.css?v=1775674575">
@@ -217,6 +218,22 @@
 
     </div>
 
+
+    <!-- ═══ RIGHT CONTEXT PANEL ═══ -->
+    <aside class="shell-right collapsed" id="shellRight" aria-label="Kontekst panel">
+        <div class="shell-right-header">
+            <span id="shell-right-title">Kontekst</span>
+            <button class="shell-right-close" onclick="closeShellRight()" aria-label="Zatvori panel">&times;</button>
+        </div>
+        <div class="shell-right-content" id="shell-right-content">
+            <div style="padding:20px 16px;color:var(--text-dim);font-size:.84rem;line-height:1.6">
+                <div style="font-size:1.6rem;margin-bottom:8px">🧠</div>
+                <div style="font-weight:600;color:var(--gold);margin-bottom:6px;font-size:.78rem;text-transform:uppercase;letter-spacing:1px">AI Assist</div>
+                <p style="margin:0">Odaberite element u modulu za kontekstualne informacije i AI analizu.</p>
+            </div>
+        </div>
+    </aside>
+
     <!-- Main -->
     <div class="main">
         <div class="topbar">
@@ -230,6 +247,9 @@
                 <span class="fx-fw-semibold fx-fs-md" style="color:var(--topbar-text)">{% block page_title %}LIMIT CONNECT{% endblock %}</span>
             </div>
             <div class="d-flex align-items-center gap-3">
+                <button class="fx-rounded-sm fx-pointer fx-fs-base d-none d-md-flex fx-theme-toggle align-items-center" onclick="toggleShellRight()" title="Kontekst panel (Alt+P)" id="right-panel-btn" style="padding:4px 8px">
+                    <i class="fas fa-columns"></i>
+                </button>
                 <button id="theme-toggle" onclick="toggleTheme()" title="Tamna/Svijetla tema"
                     class="fx-rounded-sm fx-pointer fx-fs-base d-flex fx-theme-toggle align-items-center">
                     <i class="fas fa-moon" id="theme-icon"></i>
@@ -349,221 +369,16 @@ window.FC = {
 <!-- Theme toggle now in core.js -->
 
 
-<!-- ══ GLOBALNI UPLOAD FAB ══ -->
-<!-- ══ FENIX SMART FAB — context-aware kamera ══ -->
-<div id="fenix-smart-fab"
-   title=""
-   class="d-flex fx-gap-2 fx-fw-bold fx-fs-md fx-pointer align-items-center fx-text-blue user-select-none" style="position:fixed;bottom:80px;right:20px;z-index:9998;padding:14px 22px;border-radius:50px;background:linear-gradient(135deg,#1e3a5f,#0f172a);border:1px solid rgba(96,165,250,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:all 0.3s ease">
-  <i id="fenix-fab-icon" class="fas fa-camera fx-fs-xl"></i>
-  <span id="fenix-fab-label" class="d-none d-md-inline">Skeniraj</span>
-</div>
+{# FENIX SMART FAB removed — DocScan modal covers all functionality #}
 
-<!-- FenixScan modal kontejner (dinamički) -->
-<div id="fenix-fab-scan-container" class="fx-hidden" style="position:fixed;bottom:150px;right:20px;z-index:9999;min-width:280px"></div>
-
-<script src="/static/js/fenix-scan.js"></script>
-<script>
-(function(){
-  var fab = document.getElementById('fenix-smart-fab');
-  var fabIcon = document.getElementById('fenix-fab-icon');
-  var fabLabel = document.getElementById('fenix-fab-label');
-  var scanContainer = document.getElementById('fenix-fab-scan-container');
-  var path = window.location.pathname;
-  var scannerInstance = null;
-  var fabOpen = false;
-
-  // ── Kontekst mapa ──────────────────────────────────────────
-  var ctx = (function() {
-    if (/\/golubar\//.test(path))
-      return { icon:'fa-dove', label:'Skeniraj goluba', color:'#a78bfa',
-               border:'rgba(167,139,250,0.35)', bg:'linear-gradient(135deg,#2e1065,#1e1b4b)',
-               docType:'golub', hint:'Fotografirajte goluba ili prsten za AI prepoznavanje' };
-    if (/\/inventory\//.test(path))
-      return { icon:'fa-barcode', label:'Skeniraj artikl', color:'#34d399',
-               border:'rgba(52,211,153,0.35)', bg:'linear-gradient(135deg,#064e3b,#022c22)',
-               docType:'general', hint:'Skenirajte barcode ili fotografirajte artikl' };
-    if (/\/pos\//.test(path))
-      return { icon:'fa-receipt', label:'Skeniraj račun', color:'#fbbf24',
-               border:'rgba(251,191,36,0.35)', bg:'linear-gradient(135deg,#78350f,#451a03)',
-               docType:'invoice', hint:'Fotografirajte račun za automatski unos' };
-    if (/\/(invoicing|eracun)\//.test(path))
-      return { icon:'fa-file-invoice', label:'Skeniraj fakturu', color:'#fb923c',
-               border:'rgba(251,146,60,0.35)', bg:'linear-gradient(135deg,#7c2d12,#431407)',
-               docType:'invoice', hint:'Skenirajte fakturu za automatsko popunjavanje' };
-    if (/\/partners\//.test(path))
-      return { icon:'fa-id-card', label:'Skeniraj osobnu', color:'#38bdf8',
-               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
-               docType:'id_card', hint:'Skenirajte osobnu iskaznicu za automatski unos OIB-a' };
-    if (/\/(companies\/settings|companies\/[\w-]+\/edit|registration\/company)/.test(path))
-      return { icon:'fa-id-card', label:'Skeniraj osobnu / OIB', color:'#38bdf8',
-               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
-               docType:'id_card', hint:'Skenirajte osobnu iskaznicu — AI automatski upisuje OIB i naziv' };
-    if (/\/(complaints|prigovori|helpdesk)\//.test(path))
-      return { icon:'fa-exclamation-circle', label:'Priloži foto', color:'#f87171',
-               border:'rgba(248,113,113,0.35)', bg:'linear-gradient(135deg,#7f1d1d,#450a0a)',
-               docType:'complaint', hint:'Fotografirajte oštećenje ili problem' };
-    // default
-    return { icon:'fa-cloud-upload-alt', label:'Upload', color:'#60a5fa',
-             border:'rgba(96,165,250,0.3)', bg:'linear-gradient(135deg,#1e3a5f,#0f172a)',
-             docType:'general', hint:'Upload dokumenta u arhivu', fallbackUrl:'/hr/documents/arhiva/upload/' };
-  })();
-
-  // Postavi izgled FAB-a prema kontekstu
-  fabIcon.className = 'fas ' + ctx.icon;
-  fabLabel.textContent = ctx.label;
-  fab.style.color = ctx.color;
-  fab.style.borderColor = ctx.border;
-  fab.style.background = ctx.bg;
-  fab.title = ctx.hint;
-
-  // Hover
-  // Sakrij FAB na stranicama gdje kamera nema smisla
-  var _noFab = ['/hr/dashboard','/hr/konto/','/hr/reports','/admin/','/hr/pos/session','/hr/vault/'];
-  if(_noFab.some(function(p){return path.indexOf(p)===0;}) || path==='/hr/' || path==='/') {
-    fab.style.display='none';
-  }
-
-  fab.addEventListener('mouseenter', function(){
-    fab.style.transform = 'scale(1.08)';
-    fab.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
-  });
-  fab.addEventListener('mouseleave', function(){
-    fab.style.transform = 'scale(1)';
-    fab.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
-  });
-
-  // Klik — direktno otvori kameru bez scan panela
-  fab.addEventListener('click', function(){
-    // Default kontekst → arhiva upload
-    if (ctx.fallbackUrl) {
-      window.location.href = ctx.fallbackUrl;
-      return;
-    }
-
-    // Direktno otvori kameru (input file s capture=environment)
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.setAttribute('capture', 'environment'); // stražnja kamera
-    input.style.display = 'none';
-    document.body.appendChild(input);
-
-    input.onchange = function() {
-      if (!input.files || !input.files[0]) return;
-      var file = input.files[0];
-      document.body.removeChild(input);
-
-      // Flash loading
-      fab.style.background = 'linear-gradient(135deg,#1e3a5f,#0f172a)';
-      fabIcon.className = 'fas fa-spinner fa-spin';
-      fabLabel.textContent = 'Obrada...';
-
-      // Pošalji na API
-      var formData = new FormData();
-      formData.append('file', file);
-      formData.append('doc_type', ctx.docType || 'general');
-      formData.append('source_module', window.location.pathname);
-
-      // CSRF
-      var csrf = '';
-      var el = document.querySelector('[name=csrfmiddlewaretoken]');
-      if (el) csrf = el.value;
-      var m = document.cookie.match(/csrftoken=([^;]+)/);
-      if (m) csrf = m[1];
-
-      fetch('/api/fenix/scan/', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrf },
-        body: formData
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        // Success feedback
-        fab.style.background = 'linear-gradient(135deg,#166534,#14532d)';
-        fab.style.color = '#4ade80';
-        fabIcon.className = 'fas fa-check';
-        fabLabel.textContent = 'Dodano!';
-        setTimeout(function(){
-          fabIcon.className = 'fas ' + ctx.icon;
-          fabLabel.textContent = ctx.label;
-          fab.style.background = ctx.bg;
-          fab.style.color = ctx.color;
-        }, 2500);
-
-        // Popuni form na stranici ako postoji
-        if (data.fields) {
-          Object.keys(data.fields).forEach(function(key) {
-            var el = document.querySelector('[name="'+key+'"]') || document.querySelector('#'+key);
-            if (el && data.fields[key]) el.value = data.fields[key];
-          });
-        }
-
-        // Ako je arhiva ili upload stranica — reload
-        if (/\/(documents|arhiva)\//.test(window.location.pathname)) {
-          setTimeout(function(){ window.location.reload(); }, 500);
-        }
-      })
-      .catch(function() {
-        // Fallback — otvori upload stranicu s file-om
-        fab.style.background = ctx.bg;
-        fab.style.color = ctx.color;
-        fabIcon.className = 'fas ' + ctx.icon;
-        fabLabel.textContent = ctx.label;
-        // Spremi u arhivu
-        var uploadForm = document.createElement('form');
-        uploadForm.method = 'POST';
-        uploadForm.action = '/hr/documents/arhiva/upload/';
-        uploadForm.enctype = 'multipart/form-data';
-        var fi = document.createElement('input');
-        fi.type = 'hidden'; fi.name = 'source_module'; fi.value = window.location.pathname;
-        var csrf2 = document.createElement('input');
-        csrf2.type = 'hidden'; csrf2.name = 'csrfmiddlewaretoken'; csrf2.value = csrf;
-        uploadForm.appendChild(fi);
-        uploadForm.appendChild(csrf2);
-        document.body.appendChild(uploadForm);
-        uploadForm.submit();
-      });
-    };
-
-    input.click();
-  });
-
-  // Zatvori na klik izvan
-  document.addEventListener('click', function(e){
-    if (fabOpen && !fab.contains(e.target) && !scanContainer.contains(e.target)) {
-      scanContainer.style.display = 'none';
-      fabOpen = false;
-    }
-  });
-
-  function _fabSetFile(input, b64) {
-    try {
-      var arr = b64.split(',');
-      var mime = arr[0].match(/:(.*?);/)[1];
-      var bstr = atob(arr[1]);
-      var n = bstr.length;
-      var u8 = new Uint8Array(n);
-      while(n--) u8[n] = bstr.charCodeAt(n);
-      var file = new File([u8], 'scan.jpg', {type: mime});
-      var dt = new DataTransfer();
-      dt.items.add(file);
-      input.files = dt.files;
-      // Trigger change event
-      input.dispatchEvent(new Event('change', {bubbles:true}));
-    } catch(e) { console.warn('FenixFAB setFile:', e); }
-  }
-})();
-</script>
-
-<script src="/static/js/fenix-camera.js"></script>
-<script src="/static/js/fenix-permissions.js"></script>
+{# fenix-camera.js + fenix-permissions.js — loaded by individual templates that need them #}
 <script src="/static/js/worktime-offline.js"></script>
 
 <!-- ══ MOBILE BOTTOM NAV ══ -->
 <!-- mobileBottomNav removed: using .bottom-tabs instead -->
 
 <script src="/static/js/fenix-ui.js"></script>
-{% include "includes/_ai_assist.html" %}
+{# _ai_assist.html removed — inactive #}
 
     <!-- ═══ MOBILE BOTTOM TAB BAR ═══ -->
     {% if request.user.is_authenticated %}
@@ -572,8 +387,9 @@ window.FC = {
         <a href="{% url 'dashboard' %}" class="bottom-tab"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="{% url 'invoicing:index' %}" class="bottom-tab"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>
         <a href="{% url 'pos:dashboard' %}" class="bottom-tab fx-relative"><i class="fas fa-cash-register fx-fs-4xl fx-text-green"></i><span class="fx-text-green fx-fw-bold">POS</span></a>
-        <a href="{% url 'inventory:list' %}" class="bottom-tab"><i class="fas fa-boxes"></i><span>Skladiste</span></a>
+        <a href="{% url 'documents:arhiva_list' %}" class="bottom-tab"><i class="fas fa-archive"></i><span>Arhiva</span></a>
         <button class="bottom-tab fx-border-none fx-pointer fx-bg-transparent" onclick="openSidebar()"><i class="fas fa-bars"></i><span>Vise</span></button>
+        <button class="bottom-tab fx-border-none fx-pointer fx-bg-transparent" onclick="toggleShellRight()" id="bottom-right-btn"><i class="fas fa-layer-group"></i><span>Panel</span></button>
       </div>
     </nav>
     {% endif %}
@@ -615,8 +431,7 @@ window.FC = {
       });
     })();
     </script>
-<!-- Signal gumb — Prijavi gresku gumb -->
-{% include "includes/_borg_signal.html" %}
+{# _borg_signal.html removed — duplicate of zlatno dugme #}
 
 <script>
 /* ── FENIX CSRF AUTO-REFRESH ─────────────────────────────────────
@@ -741,7 +556,7 @@ window.FC = {
 </script>
 
 <!-- ═══ ZLATNO DUGME — Floating feedback button — samo admini ═══ -->
-{% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
+{% if user.id == 1 or user.id == 7 or user.id == 11 or user.id == 273 %}
 <style>
 #zlatno-fab{position:fixed;bottom:22px;right:22px;z-index:9990;width:52px;height:52px;border-radius:50%;background:var(--gold,#c9a84c);color:var(--text);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.3);transition:transform .15s;}
 #zlatno-fab:hover{transform:scale(1.1);}
@@ -825,6 +640,122 @@ function zlatnoPosalji(){
 </script>
 {% endif %}
 <!-- ═══ END ZLATNO DUGME ═══ -->
+
+
+<!-- ═══ JOKER FULLSCREEN OVERLAY ═══ -->
+<div id="joker-overlay" aria-modal="true" role="dialog" aria-label="Fullscreen mod" style="display:none;position:fixed;inset:0;z-index:10500;background:var(--bg-body,#0a1020);flex-direction:column">
+    <div id="joker-header" style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--bg-card,#1e2a3a);border-bottom:1px solid var(--border,#334155);flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:var(--gold,#c9a84c);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;border:1px solid rgba(201,168,76,.3);padding:2px 8px;border-radius:3px">JOKER</span>
+            <span id="joker-title" style="font-weight:600;color:var(--text,#e2e8f0);font-size:.95rem"></span>
+        </div>
+        <button onclick="FenixShell.closeJoker()" title="Izlaz (Esc)" style="background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);color:var(--red,#ef4444);border-radius:6px;cursor:pointer;padding:5px 12px;font-size:.82rem;font-weight:600;transition:background .2s" onmouseover="this.style.background='rgba(224,82,82,.25)'" onmouseout="this.style.background='rgba(224,82,82,.1)'">&#10005; Izlaz</button>
+    </div>
+    <div id="joker-content" style="flex:1;overflow:auto;padding:0"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   FENIX SHELL v2 — Right Panel + Joker Fullscreen
+   ═══════════════════════════════════════════════════════ */
+window.FenixShell = (function(){
+    'use strict';
+
+    // ── RIGHT PANEL ───────────────────────────────────────
+    function openRight(){
+        var p = document.getElementById('shellRight');
+        if(!p) return;
+        p.classList.add('open');
+        p.classList.remove('collapsed');
+        var btn = document.getElementById('right-panel-btn');
+        if(btn) btn.style.color = 'var(--gold)';
+    }
+    function closeRight(){
+        var p = document.getElementById('shellRight');
+        if(!p) return;
+        p.classList.remove('open');
+        p.classList.add('collapsed');
+        var btn = document.getElementById('right-panel-btn');
+        if(btn) btn.style.color = '';
+    }
+    function toggleRight(){
+        var p = document.getElementById('shellRight');
+        if(!p) return;
+        if(p.classList.contains('open')) closeRight();
+        else openRight();
+    }
+    function setRightPanel(html, title){
+        var content = document.getElementById('shell-right-content');
+        var titleEl = document.getElementById('shell-right-title');
+        if(content && html) content.innerHTML = html;
+        if(titleEl && title) titleEl.textContent = title;
+        openRight();
+    }
+
+    // ── JOKER FULLSCREEN ──────────────────────────────────
+    function openJoker(sourceOrHtml, title){
+        var overlay = document.getElementById('joker-overlay');
+        var content = document.getElementById('joker-content');
+        var titleEl = document.getElementById('joker-title');
+        if(!overlay || !content) return;
+
+        var html = '';
+        if(typeof sourceOrHtml === 'string' && sourceOrHtml.startsWith('#')){
+            var el = document.querySelector(sourceOrHtml);
+            if(el) html = el.innerHTML;
+        } else if(sourceOrHtml && sourceOrHtml.nodeType){
+            html = sourceOrHtml.innerHTML;
+        } else {
+            html = sourceOrHtml || '';
+        }
+
+        content.innerHTML = html;
+        if(titleEl) titleEl.textContent = title || 'Fullscreen';
+        overlay.style.display = 'flex';
+        document.body.classList.add('joker-active');
+        document.addEventListener('keydown', _jokerEscHandler);
+    }
+    function closeJoker(){
+        var overlay = document.getElementById('joker-overlay');
+        if(!overlay) return;
+        overlay.style.display = 'none';
+        document.body.classList.remove('joker-active');
+        document.removeEventListener('keydown', _jokerEscHandler);
+    }
+    function _jokerEscHandler(e){
+        if(e.key === 'Escape') closeJoker();
+    }
+
+    // ── KEYBOARD SHORTCUTS ────────────────────────────────
+    document.addEventListener('keydown', function(e){
+        if(!e.altKey) return;
+        if(e.key === 'p' || e.key === 'P') { e.preventDefault(); toggleRight(); }
+        if(e.key === 'j' || e.key === 'J') { e.preventDefault(); openJoker('#joker-target', document.getElementById('joker-target') && document.getElementById('joker-target').dataset.title); }
+    });
+
+    // ── AUTO-INIT: ?joker=1 u URL ─────────────────────────
+    document.addEventListener('DOMContentLoaded', function(){
+        if(location.search.includes('joker=1')){
+            var target = document.getElementById('joker-target');
+            if(target) openJoker(target, target.dataset.title || document.title);
+        }
+    });
+
+    return {
+        openRight:     openRight,
+        closeRight:    closeRight,
+        toggleRight:   toggleRight,
+        setRightPanel: setRightPanel,
+        openJoker:     openJoker,
+        closeJoker:    closeJoker,
+    };
+})();
+
+// Backwards-compatibility aliases (stari kod u templateima)
+function openShellRight()   { FenixShell.openRight(); }
+function closeShellRight()  { FenixShell.closeRight(); }
+function toggleShellRight() { FenixShell.toggleRight(); }
+</script>
 
 </body>
 </html>
