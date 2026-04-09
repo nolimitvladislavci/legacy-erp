@@ -1496,5 +1496,102 @@ document.getElementById("sendModal").addEventListener("click", function(e) {
 });
 </script>
 
+
+// ═══ FENIX SHELL FAZA 2 — Desni panel integracija ═══════════════
+// Hook se poziva automatski iz openDrawer() -> renderDrawer()
+window._hookDrawerData = function(d) {
+    if (!window.FenixShell) return;
+
+    // Boja AI statusa
+    var statusColors = {pending:'#f59e0b', processing:'#3b82f6', done:'#22c55e', error:'#ef4444'};
+    var statusIcons  = {pending:'fa-clock', processing:'fa-spinner fa-spin', done:'fa-check-circle', error:'fa-exclamation-triangle'};
+    var aiColor = (d.ai_status && statusColors[d.ai_status]) ? statusColors[d.ai_status] : '#94a3b8';
+    var aiIcon  = (d.ai_status && statusIcons[d.ai_status])  ? statusIcons[d.ai_status]  : 'fa-circle';
+
+    // Iznos boja
+    var amountColor = '#c9a84c';
+
+    var html = [
+        '<div style="padding:16px 14px;display:flex;flex-direction:column;gap:12px">',
+
+        // Header — tip + broj
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">',
+          '<div style="font-weight:700;font-size:.95rem;color:var(--text,#e2e8f0);line-height:1.3">', (d.doc_number||'—'), '</div>',
+          '<span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:20px;background:rgba(201,168,76,.12);color:var(--gold,#c9a84c);white-space:nowrap">', (d.source_type_display||''), '</span>',
+        '</div>',
+
+        // Iznos — prominentno
+        '<div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:12px 14px;text-align:center">',
+          '<div style="font-size:1.6rem;font-weight:800;color:var(--gold,#c9a84c)">', (d.amount||'—'), ' ', (d.currency||'EUR'), '</div>',
+          '<div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">', (d.partner_name||'Nepoznat partner'), '</div>',
+        '</div>',
+
+        // Ključni detalji
+        '<div style="display:flex;flex-direction:column;gap:4px;font-size:.82rem">',
+    ].join('');
+
+    function row(label, val) {
+        if (!val) return '';
+        return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(51,65,85,.4)">'
+             + '<span style="color:var(--text-dim,#94a3b8)">' + label + '</span>'
+             + '<span style="color:var(--text,#e2e8f0);font-weight:600;max-width:60%;text-align:right">' + val + '</span>'
+             + '</div>';
+    }
+
+    html += row('Datum', d.doc_date);
+    html += row('Tvrtka', d.company_name);
+    html += row('Arhivirano', d.archived_at);
+    if (d.jir) html += row('JIR', '<code style="font-size:.72rem;color:var(--gold,#c9a84c)">' + d.jir.substring(0,16) + '…</code>');
+
+    html += '</div>';
+
+    // AI Status blok
+    if (d.ai_status && d.ai_status !== 'none') {
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:' + aiColor + '15;border:1px solid ' + aiColor + '40">'
+              + '<i class="fas ' + aiIcon + '" style="color:' + aiColor + '"></i>'
+              + '<span style="font-size:.82rem;color:' + aiColor + ';font-weight:600">' + (d.ai_status_message || d.ai_status) + '</span>'
+              + '</div>';
+    }
+
+    // Proknjiri / Generiraj gumb
+    if (d.id) {
+        var hasDone = (d.ai_status === 'done');
+        html += '<div style="display:flex;gap:8px">';
+        if (hasDone) {
+            html += '<button onclick="doProknjizi(' + d.id + ');FenixShell.closeRight();" style="flex:1;background:var(--gold,#c9a84c);color:#1a1a2e;border:none;border-radius:8px;padding:10px;font-weight:700;font-size:.82rem;cursor:pointer"><i class="fas fa-book me-1"></i>Proknjiri</button>';
+            html += '<button onclick="doProknjizi(' + d.id + ',true)" style="flex:1;background:transparent;border:1px solid var(--border,#334155);color:var(--text-dim,#94a3b8);border-radius:8px;padding:10px;font-weight:600;font-size:.82rem;cursor:pointer"><i class="fas fa-sync me-1"></i>Osvježi AI</button>';
+        } else {
+            html += '<button onclick="doProknjizi(' + d.id + ',true)" style="width:100%;background:var(--gold,#c9a84c);color:#1a1a2e;border:none;border-radius:8px;padding:10px;font-weight:700;font-size:.82rem;cursor:pointer"><i class="fas fa-brain me-1"></i>Generiraj AI prijedlog</button>';
+        }
+        html += '</div>';
+    }
+
+    // PDF / WhatsApp linkovi
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    if (d.id) {
+        html += '<a href="/hr/documents/arhiva/' + d.id + '/pdf/" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--border,#334155);border-radius:7px;font-size:.78rem;color:var(--text-dim,#94a3b8);text-decoration:none;min-width:70px" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border,#334155)'"><i class="fas fa-file-pdf"></i> PDF</a>';
+    }
+    if (d.source_type === 'invoice_out' && d.source_id) {
+        var sid = d.source_id.replace('invoice:', '');
+        html += '<a href="/invoicing/' + sid + '/" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--border,#334155);border-radius:7px;font-size:.78rem;color:var(--text-dim,#94a3b8);text-decoration:none;min-width:70px" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border,#334155)'"><i class="fas fa-file-invoice-dollar"></i> Faktura</a>';
+    }
+    html += '</div>';
+
+    html += '</div>'; // end padding wrap
+
+    var shortTitle = (d.partner_name || d.doc_number || 'Dokument');
+    if (shortTitle.length > 22) shortTitle = shortTitle.substring(0, 22) + '…';
+    FenixShell.setRightPanel(html, shortTitle);
+};
+
+// Zatvori desni panel kad se drawer zatvori
+var _origCloseDrawer = window.closeDrawer;
+window.closeDrawer = function() {
+    if (_origCloseDrawer) _origCloseDrawer();
+    if (window.FenixShell) FenixShell.closeRight();
+};
+// ═══════════════════════════════════════════════════════════════════
+
+
 {% endblock %}
 {% include 'includes/_share_modal.html' %}

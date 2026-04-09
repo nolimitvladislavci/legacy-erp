@@ -294,3 +294,87 @@
 </div>
 {% endif %}
 {% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+    if (!window.FenixShell) return;
+
+    // Podaci iz Django konteksta
+    var data = {
+        totalBank:   '{{ total_bank|floatformat:2 }}',
+        monthIn:     '{{ month_inflow|floatformat:2 }}',
+        monthOut:    '{{ month_outflow|floatformat:2 }}',
+        pnl:         '{{ pnl.profit_loss|floatformat:2 }}',
+        pnlPos:      {% if pnl.profit_loss >= 0 %}true{% else %}false{% endif %},
+        unmatched:   {{ unmatched_count|default:0 }},
+        overdue:     {{ overdue_count|default:0 }},
+        receivable:  '{{ total_receivable|floatformat:2 }}',
+        auditValid:  {% if audit_valid %}true{% else %}false{% endif %},
+        auditCount:  {{ audit_hashed|default:0 }},
+        company:     '{{ request.company.name|default:""|escapejs }}',
+    };
+
+    function kRow(label, val, color) {
+        color = color || 'var(--text,#e2e8f0)';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(51,65,85,.35);font-size:.82rem">'
+             + '<span style="color:var(--text-dim,#94a3b8)">' + label + '</span>'
+             + '<span style="font-weight:700;color:' + color + '">' + val + '</span>'
+             + '</div>';
+    }
+
+    var html = '<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">';
+
+    // Firma
+    html += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">'
+          + data.company + ' — Sažetak</div>';
+
+    // Žiro saldo — hero
+    html += '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 14px;text-align:center">'
+          + '<div style="font-size:1.5rem;font-weight:800;color:#22c55e">' + data.totalBank + ' €</div>'
+          + '<div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">Saldo žiro računa</div>'
+          + '</div>';
+
+    // Detalji
+    html += '<div style="display:flex;flex-direction:column">';
+    html += kRow('Priljevi (mj.)',  data.monthIn  + ' €', '#22c55e');
+    html += kRow('Odljevi (mj.)',   data.monthOut + ' €', '#ef4444');
+    html += kRow('Dobit/Gubitak',   data.pnl + ' €', data.pnlPos ? '#22c55e' : '#ef4444');
+    html += kRow('Potraživanja',    data.receivable + ' €', '#c9a84c');
+    if (data.overdue > 0)
+        html += kRow('Dospjelo', data.overdue + ' stavki', '#ef4444');
+    if (data.unmatched > 0)
+        html += kRow('Nepariranih txn.', data.unmatched, '#f59e0b');
+    html += '</div>';
+
+    // Audit status
+    var auditColor = data.auditValid ? '#22c55e' : (data.auditCount > 0 ? '#ef4444' : '#94a3b8');
+    var auditLabel = data.auditCount > 0
+        ? (data.auditValid ? '✅ Hash chain validan' : '⚠️ Hash chain prekinut')
+        : 'Nema hashiranih zapisa';
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:' + auditColor + '15;border:1px solid ' + auditColor + '40;font-size:.78rem;color:' + auditColor + ';font-weight:600">'
+          + auditLabel
+          + (data.auditCount > 0 ? ' <span style="margin-left:auto;opacity:.7">' + data.auditCount + ' zapisa</span>' : '')
+          + '</div>';
+
+    // Brze akcije
+    html += '<div style="display:flex;flex-direction:column;gap:6px">'
+          + '<div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">Brze akcije</div>';
+    var btns = [
+        {href:'{% url "konto:transactions" %}',    icon:'fa-exchange-alt', label:'Transakcije'},
+        {href:'{% url "konto:journal_entries" %}',  icon:'fa-book',         label:'Temeljnice'},
+        {href:'{% url "konto:report_pnl" %}',       icon:'fa-chart-line',   label:'RDG izvještaj'},
+        {href:'{% url "konto:report_vat" %}',       icon:'fa-percent',      label:'PDV prijava'},
+    ];
+    btns.forEach(function(b){
+        html += '<a href="' + b.href + '" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border,#334155);border-radius:7px;text-decoration:none;color:var(--text,#e2e8f0);font-size:.82rem;font-weight:600;transition:border-color .15s" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='var(--border,#334155)'">'
+              + '<i class="fas ' + b.icon + '" style="width:14px;color:var(--gold,#c9a84c)"></i>' + b.label + '</a>';
+    });
+    html += '</div></div>';
+
+    document.addEventListener('DOMContentLoaded', function(){
+        FenixShell.setRightPanel(html, 'Financije');
+    });
+})();
+</script>
+{% endblock %}

@@ -113,3 +113,55 @@
   {% endif %}
 </div>
 {% endblock %}
+
+
+{% block extra_js %}
+<script>
+(function(){
+    if (!window.FenixShell) return;
+
+    // Terminali iz DOM-a (čitamo iz renderiranih kartica)
+    function buildPosPanel() {
+        var cards = document.querySelectorAll('.tc');
+        if (!cards.length) return;
+
+        var html = '<div style="padding:16px 14px;display:flex;flex-direction:column;gap:12px">';
+        html += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">POS Terminali — Status</div>';
+
+        cards.forEach(function(card){
+            var name    = card.querySelector('.tc-name')  ? card.querySelector('.tc-name').textContent.trim()  : '—';
+            var code    = card.querySelector('.tc-code')  ? card.querySelector('.tc-code').textContent.trim()  : '';
+            var typeBdg = card.querySelector('[class*="tc-type-"]');
+            var typeLabel = typeBdg ? typeBdg.textContent.trim() : '';
+            var sessionEl = card.querySelector('.tc-session-val, .tc-session');
+            // Je li aktivna smjena?
+            var hasOpen = card.querySelector('.btn-danger, [class*="close"], .btn-red') !== null
+                       || (card.textContent.indexOf('Zatvori') !== -1)
+                       || (card.textContent.indexOf('Kraj') !== -1);
+            var statusColor = hasOpen ? '#22c55e' : '#94a3b8';
+            var statusLabel = hasOpen ? 'Smjena otvorena' : 'Bez aktivne smjene';
+            var statusIcon  = hasOpen ? 'fa-circle' : 'fa-moon';
+
+            html += '<div style="background:var(--surface2,rgba(30,42,58,.7));border:1px solid var(--border,#334155);border-radius:10px;padding:10px 12px">';
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+            html += '<div style="font-weight:700;font-size:.88rem;color:var(--text,#e2e8f0)">' + name + '</div>';
+            html += '<div style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:' + statusColor + ';font-weight:600">'
+                  + '<i class="fas ' + statusIcon + '" style="font-size:.5rem"></i> ' + statusLabel + '</div>';
+            html += '</div>';
+            if (code) html += '<div style="font-size:.72rem;color:var(--text-dim,#94a3b8);font-family:monospace">' + code + '</div>';
+            if (typeLabel) html += '<div style="margin-top:4px;display:inline-block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)">' + typeLabel + '</div>';
+            html += '</div>';
+        });
+
+        // Gumb — otvori novi terminal
+        html += '<a href="/pos/terminal/new/" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px dashed rgba(201,168,76,.3);border-radius:8px;text-decoration:none;color:var(--gold,#c9a84c);font-size:.82rem;font-weight:600" onmouseover="this.style.background='rgba(201,168,76,.06)'" onmouseout="this.style.background='transparent'"><i class="fas fa-plus"></i> Novi terminal</a>';
+
+        html += '</div>';
+
+        FenixShell.setRightPanel(html, 'POS Terminali');
+    }
+
+    document.addEventListener('DOMContentLoaded', buildPosPanel);
+})();
+</script>
+{% endblock %}
