@@ -100,7 +100,7 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
                 <div class="row2">
                     <div>
                         <label class="fl">Poš. broj</label>
-                        <input name="zip_code" id="zipInput" class="fc" value="{{ zip_code|default:'' }}" placeholder="31431">
+                        <input name="zip_code" id="zipInput" class="fc" value="{{ zip_code|default:''}}" placeholder="31431">
                     </div>
                     <div>
                         <label class="fl">Grad</label>
@@ -144,6 +144,16 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
                 <input type="tel" maxlength="1" inputmode="numeric" data-p="5" autocomplete="off">
             </div>
             <input type="hidden" name="pin" id="pinHidden">
+
+            <!-- Ljubimac govori — real-time PIN snaga -->
+            <div id="pet-says" style="display:none;margin:10px 0 4px;padding:10px 14px;
+              background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);
+              border-radius:10px;font-size:.84rem;line-height:1.5;text-align:left;
+              transition:background .3s,border-color .3s">
+              <span style="font-size:1.15rem">🐾</span>
+              <span id="pet-message" style="margin-left:6px;color:#e2e8f0"></span>
+            </div>
+
             {% if errors.pin %}<div class="err text-center">{{ errors.pin }}</div>{% endif %}
 
             <button type="submit" class="btn-gold"><i class="fas fa-rocket me-2"></i> Kreiraj račun i postavi PIN</button>
@@ -180,15 +190,107 @@ document.getElementById('oibInput').addEventListener('input', function(){
     }
 });
 
+// ── Ljubimac govori — PIN strength ──────────────────────────────────────
+var BANNED_PINS = new Set([
+    '123456','234567','345678','456789','567890',
+    '654321','543210','987654','876543',
+    '111111','222222','333333','444444','555555',
+    '666666','777777','888888','999999','000000',
+    '112233','998877','121212','010101','202020',
+    '131313','141414','151515','161616','171717',
+    '181818','191919','102030','142536',
+    '147258','258369','369147','159753',
+    '123123','321321'
+]);
+
+var SEQ_PINS = ['012345','123456','234567','345678','456789',
+                '567890','987654','876543','765432','654321',
+                '543210','432109'];
+
+var PET_MSG = {
+    too_short:  'Čekam još... trebam 6 znamenki! 🐾',
+    sequential: 'Hm, to mi miriše na 1-2-3... a ja sam pas, ne kalkulator. Odaberi nešto originalnije! 🐕',
+    repeating:  'Sve isti broj? Pa i moj rep se vrti u krug, ali PIN ti ne bi smio! Probaj kombinaciju. 🐾',
+    banned:     'Ovo koriste svi! Mene su naučili da lošu lozinku nanjušim na 100 metara. Smisli bolji PIN! 🐶',
+    too_simple: 'Premalo različitih znamenki. Čak i moj štenac zna više trikova od ovoga! 🐾',
+    good:       'Dobro! Ovaj PIN ima dovoljno različitih mirisa — ne bi ga lako pogodili. ✅ 🐕',
+    great:      'Odlično! Ovaj PIN bi i štene zaštitio. Nitko ga neće nanjušiti! 🏆 🐾'
+};
+
+function checkPin(pin) {
+    var box = document.getElementById('pet-says');
+    var msg = document.getElementById('pet-message');
+    if (!box || !msg) return true;
+
+    if (pin.length === 0) { box.style.display = 'none'; return true; }
+
+    if (pin.length < 6) {
+        _showPet(box, msg, 'too_short', 'rgba(201,168,76,.08)', 'rgba(201,168,76,.3)');
+        return false;
+    }
+
+    var unique = new Set(pin.split('')).size;
+    var isSeq = SEQ_PINS.indexOf(pin) !== -1;
+    var isRep = unique === 1;
+    var isBanned = BANNED_PINS.has(pin);
+
+    if (isRep)        return _showPet(box, msg, 'repeating',  'rgba(224,82,82,.12)',  'rgba(224,82,82,.35)');
+    if (isSeq)        return _showPet(box, msg, 'sequential', 'rgba(224,82,82,.12)',  'rgba(224,82,82,.35)');
+    if (isBanned)     return _showPet(box, msg, 'banned',     'rgba(224,82,82,.12)',  'rgba(224,82,82,.35)');
+    if (unique < 3)   return _showPet(box, msg, 'too_simple', 'rgba(255,165,0,.12)',  'rgba(255,165,0,.35)');
+    if (unique >= 5)  return _showPet(box, msg, 'great',      'rgba(34,197,94,.10)',  'rgba(34,197,94,.35)');
+    return _showPet(box, msg, 'good', 'rgba(34,197,94,.08)', 'rgba(34,197,94,.25)');
+}
+
+function _showPet(box, msg, key, bg, border) {
+    box.style.display = 'block';
+    box.style.background = bg;
+    box.style.borderColor = border;
+    msg.textContent = PET_MSG[key];
+    var valid = (key === 'good' || key === 'great');
+    return valid;
+}
+// ────────────────────────────────────────────────────────────────────────
+
 // PIN input logic
-const pins=document.querySelectorAll('[data-p]');
-const hidden=document.getElementById('pinHidden');
-pins.forEach((inp,i)=>{
-    inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');if(inp.value&&i<5)pins[i+1].focus();collect();});
-    inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}});
-    inp.addEventListener('paste',e=>{e.preventDefault();const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);d.split('').forEach((c,j)=>{if(pins[j])pins[j].value=c;});collect();});
+var pins = document.querySelectorAll('[data-p]');
+var hidden = document.getElementById('pinHidden');
+pins.forEach(function(inp, i){
+    inp.addEventListener('input', function(){
+        inp.value = inp.value.replace(/\D/g,'');
+        if(inp.value && i < 5) pins[i+1].focus();
+        collect();
+    });
+    inp.addEventListener('keydown', function(e){
+        if(e.key==='Backspace' && !inp.value && i>0){
+            pins[i-1].focus();
+            pins[i-1].value='';
+            collect();
+        }
+    });
+    inp.addEventListener('paste', function(e){
+        e.preventDefault();
+        var d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+        d.split('').forEach(function(c,j){ if(pins[j]) pins[j].value=c; });
+        collect();
+    });
 });
-function collect(){hidden.value=Array.from(pins).map(p=>p.value).join('');}
+
+function collect(){
+    var pin = Array.from(pins).map(function(p){ return p.value; }).join('');
+    hidden.value = pin;
+    checkPin(pin);
+}
+
+// Blokuj submit ako PIN nije validan (a nije prazan)
+document.getElementById('regForm').addEventListener('submit', function(e){
+    var pin = hidden.value;
+    if(pin.length > 0 && pin.length < 6){
+        e.preventDefault();
+        checkPin(pin);
+        pins[pin.length < 6 ? pin.length : 5].focus();
+    }
+});
 </script>
 </body>
 </html>
