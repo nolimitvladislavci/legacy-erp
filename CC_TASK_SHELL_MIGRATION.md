@@ -8,118 +8,143 @@
 
 Svaki modul u LIMIT Connect dobiva:
 - **4 hamburger toggle zone** (lijevo, desno, gore, dolje)
-- **Joker forma** — fullscreen overlay za bilo koji modul, bez migracije templatesa
-
-Korisnik može "zoomati" u bilo koji kontekst:
-- Unos fakture → joker → fullscreen forma, bez distrakcije
-- POS → već ima joker.html, ali i dalje radi kao puni shell
-- Konto → desni panel prikazuje AI objašnjenje za odabrani redak
+- **Joker forma** — fullscreen overlay za bilo koji modul
+- **Deklarativni right panel** — sadržaj definiran u Django templateu, ne JS-u
 
 ---
 
-## FAZA 1 — ODMAH (09.04., nedestruktivno, 0 migracije templatesa)
+## FAZA 1 ✅ DONE — 09.04.2026 (commit 7ace4a6d)
 
-### Princip: sve se dodaje U base.html kao additive izmjena
+Implementacija u base.html (additive, 0 migracije templatesa):
 
-**Problem:**
-- base_shell.html postoji (194 linije) ali 0 templatesa ga koristi
-- base.html koriste 568 templatesa — "migracija" = 568 izmjena = ne dolazi u obzir
-- Jedini pametan pristup: base.html POSTAJE shell
+HAMBURGER MAPA:
+1. ☰ topbar (lijevo)    → sidebar              [bio je]
+2. ⊞ topbar (desno)     → right context panel  [NOVO]
+3. ≡ sidebar header     → slim mode            [bio je]
+4. ⋮ bottom nav (mob.)  → mobilni panel        [NOVO]
 
-**Izmjene:**
+RIGHT PANEL:
+- Desktop: fixed 300px, slide-in s desna
+- Mobile: 70vh drawer slide-up
+- FenixShell.setRightPanel(html, title) JS API
+- Alt+P keyboard shortcut
 
-### A) fenix-shell.css → učitaj u base.html
-Dosad je fenix-shell.css bio samo u base_shell.html. Dodajemo u base.html head.
-
-### B) RIGHT PANEL — hamburger #2 i #4
-Novi `<aside class="shell-right">` ubačen u base.html:
-- Desktop: fiksiran desni panel, 280px, collapsed by default
-- Mobile: slide-up drawer
-- Toggle: gumb u topbaru (hamburger #2) + gumb u bottom nav (hamburger #4)
-- Sadržaj: default AI Assist, ali svaki template može overridati via JS:
-  `FenixShell.setRightPanel(html, title)`
-
-Ukupno hamburger mapa:
-1. ☰ (topbar, lijevo) → otvara sidebar         [VEĆ POSTOJI]
-2. ⊞ (topbar, desno) → otvara desni panel       [NOVO — Faza 1]
-3. ≡ (sidebar header) → slim mode toggle        [VEĆ POSTOJI]
-4. ⋮ (bottom nav, desno) → mobilni desni panel  [NOVO — Faza 1]
-
-### C) JOKER FULLSCREEN MODE
-CSS klasa + JS overlay koji se može aktivirati iz BILO KOJEG modula:
-
-```javascript
-// Iz bilo kojeg template-a:
-FenixShell.openJoker('#moj-div', 'Unos fakture');
-// ili
-FenixShell.openJoker(htmlString, 'Naslov');
-```
-
-URL parameter: `?joker=1` + `<div id="joker-target" data-title="Naslov">` → automatski fullscreen
-
-CSS `.joker-active` sakriva topbar + sidebar + bottom-tabs → čist workspace
+JOKER FULLSCREEN:
+- FenixShell.openJoker(selector, title)
+- ?joker=1 URL param → auto-fullscreen #joker-target
+- Esc tipka, Alt+J shortcut, fadeIn animacija
 
 ---
 
-## FAZA 2 — POST-LAUNCH (nakon 15.04.)
+## FAZA 2 ✅ DONE — 09.04.2026 (commit 96e4af4f)
 
-Per-modul right panel sadržaj via Django template blocks:
+Per-modul JS hooks za desni panel:
+
+| Modul | Pristup | Sadržaj panela |
+|-------|---------|----------------|
+| Arhiva list | _hookDrawerData() hook | Detalji dokumenta + Proknjiri gumbi |
+| Konto dashboard | JS injection iz Django vars | Fin. sažetak, saldo, P&L, audit |
+| POS dashboard | DOM čitanje kartica | Terminal status, smjene |
+| Claude Doktor | JS + Django template vars | Score, kategorije, preporuke |
+
+---
+
+## FAZA 3 ⏳ U TIJEKU — 09.04.2026
+
+### Cilj
+Zamijeniti JS injection s čistim Django template blokovima.
+Cleaner kod, server-side rendering, lakše održavanje.
+
+### Implementacija
+
+#### A) base.html — dodaj 3 nova Django bloka [SLJEDEĆE]
+
+U `<aside id="shellRight">` zamijeniti hardcoded sadržaj s blokovima:
 
 ```django
-{% block right_panel_content %}
-  <!-- Module-specific AI assist / context -->
-  {% include "konto/_context_panel.html" %}
-{% endblock %}
+<!-- u shell-right-header span: -->
+<span id="shell-right-title">{% block shell_right_title %}Kontekst{% endblock %}</span>
+
+<!-- u shell-right-content div: -->
+<div class="shell-right-content" id="shell-right-content">
+  {% block shell_right_content %}
+  <div style="padding:20px 16px;...">
+    <div>🧠</div>
+    <div>AI Assist</div>
+    <p>Odaberite element...</p>
+  </div>
+  {% endblock %}
+</div>
 ```
 
-Prioritet modula za Fazu 2:
-1. Arhiva/Fakture — AI "Proknjiri" button → desni panel
-2. Konto — AI objašnjenje odabranog retka
-3. POS dashboard — live stats
-4. Claude Doktor — dijagnoza u desnom panelu
+I na `.app-layout` div:
+```django
+<div class="app-layout" data-shell-mode="{% block shell_mode %}default{% endblock %}">
+```
+
+#### B) konto/dashboard.html — migrirati JS → Django blok
+- Ukloniti `{% block extra_js %}` JS injection
+- Dodati `{% block shell_right_title %}Financije{% endblock %}`
+- Dodati `{% block shell_right_content %}{% include "konto/_panel_financije.html" %}{% endblock %}`
+- Kreirati: `templates/konto/_panel_financije.html`
+
+#### C) doktor_dashboard.html — migrirati JS → Django blok
+- Ukloniti `{% block extra_js %}` JS injection
+- Dodati `{% block shell_right_title %}Doktor · {{ report.overall_score }}/100{% endblock %}`
+- Dodati `{% block shell_right_content %}{% include "limit_connect_ai/_panel_doktor.html" %}{% endblock %}`
+- Kreirati: `templates/limit_connect_ai/_panel_doktor.html`
+
+#### D) pos/dashboard.html — migrirati JS → Django blok
+- Ukloniti DOM-reading JS
+- Dodati `{% block shell_right_content %}{% include "pos/_panel_terminali.html" %}{% endblock %}`
+- Kreirati: `templates/pos/_panel_terminali.html`
+- Kontekst varijabla `terminals` je dostupna u viewu
+
+#### E) shell_mode focus za forme [BONUS]
+- U base.html: JS koji čita `data-shell-mode` i dodaje klasu na `.app-layout`
+- focus mode: sakrije .shell-right, smanji sidebar
+- forme (create/edit/wizard) mogu imati `{% block shell_mode %}focus{% endblock %}`
+
+### Pravilo za Arhivu
+Arhiva list OSTAJE na JS hooку (_hookDrawerData). Dynamic per-row data
+ne može biti server-side rendered bez AJAX endpointa u base templateu.
 
 ---
 
-## FAZA 3 — Q2 2026 (post-produkcija, planska migracija)
+## FAZA 4 — Q2 2026 (post-produkcija)
 
 Postupna migracija key modula s base.html na base_shell.html:
-- Početi s: arhiva, konto, pos/dashboard
-- Koristiti `{% extends "base_shell.html" %}` umjesto `{% extends "base.html" %}`
-- base_shell.html nasljeđuje SVE iz base.html (ne rewrite)
+- base_shell.html refaktorirati da extends base.html
+- Key moduli: arhiva → base_shell (čišći blokovi, manje CSS duplikacije)
 - Deadline: 30.06.2026
 
 ---
 
-## VERIFIKACIJA (Faza 1)
+## VERIFIKACIJA (Faza 3)
 
 ```bash
 # 1. Django check
 venv/bin/python manage.py check
 
-# 2. Right panel se renderira
-curl -s https://limit-connect.com/hr/login/ | grep -c "shell-right"
+# 2. Blokovi postoje u base.html
+grep -c "block shell_right" templates/base.html  # mora biti >= 2
 
-# 3. Joker overlay postoji u DOM
-curl -s https://limit-connect.com/hr/ | grep -c "joker-overlay"
+# 3. Konto panel se renderira server-side
+curl -s https://limit-connect.com/hr/konto/ | grep -c "shell-right-content"
 
-# 4. fenix-shell.css se učitava
-curl -I https://limit-connect.com/static/css/fenix-shell.css
+# 4. Nema dupliciranog JS injection u konto/dashboard.html
+grep -c "FenixShell.setRightPanel" templates/konto/dashboard.html  # mora biti 0
 ```
-
----
-
-## COMMITOVI
-
-1. `feat(shell): fenix-shell.css + right panel u base.html`
-2. `feat(shell): joker fullscreen mode — FenixShell.openJoker()`
-3. `feat(shell): 4. hamburger — mobilni toggle za desni panel`
-4. `docs(shell): CC_TASK_SHELL_MIGRATION.md + plan faze 1-3`
 
 ---
 
 ## STATUS
 
-- [x] Plan napisan (09.04.2026)
 - [x] Faza 1 implementirana (09.04.2026, commit 7ace4a6d)
 - [x] Faza 2 implementirana (09.04.2026, commit 96e4af4f)
-- [ ] Faza 3 (Q2 2026)
+- [ ] Faza 3A — base.html + 3 Django bloka
+- [ ] Faza 3B — konto panel migracija
+- [ ] Faza 3C — doktor panel migracija
+- [ ] Faza 3D — pos panel migracija
+- [ ] Faza 3E — shell_mode focus za forme (bonus)
+- [ ] Faza 4 (Q2 2026)

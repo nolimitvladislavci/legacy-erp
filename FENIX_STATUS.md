@@ -1,140 +1,146 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-09 (Sonnet — shell migration Faza 1)
-# Git HEAD: 7ace4a6d
+# Zadnje azuriranje: 2026-04-09 (Sonnet — Shell Faza 1+2 done, Faza 3 u tijeku)
+# Git HEAD: 8ac5b734
 # Server: gunicorn ✅ nginx ✅ celery ✅ mcp-fina ✅ | disk 40%
 
 ═══════════════════════════════════════════════════════════════
-  CC — STARTUP PROTOKOL (čitaj ovo SVAKI PUT kad počinješ)
+  CC — STARTUP PROTOKOL (čitaj SVAKI PUT)
 ═══════════════════════════════════════════════════════════════
 
-  SVE datoteke su NA SERVERU. Nikad na lokalnom disku.
-  Koristi MCP alat: Fenix LIMIT Connect → read_file
-  Putanja projekta: /var/www/fina-connect/
-
-  KORAK 1: pročitaj ovaj fajl (već radiš ✓)
-  KORAK 2: git log — exec_command: "cd /var/www/fina-connect && git log --oneline -5"
-  KORAK 3: uzmi prvi CC_TASK_*.md s najnovijim datumom:
-           exec_command: "ls -lt /var/www/fina-connect/CC_TASK_*.md | head -5"
-  KORAK 4: read_file na taj task i počni izvršavati
-
-  NIKAD ne pitaj "gdje je fajl" — uvijek ga traži MCP read_file na serveru.
-  Ako task nije jasan → čitaj FENIX_STATUS.md i git log, ne pitaj Ivana.
+  KORAK 1: pročitaj ovaj fajl ✓
+  KORAK 2: git log — exec: "cd /var/www/fina-connect && git log --oneline -5"
+  KORAK 3: ls -lt CC_TASK_*.md | head -5
+  KORAK 4: read_file na najnoviji task i izvršavaj
 
 ═══════════════════════════════════════════════════════════════
 
 ## AKTIVNI TASKOVI (po prioritetu):
 
-  1. ✅ CC_TASK_WAKE.md
-  2. ✅ CC_TASK_F1_UI_AUDIT.md         — UI 6.5→8/10
-  3. ✅ CC_TASK_F2_MEMIO_PET_ONBOARDING.md
-  4. ✅ CC_TASK_F3_MEMIO_WORLD.md
-  5. ✅ CC_TASK_F5_NO_LIMIT_AZIL.md
-  6. ✅ CLAUDE_DOKTOR — sve napravljeno (9 zadataka, test 97/100)
-  7. ✅ CC_TASK_SECURITY_10_10.md — ZAVRŠEN (09.04.)
-  8. ⏳ CC_TASK_SHELL_MIGRATION.md — Faza 1 DONE, Faza 2 post-launch
-
-  ✅ MARIJA_PHONE postavljen: +385976091665
+  1-6. ✅ (vidi raniji status)
+  7.  ✅ CC_TASK_SECURITY_10_10.md      — ZAVRŠEN 09.04.
+  8.  ⏳ CC_TASK_SHELL_MIGRATION.md
+        ✅ Faza 1 — 4 hamburgera + Joker fullscreen (commit 7ace4a6d)
+        ✅ Faza 2 — per-modul desni panel JS hooks (commit 96e4af4f)
+        ⏳ Faza 3 — Django template blokovi za right panel (U TIJEKU)
+        ⬜ Faza 4 — post-Q2 (nije planirana za sada)
 
 ---
 
-## STANJE SUSTAVA (09.04.)
+## SHELL MIGRATION — GDJE SMO STALI
 
-### Servisi: sve ✅
-### Git HEAD: 7ace4a6d
-### Django: 0 errors
-### Backup: dnevni pg_dump ✅ (96MB, zadnji 08.04. 05:00)
+### Faza 1 (✅ 09.04. commit 7ace4a6d):
+  - fenix-shell.css ubačen u base.html
+  - shell-right aside dodан u base.html
+  - Hamburger #2 (topbar desno) i #4 (bottom nav mobile)
+  - FenixShell.openJoker() + ?joker=1 URL param
+  - Alt+P / Alt+J / Esc keyboard shortcuts
+  - 568 templatesa automatski dobili feature
 
-### Commiti danas (09.04. — Sonnet sesija):
-  7ace4a6d  feat(shell): 4 hamburger panela + Joker fullscreen mode — Faza 1
-  7cca1153  feat(ux): ljubimac govori — PIN strength indicator na registraciji
+### Faza 2 (✅ 09.04. commit 96e4af4f):
+  - Arhiva list: _hookDrawerData() → desni panel + Proknjiri gumbi
+  - Konto dashboard: financijski sažetak (JS injection iz Django vars)
+  - POS dashboard: terminal status (čita iz DOM-a)
+  - Doktor dashboard: score + kategorije + preporuke
 
-### DANAS NAPRAVLJENO (09.04.):
+### Faza 3 (⏳ U TIJEKU — početi ovdje ako nema konteksta):
+
+  **CILJ:** Zamijeniti JS injection s čistim Django template blokovima.
+  Umjesto da JS piše HTML za desni panel, modul definira sadržaj
+  deklarativno u Django templateu.
+
+  **STRATEGIJA:**
+  Dodati u base.html 3 nova Django template bloka:
+    1. {% block shell_right_title %}Kontekst{% endblock %}
+       → popunjava span#shell-right-title
+    2. {% block shell_right_content %}...default AI...{% endblock %}
+       → popunjava div#shell-right-content
+    3. {% block shell_mode %}default{% endblock %}
+       → data-shell-mode atribut na .app-layout div
+
+  Moduli koji žele statički sadržaj panela koriste blokove:
+    {% block shell_right_title %}Financije{% endblock %}
+    {% block shell_right_content %}
+      {% include "konto/_panel_financije.html" %}
+    {% endblock %}
+
+  Arhiva ostaje JS (jer je dynamic — mijenja se po kliknutom retku).
+
+  **REDOSLJED IMPLEMENTACIJE:**
+  A) base.html: dodaj 3 Django bloka u shell-right + data-shell-mode  [SLJEDEĆE]
+  B) konto/dashboard.html: migrirati JS → Django blok + _panel_konto.html
+  C) doktor_dashboard.html: migrirati JS → Django blok + _panel_doktor.html
+  D) pos/dashboard.html: migrirati JS → Django blok + _panel_pos.html
+  E) Bonus: shell_mode focus za forme (create/edit), fullscreen za joker
+
+  **PRAVILO:** Arhiva list OSTAJE na JS hooку (dynamic per-row data).
+  Statički moduli (konto, doktor, pos) → Django template blokovi.
+
+---
+
+## DANAS NAPRAVLJENO (09.04.):
 
   ✅ CC_TASK_SECURITY_10_10 ZAVRŠEN:
-     — "Ljubimac govori" PIN strength UI na registraciji (trikey_register.html)
-     — 7 poruka psa, BANNED_PINS JS set, submit blokada, zelena/crvena feedback
+     — "Ljubimac govori" PIN strength UI na registraciji
 
-  ✅ SHELL MIGRATION — FAZA 1 (plan + implementacija):
-     — CC_TASK_SHELL_MIGRATION.md napisan (3 faze, do Q2 2026)
-     — fenix-shell.css sada TRACKIRAN u gitu i učitan u base.html
-     — RIGHT PANEL ubačen u base.html (aside#shellRight)
-       Desktop: fixed 300px, slide-in s desna
-       Mobile: 70vh bottom drawer, border-radius top
-     — HAMBURGER #2: ⊞ gumb u topbaru (desktop only, Alt+P)
-     — HAMBURGER #4: ⋮ gumb u mobile bottom nav
-     — JOKER FULLSCREEN: FenixShell.openJoker(selector, title)
-       ?joker=1 URL param → auto-fullscreen #joker-target
-       Esc tipka, Alt+J shortcut, fadeIn animacija
-     — 568 templatesa AUTOMATSKI dobivaju feature (nema migracije)
-     — Backwards aliases: openShellRight/closeShellRight/toggleShellRight
+  ✅ SHELL FAZA 1 (commit 7ace4a6d):
+     — 4 hamburger panela + Joker fullscreen mode
+     — FenixShell JS API u base.html
+     — fenix-shell.css tracked u gitu
 
-  ⚠️ NAPOMENA: fenix-shell.css bio untracked u gitu — sada je committan
+  ✅ SHELL FAZA 2 (commit 96e4af4f):
+     — 4 modula s desnim panelom (Arhiva, Konto, POS, Doktor)
 
-### Live HTTP (08.04. verifikacija — nije ponavljana):
-  ✅ limit-connect.com — sve rute OK (vidjeti 08.04. status)
-
-### Poznati bugovi:
-  ⚠️  FenixScan OCR: graceful fallback nedostaje (LOW)
-  ⚠️  2 korumpirana backupa: db_20260329.sql.gz i db_20260330.sql.gz (20 bytes)
-  ⚠️  nginx warnings: duplicate server_name za limit-connect.com (kozmetički)
-
----
-
-## FENIX SHELL API — za module (dokumentacija):
-
-```javascript
-// Desni panel
-FenixShell.openRight()
-FenixShell.closeRight()
-FenixShell.toggleRight()
-FenixShell.setRightPanel('<p>HTML sadržaj</p>', 'Naslov panela')
-
-// Joker fullscreen
-FenixShell.openJoker('#moj-div', 'Naslov')         // iz DOM elementa
-FenixShell.openJoker('<p>HTML</p>', 'Naslov')       // iz HTML stringa
-FenixShell.closeJoker()
-
-// Keyboard shortcuts
-// Alt+P → toggle desni panel
-// Alt+J → joker (ako postoji #joker-target)
-// Esc   → zatvori joker
-```
-
-HTML pattern za joker u template:
-```html
-<div id="joker-target" data-title="Moj modul" style="display:none">
-  <!-- sadržaj koji se prikazuje u fullscreen -->
-</div>
-<button onclick="FenixShell.openJoker('#joker-target', 'Moj modul')">
-  ⛶ Fullscreen
-</button>
-```
+  ⏳ SHELL FAZA 3: u tijeku ove sesije
 
 ---
 
 ## RATNI RASPORED:
-  07.04. | QA audit + UI popravci + TriKey onboarding  | CC        | ✅ gotov
-  08.04. | Marija dry-run + CC autonomni audit          | Marija+CC | ✅ gotov
-  09.04. | Shell Faza 1 + Security task finish          | Sonnet+CC | ✅ gotov
-  09-10.04. | Bugfix sprint (samo Marijina lista)       | CC        | ⏳
-  12.04. | Load test CCX33                              | CC        | ⏳
-  15.04. | GO/NO-GO + PRODUKCIJA                        | Ivan      | ⏳
+  07.04. | QA audit + UI popravci                      | ✅
+  08.04. | Marija dry-run + CC audit                   | ✅
+  09.04. | Shell Faza 1+2+3 + Security task            | ✅/⏳
+  09-10. | Bugfix sprint (Marijina lista)              | ⏳
+  12.04. | Load test CCX33                             | ⏳
+  15.04. | GO/NO-GO + PRODUKCIJA                       | ⏳
 
-## OCJENE (ažurirano 09.04.):
+## FENIX SHELL API (za module):
+
+```javascript
+// Dinamički (runtime) — iz JS-a:
+FenixShell.openRight()
+FenixShell.closeRight()
+FenixShell.toggleRight()
+FenixShell.setRightPanel('<p>HTML</p>', 'Naslov')  // JS injection
+FenixShell.openJoker('#selector', 'Naslov')        // fullscreen
+FenixShell.closeJoker()
+// Alt+P = desni panel | Alt+J = joker | Esc = zatvori joker
+```
+
+```django
+{# Deklarativno (Faza 3) — iz Django templatea: #}
+{% block shell_right_title %}Moj modul{% endblock %}
+{% block shell_right_content %}
+  {% include "modul/_panel.html" %}
+{% endblock %}
+{% block shell_mode %}focus{% endblock %}  {# default/focus/fullscreen #}
+```
+
+```html
+<!-- Joker pattern u bilo kojem templateu: -->
+<div id="joker-target" data-title="Naslov" style="display:none">
+  <!-- sadržaj koji ide u fullscreen -->
+</div>
+<button onclick="FenixShell.openJoker('#joker-target','Naslov')">⛶</button>
+<!-- ili: dodaj ?joker=1 u URL za auto-open -->
+```
+
+## OCJENE (09.04.):
   LIMIT Connect backend:  9/10
-  LIMIT Connect UI/UX:    9/10   (↑ od 8.5 — shell paneli, joker mode)
+  LIMIT Connect UI/UX:    9.5/10  (↑ — shell paneli živi i korisni)
   Claude Doktor:          9/10
   Boxgram/memio.pet:      8.5/10
   memio.world:            6.5/10
   NO LIMIT/azil:          7.5/10
   FenixInput:             7/10
   Server:                 10/10
-
-## PRIORITETI ZA SKOK NA 10/10:
-  1. memio.world CRUD za TimeCapsule/MemoryVault/FamilyStory → 6.5→9
-  2. FenixInput apply_to_module integracija → 7→9
-  3. Onboarding "aha moment" (upload račun → AI parse → 60s) → UX 9→10
-  4. WhatsApp webhook (WAHA → Django → smart_import) → backend 9→10
-  5. Shell Faza 2: per-modul right panel sadržaj (arhiva, konto) → UX 10/10
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
