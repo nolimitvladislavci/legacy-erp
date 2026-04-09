@@ -120,6 +120,6 @@ curl -I https://limit-connect.com/static/css/fenix-shell.css
 ## STATUS
 
 - [x] Plan napisan (09.04.2026)
-- [ ] Faza 1 implementirana
-- [ ] Faza 2 (post-launch)
+- [x] Faza 1 implementirana (09.04.2026, commit 7ace4a6d)
+- [x] Faza 2 implementirana (09.04.2026, commit 96e4af4f)
 - [ ] Faza 3 (Q2 2026)
