@@ -139,7 +139,7 @@
   <a href="/companies/tc-consent/" class="fx-text-dark fx-rounded-sm fx-fw-bold fx-fs-compact fx-no-underline text-nowrap fx-bg-gold" style="padding:6px 16px">Prihvati uvjete →</a>
 </div>
 {% endif %}
-<div class="app-layout">
+<div class="app-layout" data-shell-mode="{% block shell_mode %}default{% endblock %}">
     <!-- Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
@@ -222,15 +222,17 @@
     <!-- ═══ RIGHT CONTEXT PANEL ═══ -->
     <aside class="shell-right collapsed" id="shellRight" aria-label="Kontekst panel">
         <div class="shell-right-header">
-            <span id="shell-right-title">Kontekst</span>
+            <span id="shell-right-title">{% block shell_right_title %}Kontekst{% endblock %}</span>
             <button class="shell-right-close" onclick="closeShellRight()" aria-label="Zatvori panel">&times;</button>
         </div>
         <div class="shell-right-content" id="shell-right-content">
-            <div style="padding:20px 16px;color:var(--text-dim);font-size:.84rem;line-height:1.6">
+            {% block shell_right_content %}
+            <div style="padding:20px 16px;color:var(--text-dim,#94a3b8);font-size:.84rem;line-height:1.6">
                 <div style="font-size:1.6rem;margin-bottom:8px">🧠</div>
-                <div style="font-weight:600;color:var(--gold);margin-bottom:6px;font-size:.78rem;text-transform:uppercase;letter-spacing:1px">AI Assist</div>
+                <div style="font-weight:600;color:var(--gold,#c9a84c);margin-bottom:6px;font-size:.78rem;text-transform:uppercase;letter-spacing:1px">AI Assist</div>
                 <p style="margin:0">Odaberite element u modulu za kontekstualne informacije i AI analizu.</p>
             </div>
+            {% endblock %}
         </div>
     </aside>
 
@@ -244,6 +246,11 @@
                     <span>Pretrazi...</span>
                     <kbd>Ctrl+K</kbd>
                 </div>
+                {% if request.session.workspace_client_id %}
+                <a href="{% url 'companies:workspace_home' %}" class="btn-ghost btn-sm fx-mr-3 fx-no-underline" title="Natrag na radni prostor">
+                  <i class="fas fa-arrow-left"></i> Prostor
+                </a>
+                {% endif %}
                 <span class="fx-fw-semibold fx-fs-md" style="color:var(--topbar-text)">{% block page_title %}LIMIT CONNECT{% endblock %}</span>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -669,6 +676,8 @@ window.FenixShell = (function(){
         p.classList.remove('collapsed');
         var btn = document.getElementById('right-panel-btn');
         if(btn) btn.style.color = 'var(--gold)';
+        var layout = document.querySelector('.app-layout');
+        if(layout) layout.classList.add('right-panel-open');
     }
     function closeRight(){
         var p = document.getElementById('shellRight');
@@ -677,6 +686,8 @@ window.FenixShell = (function(){
         p.classList.add('collapsed');
         var btn = document.getElementById('right-panel-btn');
         if(btn) btn.style.color = '';
+        var layout = document.querySelector('.app-layout');
+        if(layout) layout.classList.remove('right-panel-open');
     }
     function toggleRight(){
         var p = document.getElementById('shellRight');
@@ -725,6 +736,20 @@ window.FenixShell = (function(){
     function _jokerEscHandler(e){
         if(e.key === 'Escape') closeJoker();
     }
+
+    // ── SHELL MODE iz data atributa ──────────────────────────────
+    (function applyShellMode(){
+        var layout = document.querySelector('.app-layout');
+        if (!layout) return;
+        var mode = layout.getAttribute('data-shell-mode') || 'default';
+        layout.classList.add('shell-mode-' + mode);
+        // focus: sakrij right panel na učitavanju
+        if (mode === 'focus') {
+            var rp = document.getElementById('shellRight');
+            if (rp) { rp.classList.add('collapsed'); rp.classList.remove('open'); }
+        }
+    })();
+
 
     // ── KEYBOARD SHORTCUTS ────────────────────────────────
     document.addEventListener('keydown', function(e){

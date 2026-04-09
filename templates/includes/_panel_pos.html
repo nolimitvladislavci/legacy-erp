@@ -1,0 +1,47 @@
+{% load i18n %}
+{# Desni panel za POS dashboard — server-rendered #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:12px">
+
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {% trans "POS Terminali" %} — {% trans "Status" %}
+  </div>
+
+  {% for terminal in terminals %}
+    <div style="background:var(--surface2,rgba(30,42,58,.7));border:1px solid var(--border,#334155);border-radius:10px;padding:10px 12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div style="font-weight:700;font-size:.88rem;color:var(--text,#e2e8f0)">{{ terminal.name }}</div>
+        {% if terminal.active_session %}
+          <span style="font-size:.72rem;color:#22c55e;font-weight:600;display:flex;align-items:center;gap:4px">
+            <i class="fas fa-circle" style="font-size:.45rem"></i> {% trans "Otvorena" %}
+          </span>
+        {% else %}
+          <span style="font-size:.72rem;color:var(--text-dim,#94a3b8);font-weight:600;display:flex;align-items:center;gap:4px">
+            <i class="fas fa-moon" style="font-size:.45rem"></i> {% trans "Miruje" %}
+          </span>
+        {% endif %}
+      </div>
+      {% if terminal.code %}
+        <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);font-family:monospace">{{ terminal.code }}</div>
+      {% endif %}
+      <div style="margin-top:5px;display:inline-block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold,#c9a84c)">
+        {{ terminal.get_terminal_type_display|default:terminal.terminal_type }}
+      </div>
+      {% if terminal.active_session %}
+        <div style="margin-top:6px">
+          <a href="{% url 'pos:pos_joker' terminal.id %}" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;background:var(--gold,#c9a84c);color:#1a1a2e;border-radius:6px;text-decoration:none;font-weight:700;font-size:.75rem">
+            <i class="fas fa-cash-register"></i> {% trans "Otvori POS" %}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <div style="padding:20px;text-align:center;color:var(--text-dim,#94a3b8);font-size:.82rem">
+      {% trans "Nema aktivnih terminala." %}
+    </div>
+  {% endfor %}
+
+  <a href="{% url 'pos:new_terminal' %}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border:1px dashed rgba(201,168,76,.3);border-radius:8px;text-decoration:none;color:var(--gold,#c9a84c);font-size:.82rem;font-weight:600;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.06)'" onmouseout="this.style.background='transparent'">
+    <i class="fas fa-plus"></i> {% trans "Novi terminal" %}
+  </a>
+
+</div>

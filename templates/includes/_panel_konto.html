@@ -1,0 +1,62 @@
+{% load i18n %}
+{# Desni panel za Konto dashboard — server-rendered, bez JS injection #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  {# Firma header #}
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {{ request.company.name }} — Sažetak
+  </div>
+
+  {# Hero: žiro saldo #}
+  <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 14px;text-align:center">
+    <div style="font-size:1.5rem;font-weight:800;color:#22c55e">{{ total_bank|floatformat:2 }} €</div>
+    <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">{% trans "Saldo žiro računa" %}</div>
+  </div>
+
+  {# Ključne financije #}
+  <div style="display:flex;flex-direction:column;gap:0">
+    {% include "includes/_panel_row.html" with label="Priljevi (mj.)"  val=month_inflow  suffix="€" color="#22c55e" %}
+    {% include "includes/_panel_row.html" with label="Odljevi (mj.)"   val=month_outflow suffix="€" color="#ef4444" %}
+    {% if pnl %}
+      {% if pnl.profit_loss >= 0 %}
+        {% include "includes/_panel_row.html" with label="Dobit (YTD)"    val=pnl.profit_loss  suffix="€" color="#22c55e" %}
+      {% else %}
+        {% include "includes/_panel_row.html" with label="Gubitak (YTD)"  val=pnl.profit_loss  suffix="€" color="#ef4444" %}
+      {% endif %}
+    {% endif %}
+    {% include "includes/_panel_row.html" with label="Potraživanja" val=total_receivable suffix="€" color="#c9a84c" %}
+    {% if overdue_count %}
+      {% include "includes/_panel_row.html" with label="Dospjelo"     val=overdue_count  suffix=" stavki" color="#ef4444" %}
+    {% endif %}
+    {% if unmatched_count %}
+      {% include "includes/_panel_row.html" with label="Nepariranih txn." val=unmatched_count suffix="" color="#f59e0b" %}
+    {% endif %}
+  </div>
+
+  {# Audit chain #}
+  {% if audit_hashed %}
+    {% if audit_valid %}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);font-size:.78rem;color:#22c55e;font-weight:600">
+        ✅ Hash chain validan <span style="margin-left:auto;opacity:.65">{{ audit_hashed }} zap.</span>
+      </div>
+    {% else %}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);font-size:.78rem;color:#ef4444;font-weight:600">
+        ⚠️ Hash chain prekinut
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {# Brze akcije #}
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Brze akcije" %}</div>
+    {% url 'konto:transactions' as u_txn %}
+    {% url 'konto:journal_entries' as u_jnl %}
+    {% url 'konto:report_pnl' as u_pnl %}
+    {% url 'konto:report_vat' as u_vat %}
+    {% include "includes/_panel_link.html" with href=u_txn  icon="fa-exchange-alt" label="Transakcije" %}
+    {% include "includes/_panel_link.html" with href=u_jnl  icon="fa-book"         label="Temeljnice" %}
+    {% include "includes/_panel_link.html" with href=u_pnl  icon="fa-chart-line"   label="RDG izvještaj" %}
+    {% include "includes/_panel_link.html" with href=u_vat  icon="fa-percent"      label="PDV prijava" %}
+  </div>
+
+</div>
