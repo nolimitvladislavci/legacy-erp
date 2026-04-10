@@ -122,6 +122,22 @@ def open_session(request, terminal_id):
         session_number=next_num, opening_cash=opening_cash,
         status=POSSession.Status.OPEN,
     )
+    # Audit: POS session open
+    try:
+        BookingSignature.log(
+            request, 'create',
+            target_obj=session,
+            target_repr=f'POS Open: {terminal.name} #{session.session_number}',
+            changes={
+                'terminal': terminal.name,
+                'terminal_code': terminal.terminal_code,
+                'session_number': session.session_number,
+                'opening_cash': str(session.opening_cash),
+                'workspace': str(terminal.workspace) if terminal.workspace else None,
+            },
+        )
+    except Exception:
+        pass
     messages.success(request, f'Session #{session.session_number} opened.')
     return redirect('pos:session_detail', session_id=session.pk)
 
@@ -550,6 +566,22 @@ def cancel_receipt(request, receipt_id):
     receipt.status = POSReceipt.Status.CANCELLED
     receipt.cancel_reason = reason
     receipt.save(update_fields=['status', 'cancel_reason'])
+    # Audit: POS storno
+    try:
+        BookingSignature.log(
+            request, 'storno',
+            target_obj=receipt,
+            target_repr=f'Storno bon #{receipt.global_number or receipt.receipt_number}',
+            changes={
+                'receipt_number': receipt.receipt_number,
+                'global_number': receipt.global_number,
+                'total': str(receipt.total),
+                'reason': reason,
+                'workspace': str(receipt.session.terminal.workspace) if receipt.session.terminal.workspace else None,
+            },
+        )
+    except Exception:
+        pass
     messages.warning(request, f'Bon #{receipt.receipt_number} storniran.' + (f' Razlog: {reason}' if reason else ''))
     return redirect('pos:session_detail', session_id=receipt.session_id)
 
