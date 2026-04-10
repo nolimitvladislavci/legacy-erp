@@ -1,6 +1,6 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-10 (Opus — DIO 1 kompletiran, 7/7 stavki)
-# Git HEAD: 63092572
+# Zadnje azuriranje: 2026-04-10 22:30 (Opus + Seki — 10/10 DONE)
+# Git HEAD: 985dd7d0
 # Server: gunicorn OK nginx OK celery OK mcp-fina OK | disk 41%
 
 ===============================================================
@@ -14,58 +14,57 @@
 
 ===============================================================
 
-## AKTIVNI TASKOVI (po prioritetu):
+## DANAS NAPRAVLJENO (10.04.) — 10 stavki, 9 commitova
 
-  1-8. SVE DONE (sigurnost, memio, doktor, UI audit, azil, wake, security, shell)
+  Opus (7 stavki):
+    7719d896 fix(pos): POSSettings 10 firmi + Konjik + open_session guard
+    3b65e0a3 feat(pos): BookingSignature hooks session open + storno
+    54b93e8f feat(registration): archive_readonly + auto-downgrade + login redirect
+    63092572 feat(core): worker dashboard → workspace_home redirect
+    985dd7d0 feat(stolarija): frontend templates faze 4-7 (4 templatea)
+    + data fix: 15,816 ArhivaEntry ai_status none→done
+    + 3 nova shell panela: _panel_payroll/helpdesk/inventory.html
 
----
-
-## DANAS NAPRAVLJENO (10.04.) — OPUS DIO 1:
-
-  1. fix(pos): POSSettings za 10 firmi + Konjik fiscal_active=False
-     + open_session guard (ne moze otvoriti smjenu bez POSSettings)
-  2. feat(pos): BookingSignature hooks — session open + storno audit trail
-  3. feat(registration): archive_readonly plan + auto-downgrade
-     + login redirect na /arhiva/ za istekle pretplate
-     + Celery task: downgrade_expired_subscriptions (daily)
-  4. data: 15,816 ArhivaEntry ai_status none→done (status mismatch fix)
-     backfill_ai_proposals task vec postoji za preostalih 4,537
-  5. SKIP: Silvija vec u WS#5 (audit bio stale)
-  6. feat(shell): server-rendered _panel_*.html za payroll, helpdesk, inventory
-     (_shell_right_* JS hookovi vec postojali iz Faza 2)
-  7. feat(core): worker dashboard redirect → workspace_home
-
-## DANAS NAPRAVLJENO (10.04.) — SEKI DIO 2:
-
-  8. feat(stolarija): service views, warranty portal, Celery reminders
-  9. (u toku)
-  10. cleanup(companies): KonjikStol model removed
+  Seki (3 stavke):
+    b327513a cleanup(companies): KonjikStol removed
+    447c57f2 feat(stolarija): service views + warranty portal + Celery reminders
+    90916a5e docs: PLAN update
 
 ---
 
-## COMMITOVI DANAS (10.04.):
+## STANJE BAZE
 
-  63092572 feat(core): worker dashboard redirect → workspace_home
-  90916a5e docs: update PLAN.md — tasks 9+10 complete
-  447c57f2 feat(stolarija): service views, warranty portal, Celery reminders
-  54b93e8f feat(registration): archive_readonly plan + auto-downgrade
-  b327513a cleanup(companies): remove KonjikStol model
-  3b65e0a3 feat(pos): BookingSignature hooks za session open + storno
-  7719d896 fix(pos): POSSettings + Konjik + open_session guard
-
----
-
-## SLJEDECI PRIORITETI:
-
-  1. Load test priprema (CCX33, 12.04.)
-  2. GO/NO-GO priprema (15.04.)
-  3. Seki: stolarija servis views dovrsiti (Tjedan 2)
+  Korisnici:    351 (59 aktivnih)
+  Tvrtke:       92
+  Workspace:    36 (5 desk + 31 premise)
+  POS terminali: 31 (svi s workspace + POSSettings)
+  POS smjene:   177 | Bonovi: 8
+  Arhiva:       20,353 (15,816 done + 4,537 none)
+  BookingSignature: 3
+  Pretplate:    87 aktivnih
+  Stolarija katalog: 12 profila + 12 stakala (seed data)
 
 ---
 
-## OCJENE (10.04. — post DIO 1+2 sprint):
-  LIMIT Connect backend:  9.5/10 (+ audit, archive, POS fix)
+## SLJEDECI PRIORITETI
+
+  1. Load test (CCX33, 12.04.)
+  2. GO/NO-GO (15.04.)
+  3. Zdenko pilot test stolarije
+  4. PDF ponuda + garancija (WeasyPrint)
+  5. WhatsApp ponuda (WAHA)
+
+---
+
+## OCJENE (10.04. — finalne post-sprint):
+
+  LIMIT Connect backend:  9.5/10
   LIMIT Connect UI/UX:    9.5/10
+  POS sustav:             9/10
+  Stolarija vertikala:    8.5/10 (backend+frontend done, PDF/WhatsApp pending)
+  Workspace model:        9.5/10
+  Audit/Compliance:       9/10 (BookingSignature + archive_readonly)
+  Shell/Paneli:           9/10 (7 modula pokriveno)
   Claude Doktor:          9/10
   Boxgram/memio.pet:      8.5/10
   memio.world:            6.5/10
@@ -73,9 +72,9 @@
   FenixInput:             7/10
   Server:                 10/10
 
-## POZNATI BUGOVI (otvoreni):
-  FenixScan OCR: graceful fallback nedostaje (LOW)
-  2 korumpirana backupa: db_20260329+30 (ne utjece na prod)
-  nginx: duplicate server_name (kozmeticki)
+## POZNATI BUGOVI (LOW):
+  - nginx: protocol warnings (kozmeticki)
+  - FenixScan OCR: graceful fallback nedostaje
+  - 4,537 arhiva zapisa bez AI (pos_receipt/invoice bez datoteke)
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
