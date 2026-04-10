@@ -1,5 +1,5 @@
 # FENIX MASTER PLAN — 2026-04-10
-# Ažurirano: 2026-04-10 (Opus)
+# Ažurirano: 2026-04-10 22:15 (Opus + Seki)
 # Server: 0 errors, 0 pending migrations, gunicorn ✅
 
 ═══════════════════════════════════════════════════════════════
@@ -11,9 +11,11 @@
   ✅ CSS redesign 9.5/10 (25k+ fixes, fenix-tokens.css)
   ✅ Global Shell deployed (3 faze, 4 modula s desnim panelom)
   ✅ Workspace model (5 desk + 31 premise, BookingSignature audit)
-  ✅ Stolarija backend (12 modela, 18 viewova, 3 migracije)
+  ✅ Stolarija backend (12 modela, 22 viewova, 3 migracije)
   ✅ Audit 11 bugova popravljeno
   ✅ manage.py check = 0 issues
+  ✅ KonjikStol removed (model + views + migration + template)
+  ✅ Stolarija servis views LIVE (4 views, 4 templates, 2 Celery tasks)
 
 ═══════════════════════════════════════════════════════════════
 
@@ -150,48 +152,46 @@
 
 ---
 
-### 9. Stolarija servis views — Tjedan 2
+### 9. Stolarija servis views ✅ DONE
   Prioritet: MEDIUM
-  Procjena: 3-4h
+  Zavrseno: 2026-04-10
 
-  Modeli POSTOJE (Opus): WindowWarranty, ServiceVisit.
-
-  Preostalo:
-  - [ ] Kupac portal: /garancija/<qr_token>/ — provjera QR-om
-  - [ ] Servisni nalog view (field mode za montera)
-  - [ ] Planirani pregledi: 6mj + 12mj + godišnji
-  - [ ] Email/WhatsApp reminder (30 dana prije, 7 dana, na dan)
-  - [ ] Celery task: provjera isteklih servisa
-  - [ ] Template: servisni izvještaj (što rađeno, zamjene, sljedeći)
+  Realizirano:
+  - [x] Kupac portal: /stolarija/garancija/<qr_token>/ — dark UI, no login
+  - [x] Servisni nalog view (field mode za montera: complete + reschedule)
+  - [x] Service dashboard s tabovima (upcoming/overdue/completed)
+  - [x] Warranty list s statusom + next service
+  - [x] Celery task: check_service_reminders (daily, 30d/7d/0d WhatsApp)
+  - [x] Celery task: check_expired_warranties (weekly, auto-schedule annual)
+  - [x] Auto-schedule next service (6mj) on completion
+  - [x] Fixed duplicate handover() bug
 
 ---
 
-### 10. KonjikStol — 5 zapisa dead weight
+### 10. KonjikStol ✅ DONE
   Prioritet: LOW (cleanup)
-  Procjena: 15min
+  Zavrseno: 2026-04-10
 
-  KonjikStol model ima samo 5 zapisa. Workspace ga je zamijenio.
-  moji_komitenti već koristi Workspace kao primarni izvor.
-
-  Koraci:
-  - [ ] Provjeri da nijedan view ne ovisi o KonjikStol (osim fallback)
-  - [ ] Ukloni fallback iz moji_komitenti (samo Workspace)
-  - [ ] Obriši 5 zapisa iz baze
-  - [ ] Ako model nema drugih FK-ova → makni iz models.py + migracija
-  - [ ] manage.py check + git commit
+  Realizirano:
+  - [x] Model removed from companies/models.py (93 lines)
+  - [x] Views removed from companies/views.py (148 lines)
+  - [x] Template stolovi.html removed
+  - [x] Migration 0042_remove_konjikstol applied (table dropped)
+  - [x] Docstring updated in moji_komitenti
+  - [x] manage.py check = 0 issues
 
 ═══════════════════════════════════════════════════════════════
 
 ## TIMELINE
 
   10.04. (danas)  │ Opus: #1 POS fiscal + #5 Silvija (brzi fixevi)
-  11.04.           │ Opus: #2 POS↔Workspace + #3 Archive Readonly
-  11-12.04.        │ Opus: #4 AI pipeline + #6 Shell paneli
-  12.04.           │ Opus: #7 Dashboard redirect + Load test prep
-  12.04. (CCX33)   │ Load test
-  13-14.04.        │ Seki: #8 Stolarija frontend + #10 KonjikStol
-  14-15.04.        │ Seki: #9 Servis views
-  15.04.           │ GO/NO-GO + PRODUKCIJA
+                  │ Seki: #9 Servis views ✅ + #10 KonjikStol ✅
+  11.04.          │ Opus: #2 POS↔Workspace + #3 Archive Readonly
+  11-12.04.       │ Opus: #4 AI pipeline + #6 Shell paneli
+  12.04.          │ Opus: #7 Dashboard redirect + Load test prep
+  12.04. (CCX33)  │ Load test
+  13-14.04.       │ Seki: #8 Stolarija frontend (templates + PDF + WhatsApp)
+  15.04.          │ GO/NO-GO + PRODUKCIJA
 
 ═══════════════════════════════════════════════════════════════
 
