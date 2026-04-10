@@ -1,3 +1,4 @@
+from core.models import BookingSignature
 import json
 import logging
 from decimal import Decimal, ROUND_HALF_UP
@@ -99,10 +100,16 @@ def terminal_detail(request, terminal_id):
 @require_POST
 @transaction.atomic
 def open_session(request, terminal_id):
+    # Audit: session open logged after creation (see below)
     # select_for_update: serializes session creation per terminal (race condition fix)
     terminal = get_object_or_404(POSTerminal.objects.select_for_update(), pk=terminal_id)
     company, err = _check_tenant(request, terminal)
     if err: return err
+    # POSSettings guard — ne dopusti otvaranje smjene bez konfiguracije
+    from .models import POSSettings
+    if not POSSettings.objects.filter(company=company).exists():
+        messages.error(request, 'POS nije konfiguriran za ovu tvrtku. Kontaktirajte administratora.')
+        return redirect('pos:terminal_detail', terminal_id=terminal_id)
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
         messages.warning(request, 'Terminal already has an open session.')
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
@@ -215,6 +222,21 @@ def close_session(request, session_id):
     try:
         from pos.pulse import analyze_session_close
         analyze_session_close(session)
+    except Exception:
+        pass
+    # Audit: session close with financial snapshot
+    try:
+        BookingSignature.log(
+            request, 'logout',
+            target_obj=session,
+            target_repr=f'Close POS: {session.terminal.name} #{session.session_number}',
+            changes={
+                'opening_cash': str(session.opening_cash),
+                'closing_cash': str(session.closing_cash),
+                'total_receipts': session.receipts.filter(status='paid').count(),
+                'status': session.status,
+            }
+        )
     except Exception:
         pass
     return redirect('pos:session_detail', session_id=session.pk)
@@ -507,6 +529,12 @@ def process_payment(request, receipt_id):
         logger.warning(f'Fiskalizacija bon #{receipt.receipt_number}: {_fisk_err}')
         messages.success(request, f'Bon #{receipt.receipt_number} plaćen — kusur: €{change:.2f}')
         messages.warning(request, f'Fiskalizacija nije uspjela: {str(_fisk_err)[:120]}')
+
+    # Audit: payment/fiscal
+    try:
+        BookingSignature.log(request, 'fiscal', target_model='POSReceipt', target_id=str(receipt_id), target_repr=f'Receipt #{receipt_id}')
+    except Exception:
+        pass
 
     return redirect('pos:session_detail', session_id=receipt.session_id)
 
