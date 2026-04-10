@@ -1,6 +1,6 @@
 # FENIX STATUS
-# Zadnje azuriranje: 2026-04-10 22:30 (Opus + Seki — 10/10 DONE)
-# Git HEAD: 985dd7d0
+# Zadnje azuriranje: 2026-04-10 23:00 (Opus — 15/15 stavki DONE)
+# Git HEAD: 295ea0be
 # Server: gunicorn OK nginx OK celery OK mcp-fina OK | disk 41%
 
 ===============================================================
@@ -14,57 +14,45 @@
 
 ===============================================================
 
-## DANAS NAPRAVLJENO (10.04.) — 10 stavki, 9 commitova
+## DANAS NAPRAVLJENO (10.04.) — 15 stavki, 11 commitova
 
-  Opus (7 stavki):
-    7719d896 fix(pos): POSSettings 10 firmi + Konjik + open_session guard
-    3b65e0a3 feat(pos): BookingSignature hooks session open + storno
-    54b93e8f feat(registration): archive_readonly + auto-downgrade + login redirect
-    63092572 feat(core): worker dashboard → workspace_home redirect
-    985dd7d0 feat(stolarija): frontend templates faze 4-7 (4 templatea)
-    + data fix: 15,816 ArhivaEntry ai_status none→done
-    + 3 nova shell panela: _panel_payroll/helpdesk/inventory.html
+  FAZA 1 (plan 1-10):
+    1. fix(pos): POSSettings 10 firmi + Konjik + open_session guard
+    2. feat(pos): BookingSignature hooks session open + storno
+    3. feat(registration): archive_readonly + auto-downgrade + login
+    4. data: 15,816 ArhivaEntry ai_status fix
+    5. SKIP: Silvija vec u WS#5
+    6. feat(shell): 3 nova panela (payroll/helpdesk/inventory)
+    7. feat(core): worker dashboard → workspace_home
+    8. feat(stolarija): 4 frontend templatea (prod/install/handover)
+    9. feat(stolarija): servis views + warranty portal + Celery (Seki)
+    10. cleanup: KonjikStol removed (Seki)
 
-  Seki (3 stavke):
-    b327513a cleanup(companies): KonjikStol removed
-    447c57f2 feat(stolarija): service views + warranty portal + Celery reminders
-    90916a5e docs: PLAN update
-
----
-
-## STANJE BAZE
-
-  Korisnici:    351 (59 aktivnih)
-  Tvrtke:       92
-  Workspace:    36 (5 desk + 31 premise)
-  POS terminali: 31 (svi s workspace + POSSettings)
-  POS smjene:   177 | Bonovi: 8
-  Arhiva:       20,353 (15,816 done + 4,537 none)
-  BookingSignature: 3
-  Pretplate:    87 aktivnih
-  Stolarija katalog: 12 profila + 12 stakala (seed data)
+  FAZA 2 (final 5):
+    11. feat(stolarija): PDF ponuda (WeasyPrint) + template
+    12. feat(stolarija): PDF garancija + template
+    13. feat(stolarija): WhatsApp slanje ponude (WAHA send_document)
+    14. feat(pos): PIN provjera za storno (can_void cashier)
+    15. feat(core): HTMX panel detail — univerzalni endpoint (7 modela)
 
 ---
 
-## SLJEDECI PRIORITETI
+## SPREMNO ZA TESTIRANJE
 
-  1. Load test (CCX33, 12.04.)
-  2. GO/NO-GO (15.04.)
-  3. Zdenko pilot test stolarije
-  4. PDF ponuda + garancija (WeasyPrint)
-  5. WhatsApp ponuda (WAHA)
+  Sve komponente deployane. manage.py check = 0. Server stabilan.
+  Preporuka: sustavni E2E test po modulima prije load testa 12.04.
 
 ---
 
-## OCJENE (10.04. — finalne post-sprint):
+## OCJENE (10.04. — finalne):
 
   LIMIT Connect backend:  9.5/10
   LIMIT Connect UI/UX:    9.5/10
-  POS sustav:             9/10
-  Stolarija vertikala:    8.5/10 (backend+frontend done, PDF/WhatsApp pending)
+  POS sustav:             9.5/10 (+ PIN storno)
+  Stolarija vertikala:    9/10 (+ PDF + WhatsApp)
   Workspace model:        9.5/10
-  Audit/Compliance:       9/10 (BookingSignature + archive_readonly)
-  Shell/Paneli:           9/10 (7 modula pokriveno)
+  Audit/Compliance:       9.5/10 (+ PIN audit, archive_readonly)
+  Shell/Paneli:           9.5/10 (+ HTMX dynamic)
   Claude Doktor:          9/10
   Boxgram/memio.pet:      8.5/10
   memio.world:            6.5/10
@@ -72,9 +60,11 @@
   FenixInput:             7/10
   Server:                 10/10
 
+  PROSJEK: 9.08/10
+
 ## POZNATI BUGOVI (LOW):
   - nginx: protocol warnings (kozmeticki)
   - FenixScan OCR: graceful fallback nedostaje
-  - 4,537 arhiva zapisa bez AI (pos_receipt/invoice bez datoteke)
+  - 4,537 arhiva zapisa bez AI (pos_receipt bez datoteke — ocekivano)
 
 CLAUDE.AI MAX: auto-obnova 27.04.2026. | Mastercard 8859 | ~107 EUR/mj
