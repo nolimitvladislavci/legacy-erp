@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ order.order_number }} — Proizvodnja{% endblock %}
+{% block page_title %}🏭 {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Header -->
+  <div class="fx-card fx-mb-3" style="border-top: 3px solid var(--gold)">
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h3 class="fx-fw-bold fx-text-gold fx-mb-1">{{ order.order_number }}</h3>
+          <div class="fx-text-muted" style="font-size:.85rem">
+            Ponuda: {{ order.offer.offer_number }}
+            &nbsp;|&nbsp; Kreiran: {{ order.created_at|date:"d.m.Y" }}
+            {% if order.estimated_date %}
+              &nbsp;|&nbsp; Procjena: {{ order.estimated_date|date:"d.m.Y" }}
+            {% endif %}
+          </div>
+        </div>
+        <span class="badge fs-6
+          {% if order.status == 'ready' %}bg-success
+          {% elif order.status == 'in_progress' or order.status == 'cutting' or order.status == 'assembly' %}bg-warning text-dark
+          {% elif order.status == 'cancelled' %}bg-danger
+          {% else %}bg-secondary{% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status update -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-sync-alt me-2 fx-text-gold"></i> Promijeni status
+    </div>
+    <div class="fx-card-body">
+      <form method="post" class="d-flex gap-2 flex-wrap">
+        {% csrf_token %}
+        {% for val, label in order.STATUS %}
+          {% if val != order.status %}
+            <button type="submit" name="status" value="{{ val }}"
+              class="btn btn-sm {% if val == 'ready' %}btn-success{% elif val == 'cancelled' %}btn-outline-danger{% else %}btn-outline-secondary{% endif %}">
+              {{ label }}
+            </button>
+          {% endif %}
+        {% endfor %}
+      </form>
+    </div>
+  </div>
+
+  <!-- BOM po kategoriji -->
+  {% for category, items in bom_by_category.items %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-cube me-2 fx-text-gold"></i> {{ category }}
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Materijal</th>
+              <th class="text-center">Pozicija</th>
+              <th class="text-center">Kolicina</th>
+              <th class="text-center">Jed.</th>
+              <th class="text-end">Cijena/jed.</th>
+              <th class="text-end">Ukupno</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td><strong>{{ item.name }}</strong></td>
+              <td class="text-center fx-text-muted">
+                {% if item.measurement %}
+                  Poz. {{ item.measurement.position_number }}
+                {% else %}—{% endif %}
+              </td>
+              <td class="text-center fx-text-gold fw-bold">{{ item.quantity|floatformat:2 }}</td>
+              <td class="text-center fx-text-muted">{{ item.unit }}</td>
+              <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
+              <td class="text-end fw-bold">{{ item.total_price|floatformat:2 }} €</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Ukupno materijal -->
+  <div class="fx-card fx-mb-3" style="border-color:rgba(34,197,94,.3)">
+    <div class="fx-card-body d-flex justify-content-between align-items-center">
+      <span class="fx-text-muted">Ukupno materijal:</span>
+      <span class="fx-text-gold fw-bold" style="font-size:1.3rem">
+        {{ order.material_cost|floatformat:2 }} €
+      </span>
+    </div>
+  </div>
+
+  <!-- Akcije -->
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'stolarija:offer_detail' order.offer.pk %}" class="btn btn-outline-secondary">
+      <i class="fas fa-file-alt me-1"></i> Ponuda
+    </a>
+    {% if order.status == 'ready' %}
+      {% if not order.installation %}
+        <form method="post" action="{% url 'stolarija:create_installation' order.pk %}" class="d-inline">
+          {% csrf_token %}
+          <label class="d-inline-flex align-items-center gap-2">
+            <input type="date" name="date" class="fx-input" style="width:auto" required>
+            <button type="submit" class="btn-gold" style="padding:10px 20px">
+              <i class="fas fa-truck me-1"></i> Zakaži ugradnju
+            </button>
+          </label>
+        </form>
+      {% else %}
+        <a href="{% url 'stolarija:installation_detail' order.installation.pk %}" class="btn-gold" style="padding:10px 20px">
+          <i class="fas fa-truck me-1"></i> Ugradnja
+        </a>
+      {% endif %}
+    {% endif %}
+    <a href="{% url 'stolarija:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-home me-1"></i> Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}

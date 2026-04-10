@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Primopredaja — {{ protocol.warranty.warranty_number }}{% endblock %}
+{% block page_title %}Primopredaja{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Garancija -->
+  <div class="fx-card fx-mb-3" style="border-top: 3px solid #22c55e">
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h3 class="fx-fw-bold" style="color:#22c55e">{{ warranty.warranty_number }}</h3>
+          <div class="fx-text-muted" style="font-size:.85rem">
+            Garancija: {{ warranty.valid_years }} godina
+            {% if warranty.handover_date %}
+              &nbsp;|&nbsp; Primopredaja: {{ warranty.handover_date|date:"d.m.Y" }}
+            {% endif %}
+          </div>
+        </div>
+        <span class="badge bg-success fs-6">
+          <i class="fas fa-check me-1"></i> Potpisano
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klijent -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-user me-2 fx-text-gold"></i> Klijent
+    </div>
+    <div class="fx-card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <strong class="fx-text-muted d-block" style="font-size:.75rem">Ime:</strong>
+          <span class="fw-bold">{{ protocol.client_name }}</span>
+        </div>
+        <div class="col-md-6">
+          <strong class="fx-text-muted d-block" style="font-size:.75rem">Potpisano:</strong>
+          <span>{{ protocol.signed_at|date:"d.m.Y H:i" }}</span>
+        </div>
+      </div>
+      {% if protocol.client_signature %}
+      <div class="mt-3">
+        <strong class="fx-text-muted d-block" style="font-size:.75rem">Potpis:</strong>
+        <img src="{{ protocol.client_signature }}" alt="Potpis"
+          style="max-height:80px;border:1px solid var(--gold-border);border-radius:8px;padding:4px;background:rgba(255,255,255,.03)">
+      </div>
+      {% endif %}
+      {% if protocol.remarks %}
+      <div class="mt-3">
+        <strong class="fx-text-muted d-block" style="font-size:.75rem">Napomene:</strong>
+        <span>{{ protocol.remarks }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- QR garancija -->
+  {% if warranty.qr_token %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-qrcode me-2 fx-text-gold"></i> Garancijski portal (kupac)
+    </div>
+    <div class="fx-card-body text-center">
+      <div class="fx-mb-2">
+        <a href="{% url 'stolarija_public:warranty_public' warranty.qr_token %}"
+          class="fx-text-gold" style="word-break:break-all;font-size:.85rem">
+          {{ request.scheme }}://{{ request.get_host }}/stolarija/garancija/{{ warranty.qr_token }}/
+        </a>
+      </div>
+      <div class="fx-text-muted" style="font-size:.8rem">
+        Kupac skenira QR kod i vidi status garancije, ugradnje i servisnih pregleda.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Servisni pregledi -->
+  {% with visits=warranty.service_visits.all %}
+  {% if visits %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-wrench me-2 fx-text-gold"></i> Planirani servisi
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Zakazano</th>
+              <th>Izvrseno</th>
+              <th>Monter</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in visits %}
+            <tr>
+              <td>{{ v.scheduled|date:"d.m.Y" }}</td>
+              <td>{% if v.completed %}{{ v.completed|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+              <td>{% if v.technician %}{{ v.technician.get_full_name }}{% else %}—{% endif %}</td>
+              <td>
+                {% if v.completed %}
+                  <span class="badge bg-success">Zavrseno</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Ceka</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- Akcije -->
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'stolarija:installation_detail' protocol.installation.pk %}" class="btn btn-outline-secondary">
+      <i class="fas fa-truck me-1"></i> Ugradnja
+    </a>
+    <button class="btn-gold" onclick="window.print()" style="padding:10px 20px">
+      <i class="fas fa-print me-1"></i> Ispis garancije
+    </button>
+    <a href="{% url 'stolarija:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-home me-1"></i> Dashboard
+    </a>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  .fx-sidebar, nav, .fx-topbar, .d-flex.gap-2.flex-wrap:last-child { display: none !important; }
+  .fx-container { max-width: 100%; }
+  body { background: white !important; color: black !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Ugradnja — {{ install.production_order.order_number }}{% endblock %}
+{% block page_title %}🔧 Ugradnja{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Header -->
+  <div class="fx-card fx-mb-3" style="border-top: 3px solid var(--gold)">
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h3 class="fx-fw-bold fx-text-gold fx-mb-1">
+            {{ install.production_order.order_number }} — Ugradnja
+          </h3>
+          <div class="fx-text-muted" style="font-size:.85rem">
+            Zakazano: {{ install.scheduled_date|date:"d.m.Y" }}
+            {% if install.team_lead %}
+              &nbsp;|&nbsp; Voditelj: {{ install.team_lead.get_full_name|default:install.team_lead.username }}
+            {% endif %}
+          </div>
+        </div>
+        <span class="badge fs-6
+          {% if install.status == 'completed' %}bg-success
+          {% elif install.status == 'in_progress' %}bg-warning text-dark
+          {% else %}bg-secondary{% endif %}">
+          {{ install.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <form method="post">
+    {% csrf_token %}
+    {% for item in checklist %}
+    <div class="fx-card fx-mb-2">
+      <div class="fx-card-body">
+        <div class="d-flex justify-content-between align-items-center fx-mb-2">
+          <strong class="fx-text-gold">
+            Poz. {{ item.measurement.position_number }}
+            — {{ item.measurement.get_element_type_display }}
+            {{ item.measurement.width_mm }}×{{ item.measurement.height_mm }}mm
+            × {{ item.measurement.quantity }}kom
+          </strong>
+          {% if item.is_complete %}
+            <span class="badge bg-success">Gotovo</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">U tijeku</span>
+          {% endif %}
+        </div>
+        {% if item.measurement.location_note %}
+          <div class="fx-text-muted fx-mb-2" style="font-size:.82rem">
+            <i class="fas fa-map-pin me-1"></i> {{ item.measurement.location_note }}
+          </div>
+        {% endif %}
+
+        <div class="row g-2">
+          {% with pk=item.pk %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="old_removed_{{ pk }}" value="1" {% if item.old_removed %}checked{% endif %}>
+              <span style="font-size:.85rem">Demontaža starog</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="opening_prepared_{{ pk }}" value="1" {% if item.opening_prepared %}checked{% endif %}>
+              <span style="font-size:.85rem">Priprema otvora</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="frame_mounted_{{ pk }}" value="1" {% if item.frame_mounted %}checked{% endif %}>
+              <span style="font-size:.85rem">Montaža okvira</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="glass_inserted_{{ pk }}" value="1" {% if item.glass_inserted %}checked{% endif %}>
+              <span style="font-size:.85rem">Umetanje stakla</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="sealed_{{ pk }}" value="1" {% if item.sealed %}checked{% endif %}>
+              <span style="font-size:.85rem">Brtvljenje</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="adjusted_{{ pk }}" value="1" {% if item.adjusted %}checked{% endif %}>
+              <span style="font-size:.85rem">Podešavanje</span>
+            </label>
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+              <input type="checkbox" name="cleaned_{{ pk }}" value="1" {% if item.cleaned %}checked{% endif %}>
+              <span style="font-size:.85rem">Čišćenje</span>
+            </label>
+          </div>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Spremi -->
+    <div class="d-flex gap-2 flex-wrap fx-mb-3">
+      <button type="submit" class="btn-gold" style="padding:10px 24px">
+        <i class="fas fa-save me-1"></i> Spremi checklist
+      </button>
+    </div>
+  </form>
+
+  <!-- Primopredaja gumb -->
+  {% if all_complete and install.status == 'completed' %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(34,197,94,.3)">
+    <div class="fx-card-body d-flex justify-content-between align-items-center">
+      <div>
+        <strong class="d-block" style="color:#22c55e">Ugradnja završena</strong>
+        <span class="fx-text-muted" style="font-size:.82rem">
+          {{ install.completed_at|date:"d.m.Y H:i" }}
+        </span>
+      </div>
+      {% if not install.handover %}
+        <a href="{% url 'stolarija:handover' install.pk %}" class="btn-gold" style="padding:10px 20px">
+          <i class="fas fa-signature me-1"></i> Primopredaja
+        </a>
+      {% else %}
+        <a href="{% url 'stolarija:handover_detail' install.handover.pk %}" class="btn btn-outline-success">
+          <i class="fas fa-check me-1"></i> Primopredaja
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Nav -->
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'stolarija:production_detail' install.production_order.pk %}" class="btn btn-outline-secondary">
+      <i class="fas fa-industry me-1"></i> Proizvodnja
+    </a>
+    <a href="{% url 'stolarija:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-home me-1"></i> Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}

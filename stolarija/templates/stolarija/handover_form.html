@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Primopredaja — {{ install.production_order.order_number }}{% endblock %}
+{% block page_title %}Primopredaja{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Info -->
+  <div class="fx-card fx-mb-3" style="border-top: 3px solid var(--gold)">
+    <div class="fx-card-body">
+      <h3 class="fx-fw-bold fx-text-gold fx-mb-1">Primopredaja</h3>
+      <div class="fx-text-muted" style="font-size:.85rem">
+        Nalog: {{ install.production_order.order_number }}
+        &nbsp;|&nbsp; Ugradnja: {{ install.scheduled_date|date:"d.m.Y" }}
+        {% if install.production_order.offer.session.address %}
+          &nbsp;|&nbsp; Lokacija: {{ install.production_order.offer.session.address }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ugradene stavke -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-list me-2 fx-text-gold"></i> Ugradeno
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Poz.</th>
+              <th>Element</th>
+              <th class="text-center">Dimenzije</th>
+              <th class="text-center">Kom</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in install.checklist.all %}
+            <tr>
+              <td class="fx-text-gold fw-bold">{{ item.measurement.position_number }}</td>
+              <td>
+                {{ item.measurement.get_element_type_display }}
+                — {{ item.measurement.get_wing_config_display }}
+                {% if item.measurement.profile %}
+                  <br><small class="fx-text-muted">{{ item.measurement.profile }}</small>
+                {% endif %}
+              </td>
+              <td class="text-center">{{ item.measurement.width_mm }}×{{ item.measurement.height_mm }}mm</td>
+              <td class="text-center">{{ item.measurement.quantity }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forma za potpis -->
+  <form method="post">
+    {% csrf_token %}
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-signature me-2 fx-text-gold"></i> Potpis kupca
+      </div>
+      <div class="fx-card-body">
+        <div class="fx-mb-3">
+          <label class="fx-label">Ime i prezime kupca</label>
+          <input type="text" name="client_name" class="fx-input" placeholder="npr. Marko Markovic" required>
+        </div>
+
+        <div class="fx-mb-3">
+          <label class="fx-label">Napomene / Primjedbe</label>
+          <textarea name="remarks" class="fx-input" rows="3" placeholder="Primjedbe kupca (opcionalno)"></textarea>
+        </div>
+
+        <div class="fx-mb-3">
+          <label class="fx-label">Potpis (nacrtajte prstom ili misem)</label>
+          <canvas id="sigCanvas" width="400" height="150"
+            style="border:2px dashed var(--gold-border);border-radius:8px;background:rgba(255,255,255,.03);cursor:crosshair;display:block;width:100%;touch-action:none"></canvas>
+          <input type="hidden" name="signature" id="sigData">
+          <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="clearSig()">
+            <i class="fas fa-eraser me-1"></i> Obrisi
+          </button>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn-gold" style="padding:12px 32px" onclick="captureSig()">
+            <i class="fas fa-check me-1"></i> Potvrdi primopredaju
+          </button>
+          <a href="{% url 'stolarija:installation_detail' install.pk %}" class="btn btn-outline-secondary">
+            Odustani
+          </a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var canvas = document.getElementById('sigCanvas');
+if (canvas) {
+  var ctx = canvas.getContext('2d');
+  var drawing = false;
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x, y;
+    if (e.touches) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+    else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+    x = x * canvas.width / rect.width;
+    y = y * canvas.height / rect.height;
+    return {x: x, y: y};
+  }
+
+  canvas.addEventListener('mousedown', function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); });
+  canvas.addEventListener('mouseup', function() { drawing = false; });
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); }, {passive:false});
+  canvas.addEventListener('touchend', function() { drawing = false; });
+}
+
+function clearSig() {
+  if (canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function captureSig() {
+  if (canvas) document.getElementById('sigData').value = canvas.toDataURL('image/png');
+}
+</script>
+{% endblock %}
