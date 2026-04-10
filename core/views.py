@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from core.models import BookingSignature
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
@@ -180,7 +181,14 @@ def login_view(request):
                 })
 
             if not user.is_active:
-                errors.append('Vas racun je deaktiviran. Kontaktirajte administratora.')
+                if user.username.startswith('syn_') or not user.has_usable_password():
+                    # Korisnik importan (zaposlenik) — nikad nije postavio lozinku
+                    errors.append(
+                        'Vaš korisnički račun još nije aktiviran. '
+                        'Koristite "Zaboravljena lozinka" za postavljanje lozinke i aktivaciju računa.'
+                    )
+                else:
+                    errors.append('Vaš račun je deaktiviran. Kontaktirajte administratora.')
                 return render(request, 'registration/login.html', {
                     'errors': errors, 'email_value': email,
                 })
@@ -188,6 +196,10 @@ def login_view(request):
             # Flush old session to prevent mixing with previous user
             request.session.flush()
             login(request, user)
+            try:
+                BookingSignature.log(request, 'login', target_model='User', target_id=str(user.pk), target_repr=f'Login: {user.username}')
+            except Exception:
+                pass
             if not remember:
                 request.session.set_expiry(0)
 
@@ -205,6 +217,30 @@ def login_view(request):
                     user.profile.save(update_fields=['preferred_language'])
                 except Exception:
                     pass
+
+            # Archive Readonly check — zakonski pristup (ZOR čl. 10, 11 godina)
+            try:
+                _profile = user.profile if hasattr(user, 'profile') else None
+                if _profile and _profile.company:
+                    _sub = _profile.company.subscriptions.filter(
+                        is_active=True, plan='archive_readonly'
+                    ).first()
+                    if _sub:
+                        messages.info(
+                            request,
+                            'Vaša pretplata je istekla. Imate read-only pristup arhivi i kontu. '
+                            'Za obnovu kontaktirajte nas: info@limit-connect.com'
+                        )
+                        _lang_prefix = '/{}'.format(lang) if lang and lang != 'de' else ''
+                        resp = redirect('{}/documents/arhiva/'.format(_lang_prefix))
+                        resp.set_cookie(
+                            _s.LANGUAGE_COOKIE_NAME, lang,
+                            max_age=_s.LANGUAGE_COOKIE_AGE,
+                            path='/', samesite='Lax',
+                        )
+                        return resp
+            except Exception:
+                pass
 
             host = request.get_host().split(':')[0]
             # Build language-prefixed dashboard URL

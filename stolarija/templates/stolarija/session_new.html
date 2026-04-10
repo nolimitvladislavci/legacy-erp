@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Nova sesija mjerenja{% endblock %}
+{% block page_title %}📐 Nova sesija mjerenja{% endblock %}
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:500px">
+  <div class="fx-card">
+    <div class="fx-card-header">
+      <i class="fas fa-map-marker-alt me-2 fx-text-gold"></i> Podaci o lokaciji
+    </div>
+    <div class="fx-card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="fx-mb-3">
+          <label class="fx-label">Adresa objekta *</label>
+          <input type="text" name="address" class="fx-input" required autofocus
+                 placeholder="npr. Ul. Ante Starčevića 12, Čepin">
+        </div>
+        <div class="fx-mb-3">
+          <label class="fx-label">Napomene (opcionalno)</label>
+          <textarea name="notes" class="fx-input" rows="2"
+                    placeholder="npr. Kupac treba ponudu do petka..."></textarea>
+        </div>
+        <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1rem">
+          <i class="fas fa-arrow-right me-1"></i> Počni mjeriti
+        </button>
+        <a href="{% url 'stolarija:dashboard' %}"
+           class="btn btn-outline-secondary w-100 mt-2" style="padding:10px">
+          Odustani
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

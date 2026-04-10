@@ -255,6 +255,18 @@ MODULES = [
         'price_addon': 0,
     },
     {
+        'id': 'stolarija',
+        'name': 'Stolarija',
+        'icon': 'fa-window-maximize',
+        'url': '/stolarija/',
+        'url_name': 'stolarija:dashboard',
+        'category': 'poslovanje',
+        'tier': TIER_STARTER,
+        'description': 'Mjerenje prozora/vrata, ponude, montaža, garancije.',
+        'price_addon': 0,
+        'auto_for': ['stolarija', 'građevina', 'gradevina', 'fenster', 'joinery'],
+    },
+    {
         'id': 'procurement',
         'name': 'Nabava',
         'icon': 'fa-file-invoice',

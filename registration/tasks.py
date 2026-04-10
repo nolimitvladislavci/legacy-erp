@@ -62,3 +62,46 @@ def send_ambassador_onboarding_email(self, lead_id):
     except Exception as exc:
         logger.error(f'Failed to send ambassador email to {email}: {exc}')
         raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=2, default_retry_delay=300)
+def downgrade_expired_subscriptions(self):
+    """
+    Svake noći u 01:00 — firme s isteklom pretplatom → archive_readonly.
+    Korisnici OSTAJU aktivni, ali vide samo arhivu i konto (read-only).
+    Zakonska obaveza: pristup arhivi 11 godina (ZOR čl. 10).
+    """
+    from registration.models import CompanySubscription, PricingPlan
+    from django.utils import timezone
+
+    archive_plan = PricingPlan.objects.filter(slug='archive_readonly').first()
+    if not archive_plan:
+        logger.error('PricingPlan archive_readonly ne postoji!')
+        return
+
+    today = timezone.now().date()
+    active_plans = ['starter', 'professional', 'micro', 'enterprise', 'distributor', 'business']
+
+    expired = CompanySubscription.objects.filter(
+        is_active=True,
+        valid_until__lt=today,
+        plan__in=active_plans,
+    )
+
+    downgraded = 0
+    for sub in expired:
+        # Provjeri cancel_at_period_end ili expired valid_until
+        old_plan = sub.plan
+        sub.plan = 'archive_readonly'
+        sub.pricing_plan = archive_plan
+        sub.monthly_fee = 0
+        sub.save(update_fields=['plan', 'pricing_plan', 'monthly_fee'])
+        downgraded += 1
+        logger.info(
+            'Downgraded %s from %s to archive_readonly (valid_until=%s)',
+            sub.company.name, old_plan, sub.valid_until,
+        )
+
+    if downgraded:
+        logger.info('downgrade_expired_subscriptions: %d firm downgraded', downgraded)
+    return downgraded

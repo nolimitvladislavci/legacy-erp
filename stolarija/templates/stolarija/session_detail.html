@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ session.address|default:"Sesija" }} — Stolarija{% endblock %}
+{% block page_title %}📋 Pregled sesije{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Header sesije -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h3 class="fx-fw-bold fx-text-gold fx-mb-1">
+            {{ session.address|default:"Bez adrese" }}
+          </h3>
+          <div class="fx-text-muted" style="font-size:.85rem">
+            <i class="fas fa-calendar me-1"></i> {{ session.created_at|date:"d.m.Y H:i" }}
+            &nbsp;|&nbsp;
+            <i class="fas fa-user me-1"></i> {{ session.created_by|default:"—" }}
+          </div>
+          {% if session.notes %}
+          <div class="fx-text-muted mt-1" style="font-size:.82rem">{{ session.notes }}</div>
+          {% endif %}
+        </div>
+        <a href="{% url 'stolarija:measure' session.pk %}" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-plus"></i> Dodaj
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mjerenja -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-ruler me-2 fx-text-gold"></i>
+      Mjerenja ({{ measurements.count }})
+      — ukupno {{ total_area }} m²
+    </div>
+    <div class="fx-card-body p-0">
+      {% if measurements %}
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Poz.</th>
+              <th>Lokacija</th>
+              <th>Dimenzije</th>
+              <th>Tip</th>
+              <th>Kom</th>
+              <th>Površina</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in measurements %}
+            <tr>
+              <td>
+                </td>
+              <td style="font-weight:800;color:var(--gold)">{{ m.position_number }}</td>
+              <td>{{ m.location_note|default:"—" }}
+                {% if m.floor > 0 %}<br><small class="fx-text-muted">Kat {{ m.floor }}</small>{% endif %}
+              </td>
+              <td>
+                <strong class="fx-text-gold">{{ m.width_mm }} × {{ m.height_mm }}</strong>
+                <small class="fx-text-muted">mm</small>
+              </td>
+              <td>
+                {{ m.get_element_type_display }}
+                <br><small class="fx-text-muted">{{ m.get_wing_config_display }}</small>
+              </td>
+              <td>{{ m.quantity }}</td>
+              <td>{{ m.total_area_m2 }} m²</td>
+              <td>
+                {% if m.confirmed %}
+                  <span class="badge bg-success">✓</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Na čekanju</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="fw-bold">
+              <td colspan="4" class="text-end fx-text-muted">Ukupno:</td>
+              <td class="fx-text-gold">{{ total_area }} m²</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center fx-text-muted fx-py-4">
+        Nema mjerenja. <a href="{% url 'stolarija:measure' session.pk %}">Dodaj prvo mjerenje →</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Generiraj ponudu -->
+  {% if can_offer %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(201,168,76,.3)">
+    <div class="fx-card-body">
+      <h5 class="fx-fw-bold fx-mb-3">
+        <i class="fas fa-file-invoice-dollar me-2 fx-text-gold"></i>
+        Generiraj ponudu
+      </h5>
+      <form method="post" action="{% url 'stolarija:generate_offer' session.pk %}">
+        {% csrf_token %}
+        <div class="fx-mb-3">
+          <label class="fx-label">Napomene za ponudu (opcionalno)</label>
+          <textarea name="notes" class="fx-input" rows="2"
+                    placeholder="npr. Montaža u dogovoru, avans 30%..."></textarea>
+        </div>
+        <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1rem">
+          <i class="fas fa-magic me-1"></i> Generiraj ponudu
+        </button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-body text-center fx-text-muted">
+      <i class="fas fa-info-circle fx-text-gold me-2"></i>
+      Dodaj i potvrdi barem jedno mjerenje za generiranje ponude.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Postojeće ponude -->
+  {% with offers=session.offers.all %}
+  {% if offers %}
+  <div class="fx-card">
+    <div class="fx-card-header">
+      <i class="fas fa-file-alt me-2"></i> Ponude
+    </div>
+    <div class="fx-card-body p-0">
+      {% for o in offers %}
+      <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <div>
+          <strong>{{ o.offer_number }}</strong>
+          <span class="badge bg-secondary ms-2">{{ o.get_status_display }}</span>
+          <div class="fx-text-muted" style="font-size:.82rem">{{ o.created_at|date:"d.m.Y" }}</div>
+        </div>
+        <div class="text-end">
+          <div class="fx-text-gold fw-bold">{{ o.total_gross }} €</div>
+          <a href="{% url 'stolarija:offer_detail' o.pk %}" class="btn-gold"
+             style="padding:4px 12px;font-size:.8rem;text-decoration:none;display:inline-block;margin-top:4px">
+            Otvori
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+</div>
+{% endblock %}

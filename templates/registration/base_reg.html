@@ -12,9 +12,10 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/fenix-tokens.css' %}?v=4000">
 <link rel="stylesheet" href="{% static 'css/fenix-ui.css' %}">
-<script>(function(){var t=localStorage.getItem('fina-theme');if(t)document.documentElement.setAttribute('data-theme',t);})()</script>
+<script>(function(){var t=localStorage.getItem("fina-theme")||"dark";document.documentElement.setAttribute("data-theme",t);})()</script>
 <style>
-  /* Design tokens from global_themes.css — aliases for compat */
+
+  /* Compat aliases - radi u dark i light modu */
   :root { --gold-light: var(--gold2, #e8c96a); --error: var(--red, #e05c5c); --success: var(--green, #4caf7d); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
@@ -45,7 +46,7 @@
   .reg-input option { background: var(--dark); }
   .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
   .non-field-errors { background: rgba(224,92,92,0.1); border: 1px solid var(--error); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--error); font-size: 0.875rem; }
-  .reg-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2rem; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-family: 'Barlow', sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.1s; }
+  .reg-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 0.875rem 2rem !important; background: #c9a84c !important; color: #0a0f1e !important; border: none !important; border-radius: 6px !important; font-family: 'Barlow', sans-serif; font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer !important; text-decoration: none; transition: background 0.2s, transform 0.1s; opacity: 1 !important; pointer-events: auto !important; -webkit-appearance: none; appearance: none; }
   .reg-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
   .reg-btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 0.875rem 1.5rem; font-family: 'Barlow', sans-serif; font-size: 0.9rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
   .reg-btn-outline:hover { border-color: var(--gold); color: var(--gold); }
@@ -60,7 +61,44 @@
   .glang-btn { padding:4px 8px; border:1px solid #333; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:.75rem; transition:all .2s; }
   .glang-btn:hover { border-color:var(--gold); color:var(--gold); }
   .glang-btn.active { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
-/* Force visible text in all inputs */.reg-input, .se-input, input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {    color: #ffffff !important;    -webkit-text-fill-color: #ffffff !important;    caret-color: #c9a84c !important;}input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {    -webkit-text-fill-color: #ffffff !important;    -webkit-box-shadow: 0 0 0px 1000px #111214 inset !important;    caret-color: #c9a84c !important;}
+/* Adaptive input tekst — dark i light */
+  html[data-theme="dark"] .reg-input,
+  html[data-theme="dark"] input[type="text"],
+  html[data-theme="dark"] input[type="email"],
+  html[data-theme="dark"] input[type="password"],
+  html[data-theme="dark"] input[type="tel"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #c9a84c !important;
+  }
+  html[data-theme="dark"] input:-webkit-autofill {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #111827 inset !important;
+  }
+  html[data-theme="light"] .reg-input,
+  html[data-theme="light"] input[type="text"],
+  html[data-theme="light"] input[type="email"],
+  html[data-theme="light"] input[type="password"],
+  html[data-theme="light"] input[type="tel"] {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    caret-color: #92650a !important;
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+  html[data-theme="light"] input:-webkit-autofill {
+    -webkit-text-fill-color: #0f172a !important;
+    -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset !important;
+  }
+  html[data-theme="light"] .reg-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
+  html[data-theme="light"] .reg-card-title { color: #0f172a !important; }
+  html[data-theme="light"] .reg-card-subtitle { color: #64748b !important; }
+  html[data-theme="light"] .reg-field label { color: #64748b !important; }
+  html[data-theme="light"] .reg-btn { background: #92650a !important; color: #ffffff !important; }
+  html[data-theme="light"] .reg-btn:hover { background: #7d5508 !important; }
 </style>
 {% block extra_css %}{% endblock %}
 </head>

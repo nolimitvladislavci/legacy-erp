@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "limit-connect.com", "www.limit-connect.com", ".limit-connect.com",
     "viskovic-group.de", "www.viskovic-group.de",
-    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver", "no-limit.world", "www.no-limit.world", "memio.world", "www.memio.world", "memio.pet", "www.memio.pet",
+    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver", "no-limit.world", "www.no-limit.world", "memio.world", "www.memio.world", "memio.pet", "www.memio.pet", "memio.farm", "www.memio.farm",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     "intelligence",
     "einvoice",
     "limit_connect_ai",
+    "stolarija.apps.StolarijaConfig",
     "tax_wizard",
     "borg_ops",
     "komunalno",

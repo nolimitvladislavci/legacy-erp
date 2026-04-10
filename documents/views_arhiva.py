@@ -1,3 +1,4 @@
+from core.models import BookingSignature
 """Arhiva Views — Centralizirana arhiva svih dokumenata."""
 import csv
 import io
@@ -1215,6 +1216,12 @@ def arhiva_autocomplete(request):
 
 @login_required
 @require_POST
+def _audit_delete_entry(request, entry):
+    try:
+        BookingSignature.log(request, 'delete', target_obj=entry, target_repr=f'Delete: {entry.doc_number}')
+    except Exception:
+        pass
+
 def arhiva_delete_entry(request, pk):
     """AJAX: Obrisi arhivski zapis. Instant delete bez refresha."""
     company = get_user_company(request)
@@ -1511,30 +1518,29 @@ def arhiva_upute_koristenje(request):
 
 @login_required
 def moji_komitenti(request):
-    """Radnica vidi listu svojih komitenata iz stola."""
-    from companies.models import Company, KonjikStol
+    """Radnica vidi listu svojih komitenata iz Workspace-a."""
+    from companies.models import Company, Workspace
     from accounts.models import CompanyMembership
     from documents.models import ArhivaEntry
     from django.db.models import Count, Q
 
     company = get_user_company(request)
 
-    # Pronadji stol radnice
-    stol = KonjikStol.objects.filter(
-        referent=request.user, ured=company, aktivan=True
+    # Workspace je jedini izvor klijenata
+    ws = Workspace.objects.filter(
+        workers=request.user, is_active=True
     ).first()
 
-    # Komitenti iz stola, ili iz membershipa ako nema stola
-    if stol:
-        komitenti_qs = stol.komitenti.all().order_by('name')
-        stol_naziv = stol.naziv or 'Stol %d' % stol.broj
+    if ws:
+        komitenti_qs = ws.clients.all().order_by('name')
+        stol_naziv = ws.name
     else:
-        # Fallback: sve firme iz membershipa osim matice
-        mem_ids = CompanyMembership.objects.filter(
+        # Fallback: membership (korisnici bez workspace-a)
+        mem_ids = CompanyMembership.objects.unscoped().filter(
             user=request.user, is_active=True
         ).exclude(company=company).values_list('company_id', flat=True)
         komitenti_qs = Company.objects.filter(id__in=mem_ids).order_by('name')
-        stol_naziv = 'Bez stola'
+        stol_naziv = 'Bez radnog prostora'
 
     # Dodaj statistike po komitentu
     komitenti = []

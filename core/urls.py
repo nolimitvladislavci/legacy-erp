@@ -287,6 +287,7 @@ urlpatterns += i18n_patterns(
     path('superadmin/impersonate/<uuid:company_id>/', views.start_impersonation, name='start_impersonation'),
     path('superadmin/impersonate/stop/', views.stop_impersonation, name='stop_impersonation'),
     path('superadmin/promo/create/', views.superadmin_create_promo, name='superadmin_create_promo'),
+    path('stolarija/', include('stolarija.urls', namespace='stolarija')),
     path('accounts/', include('accounts.urls')),
     path('companies/', include('companies.urls')),
     path('partners/', include('partners.urls')),

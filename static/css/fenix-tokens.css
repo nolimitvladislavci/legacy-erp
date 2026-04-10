@@ -2757,3 +2757,164 @@ body.joker-active .shell-right { display: none !important; }
 [data-theme="dark"] .sidebar-brand { color: var(--white); }
 [data-theme="dark"] .sidebar a { color: var(--text-dim, #94a3b8); }
 [data-theme="dark"] .sidebar a:hover, [data-theme="dark"] .sidebar a.active { color: white; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FENIX FORM & CARD COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════
+   Used by stolarija module and future form-heavy modules.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container ────────────────────────────────────────────────────────── */
+.fx-container {
+    max-width: var(--content-max-width, 1200px);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+/* ── Card (alternative to fenix-* when you need header/body/footer) ─── */
+.fx-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+}
+
+.fx-card-header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+}
+
+.fx-card-body {
+    padding: var(--space-4);
+}
+
+.fx-card-footer {
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+
+/* ── Form Inputs (fenix-native, not Bootstrap) ────────────────────────── */
+.fx-input {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.fx-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.fx-input::placeholder {
+    color: var(--text-muted3);
+}
+
+select.fx-input {
+    appearance: auto;
+}
+
+textarea.fx-input {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* ── Form Label ───────────────────────────────────────────────────────── */
+.fx-label {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Form Group ───────────────────────────────────────────────────────── */
+.fx-mb-3 { margin-bottom: var(--space-3) !important; }
+
+/* ── Alert ────────────────────────────────────────────────────────────── */
+.fx-alert {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+}
+
+.fx-alert-success {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid rgba(16,185,129,0.2);
+}
+
+.fx-alert-error, .fx-alert-danger {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid rgba(239,68,68,0.2);
+}
+
+.fx-alert-warning {
+    background: var(--amber-dim);
+    color: var(--amber);
+    border: 1px solid rgba(245,158,11,0.2);
+}
+
+.fx-alert-info {
+    background: var(--blue-dim);
+    color: var(--blue);
+    border: 1px solid rgba(59,130,246,0.2);
+}
+
+/* ── Table (fenix-native) ─────────────────────────────────────────────── */
+.fx-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.fx-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+}
+
+.fx-table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: var(--font-size-base);
+}
+
+.fx-table tbody tr:hover {
+    background: rgba(201,168,76,0.03);
+}
+
+/* ── Padding/Margin shortcuts ─────────────────────────────────────────── */
+.fx-py-3 { padding-top: var(--space-3) !important; padding-bottom: var(--space-3) !important; }
+.fx-py-4 { padding-top: var(--space-4) !important; padding-bottom: var(--space-4) !important; }
+.fx-py-5 { padding-top: var(--space-5) !important; padding-bottom: var(--space-5) !important; }
+.fx-mb-0 { margin-bottom: 0 !important; }
+.fx-mb-1 { margin-bottom: var(--space-1) !important; }
+.fx-mb-2 { margin-bottom: var(--space-2) !important; }
+.fx-mb-4 { margin-bottom: var(--space-4) !important; }

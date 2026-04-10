@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Mjerenje — {{ session.address|default:"Nova lokacija" }}{% endblock %}
+{% block page_title %}📏 {{ session.address|default:"Mjerenje na terenu" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Mobile-first mjerenje */
+.confirm-box {
+  background: rgba(201,168,76,.08);
+  border: 2px solid var(--gold);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  display: none;
+}
+.confirm-dims {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+.confirm-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.voice-btn {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: none; cursor: pointer;
+  color: #0a0f1e;
+  font-size: 1.8rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+  transition: all .2s;
+  box-shadow: 0 4px 20px rgba(201,168,76,.4);
+}
+.voice-btn:active, .voice-btn.recording {
+  background: #e05555;
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(224,85,85,.5);
+}
+.voice-transcript {
+  min-height: 40px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .9rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.measurement-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.measurement-card.confirmed { border-color: rgba(34,197,94,.4); }
+.dim-display { font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+.confidence-bar { height: 4px; border-radius: 2px; background: var(--border); margin: 6px 0; }
+.confidence-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Glasovni unos -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-microphone me-2 fx-text-gold"></i> Glasovni unos
+    </div>
+    <div class="fx-card-body text-center">
+      <button class="voice-btn" id="voiceBtn" title="Pritisni i govori">
+        <i class="fas fa-microphone" id="voiceIcon"></i>
+      </button>
+      <div class="voice-transcript" id="voiceTranscript">
+        Pritisni mikrofon i govori npr: "prozor sto dvadeset puta sto četrdeset bijeli dvokrilni"
+      </div>
+
+      <!-- Vizualna potvrda — prikazuje se nakon parsiranja -->
+      <div class="confirm-box" id="confirmBox">
+        <div class="fx-text-muted fx-mb-2" style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px">
+          Provjeri dimenzije!
+        </div>
+        <div class="confirm-dims" id="confirmDims">— × —</div>
+        <div class="confirm-desc" id="confirmDesc"></div>
+        <div id="confirmWarnings" class="mt-2 text-warning" style="font-size:.82rem"></div>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button class="btn-gold" id="confirmOk" onclick="confirmAndFill()">
+            <i class="fas fa-check me-1"></i> TOČNO — popuni formu
+          </button>
+          <button class="btn btn-outline-secondary" onclick="resetVoice()">
+            <i class="fas fa-times me-1"></i> Poništi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forma za dodavanje mjerenja -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-plus-circle me-2 fx-text-gold"></i> Dodaj mjerenje
+    </div>
+    <div class="fx-card-body">
+      <form method="post" id="measureForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_measurement">
+        <input type="hidden" name="voice_raw" id="hidVoiceRaw">
+        <input type="hidden" name="ai_parsed" id="hidAiParsed" value="{}">
+
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="fx-label">Širina (mm) *</label>
+            <input type="number" name="width_mm" id="fWidth" class="fx-input"
+                   min="100" max="6000" required placeholder="npr. 1200">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Visina (mm) *</label>
+            <input type="number" name="height_mm" id="fHeight" class="fx-input"
+                   min="100" max="5000" required placeholder="npr. 1400">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Tip</label>
+            <select name="element_type" id="fType" class="fx-input">
+              {% for val, label in element_types %}
+              <option value="{{ val }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Konfiguracija</label>
+            <select name="wing_config" id="fWing" class="fx-input">
+              {% for val, label in wing_configs %}
+              <option value="{{ val }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Količina</label>
+            <input type="number" name="quantity" id="fQty" class="fx-input"
+                   min="1" max="99" value="1">
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Kat</label>
+            <input type="number" name="floor" class="fx-input" min="0" max="20" value="0">
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Dubina zida</label>
+            <input type="number" name="depth_mm" class="fx-input" min="0" placeholder="mm">
+          </div>
+          <div class="col-12">
+            <label class="fx-label">Lokacija (npr. "spavaća soba, sjever")</label>
+            <input type="text" name="location_note" class="fx-input" placeholder="Opcionalno">
+          </div>
+          {% if profiles %}
+          <div class="col-6">
+            <label class="fx-label">Profil</label>
+            <select name="profile" class="fx-input">
+              <option value="">— bez profila —</option>
+              {% for p in profiles %}
+              <option value="{{ p.pk }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          {% if glasses %}
+          <div class="col-6">
+            <label class="fx-label">Staklo</label>
+            <select name="glass" class="fx-input">
+              <option value="">— bez stakla —</option>
+              {% for g in glasses %}
+              <option value="{{ g.pk }}">{{ g.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+
+          <!-- Foto otvora -->
+          <div class="col-12">
+            <label class="fx-label">Foto otvora (opcionalno)</label>
+            <div class="d-flex gap-2 align-items-center">
+              <label class="btn btn-outline-secondary" style="cursor:pointer;margin:0">
+                <i class="fas fa-camera me-1"></i> Fotografiraj
+                <input type="file" name="photo_before" accept="image/*" capture="environment"
+                       id="fPhoto" class="d-none" onchange="previewPhoto(this)">
+              </label>
+              <img id="photoPreview" class="d-none" style="height:60px;border-radius:8px;border:1px solid var(--border)">
+              <span id="photoName" class="fx-text-muted" style="font-size:.78rem"></span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-gold w-100 mt-3" style="padding:14px;font-size:1rem" enctype="multipart/form-data">
+          <i class="fas fa-plus me-1"></i> Dodaj mjerenje ✓
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista mjerenja ove sesije -->
+  {% if measurements %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-list me-2"></i>
+      Mjerenja ({{ measurements.count }})
+    </div>
+    <div class="fx-card-body p-0">
+      {% for m in measurements %}
+      <div class="measurement-card {% if m.confirmed %}confirmed{% endif %}">
+        <div>
+          <div class="dim-display">Poz. {{ m.position_number }}: {{ m.width_mm }} × {{ m.height_mm }} mm</div>
+          <div class="fx-text-muted" style="font-size:.82rem">
+            {{ m.get_element_type_display }} • {{ m.get_wing_config_display }}
+            • × {{ m.quantity }} kom
+            {% if m.location_note %} • {{ m.location_note }}{% endif %}
+          </div>
+          <div class="fx-text-muted" style="font-size:.75rem">
+            Površina: {{ m.total_area_m2 }} m²
+            {% if m.confirmed %}<span class="text-success ms-2">✓ Potvrđeno</span>{% endif %}
+          </div>
+        </div>
+        <form method="post" action="{% url 'stolarija:measurement_delete' m.pk %}"
+              onsubmit="return confirm('Obriši ovo mjerenje?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="d-grid gap-2">
+    <a href="{% url 'stolarija:session_detail' session.pk %}" class="btn-gold text-center"
+       style="padding:14px;font-size:1rem;text-decoration:none;display:block">
+      <i class="fas fa-check-double me-1"></i> Završi mjerenje → Pregled
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+// ── Voice input ───────────────────────────────────────────────────────────────
+let recognition = null;
+let parsedData  = null;
+
+const voiceBtn         = document.getElementById('voiceBtn');
+const voiceIcon        = document.getElementById('voiceIcon');
+const voiceTranscript  = document.getElementById('voiceTranscript');
+const confirmBox       = document.getElementById('confirmBox');
+const confirmDims      = document.getElementById('confirmDims');
+const confirmDesc      = document.getElementById('confirmDesc');
+const confirmWarnings  = document.getElementById('confirmWarnings');
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'hr-HR';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = function() {
+    voiceBtn.classList.add('recording');
+    voiceIcon.className = 'fas fa-stop';
+    voiceTranscript.textContent = '🎙 Slušam...';
+  };
+
+  recognition.onresult = function(e) {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    voiceTranscript.textContent = transcript;
+    if (e.results[e.results.length - 1].isFinal) {
+      sendToParser(transcript);
+    }
+  };
+
+  recognition.onend = function() {
+    voiceBtn.classList.remove('recording');
+    voiceIcon.className = 'fas fa-microphone';
+  };
+
+  voiceBtn.onclick = function() {
+    if (voiceBtn.classList.contains('recording')) {
+      recognition.stop();
+    } else {
+      resetVoice();
+      recognition.start();
+    }
+  };
+} else {
+  voiceBtn.title = 'Glasovni unos nije podržan u ovom pregledniku';
+  voiceBtn.style.opacity = '.4';
+}
+
+function sendToParser(text) {
+  fetch("{% url 'stolarija:voice_parse' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({text: text})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.ok) { voiceTranscript.textContent = 'Greška: ' + data.error; return; }
+    parsedData = data;
+    const d = data.display;
+    confirmDims.textContent = d.width + ' × ' + d.height;
+    confirmDesc.textContent = d.type + ' • ' + d.wing + ' • × ' + d.qty + ' kom';
+    confirmWarnings.textContent = data.warnings.length ? '⚠ ' + data.warnings.join(' | ') : '';
+    confirmBox.style.display = 'block';
+    document.getElementById('hidVoiceRaw').value = data.parsed.raw;
+    document.getElementById('hidAiParsed').value = JSON.stringify(data.parsed);
+  })
+  .catch(err => { voiceTranscript.textContent = 'Greška: ' + err; });
+}
+
+function confirmAndFill() {
+  if (!parsedData) return;
+  const p = parsedData.parsed;
+  if (p.width_mm)  document.getElementById('fWidth').value  = p.width_mm;
+  if (p.height_mm) document.getElementById('fHeight').value = p.height_mm;
+  if (p.quantity)  document.getElementById('fQty').value    = p.quantity;
+  if (p.element_type) {
+    const sel = document.getElementById('fType');
+    for (let o of sel.options) { if (o.value === p.element_type) { o.selected = true; break; } }
+  }
+  if (p.wing_config) {
+    const sel = document.getElementById('fWing');
+    for (let o of sel.options) { if (o.value === p.wing_config) { o.selected = true; break; } }
+  }
+  confirmBox.style.display = 'none';
+  document.getElementById('fWidth').focus();
+}
+
+function resetVoice() {
+  parsedData = null;
+  confirmBox.style.display = 'none';
+  voiceTranscript.textContent = 'Pritisni mikrofon i govori...';
+}
+</script>
+
+<script>
+function previewPhoto(input) {
+  var preview = document.getElementById('photoPreview');
+  var nameEl = document.getElementById('photoName');
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+      nameEl.textContent = input.files[0].name;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

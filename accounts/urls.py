@@ -1,3 +1,4 @@
+from django.views.generic import RedirectView
 from django.urls import path
 
 from . import views
@@ -31,6 +32,7 @@ urlpatterns = [
     path('trikey/passkey/complete/', trikey_views.passkey_register_complete, name='passkey_complete'),
     path('trikey/business-key/', trikey_views.business_key_register, name='business_key_register'),
     path('trikey/status/', trikey_views.trikey_status, name='trikey_status'),
-    path('odaberi-komitente/', views.odaberi_komitente, name='odaberi_komitente'),
     path('api/oib-lookup/', trikey_views.api_oib_lookup, name='api_oib_lookup'),
+    # Legacy redirect
+    path('odaberi-komitente/', RedirectView.as_view(url='/hr/companies/workspace/', permanent=True)),
 ]

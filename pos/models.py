@@ -23,6 +23,13 @@ class POSTerminal(models.Model):
         related_name='pos_terminals',
         verbose_name=_('Tvrtka'),
     )
+    workspace = models.ForeignKey(
+        'companies.Workspace', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='terminals',
+        verbose_name='Radni prostor (lokacija)',
+        help_text='Workspace type=PREMISE za fizičku lokaciju terminala',
+    )
     objects = CompanyManager()
     business_location = models.ForeignKey(
         'invoicing.BusinessLocation', on_delete=models.SET_NULL,

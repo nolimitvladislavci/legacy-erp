@@ -129,6 +129,7 @@ class CompanySubscription(models.Model):
         ('enterprise', 'Enterprise'),
         ('micro', 'Micro'),
         ('distributor', 'Distributor'),
+        ('archive_readonly', 'Arhiva (read-only)'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

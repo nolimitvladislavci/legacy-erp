@@ -1,3 +1,4 @@
+from django.views.generic import RedirectView
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
@@ -10,14 +11,14 @@ router.register(r"api", views.CompanyViewSet)
 app_name = "companies"
 
 urlpatterns = [
-    path('stolovi/', views.konjik_stolovi, name='stolovi'),
 
     # ── Workspace ──
     path('workspace/', views.workspace_home, name='workspace_home'),
+    # Legacy redirects
+    path('stolovi/', RedirectView.as_view(pattern_name='companies:workspace_admin', permanent=True)),
     path('workspace/admin/', views.workspace_admin, name='workspace_admin'),
     path('workspace/switch/<int:ws_id>/', views.workspace_switch, name='workspace_switch'),
     path('workspace/enter/<uuid:client_id>/', views.workspace_enter_client, name='workspace_enter_client'),
-    path('stolovi/api/', views.konjik_stolovi_api, name='stolovi_api'),
     path("", views.company_list, name="list"),
     path("new/", views.company_create, name="create"),
     path("<str:pk>/edit/", views.company_edit, name="edit"),

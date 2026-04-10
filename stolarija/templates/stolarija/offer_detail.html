@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ offer.offer_number }} — Ponuda{% endblock %}
+{% block page_title %}📄 {{ offer.offer_number }}{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Status ponude -->
+  <div class="fx-card fx-mb-3" style="border-top: 3px solid var(--gold)">
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h3 class="fx-fw-bold fx-text-gold fx-mb-1">{{ offer.offer_number }}</h3>
+          <div class="fx-text-muted" style="font-size:.85rem">
+            Kreirana: {{ offer.created_at|date:"d.m.Y H:i" }}
+            &nbsp;|&nbsp; Valjanost: {{ offer.valid_days }} dana
+          </div>
+        </div>
+        <span class="badge fs-6
+          {% if offer.status == 'accepted' %}bg-success
+          {% elif offer.status == 'rejected' %}bg-danger
+          {% elif offer.status == 'sent' %}bg-info
+          {% else %}bg-secondary{% endif %}">
+          {{ offer.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stavke iz mjerenja -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-list me-2 fx-text-gold"></i>
+      Stavke ponude
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Opis</th>
+              <th class="text-center">Dim. (mm)</th>
+              <th class="text-center">Kom</th>
+              <th class="text-center">Površina</th>
+              <th class="text-end">Cijena</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in measurements %}
+            <tr>
+              <td class="fx-text-gold fw-bold">Poz. {{ m.position_number }}</td>
+              <td>
+                <strong>{{ m.get_element_type_display }}</strong>
+                — {{ m.get_wing_config_display }}
+                {% if m.profile %}<br><small class="fx-text-muted">{{ m.profile }}</small>{% endif %}
+                {% if m.glass %}<br><small class="fx-text-muted">{{ m.glass }}</small>{% endif %}
+                {% if m.location_note %}<br><small class="fx-text-muted">{{ m.location_note }}</small>{% endif %}
+              </td>
+              <td class="text-center fx-text-gold fw-bold">{{ m.width_mm }} × {{ m.height_mm }}</td>
+              <td class="text-center">{{ m.quantity }}</td>
+              <td class="text-center">{{ m.total_area_m2 }} m²</td>
+              <td class="text-end">
+                {% if m.calculate_price %}
+                  {{ m.calculate_price }} €
+                {% else %}
+                  <span class="fx-text-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financijski sažetak -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-body">
+      <div class="row">
+        <div class="col-md-6 offset-md-6">
+          <table class="table table-sm fx-mb-0">
+            <tr>
+              <td class="fx-text-muted">Neto (bez PDV):</td>
+              <td class="text-end fw-bold">{{ offer.total_net }} €</td>
+            </tr>
+            <tr>
+              <td class="fx-text-muted">PDV (25%):</td>
+              <td class="text-end">{{ offer.total_vat }} €</td>
+            </tr>
+            <tr class="border-top">
+              <td class="fw-bold fx-text-gold">UKUPNO:</td>
+              <td class="text-end fw-bold fx-text-gold" style="font-size:1.2rem">
+                {{ offer.total_gross }} €
+              </td>
+            </tr>
+            <tr>
+              <td class="fx-text-muted">Avans ({{ offer.advance_pct }}%):</td>
+              <td class="text-end">{{ advance_amount }} €</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if offer.notes %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-body">
+      <strong class="fx-text-muted d-block mb-1">Napomene:</strong>
+      {{ offer.notes }}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Potpis klijenta -->
+  {% if offer.status == 'sent' or offer.status == 'draft' %}
+  <div class="fx-card fx-mb-3" id="signSection">
+    <div class="fx-card-header">
+      <i class="fas fa-signature me-2 fx-text-gold"></i> Potpis klijenta
+    </div>
+    <div class="fx-card-body">
+      <div class="fx-mb-3">
+        <label class="fx-label">Ime i prezime potpisnika</label>
+        <input type="text" id="sigName" class="fx-input" placeholder="npr. Marko Markovic">
+      </div>
+      <div class="fx-mb-3">
+        <label class="fx-label">Potpis (nacrtajte prstom ili mišem)</label>
+        <canvas id="sigCanvas" width="400" height="150"
+          style="border:2px dashed var(--gold-border);border-radius:8px;background:rgba(255,255,255,.03);cursor:crosshair;display:block;width:100%;touch-action:none"></canvas>
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-sm btn-outline-secondary" onclick="clearSig()">
+            <i class="fas fa-eraser me-1"></i> Obriši
+          </button>
+          <button class="btn-gold btn-sm" onclick="submitSignature()">
+            <i class="fas fa-check me-1"></i> Prihvati ponudu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if offer.client_signature %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(34,197,94,.3)">
+    <div class="fx-card-body d-flex align-items-center gap-3">
+      <span class="badge bg-success fs-6"><i class="fas fa-check"></i> Potpisano</span>
+      <div>
+        <strong>{{ offer.signed_by_name }}</strong>
+        <div class="fx-text-muted" style="font-size:.82rem">{{ offer.signed_at|date:"d.m.Y H:i" }}</div>
+      </div>
+      <img src="{{ offer.client_signature }}" style="height:50px;margin-left:auto" alt="Potpis">
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Akcije -->
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'stolarija:session_detail' offer.session.pk %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Nazad
+    </a>
+    <button class="btn-gold" onclick="window.print()" style="padding:10px 20px">
+      <i class="fas fa-print me-1"></i> Ispis / PDF
+    </button>
+    <a href="{% url 'stolarija:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-home me-1"></i> Dashboard
+    </a>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  .fx-sidebar, nav, .fx-topbar, .d-flex.gap-2 { display: none !important; }
+  .fx-container { max-width: 100%; }
+  body { background: white !important; color: black !important; }
+  .fx-text-gold { color: #92650a !important; }
+  .fx-card { border: 1px solid #ddd !important; background: white !important; }
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Canvas signature
+var canvas = document.getElementById('sigCanvas');
+if (canvas) {
+  var ctx = canvas.getContext('2d');
+  var drawing = false;
+  var rect;
+
+  function getPos(e) {
+    rect = canvas.getBoundingClientRect();
+    var x, y;
+    if (e.touches) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+    else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+    // Scale to canvas coords
+    x = x * canvas.width / rect.width;
+    y = y * canvas.height / rect.height;
+    return {x: x, y: y};
+  }
+
+  canvas.addEventListener('mousedown', function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); });
+  canvas.addEventListener('mouseup', function() { drawing = false; });
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); }, {passive:false});
+  canvas.addEventListener('touchend', function() { drawing = false; });
+}
+
+function clearSig() {
+  if (canvas) { var ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+}
+
+function submitSignature() {
+  var name = document.getElementById('sigName').value.trim();
+  if (!name) { alert('Unesite ime potpisnika'); return; }
+  var dataUrl = canvas.toDataURL('image/png');
+  // Check if anything was drawn
+  var blank = document.createElement('canvas');
+  blank.width = canvas.width; blank.height = canvas.height;
+  if (canvas.toDataURL() === blank.toDataURL()) { alert('Nacrtajte potpis'); return; }
+
+  fetch('/hr/stolarija/ponuda/{{ offer.pk }}/sign/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+    body: JSON.stringify({name: name, signature: dataUrl})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok) { location.reload(); }
+    else { alert(d.error || 'Greska'); }
+  });
+}
+</script>
+{% endblock %}

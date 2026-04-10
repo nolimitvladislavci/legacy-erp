@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Primopredaja — {{ session.address }}{% endblock %}
+{% block page_title %}🤝 Primopredaja{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:600px">
+
+  <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+    <div class="fx-card-body">
+      <h3 class="fx-fw-bold fx-text-gold fx-mb-1">Primopredaja stolarije</h3>
+      <div class="fx-text-muted" style="font-size:.85rem">
+        {{ session.address }} · {{ session.created_at|date:"d.m.Y" }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pozicije -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-list me-2 fx-text-gold"></i> Pozicije ({{ measurements.count }})
+    </div>
+    <div class="fx-card-body p-0">
+      {% for m in measurements %}
+      <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <div>
+          <strong class="fx-text-gold">Poz. {{ forloop.counter }}:</strong>
+          {{ m.get_element_type_display }} {{ m.width_mm }}×{{ m.height_mm }}mm
+          × {{ m.quantity }} kom
+          {% if m.location_note %}<br><small class="fx-text-muted">{{ m.location_note }}</small>{% endif %}
+        </div>
+        <span class="badge bg-success"><i class="fas fa-check"></i></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Garancija -->
+  <div class="fx-card fx-mb-3" style="border-color:rgba(34,197,94,.3)">
+    <div class="fx-card-body text-center">
+      <div style="font-size:3rem;margin-bottom:8px">🛡️</div>
+      <h4 class="fx-fw-bold">Garancija: {{ warranty.warranty_number }}</h4>
+      <div class="fx-text-muted">{{ warranty.valid_years }} godina · QR token: {{ warranty.qr_token|truncatechars:12 }}</div>
+      {% if warranty.handover_date %}
+      <div class="mt-2">
+        <span class="badge bg-success fs-6">Primopredano {{ warranty.handover_date|date:"d.m.Y" }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not warranty.handover_date %}
+  <!-- Forma za primopredaju -->
+  <div class="fx-card">
+    <div class="fx-card-header">
+      <i class="fas fa-clipboard-check me-2 fx-text-gold"></i> Zavrsi primopredaju
+    </div>
+    <div class="fx-card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="complete_handover">
+        <div class="fx-mb-3">
+          <label class="fx-label">Napomene</label>
+          <textarea name="notes" class="fx-input" rows="3" placeholder="Stanje stolarije, primjedbe kupca..."></textarea>
+        </div>
+        <div class="fx-mb-3">
+          <label class="fx-label">Foto primopredaje</label>
+          <input type="file" name="photo" accept="image/*" capture="environment" class="fx-input">
+        </div>
+        <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1rem">
+          <i class="fas fa-check-double me-1"></i> Zavrsi primopredaju
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
