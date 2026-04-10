@@ -1,0 +1,56 @@
+{% load i18n %}
+{# Dashboard — Right Context Panel #}
+{# Include: {% block shell_right_content %}{% include "includes/_shell_right_dashboard.html" %}{% endblock %} #}
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Aktivna tvrtka" %}</div>
+    <div class="shell-detail-value">{{ request.company.name|default:"—" }}</div>
+</div>
+
+{% if request.user.is_staff %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Danas" %}</div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Fakture" %}</span>
+        <span class="fx-fw-bold">{{ inv_count_today|default:"0" }}</span>
+    </div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "POS bona" %}</span>
+        <span class="fx-fw-bold">{{ pos_count_today|default:"0" }}</span>
+    </div>
+    <div class="d-flex justify-content-between fx-fs-sm">
+        <span class="fx-text-dim">{% trans "Promet" %}</span>
+        <span class="fx-fw-bold fx-text-green">{{ combined_today|floatformat:2|default:"0.00" }} &euro;</span>
+    </div>
+</div>
+{% endif %}
+
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-brain"></i> {% trans "AI Assist" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Kliknite na modul ili komponentu za kontekstualne informacije i AI analizu." %}</p>
+</div>
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'invoicing:invoice_create' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-plus fx-text-gold"></i> {% trans "Nova faktura" %}
+        </a>
+        <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-archive fx-text-gold"></i> {% trans "Arhiva" %}
+        </a>
+        <a href="{% url 'partners:list' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-users fx-text-gold"></i> {% trans "Partneri" %}
+        </a>
+    </div>
+</div>
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Shortcuts" %}</div>
+    <div class="fx-text-dim fx-fs-xs">
+        <div class="d-flex justify-content-between fx-mb-1"><span>Ctrl+K</span><span>{% trans "Pretraga" %}</span></div>
+        <div class="d-flex justify-content-between fx-mb-1"><span>Ctrl+B</span><span>{% trans "Sidebar" %}</span></div>
+        <div class="d-flex justify-content-between fx-mb-1"><span>Ctrl+.</span><span>{% trans "Ovaj panel" %}</span></div>
+        <div class="d-flex justify-content-between"><span>Esc</span><span>{% trans "Zatvori" %}</span></div>
+    </div>
+</div>

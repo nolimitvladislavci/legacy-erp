@@ -2,8 +2,8 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --ink: #0a0f1e; --gold: var(--gold); --accent: var(--gold);
-  --border: #2a2f45; --muted: var(--muted2); --surface: #111827;
+  --ink: #0a0f1e; --gold: #c9a84c; --accent: #c9a84c;
+  --border: #2a2f45; --muted: #64748b; --surface: #111827;
 }
 body {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
@@ -40,12 +40,12 @@ body {
 .field { margin-bottom: 16px; }
 .field label { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .field input {
-  width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border); border-radius: 8px; color: white;
+  width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.12);
+  border: 1px solid var(--border); border-radius: 8px; color: #ffffff !important; caret-color: #c9a84c; -webkit-text-fill-color: #ffffff;
   font-size: 0.9rem; font-family: 'Barlow', sans-serif; transition: border-color 0.2s; outline: none;
 }
-.field input:focus { border-color: var(--gold); background: rgba(201,168,76,0.06); }
-.field input::placeholder { color: #374151; }
+.field input:focus { border-color: var(--gold); background: rgba(201,168,76,0.12); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+.field input::placeholder { color: #6b7280; }
 
 .btn-primary {
   width: 100%; padding: 13px; background: var(--accent); color: white;
@@ -61,7 +61,7 @@ body {
 
 .btn-sso {
   width: 100%; padding: 11px; background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border); border-radius: 8px; color: white;
+  border: 1px solid var(--border); border-radius: 8px; color: #ffffff !important; caret-color: #c9a84c; -webkit-text-fill-color: #ffffff;
   font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.82rem;
   cursor: pointer; transition: all 0.15s; text-decoration: none;
   display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;
@@ -74,7 +74,7 @@ body {
 
 .messages { margin-bottom: 16px; }
 .msg { padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 6px; }
-.msg.error { background: rgba(220,38,38,0.15); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; }
+.msg.error { background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.5); color: #fecaca; font-weight: 600; }
 .msg.success { background: rgba(22,163,74,0.15); border: 1px solid rgba(22,163,74,0.3); color: #86efac; }
 .msg.info { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
 
@@ -88,7 +88,7 @@ body {
 .pwd-wrap{position:relative;display:block}
 .pwd-wrap input{width:100%;padding-right:40px;box-sizing:border-box}
 .pwd-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);
-background:none;border:none;cursor:pointer;color:var(--gold,var(--gold));font-size:18px;padding:0}
+background:none;border:none;cursor:pointer;color:var(--gold);font-size:18px;padding:0}
 
 /* F1 Audit: Login mobile fixes */
 @media(max-width:480px){
@@ -99,4 +99,33 @@ background:none;border:none;cursor:pointer;color:var(--gold,var(--gold));font-si
   .field input{padding:14px;font-size:1rem}
   .btn-primary{padding:14px;font-size:.9rem}
   .role-badges{display:none}
+}
+
+/* Force visible text in ALL inputs — nuclear option */
+.field input,
+.card input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #c9a84c !important;
+}
+
+/* Autofill override — Chrome/Safari inject their own bg+color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #111827 inset !important;
+    box-shadow: 0 0 0px 1000px #111827 inset !important;
+    caret-color: #c9a84c !important;
+}
+
+/* PIN input (trikey tab) */
+input.text-center {
+    color: #c9a84c !important;
+    -webkit-text-fill-color: #c9a84c !important;
 }

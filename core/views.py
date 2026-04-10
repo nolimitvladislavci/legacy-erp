@@ -141,6 +141,8 @@ def login_view(request):
             from django.contrib.auth import logout as _logout
             _logout(request)
         else:
+            if request.user.is_superuser:
+                return redirect('superadmin_dashboard')
             return redirect('dashboard')
 
     if request.method == 'POST':
@@ -2464,7 +2466,7 @@ def smart_home(request):
     user = request.user
 
     if user.is_superuser:
-        return redirect('control_tower')
+        return redirect("superadmin_dashboard")
 
     # ── Workspace check — ako radnik ima workspace, ide tamo ──
     from companies.models import Workspace

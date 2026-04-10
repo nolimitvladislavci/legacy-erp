@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Superadmin – LIMIT CONNECT
+{% block title %}Superadmin – LIMIT CONNECT{% endblock %}
+{% block page_title %}👑 Superadmin{% endblock %}
+{% block content %}
 <!-- Company Subscriptions and Recent Registrations -->
 {% if company_subs %}
 <div class="stat-card mt-3">
@@ -109,10 +111,6 @@
 </div>
 {% endif %}
 
-{% endblock %}
-{% block page_title %}👑 Superadmin{% endblock %}
-
-{% block content %}
 <link rel="stylesheet" href="/static/css/apps/dashboard.css">
 <div class="mb-3"><a href="{% url 'cross_company_dashboard' %}" class="btn fx-text-dark fx-fw-bold fx-bg-gold"><i class="fas fa-globe me-1"></i>Cross-Company Dashboard — Dugovi po OIB-u</a></div>
 

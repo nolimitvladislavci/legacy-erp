@@ -207,12 +207,12 @@ def send_magic_link(request):
         except User.DoesNotExist:
             # Ne otkrivaj postoji li email
             messages.success(request, _('Ako email postoji, link je poslan.'))
-            return redirect('smart_login')
+            return redirect('login')
 
         # Rate limiting za magic linkove
         if LoginAttempt.is_blocked(ip, email, max_attempts=3, minutes=10):
             messages.error(request, _('Previše zahtjeva. Pričekajte 10 minuta.'))
-            return redirect('smart_login')
+            return redirect('login')
 
         try:
             profile = user.userprofile
@@ -261,9 +261,9 @@ LIMIT CONNECT | Visković Group
             email=email, ip_address=ip, success=True, method='magic'
         )
         messages.success(request, _(f'Link za pristup poslan na {email}. Vrijedi 24 sata.'))
-        return redirect('smart_login')
+        return redirect('login')
 
-    return redirect('smart_login')
+    return redirect('login')
 
 
 # ── MAGIC LINK - PROVJERA I LOGIN
@@ -275,11 +275,11 @@ def verify_magic_link(request, token):
         magic = MagicToken.objects.select_related('user').get(token=token)
     except MagicToken.DoesNotExist:
         messages.error(request, _('Link nije valjan ili je istekao.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     if not magic.is_valid:
         messages.error(request, _('Link je istekao ili je već iskorišten. Zatražite novi.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     # Iskoristi token
     magic.mark_used(ip=ip)
@@ -287,7 +287,7 @@ def verify_magic_link(request, token):
     user = magic.user
     if not user.is_active:
         messages.error(request, _('Korisnički račun nije aktivan.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     # Login bez lozinke
     user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -381,7 +381,7 @@ def verify_2fa(request):
     """Provjera 2FA koda pri prijavi — rate limited (5/10min)"""
     user_id = request.session.get('pending_2fa_user')
     if not user_id:
-        return redirect('smart_login')
+        return redirect('login')
 
     if request.method == 'POST':
         import pyotp
@@ -410,7 +410,7 @@ def verify_2fa(request):
                 messages.error(request, _('Pogrešan kod. Pokušajte ponovo.'))
         except Exception as e:
             messages.error(request, _('Greška provjere.'))
-            return redirect('smart_login')
+            return redirect('login')
 
     return render(request, 'accounts/verify_2fa.html')
 
@@ -433,7 +433,7 @@ def forgot_password(request):
         except User.DoesNotExist:
             pass
         messages.success(request, _('Ako email postoji, link za reset je poslan.'))
-        return redirect('smart_login')
+        return redirect('login')
     return render(request, 'accounts/forgot_password.html')
 
 
@@ -452,7 +452,7 @@ def password_reset_confirm(request):
             request.user.save()
             messages.success(request, _('✓ Lozinka promijenjena! Prijavite se s novom lozinkom.'))
             logout(request)
-            return redirect('smart_login')
+            return redirect('login')
     return render(request, 'accounts/password_reset_confirm.html')
 
 
@@ -461,7 +461,7 @@ def google_login(request):
     """Inicira Google OAuth2 flow"""
     if not hasattr(settings, 'GOOGLE_CLIENT_ID'):
         messages.error(request, _('Google login nije konfiguriran.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     state = secrets.token_urlsafe(16)
     request.session['oauth_state'] = state
@@ -488,7 +488,7 @@ def google_callback(request):
 
     if state != request.session.get('oauth_state'):
         messages.error(request, _('OAuth state mismatch.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     redirect_uri = request.build_absolute_uri('/auth/google/callback/')
 
@@ -523,7 +523,7 @@ def google_callback(request):
 
         if not user.is_active:
             messages.error(request, _('Korisnički račun nije aktivan.'))
-            return redirect('smart_login')
+            return redirect('login')
 
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
@@ -534,14 +534,14 @@ def google_callback(request):
     except Exception as e:
         logger.error(f"Google OAuth greška: {e}")
         messages.error(request, _('Greška Google prijave. Pokušajte ponovo.'))
-        return redirect('smart_login')
+        return redirect('login')
 
 
 # ── MICROSOFT SSO (OAuth2)
 def microsoft_login(request):
     if not hasattr(settings, 'MICROSOFT_CLIENT_ID'):
         messages.error(request, _('Microsoft login nije konfiguriran.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     state = secrets.token_urlsafe(16)
     request.session['ms_oauth_state'] = state
@@ -569,7 +569,7 @@ def microsoft_callback(request):
 
     if state != request.session.get('ms_oauth_state'):
         messages.error(request, _('OAuth state mismatch.'))
-        return redirect('smart_login')
+        return redirect('login')
 
     redirect_uri = request.build_absolute_uri('/auth/microsoft/callback/')
 
@@ -601,7 +601,7 @@ def microsoft_callback(request):
 
         if not user.is_active:
             messages.error(request, _('Korisnički račun nije aktivan.'))
-            return redirect('smart_login')
+            return redirect('login')
 
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
@@ -612,7 +612,7 @@ def microsoft_callback(request):
     except Exception as e:
         logger.error(f"Microsoft OAuth greška: {e}")
         messages.error(request, _('Greška Microsoft prijave.'))
-        return redirect('smart_login')
+        return redirect('login')
 
 
 # ── API ZA MAGIC LINK SLANJE (iz ERP-a / viskovic-group.de)
@@ -700,7 +700,7 @@ def smart_logout(request):
         except Exception:
             pass
     logout(request)
-    return redirect('smart_login')
+    return redirect('login')
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -898,12 +898,12 @@ def device_token_auto_login(request):
 
     token_uuid = request.GET.get('token', '')
     if not token_uuid:
-        return redirect('smart_login')
+        return redirect('login')
 
     dt = DeviceToken.objects.filter(token=token_uuid, is_active=True).select_related('user', 'company').first()
     if not dt:
         messages.error(request, 'Token nije valjan ili je deaktiviran.')
-        return redirect('smart_login')
+        return redirect('login')
 
     # Login
     dt.user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -1095,10 +1095,10 @@ def verify_email(request, token):
         messages.success(request, f'✓ {message}')
         if request.user.is_authenticated:
             return redirect('/')
-        return redirect('smart_login')
+        return redirect('login')
     else:
         messages.warning(request, message)
-        return redirect('smart_login')
+        return redirect('login')
 
 
 @login_required

@@ -8,6 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/login.css">
 <style>
+        :root {
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --gold: #c9a84c;
+            --gold2: #e8c96a;
+            --red: #f87171;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --border: #334155;
+            --border2: #2a2f45;
+            --surface: #1e293b;
+            --surface2: #111827;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --black: #0a0a0a;
+            --white: #f0ede8;
+            --muted: #64748b;
+            --muted2: #94a3b8;
+        }
+
   .pin-input {
     display: flex;
     gap: 8px;
@@ -20,10 +42,13 @@
     text-align: center;
     font-size: 1.4rem;
     font-weight: 600;
-    background: var(--ink, #1a1a2e);
+    background: #0f172a;
     border: 1px solid var(--border, #334155);
     border-radius: 8px;
-    color:var(--white);
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 1.6rem;
+    border: 2px solid #334155;
     caret-color: var(--gold, #c9a84c);
     transition: border-color 0.2s;
   }
@@ -61,7 +86,19 @@
     color: var(--gold, #c9a84c);
   }
   #pin-hidden { position: absolute; opacity: 0; pointer-events: none; }
-</style>
+
+        /* Ensure visible input text */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 

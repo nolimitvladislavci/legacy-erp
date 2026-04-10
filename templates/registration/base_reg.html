@@ -60,6 +60,7 @@
   .glang-btn { padding:4px 8px; border:1px solid #333; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:.75rem; transition:all .2s; }
   .glang-btn:hover { border-color:var(--gold); color:var(--gold); }
   .glang-btn.active { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
+/* Force visible text in all inputs */.reg-input, .se-input, input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {    color: #ffffff !important;    -webkit-text-fill-color: #ffffff !important;    caret-color: #c9a84c !important;}input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {    -webkit-text-fill-color: #ffffff !important;    -webkit-box-shadow: 0 0 0px 1000px #111214 inset !important;    caret-color: #c9a84c !important;}
 </style>
 {% block extra_css %}{% endblock %}
 </head>

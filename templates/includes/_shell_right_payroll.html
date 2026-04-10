@@ -1,0 +1,22 @@
+{% load i18n %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'payroll:new' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi obračun" %}
+        </a>
+    </div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-calculator"></i> {% trans "Info" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Obračun plaća s automatskim izračunom poreza, doprinosa i neto iznosa. Podržava HR i DE zakonodavstvo." %}</p>
+</div>
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Statusi" %}</div>
+    <div class="fx-text-dim fx-fs-xs">
+        <div class="d-flex fx-gap-2 align-items-center fx-mb-1"><span class="fenix-badge fenix-badge-warning">DRAFT</span> {% trans "U izradi" %}</div>
+        <div class="d-flex fx-gap-2 align-items-center fx-mb-1"><span class="fenix-badge fenix-badge-info">LOCKED</span> {% trans "Zaključano" %}</div>
+        <div class="d-flex fx-gap-2 align-items-center fx-mb-1"><span class="fenix-badge fenix-badge-success">FINALIZED</span> {% trans "Finalizirano" %}</div>
+        <div class="d-flex fx-gap-2 align-items-center"><span class="fenix-badge fenix-badge-gold">PAID</span> {% trans "Isplaćeno" %}</div>
+    </div>
+</div>

@@ -37,7 +37,19 @@ h1 { font-size:1.5rem; }
 .msg { padding:0.75rem 1rem; border-radius:6px; margin-bottom:0.5rem; font-size:0.875rem; }
 .msg.success { background:rgba(76,175,125,0.1); border:1px solid var(--success); color:var(--success); }
 .msg.error { background:rgba(224,92,92,0.1); border:1px solid var(--error); color:var(--error); }
-</style>
+
+        /* Visible input text — all browsers */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 <div class="topbar">

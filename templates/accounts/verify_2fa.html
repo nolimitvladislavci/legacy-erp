@@ -6,6 +6,28 @@
 <title>{% trans "2FA provjera – LIMIT CONNECT" %}</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
+        :root {
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --gold: #c9a84c;
+            --gold2: #e8c96a;
+            --red: #f87171;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --border: #334155;
+            --border2: #2a2f45;
+            --surface: #1e293b;
+            --surface2: #111827;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --black: #0a0a0a;
+            --white: #f0ede8;
+            --muted: #64748b;
+            --muted2: #94a3b8;
+        }
+
 * { margin:0; padding:0; box-sizing:border-box; }
 body { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0a0f1e; font-family:'Syne',sans-serif; }
 .card { background:var(--bg-card); border:1px solid #2a2f45; border-radius:16px; padding:40px; text-align:center; max-width:360px; width:100%; }
@@ -13,10 +35,22 @@ h2 { color:var(--text); font-size:1.2rem; margin-bottom:8px; }
 p { color:var(--text-dim); font-size:0.82rem; margin-bottom:24px; }
 input { width:100%; padding:16px; background:rgba(255,255,255,0.05); border:1px solid #2a2f45; border-radius:8px; color:var(--text); font-size:1.8rem; text-align:center; letter-spacing:10px; outline:none; font-family:monospace; }
 input:focus { border-color:#1d4ed8; }
-button { width:100%; margin-top:16px; padding:13px; background:#1d4ed8; color:var(--text); border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; letter-spacing:1px; cursor:pointer; }
+button { width:100%; margin-top:16px; padding:13px; background:#1d4ed8; color:#000; border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; letter-spacing:1px; cursor:pointer; }
 .back { display:block; margin-top:16px; color:var(--text-dim); font-size:0.75rem; text-decoration:none; }
-.back:hover { color:var(--text); }
-</style>
+.back:hover { color:#000; }
+
+        /* Ensure visible input text */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 <div class="card">

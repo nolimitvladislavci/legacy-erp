@@ -13,9 +13,11 @@ from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, dumps, loads
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 
+@ensure_csrf_cookie
 def pocni(request):
     """
     GET  → prikazuje stranicu s email poljem
@@ -36,6 +38,7 @@ def pocni(request):
     })
 
 
+@csrf_exempt
 @require_POST
 def api_detect_email(request):
     """
@@ -81,22 +84,32 @@ def api_detect_email(request):
 
 def _send_magic_link(user, request):
     token = dumps({'user_id': user.pk}, key=settings.SECRET_KEY, salt='magic-login')
-    link = request.build_absolute_uri(f'/pocni/magic/{token}/')
+    safe_token = token.replace(':', '~')  # colons break email links
+    link = request.build_absolute_uri(f'/pocni/magic/{safe_token}/')
     send_mail(
         subject='Vaš pristup — LIMIT Connect',
         message=f'Kliknite link za ulaz u portal:\n{link}\n\nLink je valjan 24 sata.',
         from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@limit-connect.com'),
         recipient_list=[user.email],
+        html_message=f'<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:2rem">' \
+            f'<h2 style="color:#c9a84c">LIMIT Connect</h2>' \
+            f'<p>Kliknite gumb za pristup portalu:</p>' \
+            f'<p style="margin:1.5rem 0"><a href="{link}" style="display:inline-block;padding:14px 28px;background:#c9a84c;color:#000;text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem">Uđi u portal →</a></p>' \
+            f'<p style="color:#888;font-size:.85rem">Link vrijedi 24 sata.</p>' \
+            f'<p style="color:#888;font-size:.75rem">Ili kopirajte: {link}</p></div>',
         fail_silently=True,
     )
 
 
 def magic_login(request, token):
     """One-click login via signed token (24h TTL)."""
+    token = token.replace('~', ':')  # restore colons from email-safe format
     try:
         data = loads(token, key=settings.SECRET_KEY, salt='magic-login', max_age=86400)
         user = User.objects.get(pk=data['user_id'])
         login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
+        if user.is_superuser:
+            return redirect('/hr/superadmin/')
         return redirect('/hr/dashboard/')
     except (BadSignature, SignatureExpired, User.DoesNotExist):
         return render(request, 'registration/smart_entry.html', {

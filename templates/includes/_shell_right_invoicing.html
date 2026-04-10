@@ -1,0 +1,50 @@
+{% load i18n %}
+{# Invoicing — Right Context Panel #}
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Pregled" %}</div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Ukupno" %}</span>
+        <span class="fx-fw-bold">{{ total_eur|floatformat:2|default:"0.00" }} &euro;</span>
+    </div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Plaćeno" %}</span>
+        <span class="fx-fw-bold fx-text-green">{{ paid_eur|floatformat:2|default:"0.00" }} &euro;</span>
+    </div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Neplaćeno" %}</span>
+        <span class="fx-fw-bold fx-text-red">{{ unpaid_eur|floatformat:2|default:"0.00" }} &euro;</span>
+    </div>
+    <div class="d-flex justify-content-between fx-fs-sm">
+        <span class="fx-text-dim">{% trans "Nacrti" %}</span>
+        <span class="fx-fw-bold fx-text-dim">{{ draft_count|default:"0" }}</span>
+    </div>
+</div>
+
+{% if combined_today %}
+<div class="shell-detail-card" style="border-left:3px solid var(--green)">
+    <div class="shell-detail-label">{% trans "Danas" %}</div>
+    <div class="shell-detail-value fx-text-green">{{ combined_today|floatformat:2 }} &euro;</div>
+    <div class="fx-text-dim fx-fs-xs fx-mt-1">{{ pos_count_today }} POS + {{ inv_count_today }} {% trans "računa" %}</div>
+</div>
+{% endif %}
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'invoicing:invoice_create' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi račun" %}
+        </a>
+        <a href="{% url 'invoicing:index' %}?status=UNPAID" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-exclamation-triangle fx-text-red"></i> {% trans "Neplaćeni" %}
+        </a>
+        <a href="{% url 'invoicing:index' %}?status=OVERDUE" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-clock fx-text-amber"></i> {% trans "Dospijeli" %}
+        </a>
+    </div>
+</div>
+
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-brain"></i> {% trans "AI Analiza" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Kliknite na račun za detalje, AI sugestije naplate i prijedloge opomena." %}</p>
+</div>

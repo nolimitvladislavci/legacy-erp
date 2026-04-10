@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ workspace.name }} — Radni prostor{% endblock %}
+{% block page_title %}<i class="{{ workspace.type_icon }}"></i> {{ workspace.name }}{% endblock %}
+
+{% block content %}
+<div class="fenix-page">
+
+  {# ── Header ── #}
+  <div class="fenix-page-header">
+    <div>
+      <h2 style="margin-bottom:2px"><i class="{{ workspace.type_icon }}" style="color:{{ workspace.color }}"></i> {{ workspace.name }}</h2>
+      <div class="fx-fs-note fx-text-dim">
+        {{ workspace.get_type_display }}
+        {% if coworkers %} · {% for c in coworkers %}{{ c.get_full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
+      </div>
+    </div>
+    {% if workspaces|length > 1 %}
+    <div class="d-flex fx-gap-2">
+      {% for ws in workspaces %}
+      {% if ws.id != workspace.id %}
+      <a href="{% url 'companies:workspace_switch' ws.id %}" class="btn-ghost">
+        <i class="{{ ws.type_icon }}" style="color:{{ ws.color }}"></i> {{ ws.name }}
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Stats ── #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="fenix-stat fenix-stat-gold">
+        <div><div class="label">Klijenata</div><div class="value">{{ clients|length }}</div></div>
+        <div class="icon"><i class="fas fa-building"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="fenix-stat fenix-stat-blue">
+        <div><div class="label">Dokumenata</div><div class="value">{{ total_docs }}</div></div>
+        <div class="icon"><i class="fas fa-file-alt"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="fenix-stat fenix-stat-amber">
+        <div><div class="label">Za knjiženje</div><div class="value">{{ total_pending }}</div></div>
+        <div class="icon"><i class="fas fa-clock"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="fenix-stat fenix-stat-green">
+        <div><div class="label">Proknjiženo</div><div class="value">{{ total_docs|add:"-"|add:total_pending }}</div></div>
+        <div class="icon"><i class="fas fa-check-circle"></i></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Search ── #}
+  <div class="fenix-filters mb-3">
+    <input type="text" id="ws-search" class="form-control" placeholder="Pretraži klijente..." autocomplete="off">
+  </div>
+
+  {# ── Client List ── #}
+  <div class="fenix-table-wrap">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th style="width:40%">Klijent</th>
+          <th class="text-center">Dokumenti</th>
+          <th class="text-center">Za knjiženje</th>
+          <th class="text-end">Akcije</th>
+        </tr>
+      </thead>
+      <tbody id="ws-clients">
+        {% for c in clients %}
+        <tr class="ws-row fx-pointer" data-name="{{ c.name|lower }}" onclick="window.location='{% url 'companies:workspace_enter_client' c.id %}?next=/hr/dashboard/'">
+          <td>
+            <div class="d-flex align-items-center fx-gap-3">
+              <div class="fx-icon-box fx-bg-gold-dim fx-text-gold"><i class="fas fa-building"></i></div>
+              <div>
+                <div class="fx-fw-semibold">{{ c.name }}</div>
+                <div class="fx-fs-sm fx-text-dim">{% if c.oib %}OIB: {{ c.oib }}{% endif %}</div>
+              </div>
+            </div>
+          </td>
+          <td class="text-center">
+            <span class="fenix-badge fenix-badge-info">{{ c.doc_count }}</span>
+          </td>
+          <td class="text-center">
+            {% if c.pending_count %}
+            <span class="fenix-badge fenix-badge-warning">{{ c.pending_count }}</span>
+            {% else %}
+            <span class="fenix-badge fenix-badge-success">✓</span>
+            {% endif %}
+          </td>
+          <td class="text-end" onclick="event.stopPropagation()">
+            <div class="d-flex fx-gap-2 justify-content-end">
+              <a href="{% url 'companies:workspace_enter_client' c.id %}?next=/hr/documents/scan/batch/new/%3Fcompany={{ c.id }}" class="btn-gold btn-sm" title="Skeniraj">
+                <i class="fas fa-camera"></i>
+              </a>
+              <a href="{% url 'companies:workspace_enter_client' c.id %}?next=/hr/documents/arhiva/%3Fcompany={{ c.id }}" class="btn-ghost btn-sm" title="Arhiva">
+                <i class="fas fa-archive"></i>
+              </a>
+              <a href="{% url 'companies:workspace_enter_client' c.id %}?next=/hr/dashboard/" class="btn-ghost btn-sm" title="Dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4">
+            <div class="fenix-empty">
+              <i class="fas fa-inbox"></i>
+              <p>Nema klijenata u ovom radnom prostoru.</p>
+              <p class="fx-fs-note fx-text-dim">Kontaktirajte administratora za dodjelu klijenata.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('ws-search').addEventListener('input', function(){
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('.ws-row').forEach(function(r){
+    r.style.display = (!q || r.dataset.name.includes(q)) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

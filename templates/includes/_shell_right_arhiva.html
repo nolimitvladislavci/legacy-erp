@@ -1,0 +1,54 @@
+{% load i18n %}
+{# Digitalna Arhiva — Right Context Panel #}
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Statistika arhive" %}</div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Ukupno dokumenata" %}</span>
+        <span class="fx-fw-bold">{{ total_count|default:"—" }}</span>
+    </div>
+    {% if ai_processed_count %}
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "AI obrađeno" %}</span>
+        <span class="fx-fw-bold fx-text-green">{{ ai_processed_count }}</span>
+    </div>
+    {% endif %}
+    {% if pending_count %}
+    <div class="d-flex justify-content-between fx-fs-sm">
+        <span class="fx-text-dim">{% trans "Na čekanju" %}</span>
+        <span class="fx-fw-bold fx-text-amber">{{ pending_count }}</span>
+    </div>
+    {% endif %}
+</div>
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'documents:arhiva_upload' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-cloud-upload-alt"></i> {% trans "Upload dokumenta" %}
+        </a>
+        <a href="{% url 'documents:scan_batch' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-camera fx-text-gold"></i> {% trans "Skeniraj kamerom" %}
+        </a>
+        <a href="{% url 'documents:knjiga_ura_ira' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-book fx-text-blue"></i> {% trans "Knjiga URA/IRA" %}
+        </a>
+        <a href="{% url 'documents:revizija' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-file-archive fx-text-purple"></i> {% trans "Revizorski paket" %}
+        </a>
+    </div>
+</div>
+
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-robot"></i> {% trans "AI Scanner" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Upload ili skeniraj dokument — AI automatski prepoznaje vrstu, izvlači podatke i klasificira u URA/IRA." %}</p>
+</div>
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Tipke" %}</div>
+    <div class="fx-text-dim fx-fs-xs">
+        <div class="d-flex justify-content-between fx-mb-1"><span>Ctrl+U</span><span>{% trans "Upload" %}</span></div>
+        <div class="d-flex justify-content-between fx-mb-1"><span>Ctrl+K</span><span>{% trans "Pretraga" %}</span></div>
+        <div class="d-flex justify-content-between"><span>Ctrl+.</span><span>{% trans "Ovaj panel" %}</span></div>
+    </div>
+</div>

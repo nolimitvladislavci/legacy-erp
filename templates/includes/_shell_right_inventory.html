@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'inventory:create' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi artikl" %}
+        </a>
+        <a href="{% url 'inventory:goods_receipt_create' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-truck fx-text-green"></i> {% trans "Primka" %}
+        </a>
+    </div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-barcode"></i> {% trans "Skener" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Skenirajte barcode kamerom za brzi unos ili pretragu artikla." %}</p>
+</div>

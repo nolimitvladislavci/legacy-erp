@@ -1,0 +1,39 @@
+{% load i18n %}
+{# Partners — Right Context Panel #}
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Partneri" %}</div>
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Ukupno" %}</span>
+        <span class="fx-fw-bold">{{ total_partners|default:"—" }}</span>
+    </div>
+    {% if supplier_count %}
+    <div class="d-flex justify-content-between fx-fs-sm fx-mb-2">
+        <span class="fx-text-dim">{% trans "Dobavljači" %}</span>
+        <span class="fx-fw-bold">{{ supplier_count }}</span>
+    </div>
+    {% endif %}
+    {% if customer_count %}
+    <div class="d-flex justify-content-between fx-fs-sm">
+        <span class="fx-text-dim">{% trans "Kupci" %}</span>
+        <span class="fx-fw-bold">{{ customer_count }}</span>
+    </div>
+    {% endif %}
+</div>
+
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'partners:create' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi partner" %}
+        </a>
+        <a href="{% url 'partners:wizard' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-magic fx-text-purple"></i> {% trans "AI Wizard" %}
+        </a>
+    </div>
+</div>
+
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-id-card"></i> {% trans "Skeniraj osobnu" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Fotografirajte osobnu iskaznicu ili vizitku — AI automatski popunjava OIB, naziv i adresu." %}</p>
+</div>

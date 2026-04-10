@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'konto:bank_import' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-file-import"></i> {% trans "Uvoz izvoda" %}
+        </a>
+        <a href="{% url 'konto:reconciliation' %}" class="btn-ghost fx-fs-sm fx-w-full">
+            <i class="fas fa-balance-scale fx-text-cyan"></i> {% trans "Sravnjenje" %}
+        </a>
+    </div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-brain"></i> {% trans "AI Knjiženje" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "AI automatski predlaže kontiranje na osnovu opisa transakcije i povijesti knjiženja." %}</p>
+</div>

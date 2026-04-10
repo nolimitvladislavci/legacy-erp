@@ -1,0 +1,21 @@
+{% load i18n %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'helpdesk:create' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi tiket" %}
+        </a>
+    </div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-headset"></i> {% trans "SLA Info" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Tiketi s isteklim SLA rokom su označeni crveno. Kritični tiketi se automatski eskaliraju." %}</p>
+</div>
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Prioriteti" %}</div>
+    <div class="fx-text-dim fx-fs-xs">
+        <div class="d-flex fx-gap-2 align-items-center fx-mb-1"><span class="fenix-badge fenix-badge-danger">Kritično</span> {% trans "< 1h SLA" %}</div>
+        <div class="d-flex fx-gap-2 align-items-center fx-mb-1"><span class="fenix-badge fenix-badge-warning">Visoko</span> {% trans "< 4h SLA" %}</div>
+        <div class="d-flex fx-gap-2 align-items-center"><span class="fenix-badge fenix-badge-muted">Normalno</span> {% trans "< 24h SLA" %}</div>
+    </div>
+</div>

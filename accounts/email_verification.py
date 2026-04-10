@@ -55,12 +55,26 @@ LIMIT Connect
 limit-connect.com
 """
 
+    html_body = f'''<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:2rem;background:#0a0a0f;color:#e2e8f0">
+<h2 style="color:#c9a84c;margin-bottom:1rem">LIMIT Connect</h2>
+<p>Poštovani {user.get_full_name() or user.username},</p>
+<p>Dobrodošli! Potvrdite svoju email adresu klikom na gumb:</p>
+<p style="margin:2rem 0;text-align:center">
+<a href="{verify_url}" style="display:inline-block;padding:14px 32px;background:#c9a84c;color:#000;text-decoration:none;border-radius:8px;font-weight:700;font-size:1rem">Potvrdi email ✓</a>
+</p>
+<p style="color:#64748b;font-size:.85rem">Link vrijedi 72 sata.</p>
+<p style="color:#64748b;font-size:.75rem">Ili kopirajte: {verify_url}</p>
+<hr style="border:none;border-top:1px solid #333;margin:1.5rem 0">
+<p style="color:#475569;font-size:.75rem">Ako niste vi kreirali račun, ignorirajte ovaj email.</p>
+</div>'''
+
     try:
         send_email_task.delay(
             subject,
             body,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
+            html_message=html_body,
         )
         logger.info('Verification email sent to %s (token=%s)', user.email, token.token[:8])
     except Exception as e:

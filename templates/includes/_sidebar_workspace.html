@@ -1,0 +1,32 @@
+{% load i18n %}
+{# Workspace clients in sidebar — shown when user has active workspace #}
+{# Include in _sidebar_modules.html or base.html sidebar section #}
+
+{% if user_workspace %}
+<div class="shell-workspace" style="margin:8px 12px">
+    <div class="d-flex justify-content-between align-items-center fx-mb-2">
+        <div>
+            <div class="fx-fs-sm fx-fw-bold fx-text-body">{{ user_workspace.name }}</div>
+            <div class="fx-fs-2xs fx-text-gold fx-uppercase fx-ls-2">{{ user_workspace.get_type_display }}</div>
+        </div>
+        <a href="{% url 'companies:workspace_admin' %}" class="fx-fs-xs fx-text-dim" title="{% trans 'Uredi' %}"><i class="fas fa-cog"></i></a>
+    </div>
+    <div class="shell-workspace-clients">
+        {% for client in workspace_clients %}
+        <form method="post" action="{% url 'companies:workspace_enter_client' client.id %}" class="fx-m-0">
+            {% csrf_token %}
+            <button type="submit" class="shell-client-item fx-w-full fx-border-none fx-bg-transparent{% if request.company.id == client.id %} active{% endif %}">
+                {% if request.company.id == client.id %}
+                <i class="fas fa-check-circle fx-text-gold fx-fs-xs"></i>
+                {% else %}
+                <i class="fas fa-building fx-text-dim fx-fs-xs"></i>
+                {% endif %}
+                <span class="fx-flex-1 text-start" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ client.name }}</span>
+            </button>
+        </form>
+        {% empty %}
+        <div class="fx-text-dim fx-fs-xs fx-p-2" style="font-style:italic">{% trans "Nema dodijeljenih klijenata" %}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

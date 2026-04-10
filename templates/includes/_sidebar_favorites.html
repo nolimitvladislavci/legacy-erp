@@ -1,0 +1,37 @@
+    <script>
+    // ═══ SIDEBAR FAVORITES (localStorage) ═══
+    (function(){
+      var FAVS_KEY = 'lc-sidebar-favs';
+      var DEFAULT_FAVS = [
+        {url:'/invoicing/',label:'Fakture',icon:'fa-file-invoice-dollar'},
+        {url:'/pos/',label:'POS',icon:'fa-cash-register'},
+        {url:'/inventory/',label:'Skladiste',icon:'fa-boxes'},
+        {url:'/konto/',label:'Konto',icon:'fa-book'},
+      ];
+      function getFavs(){ try{return JSON.parse(localStorage.getItem(FAVS_KEY))||DEFAULT_FAVS}catch(e){return DEFAULT_FAVS} }
+      function saveFavs(f){ localStorage.setItem(FAVS_KEY, JSON.stringify(f)); }
+      function renderFavs(){
+        var c=document.getElementById('sidebarFavs'); if(!c)return;
+        var favs=getFavs(), html='<div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 2px">Favoriti</div>';
+        favs.forEach(function(f,i){
+          html+='<a href="'+f.url+'" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-text-body fx-no-underline fx-rounded fx-fs-note align-items-center" style="padding:7px 12px;margin:1px 4px;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+' text-center fx-fs-compact fx-text-gold" style="width:18px"></i>'+f.label+'</a>';
+        });
+        c.innerHTML=html;
+      }
+      // Expose for command palette
+      window._lcFavs={get:getFavs,save:saveFavs,render:renderFavs,add:function(url,label,icon){
+        var f=getFavs();if(f.length>=6)f.pop();if(!f.some(function(x){return x.url===url}))f.unshift({url:url,label:label,icon:icon});saveFavs(f);renderFavs();
+      }};
+      document.addEventListener('DOMContentLoaded',renderFavs);
+    })();
+
+    // ═══ HIGHLIGHT ACTIVE BOTTOM TAB ═══
+    (function(){
+      var path=location.pathname;
+      document.querySelectorAll('.bottom-tab').forEach(function(t){
+        var href=t.getAttribute('href');
+        if(href && path.startsWith(href) && href!=='/') t.classList.add('active');
+        else if(href==='/' && path==='/') t.classList.add('active');
+      });
+    })();
+    </script>

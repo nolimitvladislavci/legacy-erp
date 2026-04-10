@@ -74,7 +74,7 @@ urlpatterns = [
     path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),
     path('pocni/', __import__('registration.smart_entry', fromlist=['pocni']).pocni, name='smart_entry'),
     path('pocni/provjeri/', __import__('registration.smart_entry', fromlist=['api_detect_email']).api_detect_email, name='api_detect_email'),
-    path('pocni/magic/<str:token>/', __import__('registration.smart_entry', fromlist=['magic_login']).magic_login, name='magic_login'),
+    path('pocni/magic/<path:token>/', __import__('registration.smart_entry', fromlist=['magic_login']).magic_login, name='magic_login'),
 
     # Landing 2026 — root homepage
     path('', __import__('website.views', fromlist=['homepage']).homepage, name='landing_root'),
@@ -83,9 +83,9 @@ urlpatterns = [
     # Claim Your Business — public URLs
     path('firma/preuzmi/<uuid:company_id>/', __import__('registration.views', fromlist=['claim_company_form']).claim_company_form, name='claim_company'),
     path('firma/preuzmi/<uuid:company_id>/submit/', __import__('registration.views', fromlist=['submit_claim']).submit_claim, name='submit_claim'),
-    path('firma/aktiviraj/<str:token>/', __import__('registration.views', fromlist=['activate_via_invite']).activate_via_invite, name='activate_invite'),
+    path('firma/aktiviraj/<path:token>/', __import__('registration.views', fromlist=['activate_via_invite']).activate_via_invite, name='activate_invite'),
 
-    # path('_bypass/<str:token>/', _bypass_login),  # DISABLED — sigurnosni rizik
+    # path('_bypass/<path:token>/', _bypass_login),  # DISABLED — sigurnosni rizik
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
     path('arhiva/', TemplateView.as_view(template_name='brosura_arhiva_landing.html'), name='brochure_arhiva'),
@@ -98,8 +98,8 @@ urlpatterns = [
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 
     # BEZ PAPIRA — public receipt (no login)
-    path('pos/r/<int:receipt_id>/<str:token>/', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_short'),
-    path('pos/r/<int:receipt_id>/<str:token>', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_noslash'),
+    path('pos/r/<int:receipt_id>/<path:token>/', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_short'),
+    path('pos/r/<int:receipt_id>/<path:token>', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_noslash'),
 
     path('bau/', __import__('website.views', fromlist=['bau_page']).bau_page, name='bau_page_root'),
     path('sw.js',        _serve_sw,       name='sw_js'),
@@ -162,7 +162,7 @@ urlpatterns += i18n_patterns(
     # 2FA (TOTP)
     path('2fa/setup/', __import__('accounts.auth_views', fromlist=['setup_2fa']).setup_2fa, name='setup_2fa'),
     path('2fa/verify/', __import__('accounts.auth_views', fromlist=['verify_2fa']).verify_2fa, name='verify_2fa'),
-    path('auth/verify-email/<str:token>/', __import__('accounts.auth_views', fromlist=['verify_email']).verify_email, name='verify_email'),
+    path('auth/verify-email/<path:token>/', __import__('accounts.auth_views', fromlist=['verify_email']).verify_email, name='verify_email'),
     path('auth/resend-verification/', __import__('accounts.auth_views', fromlist=['resend_verification']).resend_verification, name='resend_verification'),
 
     # GDPR (Clanak 17 + 20)
@@ -180,15 +180,16 @@ urlpatterns += i18n_patterns(
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='registration/password_reset_form.html',
         email_template_name='registration/password_reset_email.txt',
+        html_email_template_name='registration/password_reset_email.html',
         subject_template_name='registration/password_reset_subject.txt',
-        success_url='/password-reset/done/',
+        success_url='/hr/password-reset/done/',
     ), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='registration/password_reset_done.html',
     ), name='password_reset_done'),
     path('password-reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
         template_name='registration/password_reset_confirm.html',
-        success_url='/password-reset/complete/',
+        success_url='/hr/password-reset/complete/',
     ), name='password_reset_confirm'),
     path('password-reset/complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='registration/password_reset_complete.html',
@@ -264,7 +265,7 @@ urlpatterns += i18n_patterns(
     path("cro-validator/", __import__("django.views.generic", fromlist=["RedirectView"]).RedirectView.as_view(url="/validator/", permanent=False), name="cro_validator"),
     path("no-limit/partner/", __import__("website.views", fromlist=["nolimit_partner"]).nolimit_partner, name="nolimit_partner"),
     path("korpas/letak/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/letak_a4_korpas.html")),
-    path('scan/<str:token>/', include([
+    path('scan/<path:token>/', include([
         path('', __import__('documents.views', fromlist=['scan_mobile_page']).scan_mobile_page, name='scan_mobile'),
         path('upload/', __import__('documents.views', fromlist=['scan_upload']).scan_upload, name='scan_upload'),
     ])),
@@ -391,7 +392,7 @@ urlpatterns += [
 # Health check (no language prefix needed)
 urlpatterns += [
     # Inspektor Dashboard (PUBLIC — bez logina)
-    path('inspektor/<str:token>/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
+    path('inspektor/<path:token>/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
     # Panic Button (login required)
     path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
@@ -445,9 +446,9 @@ urlpatterns += [
     # ── Memio.pet public views (HTML profili + QR) ──────────────
     path("", include("memio_pet.urls")),
     path("api/synesis/import/", synesis_views.synesis_import_api, name="synesis_import_api"),
-    path("api/synesis/script/<str:token>/", synesis_views.download_script_public, name="synesis_script_public"),
-    path("api/synesis/export/<str:token>/", synesis_export.synesis_export_api, name="synesis_export_api"),
-    path("api/synesis/export/<str:token>/confirm/", synesis_export.synesis_export_confirm, name="synesis_export_confirm"),
+    path("api/synesis/script/<path:token>/", synesis_views.download_script_public, name="synesis_script_public"),
+    path("api/synesis/export/<path:token>/", synesis_export.synesis_export_api, name="synesis_export_api"),
+    path("api/synesis/export/<path:token>/confirm/", synesis_export.synesis_export_confirm, name="synesis_export_confirm"),
 
     # Hybrid Time Tracking API (top-level)
 

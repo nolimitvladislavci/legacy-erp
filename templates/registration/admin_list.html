@@ -34,7 +34,19 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
 .back { color:var(--muted); font-size:0.875rem; text-decoration:none; }
 .back:hover { color:var(--gold); }
-</style>
+
+        /* Visible input text — all browsers */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 <div class="topbar">

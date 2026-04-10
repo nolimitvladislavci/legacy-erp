@@ -8,6 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/login.css">
 <style>
+        :root {
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --gold: #c9a84c;
+            --gold2: #e8c96a;
+            --red: #f87171;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --border: #334155;
+            --border2: #2a2f45;
+            --surface: #1e293b;
+            --surface2: #111827;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --black: #0a0a0a;
+            --white: #f0ede8;
+            --muted: #64748b;
+            --muted2: #94a3b8;
+        }
+
   .pin-input {
     display: flex;
     gap: 8px;
@@ -65,7 +87,19 @@
   @keyframes petbounce{0%{transform:scale(1) rotate(0)}35%{transform:scale(1.15) rotate(-6deg)}65%{transform:scale(.94) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
   @keyframes petshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-8deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}}
   @keyframes petnod{0%,100%{transform:translateY(0)}35%{transform:translateY(-7px)}65%{transform:translateY(2px)}}
-</style>
+
+        /* Ensure visible input text */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 

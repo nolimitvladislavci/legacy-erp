@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="shell-detail-card">
+    <div class="shell-detail-label">{% trans "Brze akcije" %}</div>
+    <div class="d-flex flex-column fx-gap-2">
+        <a href="{% url 'webshop:product_create' %}" class="btn-gold fx-fs-sm fx-w-full text-center">
+            <i class="fas fa-plus"></i> {% trans "Novi proizvod" %}
+        </a>
+    </div>
+</div>
+<div class="shell-ai-section">
+    <div class="shell-ai-title"><i class="fas fa-shopping-cart"></i> {% trans "Info" %}</div>
+    <p class="fx-text-dim fx-fs-sm">{% trans "Narudžbe se automatski pretvaraju u fakture. Klik na narudžbu za detalje." %}</p>
+</div>

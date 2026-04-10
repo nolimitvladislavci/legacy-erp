@@ -74,14 +74,14 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 .sig-canvas-wrap{background:var(--card);border:2px dashed var(--border);border-radius:var(--radius);padding:10px;margin:10px 0;text-align:center}
 .sig-canvas-wrap canvas{background:var(--bg-card);border-radius:8px;cursor:crosshair;touch-action:none;max-width:100%;width:100%}
 .sig-actions{display:flex;gap:10px;margin-top:8px;justify-content:center}
-.sig-actions button{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.85rem}
+.sig-actions button{background:transparent;border:1px solid var(--border);color:#000;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.85rem}
 .sig-actions button:hover{border-color:var(--gold);color:var(--gold)}
 .terms-check{display:flex;align-items:flex-start;gap:10px;margin:16px 0;font-size:.9rem;color:var(--text-muted)}
 .terms-check input[type=checkbox]{width:20px;height:20px;accent-color:var(--gold);flex-shrink:0;margin-top:2px}
 
 .nav-buttons{display:flex;justify-content:space-between;margin-top:30px;gap:12px}
 .btn{padding:14px 28px;border:none;border-radius:var(--radius);font-size:1rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Barlow',sans-serif}
-.btn-back{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-back{background:var(--card);border:1px solid var(--border);color:#000}
 .btn-back:hover{border-color:var(--gold);color:var(--gold)}
 .btn-next{background:var(--gold);color:var(--black)}
 .btn-next:hover{background:var(--gold-light)}
@@ -104,7 +104,19 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 .lead-status.draft{background:rgba(201,168,76,.15);color:var(--gold)}
 
 .hidden{display:none}
-</style>
+
+        /* Ensure visible input text */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 

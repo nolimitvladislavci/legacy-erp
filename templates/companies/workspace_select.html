@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Odaberi radni prostor{% endblock %}
+{% block page_title %}Odaberi radni prostor{% endblock %}
+
+{% block content %}
+<div class="fenix-page-narrow">
+  <div class="fenix-page-header">
+    <h2><i class="fas fa-th-large"></i> Odaberi radni prostor</h2>
+  </div>
+
+  <div class="row g-3">
+    {% for ws in workspaces %}
+    <div class="col-md-6">
+      <a href="{% url 'companies:workspace_switch' ws.id %}" class="fx-card fx-card-hover d-flex fx-gap-4 align-items-center fx-no-underline" style="padding:20px">
+        <div class="fx-icon-box-lg" style="background:{{ ws.color }}20;color:{{ ws.color }}">
+          <i class="{{ ws.type_icon }} fx-fs-xl"></i>
+        </div>
+        <div class="fx-flex-1">
+          <div class="fx-fw-bold fx-fs-lg fx-text-body">{{ ws.name }}</div>
+          <div class="fx-fs-note fx-text-dim">
+            {{ ws.get_type_display }} · {{ ws.client_count }} klijenata
+          </div>
+          <div class="fx-fs-sm fx-text-muted fx-mt-1">
+            {% for w in ws.workers.all %}{{ w.get_full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          </div>
+        </div>
+        <i class="fas fa-chevron-right fx-text-dim"></i>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

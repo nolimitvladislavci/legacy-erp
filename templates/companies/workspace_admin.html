@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Radni prostori — {{ matica.name }}{% endblock %}
+{% block page_title %}<i class="fas fa-th-large"></i> Radni prostori{% endblock %}
+
+{% block extra_css %}
+<style>
+.ws-wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:1.5rem}
+.ws-card{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .2s}
+.ws-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.ws-card-header{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.ws-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ws-name{font-weight:800;font-size:1rem;color:var(--text);flex:1}
+.ws-type{font-size:.65rem;padding:2px 8px;border-radius:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.ws-workers{padding:8px 14px;border-top:1px solid var(--border-light);display:flex;flex-wrap:wrap;gap:4px}
+.ws-worker{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;background:var(--gold-dim);color:var(--gold)}
+.ws-clients{flex:1;padding:8px 14px;border-top:1px solid var(--border-light);max-height:200px;overflow-y:auto}
+.ws-client{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:.78rem;color:var(--text);border-bottom:1px solid rgba(255,255,255,.03)}
+.ws-client:last-child{border:none}
+.ws-client-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws-client-remove{background:none;border:none;color:rgba(239,68,68,.5);cursor:pointer;font-size:.9rem;padding:0 2px;opacity:.5}
+.ws-client-remove:hover{opacity:1}
+.ws-footer{padding:10px 14px;border-top:1px solid var(--border-light);display:flex;gap:6px;align-items:center}
+.ws-count{font-size:.68rem;background:var(--gold-dim);color:var(--gold);padding:2px 8px;border-radius:20px;font-weight:700}
+.ws-btn{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-muted);transition:all .15s}
+.ws-btn:hover{border-color:var(--gold);color:var(--gold)}
+.ws-add{background:var(--gold-dim);border:2px dashed var(--gold-border);border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:200px;cursor:pointer;flex-direction:column;gap:8px;transition:all .2s}
+.ws-add:hover{background:rgba(201,168,76,.08);border-color:var(--gold)}
+.ws-slobodni{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);padding:1rem}
+.ws-pill{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:20px;padding:4px 10px;font-size:.75rem;color:var(--green);cursor:grab;user-select:none;transition:all .15s}
+.ws-pill:hover{background:rgba(34,197,94,.15)}
+@media(max-width:600px){.ws-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ws-wrap">
+
+  <div class="fenix-page-header">
+    <div>
+      <h2><i class="fas fa-th-large fx-text-gold"></i> Radni prostori — {{ matica.name }}</h2>
+      <div class="fx-fs-note fx-text-dim">Raspodijelite klijente i radnike na radne prostore. Tip: DESK=ured, HOME=kuća, REMOTE=online.</div>
+    </div>
+  </div>
+
+  <div class="d-flex fx-gap-3 mb-4 fx-flex-wrap">
+    <div class="fenix-stat fenix-stat-gold"><div><div class="label">Prostora</div><div class="value">{{ workspaces|length }}</div></div><div class="icon"><i class="fas fa-briefcase"></i></div></div>
+    <div class="fenix-stat fenix-stat-green"><div><div class="label">Klijenata</div><div class="value">{{ ukupno_klijenata }}</div></div><div class="icon"><i class="fas fa-building"></i></div></div>
+    <div class="fenix-stat fenix-stat-amber"><div><div class="label">Slobodnih</div><div class="value">{{ slobodni_count }}</div></div><div class="icon"><i class="fas fa-inbox"></i></div></div>
+  </div>
+
+  <div class="ws-grid" id="wsGrid">
+    {% for ws in workspaces %}
+    <div class="ws-card" id="ws-{{ ws.id }}" ondragover="event.preventDefault()" ondrop="wsDrop(event,{{ ws.id }})">
+      <div class="ws-card-header">
+        <div class="ws-dot" style="background:{{ ws.color }}"></div>
+        <div class="ws-name" contenteditable="true" onblur="wsRename({{ ws.id }},this.textContent.trim())">{{ ws.name }}</div>
+        <span class="ws-type fenix-badge fenix-badge-{% if ws.type == 'desk' %}info{% elif ws.type == 'home' %}success{% elif ws.type == 'remote' %}muted{% else %}gold{% endif %}">{{ ws.get_type_display }}</span>
+        <button class="ws-btn" onclick="wsDelete({{ ws.id }})" title="Obriši">✕</button>
+      </div>
+
+      <div class="ws-workers">
+        {% for w in ws.workers.all %}
+        <span class="ws-worker"><i class="fas fa-user"></i> {{ w.get_full_name|default:w.username }}
+          <button onclick="wsRemoveWorker({{ ws.id }},{{ w.id }})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.7rem;padding:0;margin-left:2px">✕</button>
+        </span>
+        {% empty %}
+        <span class="fx-fs-sm fx-text-dim" style="font-style:italic">Bez radnika</span>
+        {% endfor %}
+        <button class="ws-btn" onclick="wsAddWorkerModal({{ ws.id }})" style="font-size:.65rem;padding:2px 6px">+ Radnik</button>
+      </div>
+
+      <div class="ws-clients" id="clients-{{ ws.id }}">
+        {% for c in ws.clients.all %}
+        <div class="ws-client">
+          <span class="ws-client-name" title="{{ c.name }}">{{ c.name }}</span>
+          <button class="ws-client-remove" onclick="wsRemoveClient({{ ws.id }},'{{ c.id }}')" title="Makni">✕</button>
+        </div>
+        {% empty %}
+        <div class="fx-fs-sm fx-text-dim" style="font-style:italic;padding:8px 0">Povucite klijente ovdje ↓</div>
+        {% endfor %}
+      </div>
+
+      <div class="ws-footer">
+        <span class="ws-count" id="count-{{ ws.id }}">{{ ws.client_count }} klijenata</span>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="ws-add" onclick="wsAdd()">
+      <div style="font-size:2rem;color:var(--gold);opacity:.5">＋</div>
+      <div class="fx-fs-note fx-text-dim">Novi radni prostor</div>
+    </div>
+  </div>
+
+  {% if slobodni %}
+  <div class="ws-slobodni">
+    <div class="fx-fs-note fx-fw-bold fx-text-green mb-2"><i class="fas fa-inbox"></i> Slobodni klijenti — povucite na prostor ({{ slobodni_count }})</div>
+    <div class="d-flex fx-flex-wrap fx-gap-2" style="max-height:200px;overflow-y:auto">
+      {% for s in slobodni %}
+      <span class="ws-pill" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','{{ s.id }}')" title="{{ s.name }}">
+        <i class="fas fa-building fx-fs-xs"></i> {{ s.name }}
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Worker modal -->
+<div id="workerModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+  <div class="fx-bg-card fx-rounded-lg fx-w-full" style="max-width:380px;padding:1.5rem;border:1px solid var(--gold-border)">
+    <div class="fx-fw-bold fx-text-gold mb-3">Dodaj radnika</div>
+    <div id="workerList"></div>
+    <button onclick="document.getElementById('workerModal').style.display='none'" class="btn-ghost fx-w-full mt-2">Zatvori</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var API = '/hr/companies/workspace/admin/';
+var CSRF = '{{ csrf_token }}';
+
+function wsApi(data) {
+  return fetch(API, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify(data)
+  }).then(function(r){return r.json()});
+}
+
+function wsAdd(){
+  var name = prompt('Naziv novog prostora:','Novi prostor');
+  if(!name) return;
+  var type = prompt('Tip (desk/home/remote/premise):','desk');
+  wsApi({action:'add_workspace',name:name,type:type||'desk'}).then(function(){location.reload()});
+}
+
+function wsRename(id,name){
+  if(name) wsApi({action:'rename_workspace',ws_id:id,name:name});
+}
+
+function wsDelete(id){
+  if(!confirm('Obrisati ovaj radni prostor?')) return;
+  wsApi({action:'delete_workspace',ws_id:id}).then(function(){location.reload()});
+}
+
+function wsDrop(e,wsId){
+  e.preventDefault();
+  var companyId = e.dataTransfer.getData('text/plain');
+  if(!companyId) return;
+  wsApi({action:'add_client',ws_id:wsId,company_id:companyId}).then(function(){location.reload()});
+}
+
+function wsRemoveClient(wsId,companyId){
+  wsApi({action:'remove_client',ws_id:wsId,company_id:companyId}).then(function(){location.reload()});
+}
+
+function wsRemoveWorker(wsId,userId){
+  wsApi({action:'remove_worker',ws_id:wsId,user_id:userId}).then(function(){location.reload()});
+}
+
+var _activeWsId = null;
+function wsAddWorkerModal(wsId){
+  _activeWsId = wsId;
+  var list = document.getElementById('workerList');
+  list.innerHTML = '';
+  {% for r in radnici %}
+  var b = document.createElement('button');
+  b.className = 'fx-w-full d-flex fx-gap-3 align-items-center fx-rounded fx-pointer fx-border-none fx-bg-transparent fx-text-body fx-fs-md';
+  b.style.cssText = 'padding:10px 14px;border:1px solid var(--border) !important;margin-bottom:6px;text-align:left';
+  b.innerHTML = '<i class="fas fa-user fx-text-gold"></i> {{ r.get_full_name|default:r.username }}';
+  b.onclick = (function(uid){return function(){
+    wsApi({action:'add_worker',ws_id:_activeWsId,user_id:uid}).then(function(){location.reload()});
+  }})({{ r.id }});
+  list.appendChild(b);
+  {% endfor %}
+  document.getElementById('workerModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

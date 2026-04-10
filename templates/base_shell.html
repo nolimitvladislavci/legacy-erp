@@ -1,0 +1,194 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c9a84c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LIMIT Connect">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <script>
+    (function(){var t=localStorage.getItem('fina-theme');if(t!=='light')document.documentElement.setAttribute('data-theme','dark');})();
+    </script>
+    <title>{% block title %}LIMIT CONNECT{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/fenix-tokens.css?v=4000">
+    <link rel="stylesheet" href="/static/css/fenix-shell.css?v=1000">
+    <link rel="stylesheet" href="/static/css/base-layout.css?v=1775674575">
+    <link rel="stylesheet" href="/static/css/fenix-ui.css?v=1775674575">
+    <link rel="stylesheet" href="/static/css/wcag-a11y.css?v=1775674575">
+    {% block extra_css %}{% endblock %}
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<a href="#main-content" class="wcag-skip-link">{% trans "Preskoči na sadržaj" %}</a>
+
+<!-- ═══ GLOBAL SHELL ═══ -->
+<div class="shell" data-mode="{% block shell_mode %}default{% endblock %}">
+
+    <!-- ── OVERLAY (mobile panel backdrop) ── -->
+    <div class="shell-overlay"></div>
+
+    <!-- ═══ TOP — Action Bar ═══ -->
+    <header class="shell-top">
+        <div class="d-flex align-items-center gap-2">
+            <button class="shell-hamburger" onclick="toggleShellLeft()">&#9776;</button>
+            <div class="shell-top-brand">{% trans "LIMIT" %}<span>{% trans "CONNECT" %}</span></div>
+        </div>
+
+        <div class="shell-top-search" onclick="openCmdPalette && openCmdPalette()">
+            <i class="fas fa-search"></i>
+            <span>{% trans "Pretraži..." %}</span>
+            <kbd>Ctrl+K</kbd>
+        </div>
+
+        <div class="shell-top-actions">
+            {% block shell_top_actions %}
+            <!-- Camera/Scanner -->
+            <button class="shell-action-btn" onclick="document.getElementById('shell-cam')&&document.getElementById('shell-cam').click()" title="{% trans 'Skeniraj' %}">
+                <i class="fas fa-camera"></i>
+            </button>
+            <input type="file" id="shell-cam" accept="image/*" capture="environment" style="display:none">
+
+            <!-- Theme toggle -->
+            <button class="shell-action-btn" onclick="toggleTheme && toggleTheme()" title="{% trans 'Tema' %}">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+
+            <!-- Notifications -->
+            {% if request.user.is_authenticated %}
+            <button class="shell-action-btn" onclick="toggleNotifDropdown && toggleNotifDropdown()" title="{% trans 'Obavijesti' %}">
+                <i class="fas fa-bell"></i>
+                <span id="shell-notif-dot" class="badge-dot" style="display:none"></span>
+            </button>
+            {% endif %}
+
+            <!-- Context panel toggle (desktop only) -->
+            <button class="shell-action-btn d-none d-md-flex" onclick="toggleShellRight()" title="{% trans 'Kontekst panel' %}">
+                <i class="fas fa-columns"></i>
+            </button>
+
+            <!-- User -->
+            {% if request.user.is_authenticated %}
+            <a href="/worktime/profile/" class="shell-action-btn text-decoration-none" title="{{ request.user.get_full_name }}">
+                <i class="fas fa-user-circle"></i>
+            </a>
+            {% endif %}
+            {% endblock %}
+        </div>
+    </header>
+
+    <!-- ═══ LEFT — Navigation Panel ═══ -->
+    <nav class="shell-left" id="shellLeft">
+        {% block shell_left %}
+        <div class="shell-left-header">
+            <span class="fx-text-gold fx-fw-bold fx-fs-sm">
+                {% if request.user.is_superuser %}SUPERADMIN
+                {% elif request.user.is_staff %}STAFF
+                {% else %}{{ request.user.get_full_name|default:request.user.username }}
+                {% endif %}
+            </span>
+            <button class="shell-right-close d-md-none" onclick="closeShellLeft()">&times;</button>
+        </div>
+
+        <!-- Workspace / Company context -->
+        {% if request.company %}
+        <div class="shell-workspace">
+            <div class="shell-workspace-name">{{ request.company.name }}</div>
+            {% if active_plan_name %}
+            <div class="shell-workspace-type">{{ active_plan_name }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="shell-left-content">
+            {% include "includes/_sidebar_modules.html" %}
+        </div>
+
+        <!-- Footer actions -->
+        <div class="shell-left-footer">
+            <div class="d-flex gap-2 justify-content-around">
+                <a href="/hr/companies/modules/" class="shell-nav-item" style="margin:0;padding:8px" title="{% trans 'Moduli' %}"><i class="fas fa-th"></i></a>
+                <a href="/hr/companies/settings/" class="shell-nav-item" style="margin:0;padding:8px" title="{% trans 'Postavke' %}"><i class="fas fa-cog"></i></a>
+                <a href="/logout/" class="shell-nav-item" style="margin:0;padding:8px" title="{% trans 'Odjava' %}"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+        {% endblock %}
+    </nav>
+
+    <!-- ═══ CENTER — Workspace Content ═══ -->
+    <main class="shell-center" id="main-content" role="main">
+        <!-- Messages/Toasts -->
+        {% if messages %}
+        <div id="toast-container" style="position:fixed;top:60px;right:12px;z-index:9999;width:340px;max-width:90vw">
+            {% for msg in messages %}
+            <div class="toast-msg alert alert-{{ msg.tags }} alert-dismissible fade show shadow py-2 px-3" style="font-size:0.82rem;border-radius:10px;margin-bottom:8px">
+                {{ msg }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block breadcrumb %}{% endblock %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══ RIGHT — Context Panel ═══ -->
+    <aside class="shell-right collapsed" id="shellRight">
+        {% block shell_right %}
+        <div class="shell-right-header">
+            <span>{% block right_panel_title %}{% trans "Kontekst" %}{% endblock %}</span>
+            <button class="shell-right-close" onclick="closeShellRight()">&times;</button>
+        </div>
+        <div class="shell-right-content">
+            {% block right_panel_content %}
+            <!-- AI Assist default -->
+            <div class="shell-ai-section">
+                <div class="shell-ai-title"><i class="fas fa-brain"></i> AI Assist</div>
+                <p class="fx-text-dim fx-fs-sm">{% trans "Odaberite element za kontekstualne informacije." %}</p>
+            </div>
+            {% endblock %}
+        </div>
+        {% endblock %}
+    </aside>
+
+    <!-- ═══ BOTTOM — Status Bar ═══ -->
+    <footer class="shell-bottom">
+        {% block shell_bottom %}
+        <div class="shell-bottom-left">
+            <div class="shell-status-indicator">
+                <div class="shell-status-dot online"></div>
+                <span>{% trans "Online" %}</span>
+            </div>
+            {% if request.company %}
+            <span class="fx-text-dim">&middot;</span>
+            <span>{{ request.company.name|truncatechars:20 }}</span>
+            {% endif %}
+        </div>
+        <div class="shell-bottom-right">
+            <button class="shell-bottom-btn" onclick="window.print()" title="{% trans 'Print' %}">
+                <i class="fas fa-print"></i>
+            </button>
+            <button class="shell-bottom-btn" onclick="toggleTheme && toggleTheme()" title="{% trans 'Tema' %}">
+                <i class="fas fa-adjust"></i>
+            </button>
+            {% block shell_bottom_extra %}{% endblock %}
+        </div>
+        {% endblock %}
+    </footer>
+
+</div>
+<!-- ═══ END GLOBAL SHELL ═══ -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/core.js' %}"></script>
+<script src="{% static 'js/fenix-shell.js' %}"></script>
+<script src="{% static 'js/smart-input.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

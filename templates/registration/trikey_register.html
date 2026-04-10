@@ -8,6 +8,28 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
+        :root {
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --gold: #c9a84c;
+            --gold2: #e8c96a;
+            --red: #f87171;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --border: #334155;
+            --border2: #2a2f45;
+            --surface: #1e293b;
+            --surface2: #111827;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --black: #0a0a0a;
+            --white: #f0ede8;
+            --muted: #64748b;
+            --muted2: #94a3b8;
+        }
+
 body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;margin:0;color:var(--text)}
 .reg-wrap{max-width:600px;margin:0 auto;padding:40px 20px}
 .reg-card{background:rgba(30,41,59,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px;box-shadow:0 25px 50px -12px rgba(0,0,0,.5)}
@@ -25,7 +47,7 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .err{color:var(--red);font-size:.78rem;margin-top:2px}
 .err a{color:var(--gold)}
-.btn-gold{background:var(--gold);border:none;color:var(--text);font-weight:700;padding:14px;border-radius:10px;width:100%;font-size:1rem;cursor:pointer;transition:all .3s;margin-top:8px}
+.btn-gold{background:var(--gold);border:none;color:#000;font-weight:700;padding:14px;border-radius:10px;width:100%;font-size:1rem;cursor:pointer;transition:all .3s;margin-top:8px}
 .btn-gold:hover{background:#e8c96a;transform:translateY(-2px)}
 .oib-result{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 14px;margin:8px 0;display:none}
 .oib-result.show{display:block}
@@ -39,7 +61,19 @@ body{background:linear-gradient(135deg,#0f172a,#020617);min-height:100vh;font-fa
 .ki.on{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08)}
 .ki.setup{border-color:var(--gold);color:var(--gold);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-</style>
+
+        /* Ensure visible input text */
+        input, select, textarea {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #c9a84c !important;
+        }
+        input:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+        }
+        input::placeholder { color: #64748b !important; }
+    </style>
 </head>
 <body>
 <div class="reg-wrap">

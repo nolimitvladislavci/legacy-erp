@@ -188,3 +188,23 @@ def white_label_context(request):
         'WL_TAGLINE': '',
         'WL_FISCAL': 'HR',
     }
+
+
+def workspace_context(request):
+    """Inject active workspace and its clients into all templates."""
+    if not getattr(request, 'user', None) or not request.user.is_authenticated:
+        return {}
+    try:
+        from companies.models import Workspace
+        ws = Workspace.objects.filter(
+            workers=request.user,
+            is_active=True
+        ).prefetch_related('clients').first()
+        if ws:
+            return {
+                'user_workspace': ws,
+                'workspace_clients': ws.clients.all().order_by('name'),
+            }
+    except Exception:
+        pass
+    return {}
