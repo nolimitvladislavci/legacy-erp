@@ -67,7 +67,7 @@
     </div>
     <div class="fx-card-body text-center">
       <div class="fx-mb-2">
-        <a href="{% url 'stolarija_public:warranty_public' warranty.qr_token %}"
+        <a href="{% url 'stolarija:warranty_public' warranty.qr_token %}"
           class="fx-text-gold" style="word-break:break-all;font-size:.85rem">
           {{ request.scheme }}://{{ request.get_host }}/stolarija/garancija/{{ warranty.qr_token }}/
         </a>
