@@ -1,0 +1,52 @@
+{% load i18n %}
+{# Auto-panel: pametni fallback za stranice bez custom panela.
+   Prikazuje kontekstualne akcije i info na temelju URL-a. #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  {# Firma header #}
+  {% if request.company %}
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {{ request.company.name|truncatechars:30 }}
+  </div>
+  {% endif %}
+
+  {# Brze akcije po modulu (URL-based) #}
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Navigacija" %}</div>
+
+    {% include "includes/_panel_link.html" with href="/hr/dashboard/" icon="fa-home" label="Dashboard" %}
+    {% include "includes/_panel_link.html" with href="/hr/pos/" icon="fa-cash-register" label="POS Kasa" %}
+    {% include "includes/_panel_link.html" with href="/hr/documents/arhiva/" icon="fa-archive" label="Arhiva" %}
+    {% include "includes/_panel_link.html" with href="/hr/invoicing/" icon="fa-file-invoice-dollar" label="Fakture" %}
+    {% include "includes/_panel_link.html" with href="/hr/konto/" icon="fa-book" label="Konto" %}
+    {% include "includes/_panel_link.html" with href="/hr/partners/" icon="fa-users" label="Partneri" %}
+    {% include "includes/_panel_link.html" with href="/hr/inventory/" icon="fa-boxes" label="Zalihe" %}
+    {% include "includes/_panel_link.html" with href="/hr/stolarija/" icon="fa-window-maximize" label="Stolarija" %}
+  </div>
+
+  {# Workspace info #}
+  {% if request.session.active_workspace_id %}
+  <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:4px">Radni prostor</div>
+    <div style="font-size:.85rem;color:var(--text-primary,#e2e8f0)">
+      {% if request.session.active_workspace_name %}{{ request.session.active_workspace_name }}{% else %}Aktivan{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# HTMX hint #}
+  <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)">
+    <div style="font-size:.75rem;color:var(--text-dim,#94a3b8);line-height:1.5">
+      <i class="fas fa-mouse-pointer" style="margin-right:6px;opacity:.5"></i>
+      Klikni na red u tablici za detalje u ovom panelu.
+    </div>
+  </div>
+
+  {# Keyboard shortcuts reminder #}
+  <div style="display:flex;flex-direction:column;gap:3px;font-size:.72rem;color:var(--text-dim,#94a3b8)">
+    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Ctrl+K</kbd> Pretraga</div>
+    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Alt+P</kbd> Panel</div>
+    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Alt+J</kbd> Fullscreen</div>
+  </div>
+
+</div>
