@@ -69,7 +69,6 @@ def _debug_session(request):
 
 urlpatterns = [
     path('_shell_test/', _shell_test),
-    path('panel/detail/', views.panel_detail, name='panel_detail'),
     path('_debug_session/', _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka
     path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),
@@ -289,6 +288,7 @@ urlpatterns += i18n_patterns(
     path('superadmin/impersonate/stop/', views.stop_impersonation, name='stop_impersonation'),
     path('superadmin/promo/create/', views.superadmin_create_promo, name='superadmin_create_promo'),
     path('stolarija/', include('stolarija.urls', namespace='stolarija')),
+    path('panel/detail/', views.panel_detail, name='panel_detail'),
     path('accounts/', include('accounts.urls')),
     path('companies/', include('companies.urls')),
     path('partners/', include('partners.urls')),
