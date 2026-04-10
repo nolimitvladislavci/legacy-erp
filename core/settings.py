@@ -746,6 +746,13 @@ CELERY_BEAT_SCHEDULE = {
     },
 
 
+    # Archive Readonly: auto-downgrade isteklih pretplata (daily)
+    "downgrade-expired-subs": {
+        "task": "registration.tasks.downgrade_expired_subscriptions",
+        "schedule": 86400,
+    },
+
+
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
 import os as _os
