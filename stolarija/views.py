@@ -81,7 +81,7 @@ def measure(request, session_id):
             next_pos = (session.measurements.order_by('-position_number')
                        .values_list('position_number', flat=True).first() or 0) + 1
 
-            Measurement.objects.create(
+            m = Measurement.objects.create(
                 session=session,
                 position_number=next_pos,
                 width_mm=int(width),
@@ -97,9 +97,23 @@ def measure(request, session_id):
                 voice_raw=request.POST.get('voice_raw', '').strip(),
                 ai_parsed=json.loads(request.POST.get('ai_parsed', '{}')),
                 photo_before=request.FILES.get('photo_before'),
-                confirmed=True,  # Korisnik je vidio formu i kliknuo Dodaj
+                confirmed=True,
             )
-            messages.success(request, 'Mjerenje dodano ✓')
+            # AI Validator — "Drugi par očiju"
+            from .validators import validate_measurement, validate_measurement_ai
+            warnings = validate_measurement(m, session=session)
+            warnings += validate_measurement_ai(m, session=session)
+            for w in warnings:
+                if w['level'] == 'error':
+                    messages.error(request, f"⚠ {w['message']}")
+                elif w['level'] == 'warn':
+                    messages.warning(request, f"⚡ {w['message']}")
+                else:
+                    messages.info(request, f"💡 {w['message']}")
+            if not warnings:
+                messages.success(request, 'Mjerenje dodano ✓')
+            else:
+                messages.success(request, f'Mjerenje dodano — {len(warnings)} upozorenja.')
             return redirect('stolarija:measure', session_id=session_id)
 
         elif action == 'finish':
@@ -136,10 +150,29 @@ def voice_parse_api(request):
             return JsonResponse({'error': 'Nema teksta'}, status=400)
 
         parsed = parse_voice_input(text)
+        # AI Validator na parsiranim dimenzijama
+        ai_warnings = []
+        if parsed.get('width_mm') and parsed.get('height_mm'):
+            from .validators import validate_measurement
+            # Napravi temp objekt za validaciju
+            class _TempM:
+                def __init__(self, p):
+                    self.width_mm = p['width_mm']
+                    self.height_mm = p['height_mm']
+                    self.quantity = p.get('quantity', 1)
+                    self.element_type = p.get('element_type', 'window')
+                    self.wing_config = p.get('wing_config', 'double')
+                    self.floor = 0
+                    self.profile = None
+                    self.pk = None
+            ai_warnings = validate_measurement(_TempM(parsed))
+            parsed['warnings'] += [w['message'] for w in ai_warnings]
+
         return JsonResponse({
             'ok': True,
             'parsed': parsed,
             'warnings': parsed['warnings'],
+            'ai_warnings': [{'level': w['level'], 'message': w['message'], 'code': w['code']} for w in ai_warnings],
             'confidence': parsed['confidence'],
             'display': {
                 'width':  f"{parsed['width_mm']} mm"  if parsed['width_mm']  else '?',
@@ -802,11 +835,20 @@ def offer_pdf(request, offer_id):
     session = offer.session
     measurements = session.measurements.filter(confirmed=True)
 
+    # Generiraj SVG vizualizacije za svako mjerenje
+    from .svg_window import generate_window_svg
+    measurement_list = list(measurements)
+    for m in measurement_list:
+        m.svg = generate_window_svg(
+            m.width_mm, m.height_mm, m.wing_config, m.element_type,
+            profile_color=getattr(m.profile, 'color_outer', '#4a5568') or '#4a5568',
+        )
+
     from django.template.loader import render_to_string
     html = render_to_string('stolarija/offer_pdf.html', {
         'offer': offer,
         'session': session,
-        'measurements': measurements,
+        'measurements': measurement_list,
         'advance_amount': round(offer.total_gross * offer.advance_pct / 100, 2),
     })
 

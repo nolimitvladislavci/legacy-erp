@@ -57,6 +57,7 @@
       <th>Profil / Staklo</th>
       <th style="text-align:center">Kom</th>
       <th style="text-align:center">m2</th>
+      <th style="text-align:center">Vizual</th>
       <th style="text-align:right">Cijena</th>
     </tr>
   </thead>
@@ -72,6 +73,7 @@
       </td>
       <td style="text-align:center">{{ m.quantity }}</td>
       <td style="text-align:center">{{ m.total_area_m2 }}</td>
+      <td style="text-align:center">{% if m.svg %}{{ m.svg|safe }}{% endif %}</td>
       <td class="right">
         {% if m.calculate_price %}{{ m.calculate_price }} EUR{% else %}—{% endif %}
       </td>
