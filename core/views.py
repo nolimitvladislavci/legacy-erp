@@ -2941,6 +2941,12 @@ def panel_detail(request):
     except LookupError:
         return render(request, 'includes/_panel_htmx_detail.html', {'error': f'Model not found'})
 
+    # Validate ID is numeric (prevent ValueError on XSS/injection payloads)
+    try:
+        int(obj_id)
+    except (ValueError, TypeError):
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': 'Invalid ID'})
+
     try:
         obj = Model.objects.get(pk=obj_id)
     except Model.DoesNotExist:
