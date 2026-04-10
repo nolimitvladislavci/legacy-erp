@@ -149,7 +149,7 @@ def calculate_payslip(payroll_run, user):
         base_rate = emp.hourly_rate or Decimal('20')
         ot_rate   = emp.overtime_rate or Decimal('30')
         emp_iban  = emp.bank_account or ''
-        personal_allowance = Decimal('560.00')  # TODO: dodati na EmployeeProfile
+        personal_allowance = emp.personal_allowance
     except EmployeeProfile.DoesNotExist:
         base_rate = Decimal('20')
         ot_rate   = Decimal('30')

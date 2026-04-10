@@ -24,8 +24,25 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
+    def actual_cost(self):
+        """Stvarni trošak = suma (sati × satnica) iz TimeEntry-ja."""
+        from django.db.models import Sum, F, DecimalField
+        from django.db.models.functions import Coalesce
+        from decimal import Decimal
+        total = self.time_entries.aggregate(
+            cost=Coalesce(
+                Sum(F('hours') * F('user__employeeprofile__hourly_rate'),
+                    output_field=DecimalField()),
+                Decimal('0')
+            )
+        )['cost']
+        return total
+
+    @property
     def budget_usage_percentage(self):
-        return 0  # TODO: kalkulacija iz povezanih troskova
+        if not self.budget or self.budget == 0:
+            return 0
+        return round(float(self.actual_cost) / float(self.budget) * 100, 1)
 
     class Meta:
         verbose_name = _('Projekt')

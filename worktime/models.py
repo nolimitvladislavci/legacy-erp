@@ -86,6 +86,11 @@ class EmployeeProfile(models.Model):
     phone = models.CharField(max_length=30, blank=True)
     address = models.TextField(blank=True)
     bank_account = models.CharField('IBAN', max_length=34, blank=True)
+    personal_allowance = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal('560.00'),
+        verbose_name='Osobni odbitak (EUR/mj)',
+        help_text='Zakonski: 560 EUR bazni. Uvecani za djecu, invalidnost, etc.',
+    )
     department = models.CharField(max_length=100, blank=True)
     position = models.CharField(max_length=100, blank=True)
     date_hired = models.DateField(null=True, blank=True)
