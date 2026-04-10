@@ -129,7 +129,14 @@ def dashboard_router(request):
     elif role == 'investor' or role == 'partner':
         return redirect('partner_dashboard') # Šaljemo ih oboje u Staklenu sobu
     else:
-        # worker / unknown → worker dashboard
+        # worker with workspace → workspace_home
+        try:
+            from companies.models import Workspace
+            ws = Workspace.objects.filter(workers=request.user).first()
+            if ws:
+                return redirect('workspace_home')
+        except Exception:
+            pass
         return redirect('worker_dashboard')
 
 from django.views.decorators.csrf import ensure_csrf_cookie
