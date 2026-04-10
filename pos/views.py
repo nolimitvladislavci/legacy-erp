@@ -562,6 +562,19 @@ def cancel_receipt(request, receipt_id):
     if receipt.status == POSReceipt.Status.PAID:
         messages.error(request, 'Plaćeni bon se ne može stornirati.')
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
+    # PIN provjera za storno (ako postoji cashier s can_void)
+    from .models import POSCashier
+    pin = request.POST.get('pin', '').strip()
+    company = receipt.session.terminal.company
+    cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True)
+    if cashiers_with_void.exists():
+        if not pin:
+            messages.error(request, 'PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika.')
+            return redirect('pos:receipt_detail', receipt_id=receipt_id)
+        pin_ok = any(c.check_pin(pin) for c in cashiers_with_void)
+        if not pin_ok:
+            messages.error(request, 'Neispravan PIN. Storno odbijen.')
+            return redirect('pos:receipt_detail', receipt_id=receipt_id)
     reason = request.POST.get('cancel_reason', '').strip()[:200]
     receipt.status = POSReceipt.Status.CANCELLED
     receipt.cancel_reason = reason

@@ -30,6 +30,11 @@ urlpatterns = [
     path('servis/',                               views.service_list,            name='service_list'),
     path('servis/<int:visit_id>/',                views.service_detail,          name='service_detail'),
 
+    # PDF + WhatsApp
+    path('ponuda/<int:offer_id>/pdf/',          views.offer_pdf,          name='offer_pdf'),
+    path('ponuda/<int:offer_id>/whatsapp/',     views.offer_send_whatsapp, name='offer_whatsapp'),
+    path('garancija/<int:warranty_id>/pdf/',     views.warranty_pdf,       name='warranty_pdf'),
+
     # API
     path('voice-parse/',                        views.voice_parse_api,    name='voice_parse'),
     path('ponuda/<int:offer_id>/sign/',         views.sign_offer,         name='sign_offer'),

@@ -1,0 +1,30 @@
+{# HTMX partial — server-rendered row detail za desni panel #}
+{# Koristi se sa: hx-get="/hr/panel/detail/?model=ArhivaEntry&id=123" hx-target="#shell-right-body" #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:12px">
+
+  {% if error %}
+    <div style="color:#ef4444;font-size:.85rem">{{ error }}</div>
+  {% elif obj %}
+    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+      {{ model_name }}
+    </div>
+
+    {% for field in fields %}
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem">
+      <span style="color:var(--text-dim,#94a3b8)">{{ field.label }}</span>
+      <span style="font-weight:600;color:var(--text-primary,#e2e8f0)">{{ field.value }}</span>
+    </div>
+    {% endfor %}
+
+    {% if detail_url %}
+    <a href="{{ detail_url }}" style="display:block;text-align:center;padding:10px;background:var(--gold,#c9a84c);color:#0a0a0a;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem;margin-top:8px">
+      Otvori detalj
+    </a>
+    {% endif %}
+  {% else %}
+    <div style="color:var(--text-dim,#94a3b8);text-align:center;padding:40px 0;font-size:.85rem">
+      Odaberi red u tablici
+    </div>
+  {% endif %}
+
+</div>

@@ -69,6 +69,7 @@ def _debug_session(request):
 
 urlpatterns = [
     path('_shell_test/', _shell_test),
+    path('panel/detail/', views.panel_detail, name='panel_detail'),
     path('_debug_session/', _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka
     path('postani-distributer/', __import__('registration.views', fromlist=['distributor_apply']).distributor_apply, name='distributor_apply'),

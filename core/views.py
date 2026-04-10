@@ -2901,3 +2901,74 @@ def borg_error_queue(request):
         'pending_count': pending.count(),
         'resolved': resolved,
     })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HTMX Panel Detail — univerzalni endpoint za desni panel
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def panel_detail(request):
+    """
+    HTMX endpoint: GET /panel/detail/?model=ArhivaEntry&id=123
+    Vraca HTML partial za desni shell panel.
+    """
+    from django.apps import apps
+
+    model_name = request.GET.get('model', '')
+    obj_id = request.GET.get('id', '')
+
+    if not model_name or not obj_id:
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': 'Missing model or id'})
+
+    # Whitelist modela koji smiju biti prikazani
+    MODEL_MAP = {
+        'ArhivaEntry': ('documents', 'ArhivaEntry'),
+        'Invoice': ('invoicing', 'Invoice'),
+        'POSReceipt': ('pos', 'POSReceipt'),
+        'InventoryItem': ('inventory', 'InventoryItem'),
+        'Partner': ('partners', 'Partner'),
+        'Ticket': ('helpdesk', 'Ticket'),
+        'WorkOrder': ('work_orders', 'WorkOrder'),
+    }
+
+    if model_name not in MODEL_MAP:
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': f'Model {model_name} not allowed'})
+
+    app_label, model_cls_name = MODEL_MAP[model_name]
+    try:
+        Model = apps.get_model(app_label, model_cls_name)
+    except LookupError:
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': f'Model not found'})
+
+    try:
+        obj = Model.objects.get(pk=obj_id)
+    except Model.DoesNotExist:
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': 'Not found'})
+
+    # Tenant check
+    company = getattr(request, 'company', None)
+    obj_company = getattr(obj, 'company', None)
+    if company and obj_company and obj_company.pk != company.pk:
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': 'Access denied'})
+
+    # Extract display fields
+    fields = []
+    for f in obj._meta.get_fields():
+        if not hasattr(f, 'column') or f.name in ('id', 'pk'):
+            continue
+        if f.name.endswith('_id') or f.is_relation:
+            continue
+        val = getattr(obj, f.name, None)
+        if val is None or val == '':
+            continue
+        label = getattr(f, 'verbose_name', f.name).capitalize()
+        fields.append({'label': label, 'value': str(val)[:100]})
+        if len(fields) >= 12:
+            break
+
+    return render(request, 'includes/_panel_htmx_detail.html', {
+        'obj': obj,
+        'model_name': model_name,
+        'fields': fields,
+    })

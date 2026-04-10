@@ -788,3 +788,131 @@ def warranty_list(request):
         'warranties': warranties,
         'page_title': 'Garancije',
     })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PDF GENERIRANJE — Ponuda + Garancija
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def offer_pdf(request, offer_id):
+    """Generiraj PDF ponude za download ili WhatsApp slanje."""
+    company = _company(request)
+    offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
+    session = offer.session
+    measurements = session.measurements.filter(confirmed=True)
+
+    from django.template.loader import render_to_string
+    html = render_to_string('stolarija/offer_pdf.html', {
+        'offer': offer,
+        'session': session,
+        'measurements': measurements,
+        'advance_amount': round(offer.total_gross * offer.advance_pct / 100, 2),
+    })
+
+    try:
+        from weasyprint import HTML
+        pdf_bytes = HTML(string=html).write_pdf()
+    except ImportError:
+        return HttpResponse(html, content_type='text/html')
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{offer.offer_number}.pdf"'
+    return response
+
+
+@login_required
+def warranty_pdf(request, warranty_id):
+    """Generiraj PDF garancijskog lista."""
+    from .models import WindowWarranty
+    company = _company(request)
+    warranty = get_object_or_404(WindowWarranty, pk=warranty_id, session__company=company)
+    session = warranty.session
+    measurements = session.measurements.filter(confirmed=True) if session else []
+
+    now_date = timezone.now().date()
+    if warranty.handover_date:
+        expiry = warranty.handover_date.replace(year=warranty.handover_date.year + warranty.valid_years)
+    else:
+        expiry = None
+
+    from django.template.loader import render_to_string
+    html = render_to_string('stolarija/warranty_pdf.html', {
+        'warranty': warranty,
+        'session': session,
+        'measurements': measurements,
+        'expiry': expiry,
+    })
+
+    try:
+        from weasyprint import HTML
+        pdf_bytes = HTML(string=html).write_pdf()
+    except ImportError:
+        return HttpResponse(html, content_type='text/html')
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{warranty.warranty_number}.pdf"'
+    return response
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WHATSAPP SLANJE PONUDE
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+@require_POST
+def offer_send_whatsapp(request, offer_id):
+    """Pošalji ponudu PDF-om na WhatsApp kupcu."""
+    company = _company(request)
+    offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
+    phone = request.POST.get('phone', '').strip()
+
+    if not phone:
+        messages.error(request, 'Unesite telefonski broj.')
+        return redirect('stolarija:offer_detail', offer_id=offer.pk)
+
+    # Generiraj PDF u temp file
+    import tempfile, os
+    from django.template.loader import render_to_string
+    session = offer.session
+    measurements = session.measurements.filter(confirmed=True)
+
+    html = render_to_string('stolarija/offer_pdf.html', {
+        'offer': offer,
+        'session': session,
+        'measurements': measurements,
+        'advance_amount': round(offer.total_gross * offer.advance_pct / 100, 2),
+    })
+
+    try:
+        from weasyprint import HTML
+        pdf_bytes = HTML(string=html).write_pdf()
+    except ImportError:
+        messages.error(request, 'PDF generator nedostupan.')
+        return redirect('stolarija:offer_detail', offer_id=offer.pk)
+
+    # Spremi temp PDF
+    tmp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False, dir='/tmp')
+    tmp.write(pdf_bytes)
+    tmp.close()
+
+    try:
+        from core.whatsapp import send_document
+        result = send_document(
+            phone=phone,
+            file_path=tmp.name,
+            caption=f'Ponuda {offer.offer_number} — {offer.total_gross} EUR\n{offer.company.name}',
+            filename=f'{offer.offer_number}.pdf',
+            company_id=str(company.pk) if company else None,
+        )
+        if result.get('success'):
+            offer.status = 'sent'
+            offer.sent_at = timezone.now()
+            offer.save(update_fields=['status', 'sent_at'])
+            messages.success(request, f'Ponuda poslana na WhatsApp ({phone}).')
+        else:
+            messages.warning(request, f'WhatsApp: {result.get("error", "nepoznata greška")}')
+    finally:
+        os.unlink(tmp.name)
+
+    return redirect('stolarija:offer_detail', offer_id=offer.pk)
