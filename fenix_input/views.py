@@ -188,14 +188,85 @@ def confirm_message(request, message_id):
     msg.confirmed_at = timezone.now()
     msg.save()
 
-    # TODO: apply_to_module(msg) — spremi u ciljni modul
-    # Ovo je faza 2 — za sad samo označavamo kao confirmed
+    # Apply to target module
+    apply_result = _apply_to_module(msg)
 
     return JsonResponse({
         'id': msg.pk,
         'status': 'confirmed',
         'parsed': msg.ai_parsed,
+        'applied': apply_result,
     })
+
+
+def _apply_to_module(msg):
+    """
+    Spremi potvrdene podatke u ciljni modul.
+    Dispatcher po target_module + target_action.
+    Returns: dict s rezultatom ili None.
+    """
+    module = msg.target_module
+    action = msg.target_action
+    fields = msg.ai_parsed.get('fields', {})
+    company = msg.company
+
+    if not module or not action or not fields:
+        return None
+
+    try:
+        if module == 'inventory' and action == 'create_record':
+            from inventory.models import InventoryItem
+            item = InventoryItem.objects.create(
+                company=company,
+                name=fields.get('name', 'Novi artikl'),
+                barcode=fields.get('barcode', ''),
+                unit_price=fields.get('price', 0),
+                quantity=fields.get('quantity', 0),
+                unit=fields.get('unit', 'kom'),
+            )
+            return {'created': 'InventoryItem', 'id': item.pk, 'name': item.name}
+
+        elif module == 'partners' and action == 'create_record':
+            from partners.models import Partner
+            partner = Partner.objects.create(
+                company=company,
+                name=fields.get('name', ''),
+                oib=fields.get('oib', ''),
+                phone=fields.get('phone', ''),
+                email=fields.get('email', ''),
+                city=fields.get('city', ''),
+            )
+            return {'created': 'Partner', 'id': partner.pk, 'name': partner.name}
+
+        elif module == 'documents' and action == 'create_record':
+            from documents.models import ArhivaEntry
+            entry = ArhivaEntry.objects.create(
+                company=company,
+                doc_number=fields.get('doc_number', ''),
+                partner_name=fields.get('partner', ''),
+                amount=fields.get('amount', 0),
+                source_type=fields.get('type', 'document'),
+            )
+            return {'created': 'ArhivaEntry', 'id': entry.pk}
+
+        elif module == 'helpdesk' and action == 'create_record':
+            from helpdesk.models import Ticket
+            ticket = Ticket.objects.create(
+                company=company,
+                title=fields.get('title', 'Novi tiket'),
+                description=fields.get('description', ''),
+                priority=fields.get('priority', 'medium'),
+                reported_by=msg.user,
+            )
+            return {'created': 'Ticket', 'id': ticket.pk, 'number': ticket.ticket_number}
+
+        else:
+            return {'skipped': True, 'reason': f'Unknown module/action: {module}/{action}'}
+
+    except Exception as e:
+        import logging
+        logging.getLogger('fenix_input').warning('apply_to_module failed: %s', e)
+        return {'error': str(e)[:100]}
 
 
 @login_required
