@@ -8,7 +8,7 @@
 {% block meta %}
 <meta name="description" content="Memio.pet — {% trans 'Digitalni dom za tvog ljubimca' %}">
 {% endblock %}
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/static/memio_pet_manifest.json">
 <meta name="theme-color" content="#c9a84c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -103,6 +103,14 @@ function toggleTheme(){
     });
   });
 })();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/memio_pet_sw.js')
+    .then(r => console.log('Memio SW registered:', r.scope))
+    .catch(e => console.warn('Memio SW failed:', e));
+}
 </script>
 </body>
 </html>
