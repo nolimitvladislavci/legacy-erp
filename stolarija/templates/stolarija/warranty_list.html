@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Garancije — LIMIT Connect{% endblock %}
+{% block page_title %}Garancije{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-0">Garancije</h2>
+    <a href="{% url 'stolarija:service_list' %}" class="btn-gold-outline">
+      <i class="fas fa-tools me-1"></i> Servisni pregledi
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% if warranties %}
+  <div class="fx-card">
+    <table class="fx-table fx-table-hover w-100">
+      <thead>
+        <tr>
+          <th>Garancija</th>
+          <th>Adresa</th>
+          <th>Primopredaja</th>
+          <th>Istice</th>
+          <th>Status</th>
+          <th>Sljedeci servis</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in warranties %}
+        <tr>
+          <td class="fx-fw-semibold">{{ w.warranty_number }}</td>
+          <td>{{ w.session.address|default:"—" }}</td>
+          <td>{{ w.handover_date|date:"d.m.Y"|default:"—" }}</td>
+          <td>{{ w.expiry_date|date:"d.m.Y"|default:"—" }}</td>
+          <td>
+            {% if w.is_valid %}
+              <span class="fx-badge fx-badge-success">Aktivna</span>
+            {% elif w.handover_date %}
+              <span class="fx-badge fx-badge-danger">Istekla</span>
+            {% else %}
+              <span class="fx-badge fx-badge-secondary">Ceka primopredaju</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if w.next_service %}
+              {{ w.next_service.scheduled|date:"d.m.Y" }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'stolarija:warranty_public' qr_token=w.qr_token %}"
+               class="btn btn-sm btn-gold-outline" target="_blank" title="QR portal">
+              <i class="fas fa-qrcode"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="fx-card fx-p-4 text-center">
+    <i class="fas fa-shield-alt fa-2x fx-text-muted fx-mb-2"></i>
+    <p class="fx-text-muted">Nema garancija. Garancije se kreiraju automatski nakon primopredaje.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% load i18n %}
+{# Desni panel za Inventory dashboard #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {% trans "Zalihe" %}
+  </div>
+
+  <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:12px 14px;text-align:center">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--gold,#c9a84c)">{{ total_items|default:"0" }}</div>
+    <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">{% trans "Aktivnih artikala" %}</div>
+  </div>
+
+  {% include "includes/_panel_row.html" with label="Vrijednost zaliha" val=stock_value suffix=" EUR" color="#22c55e" %}
+  {% if low_stock_count %}
+    {% include "includes/_panel_row.html" with label="Niska zaliha" val=low_stock_count suffix=" artikala" color="#ef4444" %}
+  {% endif %}
+  {% if zero_stock_count %}
+    {% include "includes/_panel_row.html" with label="Bez zalihe" val=zero_stock_count suffix=" artikala" color="#dc2626" %}
+  {% endif %}
+  {% include "includes/_panel_row.html" with label="Pokreta danas" val=movements_today suffix="" color="#3b82f6" %}
+
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Brze akcije" %}</div>
+    {% include "includes/_panel_link.html" with href="/hr/inventory/" icon="fa-boxes" label="Zalihe" %}
+    {% include "includes/_panel_link.html" with href="/hr/inventory/movements/" icon="fa-exchange-alt" label="Pokreti" %}
+    {% include "includes/_panel_link.html" with href="/hr/inventory/low-stock/" icon="fa-exclamation-triangle" label="Niska zaliha" %}
+  </div>
+
+</div>

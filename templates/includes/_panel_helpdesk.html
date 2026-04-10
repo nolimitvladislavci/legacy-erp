@@ -1,0 +1,33 @@
+{% load i18n %}
+{# Desni panel za Helpdesk dashboard #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {% trans "Helpdesk" %}
+  </div>
+
+  {% if open_tickets %}
+    <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px 14px;text-align:center">
+      <div style="font-size:1.5rem;font-weight:800;color:#ef4444">{{ open_tickets }}</div>
+      <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">{% trans "Otvorenih tiketa" %}</div>
+    </div>
+  {% else %}
+    <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 14px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:800;color:#22c55e">0</div>
+      <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">{% trans "Sve rijeseno" %}</div>
+    </div>
+  {% endif %}
+
+  {% include "includes/_panel_row.html" with label="U tijeku" val=in_progress_tickets suffix="" color="#f59e0b" %}
+  {% include "includes/_panel_row.html" with label="Danas kreirano" val=today_tickets suffix="" color="#3b82f6" %}
+  {% if overdue_tickets %}
+    {% include "includes/_panel_row.html" with label="Prekoraceno SLA" val=overdue_tickets suffix="" color="#ef4444" %}
+  {% endif %}
+
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Brze akcije" %}</div>
+    {% include "includes/_panel_link.html" with href="/hr/helpdesk/" icon="fa-headset" label="Svi tiketi" %}
+    {% include "includes/_panel_link.html" with href="/hr/helpdesk/create/" icon="fa-plus" label="Novi tiket" %}
+  </div>
+
+</div>

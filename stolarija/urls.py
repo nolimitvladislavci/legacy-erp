@@ -24,7 +24,14 @@ urlpatterns = [
     path('primopredaja/<int:install_id>/',        views.handover,                name='handover'),
     path('primopredaja/<int:handover_id>/detalj/',views.handover_detail,         name='handover_detail'),
 
+    # Phase 8: Service & Warranty
+    path('garancije/',                            views.warranty_list,           name='warranty_list'),
+    path('garancija/<str:qr_token>/',             views.warranty_public,         name='warranty_public'),
+    path('servis/',                               views.service_list,            name='service_list'),
+    path('servis/<int:visit_id>/',                views.service_detail,          name='service_detail'),
+
+    # API
     path('voice-parse/',                        views.voice_parse_api,    name='voice_parse'),
     path('ponuda/<int:offer_id>/sign/',         views.sign_offer,         name='sign_offer'),
-    path('sesija/<int:session_id>/primopredaja/', views.handover,          name='handover'),
+    path('sesija/<int:session_id>/primopredaja/', views.session_handover,  name='session_handover'),
 ]

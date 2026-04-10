@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Servis {{ warranty.warranty_number }} — LIMIT Connect{% endblock %}
+{% block page_title %}Servisni nalog{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <div>
+      <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-1">Servisni nalog</h2>
+      <p class="fx-text-muted fx-mb-0">
+        {{ warranty.warranty_number }} — {{ session.address|default:"Nepoznata adresa" }}
+      </p>
+    </div>
+    <a href="{% url 'stolarija:service_list' %}" class="btn btn-gold-outline">
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- Info kartica -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Info</h3>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Zakazano:</span>
+          <span class="fx-fw-semibold">{{ visit.scheduled|date:"d.m.Y" }}</span>
+        </div>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Garancija:</span>
+          <span>{{ warranty.warranty_number }}</span>
+        </div>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Garancija istice:</span>
+          <span>
+            {% if warranty.handover_date %}
+              {{ warranty.handover_date|date:"Y" }} + {{ warranty.valid_years }}g
+            {% else %}
+              —
+            {% endif %}
+          </span>
+        </div>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Adresa:</span>
+          <span>{{ session.address|default:"—" }}</span>
+        </div>
+        {% if visit.completed %}
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Izvrseno:</span>
+          <span class="fx-text-success fx-fw-semibold">{{ visit.completed|date:"d.m.Y" }}</span>
+        </div>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Tehnicar:</span>
+          <span>{{ visit.technician.get_full_name|default:"—" }}</span>
+        </div>
+        {% if visit.notes %}
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Napomena:</span>
+          <span>{{ visit.notes }}</span>
+        </div>
+        {% endif %}
+        {% if visit.cost %}
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Trosak:</span>
+          <span>{{ visit.cost }} EUR</span>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Pozicije -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Ugradena stolarija</h3>
+        {% for m in measurements %}
+        <div class="d-flex justify-content-between align-items-center fx-py-2" style="border-bottom: 1px solid var(--fx-border);">
+          <div>
+            <span class="fx-fw-semibold">Poz. {{ m.position_number }}</span>
+            <span class="fx-text-muted ms-2">{{ m.get_element_type_display }}</span>
+          </div>
+          <div>
+            <span class="fx-text-gold fx-fw-bold">{{ m.width_mm }}×{{ m.height_mm }}mm</span>
+            <span class="fx-text-muted ms-1">×{{ m.quantity }}</span>
+          </div>
+        </div>
+        {% empty %}
+        <p class="fx-text-muted">Nema podataka o pozicijama.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if not visit.completed %}
+  <!-- Akcije -->
+  <div class="row g-3 fx-mt-3">
+    <!-- Zavrsi servis -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Zavrsi servis</h3>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="complete">
+
+          <div class="fx-mb-3">
+            <label class="fx-label">Napomena</label>
+            <textarea name="notes" class="fx-input w-100" rows="3"
+              placeholder="Sto je pregledano, zamijenjeno, podeseno..."></textarea>
+          </div>
+
+          <div class="fx-mb-3">
+            <label class="fx-label">Trosak (EUR)</label>
+            <input type="number" name="cost" step="0.01" min="0" class="fx-input w-100" placeholder="0.00">
+          </div>
+
+          <div class="fx-mb-3">
+            <label class="fx-label">Foto</label>
+            <input type="file" name="photo" accept="image/*" capture="environment" class="fx-input w-100">
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100">
+            <i class="fas fa-check me-1"></i> Zavrsi pregled
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Pomakni datum -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Pomakni datum</h3>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reschedule">
+
+          <div class="fx-mb-3">
+            <label class="fx-label">Novi datum</label>
+            <input type="date" name="new_date" class="fx-input w-100" required>
+          </div>
+
+          <button type="submit" class="btn btn-gold-outline w-100">
+            <i class="fas fa-calendar-alt me-1"></i> Pomakni
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

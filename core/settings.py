@@ -1246,3 +1246,15 @@ CELERY_BEAT_SCHEDULE.update({
 
 # ── Boxgram Social Import ───────────────────────────────────────
 INSTAGRAM_OEMBED_TOKEN = os.environ.get('INSTAGRAM_OEMBED_TOKEN', '')
+
+# ── Stolarija Service Reminders ────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "stolarija-service-reminders-daily": {
+        "task": "stolarija.tasks.check_service_reminders",
+        "schedule": 86400.0,  # 1x dnevno
+    },
+    "stolarija-warranty-annual-check": {
+        "task": "stolarija.tasks.check_expired_warranties",
+        "schedule": 604800.0,  # 1x tjedno
+    },
+})

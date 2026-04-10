@@ -584,7 +584,7 @@ def sign_offer(request, offer_id):
 # ─── 10. HANDOVER — primopredaja s garancijom ────────────────────────────────
 
 @login_required
-def handover(request, session_id):
+def session_handover(request, session_id):
     from .models import MeasurementSession, WindowWarranty
     company = _company(request)
     session = get_object_or_404(MeasurementSession, pk=session_id, company=company)
@@ -613,4 +613,178 @@ def handover(request, session_id):
         'warranty': warranty,
         'measurements': session.measurements.filter(confirmed=True),
         'page_title': f'Primopredaja — {session.address}',
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 8: Servis — garancija portal, servisni nalozi, pregledi
+# ═══════════════════════════════════════════════════════════════════════════
+
+def warranty_public(request, qr_token):
+    """Kupac portal — provjera garancije putem QR koda. Bez login-a."""
+    from .models import WindowWarranty
+    warranty = get_object_or_404(WindowWarranty, qr_token=qr_token)
+    session = warranty.session
+    visits = warranty.service_visits.order_by('scheduled')
+
+    now = timezone.now().date()
+    if warranty.handover_date:
+        expiry = warranty.handover_date.replace(
+            year=warranty.handover_date.year + warranty.valid_years
+        )
+        is_valid = now <= expiry
+        days_left = (expiry - now).days if is_valid else 0
+    else:
+        expiry = None
+        is_valid = False
+        days_left = 0
+
+    return render(request, 'stolarija/warranty_public.html', {
+        'warranty': warranty,
+        'session': session,
+        'visits': visits,
+        'is_valid': is_valid,
+        'expiry': expiry,
+        'days_left': days_left,
+        'measurements': session.measurements.filter(confirmed=True) if session else [],
+    })
+
+
+@login_required
+def service_list(request):
+    """Lista servisnih posjeta za firmu — dashboard za servis."""
+    from .models import ServiceVisit
+    company = _company(request)
+
+    tab = request.GET.get('tab', 'upcoming')
+    today = timezone.now().date()
+
+    if tab == 'completed':
+        visits = ServiceVisit.objects.filter(
+            warranty__session__company=company,
+            completed__isnull=False,
+        ).select_related('warranty', 'technician').order_by('-completed')
+    elif tab == 'overdue':
+        visits = ServiceVisit.objects.filter(
+            warranty__session__company=company,
+            completed__isnull=True,
+            scheduled__lt=today,
+        ).select_related('warranty', 'technician').order_by('scheduled')
+    else:
+        visits = ServiceVisit.objects.filter(
+            warranty__session__company=company,
+            completed__isnull=True,
+            scheduled__gte=today,
+        ).select_related('warranty', 'technician').order_by('scheduled')
+
+    stats = {
+        'upcoming': ServiceVisit.objects.filter(
+            warranty__session__company=company, completed__isnull=True, scheduled__gte=today
+        ).count(),
+        'overdue': ServiceVisit.objects.filter(
+            warranty__session__company=company, completed__isnull=True, scheduled__lt=today
+        ).count(),
+        'completed': ServiceVisit.objects.filter(
+            warranty__session__company=company, completed__isnull=False
+        ).count(),
+    }
+
+    return render(request, 'stolarija/service_list.html', {
+        'visits': visits,
+        'tab': tab,
+        'stats': stats,
+        'page_title': 'Servisni pregledi',
+    })
+
+
+@login_required
+def service_detail(request, visit_id):
+    """Servisni nalog — field mode za montera."""
+    from .models import ServiceVisit
+    company = _company(request)
+    visit = get_object_or_404(
+        ServiceVisit, pk=visit_id, warranty__session__company=company
+    )
+    warranty = visit.warranty
+    session = warranty.session
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'complete':
+            visit.completed = timezone.now().date()
+            visit.technician = request.user
+            visit.notes = request.POST.get('notes', '').strip()
+            if request.FILES.get('photo'):
+                visit.photo = request.FILES['photo']
+            cost = request.POST.get('cost', '').strip()
+            if cost:
+                visit.cost = Decimal(cost)
+            visit.save()
+
+            # Auto-schedule next visit (6 months or 12 months)
+            from .models import ServiceVisit as SV
+            from datetime import timedelta
+            next_date = visit.completed + timedelta(days=180)
+            if not SV.objects.filter(warranty=warranty, scheduled=next_date).exists():
+                SV.objects.create(warranty=warranty, scheduled=next_date)
+
+            try:
+                from core.models import BookingSignature
+                BookingSignature.log(request, 'update', target_obj=visit,
+                    target_repr=f'Service completed: {warranty.warranty_number}',
+                    changes={'completed': str(visit.completed), 'technician': str(request.user)})
+            except Exception:
+                pass
+
+            messages.success(request, 'Servisni pregled završen. Sljedeći zakazan.')
+            return redirect('stolarija:service_list')
+
+        elif action == 'reschedule':
+            from django.utils.dateparse import parse_date
+            new_date = parse_date(request.POST.get('new_date', ''))
+            if new_date:
+                visit.scheduled = new_date
+                visit.save(update_fields=['scheduled'])
+                messages.success(request, f'Pregled pomaknut na {new_date.strftime("%d.%m.%Y")}.')
+            return redirect('stolarija:service_detail', visit_id=visit.pk)
+
+    measurements = session.measurements.filter(confirmed=True) if session else []
+
+    return render(request, 'stolarija/service_detail.html', {
+        'visit': visit,
+        'warranty': warranty,
+        'session': session,
+        'measurements': measurements,
+        'page_title': f'Servis — {warranty.warranty_number}',
+    })
+
+
+@login_required
+def warranty_list(request):
+    """Lista svih garancija za firmu."""
+    from .models import WindowWarranty
+    company = _company(request)
+    today = timezone.now().date()
+
+    warranties = WindowWarranty.objects.filter(
+        session__company=company
+    ).select_related('session').order_by('-issued_at')
+
+    for w in warranties:
+        if w.handover_date:
+            expiry = w.handover_date.replace(year=w.handover_date.year + w.valid_years)
+            w.is_valid = today <= expiry
+            w.expiry_date = expiry
+            w.next_service = w.service_visits.filter(
+                completed__isnull=True
+            ).order_by('scheduled').first()
+        else:
+            w.is_valid = False
+            w.expiry_date = None
+            w.next_service = None
+
+    return render(request, 'stolarija/warranty_list.html', {
+        'warranties': warranties,
+        'page_title': 'Garancije',
     })

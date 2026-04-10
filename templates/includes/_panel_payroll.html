@@ -1,0 +1,29 @@
+{% load i18n %}
+{# Desni panel za Payroll dashboard #}
+<div style="padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+
+  <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c)">
+    {% trans "Platne liste" %}
+  </div>
+
+  {% if active_run %}
+    <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:12px 14px;text-align:center">
+      <div style="font-size:1.1rem;font-weight:800;color:var(--gold,#c9a84c)">{{ active_run.period_label }}</div>
+      <div style="font-size:.72rem;color:var(--text-dim,#94a3b8);margin-top:2px">{{ active_run.get_status_display }}</div>
+    </div>
+    {% include "includes/_panel_row.html" with label="Zaposlenika" val=active_run.payslips.count suffix="" color="#c9a84c" %}
+    {% include "includes/_panel_row.html" with label="Bruto ukupno" val=total_bruto suffix=" EUR" color="#22c55e" %}
+    {% include "includes/_panel_row.html" with label="Neto ukupno" val=total_neto suffix=" EUR" color="#3b82f6" %}
+  {% else %}
+    <div style="padding:24px 12px;text-align:center;color:var(--text-dim,#94a3b8);font-size:.85rem">
+      {% trans "Nema aktivnog obracuna" %}
+    </div>
+  {% endif %}
+
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Brze akcije" %}</div>
+    {% include "includes/_panel_link.html" with href="/hr/payroll/" icon="fa-money-check-alt" label="Obracuni" %}
+    {% include "includes/_panel_link.html" with href="/hr/payroll/joppd/" icon="fa-file-alt" label="JOPPD obrazac" %}
+  </div>
+
+</div>
