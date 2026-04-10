@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Predictive Service — LIMIT Connect{% endblock %}
+{% block page_title %}Predictive Service{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <div>
+      <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-1">Predictive Service</h2>
+      <p class="fx-text-muted fx-mb-0">AI risk scoring — predvidanje problema prije nego nastanu</p>
+    </div>
+    <a href="?recalculate=1" class="btn-gold-outline">
+      <i class="fas fa-sync-alt me-1"></i> Azuriraj
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="row g-3 fx-mb-4">
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-p-3 text-center" style="border-left: 4px solid #ef4444">
+        <div style="font-size:2rem;font-weight:700;color:#ef4444">{{ stats.critical }}</div>
+        <div class="fx-text-muted" style="font-size:.85rem">Kriticno</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-p-3 text-center" style="border-left: 4px solid #f97316">
+        <div style="font-size:2rem;font-weight:700;color:#f97316">{{ stats.high }}</div>
+        <div class="fx-text-muted" style="font-size:.85rem">Visok rizik</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-p-3 text-center" style="border-left: 4px solid #c9a84c">
+        <div style="font-size:2rem;font-weight:700;color:#c9a84c">{{ stats.medium }}</div>
+        <div class="fx-text-muted" style="font-size:.85rem">Srednji</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-p-3 text-center" style="border-left: 4px solid #22c55e">
+        <div style="font-size:2rem;font-weight:700;color:#22c55e">{{ stats.low }}</div>
+        <div class="fx-text-muted" style="font-size:.85rem">Nizak</div>
+      </div>
+    </div>
+  </div>
+
+  {% if profiles %}
+  <div class="fx-card">
+    <table class="fx-table fx-table-hover w-100">
+      <thead>
+        <tr>
+          <th style="width:80px">Score</th>
+          <th>Garancija</th>
+          <th>Adresa</th>
+          <th>Zona</th>
+          <th>Predvideni problem</th>
+          <th>Preporuka</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in profiles %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+                {% if p.risk_level == 'critical' %}background:rgba(239,68,68,.15);color:#ef4444;border:2px solid #ef4444
+                {% elif p.risk_level == 'high' %}background:rgba(249,115,22,.15);color:#f97316;border:2px solid #f97316
+                {% elif p.risk_level == 'medium' %}background:rgba(201,168,76,.15);color:#c9a84c;border:2px solid #c9a84c
+                {% else %}background:rgba(34,197,94,.15);color:#22c55e;border:2px solid #22c55e{% endif %}">
+                {{ p.risk_score }}
+              </div>
+            </div>
+          </td>
+          <td class="fx-fw-semibold">{{ p.warranty.warranty_number }}</td>
+          <td>{{ p.warranty.session.address|default:"—"|truncatechars:30 }}</td>
+          <td>
+            <span class="fx-badge fx-badge-secondary" style="font-size:.75rem">
+              {{ p.get_location_zone_display }}
+            </span>
+          </td>
+          <td>{{ p.get_predicted_issue_display|truncatechars:35 }}</td>
+          <td class="fx-text-muted" style="font-size:.85rem">{{ p.optimal_service_window }}</td>
+          <td>
+            <a href="{% url 'stolarija:risk_detail' profile_id=p.pk %}" class="btn btn-sm btn-gold-outline">
+              <i class="fas fa-chart-line"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="fx-card fx-p-4 text-center">
+    <i class="fas fa-brain fa-2x fx-text-muted fx-mb-2"></i>
+    <p class="fx-text-muted">Nema risk profila. Kliknite "Azuriraj" za izracun ili sacekajte tjedni Celery task.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

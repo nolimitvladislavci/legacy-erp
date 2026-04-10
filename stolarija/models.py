@@ -503,3 +503,153 @@ class HandoverProtocol(models.Model):
 
     def __str__(self):
         return f"Primopredaja — {self.client_name} ({self.signed_at or 'nepotpisano'})"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 9: Predictive Service — AI risk scoring
+# ═══════════════════════════════════════════════════════════════════════════
+
+class ServiceRiskProfile(models.Model):
+    """
+    AI-generated risk profile per warranty.
+    Recalculated weekly by Celery. Rule-based Phase 1, ML Phase 2.
+    """
+    RISK_LEVELS = [
+        ('low',      'Nizak'),
+        ('medium',   'Srednji'),
+        ('high',     'Visok'),
+        ('critical', 'Kritičan'),
+    ]
+    ISSUE_CATEGORIES = [
+        ('seal',          'Brtva — propuštanje, starenje'),
+        ('hardware',      'Okov — korozija, habanje'),
+        ('condensation',  'Kondenzacija — vlaga između stakala'),
+        ('deformation',   'Deformacija — PVC širenje/skupljanje'),
+        ('glass',         'Staklo — oštećenje, U-degradacija'),
+        ('frame',         'Okvir — pucanje, savijanje'),
+        ('drainage',      'Odvodnja — začepljenje kanala'),
+    ]
+    LOCATION_ZONES = [
+        ('coastal',    'Primorje (slana sredina)'),
+        ('continental','Kontinentalna (velika amplituda)'),
+        ('mountain',   'Planinska (snijeg, vjetar)'),
+        ('urban',      'Urbana (standardna)'),
+    ]
+
+    warranty       = models.OneToOneField(WindowWarranty, on_delete=models.CASCADE,
+                                           related_name='risk_profile')
+    risk_score     = models.PositiveSmallIntegerField(default=0,
+                                                       help_text='0-100, higher = more risk')
+    risk_level     = models.CharField(max_length=10, choices=RISK_LEVELS, default='low')
+
+    # Predicted primary issue
+    predicted_issue = models.CharField(max_length=20, choices=ISSUE_CATEGORIES,
+                                        default='seal')
+    issue_confidence = models.FloatField(default=0.0,
+                                          help_text='0.0-1.0 confidence in prediction')
+
+    # Risk factors (stored for transparency)
+    factors        = models.JSONField(default=dict, blank=True,
+                                       help_text='Breakdown of risk factors and scores')
+
+    # Location classification
+    location_zone  = models.CharField(max_length=15, choices=LOCATION_ZONES,
+                                       default='urban')
+
+    # Recommended action
+    recommendation = models.TextField(blank=True,
+                                       help_text='AI-generated maintenance recommendation')
+    optimal_service_window = models.CharField(max_length=100, blank=True,
+                                               help_text='e.g. "Prije zime 2026"')
+
+    # Meta
+    calculated_at  = models.DateTimeField(auto_now=True)
+    version        = models.PositiveSmallIntegerField(default=1,
+                                                       help_text='Algorithm version')
+
+    class Meta:
+        ordering = ['-risk_score']
+        verbose_name = 'Risk profil'
+        verbose_name_plural = 'Risk profili'
+
+    def __str__(self):
+        return f"Risk {self.risk_score}/100 ({self.get_risk_level_display()}) — {self.warranty}"
+
+
+class ServiceMessage(models.Model):
+    """
+    AI-managed service communication — inbound from client, outbound drafts.
+    Human-in-the-loop: AI drafts, human approves.
+    """
+    DIRECTION = [
+        ('inbound',  'Primljeno od kupca'),
+        ('outbound', 'Poslano kupcu'),
+    ]
+    STATUS = [
+        ('received',  'Primljeno'),
+        ('ai_draft',  'AI nacrt'),
+        ('approved',  'Odobreno'),
+        ('sent',      'Poslano'),
+        ('escalated', 'Eskalirano'),
+    ]
+    CHANNELS = [
+        ('email',    'Email'),
+        ('whatsapp', 'WhatsApp'),
+        ('sms',      'SMS'),
+        ('portal',   'Portal'),
+    ]
+
+    warranty       = models.ForeignKey(WindowWarranty, on_delete=models.CASCADE,
+                                        related_name='messages', null=True, blank=True)
+    company        = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                        related_name='service_messages')
+    direction      = models.CharField(max_length=10, choices=DIRECTION)
+    channel        = models.CharField(max_length=10, choices=CHANNELS, default='email')
+    status         = models.CharField(max_length=10, choices=STATUS, default='received')
+
+    # Content
+    subject        = models.CharField(max_length=300, blank=True)
+    body           = models.TextField(blank=True)
+    sender_email   = models.EmailField(blank=True)
+    sender_name    = models.CharField(max_length=200, blank=True)
+
+    # AI analysis
+    ai_draft       = models.TextField(blank=True,
+                                       help_text='AI-generated reply draft')
+    ai_sentiment   = models.CharField(max_length=20, blank=True,
+                                       help_text='positive/neutral/negative/urgent')
+    ai_category    = models.CharField(max_length=30, blank=True,
+                                       help_text='complaint/service_request/info/scheduling')
+    ai_image_analysis = models.JSONField(default=dict, blank=True,
+                                          help_text='Multimodal image analysis results')
+    ai_confidence  = models.FloatField(default=0.0)
+
+    # Attachments
+    attachment     = models.FileField(upload_to='stolarija/messages/%Y/%m/',
+                                       null=True, blank=True)
+    attachment_thumbnail = models.ImageField(upload_to='stolarija/messages/thumbs/%Y/%m/',
+                                              null=True, blank=True)
+
+    # Human-in-the-loop
+    approved_by    = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                        null=True, blank=True, related_name='approved_messages')
+    approved_at    = models.DateTimeField(null=True, blank=True)
+    edited_body    = models.TextField(blank=True,
+                                       help_text='Human-edited version of AI draft')
+
+    # Tracking
+    sent_at        = models.DateTimeField(null=True, blank=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Servisna poruka'
+        verbose_name_plural = 'Servisne poruke'
+
+    def __str__(self):
+        return f"[{self.get_direction_display()}] {self.subject or 'Bez predmeta'} ({self.get_status_display()})"
+
+    @property
+    def final_body(self):
+        """Return edited body if exists, else AI draft."""
+        return self.edited_body or self.ai_draft or self.body

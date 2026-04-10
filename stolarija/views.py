@@ -958,3 +958,186 @@ def offer_send_whatsapp(request, offer_id):
         os.unlink(tmp.name)
 
     return redirect('stolarija:offer_detail', offer_id=offer.pk)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 9: Predictive Risk Dashboard
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def risk_dashboard(request):
+    """Risk overview — all warranties with risk scores."""
+    from .models import ServiceRiskProfile
+    company = _company(request)
+
+    profiles = ServiceRiskProfile.objects.filter(
+        warranty__session__company=company
+    ).select_related('warranty__session').order_by('-risk_score')
+
+    stats = {
+        'critical': profiles.filter(risk_level='critical').count(),
+        'high': profiles.filter(risk_level='high').count(),
+        'medium': profiles.filter(risk_level='medium').count(),
+        'low': profiles.filter(risk_level='low').count(),
+        'total': profiles.count(),
+    }
+
+    # Trigger recalculation on demand
+    if request.GET.get('recalculate') == '1':
+        from .risk_engine import recalculate_all_risks
+        count = recalculate_all_risks()
+        messages.success(request, f'Risk profili ažurirani: {count} garancija.')
+        return redirect('stolarija:risk_dashboard')
+
+    return render(request, 'stolarija/risk_dashboard.html', {
+        'profiles': profiles,
+        'stats': stats,
+        'page_title': 'Predictive Service',
+    })
+
+
+@login_required
+def risk_detail(request, profile_id):
+    """Detailed risk breakdown for a single warranty."""
+    from .models import ServiceRiskProfile
+    company = _company(request)
+    profile = get_object_or_404(
+        ServiceRiskProfile, pk=profile_id, warranty__session__company=company
+    )
+    warranty = profile.warranty
+    visits = warranty.service_visits.order_by('scheduled')
+
+    return render(request, 'stolarija/risk_detail.html', {
+        'profile': profile,
+        'warranty': warranty,
+        'visits': visits,
+        'factors': profile.factors,
+        'page_title': f'Risk — {warranty.warranty_number}',
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 9: AI Service Agent Dashboard (Human-in-the-loop)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def ai_inbox(request):
+    """AI message dashboard — pending drafts, escalated, sent."""
+    from .models import ServiceMessage
+    company = _company(request)
+
+    tab = request.GET.get('tab', 'pending')
+    if tab == 'escalated':
+        msgs = ServiceMessage.objects.filter(company=company, status='escalated')
+    elif tab == 'sent':
+        msgs = ServiceMessage.objects.filter(company=company, status='sent')
+    elif tab == 'all':
+        msgs = ServiceMessage.objects.filter(company=company)
+    else:
+        msgs = ServiceMessage.objects.filter(company=company, status='ai_draft')
+
+    msgs = msgs.select_related('warranty', 'approved_by').order_by('-created_at')
+
+    stats = {
+        'pending': ServiceMessage.objects.filter(company=company, status='ai_draft').count(),
+        'escalated': ServiceMessage.objects.filter(company=company, status='escalated').count(),
+        'sent': ServiceMessage.objects.filter(company=company, status='sent').count(),
+    }
+
+    return render(request, 'stolarija/ai_inbox.html', {
+        'messages': msgs,
+        'tab': tab,
+        'stats': stats,
+        'page_title': 'AI Servis Agent',
+    })
+
+
+@login_required
+def ai_message_detail(request, msg_id):
+    """Review and approve/edit AI draft."""
+    from .models import ServiceMessage
+    company = _company(request)
+    msg = get_object_or_404(ServiceMessage, pk=msg_id, company=company)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            edited = request.POST.get('edited_body', '').strip()
+            msg.edited_body = edited if edited else ''
+            msg.status = 'approved'
+            msg.approved_by = request.user
+            msg.approved_at = timezone.now()
+            msg.direction = 'outbound'
+            msg.save(update_fields=[
+                'edited_body', 'status', 'approved_by', 'approved_at', 'direction'
+            ])
+
+            try:
+                from core.models import BookingSignature
+                BookingSignature.log(request, 'approve', target_obj=msg,
+                    target_repr=f'AI draft approved for {msg.sender_email}',
+                    changes={'sentiment': msg.ai_sentiment, 'category': msg.ai_category})
+            except Exception:
+                pass
+
+            messages.success(request, 'Poruka odobrena — bit će poslana automatski.')
+            return redirect('stolarija:ai_inbox')
+
+        elif action == 'reject':
+            msg.status = 'received'  # Reset to received for re-processing or manual reply
+            msg.ai_draft = ''
+            msg.save(update_fields=['status', 'ai_draft'])
+            messages.info(request, 'AI nacrt odbijen.')
+            return redirect('stolarija:ai_inbox')
+
+        elif action == 'escalate':
+            msg.status = 'escalated'
+            msg.save(update_fields=['status'])
+            messages.warning(request, 'Poruka eskalirana voditelju.')
+            return redirect('stolarija:ai_inbox')
+
+    return render(request, 'stolarija/ai_message_detail.html', {
+        'msg': msg,
+        'page_title': f'Poruka — {msg.subject or msg.sender_name}',
+    })
+
+
+@login_required
+@require_POST
+def ai_simulate_inbound(request):
+    """Debug/test: simulate an inbound service message."""
+    from .models import ServiceMessage, WindowWarranty
+    company = _company(request)
+
+    body = request.POST.get('body', '').strip()
+    sender = request.POST.get('sender_name', 'Test Kupac')
+    email = request.POST.get('sender_email', 'test@example.com')
+    warranty_id = request.POST.get('warranty_id', '')
+
+    if not body:
+        messages.error(request, 'Poruka ne može biti prazna.')
+        return redirect('stolarija:ai_inbox')
+
+    warranty = None
+    if warranty_id:
+        warranty = WindowWarranty.objects.filter(pk=warranty_id, session__company=company).first()
+
+    msg = ServiceMessage.objects.create(
+        company=company,
+        warranty=warranty,
+        direction='inbound',
+        channel='email',
+        status='received',
+        subject=f'Servis upit — {sender}',
+        body=body,
+        sender_name=sender,
+        sender_email=email,
+    )
+
+    # Process immediately
+    from .ai_service_agent import process_inbound_message
+    process_inbound_message(msg)
+
+    messages.success(request, f'Simulirana poruka procesirana. Sentiment: {msg.ai_sentiment}, Status: {msg.get_status_display()}')
+    return redirect('stolarija:ai_message_detail', msg_id=msg.pk)

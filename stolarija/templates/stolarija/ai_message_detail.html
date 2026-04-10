@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Poruka — {{ msg.sender_name }} — LIMIT Connect{% endblock %}
+{% block page_title %}AI Poruka{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-0">{{ msg.subject|default:"Servisna poruka" }}</h2>
+    <a href="{% url 'stolarija:ai_inbox' %}" class="btn btn-gold-outline">
+      <i class="fas fa-arrow-left me-1"></i> Inbox
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}
+    <div class="fx-alert fx-alert-{{ m.tags }} fx-mb-3">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- Originalna poruka -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-2">
+          <i class="fas fa-envelope-open me-1 fx-text-gold"></i> Poruka kupca
+        </h3>
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Od:</span>
+          <span class="fx-fw-semibold">{{ msg.sender_name|default:"—" }}</span>
+          <span class="fx-text-muted ms-1">({{ msg.sender_email|default:"—" }})</span>
+        </div>
+        {% if msg.warranty %}
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Garancija:</span>
+          <span>{{ msg.warranty.warranty_number }}</span>
+        </div>
+        {% endif %}
+        <div class="fx-mb-2">
+          <span class="fx-text-muted">Primljeno:</span>
+          <span>{{ msg.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+        <div class="fx-mb-2 d-flex gap-2">
+          {% if msg.ai_sentiment == 'urgent' %}
+            <span class="fx-badge" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid #ef4444">HITNO</span>
+          {% elif msg.ai_sentiment == 'negative' %}
+            <span class="fx-badge" style="background:rgba(249,115,22,.15);color:#f97316;border:1px solid #f97316">Negativan</span>
+          {% elif msg.ai_sentiment == 'positive' %}
+            <span class="fx-badge" style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e">Pozitivan</span>
+          {% else %}
+            <span class="fx-badge fx-badge-secondary">Neutralan</span>
+          {% endif %}
+          {% if msg.ai_category %}
+            <span class="fx-badge fx-badge-secondary">{{ msg.ai_category }}</span>
+          {% endif %}
+          <span class="fx-text-muted" style="font-size:.8rem">Confidence: {{ msg.ai_confidence|floatformat:0 }}%</span>
+        </div>
+        <hr style="border-color:var(--fx-border)">
+        <div style="white-space:pre-wrap;line-height:1.6">{{ msg.body }}</div>
+
+        {% if msg.ai_image_analysis and msg.ai_image_analysis.description %}
+        <hr style="border-color:var(--fx-border)">
+        <div class="fx-mb-1">
+          <i class="fas fa-camera me-1 fx-text-gold"></i>
+          <span class="fx-fw-bold">Analiza slike</span>
+        </div>
+        <div class="fx-text-muted">{{ msg.ai_image_analysis.description }}</div>
+        {% if msg.ai_image_analysis.issues_found %}
+        <div class="fx-mt-1">
+          {% for issue in msg.ai_image_analysis.issues_found %}
+            <span class="fx-badge fx-badge-warning me-1">{{ issue }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- AI Draft + Approve -->
+    <div class="col-md-6">
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-2">
+          <i class="fas fa-robot me-1 fx-text-gold"></i> AI nacrt odgovora
+        </h3>
+
+        {% if msg.status == 'sent' %}
+          <div class="fx-alert fx-alert-success fx-mb-2">
+            Poslano {{ msg.sent_at|date:"d.m.Y H:i" }}
+            {% if msg.approved_by %} — odobrio {{ msg.approved_by.get_full_name }}{% endif %}
+          </div>
+          <div style="white-space:pre-wrap;line-height:1.6;background:rgba(34,197,94,.05);padding:1rem;border-radius:8px">{{ msg.final_body }}</div>
+
+        {% elif msg.status == 'approved' %}
+          <div class="fx-alert fx-alert-info fx-mb-2">
+            Odobreno — ceka slanje
+          </div>
+          <div style="white-space:pre-wrap;line-height:1.6">{{ msg.final_body }}</div>
+
+        {% else %}
+          <form method="post">
+            {% csrf_token %}
+            <div class="fx-mb-3">
+              <label class="fx-label">Odgovor (uredi po potrebi)</label>
+              <textarea name="edited_body" class="fx-input w-100" rows="10"
+                style="font-size:.9rem;line-height:1.6">{{ msg.ai_draft }}</textarea>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" name="action" value="approve" class="btn btn-gold">
+                <i class="fas fa-check me-1"></i> Odobri i posalji
+              </button>
+              <button type="submit" name="action" value="reject" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i> Odbij nacrt
+              </button>
+              <button type="submit" name="action" value="escalate" class="btn btn-outline-danger">
+                <i class="fas fa-exclamation-triangle me-1"></i> Eskaliraj
+              </button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

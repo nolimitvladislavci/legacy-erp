@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Risk {{ warranty.warranty_number }} — LIMIT Connect{% endblock %}
+{% block page_title %}Risk analiza{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <div>
+      <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-1">{{ warranty.warranty_number }}</h2>
+      <p class="fx-text-muted fx-mb-0">{{ warranty.session.address|default:"Nepoznata adresa" }}</p>
+    </div>
+    <a href="{% url 'stolarija:risk_dashboard' %}" class="btn btn-gold-outline">
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </a>
+  </div>
+
+  <div class="row g-3">
+    <!-- Score -->
+    <div class="col-md-4">
+      <div class="fx-card fx-p-4 text-center">
+        <div style="width:120px;height:120px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;
+          {% if profile.risk_level == 'critical' %}background:rgba(239,68,68,.15);color:#ef4444;border:4px solid #ef4444
+          {% elif profile.risk_level == 'high' %}background:rgba(249,115,22,.15);color:#f97316;border:4px solid #f97316
+          {% elif profile.risk_level == 'medium' %}background:rgba(201,168,76,.15);color:#c9a84c;border:4px solid #c9a84c
+          {% else %}background:rgba(34,197,94,.15);color:#22c55e;border:4px solid #22c55e{% endif %}">
+          {{ profile.risk_score }}
+        </div>
+        <div class="fx-fw-bold" style="font-size:1.1rem">{{ profile.get_risk_level_display }}</div>
+        <div class="fx-text-muted" style="font-size:.85rem">Confidence: {{ profile.issue_confidence|floatformat:0 }}%</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Algoritam v{{ profile.version }} — {{ profile.calculated_at|date:"d.m.Y H:i" }}</div>
+      </div>
+    </div>
+
+    <!-- Predicted issue + recommendation -->
+    <div class="col-md-8">
+      <div class="fx-card fx-p-3 fx-mb-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-2">Predvideni problem</h3>
+        <div class="d-flex align-items-center gap-2 fx-mb-2">
+          <span class="fx-badge fx-badge-warning">{{ profile.get_predicted_issue_display }}</span>
+          <span class="fx-text-muted">{{ profile.optimal_service_window }}</span>
+        </div>
+        <p class="fx-mb-0">{{ profile.recommendation }}</p>
+      </div>
+
+      <div class="fx-card fx-p-3">
+        <h3 class="fx-fs-h4 fx-fw-bold fx-mb-2">Info</h3>
+        <div class="row g-2">
+          <div class="col-6">
+            <span class="fx-text-muted d-block" style="font-size:.75rem">Lokacija</span>
+            <span class="fx-fw-semibold">{{ profile.get_location_zone_display }}</span>
+          </div>
+          <div class="col-6">
+            <span class="fx-text-muted d-block" style="font-size:.75rem">Primopredaja</span>
+            <span>{{ warranty.handover_date|date:"d.m.Y"|default:"—" }}</span>
+          </div>
+          <div class="col-6">
+            <span class="fx-text-muted d-block" style="font-size:.75rem">Garancija</span>
+            <span>{{ warranty.valid_years }} godina</span>
+          </div>
+          <div class="col-6">
+            <span class="fx-text-muted d-block" style="font-size:.75rem">Pozicija</span>
+            <span>{{ warranty.session.measurements.count }} elemenata</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Factor breakdown -->
+  {% if factors %}
+  <div class="fx-card fx-p-3 fx-mt-3">
+    <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Faktori rizika</h3>
+    <div class="row g-3">
+      {% if factors.material %}
+      <div class="col-md-4">
+        <div class="fx-p-2" style="border:1px solid var(--fx-border);border-radius:8px">
+          <div class="fx-fw-bold fx-mb-1">Materijal</div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Tip:</span><span>{{ factors.material.type|upper }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Zona:</span><span>{{ factors.material.zone }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Starost:</span><span>{{ factors.material.years }}g</span>
+          </div>
+          <div class="d-flex justify-content-between fx-fw-bold">
+            <span>Score:</span><span class="fx-text-gold">{{ factors.material.score }}/40</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if factors.hardware %}
+      <div class="col-md-4">
+        <div class="fx-p-2" style="border:1px solid var(--fx-border);border-radius:8px">
+          <div class="fx-fw-bold fx-mb-1">Okov</div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Konfiguracija:</span><span>{{ factors.hardware.config }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Godisnji rate:</span><span>{{ factors.hardware.annual_rate }}</span>
+          </div>
+          <div class="d-flex justify-content-between fx-fw-bold">
+            <span>Score:</span><span class="fx-text-gold">{{ factors.hardware.score }}/25</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if factors.service %}
+      <div class="col-md-4">
+        <div class="fx-p-2" style="border:1px solid var(--fx-border);border-radius:8px">
+          <div class="fx-fw-bold fx-mb-1">Servis historija</div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Zakasnjelo:</span>
+            <span {% if factors.service.overdue > 0 %}style="color:#ef4444;font-weight:700"{% endif %}>{{ factors.service.overdue }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Zavrseno:</span><span>{{ factors.service.completed }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="fx-text-muted">Dana od zadnjeg:</span><span>{{ factors.service.days_since_last }}</span>
+          </div>
+          <div class="d-flex justify-content-between fx-fw-bold">
+            <span>Score:</span><span class="fx-text-gold">{{ factors.service.score }}/25</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% if factors.season %}
+    <div class="fx-text-muted fx-mt-2" style="font-size:.8rem">
+      Sezonski multiplikator: {{ factors.season.multiplier }}x (mjesec {{ factors.season.month }})
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Service visits -->
+  {% if visits %}
+  <div class="fx-card fx-p-3 fx-mt-3">
+    <h3 class="fx-fs-h4 fx-fw-bold fx-mb-3">Servisni pregledi</h3>
+    {% for v in visits %}
+    <div class="d-flex justify-content-between align-items-center fx-py-2" style="border-bottom:1px solid var(--fx-border)">
+      <div>
+        <span class="fx-fw-semibold">{{ v.scheduled|date:"d.m.Y" }}</span>
+        {% if v.technician %}<span class="fx-text-muted ms-2">{{ v.technician.get_full_name }}</span>{% endif %}
+      </div>
+      <div>
+        {% if v.completed %}
+          <span class="fx-badge fx-badge-success">Zavrseno {{ v.completed|date:"d.m.Y" }}</span>
+        {% else %}
+          <span class="fx-badge fx-badge-warning">Zakazano</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

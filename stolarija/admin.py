@@ -1,7 +1,10 @@
 from django.contrib import admin
 from .models import (
     WindowProfile, GlassType, MeasurementSession,
-    Measurement, WindowOffer, WindowWarranty, ServiceVisit
+    Measurement, WindowOffer, WindowWarranty, ServiceVisit,
+    ProductionOrder, BOMItem, InstallationOrder,
+    InstallationChecklist, HandoverProtocol,
+    ServiceRiskProfile, ServiceMessage,
 )
 
 
@@ -50,3 +53,53 @@ class WindowWarrantyAdmin(admin.ModelAdmin):
 class ServiceVisitAdmin(admin.ModelAdmin):
     list_display  = ['warranty', 'scheduled', 'completed', 'technician', 'ai_reminder_sent']
     list_filter   = ['ai_reminder_sent']
+
+
+@admin.register(ProductionOrder)
+class ProductionOrderAdmin(admin.ModelAdmin):
+    list_display  = ['order_number', 'offer', 'status', 'material_cost', 'estimated_date', 'created_at']
+    list_filter   = ['status', 'company']
+    search_fields = ['order_number']
+    readonly_fields = ['order_number', 'created_at', 'updated_at']
+
+
+@admin.register(BOMItem)
+class BOMItemAdmin(admin.ModelAdmin):
+    list_display  = ['name', 'category', 'quantity', 'unit', 'unit_price', 'total_price', 'ordered', 'received']
+    list_filter   = ['category', 'ordered', 'received']
+    search_fields = ['name']
+
+
+@admin.register(InstallationOrder)
+class InstallationOrderAdmin(admin.ModelAdmin):
+    list_display  = ['__str__', 'scheduled_date', 'team_lead', 'status', 'completed_at']
+    list_filter   = ['status', 'company']
+    readonly_fields = ['created_at']
+
+
+@admin.register(InstallationChecklist)
+class InstallationChecklistAdmin(admin.ModelAdmin):
+    list_display  = ['installation', 'measurement', 'is_complete', 'old_removed', 'frame_mounted', 'sealed']
+    list_filter   = ['installation__company']
+
+
+@admin.register(HandoverProtocol)
+class HandoverProtocolAdmin(admin.ModelAdmin):
+    list_display  = ['client_name', 'installation', 'accepted', 'signed_at', 'warranty']
+    list_filter   = ['accepted']
+    readonly_fields = ['signed_at', 'created_at']
+
+
+@admin.register(ServiceRiskProfile)
+class ServiceRiskProfileAdmin(admin.ModelAdmin):
+    list_display  = ['warranty', 'risk_score', 'risk_level', 'predicted_issue', 'location_zone', 'calculated_at']
+    list_filter   = ['risk_level', 'location_zone', 'predicted_issue']
+    readonly_fields = ['calculated_at']
+
+
+@admin.register(ServiceMessage)
+class ServiceMessageAdmin(admin.ModelAdmin):
+    list_display  = ['__str__', 'direction', 'channel', 'status', 'ai_sentiment', 'ai_category', 'created_at']
+    list_filter   = ['status', 'direction', 'channel', 'ai_sentiment']
+    search_fields = ['subject', 'sender_name', 'sender_email']
+    readonly_fields = ['created_at', 'sent_at', 'approved_at']

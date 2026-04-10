@@ -1257,4 +1257,16 @@ CELERY_BEAT_SCHEDULE.update({
         "task": "stolarija.tasks.check_expired_warranties",
         "schedule": 604800.0,  # 1x tjedno
     },
+    "stolarija-risk-recalculate-weekly": {
+        "task": "stolarija.tasks.recalculate_risk_profiles",
+        "schedule": 604800.0,  # 1x tjedno
+    },
+    "stolarija-ai-process-messages": {
+        "task": "stolarija.tasks.process_pending_messages",
+        "schedule": 300.0,  # svakih 5 min
+    },
+    "stolarija-ai-send-approved": {
+        "task": "stolarija.tasks.send_approved_messages",
+        "schedule": 300.0,  # svakih 5 min
+    },
 })

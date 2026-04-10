@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}AI Servis Agent — LIMIT Connect{% endblock %}
+{% block page_title %}AI Servis Agent{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <div>
+      <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-1">AI Servis Agent</h2>
+      <p class="fx-text-muted fx-mb-0">Human-in-the-loop — AI predlaze, ti odobravaj</p>
+    </div>
+    <a href="{% url 'stolarija:risk_dashboard' %}" class="btn-gold-outline">
+      <i class="fas fa-chart-line me-1"></i> Risk Dashboard
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Tabs -->
+  <div class="d-flex gap-2 fx-mb-3">
+    <a href="?tab=pending" class="btn {% if tab == 'pending' %}btn-gold{% else %}btn-gold-outline{% endif %}">
+      AI nacrti ({{ stats.pending }})
+    </a>
+    <a href="?tab=escalated" class="btn {% if tab == 'escalated' %}btn-gold{% else %}btn-gold-outline{% endif %}">
+      Eskalirano ({{ stats.escalated }})
+    </a>
+    <a href="?tab=sent" class="btn {% if tab == 'sent' %}btn-gold{% else %}btn-gold-outline{% endif %}">
+      Poslano ({{ stats.sent }})
+    </a>
+    <a href="?tab=all" class="btn {% if tab == 'all' %}btn-gold{% else %}btn-gold-outline{% endif %}">
+      Sve
+    </a>
+  </div>
+
+  <!-- Simulate -->
+  <div class="fx-card fx-p-3 fx-mb-3">
+    <details>
+      <summary class="fx-fw-bold" style="cursor:pointer">
+        <i class="fas fa-flask me-1 fx-text-gold"></i> Simuliraj dolaznu poruku
+      </summary>
+      <form method="post" action="{% url 'stolarija:ai_simulate' %}" class="fx-mt-2">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" name="sender_name" class="fx-input w-100" placeholder="Ime kupca" value="Marko Markovic">
+          </div>
+          <div class="col-md-4">
+            <input type="email" name="sender_email" class="fx-input w-100" placeholder="Email" value="marko@example.com">
+          </div>
+          <div class="col-md-4">
+            <input type="number" name="warranty_id" class="fx-input w-100" placeholder="Warranty ID (opcionalno)">
+          </div>
+          <div class="col-12">
+            <textarea name="body" class="fx-input w-100" rows="3"
+              placeholder="Npr: Dobar dan, prozori nam skripe i propustaju na jednom mjestu. Mozete li poslati nekoga?"></textarea>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-gold">
+              <i class="fas fa-paper-plane me-1"></i> Simuliraj
+            </button>
+          </div>
+        </div>
+      </form>
+    </details>
+  </div>
+
+  {% if messages_list %}{% endif %}
+  {% for m in messages %}
+  <div class="fx-card fx-p-3 fx-mb-2">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <span class="fx-fw-bold">{{ m.sender_name|default:"Nepoznat" }}</span>
+        <span class="fx-text-muted ms-2" style="font-size:.85rem">{{ m.sender_email }}</span>
+        {% if m.warranty %}
+          <span class="fx-badge fx-badge-secondary ms-2" style="font-size:.7rem">{{ m.warranty.warranty_number }}</span>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <!-- Sentiment -->
+        {% if m.ai_sentiment == 'urgent' %}
+          <span class="fx-badge" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid #ef4444">HITNO</span>
+        {% elif m.ai_sentiment == 'negative' %}
+          <span class="fx-badge" style="background:rgba(249,115,22,.15);color:#f97316;border:1px solid #f97316">Negativan</span>
+        {% elif m.ai_sentiment == 'positive' %}
+          <span class="fx-badge" style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e">Pozitivan</span>
+        {% else %}
+          <span class="fx-badge fx-badge-secondary">Neutralan</span>
+        {% endif %}
+        <!-- Status -->
+        {% if m.status == 'ai_draft' %}
+          <span class="fx-badge fx-badge-warning">AI nacrt</span>
+        {% elif m.status == 'escalated' %}
+          <span class="fx-badge" style="background:rgba(239,68,68,.15);color:#ef4444">Eskalirano</span>
+        {% elif m.status == 'sent' %}
+          <span class="fx-badge fx-badge-success">Poslano</span>
+        {% elif m.status == 'approved' %}
+          <span class="fx-badge" style="background:rgba(59,130,246,.15);color:#3b82f6">Odobreno</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="fx-mt-2 fx-text-muted" style="font-size:.85rem">
+      {{ m.body|truncatechars:200 }}
+    </div>
+    <div class="d-flex justify-content-between align-items-center fx-mt-2">
+      <span class="fx-text-muted" style="font-size:.8rem">
+        {{ m.created_at|date:"d.m.Y H:i" }}
+        {% if m.ai_category %} — {{ m.ai_category }}{% endif %}
+      </span>
+      <a href="{% url 'stolarija:ai_message_detail' msg_id=m.pk %}" class="btn btn-sm btn-gold-outline">
+        <i class="fas fa-eye me-1"></i> Pregledaj
+      </a>
+    </div>
+  </div>
+  {% empty %}
+  <div class="fx-card fx-p-4 text-center">
+    <i class="fas fa-robot fa-2x fx-text-muted fx-mb-2"></i>
+    <p class="fx-text-muted">Nema poruka u ovoj kategoriji.</p>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}
