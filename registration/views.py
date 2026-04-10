@@ -1590,10 +1590,27 @@ def register_quick(request):
         if not email:
             errors["email"] = "Email je obavezan."
         elif User.objects.filter(email=email).exists():
-            errors["email"] = (
-                'Već imate račun. '
-                '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">Prijavite se →</a>'
-            )
+            existing = User.objects.filter(email=email).first()
+            # Orphan syn_ korisnik (Synesis import, nikad aktiviran) → preuzmi account
+            if existing.username.startswith('syn_') and not existing.profile.company:
+                # Recycle orphan: postavi lozinku, ime, nastavi flow
+                existing.set_password(password1)
+                existing.first_name = first_name
+                existing.is_active = True
+                existing.save(update_fields=['password', 'first_name', 'is_active'])
+                from django.contrib.auth import login
+                login(request, existing)
+                for key in list(request.session.keys()):
+                    if key.startswith("reg_"):
+                        del request.session[key]
+                from django.contrib import messages as msg
+                msg.success(request, 'Račun aktiviran! Postavite podatke tvrtke.')
+                return redirect("companies:setup_wizard")
+            else:
+                errors["email"] = (
+                    'Već imate račun. '
+                    '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">Prijavite se →</a>'
+                )
         if len(password1) < 8:
             errors["password1"] = "Lozinka mora imati min. 8 znakova."
         if password1 != password2:
