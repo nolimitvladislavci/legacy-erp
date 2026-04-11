@@ -33,6 +33,18 @@ def sidebar_modules(request):
             # Default: show all modules
             enabled = [m['id'] for m in MODULES]
 
+        # Resolve module URLs with i18n prefix
+        from django.urls import reverse, NoReverseMatch
+        for m in MODULES:
+            url_name = m.get('url_name', '')
+            if url_name:
+                try:
+                    m['resolved_url'] = reverse(url_name)
+                except NoReverseMatch:
+                    m['resolved_url'] = m.get('url', '/')
+            else:
+                m['resolved_url'] = m.get('url', '/')
+
         # Build sidebar structure grouped by category
         grouped = []
         for cat_id, cat_info in sorted(CATEGORIES.items(), key=lambda x: x[1]['order']):

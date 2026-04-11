@@ -28,7 +28,6 @@ Kontekst varijable (iz context processora):
   <div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 4px">Brzi pristup</div>
   <a href="{% url 'borg_ops:borg_hub' %}" class="nav-link fx-rounded fx-p-8-12" style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.2);margin:4px 8px" onclick="closeSidebar()"><i class="fas fa-globe me-2 fx-text-gold"></i><span class="fx-fw-bold fx-text-gold">BORG Hub</span></a>
   <a href="{% url 'dashboard' %}" onclick="closeSidebar()" class="fx-text-body"><i class="fas fa-home"></i> <span>Dashboard</span></a>
-  <a href="{% url 'stolarija:dashboard' %}" onclick="closeSidebar()" class="fx-text-body"><i class="fas fa-window-maximize"></i> <span>Stolarija</span></a>
   {% for qa in sidebar_quick_actions %}
   <a href="{{ qa.url }}" onclick="closeSidebar()" style="color:{{ qa.color }}"><i class="fas {{ qa.icon }}"></i> <span>{{ qa.label }}</span></a>
   {% endfor %}
@@ -42,7 +41,7 @@ Kontekst varijable (iz context processora):
     {% for group in sidebar_modules %}
       {% for mod in group.modules %}
         {% if mod.id in sidebar_enabled_ids or mod.always_visible %}
-        <a href="{{ mod.url }}" onclick="closeSidebar()" class="mod-tile"
+        <a href="{{ mod.resolved_url }}" onclick="closeSidebar()" class="mod-tile"
            {% if mod.accent_color %}style="border-color:{{ mod.accent_color }}33"{% endif %}>
           <i class="fas {{ mod.icon }}"
              {% if mod.accent_color %}style="color:{{ mod.accent_color }}"{% endif %}></i>
@@ -66,7 +65,7 @@ Kontekst varijable (iz context processora):
     <div class="sidebar-group-links{% if cat.order > 4 %} collapsed{% endif %}">
       {% for mod in group.modules %}
         {% if mod.id in sidebar_enabled_ids or mod.always_visible %}
-        <a href="{{ mod.url }}" onclick="closeSidebar()"
+        <a href="{{ mod.resolved_url }}" onclick="closeSidebar()"
            {% if mod.accent_color %}style="color:{{ mod.accent_color }}"{% endif %}>
           <i class="fas {{ mod.icon }}"></i> <span>{{ mod.name }}</span>
         </a>
