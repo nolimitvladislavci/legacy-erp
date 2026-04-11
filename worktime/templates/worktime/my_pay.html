@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Moja plaća{% endblock %}
+{% block page_title %}Moja plaća{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:700px">
+
+  <div class="d-flex justify-content-between align-items-center fx-mb-3">
+    <h3 class="fx-fw-bold fx-text-gold fx-mb-0">Isplatne liste</h3>
+    <a href="{% url 'worktime:my_hours' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-clock me-1"></i> Moji sati
+    </a>
+  </div>
+
+  {% if payslips %}
+  <div class="fx-card">
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Bruto</th>
+              <th>Neto</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in payslips %}
+            <tr>
+              <td>
+                <strong>{{ p.payroll_run.get_period_label }}</strong>
+              </td>
+              <td>{{ p.gross_salary|floatformat:2 }} €</td>
+              <td class="fw-bold" style="color:#22c55e">{{ p.net_salary|floatformat:2 }} €</td>
+              <td>
+                <span class="badge {% if p.payroll_run.status == 'finalized' %}bg-success{% elif p.payroll_run.status == 'draft' %}bg-warning text-dark{% else %}bg-secondary{% endif %}" style="font-size:.7rem">
+                  {{ p.payroll_run.get_status_display }}
+                </span>
+              </td>
+              <td>
+                {% if p.payroll_run.status == 'finalized' %}
+                <a href="{% url 'payroll:payslip_pdf' p.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                  <i class="fas fa-file-pdf"></i>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="fx-card">
+    <div class="fx-card-body text-center fx-py-5 fx-text-muted">
+      <i class="fas fa-file-invoice-dollar fa-3x fx-text-gold opacity-25 d-block mb-3"></i>
+      Još nema isplatnih lista.
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

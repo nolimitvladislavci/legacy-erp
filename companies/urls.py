@@ -46,6 +46,8 @@ urlpatterns = [
     path('modules/api/toggle/', views_modules.module_toggle_api, name='module_toggle'),
 
     # Specialized Module Config (udruge, DVD, KUD, etc.)
+    path('onboard/employee/', views.employee_onboard, name='employee_onboard'),
+    path('onboard/employee/<int:pk>/', views.employee_onboard, name='employee_onboard_edit'),
     path('modules/config/', views_modules.company_modules, name='company_modules'),
     path('modules/config/api/toggle/', views_modules.spec_module_toggle_api, name='spec_module_toggle'),
 ]

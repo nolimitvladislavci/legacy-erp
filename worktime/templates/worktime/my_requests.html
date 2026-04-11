@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Moji zahtjevi{% endblock %}
+{% block page_title %}Moji zahtjevi{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:700px">
+
+  <!-- Forma za novi zahtjev -->
+  <div class="fx-card fx-mb-4">
+    <div class="fx-card-header">
+      <i class="fas fa-paper-plane me-2 fx-text-gold"></i> Novi zahtjev
+    </div>
+    <div class="fx-card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="fx-label">Tip zahtjeva</label>
+            <select name="type" class="fx-input" required>
+              <option value="">— Odaberi —</option>
+              {% for val, label in absence_types %}
+              <option value="{{ val }}">{{ label }}</option>
+              {% endfor %}
+              <option value="pin_change">Promjena PIN-a</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Od datuma</label>
+            <input type="date" name="date_from" class="fx-input" required>
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Do datuma</label>
+            <input type="date" name="date_to" class="fx-input">
+          </div>
+          <div class="col-12">
+            <label class="fx-label">Napomena</label>
+            <textarea name="note" class="fx-input" rows="2" placeholder="Opcionalno..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-gold w-100 mt-3" style="padding:12px">
+          <i class="fas fa-paper-plane me-1"></i> Pošalji zahtjev
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Na čekanju -->
+  {% if pending %}
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-header">
+      <i class="fas fa-hourglass-half me-2" style="color:#f59e0b"></i> Na čekanju ({{ pending.count }})
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead><tr><th>Datum</th><th>Tip</th><th>Opis</th></tr></thead>
+          <tbody>
+            {% for e in pending %}
+            <tr>
+              <td>{{ e.date|date:"d.m.Y" }}</td>
+              <td><span class="badge bg-warning text-dark" style="font-size:.7rem">{{ e.get_absence_type_display }}</span></td>
+              <td style="font-size:.82rem;color:var(--text-dim)">{{ e.description|truncatechars:40 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Odobreni -->
+  {% if approved %}
+  <div class="fx-card">
+    <div class="fx-card-header">
+      <i class="fas fa-check-circle me-2" style="color:#22c55e"></i> Odobreni
+    </div>
+    <div class="fx-card-body p-0">
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead><tr><th>Datum</th><th>Tip</th><th>Odobrio</th></tr></thead>
+          <tbody>
+            {% for e in approved %}
+            <tr>
+              <td>{{ e.date|date:"d.m.Y" }}</td>
+              <td><span class="badge bg-success" style="font-size:.7rem">{{ e.get_absence_type_display }}</span></td>
+              <td style="font-size:.82rem">{{ e.approved_by.get_full_name|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Navigacija -->
+  <div class="d-flex gap-2 mt-3">
+    <a href="{% url 'worktime:my_hours' %}" class="btn btn-outline-secondary flex-fill text-center">
+      <i class="fas fa-clock me-1"></i> Moji sati
+    </a>
+    <a href="{% url 'worktime:my_pay' %}" class="btn btn-outline-secondary flex-fill text-center">
+      <i class="fas fa-file-invoice-dollar me-1"></i> Plaća
+    </a>
+  </div>
+
+</div>
+{% endblock %}

@@ -106,7 +106,7 @@ def _require_strict_admin(request):
 def company_settings(request):
     profile, company = _require_company_admin(request)
     if not company:
-        messages.error(request, "Nemate pristup postavkama tvrtke.")
+        messages.error(request, _("Nemate pristup postavkama tvrtke."))
         return redirect("/")
 
     tab = request.GET.get("tab", "info")
@@ -143,7 +143,7 @@ def company_settings(request):
         elif "nkd_code_id" in request.POST:
             company.nkd_code = None
         company.save()
-        messages.success(request, "Podaci tvrtke su azurirani.")
+        messages.success(request, _("Podaci tvrtke su azurirani."))
         return redirect("/companies/settings/?tab=info")
 
     # Tab: settings
@@ -163,7 +163,7 @@ def company_settings(request):
         s["send_offer_email"] = request.POST.get("send_offer_email") == "1"
         company.settings = s
         company.save()
-        messages.success(request, "Postavke spremljene.")
+        messages.success(request, _("Postavke spremljene."))
         return redirect("/companies/settings/?tab=settings")
 
     # Tab: fiscal
@@ -177,7 +177,7 @@ def company_settings(request):
             "fiscal_system", "pdv_status", "is_vat_registered",
             "is_kleinunternehmer", "vat_id",
         ])
-        messages.success(request, "Fiskalne postavke su azurirane.")
+        messages.success(request, _("Fiskalne postavke su azurirane."))
         return redirect("/companies/settings/?tab=fiscal")
 
     # Context
@@ -223,7 +223,7 @@ def company_settings(request):
             s.pop("fina_infobiz_token", None)
         company.settings = s
         company.save()
-        messages.success(request, "✅ Integracije spremljene.")
+        messages.success(request, _("✅ Integracije spremljene."))
         return redirect("/companies/settings/?tab=integrations")
 
     return render(request, "companies/settings.html", {
@@ -321,6 +321,44 @@ def employee_create(request):
         )
     except Exception:
         pass
+
+    # ── EmployeeProfile — kreira se ako je attr_worker ili attr_manager ──
+    attr_worker  = request.POST.get("attr_worker")
+    attr_manager = request.POST.get("attr_manager")
+    is_manager   = request.POST.get("is_manager") == "1"
+
+    if attr_worker or attr_manager:
+        try:
+            from worktime.models import EmployeeProfile
+            from decimal import Decimal
+            import datetime
+            ep, ep_created = EmployeeProfile.objects.get_or_create(
+                user=user,
+                defaults={
+                    "company": company,
+                    "tax_id": request.POST.get("tax_id", "").strip()[:11],
+                    "bank_account": request.POST.get("bank_account", "").strip(),
+                    "hourly_rate": Decimal(request.POST.get("hourly_rate") or "20.00"),
+                    "overtime_rate": Decimal("30.00"),
+                    "weekly_hours": Decimal(request.POST.get("weekly_hours") or "40"),
+                    "daily_hours": Decimal("8.00"),
+                    "personal_allowance": Decimal(request.POST.get("personal_allowance") or "560.00"),
+                    "position": request.POST.get("position", "").strip(),
+                    "is_manager": is_manager,
+                    "is_volunteer": bool(request.POST.get("is_volunteer")),
+                    "date_hired": request.POST.get("date_hired") or None,
+                    "phone": phone,
+                }
+            )
+            if not ep_created:
+                ep.company = company
+                ep.tax_id = request.POST.get("tax_id", "").strip()[:11] or ep.tax_id
+                ep.bank_account = request.POST.get("bank_account", "").strip() or ep.bank_account
+                ep.is_manager = is_manager
+                ep.save(update_fields=["company","tax_id","bank_account","is_manager"])
+        except Exception as e:
+            import logging
+            logging.getLogger("companies").warning("EmployeeProfile create failed: %s", e)
 
     return JsonResponse({"ok": True, "message": "Zaposlenik " + first_name + " " + last_name + " kreiran.", "temp_password": temp_pw})
 
@@ -557,7 +595,7 @@ def tax_rate_list(request):
         elif action == 'delete':
             tid = request.POST.get('tax_id')
             TaxRate.objects.filter(pk=tid, country=country).delete()
-            messages.success(request, 'Stopa obrisana.')
+            messages.success(request, _('Stopa obrisana.'))
         elif action == 'edit':
             tid = request.POST.get('tax_id')
             t = TaxRate.objects.filter(pk=tid, country=country).first()
@@ -565,7 +603,7 @@ def tax_rate_list(request):
                 t.name = request.POST.get('name', t.name)
                 t.rate = request.POST.get('rate', t.rate)
                 t.save()
-                messages.success(request, 'Stopa ažurirana.')
+                messages.success(request, _('Stopa ažurirana.'))
         return redirect('companies:tax_rates')
 
     rates = TaxRate.objects.filter(country=country).order_by('-rate')
@@ -614,11 +652,11 @@ def subscription_cancel(request):
     if action == 'reactivate':
         sub.reactivate()
         from django.contrib import messages
-        messages.success(request, 'Pretplata reaktivirana!')
+        messages.success(request, _('Pretplata reaktivirana!'))
     else:
         sub.cancel()
         from django.contrib import messages
-        messages.success(request, 'Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna.' % sub.valid_until)
+        messages.success(request, _('Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna.') % sub.valid_until)
 
     from django.shortcuts import redirect
     return redirect('companies:subscription')
@@ -634,11 +672,11 @@ def tc_consent_view(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Niste povezani s firmom.')
+        messages.error(request, _('Niste povezani s firmom.'))
         return redirect('dashboard')
 
     if company.has_signed_tc_consent:
-        messages.info(request, 'Uvjeti su već prihvaćeni.')
+        messages.info(request, _('Uvjeti su već prihvaćeni.'))
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -651,10 +689,10 @@ def tc_consent_view(request):
                 'tc_consent_signed_at',
                 'tc_consent_version',
             ])
-            messages.success(request, 'Uvjeti korištenja uspješno prihvaćeni. Hvala!')
+            messages.success(request, _('Uvjeti korištenja uspješno prihvaćeni. Hvala!'))
             return redirect('dashboard')
         else:
-            messages.warning(request, 'Morate označiti polje za prihvaćanje uvjeta.')
+            messages.warning(request, _('Morate označiti polje za prihvaćanje uvjeta.'))
 
     return render(request, 'companies/tc_consent_document.html', {
         'company': company,
@@ -668,6 +706,7 @@ def tc_consent_view(request):
 @login_required
 def setup_wizard(request):
     """Setup wizard — 5 sekcija, svaka neovisna."""
+    from core.company_utils import get_user_company
     company = get_user_company(request)
     if not company:
         return redirect('/')
@@ -708,7 +747,7 @@ def setup_wizard_company(request):
         company.industry = request.POST.get('industry', 'other')
         company.is_draft = False
         company.save()
-        messages.success(request, 'Podaci tvrtke spremljeni.')
+        messages.success(request, _('Podaci tvrtke spremljeni.'))
         return redirect('companies:setup_wizard')
 
     return render(request, 'companies/setup_wizard.html', {
@@ -729,7 +768,7 @@ def setup_wizard_contact(request):
         company.email = request.POST.get('email', '').strip()
         company.website = request.POST.get('website', '').strip()
         company.save(update_fields=['phone', 'email', 'website'])
-        messages.success(request, 'Kontakt podaci spremljeni.')
+        messages.success(request, _('Kontakt podaci spremljeni.'))
         return redirect('companies:setup_wizard')
 
     return render(request, 'companies/setup_wizard.html', {
@@ -754,7 +793,7 @@ def setup_wizard_fiscal(request):
             company.iban = iban
         company.is_draft = False
         company.save()
-        messages.success(request, 'Fiskalni podaci spremljeni.')
+        messages.success(request, _('Fiskalni podaci spremljeni.'))
         return redirect('companies:setup_wizard')
 
     return render(request, 'companies/setup_wizard.html', {
@@ -1023,4 +1062,233 @@ def workspace_admin(request):
         'slobodni_count': slobodni.count(),
         'radnici': radnici,
         'ukupno_klijenata': len(partner_ids),
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 5: ONBOARDING WIZARD — 4 koraka
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def employee_onboard(request, pk=None):
+    """
+    Onboarding wizard za radnika — 4 koraka:
+    1. Identitet (OIB/IBAN validacija)
+    2. Pristup (role, terminal, workspace)
+    3. PIN (6 znamenki)
+    4. Potpis (ugovor)
+    """
+    from worktime.models import EmployeeProfile
+    from core.company_utils import get_user_company
+    from django.utils import timezone
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    # Existing employee ili novi
+    ep = None
+    if pk:
+        ep = get_object_or_404(EmployeeProfile, pk=pk, company=company)
+
+    step = request.POST.get('step', request.GET.get('step', '1'))
+
+    if request.method == 'POST':
+
+        # ── KORAK 1: Identitet ──
+        if step == '1':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            oib = request.POST.get('oib', '').strip()
+            iban = request.POST.get('iban', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            hourly_rate = request.POST.get('hourly_rate', '20')
+            date_hired = request.POST.get('date_hired', '')
+
+            errors = []
+            if not first_name: errors.append('Ime je obavezno.')
+            if not last_name: errors.append('Prezime je obavezno.')
+
+            # OIB validacija (MOD11)
+            if oib and len(oib) == 11 and oib.isdigit():
+                a = 10
+                for ch in oib[:10]:
+                    a = (a + int(ch)) % 10
+                    if a == 0: a = 10
+                    a = (a * 2) % 11
+                ctrl = (11 - a) % 10
+                if ctrl != int(oib[10]):
+                    errors.append(f'OIB {oib} — neispravan (kontrolna znamenka).')
+
+            if errors:
+                return render(request, 'companies/onboard_wizard.html', {
+                    'step': '1', 'errors': errors, 'form': request.POST,
+                    'employee': ep, 'company': company,
+                })
+
+            # Spremi u sesiju
+            request.session['onb_first_name'] = first_name
+            request.session['onb_last_name'] = last_name
+            request.session['onb_email'] = email
+            request.session['onb_oib'] = oib
+            request.session['onb_iban'] = iban
+            request.session['onb_phone'] = phone
+            request.session['onb_hourly_rate'] = hourly_rate
+            request.session['onb_date_hired'] = date_hired
+
+            return render(request, 'companies/onboard_wizard.html', {
+                'step': '2', 'company': company, 'employee': ep,
+                'workspaces': company.workspaces.all(),
+                'terminals': company.pos_terminals.filter(is_active=True),
+            })
+
+        # ── KORAK 2: Pristup ──
+        elif step == '2':
+            request.session['onb_role'] = request.POST.get('role', 'worker')
+            request.session['onb_workspace'] = request.POST.get('workspace', '')
+            request.session['onb_terminal'] = request.POST.get('terminal', '')
+
+            return render(request, 'companies/onboard_wizard.html', {
+                'step': '3', 'company': company, 'employee': ep,
+                'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
+            })
+
+        # ── KORAK 3: PIN ──
+        elif step == '3':
+            pin = request.POST.get('pin', '').strip()
+            if len(pin) < 4:
+                return render(request, 'companies/onboard_wizard.html', {
+                    'step': '3', 'errors': ['PIN mora imati min. 4 znamenke.'],
+                    'company': company, 'employee': ep,
+                    'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
+                })
+            request.session['onb_pin'] = pin
+
+            return render(request, 'companies/onboard_wizard.html', {
+                'step': '4', 'company': company, 'employee': ep,
+                'summary': {
+                    'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
+                    'oib': request.session.get('onb_oib', ''),
+                    'iban': request.session.get('onb_iban', ''),
+                    'role': request.session.get('onb_role', 'worker'),
+                    'pin': '●●●●' + pin[-2:] if len(pin) > 2 else '●●●●',
+                },
+            })
+
+        # ── KORAK 4: Potvrda + kreiranje ──
+        elif step == '4':
+            from django.contrib.auth.models import User
+            from accounts.models import UserProfile, CompanyMembership
+            from django.db import transaction
+            import secrets, string
+
+            fn = request.session.get('onb_first_name', '')
+            ln = request.session.get('onb_last_name', '')
+            email = request.session.get('onb_email', '')
+            oib = request.session.get('onb_oib', '')
+            iban = request.session.get('onb_iban', '')
+            phone = request.session.get('onb_phone', '')
+            hourly_rate = request.session.get('onb_hourly_rate', '20')
+            date_hired = request.session.get('onb_date_hired', '')
+            role = request.session.get('onb_role', 'worker')
+            workspace_id = request.session.get('onb_workspace', '')
+            terminal_id = request.session.get('onb_terminal', '')
+            pin = request.session.get('onb_pin', '')
+
+            with transaction.atomic():
+                # User
+                if ep:
+                    user = ep.user
+                    user.first_name = fn
+                    user.last_name = ln
+                    if email: user.email = email
+                    user.save()
+                else:
+                    base_un = (email.split('@')[0] if email else f'{fn}_{ln}').lower().replace('.', '_')[:25]
+                    username = base_un
+                    i = 1
+                    while User.objects.filter(username=username).exists():
+                        username = f'{base_un}{i}'; i += 1
+                    temp_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+                    user = User.objects.create_user(
+                        username=username, email=email or '', password=temp_pw,
+                        first_name=fn, last_name=ln,
+                    )
+
+                # UserProfile
+                up, _ = UserProfile.objects.update_or_create(
+                    user=user,
+                    defaults={'company': company, 'role': role, 'phone': phone},
+                )
+
+                # CompanyMembership
+                CompanyMembership.objects.update_or_create(
+                    user=user, company=company,
+                    defaults={'role': role, 'is_active': True, 'is_default': True},
+                )
+
+                # EmployeeProfile
+                from decimal import Decimal
+                import datetime
+                ep_defaults = {
+                    'company': company,
+                    'hourly_rate': Decimal(hourly_rate or '20'),
+                    'phone': phone,
+                    'bank_account': iban,
+                    'tax_id': oib,
+                }
+                if date_hired:
+                    try:
+                        ep_defaults['date_hired'] = datetime.datetime.strptime(date_hired, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass
+                ep_obj, _ = EmployeeProfile.objects.update_or_create(
+                    user=user, defaults=ep_defaults,
+                )
+
+                # PIN
+                if pin:
+                    from pos.models import POSCashier
+                    cashier, _ = POSCashier.objects.get_or_create(
+                        company=company, user=user,
+                        defaults={'name': f'{fn} {ln}', 'can_void': False, 'can_discount': False},
+                    )
+                    cashier.set_pin(pin)
+                    cashier.save()
+
+                # Workspace
+                if workspace_id:
+                    from companies.models import Workspace
+                    try:
+                        ws = Workspace.objects.get(pk=workspace_id, company=company)
+                        ws.workers.add(user)
+                    except Exception:
+                        pass
+
+                # Audit
+                try:
+                    from core.models import BookingSignature
+                    BookingSignature.log(request, 'create',
+                        target_obj=ep_obj,
+                        target_repr=f'Onboarding: {fn} {ln} ({role})',
+                        changes={
+                            'oib': bool(oib), 'iban': bool(iban),
+                            'pin': bool(pin), 'workspace': workspace_id,
+                        })
+                except Exception:
+                    pass
+
+            # Cleanup session
+            for k in list(request.session.keys()):
+                if k.startswith('onb_'):
+                    del request.session[k]
+
+            messages.success(request, f'{fn} {ln} uspješno dodan! OIB: {"✓" if oib else "—"} | IBAN: {"✓" if iban else "—"} | PIN: {"✓" if pin else "—"}')
+            return redirect('companies:settings')
+
+    # GET — korak 1
+    return render(request, 'companies/onboard_wizard.html', {
+        'step': '1', 'company': company, 'employee': ep,
+        'form': {},
     })

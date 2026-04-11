@@ -450,3 +450,198 @@ def offline_sync(request):
                 synced += 1
 
     return JsonResponse({'ok': True, 'synced': synced})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 4: SELF-SERVICE PORTAL — Radnik vidi svoje sate i plaću
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def my_hours(request):
+    """Radnik vidi SVOJE sate — ne može vidjeti tuđe."""
+    from django.utils import timezone
+    from django.db.models import Sum
+    from decimal import Decimal
+
+    company = getattr(getattr(request.user, 'profile', None), 'company', None)
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+
+    # Odabir mjeseca
+    import datetime
+    month_str = request.GET.get('month', '')
+    if month_str:
+        try:
+            year, month = month_str.split('-')
+            month_start = datetime.date(int(year), int(month), 1)
+            if int(month) == 12:
+                month_end = datetime.date(int(year) + 1, 1, 1) - datetime.timedelta(days=1)
+            else:
+                month_end = datetime.date(int(year), int(month) + 1, 1) - datetime.timedelta(days=1)
+        except (ValueError, TypeError):
+            month_end = today
+    else:
+        month_end = today
+
+    entries = TimeEntry.objects.filter(
+        user=request.user,
+        date__gte=month_start,
+        date__lte=month_end,
+    ).order_by('-date')
+
+    agg = entries.aggregate(
+        total=Sum('duration'),
+        regular=Sum('regular_hours'),
+        overtime=Sum('overtime_hours'),
+        night=Sum('night_hours'),
+    )
+    total_hours = float(agg['total'] or 0)
+    regular = float(agg['regular'] or 0)
+    overtime = float(agg['overtime'] or 0)
+    night = float(agg['night'] or 0)
+
+    # Projekcija plaće
+    projected_pay = None
+    hourly_rate = None
+    try:
+        ep = request.user.employeeprofile
+        hourly_rate = float(ep.hourly_rate)
+        projected_pay = round(hourly_rate * total_hours, 2)
+    except Exception:
+        pass
+
+    # Dnevni breakdown za graf
+    daily_data = []
+    for entry in entries:
+        daily_data.append({
+            'date': entry.date.strftime('%d.%m'),
+            'hours': float(entry.duration or 0),
+            'overtime': float(entry.overtime_hours or 0),
+            'type': entry.get_task_type_display(),
+        })
+
+    # Prethodni/sljedeći mjesec
+    if month_start.month == 1:
+        prev_month = f'{month_start.year - 1}-12'
+    else:
+        prev_month = f'{month_start.year}-{month_start.month - 1:02d}'
+    if month_start.month == 12:
+        next_month = f'{month_start.year + 1}-01'
+    else:
+        next_month = f'{month_start.year}-{month_start.month + 1:02d}'
+
+    return render(request, 'worktime/my_hours.html', {
+        'entries': entries,
+        'total_hours': total_hours,
+        'regular': regular,
+        'overtime': overtime,
+        'night': night,
+        'projected_pay': projected_pay,
+        'hourly_rate': hourly_rate,
+        'daily_data': daily_data,
+        'month_start': month_start,
+        'month_end': month_end,
+        'prev_month': prev_month,
+        'next_month': next_month,
+        'page_title': 'Moji sati',
+    })
+
+
+@login_required
+def my_pay(request):
+    """Radnik vidi svoje isplatne liste."""
+    from payroll.models import PayrollRun, Payslip
+    company = getattr(getattr(request.user, 'profile', None), 'company', None)
+
+    payslips = Payslip.objects.filter(
+        user=request.user,
+        payroll_run__company=company,
+    ).select_related('payroll_run').order_by('-payroll_run__year', '-payroll_run__month')[:24]
+
+    return render(request, 'worktime/my_pay.html', {
+        'payslips': payslips,
+        'page_title': 'Moja plaća',
+    })
+
+
+@login_required
+def my_requests(request):
+    """Radnik šalje zahtjeve — godišnji, bolovanje, PIN promjena."""
+    from django.utils import timezone
+
+    if request.method == 'POST':
+        req_type = request.POST.get('type', '')
+        date_from = request.POST.get('date_from', '')
+        date_to = request.POST.get('date_to', '')
+        note = request.POST.get('note', '').strip()
+
+        if req_type == 'pin_change':
+            # PIN promjena — redirect na TriKey
+            return redirect('trikey_change_pin')
+
+        if not req_type or not date_from:
+            messages.error(request, 'Popunite sva polja.')
+            return redirect('worktime:my_requests')
+
+        # Kreiraj TimeEntry za odsutnost
+        try:
+            import datetime
+            df = datetime.datetime.strptime(date_from, '%Y-%m-%d').date()
+            dt = datetime.datetime.strptime(date_to, '%Y-%m-%d').date() if date_to else df
+            company = getattr(request.user.profile, 'company', None)
+
+            # Za svaki dan u rasponu kreiraj entry
+            created = 0
+            current = df
+            while current <= dt:
+                if current.weekday() < 5:  # samo radni dani
+                    TimeEntry.objects.create(
+                        user=request.user,
+                        company=company,
+                        project_id=1,  # default project — TODO: absence project
+                        date=current,
+                        duration=8,
+                        regular_hours=8,
+                        absence_type=req_type,
+                        status='PENDING',
+                        description=note,
+                        task_type='OTHER',
+                    )
+                    created += 1
+                current += datetime.timedelta(days=1)
+
+            # Audit
+            try:
+                from core.models import BookingSignature
+                BookingSignature.log(request, 'create',
+                    target_model='TimeEntry',
+                    target_repr=f'Zahtjev: {req_type} {df}—{dt} ({created} dana)',
+                )
+            except Exception:
+                pass
+
+            messages.success(request, f'Zahtjev poslan: {created} dana {req_type}. Čeka odobrenje.')
+        except Exception as e:
+            messages.error(request, f'Greška: {e}')
+
+        return redirect('worktime:my_requests')
+
+    # GET — prikaži formu + aktivni zahtjevi
+    pending = TimeEntry.objects.filter(
+        user=request.user,
+        status='PENDING',
+        absence_type__gt='',
+    ).order_by('-date')[:20]
+
+    approved = TimeEntry.objects.filter(
+        user=request.user,
+        status='APPROVED',
+        absence_type__gt='',
+    ).order_by('-date')[:10]
+
+    return render(request, 'worktime/my_requests.html', {
+        'pending': pending,
+        'approved': approved,
+        'absence_types': TimeEntry.ABSENCE_TYPES[1:],  # skip empty
+        'page_title': 'Moji zahtjevi',
+    })

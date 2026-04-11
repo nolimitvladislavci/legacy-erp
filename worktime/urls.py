@@ -5,6 +5,11 @@ from .views import api_clock_in, api_clock_out, api_auditor_flags
 
 app_name = 'worktime'
 urlpatterns = [
+    # Self-Service Portal (Faza 4)
+    path('moji-sati/', views.my_hours, name='my_hours'),
+    path('moja-placa/', views.my_pay, name='my_pay'),
+    path('zahtjevi/', views.my_requests, name='my_requests'),
+
     path('api/quick-create-project/', views.api_quick_create_project, name='api_quick_create_project'),
     path('', timesheet_views.worker_dashboard, name='ts_worker'),
     path('manager/', timesheet_views.manager_timesheet, name='ts_manager'),
@@ -54,4 +59,5 @@ urlpatterns = [
     path('api/auditor/flags/', api_auditor_flags, name='api_auditor_flags'),
 
     path('api/offline-sync/', views.offline_sync, name='offline_sync'),
+    path('revision/<int:revision_id>/dispute/', timesheet_views.dispute_revision, name='dispute_revision'),
 ]

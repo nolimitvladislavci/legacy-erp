@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Onboarding — Korak {{ step }}{% endblock %}
+{% block page_title %}Onboarding radnika{% endblock %}
+{% block shell_mode %}focus{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:600px">
+
+  <!-- Progress -->
+  <div class="d-flex gap-2 fx-mb-4">
+    {% for s in "1234" %}
+    <div style="flex:1;height:4px;border-radius:2px;background:{% if s <= step %}#c9a84c{% else %}rgba(255,255,255,.1){% endif %}"></div>
+    {% endfor %}
+  </div>
+
+  {% if errors %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(239,68,68,.3)">
+    <div class="fx-card-body">
+      {% for e in errors %}<div style="color:#ef4444;font-size:.9rem">{{ e }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" id="wizardForm">
+    {% csrf_token %}
+    <input type="hidden" name="step" value="{{ step }}">
+
+    {% if step == "1" %}
+    <!-- KORAK 1: Identitet -->
+    <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+      <div class="fx-card-header"><i class="fas fa-user-plus me-2 fx-text-gold"></i> Korak 1: Identitet</div>
+      <div class="fx-card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="fx-label">Ime *</label>
+            <input type="text" name="first_name" class="fx-input" required value="{{ form.first_name|default:'' }}" autofocus>
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Prezime *</label>
+            <input type="text" name="last_name" class="fx-input" required value="{{ form.last_name|default:'' }}">
+          </div>
+          <div class="col-12">
+            <label class="fx-label">Email</label>
+            <input type="email" name="email" class="fx-input" value="{{ form.email|default:'' }}" placeholder="radnik@firma.hr">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">OIB (11 znamenki)</label>
+            <input type="text" name="oib" class="fx-input" maxlength="11" pattern="\d{11}" value="{{ form.oib|default:'' }}" placeholder="12345678901" id="oibField">
+            <div id="oibStatus" style="font-size:.75rem;margin-top:4px"></div>
+          </div>
+          <div class="col-6">
+            <label class="fx-label">IBAN</label>
+            <input type="text" name="iban" class="fx-input" value="{{ form.iban|default:'' }}" placeholder="HR1234567890123456789" id="ibanField">
+            <div id="ibanStatus" style="font-size:.75rem;margin-top:4px"></div>
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Telefon</label>
+            <input type="tel" name="phone" class="fx-input" value="{{ form.phone|default:'' }}">
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Satnica (EUR)</label>
+            <input type="number" name="hourly_rate" class="fx-input" step="0.01" value="{{ form.hourly_rate|default:'20' }}">
+          </div>
+          <div class="col-4">
+            <label class="fx-label">Datum zaposlenja</label>
+            <input type="date" name="date_hired" class="fx-input" value="{{ form.date_hired|default:'' }}">
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    // OIB real-time validacija (MOD11)
+    document.getElementById('oibField').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g,'');
+      var el = document.getElementById('oibStatus');
+      if (v.length < 11) { el.textContent = ''; return; }
+      var a = 10;
+      for (var i = 0; i < 10; i++) { a = (a + parseInt(v[i])) % 10; if (a === 0) a = 10; a = (a * 2) % 11; }
+      var ctrl = (11 - a) % 10;
+      if (ctrl === parseInt(v[10])) {
+        el.innerHTML = '<span style="color:#22c55e"><i class="fas fa-check-circle"></i> OIB validan</span>';
+      } else {
+        el.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> Neispravan OIB</span>';
+      }
+    });
+    // IBAN validacija (HR format)
+    document.getElementById('ibanField').addEventListener('input', function() {
+      var v = this.value.replace(/\s/g,'').toUpperCase();
+      var el = document.getElementById('ibanStatus');
+      if (v.length < 21) { el.textContent = ''; return; }
+      if (v.startsWith('HR') && v.length === 21) {
+        el.innerHTML = '<span style="color:#22c55e"><i class="fas fa-check-circle"></i> IBAN format OK</span>';
+      } else if (v.startsWith('DE') && v.length === 22) {
+        el.innerHTML = '<span style="color:#22c55e"><i class="fas fa-check-circle"></i> IBAN format OK (DE)</span>';
+      } else {
+        el.innerHTML = '<span style="color:#f59e0b"><i class="fas fa-exclamation-triangle"></i> Provjerite format</span>';
+      }
+    });
+    </script>
+
+    {% elif step == "2" %}
+    <!-- KORAK 2: Pristup -->
+    <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+      <div class="fx-card-header"><i class="fas fa-key me-2 fx-text-gold"></i> Korak 2: Pristup i dozvole</div>
+      <div class="fx-card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="fx-label">Uloga</label>
+            <select name="role" class="fx-input">
+              <option value="worker">Radnik</option>
+              <option value="company_admin">Administrator</option>
+              <option value="project_manager">Voditelj</option>
+            </select>
+          </div>
+          {% if workspaces %}
+          <div class="col-12">
+            <label class="fx-label">Radni prostor</label>
+            <select name="workspace" class="fx-input">
+              <option value="">— Bez workspace-a —</option>
+              {% for ws in workspaces %}
+              <option value="{{ ws.pk }}">{{ ws.name }} ({{ ws.get_type_display }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          {% if terminals %}
+          <div class="col-12">
+            <label class="fx-label">POS Terminal (opciono)</label>
+            <select name="terminal" class="fx-input">
+              <option value="">— Nema POS —</option>
+              {% for t in terminals %}
+              <option value="{{ t.pk }}">{{ t.name }} ({{ t.terminal_code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% elif step == "3" %}
+    <!-- KORAK 3: PIN -->
+    <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+      <div class="fx-card-header"><i class="fas fa-lock me-2 fx-text-gold"></i> Korak 3: PIN za {{ name }}</div>
+      <div class="fx-card-body text-center">
+        <p class="fx-text-muted fx-mb-3">Radnik koristi PIN za prijavu na POS terminal i potvrdu akcija.</p>
+        <input type="text" name="pin" class="fx-input" inputmode="numeric" pattern="\d{4,6}"
+               style="text-align:center;font-size:2rem;letter-spacing:12px;max-width:250px;margin:0 auto"
+               placeholder="●●●●" maxlength="6" required autofocus>
+        <div class="fx-text-muted" style="font-size:.75rem;margin-top:8px">Min. 4 znamenke. Ne koristite 1234 ili datum rodjenja.</div>
+      </div>
+    </div>
+
+    {% elif step == "4" %}
+    <!-- KORAK 4: Potvrda -->
+    <div class="fx-card fx-mb-3" style="border-top:3px solid #22c55e">
+      <div class="fx-card-header"><i class="fas fa-check-double me-2" style="color:#22c55e"></i> Korak 4: Potvrda</div>
+      <div class="fx-card-body">
+        <div class="row g-2">
+          <div class="col-6"><span class="fx-text-muted">Ime:</span></div>
+          <div class="col-6"><strong>{{ summary.name }}</strong></div>
+          <div class="col-6"><span class="fx-text-muted">OIB:</span></div>
+          <div class="col-6"><strong>{{ summary.oib|default:"—" }}</strong></div>
+          <div class="col-6"><span class="fx-text-muted">IBAN:</span></div>
+          <div class="col-6"><strong>{{ summary.iban|default:"—" }}</strong></div>
+          <div class="col-6"><span class="fx-text-muted">Uloga:</span></div>
+          <div class="col-6"><strong>{{ summary.role }}</strong></div>
+          <div class="col-6"><span class="fx-text-muted">PIN:</span></div>
+          <div class="col-6"><strong>{{ summary.pin }}</strong></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1.05rem;font-weight:700">
+      {% if step == "4" %}
+        <i class="fas fa-user-check me-1"></i> ZAVRSI ONBOARDING
+      {% else %}
+        Dalje <i class="fas fa-arrow-right ms-1"></i>
+      {% endif %}
+    </button>
+
+    {% if step != "1" %}
+    <button type="button" onclick="history.back()" class="btn btn-outline-secondary w-100 mt-2" style="padding:10px">
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </button>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

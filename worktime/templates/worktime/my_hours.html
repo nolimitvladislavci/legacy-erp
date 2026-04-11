@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Moji sati{% endblock %}
+{% block page_title %}Moji sati{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3" style="max-width:800px">
+
+  <!-- Navigacija mjesec -->
+  <div class="d-flex justify-content-between align-items-center fx-mb-3">
+    <a href="?month={{ prev_month }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-chevron-left"></i> Prethodni
+    </a>
+    <h3 class="fx-fw-bold fx-text-gold fx-mb-0">
+      {{ month_start|date:"F Y" }}
+    </h3>
+    <a href="?month={{ next_month }}" class="btn btn-outline-secondary btn-sm">
+      Sljedeći <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+
+  <!-- KPI kartice -->
+  <div class="row g-3 fx-mb-4">
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-card-body text-center">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">{{ total_hours|floatformat:1 }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Ukupno sati</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-card-body text-center">
+        <div style="font-size:1.8rem;font-weight:800;color:#22c55e">{{ regular|floatformat:1 }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Redovni</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-card-body text-center">
+        <div style="font-size:1.8rem;font-weight:800;color:#f59e0b">{{ overtime|floatformat:1 }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Prekovremeni</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card fx-card-body text-center">
+        {% if projected_pay %}
+        <div style="font-size:1.8rem;font-weight:800;color:#3b82f6">{{ projected_pay }} €</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Projekcija ({{ hourly_rate }} €/h)</div>
+        {% else %}
+        <div style="font-size:1.8rem;font-weight:800;color:#64748b">—</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Plaća</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Dnevni graf -->
+  {% if daily_data %}
+  <div class="fx-card fx-mb-4">
+    <div class="fx-card-header">
+      <i class="fas fa-chart-bar me-2 fx-text-gold"></i> Sati po danima
+    </div>
+    <div class="fx-card-body" style="overflow-x:auto">
+      <div style="display:flex;gap:3px;align-items:flex-end;min-height:120px;padding-top:10px">
+        {% for d in daily_data %}
+        <div style="flex:1;min-width:20px;display:flex;flex-direction:column;align-items:center">
+          <div style="width:100%;background:{% if d.overtime > 0 %}#f59e0b{% else %}var(--gold,#c9a84c){% endif %};border-radius:3px 3px 0 0;min-height:4px;height:{{ d.hours|floatformat:0 }}0px;max-height:100px;transition:height .3s" title="{{ d.hours }}h {{ d.type }}"></div>
+          <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px;writing-mode:vertical-rl;text-orientation:mixed;max-height:30px;overflow:hidden">{{ d.date }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Lista smjena -->
+  <div class="fx-card">
+    <div class="fx-card-header d-flex justify-content-between">
+      <span><i class="fas fa-list me-2"></i> Smjene ({{ entries.count }})</span>
+      <div class="d-flex gap-2">
+        <a href="{% url 'worktime:my_pay' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-file-invoice-dollar me-1"></i> Plaća
+        </a>
+        <a href="{% url 'worktime:my_requests' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-paper-plane me-1"></i> Zahtjevi
+        </a>
+      </div>
+    </div>
+    <div class="fx-card-body p-0">
+      {% if entries %}
+      <div class="table-responsive">
+        <table class="table fx-table fx-mb-0">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Sati</th>
+              <th>Tip</th>
+              <th>Status</th>
+              <th>Projekt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in entries %}
+            <tr>
+              <td>{{ e.date|date:"d.m.Y" }}{% if e.is_night_work %} <span class="badge bg-dark" style="font-size:.6rem">NOĆ</span>{% endif %}</td>
+              <td>
+                <strong class="fx-text-gold">{{ e.duration|floatformat:1 }}h</strong>
+                {% if e.overtime_hours > 0 %}<span style="color:#f59e0b;font-size:.75rem"> (+{{ e.overtime_hours }}h OT)</span>{% endif %}
+              </td>
+              <td style="font-size:.82rem">
+                {% if e.absence_type %}
+                  <span class="badge bg-info" style="font-size:.7rem">{{ e.get_absence_type_display }}</span>
+                {% else %}
+                  {{ e.get_task_type_display }}
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge {% if e.status == 'APPROVED' %}bg-success{% elif e.status == 'REJECTED' %}bg-danger{% elif e.status == 'PENDING' %}bg-warning text-dark{% else %}bg-secondary{% endif %}" style="font-size:.7rem">
+                  {{ e.get_status_display }}
+                </span>
+              </td>
+              <td style="font-size:.8rem;color:var(--text-dim)">{{ e.project.name|truncatechars:20 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center fx-py-5 fx-text-muted">
+        Nema zapisa za ovaj mjesec.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
