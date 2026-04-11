@@ -56,6 +56,21 @@
     </div>
     <textarea name="description" placeholder="Detaljan opis — što se događa, kad, gdje..." rows="3" required
               class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-md fx-b2 fx-mb-4" style="box-sizing:border-box;padding:.65rem;font-family:inherit;resize:vertical"></textarea>
+    <div class="d-flex fx-gap-3 align-items-center fx-flex-wrap fx-mb-3">
+      <span class="fx-text-dim fx-fs-caption">Posalji na:</span>
+      <label class="fx-pointer d-flex align-items-center fx-gap-1 fx-fs-md">
+        <input type="radio" name="send_method" value="whatsapp" checked style="accent-color:#25D366">
+        <i class="fab fa-whatsapp" style="color:#25D366"></i> WhatsApp
+      </label>
+      <label class="fx-pointer d-flex align-items-center fx-gap-1 fx-fs-md">
+        <input type="radio" name="send_method" value="email" style="accent-color:#3b82f6">
+        <i class="fas fa-envelope" style="color:#3b82f6"></i> Email
+      </label>
+      <label class="fx-pointer d-flex align-items-center fx-gap-1 fx-fs-md">
+        <input type="radio" name="send_method" value="none" style="accent-color:#666">
+        Samo spremi
+      </label>
+    </div>
     <button type="submit" class="fx-text-dark fx-border-none fx-rounded fx-fw-bold fx-pointer" style="padding:.7rem 2rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);font-family:inherit">
       ⭐ Prijavi → Trojstvo analizira
     </button>

@@ -139,6 +139,12 @@ class InspectionProtocol(models.Model):
     signed_at = models.DateTimeField(null=True, blank=True)
     signed_ip = models.GenericIPAddressField(null=True, blank=True)
 
+    # Upload — slika znacke/naloga
+    badge_photo = models.ImageField(upload_to='inspection/badges/', null=True, blank=True,
+        verbose_name='Fotografija znacke')
+    warrant_photo = models.ImageField(upload_to='inspection/warrants/', null=True, blank=True,
+        verbose_name='Fotografija naloga/rjesenja')
+
     # Geolokacija (opciono, ako browser dozvoli)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

@@ -86,7 +86,7 @@
   </ul>
   {% endif %}
 
-  <form method="post" id="regForm">
+  <form method="post" id="regForm" enctype="multipart/form-data">
     {% csrf_token %}
 
     <!-- 1. Identifikacija -->
@@ -131,6 +131,25 @@
         <label>Broj naloga / rjesenja / pravni temelj</label>
         <input type="text" name="legal_basis" value="{{ form_data.legal_basis|default:'' }}" placeholder="Npr. UP/II-471-01/26-01/123 ili Zakon o inspekcijama cl. 24">
         <div class="hint">Navedite broj sluzbenog naloga ili zakonsku osnovu za inspekciju</div>
+      </div>
+    </div>
+
+    <!-- 2b. Dokumentacija (fotografije) -->
+    <div class="reg-section">
+      <h3><span class="step"><i class="fas fa-camera"></i></span> Dokumentacija</h3>
+      <div class="field-row">
+        <div class="field">
+          <label><i class="fas fa-id-badge"></i> Fotografija znacke</label>
+          <input type="file" name="badge_photo" accept="image/*" capture="environment"
+            style="padding:10px">
+          <div class="hint">Slikajte prednju stranu sluzbene iskaznice</div>
+        </div>
+        <div class="field">
+          <label><i class="fas fa-file-alt"></i> Fotografija naloga</label>
+          <input type="file" name="warrant_photo" accept="image/*" capture="environment"
+            style="padding:10px">
+          <div class="hint">Slikajte nalog za inspekciju (ako postoji)</div>
+        </div>
       </div>
     </div>
 

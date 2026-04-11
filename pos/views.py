@@ -4423,8 +4423,37 @@ def improvement_list(request):
                 trojstvo_rijesi.delay(s.pk)
             except Exception as e:
                 import logging
-                logging.getLogger('trojstvo').error('Task dispatch greška: %s', e)
-            messages.success(request, '✅ Prijavljeno! Haiku i Gemini analiziraju...')
+                logging.getLogger('trojstvo').error('Task dispatch greska: %s', e)
+
+            # WhatsApp notifikacija Ivanu
+            try:
+                _zlatno_dugme_notify_ivan(s)
+            except Exception:
+                pass
+
+            # Odabir slanja
+            send_method = request.POST.get('send_method', 'none')
+            if send_method == 'whatsapp':
+                try:
+                    from core.whatsapp import send_text
+                    send_text(IVAN_PHONE,
+                        f'Zlatno dugme: {title}\n{desc[:200]}\nPrioritet: P{s.priority}\nFirma: {company.name}')
+                except Exception:
+                    pass
+            elif send_method == 'email':
+                try:
+                    from django.core.mail import send_mail
+                    send_mail(
+                        subject=f'Zlatno dugme: {title} (P{s.priority})',
+                        message=f'{desc}\n\nFirma: {company.name}\nAutor: {request.user.get_full_name()}',
+                        from_email=None,
+                        recipient_list=['viskovic.bau@gmail.com'],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+
+            messages.success(request, 'Prijavljeno! Haiku i Gemini analiziraju...')
             return redirect('pos:improvement_list')
 
     return render(request, 'pos/improvement_list.html', {

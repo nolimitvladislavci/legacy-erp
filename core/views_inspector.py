@@ -499,9 +499,7 @@ def inspector_register(request, token):
         if ',' in ip:
             ip = ip.split(',')[0].strip()
 
-        protocol, created = InspectionProtocol.objects.update_or_create(
-            token=tok,
-            defaults={
+        defaults = {
                 'inspector_first_name': first_name,
                 'inspector_last_name': last_name,
                 'inspector_badge': badge,
@@ -515,8 +513,15 @@ def inspector_register(request, token):
                 'signed_ip': ip or None,
                 'latitude': float(lat) if lat else None,
                 'longitude': float(lng) if lng else None,
-            }
-        )
+        }
+        # File uploads
+        if request.FILES.get('badge_photo'):
+            defaults['badge_photo'] = request.FILES['badge_photo']
+        if request.FILES.get('warrant_photo'):
+            defaults['warrant_photo'] = request.FILES['warrant_photo']
+
+        protocol, created = InspectionProtocol.objects.update_or_create(
+            token=tok, defaults=defaults)
 
         # Audit
         try:
@@ -528,6 +533,44 @@ def inspector_register(request, token):
                     'institution': institution,
                     'ip': ip,
                 })
+        except Exception:
+            pass
+
+        # Notifikacija vlasniku firme — inspektor se prijavio
+        try:
+            from core.whatsapp import send_text
+            owner_phone = tok.company.phone or ''
+            if owner_phone:
+                scope_labels = dict(InspectionToken.SCOPE_CHOICES)
+                msg = (
+                    f"INSPEKCIJA — {scope_labels.get(tok.scope, tok.scope)}\n\n"
+                    f"Inspektor: {first_name} {last_name}\n"
+                    f"Znacka: {badge or 'nije unio'}\n"
+                    f"Institucija: {institution or 'nije unio'}\n"
+                    f"Pravni temelj: {legal_basis or 'nije unio'}\n"
+                    f"Potpisan zapisnik: DA\n"
+                    f"Vrijeme: {timezone.now().strftime('%d.%m.%Y %H:%M')}\n\n"
+                    f"Pristup istjece: {tok.expires_at.strftime('%d.%m.%Y %H:%M')}"
+                )
+                send_text(owner_phone, msg, company_id=str(tok.company.pk))
+        except Exception:
+            pass
+
+        # Email notifikacija
+        try:
+            from django.core.mail import send_mail
+            admin_emails = list(tok.company.subscriptions.filter(is_active=True).values_list(
+                'company__email', flat=True)) or []
+            if tok.created_by and tok.created_by.email:
+                admin_emails.append(tok.created_by.email)
+            if admin_emails:
+                send_mail(
+                    subject=f'Inspekcija — {first_name} {last_name} pristupa podacima',
+                    message=f'Inspektor {first_name} {last_name} (znacka: {badge}) potpisao zapisnik i pristupa podacima firme {tok.company.name}.',
+                    from_email=None,
+                    recipient_list=admin_emails[:3],
+                    fail_silently=True,
+                )
         except Exception:
             pass
 
