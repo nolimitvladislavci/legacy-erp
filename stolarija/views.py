@@ -50,11 +50,15 @@ def session_new(request):
             messages.error(request, 'Adresa je obavezna.')
             return render(request, 'stolarija/session_new.html', {'page_title': 'Nova sesija mjerenja'})
 
+        lat = request.POST.get('latitude', '')
+        lng = request.POST.get('longitude', '')
         session = MeasurementSession.objects.create(
             company=company,
             created_by=request.user,
             address=address,
             notes=request.POST.get('notes', '').strip(),
+            latitude=float(lat) if lat else None,
+            longitude=float(lng) if lng else None,
         )
         messages.success(request, f'Sesija kreirana — možeš početi mjeriti.')
 

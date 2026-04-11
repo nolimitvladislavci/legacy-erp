@@ -63,6 +63,8 @@ class MeasurementSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     address    = models.CharField(max_length=255, blank=True, verbose_name='Adresa objekta')
     notes      = models.TextField(blank=True)
+    latitude   = models.FloatField(null=True, blank=True, verbose_name='GPS lat')
+    longitude  = models.FloatField(null=True, blank=True, verbose_name='GPS lng')
 
     class Meta:
         ordering = ['-created_at']

@@ -1,101 +1,168 @@
 {% extends 'base.html' %}
 {% block shell_mode %}focus{% endblock %}
 {% load i18n %}
-{% block title %}Nova sesija mjerenja{% endblock %}
-{% block page_title %}📐 Nova sesija mjerenja{% endblock %}
+{% block title %}Novo mjerenje{% endblock %}
+{% block page_title %}Novo mjerenje{% endblock %}
+
 {% block content %}
-<div class="fx-container fx-py-3" style="max-width:500px">
-  <div class="fx-card">
-    <div class="fx-card-header">
-      <i class="fas fa-map-marker-alt me-2 fx-text-gold"></i> Podaci o lokaciji
-    </div>
-    <div class="fx-card-body">
-      <form method="post">
-        {% csrf_token %}
-        <div class="fx-mb-3">
-          <label class="fx-label">Adresa objekta *</label>
-          <input type="text" name="address" class="fx-input" required autofocus
-                 placeholder="npr. Ul. Ante Starčevića 12, Čepin">
-        </div>
-        <div class="fx-mb-3">
-          <label class="fx-label">Napomene (opcionalno)</label>
-          <textarea name="notes" class="fx-input" rows="2"
-                    placeholder="npr. Kupac treba ponudu do petka..."></textarea>
-        </div>
-        <button type="submit" class="btn-gold w-100" id="submitBtn" style="padding:14px;font-size:1rem">
-          <i class="fas fa-arrow-right me-1"></i> Počni mjeriti
-        </button>
-        <div id="formMsg" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:.9rem"></div>
-        <a href="{% url 'stolarija:dashboard' %}"
-           class="btn btn-outline-secondary w-100 mt-2" style="padding:10px">
-          Odustani
-        </a>
-      </form>
-      <script>
-      document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var btn = document.getElementById('submitBtn');
-        var msg = document.getElementById('formMsg');
-        var form = this;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Kreiranje...';
-        msg.style.display = 'none';
-        
-        var data = new FormData(form);
-        
-        fetch(form.action || window.location.href, {
-          method: 'POST',
-          body: data,
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          credentials: 'same-origin',
-        })
-        .then(function(r) {
-          if (r.redirected) {
-            window.location.href = r.url;
-            return;
-          }
-          return r.text().then(function(body) {
-            if (body.includes('csrf_error') || body.includes('csrftoken')) {
-              // CSRF token expired — refresh and retry
-              try {
-                var d = JSON.parse(body);
-                if (d.new_token) {
-                  document.cookie = 'csrftoken=' + d.new_token + ';path=/;SameSite=Lax;Secure';
-                  var csrf = form.querySelector('[name=csrfmiddlewaretoken]');
-                  if (csrf) csrf.value = d.new_token;
-                  msg.innerHTML = '<i class="fas fa-sync me-1"></i> Token osvjezen — ponovite klik.';
-                  msg.style.display = 'block';
-                  msg.style.background = 'rgba(201,168,76,.1)';
-                  msg.style.color = '#c9a84c';
-                  msg.style.border = '1px solid rgba(201,168,76,.3)';
-                  btn.disabled = false;
-                  btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
-                  return;
-                }
-              } catch(ex) {}
-            }
-            // Unexpected response
-            msg.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Greska. Osvjezite stranicu.';
-            msg.style.display = 'block';
-            msg.style.background = 'rgba(239,68,68,.1)';
-            msg.style.color = '#ef4444';
-            msg.style.border = '1px solid rgba(239,68,68,.3)';
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
-          });
-        })
-        .catch(function() {
-          msg.innerHTML = '<i class="fas fa-wifi me-1"></i> Nema veze. Provjerite internet.';
-          msg.style.display = 'block';
-          msg.style.background = 'rgba(239,68,68,.1)';
-          msg.style.color = '#ef4444';
-          msg.style.border = '1px solid rgba(239,68,68,.3)';
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
-        });
-      });
-      </script>
+<div class="fx-container fx-py-3" style="max-width:540px">
+
+  <!-- Geolokacija hero -->
+  <div class="fx-card fx-mb-3" id="geoCard" style="border:2px solid rgba(201,168,76,.3);overflow:hidden">
+    <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),transparent);padding:28px 24px;text-align:center">
+      <div id="geoIcon" style="font-size:3rem;margin-bottom:12px;transition:all .3s">
+        <i class="fas fa-location-crosshairs" style="color:#c9a84c"></i>
+      </div>
+      <div id="geoStatus" style="font-size:1.1rem;font-weight:700;color:#c9a84c">
+        Trazim vasu lokaciju...
+      </div>
+      <div id="geoAddress" style="font-size:1.3rem;font-weight:800;color:#e2e8f0;margin-top:8px;min-height:1.6em;display:none">
+      </div>
+      <div id="geoCoords" style="font-size:.72rem;color:#64748b;margin-top:4px"></div>
     </div>
   </div>
+
+  <!-- Forma -->
+  <form method="post" id="sessionForm">
+    {% csrf_token %}
+    <input type="hidden" name="latitude" id="fLat">
+    <input type="hidden" name="longitude" id="fLng">
+
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-body">
+        <div class="fx-mb-3">
+          <label class="fx-label">Adresa objekta</label>
+          <input type="text" name="address" id="fAddress" class="fx-input" required
+                 placeholder="Automatski popunjeno ili upisite rucno"
+                 style="font-size:1.05rem;padding:14px">
+        </div>
+        <div class="fx-mb-3">
+          <label class="fx-label">Napomene</label>
+          <textarea name="notes" id="fNotes" class="fx-input" rows="2"
+                    placeholder="Kupac, kontakt, rok..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-gold w-100" id="submitBtn"
+            style="padding:16px;font-size:1.15rem;font-weight:800;border-radius:14px">
+      <i class="fas fa-arrow-right me-1"></i> POCNI MJERITI
+    </button>
+
+    <div id="formMsg" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:.9rem;text-align:center"></div>
+
+    <a href="{% url 'stolarija:dashboard' %}"
+       class="btn btn-outline-secondary w-100 mt-2" style="padding:10px;text-align:center;display:block;text-decoration:none">
+      Odustani
+    </a>
+  </form>
 </div>
-{% endblock %}
+
+<script>
+(function() {
+  var geoIcon = document.getElementById('geoIcon');
+  var geoStatus = document.getElementById('geoStatus');
+  var geoAddress = document.getElementById('geoAddress');
+  var geoCoords = document.getElementById('geoCoords');
+  var fAddress = document.getElementById('fAddress');
+  var fLat = document.getElementById('fLat');
+  var fLng = document.getElementById('fLng');
+
+  // Animacija trazenja
+  geoIcon.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#c9a84c"></i>';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+        fLat.value = lat;
+        fLng.value = lng;
+        geoCoords.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+
+        // Reverse geocode s Nominatim (besplatni, bez API kljuca)
+        geoStatus.textContent = 'Lokacija pronadena! Trazim adresu...';
+        geoIcon.innerHTML = '<i class="fas fa-map-marker-alt" style="color:#22c55e"></i>';
+
+        fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&addressdetails=1&accept-language=hr', {
+          headers: { 'User-Agent': 'LIMITConnect/1.0' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var a = data.address || {};
+          var parts = [];
+          if (a.road) parts.push(a.road + (a.house_number ? ' ' + a.house_number : ''));
+          if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
+          if (a.postcode) parts.push(a.postcode);
+
+          var address = parts.join(', ') || data.display_name || '';
+
+          if (address) {
+            geoAddress.textContent = address;
+            geoAddress.style.display = 'block';
+            geoStatus.textContent = 'Jeste li na ovoj adresi?';
+            geoStatus.style.fontSize = '.85rem';
+            geoStatus.style.color = '#94a3b8';
+            fAddress.value = address;
+
+            // Zvucni signal — lokacija pronadena
+            try {
+              var ac = new (window.AudioContext || window.webkitAudioContext)();
+              var o = ac.createOscillator();
+              var g = ac.createGain();
+              o.connect(g); g.connect(ac.destination);
+              o.frequency.value = 880; g.gain.value = 0.15;
+              o.start(); o.stop(ac.currentTime + 0.1);
+            } catch(e) {}
+          } else {
+            geoStatus.textContent = 'Adresa nije prepoznata — upisite rucno';
+            geoStatus.style.color = '#f59e0b';
+          }
+        })
+        .catch(function() {
+          geoStatus.textContent = 'Geocoding nedostupan — upisite rucno';
+          geoStatus.style.color = '#f59e0b';
+        });
+      },
+      function(err) {
+        geoIcon.innerHTML = '<i class="fas fa-keyboard" style="color:#64748b"></i>';
+        if (err.code === 1) {
+          geoStatus.textContent = 'Lokacija blokirana — upisite adresu rucno';
+        } else {
+          geoStatus.textContent = 'GPS nedostupan — upisite adresu rucno';
+        }
+        geoStatus.style.color = '#64748b';
+        fAddress.focus();
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+    );
+  } else {
+    geoIcon.innerHTML = '<i class="fas fa-keyboard" style="color:#64748b"></i>';
+    geoStatus.textContent = 'Upisite adresu rucno';
+    geoStatus.style.color = '#64748b';
+    fAddress.focus();
+  }
+
+  // Klasicni submit — ali prvo osvjezi CSRF token
+  document.getElementById('sessionForm').addEventListener('submit', function(e) {
+    var btn = document.getElementById('submitBtn');
+    if (!fAddress.value.trim()) {
+      e.preventDefault();
+      fAddress.style.borderColor = '#ef4444';
+      fAddress.focus();
+      return;
+    }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Kreiranje sesije...';
+    // Beep
+    try {
+      var ac = new (window.AudioContext || window.webkitAudioContext)();
+      var o = ac.createOscillator(); var g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.value = 660; g.gain.value = 0.1;
+      o.start(); o.stop(ac.currentTime + 0.08);
+    } catch(ex) {}
+    // Submit normalno — browser handles redirect
+  });
+})();
+</script>
