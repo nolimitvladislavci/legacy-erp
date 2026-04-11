@@ -14,14 +14,22 @@
   <div style="display:flex;flex-direction:column;gap:5px">
     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Navigacija" %}</div>
 
-    {% include "includes/_panel_link.html" with href="{% url 'dashboard' %}" icon="fa-home" label="Dashboard" %}
-    {% include "includes/_panel_link.html" with href="{% url 'pos:dashboard' %}" icon="fa-cash-register" label="POS Kasa" %}
-    {% include "includes/_panel_link.html" with href="{% url 'documents:arhiva_list' %}" icon="fa-archive" label="Arhiva" %}
-    {% include "includes/_panel_link.html" with href="{% url 'invoicing:index' %}" icon="fa-file-invoice-dollar" label="Fakture" %}
-    {% include "includes/_panel_link.html" with href="{% url 'konto:dashboard' %}" icon="fa-book" label="Konto" %}
-    {% include "includes/_panel_link.html" with href="{% url 'partners:partner_list' %}" icon="fa-users" label="Partneri" %}
-    {% include "includes/_panel_link.html" with href="{% url 'inventory:list' %}" icon="fa-boxes" label="Zalihe" %}
-    {% include "includes/_panel_link.html" with href="{% url 'stolarija:dashboard' %}" icon="fa-window-maximize" label="Stolarija" %}
+    {% url 'dashboard' as nav_dash %}
+    {% url 'pos:dashboard' as nav_pos %}
+    {% url 'documents:arhiva_list' as nav_arh %}
+    {% url 'invoicing:index' as nav_inv %}
+    {% url 'konto:dashboard' as nav_kon %}
+    {% url 'partners:partner_list' as nav_par %}
+    {% url 'inventory:list' as nav_zal %}
+    {% url 'stolarija:dashboard' as nav_sto %}
+    {% include "includes/_panel_link.html" with href=nav_dash icon="fa-home" label="Dashboard" %}
+    {% include "includes/_panel_link.html" with href=nav_pos icon="fa-cash-register" label="POS Kasa" %}
+    {% include "includes/_panel_link.html" with href=nav_arh icon="fa-archive" label="Arhiva" %}
+    {% include "includes/_panel_link.html" with href=nav_inv icon="fa-file-invoice-dollar" label="Fakture" %}
+    {% include "includes/_panel_link.html" with href=nav_kon icon="fa-book" label="Konto" %}
+    {% include "includes/_panel_link.html" with href=nav_par icon="fa-users" label="Partneri" %}
+    {% include "includes/_panel_link.html" with href=nav_zal icon="fa-boxes" label="Zalihe" %}
+    {% include "includes/_panel_link.html" with href=nav_sto icon="fa-window-maximize" label="Stolarija" %}
   </div>
 
   {# Workspace info #}
