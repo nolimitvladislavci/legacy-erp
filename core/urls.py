@@ -394,7 +394,8 @@ urlpatterns += [
 # Health check (no language prefix needed)
 urlpatterns += [
     # Inspektor Dashboard (PUBLIC — bez logina)
-    path('inspektor/<path:token>/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
+    path('inspektor/<path:token>/', __import__('core.views_inspector', fromlist=['inspector_register']).inspector_register, name='inspector_register'),
+    path('inspektor/<path:token>/podaci/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
     # Panic Button (login required)
     path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),

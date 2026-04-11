@@ -36,6 +36,10 @@ def inspector_dashboard(request, token):
     if not tok.is_valid:
         return render(request, 'inspector/expired.html', {'token': tok})
 
+    # Zahtijeva potpisan protokol
+    if not hasattr(tok, 'protocol') or not tok.protocol.signed_at:
+        return redirect('inspector_register', token=token)
+
     # Record access
     ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
     if ',' in ip:
@@ -359,7 +363,7 @@ def _gather_livestock(company, scope):
 
 @login_required
 def panic_button(request):
-    """Panic Button page — firma generira QR za inspektora."""
+    """Inspekcijski pristup — firma generira QR + inspektor se registrira."""
     from core.company_utils import get_user_company
     company = get_user_company(request)
     if not company:
@@ -398,6 +402,15 @@ def panic_button(request):
             created_by=request.user,
         )
 
+        # Audit
+        try:
+            from core.models import BookingSignature
+            BookingSignature.log(request, 'create', target_obj=tok,
+                target_repr=f'Inspekcija: {scope_labels.get(scope)} {df}—{dt}',
+                changes={'scope': scope, 'hours': hours})
+        except Exception:
+            pass
+
         qr_url = request.build_absolute_uri(f'/inspektor/{tok.token}/')
 
         return render(request, 'inspector/qr_generated.html', {
@@ -408,11 +421,11 @@ def panic_button(request):
             'scope_label': scope_labels.get(scope, scope),
         })
 
-    # GET — show panic button
+    # GET
     active_tokens = InspectionToken.objects.filter(
         company=company, is_active=True,
         expires_at__gt=timezone.now(),
-    )
+    ).select_related('protocol')
 
     return render(request, 'inspector/panic_button.html', {
         'company': company,
@@ -429,3 +442,100 @@ def panic_revoke(request, token_id):
     tok.is_active = False
     tok.save(update_fields=['is_active'])
     return redirect('panic_button')
+
+
+
+# ═══════════════════════════════════════════════════
+#  INSPECTOR REGISTRATION — inspektor se identificira
+# ═══════════════════════════════════════════════════
+
+def inspector_register(request, token):
+    """Inspektor popunjava podatke i potpisuje zapisnik PRIJE pristupa."""
+    from core.models import InspectionProtocol
+
+    tok = get_object_or_404(InspectionToken, token=token)
+
+    if not tok.is_valid:
+        return render(request, 'inspector/expired.html', {'token': tok})
+
+    # Ako je vec potpisan — idi na dashboard
+    if hasattr(tok, 'protocol') and tok.protocol.signed_at:
+        return redirect('inspector_dashboard', token=token)
+
+    scope_labels = dict(InspectionToken.SCOPE_CHOICES)
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        badge = request.POST.get('badge', '').strip()
+        institution = request.POST.get('institution', '').strip()
+        phone = request.POST.get('inspector_phone', '').strip()
+        email = request.POST.get('inspector_email', '').strip()
+        legal_basis = request.POST.get('legal_basis', '').strip()
+        signature = request.POST.get('signature', '')
+        terms = request.POST.get('terms_accepted', '')
+        lat = request.POST.get('latitude', '')
+        lng = request.POST.get('longitude', '')
+
+        errors = []
+        if not first_name:
+            errors.append('Ime je obavezno.')
+        if not last_name:
+            errors.append('Prezime je obavezno.')
+        if not terms:
+            errors.append('Morate prihvatiti uvjete pristupa.')
+        if not signature:
+            errors.append('Potpis je obavezan.')
+
+        if errors:
+            return render(request, 'inspector/register.html', {
+                'token': tok,
+                'scope_label': scope_labels.get(tok.scope, tok.scope),
+                'errors': errors,
+                'form_data': request.POST,
+            })
+
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+        if ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        protocol, created = InspectionProtocol.objects.update_or_create(
+            token=tok,
+            defaults={
+                'inspector_first_name': first_name,
+                'inspector_last_name': last_name,
+                'inspector_badge': badge,
+                'inspector_institution': institution,
+                'inspector_phone': phone,
+                'inspector_email': email,
+                'legal_basis': legal_basis,
+                'terms_accepted': True,
+                'signature': signature,
+                'signed_at': timezone.now(),
+                'signed_ip': ip or None,
+                'latitude': float(lat) if lat else None,
+                'longitude': float(lng) if lng else None,
+            }
+        )
+
+        # Audit
+        try:
+            from core.models import BookingSignature
+            BookingSignature.log(request, 'approve', target_obj=protocol,
+                target_repr=f'Inspektor: {first_name} {last_name} ({badge})',
+                changes={
+                    'scope': tok.scope,
+                    'institution': institution,
+                    'ip': ip,
+                })
+        except Exception:
+            pass
+
+        return redirect('inspector_dashboard', token=token)
+
+    return render(request, 'inspector/register.html', {
+        'token': tok,
+        'scope_label': scope_labels.get(tok.scope, tok.scope),
+        'errors': [],
+        'form_data': {},
+    })

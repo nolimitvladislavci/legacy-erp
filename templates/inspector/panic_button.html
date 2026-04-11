@@ -5,9 +5,9 @@
 {% block extra_css %}
 <style>
 .panic-container{max-width:700px;margin:0 auto;padding:2rem 1rem}
-.panic-hero{background:linear-gradient(135deg,#b91c1c,#dc2626);color:var(--white);padding:2.5rem;border-radius:16px;text-align:center;margin-bottom:2rem;box-shadow:0 8px 30px rgba(220,38,38,.3)}
-.panic-hero h1{font-size:2.5rem;font-weight:900;letter-spacing:3px;margin:0}
-.panic-hero p{opacity:.9;margin-top:.5rem;font-size:1.05rem}
+.insp-hero{background:linear-gradient(135deg,#1a2332,#0f172a);border:2px solid rgba(201,168,76,.3);color:var(--white);padding:2.5rem;border-radius:16px;text-align:center;margin-bottom:2rem;box-shadow:0 8px 30px rgba(201,168,76,.15)}
+.insp-hero h1{font-size:2.5rem;font-weight:900;letter-spacing:3px;margin:0}
+.insp-hero p{opacity:.9;margin-top:.5rem;font-size:1.05rem}
 .scope-form{background:var(--bg-card,#1a1a1a);border-radius:14px;padding:2rem;margin-bottom:1.5rem;border:1px solid var(--border,#333)}
 .scope-form h3{color:var(--gold,#c9a84c);margin-bottom:1rem}
 .scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
@@ -21,8 +21,8 @@
 .period-row{display:flex;gap:1rem;margin:1.5rem 0;align-items:end}
 .period-row label{display:block;color:var(--muted,#888);font-size:.85rem;margin-bottom:4px}
 .period-row input,.period-row select{background:var(--bg,#0f0f0f);border:1px solid var(--border,#333);color:var(--text,#e5e5e5);padding:.6rem;border-radius:8px;font-size:.9rem;width:100%}
-.generate-btn{width:100%;padding:1rem;font-size:1.2rem;font-weight:800;border:none;border-radius:12px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:var(--white);cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:.2s}
-.generate-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(220,38,38,.4)}
+.generate-btn{width:100%;padding:1rem;font-size:1.2rem;font-weight:800;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a84c,#a88a32);color:#0a0e1a;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:.2s}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,.3)}
 .active-tokens{background:var(--bg-card,#1a1a1a);border-radius:14px;padding:1.5rem;border:1px solid var(--border,#333)}
 .active-tokens h3{color:var(--gold);margin-bottom:1rem}
 .token-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem;border-bottom:1px solid var(--border,#333)}
@@ -33,10 +33,10 @@
 
 {% block content %}
 <div class="panic-container">
-  <div class="panic-hero">
-    <i class="fas fa-exclamation-triangle fx-fs-hero mb-2"></i>
-    <h1>PANIC BUTTON</h1>
-    <p>Generiraj QR pristup za inspektora — read-only, vremenski ogranicen</p>
+  <div class="insp-hero">
+    <i class="fas fa-shield-halved fx-fs-hero mb-2"></i>
+    <h1>INSPEKCIJSKI PRISTUP</h1>
+    <p>Generirajte sigurni pristup za inspektora — read-only, vremenski ogranicen, s digitalnim zapisnikom</p>
   </div>
 
   <form method="post" action="{% url 'panic_button' %}">
@@ -70,7 +70,7 @@
     </div>
 
     <button type="submit" class="generate-btn">
-      <i class="fas fa-qrcode"></i> GENERIRAJ QR ZA INSPEKTORA
+      <i class="fas fa-qrcode"></i> GENERIRAJ PRISTUP
     </button>
   </form>
 

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Inspekcijski pristup — {{ token.company.name }}</title>
+<link rel="stylesheet" href="/static/css/fenix-tokens.css?v=5000">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0a0e1a; color: #e2e8f0; min-height: 100vh; }
+  .reg-container { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
+
+  /* Header — profesionalan, NE panika */
+  .reg-header { text-align: center; padding: 32px 20px; border-bottom: 2px solid rgba(201,168,76,.3); margin-bottom: 28px; }
+  .reg-header .shield { font-size: 3rem; color: #c9a84c; margin-bottom: 12px; }
+  .reg-header h1 { font-size: 1.4rem; font-weight: 800; color: #c9a84c; letter-spacing: 2px; text-transform: uppercase; }
+  .reg-header .subtitle { color: #94a3b8; font-size: .9rem; margin-top: 6px; }
+  .reg-header .company { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; margin-top: 12px; }
+  .reg-header .scope-badge { display: inline-block; background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.3); color: #c9a84c; padding: 4px 16px; border-radius: 20px; font-size: .8rem; font-weight: 600; margin-top: 8px; }
+
+  /* Sections */
+  .reg-section { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+  .reg-section h3 { color: #c9a84c; font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .reg-section h3 .step { background: #c9a84c; color: #0a0e1a; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; }
+
+  /* Form fields */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: .78rem; color: #94a3b8; margin-bottom: 4px; font-weight: 600; }
+  .field input, .field select, .field textarea { width: 100%; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: #e2e8f0; font-size: .95rem; outline: none; transition: border-color .2s; }
+  .field input:focus, .field select:focus { border-color: #c9a84c; }
+  .field .hint { font-size: .7rem; color: #64748b; margin-top: 3px; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; }
+
+  /* Terms */
+  .terms-box { background: rgba(201,168,76,.05); border: 1px solid rgba(201,168,76,.2); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .terms-box h4 { color: #c9a84c; font-size: .8rem; margin-bottom: 8px; }
+  .terms-box ol { font-size: .78rem; color: #94a3b8; line-height: 1.6; padding-left: 18px; }
+  .terms-check { display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; cursor: pointer; }
+  .terms-check input { margin-top: 3px; accent-color: #c9a84c; width: 18px; height: 18px; }
+  .terms-check span { font-size: .85rem; color: #e2e8f0; }
+
+  /* Signature */
+  .sig-canvas { border: 2px dashed rgba(201,168,76,.4); border-radius: 12px; background: rgba(0,0,0,.3); cursor: crosshair; display: block; width: 100%; touch-action: none; }
+  .sig-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .sig-clear { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: .8rem; }
+
+  /* Submit */
+  .submit-btn { width: 100%; padding: 16px; font-size: 1.1rem; font-weight: 800; border: none; border-radius: 14px; background: linear-gradient(135deg, #c9a84c, #a88a32); color: #0a0e1a; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; margin-top: 12px; }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201,168,76,.3); }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* Errors */
+  .error-list { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+  .error-list li { color: #ef4444; font-size: .85rem; margin-bottom: 4px; }
+
+  /* Geolocation indicator */
+  .geo-status { font-size: .75rem; color: #64748b; display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .geo-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .geo-dot.active { background: #22c55e; }
+  .geo-dot.inactive { background: #64748b; }
+
+  @media (max-width: 500px) {
+    .field-row { flex-direction: column; gap: 0; }
+    .reg-header h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reg-container">
+
+  <!-- Header -->
+  <div class="reg-header">
+    <div class="shield"><i class="fas fa-shield-halved"></i></div>
+    <h1>Inspekcijski pristup</h1>
+    <div class="subtitle">Elektronicka identifikacija inspektora</div>
+    <div class="company">{{ token.company.name }}</div>
+    <div class="scope-badge"><i class="fas fa-crosshairs"></i> {{ scope_label }}</div>
+  </div>
+
+  {% if errors %}
+  <ul class="error-list">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <form method="post" id="regForm">
+    {% csrf_token %}
+
+    <!-- 1. Identifikacija -->
+    <div class="reg-section">
+      <h3><span class="step">1</span> Identifikacija inspektora</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Ime *</label>
+          <input type="text" name="first_name" required value="{{ form_data.first_name|default:'' }}" placeholder="Ime">
+        </div>
+        <div class="field">
+          <label>Prezime *</label>
+          <input type="text" name="last_name" required value="{{ form_data.last_name|default:'' }}" placeholder="Prezime">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Broj znacke / službeni ID</label>
+          <input type="text" name="badge" value="{{ form_data.badge|default:'' }}" placeholder="Npr. PI-2026/1234">
+        </div>
+        <div class="field">
+          <label>Institucija</label>
+          <input type="text" name="institution" value="{{ form_data.institution|default:'' }}" placeholder="Npr. Porezna uprava">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Telefon</label>
+          <input type="tel" name="inspector_phone" value="{{ form_data.inspector_phone|default:'' }}" placeholder="+385...">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="inspector_email" value="{{ form_data.inspector_email|default:'' }}" placeholder="inspektor@drzava.hr">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Pravni temelj -->
+    <div class="reg-section">
+      <h3><span class="step">2</span> Pravni temelj</h3>
+      <div class="field">
+        <label>Broj naloga / rjesenja / pravni temelj</label>
+        <input type="text" name="legal_basis" value="{{ form_data.legal_basis|default:'' }}" placeholder="Npr. UP/II-471-01/26-01/123 ili Zakon o inspekcijama cl. 24">
+        <div class="hint">Navedite broj sluzbenog naloga ili zakonsku osnovu za inspekciju</div>
+      </div>
+    </div>
+
+    <!-- 3. Uvjeti pristupa -->
+    <div class="reg-section">
+      <h3><span class="step">3</span> Uvjeti pristupa</h3>
+      <div class="terms-box">
+        <h4><i class="fas fa-file-contract"></i> Zapisnik o inspekcijskom pristupu</h4>
+        <ol>
+          <li>Pristup je <strong>read-only</strong> — izmjena podataka nije moguca.</li>
+          <li>Pristup je <strong>vremenski ogranicen</strong> (istjece: {{ token.expires_at|date:"d.m.Y H:i" }}).</li>
+          <li>Period podataka: {{ token.date_from|date:"d.m.Y" }} — {{ token.date_to|date:"d.m.Y" }}.</li>
+          <li>Dijeljenje QR koda ili pristupnog linka s neovlastenim osobama je <strong>zabranjeno</strong>.</li>
+          <li>Svaki pristup se <strong>bilježi</strong> (IP, vrijeme, geolokacija) u revizijski trag.</li>
+          <li>Podaci su zasticeni sukladno <strong>GDPR</strong> (EU 2016/679) i <strong>Zakonu o provedbi Opce uredbe o zastiti podataka</strong> (NN 42/18).</li>
+          <li>Neovlasteno koristenje podataka podlijeze kaznenim odredbama.</li>
+        </ol>
+        <label class="terms-check">
+          <input type="checkbox" name="terms_accepted" value="1" required>
+          <span>Procitao/la sam i prihvacam uvjete pristupa. Potvrdujem da sam ovlasten/a za ovu inspekciju.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 4. Potpis -->
+    <div class="reg-section">
+      <h3><span class="step">4</span> Digitalni potpis</h3>
+      <canvas id="sigCanvas" class="sig-canvas" width="560" height="160"></canvas>
+      <input type="hidden" name="signature" id="sigData">
+      <input type="hidden" name="latitude" id="geoLat">
+      <input type="hidden" name="longitude" id="geoLng">
+      <div class="sig-actions">
+        <button type="button" class="sig-clear" onclick="clearSig()"><i class="fas fa-eraser"></i> Obrisi</button>
+      </div>
+      <div class="geo-status" id="geoStatus">
+        <span class="geo-dot inactive" id="geoDot"></span>
+        <span id="geoText">Geolokacija: cekam...</span>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="submit-btn" id="submitBtn" onclick="captureSig()">
+      <i class="fas fa-shield-halved"></i> Potvrdi identitet i pristupi
+    </button>
+
+  </form>
+</div>
+
+<script>
+// Canvas signature
+var canvas = document.getElementById('sigCanvas');
+var ctx = canvas.getContext('2d');
+var drawing = false;
+
+function getPos(e) {
+  var rect = canvas.getBoundingClientRect();
+  var x, y;
+  if (e.touches) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+  else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+  return { x: x * canvas.width / rect.width, y: y * canvas.height / rect.height };
+}
+
+canvas.addEventListener('mousedown', function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke(); });
+canvas.addEventListener('mouseup', function() { drawing = false; });
+canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
+canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke(); }, {passive:false});
+canvas.addEventListener('touchend', function() { drawing = false; });
+
+function clearSig() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+function captureSig() { document.getElementById('sigData').value = canvas.toDataURL('image/png'); }
+
+// Geolocation
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      document.getElementById('geoLat').value = pos.coords.latitude;
+      document.getElementById('geoLng').value = pos.coords.longitude;
+      document.getElementById('geoDot').className = 'geo-dot active';
+      document.getElementById('geoText').textContent = 'Lokacija zabilježena (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
+    },
+    function() {
+      document.getElementById('geoText').textContent = 'Lokacija nedostupna (nastavite bez)';
+    },
+    { timeout: 10000 }
+  );
+}
+</script>
+
+</body>
+</html>

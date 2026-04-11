@@ -111,6 +111,53 @@ class InspectionToken(models.Model):
         self.save(update_fields=['view_count', 'last_accessed', 'access_ip'])
 
 
+class InspectionProtocol(models.Model):
+    """
+    Zapisnik o inspekcijskom pristupu — inspektor potpisuje PRIJE pristupa podacima.
+    Pravna osnova: GDPR čl. 30, Zakon o inspekcijama (NN 115/18) čl. 24.
+    """
+    token = models.OneToOneField(InspectionToken, on_delete=models.CASCADE,
+                                  related_name='protocol')
+    # Inspektor
+    inspector_first_name = models.CharField(max_length=100, verbose_name='Ime inspektora')
+    inspector_last_name = models.CharField(max_length=100, verbose_name='Prezime inspektora')
+    inspector_badge = models.CharField(max_length=50, blank=True, verbose_name='Broj znacke / ID')
+    inspector_institution = models.CharField(max_length=200, blank=True,
+        verbose_name='Institucija (npr. Porezna uprava, DORH, MUP)')
+    inspector_phone = models.CharField(max_length=30, blank=True, verbose_name='Kontakt telefon')
+    inspector_email = models.EmailField(blank=True, verbose_name='Email inspektora')
+
+    # Pravni temelj
+    legal_basis = models.CharField(max_length=300, blank=True,
+        verbose_name='Pravni temelj inspekcije',
+        help_text='Npr. Nalog br. UP/II-471-01/26-01/123')
+
+    # Izjava i potpis
+    terms_accepted = models.BooleanField(default=False,
+        verbose_name='Inspektor prihvatio uvjete pristupa')
+    signature = models.TextField(blank=True, verbose_name='Digitalni potpis (base64)')
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signed_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    # Geolokacija (opciono, ako browser dozvoli)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Inspekcijski zapisnik'
+        verbose_name_plural = 'Inspekcijski zapisnici'
+
+    def __str__(self):
+        return f'{self.inspector_first_name} {self.inspector_last_name} — {self.token.label}'
+
+    @property
+    def inspector_full_name(self):
+        return f'{self.inspector_first_name} {self.inspector_last_name}'.strip()
+
+
 class MemioPetWaitlist(models.Model):
     """Waiting lista za memio.pet — javna prijava s landing pagea."""
     PET_TYPE_CHOICES = [
