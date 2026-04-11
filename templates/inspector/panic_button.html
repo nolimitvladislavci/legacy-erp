@@ -39,8 +39,9 @@
     <p>Generirajte sigurni pristup za inspektora — read-only, vremenski ogranicen, s digitalnim zapisnikom</p>
   </div>
 
-  <form method="post" action="{% url 'panic_button' %}">
+  <form method="post" action="">
     {% csrf_token %}
+    <input type="hidden" name="step" value="1">
     <div class="scope-form">
       <h3><i class="fas fa-crosshairs"></i> 1. Odaberi tip inspekcije</h3>
       <input type="hidden" name="scope" id="scope-input" value="all">
