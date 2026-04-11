@@ -280,11 +280,29 @@ def login_view(request):
         })
 
     success_msg = request.GET.get('msg')
+    prefill_email = request.GET.get('email', '')
     return render(request, 'registration/login.html', {
         'success_msg': success_msg,
+        'email_value': prefill_email,
     })
 
 def logout_view(request):
+    # SessionGuard — provjeri otvorene resurse prije odjave
+    if request.user.is_authenticated:
+        from core.session_guard import SessionGuard
+        warnings = SessionGuard.check(request)
+        if warnings and not request.GET.get('confirm'):
+            # Prikaži upozorenja i pitaj za potvrdu
+            return render(request, 'registration/logout_confirm.html', {
+                'warnings': warnings,
+            })
+        # Log audit trail
+        try:
+            BookingSignature.log(request, 'logout', target_model='User',
+                target_id=str(request.user.pk),
+                target_repr=f'Logout: {request.user.username}')
+        except Exception:
+            pass
     logout(request)
     host = request.get_host().split(':')[0]
     if 'viskovic' in host:
@@ -469,7 +487,7 @@ def umbrella_dashboard(request):
             pass
 
     if not company.is_umbrella and not request.user.is_superuser:
-        messages.warning(request, 'Vasa tvrtka nije umbrella tvrtka.')
+        messages.warning(request, _('Vasa tvrtka nije umbrella tvrtka.'))
         return redirect('dashboard')
 
     children = Company.objects.filter(umbrella_parent=company).order_by('name')
@@ -554,9 +572,9 @@ def umbrella_dashboard(request):
                     child.umbrella_parent = company
                     child.umbrella_relation = relation
                     child.save(update_fields=['umbrella_parent', 'umbrella_relation'])
-                    messages.success(request, '{} dodana kao podtvrtka.'.format(child.name))
+                    messages.success(request, _('{} dodana kao podtvrtka.').format(child.name))
                 except Company.DoesNotExist:
-                    messages.error(request, 'Tvrtka nije pronadjena ili vec ima nadredjenu.')
+                    messages.error(request, _('Tvrtka nije pronadjena ili vec ima nadredjenu.'))
             return redirect(request.get_full_path())
 
         elif action == 'remove_child':
@@ -566,7 +584,7 @@ def umbrella_dashboard(request):
                     child = Company.objects.get(pk=child_id, umbrella_parent=company)
                     child.umbrella_parent = None
                     child.save(update_fields=['umbrella_parent'])
-                    messages.success(request, '{} uklonjena iz umbrella.'.format(child.name))
+                    messages.success(request, _('{} uklonjena iz umbrella.').format(child.name))
                 except Company.DoesNotExist:
                     pass
             return redirect(request.get_full_path())
@@ -580,9 +598,9 @@ def umbrella_dashboard(request):
             phone = request.POST.get('phone', '').strip()
 
             if not name or not oib:
-                messages.error(request, 'Naziv i OIB su obavezni.')
+                messages.error(request, _('Naziv i OIB su obavezni.'))
             elif Company.objects.filter(oib=oib).exists():
-                messages.error(request, 'Tvrtka s OIB-om {} vec postoji.'.format(oib))
+                messages.error(request, _('Tvrtka s OIB-om {} vec postoji.').format(oib))
             else:
                 relation = request.POST.get('relation', 'client')
                 new_child = Company.objects.create(
@@ -605,7 +623,7 @@ def umbrella_dashboard(request):
                 except Exception:
                     pass
 
-                messages.success(request, 'Tvrtka {} kreirana i dodana pod umbrella.'.format(name))
+                messages.success(request, _('Tvrtka {} kreirana i dodana pod umbrella.').format(name))
             return redirect(request.get_full_path())
 
     # Available companies to add (no parent, not self, not already umbrella)
@@ -773,7 +791,7 @@ def superadmin_edit_user(request, user_id):
         profile.can_upload_photos = request.POST.get('can_upload_photos') == '1'
         profile.save()
 
-        messages.success(request, 'Korisnik {} uspjesno azuriran.'.format(target.username))
+        messages.success(request, _('Korisnik {} uspjesno azuriran.').format(target.username))
         return redirect('superadmin_users')
 
     return render(request, 'dashboards/superadmin_edit_user.html', {
@@ -841,17 +859,17 @@ def superadmin_users(request):
                 if action == 'toggle_active':
                     target.is_active = not target.is_active
                     target.save(update_fields=['is_active'])
-                    messages.success(request, '{} je sada {}'.format(
+                    messages.success(request, _('{} je sada {}').format(
                         target.username, 'aktivan' if target.is_active else 'neaktivan'))
                 elif action == 'toggle_staff':
                     target.is_staff = not target.is_staff
                     target.save(update_fields=['is_staff'])
-                    messages.success(request, '{} staff status: {}'.format(
+                    messages.success(request, _('{} staff status: {}').format(
                         target.username, target.is_staff))
                 elif action == 'impersonate_company' and hasattr(target, 'profile') and target.profile.company:
                     return redirect('start_impersonation', company_id=target.profile.company_id)
             except User.DoesNotExist:
-                messages.error(request, 'Korisnik nije pronaden.')
+                messages.error(request, _('Korisnik nije pronaden.'))
             return redirect(request.get_full_path())
 
     return render(request, 'dashboards/superadmin_users.html', {
@@ -1743,7 +1761,7 @@ def stop_impersonation(request):
         ImpersonationLog.objects.filter(id=log_id).update(ended_at=timezone.now())
     for key in ('impersonated_company_id', 'impersonation_started_at', 'impersonation_log_id'):
         request.session.pop(key, None)
-    messages.info(request, 'Impersonacija završena. Vraćeni ste u superadmin prikaz.')
+    messages.info(request, _('Impersonacija završena. Vraćeni ste u superadmin prikaz.'))
     return redirect('superadmin_dashboard')
 
 
@@ -1985,7 +2003,7 @@ def superadmin_create_promo(request):
                 max_uses=int(request.POST.get('max_uses') or 0),
                 is_active=True,
             )
-            messages.success(request, 'Promo kod kreiran.')
+            messages.success(request, _('Promo kod kreiran.'))
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
@@ -2640,7 +2658,7 @@ def tc_consent(request):
             pass  # Audit ne smije blokirati potpis
 
         from django.contrib import messages
-        messages.success(request, 'Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!')
+        messages.success(request, _('Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!'))
         return redirect('/')
 
     return render(request, 'legal/tc_consent.html', {
@@ -2658,7 +2676,7 @@ def tc_consent(request):
 def cross_company_dashboard(request):
     """Superadmin: agregirani prikaz dugova po OIB-u preko svih firmi."""
     if not request.user.is_superuser:
-        messages.error(request, 'Samo superadmin.')
+        messages.error(request, _('Samo superadmin.'))
         return redirect('dashboard')
 
     from invoicing.models import Invoice
@@ -2806,7 +2824,7 @@ def cross_company_dashboard(request):
 def tc_consent_status(request):
     """Superadmin: pregled T&C consent statusa za sve firme."""
     if not request.user.is_superuser:
-        messages.error(request, 'Samo superadmin.')
+        messages.error(request, _('Samo superadmin.'))
         return redirect('dashboard')
 
     from companies.models import Company
@@ -2885,7 +2903,7 @@ def tc_consent_remind(request):
 def borg_error_queue(request):
     """Superadmin: BORG error queue — pending fixes."""
     if not request.user.is_superuser:
-        messages.error(request, 'Samo superadmin.')
+        messages.error(request, _('Samo superadmin.'))
         return redirect('dashboard')
 
     from superadmin_ai.models import PendingAIAction

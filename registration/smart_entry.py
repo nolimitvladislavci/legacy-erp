@@ -66,12 +66,35 @@ def api_detect_email(request):
         })
     cache.set(rate_key, attempts + 1, timeout=600)
 
-    user = User.objects.filter(email=email).first()
+    user = User.objects.filter(email=email).order_by('-last_login').first()
     if user:
-        _send_magic_link(user, request)
+        has_password = user.has_usable_password()
+        is_active = user.is_active
+        company_name = ''
+        try:
+            company_name = user.profile.company.name if user.profile.company else ''
+        except Exception:
+            pass
+
+        # Posalji magic link kao backup
+        try:
+            _send_magic_link(user, request)
+        except Exception:
+            pass
+
         return JsonResponse({
             'status': 'existing',
-            'msg': f'Poslali smo vam link na {email}. Provjerite inbox (i spam).',
+            'has_password': has_password,
+            'is_active': is_active,
+            'company': company_name,
+            'username': user.username,
+            'first_name': user.first_name,
+            'msg': (
+                f'Dobrodosli natrag{", " + user.first_name if user.first_name else ""}! '
+                f'{"Firma: " + company_name + ". " if company_name else ""}'
+                f'Prijavite se lozinkom ili koristite link koji smo poslali na {email}.'
+            ),
+            'login_url': '/hr/login/',
         })
 
     ref = request.session.get('agent_ref', '')

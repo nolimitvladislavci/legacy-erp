@@ -56,8 +56,8 @@
     </style>
 </head>
 <body>
-<nav><div class="c"><a href="{% url 'dashboard' %}" class="logo">LIMIT <span>CONNECT</span></a><div class="nb"><a href="#f">Značajke</a><a href="#p">Cijene</a><a href="{% url 'login' %}" class="bl">Prijava</a><a href="{% url 'accounts:quick_register' %}" class="bs">Besplatno isprobajte</a></div></div></nav>
-<section class="hero"><div class="c"><div class="badge">14 dana besplatno</div><h1>Vaš kompletni <span>poslovni ERP</span> sustav</h1><p>Računi, blagajna, knjigovodstvo, projekti, evidencija vremena, termini i više. Za obrtnike, ugostiteljstvo i uslužne djelatnosti.</p><div class="hb"><a href="{% url 'accounts:quick_register' %}" class="bp">Započnite besplatno</a><a href="#f" class="bo">Otkrijte značajke</a></div></div></section>
+<nav><div class="c"><a href="{% url 'dashboard' %}" class="logo">LIMIT <span>CONNECT</span></a><div class="nb"><a href="#f">Značajke</a><a href="#p">Cijene</a><a href="{% url 'login' %}" class="bl">Prijava</a><a href="/pocni/" class="bs">Besplatno isprobajte</a></div></div></nav>
+<section class="hero"><div class="c"><div class="badge">14 dana besplatno</div><h1>Vaš kompletni <span>poslovni ERP</span> sustav</h1><p>Računi, blagajna, knjigovodstvo, projekti, evidencija vremena, termini i više. Za obrtnike, ugostiteljstvo i uslužne djelatnosti.</p><div class="hb"><a href="/pocni/" class="bp">Započnite besplatno</a><a href="#f" class="bo">Otkrijte značajke</a></div></div></section>
 <section class="sec" id="f"><div class="c"><h2>Sve što Vaše poslovanje treba</h2><div class="fg">
 <div class="fc"><div class="ic"><i class="fas fa-file-invoice"></i></div><h3>Računi</h3><p>Kreirajte, šaljite, fiskalizirajte. U skladu s HR i DE propisima.</p></div>
 <div class="fc"><div class="ic"><i class="fas fa-cash-register"></i></div><h3>Blagajna (POS)</h3><p>Maloprodaja i ugostiteljstvo. Ispis računa, Z-izvještaj.</p></div>
@@ -69,10 +69,10 @@
 <div class="fc"><div class="ic"><i class="fas fa-robot"></i></div><h3>AI Asistent</h3><p>Umjetna inteligencija za poslovne podatke i izvještaje.</p></div>
 </div></div></section>
 <section class="sec" id="p" style="background:rgba(30,41,59,0.2)"><div class="c"><h2>Jednostavne, transparentne cijene</h2><div class="pg">
-<div class="pc"><h3>Starter</h3><div class="pr">29€ <span>/mj</span></div><ul><li>Računi</li><li>Blagajna (POS)</li><li>Evidencija vremena</li><li>Kalkulator</li><li>Projekti</li><li>Termini</li><li>3 korisnika</li></ul><a href="{% url 'accounts:quick_register' %}" class="pb o">Započnite besplatno</a></div>
-<div class="pc pop"><h3>Business</h3><div class="pr">59€ <span>/mj</span></div><ul><li>Sve iz Starter plana</li><li>Knjigovodstvo</li><li>Gastro POS</li><li>Praćenje</li><li>Vlastita web stranica</li><li>15 korisnika</li></ul><a href="{% url 'accounts:quick_register' %}" class="pb g">Započnite besplatno</a></div>
-<div class="pc"><h3>Enterprise</h3><div class="pr">99€ <span>/mj</span></div><ul><li>Sve iz Business plana</li><li>AI Asistent</li><li>Web trgovina</li><li>Skladište</li><li>Osiguranja</li><li>Neograničeno</li></ul><a href="{% url 'accounts:quick_register' %}" class="pb o">Započnite besplatno</a></div>
+<div class="pc"><h3>Starter</h3><div class="pr">29€ <span>/mj</span></div><ul><li>Računi</li><li>Blagajna (POS)</li><li>Evidencija vremena</li><li>Kalkulator</li><li>Projekti</li><li>Termini</li><li>3 korisnika</li></ul><a href="/pocni/" class="pb o">Započnite besplatno</a></div>
+<div class="pc pop"><h3>Business</h3><div class="pr">59€ <span>/mj</span></div><ul><li>Sve iz Starter plana</li><li>Knjigovodstvo</li><li>Gastro POS</li><li>Praćenje</li><li>Vlastita web stranica</li><li>15 korisnika</li></ul><a href="/pocni/" class="pb g">Započnite besplatno</a></div>
+<div class="pc"><h3>Enterprise</h3><div class="pr">99€ <span>/mj</span></div><ul><li>Sve iz Business plana</li><li>AI Asistent</li><li>Web trgovina</li><li>Skladište</li><li>Osiguranja</li><li>Neograničeno</li></ul><a href="/pocni/" class="pb o">Započnite besplatno</a></div>
 </div></div></section>
-<footer><div class="c"><p>© 2026 LIMIT CONNECT · <a href="{% url 'login' %}">Prijava</a> · <a href="{% url 'accounts:quick_register' %}">Registracija</a> &middot; <a href="/impressum/">Pravne informacije</a> &middot; <a href="/privatnost/">Privatnost</a></p></div></footer>
+<footer><div class="c"><p>© 2026 LIMIT CONNECT · <a href="{% url 'login' %}">Prijava</a> · <a href="/pocni/">Registracija</a> &middot; <a href="/impressum/">Pravne informacije</a> &middot; <a href="/privatnost/">Privatnost</a></p></div></footer>
 </body>
 </html>

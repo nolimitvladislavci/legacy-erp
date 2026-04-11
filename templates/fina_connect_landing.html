@@ -113,7 +113,7 @@ a { color: var(--gold); text-decoration: none; }
     <a href="#pricing">Cijene</a>
     <a href="#domains">Platforme</a>
     <a href="{% url 'login' %}" class="btn-nav btn-nav-outline">Prijava</a>
-    <a href="{% url 'accounts:quick_register' %}" class="btn-nav btn-nav-solid">Registracija</a>
+    <a href="/pocni/" class="btn-nav btn-nav-solid">Registracija</a>
   </div>
 </nav>
 
@@ -123,7 +123,7 @@ a { color: var(--gold); text-decoration: none; }
   <p class="subtitle">Potpuno digitalno. Bez papira, bez stresa &mdash; od fakture do fiskalizacije.</p>
   <p class="slogan">Bavite se svojim poslom &mdash; ostalo prepustite nama.</p>
   <div class="hero-cta">
-    <a href="{% url 'accounts:quick_register' %}" class="btn-hero btn-hero-primary"><i class="fas fa-rocket"></i> Zapocni besplatno &mdash; 14 dana</a>
+    <a href="/pocni/" class="btn-hero btn-hero-primary"><i class="fas fa-rocket"></i> Zapocni besplatno &mdash; 14 dana</a>
     <a href="#features" class="btn-hero btn-hero-ghost"><i class="fas fa-play"></i> Saznaj vise</a>
   </div>
   <div class="eco-badge"><i class="fas fa-leaf"></i> Digitalno poslovanje = zdraviji planet. Svaka faktura u oblaku je jedno drvo manje.</div>
@@ -269,18 +269,18 @@ a { color: var(--gold); text-decoration: none; }
 <section class="cta-section">
   <h2>Spremni za digitalizaciju?</h2>
   <p>Registrirajte se u 2 minute. Bez kreditne kartice.</p>
-  <a href="{% url 'accounts:quick_register' %}" class="btn-hero btn-hero-primary"><i class="fas fa-rocket"></i> Zapocni besplatno</a>
+  <a href="/pocni/" class="btn-hero btn-hero-primary"><i class="fas fa-rocket"></i> Zapocni besplatno</a>
 </section>
 
 <!-- FOOTER -->
 <footer class="footer">
-  <p>&copy; 2026 LIMIT Connect | <a href="/pricing/">Cijene</a> | <a href="{% url 'accounts:quick_register' %}">Registracija</a> | <a href="{% url 'login' %}">Prijava</a></p>
+  <p>&copy; 2026 LIMIT Connect | <a href="/pricing/">Cijene</a> | <a href="/pocni/">Registracija</a> | <a href="{% url 'login' %}">Prijava</a></p>
   <p class="slogan-footer">Bez papira. Bez brige. Bez granica.</p>
   <p class="fx-fs-caption fx-mt-3" style="color:#444">Ekolosko. Digitalno. Jednostavno.</p>
 </footer>
 
 <!-- Connect Widget -->
-<a href="{% url 'accounts:quick_register' %}" class="connect-fab">
+<a href="/pocni/" class="connect-fab">
   <i class="fas fa-robot"></i>
   <span>Connect &mdash; tu sam.</span>
 </a>

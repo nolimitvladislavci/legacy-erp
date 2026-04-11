@@ -89,7 +89,7 @@ a { color: var(--gold); text-decoration: none; }
     <a href="/about/" class="active">{% trans "O nama" %}</a>
     <a href="/pricing/">{% trans "Cijene" %}</a>
     <a href="{% url 'login' %}">{% trans "Prijava" %}</a>
-    <a href="{% url 'accounts:quick_register' %}" class="btn-nav btn-nav-solid">{% trans "Registracija" %}</a>
+    <a href="/pocni/" class="btn-nav btn-nav-solid">{% trans "Registracija" %}</a>
   </div>
 </nav>
 
@@ -171,11 +171,11 @@ a { color: var(--gold); text-decoration: none; }
 <section class="cta">
   <h2>{% trans "Spremni za početak?" %}</h2>
   <p>{% trans "Registrirajte se u 2 minute. 14 dana besplatno, bez kreditne kartice." %}</p>
-  <a href="{% url 'accounts:quick_register' %}" class="btn-cta"><i class="fas fa-rocket"></i> {% trans "Počni besplatno" %}</a>
+  <a href="/pocni/" class="btn-cta"><i class="fas fa-rocket"></i> {% trans "Počni besplatno" %}</a>
 </section>
 
 <footer class="footer">
-  <p>&copy; 2026 LIMIT Connect | Konjik d.o.o. | <a href="/pricing/">{% trans "Cijene" %}</a> | <a href="{% url 'accounts:quick_register' %}">{% trans "Registracija" %}</a> | <a href="{% url 'login' %}">{% trans "Prijava" %}</a></p>
+  <p>&copy; 2026 LIMIT Connect | Konjik d.o.o. | <a href="/pricing/">{% trans "Cijene" %}</a> | <a href="/pocni/">{% trans "Registracija" %}</a> | <a href="{% url 'login' %}">{% trans "Prijava" %}</a></p>
   <p class="slogan">{% trans "Bez papira. Bez brige. Bez granica." %}</p>
 </footer>
 
