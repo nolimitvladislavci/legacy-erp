@@ -357,19 +357,27 @@ class RateLimitMiddleware:
         ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
         is_authenticated = getattr(request, 'user', None) and getattr(request.user, 'is_authenticated', False)
 
-        # Autenticirani korisnici — praktično bez limita
+        # Autenticirani korisnici — bez limita
         if is_authenticated:
+            return self.get_response(request)
+
+        # Whitelist IP-ova (admin, office) — bez limita
+        WHITELIST_IPS = getattr(settings, 'RATE_LIMIT_WHITELIST', [
+            '37.27.248.86',   # Server
+            '127.0.0.1',      # Localhost
+        ])
+        if ip in WHITELIST_IPS:
             return self.get_response(request)
 
         # Login brute-force zaštita — striktno po IP+path
         if ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
-            limit, window = 50, 60
+            limit, window = 20, 300  # 20 login pokusaja u 5 min (brute-force)
             key = 'rl:%s:login' % ip
         elif path.startswith('/api/'):
-            limit, window = 120, 60
+            limit, window = 600, 60  # 600/min za API
             key = 'rl:%s:api' % ip
         else:
-            limit, window = 300, 60
+            limit, window = 1000, 60  # 1000/min za stranice (normalna navigacija)
             key = 'rl:%s:page' % ip
 
         try:
