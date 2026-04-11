@@ -78,13 +78,31 @@
     <h2>Moduli</h2>
     <small class="fx-text-dim">Klikni za uključi/isključi — promjene se spremaju gumbom ispod</small>
   </div>
-  <form method="post" class="d-inline">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="ai_recommend">
-    <button type="submit" class="fx-rounded fx-fs-note fx-pointer fx-text-gold fx-bg-transparent" style="border:1px solid var(--gold,#c9a84c);padding:6px 16px">
-      <i class="fas fa-magic me-1"></i> AI Preporuka
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+    <form method="post" class="d-inline">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="ai_recommend">
+      <button type="submit" class="fx-rounded fx-fs-note fx-pointer fx-text-gold fx-bg-transparent" style="border:1px solid var(--gold,#c9a84c);padding:6px 16px">
+        <i class="fas fa-magic me-1"></i> AI Preporuka
+      </button>
+    </form>
+    <button onclick="selectAll()" class="fx-rounded fx-fs-note fx-pointer" style="border:1px solid #334155;padding:6px 14px;background:transparent;color:var(--text-muted)">
+      <i class="fas fa-check-double me-1"></i> Odaberi sve
     </button>
-  </form>
+    <button onclick="deselectAll()" class="fx-rounded fx-fs-note fx-pointer" style="border:1px solid #334155;padding:6px 14px;background:transparent;color:var(--text-muted)">
+      <i class="fas fa-times me-1"></i> Odznaci sve
+    </button>
+  </div>
+</div>
+
+<!-- Pretraga modula -->
+<div style="margin-bottom:16px">
+  <div class="d-flex align-items-center gap-2" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px">
+    <i class="fas fa-search" style="color:var(--text-dim)"></i>
+    <input type="text" id="modSearch" placeholder="Pretrazi module..." oninput="filterModules(this.value)"
+      style="flex:1;border:none;outline:none;background:transparent;color:var(--text,#e2e8f0);font-size:.9rem">
+    <span id="modSearchCount" class="fx-text-dim fx-fs-2xs"></span>
+  </div>
 </div>
 
 {% if ai_recommendations %}
@@ -109,8 +127,10 @@
   <input type="hidden" name="action" value="save">
 
   {% for cat_id, cat in categories.items %}
-  <div class="mp-cat">
-    {{ cat.info.name }}
+  <div class="mp-cat" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center"
+       onclick="toggleCategory(this)">
+    <span>{{ cat.info.name }}</span>
+    <span class="mp-cat-count fx-fs-2xs" style="opacity:.5"></span>
   </div>
   <div class="mp-grid">
     {% for mod in cat.modules %}
@@ -142,7 +162,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   var cards = document.querySelectorAll('.mp-card');
   var dirty = false;
-  var pendingChanges = {};  // mod_id -> true/false (desired state)
+  window.pendingChanges = {};
+  var pendingChanges = window.pendingChanges;  // mod_id -> true/false (desired state)
 
   function updateCount() {
     // Count: current checked + pending adds - pending removes
@@ -217,6 +238,92 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   updateCount();
+  updateCategoryCounts();
 });
+
+// ═══ Select All / Deselect All ═══
+function selectAll() {
+  document.querySelectorAll('.mp-card:not([data-locked])').forEach(function(card) {
+    var mod = card.dataset.mod;
+    var cb = card.querySelector('.mp-cb');
+    if (!cb.checked && !(mod in pendingChanges && pendingChanges[mod])) {
+      card.click();
+    }
+  });
+}
+function deselectAll() {
+  document.querySelectorAll('.mp-card:not([data-locked])').forEach(function(card) {
+    var mod = card.dataset.mod;
+    var cb = card.querySelector('.mp-cb');
+    var isOn = (mod in pendingChanges) ? pendingChanges[mod] : cb.checked;
+    if (isOn) card.click();
+  });
+}
+
+// ═══ Search / Filter ═══
+function filterModules(q) {
+  q = q.toLowerCase().trim();
+  var visible = 0;
+  document.querySelectorAll('.mp-card').forEach(function(card) {
+    var name = card.querySelector('.mp-name').textContent.toLowerCase();
+    var desc = card.querySelector('.mp-desc').textContent.toLowerCase();
+    var show = !q || name.includes(q) || desc.includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  // Hide empty categories
+  document.querySelectorAll('.mp-cat').forEach(function(cat) {
+    var grid = cat.nextElementSibling;
+    if (grid && grid.classList.contains('mp-grid')) {
+      var hasVisible = grid.querySelector('.mp-card:not([style*="display: none"])');
+      cat.style.display = hasVisible ? '' : 'none';
+      grid.style.display = hasVisible ? '' : 'none';
+    }
+  });
+  var el = document.getElementById('modSearchCount');
+  if (el) el.textContent = q ? visible + ' rezultata' : '';
+}
+
+// ═══ Toggle Category (all modules in one click) ═══
+function toggleCategory(catEl) {
+  var grid = catEl.nextElementSibling;
+  if (!grid) return;
+  var cards = grid.querySelectorAll('.mp-card:not([data-locked])');
+  // Check if majority is ON
+  var onCount = 0;
+  cards.forEach(function(c) {
+    var mod = c.dataset.mod;
+    var cb = c.querySelector('.mp-cb');
+    var isOn = (mod in pendingChanges) ? pendingChanges[mod] : cb.checked;
+    if (isOn) onCount++;
+  });
+  var shouldTurnOff = onCount > cards.length / 2;
+  cards.forEach(function(card) {
+    var mod = card.dataset.mod;
+    var cb = card.querySelector('.mp-cb');
+    var isOn = (mod in pendingChanges) ? pendingChanges[mod] : cb.checked;
+    if (shouldTurnOff && isOn) card.click();
+    if (!shouldTurnOff && !isOn) card.click();
+  });
+}
+
+// ═══ Category Counts ═══
+function updateCategoryCounts() {
+  document.querySelectorAll('.mp-cat').forEach(function(cat) {
+    var grid = cat.nextElementSibling;
+    if (!grid) return;
+    var total = grid.querySelectorAll('.mp-card').length;
+    var on = grid.querySelectorAll('.mp-card.on').length;
+    var span = cat.querySelector('.mp-cat-count');
+    if (span) span.textContent = on + '/' + total;
+  });
+}
+
+// Hook category update into card clicks
+var _origUpdate = updateCount;
+updateCount = function() {
+  _origUpdate();
+  updateCategoryCounts();
+};
 </script>
 {% endblock %}
