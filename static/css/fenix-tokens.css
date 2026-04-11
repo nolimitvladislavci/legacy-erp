@@ -1776,12 +1776,22 @@ html {
     overflow-y: auto;
     transition: transform 0.3s ease, width 0.3s ease;
     z-index: 200;
+    position: fixed;
+    top: 52px;
+    right: 0;
+    bottom: 0;
+    transform: translateX(100%);
 }
 
 .shell-right.collapsed {
-    width: 0;
+    transform: translateX(100%);
     overflow: hidden;
     border: none;
+}
+
+.shell-right.open {
+    transform: translateX(0);
+    box-shadow: -4px 0 24px rgba(0,0,0,0.4);
 }
 
 .shell-right-header {
@@ -1976,25 +1986,7 @@ html {
         transform: translateX(0);
     }
 
-    /* RIGHT — off-screen drawer (swipe left to open) */
-    .shell-right {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 300px;
-        transform: translateX(100%);
-        z-index: 300;
-        box-shadow: -4px 0 20px rgba(0,0,0,0.4);
-    }
-
-    .shell-right.open {
-        transform: translateX(0);
-    }
-
-    .shell-right.collapsed {
-        width: 300px;
-    }
+    /* RIGHT — definirano u fenix-shell.css (slide-up drawer na mobitelu) */
 
     /* CENTER — full width */
     .shell-center {

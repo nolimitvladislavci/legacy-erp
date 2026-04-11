@@ -223,6 +223,7 @@
 
 
     <!-- ═══ RIGHT CONTEXT PANEL ═══ -->
+    <div class="shell-right-backdrop" id="shellRightBackdrop" onclick="closeShellRight()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1039;backdrop-filter:blur(2px)"></div>
     <aside class="shell-right collapsed" id="shellRight" aria-label="Kontekst panel">
         <div class="shell-right-header">
             <span id="shell-right-title">{% block shell_right_title %}Kontekst{% endblock %}</span>
@@ -297,7 +298,7 @@
                      style="margin-bottom:8px;backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:10px;padding:12px 16px;box-shadow:0 4px 24px rgba(0,0,0,.15);border-left:4px solid;{% if 'success' in msg.tags %}background:rgba(240,253,244,.97);border-left-color:var(--green);color:#166534;{% elif 'error' in msg.tags %}background:rgba(254,242,242,.97);border-left-color:var(--red);color:#991b1b;{% elif 'warning' in msg.tags %}background:rgba(255,251,235,.97);border-left-color:#f59e0b;color:#92400e;{% else %}background:rgba(239,246,255,.97);border-left-color:#3b82f6;color:#1e40af;{% endif %}">
                     <span class="fx-fs-lg" style="flex-shrink:0;margin-top:1px">{% if 'success' in msg.tags %}✓{% elif 'error' in msg.tags %}✗{% elif 'warning' in msg.tags %}⚡{% else %}💡{% endif %}</span>
                     <span class="fx-fs-note" style="flex:1;line-height:1.5">{{ msg }}</span>
-                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" style="flex-shrink:0;margin-top:2px"></button>
+                    <button type="button" onclick="this.parentElement.style.transition='all .3s';this.parentElement.style.opacity='0';setTimeout(function(){this.parentElement.remove()}.bind(this),300)" style="flex-shrink:0;background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:.5;padding:0 2px;line-height:1;color:inherit" title="Zatvori">&times;</button>
                 </div>
                 {% endfor %}
             </div>
@@ -465,8 +466,15 @@ window.FenixShell = (function(){
         p.classList.remove('collapsed');
         var btn = document.getElementById('right-panel-btn');
         if(btn) btn.style.color = 'var(--gold)';
+        var bbtn = document.getElementById('bottom-right-btn');
+        if(bbtn) bbtn.style.color = 'var(--gold)';
         var layout = document.querySelector('.app-layout');
         if(layout) layout.classList.add('right-panel-open');
+        // Mobile backdrop
+        if(window.innerWidth < 768) {
+            var bd = document.getElementById('shellRightBackdrop');
+            if(bd) bd.style.display = 'block';
+        }
     }
     function closeRight(){
         var p = document.getElementById('shellRight');
@@ -475,8 +483,13 @@ window.FenixShell = (function(){
         p.classList.add('collapsed');
         var btn = document.getElementById('right-panel-btn');
         if(btn) btn.style.color = '';
+        var bbtn = document.getElementById('bottom-right-btn');
+        if(bbtn) bbtn.style.color = '';
         var layout = document.querySelector('.app-layout');
         if(layout) layout.classList.remove('right-panel-open');
+        // Hide backdrop
+        var bd = document.getElementById('shellRightBackdrop');
+        if(bd) bd.style.display = 'none';
     }
     function toggleRight(){
         var p = document.getElementById('shellRight');
