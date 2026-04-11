@@ -237,10 +237,10 @@
 
     <!-- Main -->
     <div class="main">
-        <div class="topbar">
-            <div class="d-flex align-items-center gap-2">
+        <header class="shell-top topbar" role="banner">
+            <div class="shell-top-brand">
                 <button class="hamburger" onclick="openSidebar()">☰</button>
-                <div class="topbar-search" onclick="openCmdPalette()">
+                <div class="shell-top-search topbar-search" onclick="openCmdPalette()">
                     <i class="fas fa-search"></i>
                     <span>Pretrazi...</span>
                     <kbd>Ctrl+K</kbd>
@@ -252,7 +252,7 @@
                 {% endif %}
                 <span class="fx-fw-semibold fx-fs-md" style="color:var(--topbar-text)">{% block page_title %}LIMIT CONNECT{% endblock %}</span>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="shell-top-actions">
                 <button class="fx-rounded-sm fx-pointer fx-fs-base d-none d-md-flex fx-theme-toggle align-items-center" onclick="toggleShellRight()" title="Kontekst panel (Alt+P)" id="right-panel-btn" style="padding:4px 8px">
                     <i class="fas fa-columns"></i>
                 </button>
@@ -287,7 +287,7 @@
                 {% endif %}
                 <a href="/worktime/profile/" class="text-decoration-none d-flex align-items-center gap-1 fx-fs-compact fx-text-dim"><i class="fas fa-user-circle fx-fs-2xl"></i><span class="d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span></a>
             </div>
-        </div>
+        </header>
         <div class="fav-bar" id="favBar"></div>
         <div class="content">
             {% if messages %}
@@ -326,21 +326,8 @@
             {% endif %}
             {% block breadcrumb %}{% endblock %}
             <main id="main-content" role="main">{% block content %}{% endblock %}</main>
-        <!-- ═══ DESKTOP STATUS BAR ═══ -->
-        <div class="shell-status-bar d-none d-md-flex" style="padding:4px 16px;border-top:1px solid var(--border);font-size:.65rem;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between;margin-top:auto">
-            <div class="d-flex align-items-center" style="gap:8px">
-                <div class="d-flex align-items-center" style="gap:4px" id="syncStatus">
-                    <div class="shell-status-dot online" id="statusDot"></div>
-                    <span id="statusText">Online</span>
-                </div>
-                {% if request.company %}<span>&middot; {{ request.company.name|truncatechars:30 }}</span>{% endif %}
-                {% block status_bar_extra %}{% endblock %}
-            </div>
-            <div class="d-flex align-items-center" style="gap:6px">
-                <button onclick="window.print()" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);padding:2px 8px;cursor:pointer;font-size:.6rem" title="Print"><i class="fas fa-print"></i></button>
-                <button onclick="toggleTheme&&toggleTheme()" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);padding:2px 8px;cursor:pointer;font-size:.6rem" title="Tema"><i class="fas fa-adjust"></i></button>
-            </div>
-        </div>
+        <!-- ═══ SHELL BOTTOM — Status Bar + Mobile Nav ═══ -->
+        {% include "includes/_shell_bottom.html" %}
         </div>
     </div>
 </div>
@@ -402,7 +389,6 @@ window.FC = {
 <script src="/static/js/fenix-shell.js"></script>
 {# _ai_assist.html removed — inactive #}
 
-    {% include "includes/_bottom_tabs.html" %}
 
 {% include "includes/_sidebar_favorites.html" %}
 {# _borg_signal.html removed — duplicate of zlatno dugme #}

@@ -1,3 +1,4 @@
+from core.models import BookingSignature
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
@@ -375,6 +376,10 @@ def switch_company(request):
                   ref=str(company.pk),
                   detail='Switch na %s (%s)' % (company.name, role_display),
                   company=company)
+        except Exception:
+            pass
+        try:
+            BookingSignature.log(request, "switch", target_model="Company", target_id=str(company.pk), target_repr=f"Switch na {company.name}")
         except Exception:
             pass
     except (CompanyMembership.DoesNotExist, Company.DoesNotExist):

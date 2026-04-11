@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from core.models import BookingSignature

@@ -1,0 +1,64 @@
+{% load i18n %}
+{# ═══ SHELL BOTTOM — Desktop Status Bar + Mobile Nav ═══ #}
+
+{# Desktop: status bar #}
+<footer class="shell-bottom d-none d-md-flex" role="contentinfo">
+    <div class="shell-bottom-left">
+        <div class="shell-status-indicator" id="shell-online-status">
+            <span class="shell-status-dot online" id="shell-status-dot"></span>
+            <span id="shell-status-text">Online</span>
+        </div>
+        {% if request.company %}
+        <span class="fx-text-muted3">{{ request.company.name }}</span>
+        {% endif %}
+        {% if workspace %}
+        <span class="fx-text-muted3">· {{ workspace.name }}</span>
+        {% endif %}
+    </div>
+    <div class="shell-bottom-right">
+        <button class="shell-bottom-btn" onclick="toggleTheme()" title="{% trans 'Tema' %}">
+            <i class="fas fa-adjust"></i>
+        </button>
+        <button class="shell-bottom-btn" onclick="window.print()" title="{% trans 'Ispis' %}">
+            <i class="fas fa-print"></i>
+        </button>
+        <span class="fx-text-muted3 fx-fs-2xs" id="shell-clock"></span>
+    </div>
+</footer>
+
+{# Mobile: navigation tabs (unchanged) #}
+{% if request.user.is_authenticated %}
+<nav class="bottom-tabs" role="navigation" aria-label="{% trans 'Glavna navigacija' %}">
+    <div class="bottom-tabs-inner">
+        <a href="{% url 'dashboard' %}" class="bottom-tab"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{% url 'invoicing:index' %}" class="bottom-tab"><i class="fas fa-file-invoice-dollar"></i><span>{% trans "Fakture" %}</span></a>
+        <a href="{% url 'pos:dashboard' %}" class="bottom-tab fx-relative"><i class="fas fa-cash-register fx-fs-4xl fx-text-green"></i><span class="fx-text-green fx-fw-bold">POS</span></a>
+        <a href="{% url 'documents:arhiva_list' %}" class="bottom-tab"><i class="fas fa-archive"></i><span>{% trans "Arhiva" %}</span></a>
+        <button class="bottom-tab fx-border-none fx-pointer fx-bg-transparent" onclick="openSidebar()"><i class="fas fa-bars"></i><span>{% trans "Vise" %}</span></button>
+        <button class="bottom-tab fx-border-none fx-pointer fx-bg-transparent" onclick="toggleShellRight()" id="bottom-right-btn"><i class="fas fa-layer-group"></i><span>Panel</span></button>
+    </div>
+</nav>
+{% endif %}
+
+<script>
+(function(){
+    // Online/offline status
+    var dot=document.getElementById('shell-status-dot');
+    var txt=document.getElementById('shell-status-text');
+    function updateOnline(){
+        if(!dot)return;
+        if(navigator.onLine){dot.className='shell-status-dot online';txt.textContent='Online';}
+        else{dot.className='shell-status-dot offline';txt.textContent='Offline';}
+    }
+    window.addEventListener('online',updateOnline);
+    window.addEventListener('offline',updateOnline);
+    updateOnline();
+
+    // Clock
+    var clk=document.getElementById('shell-clock');
+    if(clk){
+        function tick(){var d=new Date();clk.textContent=d.toLocaleTimeString('hr-HR',{hour:'2-digit',minute:'2-digit'});}
+        tick();setInterval(tick,30000);
+    }
+})();
+</script>

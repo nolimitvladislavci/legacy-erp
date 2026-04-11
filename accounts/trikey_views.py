@@ -1,3 +1,4 @@
+from core.models import BookingSignature
 """
 accounts/trikey_views.py — TriKey autentifikacija views
 
@@ -92,6 +93,10 @@ def trikey_login(request):
                 login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
                 trikey.calculate_auth_level({'pin'})
                 logger.info(f'TriKey login: {email} via PIN')
+                try:
+                    BookingSignature.log(request, "login", target_model="User", target_id=str(user.pk), target_repr=f"PIN login: {user.username}", pin_verified=True)
+                except Exception:
+                    pass
                 next_url = request.POST.get('next', request.GET.get('next', '/'))
                 return redirect(next_url or 'dashboard')
             else:

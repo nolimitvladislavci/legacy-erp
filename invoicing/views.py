@@ -1,3 +1,4 @@
+from core.models import BookingSignature
 import logging
 import os
 
@@ -280,6 +281,10 @@ def storno(request, pk):
     result = create_storno(original, user=request.user, ip_address=ip, cancel_reason=cancel_reason)
     if result['success']:
         messages.success(request, f'Storno racun {result["storno_invoice"].number} kreiran!')
+        try:
+            BookingSignature.log(request, "storno", target_model="Invoice", target_id=str(original.pk), target_repr=f"Storno {result['storno_invoice'].number} za {original.number}")
+        except Exception:
+            pass
         return redirect('invoicing:index')
     else:
         messages.error(request, result['message'])
@@ -667,8 +672,16 @@ def invoice_save(request):
         is_new = not request.POST.get('invoice_id')
         if is_new:
             messages.success(request, f'✅ {dtype_name} {invoice.number} uspješno kreiran!')
+            try:
+                BookingSignature.log(request, "book", target_model="Invoice", target_id=str(invoice.pk), target_repr=f"Kreiran {dtype_name} {invoice.number}")
+            except Exception:
+                pass
         else:
             messages.success(request, f'✅ {dtype_name} {invoice.number} uspješno ažuriran!')
+            try:
+                BookingSignature.log(request, "update", target_model="Invoice", target_id=str(invoice.pk), target_repr=f"Ažuriran {dtype_name} {invoice.number}")
+            except Exception:
+                pass
             # ── FIX: InvoiceEvent za svaku izmjenu (GoBD §147, ZOR čl.9) ──
             try:
                 from .models import InvoiceEvent

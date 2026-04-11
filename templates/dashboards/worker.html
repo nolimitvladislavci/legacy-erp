@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block title %}Moj portal – LIMIT Connect{% endblock %}
 {% block content %}
+{% if active_timer %}
 <!-- lang: topbar -->
       <div class="d-flex fx-gap-2 fx-flex-col">
         <form method="post" action="{% url 'worktime:timer_stop' %}">{% csrf_token %}
