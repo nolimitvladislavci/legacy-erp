@@ -1085,19 +1085,42 @@ def verify_email(request, token):
     """
     GET /auth/verify-email/<token>/
     Verificira email adresu korisnika.
-    Moderan pristup: ne zahtijeva login.
     """
     from accounts.email_verification import verify_email_token
 
     success, user, message = verify_email_token(token, request)
 
     if success:
-        messages.success(request, f'✓ {message}')
+        messages.success(request,
+            'Email adresa uspjesno verificirana! '
+            'Vas racun je sada potpuno aktivan.'
+        )
+        # Audit
+        try:
+            from core.models import BookingSignature
+            BookingSignature.log(request, 'approve',
+                target_model='User', target_id=str(user.pk),
+                target_repr=f'Email verified: {user.email}')
+        except Exception:
+            pass
         if request.user.is_authenticated:
             return redirect('/')
         return redirect('login')
     else:
-        messages.warning(request, message)
+        if 'istekao' in message.lower() or 'expired' in message.lower():
+            messages.error(request,
+                'Verifikacijski link je istekao (72h). '
+                'Prijavite se i kliknite "Posalji ponovo" na dashboardu, '
+                'ili nas kontaktirajte: info@limit-connect.com'
+            )
+        elif 'verificiran' in message.lower() or 'already' in message.lower():
+            messages.info(request,
+                'Email adresa je vec verificirana. Mozete se normalno prijaviti.'
+            )
+        else:
+            messages.warning(request,
+                f'{message} Ako imate poteskoca, kontaktirajte nas: info@limit-connect.com'
+            )
         return redirect('login')
 
 
@@ -1105,17 +1128,47 @@ def verify_email(request, token):
 def resend_verification(request):
     """
     POST /auth/resend-verification/
-    Ponovo šalje verifikacijski email.
+    Ponovo salje verifikacijski email.
     """
     from accounts.email_verification import resend_verification_email
 
     if request.method != 'POST':
         return redirect('/')
 
-    success, message = resend_verification_email(request.user)
+    user = request.user
+
+    # Provjera: email vec verificiran?
+    try:
+        if user.profile.email_verified:
+            messages.info(request, 'Vas email je vec verificiran! Sve je u redu.')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+    except Exception:
+        pass
+
+    # Provjera: postoji li drugi korisnik s istim emailom?
+    from django.contrib.auth.models import User as AuthUser
+    dupes = AuthUser.objects.filter(email=user.email).exclude(pk=user.pk)
+    if dupes.exists():
+        dupe_names = ', '.join(d.username for d in dupes[:3])
+        messages.warning(request,
+            f'U sustavu postoji jos {dupes.count()} racun(a) s ovom email adresom '
+            f'({dupe_names}). Ako je to vas stariji racun, kontaktirajte nas '
+            f'na info@limit-connect.com za spajanje racuna.'
+        )
+
+    success, message = resend_verification_email(user)
     if success:
-        messages.success(request, f'✓ {message}')
+        messages.success(request,
+            f'Verifikacijski email poslan na {user.email}. '
+            f'Provjerite inbox i spam/junk mapu. Link vrijedi 72 sata.'
+        )
     else:
-        messages.warning(request, message)
+        if 'Previse' in message or 'limit' in message.lower():
+            messages.error(request,
+                'Dosegnuli ste limit od 3 pokusaja u 24 sata. '
+                'Provjerite spam mapu ili nas kontaktirajte: info@limit-connect.com'
+            )
+        else:
+            messages.warning(request, message)
 
     return redirect(request.META.get('HTTP_REFERER', '/'))

@@ -310,18 +310,35 @@
             </div>
             {% endif %}
             {% if user.is_authenticated and user.profile and not user.profile.email_verified %}
-            <div class="fx-rounded d-flex fx-flex-wrap fx-gap-2 fx-email-verify-banner align-items-center justify-content-between">
-              <div class="d-flex fx-gap-3 align-items-center">
-                <span class="fx-fs-2xl">📧</span>
-                <div>
-                  <div class="fx-fs-note fx-fw-semibold fx-text-amber">Potvrdite svoju email adresu</div>
-                  <div class="fx-fs-sm" style="color:#a8a29e">Provjerite {{ user.email }} za verifikacijski link</div>
+            <div class="fx-rounded" style="background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.25);padding:16px 20px;margin-bottom:12px">
+              <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center justify-content-between">
+                <div class="d-flex fx-gap-3 align-items-center">
+                  <div style="width:40px;height:40px;background:rgba(201,168,76,.15);border-radius:10px;display:flex;align-items:center;justify-content:center">
+                    <i class="fas fa-envelope" style="color:#c9a84c;font-size:1.1rem"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:.9rem;font-weight:700;color:#c9a84c">Potvrdite email adresu</div>
+                    <div style="font-size:.78rem;color:#94a3b8">
+                      Poslali smo verifikacijski link na <strong style="color:#e2e8f0">{{ user.email }}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex fx-gap-2 align-items-center">
+                  <form method="post" action="{% url 'resend_verification' %}" class="fx-m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="fx-rounded-sm fx-fs-sm fx-fw-semibold fx-pointer" style="background:#c9a84c;color:#0a0e1a;border:none;padding:8px 16px">
+                      <i class="fas fa-redo me-1"></i> Posalji ponovo
+                    </button>
+                  </form>
+                  <a href="mailto:info@limit-connect.com?subject=Verifikacija%20email%20{{ user.email }}" class="fx-rounded-sm fx-fs-sm fx-fw-semibold" style="color:#94a3b8;text-decoration:none;padding:8px 12px;border:1px solid rgba(255,255,255,.1);border-radius:6px">
+                    <i class="fas fa-headset me-1"></i> Pomoc
+                  </a>
                 </div>
               </div>
-              <form method="post" action="{% url 'resend_verification' %}" class="fx-m-0">
-                {% csrf_token %}
-                <button type="submit" class="fx-rounded-sm fx-fs-sm fx-fw-semibold fx-pointer fx-text-gold" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);padding:6px 14px">Pošalji ponovo</button>
-              </form>
+              <div style="margin-top:10px;font-size:.72rem;color:#64748b;line-height:1.5">
+                <strong>Savjet:</strong> Provjerite spam/junk mapu. Link vrijedi 72 sata.
+                Ako ne dolazi email, kliknite "Pomoc" ili nas kontaktirajte na <strong>info@limit-connect.com</strong>.
+              </div>
             </div>
             {% endif %}
             {% block breadcrumb %}{% endblock %}
