@@ -205,7 +205,7 @@
 
         <div class="sidebar-footer">
             {% if pending_claims_count > 0 %}
-            <a href="/hr/firma/zahtjevi/" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-no-underline fx-rounded fx-fs-compact align-items-center mb-1" style="padding:7px 12px;color:#facc15;margin:1px 4px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2)">
+            <a href="{% url 'pending_claims' %}" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-no-underline fx-rounded fx-fs-compact align-items-center mb-1" style="padding:7px 12px;color:#facc15;margin:1px 4px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2)">
               <i class="fas fa-inbox text-center" style="width:18px"></i>
               <span>Zahtjevi za pristup</span>
               <span class="fx-text-dark fx-fs-xs fx-fw-800 fx-rounded fx-ml-auto" style="background:#facc15;padding:1px 7px">{{ pending_claims_count }}</span>
@@ -213,8 +213,8 @@
             {% endif %}
             <a href="/panic/" onclick="closeSidebar()" class="fx-text-white fx-rounded fx-fw-bold fx-fs-body-sm text-center d-flex fx-gap-2 fx-no-underline align-items-center justify-content-center mb-1 fx-ls-2" style="background:linear-gradient(135deg,#b91c1c,#dc2626);padding:7px 12px"><i class="fas fa-shield-halved"></i> <span>INSPEKCIJA</span></a>
             <div class="d-flex fx-gap-1">
-              <a href="/hr/companies/modules/" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Moduli"><i class="fas fa-th"></i></a>
-              <a href="/hr/companies/settings/" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Postavke"><i class="fas fa-cog"></i></a>
+              <a href="{% url 'companies:module_picker' %}" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Moduli"><i class="fas fa-th"></i></a>
+              <a href="{% url 'companies:settings' %}" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Postavke"><i class="fas fa-cog"></i></a>
               <a href="/logout/" class="text-center fx-fs-caption fx-flex-1" title="Odjava"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>

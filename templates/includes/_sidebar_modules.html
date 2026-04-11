@@ -85,15 +85,15 @@ Kontekst varijable (iz context processora):
     <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
   </button>
   <div class="sidebar-group-links collapsed">
-    <a href="/hr/superadmin/ivan/" onclick="closeSidebar()" class="fx-text-gold"><i class="fas fa-fire"></i> <span>Fenix soba 🔥</span></a>
-    <a href="/hr/pos/improvements/" onclick="closeSidebar()" class="d-flex fx-text-gold align-items-center justify-content-between">
+    <a href="{% url 'ivan_cockpit' %}" onclick="closeSidebar()" class="fx-text-gold"><i class="fas fa-fire"></i> <span>Fenix soba 🔥</span></a>
+    <a href="{% url 'pos:improvement_list' %}" onclick="closeSidebar()" class="d-flex fx-text-gold align-items-center justify-content-between">
       <span><i class="fas fa-lightbulb"></i> Poruke / Zlatno dugme</span>
       <span id="sidebar-feedback-badge" class="fx-bg-red fx-text-white fx-rounded-xl fx-fs-xs fx-fw-bold fx-hidden" style="padding:1px 7px">0</span>
     </a>
     <a href="/hr/companies/komitenti/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Komitenti</span></a>
-    <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Korisnici</span></a>
+    <a href="/hr/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Korisnici</span></a>
     <a href="/hr/umbrella/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> <span>Umbrella</span></a>
-    <a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>AI Upravljanje</span></a>
+    <a href="/hr/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>AI Upravljanje</span></a>
     <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Django Admin</span></a>
   </div>
 </div>

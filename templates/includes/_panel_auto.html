@@ -14,14 +14,14 @@
   <div style="display:flex;flex-direction:column;gap:5px">
     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Navigacija" %}</div>
 
-    {% include "includes/_panel_link.html" with href="/hr/dashboard/" icon="fa-home" label="Dashboard" %}
-    {% include "includes/_panel_link.html" with href="/hr/pos/" icon="fa-cash-register" label="POS Kasa" %}
-    {% include "includes/_panel_link.html" with href="/hr/documents/arhiva/" icon="fa-archive" label="Arhiva" %}
-    {% include "includes/_panel_link.html" with href="/hr/invoicing/" icon="fa-file-invoice-dollar" label="Fakture" %}
-    {% include "includes/_panel_link.html" with href="/hr/konto/" icon="fa-book" label="Konto" %}
-    {% include "includes/_panel_link.html" with href="/hr/partners/" icon="fa-users" label="Partneri" %}
-    {% include "includes/_panel_link.html" with href="/hr/inventory/" icon="fa-boxes" label="Zalihe" %}
-    {% include "includes/_panel_link.html" with href="/hr/stolarija/" icon="fa-window-maximize" label="Stolarija" %}
+    {% include "includes/_panel_link.html" with href="{% url 'dashboard' %}" icon="fa-home" label="Dashboard" %}
+    {% include "includes/_panel_link.html" with href="{% url 'pos:dashboard' %}" icon="fa-cash-register" label="POS Kasa" %}
+    {% include "includes/_panel_link.html" with href="{% url 'documents:arhiva_list' %}" icon="fa-archive" label="Arhiva" %}
+    {% include "includes/_panel_link.html" with href="{% url 'invoicing:index' %}" icon="fa-file-invoice-dollar" label="Fakture" %}
+    {% include "includes/_panel_link.html" with href="{% url 'konto:dashboard' %}" icon="fa-book" label="Konto" %}
+    {% include "includes/_panel_link.html" with href="{% url 'partners:partner_list' %}" icon="fa-users" label="Partneri" %}
+    {% include "includes/_panel_link.html" with href="{% url 'inventory:list' %}" icon="fa-boxes" label="Zalihe" %}
+    {% include "includes/_panel_link.html" with href="{% url 'stolarija:dashboard' %}" icon="fa-window-maximize" label="Stolarija" %}
   </div>
 
   {# Workspace info #}
