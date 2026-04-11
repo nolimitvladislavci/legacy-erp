@@ -84,7 +84,7 @@
         <strong>{{ t.label }}</strong><br>
         <small class="fx-text-muted">Istjece: {{ t.expires_at|date:"d.m.Y H:i" }} | Pregleda: {{ t.view_count }}</small>
       </div>
-      <form method="post" action="{% url 'panic_revoke' t.pk %}" class="d-inline">{% csrf_token %}<button class="revoke-btn"><i class="fas fa-ban"></i> Ukini</button></form>
+      <form method="post" action="revoke/{{ t.pk }}/" class="d-inline">{% csrf_token %}<button class="revoke-btn"><i class="fas fa-ban"></i> Ukini</button></form>
     </div>
     {% endfor %}
   </div>

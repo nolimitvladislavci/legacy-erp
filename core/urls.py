@@ -288,6 +288,8 @@ urlpatterns += i18n_patterns(
     path('superadmin/impersonate/stop/', views.stop_impersonation, name='stop_impersonation'),
     path('superadmin/promo/create/', views.superadmin_create_promo, name='superadmin_create_promo'),
     path('stolarija/', include('stolarija.urls', namespace='stolarija')),
+    path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
+    path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
     path('panel/detail/', views.panel_detail, name='panel_detail'),
     path('accounts/', include('accounts.urls')),
     path('companies/', include('companies.urls')),
@@ -396,10 +398,6 @@ urlpatterns += [
     # Inspektor Dashboard (PUBLIC — bez logina)
     path('inspektor/<path:token>/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
     # Panic Button (login required)
-    path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
-    path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
-    path('hr/panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button_hr'),
-    path('hr/panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke_hr'),
     path('api/search/', __import__('core.views_search', fromlist=['global_search']).global_search, name='global_search'),
     path('report/synesis-dokaz/', __import__('core.views_search', fromlist=['synesis_report']).synesis_report, name='synesis_report'),
 
