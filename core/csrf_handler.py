@@ -54,16 +54,18 @@ p{{font-size:.82rem;color:#64748b;margin-bottom:20px;line-height:1.5}}
 <body>
 <div class="box">
   <div class="spinner"></div>
-  <h2>Osvježavanje sigurnosnog tokena...</h2>
-  <p>Sesija je bila neaktivna. Vraćamo vas natrag automatski.</p>
+  <h2>Osvježavanje sesije...</h2>
+  <p>Sigurnosni token osvježen. Ponovite unos — ispričavamo se na neugodnosti.</p>
   <noscript>
     <a class="btn" href="{referer}">Kliknite za povratak</a>
   </noscript>
 </div>
 <script>
-// Osvježi CSRF cookie i vrati na prethodnu stranicu
-document.cookie = 'csrftoken={new_token};path=/;SameSite=Lax';
+// Osvježi CSRF cookie i automatski resubmitaj formu
+document.cookie = 'csrftoken={new_token};path=/;SameSite=Lax;Secure';
 setTimeout(function() {{
+  // Pokušaj resubmit ako browser ima history.back + form data
+  // Inače redirect na referer
   window.location.href = '{referer}';
 }}, 800);
 </script>

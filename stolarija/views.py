@@ -6,6 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 
 from .models import (
@@ -44,13 +45,24 @@ def dashboard(request):
 def session_new(request):
     company = _company(request)
     if request.method == 'POST':
+        address = request.POST.get('address', '').strip()
+        if not address:
+            messages.error(request, 'Adresa je obavezna.')
+            return render(request, 'stolarija/session_new.html', {'page_title': 'Nova sesija mjerenja'})
+
         session = MeasurementSession.objects.create(
-            company=request.POST.get('company') and company or company,
+            company=company,
             created_by=request.user,
-            address=request.POST.get('address', '').strip(),
+            address=address,
             notes=request.POST.get('notes', '').strip(),
         )
         messages.success(request, f'Sesija kreirana — možeš početi mjeriti.')
+
+        # AJAX request — redirect as JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from django.urls import reverse
+            return redirect(reverse('stolarija:measure', args=[session.pk]))
+
         return redirect('stolarija:measure', session_id=session.pk)
 
     return render(request, 'stolarija/session_new.html', {
@@ -74,7 +86,7 @@ def measure(request, session_id):
             width  = request.POST.get('width_mm', '').strip()
             height = request.POST.get('height_mm', '').strip()
             if not width or not height:
-                messages.error(request, 'Širina i visina su obavezni.')
+                messages.error(request, _('Širina i visina su obavezni.'))
                 return redirect('stolarija:measure', session_id=session_id)
 
             # Auto-assign position number
@@ -111,7 +123,7 @@ def measure(request, session_id):
                 else:
                     messages.info(request, f"💡 {w['message']}")
             if not warnings:
-                messages.success(request, 'Mjerenje dodano ✓')
+                messages.success(request, _('Mjerenje dodano ✓'))
             else:
                 messages.success(request, f'Mjerenje dodano — {len(warnings)} upozorenja.')
             return redirect('stolarija:measure', session_id=session_id)
@@ -214,7 +226,7 @@ def measurement_delete(request, pk):
     m = get_object_or_404(Measurement, pk=pk, session__company=company)
     session_id = m.session_id
     m.delete()
-    messages.success(request, 'Mjerenje obrisano.')
+    messages.success(request, _('Mjerenje obrisano.'))
     return redirect('stolarija:measure', session_id=session_id)
 
 
@@ -228,7 +240,7 @@ def generate_offer(request, session_id):
 
     confirmed = session.measurements.filter(confirmed=True)
     if not confirmed.exists():
-        messages.error(request, 'Nema potvrđenih mjerenja za generiranje ponude.')
+        messages.error(request, _('Nema potvrđenih mjerenja za generiranje ponude.'))
         return redirect('stolarija:session_detail', session_id=session_id)
 
     offer = WindowOffer.objects.create(
@@ -273,7 +285,7 @@ def create_production_order(request, offer_id):
     offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
 
     if hasattr(offer, 'production_order'):
-        messages.info(request, 'Proizvodni nalog već postoji.')
+        messages.info(request, _('Proizvodni nalog već postoji.'))
         return redirect('stolarija:production_detail', order_id=offer.production_order.pk)
 
     # Kreiraj proizvodni nalog
@@ -439,7 +451,7 @@ def create_installation(request, order_id):
         date_str = request.POST.get('date', '')
         scheduled = parse_date(date_str)
         if not scheduled:
-            messages.error(request, 'Unesite datum ugradnje.')
+            messages.error(request, _('Unesite datum ugradnje.'))
             return redirect('stolarija:production_detail', order_id=order.pk)
 
         install = InstallationOrder.objects.create(
@@ -494,9 +506,9 @@ def installation_detail(request, install_id):
             install.status = 'completed'
             install.completed_at = now()
             install.save(update_fields=['status', 'completed_at'])
-            messages.success(request, 'Ugradnja završena!')
+            messages.success(request, _('Ugradnja završena!'))
         else:
-            messages.success(request, 'Checklist ažuriran.')
+            messages.success(request, _('Checklist ažuriran.'))
 
         return redirect('stolarija:installation_detail', install_id=install.pk)
 
@@ -770,7 +782,7 @@ def service_detail(request, visit_id):
             except Exception:
                 pass
 
-            messages.success(request, 'Servisni pregled završen. Sljedeći zakazan.')
+            messages.success(request, _('Servisni pregled završen. Sljedeći zakazan.'))
             return redirect('stolarija:service_list')
 
         elif action == 'reschedule':
@@ -923,7 +935,7 @@ def offer_send_whatsapp(request, offer_id):
     phone = request.POST.get('phone', '').strip()
 
     if not phone:
-        messages.error(request, 'Unesite telefonski broj.')
+        messages.error(request, _('Unesite telefonski broj.'))
         return redirect('stolarija:offer_detail', offer_id=offer.pk)
 
     # Generiraj PDF u temp file
@@ -943,7 +955,7 @@ def offer_send_whatsapp(request, offer_id):
         from weasyprint import HTML
         pdf_bytes = HTML(string=html).write_pdf()
     except ImportError:
-        messages.error(request, 'PDF generator nedostupan.')
+        messages.error(request, _('PDF generator nedostupan.'))
         return redirect('stolarija:offer_detail', offer_id=offer.pk)
 
     # Spremi temp PDF
@@ -1094,20 +1106,20 @@ def ai_message_detail(request, msg_id):
             except Exception:
                 pass
 
-            messages.success(request, 'Poruka odobrena — bit će poslana automatski.')
+            messages.success(request, _('Poruka odobrena — bit će poslana automatski.'))
             return redirect('stolarija:ai_inbox')
 
         elif action == 'reject':
             msg.status = 'received'  # Reset to received for re-processing or manual reply
             msg.ai_draft = ''
             msg.save(update_fields=['status', 'ai_draft'])
-            messages.info(request, 'AI nacrt odbijen.')
+            messages.info(request, _('AI nacrt odbijen.'))
             return redirect('stolarija:ai_inbox')
 
         elif action == 'escalate':
             msg.status = 'escalated'
             msg.save(update_fields=['status'])
-            messages.warning(request, 'Poruka eskalirana voditelju.')
+            messages.warning(request, _('Poruka eskalirana voditelju.'))
             return redirect('stolarija:ai_inbox')
 
     return render(request, 'stolarija/ai_message_detail.html', {
@@ -1129,7 +1141,7 @@ def ai_simulate_inbound(request):
     warranty_id = request.POST.get('warranty_id', '')
 
     if not body:
-        messages.error(request, 'Poruka ne može biti prazna.')
+        messages.error(request, _('Poruka ne može biti prazna.'))
         return redirect('stolarija:ai_inbox')
 
     warranty = None

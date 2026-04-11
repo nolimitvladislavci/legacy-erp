@@ -22,14 +22,79 @@
           <textarea name="notes" class="fx-input" rows="2"
                     placeholder="npr. Kupac treba ponudu do petka..."></textarea>
         </div>
-        <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1rem">
+        <button type="submit" class="btn-gold w-100" id="submitBtn" style="padding:14px;font-size:1rem">
           <i class="fas fa-arrow-right me-1"></i> Počni mjeriti
         </button>
+        <div id="formMsg" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:.9rem"></div>
         <a href="{% url 'stolarija:dashboard' %}"
            class="btn btn-outline-secondary w-100 mt-2" style="padding:10px">
           Odustani
         </a>
       </form>
+      <script>
+      document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('submitBtn');
+        var msg = document.getElementById('formMsg');
+        var form = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Kreiranje...';
+        msg.style.display = 'none';
+        
+        var data = new FormData(form);
+        
+        fetch(form.action || window.location.href, {
+          method: 'POST',
+          body: data,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        })
+        .then(function(r) {
+          if (r.redirected) {
+            window.location.href = r.url;
+            return;
+          }
+          return r.text().then(function(body) {
+            if (body.includes('csrf_error') || body.includes('csrftoken')) {
+              // CSRF token expired — refresh and retry
+              try {
+                var d = JSON.parse(body);
+                if (d.new_token) {
+                  document.cookie = 'csrftoken=' + d.new_token + ';path=/;SameSite=Lax;Secure';
+                  var csrf = form.querySelector('[name=csrfmiddlewaretoken]');
+                  if (csrf) csrf.value = d.new_token;
+                  msg.innerHTML = '<i class="fas fa-sync me-1"></i> Token osvjezen — ponovite klik.';
+                  msg.style.display = 'block';
+                  msg.style.background = 'rgba(201,168,76,.1)';
+                  msg.style.color = '#c9a84c';
+                  msg.style.border = '1px solid rgba(201,168,76,.3)';
+                  btn.disabled = false;
+                  btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
+                  return;
+                }
+              } catch(ex) {}
+            }
+            // Unexpected response
+            msg.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Greska. Osvjezite stranicu.';
+            msg.style.display = 'block';
+            msg.style.background = 'rgba(239,68,68,.1)';
+            msg.style.color = '#ef4444';
+            msg.style.border = '1px solid rgba(239,68,68,.3)';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
+          });
+        })
+        .catch(function() {
+          msg.innerHTML = '<i class="fas fa-wifi me-1"></i> Nema veze. Provjerite internet.';
+          msg.style.display = 'block';
+          msg.style.background = 'rgba(239,68,68,.1)';
+          msg.style.color = '#ef4444';
+          msg.style.border = '1px solid rgba(239,68,68,.3)';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i> Pocni mjeriti';
+        });
+      });
+      </script>
     </div>
   </div>
 </div>
