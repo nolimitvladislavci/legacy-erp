@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Inspekcija — Korak 2: Inspektor{% endblock %}
+{% block shell_mode %}focus{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;margin:0 auto;padding:20px 16px">
+
+  <!-- Progress -->
+  <div class="d-flex gap-2 fx-mb-4">
+    <div style="flex:1;height:4px;background:#22c55e;border-radius:2px"></div>
+    <div style="flex:1;height:4px;background:#c9a84c;border-radius:2px"></div>
+    <div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px"></div>
+  </div>
+
+  <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+    <div class="fx-card-body">
+      <h3 class="fx-fw-bold fx-text-gold fx-mb-1">
+        <i class="fas fa-id-badge me-2"></i> Korak 2: Podaci inspektora
+      </h3>
+      <div class="fx-text-muted" style="font-size:.85rem">
+        Tip: <strong class="fx-text-gold">{{ scope_label }}</strong>
+        — Slikajte znacku i unesite podatke
+      </div>
+    </div>
+  </div>
+
+  {% if errors %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)">
+    <div class="fx-card-body">
+      {% for e in errors %}<div style="color:#ef4444;font-size:.9rem">{{ e }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="step" value="2">
+
+    <!-- Fotografija znacke -->
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-camera me-2 fx-text-gold"></i> Fotografija sluzbene iskaznice / znacke
+      </div>
+      <div class="fx-card-body">
+        <div style="border:2px dashed rgba(201,168,76,.3);border-radius:12px;padding:24px;text-align:center;background:rgba(201,168,76,.03)">
+          <input type="file" name="badge_photo" accept="image/*" capture="environment"
+            id="badgeInput" style="display:none" onchange="previewImg(this,'badgePreview')">
+          <div id="badgePreview" style="margin-bottom:12px"></div>
+          <button type="button" onclick="document.getElementById('badgeInput').click()"
+            class="btn-gold" style="padding:12px 24px;font-size:1rem">
+            <i class="fas fa-camera me-1"></i> Slikaj znacku
+          </button>
+          <div class="fx-text-muted" style="font-size:.75rem;margin-top:8px">
+            Obavezno za pravnu valjanost zapisnika
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Podaci inspektora -->
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-user-shield me-2 fx-text-gold"></i> Identifikacija
+      </div>
+      <div class="fx-card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="fx-label">Ime *</label>
+            <input type="text" name="first_name" class="fx-input" required
+              value="{{ form.first_name|default:'' }}" placeholder="Ime inspektora">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Prezime *</label>
+            <input type="text" name="last_name" class="fx-input" required
+              value="{{ form.last_name|default:'' }}" placeholder="Prezime">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Broj znacke / ID</label>
+            <input type="text" name="badge" class="fx-input"
+              value="{{ form.badge|default:'' }}" placeholder="PI-2026/1234">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Institucija</label>
+            <input type="text" name="institution" class="fx-input"
+              value="{{ form.institution|default:'' }}" placeholder="Porezna uprava">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Telefon</label>
+            <input type="tel" name="inspector_phone" class="fx-input"
+              value="{{ form.inspector_phone|default:'' }}" placeholder="+385...">
+          </div>
+          <div class="col-6">
+            <label class="fx-label">Email (za zapisnik)</label>
+            <input type="email" name="inspector_email" class="fx-input"
+              value="{{ form.inspector_email|default:'' }}" placeholder="inspektor@drzava.hr">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pravni temelj -->
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-gavel me-2 fx-text-gold"></i> Pravni temelj
+      </div>
+      <div class="fx-card-body">
+        <label class="fx-label">Broj naloga / rjesenja</label>
+        <input type="text" name="legal_basis" class="fx-input"
+          value="{{ form.legal_basis|default:'' }}"
+          placeholder="UP/II-471-01/26-01/123 ili Zakon o inspekcijama cl. 24">
+
+        <!-- Upload naloga -->
+        <div style="margin-top:12px">
+          <label class="fx-label">Fotografija naloga (opciono)</label>
+          <input type="file" name="warrant_photo" accept="image/*" capture="environment"
+            class="fx-input" style="padding:10px">
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-gold w-100" style="padding:14px;font-size:1.1rem">
+      Dalje — Potpis inspektora <i class="fas fa-arrow-right ms-2"></i>
+    </button>
+  </form>
+</div>
+
+<script>
+function previewImg(input, targetId) {
+  var el = document.getElementById(targetId);
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      el.innerHTML = '<img src="' + e.target.result + '" style="max-height:200px;border-radius:10px;border:2px solid rgba(201,168,76,.3)">';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

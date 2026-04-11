@@ -40,7 +40,8 @@ def haccp_resolve(request, pk):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'error': 'Resolution note je obavezan'}, status=400)
         from django.contrib import messages
-        messages.error(request, 'Morate unijeti sto je poduzeto (resolution note).')
+        from django.utils.translation import gettext as _
+        messages.error(request, _('Morate unijeti sto je poduzeto (resolution note).'))
         return redirect('delivery:haccp_incidents')
 
     incident.resolve(request.user, note)

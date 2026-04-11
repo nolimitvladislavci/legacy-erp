@@ -422,7 +422,8 @@ def confirm_view(request, pk):
 @login_required
 def manual_entry_view(request, pk):
     """Manual data entry for failed Smart Import batch -- fallback when AI fails."""
-    from django.contrib import messages as django_messages
+    from django.contrib import messages
+    from django.utils.translation import gettext as _
     from documents.models import ArhivaEntry
     from django.utils import timezone
     import hashlib
@@ -500,7 +501,7 @@ def manual_entry_view(request, pk):
         batch.status_message = "Rucno uneseno u arhivu"
         batch.save(update_fields=["status", "status_message"])
 
-        django_messages.success(request, "Rucno uneseno: {} -- {}".format(doc_number, partner_name))
+        django_messages.success(request, _("Rucno uneseno: {} -- {}").format(doc_number, partner_name))
         return redirect("smart_import:upload")
 
     image_url = batch.file.url if batch.file and batch.file_type in ("image", "img") else None

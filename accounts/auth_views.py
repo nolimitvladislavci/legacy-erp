@@ -691,7 +691,7 @@ def smart_logout(request):
                         receipt.save(update_fields=['status', 'cancel_reason'])
                         cancelled += 1
                     if cancelled:
-                        messages.info(request, '%d otvorenih bonova automatski stornirano.' % cancelled)
+                        messages.info(request, _('%d otvorenih bonova automatski stornirano.') % cancelled)
 
             # Zatvori radno vrijeme + waiter shift + cashier
             if company:
@@ -733,7 +733,7 @@ def device_token_manage(request):
                 cashier=cashier,
                 auto_pos_login=True,
             )
-            messages.success(request, 'Device token "%s" kreiran. Spremi barcode u mobitel.' % token.device_name)
+            messages.success(request, _('Device token "%s" kreiran. Spremi barcode u mobitel.') % token.device_name)
             return redirect('device_token_detail', token_id=token.pk)
 
         elif action == 'deactivate':
@@ -742,9 +742,9 @@ def device_token_manage(request):
                 token = tokens.get(pk=token_id)
                 token.is_active = False
                 token.save()
-                messages.success(request, 'Token "%s" deaktiviran.' % token.device_name)
+                messages.success(request, _('Token "%s" deaktiviran.') % token.device_name)
             except DeviceToken.DoesNotExist:
-                messages.error(request, 'Token ne postoji.')
+                messages.error(request, _('Token ne postoji.'))
 
         elif action == 'activate':
             token_id = request.POST.get('token_id')
@@ -752,7 +752,7 @@ def device_token_manage(request):
                 token = tokens.get(pk=token_id)
                 token.is_active = True
                 token.save()
-                messages.success(request, 'Token "%s" aktiviran.' % token.device_name)
+                messages.success(request, _('Token "%s" aktiviran.') % token.device_name)
             except DeviceToken.DoesNotExist:
                 pass
 
@@ -772,7 +772,7 @@ def device_token_detail(request, token_id):
     from accounts.models import DeviceToken
     token = DeviceToken.objects.filter(pk=token_id, user=request.user).first()
     if not token:
-        messages.error(request, 'Token ne postoji.')
+        messages.error(request, _('Token ne postoji.'))
         return redirect('device_token_manage')
 
     # Generiraj barcode sliku (Code128 + QR)
@@ -902,7 +902,7 @@ def device_token_auto_login(request):
 
     dt = DeviceToken.objects.filter(token=token_uuid, is_active=True).select_related('user', 'company').first()
     if not dt:
-        messages.error(request, 'Token nije valjan ili je deaktiviran.')
+        messages.error(request, _('Token nije valjan ili je deaktiviran.'))
         return redirect('login')
 
     # Login
@@ -930,7 +930,7 @@ def device_token_auto_login(request):
         parts.append('Konobarova smjena aktivna.')
     if 'cashier' in started:
         parts.append('Blagajnik: %s' % work_result.get('cashier_name', ''))
-    messages.success(request, ' '.join(parts))
+    messages.success(request, _(' ').join(parts))
 
     from pos.models import POSTerminal
     terminal = POSTerminal.objects.filter(company=dt.company, is_active=True).first()
@@ -988,7 +988,7 @@ def gdpr_export_view(request):
                 'error': 'Lozinka je netočna. Pokušajte ponovo.',
             }, status=403)
         from django.contrib import messages
-        messages.error(request, 'Lozinka je netočna. Pokušajte ponovo.')
+        messages.error(request, _('Lozinka je netočna. Pokušajte ponovo.'))
         return render(request, 'accounts/gdpr_export.html')
 
     # Lozinka OK — generiraj export
@@ -1092,8 +1092,7 @@ def verify_email(request, token):
 
     if success:
         messages.success(request,
-            'Email adresa uspjesno verificirana! '
-            'Vas racun je sada potpuno aktivan.'
+            _('Email adresa uspješno verificirana! Vaš račun je sada potpuno aktivan.')
         )
         # Audit
         try:
@@ -1109,13 +1108,11 @@ def verify_email(request, token):
     else:
         if 'istekao' in message.lower() or 'expired' in message.lower():
             messages.error(request,
-                'Verifikacijski link je istekao (72h). '
-                'Prijavite se i kliknite "Posalji ponovo" na dashboardu, '
-                'ili nas kontaktirajte: info@limit-connect.com'
+                _('Verifikacijski link je istekao (72h). Prijavite se i kliknite "Pošalji ponovo" na dashboardu, ili nas kontaktirajte: info@limit-connect.com')
             )
         elif 'verificiran' in message.lower() or 'already' in message.lower():
             messages.info(request,
-                'Email adresa je vec verificirana. Mozete se normalno prijaviti.'
+                _('Email adresa je vec verificirana. Mozete se normalno prijaviti.')
             )
         else:
             messages.warning(request,
@@ -1140,7 +1137,7 @@ def resend_verification(request):
     # Provjera: email vec verificiran?
     try:
         if user.profile.email_verified:
-            messages.info(request, 'Vas email je vec verificiran! Sve je u redu.')
+            messages.info(request, _('Vas email je vec verificiran! Sve je u redu.'))
             return redirect(request.META.get('HTTP_REFERER', '/'))
     except Exception:
         pass
@@ -1165,8 +1162,7 @@ def resend_verification(request):
     else:
         if 'Previse' in message or 'limit' in message.lower():
             messages.error(request,
-                'Dosegnuli ste limit od 3 pokusaja u 24 sata. '
-                'Provjerite spam mapu ili nas kontaktirajte: info@limit-connect.com'
+                _('Dosegnuli ste limit od 3 pokusaja u 24 sata. Provjerite spam mapu ili nas kontaktirajte: info@limit-connect.com')
             )
         else:
             messages.warning(request, message)

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Inspekcija — Korak 3: Potpis{% endblock %}
+{% block shell_mode %}focus{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;margin:0 auto;padding:20px 16px">
+
+  <!-- Progress -->
+  <div class="d-flex gap-2 fx-mb-4">
+    <div style="flex:1;height:4px;background:#22c55e;border-radius:2px"></div>
+    <div style="flex:1;height:4px;background:#22c55e;border-radius:2px"></div>
+    <div style="flex:1;height:4px;background:#c9a84c;border-radius:2px"></div>
+  </div>
+
+  <div class="fx-card fx-mb-3" style="border-top:3px solid var(--gold)">
+    <div class="fx-card-body">
+      <h3 class="fx-fw-bold fx-text-gold fx-mb-1">
+        <i class="fas fa-signature me-2"></i> Korak 3: Potpis i uvjeti
+      </h3>
+      <div class="fx-text-muted" style="font-size:.85rem">
+        Inspektor: <strong>{{ inspector_name }}</strong>
+        {% if badge %} | Znacka: <strong>{{ badge }}</strong>{% endif %}
+        {% if institution %} | {{ institution }}{% endif %}
+      </div>
+      <div class="fx-text-muted" style="font-size:.85rem">
+        Tip: <strong class="fx-text-gold">{{ scope_label }}</strong>
+      </div>
+    </div>
+  </div>
+
+  {% if errors %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)">
+    <div class="fx-card-body">
+      {% for e in errors %}<div style="color:#ef4444;font-size:.9rem">{{ e }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" id="signForm">
+    {% csrf_token %}
+    <input type="hidden" name="step" value="3">
+    <input type="hidden" name="signature" id="sigData">
+    <input type="hidden" name="latitude" id="geoLat">
+    <input type="hidden" name="longitude" id="geoLng">
+
+    <!-- Uvjeti pristupa -->
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-file-contract me-2 fx-text-gold"></i> Zapisnik o inspekcijskom pristupu
+      </div>
+      <div class="fx-card-body">
+        <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:16px;font-size:.82rem;color:#94a3b8;line-height:1.7">
+          <ol>
+            <li>Pristup je <strong style="color:#e2e8f0">iskljucivo read-only</strong> — izmjena podataka nije moguca.</li>
+            <li>Pristup je <strong style="color:#e2e8f0">vremenski ogranicen</strong> i automatski istjece.</li>
+            <li>Svaki pristup se <strong style="color:#e2e8f0">biljezi u revizijski trag</strong> (IP adresa, vrijeme, geolokacija).</li>
+            <li><strong style="color:#ef4444">Zabranjeno</strong> je dijeljenje QR koda ili pristupnog linka s neovlastenim osobama.</li>
+            <li>Podaci su zasticeni sukladno <strong style="color:#e2e8f0">GDPR</strong> (EU 2016/679) i <strong style="color:#e2e8f0">Zakonu o provedbi Opce uredbe</strong> (NN 42/18).</li>
+            <li>Neovlasteno koristenje podlijeze <strong style="color:#ef4444">kaznenim odredbama</strong> (KZ cl. 266).</li>
+            <li>Zapisnik se automatski sprema u sustav i salje na email inspektora.</li>
+          </ol>
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:16px;cursor:pointer">
+          <input type="checkbox" name="terms_accepted" value="1" required id="termsCheck"
+            style="margin-top:3px;accent-color:#c9a84c;width:20px;height:20px;flex-shrink:0">
+          <span style="font-size:.9rem;color:#e2e8f0">
+            Procitao/la sam i prihvacam uvjete pristupa.
+            Potvrdujem da sam <strong>ovlasten/a</strong> za ovu inspekciju.
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Potpis -->
+    <div class="fx-card fx-mb-3">
+      <div class="fx-card-header">
+        <i class="fas fa-pen-fancy me-2 fx-text-gold"></i> Digitalni potpis inspektora
+      </div>
+      <div class="fx-card-body">
+        <canvas id="sigCanvas" width="560" height="160"
+          style="border:2px dashed rgba(201,168,76,.4);border-radius:12px;background:rgba(0,0,0,.2);cursor:crosshair;display:block;width:100%;touch-action:none"></canvas>
+        <div class="d-flex gap-2 mt-2 align-items-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSig()">
+            <i class="fas fa-eraser me-1"></i> Obrisi
+          </button>
+          <div id="geoStatus" style="font-size:.75rem;color:#64748b;margin-left:auto">
+            <span id="geoDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#64748b;vertical-align:middle;margin-right:4px"></span>
+            <span id="geoText">Geolokacija: cekam...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn-gold w-100" style="padding:16px;font-size:1.1rem;font-weight:800"
+      onclick="captureSig()" id="submitBtn">
+      <i class="fas fa-shield-halved me-1"></i> POTVRDI — Generiraj QR pristup
+    </button>
+  </form>
+</div>
+
+<script>
+// Canvas
+var canvas = document.getElementById('sigCanvas');
+var ctx = canvas.getContext('2d');
+var drawing = false;
+function getPos(e){var r=canvas.getBoundingClientRect();var x,y;if(e.touches){x=e.touches[0].clientX-r.left;y=e.touches[0].clientY-r.top}else{x=e.clientX-r.left;y=e.clientY-r.top}return{x:x*canvas.width/r.width,y:y*canvas.height/r.height}}
+canvas.addEventListener('mousedown',function(e){drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y)});
+canvas.addEventListener('mousemove',function(e){if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.stroke()});
+canvas.addEventListener('mouseup',function(){drawing=false});
+canvas.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;ctx.beginPath();var p=getPos(e);ctx.moveTo(p.x,p.y)},{passive:false});
+canvas.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=getPos(e);ctx.lineTo(p.x,p.y);ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.stroke()},{passive:false});
+canvas.addEventListener('touchend',function(){drawing=false});
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height)}
+function captureSig(){document.getElementById('sigData').value=canvas.toDataURL('image/png')}
+
+// Geolocation
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(function(p){
+    document.getElementById('geoLat').value=p.coords.latitude;
+    document.getElementById('geoLng').value=p.coords.longitude;
+    document.getElementById('geoDot').style.background='#22c55e';
+    document.getElementById('geoText').textContent='Lokacija: '+p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);
+  },function(){
+    document.getElementById('geoText').textContent='Lokacija nedostupna';
+  },{timeout:10000});
+}
+
+// Zvucna potvrda pri submittu
+document.getElementById('signForm').addEventListener('submit', function() {
+  // Beep zvuk kao potvrda
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ac.createOscillator();
+    var gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.frequency.value = 880; // A5
+    gain.gain.value = 0.3;
+    osc.start(); osc.stop(ac.currentTime + 0.15);
+    setTimeout(function(){
+      var osc2 = ac.createOscillator();
+      var g2 = ac.createGain();
+      osc2.connect(g2); g2.connect(ac.destination);
+      osc2.frequency.value = 1320; // E6
+      g2.gain.value = 0.3;
+      osc2.start(); osc2.stop(ac.currentTime + 0.2);
+    }, 150);
+  } catch(e) {}
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generiranje pristupa...';
+});
+</script>
+{% endblock %}

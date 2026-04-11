@@ -36,9 +36,12 @@ def inspector_dashboard(request, token):
     if not tok.is_valid:
         return render(request, 'inspector/expired.html', {'token': tok})
 
-    # Zahtijeva potpisan protokol
+    # Protokol je vec potpisan u firmi — inspektor ide direkt na podatke
     if not hasattr(tok, 'protocol') or not tok.protocol.signed_at:
-        return redirect('inspector_register', token=token)
+        return render(request, 'inspector/expired.html', {
+            'token': tok,
+            'reason': 'Zapisnik nije potpisan. Kontaktirajte firmu za novi pristup.',
+        })
 
     # Record access
     ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
@@ -363,65 +366,240 @@ def _gather_livestock(company, scope):
 
 @login_required
 def panic_button(request):
-    """Inspekcijski pristup — firma generira QR + inspektor se registrira."""
+    """
+    Inspekcijski pristup — NOVI FLOW:
+    1. Firma odabire tip + period
+    2. Firma slika znacku inspektora + unosi podatke
+    3. Inspektor cita uvjete + potpisuje na mobitelu firme
+    4. TEK ONDA se generira QR + zapisnik
+    """
     from core.company_utils import get_user_company
+    from core.models import InspectionProtocol
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
 
+    step = request.POST.get('step', request.GET.get('step', '1'))
+
     if request.method == 'POST':
-        scope = request.POST.get('scope', 'all')
-        hours = int(request.POST.get('hours', '24'))
-        date_from = request.POST.get('date_from', '')
-        date_to = request.POST.get('date_to', '')
 
-        from datetime import datetime
-        df = None
-        dt = None
-        try:
-            if date_from:
-                df = datetime.strptime(date_from, '%Y-%m-%d').date()
-            if date_to:
-                dt = datetime.strptime(date_to, '%Y-%m-%d').date()
-        except ValueError:
-            pass
+        # ── KORAK 1 → 2: odabir tipa i perioda ──
+        if step == '1':
+            request.session['insp_scope'] = request.POST.get('scope', 'all')
+            request.session['insp_hours'] = int(request.POST.get('hours', '24'))
+            request.session['insp_date_from'] = request.POST.get('date_from', '')
+            request.session['insp_date_to'] = request.POST.get('date_to', '')
+            return render(request, 'inspector/step2_inspector.html', {
+                'company': company,
+                'scope': request.session['insp_scope'],
+                'scope_label': dict(InspectionToken.SCOPE_CHOICES).get(request.session['insp_scope'], ''),
+            })
 
-        if not df:
-            df = date(date.today().year, 1, 1)
-        if not dt:
-            dt = date.today()
+        # ── KORAK 2 → 3: podaci inspektora + foto znacke ──
+        elif step == '2':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            badge = request.POST.get('badge', '').strip()
+            institution = request.POST.get('institution', '').strip()
+            phone = request.POST.get('inspector_phone', '').strip()
+            email = request.POST.get('inspector_email', '').strip()
+            legal_basis = request.POST.get('legal_basis', '').strip()
 
-        scope_labels = dict(InspectionToken.SCOPE_CHOICES)
-        tok = InspectionToken.objects.create(
-            company=company,
-            scope=scope,
-            label=f'{scope_labels.get(scope, scope)} — {company.name} — {date.today().strftime("%d.%m.%Y")}',
-            date_from=df,
-            date_to=dt,
-            expires_at=timezone.now() + timedelta(hours=hours),
-            created_by=request.user,
-        )
+            errors = []
+            if not first_name: errors.append('Ime inspektora je obavezno.')
+            if not last_name: errors.append('Prezime inspektora je obavezno.')
 
-        # Audit
-        try:
-            from core.models import BookingSignature
-            BookingSignature.log(request, 'create', target_obj=tok,
-                target_repr=f'Inspekcija: {scope_labels.get(scope)} {df}—{dt}',
-                changes={'scope': scope, 'hours': hours})
-        except Exception:
-            pass
+            if errors:
+                return render(request, 'inspector/step2_inspector.html', {
+                    'company': company, 'errors': errors,
+                    'scope': request.session.get('insp_scope', 'all'),
+                    'scope_label': dict(InspectionToken.SCOPE_CHOICES).get(request.session.get('insp_scope','all'), ''),
+                    'form': request.POST,
+                })
 
-        qr_url = request.build_absolute_uri(f'/inspektor/{tok.token}/')
+            # Spremi u sesiju
+            request.session['insp_first_name'] = first_name
+            request.session['insp_last_name'] = last_name
+            request.session['insp_badge'] = badge
+            request.session['insp_institution'] = institution
+            request.session['insp_phone'] = phone
+            request.session['insp_email'] = email
+            request.session['insp_legal_basis'] = legal_basis
 
-        return render(request, 'inspector/qr_generated.html', {
-            'company': company,
-            'token': tok,
-            'qr_url': qr_url,
-            'scope': scope,
-            'scope_label': scope_labels.get(scope, scope),
-        })
+            # Spremi fotografije privremeno
+            if request.FILES.get('badge_photo'):
+                import os, tempfile
+                f = request.FILES['badge_photo']
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp')
+                for chunk in f.chunks():
+                    tmp.write(chunk)
+                tmp.close()
+                request.session['insp_badge_photo_path'] = tmp.name
 
-    # GET
+            if request.FILES.get('warrant_photo'):
+                import os, tempfile
+                f = request.FILES['warrant_photo']
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp')
+                for chunk in f.chunks():
+                    tmp.write(chunk)
+                tmp.close()
+                request.session['insp_warrant_photo_path'] = tmp.name
+
+            return render(request, 'inspector/step3_sign.html', {
+                'company': company,
+                'inspector_name': f'{first_name} {last_name}',
+                'badge': badge,
+                'institution': institution,
+                'scope_label': dict(InspectionToken.SCOPE_CHOICES).get(request.session.get('insp_scope','all'), ''),
+            })
+
+        # ── KORAK 3 → GOTOVO: potpis + generiranje QR + zapisnik ──
+        elif step == '3':
+            signature = request.POST.get('signature', '')
+            terms = request.POST.get('terms_accepted', '')
+
+            if not signature or not terms:
+                return render(request, 'inspector/step3_sign.html', {
+                    'company': company,
+                    'errors': ['Potpis i prihvacanje uvjeta su obavezni.'],
+                    'inspector_name': f"{request.session.get('insp_first_name','')} {request.session.get('insp_last_name','')}",
+                    'badge': request.session.get('insp_badge', ''),
+                    'institution': request.session.get('insp_institution', ''),
+                    'scope_label': dict(InspectionToken.SCOPE_CHOICES).get(request.session.get('insp_scope','all'), ''),
+                })
+
+            from datetime import datetime
+
+            scope = request.session.get('insp_scope', 'all')
+            hours = request.session.get('insp_hours', 24)
+            df_str = request.session.get('insp_date_from', '')
+            dt_str = request.session.get('insp_date_to', '')
+
+            df = datetime.strptime(df_str, '%Y-%m-%d').date() if df_str else date(date.today().year, 1, 1)
+            dt = datetime.strptime(dt_str, '%Y-%m-%d').date() if dt_str else date.today()
+
+            scope_labels = dict(InspectionToken.SCOPE_CHOICES)
+
+            # Kreiraj token
+            tok = InspectionToken.objects.create(
+                company=company,
+                scope=scope,
+                label=f'{scope_labels.get(scope, scope)} — {request.session.get("insp_first_name","")} {request.session.get("insp_last_name","")} — {date.today().strftime("%d.%m.%Y")}',
+                date_from=df,
+                date_to=dt,
+                expires_at=timezone.now() + timedelta(hours=hours),
+                created_by=request.user,
+            )
+
+            # Kreiraj zapisnik (protocol)
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+            if ',' in ip: ip = ip.split(',')[0].strip()
+            lat = request.POST.get('latitude', '')
+            lng = request.POST.get('longitude', '')
+
+            protocol = InspectionProtocol.objects.create(
+                token=tok,
+                inspector_first_name=request.session.get('insp_first_name', ''),
+                inspector_last_name=request.session.get('insp_last_name', ''),
+                inspector_badge=request.session.get('insp_badge', ''),
+                inspector_institution=request.session.get('insp_institution', ''),
+                inspector_phone=request.session.get('insp_phone', ''),
+                inspector_email=request.session.get('insp_email', ''),
+                legal_basis=request.session.get('insp_legal_basis', ''),
+                terms_accepted=True,
+                signature=signature,
+                signed_at=timezone.now(),
+                signed_ip=ip or None,
+                latitude=float(lat) if lat else None,
+                longitude=float(lng) if lng else None,
+            )
+
+            # Spremi slike znacke/naloga
+            import os
+            from django.core.files import File
+            bp = request.session.pop('insp_badge_photo_path', '')
+            if bp and os.path.exists(bp):
+                with open(bp, 'rb') as f:
+                    protocol.badge_photo.save(f'badge_{tok.pk}.jpg', File(f))
+                os.unlink(bp)
+            wp = request.session.pop('insp_warrant_photo_path', '')
+            if wp and os.path.exists(wp):
+                with open(wp, 'rb') as f:
+                    protocol.warrant_photo.save(f'warrant_{tok.pk}.jpg', File(f))
+                os.unlink(wp)
+
+            # Audit
+            try:
+                from core.models import BookingSignature
+                BookingSignature.log(request, 'create', target_obj=tok,
+                    target_repr=f'Inspekcija: {protocol.inspector_full_name} ({scope})',
+                    changes={
+                        'scope': scope, 'badge': protocol.inspector_badge,
+                        'institution': protocol.inspector_institution,
+                        'signed_ip': ip,
+                    })
+            except Exception:
+                pass
+
+            # WhatsApp notifikacija vlasniku
+            try:
+                from core.whatsapp import send_text
+                owner_phone = company.phone or ''
+                if owner_phone:
+                    send_text(owner_phone,
+                        f"INSPEKCIJA AKTIVNA\n\n"
+                        f"Inspektor: {protocol.inspector_full_name}\n"
+                        f"Znacka: {protocol.inspector_badge or '-'}\n"
+                        f"Institucija: {protocol.inspector_institution or '-'}\n"
+                        f"Tip: {scope_labels.get(scope)}\n"
+                        f"Potpisan zapisnik: DA\n"
+                        f"Istjece: {tok.expires_at.strftime('%d.%m.%Y %H:%M')}",
+                        company_id=str(company.pk))
+            except Exception:
+                pass
+
+            # Email zapisnika inspektoru (ako ima email)
+            insp_email = request.session.get('insp_email', '')
+            if insp_email:
+                try:
+                    from django.core.mail import send_mail
+                    send_mail(
+                        subject=f'Zapisnik inspekcije — {company.name}',
+                        message=(
+                            f'Postovani {protocol.inspector_full_name},\n\n'
+                            f'Zapisnik inspekcijskog pristupa:\n'
+                            f'Firma: {company.name} (OIB: {company.oib})\n'
+                            f'Tip: {scope_labels.get(scope)}\n'
+                            f'Period: {df} — {dt}\n'
+                            f'Potpisan: {protocol.signed_at.strftime("%d.%m.%Y %H:%M")}\n'
+                            f'IP: {ip}\n\n'
+                            f'Ovaj email je automatski generiran.\n'
+                            f'LIMIT Connect ERP — limit-connect.com'
+                        ),
+                        from_email=None,
+                        recipient_list=[insp_email],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+
+            # Cleanup session
+            for k in list(request.session.keys()):
+                if k.startswith('insp_'):
+                    del request.session[k]
+
+            qr_url = request.build_absolute_uri(f'/inspektor/{tok.token}/')
+
+            return render(request, 'inspector/qr_generated.html', {
+                'company': company,
+                'token': tok,
+                'protocol': protocol,
+                'qr_url': qr_url,
+                'scope': scope,
+                'scope_label': scope_labels.get(scope, scope),
+            })
+
+    # GET — korak 1
     active_tokens = InspectionToken.objects.filter(
         company=company, is_active=True,
         expires_at__gt=timezone.now(),
