@@ -835,14 +835,27 @@ def offer_pdf(request, offer_id):
     session = offer.session
     measurements = session.measurements.filter(confirmed=True)
 
-    # Generiraj SVG vizualizacije za svako mjerenje
-    from .svg_window import generate_window_svg
+    # Generiraj SVG vizualizacije za svako mjerenje (po tipu)
+    from .svg_window import generate_window_svg, generate_door_svg, generate_mosquito_svg
     measurement_list = list(measurements)
     for m in measurement_list:
-        m.svg = generate_window_svg(
-            m.width_mm, m.height_mm, m.wing_config, m.element_type,
-            profile_color=getattr(m.profile, 'color_outer', '#4a5568') or '#4a5568',
-        )
+        if m.element_type in ('interior_door', 'door', 'balcony_door'):
+            m.svg = generate_door_svg(
+                m.width_mm, m.height_mm,
+                m.wing_config or 'single_left',
+                m.swing_direction or 'inward',
+                m.element_type,
+            )
+        elif m.element_type == 'mosquito':
+            m.svg = generate_mosquito_svg(
+                m.width_mm, m.height_mm,
+                m.mounting_type or 'fixed_frame',
+            )
+        else:
+            m.svg = generate_window_svg(
+                m.width_mm, m.height_mm, m.wing_config, m.element_type,
+                profile_color=getattr(m.profile, 'color_outer', '#4a5568') or '#4a5568',
+            )
 
     from django.template.loader import render_to_string
     html = render_to_string('stolarija/offer_pdf.html', {

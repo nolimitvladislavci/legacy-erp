@@ -88,19 +88,47 @@ class Measurement(models.Model):
     KLJUČNO: confirmed=True tek kad Zdenko vizualno potvrdi dimenzije.
     """
     ELEMENT_TYPES = [
-        ('window',   'Prozor'),
-        ('door',     'Vrata'),
-        ('mosquito', 'Komarnik'),
-        ('facade',   'Fasadna stijena'),
-        ('other',    'Ostalo'),
+        ('window',       'Prozor'),
+        ('door',         'Vrata (ulazna)'),
+        ('interior_door','Sobna vrata'),
+        ('balcony_door', 'Balkonska vrata'),
+        ('mosquito',     'Komarnik'),
+        ('roller',       'Roleta'),
+        ('facade',       'Fasadna stijena'),
+        ('other',        'Ostalo'),
     ]
     WING_CONFIGS = [
-        ('fixed',     'Fiksno'),
-        ('single',    'Jednokrilno'),
-        ('double',    'Dvokrilno'),
-        ('triple',    'Trokrilno'),
-        ('sliding',   'Klizno'),
-        ('tilt_turn', 'Kip-turn'),
+        ('fixed',       'Fiksno'),
+        ('single',      'Jednokrilno'),
+        ('double',      'Dvokrilno'),
+        ('triple',      'Trokrilno'),
+        ('sliding',     'Klizno'),
+        ('tilt_turn',   'Kip-turn'),
+        ('single_left', 'Jednokrilno LIJEVO (L)'),
+        ('single_right','Jednokrilno DESNO (D)'),
+        ('double_asym', 'Dvokrilno asimetricno'),
+        ('pivot',       'Pivotirajuce'),
+        ('barn',        'Klizno na zid (barn door)'),
+    ]
+
+    SWING_DIRECTION = [
+        ('inward',  'U prostoriju'),
+        ('outward', 'Van prostorije'),
+    ]
+
+    DOOR_POSITION = [
+        ('north', 'Sjever'),
+        ('south', 'Jug'),
+        ('east',  'Istok'),
+        ('west',  'Zapad'),
+        ('internal', 'Unutarnji zid'),
+        ('bathroom', 'Kupaonica'),
+        ('bedroom',  'Spavaca soba'),
+        ('kitchen',  'Kuhinja'),
+        ('living',   'Dnevni boravak'),
+        ('hallway',  'Hodnik'),
+        ('storage',  'Ostava'),
+        ('wc',       'WC'),
     ]
 
     session      = models.ForeignKey(MeasurementSession, on_delete=models.CASCADE,
@@ -112,6 +140,40 @@ class Measurement(models.Model):
     location_note = models.CharField(max_length=200, blank=True,
                                       verbose_name='Lokacija otvora')
     floor        = models.SmallIntegerField(default=0, verbose_name='Kat (0=prizemlje)')
+
+    # Sobna vrata specifika
+    swing_direction = models.CharField(
+        max_length=10, blank=True, default='',
+        verbose_name='Smjer otvaranja',
+        help_text='inward=u prostoriju, outward=van prostorije',
+    )
+    door_position = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name='Pozicija vrata / prostorija',
+        help_text='Prostorija u koju vrata vode',
+    )
+    wall_thickness_mm = models.PositiveIntegerField(
+        default=0, blank=True,
+        verbose_name='Debljina zida (mm)',
+        help_text='Za obuhvatni stok — mjeri se na licu mjesta',
+    )
+    door_standard = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name='Standard vrata',
+        help_text='DIN/HR/BiH/PL/IT/TR — sustav auto-detektira',
+    )
+
+    # Komarnik specifika
+    mesh_type = models.CharField(
+        max_length=30, blank=True, default='',
+        verbose_name='Tip mreze',
+        help_text='pvc/alu/fiberglass/plisse',
+    )
+    mounting_type = models.CharField(
+        max_length=30, blank=True, default='',
+        verbose_name='Tip montaze komarnika',
+        help_text='fixed_frame/roller/plisse/magnetic/velcro',
+    )
 
     # Dimenzije u mm
     width_mm     = models.PositiveIntegerField(verbose_name='Širina (mm)')
