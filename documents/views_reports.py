@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
@@ -721,7 +722,7 @@ def revizija_export(request):
     if not request.user.is_superuser:
         user_co = get_user_company(request)
         if not user_co or str(user_co.pk) != str(company_id):
-            messages.error(request, 'Nemate pristup.')
+            messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
             return redirect('documents:revizija')
 
     # Query entries

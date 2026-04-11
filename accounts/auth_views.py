@@ -330,7 +330,7 @@ def setup_2fa(request):
     try:
         profile = request.user.userprofile
     except Exception:
-        messages.error(request, 'Nema profila')
+        messages.error(request, _('Korisnički profil nije pronađen. Obratite se administratoru.'))
         return redirect('/')
 
     if request.method == 'POST':

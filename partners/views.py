@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -74,7 +75,7 @@ def partner_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, 'Nema aktivne firme.')
+                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
                 return redirect('dashboard')
             p = Partner(
                 company=company,

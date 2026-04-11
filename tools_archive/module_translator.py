@@ -70,7 +70,7 @@ def translation_manager(request, lang_code='de'):
                 else:
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u modulu: {target_module.upper()}.')
             except Exception as e:
-                messages.error(request, f'Greška: {str(e)}')
+                messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('accounts:translation_manager', lang_code=lang_code)
             
         else:

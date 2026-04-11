@@ -8,6 +8,7 @@ Routes:
 import logging
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -70,7 +71,7 @@ def finalize_oib_view(request):
             messages.warning(request, 'Finalizacija završena s upozorenjima.')
 
     except OIBFinalizerError as exc:
-        messages.error(request, f'Greška: {exc}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     except Exception as exc:
         logger.exception('OIB Finalizer unexpected error')
         messages.error(request, f'Neočekivana greška: {exc}')

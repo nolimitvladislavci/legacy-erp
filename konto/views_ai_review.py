@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.db import transaction
 from django.utils import timezone
 
@@ -34,7 +35,7 @@ def ai_review_queue(request):
     """Show ArhivaEntries with AI proposals that are not booked yet."""
     company = _get_company(request)
     if not company:
-        messages.warning(request, 'Nema aktivne tvrtke.')
+        messages.warning(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     entries = (
@@ -133,7 +134,7 @@ def ai_confirm_booking(request, pk):
         )
     except Exception as exc:
         logger.error("AI confirm booking failed for %s: %s", entry.pk, exc, exc_info=True)
-        messages.error(request, f'Greska pri knjizenju: {exc}')
+        messages.error(request, _('Knjiženje nije uspjelo. Provjerite konto i iznos.'))
 
     return redirect('konto:ai_review_queue')
 

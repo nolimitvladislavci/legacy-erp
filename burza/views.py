@@ -3,6 +3,7 @@ logger = logging.getLogger(__name__)
 import json
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
@@ -224,7 +225,7 @@ def lead_new(request):
             messages.success(request, 'Kartica kreirana uspješno.')
             return redirect('burza:kanban')
         except Exception as e:
-            messages.error(request, f'Greška: {str(e)}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'burza/lead_form.html', {
         'categories': ProjectLead.Category.choices, 'is_superadmin': sa,
     })

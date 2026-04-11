@@ -7,6 +7,7 @@ Read-only aggregation — never mutates data across tenants.
 import logging
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -44,7 +45,7 @@ def intelligence_dashboard(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nemate dodijeljenu tvrtku.')
+        messages.error(request, _('Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup.'))
         return redirect('dashboard')
 
     # Superadmin umbrella override

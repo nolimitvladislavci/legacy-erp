@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
 
 
@@ -119,7 +120,7 @@ def bank_upload(request):
                 except UnicodeDecodeError:
                     content = raw.decode('cp1250', errors='replace')
         except Exception as e:
-            messages.error(request, f'Greska pri citanju datoteke: {e}')
+            messages.error(request, _('Datoteka se ne može pročitati. Provjerite format i pokušajte ponovo.'))
             return redirect('konto:bank_upload')
 
         filename = uploaded_file.name.lower() if uploaded_file.name else ''
@@ -169,9 +170,9 @@ def bank_upload(request):
                 acct.recalculate_balance()
 
         except ValueError as e:
-            messages.error(request, f'Greska u formatu: {e}')
+            messages.error(request, _('Neispravan format datoteke. Provjerite strukturu podataka.'))
         except Exception as e:
-            messages.error(request, f'Greska pri uvozu: {e}')
+            messages.error(request, _('Uvoz nije uspio. Provjerite format datoteke i pokušajte ponovo.'))
 
         return redirect('konto:bank_dashboard')
 

@@ -2,6 +2,7 @@
 Client/Partner Portal — Token-based, no login required.
 """
 from django.shortcuts import render, get_object_or_404
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.db.models import Sum, Count
 from .models import Partner
@@ -131,6 +132,7 @@ def portal_documents(request, token):
 
 def send_portal_link(request, partner_id):
     from django.contrib import messages
+    from django.utils.translation import gettext as _
     from django.shortcuts import redirect
     from django.core.mail import send_mail
     from django.template.loader import render_to_string
@@ -153,7 +155,7 @@ def send_portal_link(request, partner_id):
                   recipient_list=[partner.email], html_message=html_msg, fail_silently=False)
         messages.success(request, f"Portal link poslan na {partner.email}")
     except Exception as e:
-        messages.error(request, f"Greska: {e}")
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect(request.META.get("HTTP_REFERER", "/partners/"))
 
 
@@ -183,7 +185,7 @@ def send_portal_whatsapp(request, partner_id):
     if result["success"]:
         messages.success(request, f"WhatsApp poslan na {phone}")
     else:
-        messages.error(request, f"Greska: {result["error"]}")
+        messages.error(request, _('Radnja nije uspjela. Pokušajte ponovo.'))
     return redirect(request.META.get("HTTP_REFERER", "/partners/"))
 
 

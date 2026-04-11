@@ -2,6 +2,7 @@ import json
 import logging
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
@@ -18,7 +19,7 @@ logger = logging.getLogger('udruge')
 def clan_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne udruge.')
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect('dashboard')
 
     from .models import Clan
@@ -99,7 +100,7 @@ def clan_detail(request, pk):
 def clan_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne udruge.')
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect('udruge:clan_list')
 
     from .models import Clan
@@ -742,7 +743,7 @@ def download_annual_volunteer_report(request):
 def dogadjaj_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("dashboard")
 
     from .models import Dogadjaj
@@ -779,7 +780,7 @@ def dogadjaj_list(request):
 def dogadjaj_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("udruge:dogadjaj_list")
 
     from .models import Dogadjaj, Kampanja
@@ -878,7 +879,7 @@ def dogadjaj_register(request, pk):
 def kampanja_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("dashboard")
 
     from .models import Kampanja
@@ -915,7 +916,7 @@ def kampanja_list(request):
 def kampanja_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("udruge:kampanja_list")
 
     from .models import Kampanja
@@ -976,7 +977,7 @@ def kampanja_detail(request, pk):
 def email_kampanja_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("dashboard")
 
     from .models import EmailKampanja
@@ -994,7 +995,7 @@ def email_kampanja_list(request):
 def email_kampanja_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne udruge.")
+        messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("udruge:email_kampanja_list")
 
     from .models import EmailKampanja, Kampanja, Dogadjaj, Clan
@@ -3762,7 +3763,7 @@ def flock_list(request):
     from .models import Flock
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     qs = Flock.objects.filter(company=company)
@@ -3802,7 +3803,7 @@ def flock_create(request):
     from .models import Flock
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -4005,7 +4006,7 @@ def bridge_publish(request):
     """Ponudi proizvod na tržnicu — univerzalni bridge endpoint."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -4084,7 +4085,7 @@ def bridge_publish(request):
                 except Exception:
                     pass
         except Exception as e:
-            messages.error(request, f'Greška pri objavljivanju: {e}')
+            messages.error(request, _('Objavljivanje nije uspjelo. Pokušajte ponovo.'))
 
         return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
 

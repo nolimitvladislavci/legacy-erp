@@ -7,6 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
 from core.company_utils import get_user_company
@@ -450,7 +451,7 @@ def sukladnost_dashboard(request):
     from .models import SukladnostTestRun
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     runs = SukladnostTestRun.objects.filter(company=company)[:10]

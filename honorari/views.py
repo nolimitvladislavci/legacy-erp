@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from .models import (
     HonorarContract, HonorarCalculation,
@@ -38,7 +39,7 @@ def contract_list(request):
     """Lista svih ugovora o honorarima."""
     company = _get_company(request)
     if not company:
-        messages.warning(request, 'Nema aktivne tvrtke.')
+        messages.warning(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     status = request.GET.get('status', '')
@@ -111,7 +112,7 @@ def contract_create(request):
     """Kreiranje novog ugovora o honoraru."""
     company = _get_company(request)
     if not company:
-        messages.warning(request, 'Nema aktivne tvrtke.')
+        messages.warning(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'GET':
@@ -250,7 +251,7 @@ def calculation_create(request, pk):
 
         messages.success(request, f'Obračun kreiran. Neto: {calc.net_amount} EUR')
     except Exception as e:
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('honorari:contract_detail', pk=pk)
 
@@ -389,7 +390,7 @@ def calculation_post(request, calc_id):
 
         messages.success(request, f'Obračun proknjižen — temeljnica {je.entry_number}')
     except Exception as e:
-        messages.error(request, f'Greška pri knjiženju: {e}')
+        messages.error(request, _('Knjiženje nije uspjelo. Provjerite konto i iznos.'))
 
     return redirect('honorari:contract_detail', pk=contract.pk)
 
@@ -402,7 +403,7 @@ def joppd_preview(request):
     """Pregled JOPPD stavki za mjesec — za slanje Poreznoj."""
     company = _get_company(request)
     if not company:
-        messages.warning(request, 'Nema aktivne tvrtke.')
+        messages.warning(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     today = timezone.now().date()

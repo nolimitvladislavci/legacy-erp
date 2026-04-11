@@ -9,6 +9,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -81,7 +82,7 @@ def dashboard(request):
     """Pregled proizvodnje: nalozi po statusu, KPI-evi."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     orders = ProductionOrder.objects.filter(company=company).select_related(
@@ -159,7 +160,7 @@ def bom_list(request):
     """Lista svih sastavnica s pretragom (JS-side filtering)."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     boms = (
@@ -187,7 +188,7 @@ def bom_create(request, pk=None):
     """Kreiranje/uređivanje sastavnice s inline formset."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     bom = None
@@ -240,7 +241,7 @@ def order_list(request):
     """Lista radnih naloga s filterima."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     q = request.GET.get('q', '').strip()
@@ -314,7 +315,7 @@ def order_create(request, pk=None):
     """Kreiranje ili uređivanje radnog naloga."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     order = None
@@ -495,7 +496,7 @@ def order_produce(request, pk):
             )
         messages.success(request, f"Evidentirano: {qty} {order.bom.output_unit} proizvedeno.")
     except Exception as e:
-        messages.error(request, f"Greška: {e}")
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('production:order_detail', pk=pk)
 
@@ -593,7 +594,7 @@ def workstation_list(request):
     """Lista radnih stanica."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     workstations = Workstation.objects.filter(company=company)
@@ -607,7 +608,7 @@ def workstation_create(request, pk=None):
     """Kreiranje/uređivanje radne stanice."""
     company = _company_or_redirect(request)
     if not company:
-        messages.error(request, "Nema konteksta tvrtke.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     ws = None

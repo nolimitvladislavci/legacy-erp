@@ -6,6 +6,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.http import HttpResponse, JsonResponse
@@ -377,7 +378,7 @@ def arhiva_convert(request):
         if not company:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'error': 'Nema aktivne tvrtke'}, status=400)
-            messages.error(request, 'Nema aktivne tvrtke.')
+            messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
             return redirect('documents:arhiva_list')
 
         uploaded = request.FILES['file']

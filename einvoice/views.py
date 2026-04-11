@@ -2,6 +2,8 @@
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib import messages as django_messages
 from django.utils import timezone
 from django.http import JsonResponse
@@ -16,7 +18,7 @@ def smart_mailbox(request):
     """Smart Mailbox inbox — list all inbound invoices with AI classification."""
     company = get_user_company(request)
     if not company:
-        django_messages.error(request, "Nema aktivne firme.")
+        django_messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("dashboard")
 
     from einvoice.models import InboundInvoice, AS4Message, MessageDirection

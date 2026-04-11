@@ -259,13 +259,13 @@ def fiscalize(request, pk):
     result = _fiscalize(invoice, user=request.user, ip_address=ip)
     if result['success']:
         if result.get('demo'):
-            messages.success(request, 'Racun fiskaliziran (DEMO)!')
+            messages.success(request, _('Račun fiskaliziran (DEMO režim)!'))
             messages.warning(request, f'ZKI: {result["zki"]} | JIR: {result["jir"]}')
         else:
-            messages.success(request, 'Racun uspjesno fiskaliziran!')
+            messages.success(request, _('Račun uspješno fiskaliziran!'))
             messages.success(request, f'ZKI: {result["zki"]} | JIR: {result["jir"]}')
     else:
-        messages.error(request, f'Greska: {result["error"]}')
+        messages.error(request, _('Fiskalizacija nije uspjela. Provjerite certifikat i vezu.'))
     return redirect('invoicing:index')
 
 
@@ -280,7 +280,7 @@ def storno(request, pk):
     cancel_reason = request.POST.get('cancel_reason', '').strip()[:200] if request.method == 'POST' else ''
     result = create_storno(original, user=request.user, ip_address=ip, cancel_reason=cancel_reason)
     if result['success']:
-        messages.success(request, f'Storno racun {result["storno_invoice"].number} kreiran!')
+        messages.success(request, _('Storno račun {n} kreiran! Originalni račun je poništen.').format(n=result['storno_invoice'].number))
         try:
             BookingSignature.log(request, "storno", target_model="Invoice", target_id=str(original.pk), target_repr=f"Storno {result['storno_invoice'].number} za {original.number}")
         except Exception:
@@ -557,7 +557,7 @@ def invoice_edit(request, pk):
     from .models import Invoice
     invoice = get_object_or_404(Invoice, pk=pk)
     if invoice.is_locked:
-        messages.warning(request, 'Ova faktura je zakljucana (Synesis arhiva) i ne moze se editirati.')
+        messages.warning(request, _('Ovaj dokument je zaključan (Synesis arhiva). Za izmjene kontaktirajte administratora.'))
         return redirect('invoicing:index')
     try:
         from .fiscal_models import BusinessLocation, FiscalConfig, FiscalOperator
@@ -699,7 +699,7 @@ def invoice_save(request):
             except Exception as _ev_err:
                 logger.warning(f'InvoiceEvent edited failed: {_ev_err}')
     except Exception as e:
-        messages.error(request, f'❌ Greška pri spremanju: {str(e)}')
+        messages.error(request, _('Spremanje dokumenta nije uspjelo. Provjerite sva obavezna polja i pokušajte ponovo.'))
         logger.error("Invoice save error", exc_info=True)
         inv_id = request.POST.get('invoice_id')
         if inv_id:
@@ -1145,7 +1145,7 @@ def invoice_clone(request, pk):
         )
     clone.recalculate()
     clone.save()
-    messages.success(request, f"Kopija kreirana: {clone.number}")
+    messages.success(request, _('Kopija kreirana: {n}. Možete je urediti i poslati.').format(n=clone.number))
     return redirect('invoicing:invoice_edit', pk=clone.pk)
 
 
@@ -2203,7 +2203,7 @@ def dunning_dashboard(request):
     # Trigger manual run
     if request.method == "POST" and request.POST.get("action") == "run_now":
         run_dunning_cycle.delay()
-        messages.success(request, "Dunning ciklus pokrenut! Rezultati ce biti vidljivi za nekoliko minuta.")
+        messages.success(request, _('Proces opomena pokrenut! Rezultati će biti vidljivi za nekoliko minuta.'))
         return redirect("invoicing:dunning_dashboard")
 
     # Overdue invoices

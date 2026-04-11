@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -50,7 +51,7 @@ def item_create(request):
             from core.company_utils import get_user_company
             company = get_user_company(request)
             if not company:
-                messages.error(request, "Greška: nema konteksta tvrtke.")
+                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
                 return redirect("inventory:list")
             supplier_id = request.POST.get("supplier")
             item = InventoryItem(
@@ -326,7 +327,7 @@ def goods_receipt_confirm(request, pk):
         receipt.confirm()
         messages.success(request, f'Primka {receipt.receipt_number} potvrđena. Zalihe i cijene ažurirane.')
     except Exception as e:
-        messages.error(request, f'Greška pri potvrdi primke: {e}')
+        messages.error(request, _('Potvrda primke nije uspjela. Provjerite stavke i pokušajte ponovo.'))
     return redirect('inventory:receipt_detail', pk=pk)
 
 
@@ -583,7 +584,7 @@ def kalo_view(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('inventory:item_list')
 
     items_with_kalo = InventoryItem.objects.filter(

@@ -2,6 +2,7 @@ import io
 import logging
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -379,7 +380,7 @@ def export_to_synesis(request, pk):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne firme.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('calculator:estimate_list')
 
     calculation = get_object_or_404(Calculation, pk=pk)
@@ -489,7 +490,7 @@ def export_pkv_to_synesis(request, pk):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne firme.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('calculator:estimate_list')
 
     calculation = get_object_or_404(Calculation, pk=pk)

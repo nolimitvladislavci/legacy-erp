@@ -486,7 +486,7 @@ def client_card_create(request):
             messages.success(request, f"Karton klijenta {cc} kreiran.")
             return redirect('work_orders:client_card_list')
         except Exception as e:
-            messages.error(request, f"Greška: {e}")
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     from partners.models import Partner
     clients = Partner.objects.filter(company=company, is_active=True).order_by('name')

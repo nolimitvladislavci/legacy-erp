@@ -8,6 +8,7 @@ from decimal import Decimal
 from datetime import timedelta
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum, Count, F, Case, When, DecimalField
 from django.http import JsonResponse, HttpResponse
@@ -462,7 +463,7 @@ def order_ship(request, pk):
 
     except Exception as e:
         logger.exception('Greška pri kreiranju otpremnice')
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('sales:order_detail', pk=pk)
 
@@ -525,7 +526,7 @@ def order_invoice(request, pk):
 
     except Exception as e:
         logger.exception('Greška pri kreiranju fakture')
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('sales:order_detail', pk=pk)
 
@@ -792,7 +793,7 @@ def ios_send_email(request, pk):
 
     except Exception as e:
         logger.exception('IOS send email error')
-        messages.error(request, f'Greška pri slanju: {e}')
+        messages.error(request, _('Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovo.'))
 
     return redirect('sales:saldakonti_dashboard')
 

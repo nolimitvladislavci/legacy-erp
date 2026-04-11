@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
@@ -619,7 +620,7 @@ def register_step4(request):
 
         except Exception as e:
             logger.exception("Self-service registration error")
-            messages.error(request, "Greska pri registraciji: {}".format(e))
+            messages.error(request, _('Registracija nije uspjela. Provjerite podatke i pokušajte ponovo.'))
             return redirect("registration:register_step4")
 
     return render(request, "registration/step4.html", {
@@ -1715,7 +1716,7 @@ def distributor_apply(request):
             messages.success(request, 'Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.')
             return redirect('distributor_apply')
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'registration/distributor_apply.html', {
         'page_title': 'Postani distributer',
@@ -1842,7 +1843,7 @@ def register_trikey(request):
                 return redirect("dashboard")
         except Exception as e:
             logger.exception("TriKey registration error")
-            messages.error(request, f"Greška: {e}")
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, "registration/trikey_register.html", {
         "step": 2, "errors": {},

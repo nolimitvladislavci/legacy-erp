@@ -1,5 +1,6 @@
 from core.models import BookingSignature
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.contrib.auth.forms import PasswordResetForm
@@ -157,7 +158,7 @@ def translation_manager(request, lang_code='de'):
                 else:
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u modulu: {target_module.upper()}.')
             except Exception as e:
-                messages.error(request, f'Greška: {str(e)}')
+                messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('accounts:translation_manager', lang_code=lang_code)
 
         else:
@@ -317,7 +318,7 @@ def switch_company(request):
     company_id = request.POST.get('company_id')
 
     if not membership_id and not company_id:
-        messages.error(request, 'Nedostaje membership_id ili company_id.')
+        messages.error(request, _('Odaberite tvrtku iz izbornika prije nastavka.'))
         return redirect('/')
 
     try:
@@ -360,10 +361,10 @@ def switch_company(request):
                 request.session['active_membership_id'] = mem.id
                 role_display = 'Umbrella Admin'
             else:
-                messages.error(request, 'Nemate pristup toj tvrtki.')
+                messages.error(request, _('Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom.'))
                 return redirect('/')
         else:
-            messages.error(request, 'Nemate pristup toj tvrtki.')
+            messages.error(request, _('Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom.'))
             return redirect('/')
 
         # Postavi session za get_user_company
@@ -383,7 +384,7 @@ def switch_company(request):
         except Exception:
             pass
     except (CompanyMembership.DoesNotExist, Company.DoesNotExist):
-        messages.error(request, 'Nemate pristup toj tvrtki.')
+        messages.error(request, _('Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom.'))
     return redirect('/')
 
 
@@ -513,7 +514,7 @@ def switch_company_get(request, company_id):
     try:
         company = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
-        messages.error(request, 'Firma ne postoji.')
+        messages.error(request, _('Tvrtka nije pronađena u sustavu. Provjerite podatke.'))
         return redirect('/')
 
     if not request.user.is_superuser:
@@ -521,7 +522,7 @@ def switch_company_get(request, company_id):
             user=request.user, company=company, is_active=True
         ).first()
         if not mem:
-            messages.error(request, 'Nemate pristup toj firmi.')
+            messages.error(request, _('Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom.'))
             return redirect('/')
 
     # Superadmin ili ima membership — switch
@@ -543,7 +544,7 @@ def switch_company_get(request, company_id):
             user=request.user, company=company
         ).first()
         if not mem:
-            messages.error(request, 'Greska pri prebacivanju.')
+            messages.error(request, _('Prebacivanje nije uspjelo. Pokušajte ponovo.'))
             return redirect('/')
     request.session['active_membership_id'] = mem.id
     request.session['superadmin_as_company'] = str(company.pk)

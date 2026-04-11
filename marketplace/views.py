@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
@@ -1023,7 +1024,7 @@ def gastro_bridge(request, pk):
                 'Vidljivo na digitalnom meniju.' % (gastro_name, gastro_price)
             )
         except Exception as e:
-            messages.error(request, 'Greska pri prebacivanju: %s' % e)
+            messages.error(request, _('Prebacivanje nije uspjelo. Pokušajte ponovo.'))
 
         return redirect('marketplace:seller_dashboard')
 

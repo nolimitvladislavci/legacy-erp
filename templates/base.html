@@ -293,8 +293,11 @@
             {% if messages %}
             <div id="toast-container" class="fx-toast-container">
                 {% for msg in messages %}
-                <div class="toast-msg alert alert-{{ msg.tags }} alert-dismissible fade show shadow py-2 px-3 fx-fs-note fx-rounded" style="margin-bottom:8px;backdrop-filter:blur(8px);{% if 'success' in msg.tags %}background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:var(--green);{% elif 'error' in msg.tags %}background:rgba(254,242,242,.95);border:1px solid #fecaca;color:var(--red);{% elif 'warning' in msg.tags %}background:rgba(255,251,235,.95);border:1px solid #fed7aa;color:#92400e;{% else %}background:rgba(239,246,255,.95);border:1px solid #bfdbfe;color:var(--blue);{% endif %}">
-                    {{ msg }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                <div class="toast-msg alert alert-{{ msg.tags }} alert-dismissible fade show fx-rounded" role="alert"
+                     style="margin-bottom:8px;backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:10px;padding:12px 16px;box-shadow:0 4px 24px rgba(0,0,0,.15);border-left:4px solid;{% if 'success' in msg.tags %}background:rgba(240,253,244,.97);border-left-color:var(--green);color:#166534;{% elif 'error' in msg.tags %}background:rgba(254,242,242,.97);border-left-color:var(--red);color:#991b1b;{% elif 'warning' in msg.tags %}background:rgba(255,251,235,.97);border-left-color:#f59e0b;color:#92400e;{% else %}background:rgba(239,246,255,.97);border-left-color:#3b82f6;color:#1e40af;{% endif %}">
+                    <span class="fx-fs-lg" style="flex-shrink:0;margin-top:1px">{% if 'success' in msg.tags %}✓{% elif 'error' in msg.tags %}✗{% elif 'warning' in msg.tags %}⚡{% else %}💡{% endif %}</span>
+                    <span class="fx-fs-note" style="flex:1;line-height:1.5">{{ msg }}</span>
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" style="flex-shrink:0;margin-top:2px"></button>
                 </div>
                 {% endfor %}
             </div>

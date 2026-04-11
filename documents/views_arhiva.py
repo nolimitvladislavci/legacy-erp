@@ -14,6 +14,7 @@ import fitz  # PyMuPDF
 
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q, Sum
@@ -503,7 +504,7 @@ def arhiva_upload(request):
 
         except Exception as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
-            messages.error(request, 'Greska pri uploadu. Provjerite format datoteke.')
+            messages.error(request, _('Upload nije uspio. Provjerite format datoteke i pokušajte ponovo.'))
 
         return redirect('documents:arhiva_list')
 

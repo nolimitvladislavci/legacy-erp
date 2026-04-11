@@ -5,6 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse, Http404
@@ -108,10 +109,10 @@ def open_session(request, terminal_id):
     # POSSettings guard — ne dopusti otvaranje smjene bez konfiguracije
     from .models import POSSettings
     if not POSSettings.objects.filter(company=company).exists():
-        messages.error(request, 'POS nije konfiguriran za ovu tvrtku. Kontaktirajte administratora.')
+        messages.error(request, _('POS sustav nije konfiguriran. Otvorite Postavke → POS ili kontaktirajte administratora.'))
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
-        messages.warning(request, 'Terminal already has an open session.')
+        messages.warning(request, _('Terminal već ima otvorenu smjenu. Zatvorite je prije otvaranja nove.'))
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
     from django.db.models import Max
     max_num = terminal.sessions.aggregate(m=Max('session_number'))['m'] or 0
@@ -138,7 +139,7 @@ def open_session(request, terminal_id):
         )
     except Exception:
         pass
-    messages.success(request, f'Session #{session.session_number} opened.')
+    messages.success(request, _('Smjena #{n} otvorena! Skenirajte artikle za kreiranje bona.').format(n=session.session_number))
     return redirect('pos:session_detail', session_id=session.pk)
 
 
@@ -167,17 +168,17 @@ def close_session(request, session_id):
     company, err = _check_tenant(request, session)
     if err: return err
     if session.status != POSSession.Status.OPEN:
-        messages.warning(request, 'Session is already closed.')
+        messages.warning(request, _('Ova smjena je već zatvorena. Otvorite novu za nastavak rada.'))
         return redirect('pos:session_detail', session_id=session_id)
     open_count = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']).count()
     if open_count:
-        messages.error(request, f'Cannot close: {open_count} open receipt(s) pending.')
+        messages.error(request, _('Nije moguće zatvoriti: {n} bonova čeka naplatu. Naplatite ili obrišite ih.').format(n=open_count))
         return redirect('pos:session_detail', session_id=session_id)
     # Provjera: prazna smjena?
     paid_count = session.receipts.filter(status=POSReceipt.Status.PAID).count()
     force = request.POST.get('force_close', '')
     if paid_count == 0 and not force:
-        messages.warning(request, 'Zatvarate smjenu bez ijednog bona. Ako ste sigurni, kliknite ponovo.')
+        messages.warning(request, _('Zatvarate smjenu bez ijednog bona. Kliknite ponovo za potvrdu.'))
         # Set flag da sljedeći PUT prolazi
         from django.shortcuts import render
         return render(request, 'pos/session.html', {
@@ -197,7 +198,7 @@ def close_session(request, session_id):
         session_close_all_cashiers(session)
     except Exception:
         pass
-    messages.success(request, f'Session #{session.session_number} closed.')
+    messages.success(request, _('Smjena #{n} zatvorena. Z-izvještaj je generiran.').format(n=session.session_number))
 
     # Auto Otpremnica per bon → Propter
     try:
@@ -265,7 +266,7 @@ def new_receipt(request, session_id):
     # select_for_update: serializes receipt creation per session (race condition fix)
     session = get_object_or_404(POSSession.objects.select_for_update(), pk=session_id)
     if session.status != POSSession.Status.OPEN:
-        messages.error(request, 'Session is closed.')
+        messages.error(request, _('Ova smjena je zatvorena. Otvorite novu smjenu za nastavak rada.'))
         return redirect('pos:session_detail', session_id=session_id)
     from django.db.models import Max
     max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
@@ -320,7 +321,7 @@ def receipt_detail(request, receipt_id):
 def add_item(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     if receipt.status != POSReceipt.Status.OPEN:
-        messages.error(request, 'Receipt is closed.')
+        messages.warning(request, _('Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     try:
         quantity = Decimal(request.POST.get('quantity', '1') or '1')
@@ -329,7 +330,7 @@ def add_item(request, receipt_id):
         discount_pct = Decimal(request.POST.get('discount_percent', '0') or '0')
     except Exception:
         logger.warning("Suppressed error", exc_info=True)
-        messages.error(request, 'Invalid numeric values.')
+        messages.error(request, _('Neispravan broj. Provjerite količinu i cijenu.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     description = request.POST.get('description', '').strip()
     barcode = request.POST.get('barcode', '').strip()
@@ -415,14 +416,14 @@ def add_item(request, receipt_id):
         except InventoryItem.DoesNotExist:
             pass
     if not kwargs.get('description'):
-        messages.error(request, 'Item description is required.')
+        messages.error(request, _('Unesite naziv artikla.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     item = POSReceiptItem.objects.create(**kwargs)
     _recalculate(receipt)
 
     # ── Korisnicke poruke ──
     desc = kwargs.get('description', 'Artikl')
-    messages.success(request, f'{desc} x{quantity} dodan na bon.')
+    messages.success(request, _('{d} x{q} dodano na bon.').format(d=desc, q=quantity))
 
     # ── Stock upozorenje ──
     if inventory_id:
@@ -431,15 +432,15 @@ def add_item(request, receipt_id):
             stock = inv_item.quantity or 0
             min_qty = inv_item.min_quantity or 0
             if stock <= 0:
-                messages.warning(request, f'Upozorenje: {desc} — zaliha je 0! Nastavite samo ako imate robu.')
+                messages.warning(request, _('{d} — zaliha je 0! Nastavite samo ako imate robu fizički na lageru.').format(d=desc))
             elif min_qty > 0 and stock <= min_qty:
-                messages.warning(request, f'Niska zaliha: {desc} — preostalo {stock} {inv_item.unit}. Minimalna kolicina: {min_qty}.')
+                messages.warning(request, _('Niska zaliha: {d} — preostalo {s} {u}. Naručite novu količinu.').format(d=desc, s=stock, u=inv_item.unit))
             # Upozorenje za visok rabat
             if discount_pct > 20:
-                messages.info(request, f'Info: Popust {discount_pct}% na {desc}. Provjerite je li ispravan.')
+                messages.info(request, _('Popust {p}%% na {d}. Provjerite je li ispravan.').format(p=discount_pct, d=desc))
             # Upozorenje za 0 cijenu
             if kwargs.get('unit_price', 0) == 0:
-                messages.warning(request, f'Cijena za {desc} je 0.00 EUR — jeste li sigurni?')
+                messages.warning(request, _('Cijena za {d} je 0.00 EUR — provjerite je li ispravna.').format(d=desc))
         except Exception:
             pass
 
@@ -452,11 +453,11 @@ def remove_item(request, receipt_id, item_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     item = get_object_or_404(POSReceiptItem, pk=item_id, receipt=receipt)
     if receipt.status != POSReceipt.Status.OPEN:
-        messages.error(request, 'Receipt is closed.')
+        messages.warning(request, _('Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     item_name = item.description or 'Artikl'
     item.delete(); _recalculate(receipt)
-    messages.success(request, f'{item_name} uklonjen s bona.')
+    messages.success(request, _('{n} uklonjen s bona.').format(n=item_name))
     return redirect('pos:receipt_detail', receipt_id=receipt_id)
 
 
@@ -466,13 +467,13 @@ def remove_item(request, receipt_id, item_id):
 def process_payment(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     if receipt.status not in [POSReceipt.Status.OPEN, 'ISSUED']:
-        messages.error(request, 'Receipt is already closed.')
+        messages.warning(request, _('Ovaj bon je već zatvoren. Kreirajte novi bon.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     if not receipt.items.exists():
-        messages.error(request, 'Bon je prazan — dodajte artikle prije naplate.')
+        messages.error(request, _('Bon je prazan. Dodajte artikle prije naplate — skenirajte ili pretražite.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     if receipt.total <= 0:
-        messages.warning(request, 'Ukupan iznos je 0.00 EUR. Provjerite stavke na bonu.')
+        messages.warning(request, _('Ukupan iznos je 0.00 EUR. Provjerite stavke na bonu.'))
     # Multi-cashier
     cashier_id = request.POST.get('cashier_id')
     if cashier_id and not receipt.cashier_id:
@@ -540,10 +541,10 @@ def process_payment(request, receipt_id):
                 f'Bon #{receipt.receipt_number} plaćen i fiskaliziran. '
                 f'JIR: {jir[:8]}… | Kusur: €{change:.2f}')
         else:
-            messages.success(request, f'Bon #{receipt.receipt_number} plaćen — kusur: €{change:.2f}')
+            messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
     except Exception as _fisk_err:
         logger.warning(f'Fiskalizacija bon #{receipt.receipt_number}: {_fisk_err}')
-        messages.success(request, f'Bon #{receipt.receipt_number} plaćen — kusur: €{change:.2f}')
+        messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
         messages.warning(request, f'Fiskalizacija nije uspjela: {str(_fisk_err)[:120]}')
 
     # Audit: payment/fiscal
@@ -770,7 +771,7 @@ def new_terminal(request):
     """Create a new POS terminal — 3-step wizard: Tax rates → Cashier → Type = GO."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('pos:dashboard')
 
     if request.method == 'POST':
@@ -931,7 +932,7 @@ def session_zreport(request, session_id):
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename="Z-report-S{session.session_number}.pdf"'
         return response
-        messages.error(request, 'Greska pri generiranju PDF-a.')
+        messages.error(request, _('Generiranje PDF-a nije uspjelo. Pokušajte ponovo.'))
     except Exception as e:
         logger.exception("Unexpected error", exc_info=True)
         messages.error(request, f'PDF greska: {e}')
@@ -1005,7 +1006,7 @@ def receipt_pdf(request, receipt_id):
                 f'inline; filename="bon-{receipt.receipt_number}-a4.pdf"'
             )
             return response
-            messages.error(request, 'Greška pri generiranju A4 PDF-a.')
+            messages.error(request, _('Generiranje PDF-a nije uspjelo. Pokušajte ponovo.'))
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, f'PDF greška: {e}')
@@ -2915,7 +2916,7 @@ def cash_deposit(request, session_id):
                 messages.success(request, f'{label} {amount:.2f} EUR evidentiran.')
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('pos:session_detail', session_id=session_id)
 
     deposits = CashDeposit.objects.filter(session=session).order_by('-created_at')
@@ -3307,7 +3308,7 @@ def voucher_list(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('pos:dashboard')
 
     if request.method == 'POST':
@@ -3900,7 +3901,7 @@ def yesterday_manage(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('/')
 
     today = date.today()
@@ -4756,7 +4757,7 @@ def receipt_list(request):
     """Lista svih racuna za ispis/pregled/naknadni WhatsApp."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('pos:dashboard')
 
     receipts = POSReceipt.objects.filter(

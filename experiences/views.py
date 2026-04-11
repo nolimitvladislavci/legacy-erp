@@ -5,6 +5,7 @@ import json
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -29,7 +30,7 @@ from .models import (
 def experience_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     qs = Experience.objects.filter(company=company)
@@ -62,7 +63,7 @@ def experience_list(request):
 def experience_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -352,7 +353,7 @@ def review_create(request, pk):
 def package_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     qs = AgroPackage.objects.filter(company=company)
@@ -363,7 +364,7 @@ def package_list(request):
 def package_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -418,7 +419,7 @@ def package_tax_breakdown(request, pk):
 def recall_list(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     qs = RecallEvent.objects.filter(company=company)
@@ -429,7 +430,7 @@ def recall_list(request):
 def recall_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     if request.method == 'POST':

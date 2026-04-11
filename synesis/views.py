@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from core.company_utils import get_user_company
 
@@ -35,7 +36,7 @@ def _country_name(code):
 def synesis_settings(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne firme.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("dashboard")
     cfg = _get_config(company)
     from .models import SynesisLog
@@ -77,7 +78,7 @@ def regenerate_token(request):
 def download_script(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne firme.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("synesis:settings")
     cfg = _get_config(company)
     script = _build_script(cfg, company)
@@ -849,7 +850,7 @@ def download_script_public(request, token):
 def download_setup_bat(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, "Nema aktivne firme.")
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("synesis:settings")
     cfg = _get_config(company)
     bat = _build_setup_bat(cfg, company)

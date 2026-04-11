@@ -7,6 +7,7 @@
 import logging
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -61,7 +62,7 @@ def document_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, 'Nema aktivne firme.')
+                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
                 return redirect('documents:list')
             partner_id = request.POST.get("partner")
             partner = Partner.objects.get(pk=partner_id) if partner_id else None

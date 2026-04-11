@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
@@ -49,7 +50,7 @@ def transaction_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, 'Nema aktivne firme.')
+                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
                 return redirect('finance:list')
             partner = Partner.objects.get(pk=request.POST["partner"])
             t = Transaction(
@@ -104,7 +105,7 @@ def bank_import_csv(request):
     from core.company_utils import get_user_company
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('finance:list')
     banks = BankAccount.objects.filter(company=company, is_active=True)
     if request.method != 'POST':
@@ -225,7 +226,7 @@ def report_pnl_pdf(request):
     company = get_user_company(request)
     if not company:
         from django.contrib import messages
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('konto:report_pnl')
     today = timezone.now().date()
     date_from = request.GET.get('from', str(_dt.date(today.year, 1, 1)))
@@ -299,7 +300,7 @@ def bank_import_xml(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('finance:list')
 
     banks = BankAccount.objects.filter(company=company, is_active=True)
@@ -323,7 +324,7 @@ def bank_import_xml(request):
         import_batch = str(uuid.uuid4())[:8]
         stats = parser.parse(company=company, import_batch=import_batch)
     except Exception as e:
-        messages.error(request, f'Greška pri parsiranju XML-a: {e}')
+        messages.error(request, _('XML datoteka nije ispravnog formata. Provjerite datoteku.'))
         return render(request, 'konto/bank_import_xml.html', {'banks': banks})
 
     # Auto-match nakon importa
@@ -371,7 +372,7 @@ def bank_pain001_suppliers(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('finance:list')
 
     banks = BankAccount.objects.filter(company=company, is_active=True)
@@ -416,7 +417,7 @@ def bank_pain001_suppliers(request):
         messages.error(request, str(e))
         return redirect(request.path)
     except Exception as e:
-        messages.error(request, f'Greška pri generiranju XML-a: {e}')
+        messages.error(request, _('Generiranje XML datoteke nije uspjelo. Pokušajte ponovo.'))
         return redirect(request.path)
 
     from django.utils import timezone
@@ -470,7 +471,7 @@ def bank_pain001_salaries(request):
         messages.error(request, str(e))
         return redirect(request.path)
     except Exception as e:
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect(request.path)
 
     filename = f"pain001_place_{period_from}_{period_to}.xml"

@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -85,7 +86,7 @@ def new_intervention(request):
     from core.tenant import get_current_company
     company = get_current_company()
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('interventions:kanban')
 
     workers = _get_company_workers(company)

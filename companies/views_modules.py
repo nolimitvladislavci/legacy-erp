@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
 
 
@@ -15,7 +16,7 @@ def module_picker(request):
     """Module picker — visual grid with toggles."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     from .models import CompanyModuleConfig
@@ -106,7 +107,7 @@ def company_modules(request):
     """
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     from .models import CompanyModuleConfig

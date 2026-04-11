@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
@@ -270,7 +271,7 @@ def komitent_create(request):
             messages.success(request, f'Komitent {c.name} kreiran.')
             return redirect('companies:komitent_detail', pk=p.pk)
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'companies/komitent_form.html', {
         'action': 'Novi komitent',

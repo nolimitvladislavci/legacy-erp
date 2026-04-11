@@ -495,7 +495,7 @@ def gallery_manage(request):
     """Upload i upravljanje slikama za web stranicu firme."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('/')
 
     from website.models import GalleryImage

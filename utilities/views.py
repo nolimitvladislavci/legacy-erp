@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.db.models import Sum, Avg, Count, Q
 from django.utils import timezone
 from decimal import Decimal
@@ -79,7 +80,7 @@ def bill_book(request, bill_id):
     bill = get_object_or_404(UtilityBill, pk=bill_id)
     company = get_user_company(request)
     if bill.company != company:
-        messages.error(request, 'Nemate pristup.')
+        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
         return redirect('utilities:dashboard')
 
     je = bill.book(user=request.user)

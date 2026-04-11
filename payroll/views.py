@@ -16,6 +16,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from core.audit_access import audit_sensitive_access, audit_bulk_access
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.utils import timezone
 
@@ -31,7 +32,7 @@ from . import services
 def payroll_list(request):
     company = get_user_company(request)
     if not company:
-        messages.warning(request, 'Nema aktivne tvrtke.')
+        messages.warning(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     runs = PayrollRun.objects.filter(company=company).order_by('-year', '-month')
@@ -59,7 +60,7 @@ def payroll_new(request):
                 messages.success(request, f'Kreiran obračun za {month:02d}/{year}.')
             return redirect('payroll:detail', pk=run.pk)
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     import datetime
     today = datetime.date.today()
@@ -106,7 +107,7 @@ def payroll_run_action(request, pk):
             f'Bruto: {run.total_gross}€ | Neto: {run.total_net}€'
         )
     except Exception as e:
-        messages.error(request, f'Greška pri obračunu: {e}')
+        messages.error(request, _('Obračun nije uspio. Provjerite podatke i pokušajte ponovo.'))
     return redirect('payroll:detail', pk=pk)
 
 
@@ -123,7 +124,7 @@ def payroll_book_action(request, pk):
             f'Proknjiženo: {entry.entry_number} | '
             f'Konto 4000 ← {run.total_gross}€')
     except Exception as e:
-        messages.error(request, f'Greška pri knjiženju: {e}')
+        messages.error(request, _('Knjiženje nije uspjelo. Provjerite konto i iznos.'))
     return redirect('payroll:detail', pk=pk)
 
 
@@ -144,7 +145,7 @@ def payroll_pain001(request, pk):
         messages.error(request, str(e))
         return redirect('payroll:detail', pk=pk)
     except Exception as e:
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('payroll:detail', pk=pk)
 
     filename = f"pain001_placa_{run.month:02d}{run.year}_{batch_id}.xml"

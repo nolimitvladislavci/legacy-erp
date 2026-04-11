@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from core.company_utils import get_user_company
 
@@ -17,7 +18,7 @@ def posrednik_setup(request):
     """Posrednik setup wizard — rucni unos ILI AI paste."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     from .models import ERacunConfig
@@ -71,7 +72,7 @@ def posrednik_setup(request):
             else:
                 config.posrednik_status = 'error'
                 config.save(update_fields=['posrednik_status'])
-                messages.error(request, f'Greska: {result["message"]}')
+                messages.error(request, _('Radnja nije uspjela. Pokušajte ponovo.'))
             return redirect('eracun:posrednik_setup')
 
     return render(request, 'eracun/posrednik_setup.html', {
@@ -128,7 +129,7 @@ def send_eracun_button(request, invoice_pk):
             invoice.save(update_fields=['status'])
             messages.success(request, f'e-Racun poslan! {result.message}')
         else:
-            messages.error(request, f'Greska: {result.message}')
+            messages.error(request, _('Radnja nije uspjela. Pokušajte ponovo.'))
 
         return redirect('eracun:dashboard')
 

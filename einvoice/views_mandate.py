@@ -39,8 +39,9 @@ def mandate_list(request):
     """Lista svih mandata za korisnikovu firmu."""
     company = _get_company_or_error(request)
     if not company:
-        from django.contrib import messages as django_messages
-        django_messages.error(request, "Nema aktivne firme.")
+        from django.contrib import messages
+        from django.utils.translation import gettext as _
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("dashboard")
 
     mandates = Mandate.objects.filter(

@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.core.cache import cache
@@ -69,7 +70,7 @@ def pet_detail(request, pk):
             )
             messages.success(request, 'Zapis dodan.')
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('livestock:pet_detail', pk=pk)
 
     return render(request, 'livestock/pets_detail.html', {
@@ -121,7 +122,7 @@ def pet_create(request):
             messages.success(request, f'{pet.get_vrsta_display()} {name} uspješno dodan/a.')
             return redirect('livestock:pet_detail', pk=pet.pk)
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_create.html', {
         'pet_vrste': [v for v in Livestock.VRSTA_CHOICES if v[0] in PET_VRSTE],
@@ -164,7 +165,7 @@ def pet_edit(request, pk):
             messages.success(request, 'Podaci ažurirani.')
             return redirect('livestock:pet_detail', pk=pk)
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_edit.html', {
         'pet': pet,

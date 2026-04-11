@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
 
 
@@ -17,7 +18,7 @@ def inbox_dashboard(request):
     """Dashboard for incoming e-invoices."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
     from .models import ERacun
@@ -62,7 +63,7 @@ def inbox_upload(request):
     if result['success']:
         messages.success(request, result['message'])
     else:
-        messages.error(request, result.get('error', 'Greska'))
+        messages.error(request, _('Radnja nije uspjela. Pokušajte ponovo.'))
 
     return redirect('eracun:inbox')
 

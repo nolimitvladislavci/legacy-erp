@@ -14,6 +14,7 @@ import qrcode
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -191,7 +192,7 @@ def barf_create(request):
             messages.success(request, f'BARF ponuda kreirana: {listing}')
             return redirect('memio_pet:barf_listings')
         except Exception as e:
-            messages.error(request, f'Greska: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/barf_create.html', {
         'company': company, 'product_types': RawFoodListing.PRODUCT_CHOICES, 'page_title': 'Nova BARF ponuda',
     })
@@ -231,7 +232,7 @@ def pet_hotel_booking(request):
             else:
                 messages.error(request, 'Unesite ime ljubimca ili broj mikrocipa.')
         except Exception as e:
-            messages.error(request, f'Greska: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/pet_hotel_booking.html', {
         'hotels': hotels, 'room_types': PetBoardingReservation.ROOM_TYPES, 'page_title': 'Pet Hotel — Rezervacija',
     })

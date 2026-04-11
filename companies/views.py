@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import permissions, viewsets
@@ -469,7 +470,7 @@ def branch_save_redirect(request, pk=None):
     """Wrapper around branch_save that redirects instead of returning JSON."""
     profile, company = _require_company_admin(request)
     if not company:
-        messages.error(request, 'Nemate pristup.')
+        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
         return redirect('/companies/settings/?tab=branches')
 
     if pk:
@@ -497,7 +498,7 @@ def branch_save_redirect(request, pk=None):
         if is_ajax:
             from django.http import JsonResponse
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('/companies/settings/?tab=branches')
 
 
@@ -507,7 +508,7 @@ def branch_toggle_redirect(request, pk):
     """Toggle branch active status and redirect."""
     profile, company = _require_company_admin(request)
     if not company:
-        messages.error(request, 'Nemate pristup.')
+        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
         return redirect('/companies/settings/?tab=branches')
     from .models import CompanyBranch
     branch = get_object_or_404(CompanyBranch, pk=pk, parent_company=company)
@@ -524,7 +525,7 @@ def employee_toggle_redirect(request, pk):
     """Toggle employee active status and redirect (form-friendly)."""
     profile, company = _require_strict_admin(request)
     if not company:
-        messages.error(request, 'Nemate pristup.')
+        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
         return redirect('/companies/settings/?tab=employees')
     up = get_object_or_404(UserProfile, pk=pk, company=company)
     up.user.is_active = not up.user.is_active
@@ -541,7 +542,7 @@ def tax_rate_list(request):
     from core.company_utils import get_user_company
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('/')
     country = getattr(company, 'country', 'HR') or 'HR'
 

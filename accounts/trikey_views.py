@@ -12,6 +12,7 @@ import json
 import logging
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -246,7 +247,7 @@ def business_key_register(request):
             fingerprint = trikey.register_fina_cert(cert_bytes)
             registered.append(f'FINA cert (fingerprint: {fingerprint[:12]}...)')
         except Exception as e:
-            messages.error(request, f'Greška s FINA certifikatom: {e}')
+            messages.error(request, _('Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo.'))
 
     if api_key:
         trikey.register_eposrednik_key(api_key)

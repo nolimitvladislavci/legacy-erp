@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum
@@ -466,7 +467,7 @@ def time_entry_add(request):
                 return redirect('worktime:ts_add')
                 return
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('worktime:ts_worker')
     # GET — prikaži formu za unos
     prefill_date = request.GET.get('date', str(date.today()))
@@ -536,7 +537,7 @@ def time_entry_edit(request, pk):
             te.save()
             messages.success(request, f'✓ Unos ažuriran ({te.duration}h)')
         except Exception as e:
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('worktime:ts_worker')
     projects = Project.objects.filter(
         company=_user_company(request.user), status='ACTIVE'
@@ -775,7 +776,7 @@ def template_save(request):
         )
         messages.success(request, f'✓ Predložak {"kreiran" if created else "ažuriran"}: {name}')
     except Exception as e:
-        messages.error(request, f'Greška: {e}')
+        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('worktime:ts_worker')
 
 
@@ -936,7 +937,7 @@ def worker_profile(request):
                 emp.save()
                 messages.success(request, f'✓ Satnica ažurirana: €{emp.hourly_rate}/h (prekovremeno: €{emp.overtime_rate}/h)')
             except Exception as e:
-                messages.error(request, f'Greška: {e}')
+                messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('worktime:ts_profile')
         # change_password action removed — use /accounts/password/
         return redirect('worktime:ts_profile')

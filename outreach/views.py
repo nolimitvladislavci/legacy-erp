@@ -4,6 +4,7 @@ import io
 
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -436,6 +437,6 @@ def contact_whatsapp(request, pk):
                     c.status = 'kontaktiert'
                     c.save(update_fields=['status'])
             else:
-                messages.error(request, f'Greška: {result["error"]}')
+                messages.error(request, _('Radnja nije uspjela. Pokušajte ponovo.'))
         return redirect('outreach:contacts')
     return render(request, 'outreach/contact_whatsapp.html', {'contact': c})

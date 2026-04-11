@@ -3,6 +3,7 @@ import io
 from datetime import date
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -99,7 +100,7 @@ def otpremnica_list(request):
 def otpremnica_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('documents:list')
     if request.method == 'POST':
         doc = Otpremnica(
@@ -197,7 +198,7 @@ def otkupni_list(request):
 def otkupni_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('documents:list')
     if request.method == 'POST':
         doc = OtkupniBlok(
@@ -250,7 +251,7 @@ def cmr_list(request):
 def cmr_create(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema aktivne firme.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('documents:list')
     if request.method == 'POST':
         doc = CMR(

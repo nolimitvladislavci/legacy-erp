@@ -457,7 +457,7 @@ def umbrella_dashboard(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nemate dodijeljenu tvrtku.')
+        messages.error(request, _('Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup.'))
         return redirect('dashboard')
 
     # Superadmin can view any umbrella
@@ -1988,7 +1988,7 @@ def superadmin_create_promo(request):
             messages.success(request, 'Promo kod kreiran.')
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
-            messages.error(request, f'Greška: {e}')
+            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('superadmin_dashboard')
 
 
@@ -2551,7 +2551,7 @@ def audit_package(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema konteksta tvrtke.')
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
     date_from = request.GET.get('from', '')
@@ -2607,7 +2607,7 @@ def tc_consent(request):
 
     if not company:
         from django.contrib import messages
-        messages.error(request, 'Nemate dodijeljenu tvrtku.')
+        messages.error(request, _('Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup.'))
         return redirect('/')
 
     TC_VERSION = 'v1.0-2026'
