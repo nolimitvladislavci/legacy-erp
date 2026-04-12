@@ -74,27 +74,31 @@ async function detectEmail(){
     const res=await fetch('/pocni/provjeri/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({email})});
     const data=await res.json();
     if(data.status==='new'){showStatus('Dobrodošli! Preusmjeravamo...','success');setTimeout(()=>{window.location.href=data.redirect},800)}
-    else if(data.status==='existing'){
+    else if(data.status==='check_email'){
       // Prikazi login opcije umjesto samo "poslali smo link"
       var name = data.first_name || '';
       var company = data.company || '';
+      // Privacy-First: ne prikazujemo ime/firmu — samo opcije
       var loginHtml = '<div style="text-align:center">' +
-        '<div style="font-size:1.1rem;font-weight:700;color:#c9a84c;margin-bottom:8px">' +
-        'Dobrodosli natrag' + (name ? ', ' + name : '') + '!</div>' +
-        (company ? '<div style="font-size:.85rem;color:#94a3b8;margin-bottom:16px">' + company + '</div>' : '') +
+        '<div style="font-size:1.1rem;font-weight:700;color:#c9a84c;margin-bottom:12px">' +
+        'Provjerite email</div>' +
         '<div style="display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto">';
 
-      if(data.has_password) {
-        loginHtml += '<a href="' + (data.login_url || '/hr/login/') + '?email=' + encodeURIComponent(email) + '" ' +
-          'style="display:block;padding:14px;background:#c9a84c;color:#0a0e1a;border-radius:10px;text-decoration:none;font-weight:700;font-size:1rem;text-align:center">' +
-          '<i class="fas fa-sign-in-alt" style="margin-right:6px"></i>Prijavi se s lozinkom</a>';
+      if(data.has_account) {
+        loginHtml += '<div style="font-size:.88rem;color:#22c55e;padding:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px">' +
+          '<i class="fas fa-envelope" style="margin-right:6px"></i>Pristupni link poslan na ' + email + '</div>' +
+          '<div style="font-size:.78rem;color:#64748b;padding:6px">Provjerite inbox i spam. Link vrijedi 24h.</div>' +
+          '<div style="font-size:.82rem;color:#64748b;padding:8px">ili</div>' +
+          '<a href="' + (data.login_url || '/hr/login/') + '" ' +
+          'style="display:block;padding:12px;background:rgba(201,168,76,.1);color:#c9a84c;border:1px solid rgba(201,168,76,.3);border-radius:10px;text-decoration:none;font-weight:600;font-size:.95rem;text-align:center">' +
+          'Prijavi se s lozinkom</a>';
+      } else {
+        loginHtml += '<div style="font-size:.88rem;color:#c9a84c;padding:12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px">' +
+          'Dobrodosli! Nastavljamo s registracijom...</div>';
+        setTimeout(function(){ if(data.redirect) window.location.href = data.redirect; }, 1200);
       }
 
-      loginHtml += '<div style="font-size:.82rem;color:#64748b;padding:8px">ili</div>' +
-        '<div style="font-size:.88rem;color:#22c55e;padding:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px">' +
-        '<i class="fas fa-envelope" style="margin-right:6px"></i>Magic link poslan na ' + email + '</div>' +
-        '<div style="font-size:.72rem;color:#64748b;margin-top:4px">Provjerite inbox i spam mapu. Link vrijedi 24h.</div>' +
-        '</div></div>';
+      loginHtml += '</div></div>';
 
       document.getElementById('seStatus').innerHTML = loginHtml;
       document.getElementById('seStatus').className = 'se-status';

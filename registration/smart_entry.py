@@ -68,38 +68,28 @@ def api_detect_email(request):
 
     user = User.objects.filter(email=email).order_by('-last_login').first()
     if user:
-        has_password = user.has_usable_password()
-        is_active = user.is_active
-        company_name = ''
-        try:
-            company_name = user.profile.company.name if user.profile.company else ''
-        except Exception:
-            pass
-
-        # Posalji magic link kao backup
+        # Posalji magic link
         try:
             _send_magic_link(user, request)
         except Exception:
             pass
 
+        # Privacy-First: NE otkrivamo ime/firmu/status na javnom endpointu
+        # GDPR: User Enumeration = krsenje privatnosti
         return JsonResponse({
-            'status': 'existing',
-            'has_password': has_password,
-            'is_active': is_active,
-            'company': company_name,
-            'username': user.username,
-            'first_name': user.first_name,
+            'status': 'check_email',
+            'has_account': True,
             'msg': (
-                f'Dobrodosli natrag{", " + user.first_name if user.first_name else ""}! '
-                f'{"Firma: " + company_name + ". " if company_name else ""}'
-                f'Prijavite se lozinkom ili koristite link koji smo poslali na {email}.'
+                f'Provjerite {email} — poslali smo pristupni link. '
+                f'Ako vec imate lozinku, mozete se prijaviti direktno.'
             ),
             'login_url': '/hr/login/',
         })
 
     ref = request.session.get('agent_ref', '')
     return JsonResponse({
-        'status': 'new',
+        'status': 'check_email',
+        'has_account': False,
         'msg': 'Dobrodošli! Kreiramo vaš račun.',
         'redirect': f'/hr/accounts/quick-register/?email={email}&ref={ref}',
     })

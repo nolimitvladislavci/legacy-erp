@@ -37,12 +37,55 @@ def trojstvo_rijesi(self, suggestion_id):
     s.trojstvo_status = 'pending'
     s.save(update_fields=['trojstvo_status'])
 
+    # ── Zlatni Paket: obogaceni kontekst za AI ──
     problem = (
         f"PROBLEM: {s.title}\n\n"
         f"OPIS: {s.description}\n\n"
         f"KATEGORIJA: {s.category or 'pos'} | PRIORITET: {s.priority}/5 | "
-        f"FIRMA: {s.company}"
+        f"FIRMA: {s.company}\n\n"
     )
+
+    # Dodaj error log (zadnjih 20 linija)
+    try:
+        import os
+        log_path = '/var/www/fina-connect/logs/django.log'
+        if os.path.exists(log_path):
+            with open(log_path, 'r') as f:
+                lines = f.readlines()
+            recent_errors = [l.strip() for l in lines[-100:] if 'ERROR' in l or 'Traceback' in l][-20:]
+            if recent_errors:
+                problem += "RECENT ERRORS (zadnjih 20):\n" + "\n".join(recent_errors) + "\n\n"
+    except Exception:
+        pass
+
+    # Dodaj BookingSignature (zadnjih 10 akcija autora)
+    try:
+        from core.models import BookingSignature
+        recent_actions = BookingSignature.objects.filter(
+            user=s.author
+        ).order_by('-timestamp')[:10]
+        if recent_actions:
+            actions_str = "\n".join(
+                f"  {a.timestamp:%H:%M} {a.action} {a.target_model}:{a.target_id}"
+                for a in recent_actions
+            )
+            problem += f"KORISNIKOVE AKCIJE (zadnjih 10):\n{actions_str}\n\n"
+    except Exception:
+        pass
+
+    # Dodaj screenshot info
+    if '[screenshot:' in (s.admin_note or ''):
+        problem += "SCREENSHOT: prilozen (vidi admin_note)\n\n"
+
+    # Dodaj terminal info ako je POS kategorija
+    if s.category in ('pos', 'workflow'):
+        try:
+            from pos.models import POSTerminal
+            terminals = POSTerminal.objects.filter(company=s.company, is_active=True)
+            term_info = ", ".join(f"{t.name} ({t.pos_type})" for t in terminals[:5])
+            problem += f"POS TERMINALI: {term_info}\n"
+        except Exception:
+            pass
 
     try:
         haiku_result  = _haiku_analiza(problem)
@@ -79,13 +122,24 @@ def trojstvo_rijesi(self, suggestion_id):
 # ── Haiku analiza ─────────────────────────────────────────────────────────────
 
 def _haiku_analiza(problem: str) -> str:
-    import anthropic
-    from django.conf import settings
+    """
+    Haiku kao primarni inženjer (v2 — Advisor Strategy 2026-04-09).
+    Za arhitekturalne/sigurnosne probleme konzultira Opus max 2 puta.
+    """
+    from core.anthropic_advisor import haiku_with_advisor
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    system = (
+        "Ti si senior Django inženjer na LIMIT Connect ERP/POS sustavu "
+        "(Django 5.1, PostgreSQL, Celery, Redis, Nginx, WeasyPrint, WAHA). "
+        "Baza: 668+ modela, 80+ klijenata, multi-tenant arhitektura, "
+        "hrvatska fiskalizacija (FINA certifikati), GDPR. "
+        "Imaš pristup Opus advisoru — konzultiraj ga SAMO za: "
+        "arhitekturalne promjene, sigurnosne probleme, FSM tranzicije, "
+        "migracijske rizike, multi-tenant izolaciju, fiskalizacijske greške. "
+        "Za standardne bugove i manje promjene — rješavaj sam."
+    )
+
     prompt = (
-        "Ti si senior Django inženjer na LIMIT Connect ERP/POS sustavu (Django 5.1, "
-        "PostgreSQL, Celery, Redis, Nginx). Baza ima 543+ tablica, 80+ klijenata.\n\n"
         f"{problem}\n\n"
         "Odgovori KONKRETNO:\n"
         "## Dijagnoza\n[Uzrok — koji fajl, koja linija, koji model]\n\n"
@@ -93,12 +147,13 @@ def _haiku_analiza(problem: str) -> str:
         "## Složenost\n[Procjena: X sati, razlog]\n\n"
         "Bez floskula. Bez uvoda. Samo tehnika."
     )
-    msg = client.messages.create(
-        model='claude-haiku-4-5-20251001',
-        max_tokens=1000,
-        messages=[{'role': 'user', 'content': prompt}]
+
+    return haiku_with_advisor(
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=1500,
+        max_uses=2,
+        system=system,
     )
-    return msg.content[0].text.strip()
 
 
 # ── Gemini analiza ────────────────────────────────────────────────────────────

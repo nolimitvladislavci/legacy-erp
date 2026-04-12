@@ -111,8 +111,37 @@ def open_session(request, terminal_id):
     if not POSSettings.objects.filter(company=company).exists():
         messages.error(request, _('POS sustav nije konfiguriran. Otvorite Postavke → POS ili kontaktirajte administratora.'))
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
+    # OIB Hard-Stop — blagajnik BEZ OIB-a ne smije otvoriti smjenu
+    # Zakon o fiskalizaciji cl. 9: OIB operatera obavezan na svakom racunu
+    try:
+        from worktime.models import EmployeeProfile
+        ep = EmployeeProfile.objects.filter(user=request.user, company=company).first()
+        if ep and not ep.tax_id:
+            messages.error(request,
+                'OIB nije unesen — ne mozete otvoriti smjenu. '
+                'Javite se voditelju. (Zakon o fiskalizaciji cl. 9)')
+            return redirect('pos:terminal_detail', terminal_id=terminal_id)
+    except Exception:
+        pass
+
+    # ZOR upozorenje — >50h/tjedan
+    try:
+        from django.db.models import Sum as _Sum
+        from django.utils import timezone as _tz
+        from datetime import timedelta as _td
+        from worktime.models import TimeEntry
+        _ws = _tz.now().date() - _td(days=_tz.now().weekday())
+        _wh = TimeEntry.objects.filter(
+            user=request.user, company=company, date__gte=_ws
+        ).aggregate(s=_Sum('duration'))['s'] or 0
+        if float(_wh) >= 50:
+            messages.warning(request,
+                f'Upozorenje: {_wh}h ovaj tjedan (ZOR limit 50h). Nastavak zahtijeva odobrenje voditelja.')
+    except Exception:
+        pass
+
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
-        messages.warning(request, _('Terminal već ima otvorenu smjenu. Zatvorite je prije otvaranja nove.'))
+        messages.warning(request, _('Terminal vec ima otvorenu smjenu. Zatvorite je prije otvaranja nove.'))
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
     from django.db.models import Max
     max_num = terminal.sessions.aggregate(m=Max('session_number'))['m'] or 0
