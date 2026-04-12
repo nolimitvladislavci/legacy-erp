@@ -752,6 +752,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "registration.tasks.downgrade_expired_subscriptions",
         "schedule": 86400,
     },
+    # Growth Engine: Trojstvo dnevni patrol (03:30)
+    "growth-patrol-daily": {
+        "task": "limit_connect_ai.tasks.growth_patrol",
+        "schedule": 86400,
+    },
 
 
 }

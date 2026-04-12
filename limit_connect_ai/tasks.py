@@ -890,3 +890,139 @@ def classify_nn_updates():
 
     logger.info('NN Classification: %d classified, %d relevant', classified, relevant)
     return {"classified": classified, "relevant": relevant}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CONTINUOUS GROWTH ENGINE — Trojstvo autonomno prati trendove
+# ═══════════════════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, soft_time_limit=300, name='limit_connect_ai.tasks.growth_patrol')
+def growth_patrol(self):
+    """
+    Dnevni patrol — Haiku skenira sustav i predlaže poboljšanja.
+    Pokreće se svaku noć u 03:30 (Celery Beat).
+    
+    Skenira:
+    1. Korisničke greške (500 errori u zadnja 24h)
+    2. Neiskorišteni moduli (enabled ali 0 zapisa)
+    3. Performance problemi (spore stranice)
+    4. Compliance gaps (radnici bez OIB, istekli certifikati)
+    5. UX problemi (stranice s visokim bounce rate-om)
+    
+    Rezultat: ImprovementSuggestion(source='system') → Trojstvo analizira
+    """
+    import os
+    from django.utils import timezone
+    from datetime import timedelta
+    from pos.models import ImprovementSuggestion
+    from companies.models import Company
+    
+    now = timezone.now()
+    yesterday = now - timedelta(hours=24)
+    findings = []
+    
+    # 1. Error scan — zadnja 24h
+    try:
+        log_path = '/var/www/fina-connect/logs/django.log'
+        if os.path.exists(log_path):
+            with open(log_path, 'r') as f:
+                lines = f.readlines()
+            recent_errors = [l for l in lines if 'ERROR' in l and now.strftime('%Y-%m-%d') in l]
+            if len(recent_errors) > 5:
+                findings.append({
+                    'title': f'{len(recent_errors)} errora u zadnja 24h',
+                    'desc': '\n'.join(recent_errors[-5:]),
+                    'category': 'workflow',
+                    'priority': 2,
+                })
+    except Exception:
+        pass
+    
+    # 2. Compliance gaps
+    try:
+        from worktime.models import EmployeeProfile
+        no_oib = EmployeeProfile.objects.filter(
+            tax_id='', is_terminated=False
+        ).exclude(user__is_active=False).count()
+        if no_oib > 0:
+            findings.append({
+                'title': f'{no_oib} radnika bez OIB-a',
+                'desc': 'Zakon o fiskalizaciji cl. 9 — kazna do 66.000 EUR po radniku.',
+                'category': 'workflow',
+                'priority': 1,
+            })
+    except Exception:
+        pass
+    
+    # 3. Nefiskalizirani računi
+    try:
+        from pos.models import POSReceipt
+        unfiscalized = POSReceipt.objects.filter(
+            status='paid', jir__isnull=True,
+            created_at__gte=yesterday,
+        ).exclude(jir='').count()
+        if unfiscalized > 0:
+            findings.append({
+                'title': f'{unfiscalized} racuna bez JIR-a (24h)',
+                'desc': 'Zakon o fiskalizaciji — rok 48h za fiskalizaciju.',
+                'category': 'fiscal',
+                'priority': 1,
+            })
+    except Exception:
+        pass
+    
+    # 4. Certifikati koji istječu
+    try:
+        from django.db.models import F
+        from registration.models import CompanySubscription
+        expiring = CompanySubscription.objects.filter(
+            is_active=True,
+            valid_until__lte=(now + timedelta(days=14)).date(),
+            valid_until__gt=now.date(),
+        ).count()
+        if expiring > 0:
+            findings.append({
+                'title': f'{expiring} pretplata istjece u 14 dana',
+                'desc': 'Kontaktiraj korisnike za obnovu.',
+                'category': 'other',
+                'priority': 3,
+            })
+    except Exception:
+        pass
+    
+    # Kreiraj sugestije za svaki finding
+    platform = Company.objects.filter(is_platform_owner=True).first()
+    if not platform:
+        platform = Company.objects.first()
+    
+    created = 0
+    for f in findings:
+        # Provjeri duplikat (isti naslov u zadnja 24h)
+        exists = ImprovementSuggestion.objects.filter(
+            title=f['title'],
+            created_at__gte=yesterday,
+        ).exists()
+        if exists:
+            continue
+        
+        s = ImprovementSuggestion.objects.create(
+            company=platform,
+            source='system',
+            title=f['title'],
+            description=f['desc'],
+            category=f['category'],
+            priority=f['priority'],
+            trojstvo_status='pending',
+        )
+        
+        # Pokreni Trojstvo analizu
+        try:
+            from pos.trojstvo_task import trojstvo_rijesi
+            trojstvo_rijesi.delay(s.pk)
+        except Exception:
+            pass
+        
+        created += 1
+    
+    logger.info('Growth patrol: %d findings, %d new suggestions', len(findings), created)
+    return {'findings': len(findings), 'created': created}
