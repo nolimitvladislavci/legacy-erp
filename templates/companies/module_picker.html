@@ -226,8 +226,11 @@ document.addEventListener('DOMContentLoaded', function() {
     card.addEventListener('click', handleToggle);
   });
 
-  // On submit: apply pending changes to checkboxes
+  // On submit: refresh CSRF token then apply changes and submit
   document.getElementById('moduleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = this;
+    
     // Primijeni pending promjene na checkboxe
     for (var mod in pendingChanges) {
       var cb = document.querySelector('.mp-cb[value="' + mod + '"]');
@@ -236,7 +239,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('btnSave');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Spremam...';
-    // Native submit — browser handles POST + redirect
+    
+    // Refresh CSRF token prije submita
+    fetch('/api/csrf-token/', {credentials: 'same-origin'})
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.token) {
+          var csrf = form.querySelector('[name=csrfmiddlewaretoken]');
+          if (csrf) csrf.value = d.token;
+          document.cookie = 'csrftoken=' + d.token + ';path=/;SameSite=Lax;Secure';
+        }
+        form.submit();
+      })
+      .catch(function() {
+        // Fallback — submit bez refresha
+        form.submit();
+      });
   });
 
   updateCount();
