@@ -390,7 +390,7 @@ def order_confirm(request, pk):
         return redirect('home')
     order = get_object_or_404(SalesOrder, pk=pk, company=company)
     if order.status != 'draft':
-        messages.warning(request, 'Narudžba nije u statusu Nacrt.')
+        messages.warning(request, _('Narudžba nije u statusu Nacrt.'))
         return redirect('sales:order_detail', pk=pk)
 
     order.status = 'confirmed'
@@ -421,7 +421,7 @@ def order_ship(request, pk):
         return redirect('home')
     order = get_object_or_404(SalesOrder, pk=pk, company=company)
     if order.status not in ('confirmed', 'processing'):
-        messages.warning(request, 'Narudžba mora biti potvrđena za isporuku.')
+        messages.warning(request, _('Narudžba mora biti potvrđena za isporuku.'))
         return redirect('sales:order_detail', pk=pk)
 
     try:
@@ -477,7 +477,7 @@ def order_invoice(request, pk):
         return redirect('home')
     order = get_object_or_404(SalesOrder, pk=pk, company=company)
     if order.status not in ('shipped', 'confirmed', 'processing'):
-        messages.warning(request, 'Narudžba mora biti isporučena ili potvrđena za fakturiranje.')
+        messages.warning(request, _('Narudžba mora biti isporučena ili potvrđena za fakturiranje.'))
         return redirect('sales:order_detail', pk=pk)
 
     try:
@@ -540,7 +540,7 @@ def order_cancel(request, pk):
         return redirect('home')
     order = get_object_or_404(SalesOrder, pk=pk, company=company)
     if order.status in ('invoiced', 'closed'):
-        messages.warning(request, 'Fakturirana ili zatvorena narudžba se ne može otkazati.')
+        messages.warning(request, _('Fakturirana ili zatvorena narudžba se ne može otkazati.'))
         return redirect('sales:order_detail', pk=pk)
     order.status = 'cancelled'
     order.save(update_fields=['status', 'updated_at'])
@@ -809,7 +809,7 @@ def payment_register(request, pk):
     amount = Decimal(request.POST.get('amount', '0'))
 
     if amount <= 0:
-        messages.warning(request, 'Iznos mora biti veći od 0.')
+        messages.warning(request, _('Iznos mora biti veći od 0.'))
         return redirect('sales:partner_open_items', partner_id=item.partner_id)
 
     if amount > item.remaining:

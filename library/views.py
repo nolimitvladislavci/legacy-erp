@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.db.models import Count, Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -272,7 +273,7 @@ def loan_checkout(request):
         ).first()
 
         if not member:
-            messages.error(request, "Clan nije pronadjen.")
+            messages.error(request, _("Clan nije pronadjen."))
             return redirect("library:loan_checkout")
 
         if not member.can_borrow:
@@ -397,9 +398,9 @@ def loan_renew(request, pk):
     """Produljenje posudbe."""
     loan = get_object_or_404(Loan, pk=pk, member__company=_company(request))
     if loan.returned_date:
-        messages.error(request, "Ova posudba je vec vracena.")
+        messages.error(request, _("Ova posudba je vec vracena."))
     elif loan.renewed_count >= 2:
-        messages.error(request, "Maksimalno 2 produljenja.")
+        messages.error(request, _("Maksimalno 2 produljenja."))
     else:
         days = 14
         if loan.member.membership_type:

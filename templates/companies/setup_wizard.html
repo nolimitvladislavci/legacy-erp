@@ -87,7 +87,7 @@
     {% if edit_section == 'company' or not sections.company %}
     <form method="post" action="{% url 'companies:setup_wizard_company' %}" class="wiz-form">{% csrf_token %}
       <div class="wiz-field"><label>{% trans "Naziv tvrtke" %} *</label><input name="name" value="{{ company.name }}" required placeholder="Tvrtka d.o.o."></div>
-      <div class="wiz-field"><label>OIB *</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" required placeholder="12345678901" maxlength="11"></div>
+      <div class="wiz-field"><label>OIB *</label><input name="oib" value="{{ company.oib }}" required placeholder="12345678901" maxlength="11"></div>
       <div class="d-grid fx-gap-2 fx-grid-2-equal">
         <div class="wiz-field"><label>{% trans "Grad" %}</label><input name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb"></div>
         <div class="wiz-field"><label>{% trans "Poštanski broj" %}</label><input name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000"></div>
@@ -134,7 +134,7 @@
     <div class="wiz-desc">{% trans "OIB validacija i bankovni račun za fakture" %}</div>
     {% if edit_section == 'fiscal' or not sections.fiscal %}
     <form method="post" action="{% url 'companies:setup_wizard_fiscal' %}" class="wiz-form">{% csrf_token %}
-      <div class="wiz-field"><label>OIB (11 {% trans "znamenki" %})</label><input name="oib" value="{% if not company.oib|make_list.0 == 'D' %}{{ company.oib }}{% endif %}" placeholder="12345678901" maxlength="11"></div>
+      <div class="wiz-field"><label>OIB (11 {% trans "znamenki" %})</label><input name="oib" value="{{ company.oib }}" placeholder="12345678901" maxlength="11"></div>
       <div class="wiz-field"><label>IBAN</label><input name="iban" value="{{ company.iban|default:'' }}" placeholder="HR1210010051863000160" maxlength="21"></div>
       <button type="submit" class="wiz-btn wiz-btn-gold">{% trans "Spremi" %}</button>
       <a href="{% url 'companies:setup_wizard' %}" class="wiz-skip">{% trans "Preskoči" %}</a>

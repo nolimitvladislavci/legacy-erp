@@ -198,7 +198,7 @@ def arhiva_list(request):
                 except ArhivaLabel.DoesNotExist:
                     if request.headers.get('HX-Request'):
                         return JsonResponse({'ok': False, 'message': 'Labela ne postoji.'}, status=404)
-                    messages.error(request, 'Labela ne postoji.')
+                    messages.error(request, _('Labela ne postoji.'))
             return redirect('documents:arhiva_list')
 
         elif action == 'bulk_export' and entry_ids:
@@ -216,6 +216,7 @@ def arhiva_list(request):
 
         return redirect('documents:arhiva_list')
 
+    from companies.models import Company
     is_superadmin = request.user.is_superuser
 
     if is_superadmin:
@@ -392,7 +393,7 @@ def arhiva_upload(request):
     if request.method == 'POST' and request.FILES.get('file'):
         company = get_user_company(request)
         if not company:
-            messages.error(request, 'Nije moguce odrediti tvrtku.')
+            messages.error(request, _('Nije moguce odrediti tvrtku.'))
             return redirect('documents:arhiva_list')
 
         uploaded = request.FILES['file']
@@ -485,7 +486,7 @@ def arhiva_upload(request):
             partner_msg = ''
             if matched_partner:
                 partner_msg = ' | Partner: %s' % matched_partner.name
-            messages.success(request, 'Datoteka spremljena (%s, %dKB, backend: %s%s)' % (
+            messages.success(request, _('Datoteka spremljena (%s, %dKB, backend: %s%s)') % (
                 uploaded.name, size_kb, result['backend'], partner_msg))
 
             # Trigeraj AI analizu async
@@ -1406,7 +1407,7 @@ def arhiva_save_to_disk(request):
     entries = list(qs[:2000])  # Limit za sigurnost
 
     if not entries:
-        messages.warning(request, 'Nema dokumenata za odabrani period.')
+        messages.warning(request, _('Nema dokumenata za odabrani period.'))
         return redirect('documents:arhiva_list')
 
     buf = io.BytesIO()

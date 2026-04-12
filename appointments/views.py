@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -135,7 +136,7 @@ def appointment_create(request):
                 if company:
                     appt.company = company
             appt.save()
-            messages.success(request, "Termin kreiran.")
+            messages.success(request, _("Termin kreiran."))
             return redirect("appointments:list")
         else:
             messages.error(request, str(form.errors))
@@ -160,7 +161,7 @@ def appointment_edit(request, pk):
         form = AppointmentForm(request.POST, instance=appt)
         if form.is_valid():
             form.save()
-            messages.success(request, "Termin ažuriran.")
+            messages.success(request, _("Termin ažuriran."))
             return redirect("appointments:list")
         else:
             messages.error(request, str(form.errors))
@@ -184,7 +185,7 @@ def appointment_delete(request, pk):
     appt = get_object_or_404(Appointment, pk=pk)
     if request.method == "POST":
         appt.delete()
-        messages.success(request, "Termin obrisan.")
+        messages.success(request, _("Termin obrisan."))
     return redirect("appointments:list")
 
 
@@ -515,7 +516,7 @@ def baking_intake(request, pk):
         # WhatsApp — sirovinu zaprimili
         _send_status_wa(appointment, 'Zaprimljeno! Limeni broj: %d. Javimo vam kad bude gotovo.' % appointment.token_number)
 
-        messages.success(request, 'Zaprimljeno — limeni broj %d' % appointment.token_number)
+        messages.success(request, _('Zaprimljeno — limeni broj %d') % appointment.token_number)
         return redirect('appointments:baking_board')
 
     # Suggest next token number
@@ -830,7 +831,7 @@ def dossier_entry_create(request, partner_id):
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
         entry.save()
-        messages.success(request, "Unos u karton spremljen.")
+        messages.success(request, _("Unos u karton spremljen."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     appointment_id = request.GET.get("appointment_id")
     prefill_type   = request.GET.get("type", "note")
@@ -868,7 +869,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
         entry.save()
-        messages.success(request, "Unos ažuriran.")
+        messages.success(request, _("Unos ažuriran."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     import json as _json
     return render(request, "appointments/dossier_entry_form.html", {
@@ -894,7 +895,7 @@ def dossier_entry_delete(request, partner_id, entry_id):
     dossier = get_object_or_404(ClientDossier, company=get_user_company(request), client=client)
     entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
     entry.delete()
-    messages.success(request, "Unos obrisan.")
+    messages.success(request, _("Unos obrisan."))
     return redirect("appointments:dossier_detail", partner_id=partner_id)
 
 
@@ -921,7 +922,7 @@ def service_create(request):
             if not svc.company_id:
                 svc.company = get_user_company(request)
             svc.save()
-            messages.success(request, "Usluga kreirana: " + svc.name)
+            messages.success(request, _("Usluga kreirana: ") + svc.name)
             return redirect("appointments:service_list")
         else:
             messages.error(request, str(form.errors))
@@ -940,7 +941,7 @@ def service_edit(request, pk):
         form = BookingServiceForm(request.POST, instance=svc)
         if form.is_valid():
             form.save()
-            messages.success(request, "Usluga ažurirana: " + svc.name)
+            messages.success(request, _("Usluga ažurirana: ") + svc.name)
             return redirect("appointments:service_list")
         else:
             messages.error(request, str(form.errors))
@@ -1123,7 +1124,7 @@ def dossier_entry_create(request, partner_id):
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
         entry.save()
-        messages.success(request, "Unos u karton spremljen.")
+        messages.success(request, _("Unos u karton spremljen."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     appointment_id = request.GET.get("appointment_id")
     prefill_type   = request.GET.get("type", "note")
@@ -1160,7 +1161,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
         entry.save()
-        messages.success(request, "Unos ažuriran.")
+        messages.success(request, _("Unos ažuriran."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     import json as _json
     return render(request, "appointments/dossier_entry_form.html", {
@@ -1185,7 +1186,7 @@ def dossier_entry_delete(request, partner_id, entry_id):
     dossier = get_object_or_404(ClientDossier, company=get_user_company(request), client=client)
     entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
     entry.delete()
-    messages.success(request, "Unos obrisan.")
+    messages.success(request, _("Unos obrisan."))
     return redirect("appointments:dossier_detail", partner_id=partner_id)
 
 
@@ -1209,7 +1210,7 @@ def service_create(request):
             if not svc.company_id:
                 svc.company = get_user_company(request)
             svc.save()
-            messages.success(request, "Usluga kreirana: " + svc.name)
+            messages.success(request, _("Usluga kreirana: ") + svc.name)
             return redirect("appointments:service_list")
         else:
             messages.error(request, str(form.errors))
@@ -1228,7 +1229,7 @@ def service_edit(request, pk):
         form = BookingServiceForm(request.POST, instance=svc)
         if form.is_valid():
             form.save()
-            messages.success(request, "Usluga ažurirana: " + svc.name)
+            messages.success(request, _("Usluga ažurirana: ") + svc.name)
             return redirect("appointments:service_list")
         else:
             messages.error(request, str(form.errors))
@@ -1268,21 +1269,21 @@ def send_reminder(request, pk):
             appt.whatsapp_reminder_sent = True
             sent.append('WhatsApp')
         except Exception as e:
-            messages.error(request, 'WA greska: {}'.format(e))
+            messages.error(request, _('WA greska: {}').format(e))
     if appt.client and appt.client.email:
         try:
             _send_reminder_email(appt)
             appt.email_reminder_sent = True
             sent.append('Email')
         except Exception as e:
-            messages.error(request, 'Email greska: {}'.format(e))
+            messages.error(request, _('Email greska: {}').format(e))
     if sent:
         from django.utils import timezone
         appt.reminder_sent_at = timezone.now()
         appt.save(update_fields=['whatsapp_reminder_sent','email_reminder_sent','reminder_sent_at'])
-        messages.success(request, 'Podsjetnik poslan: {}'.format(', '.join(sent)))
+        messages.success(request, _('Podsjetnik poslan: {}').format(', '.join(sent)))
     elif not sent and not wa and not (appt.client and appt.client.email):
-        messages.warning(request, 'Nema telefona ni emaila za slanje.')
+        messages.warning(request, _('Nema telefona ni emaila za slanje.'))
     return redirect(request.META.get('HTTP_REFERER', '/appointments/'))
 
 
@@ -1292,7 +1293,7 @@ def send_reminders_now(request):
     from django.shortcuts import redirect
     from appointments.tasks import send_appointment_reminders
     result = send_appointment_reminders()
-    messages.success(request, 'Podsjetnici: {} email + {} WhatsApp (od {} termina)'.format(
+    messages.success(request, _('Podsjetnici: {} email + {} WhatsApp (od {} termina)').format(
         result['email'], result['whatsapp'], result['total']))
     return redirect(request.META.get('HTTP_REFERER', '/appointments/calendar/'))
 

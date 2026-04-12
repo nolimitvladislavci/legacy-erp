@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -354,7 +355,7 @@ def announcement_create(request):
             priority=d.get('priority', 'normal'),
             author=request.user,
         )
-        messages.success(request, 'Obavijest objavljena.')
+        messages.success(request, _('Obavijest objavljena.'))
         return redirect('kindergarten:dashboard')
 
     return render(request, 'kindergarten/announcement_form.html', {
@@ -576,7 +577,7 @@ def preporuci_u_kud(request):
     if not kud:
         kud = Company.objects.filter(name__icontains='KUD').first()
     if not kud:
-        messages.error(request, 'KUD nije pronađen u sustavu.')
+        messages.error(request, _('KUD nije pronađen u sustavu.'))
         return redirect('kindergarten:child_detail', pk=child.pk)
 
     # Create GlazbeniUcenik

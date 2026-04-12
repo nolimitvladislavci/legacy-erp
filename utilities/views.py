@@ -91,6 +91,6 @@ def bill_book(request, bill_id):
         if bill.detect_anomaly():
             messages.warning(request, f'⚠️ Anomalija: {bill.anomaly_note}')
     else:
-        messages.info(request, 'Već proknjiženo.')
+        messages.info(request, _('Već proknjiženo.'))
 
     return redirect('utilities:dashboard')

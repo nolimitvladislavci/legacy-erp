@@ -230,7 +230,7 @@ def pet_hotel_booking(request):
                 messages.success(request, f'Rezervacija potvrdjena za {animal.name}!')
                 return redirect('memio_pet:pet_hotel_booking')
             else:
-                messages.error(request, 'Unesite ime ljubimca ili broj mikrocipa.')
+                messages.error(request, _('Unesite ime ljubimca ili broj mikrocipa.'))
         except Exception as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/pet_hotel_booking.html', {
@@ -459,11 +459,11 @@ def resend_consent(request):
         return redirect('memio_pet:registracija')
 
     if bp.parental_consent:
-        messages.info(request, 'Pristanak roditelja je već potvrđen.')
+        messages.info(request, _('Pristanak roditelja je već potvrđen.'))
         return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
 
     if not bp.parent_email:
-        messages.error(request, 'Nema upisanog emaila roditelja.')
+        messages.error(request, _('Nema upisanog emaila roditelja.'))
         return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
 
     # Generiraj novi token ako je stari prazan
@@ -494,7 +494,7 @@ def breeder_dashboard(request):
             breeder.user_id = request.user.pk
             breeder.save(using=db, update_fields=['user_id'])
     if not breeder:
-        messages.info(request, 'Nemate profil. Kreirajte ga.')
+        messages.info(request, _('Nemate profil. Kreirajte ga.'))
         return redirect('memio_pet:registracija')
     animals = list(AnimalProfile.objects.using(db).filter(breeder=breeder).order_by('-created_at'))
     reviews = list(BreederReview.objects.using(db).filter(breeder=breeder, is_published=True).order_by('-created_at')[:10])
@@ -795,7 +795,7 @@ def dugini_most(request, chip_or_tag):
     breeder_pk = request.session.get('memio_breeder_pk')
     if not breeder_pk or (animal.breeder and str(animal.breeder.pk) != breeder_pk):
         if not (request.user.is_authenticated and request.user.is_staff):
-            messages.error(request, 'Nemate pristup za ovu akciju.')
+            messages.error(request, _('Nemate pristup za ovu akciju.'))
             identifier = animal.chip_number or animal.ear_tag
             return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
@@ -844,7 +844,7 @@ def memorial_edit(request, chip_or_tag):
     breeder_pk = request.session.get('memio_breeder_pk')
     if not breeder_pk or (animal.breeder and str(animal.breeder.pk) != breeder_pk):
         if not (request.user.is_authenticated and request.user.is_staff):
-            messages.error(request, 'Nemate pristup za uredjivanje ovog memorijala.')
+            messages.error(request, _('Nemate pristup za uredjivanje ovog memorijala.'))
             identifier = animal.chip_number or animal.ear_tag
             return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
@@ -865,7 +865,7 @@ def memorial_edit(request, chip_or_tag):
             except Exception:
                 pass
         memorial.save(using=db)
-        messages.success(request, 'Memorijal azuriran.')
+        messages.success(request, _('Memorijal azuriran.'))
         identifier = animal.chip_number or animal.ear_tag
         return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
@@ -1123,7 +1123,7 @@ def social_import_wizard(request):
                 note=f'Uvezeno s: {url}',
             )
             identifier = animal.chip_number or animal.ear_tag
-            messages.success(request, 'Objava dodana na životni trak!')
+            messages.success(request, _('Objava dodana na životni trak!'))
             return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
     return render(request, 'memio_pet/social_import.html', {

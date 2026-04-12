@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
@@ -227,7 +228,7 @@ def project_update_add(request, pk):
                 content=request.POST["content"],
                 is_public="is_public" in request.POST,
             )
-            messages.success(request, "Ažuriranje dodano.")
+            messages.success(request, _("Ažuriranje dodano."))
         except Exception as e:
             messages.error(request, str(e))
     return redirect("project_detail", pk=pk)
@@ -245,14 +246,14 @@ def project_team_add(request, pk):
     User = get_user_model()
     user_id = request.POST.get('user_id', '').strip()
     if not user_id:
-        messages.error(request, 'Odaberi radnika iz liste.')
+        messages.error(request, _('Odaberi radnika iz liste.'))
         return redirect('project_detail', pk=pk)
     try:
         user = User.objects.get(pk=user_id)
         project.team.add(user)
         messages.success(request, f'✅ {user.get_full_name() or user.username} dodan u tim.')
     except User.DoesNotExist:
-        messages.error(request, 'Korisnik nije pronađen.')
+        messages.error(request, _('Korisnik nije pronađen.'))
     return redirect('project_detail', pk=pk)
 
 

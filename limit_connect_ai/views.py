@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db.models import Sum, Count, F
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
 from .models import (
@@ -108,7 +109,7 @@ def ai_missions(request):
                     next_run=timezone.now(),
                     created_by=request.user,
                 )
-                messages.success(request, "Misija kreirana.")
+                messages.success(request, _("Misija kreirana."))
 
         elif action == "toggle":
             mission_id = request.POST.get("mission_id")
@@ -117,9 +118,9 @@ def ai_missions(request):
                 mission.is_active = not mission.is_active
                 mission.save(update_fields=["is_active"])
                 state = "aktivirana" if mission.is_active else "deaktivirana"
-                messages.success(request, "Misija {}.".format(state))
+                messages.success(request, _("Misija {}.").format(state))
             except AIAgentMission.DoesNotExist:
-                messages.error(request, "Misija nije pronadjena.")
+                messages.error(request, _("Misija nije pronadjena."))
 
         return redirect("limit_connect_ai:ai_missions")
 

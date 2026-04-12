@@ -7,6 +7,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Count, Sum, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -280,7 +281,7 @@ def propter_create_tenant(request):
     if request.method == 'POST':
         company_id = request.POST.get('company_id')
         if not company_id:
-            messages.error(request, 'Odaberite tvrtku.')
+            messages.error(request, _('Odaberite tvrtku.'))
             return redirect('registration:propter_create_tenant')
 
         company = get_object_or_404(Company, pk=company_id)

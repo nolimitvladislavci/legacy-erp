@@ -267,11 +267,11 @@ def calculation_post(request, calc_id):
     calc = get_object_or_404(HonorarCalculation, pk=calc_id)
     contract = calc.contract
     if contract.company != company:
-        messages.error(request, 'Nemate pristup ovom obračunu.')
+        messages.error(request, _('Nemate pristup ovom obračunu.'))
         return redirect('honorari:contract_list')
 
     if calc.is_posted:
-        messages.warning(request, 'Obračun je već proknjižen.')
+        messages.warning(request, _('Obračun je već proknjižen.'))
         return redirect('honorari:contract_detail', pk=contract.pk)
 
     if request.method != 'POST':

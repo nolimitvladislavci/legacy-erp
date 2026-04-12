@@ -34,7 +34,7 @@ def draft_companies_view(request):
         return redirect('dashboard')
 
     if not company.is_umbrella and not request.user.is_superuser:
-        messages.warning(request, 'Samo umbrella korisnici mogu pristupiti ovoj stranici.')
+        messages.warning(request, _('Samo umbrella korisnici mogu pristupiti ovoj stranici.'))
         return redirect('dashboard')
 
     drafts = get_draft_companies()
@@ -54,7 +54,7 @@ def finalize_oib_view(request):
     new_oib = request.POST.get('new_oib', '').strip()
 
     if not company_id or not new_oib:
-        messages.error(request, 'Nedostaje ID tvrtke ili OIB.')
+        messages.error(request, _('Nedostaje ID tvrtke ili OIB.'))
         return redirect('draft_companies')
 
     try:
@@ -68,7 +68,7 @@ def finalize_oib_view(request):
                 f'Akcije: {action_summary}'
             )
         else:
-            messages.warning(request, 'Finalizacija završena s upozorenjima.')
+            messages.warning(request, _('Finalizacija završena s upozorenjima.'))
 
     except OIBFinalizerError as exc:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))

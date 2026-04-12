@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from django.db import models as db_models
 from .models import BillingPeriod, Otpremnica, OtpremnicaItem, PropterConfig, EkoStats
@@ -101,7 +102,7 @@ def period_close(request, pk):
     period = get_object_or_404(BillingPeriod, pk=pk, company=company)
     try:
         close_period(period, user=request.user)
-        messages.success(request, "Period zatvoren. Ukupno: {:.2f} EUR ({} otpremnica)".format(
+        messages.success(request, _("Period zatvoren. Ukupno: {:.2f} EUR ({} otpremnica)").format(
             period.total_with_tax, period.otpremnica_count
         ))
     except Exception as e:
@@ -117,7 +118,7 @@ def period_aggregate(request, pk):
     try:
         eracun = aggregate_to_eracun(period, user=request.user)
         messages.success(request,
-            "Zbirni e-Racun kreiran: {}. Ukupno: {:.2f} EUR.".format(
+            _("Zbirni e-Racun kreiran: {}. Ukupno: {:.2f} EUR.").format(
                 eracun.invoice_number, float(eracun.total)
             ))
     except Exception as e:
@@ -164,7 +165,7 @@ def otpremnica_create(request):
                 note=d.get("note", ""),
                 created_by=request.user,
             )
-            messages.success(request, "Otpremnica {} kreirana.".format(otp.number))
+            messages.success(request, _("Otpremnica {} kreirana.").format(otp.number))
             return redirect("propter:otpremnica_detail", pk=otp.pk)
         except Exception as e:
             messages.error(request, str(e))
@@ -397,7 +398,7 @@ def esg_pdf(request, year=None):
     ).order_by("month")
 
     if not stats.exists():
-        messages.warning(request, "Nema eko podataka za {}.".format(year))
+        messages.warning(request, _("Nema eko podataka za {}.").format(year))
         return redirect("propter:eko_dashboard")
 
     # Aggregates
@@ -464,17 +465,17 @@ def propter_soba(request):
     """Propter Soba - document processing room with upload, AI parsing, and mobile camera."""
     company = _company(request)
     if not company:
-        messages.error(request, "Nema povezane tvrtke.")
+        messages.error(request, _("Nema povezane tvrtke."))
         return redirect("/dashboard/")
 
     # Security: PropterConfig must exist and be active
     try:
         propter_config = company.propter_config
         if not propter_config.is_active:
-            messages.warning(request, "Propter modul nije aktivan za vašu tvrtku.")
+            messages.warning(request, _("Propter modul nije aktivan za vašu tvrtku."))
             return redirect("propter:dashboard")
     except PropterConfig.DoesNotExist:
-        messages.warning(request, "Propter nije konfiguriran. Kontaktirajte administratora.")
+        messages.warning(request, _("Propter nije konfiguriran. Kontaktirajte administratora."))
         return redirect("propter:dashboard")
 
     from eracun.models import ERacunConfig

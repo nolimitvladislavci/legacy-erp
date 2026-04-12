@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import JsonResponse
 from django.db.models import Q, Sum, Count, Avg
 from django.utils import timezone
@@ -108,7 +109,7 @@ def po_edit(request, pk):
     company = _get_company(request)
     po = get_object_or_404(PurchaseOrder, pk=pk, company=company)
     if po.status not in ('draft', 'sent'):
-        messages.error(request, 'Samo nacrt/poslane narudzbenice se mogu uredjivati.')
+        messages.error(request, _('Samo nacrt/poslane narudzbenice se mogu uredjivati.'))
         return redirect('procurement:detail', pk=po.pk)
     if request.method == 'POST':
         po.priority = request.POST.get('priority', po.priority)
@@ -139,7 +140,7 @@ def po_edit(request, pk):
                 unit=units[i] if i < len(units) else 'kom',
             )
         po.recalculate()
-        messages.success(request, 'Narudzbenica azurirana.')
+        messages.success(request, _('Narudzbenica azurirana.'))
         return redirect('procurement:detail', pk=po.pk)
     from partners.models import Partner
     suppliers = Partner.objects.filter(company=company)
@@ -197,7 +198,7 @@ def po_receive(request, pk):
             messages.success(request, f'Primka {gr.pk} automatski kreirana.')
         except Exception as e:
             messages.warning(request, f'Prijem evidentiran, ali automatska primka nije kreirana: {e}')
-        messages.success(request, 'Prijem robe evidentiran.')
+        messages.success(request, _('Prijem robe evidentiran.'))
         return redirect('procurement:detail', pk=po.pk)
     return render(request, 'procurement/receive.html', {'po': po, 'items': po.items.all()})
 
@@ -211,7 +212,7 @@ def po_cancel(request, pk):
         po.save(update_fields=['status', 'updated_at'])
         messages.success(request, f'Narudzbenica {po.po_number} otkazana.')
     else:
-        messages.error(request, 'Ne moze se otkazati vec isporucena/fakturirana narudzbenica.')
+        messages.error(request, _('Ne moze se otkazati vec isporucena/fakturirana narudzbenica.'))
     return redirect('procurement:detail', pk=po.pk)
 
 
@@ -252,7 +253,7 @@ def po_approve_match(request, pk):
         po.approved_by = request.user
         po.status = 'invoiced'
         po.save(update_fields=['match_status', 'approved_by', 'status', 'updated_at'])
-        messages.success(request, 'Uparivanje odobreno.')
+        messages.success(request, _('Uparivanje odobreno.'))
     return redirect('procurement:detail', pk=po.pk)
 
 

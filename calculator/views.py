@@ -389,7 +389,7 @@ def export_to_synesis(request, pk):
     # Provjeri postoji li Synesis konfiguracija za ovu tvrtku
     has_synesis = SynesisConfig.objects.filter(company=company, is_active=True).exists()
     if not has_synesis:
-        messages.error(request, "Synesis nije konfiguriran za ovu tvrtku. Idite na Integracije → Synesis.")
+        messages.error(request, _("Synesis nije konfiguriran za ovu tvrtku. Idite na Integracije → Synesis."))
         return redirect('calculator:estimate_list')
 
     # Građi payload koji mapira na Synesis ITEMS tablicu
@@ -498,7 +498,7 @@ def export_pkv_to_synesis(request, pk):
 
     has_synesis = SynesisConfig.objects.filter(company=company, is_active=True).exists()
     if not has_synesis:
-        messages.error(request, "Synesis nije konfiguriran. Idite na Integracije → Synesis.")
+        messages.error(request, _("Synesis nije konfiguriran. Idite na Integracije → Synesis."))
         return redirect('calculator:estimate_list')
 
     project = calculation.project

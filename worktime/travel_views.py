@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from decimal import Decimal
 from core.company_utils import get_user_company
@@ -102,7 +103,7 @@ def travel_expense_add(request, pk):
             receipt_date=request.POST.get("receipt_date") or None,
             notes=request.POST.get("notes", ""),
         )
-        messages.success(request, "Trosak dodan.")
+        messages.success(request, _("Trosak dodan."))
     return redirect("worktime:travel_order_detail", pk=pk)
 
 

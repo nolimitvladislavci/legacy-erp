@@ -49,7 +49,7 @@ def inbox_upload(request):
 
     xml_file = request.FILES.get('xml_file')
     if not xml_file:
-        messages.error(request, 'Odaberite XML datoteku.')
+        messages.error(request, _('Odaberite XML datoteku.'))
         return redirect('eracun:inbox')
 
     try:
@@ -93,7 +93,7 @@ def inbox_book(request, pk):
     eracun = get_object_or_404(ERacun, pk=pk, direction='incoming', company=company)
 
     if eracun.is_booked:
-        messages.warning(request, 'Vec proknjizeno.')
+        messages.warning(request, _('Vec proknjizeno.'))
         return redirect('eracun:inbox_detail', pk=pk)
 
     # Find or create supplier partner

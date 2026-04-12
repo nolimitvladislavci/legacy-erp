@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -67,11 +68,11 @@ def futures_reserve(request, pk):
     company = get_user_company(request)
 
     if not company:
-        messages.error(request, 'Nemate aktivnu firmu.')
+        messages.error(request, _('Nemate aktivnu firmu.'))
         return redirect('marketplace:futures_detail', pk=pk)
 
     if not listing.is_bookable:
-        messages.error(request, 'Ova ponuda vise nije dostupna za rezervaciju.')
+        messages.error(request, _('Ova ponuda vise nije dostupna za rezervaciju.'))
         return redirect('marketplace:futures_detail', pk=pk)
 
     if request.method == 'POST':
@@ -88,7 +89,7 @@ def futures_reserve(request, pk):
         # Check for existing reservation
         existing = FuturesReservation.objects.filter(listing=listing, buyer_company=company).first()
         if existing:
-            messages.warning(request, 'Vec imate rezervaciju za ovu ponudu.')
+            messages.warning(request, _('Vec imate rezervaciju za ovu ponudu.'))
             return redirect('marketplace:futures_detail', pk=pk)
 
         # Calculate discount (partner tier applies to futures too)
@@ -181,7 +182,7 @@ def futures_create(request):
     """Create a new futures listing (seller view)."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nemate aktivnu firmu.')
+        messages.error(request, _('Nemate aktivnu firmu.'))
         return redirect('/')
 
     if request.method == 'POST':
@@ -239,7 +240,7 @@ def futures_seller_action(request, pk):
     elif action == 'mark_ready' and reservation.status in ('confirmed', 'deposit_paid'):
         reservation.status = 'ready'
         reservation.save(update_fields=['status'])
-        messages.success(request, 'Roba oznacena kao spremna.')
+        messages.success(request, _('Roba oznacena kao spremna.'))
 
     elif action == 'cancel':
         reservation.status = 'cancelled'
@@ -252,6 +253,6 @@ def futures_seller_action(request, pk):
         if listing.status == 'fully_booked':
             listing.status = 'open'
         listing.save(update_fields=['reserved_qty', 'status'])
-        messages.warning(request, 'Rezervacija otkazana.')
+        messages.warning(request, _('Rezervacija otkazana.'))
 
     return redirect('marketplace:futures_my')

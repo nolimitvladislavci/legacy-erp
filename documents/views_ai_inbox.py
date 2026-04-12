@@ -389,7 +389,7 @@ def arhiva_convert(request):
         if ext not in ('.jpg', '.jpeg', '.png', '.webp', '.gif'):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'error': 'Samo slike (JPG, PNG, WebP). PDF koristite Smart Import.'}, status=400)
-            messages.error(request, 'Samo slike (JPG, PNG, WebP).')
+            messages.error(request, _('Samo slike (JPG, PNG, WebP).'))
             return redirect('documents:arhiva_list')
 
         try:
@@ -425,7 +425,7 @@ def arhiva_convert(request):
             if record.is_valid:
                 messages.success(request, result['message'])
             else:
-                messages.warning(request, 'Konverzija zavrsena s upozorenjima: %s' % '; '.join(record.validation_errors))
+                messages.warning(request, _('Konverzija zavrsena s upozorenjima: %s') % '; '.join(record.validation_errors))
 
         except Exception as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)

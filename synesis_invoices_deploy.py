@@ -520,7 +520,7 @@ if 'is_locked' not in content:
             edit_marker + "\n"
             "    inv = get_object_or_404(Invoice, pk=pk)\n"
             "    if inv.is_locked:\n"
-            "        messages.warning(request, 'Ova faktura je zaključana (Synesis arhiva) i ne može se editirati.')\n"
+            "        messages.warning(request, _('Ova faktura je zaključana (Synesis arhiva) i ne može se editirati.'))\n"
             "        return redirect('invoicing:detail', pk=pk)\n",
             1  # replace only first occurrence
         )

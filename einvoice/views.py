@@ -109,7 +109,7 @@ def mailbox_approve(request, pk):
         konto = inbound.suggested_konto
 
     if not konto:
-        django_messages.error(request, "Konto je obavezan za knjizenje.")
+        django_messages.error(request, _("Konto je obavezan za knjizenje."))
         return redirect("einvoice:mailbox_detail", pk=pk)
 
     # Book the invoice

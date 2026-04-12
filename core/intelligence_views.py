@@ -57,7 +57,7 @@ def intelligence_dashboard(request):
             pass
 
     if not company.is_umbrella and not request.user.is_superuser:
-        messages.warning(request, 'Intelligence Dashboard je dostupan samo za umbrella korisnike.')
+        messages.warning(request, _('Intelligence Dashboard je dostupan samo za umbrella korisnike.'))
         return redirect('dashboard')
 
     company_ids = _get_company_ids(company, request.user)

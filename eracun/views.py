@@ -68,7 +68,7 @@ def settings_view(request):
             config.cert_p12 = request.FILES['cert_p12']
 
         config.save()
-        messages.success(request, 'Postavke e-Racuna spremljene.')
+        messages.success(request, _('Postavke e-Racuna spremljene.'))
         return redirect('eracun:settings')
 
     return render(request, 'eracun/settings.html', {'config': config})
@@ -103,7 +103,7 @@ def send_eracun(request, pk):
     if eracun.status in ('accepted', 'archived'):
         if is_ajax:
             return JsonResponse({'ok': False, 'message': 'Ovaj e-Račun je već poslan.'})
-        messages.warning(request, 'Ovaj e-Racun je vec poslan.')
+        messages.warning(request, _('Ovaj e-Racun je vec poslan.'))
         return redirect('eracun:detail', pk=pk)
 
     # ── XSD-First validacija ─────────────────────────────────────────
@@ -173,7 +173,7 @@ def create_from_invoice(request, invoice_pk):
 
     # Check if already has eracun
     if hasattr(invoice, 'eracun') and invoice.eracun:
-        messages.info(request, 'Ovaj racun vec ima e-Racun.')
+        messages.info(request, _('Ovaj racun vec ima e-Racun.'))
         return redirect('eracun:detail', pk=invoice.eracun.pk)
 
     from .services.engine import create_eracun_from_invoice
@@ -213,7 +213,7 @@ def download_fina_xml(request, pk):
     content = eracun.xml_request if xml_type == 'request' else eracun.xml_response
 
     if not content:
-        messages.warning(request, 'Nema XML-a za preuzimanje.')
+        messages.warning(request, _('Nema XML-a za preuzimanje.'))
         return redirect('eracun:detail', pk=pk)
 
     response = HttpResponse(content, content_type='application/xml')

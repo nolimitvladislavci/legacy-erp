@@ -178,7 +178,7 @@ def work_order_edit(request, pk):
     wo = get_object_or_404(WorkOrder, pk=pk, company=company)
 
     if wo.status in ('invoiced', 'cancelled'):
-        messages.error(request, "Fakturirani/otkazani nalozi se ne mogu mijenjati.")
+        messages.error(request, _("Fakturirani/otkazani nalozi se ne mogu mijenjati."))
         return redirect('work_orders:detail', pk=pk)
 
     if request.method == 'POST':
@@ -229,7 +229,7 @@ def work_order_edit(request, pk):
             _save_items(wo, request.POST)
             wo.recalculate_totals()
 
-        messages.success(request, "Radni nalog ažuriran.")
+        messages.success(request, _("Radni nalog ažuriran."))
         return redirect('work_orders:detail', pk=pk)
 
     from partners.models import Partner
@@ -288,7 +288,7 @@ def work_order_to_invoice(request, pk):
     wo = get_object_or_404(WorkOrder, pk=pk, company=company)
 
     if wo.status == 'invoiced':
-        messages.warning(request, "Nalog je već fakturiran.")
+        messages.warning(request, _("Nalog je već fakturiran."))
         return redirect('work_orders:detail', pk=pk)
 
     if request.method == 'POST':
@@ -433,7 +433,7 @@ def vehicle_card_edit(request, pk):
         vc.color = request.POST.get('color', '')
         vc.notes = request.POST.get('notes', '')
         vc.save()
-        messages.success(request, "Karton vozila ažuriran.")
+        messages.success(request, _("Karton vozila ažuriran."))
         return redirect('work_orders:vehicle_detail', pk=pk)
 
     from partners.models import Partner
@@ -514,7 +514,7 @@ def client_card_edit(request, pk):
         cc.card_type = request.POST.get('card_type', cc.card_type)
         _fill_client_card(cc, request.POST)
         cc.save()
-        messages.success(request, "Karton klijenta ažuriran.")
+        messages.success(request, _("Karton klijenta ažuriran."))
         return redirect('work_orders:client_card_detail', pk=pk)
 
     from partners.models import Partner

@@ -109,7 +109,7 @@ def ai_confirm_booking(request, pk):
         credit_lines = proposal.get('credit', [])
 
     if not debit_lines and not credit_lines:
-        messages.error(request, 'Nema stavki za knjizenje.')
+        messages.error(request, _('Nema stavki za knjizenje.'))
         return redirect('konto:ai_review_queue')
 
     # Validate balance

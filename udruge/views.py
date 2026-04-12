@@ -132,7 +132,7 @@ def clan_create(request):
         if sponsor_id:
             clan.paying_sponsor_id = int(sponsor_id)
         clan.save()
-        messages.success(request, 'Clan %s %s dodan.' % (clan.first_name, clan.last_name))
+        messages.success(request, _('Clan %s %s dodan.') % (clan.first_name, clan.last_name))
         return redirect('udruge:clan_detail', pk=clan.pk)
 
     from partners.models import Partner
@@ -304,7 +304,7 @@ def clanarina_pay(request, pk):
         clanarina=clanarina,
     )
 
-    messages.success(request, "Clanarina placena: %s EUR" % clanarina.amount)
+    messages.success(request, _("Clanarina placena: %s EUR") % clanarina.amount)
     return redirect('udruge:clanarina_list')
 
 
@@ -320,7 +320,7 @@ def clanarina_bulk_create(request):
     period_end = request.POST.get('period_end')
 
     if not all([amount, period_start, period_end]):
-        messages.error(request, 'Sva polja su obavezna.')
+        messages.error(request, _('Sva polja su obavezna.'))
         return redirect('udruge:clanarina_list')
 
     from decimal import Decimal
@@ -339,7 +339,7 @@ def clanarina_bulk_create(request):
             )
             created += 1
 
-    messages.success(request, "Kreirano %d clanarina po %s EUR." % (created, amount))
+    messages.success(request, _("Kreirano %d clanarina po %s EUR.") % (created, amount))
     return redirect('udruge:clanarina_list')
 
 
@@ -419,13 +419,13 @@ def donacija_create(request):
             aml_status, aml_msg = AMLGuard.check_donation(donacija)
             donacija.save(update_fields=['aml_status', 'aml_flag_reason', 'aml_flagged_at'])
             if aml_status == 'kyc_pending':
-                messages.warning(request, 'AML UPOZORENJE: %s — Potrebna dubinska analiza (KYC)!' % aml_msg)
+                messages.warning(request, _('AML UPOZORENJE: %s — Potrebna dubinska analiza (KYC)!') % aml_msg)
             elif aml_status == 'review':
-                messages.warning(request, 'AML: Donacija oznacena za pregled — %s' % aml_msg)
+                messages.warning(request, _('AML: Donacija oznacena za pregled — %s') % aml_msg)
             else:
-                messages.success(request, "Donacija %s EUR od %s evidentirana." % (donacija.amount, donacija.donor_name))
+                messages.success(request, _("Donacija %s EUR od %s evidentirana.") % (donacija.amount, donacija.donor_name))
         except Exception:
-            messages.success(request, "Donacija %s EUR od %s evidentirana." % (donacija.amount, donacija.donor_name))
+            messages.success(request, _("Donacija %s EUR od %s evidentirana.") % (donacija.amount, donacija.donor_name))
         return redirect('udruge:donacija_list')
 
     return render(request, 'udruge/donacija_form.html', {
@@ -484,7 +484,7 @@ def knjiga_primitaka_create(request):
             dokument=request.POST.get('dokument', ''),
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Stavka dodana u Knjigu primitaka i izdataka.')
+        messages.success(request, _('Stavka dodana u Knjigu primitaka i izdataka.'))
         return redirect('udruge:knjiga_primitaka')
 
     return render(request, 'udruge/knjiga_primitaka_form.html', {
@@ -810,7 +810,7 @@ def dogadjaj_create(request):
         if kampanja_id:
             dogadjaj.kampanja_id = int(kampanja_id)
         dogadjaj.save()
-        messages.success(request, "Dogadjaj '%s' kreiran." % dogadjaj.name)
+        messages.success(request, _("Dogadjaj '%s' kreiran.") % dogadjaj.name)
         return redirect("udruge:dogadjaj_detail", pk=dogadjaj.pk)
 
     kampanje = Kampanja.objects.filter(company=company, status__in=["draft", "active"])
@@ -852,11 +852,11 @@ def dogadjaj_register(request, pk):
 
     clan = Clan.objects.filter(company=company, email=request.user.email).first()
     if not clan:
-        messages.error(request, "Nemate clan profil u ovoj udruzi.")
+        messages.error(request, _("Nemate clan profil u ovoj udruzi."))
         return redirect("udruge:dogadjaj_detail", pk=pk)
 
     if dogadjaj.is_full:
-        messages.error(request, "Nema slobodnih mjesta.")
+        messages.error(request, _("Nema slobodnih mjesta."))
         return redirect("udruge:dogadjaj_detail", pk=pk)
 
     prijava, created = EventPrijava.objects.get_or_create(
@@ -864,9 +864,9 @@ def dogadjaj_register(request, pk):
         defaults={"status": "confirmed"},
     )
     if created:
-        messages.success(request, "Prijava uspjesna!")
+        messages.success(request, _("Prijava uspjesna!"))
     else:
-        messages.info(request, "Vec ste prijavljeni.")
+        messages.info(request, _("Vec ste prijavljeni."))
 
     return redirect("udruge:dogadjaj_detail", pk=pk)
 
@@ -939,7 +939,7 @@ def kampanja_create(request):
             notes=request.POST.get("notes", ""),
         )
         kampanja.save()
-        messages.success(request, "Kampanja '%s' kreirana." % kampanja.name)
+        messages.success(request, _("Kampanja '%s' kreirana.") % kampanja.name)
         return redirect("udruge:kampanja_detail", pk=kampanja.pk)
 
     return render(request, "udruge/kampanja_form.html", {
@@ -1032,7 +1032,7 @@ def email_kampanja_create(request):
                 ek.ai_prompt = ai_prompt
             except Exception as e:
                 logger.error("AI email generate: %s", e)
-                messages.warning(request, "AI generiranje nije uspjelo: %s" % str(e))
+                messages.warning(request, _("AI generiranje nije uspjelo: %s") % str(e))
 
         target_kampanja_id = request.POST.get("target_kampanja")
         if target_kampanja_id:
@@ -1042,7 +1042,7 @@ def email_kampanja_create(request):
             ek.target_dogadjaj_id = int(target_dogadjaj_id)
 
         ek.save()
-        messages.success(request, "Email kampanja '%s' kreirana." % ek.name)
+        messages.success(request, _("Email kampanja '%s' kreirana.") % ek.name)
         return redirect("udruge:email_kampanja_list")
 
     kampanje = Kampanja.objects.filter(company=company)
@@ -1066,7 +1066,7 @@ def email_kampanja_send(request, pk):
     kampanja = get_object_or_404(EmailKampanja, pk=pk, company=company)
 
     if kampanja.status not in ("draft", "scheduled"):
-        messages.error(request, "Kampanja se ne moze poslati (status: %s)." % kampanja.get_status_display())
+        messages.error(request, _("Kampanja se ne moze poslati (status: %s).") % kampanja.get_status_display())
         return redirect("udruge:email_kampanja_list")
 
     kampanja.status = "scheduled"
@@ -1076,7 +1076,7 @@ def email_kampanja_send(request, pk):
     from .tasks import send_email_campaign
     send_email_campaign.delay(kampanja.pk)
 
-    messages.success(request, "Email kampanja '%s' zakazana za slanje!" % kampanja.name)
+    messages.success(request, _("Email kampanja '%s' zakazana za slanje!") % kampanja.name)
     return redirect("udruge:email_kampanja_list")
 
 
@@ -1105,7 +1105,7 @@ def clan_edit(request, pk):
         sponsor_id = request.POST.get('paying_sponsor')
         clan.paying_sponsor_id = int(sponsor_id) if sponsor_id else None
         clan.save()
-        messages.success(request, 'Clan %s azuriran.' % clan.full_name)
+        messages.success(request, _('Clan %s azuriran.') % clan.full_name)
         return redirect('udruge:clan_detail', pk=clan.pk)
 
     from partners.models import Partner
@@ -1168,7 +1168,7 @@ def volunteer_create(request):
             dogadjaj_id=request.POST.get('dogadjaj') or None,
             kampanja_id=request.POST.get('kampanja') or None, notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Volonterska aktivnost evidentirana.')
+        messages.success(request, _('Volonterska aktivnost evidentirana.'))
         return redirect('udruge:volunteer_list')
     return render(request, 'udruge/volunteer_form.html', {
         'clanovi': Clan.objects.filter(company=company, status='aktivan'),
@@ -1189,7 +1189,7 @@ def eu_fund_search(request):
         return JsonResponse({'error': 'Nema aktivne udruge'}, status=400)
     from .tasks import ai_search_eu_funds
     ai_search_eu_funds.delay(company.pk)
-    messages.success(request, 'AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama.')
+    messages.success(request, _('AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama.'))
     return redirect('udruge:kampanja_list')
 
 
@@ -1287,7 +1287,7 @@ def sekcija_create(request):
             description=request.POST.get('description', ''),
             max_members=int(request.POST.get('max_members', 0) or 0),
         )
-        messages.success(request, 'Sekcija kreirana.')
+        messages.success(request, _('Sekcija kreirana.'))
         return redirect('udruge:sekcija_list')
     return render(request, 'udruge/sekcija_form.html', {})
 
@@ -1303,7 +1303,7 @@ def sekcija_add_member(request, pk):
     if clan_id:
         clan = get_object_or_404(Clan, pk=clan_id)
         ClanSekcija.objects.get_or_create(clan=clan, sekcija=sekcija, defaults={'role': role})
-        messages.success(request, '%s dodan u %s.' % (clan, sekcija.name))
+        messages.success(request, _('%s dodan u %s.') % (clan, sekcija.name))
     return redirect('udruge:sekcija_detail', pk=pk)
 
 
@@ -1330,7 +1330,7 @@ def clan_dokumenti(request, pk):
             file=request.FILES.get('file'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Dokument dodan.')
+        messages.success(request, _('Dokument dodan.'))
         return redirect('udruge:clan_dokumenti', pk=pk)
 
     return render(request, 'udruge/clan_dokumenti.html', {
@@ -1446,7 +1446,7 @@ def vatrogasna_oprema_create(request):
             photo=request.FILES.get('photo'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Oprema dodana.')
+        messages.success(request, _('Oprema dodana.'))
         return redirect('udruge:vatrogasna_oprema_list')
     return render(request, 'udruge/vatrogasna_oprema_form.html', {
         'kategorije': VatrogasnaOprema.KATEGORIJA_CHOICES, 'statusi': VatrogasnaOprema.STATUS_CHOICES,
@@ -1494,7 +1494,7 @@ def vatrogasno_vozilo_create(request):
             photo=request.FILES.get('photo'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Vozilo dodano.')
+        messages.success(request, _('Vozilo dodano.'))
         return redirect('udruge:vatrogasno_vozilo_list')
     return render(request, 'udruge/vatrogasno_vozilo_form.html', {
         'tipovi': VatrogasnoVozilo.TIP_CHOICES,
@@ -1554,7 +1554,7 @@ def intervencija_create(request):
             notes=request.POST.get('notes', ''),
             created_by=request.user,
         )
-        messages.success(request, 'Intervencija evidentirana.')
+        messages.success(request, _('Intervencija evidentirana.'))
         return redirect('udruge:intervencija_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/intervencija_form.html', {
@@ -1601,7 +1601,7 @@ def vjezba_create(request):
             ocjena=request.POST.get('ocjena', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Vježba evidentirana.')
+        messages.success(request, _('Vježba evidentirana.'))
         return redirect('udruge:vjezba_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/vjezba_form.html', {
@@ -1646,7 +1646,7 @@ def vatrogasno_zvanje_create(request):
             vrijedi_do=request.POST.get('vrijedi_do') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Zvanje dodano.')
+        messages.success(request, _('Zvanje dodano.'))
         return redirect('udruge:vatrogasno_zvanje_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/vatrogasno_zvanje_form.html', {'clanovi': clanovi})
@@ -1732,7 +1732,7 @@ def repertoar_create(request):
             video_url=request.POST.get('video_url', ''),
             koreografija_file=request.FILES.get('koreografija_file'),
         )
-        messages.success(request, 'Repertoar dodan.')
+        messages.success(request, _('Repertoar dodan.'))
         return redirect('udruge:repertoar_list')
     sekcije = Sekcija.objects.filter(company=company)
     return render(request, 'udruge/repertoar_form.html', {
@@ -1777,7 +1777,7 @@ def proba_create(request):
             voditelj_id=request.POST.get('voditelj') or None,
             biljeska=request.POST.get('biljeska', ''),
         )
-        messages.success(request, 'Proba evidentirana.')
+        messages.success(request, _('Proba evidentirana.'))
         return redirect('udruge:proba_list')
     sekcije = Sekcija.objects.filter(company=company)
     clanovi = Clan.objects.filter(company=company)
@@ -1832,7 +1832,7 @@ def kostim_create(request):
             opis_dijelova=request.POST.get('opis_dijelova', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Kostim dodan.')
+        messages.success(request, _('Kostim dodan.'))
         return redirect('udruge:kostim_list')
     sekcije = Sekcija.objects.filter(company=company)
     clanovi = Clan.objects.filter(company=company)
@@ -1879,7 +1879,7 @@ def nastup_plan_create(request):
             troskovi=Decimal(request.POST.get('troskovi') or '0'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Plan nastupa kreiran.')
+        messages.success(request, _('Plan nastupa kreiran.'))
         return redirect('udruge:nastup_plan_list')
     dogadjaji = Dogadjaj.objects.filter(company=company)
     return render(request, 'udruge/nastup_plan_form.html', {'dogadjaji': dogadjaji})
@@ -1959,7 +1959,7 @@ def revir_create(request):
             max_dnevni_ulov_kg=Decimal(request.POST.get('max_dnevni_ulov_kg') or '5'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Revir dodan.')
+        messages.success(request, _('Revir dodan.'))
         return redirect('udruge:revir_list')
     return render(request, 'udruge/revir_form.html', {'tipovi': Revir.TIP_CHOICES})
 
@@ -2007,7 +2007,7 @@ def ribolovna_dozvola_create(request):
             cijena=Decimal(request.POST.get('cijena') or '0'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Dozvola izdana.')
+        messages.success(request, _('Dozvola izdana.'))
         return redirect('udruge:ribolovna_dozvola_list')
     clanovi = Clan.objects.filter(company=company)
     reviri = Revir.objects.filter(company=company, is_active=True)
@@ -2055,7 +2055,7 @@ def ulov_create(request):
             catch_and_release=request.POST.get('catch_and_release') == 'on',
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Ulov evidentiran.')
+        messages.success(request, _('Ulov evidentiran.'))
         return redirect('udruge:ulov_list')
     reviri = Revir.objects.filter(company=company, is_active=True)
     clanovi = Clan.objects.filter(company=company)
@@ -2101,7 +2101,7 @@ def poribljavanje_create(request):
             cijena_eur=Decimal(request.POST.get('cijena_eur') or '0'),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Poribljavanje evidentirano.')
+        messages.success(request, _('Poribljavanje evidentirano.'))
         return redirect('udruge:poribljavanje_list')
     reviri = Revir.objects.filter(company=company, is_active=True)
     return render(request, 'udruge/poribljavanje_form.html', {'reviri': reviri})
@@ -2144,7 +2144,7 @@ def cuvarska_straza_create(request):
             zapisnik=request.POST.get('zapisnik', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Čuvarska straža evidentirana.')
+        messages.success(request, _('Čuvarska straža evidentirana.'))
         return redirect('udruge:cuvarska_straza_list')
     clanovi = Clan.objects.filter(company=company)
     reviri = Revir.objects.filter(company=company, is_active=True)
@@ -2223,7 +2223,7 @@ def pcelinjak_create(request):
             stacionarni=request.POST.get('stacionarni') != 'off',
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Pčelinjak dodan.')
+        messages.success(request, _('Pčelinjak dodan.'))
         return redirect('udruge:pcelinjak_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/pcelinjak_form.html', {'clanovi': clanovi})
@@ -2272,7 +2272,7 @@ def kosnica_create(request):
             snaga_zajednice=int(request.POST.get('snaga_zajednice') or 0) or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Košnica dodana.')
+        messages.success(request, _('Košnica dodana.'))
         return redirect('udruge:kosnica_list')
     pcelinjaci = Pcelinjak.objects.filter(company=company)
     return render(request, 'udruge/kosnica_form.html', {
@@ -2319,7 +2319,7 @@ def tretman_kosnice_create(request):
             rezultat=request.POST.get('rezultat', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Tretman evidentiran.')
+        messages.success(request, _('Tretman evidentiran.'))
         return redirect('udruge:tretman_kosnice_list')
     kosnice = Kosnica.objects.filter(pcelinjak__company=company).select_related('pcelinjak')
     return render(request, 'udruge/tretman_kosnice_form.html', {
@@ -2367,7 +2367,7 @@ def med_proizvodnja_create(request):
             serija=request.POST.get('serija', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Proizvodnja meda evidentirana.')
+        messages.success(request, _('Proizvodnja meda evidentirana.'))
         return redirect('udruge:med_proizvodnja_list')
     pcelinjaci = Pcelinjak.objects.filter(company=company)
     return render(request, 'udruge/med_proizvodnja_form.html', {
@@ -2412,7 +2412,7 @@ def selidba_create(request):
             vracanje_datum=request.POST.get('vracanje_datum') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Selidba evidentirana.')
+        messages.success(request, _('Selidba evidentirana.'))
         return redirect('udruge:selidba_list')
     pcelinjaci = Pcelinjak.objects.filter(company=company)
     return render(request, 'udruge/selidba_form.html', {'pcelinjaci': pcelinjaci})
@@ -2489,7 +2489,7 @@ def destilacija_kotao_create(request):
             registriran_od=request.POST.get('registriran_od') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Kotao registriran.')
+        messages.success(request, _('Kotao registriran.'))
         return redirect('udruge:destilacija_kotao_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/destilacija_kotao_form.html', {'clanovi': clanovi})
@@ -2535,7 +2535,7 @@ def destilacija_log_create(request):
             temperatura_c=Decimal(request.POST.get('temperatura_c') or '0') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Destilacija evidentirana.')
+        messages.success(request, _('Destilacija evidentirana.'))
         return redirect('udruge:destilacija_log_list')
     kotlovi = DestilacijaKotao.objects.filter(company=company, is_active=True)
     return render(request, 'udruge/destilacija_log_form.html', {
@@ -2584,7 +2584,7 @@ def rakija_proizvodnja_create(request):
             cijena_eur_l=Decimal(request.POST.get('cijena_eur_l') or '0') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Rakija evidentirana.')
+        messages.success(request, _('Rakija evidentirana.'))
         return redirect('udruge:rakija_proizvodnja_list')
     destilacije = DestilacijaLog.objects.filter(kotao__company=company)[:50]
     today = timezone.now().date()
@@ -2630,7 +2630,7 @@ def trosarina_create(request):
             datum_prijave=request.POST.get('datum_prijave') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Trošarinska prijava kreirana.')
+        messages.success(request, _('Trošarinska prijava kreirana.'))
         return redirect('udruge:trosarina_list')
     return render(request, 'udruge/trosarina_form.html', {
         'statusi': TrosarinaPrijava.STATUS_CHOICES,
@@ -2718,7 +2718,7 @@ def vocnjak_create(request):
             is_organic=request.POST.get('is_organic') == 'on',
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Voćnjak dodan.')
+        messages.success(request, _('Voćnjak dodan.'))
         return redirect('udruge:vocnjak_list')
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/vocnjak_form.html', {
@@ -2770,7 +2770,7 @@ def berba_create(request):
             cijena_eur_kg=Decimal(request.POST.get('cijena_eur_kg') or '0') or None,
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Berba evidentirana.')
+        messages.success(request, _('Berba evidentirana.'))
         return redirect('udruge:berba_list')
     vocnjaci = Vocnjak.objects.filter(company=company)
     return render(request, 'udruge/berba_form.html', {'vocnjaci': vocnjaci})
@@ -2816,7 +2816,7 @@ def tretman_vocnjaka_create(request):
             vremenske_prilike=request.POST.get('vremenske_prilike', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Tretman evidentiran.')
+        messages.success(request, _('Tretman evidentiran.'))
         return redirect('udruge:tretman_vocnjaka_list')
     vocnjaci = Vocnjak.objects.filter(company=company)
     return render(request, 'udruge/tretman_vocnjaka_form.html', {
@@ -2859,7 +2859,7 @@ def vatrogasna_oprema_edit(request, pk):
         if request.FILES.get('photo'):
             obj.photo = request.FILES['photo']
         obj.save()
-        messages.success(request, 'Oprema azurirana.')
+        messages.success(request, _('Oprema azurirana.'))
         return redirect('udruge:vatrogasna_oprema_list')
     return render(request, 'udruge/vatrogasna_oprema_form.html', {
         'oprema': obj, 'edit': True,
@@ -2893,7 +2893,7 @@ def intervencija_edit(request, pk):
         obj.spaseno_zivotinja = int(request.POST.get('spaseno_zivotinja') or 0)
         obj.notes = request.POST.get('notes', obj.notes)
         obj.save()
-        messages.success(request, 'Intervencija azurirana.')
+        messages.success(request, _('Intervencija azurirana.'))
         return redirect('udruge:intervencija_detail', pk=obj.pk)
     clanovi = Clan.objects.filter(company=company)
     return render(request, 'udruge/intervencija_form.html', {
@@ -2924,7 +2924,7 @@ def kostim_edit(request, pk):
         if request.FILES.get('photo'):
             obj.photo = request.FILES['photo']
         obj.save()
-        messages.success(request, 'Kostim azuriran.')
+        messages.success(request, _('Kostim azuriran.'))
         return redirect('udruge:kostim_list')
     sekcije = Sekcija.objects.filter(company=company)
     clanovi = Clan.objects.filter(company=company)
@@ -2969,7 +2969,7 @@ def branitelj_status_create(request, clan_pk):
     from .models import Clan, StatusBranitelja
     clan = get_object_or_404(Clan, pk=clan_pk, company=company)
     if hasattr(clan, 'status_branitelja'):
-        messages.info(request, 'Član već ima status branitelja.')
+        messages.info(request, _('Član već ima status branitelja.'))
         return redirect('udruge:branitelji_dashboard')
     if request.method == 'POST':
         d = request.POST
@@ -2988,7 +2988,7 @@ def branitelj_status_create(request, clan_pk):
             odlikovanja=d.get('odlikovanja', ''),
             napomena=d.get('napomena', ''),
         )
-        messages.success(request, 'Status branitelja dodan za %s.' % clan)
+        messages.success(request, _('Status branitelja dodan za %s.') % clan)
         return redirect('udruge:branitelji_dashboard')
     return render(request, 'udruge/branitelj_status_form.html', {
         'clan': clan,
@@ -3062,7 +3062,7 @@ def lov_dopustenje_create(request):
             sle_evidencija_br=request.POST.get('sle_evidencija_br', ''),
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Dopuštenje kreirano.')
+        messages.success(request, _('Dopuštenje kreirano.'))
         return redirect('udruge:lov_dopustenja_list')
     lovista = Loviste.objects.filter(company=company, is_active=True)
     clanovi = Clan.objects.filter(company=company)
@@ -3102,7 +3102,7 @@ def lov_zapisnik_create(request):
             sle_broj=request.POST.get('sle_broj', ''),
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Zapisnik kreiran.')
+        messages.success(request, _('Zapisnik kreiran.'))
         return redirect('udruge:lov_zapisnici_list')
     from .models import DopustenjeLova
     lovista = Loviste.objects.filter(company=company, is_active=True)
@@ -3150,7 +3150,7 @@ def branitelj_status_edit(request, pk):
         obj.odlikovanja = d.get('odlikovanja', obj.odlikovanja)
         obj.napomena = d.get('napomena', obj.napomena)
         obj.save()
-        messages.success(request, 'Status branitelja ažuriran.')
+        messages.success(request, _('Status branitelja ažuriran.'))
         return redirect('udruge:branitelji_dashboard')
     return render(request, 'udruge/branitelj_status_form.html', {
         'clan': obj.clan, 'obj': obj, 'edit': True,
@@ -3174,7 +3174,7 @@ def lov_dopustenje_edit(request, pk):
         obj.sle_evidencija_br = request.POST.get('sle_evidencija_br', obj.sle_evidencija_br)
         obj.napomena = request.POST.get('napomena', obj.napomena)
         obj.save()
-        messages.success(request, 'Dopuštenje ažurirano.')
+        messages.success(request, _('Dopuštenje ažurirano.'))
         return redirect('udruge:lov_dopustenja_list')
     lovista = Loviste.objects.filter(company=company, is_active=True)
     clanovi = Clan.objects.filter(company=company)
@@ -3201,7 +3201,7 @@ def lov_zapisnik_edit(request, pk):
         obj.sle_broj = request.POST.get('sle_broj', obj.sle_broj)
         obj.napomena = request.POST.get('napomena', obj.napomena)
         obj.save()
-        messages.success(request, 'Zapisnik ažuriran.')
+        messages.success(request, _('Zapisnik ažuriran.'))
         return redirect('udruge:lov_zapisnici_list')
     lovista = Loviste.objects.filter(company=company, is_active=True)
     clanovi = Clan.objects.filter(company=company)
@@ -3242,7 +3242,7 @@ def loviste_create(request):
             opis_granica=request.POST.get('opis_granica', ''),
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Lovište dodano.')
+        messages.success(request, _('Lovište dodano.'))
         return redirect('udruge:loviste_list')
     return render(request, 'udruge/loviste_form.html', {
         'vrsta_choices': [('zajednicko','Zajedničko'),('privatno','Privatno'),('uzgajaliste','Uzgajalište')],
@@ -3266,7 +3266,7 @@ def loviste_edit(request, pk):
         obj.opis_granica = request.POST.get('opis_granica', obj.opis_granica)
         obj.napomena = request.POST.get('napomena', obj.napomena)
         obj.save()
-        messages.success(request, 'Lovište ažurirano.')
+        messages.success(request, _('Lovište ažurirano.'))
         return redirect('udruge:loviste_list')
     return render(request, 'udruge/loviste_form.html', {
         'obj': obj, 'edit': True,
@@ -3294,7 +3294,7 @@ def trofej_create(request):
             datum_vrjednovanja=request.POST.get('datum_vrjednovanja') or None,
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Trofej dodan.')
+        messages.success(request, _('Trofej dodan.'))
         return redirect('udruge:lov_trofeji_list')
     clanovi = Clan.objects.filter(company=company)
     zapisnici = ZapisnikLova.objects.filter(company=company).order_by('-datum')[:30]
@@ -3353,7 +3353,7 @@ def zadrugar_create(request):
             phone=request.POST.get('phone', ''),
             notes=request.POST.get('notes', ''),
         )
-        messages.success(request, 'Zadrugar dodan.')
+        messages.success(request, _('Zadrugar dodan.'))
         return redirect('udruge:zadruge_dashboard')
     return render(request, 'udruge/zadrugar_form.html', {
         'uloga_choices': Zadrugar.ULOGA_CHOICES,
@@ -3377,7 +3377,7 @@ def revizija_create(request):
             nalaz=request.POST.get('nalaz', ''),
             ocjena=request.POST.get('ocjena', ''),
         )
-        messages.success(request, 'Revizija evidentirana.')
+        messages.success(request, _('Revizija evidentirana.'))
         return redirect('udruge:zadruge_dashboard')
     return render(request, 'udruge/revizija_form.html', {
         'ocjena_choices': [('uredna','Uredna'),('napomene','S napomenama'),('neuredna','Neuredna')],
@@ -3440,7 +3440,7 @@ def golubinjak_create(request):
         if request.FILES.get('fotografija'):
             g.fotografija = request.FILES['fotografija']
             g.save(update_fields=['fotografija'])
-        messages.success(request, 'Golubinjak kreiran.')
+        messages.success(request, _('Golubinjak kreiran.'))
         return redirect('udruge:golubinjak_detail', pk=g.pk)
     return render(request, 'udruge/golubar_golubinjak_form.html', {})
 
@@ -3495,7 +3495,7 @@ def golub_create(request):
         if request.FILES.get('fotografija'):
             golub.fotografija = request.FILES['fotografija']
             golub.save()
-        messages.success(request, 'Golub %s kreiran.' % golub.prsten_broj)
+        messages.success(request, _('Golub %s kreiran.') % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
     golubinjaci = Golubinjak.objects.filter(company=company)
     golubovi = Golub.objects.filter(company=company)
@@ -3554,7 +3554,7 @@ def golub_edit(request, pk):
         if request.FILES.get('fotografija'):
             golub.fotografija = request.FILES['fotografija']
         golub.save()
-        messages.success(request, 'Golub %s azuriran.' % golub.prsten_broj)
+        messages.success(request, _('Golub %s azuriran.') % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
     golubinjaci = Golubinjak.objects.filter(company=company)
     golubovi = Golub.objects.filter(company=company).exclude(pk=golub.pk)
@@ -3600,7 +3600,7 @@ def par_create(request):
             datum_spajanja=request.POST.get('datum_spajanja') or None,
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Par kreiran.')
+        messages.success(request, _('Par kreiran.'))
         return redirect('udruge:par_list')
     muzjaci = Golub.objects.filter(company=company, spol='M', aktivan=True)
     zenke = Golub.objects.filter(company=company, spol='F', aktivan=True)
@@ -3628,7 +3628,7 @@ def leglo_create(request, par_pk):
             ptic_2_id=request.POST.get('ptic_2') or None,
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Leglo evidentirano.')
+        messages.success(request, _('Leglo evidentirano.'))
         return redirect('udruge:par_list')
     golubovi = Golub.objects.filter(company=company)
     return render(request, 'udruge/golubar_leglo_form.html', {
@@ -3654,7 +3654,7 @@ def zdravstveni_create(request, golub_pk):
             sljedeci_tretman=request.POST.get('sljedeci_tretman') or None,
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Zdravstveni zapis kreiran.')
+        messages.success(request, _('Zdravstveni zapis kreiran.'))
         return redirect('udruge:golub_detail', pk=golub.pk)
     return render(request, 'udruge/golubar_zdravstveni_form.html', {
         'golub': golub,
@@ -3695,7 +3695,7 @@ def utrka_create(request):
             uvjeti=request.POST.get('uvjeti', ''),
             napomena=request.POST.get('napomena', ''),
         )
-        messages.success(request, 'Utrka "%s" kreirana.' % utrka.naziv)
+        messages.success(request, _('Utrka "%s" kreirana.') % utrka.naziv)
         return redirect('udruge:utrka_detail', pk=utrka.pk)
     return render(request, 'udruge/golubar_utrka_form.html', {})
 
@@ -3732,7 +3732,7 @@ def rezultat_create(request, utrka_pk):
             bodovi=Decimal(request.POST.get('bodovi')) if request.POST.get('bodovi') else None,
             ets_data={'napomena': request.POST.get('napomena', '')},
         )
-        messages.success(request, 'Rezultat dodan.')
+        messages.success(request, _('Rezultat dodan.'))
         return redirect('udruge:utrka_detail', pk=utrka.pk)
     golubovi = Golub.objects.filter(company=company, aktivan=True)
     return render(request, 'udruge/golubar_rezultat_form.html', {
@@ -3749,7 +3749,7 @@ def golub_seal(request, pk):
     from .models import Golub
     golub = get_object_or_404(Golub, pk=pk, company=company)
     golub.zapecati()
-    messages.success(request, 'Golub %s zapecacen. Hash: %s' % (golub.prsten_broj, golub.genetics_hash[:16]))
+    messages.success(request, _('Golub %s zapecacen. Hash: %s') % (golub.prsten_broj, golub.genetics_hash[:16]))
     return redirect('udruge:golub_detail', pk=golub.pk)
 
 
@@ -4040,7 +4040,7 @@ def bridge_publish(request):
         # Validacija: OPG broj obavezan za hranu
         food_models = {'EggRecord', 'BerbaLog', 'MedProizvodnja', 'RakijaProizvodnja'}
         if source_model in food_models and not opg_number:
-            messages.error(request, 'OPG broj je obavezan za prehrambene proizvode (Zakon o OPG čl.12).')
+            messages.error(request, _('OPG broj je obavezan za prehrambene proizvode (Zakon o OPG čl.12).'))
             return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
 
         try:
@@ -4537,15 +4537,15 @@ def azil_zivotinja_detalj(request, pk):
                 sljedeci_pregled=request.POST.get('sljedeci_pregled') or None,
                 trosak_eur=request.POST.get('trosak_eur') or 0,
             )
-            messages.success(request, 'Tretman dodan.')
+            messages.success(request, _('Tretman dodan.'))
         elif action == 'status_slobodan' and z.status == 'karantena':
             z.status = 'slobodan'
             z.save(update_fields=['status', 'updated_at'])
-            messages.success(request, 'Status → Slobodan za udomljenje.')
+            messages.success(request, _('Status → Slobodan za udomljenje.'))
         elif action == 'status_rezerviran':
             z.status = 'rezerviran'
             z.save(update_fields=['status', 'updated_at'])
-            messages.success(request, 'Status → Rezerviran.')
+            messages.success(request, _('Status → Rezerviran.'))
         return redirect('udruge:azil_zivotinja_detalj', pk=pk)
 
     ctx = {
@@ -4588,7 +4588,7 @@ def azil_intervencija_nova(request):
             broj_zivotinja=p.get('broj_zivotinja') or 1,
             rezultat=p.get('rezultat', 'preuzeto'),
         )
-        messages.success(request, 'Intervencija evidentirana.')
+        messages.success(request, _('Intervencija evidentirana.'))
         return redirect('udruge:azil_dashboard')
 
     return render(request, 'udruge/azil/intervencija_forma.html', {

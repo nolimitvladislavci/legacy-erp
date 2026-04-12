@@ -38,11 +38,12 @@ def posrednik_setup(request):
                 return render(request, 'eracun/posrednik_setup.html', {
                     'config': config,
                     'parsed': parsed,
+                    'parsed_confidence': round(parsed.get('_confidence', 0) * 100),
                     'raw_text': raw_text,
                     'step': 'confirm',
                 })
             else:
-                messages.warning(request, 'Zalijepite tekst iz emaila ili dokumenta posrednika.')
+                messages.warning(request, _('Zalijepite tekst iz emaila ili dokumenta posrednika.'))
                 return redirect('eracun:posrednik_setup')
 
         elif action == 'save':
@@ -58,7 +59,7 @@ def posrednik_setup(request):
             config.posrednik_status = 'testing'
             config.is_active = True
             config.save()
-            messages.success(request, 'Posrednik konfiguriran! Testirajte vezu.')
+            messages.success(request, _('Posrednik konfiguriran! Testirajte vezu.'))
             return redirect('eracun:posrednik_setup')
 
         elif action == 'test':
@@ -97,7 +98,7 @@ def send_eracun_button(request, invoice_pk):
 
     config = ERacunConfig.objects.filter(company=company, is_active=True).first()
     if not config:
-        messages.error(request, 'e-Racun nije konfiguriran. Idite na Postavke posrednika.')
+        messages.error(request, _('e-Racun nije konfiguriran. Idite na Postavke posrednika.'))
         return redirect('eracun:posrednik_setup')
 
     if request.method == 'GET':

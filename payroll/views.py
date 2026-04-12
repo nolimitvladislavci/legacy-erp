@@ -160,7 +160,7 @@ def payroll_datev_export(request, pk):
     company = get_user_company(request)
     run = get_object_or_404(PayrollRun, pk=pk, company=company)
     if getattr(company, 'country', 'HR') != 'DE':
-        messages.warning(request, 'DATEV export samo za DE kompanije.')
+        messages.warning(request, _('DATEV export samo za DE kompanije.'))
         return redirect('payroll:detail', pk=pk)
     csv_content = services.generate_datev_bewegungsdaten(run)
     filename = f"datev_bewegung_{run.month:02d}{run.year}.csv"
@@ -197,7 +197,7 @@ def payroll_joppd_export(request, pk):
     run = get_object_or_404(PayrollRun, pk=pk, company=company)
     payslips = run.payslips.select_related('user').all()
     if not payslips.exists():
-        messages.error(request, 'Nema obracunatih placa za ovaj period.')
+        messages.error(request, _('Nema obracunatih placa za ovaj period.'))
         return redirect('payroll:detail', pk=pk)
     from payroll.joppd_generator import generate_joppd_xml
     xml_str = generate_joppd_xml(company, run, payslips)
@@ -214,10 +214,10 @@ def payroll_sepa_hr(request, pk):
     run = get_object_or_404(PayrollRun, pk=pk, company=company)
     payslips = run.payslips.select_related('user').all()
     if not payslips.exists():
-        messages.error(request, 'Nema obracunatih placa za ovaj period.')
+        messages.error(request, _('Nema obracunatih placa za ovaj period.'))
         return redirect('payroll:detail', pk=pk)
     if not getattr(company, 'iban', None):
-        messages.error(request, 'IBAN firme nije postavljen.')
+        messages.error(request, _('IBAN firme nije postavljen.'))
         return redirect('payroll:detail', pk=pk)
     from payroll.sepa_generator import generate_sepa_from_payroll_run
     xml_str = generate_sepa_from_payroll_run(company, run, payslips)

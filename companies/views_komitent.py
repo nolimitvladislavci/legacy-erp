@@ -56,7 +56,7 @@ def _detect_category(company):
 def komitent_dashboard(request):
     """Glavni dashboard — KPI + lista svih komitenata."""
     if not request.user.is_superuser and not request.user.is_staff:
-        messages.error(request, 'Nemate pristup upravljanju komitentima.')
+        messages.error(request, _('Nemate pristup upravljanju komitentima.'))
         return redirect('/')
 
     # Auto-create missing profiles
@@ -197,7 +197,7 @@ def komitent_detail(request, pk):
                     description=note_text,
                     created_by=request.user,
                 )
-                messages.success(request, 'Bilješka dodana.')
+                messages.success(request, _('Bilješka dodana.'))
             return redirect('companies:komitent_detail', pk=pk)
 
     # Timeline

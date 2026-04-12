@@ -40,7 +40,7 @@ def apply_integrity():
     item_validation = """
     items_data = request.POST.get('items')  # Provjera naziva polja iz tvog frontenda
     if not items_data or items_data == '[]':
-        messages.error(request, "KRITIČNA GREŠKA: Račun mora imati barem jednu stavku!")
+        messages.error(request, _("KRITIČNA GREŠKA: Račun mora imati barem jednu stavku!"))
         return redirect(request.META.get('HTTP_REFERER', 'invoicing:invoice_list'))
     """
 

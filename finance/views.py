@@ -63,7 +63,7 @@ def transaction_create(request):
             )
             t.save()
             partner.update_balance()
-            messages.success(request, "Transakcija kreirana.")
+            messages.success(request, _("Transakcija kreirana."))
             return redirect("finance:list")
         except Exception as e:
             messages.error(request, str(e))
@@ -85,7 +85,7 @@ def transaction_delete(request, pk):
             partner.update_balance()
         except Exception:
             pass
-        messages.success(request, "Transakcija obrisana.")
+        messages.success(request, _("Transakcija obrisana."))
         return redirect("finance:list")
     return redirect("finance:list")
 
@@ -113,7 +113,7 @@ def bank_import_csv(request):
     bank_id = request.POST.get('bank_account')
     csvfile = request.FILES.get('csvfile')
     if not bank_id or not csvfile:
-        messages.error(request, 'Odaberi ziro racun i CSV datoteku.')
+        messages.error(request, _('Odaberi ziro racun i CSV datoteku.'))
         return render(request, 'konto/bank_import.html', {'banks': banks})
     ba = get_object_or_404(BankAccount, pk=bank_id, company=company)
     content = csvfile.read().decode('utf-8-sig', errors='replace')
@@ -188,9 +188,9 @@ def bank_import_csv(request):
         except Exception: errors += 1
     ba.recalculate_balance()
     if created:
-        messages.success(request, 'Importirano {} | Duplikati: {} | Greske: {}'.format(created, skipped, errors))
+        messages.success(request, _('Importirano {} | Duplikati: {} | Greske: {}').format(created, skipped, errors))
     else:
-        messages.warning(request, 'Nema novih transakcija. Duplikati: {}, Greske: {}'.format(skipped, errors))
+        messages.warning(request, _('Nema novih transakcija. Duplikati: {}, Greske: {}').format(skipped, errors))
     return redirect('konto:transactions')
 
 
@@ -250,7 +250,7 @@ def report_pnl_pdf(request):
         return resp
     except Exception as e:
         from django.contrib import messages
-        messages.error(request, 'PDF greska: {}'.format(e))
+        messages.error(request, _('PDF greska: {}').format(e))
         return redirect('konto:report_pnl')
 
 
@@ -277,7 +277,7 @@ def report_vat_pdf(request, pk):
         return resp
     except Exception as e:
         from django.contrib import messages
-        messages.error(request, 'PDF greska: {}'.format(e))
+        messages.error(request, _('PDF greska: {}').format(e))
         return redirect('konto:report_vat')
 
 
@@ -310,12 +310,12 @@ def bank_import_xml(request):
 
     xmlfile = request.FILES.get('xmlfile')
     if not xmlfile:
-        messages.error(request, 'Odaberi XML datoteku.')
+        messages.error(request, _('Odaberi XML datoteku.'))
         return render(request, 'konto/bank_import_xml.html', {'banks': banks})
 
     # Validacija: max 10 MB
     if xmlfile.size > 10 * 1024 * 1024:
-        messages.error(request, 'Datoteka je prevelika (max 10 MB).')
+        messages.error(request, _('Datoteka je prevelika (max 10 MB).'))
         return render(request, 'konto/bank_import_xml.html', {'banks': banks})
 
     try:
@@ -400,7 +400,7 @@ def bank_pain001_suppliers(request):
     invoice_ids = request.POST.getlist('invoice_ids')
 
     if not bank_id:
-        messages.error(request, 'Odaberi žiro račun.')
+        messages.error(request, _('Odaberi žiro račun.'))
         return redirect(request.path)
 
     try:

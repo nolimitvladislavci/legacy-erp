@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Compliance Monitor — LIMIT Connect{% endblock %}
+{% block page_title %}Compliance Monitor{% endblock %}
+{% block shell_mode %}default{% endblock %}
+{% block content %}
+<div class="fenix-page" style="max-width:800px;margin:0 auto">
+
+  <!-- Score -->
+  <div class="fx-rounded fx-bg-card fx-p-6 fx-mb-4" style="border:1px solid var(--border);text-align:center">
+    <div class="fx-fs-xs fx-text-dim fx-fw-bold fx-uppercase fx-ls-2 fx-mb-2">{% trans "Compliance Score" %}</div>
+    <div class="fx-fs-5xl fx-fw-800" style="color:{% if score >= 80 %}var(--green){% elif score >= 50 %}var(--amber){% else %}var(--red){% endif %}">{{ score }}%</div>
+    <div style="background:var(--bg);border-radius:8px;height:12px;margin-top:12px;overflow:hidden">
+      <div style="height:100%;width:{{ score }}%;border-radius:8px;transition:width .5s;background:{% if score >= 80 %}var(--green){% elif score >= 50 %}var(--amber){% else %}var(--red){% endif %}"></div>
+    </div>
+    <div class="fx-fs-sm fx-text-dim fx-mt-2">{{ total_employees }} {% trans "radnika" %} · {{ critical|length }} {% trans "kritično" %} · {{ warnings|length }} {% trans "upozorenja" %}</div>
+  </div>
+
+  <!-- Critical -->
+  {% if critical %}
+  <div class="fx-mb-4">
+    <div class="fx-fs-sm fx-fw-bold fx-text-red fx-uppercase fx-ls-2 fx-mb-2"><i class="fas fa-exclamation-circle"></i> {% trans "Kritično" %}</div>
+    {% for a in critical %}
+    <div class="fx-rounded fx-p-4 fx-mb-2" style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2)">
+      <div class="d-flex align-items-start gap-3">
+        <i class="fas fa-times-circle fx-text-red fx-fs-lg" style="margin-top:2px"></i>
+        <div class="fx-flex-1">
+          <div class="fx-fw-semibold">{% if a.employee %}{{ a.employee.user.get_full_name }}{% else %}{% trans "Sustav" %}{% endif %}</div>
+          <div class="fx-fs-sm fx-text-dim">{{ a.message }}</div>
+        </div>
+        {% if a.action_url %}
+        <a href="{{ a.action_url }}" class="fx-fs-sm fx-fw-bold fx-text-red fx-no-underline" style="white-space:nowrap">{{ a.action_label }} →</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Warnings -->
+  {% if warnings %}
+  <div class="fx-mb-4">
+    <div class="fx-fs-sm fx-fw-bold fx-text-amber fx-uppercase fx-ls-2 fx-mb-2"><i class="fas fa-exclamation-triangle"></i> {% trans "Upozorenja" %}</div>
+    {% for a in warnings %}
+    <div class="fx-rounded fx-p-3 fx-mb-2" style="background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15)">
+      <div class="d-flex align-items-center gap-3">
+        <i class="fas fa-exclamation-triangle fx-text-amber"></i>
+        <div class="fx-flex-1 fx-fs-sm">
+          {% if a.employee %}<strong>{{ a.employee.user.get_full_name }}</strong> — {% endif %}{{ a.message }}
+        </div>
+        {% if a.action_url %}
+        <a href="{{ a.action_url }}" class="fx-fs-xs fx-text-amber fx-no-underline">{{ a.action_label }} →</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Info -->
+  {% if info %}
+  <div class="fx-mb-4">
+    <div class="fx-fs-sm fx-fw-bold fx-text-blue fx-uppercase fx-ls-2 fx-mb-2"><i class="fas fa-info-circle"></i> {% trans "Informacije" %}</div>
+    {% for a in info %}
+    <div class="fx-rounded fx-p-3 fx-mb-2" style="background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.12)">
+      <div class="d-flex align-items-center gap-3">
+        <i class="fas fa-info-circle fx-text-blue fx-fs-sm"></i>
+        <span class="fx-fs-sm">{% if a.employee %}<strong>{{ a.employee.user.get_full_name }}</strong> — {% endif %}{{ a.message }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- All clear -->
+  {% if not alerts %}
+  <div class="fx-rounded fx-p-6 text-center" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2)">
+    <div class="fx-fs-4xl fx-mb-2">✓</div>
+    <div class="fx-fs-lg fx-fw-bold fx-text-green">{% trans "Sve čisto!" %}</div>
+    <div class="fx-fs-sm fx-text-dim fx-mt-1">{% trans "Nema compliance problema. Svi radnici su usklađeni." %}</div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

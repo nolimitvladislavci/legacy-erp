@@ -31,7 +31,13 @@ class CompanyManager(models.Manager):
         qs = CompanyQuerySet(self.model, using=self._db)
         company = get_current_company()
         if company is not None:
-            qs = qs.filter(company=company)
+            # Check which FK name this model uses for company
+            model_fields = {f.name for f in self.model._meta.get_fields()}
+            if 'company' in model_fields:
+                qs = qs.filter(company=company)
+            elif 'parent_company' in model_fields:
+                qs = qs.filter(parent_company=company)
+            # Models without company or parent_company FK → no auto-filter
         return qs
 
     def unscoped(self):

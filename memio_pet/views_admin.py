@@ -9,6 +9,7 @@ import functools
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -115,7 +116,7 @@ def admin_animal_action(request, animal_id):
     try:
         animal = AnimalProfile.objects.using(db).get(pk=uuid.UUID(str(animal_id)))
     except AnimalProfile.DoesNotExist:
-        messages.error(request, 'Životinja ne postoji.')
+        messages.error(request, _('Životinja ne postoji.'))
         return redirect('memio_admin_dashboard')
 
     action = request.POST.get('action', '')
@@ -140,7 +141,7 @@ def admin_animal_action(request, animal_id):
             animal.save(using=db, update_fields=['breeder', 'breeder_name_snapshot', 'updated_at'])
             messages.success(request, f'{animal.name} prebačen na {new_breeder.name}')
         except BreederProfile.DoesNotExist:
-            messages.error(request, 'Profil ne postoji.')
+            messages.error(request, _('Profil ne postoji.'))
 
     elif action == 'delete':
         name = animal.name
@@ -159,7 +160,7 @@ def admin_profile_action(request, profile_id):
     try:
         bp = BreederProfile.objects.using(db).get(pk=uuid.UUID(str(profile_id)))
     except BreederProfile.DoesNotExist:
-        messages.error(request, 'Profil ne postoji.')
+        messages.error(request, _('Profil ne postoji.'))
         return redirect('memio_admin_dashboard')
 
     action = request.POST.get('action', '')

@@ -392,7 +392,7 @@ def order_action(request, pk, action):
 
     if action == 'confirm':
         if order.status != 'draft':
-            messages.warning(request, "Nalog nije u nacrtu.")
+            messages.warning(request, _("Nalog nije u nacrtu."))
             return redirect('production:order_detail', pk=pk)
         order.status = 'confirmed'
         order.save(update_fields=['status'])
@@ -417,7 +417,7 @@ def order_action(request, pk, action):
 
     elif action == 'complete':
         if order.status not in ('in_progress', 'confirmed'):
-            messages.warning(request, "Nalog nije u statusu za završetak.")
+            messages.warning(request, _("Nalog nije u statusu za završetak."))
             return redirect('production:order_detail', pk=pk)
         calculate_costs(order)
         order.status = 'done'
@@ -439,7 +439,7 @@ def order_action(request, pk, action):
 
     elif action == 'cancel':
         if order.status == 'done':
-            messages.warning(request, "Završen nalog se ne može otkazati.")
+            messages.warning(request, _("Završen nalog se ne može otkazati."))
             return redirect('production:order_detail', pk=pk)
         reason = request.POST.get('reason', '')
         order.status = 'cancelled'
@@ -466,7 +466,7 @@ def order_produce(request, pk):
     order = get_object_or_404(ProductionOrder, pk=pk, company=company)
 
     if order.status not in ('confirmed', 'in_progress'):
-        messages.warning(request, "Nalog nije u statusu za evidentiranje proizvodnje.")
+        messages.warning(request, _("Nalog nije u statusu za evidentiranje proizvodnje."))
         return redirect('production:order_detail', pk=pk)
 
     qty_str = request.POST.get('quantity', '0')
@@ -478,7 +478,7 @@ def order_produce(request, pk):
         if qty <= 0:
             raise InvalidOperation
     except (InvalidOperation, ValueError):
-        messages.error(request, "Nevaljana količina.")
+        messages.error(request, _("Nevaljana količina."))
         return redirect('production:order_detail', pk=pk)
 
     try:
@@ -580,7 +580,7 @@ def qc_create(request, order_pk):
         )
         messages.success(request, f'Kontrola kvalitete "{qc.check_name}" zabilježena: {qc.get_result_display()}')
     else:
-        messages.error(request, "Ispravite greške u QC obrascu.")
+        messages.error(request, _("Ispravite greške u QC obrascu."))
 
     return redirect('production:order_detail', pk=order_pk)
 

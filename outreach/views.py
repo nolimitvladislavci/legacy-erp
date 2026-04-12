@@ -137,7 +137,7 @@ def contact_edit(request, pk):
         c.status       = request.POST.get('status','neu')
         c.notes        = request.POST.get('notes','').strip()
         c.save()
-        messages.success(request, 'Gespeichert.')
+        messages.success(request, _('Gespeichert.'))
         return redirect('outreach:contacts')
     return render(request, 'outreach/contact_form.html', {
         'contact': c,
@@ -153,7 +153,7 @@ def csv_import(request):
         return redirect('outreach:contacts')
     f = request.FILES.get('csvfile')
     if not f:
-        messages.error(request, 'Keine Datei gewaehlt.')
+        messages.error(request, _('Keine Datei gewaehlt.'))
         return redirect('outreach:contacts')
     content = f.read().decode('utf-8-sig', errors='replace')
     delim   = ',' if content.count(',') >= content.count(';') else ';'
@@ -426,9 +426,9 @@ def contact_whatsapp(request, pk):
         if not phone or not normalize_phone(phone):
             messages.error(request, f'Kontakt nema validan WhatsApp broj.')
         elif not is_gateway_healthy():
-            messages.error(request, 'WhatsApp gateway nije dostupan.')
+            messages.error(request, _('WhatsApp gateway nije dostupan.'))
         elif not msg:
-            messages.error(request, 'Poruka ne može biti prazna.')
+            messages.error(request, _('Poruka ne može biti prazna.'))
         else:
             result = send_text(phone, msg)
             if result['success']:

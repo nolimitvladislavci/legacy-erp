@@ -4,29 +4,50 @@
 <!-- responsive: fenix-tokens.css -->
 {% endblock %}
 {% block content %}
-<!-- lang: topbar -->
-                    </td>
-                    <td>{{ u.email }}</td>
-                    <td>
-                        {% if u.is_superuser %}<span class="fenix-badge fenix-badge-danger">{% trans "Superadmin" %}</span>
-                        {% elif u.is_staff %}<span class="fenix-badge fenix-badge-warning">{% trans "Staff" %}</span>
-                        {% else %}<span class="badge bg-light text-dark">{% trans "User" %}</span>{% endif %}
-                    </td>
-                    <td><small>{{ u.last_login|date:"d.m.Y H:i"|default:"Nikad" }}</small></td>
-                    <td>
-                        {% if u.is_active %}<span class="text-success">{% trans "● Aktivan" %}</span>
-                        {% else %}<span class="text-danger">{% trans "● Inaktivan" %}</span>{% endif %}
-                    </td>
-                    <td class="text-end">
-                        <a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-primary">{% trans "Uredi" %}</a>
-                        <a href="{% url 'accounts:toggle_status' u.pk %}" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
-                            {% if u.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="container-fluid px-4 py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">{% trans "Korisnici" %}</h4>
+    <a href="{% url 'accounts:quick_register' %}" class="btn btn-sm btn-outline-primary">+ {% trans "Novi korisnik" %}</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-dark table-hover mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Korisnik" %}</th>
+          <th>{% trans "Email" %}</th>
+          <th>{% trans "Uloga" %}</th>
+          <th>{% trans "Zadnja prijava" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="text-end">{% trans "Akcije" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><strong>{{ u.get_full_name|default:u.username }}</strong></td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.is_superuser %}<span class="fenix-badge fenix-badge-danger">{% trans "Superadmin" %}</span>
+            {% elif u.is_staff %}<span class="fenix-badge fenix-badge-warning">{% trans "Staff" %}</span>
+            {% else %}<span class="badge bg-light text-dark">{% trans "User" %}</span>{% endif %}
+          </td>
+          <td><small>{{ u.last_login|date:"d.m.Y H:i"|default:"Nikad" }}</small></td>
+          <td>
+            {% if u.is_active %}<span class="text-success">{% trans "● Aktivan" %}</span>
+            {% else %}<span class="text-danger">{% trans "● Inaktivan" %}</span>{% endif %}
+          </td>
+          <td class="text-end">
+            <a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-primary">{% trans "Uredi" %}</a>
+            <a href="{% url 'accounts:toggle_status' u.pk %}" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+              {% if u.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">{% trans "Nema korisnika." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

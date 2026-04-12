@@ -27,11 +27,11 @@
           <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>
         {% endif %}
-        <a href="{% url 'invoicing:create' %}" class="welcome-action">
+        <a href="{% url 'invoicing:invoice_create' %}" class="welcome-action">
           <span>&#129534;</span> {% trans "Kreirajte prvu fakturu" %}
           <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>
-        <a href="{% url 'pos:index' %}" class="welcome-action">
+        <a href="{% url 'pos:dashboard' %}" class="welcome-action">
           <span>&#128722;</span> {% trans "Otvorite POS blagajnu" %}
           <span class="fx-text-gold fx-ml-auto">&rarr;</span>
         </a>

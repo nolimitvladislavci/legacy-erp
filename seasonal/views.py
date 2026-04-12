@@ -86,7 +86,7 @@ def worker_create(request):
         p = request.POST
         oib = p.get('oib', '').strip()
         if len(oib) != 11 or not oib.isdigit():
-            messages.error(request, 'OIB mora biti točno 11 znamenki.')
+            messages.error(request, _('OIB mora biti točno 11 znamenki.'))
             return render(request, 'seasonal/worker_form.html',
                           {'nationality_choices': SeasonalWorker.NATIONALITY_CHOICES,
                            'form_data': p})
@@ -215,7 +215,7 @@ def contract_complete(request, pk):
                 notes='Auto-kreirana završna isplata',
                 status='planned',
             )
-            messages.info(request, 'Završna isplata automatski kreirana — provjeri i odobri.')
+            messages.info(request, _('Završna isplata automatski kreirana — provjeri i odobri.'))
     return redirect('seasonal:contract_detail', pk=pk)
 
 
@@ -240,7 +240,7 @@ def payment_create(request, contract_pk):
                 f'Isplata odobrena: {payment.net_amount}€ neto '
                 f'za {contract.worker.full_name}.')
         else:
-            messages.success(request, 'Isplata kreirana.')
+            messages.success(request, _('Isplata kreirana.'))
         return redirect('seasonal:contract_detail', pk=contract_pk)
     return render(request, 'seasonal/payment_form.html', {
         'contract':     contract,
@@ -295,5 +295,6 @@ def cost_report(request):
     workers_count = contracts.values('worker').distinct().count()
     return render(request, 'seasonal/cost_report.html', {
         'contracts': contracts, 'total_gross': total_gross,
+        'years_range': list(range(2024, timezone.localdate().year + 2)),
         'total_paid': total_paid, 'workers_count': workers_count, 'year': year,
     })

@@ -87,7 +87,7 @@ def doc_confirm(request, pk):
             return redirect(request.META.get('HTTP_REFERER', '/documents/'))
         except model_cls.DoesNotExist:
             continue
-    messages.error(request, "Dokument nije pronađen.")
+    messages.error(request, _("Dokument nije pronađen."))
     return redirect('/documents/')
 
 

@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "rosetta",
     "modeltranslation",
     "rest_framework",
@@ -1270,3 +1271,9 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": 300.0,  # svakih 5 min
     },
 })
+
+CELERY_BEAT_SCHEDULE['worktime-iban-vault-check'] = {
+    'task': 'worktime.tasks.iban_vault_check',
+    'schedule': 86400,  # daily
+}
+

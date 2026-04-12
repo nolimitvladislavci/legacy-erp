@@ -117,14 +117,16 @@ updateOfflineBar();
 // ═══ TOAST AUTO-DISMISS ══════════════════════════════════════════════════
 function initToasts(){
   document.querySelectorAll('.toast-msg').forEach(function(el){
-    if(el.classList.contains('alert-success')){
-      setTimeout(function(){
-        el.style.transition = 'all 0.5s';
-        el.style.opacity = '0';
-        el.style.transform = 'translateX(20px)';
-        setTimeout(function(){ el.remove(); }, 500);
-      }, 4000);
-    }
+    var delay = 8000; // default for error
+    if(el.classList.contains('alert-success')) delay = 4000;
+    else if(el.classList.contains('alert-info')) delay = 5000;
+    else if(el.classList.contains('alert-warning')) delay = 6000;
+    setTimeout(function(){
+      el.style.transition = 'all 0.5s';
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(20px)';
+      setTimeout(function(){ el.remove(); }, 500);
+    }, delay);
   });
 }
 
@@ -689,3 +691,4 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!ptr.classList.contains("loading")) ptr.classList.remove("visible");
   });
 })();
+

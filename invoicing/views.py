@@ -1071,27 +1071,27 @@ def client_portal(request, token):
             invoice.status = 'ACCEPTED'
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'accepted')
-            messages.success(request, 'Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro.')
+            messages.success(request, _('Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro.'))
 
         elif action == 'reject':
             invoice.status = 'REJECTED'
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'rejected')
-            messages.info(request, 'Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu.')
+            messages.info(request, _('Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu.'))
 
         elif action == 'undo_accept' and invoice.status == 'ACCEPTED':
             # Klijent je slučajno prihvatio — vraća se na SENT
             invoice.status = 'SENT'
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'undo_accepted')
-            messages.info(request, 'Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti.')
+            messages.info(request, _('Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti.'))
 
         elif action == 'undo_reject' and invoice.status == 'REJECTED':
             # Klijent se predomislio — direktno prihvaća
             invoice.status = 'ACCEPTED'
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'accepted')
-            messages.success(request, 'Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro.')
+            messages.success(request, _('Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro.'))
         return redirect(request.path)
 
     # Dohvati sekcije za renderiranje (ista logika kao PDF)

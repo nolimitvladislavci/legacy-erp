@@ -53,7 +53,7 @@ def pet_detail(request, pk):
 
     if request.method == 'POST' and request.POST.get('action') == 'delete':
         pet.delete()
-        messages.success(request, 'Ljubimac obrisan.')
+        messages.success(request, _('Ljubimac obrisan.'))
         return redirect('livestock:pet_list')
 
     if request.method == 'POST' and request.POST.get('action') == 'add_health':
@@ -68,7 +68,7 @@ def pet_detail(request, pk):
                 trosak_eur=request.POST.get('trosak_eur') or None,
                 created_by=request.user,
             )
-            messages.success(request, 'Zapis dodan.')
+            messages.success(request, _('Zapis dodan.'))
         except Exception as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('livestock:pet_detail', pk=pk)
@@ -162,7 +162,7 @@ def pet_edit(request, pk):
             if 'photo' in request.FILES:
                 pet.photo = request.FILES['photo']
             pet.save()
-            messages.success(request, 'Podaci ažurirani.')
+            messages.success(request, _('Podaci ažurirani.'))
             return redirect('livestock:pet_detail', pk=pk)
         except Exception as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
@@ -333,7 +333,7 @@ def pet_adopt(request, pk):
     adopter_email   = request.POST.get('adopter_email', '').strip()
 
     if not adopter_name:
-        messages.error(request, 'Ime udomljavača je obavezno.')
+        messages.error(request, _('Ime udomljavača je obavezno.'))
         return redirect('livestock:pet_detail', pk=pk)
 
     # Zapamti udomljavača u notes

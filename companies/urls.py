@@ -33,6 +33,9 @@ urlpatterns = [
     path("settings/employee/<int:pk>/edit/", views.employee_edit, name="employee_edit"),
     path("settings/employee/<int:pk>/password/", views.employee_change_password, name="employee_change_password"),
     path("settings/employee/<int:pk>/toggle/", views.employee_toggle_redirect, name="employee_toggle_active"),
+    path('compliance/', views.compliance_monitor, name='compliance_monitor'),
+    path('settings/employee/<int:pk>/offboard/', views.employee_offboard, name='employee_offboard'),
+
     path("settings/branch/save/", views.branch_save_redirect, name="branch_create"),
     path("settings/branch/<int:pk>/save/", views.branch_save_redirect, name="branch_edit"),
     path("settings/branch/<int:pk>/toggle/", views.branch_toggle_redirect, name="branch_toggle_active"),

@@ -172,7 +172,7 @@ def send_portal_whatsapp(request, partner_id):
         messages.error(request, f"Partner nema validan WhatsApp broj.")
         return redirect(request.META.get("HTTP_REFERER", "/partners/"))
     if not is_gateway_healthy():
-        messages.error(request, "WhatsApp gateway nije dostupan.")
+        messages.error(request, _("WhatsApp gateway nije dostupan."))
         return redirect(request.META.get("HTTP_REFERER", "/partners/"))
     portal_url = request.build_absolute_uri(f"/portal/{partner.portal_token}/")
     sender = request.user.get_full_name() or "Viskovic Bau"

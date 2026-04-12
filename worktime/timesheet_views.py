@@ -189,19 +189,19 @@ def timer_start(request):
                 entry = existing.stop_and_save()
                 messages.info(request, f'Prethodni timer spremljen ({entry.duration}h)')
             else:
-                messages.warning(request, 'Već imate aktivan timer! Zaustavite ga prvo.')
+                messages.warning(request, _('Već imate aktivan timer! Zaustavite ga prvo.'))
                 return redirect('worktime:ts_worker')
         except ActiveTimer.DoesNotExist:
             pass
 
     project_id = request.POST.get('project_id') or request.POST.get('project')
     if not project_id:
-        messages.error(request, 'Odaberite projekt!')
+        messages.error(request, _('Odaberite projekt!'))
         return redirect('worktime:ts_worker')
     try:
         project = Project.objects.get(pk=project_id, status='ACTIVE')
     except Project.DoesNotExist:
-        messages.error(request, 'Projekt nije pronađen!')
+        messages.error(request, _('Projekt nije pronađen!'))
         return redirect('worktime:ts_worker')
 
     _timer_lead_id = request.POST.get('project_lead', '').strip()
@@ -239,7 +239,7 @@ def timer_pause(request):
             return JsonResponse({'status':'paused','elapsed':timer.elapsed_seconds,
                                  'display':timer.elapsed_display})
     except ActiveTimer.DoesNotExist:
-        messages.error(request, 'Nemate aktivan timer.')
+        messages.error(request, _('Nemate aktivan timer.'))
     return redirect('worktime:ts_worker')
 
 
@@ -249,12 +249,12 @@ def timer_resume(request):
     try:
         timer = request.user.active_timer
         timer.resume()
-        messages.success(request, '▶ Štoperica nastavljena')
+        messages.success(request, _('▶ Štoperica nastavljena'))
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status':'running','started_at':timer.started_at.isoformat(),
                                  'accumulated':timer.accumulated_seconds})
     except ActiveTimer.DoesNotExist:
-        messages.error(request, 'Nemate aktivan timer.')
+        messages.error(request, _('Nemate aktivan timer.'))
     return redirect('worktime:ts_worker')
 
 
@@ -295,7 +295,7 @@ def timer_stop(request):
             return JsonResponse({'status':'saved','entry_id':entry.pk,
                                  'duration':str(entry.duration),'project':entry.project.name})
     except ActiveTimer.DoesNotExist:
-        messages.error(request, 'Nemate aktivan timer.')
+        messages.error(request, _('Nemate aktivan timer.'))
     return redirect('worktime:ts_worker')
 
 
@@ -309,7 +309,7 @@ def timer_discard(request):
         timer.discard()
         messages.warning(request, f'Timer za {project_name} odbačen ({elapsed})')
     except ActiveTimer.DoesNotExist:
-        messages.error(request, 'Nemate aktivan timer.')
+        messages.error(request, _('Nemate aktivan timer.'))
     return redirect('worktime:ts_worker')
 
 
@@ -386,7 +386,7 @@ def time_entry_add(request):
                 duration = Decimal(dur_str) if dur_str else Decimal('0')
 
             if duration <= 0:
-                messages.error(request, '❌ Trajanje mora biti pozitivno!')
+                messages.error(request, _('❌ Trajanje mora biti pozitivno!'))
                 return redirect('worktime:ts_worker')
 
             # ═══ VALIDATION: Max hours per entry ═══
@@ -491,7 +491,7 @@ def time_entry_add(request):
 def time_entry_edit(request, pk):
     te = get_object_or_404(TimeEntry, pk=pk, user=request.user)
     if te.status not in ('DRAFT','PENDING'):
-        messages.error(request, 'Možete uređivati samo unose u statusu Skica ili Na čekanju.')
+        messages.error(request, _('Možete uređivati samo unose u statusu Skica ili Na čekanju.'))
         return redirect('worktime:ts_worker')
     if request.method == 'POST':
         try:
@@ -554,9 +554,9 @@ def time_entry_delete(request, pk):
     te = get_object_or_404(TimeEntry, pk=pk, user=request.user)
     if te.status in ('DRAFT','PENDING'):
         te.delete()
-        messages.success(request, 'Unos obrisan.')
+        messages.success(request, _('Unos obrisan.'))
     else:
-        messages.error(request, 'Možete brisati samo unose na čekanju.')
+        messages.error(request, _('Možete brisati samo unose na čekanju.'))
     return redirect('worktime:ts_worker')
 
 
@@ -617,7 +617,7 @@ def copy_day(request):
         source = date.fromisoformat(source_str) if source_str else date.today() - timedelta(days=1)
         target = date.fromisoformat(target_str)
     except ValueError:
-        messages.error(request, 'Neispravan datum.')
+        messages.error(request, _('Neispravan datum.'))
         return redirect('worktime:ts_worker')
     entries = TimeEntry.objects.filter(user=request.user, date=source)
     if not entries.exists():
@@ -805,7 +805,7 @@ def template_use(request, pk):
 def template_delete(request, pk):
     tmpl = get_object_or_404(TimeEntryTemplate, pk=pk, user=request.user)
     tmpl.delete()
-    messages.success(request, 'Predložak obrisan.')
+    messages.success(request, _('Predložak obrisan.'))
     return redirect('worktime:ts_worker')
 
 
@@ -821,10 +821,10 @@ def daily_note_save(request):
     if note_text:
         DailyNote.objects.update_or_create(
             user=request.user, date=note_date, defaults={'note': note_text})
-        messages.success(request, '✓ Bilješka spremljena')
+        messages.success(request, _('✓ Bilješka spremljena'))
     else:
         DailyNote.objects.filter(user=request.user, date=note_date).delete()
-        messages.info(request, 'Bilješka obrisana')
+        messages.info(request, _('Bilješka obrisana'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'ok'})
     return redirect('worktime:ts_worker')
@@ -921,7 +921,7 @@ def worker_profile(request):
             if tax_id:
                 emp.tax_id = tax_id
             emp.save()
-            messages.success(request, '✓ Profil ažuriran!')
+            messages.success(request, _('✓ Profil ažuriran!'))
         elif action == 'update_rate':
             if not emp:
                 emp = EmployeeProfile.objects.create(user=user, company=_user_company(user))
@@ -1207,7 +1207,7 @@ def bill_entries(request):
         if project_id: qs = qs.filter(project_id=project_id)
 
     if not qs.exists():
-        messages.warning(request, 'Nema odobrenih nefakturiranih sati.')
+        messages.warning(request, _('Nema odobrenih nefakturiranih sati.'))
         return redirect('worktime:ts_manager')
 
     from invoicing.models import Invoice, InvoiceItem
@@ -1740,4 +1740,65 @@ def clock_inout(request):
     return render(request, 'worktime/clock_inout.html', {
         'open_shift': open_shift,
         'today_shifts': today_shifts,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# DISPUTE — Radnik prijavljuje neslaganje s izmjenom sata
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+@require_POST
+def dispute_revision(request, revision_id):
+    """Radnik prijavljuje neslaganje s izmjenom sata."""
+    from worktime.models import TimeLogRevision
+    from django.utils import timezone
+    from django.http import JsonResponse
+
+    rev = get_object_or_404(
+        TimeLogRevision,
+        pk=revision_id,
+        time_entry__user=request.user  # samo SVOJE revizije
+    )
+    if rev.disputed_by:
+        return JsonResponse({'error': _('Već prijavljeno.')}, status=400)
+
+    rev.disputed_by = request.user
+    rev.disputed_at = timezone.now()
+    rev.dispute_note = request.POST.get('note', '').strip()
+    # Bypass append-only za dispute polja (ovo je jedini dozvoljen update)
+    TimeLogRevision.objects.filter(pk=rev.pk).update(
+        disputed_by=request.user,
+        disputed_at=timezone.now(),
+        dispute_note=rev.dispute_note,
+    )
+
+    # Notifikacija manageru
+    try:
+        from notifications.services import notify
+        manager = rev.changed_by
+        if manager:
+            notify(
+                manager,
+                f'Prigovor na izmjenu sata: {request.user.get_full_name()} ne slaže se s izmjenom {rev.field_name}',
+                url=f'/hr/worktime/ts/manager/',
+            )
+    except Exception:
+        pass
+
+    # Audit
+    try:
+        from core.models import BookingSignature
+        BookingSignature.log(
+            request, 'update',
+            target_model='TimeLogRevision',
+            target_id=str(rev.pk),
+            target_repr=f'Dispute: {request.user.get_full_name()} — {rev.field_name}',
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'ok': True,
+        'msg': _('Prigovor zabilježen. Voditelj je obaviješten.'),
     })

@@ -52,7 +52,7 @@ def synesis_settings(request):
         cfg.auto_backup_enabled    = request.POST.get("auto_backup_enabled") == "on"
         cfg.save(update_fields=["storage_db_path", "journal_db_path", "pos_db_path", "pos_db_password",
                                  "connect_base_path", "backup_retention_days", "auto_backup_enabled", "updated_at"])
-        messages.success(request, "Konfiguracija Synesis integracije je spremljena.")
+        messages.success(request, _("Konfiguracija Synesis integracije je spremljena."))
         return redirect("synesis:settings")
 
     return render(request, "synesis/settings.html", {"cfg": cfg, "logs": logs})
@@ -68,7 +68,7 @@ def regenerate_token(request):
         return JsonResponse({"error": "no company"}, status=400)
     cfg = _get_config(company)
     cfg.regenerate_token()
-    messages.success(request, "API token je regeneriran. Azurirajte sync skriptu!")
+    messages.success(request, _("API token je regeneriran. Azurirajte sync skriptu!"))
     return redirect("synesis:settings")
 
 

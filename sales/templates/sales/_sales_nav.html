@@ -3,7 +3,7 @@
 <nav aria-label="breadcrumb" class="mb-2">
   <ol class="breadcrumb mb-0 small">
     <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-    <li class="breadcrumb-item"><a href="{% url 'sales:dashboard' %}">Prodaja</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'sales:order_dashboard' %}">Prodaja</a></li>
     {% for crumb in breadcrumbs %}
     <li class="breadcrumb-item {% if forloop.last %}active{% endif %}"
         {% if forloop.last %}aria-current="page"{% endif %}>

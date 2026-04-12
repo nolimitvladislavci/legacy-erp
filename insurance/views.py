@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
@@ -75,7 +76,7 @@ def policy_create(request):
                 status=request.POST.get("status", "active"),
                 notes=request.POST.get("notes", ""),
             )
-            messages.success(request, "Polica kreirana.")
+            messages.success(request, _("Polica kreirana."))
             return redirect("insurance:list")
         except Exception as e:
             messages.error(request, str(e))
@@ -104,7 +105,7 @@ def policy_edit(request, pk):
             policy.status = request.POST.get("status", "active")
             policy.notes = request.POST.get("notes", "")
             policy.save()
-            messages.success(request, "Polica ažurirana.")
+            messages.success(request, _("Polica ažurirana."))
             return redirect("insurance:list")
         except Exception as e:
             messages.error(request, str(e))
@@ -122,5 +123,5 @@ def policy_delete(request, pk):
     policy = get_object_or_404(InsurancePolicy, pk=pk)
     if request.method == "POST":
         policy.delete()
-        messages.success(request, "Polica obrisana.")
+        messages.success(request, _("Polica obrisana."))
     return redirect("insurance:list")

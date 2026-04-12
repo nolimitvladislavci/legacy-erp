@@ -561,7 +561,7 @@ def process_payment(request, receipt_id):
 def cancel_receipt(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     if receipt.status == POSReceipt.Status.PAID:
-        messages.error(request, 'Plaćeni bon se ne može stornirati.')
+        messages.error(request, _('Plaćeni bon se ne može stornirati.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
     # PIN provjera za storno (ako postoji cashier s can_void)
     from .models import POSCashier
@@ -570,11 +570,11 @@ def cancel_receipt(request, receipt_id):
     cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True)
     if cashiers_with_void.exists():
         if not pin:
-            messages.error(request, 'PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika.')
+            messages.error(request, _('PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika.'))
             return redirect('pos:receipt_detail', receipt_id=receipt_id)
         pin_ok = any(c.check_pin(pin) for c in cashiers_with_void)
         if not pin_ok:
-            messages.error(request, 'Neispravan PIN. Storno odbijen.')
+            messages.error(request, _('Neispravan PIN. Storno odbijen.'))
             return redirect('pos:receipt_detail', receipt_id=receipt_id)
     reason = request.POST.get('cancel_reason', '').strip()[:200]
     receipt.status = POSReceipt.Status.CANCELLED
@@ -872,7 +872,7 @@ def session_zreport(request, session_id):
     company, err = _check_tenant(request, session)
     if err: return err
     if session.status == POSSession.Status.OPEN:
-        messages.error(request, 'Smjena mora biti zatvorena prije generiranja Z-reporta.')
+        messages.error(request, _('Smjena mora biti zatvorena prije generiranja Z-reporta.'))
         return redirect('pos:session_detail', session_id=session_id)
 
     paid_receipts = list(session.receipts.filter(status=POSReceipt.Status.PAID).prefetch_related('items', 'payment_lines'))
@@ -1148,7 +1148,7 @@ def _quick_pos_legacy(request, terminal_id):
 
     # Auto-otvori sesiju ako ne postoji — redirect na terminal za unos pologa
     if not session and request.user.is_authenticated:
-        messages.warning(request, 'Unesite početnu gotovinu prije otvaranja blagajne.')
+        messages.warning(request, _('Unesite početnu gotovinu prije otvaranja blagajne.'))
         return redirect('pos:terminal_detail', terminal_id=terminal.pk)
 
     try:
@@ -2656,7 +2656,7 @@ def expiry_add(request):
             expiry_date=expiry_date,
             alert_days_before=alert_days,
         )
-        messages.success(request, 'Sarzni rok dodan.')
+        messages.success(request, _('Sarzni rok dodan.'))
         return redirect('pos:expiry_dashboard')
     company = get_user_company(request)
     items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')
@@ -2893,7 +2893,7 @@ def cash_deposit(request, session_id):
     from .models import CashDeposit
     session = get_object_or_404(POSSession, pk=session_id)
     if session.status != POSSession.Status.OPEN:
-        messages.error(request, 'Polog/isplata je moguća samo na otvorenoj smjeni.')
+        messages.error(request, _('Polog/isplata je moguća samo na otvorenoj smjeni.'))
         return redirect('pos:session_detail', session_id=session_id)
 
     if request.method == 'POST':
@@ -2903,7 +2903,7 @@ def cash_deposit(request, session_id):
             dtype  = request.POST.get('deposit_type', 'deposit')
             note   = request.POST.get('note', '')
             if amount <= 0:
-                messages.error(request, 'Iznos mora biti pozitivan.')
+                messages.error(request, _('Iznos mora biti pozitivan.'))
             else:
                 CashDeposit.objects.create(
                     session=session,
@@ -2947,7 +2947,7 @@ def cashier_full_report(request, session_id):
     try:
         context = ReportingService.generate_cashier_report(session, company)
     except ReportingError:
-        messages.warning(request, 'Smjena mora biti zatvorena za generiranje izvještaja.')
+        messages.warning(request, _('Smjena mora biti zatvorena za generiranje izvještaja.'))
         return redirect('pos:session_detail', session_id=session_id)
 
     fmt = request.GET.get('format', 'html')
@@ -3320,7 +3320,7 @@ def voucher_list(request):
             if amount <= 0:
                 raise ValueError('Iznos mora biti > 0')
         except Exception:
-            messages.error(request, 'Nevažeći iznos.')
+            messages.error(request, _('Nevažeći iznos.'))
             return redirect('pos:voucher_list')
 
         expiry = None
@@ -3329,7 +3329,7 @@ def voucher_list(request):
                 from datetime import datetime
                 expiry = datetime.strptime(expiry_str, '%Y-%m-%d').date()
             except ValueError:
-                messages.error(request, 'Nevažeći datum isteka.')
+                messages.error(request, _('Nevažeći datum isteka.'))
                 return redirect('pos:voucher_list')
 
         year = date.today().year
@@ -3941,14 +3941,14 @@ def yesterday_manage(request):
                     added += 1
                 except Exception as e:
                     messages.error(request, str(e)[:100])
-            messages.success(request, '%d artikala dodano u "Roba od jučer".' % added)
+            messages.success(request, _('%d artikala dodano u "Roba od jučer".') % added)
 
         elif action == 'deactivate':
             dd_id = request.POST.get('dd_id')
             cursor = _conn.cursor()
             cursor.execute('UPDATE pos_dailydiscount SET is_active = FALSE WHERE id = %s AND company_id = %s',
                            [dd_id, str(company.id)])
-            messages.success(request, 'Uklonjeno iz ponude.')
+            messages.success(request, _('Uklonjeno iz ponude.'))
 
         return redirect('pos:yesterday_manage')
 
@@ -4454,7 +4454,7 @@ def improvement_list(request):
                 except Exception:
                     pass
 
-            messages.success(request, 'Prijavljeno! Haiku i Gemini analiziraju...')
+            messages.success(request, _('Prijavljeno! Haiku i Gemini analiziraju...'))
             return redirect('pos:improvement_list')
 
     return render(request, 'pos/improvement_list.html', {
@@ -4494,7 +4494,7 @@ def onboarding_wizard(request):
     """
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema tvrtke.')
+        messages.error(request, _('Nema tvrtke.'))
         return redirect('core:dashboard')
 
     from inventory.models import InventoryItem
@@ -4554,7 +4554,7 @@ def cashier_setup(request):
     Koristi se iz onboarding wizarda i POS settings."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nema tvrtke.')
+        messages.error(request, _('Nema tvrtke.'))
         return redirect('core:dashboard')
 
     error = None
@@ -5616,10 +5616,10 @@ def pp_mi_po_report(request):
     try:
         pos_settings = company.pos_settings
         if not pos_settings.consumption_tax_active:
-            messages.warning(request, 'Porez na potrošnju nije aktiviran za ovu tvrtku.')
+            messages.warning(request, _('Porez na potrošnju nije aktiviran za ovu tvrtku.'))
             return redirect('pos_dashboard')
     except Exception:
-        messages.error(request, 'POS postavke nisu konfigurirane.')
+        messages.error(request, _('POS postavke nisu konfigurirane.'))
         return redirect('pos_dashboard')
 
     # Mjesec/godina iz parametara (default: prethodni mjesec)

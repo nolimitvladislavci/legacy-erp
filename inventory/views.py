@@ -321,7 +321,7 @@ def goods_receipt_confirm(request, pk):
     company = get_current_company()
     receipt = get_object_or_404(GoodsReceipt, pk=pk, company=company)
     if receipt.status != 'draft':
-        messages.error(request, 'Primka nije u statusu Nacrt.')
+        messages.error(request, _('Primka nije u statusu Nacrt.'))
         return redirect('inventory:receipt_detail', pk=pk)
     try:
         receipt.confirm()
@@ -606,7 +606,7 @@ def kalo_view(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('item_ids')
         if not item_ids:
-            messages.warning(request, 'Nijedan artikl nije odabran.')
+            messages.warning(request, _('Nijedan artikl nije odabran.'))
             return redirect('inventory:kalo')
 
         month_label = now().strftime('%Y-%m')
@@ -937,7 +937,7 @@ def trigger_reorder(request):
     if request.method == 'POST':
         from inventory.tasks import predictive_reorder_check
         predictive_reorder_check.delay()
-        messages.success(request, 'Prediktivna analiza pokrenuta. Rezultati će biti dostupni uskoro.')
+        messages.success(request, _('Prediktivna analiza pokrenuta. Rezultati će biti dostupni uskoro.'))
     return redirect('inventory:reorder_predictions')
 
 
@@ -1050,7 +1050,7 @@ def transfer_create(request):
         src_id = request.POST.get('source_warehouse')
         dst_id = request.POST.get('destination_warehouse')
         if src_id == dst_id:
-            messages.error(request, 'Izvor i odrediste ne mogu biti isti.')
+            messages.error(request, _('Izvor i odrediste ne mogu biti isti.'))
             return redirect('inventory:transfer_create')
 
         # Auto-broj: MS-YYYY-NNNN
@@ -1095,7 +1095,7 @@ def transfer_create(request):
                 except (ValueError, TypeError):
                     pass
 
-        messages.success(request, 'Medjuskladisnica %s kreirana (%d stavki).' % (transfer_number, items_added))
+        messages.success(request, _('Medjuskladisnica %s kreirana (%d stavki).') % (transfer_number, items_added))
         return redirect('inventory:transfer_detail', pk=transfer.pk)
 
     items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')
@@ -1127,7 +1127,7 @@ def transfer_confirm(request, pk):
     transfer = get_object_or_404(WarehouseTransfer, pk=pk, company=company)
     try:
         transfer.confirm(user=request.user)
-        messages.success(request, 'Izdatnica %s potvrdjena. Roba u prijenosu.' % transfer.transfer_number)
+        messages.success(request, _('Izdatnica %s potvrdjena. Roba u prijenosu.') % transfer.transfer_number)
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('inventory:transfer_detail', pk=pk)
@@ -1194,7 +1194,7 @@ def inventura_create(request):
                         pass
         # Generiraj stavke
         inv.start_counting()
-        messages.success(request, 'Inventura %s pokrenuta — %d artikala.' % (inv.inventura_number, inv.total_items))
+        messages.success(request, _('Inventura %s pokrenuta — %d artikala.') % (inv.inventura_number, inv.total_items))
         return redirect('inventory:inventura_detail', pk=inv.pk)
 
     warehouses = Warehouse.objects.filter(company=company) if company else Warehouse.objects.none()
@@ -1256,7 +1256,7 @@ def inventura_count(request, pk):
     from .models import Inventura
     inv = get_object_or_404(Inventura, pk=pk, company=company)
     if inv.status not in ('counting', 'in_progress'):
-        messages.warning(request, 'Inventura nije u statusu brojanja.')
+        messages.warning(request, _('Inventura nije u statusu brojanja.'))
         return redirect('inventory:inventura_detail', pk=pk)
 
     uncounted = inv.items.filter(counted_at__isnull=True).select_related('inventory_item').count()
@@ -1476,7 +1476,7 @@ def inventura_complete(request, pk):
     inv = get_object_or_404(Inventura, pk=pk, company=company)
     try:
         inv.complete(user=request.user)
-        messages.success(request, 'Inventura %s završena.' % inv.inventura_number)
+        messages.success(request, _('Inventura %s završena.') % inv.inventura_number)
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('inventory:inventura_detail', pk=pk)
@@ -1491,7 +1491,7 @@ def inventura_approve(request, pk):
     inv = get_object_or_404(Inventura, pk=pk, company=company)
     try:
         inv.approve_and_adjust(user=request.user)
-        messages.success(request, 'Inventura %s odobrena. Zalihe korigirane.' % inv.inventura_number)
+        messages.success(request, _('Inventura %s odobrena. Zalihe korigirane.') % inv.inventura_number)
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('inventory:inventura_detail', pk=pk)
@@ -1633,7 +1633,7 @@ def transfer_receive(request, pk):
     transfer = get_object_or_404(WarehouseTransfer, pk=pk, company=company)
     try:
         transfer.receive(user=request.user)
-        messages.success(request, 'Roba zaprimljena u %s.' % transfer.destination_warehouse.name)
+        messages.success(request, _('Roba zaprimljena u %s.') % transfer.destination_warehouse.name)
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('inventory:transfer_detail', pk=pk)

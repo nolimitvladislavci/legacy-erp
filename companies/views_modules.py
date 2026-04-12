@@ -172,7 +172,7 @@ def company_modules(request):
             if count:
                 messages.success(request, f'Aktivirano {count} preporučenih modula!')
             else:
-                messages.info(request, 'Svi preporučeni moduli su već aktivni.')
+                messages.info(request, _('Svi preporučeni moduli su već aktivni.'))
             return redirect('companies:company_modules')
 
     active_keys = get_active_modules(company)

@@ -15,7 +15,7 @@
   <div class="mb-3 d-flex gap-2 align-items-center">
     <form method="get" class="d-flex gap-2">
       <select name="year" class="form-select form-select-sm bg-dark border-secondary text-white" style="width:120px">
-        {% for y in "2024,2025,2026,2027"|split:"," %}
+        {% for y in years_range %}
         <option value="{{ y }}" {% if y == year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
         {% endfor %}
       </select>

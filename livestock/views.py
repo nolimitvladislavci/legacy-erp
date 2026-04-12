@@ -120,7 +120,7 @@ def vet_quick_entry(request, farm_token):
         ear_tag = request.POST.get('ear_tag')
         animal = Livestock.objects.filter(company=company, ear_tag=ear_tag).first()
         if not animal:
-            messages.error(request, 'Grlo nije pronadjeno: %s' % ear_tag)
+            messages.error(request, _('Grlo nije pronadjeno: %s') % ear_tag)
             return redirect('livestock:vet_quick_entry', farm_token=farm_token)
 
         HealthRecord.objects.create(
@@ -168,7 +168,7 @@ def vet_quick_entry(request, farm_token):
         except Exception:
             pass
 
-        messages.success(request, 'Tretman zabilje\u017een za %s' % ear_tag)
+        messages.success(request, _('Tretman zabilje\u017een za %s') % ear_tag)
         return redirect('livestock:vet_quick_entry', farm_token=farm_token)
 
     return render(request, 'livestock/vet_quick_entry.html', {
@@ -429,17 +429,17 @@ def token_management(request):
                 scope=request.POST.get('scope', 'hapih'),
                 created_by=request.user,
             )
-            messages.success(request, 'Token kreiran!')
+            messages.success(request, _('Token kreiran!'))
         elif action == 'revoke':
             pk = request.POST.get('token_id')
             InstitutionalAccessToken.objects.filter(pk=pk, company=company).update(is_active=False)
-            messages.success(request, 'Token opozvan.')
+            messages.success(request, _('Token opozvan.'))
         elif action == 'regenerate':
             pk = request.POST.get('token_id')
             t = InstitutionalAccessToken.objects.filter(pk=pk, company=company).first()
             if t:
                 t.regenerate()
-                messages.success(request, 'Novi token generiran.')
+                messages.success(request, _('Novi token generiran.'))
         return redirect('livestock:token_management')
 
     tokens = InstitutionalAccessToken.objects.filter(company=company).order_by('-created_at')

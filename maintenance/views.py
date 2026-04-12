@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import JsonResponse
 from django.db.models import Q, Sum, Count
 from django.utils import timezone
@@ -144,7 +145,7 @@ def asset_edit(request, pk):
         else:
             asset.assigned_to = None
         asset.save()
-        messages.success(request, 'Imovina azurirana.')
+        messages.success(request, _('Imovina azurirana.'))
         return redirect('maintenance:asset_detail', pk=asset.pk)
     from django.contrib.auth.models import User
     users = User.objects.filter(is_active=True)
@@ -201,7 +202,7 @@ def add_maintenance_log(request, pk):
         if schedule_id:
             log.schedule = MaintenanceSchedule.objects.filter(id=schedule_id, asset=asset).first()
         log.save()
-        messages.success(request, 'Servisni zapis dodan.')
+        messages.success(request, _('Servisni zapis dodan.'))
         return redirect('maintenance:asset_detail', pk=asset.pk)
     schedules = asset.schedules.filter(is_active=True)
     return render(request, 'maintenance/add_log.html', {
@@ -230,7 +231,7 @@ def add_schedule(request, pk):
         if notify:
             sched.notify_days_before = int(notify)
         sched.save()
-        messages.success(request, 'Raspored odrzavanja dodan.')
+        messages.success(request, _('Raspored odrzavanja dodan.'))
         return redirect('maintenance:asset_detail', pk=asset.pk)
     return render(request, 'maintenance/add_schedule.html', {
         'asset': asset, 'frequencies': MaintenanceSchedule.FREQUENCY_CHOICES,
@@ -319,5 +320,5 @@ def run_depreciation(request):
     if entries:
         messages.success(request, f'Amortizacija provedena za {len(entries)} sredstava.')
     else:
-        messages.info(request, 'Nema sredstava za amortizaciju ili vec provedena.')
+        messages.info(request, _('Nema sredstava za amortizaciju ili vec provedena.'))
     return redirect('maintenance:asset_register')

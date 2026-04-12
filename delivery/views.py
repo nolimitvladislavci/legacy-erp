@@ -20,6 +20,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
 from .models import (
@@ -854,7 +855,7 @@ def transport_order_create(request):
 
         issues = order.verify_documents()
         if issues:
-            messages.warning(request, 'Nalog kreiran, ali postoje problemi s dokumentima: ' + '; '.join(issues))
+            messages.warning(request, _('Nalog kreiran, ali postoje problemi s dokumentima: ') + '; '.join(issues))
         else:
             messages.success(request, f'Transportni nalog {order.order_number} kreiran.')
         return redirect('delivery:transport_detail', pk=order.pk)

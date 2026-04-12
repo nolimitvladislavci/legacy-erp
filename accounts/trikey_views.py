@@ -74,7 +74,7 @@ def trikey_login(request):
         pin = request.POST.get('pin', '').strip()
 
         if not email or not pin:
-            messages.error(request, 'Email i PIN su obavezni.')
+            messages.error(request, _('Email i PIN su obavezni.'))
             return render(request, 'accounts/trikey_login.html')
 
         # Find user by email
@@ -82,7 +82,7 @@ def trikey_login(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            messages.error(request, 'Neispravan email ili PIN.')
+            messages.error(request, _('Neispravan email ili PIN.'))
             return render(request, 'accounts/trikey_login.html')
 
         # Get or create TriKey profile
@@ -125,13 +125,13 @@ def pin_setup(request):
         pin_confirm = request.POST.get('pin_confirm', '').strip()
 
         if pin != pin_confirm:
-            messages.error(request, 'PIN-ovi se ne podudaraju.')
+            messages.error(request, _('PIN-ovi se ne podudaraju.'))
         elif len(pin) != 6 or not pin.isdigit():
-            messages.error(request, 'PIN mora biti točno 6 znamenki.')
+            messages.error(request, _('PIN mora biti točno 6 znamenki.'))
         else:
             try:
                 trikey.set_pin(pin)
-                messages.success(request, 'PIN uspješno postavljen! 🔑')
+                messages.success(request, _('PIN uspješno postavljen! 🔑'))
                 return redirect('accounts:trikey_status')
             except ValueError as e:
                 messages.error(request, str(e))
@@ -256,7 +256,7 @@ def business_key_register(request):
     if registered:
         messages.success(request, f'Registrirano: {", ".join(registered)} 🔑')
     else:
-        messages.warning(request, 'Niste unijeli niti certifikat niti API ključ.')
+        messages.warning(request, _('Niste unijeli niti certifikat niti API ključ.'))
 
     return redirect('accounts:trikey_status')
 
@@ -292,17 +292,17 @@ def pin_recovery(request):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        messages.error(request, 'Email nije pronađen.')
+        messages.error(request, _('Email nije pronađen.'))
         return render(request, 'accounts/pin_recovery.html')
 
     trikey = TriKeyProfile.objects.filter(user=user).first()
     if not trikey:
-        messages.error(request, 'TriKey profil ne postoji.')
+        messages.error(request, _('TriKey profil ne postoji.'))
         return render(request, 'accounts/pin_recovery.html')
 
     # Verify business key
     if not trikey.verify_business_key(api_key=api_key):
-        messages.error(request, 'Neispravan Business Key.')
+        messages.error(request, _('Neispravan Business Key.'))
         return render(request, 'accounts/pin_recovery.html')
 
     # Generate new PIN and send via email
@@ -318,7 +318,7 @@ def pin_recovery(request):
         fail_silently=True,
     )
 
-    messages.success(request, 'Novi PIN poslan na email. Provjerite inbox.')
+    messages.success(request, _('Novi PIN poslan na email. Provjerite inbox.'))
     return redirect('accounts:trikey_login')
 
 
@@ -362,7 +362,7 @@ def quick_login(request):
         pin = request.POST.get('pin', '').strip()
 
         if not user_id or not pin:
-            messages.error(request, 'Odaberite ime i unesite PIN.')
+            messages.error(request, _('Odaberite ime i unesite PIN.'))
             return render(request, 'accounts/quick_login.html', {
                 'users': users, 'company': company,
             })
@@ -371,7 +371,7 @@ def quick_login(request):
         try:
             user = User.objects.get(pk=user_id, is_active=True)
         except User.DoesNotExist:
-            messages.error(request, 'Korisnik nije pronađen.')
+            messages.error(request, _('Korisnik nije pronađen.'))
             return render(request, 'accounts/quick_login.html', {
                 'users': users, 'company': company,
             })

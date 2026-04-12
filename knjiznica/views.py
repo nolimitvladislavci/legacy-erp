@@ -4,6 +4,7 @@ from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from datetime import timedelta
 from decimal import Decimal
@@ -220,7 +221,7 @@ def loan_create(request):
 
         meta = getattr(item, 'book_meta', None)
         if meta and meta.is_reference:
-            messages.error(request, 'Referentna građa se ne posuđuje.')
+            messages.error(request, _('Referentna građa se ne posuđuje.'))
             return redirect('knjiznica:loan_create')
 
         can_borrow, reason = member.can_borrow
@@ -269,7 +270,7 @@ def loan_return(request, pk):
     loan = get_object_or_404(BookLoan, pk=pk, company=company)
 
     if loan.status not in ('borrowed', 'overdue'):
-        messages.error(request, 'Ova posudba nije aktivna.')
+        messages.error(request, _('Ova posudba nije aktivna.'))
         return redirect('knjiznica:dashboard')
 
     if request.method == 'POST':
@@ -278,7 +279,7 @@ def loan_return(request, pk):
         if loan.fine_total > 0:
             messages.warning(request, f'Knjiga vraćena s kaznama: {loan.fine_total}€')
         else:
-            messages.success(request, 'Knjiga vraćena. Nema kazni.')
+            messages.success(request, _('Knjiga vraćena. Nema kazni.'))
 
         reservation = BookReservation.objects.filter(
             item=loan.item, company=company, status='waiting'
@@ -323,7 +324,7 @@ def reservation_create(request):
             member=member, item=item, company=company, status='waiting'
         ).exists()
         if existing:
-            messages.error(request, 'Član već čeka ovu knjigu.')
+            messages.error(request, _('Član već čeka ovu knjigu.'))
             return redirect('knjiznica:catalog_list')
 
         BookReservation.objects.create(

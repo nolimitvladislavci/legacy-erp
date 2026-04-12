@@ -179,23 +179,297 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
-<!-- Add Employee Modal -->
-<div class="modal fade" id="addEmployeeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
-  <div class="modal-header"><h6 class="modal-title">Novi zaposlenik</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-  <form id="addEmployeeForm" method="post" action="{% url 'companies:employee_create' %}" onsubmit="return ajaxPost(this)">
-  {% csrf_token %}
-  <div class="modal-body">
-    <div class="row g-2">
-      <div class="col-6"><label class="form-label f-form-label-sm">Ime</label><input type="text" name="first_name" class="form-control" required></div>
-      <div class="col-6"><label class="form-label f-form-label-sm">Prezime</label><input type="text" name="last_name" class="form-control" required></div>
-      <div class="col-12"><label class="form-label f-form-label-sm">Email</label><input type="email" name="email" class="form-control" required></div>
-      <div class="col-6"><label class="form-label f-form-label-sm">Telefon</label><input type="text" name="phone" class="form-control"></div>
-      <div class="col-6"><label class="form-label f-form-label-sm">Uloga</label><select name="role" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+<!-- Add Employee Modal — novi, inženjerski pristup -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="background:var(--bg-card,#1e293b);border:1px solid var(--border,#334155)">
+      <div class="modal-header" style="border-color:var(--border,#334155)">
+        <div>
+          <h6 class="modal-title fx-text-gold fx-fw-bold mb-0">
+            <i class="fas fa-user-plus me-2"></i>Novi član tima
+          </h6>
+          <div style="font-size:.72rem;color:var(--text-muted,#94a3b8);margin-top:2px">
+            Jedan unos — odaberi atribute koje osoba ima
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="addEmployeeForm" method="post" action="{% url 'companies:employee_create' %}" onsubmit="return submitEmployee(this)">
+      {% csrf_token %}
+      <div class="modal-body" style="padding:24px">
+
+        <!-- AI hint -->
+        <div id="empAiHint" style="display:none;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.82rem;color:var(--text-muted,#94a3b8)">
+          <i class="fas fa-robot me-2" style="color:#c9a84c"></i>
+          <span id="empAiHintText"></span>
+        </div>
+
+        <!-- BLOK 1: Identitet -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted,#94a3b8);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-id-card" style="color:#c9a84c"></i> Identitet
+          </div>
+          <div class="row g-2">
+            <div class="col-5">
+              <label class="form-label f-form-label-sm">Ime *</label>
+              <input type="text" name="first_name" id="empFirstName" class="form-control" required autofocus>
+            </div>
+            <div class="col-7">
+              <label class="form-label f-form-label-sm">Prezime *</label>
+              <input type="text" name="last_name" id="empLastName" class="form-control" required>
+            </div>
+            <div class="col-8">
+              <label class="form-label f-form-label-sm">Email *</label>
+              <input type="email" name="email" id="empEmail" class="form-control" required
+                     placeholder="Sustav šalje pozivnicu automatski">
+            </div>
+            <div class="col-4">
+              <label class="form-label f-form-label-sm">Telefon</label>
+              <input type="text" name="phone" class="form-control" placeholder="+385...">
+            </div>
+            <div class="col-6">
+              <label class="form-label f-form-label-sm">OIB</label>
+              <div style="position:relative">
+                <input type="text" name="tax_id" id="empOib" class="form-control" maxlength="11"
+                       inputmode="numeric" placeholder="11 znamenki"
+                       oninput="this.value=this.value.replace(/\D/g,'');empOibCheck()">
+                <span id="empOibIcon" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.8rem"></span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label f-form-label-sm">IBAN</label>
+              <input type="text" name="bank_account" class="form-control" placeholder="HR...">
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOK 2: Atributi — checkboxovi -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted,#94a3b8);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-tags" style="color:#c9a84c"></i> Atributi — što ova osoba ima u sustavu
+          </div>
+          <div class="row g-2">
+
+            <div class="col-6">
+              <label class="emp-attr-card" id="attrAdmin">
+                <input type="checkbox" name="attr_admin" value="1" onchange="attrChanged()">
+                <div class="emp-attr-inner">
+                  <i class="fas fa-crown"></i>
+                  <div>
+                    <strong>Admin</strong>
+                    <span>Vidi i mijenja sve postavke firme</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="col-6">
+              <label class="emp-attr-card" id="attrWorker">
+                <input type="checkbox" name="attr_worker" value="1" checked onchange="attrChanged()">
+                <div class="emp-attr-inner">
+                  <i class="fas fa-hard-hat"></i>
+                  <div>
+                    <strong>Radnik</strong>
+                    <span>Evidencija radnog vremena i plaća</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="col-6">
+              <label class="emp-attr-card" id="attrAccountant">
+                <input type="checkbox" name="attr_accountant" value="1" onchange="attrChanged()">
+                <div class="emp-attr-inner">
+                  <i class="fas fa-calculator"></i>
+                  <div>
+                    <strong>Računovođa</strong>
+                    <span>Pristup knjiženjima i PDV obrascima</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="col-6">
+              <label class="emp-attr-card" id="attrManager">
+                <input type="checkbox" name="attr_manager" value="1" onchange="attrChanged()">
+                <div class="emp-attr-inner">
+                  <i class="fas fa-sitemap"></i>
+                  <div>
+                    <strong>Voditelj</strong>
+                    <span>Odobrava radne sate tima</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- BLOK 3: Plaća — prikazuje se samo ako attr_worker čekiran -->
+        <div id="payrollBlock" style="margin-bottom:4px">
+          <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted,#94a3b8);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-euro-sign" style="color:#c9a84c"></i> Plaća i radno vrijeme
+          </div>
+          <div class="row g-2">
+            <div class="col-4">
+              <label class="form-label f-form-label-sm">Satnica (€)</label>
+              <input type="number" name="hourly_rate" class="form-control" value="20.00" step="0.01" min="0">
+            </div>
+            <div class="col-4">
+              <label class="form-label f-form-label-sm">Tjed. sati</label>
+              <input type="number" name="weekly_hours" class="form-control" value="40" step="0.5" min="0">
+            </div>
+            <div class="col-4">
+              <label class="form-label f-form-label-sm">Osobni odbitak (€)</label>
+              <input type="number" name="personal_allowance" class="form-control" value="560.00" step="0.01">
+            </div>
+            <div class="col-6">
+              <label class="form-label f-form-label-sm">Radno mjesto</label>
+              <input type="text" name="position" class="form-control" placeholder="npr. Računovođa">
+            </div>
+            <div class="col-6">
+              <label class="form-label f-form-label-sm">Datum zaposlenja</label>
+              <input type="date" name="date_hired" class="form-control">
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;color:var(--text-muted,#94a3b8)">
+              <input type="checkbox" name="is_volunteer" value="1" style="accent-color:#c9a84c">
+              Volonter (Zakon o volontiranju NN 58/07) — isključuje iz obračuna plaća
+            </label>
+          </div>
+        </div>
+
+        <!-- Info: što se automatski događa -->
+        <div id="empSummary" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 14px;font-size:.78rem;color:var(--text-muted,#94a3b8);margin-top:16px">
+          <i class="fas fa-check-circle me-2" style="color:#22c55e"></i>
+          <span id="empSummaryText">Kreira se korisnički račun + evidencija radnog vremena. Sustav šalje pozivnicu s privremenom lozinkom.</span>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="border-color:var(--border,#334155);justify-content:space-between">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+        <button type="submit" class="btn-gold" style="padding:8px 24px;font-size:.88rem;width:auto">
+          <i class="fas fa-user-plus me-1"></i> Dodaj člana tima
+        </button>
+      </div>
+      </form>
     </div>
   </div>
-  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Kreiraj</button></div>
-  </form>
-</div></div></div>
+</div>
+
+<style>
+.emp-attr-card {
+  display:block;cursor:pointer;
+  background:var(--bg-card,#111827);
+  border:2px solid var(--border,#334155);
+  border-radius:10px;padding:12px;
+  transition:all .2s;
+  user-select:none;
+}
+.emp-attr-card:has(input:checked) {
+  border-color:#c9a84c;
+  background:rgba(201,168,76,.08);
+}
+.emp-attr-card input[type=checkbox] { display:none; }
+.emp-attr-inner {
+  display:flex;align-items:flex-start;gap:10px;
+}
+.emp-attr-inner i {
+  font-size:1.2rem;color:var(--text-muted,#94a3b8);
+  width:20px;flex-shrink:0;margin-top:2px;transition:color .2s;
+}
+.emp-attr-card:has(input:checked) .emp-attr-inner i { color:#c9a84c; }
+.emp-attr-inner strong { display:block;font-size:.85rem;color:var(--text,#fff); }
+.emp-attr-inner span { font-size:.72rem;color:var(--text-muted,#94a3b8); }
+</style>
+
+<script>
+function attrChanged(){
+  var isWorker   = document.querySelector('[name=attr_worker]').checked;
+  var isAdmin    = document.querySelector('[name=attr_admin]').checked;
+  var isAcct     = document.querySelector('[name=attr_accountant]').checked;
+  var isMgr      = document.querySelector('[name=attr_manager]').checked;
+
+  // Payroll blok
+  document.getElementById('payrollBlock').style.display = isWorker ? '' : 'none';
+
+  // Role hidden field — prioritet: admin > racunovodja > voditelj > radnik
+  var role = 'worker';
+  if (isAdmin) role = 'company_admin';
+  else if (isAcct) role = 'racunovodja';
+  else if (isMgr) role = 'project_manager';
+
+  var roleEl = document.querySelector('[name=role]');
+  if (!roleEl){
+    roleEl = document.createElement('input');
+    roleEl.type = 'hidden'; roleEl.name = 'role';
+    document.getElementById('addEmployeeForm').appendChild(roleEl);
+  }
+  roleEl.value = role;
+
+  // Manager flag
+  var mgrEl = document.querySelector('[name=is_manager]');
+  if (!mgrEl){
+    mgrEl = document.createElement('input');
+    mgrEl.type = 'hidden'; mgrEl.name = 'is_manager';
+    document.getElementById('addEmployeeForm').appendChild(mgrEl);
+  }
+  mgrEl.value = isMgr ? '1' : '0';
+
+  // Summary tekst
+  var parts = [];
+  if (isAdmin)  parts.push('admin firme');
+  if (isWorker) parts.push('radnik (plaća + sati)');
+  if (isAcct)   parts.push('računovođa');
+  if (isMgr)    parts.push('voditelj tima');
+  var txt = parts.length
+    ? 'Kreira se: ' + parts.join(' + ') + '. Sustav šalje pozivnicu s privremenom lozinkom.'
+    : 'Odaberi barem jedan atribut.';
+  document.getElementById('empSummaryText').textContent = txt;
+
+  // AI hint
+  var hint = '';
+  if (isAdmin && isWorker)
+    hint = '💡 Vlasnik ili direktorica? Tipično za osobu koja i upravlja i prima plaću.';
+  else if (isAcct && isWorker)
+    hint = '💡 Računovođa-radnik: ima pristup knjiženjima i vidi svoje radne sate.';
+  else if (isMgr && isWorker)
+    hint = '💡 Voditelj koji i sam radi: odobrava sate tima i bilježi vlastite.';
+
+  var hintEl = document.getElementById('empAiHint');
+  if (hint){
+    document.getElementById('empAiHintText').textContent = hint;
+    hintEl.style.display = '';
+  } else {
+    hintEl.style.display = 'none';
+  }
+}
+
+function empOibCheck(){
+  var v = document.getElementById('empOib').value;
+  var icon = document.getElementById('empOibIcon');
+  if (v.length === 11){
+    icon.textContent = '✓';
+    icon.style.color = '#22c55e';
+  } else {
+    icon.textContent = v.length + '/11';
+    icon.style.color = '#64748b';
+  }
+}
+
+function submitEmployee(form){
+  // Provjeri barem 1 atribut
+  var anyAttr = ['attr_admin','attr_worker','attr_accountant','attr_manager']
+    .some(n => form.querySelector('[name='+n+']').checked);
+  if (!anyAttr){ alert('Odaberi barem jedan atribut.'); return false; }
+  return ajaxPost(form);
+}
+
+// Init
+attrChanged();
+</script>
 
 <!-- Edit Employee Modal -->
 <div class="modal fade" id="editEmployeeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">

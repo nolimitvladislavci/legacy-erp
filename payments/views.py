@@ -41,7 +41,8 @@ def payment_settings(request):
         config.default_currency = request.POST.get('default_currency', 'EUR').strip()
         config.save()
         from django.contrib import messages
-        messages.success(request, 'Postavke placanja spremljene.')
+        from django.utils.translation import gettext as _
+        messages.success(request, _('Postavke placanja spremljene.'))
         return redirect('payments:settings')
 
     payments_recent = Payment.objects.filter(company=company).order_by('-created_at')[:20]

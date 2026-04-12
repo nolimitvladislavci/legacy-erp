@@ -55,7 +55,7 @@ def bank_account_create(request):
         is_primary = request.POST.get('is_primary') == 'on'
 
         if not iban or not name:
-            messages.error(request, 'IBAN i naziv su obavezni.')
+            messages.error(request, _('IBAN i naziv su obavezni.'))
             return redirect('konto:bank_dashboard')
 
         # Link to konto 1000
@@ -101,7 +101,7 @@ def bank_upload(request):
         account_id = request.POST.get('account_id')
 
         if not uploaded_file:
-            messages.error(request, 'Odaberite datoteku bankovnog izvoda.')
+            messages.error(request, _('Odaberite datoteku bankovnog izvoda.'))
             return redirect('konto:bank_upload')
 
         # Resolve bank account
@@ -141,7 +141,7 @@ def bank_upload(request):
                 created = parse_mt940(content, account, company)
                 fmt_label = 'MT940'
             else:
-                messages.error(request, 'Nepoznat format datoteke. Podrzano: XML (camt.053), CSV, MT940.')
+                messages.error(request, _('Nepoznat format datoteke. Podrzano: XML (camt.053), CSV, MT940.'))
                 return redirect('konto:bank_upload')
 
             # Count results
@@ -153,7 +153,7 @@ def bank_upload(request):
                     f'Uvezeno {num_created} transakcija iz {fmt_label} formata.')
             else:
                 messages.info(request,
-                    'Nema novih transakcija za uvoz (sve vec postoje ili datoteka prazna).')
+                    _('Nema novih transakcija za uvoz (sve vec postoje ili datoteka prazna).'))
 
             # Auto-reconcile after import
             try:
@@ -232,7 +232,7 @@ def bank_reconcile(request, pk):
         elif action == 'ignore':
             tx.status = 'ignored'
             tx.save(update_fields=['status'])
-            messages.info(request, 'Transakcija ignorirana.')
+            messages.info(request, _('Transakcija ignorirana.'))
 
         return redirect('konto:bank_dashboard')
 

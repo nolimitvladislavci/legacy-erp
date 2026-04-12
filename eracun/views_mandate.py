@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 
 logger = logging.getLogger('eracun.mandate')
@@ -82,7 +83,7 @@ def mandate_activate(request, pk):
 
     mandate = get_object_or_404(Mandate, pk=pk)
     if mandate.status not in ('draft', 'signed'):
-        messages.error(request, 'Mandat nije u statusu za aktivaciju.')
+        messages.error(request, _('Mandat nije u statusu za aktivaciju.'))
         return redirect('eracun:mandate_list')
 
     mandate.status = MandateStatus.ACTIVE

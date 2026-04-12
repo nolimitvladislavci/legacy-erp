@@ -4,6 +4,7 @@ Virtualni Ured — views.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Count, Q
@@ -123,7 +124,7 @@ def mail_upload_scan(request, pk):
         mail.processed_by = request.user
         mail.processed_at = timezone.now()
         mail.save()
-        messages.success(request, 'Sken uploadan.')
+        messages.success(request, _('Sken uploadan.'))
 
     return redirect('virtual_office:detail', pk=pk)
 
@@ -137,5 +138,5 @@ def mail_archive(request, pk):
     mail = get_object_or_404(IncomingMail, pk=pk, company=company)
     mail.status = 'archived'
     mail.save(update_fields=['status'])
-    messages.success(request, 'Posta arhivirana.')
+    messages.success(request, _('Posta arhivirana.'))
     return redirect('virtual_office:dashboard')

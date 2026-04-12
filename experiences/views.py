@@ -176,7 +176,7 @@ def booking_create(request, schedule_pk):
     company = get_user_company(request)
 
     if not schedule.is_bookable:
-        messages.error(request, 'Termin je popunjen ili zatvoren.')
+        messages.error(request, _('Termin je popunjen ili zatvoren.'))
         return redirect('experiences:experience_detail', pk=schedule.experience.pk)
 
     if request.method == 'POST':
@@ -329,7 +329,7 @@ def review_create(request, pk):
     booking = get_object_or_404(ExperienceBooking, pk=pk, status='completed')
 
     if hasattr(booking, 'review'):
-        messages.info(request, 'Ocjena već postoji.')
+        messages.info(request, _('Ocjena već postoji.'))
         return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
 
     if request.method == 'POST':
@@ -339,7 +339,7 @@ def review_create(request, pk):
             text=request.POST.get('text', ''),
         )
         review.save()
-        messages.success(request, 'Hvala na ocjeni!')
+        messages.success(request, _('Hvala na ocjeni!'))
         return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
 
     return render(request, 'experiences/review_form.html', {'booking': booking})

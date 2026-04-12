@@ -4,6 +4,7 @@ Permission decorators for views
 from functools import wraps
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
 
@@ -88,7 +89,7 @@ def require_any_permission(*permission_codenames, company_param='company_id'):
             )
 
             if not has_perm:
-                messages.error(request, 'Nemate potrebne dozvole')
+                messages.error(request, _('Nemate potrebne dozvole'))
                 return HttpResponseForbidden('Permission denied')
 
             return view_func(request, *args, **kwargs)
@@ -139,7 +140,7 @@ def require_role(*role_types):
                         return view_func(request, *args, **kwargs)
                 except Exception:
                     pass
-                messages.error(request, 'Nemate odgovarajucu ulogu')
+                messages.error(request, _('Nemate odgovarajucu ulogu'))
                 return HttpResponseForbidden('Insufficient role')
 
             return view_func(request, *args, **kwargs)

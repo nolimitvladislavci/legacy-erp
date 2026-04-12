@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -70,7 +71,7 @@ def field_start(request, terminal_id):
                 item.save(update_fields=['quantity'])
 
         if not loaded:
-            messages.error(request, 'Morate utovariti barem jedan artikl.')
+            messages.error(request, _('Morate utovariti barem jedan artikl.'))
             return redirect('pos:field_start', terminal_id=terminal_id)
 
         # Create session
@@ -124,7 +125,7 @@ def field_start(request, terminal_id):
         except Exception as e:
             logger.warning('Otpremnica creation failed: %s', e)
 
-        messages.success(request, 'Terenska smjena otvorena! Ruta: ' + route)
+        messages.success(request, _('Terenska smjena otvorena! Ruta: ') + route)
         return redirect('pos:field_dashboard', session_id=session.pk)
 
     return render(request, 'pos/field_start.html', {
@@ -283,5 +284,5 @@ def field_return(request, session_id):
     except Exception:
         pass
 
-    messages.success(request, 'Terenska smjena zatvorena. Povrat: ' + str(len(returned)) + ' artikala.')
+    messages.success(request, _('Terenska smjena zatvorena. Povrat: ') + str(len(returned)) + ' artikala.')
     return redirect('pos:field_dashboard', session_id=session.pk)

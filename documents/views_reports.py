@@ -713,7 +713,7 @@ def revizija_export(request):
     date_to = request.POST.get('date_to', '')
 
     if not company_id or not date_from or not date_to:
-        messages.error(request, 'Sva polja su obavezna.')
+        messages.error(request, _('Sva polja su obavezna.'))
         return redirect('documents:revizija')
 
     company = get_object_or_404(Company, pk=company_id)

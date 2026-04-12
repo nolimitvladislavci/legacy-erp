@@ -223,6 +223,20 @@
         </button>
     </form>
 
+    <!-- PIN brzi ulaz -->
+    <div style="text-align:center;margin:16px 0 8px;padding:14px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:10px">
+      <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;font-weight:700;margin-bottom:6px">
+        <i class="fas fa-hashtag me-1"></i> Brzi ulaz s PIN-om
+      </div>
+      <div style="font-size:.78rem;color:#94a3b8;margin-bottom:10px">
+        Imaš postavljen PIN? Prijavi se s emailom + 6 znamenki.
+      </div>
+      <a href="{% url 'accounts:trikey_login' %}"
+         style="display:inline-block;background:#c9a84c;color:#0a0f1e;padding:8px 20px;border-radius:7px;font-weight:800;font-size:.82rem;text-decoration:none">
+        <i class="fas fa-hashtag me-1"></i> Prijava s PIN-om
+      </a>
+    </div>
+
     <div class="footer-links">
         <div class="mt-3">
             <span>{% trans "Nemate račun?" %}</span>

@@ -6,6 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Sum, Count
@@ -310,7 +311,7 @@ def guest_pay(request, access_qr):
                 return redirect(payment.external_url)
         except Exception as e:
             logger.error("Guest payment failed: %s", e)
-            messages.error(request, 'Placanje nije uspjelo. Pokusajte ponovo.')
+            messages.error(request, _('Placanje nije uspjelo. Pokusajte ponovo.'))
 
     return render(request, 'rental/guest_pay.html', {'booking': booking})
 

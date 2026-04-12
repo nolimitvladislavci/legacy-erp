@@ -18,6 +18,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
@@ -44,15 +45,15 @@ def request_deactivation(request):
     """
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nije moguće odrediti tvrtku.')
+        messages.error(request, _('Nije moguće odrediti tvrtku.'))
         return redirect('/')
 
     if getattr(company, 'is_vaulted', False):
-        messages.error(request, 'Račun je već zapečaćen u arhivu.')
+        messages.error(request, _('Račun je već zapečaćen u arhivu.'))
         return redirect('/')
 
     if company.deactivation_requested_at:
-        messages.warning(request, 'Deaktivacija je već zatražena.')
+        messages.warning(request, _('Deaktivacija je već zatražena.'))
         return redirect('accounts:deactivation_status')
 
     # Postavi deactivation pending
@@ -145,12 +146,12 @@ def cancel_deactivation(request):
 
     is_vaulted = getattr(company, 'is_vaulted', False)
     if not company.deactivation_requested_at or is_vaulted:
-        messages.error(request, 'Nema aktivnog zahtjeva za deaktivaciju.')
+        messages.error(request, _('Nema aktivnog zahtjeva za deaktivaciju.'))
         return redirect('/')
 
     expiry_dt = company.deactivation_requested_at + timedelta(days=GRACE_PERIOD_DAYS)
     if tz.now() > expiry_dt:
-        messages.error(request, 'Grace period je istekao.')
+        messages.error(request, _('Grace period je istekao.'))
         return redirect('accounts:deactivation_status')
 
     old_dt = company.deactivation_requested_at
@@ -169,7 +170,7 @@ def cancel_deactivation(request):
     except Exception:
         pass
 
-    messages.success(request, 'Zahtjev poništen. Račun je ponovo potpuno aktivan.')
+    messages.success(request, _('Zahtjev poništen. Račun je ponovo potpuno aktivan.'))
     return redirect('/')
 
 
@@ -184,14 +185,14 @@ def reactivate_company(request, company_id):
     Upsell: korisnik se vratio jer mu je novi program smeće.
     """
     if not request.user.is_superuser:
-        messages.error(request, 'Samo superadmin može reaktivirati.')
+        messages.error(request, _('Samo superadmin može reaktivirati.'))
         return redirect('/')
 
     from companies.models import Company
     try:
         company = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
-        messages.error(request, 'Tvrtka nije pronađena.')
+        messages.error(request, _('Tvrtka nije pronađena.'))
         return redirect('/')
 
     company.is_vaulted = False
@@ -222,7 +223,7 @@ def reactivate_company(request, company_id):
     except Exception:
         pass
 
-    messages.success(request, 'Firma %s reaktivirana! Svi podaci netaknuti.' % company.name)
+    messages.success(request, _('Firma %s reaktivirana! Svi podaci netaknuti.') % company.name)
     return redirect('/')
 
 

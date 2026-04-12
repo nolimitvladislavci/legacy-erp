@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from core.company_utils import get_user_company
@@ -53,7 +54,7 @@ def download_xml(request, export_id):
     export = get_object_or_404(GovExport, pk=export_id, company=company)
     
     if not export.xml_content:
-        messages.error(request, 'XML još nije generiran.')
+        messages.error(request, _('XML još nije generiran.'))
         return redirect('gov_export:dashboard')
     
     response = HttpResponse(export.xml_content, content_type='application/xml')

@@ -132,7 +132,7 @@
       <p class="fx-fs-note fx-text-muted mb-3 fx-lh-normal">
         {% trans "Brza prijava PIN-om — kao mBanking. 6 znamenki." %}
       </p>
-      <form method="post" action="{% url 'trikey_login' %}">
+      <form method="post" action="{% url 'accounts:trikey_login' %}">
         {% csrf_token %}
         <div class="field">
           <label>{% trans "Email" %}</label>
@@ -145,7 +145,7 @@
         <button type="submit" class="btn-primary">{% trans "Prijava PIN-om →" %}</button>
       </form>
       <div class="link-row mt-3">
-        <a href="{% url 'pin_setup' %}">{% trans "Postavi PIN →" %}</a>
+        <a href="{% url 'accounts:pin_setup' %}">{% trans "Postavi PIN →" %}</a>
       </div>
     </div>
   </div><!-- /card -->

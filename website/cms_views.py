@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -18,7 +19,7 @@ def cms_gallery(request):
         caption_hr = request.POST.get('caption_hr', '')
         if image:
             GalleryImage.objects.create(image=image, category=category, caption_de=caption_de, caption_hr=caption_hr, is_active=True, order=0)
-            messages.success(request, 'Slika uspješno dodana!')
+            messages.success(request, _('Slika uspješno dodana!'))
         return redirect('website:cms_gallery')
 
     images = GalleryImage.objects.all().order_by('-id')
@@ -93,7 +94,7 @@ def website_editor(request):
         if 'hero_image' in request.FILES:
             site.hero_image = request.FILES['hero_image']
         site.save()
-        messages.success(request, 'Web stranica uspjesno azurirana!')
+        messages.success(request, _('Web stranica uspjesno azurirana!'))
         return redirect('website:website_editor')
 
     unread = site.contact_messages.filter(is_read=False).count()

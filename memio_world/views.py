@@ -53,6 +53,7 @@ def waitlist_count(request):
 from django.shortcuts import render, redirect
 from django.views.decorators.cache import cache_page
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 
 def registracija_page(request):
@@ -63,7 +64,7 @@ def registracija_page(request):
         interest = (request.POST.get('interest') or 'general').strip()
 
         if not email or '@' not in email:
-            messages.error(request, 'Email adresa je obavezna.')
+            messages.error(request, _('Email adresa je obavezna.'))
         else:
             entry, created = WaitlistEntry.objects.using('memio_world').get_or_create(
                 email=email,
@@ -75,9 +76,9 @@ def registracija_page(request):
                 },
             )
             if created:
-                messages.success(request, 'Uspješno ste se prijavili na listu čekanja!')
+                messages.success(request, _('Uspješno ste se prijavili na listu čekanja!'))
             else:
-                messages.info(request, 'Već ste prijavljeni. Obavijestit ćemo vas kad krenemo!')
+                messages.info(request, _('Već ste prijavljeni. Obavijestit ćemo vas kad krenemo!'))
             return redirect('memio_world:registracija')
 
     count = WaitlistEntry.objects.using('memio_world').count()

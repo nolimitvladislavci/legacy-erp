@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Odjava" %} — LIMIT Connect{% endblock %}
+{% block shell_mode %}focus{% endblock %}
+{% block content %}
+<div class="fenix-page" style="max-width:520px;margin:40px auto;padding:0 16px">
+    <div class="fx-rounded fx-bg-card fx-p-6" style="border:1px solid var(--border)">
+        <h2 class="fx-fs-xl fx-fw-bold fx-mb-4" style="color:var(--gold)">
+            <i class="fas fa-sign-out-alt fx-mr-2"></i>{% trans "Prije odjave" %}
+        </h2>
+
+        <p class="fx-text-dim fx-fs-base fx-mb-4">
+            {% trans "Provjerili smo vaš radni prostor i pronašli otvorene stavke:" %}
+        </p>
+
+        {% for w in warnings %}
+        <div class="fx-rounded fx-p-4 fx-mb-3" style="background:{% if w.level == 'warning' %}rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25){% else %}rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2){% endif %}">
+            <div class="d-flex align-items-start gap-3">
+                <i class="fas {{ w.icon }} fx-fs-xl" style="color:{% if w.level == 'warning' %}var(--amber){% else %}var(--blue){% endif %};margin-top:2px"></i>
+                <div class="fx-flex-1">
+                    <div class="fx-fw-semibold fx-fs-base">{{ w.msg }}</div>
+                    <div class="fx-text-dim fx-fs-sm fx-mt-1">{{ w.hint }}</div>
+                    {% if w.action_url %}
+                    <a href="{{ w.action_url }}" class="fx-fs-sm fx-fw-semibold fx-text-gold fx-no-underline fx-mt-2 d-inline-block">
+                        {{ w.action_label }} →
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="d-flex gap-3 fx-mt-5">
+            <a href="{% url 'dashboard' %}" class="fx-flex-1 btn-ghost fx-rounded text-center fx-fs-base fx-fw-semibold" style="padding:12px">
+                <i class="fas fa-arrow-left fx-mr-2"></i>{% trans "Natrag" %}
+            </a>
+            <a href="{% url 'logout' %}?confirm=1" class="fx-flex-1 fx-rounded text-center fx-fs-base fx-fw-semibold fx-no-underline" style="padding:12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)">
+                <i class="fas fa-sign-out-alt fx-mr-2"></i>{% trans "Odjavi se svejedno" %}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

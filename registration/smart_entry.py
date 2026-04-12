@@ -101,7 +101,7 @@ def api_detect_email(request):
     return JsonResponse({
         'status': 'new',
         'msg': 'Dobrodošli! Kreiramo vaš račun.',
-        'redirect': f'/hr/register/?email={email}&ref={ref}',
+        'redirect': f'/hr/accounts/quick-register/?email={email}&ref={ref}',
     })
 
 

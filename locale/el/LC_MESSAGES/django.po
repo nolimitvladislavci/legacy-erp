@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-11 09:49+0200\n"
+"POT-Creation-Date: 2026-04-11 10:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,6 +129,99 @@ msgstr "Έχετε συνδεθεί μέσω Microsoft: {email}"
 
 msgid "Greška Microsoft prijave."
 msgstr "Σφάλμα στις συνδέσεις της Microsoft."
+
+#, python-format
+msgid "%d otvorenih bonova automatski stornirano."
+msgstr ""
+
+#, python-format
+msgid "Device token \"%s\" kreiran. Spremi barcode u mobitel."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Korisnički račun nije aktivan."
+msgid "Token \"%s\" deaktiviran."
+msgstr "Ο λογαριασμός χρήστη δεν είναι ενεργός."
+
+msgid "Token ne postoji."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Deaktiviran"
+msgid "Token \"%s\" aktiviran."
+msgstr "Ενεργός"
+
+#, fuzzy
+#| msgid "Link nije valjan ili je istekao."
+msgid "Token nije valjan ili je deaktiviran."
+msgstr "Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει."
+
+#, fuzzy
+#| msgid ", "
+msgid " "
+msgstr ", "
+
+#, fuzzy
+#| msgid "Pogrešan kod. Pokušajte ponovo."
+msgid "Lozinka je netočna. Pokušajte ponovo."
+msgstr "Η ενέργεια απέτυχε. Δοκιμάστε ξανά."
+
+msgid "Email adresa uspješno verificirana! Vaš račun je sada potpuno aktivan."
+msgstr ""
+
+msgid ""
+"Verifikacijski link je istekao (72h). Prijavite se i kliknite \"Pošalji "
+"ponovo\" na dashboardu, ili nas kontaktirajte: info@limit-connect.com"
+msgstr ""
+
+msgid "Email adresa je vec verificirana. Mozete se normalno prijaviti."
+msgstr ""
+
+msgid "Vas email je vec verificiran! Sve je u redu."
+msgstr ""
+
+msgid ""
+"Dosegnuli ste limit od 3 pokusaja u 24 sata. Provjerite spam mapu ili nas "
+"kontaktirajte: info@limit-connect.com"
+msgstr ""
+
+#, fuzzy
+#| msgid "Nije moguće označiti kao odbijeno."
+msgid "Nije moguće odrediti tvrtku."
+msgstr "Δεν είναι δυνατό να επισημανθεί ως απορρίφθηκε."
+
+msgid "Račun je već zapečaćen u arhivu."
+msgstr ""
+
+#, fuzzy
+#| msgid "Smjena zatvorena"
+msgid "Deaktivacija je već zatražena."
+msgstr "Βάρδια κλειστή"
+
+#, fuzzy
+#| msgid "Zahtjev za deaktivacijom"
+msgid "Nema aktivnog zahtjeva za deaktivaciju."
+msgstr "Αίτημα απενεργοποίησης"
+
+#, fuzzy
+#| msgid "Link je istekao"
+msgid "Grace period je istekao."
+msgstr "Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει."
+
+msgid "Zahtjev poništen. Račun je ponovo potpuno aktivan."
+msgstr ""
+
+msgid "Samo superadmin može reaktivirati."
+msgstr ""
+
+#, fuzzy
+#| msgid "Tvrtka već postoji u sustavu."
+msgid "Tvrtka nije pronađena."
+msgstr "Η εταιρεία υπάρχει ήδη στο σύστημα."
+
+#, python-format
+msgid "Firma %s reaktivirana! Svi podaci netaknuti."
+msgstr ""
 
 msgid "Super Administrator"
 msgstr "Σούπερ διαχειριστής"
@@ -358,13 +451,74 @@ msgstr "💾 Αποθήκευση αλλαγών"
 msgid "Odustani"
 msgstr "Ακύρωση"
 
+msgid "Email i PIN su obavezni."
+msgstr ""
+
+#, fuzzy
+#| msgid "Neispravan PIN."
+msgid "Neispravan email ili PIN."
+msgstr "Λανθασμένο PIN."
+
+#, fuzzy
+#| msgid "Lozinke se ne podudaraju."
+msgid "PIN-ovi se ne podudaraju."
+msgstr "Οι κωδικοί πρόσβασης δεν ταιριάζουν."
+
+#, fuzzy
+#| msgid "OIB mora imati točno 11 znamenki."
+msgid "PIN mora biti točno 6 znamenki."
+msgstr "Το OIB πρέπει να έχει ακριβώς 11 ψηφία."
+
+msgid "PIN uspješno postavljen! 🔑"
+msgstr ""
+
 #, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo."
 msgstr "Επαληθεύστε τα δεδομένα και αποδεχθείτε τους όρους."
 
+msgid "Niste unijeli niti certifikat niti API ključ."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nije pronađen OIB"
+msgid "Email nije pronađen."
+msgstr "OIB δεν βρέθηκε"
+
+msgid "TriKey profil ne postoji."
+msgstr ""
+
+#, fuzzy
+#| msgid "Neispravan PIN."
+msgid "Neispravan Business Key."
+msgstr "Λανθασμένο PIN."
+
+msgid "Novi PIN poslan na email. Provjerite inbox."
+msgstr ""
+
+#, fuzzy
+#| msgid "Odaberite tip i pritisnite gumb za otvaranje POS-a."
+msgid "Odaberite ime i unesite PIN."
+msgstr "Επιλέξτε τύπο και πατήστε το κουμπί για άνοιγμα POS."
+
+#, fuzzy
+#| msgid "Korisnički račun"
+msgid "Korisnik nije pronađen."
+msgstr "Προφίλ χρήστη"
+
 msgid "Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku."
 msgstr "Κάτι πήγε στραβά. Δοκιμάστε ξανά ή επικοινωνήστε με την υποστήριξη."
+
+#, fuzzy
+#| msgid "Lozinka mora imati najmanje 10 znakova."
+msgid "Lozinka mora imati najmanje 8 znakova."
+msgstr "Ο κωδικός πρόσβασης πρέπει να έχει μήκος τουλάχιστον 8 χαρακτήρες."
+
+msgid "✓ Lozinka uspješno promijenjena."
+msgstr ""
+
+msgid "Račun kreiran! Provjerite email za verifikaciju."
+msgstr ""
 
 #, fuzzy
 #| msgid "Odaberite datum za nastavak"
@@ -376,6 +530,10 @@ msgid ""
 "računom."
 msgstr ""
 
+#, python-format
+msgid "Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi."
+msgstr ""
+
 #, fuzzy
 #| msgid "Tvrtka nije pronađena. Molimo skenirajte QR kod ponovno."
 msgid "Tvrtka nije pronađena u sustavu. Provjerite podatke."
@@ -385,6 +543,10 @@ msgstr "Η εταιρεία δεν βρέθηκε. Παρακαλώ σαρώστ
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Prebacivanje nije uspjelo. Pokušajte ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+#, python-format
+msgid "Prebaceno na: %s"
+msgstr ""
 
 msgid "Novi Termin / Najam"
 msgstr "Νέο Ραντεβού / Ενοικίαση"
@@ -643,6 +805,73 @@ msgstr "Δεν υπάρχουν διαθέσιμες υπηρεσίες για o
 
 msgid "Kontaktirajte nas direktno."
 msgstr "Επικοινωνήστε μαζί μας απευθείας."
+
+#, fuzzy
+#| msgid "Termini + fakturiranje"
+msgid "Termin kreiran."
+msgstr "Τιμολόγηση"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Termin ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Termin obrisan."
+msgstr "Έγγραφα"
+
+#, python-format
+msgid "Zaprimljeno — limeni broj %d"
+msgstr ""
+
+#, fuzzy
+#| msgid "Unos radnog vremena"
+msgid "Unos u karton spremljen."
+msgstr "Νέα καταχώριση χρόνου εργασίας"
+
+#, fuzzy
+#| msgid "Trošak ažuriran"
+msgid "Unos ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Unos obrisan."
+msgstr "Έγγραφα"
+
+#, fuzzy
+#| msgid "Nalog kreiran"
+msgid "Usluga kreirana: "
+msgstr "Παραγγελία δημιουργήθηκε"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Usluga ažurirana: "
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "AI greška"
+msgid "WA greska: {}"
+msgstr "Σφάλμα AI"
+
+#, fuzzy
+#| msgid "Email adresa"
+msgid "Email greska: {}"
+msgstr "Διεύθυνση ηλεκτρονικού ταχυδρομείου"
+
+#, fuzzy
+#| msgid "Podsjetnik (dana prije)"
+msgid "Podsjetnik poslan: {}"
+msgstr "Υπενθύμιση (ημέρες πριν)"
+
+#, fuzzy
+#| msgid "Nema zakazanih termina za danas."
+msgid "Nema telefona ni emaila za slanje."
+msgstr "Δεν υπάρχουν επικείμενες συναντήσεις."
+
+msgid "Podsjetnici: {} email + {} WhatsApp (od {} termina)"
+msgstr ""
 
 msgid "Konverzija računa"
 msgstr "Αρίθμηση λογαριασμού"
@@ -1350,6 +1579,14 @@ msgstr "Εσωτερικές σημειώσεις"
 msgid "Spremi →"
 msgstr "Αποδέχομαι"
 
+msgid "Kartica kreirana uspješno."
+msgstr ""
+
+#, fuzzy
+#| msgid "Projekt"
+msgid "Project "
+msgstr "Σχέδιο"
+
 msgid "Naziv normativa"
 msgstr "Ονομασία κανονισμού"
 
@@ -1762,6 +1999,13 @@ msgstr "Προσφορά"
 
 msgid "Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."
 msgstr "Δεν είστε συνδεδεμένοι με εταιρεία. Επιλέξτε μία από το μενού."
+
+msgid ""
+"Synesis nije konfiguriran za ovu tvrtku. Idite na Integracije → Synesis."
+msgstr ""
+
+msgid "Synesis nije konfiguriran. Idite na Integracije → Synesis."
+msgstr ""
 
 msgid "Osnovni podaci"
 msgstr "Βασικές πληροφορίες"
@@ -2278,12 +2522,104 @@ msgstr "Επισκόπηση και διαχείριση - εταιρείες"
 msgid "Companies Modul"
 msgstr "Ενότητα εταιρειών"
 
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup postavkama tvrtke."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Podaci tvrtke"
+msgid "Podaci tvrtke su azurirani."
+msgstr "Διαχειριστής εταιρείας"
+
+#, fuzzy
+#| msgid "Pocetak smjene"
+msgid "Postavke spremljene."
+msgstr "Έναρξη βάρδιας"
+
+#, fuzzy
+#| msgid "Napredne postavke sustava"
+msgid "Fiskalne postavke su azurirane."
+msgstr "Προηγμένες ρυθμίσεις συστήματος"
+
+#, fuzzy
+#| msgid "Promjene cijena"
+msgid "✅ Integracije spremljene."
+msgstr "Εκτιμήσεις και υπολογισμοί"
+
 msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
 msgstr ""
 "Δεν έχετε δικαίωμα για αυτή την ενέργεια. Επικοινωνήστε με τον διαχειριστή."
 
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Stopa obrisana."
+msgstr "Έγγραφα"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Stopa ažurirana."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+msgid "Pretplata reaktivirana!"
+msgstr ""
+
+#, python-format
+msgid ""
+"Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna."
+msgstr ""
+
+#, fuzzy
+#| msgid "Niste povezani s tvrtkom."
+msgid "Niste povezani s firmom."
+msgstr "Δεν είστε συνδεδεμένοι με εταιρεία."
+
+#, fuzzy
+#| msgid "Djelomično prihvaćeno"
+msgid "Uvjeti su već prihvaćeni."
+msgstr "Μερικώς αποδεκτό"
+
+#, fuzzy
+#| msgid "Uvjeti korištenja platforme"
+msgid "Uvjeti korištenja uspješno prihvaćeni. Hvala!"
+msgstr "Όροι χρήσης της πλατφόρμας"
+
+msgid "Morate označiti polje za prihvaćanje uvjeta."
+msgstr ""
+
+#, fuzzy
+#| msgid "Podaci tvrtke"
+msgid "Podaci tvrtke spremljeni."
+msgstr "Διαχειριστής εταιρείας"
+
+#, fuzzy
+#| msgid "Kontakt podaci"
+msgid "Kontakt podaci spremljeni."
+msgstr "Προσωπικά δεδομένα"
+
+#, fuzzy
+#| msgid "Fiskalni tretman"
+msgid "Fiskalni podaci spremljeni."
+msgstr "Φορολογημένο"
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup upravljanju komitentima."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Bilješka za danas"
+msgid "Bilješka dodana."
+msgstr "Σημειώσεις για σήμερα..."
+
+msgid "Svi preporučeni moduli su već aktivni."
+msgstr ""
+
 msgid "Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup."
 msgstr "Δεν σας έχει ανατεθεί εταιρεία. Επικοινωνήστε με τον διαχειριστή."
+
+msgid "Intelligence Dashboard je dostupan samo za umbrella korisnike."
+msgstr ""
 
 msgid "Niste povezani s tvrtkom."
 msgstr "Δεν είστε συνδεδεμένοι με εταιρεία."
@@ -2370,11 +2706,6 @@ msgstr ""
 #| msgid "Unesite novu lozinku (min. 10 znakova)"
 msgid "Unesite istu lozinku u oba polja."
 msgstr "Εισάγετε νέο κωδικό πρόσβασης (ελάχιστο 10 χαρακτήρες)"
-
-#, fuzzy
-#| msgid "Lozinka mora imati najmanje 10 znakova."
-msgid "Lozinka mora imati najmanje 8 znakova."
-msgstr "Ο κωδικός πρόσβασης πρέπει να έχει μήκος τουλάχιστον 8 χαρακτήρες."
 
 msgid "Koristite kombinaciju slova, brojeva i znakova."
 msgstr ""
@@ -2581,6 +2912,15 @@ msgstr ""
 msgid "Sve čisto!"
 msgstr "Όλα επιλύθηκαν"
 
+msgid "Samo umbrella korisnici mogu pristupiti ovoj stranici."
+msgstr ""
+
+msgid "Nedostaje ID tvrtke ili OIB."
+msgstr ""
+
+msgid "Finalizacija završena s upozorenjima."
+msgstr ""
+
 msgid "Deutsch"
 msgstr "Γερμανικά"
 
@@ -2595,6 +2935,68 @@ msgstr "Τουρκικά"
 
 msgid "Ελληνικά"
 msgstr "Ελληνικά"
+
+msgid "Vasa tvrtka nije umbrella tvrtka."
+msgstr ""
+
+msgid "{} dodana kao podtvrtka."
+msgstr ""
+
+#, fuzzy
+#| msgid "Tvrtka već postoji u sustavu."
+msgid "Tvrtka nije pronadjena ili vec ima nadredjenu."
+msgstr "Η εταιρεία υπάρχει ήδη στο σύστημα."
+
+#, fuzzy
+#| msgid "{n} uklonjen s bona."
+msgid "{} uklonjena iz umbrella."
+msgstr "{n} αφαιρέθηκε από την απόδειξη."
+
+msgid "Naziv i OIB su obavezni."
+msgstr ""
+
+msgid "Tvrtka s OIB-om {} vec postoji."
+msgstr ""
+
+msgid "Tvrtka {} kreirana i dodana pod umbrella."
+msgstr ""
+
+#, fuzzy
+#| msgid "Vaš termin je uspješno rezerviran."
+msgid "Korisnik {} uspjesno azuriran."
+msgstr "Το ραντεβού σας έχει κρατηθεί με επιτυχία."
+
+msgid "{} je sada {}"
+msgstr ""
+
+msgid "{} staff status: {}"
+msgstr ""
+
+#, fuzzy
+#| msgid "Korisnički profil"
+msgid "Korisnik nije pronaden."
+msgstr "Προφίλ χρήστη"
+
+msgid "Impersonacija završena. Vraćeni ste u superadmin prikaz."
+msgstr ""
+
+#, fuzzy
+#| msgid "Promo kodovi"
+msgid "Promo kod kreiran."
+msgstr "Κωδικοί προώθησης"
+
+#, fuzzy
+#| msgid "Sve je postavljeno! Dobrodošli u LIMIT Connect."
+msgid "Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!"
+msgstr "Όλα έχουν ρυθμιστεί! Καλώς ήρθατε στο LIMIT Connect."
+
+#, fuzzy
+#| msgid "Superadmin"
+msgid "Samo superadmin."
+msgstr "Σούπερ διαχειριστής"
+
+msgid "Morate unijeti sto je poduzeto (resolution note)."
+msgstr ""
 
 msgid "Kombi"
 msgstr "Συνδυασμένο"
@@ -3591,6 +3993,9 @@ msgstr "Όροι"
 msgid "Napredak"
 msgstr "Πρόοδος"
 
+msgid "Nalog kreiran, ali postoje problemi s dokumentima: "
+msgstr ""
+
 msgid "Izlazni Račun"
 msgstr "Τελικός απολογισμός"
 
@@ -4017,10 +4422,42 @@ msgstr "Αναθεώρηση και διαχείριση - έγγραφα"
 msgid "Documents Modul"
 msgstr "Έγγραφο"
 
+msgid "Samo slike (JPG, PNG, WebP)."
+msgstr ""
+
+#, python-format
+msgid "Konverzija zavrsena s upozorenjima: %s"
+msgstr ""
+
+msgid "Labela ne postoji."
+msgstr ""
+
+msgid "Nije moguce odrediti tvrtku."
+msgstr ""
+
+#, python-format
+msgid "Datoteka spremljena (%s, %dKB, backend: %s%s)"
+msgstr ""
+
 #, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Upload nije uspio. Provjerite format datoteke i pokušajte ponovo."
 msgstr "Η μεταφόρτωση απέτυχε. Ελέγξτε τη μορφή αρχείου."
+
+#, fuzzy
+#| msgid "Nema nenaplaćenih odobrenih sati za odabrani period."
+msgid "Nema dokumenata za odabrani period."
+msgstr "Δεν υπάρχουν αναπλήρωτες εγκεκριμένες ώρες για την επιλεγμένη περίοδο."
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Dokument nije pronađen."
+msgstr "Έγγραφα"
+
+#, fuzzy
+#| msgid "Zamjena obavezna!"
+msgid "Sva polja su obavezna."
+msgstr "Αντικατάσταση υποχρεωτική!"
 
 msgid "Potpuna punomoć (slanje + primanje)"
 msgstr "Πλήρης εξουσιοδότηση (αποστολή + λήψη)"
@@ -4090,6 +4527,9 @@ msgstr "Εξουσία (e-Τιμολόγιο έντολο)"
 
 msgid "Punomoći (e-Račun mandati)"
 msgstr "Εξουσίες (e-Τιμολόγια έντολα)"
+
+msgid "Konto je obavezan za knjizenje."
+msgstr ""
 
 msgid "Broj sobe"
 msgstr "Αριθμός"
@@ -4281,9 +4721,51 @@ msgid "Aktivnost"
 msgstr "Ενεργό"
 
 #, fuzzy
+#| msgid "Promjene cijena"
+msgid "Postavke e-Racuna spremljene."
+msgstr "Εκτιμήσεις και υπολογισμοί"
+
+#, fuzzy
+#| msgid "Ovaj link je vec iskoristen."
+msgid "Ovaj e-Racun je vec poslan."
+msgstr "Αυτός ο σύνδεσμος έχει ήδη χρησιμοποιηθεί."
+
+msgid "Ovaj racun vec ima e-Racun."
+msgstr ""
+
+#, fuzzy
+#| msgid "Spremna za preuzimanje"
+msgid "Nema XML-a za preuzimanje."
+msgstr "Έτοιμο για λήψη"
+
+#, fuzzy
+#| msgid "Odaberi CSV datoteku"
+msgid "Odaberite XML datoteku."
+msgstr "Σχέδιο Odaberi"
+
+#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Radnja nije uspjela. Pokušajte ponovo."
 msgstr "Η ενέργεια απέτυχε. Δοκιμάστε ξανά."
+
+#, fuzzy
+#| msgid "Proknjiženo"
+msgid "Vec proknjizeno."
+msgstr "Καταχωρημένο"
+
+#, fuzzy
+#| msgid "Kontaktirajte dispecera za novi link."
+msgid "Mandat nije u statusu za aktivaciju."
+msgstr "Επικοινωνήστε με τον διαχειριστή για νέο σύνδεσμο."
+
+msgid "Zalijepite tekst iz emaila ili dokumenta posrednika."
+msgstr ""
+
+msgid "Posrednik konfiguriran! Testirajte vezu."
+msgstr ""
+
+msgid "e-Racun nije konfiguriran. Idite na Postavke posrednika."
+msgstr ""
 
 msgid "OPG / Tvrtka"
 msgstr "Εταιρεία"
@@ -4540,6 +5022,19 @@ msgstr "Ειδοποίηση ανάκλησης"
 msgid "Obavijesti o povlačenjima"
 msgstr "Ειδοποιήσεις ανακλήσεων"
 
+msgid "Termin je popunjen ili zatvoren."
+msgstr ""
+
+#, fuzzy
+#| msgid "Preskoči ako već postoji"
+msgid "Ocjena već postoji."
+msgstr "Παράλειψη εάν υπάρχει ήδη"
+
+#, fuzzy
+#| msgid "Hvala na kupnji!"
+msgid "Hvala na ocjeni!"
+msgstr "Ευχαριστώ για την αγορά!"
+
 msgid "Transakcija"
 msgstr "Συναλλαγή"
 
@@ -4622,14 +5117,57 @@ msgid "Finance Modul"
 msgstr "Χρηματοοικονομικά"
 
 #, fuzzy
+#| msgid "Transakcijski račun"
+msgid "Transakcija kreirana."
+msgstr "Λογαριασμός συναλλαγών"
+
+#, fuzzy
+#| msgid "Transakcija"
+msgid "Transakcija obrisana."
+msgstr "Συναλλαγή"
+
+#, fuzzy
+#| msgid "Odaberi CSV datoteku"
+msgid "Odaberi ziro racun i CSV datoteku."
+msgstr "Σχέδιο Odaberi"
+
+msgid "Importirano {} | Duplikati: {} | Greske: {}"
+msgstr ""
+
+msgid "Nema novih transakcija. Duplikati: {}, Greske: {}"
+msgstr ""
+
+msgid "PDF greska: {}"
+msgstr ""
+
+#, fuzzy
+#| msgid "Odaberi CSV datoteku"
+msgid "Odaberi XML datoteku."
+msgstr "Σχέδιο Odaberi"
+
+msgid "Datoteka je prevelika (max 10 MB)."
+msgstr ""
+
+#, fuzzy
 #| msgid "Tvrtka nije pronađena. Molimo skenirajte QR kod ponovno."
 msgid "XML datoteka nije ispravnog formata. Provjerite datoteku."
 msgstr "Η εταιρεία δεν βρέθηκε. Παρακαλώ σαρώστε ξανά τον κωδικό QR."
 
 #, fuzzy
+#| msgid "Odaberi račun"
+msgid "Odaberi žiro račun."
+msgstr "Οι λογαριασμοί σας"
+
+#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Generiranje XML datoteke nije uspjelo. Pokušajte ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+msgid "Nema konfiguracije za tu tvrtku."
+msgstr ""
+
+msgid "✗ Veza s FINA CIS nije uspjela."
+msgstr ""
 
 msgid "Pregled i upravljanje - fitness"
 msgstr "Προβολή και διαχείριση - fitness"
@@ -4801,6 +5339,11 @@ msgstr "Κρατική εξαγωγή"
 msgid "Državni exporti"
 msgstr "Κρατικές εξαγωγές"
 
+#, fuzzy
+#| msgid "XML generiran"
+msgid "XML još nije generiran."
+msgstr "XML δημιουργήθηκε"
+
 msgid "Kvaliteta robe"
 msgstr "Ποιότητα εμπορεύματος"
 
@@ -4851,6 +5394,24 @@ msgstr "Μήνας"
 
 msgid "Zatvoren"
 msgstr "Κλειστό"
+
+#, fuzzy
+#| msgid "Odgovor poslan"
+msgid "Odgovor poslan."
+msgstr "Απάντηση αποστάλθηκε"
+
+#, fuzzy
+#| msgid "Nedodijeljeni"
+msgid "Tiket dodijeljen."
+msgstr "Μη ανατεθειμένα"
+
+msgid "Telefon i ime su obavezni."
+msgstr ""
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "VIP kontakt obrisan."
+msgstr "Έγγραφα"
 
 msgid "Završen"
 msgstr "Ολοκληρωμένο"
@@ -4967,6 +5528,14 @@ msgid "Isplate honorara"
 msgstr "Πληρωμές αμοιβών"
 
 #, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup ovom obračunu."
+msgstr "Όνομα εταιρείας"
+
+msgid "Obračun je već proknjižen."
+msgstr ""
+
+#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Knjiženje nije uspjelo. Provjerite konto i iznos."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
@@ -4979,6 +5548,21 @@ msgstr "Ανασκόπηση και διαχείριση - ασφάλεια"
 
 msgid "Insurance Modul"
 msgstr "Ενότητα Ασφάλειας"
+
+#, fuzzy
+#| msgid "Police osiguranja"
+msgid "Polica kreirana."
+msgstr "Πολιτικές ασφάλισης"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Polica ažurirana."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Police osiguranja"
+msgid "Polica obrisana."
+msgstr "Πολιτικές ασφάλισης"
 
 msgid "Adresa intervencije"
 msgstr "Διεύθυνση παρέμβασης"
@@ -4997,6 +5581,9 @@ msgstr "Λήξη"
 
 msgid "TTL istjece"
 msgstr "TTL λήγει"
+
+msgid "Naslov, adresa, ime i telefon klijenta su obavezni."
+msgstr ""
 
 msgid "Identifikacija"
 msgstr "Επαλήθευση email"
@@ -5740,9 +6327,50 @@ msgid "Inventory Modul"
 msgstr "Ενότητα Inventory"
 
 #, fuzzy
+#| msgid "Dokument nije u statusu Nacrt."
+msgid "Primka nije u statusu Nacrt."
+msgstr "Το έγγραφο δεν είναι σε κατάσταση σχεδίου."
+
+#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Potvrda primke nije uspjela. Provjerite stavke i pokušajte ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+msgid "Nijedan artikl nije odabran."
+msgstr ""
+
+msgid "Prediktivna analiza pokrenuta. Rezultati će biti dostupni uskoro."
+msgstr ""
+
+msgid "Izvor i odrediste ne mogu biti isti."
+msgstr ""
+
+#, python-format
+msgid "Medjuskladisnica %s kreirana (%d stavki)."
+msgstr ""
+
+#, python-format
+msgid "Izdatnica %s potvrdjena. Roba u prijenosu."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Inventura je već pokrenuta."
+msgid "Inventura %s pokrenuta — %d artikala."
+msgstr "Η απογραφή έχει ήδη ξεκινήσει."
+
+#, fuzzy, python-format
+#| msgid "Inventura je već pokrenuta."
+msgid "Inventura %s završena."
+msgstr "Η απογραφή έχει ήδη ξεκινήσει."
+
+#, python-format
+msgid "Inventura %s odobrena. Zalihe korigirane."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Reklamacija zaprimljena"
+msgid "Roba zaprimljena u %s."
+msgstr "Παράπονο ληφθέν"
 
 msgid "Fisk."
 msgstr "Ψάρια."
@@ -6802,6 +7430,24 @@ msgid ""
 "ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
 
+#, fuzzy
+#| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
+msgid "Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro."
+msgstr ""
+"Το αίτημά σας έχει ληφθεί. Θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό."
+
+msgid "Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu."
+msgstr ""
+
+msgid "Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti."
+msgstr ""
+
+#, fuzzy
+#| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
+msgid "Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro."
+msgstr ""
+"Το αίτημά σας έχει ληφθεί. Θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό."
+
 #, fuzzy, python-brace-format
 #| msgid "Dokument se sprema kao nacrt. Možete ga kasnije uređivati i slati."
 msgid "Kopija kreirana: {n}. Možete je urediti i poslati."
@@ -7032,6 +7678,16 @@ msgstr "Ειδοποίηση"
 
 msgid "Obavijesti"
 msgstr "Ειδοποιήσεις"
+
+#, fuzzy
+#| msgid "Obavijest o povlačenju"
+msgid "Obavijest objavljena."
+msgstr "Ειδοποίηση ανάκλησης"
+
+#, fuzzy
+#| msgid "Tvrtka već postoji u sustavu."
+msgid "KUD nije pronađen u sustavu."
+msgstr "Η εταιρεία υπάρχει ήδη στο σύστημα."
 
 msgid "Autor"
 msgstr "Συγγραφέας"
@@ -7290,6 +7946,20 @@ msgstr "Οικογενειακή πρόκληση"
 
 msgid "Obiteljski izazovi"
 msgstr "Οικογενειακές προκλήσεις"
+
+#, fuzzy
+#| msgid "Referentna (ne posudjuje se)"
+msgid "Referentna građa se ne posuđuje."
+msgstr "Αναφορική (δεν δανείζεται)"
+
+msgid "Ova posudba nije aktivna."
+msgstr ""
+
+msgid "Knjiga vraćena. Nema kazni."
+msgstr ""
+
+msgid "Član već čeka ovu knjigu."
+msgstr ""
 
 msgid "Zeleni otok"
 msgstr "Πράσινο νησί"
@@ -8066,14 +8736,52 @@ msgid "Nema transakcija"
 msgstr "Συναλλαγή"
 
 #, fuzzy
+#| msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
+msgid "Nema aktivne tvrtke. Obratite se administratoru."
+msgstr ""
+"Δεν έχετε δικαίωμα για αυτή την ενέργεια. Επικοινωνήστε με τον διαχειριστή."
+
+#, fuzzy
+#| msgid "Neispravan format telefona."
+msgid "Neispravan format datuma."
+msgstr "Ακατάλληλη μορφή τηλεφώνου."
+
+#, fuzzy
+#| msgid "Nema stavki."
+msgid "Nema stavki za knjizenje."
+msgstr "Δεν υπάρχουν δεδομένα"
+
+msgid "IBAN i naziv su obavezni."
+msgstr ""
+
+#, fuzzy
+#| msgid "CSV Import bankovnog izvoda"
+msgid "Odaberite datoteku bankovnog izvoda."
+msgstr "CSV Import τραπεζικού εξοφλήματος"
+
+#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Datoteka se ne može pročitati. Provjerite format i pokušajte ponovo."
 msgstr "Επαληθεύστε τα δεδομένα και αποδεχθείτε τους όρους."
+
+msgid "Nepoznat format datoteke. Podrzano: XML (camt.053), CSV, MT940."
+msgstr ""
+
+msgid "Nema novih transakcija za uvoz (sve vec postoje ili datoteka prazna)."
+msgstr ""
+
+msgid "Neispravan format datoteke. Provjerite strukturu podataka."
+msgstr ""
 
 #, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Uvoz nije uspio. Provjerite format datoteke i pokušajte ponovo."
 msgstr "Επαληθεύστε τα δεδομένα και αποδεχθείτε τους όρους."
+
+#, fuzzy
+#| msgid "Transakcijski račun"
+msgid "Transakcija ignorirana."
+msgstr "Λογαριασμός συναλλαγών"
 
 msgid "Autori"
 msgstr "Συγγραφείς"
@@ -8327,6 +9035,19 @@ msgstr "Παιδικό προφίλ αναγνώστη"
 msgid "Djecji citateljski profili"
 msgstr "Παιδικά προφίλ αναγνωστών"
 
+msgid "Clan nije pronadjen."
+msgstr ""
+
+#, fuzzy
+#| msgid "Smjena zatvorena"
+msgid "Ova posudba je vec vracena."
+msgstr "Βάρδια κλειστή"
+
+#, fuzzy
+#| msgid "Broj produljenja"
+msgid "Maksimalno 2 produljenja."
+msgstr "Αριθμός εγγράφου"
+
 msgid "Automatsko knjiženje"
 msgstr "Αυτόματη καταχώριση"
 
@@ -8377,6 +9098,62 @@ msgstr "Προσφορές"
 
 msgid "AI akcije"
 msgstr "Προσφορές"
+
+#, fuzzy
+#| msgid "Nalog kreiran"
+msgid "Misija kreirana."
+msgstr "Παραγγελία δημιουργήθηκε"
+
+msgid "Misija {}."
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizacija fail"
+msgid "Misija nije pronadjena."
+msgstr "Φορολογία (HR)"
+
+#, python-format
+msgid "Grlo nije pronadjeno: %s"
+msgstr ""
+
+#, python-format
+msgid "Tretman zabilje\\u017een za %s"
+msgstr ""
+
+#, fuzzy
+#| msgid "Račun režija"
+msgid "Token kreiran!"
+msgstr "Λογαριασμοί"
+
+#, fuzzy
+#| msgid "Tokeni odgovora"
+msgid "Token opozvan."
+msgstr "Tokens απάντησης"
+
+#, fuzzy
+#| msgid "Novi termin"
+msgid "Novi token generiran."
+msgstr "Όροι Nadolazeći"
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Ljubimac obrisan."
+msgstr "Έγγραφα"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Zapis dodan."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Dodaj ažuriranje"
+msgid "Podaci ažurirani."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Ime je obavezno"
+msgid "Ime udomljavača je obavezno."
+msgstr "Το όνομα είναι υποχρεωτικό"
 
 msgid "IT oprema"
 msgstr "Εξοπλισμός IT"
@@ -8431,6 +9208,47 @@ msgstr "Πλοήγηση"
 
 msgid "Popravak"
 msgstr "Επισκευή"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Imovina azurirana."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+msgid "Servisni zapis dodan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Raspored dana"
+msgid "Raspored odrzavanja dodan."
+msgstr "Ημερήσιο πρόγραμμα"
+
+msgid "Nema sredstava za amortizaciju ili vec provedena."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nema aktivne smjene."
+msgid "Nemate aktivnu firmu."
+msgstr "Δεν υπάρχει ενεργή βάρδια."
+
+#, fuzzy
+#| msgid "Trenutno nema dostupnih usluga za online rezervaciju."
+msgid "Ova ponuda vise nije dostupna za rezervaciju."
+msgstr "Δεν υπάρχουν διαθέσιμες υπηρεσίες για online κράτηση."
+
+#, fuzzy
+#| msgid "Nema polica osiguranja."
+msgid "Vec imate rezervaciju za ovu ponudu."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Roba spremna"
+msgid "Roba oznacena kao spremna."
+msgstr "Εμπόρευμα έτοιμο"
+
+#, fuzzy
+#| msgid "Rezervacija"
+msgid "Rezervacija otkazana."
+msgstr "Κράτηση"
 
 msgid "Emoji"
 msgstr "Εικονίδιο Emoji"
@@ -8921,6 +9739,80 @@ msgstr "Δημοπρασίας προσφορά"
 msgid "Aukcijske ponude"
 msgstr "Δημοπρασίας προσφορές"
 
+#, fuzzy
+#| msgid "Stavka knjiženja"
+msgid "Stavka uklonjena."
+msgstr "Στοιχείο καταχώρησης"
+
+#, fuzzy
+#| msgid "Kartice pacijenata"
+msgid "Kosarica ispraznjena."
+msgstr "Κάρτες ασθενών"
+
+#, fuzzy
+#| msgid "Arhiva je prazna"
+msgid "Kosarica je prazna."
+msgstr "Το αρχείο είναι άδειο"
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup ovoj narudzbi."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Spremno za preuzimanje"
+msgid "Oznaceno kao spremno za preuzimanje."
+msgstr "Έτοιμο για ανάληψη"
+
+#, fuzzy
+#| msgid "Nabavna cijena"
+msgid "Narudzba odbijena."
+msgstr "Τιμή αγοράς"
+
+msgid "Unesite ime ljubimca ili broj mikrocipa."
+msgstr ""
+
+#, fuzzy
+#| msgid "GDPR pristanak roditelja"
+msgid "Pristanak roditelja je već potvrđen."
+msgstr "GDPR συγκατάθεση γονέα"
+
+#, fuzzy
+#| msgid "GDPR pristanak roditelja"
+msgid "Nema upisanog emaila roditelja."
+msgstr "GDPR συγκατάθεση γονέα"
+
+#, fuzzy
+#| msgid "Nema obračuna. Kreirajte prvi!"
+msgid "Nemate profil. Kreirajte ga."
+msgstr "Δεν υπάρχει μισθοδοσία. Δημιουργήστε την πρώτη!"
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup za ovu akciju."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate pristup za uredjivanje ovog memorijala."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Memorijal"
+msgid "Memorijal azuriran."
+msgstr "Μνημείο"
+
+msgid "Objava dodana na životni trak!"
+msgstr ""
+
+msgid "Životinja ne postoji."
+msgstr ""
+
+#, fuzzy
+#| msgid "Preskoči ako već postoji"
+msgid "Profil ne postoji."
+msgstr "Παράλειψη εάν υπάρχει ήδη"
+
 msgid "Waitlist prijava"
 msgstr "Εγγραφή λίστας αναμονής"
 
@@ -8962,6 +9854,19 @@ msgstr "Υπερωρίες"
 
 msgid "Prekretnice"
 msgstr "Υπερωρίες"
+
+#, fuzzy
+#| msgid "Ime je obavezno"
+msgid "Email adresa je obavezna."
+msgstr "Το όνομα είναι υποχρεωτικό"
+
+msgid "Uspješno ste se prijavili na listu čekanja!"
+msgstr ""
+
+#, fuzzy
+#| msgid "je uspjesno zaprimljena. Obavijestit cemo vas o statusu."
+msgid "Već ste prijavljeni. Obavijestit ćemo vas kad krenemo!"
+msgstr "ελήφθη με επιτυχία. Θα σας ενημερώσουμε για την κατάσταση."
 
 msgid "Firma"
 msgstr "Ακολουθεί η μετάφραση του κειμένου:  Virman"
@@ -9301,6 +10206,20 @@ msgstr "⚪ Κρύο"
 msgid "Keine Antworten im Posteingang."
 msgstr "Καμία απάντηση στα εισερχόμενα."
 
+msgid "Gespeichert."
+msgstr ""
+
+msgid "Keine Datei gewaehlt."
+msgstr ""
+
+msgid "WhatsApp gateway nije dostupan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Cijena ne može biti negativna."
+msgid "Poruka ne može biti prazna."
+msgstr "Η τιμή δεν μπορεί να είναι αρνητική."
+
 msgid "Osnovno"
 msgstr "Βασικές πληροφορίες"
 
@@ -9616,6 +10535,11 @@ msgstr "Πληρωμή"
 msgid "Placanja"
 msgstr "Πληρωμές"
 
+#, fuzzy
+#| msgid "Promjene cijena"
+msgid "Postavke placanja spremljene."
+msgstr "Εκτιμήσεις και υπολογισμοί"
+
 msgid "Zaključan — obračun u toku"
 msgstr "Κλειδωμένο — υπολογισμός σε εξέλιξη"
 
@@ -9647,6 +10571,23 @@ msgstr "Υπολογιστικά σημειώματα"
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Obračun nije uspio. Provjerite podatke i pokušajte ponovo."
 msgstr "Επαληθεύστε τα δεδομένα και αποδεχθείτε τους όρους."
+
+msgid "DATEV export samo za DE kompanije."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nema izdanih računa za ovaj period."
+msgid "Nema obracunatih placa za ovaj period."
+msgstr "Δεν υπάρχουν εκδοθείσες τιμολόγια για αυτήν την περίοδο."
+
+msgid "IBAN firme nije postavljen."
+msgstr ""
+
+msgid "Nemate potrebne dozvole"
+msgstr ""
+
+msgid "Nemate odgovarajucu ulogu"
+msgstr ""
 
 msgid "Plaćenih bonova"
 msgstr "Πληρωμένο"
@@ -9680,6 +10621,21 @@ msgstr "Ευχαριστούμε για την πρόταση!"
 
 msgid "Zapis evidentiran"
 msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Račun mora imati barem jednu stavku."
+msgid "Morate utovariti barem jedan artikl."
+msgstr "Το τιμολόγιο πρέπει να έχει τουλάχιστον ένα είδος."
+
+#, fuzzy
+#| msgid "Terenska smjena"
+msgid "Terenska smjena otvorena! Ruta: "
+msgstr "Εργασίες στο πεδίο"
+
+#, fuzzy
+#| msgid "Terenska smjena"
+msgid "Terenska smjena zatvorena. Povrat: "
+msgstr "Εργασίες στο πεδίο"
 
 msgid "Početni iznos u blagajni"
 msgstr "Αρχικό ποσό στο ταμείο"
@@ -10721,10 +11677,86 @@ msgstr ""
 msgid "Bon #{n} plaćen! Kusur: €{c:.2f}"
 msgstr "Απόδειξη #{n} πληρώθηκε! Ρέστα: €{c:.2f}"
 
+msgid "Plaćeni bon se ne može stornirati."
+msgstr ""
+
+msgid "PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika."
+msgstr ""
+
+#, fuzzy
+#| msgid "Neispravan PIN."
+msgid "Neispravan PIN. Storno odbijen."
+msgstr "Λανθασμένο PIN."
+
+#, fuzzy
+#| msgid "Inventura mora biti završena prije odobrenja."
+msgid "Smjena mora biti zatvorena prije generiranja Z-reporta."
+msgstr "Η απογραφή πρέπει να ολοκληρωθεί πριν από την έγκριση."
+
 #, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Generiranje PDF-a nije uspjelo. Pokušajte ponovo."
 msgstr "Η δημιουργία PDF απέτυχε. Δοκιμάστε ξανά."
+
+#, fuzzy
+#| msgid "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu."
+msgid "Unesite početnu gotovinu prije otvaranja blagajne."
+msgstr ""
+"Εισάγετε το αρχικό ταμειακό χρήμα στη ταμειακή μηχανή (προαιρετικό) και "
+"ξεκινήστε τη βάρδια."
+
+#, fuzzy
+#| msgid "Sarzni rok"
+msgid "Sarzni rok dodan."
+msgstr "Προθεσμία παρτίδας"
+
+msgid "Polog/isplata je moguća samo na otvorenoj smjeni."
+msgstr ""
+
+msgid "Iznos mora biti pozitivan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Inventura mora biti završena prije odobrenja."
+msgid "Smjena mora biti zatvorena za generiranje izvještaja."
+msgstr "Η απογραφή πρέπει να ολοκληρωθεί πριν από την έγκριση."
+
+#, fuzzy
+#| msgid "Plaćeni iznos"
+msgid "Nevažeći iznos."
+msgstr "Πληρωμένο"
+
+#, fuzzy
+#| msgid "Datum isteka"
+msgid "Nevažeći datum isteka."
+msgstr "Αρχείο"
+
+#, python-format
+msgid "%d artikala dodano u \"Roba od jučer\"."
+msgstr ""
+
+#, fuzzy
+#| msgid "Ugovori, ponude"
+msgid "Uklonjeno iz ponude."
+msgstr "Συμβάσεις, προσφορές"
+
+msgid "Prijavljeno! Haiku i Gemini analiziraju..."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nema tvrtke."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Porez na potrošnju aktivan"
+msgid "Porez na potrošnju nije aktiviran za ovu tvrtku."
+msgstr "Φόρος κατανάλωσης ενεργός"
+
+#, fuzzy
+#| msgid "Microsoft login nije konfiguriran."
+msgid "POS postavke nisu konfigurirane."
+msgstr "Η σύνδεση Microsoft δεν έχει ρυθμιστεί."
 
 msgid "Gruppe"
 msgstr "Ομάδα"
@@ -10845,6 +11877,27 @@ msgstr "Έναρξη πρωτοκόλλου"
 
 msgid "Fakturirano"
 msgstr "Τιμολογημένο"
+
+msgid "Samo nacrt/poslane narudzbenice se mogu uredjivati."
+msgstr ""
+
+#, fuzzy
+#| msgid "Narudzba vec kreirana"
+msgid "Narudzbenica azurirana."
+msgstr "Η παραγγελία έχει ήδη δημιουργηθεί"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Prijem robe evidentiran."
+msgstr "Εγγραφή καταγράφηκε"
+
+msgid "Ne moze se otkazati vec isporucena/fakturirana narudzbenica."
+msgstr ""
+
+#, fuzzy
+#| msgid "Sve odobreno!"
+msgid "Uparivanje odobreno."
+msgstr "Εγκρίθηκε"
 
 msgid "Stroj"
 msgstr "Μηχάνημα"
@@ -11099,6 +12152,28 @@ msgstr "Σχέδιο παραγγελίας MRP"
 msgid "MRP planirani nalozi"
 msgstr "Σχέδια παραγγελιών MRP"
 
+msgid "Nalog nije u nacrtu."
+msgstr ""
+
+#, fuzzy
+#| msgid "Dokument nije u statusu Nacrt."
+msgid "Nalog nije u statusu za završetak."
+msgstr "Το έγγραφο δεν είναι σε κατάσταση σχεδίου."
+
+msgid "Završen nalog se ne može otkazati."
+msgstr ""
+
+msgid "Nalog nije u statusu za evidentiranje proizvodnje."
+msgstr ""
+
+#, fuzzy
+#| msgid "Planirana količina"
+msgid "Nevaljana količina."
+msgstr "Προγραμματισμένη ποσότητα"
+
+msgid "Ispravite greške u QC obrascu."
+msgstr ""
+
 msgid "Datum završetka ne može biti prije datuma početka."
 msgstr ""
 "Η ημερομηνία λήξης δεν μπορεί να είναι πριν από την ημερομηνία έναρξης."
@@ -11136,6 +12211,43 @@ msgstr "Δεν υπάρχουν έργα"
 msgid "Dodaj prvi projekt"
 msgstr "Προσθέστε το πρώτο έργο"
 
+#, fuzzy
+#| msgid "Ažuriranje"
+msgid "Ažuriranje dodano."
+msgstr "Ενημερώσεις"
+
+#, fuzzy
+#| msgid "— Odaberi radnika —"
+msgid "Odaberi radnika iz liste."
+msgstr "— Επιλέξτε εργαζόμενο —"
+
+msgid "Period zatvoren. Ukupno: {:.2f} EUR ({} otpremnica)"
+msgstr ""
+
+msgid "Zbirni e-Racun kreiran: {}. Ukupno: {:.2f} EUR."
+msgstr ""
+
+#, fuzzy
+#| msgid "Otpremnica (Lieferschein)"
+msgid "Otpremnica {} kreirana."
+msgstr "Δελτίο αποστολής (Lieferschein)"
+
+#, fuzzy
+#| msgid "Nema podataka"
+msgid "Nema eko podataka za {}."
+msgstr "Δεν υπάρχουν δεδομένα"
+
+#, fuzzy
+#| msgid "Niste povezani s tvrtkom."
+msgid "Nema povezane tvrtke."
+msgstr "Δεν είστε συνδεδεμένοι με εταιρεία."
+
+msgid "Propter modul nije aktivan za vašu tvrtku."
+msgstr ""
+
+msgid "Propter nije konfiguriran. Kontaktirajte administratora."
+msgstr ""
+
 msgid "Pending"
 msgstr "Εκκρεμεί"
 
@@ -11146,9 +12258,73 @@ msgid "Rejected"
 msgstr "Απορρίφθηκε"
 
 #, fuzzy
+#| msgid "Odaberite datum"
+msgid "Odaberite tvrtku."
+msgstr "Σχέδιο Odaberi"
+
+#, fuzzy
+#| msgid "Odabrani plan"
+msgid "Odabrani plan nije dostupan."
+msgstr "Επιλεγμένο σχέδιο"
+
+msgid "Morate prihvatiti uvjete korištenja."
+msgstr "Πρέπει να αποδεχθείτε τους όρους χρήσης."
+
+#, fuzzy
+#| msgid "Dobrodošli u LIMIT Connect"
+msgid "Dobrodosli u LIMIT Connect! Vas trial traje do {}."
+msgstr "Καλώς ήρθατε στο LIMIT Connect"
+
+msgid "Dobrodosli u LIMIT Connect! Vas besplatni plan je aktiviran."
+msgstr ""
+
+#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Registracija nije uspjela. Provjerite podatke i pokušajte ponovo."
 msgstr "Η εγγραφή απέτυχε. Ελέγξτε τα δεδομένα."
+
+#, fuzzy
+#| msgid "Registration Details"
+msgid "Registration is already {}."
+msgstr "Τελικές λεπτομέρειες"
+
+msgid "Approved: {}. Account created for {}."
+msgstr ""
+
+msgid "Error during approval: {}"
+msgstr ""
+
+#, fuzzy
+#| msgid "Registration Details"
+msgid "Registration for {} rejected."
+msgstr "Τελικές λεπτομέρειες"
+
+#, fuzzy
+#| msgid "Ovo će biti vaš administratorski račun."
+msgid "Ova firma već ima aktivnog administratora."
+msgstr "Αυτός θα είναι ο λογαριασμός διαχειριστή σας."
+
+msgid "Email i ime su obavezni."
+msgstr ""
+
+msgid "Vaš zahtjev je već poslan. Čekajte odobrenje."
+msgstr ""
+
+#, fuzzy
+#| msgid "Link je istekao ili je već iskorišten. Zatražite novi."
+msgid "Link je istekao ili nevažeći."
+msgstr "Ο σύνδεσμος έχει λήξει ή έχει ήδη χρησιμοποιηθεί. Ζητήστε έναν νέο."
+
+#, fuzzy
+#| msgid "Zahtjev"
+msgid "Zahtjev odbijen."
+msgstr "Αίτημα"
+
+#, fuzzy
+#| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
+msgid "Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h."
+msgstr ""
+"Το αίτημά σας έχει ληφθεί. Θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό."
 
 msgid "Kuca"
 msgstr "Σπίτι"
@@ -11340,6 +12516,11 @@ msgstr "Ανασκόπηση και διαχείριση - ενοικίαση"
 msgid "Rental Modul"
 msgstr "Ενότητα ενοικίασης"
 
+#, fuzzy
+#| msgid "Pogrešan kod. Pokušajte ponovo."
+msgid "Placanje nije uspjelo. Pokusajte ponovo."
+msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
 msgid "Rabatna grupa"
 msgstr "Ομάδα έκπτωσης"
 
@@ -11485,9 +12666,28 @@ msgid "IOS izvodi"
 msgstr "IOS καταστάσεις"
 
 #, fuzzy
+#| msgid "Dokument nije u statusu Nacrt."
+msgid "Narudžba nije u statusu Nacrt."
+msgstr "Το έγγραφο δεν είναι σε κατάσταση σχεδίου."
+
+msgid "Narudžba mora biti potvrđena za isporuku."
+msgstr ""
+
+msgid "Narudžba mora biti isporučena ili potvrđena za fakturiranje."
+msgstr ""
+
+msgid "Fakturirana ili zatvorena narudžba se ne može otkazati."
+msgstr ""
+
+#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+#, fuzzy
+#| msgid "Iznos plaćanja mora biti veći od 0."
+msgid "Iznos mora biti veći od 0."
+msgstr "Το ποσό πληρωμής πρέπει να είναι μεγαλύτερο από 0."
 
 msgid "Državljanstvo"
 msgstr "Κράτος"
@@ -11569,6 +12769,74 @@ msgstr "Πληρωμή / Έξοδα"
 
 msgid "Isplate sezonskim radnicima"
 msgstr "Πληρωμές εποχικών εργατών"
+
+#, fuzzy
+#| msgid "OIB mora imati točno 11 znamenki."
+msgid "OIB mora biti točno 11 znamenki."
+msgstr "Το OIB πρέπει να έχει ακριβώς 11 ψηφία."
+
+msgid "Završna isplata automatski kreirana — provjeri i odobri."
+msgstr ""
+
+#, fuzzy
+#| msgid "Isplata honorara"
+msgid "Isplata kreirana."
+msgstr "Πληρωμή / Έξοδα"
+
+msgid "Rucno uneseno: {} -- {}"
+msgstr ""
+
+msgid "Širina i visina su obavezni."
+msgstr ""
+
+msgid "Mjerenje dodano ✓"
+msgstr ""
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Mjerenje obrisano."
+msgstr "Έγγραφα"
+
+msgid "Nema potvrđenih mjerenja za generiranje ponude."
+msgstr ""
+
+#, fuzzy
+#| msgid "Preskoči ako već postoji"
+msgid "Proizvodni nalog već postoji."
+msgstr "Παράλειψη εάν υπάρχει ήδη"
+
+msgid "Unesite datum ugradnje."
+msgstr ""
+
+#, fuzzy
+#| msgid "Zadnja zamjena"
+msgid "Ugradnja završena!"
+msgstr "Τελευταία αντικατάσταση"
+
+#, fuzzy
+#| msgid "Detalji ažuriranja..."
+msgid "Checklist ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+msgid "Servisni pregled završen. Sljedeći zakazan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Unesite novu lozinku (min. 10 znakova)"
+msgid "Unesite telefonski broj."
+msgstr "Εισάγετε νέο κωδικό πρόσβασης (ελάχιστο 10 χαρακτήρες)"
+
+msgid "PDF generator nedostupan."
+msgstr ""
+
+msgid "Poruka odobrena — bit će poslana automatski."
+msgstr ""
+
+msgid "AI nacrt odbijen."
+msgstr ""
+
+msgid "Poruka eskalirana voditelju."
+msgstr ""
 
 msgid "Isključeno"
 msgstr "Αποκλειστικά"
@@ -11665,6 +12933,12 @@ msgstr "AI αρχείο καταγραφής"
 
 msgid "AI logovi"
 msgstr "AI αρχεία καταγραφής"
+
+msgid "Konfiguracija Synesis integracije je spremljena."
+msgstr ""
+
+msgid "API token je regeneriran. Azurirajte sync skriptu!"
+msgstr ""
 
 msgid "PO-SD — Paušalni obrt"
 msgstr "PO-SD — Paušalni obrt"
@@ -17978,9 +19252,6 @@ msgstr "και καταλαβαίνω ότι τα δεδομένα προστα�
 msgid "regulativi"
 msgstr "Κανονισμοί"
 
-msgid "Morate prihvatiti uvjete korištenja."
-msgstr "Πρέπει να αποδεχθείτε τους όρους χρήσης."
-
 msgid "Pokreni besplatno"
 msgstr "Ξεκινήστε δωρεάν"
 
@@ -18946,13 +20217,353 @@ msgstr "Γεγονός ίχνους"
 msgid "Događaji traga"
 msgstr "Γεγονότα ίχνους"
 
+#, fuzzy
+#| msgid "Trošak ažuriran"
+msgid "Tracking ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
 msgid "Niste povezani s udrugom. Odaberite udrugu iz izbornika."
 msgstr "Δεν είστε συνδεδεμένοι με σύλλογο. Επιλέξτε έναν από το μενού."
+
+#, python-format
+msgid "Clan %s %s dodan."
+msgstr ""
+
+#, python-format
+msgid "Clanarina placena: %s EUR"
+msgstr ""
+
+#, python-format
+msgid "Kreirano %d clanarina po %s EUR."
+msgstr ""
+
+#, python-format
+msgid "AML UPOZORENJE: %s — Potrebna dubinska analiza (KYC)!"
+msgstr ""
+
+#, python-format
+msgid "AML: Donacija oznacena za pregled — %s"
+msgstr ""
+
+#, python-format
+msgid "Donacija %s EUR od %s evidentirana."
+msgstr ""
+
+msgid "Stavka dodana u Knjigu primitaka i izdataka."
+msgstr ""
+
+#, python-format
+msgid "Dogadjaj '%s' kreiran."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nema tvrtki."
+msgid "Nemate clan profil u ovoj udruzi."
+msgstr "Όνομα εταιρείας"
+
+#, fuzzy
+#| msgid "Nema obavijesti"
+msgid "Nema slobodnih mjesta."
+msgstr "Δεν υπάρχουν έργα"
+
+#, fuzzy
+#| msgid "Prijava u"
+msgid "Prijava uspjesna!"
+msgstr "Σύνδεση σε"
+
+#, fuzzy
+#| msgid "Nije prijavljen"
+msgid "Vec ste prijavljeni."
+msgstr "Τελευταίες εγγραφές"
+
+#, python-format
+msgid "Kampanja '%s' kreirana."
+msgstr ""
+
+#, python-format
+msgid "AI generiranje nije uspjelo: %s"
+msgstr ""
+
+#, python-format
+msgid "Email kampanja '%s' kreirana."
+msgstr ""
+
+#, python-format
+msgid "Kampanja se ne moze poslati (status: %s)."
+msgstr ""
+
+#, python-format
+msgid "Email kampanja '%s' zakazana za slanje!"
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Zadnje azurirano"
+msgid "Clan %s azuriran."
+msgstr "Τελευταίες τιμολογίες"
+
+msgid "Volonterska aktivnost evidentirana."
+msgstr ""
+
+msgid "AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama."
+msgstr ""
+
+#, fuzzy
+#| msgid "Nema kretanja."
+msgid "Sekcija kreirana."
+msgstr "Δεν υπάρχει λογαριασμός"
+
+#, python-format
+msgid "%s dodan u %s."
+msgstr ""
+
+#, fuzzy
+#| msgid "Dokument vozila"
+msgid "Dokument dodan."
+msgstr "Έγγραφα"
+
+#, fuzzy
+#| msgid "Nema ponuda."
+msgid "Oprema dodana."
+msgstr "Δεν υπάρχουν δεδομένα"
+
+#, fuzzy
+#| msgid "Vozilo cisto"
+msgid "Vozilo dodano."
+msgstr "Όχημα καθαρό"
+
+#, fuzzy
+#| msgid "Intervencija"
+msgid "Intervencija evidentirana."
+msgstr "Εσωτερικός αριθμός αναγνώρισης"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Vježba evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Zadnje brojao"
+msgid "Zvanje dodano."
+msgstr "Τελευταίες εγγραφές"
+
+msgid "Repertoar dodan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Proba evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Gosti danas"
+msgid "Kostim dodan."
+msgstr "Οι μέρες μου (7 ημέρες)"
+
+msgid "Plan nastupa kreiran."
+msgstr ""
+
+msgid "Revir dodan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Država izdavanja"
+msgid "Dozvola izdana."
+msgstr "Ημερομηνία κυκλοφορίας"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Ulov evidentiran."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Poribljavanje evidentirano."
+msgstr "Εγγραφή καταγράφηκε"
+
+msgid "Čuvarska straža evidentirana."
+msgstr ""
+
+#, fuzzy
+#| msgid "Pčelinja zajednica"
+msgid "Pčelinjak dodan."
+msgstr "Μελίσσια κοινότητα"
+
+#, fuzzy
+#| msgid "Kasni dana"
+msgid "Košnica dodana."
+msgstr "Ιδιοκτήτης δεδομένων"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Tretman evidentiran."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Proizvodnja/centrala"
+msgid "Proizvodnja meda evidentirana."
+msgstr "Παραγωγή/κεντρικό"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Selidba evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Potvrda registracije"
+msgid "Kotao registriran."
+msgstr "Επιβεβαίωση εγγραφής"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Destilacija evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Rakija evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Trošak prijevoza/dan"
+msgid "Trošarinska prijava kreirana."
+msgstr "Κόστος μεταφοράς/ημέρα"
+
+msgid "Voćnjak dodan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Berba evidentirana."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Nema ažuriranja"
+msgid "Oprema azurirana."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Intervencija"
+msgid "Intervencija azurirana."
+msgstr "Εσωτερικός αριθμός αναγνώρισης"
+
+msgid "Kostim azuriran."
+msgstr ""
+
+msgid "Član već ima status branitelja."
+msgstr ""
+
+#, python-format
+msgid "Status branitelja dodan za %s."
+msgstr ""
+
+#, fuzzy
+#| msgid "Dopušteno"
+msgid "Dopuštenje kreirano."
+msgstr "Επιτρεπόμενο"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Zapisnik kreiran."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Detalji ažuriranja..."
+msgid "Status branitelja ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Trošak ažuriran"
+msgid "Dopuštenje ažurirano."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Trošak ažuriran"
+msgid "Zapisnik ažuriran."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#, fuzzy
+#| msgid "Lovište"
+msgid "Lovište dodano."
+msgstr "Κυνηγετική περιοχή"
+
+#, fuzzy
+#| msgid "Trošak ažuriran"
+msgid "Lovište ažurirano."
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+msgid "Trofej dodan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Zadruga"
+msgid "Zadrugar dodan."
+msgstr "Συνεταιρισμός"
+
+#, fuzzy
+#| msgid "Nema evidentiranih pologa."
+msgid "Revizija evidentirana."
+msgstr "Δεν υπάρχουν καταχωρημένες καταθέσεις."
+
+msgid "Golubinjak kreiran."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Nalog kreiran"
+msgid "Golub %s kreiran."
+msgstr "Παραγγελία δημιουργήθηκε"
+
+#, python-format
+msgid "Golub %s azuriran."
+msgstr ""
+
+#, fuzzy
+#| msgid "Pariran"
+msgid "Par kreiran."
+msgstr "Τιμολογημένο"
+
+#, fuzzy
+#| msgid "Zapis evidentiran"
+msgid "Leglo evidentirano."
+msgstr "Εγγραφή καταγράφηκε"
+
+#, fuzzy
+#| msgid "Zdravstvene napomene"
+msgid "Zdravstveni zapis kreiran."
+msgstr "Εσωτερικές σημειώσεις"
+
+#, python-format
+msgid "Utrka \"%s\" kreirana."
+msgstr ""
+
+#, fuzzy
+#| msgid "Rezultat"
+msgid "Rezultat dodan."
+msgstr "Αποτέλεσμα"
+
+#, python-format
+msgid "Golub %s zapecacen. Hash: %s"
+msgstr ""
+
+#, fuzzy
+#| msgid "Obavezno za prehrambene proizvode — Zakon o OPG čl.12"
+msgid "OPG broj je obavezan za prehrambene proizvode (Zakon o OPG čl.12)."
+msgstr "Υποχρεωτικό για τρόφιμα — Νόμος περί OPG άρθ.12"
 
 #, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Objavljivanje nije uspjelo. Pokušajte ponovo."
 msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+msgid "Tretman dodan."
+msgstr ""
+
+msgid "Status → Slobodan za udomljenje."
+msgstr ""
+
+#, fuzzy
+#| msgid "Rezervirano"
+msgid "Status → Rezerviran."
+msgstr "Δεσμευμένο"
 
 msgid "Električna energija"
 msgstr "Ηλεκτρική ενέργεια"
@@ -19077,6 +20688,19 @@ msgstr "Λογαριασμοί"
 msgid "Računi režija"
 msgstr "Λογαριασμοί"
 
+#, fuzzy
+#| msgid "Proknjiženo"
+msgid "Već proknjiženo."
+msgstr "Καταχωρημένο"
+
+msgid "Sken uploadan."
+msgstr ""
+
+#, fuzzy
+#| msgid "Datum arhiviranja"
+msgid "Posta arhivirana."
+msgstr "Ημερομηνία κυκλοφορίας"
+
 msgid "Pregled i upravljanje - webshop"
 msgstr "Προβολή και διαχείριση - webshop"
 
@@ -19112,6 +20736,14 @@ msgstr "Πλοήγηση"
 
 msgid "Preview"
 msgstr "Προεπισκόπηση"
+
+#, fuzzy
+#| msgid "Dokument vozača"
+msgid "Slika uspješno dodana!"
+msgstr "Έγγραφο"
+
+msgid "Web stranica uspjesno azurirana!"
+msgstr ""
 
 msgid "Stranice"
 msgstr "Σελίδες"
@@ -19619,6 +21251,29 @@ msgstr "Πρόγραμμα ηλεκτρονικού ταχυδρομείου"
 msgid "Kartoni klijenata"
 msgstr "Πρόγραμμα ηλεκτρονικού ταχυδρομείου"
 
+msgid "Fakturirani/otkazani nalozi se ne mogu mijenjati."
+msgstr ""
+
+#, fuzzy
+#| msgid "Radni nalog"
+msgid "Radni nalog ažuriran."
+msgstr "Εργασιακή εντολή"
+
+#, fuzzy
+#| msgid "Nalog kreiran"
+msgid "Nalog je već fakturiran."
+msgstr "Παραγγελία δημιουργήθηκε"
+
+#, fuzzy
+#| msgid "Karton vozila"
+msgid "Karton vozila ažuriran."
+msgstr "Κάρτα"
+
+#, fuzzy
+#| msgid "Karton klijenta"
+msgid "Karton klijenta ažuriran."
+msgstr "Πρόγραμμα ηλεκτρονικού ταχυδρομείου"
+
 msgid "Tjedni"
 msgstr "Εβδομαδιαία"
 
@@ -19735,6 +21390,69 @@ msgstr "Αλλάξτε τον κωδικό πρόσβασης για τον λο
 
 msgid "Promijeni lozinku"
 msgstr "Αλλαγή κωδικού πρόσβασης"
+
+msgid "Već imate aktivan timer! Zaustavite ga prvo."
+msgstr ""
+
+#, fuzzy
+#| msgid "Odaberi projekt"
+msgid "Odaberite projekt!"
+msgstr "Σχέδιο Odaberi"
+
+#, fuzzy
+#| msgid "Projektni rad"
+msgid "Projekt nije pronađen!"
+msgstr "Έργο"
+
+#, fuzzy
+#| msgid "Nema aktivne smjene."
+msgid "Nemate aktivan timer."
+msgstr "Δεν υπάρχει ενεργή βάρδια."
+
+#, fuzzy
+#| msgid "Štoperica, unos sati, evidencija"
+msgid "▶ Štoperica nastavljena"
+msgstr "Χρονόμετρο, καταγραφή ώρας, τήρηση αρχείων"
+
+msgid "❌ Trajanje mora biti pozitivno!"
+msgstr ""
+
+msgid "Možete uređivati samo unose u statusu Skica ili Na čekanju."
+msgstr ""
+
+msgid "Možete brisati samo unose na čekanju."
+msgstr ""
+
+#, fuzzy
+#| msgid "Neispravan PIN."
+msgid "Neispravan datum."
+msgstr "Λανθασμένο PIN."
+
+#, fuzzy
+#| msgid "Predložak usluge"
+msgid "Predložak obrisan."
+msgstr "Πρότυπο υπηρεσίας"
+
+msgid "✓ Bilješka spremljena"
+msgstr ""
+
+#, fuzzy
+#| msgid "Bilješka za danas"
+msgid "Bilješka obrisana"
+msgstr "Σημειώσεις για σήμερα..."
+
+#, fuzzy
+#| msgid "Profil fakturiranja"
+msgid "✓ Profil ažuriran!"
+msgstr "Συνολικό τιμολογηθέν ποσό"
+
+#, fuzzy
+#| msgid "Nema registriranih blagajnika."
+msgid "Nema odobrenih nefakturiranih sati."
+msgstr "Δεν υπάρχουν εγγεγραμμένοι ταμίες."
+
+msgid "Trosak dodan."
+msgstr ""
 
 #~ msgid "Opis prigovora"
 #~ msgstr "Περιγραφή παράπονου"
@@ -19855,9 +21573,6 @@ msgstr "Αλλαγή κωδικού πρόσβασης"
 
 #~ msgid "Fitness – Članovi"
 #~ msgstr "Fitness – Μέλη"
-
-#~ msgid "Police osiguranja"
-#~ msgstr "Πολιτικές ασφάλισης"
 
 #~ msgid "Nova polica"
 #~ msgstr "Νέος κωδικός πρόσβασης"
@@ -20935,9 +22650,6 @@ msgstr "Αλλαγή κωδικού πρόσβασης"
 
 #~ msgid "or"
 #~ msgstr "ή"
-
-#~ msgid ", "
-#~ msgstr ", "
 
 #~ msgid "Forbidden"
 #~ msgstr "Απαγορεύεται"

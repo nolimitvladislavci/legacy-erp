@@ -101,7 +101,7 @@ def new_intervention(request):
         worker_id   = request.POST.get('assigned_to', '').strip()
 
         if not all([title, address, client_name, client_phone]):
-            messages.error(request, 'Naslov, adresa, ime i telefon klijenta su obavezni.')
+            messages.error(request, _('Naslov, adresa, ime i telefon klijenta su obavezni.'))
         else:
             interv = HitnaIntervencija.objects.create(
                 company=company,

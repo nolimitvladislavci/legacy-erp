@@ -194,6 +194,22 @@ MODULE_REGISTRY = {
         'nkd_codes': ['01.41', '01.42'],
         'keywords': ['stočar', 'govedar', 'govedo', 'mlijeko', 'cattle'],
     },
+    'stolarija': {
+        'name': 'Stolarija (ALU/PVC)',
+        'icon': 'fa-window-maximize',
+        'description': 'Mjerenje, ponuda, proizvodnja, ugradnja, garancija za ALU/PVC stolariju',
+        'category': 'proizvodnja',
+        'url_prefix': '/stolarija/',
+        'sidebar_items': [
+            {'name': 'Dashboard', 'url': 'stolarija:dashboard', 'icon': 'fa-tachometer-alt'},
+            {'name': 'Nova sesija', 'url': 'stolarija:session_new', 'icon': 'fa-plus'},
+            {'name': 'Ponude', 'url': 'stolarija:offer_list', 'icon': 'fa-file-invoice'},
+            {'name': 'Garancije', 'url': 'stolarija:warranty_list', 'icon': 'fa-shield-alt'},
+        ],
+        'auto_activate_for': ['obrt', 'doo'],
+        'nkd_codes': ['25.12', '43.32'],
+        'keywords': ['stolarija', 'prozor', 'vrata', 'alu', 'pvc', 'staklo', 'window', 'door'],
+    },
 }
 
 # Category display metadata
@@ -201,6 +217,7 @@ MODULE_CATEGORIES = {
     'udruge': {'name': 'Udruge — Osnovno', 'icon': 'fa-users', 'order': 0},
     'dvd': {'name': 'Vatrogasci (DVD)', 'icon': 'fa-fire-extinguisher', 'order': 1},
     'kud': {'name': 'Kultura (KUD)', 'icon': 'fa-music', 'order': 2},
+    'proizvodnja': {'name': 'Proizvodnja i obrt', 'icon': 'fa-industry', 'order': 10},
     'ribolov': {'name': 'Ribolov (ŠRD)', 'icon': 'fa-fish', 'order': 3},
     'pcelari': {'name': 'Pčelarstvo', 'icon': 'fa-bug', 'order': 4},
     'rakija': {'name': 'Rakija / Destilacija', 'icon': 'fa-wine-bottle', 'order': 5},

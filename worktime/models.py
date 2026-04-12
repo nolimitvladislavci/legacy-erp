@@ -123,11 +123,54 @@ class EmployeeProfile(models.Model):
         verbose_name='Datum ugovora o volontiranju',
     )
 
+    # ── Offboarding + Data Vault (GDPR + ZOR) ──────────────────
+    is_terminated = models.BooleanField(default=False, verbose_name='Prekinut radni odnos')
+    terminated_at = models.DateField(null=True, blank=True, verbose_name='Datum prestanka')
+    termination_reason = models.CharField(max_length=30, blank=True, choices=[
+        ('resignation', 'Otkaz radnika'),
+        ('employer', 'Otkaz poslodavca'),
+        ('mutual', 'Sporazumni raskid'),
+        ('contract_end', 'Istekao ugovor'),
+        ('probation', 'Probni rad'),
+        ('retirement', 'Mirovina'),
+    ], verbose_name='Razlog prestanka')
+    # Data Vault: IBAN se NE briše (ZOR 6god, mirovinsko trajno)
+    # Ali se skriva iz UI-a nakon 30 dana
+    iban_archived = models.BooleanField(default=False,
+        verbose_name='IBAN arhiviran',
+        help_text='Skriven iz UI-a, ali pohranjen za porezni nadzor')
+    iban_archived_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username}"
+
+    def terminate(self, reason='mutual', terminated_at=None):
+        """Offboarding process — deaktivira radnika, čuva podatke."""
+        from django.utils import timezone
+        self.is_terminated = True
+        self.terminated_at = terminated_at or timezone.now().date()
+        self.termination_reason = reason
+        self.save(update_fields=['is_terminated', 'terminated_at', 'termination_reason', 'updated_at'])
+        # Deaktiviraj PIN
+        try:
+            tk = self.user.trikey
+            tk.pin_hash = ''
+            tk.pin_attempts = 0
+            tk.save(update_fields=['pin_hash', 'pin_attempts'])
+        except Exception:
+            pass
+        # Deaktiviraj user account
+        self.user.is_active = False
+        self.user.save(update_fields=['is_active'])
+
+    def delete(self, *args, **kwargs):
+        raise PermissionError(
+            "EmployeeProfile cannot be deleted — legal requirement (ZOR, fiskalizacija). "
+            "Use terminate() instead."
+        )
 
     @property
     def is_volunteer_active(self):
@@ -805,3 +848,70 @@ class TravelExpense(models.Model):
 
     def __str__(self):
         return f'{self.get_expense_type_display()}: {self.amount} EUR — {self.description}'
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# TimeLogRevision — Zakonski nepromjenjivi trag izmjena radnog vremena
+# Inspektorat rada zahtijeva: tko, kad, što, zašto
+# ═══════════════════════════════════════════════════════════════════════
+
+class TimeLogRevision(models.Model):
+    """
+    Svaka izmjena TimeEntry-ja se logira ovdje. Append-only.
+    Zakon o radu + Pravilnik o evidenciji radnog vremena (NN 55/24).
+    """
+    time_entry = models.ForeignKey(
+        TimeEntry, on_delete=models.CASCADE, related_name='revisions',
+    )
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE, null=True, blank=True,
+    )
+
+    # Tko i kad
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, related_name='time_revisions_made',
+    )
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    # Što se promijenilo
+    field_name = models.CharField(max_length=50)
+    old_value = models.CharField(max_length=200)
+    new_value = models.CharField(max_length=200)
+    reason = models.CharField(max_length=300, blank=True,
+        verbose_name='Razlog izmjene',
+        help_text='Obavezno za inspektora rada')
+
+    # Dispute — radnik se ne slaže
+    disputed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='time_disputes',
+    )
+    disputed_at = models.DateTimeField(null=True, blank=True)
+    dispute_note = models.TextField(blank=True)
+    dispute_resolved = models.BooleanField(default=False)
+    dispute_resolved_at = models.DateTimeField(null=True, blank=True)
+    dispute_resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='time_disputes_resolved',
+    )
+
+    class Meta:
+        ordering = ['-changed_at']
+        verbose_name = 'Revizija radnog sata'
+        verbose_name_plural = 'Revizije radnih sati'
+        indexes = [
+            models.Index(fields=['time_entry', '-changed_at']),
+            models.Index(fields=['company', '-changed_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.time_entry_id} | {self.field_name}: {self.old_value} → {self.new_value}"
+
+    def delete(self, *args, **kwargs):
+        raise PermissionError("TimeLogRevision records cannot be deleted — legal requirement.")
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise PermissionError("TimeLogRevision records cannot be modified — append only.")
+        super().save(*args, **kwargs)

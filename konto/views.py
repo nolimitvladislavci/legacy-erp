@@ -48,7 +48,7 @@ def dashboard(request):
     company = _get_company(request)
     if not company:
         from django.contrib import messages
-        messages.warning(request, 'Nema aktivne tvrtke. Obratite se administratoru.')
+        messages.warning(request, _('Nema aktivne tvrtke. Obratite se administratoru.'))
         return redirect('dashboard')
     today = timezone.now().date()
     year_start = datetime.date(today.year, 1, 1)
@@ -1555,7 +1555,7 @@ def saft_export_view(request):
             pt = date.fromisoformat(period_to)
         except (ValueError, TypeError):
             from django.contrib import messages
-            messages.error(request, 'Neispravan format datuma.')
+            messages.error(request, _('Neispravan format datuma.'))
             return render(request, 'konto/saft_export.html')
 
         gen = SAFTGenerator(request.company, pf, pt)

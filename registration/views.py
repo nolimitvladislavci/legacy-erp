@@ -254,13 +254,13 @@ def register_step3_confirm(request):
     from .models import PricingPlan
     plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
     if not plan:
-        messages.error(request, "Odabrani plan nije dostupan.")
+        messages.error(request, _("Odabrani plan nije dostupan."))
         return redirect("registration:register_step1")
 
     if request.method == "POST":
         # T&C acceptance check
         if not request.POST.get("tc_accept"):
-            messages.error(request, "Morate prihvatiti uvjete korištenja.")
+            messages.error(request, _("Morate prihvatiti uvjete korištenja."))
             return render(request, "registration/step3_confirm.html", {
                 "step": 3, "plan": plan, "company": company_data,
                 "user": user_data, "tc_error": True,
@@ -434,7 +434,7 @@ def register_step4(request):
     from .models import PricingPlan
     plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
     if not plan:
-        messages.error(request, "Odabrani plan nije dostupan.")
+        messages.error(request, _("Odabrani plan nije dostupan."))
         return redirect("registration:register_step1")
 
     if request.method == "POST":
@@ -592,9 +592,9 @@ def register_step4(request):
                 website_url = None
 
             if plan.price_monthly > 0:
-                messages.success(request, "Dobrodosli u LIMIT Connect! Vas trial traje do {}.".format(trial_end.strftime("%d.%m.%Y")))
+                messages.success(request, _("Dobrodosli u LIMIT Connect! Vas trial traje do {}.").format(trial_end.strftime("%d.%m.%Y")))
             else:
-                messages.success(request, "Dobrodosli u LIMIT Connect! Vas besplatni plan je aktiviran.")
+                messages.success(request, _("Dobrodosli u LIMIT Connect! Vas besplatni plan je aktiviran."))
 
             # Store info for success page
             request.session["reg_success_website_url"] = website_url or ""
@@ -683,7 +683,7 @@ def admin_registration_detail(request, pk):
 def admin_approve_registration(request, pk):
     reg = get_object_or_404(CompanyRegistration, pk=pk)
     if reg.status != CompanyRegistration.PENDING:
-        messages.warning(request, 'Registration is already {}.'.format(reg.status))
+        messages.warning(request, _('Registration is already {}.').format(reg.status))
         return redirect('registration:admin_list')
     try:
         from accounts.models import UserProfile
@@ -741,10 +741,10 @@ def admin_approve_registration(request, pk):
         website = _auto_create_website(company)
         company_email = _generate_company_email(company)
 
-        messages.success(request, 'Approved: {}. Account created for {}.'.format(reg.name, reg.contact_email))
+        messages.success(request, _('Approved: {}. Account created for {}.').format(reg.name, reg.contact_email))
     except Exception as e:
         logger.exception('Error approving registration %s', pk)
-        messages.error(request, 'Error during approval: {}'.format(e))
+        messages.error(request, _('Error during approval: {}').format(e))
     return redirect('registration:admin_list')
 
 
@@ -754,7 +754,7 @@ def admin_approve_registration(request, pk):
 def admin_reject_registration(request, pk):
     reg = get_object_or_404(CompanyRegistration, pk=pk)
     if reg.status != CompanyRegistration.PENDING:
-        messages.warning(request, 'Registration is already {}.'.format(reg.status))
+        messages.warning(request, _('Registration is already {}.').format(reg.status))
         return redirect('registration:admin_list')
     reason = request.POST.get('rejection_reason', '').strip()
     reg.status = CompanyRegistration.REJECTED
@@ -762,7 +762,7 @@ def admin_reject_registration(request, pk):
     reg.reviewed_by = request.user
     reg.save()
     _send_rejection_email(reg, reason)
-    messages.warning(request, 'Registration for {} rejected.'.format(reg.name))
+    messages.warning(request, _('Registration for {} rejected.').format(reg.name))
     return redirect('registration:admin_list')
 
 
@@ -1286,7 +1286,7 @@ def claim_company_form(request, company_id):
     company = get_object_or_404(Company, id=company_id)
 
     if UserProfile.objects.filter(company=company).exists():
-        messages.warning(request, 'Ova firma već ima aktivnog administratora.')
+        messages.warning(request, _('Ova firma već ima aktivnog administratora.'))
         return redirect('home')
 
     pending = CompanyClaimRequest.objects.filter(company=company, status='pending').exists()
@@ -1339,11 +1339,11 @@ def submit_claim(request, company_id):
     phone = request.POST.get('phone', '').strip()
 
     if not email or not first_name:
-        messages.error(request, 'Email i ime su obavezni.')
+        messages.error(request, _('Email i ime su obavezni.'))
         return redirect('claim_company', company_id=company_id)
 
     if CompanyClaimRequest.objects.filter(email=email, company=company, status='pending').exists():
-        messages.info(request, 'Vaš zahtjev je već poslan. Čekajte odobrenje.')
+        messages.info(request, _('Vaš zahtjev je već poslan. Čekajte odobrenje.'))
         return redirect('claim_company', company_id=company_id)
 
     claim = CompanyClaimRequest.objects.create(
@@ -1388,13 +1388,13 @@ def activate_via_invite(request, token):
     claim = get_object_or_404(CompanyClaimRequest, verify_token=token)
 
     if not claim.is_token_valid:
-        messages.error(request, 'Link je istekao ili nevažeći.')
+        messages.error(request, _('Link je istekao ili nevažeći.'))
         return redirect('home')
 
     if request.method == 'POST':
         password = request.POST.get('password1', '')
         if len(password) < 8:
-            messages.error(request, 'Lozinka mora imati najmanje 8 znakova.')
+            messages.error(request, _('Lozinka mora imati najmanje 8 znakova.'))
             return render(request, 'registration/activate_invite.html', {'claim': claim})
 
         user, _ = claim.approve(reviewed_by=None)
@@ -1462,7 +1462,7 @@ def approve_claim(request, claim_id):
             claim.reviewed_at = timezone.now()
             claim.reject_reason = request.POST.get('reason', '')
             claim.save()
-            messages.warning(request, 'Zahtjev odbijen.')
+            messages.warning(request, _('Zahtjev odbijen.'))
             return redirect('pending_claims')
 
     # Stats za firmu
@@ -1713,7 +1713,7 @@ def distributor_apply(request):
                 motivation=request.POST.get('motivation', '').strip(),
                 website=request.POST.get('website', '').strip() or '',
             )
-            messages.success(request, 'Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.')
+            messages.success(request, _('Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.'))
             return redirect('distributor_apply')
         except Exception as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))

@@ -124,3 +124,28 @@ def worktime_anomaly_patrol(self):
         logger.warning('Patrol notify failed: %s', notif_err)
 
     return {'alerts': len(alerts), 'created': created}
+
+
+# ═══════════════════════════════════════════════════════════════
+# Data Vault — GDPR + ZOR kompromis
+# Svake noći: ako radnik terminiran > 30 dana, skrij IBAN iz UI-a
+# IBAN ostaje u bazi (bank_account) — ZOR zahtijeva čuvanje 6 god
+# ═══════════════════════════════════════════════════════════════
+
+@shared_task(name='worktime.tasks.iban_vault_check')
+def iban_vault_check():
+    """Nightly: archive IBAN for terminated employees after 30 days."""
+    from django.utils import timezone
+    from datetime import timedelta
+    from .models import EmployeeProfile
+
+    cutoff = timezone.now().date() - timedelta(days=30)
+    to_vault = EmployeeProfile.objects.filter(
+        is_terminated=True,
+        iban_archived=False,
+        terminated_at__lte=cutoff,
+        bank_account__gt='',
+    )
+    count = to_vault.update(iban_archived=True, iban_archived_at=timezone.now())
+    logger.info('Data Vault: %d IBAN(s) archived', count)
+    return {'archived': count}

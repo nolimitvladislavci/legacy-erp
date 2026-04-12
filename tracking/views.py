@@ -93,7 +93,8 @@ def shipment_update(request, pk):
                 item.update_status(st, user=request.user, note=request.POST.get('note', ''))
         item.save()
         from django.contrib import messages
-        messages.success(request, 'Tracking ažuriran.')
+        from django.utils.translation import gettext as _
+        messages.success(request, _('Tracking ažuriran.'))
     return redirect(request.META.get('HTTP_REFERER', '/tracking/'))
 
 

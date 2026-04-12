@@ -105,6 +105,7 @@ cms_views_code = """from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from .models import GalleryImage
 
 @login_required
@@ -119,7 +120,7 @@ def cms_gallery(request):
         caption_hr = request.POST.get('caption_hr', '')
         if image:
             GalleryImage.objects.create(image=image, category=category, caption_de=caption_de, caption_hr=caption_hr, is_active=True, order=0)
-            messages.success(request, 'Slika uspješno dodana!')
+            messages.success(request, _('Slika uspješno dodana!'))
         return redirect('website:cms_gallery')
 
     images = GalleryImage.objects.all().order_by('-id')

@@ -222,7 +222,7 @@ def lead_new(request):
             if bf: lead.budget_from = float(bf)
             if bt: lead.budget_to = float(bt)
             lead.save()
-            messages.success(request, 'Kartica kreirana uspješno.')
+            messages.success(request, _('Kartica kreirana uspješno.'))
             return redirect('burza:kanban')
         except Exception as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
@@ -323,7 +323,7 @@ def bathroom_to_project(request, lead_pk):
         lead.status = "INTERNA_PROCJENA"
         lead.internal_notes += "\nProject: " + proj.code
         lead.save()
-        messages.success(request, "Project " + proj.code + " kreiran.")
+        messages.success(request, _("Project ") + proj.code + " kreiran.")
         return redirect("burza:bathroom_pdf", pk=calc.pk)
 
     desc    = lead.description or ""

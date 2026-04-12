@@ -23,6 +23,7 @@ cms_views_code = """from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from .models import GalleryImage, VideoGallery, HitnaIntervencija
 
 def is_admin(user):
@@ -50,7 +51,7 @@ def custom_cms_gallery(request):
                 is_active=True,
                 order=0
             )
-            messages.success(request, 'Slika je uspješno dodana na javni portal!')
+            messages.success(request, _('Slika je uspješno dodana na javni portal!'))
         return redirect('website:custom_cms_gallery')
 
     images = GalleryImage.objects.all().order_by('-id')

@@ -2,6 +2,7 @@
 import os
 
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -35,7 +36,7 @@ def config_view(request):
         try:
             company = Company.objects.get(pk=company_id)
         except Company.DoesNotExist:
-            messages.error(request, 'Tvrtka nije pronađena.')
+            messages.error(request, _('Tvrtka nije pronađena.'))
             return redirect('fiskalizacija:config')
 
         if action == 'save':
@@ -68,7 +69,7 @@ def config_view(request):
             try:
                 config = company.fiscal_config
             except FiscalConfig.DoesNotExist:
-                messages.error(request, 'Nema konfiguracije za tu tvrtku.')
+                messages.error(request, _('Nema konfiguracije za tu tvrtku.'))
                 return redirect('fiskalizacija:config')
             ok = ping_fina(config.cert_path, config.get_password(), config.is_demo)
             config.last_test_ok = ok
@@ -77,7 +78,7 @@ def config_view(request):
             if ok:
                 messages.success(request, f'✓ Veza s FINA CIS uspješna!')
             else:
-                messages.error(request, '✗ Veza s FINA CIS nije uspjela.')
+                messages.error(request, _('✗ Veza s FINA CIS nije uspjela.'))
 
         return redirect('fiskalizacija:config')
 

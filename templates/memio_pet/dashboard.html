@@ -68,7 +68,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="top-bar">
   <a href="/" class="top-bar-logo">Memio<span>.pet</span></a>
   <div class="top-bar-right">
-    <a href="{% url 'memio_pet:add_animal' %}">+ Dodaj ljubimca</a>
+    <a href="{% url 'memio_pet:add_animal_zatrazi' %}">+ Dodaj ljubimca</a>
     <a href="/logout/">Odjava</a>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
   </div>
@@ -114,7 +114,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <div class="card-body">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h2 class="section-title mb-0" style="padding-bottom:0;border-bottom:none">Moji ljubimci ({{ animals|length }})</h2>
-        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold">+ Dodaj</a>
+        <a href="{% url 'memio_pet:add_animal_zatrazi' %}" class="btn btn-gold">+ Dodaj</a>
       </div>
 
       {% if animals %}
@@ -144,7 +144,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       <div class="text-center fx-text-dim" style="padding:24px">
         <div class="mb-2 fx-fs-7xl">🐾</div>
         <p>Nemate još niti jednog ljubimca.</p>
-        <a href="{% url 'memio_pet:add_animal' %}" class="btn btn-gold mt-3">Dodaj prvog ljubimca</a>
+        <a href="{% url 'memio_pet:add_animal_zatrazi' %}" class="btn btn-gold mt-3">Dodaj prvog ljubimca</a>
       </div>
       {% endif %}
     </div>

@@ -204,9 +204,9 @@ def change_password(request):
         p1 = request.POST.get('new_password1', '').strip()
         p2 = request.POST.get('new_password2', '').strip()
         if p1 != p2:
-            messages.error(request, 'Lozinke se ne podudaraju.')
+            messages.error(request, _('Lozinke se ne podudaraju.'))
         elif len(p1) < 10:
-            messages.error(request, 'Lozinka mora imati najmanje 8 znakova.')
+            messages.error(request, _('Lozinka mora imati najmanje 8 znakova.'))
         else:
             request.user.set_password(p1)
             request.user.save()
@@ -220,93 +220,157 @@ def change_password(request):
                 pass
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
-            messages.success(request, '✓ Lozinka uspješno promijenjena.')
+            messages.success(request, _('✓ Lozinka uspješno promijenjena.'))
             return redirect('/')
     return render(request, 'accounts/change_password.html', {})
 
 
 def quick_register(request):
-    """Quick registration for clients (no company needed)."""
-    from django.contrib.auth import login
+    """Registracija s odabirom uloge, OIB lookup i email verifikacijom."""
+    from django.contrib.auth import login as auth_login
     next_url = request.GET.get('next', request.POST.get('next', '/dashboard/'))
-    company_slug = request.GET.get('company', request.POST.get('company', ''))
 
     if request.user.is_authenticated:
         return redirect(next_url)
 
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        email = request.POST.get('email', '').strip()
-        phone = request.POST.get('phone', '').strip()
+        name     = request.POST.get('name', '').strip()
+        email    = request.POST.get('email', '').strip().lower()
+        phone    = request.POST.get('phone', '').strip()
         password = request.POST.get('password', '')
+        role     = request.POST.get('role', 'company_admin')
+        firm_oib  = request.POST.get('firm_oib', '').strip()
+        firm_name = request.POST.get('firm_name', '').strip()
+        firm_city = request.POST.get('firm_city', '').strip()
+        firm_zip  = request.POST.get('firm_zip', '').strip()
+
         errors = {}
         if not name:
-            errors['name'] = 'Ime je obavezno.'
+            errors['name'] = 'Ime i prezime su obavezni.'
         if not email:
             errors['email'] = 'Email je obavezan.'
-        elif User.objects.filter(email=email).exists():
-            errors['email'] = 'Korisnik s ovim emailom vec postoji.'
-        if len(password) < 10:
-            errors['password'] = 'Lozinka mora imati najmanje 10 znakova.'
+        elif User.objects.filter(email__iexact=email).exists():
+            errors['email'] = 'Korisnik s ovim emailom već postoji. Prijavite se ili resetirajte lozinku.'
+        if len(password) < 8:
+            errors['password'] = 'Lozinka mora imati najmanje 8 znakova.'
+
         if errors:
             return render(request, 'accounts/quick_register.html', {
                 'errors': errors, 'name': name, 'email': email, 'phone': phone,
-                'next': next_url, 'company': company_slug,
+                'next': next_url,
             })
 
-        name_parts = name.strip().split(None, 1)
-        first_name = name_parts[0] if name_parts else ''
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
-        base_un = email.split('@')[0].lower().replace('.', '_')[:30]
+        # Kreiraj korisnika
+        name_parts = name.split(None, 1)
+        first_name = name_parts[0]
+        last_name  = name_parts[1] if len(name_parts) > 1 else ''
+        base_un = email.split('@')[0].lower().replace('.','_')[:25]
         username = base_un
-        counter = 1
+        i = 1
         while User.objects.filter(username=username).exists():
-            username = '{}{}'.format(base_un, counter)
-            counter += 1
+            username = f'{base_un}{i}'; i += 1
+
         user = User.objects.create_user(
             username=username, email=email, password=password,
             first_name=first_name, last_name=last_name,
         )
-        # Link to company if slug provided
-        if company_slug:
+
+        # Kreiraj ili poveži firmu
+        try:
+            import uuid
+            from django.utils import timezone
+            from companies.models import Company
+            from registration.models import CompanySubscription, PricingPlan
+
+            # Mapa uloge → role string
+            role_map = {
+                'racunovodja': 'racunovodja',
+                'firma': 'company_admin',
+                'obrt': 'company_admin',
+                'udruga': 'company_admin',
+            }
+            profile_role = role_map.get(role, 'company_admin')
+
+            # Kreiraj firmu
+            oib_val = firm_oib if firm_oib and len(firm_oib) == 11 else f'DRAFT{uuid.uuid4().hex[:6].upper()}'
+            company, created = Company.objects.get_or_create(
+                oib=oib_val,
+                defaults={
+                    'name': firm_name or name,
+                    'country': 'HR',
+                    'business_type': 'racunovodja' if role == 'racunovodja' else 'doo',
+                    'has_signed_tc_consent': True,
+                    'tc_consent_version': 'v1.0-2026',
+                    'tc_consent_signed_at': timezone.now(),
+                }
+            )
+            if not created and firm_name:
+                pass  # firma već postoji, ne mijenjamo
+
+            # Profil
+            profile, _ = UserProfile.objects.get_or_create(user=user, defaults={
+                'company': company,
+                'role': profile_role,
+            })
+            if not profile.company:
+                profile.company = company
+                profile.role = profile_role
+                profile.save(update_fields=['company', 'role'])
+
+            # Trial subscription
             try:
-                from companies.models import Company
-                company = Company.objects.get(slug=company_slug)
-                profile, _ = UserProfile.objects.get_or_create(user=user, defaults={
-                    'company': company, 'role': 'client',
-                })
+                plan = PricingPlan.objects.filter(
+                    slug='professional' if role == 'racunovodja' else 'starter'
+                ).first()
+                if plan and not company.subscriptions.filter(is_active=True).exists():
+                    import datetime
+                    CompanySubscription.objects.create(
+                        company=company,
+                        plan=plan.slug,
+                        pricing_plan=plan,
+                        valid_from=timezone.now().date(),
+                        trial_ends=timezone.now().date() + datetime.timedelta(days=14),
+                        monthly_fee=plan.price_monthly,
+                        is_active=True,
+                    )
             except Exception:
                 pass
-        request.session.flush()
-        login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
 
-        # Email verifikacija (async, ne blokira)
+        except Exception:
+            pass
+
+        # Login
+        request.session.flush()
+        auth_login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')
+
+        # Email verifikacija — šalje se stvarno
         try:
             from accounts.email_verification import send_verification_email
             send_verification_email(user)
         except Exception:
             pass
 
-        # Audit log
+        # Audit
         try:
             from core.models import SystemAuditLog
             SystemAuditLog.objects.create(
-                user=user,
-                model_name='auth.User',
-                object_id=str(user.pk),
+                user=user, model_name='auth.User', object_id=str(user.pk),
                 action='register',
-                changes={'email': email, 'method': 'quick_register'},
-                ip_address=request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', ''),
+                changes={'email': email, 'role': role, 'firm': firm_name},
+                ip_address=request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR',''),
             )
         except Exception:
             pass
 
-        messages.success(request, 'Račun kreiran! Provjerite email za verifikaciju.')
-        return redirect(next_url)
+        return render(request, 'accounts/quick_register.html', {
+            'registration_success': True,
+            'registered_email': email,
+            'next': next_url,
+            'errors': {},
+        })
 
     return render(request, 'accounts/quick_register.html', {
-        'next': next_url, 'company': company_slug,
-        'errors': {}, 'name': '', 'email': '', 'phone': '',
+        'next': next_url, 'errors': {}, 'name': '', 'email': '', 'phone': '',
     })
 
 
@@ -488,7 +552,7 @@ def odaberi_komitente(request):
 
         from django.contrib import messages
         messages.success(request,
-            'Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi.' % (
+            _('Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi.') % (
                 added, removed, len(selected_ids)))
         return redirect('accounts:odaberi_komitente')
 
@@ -548,5 +612,5 @@ def switch_company_get(request, company_id):
             return redirect('/')
     request.session['active_membership_id'] = mem.id
     request.session['superadmin_as_company'] = str(company.pk)
-    messages.success(request, 'Prebaceno na: %s' % company.name)
+    messages.success(request, _('Prebaceno na: %s') % company.name)
     return redirect('/')

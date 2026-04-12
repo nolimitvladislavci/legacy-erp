@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import JsonResponse
 from django.db.models import Q, Count, Avg
 from django.utils import timezone
@@ -160,7 +161,7 @@ def ticket_reply(request, pk):
         if ticket.status == 'open':
             ticket.status = 'in_progress'
             ticket.save(update_fields=['status', 'updated_at'])
-        messages.success(request, 'Odgovor poslan.')
+        messages.success(request, _('Odgovor poslan.'))
     return redirect('helpdesk:detail', pk=ticket.pk)
 
 
@@ -176,7 +177,7 @@ def ticket_assign(request, pk):
         else:
             ticket.assigned_to = None
         ticket.save(update_fields=['assigned_to', 'updated_at'])
-        messages.success(request, 'Tiket dodijeljen.')
+        messages.success(request, _('Tiket dodijeljen.'))
     return redirect('helpdesk:detail', pk=ticket.pk)
 
 
@@ -242,12 +243,12 @@ def vip_list(request):
                 )
                 messages.success(request, f'VIP kontakt {name} dodan.')
             else:
-                messages.error(request, 'Telefon i ime su obavezni.')
+                messages.error(request, _('Telefon i ime su obavezni.'))
 
         elif action == 'delete':
             vip_id = request.POST.get('vip_id')
             VIPContact.objects.filter(id=vip_id).delete()
-            messages.success(request, 'VIP kontakt obrisan.')
+            messages.success(request, _('VIP kontakt obrisan.'))
 
         elif action == 'toggle':
             vip_id = request.POST.get('vip_id')

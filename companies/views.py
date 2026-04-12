@@ -1292,3 +1292,193 @@ def employee_onboard(request, pk=None):
         'step': '1', 'company': company, 'employee': ep,
         'form': {},
     })
+
+
+# ═══════════════════════════════════════════════════════════════
+# EMPLOYEE OFFBOARDING — Kontroliran process odjave radnika
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+@require_POST
+def employee_offboard(request, pk):
+    """Offboarding process — deaktivira radnika, čuva pravne podatke."""
+    from worktime.models import EmployeeProfile
+    from django.http import JsonResponse
+
+    profile, company = _require_strict_admin(request)
+    if not company:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    ep = get_object_or_404(EmployeeProfile, pk=pk, company=company)
+
+    if ep.is_terminated:
+        return JsonResponse({'error': _('Radnik je već odjavljen.')}, status=400)
+
+    reason = request.POST.get('reason', 'mutual')
+    term_date = request.POST.get('terminated_at', '')
+
+    # Terminate
+    ep.terminate(reason=reason, terminated_at=term_date or None)
+
+    # Check open POS sessions
+    open_sessions = 0
+    try:
+        from pos.models import POSSession
+        open_sessions = POSSession.objects.filter(
+            operator=ep.user, status='open'
+        ).count()
+    except Exception:
+        pass
+
+    # Audit
+    try:
+        from core.models import BookingSignature
+        BookingSignature.log(
+            request, 'delete',
+            target_model='EmployeeProfile',
+            target_id=str(ep.pk),
+            target_repr=f'Offboarding: {ep.user.get_full_name()} ({reason})',
+        )
+    except Exception:
+        pass
+
+    messages.success(request, _(
+        '{name} je odjavljen. PIN deaktiviran. IBAN se arhivira za 30 dana.'
+    ).format(name=ep.user.get_full_name()))
+
+    return JsonResponse({
+        'ok': True,
+        'checklist': {
+            'pin_deactivated': True,
+            'user_deactivated': True,
+            'iban_vault_scheduled': '30 dana',
+            'oib_retained': '11 godina (ZOR + fiskalizacija)',
+            'fiscal_records': 'nepromjenjivo',
+            'open_pos_sessions': open_sessions,
+        }
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# COMPLIANCE MONITOR — Admin vidi sve HR/pravne flagove
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def compliance_monitor(request):
+    """Real-time compliance dashboard za radnike tvrtke."""
+    from core.company_utils import get_user_company
+    from worktime.models import EmployeeProfile
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Sum
+
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
+        return redirect('/')
+
+    alerts = []
+    employees = EmployeeProfile.objects.filter(
+        company=company, is_terminated=False,
+    ).select_related('user')
+
+    week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
+
+    for ep in employees:
+        # KRITIČNO: nema OIB a mogao bi raditi na kasi
+        if not ep.tax_id:
+            # Check if this person is actually a POS cashier
+            try:
+                from pos.models import POSCashier
+                is_cashier = POSCashier.objects.filter(
+                    user=ep.user, is_active=True
+                ).exists()
+            except Exception:
+                is_cashier = False
+            
+            level = 'critical' if is_cashier else 'warning'
+            msg = _('Nema OIB! Radi na kasi — kazna do 66.000€') if is_cashier else _('Nema OIB — preporučeno za evidenciju')
+            alerts.append({
+                'level': level,
+                'employee': ep,
+                'message': msg,
+                'action_url': f'/hr/companies/settings/employee/{ep.pk}/edit/',
+                'action_label': _('Unesi OIB'),
+            })
+
+        # KRITIČNO: nema IBAN a treba primiti plaću
+        if not ep.bank_account and not ep.is_volunteer and not ep.iban_archived:
+            alerts.append({
+                'level': 'warning',
+                'employee': ep,
+                'message': _('Nema IBAN — ne može primiti plaću'),
+                'action_url': f'/hr/companies/settings/employee/{ep.pk}/edit/',
+                'action_label': _('Unesi IBAN'),
+            })
+
+        # UPOZORENJE: PIN star > 90 dana
+        try:
+            tk = ep.user.trikey
+            if tk.pin_set_at:
+                days = (timezone.now() - tk.pin_set_at).days
+                if days > 90:
+                    alerts.append({
+                        'level': 'info',
+                        'employee': ep,
+                        'message': _('PIN star {d} dana — preporuka rotacija').format(d=days),
+                        'action_url': None,
+                        'action_label': None,
+                    })
+        except Exception:
+            pass
+
+        # UPOZORENJE: prekovremeni > 42h ovaj tjedan (ZOR čl. 96 upozorenje na 42, limit 50)
+        try:
+            from worktime.models import TimeEntry
+            week_hours = TimeEntry.objects.filter(
+                user=ep.user, date__gte=week_start,
+            ).aggregate(total=Sum('duration'))['total'] or 0
+            if float(week_hours) > 42:
+                alerts.append({
+                    'level': 'warning' if float(week_hours) < 50 else 'critical',
+                    'employee': ep,
+                    'message': _('{h:.0f}h ovaj tjedan — ZOR limit 50h').format(h=float(week_hours)),
+                    'action_url': None,
+                    'action_label': None,
+                })
+        except Exception:
+            pass
+
+    # Disputed revisions
+    try:
+        from worktime.models import TimeLogRevision
+        open_disputes = TimeLogRevision.objects.filter(
+            company=company,
+            disputed_by__isnull=False,
+            dispute_resolved=False,
+        ).count()
+        if open_disputes:
+            alerts.append({
+                'level': 'warning',
+                'employee': None,
+                'message': _('{n} prigovora na izmjene sati čeka rješenje').format(n=open_disputes),
+                'action_url': '/hr/worktime/ts/manager/',
+                'action_label': _('Pregledaj prigovore'),
+            })
+    except Exception:
+        pass
+
+    critical = [a for a in alerts if a['level'] == 'critical']
+    warnings = [a for a in alerts if a['level'] == 'warning']
+    info = [a for a in alerts if a['level'] == 'info']
+    score = max(0, 100 - len(critical) * 20 - len(warnings) * 5 - len(info) * 1)
+
+    return render(request, 'companies/compliance_monitor.html', {
+        'alerts': alerts,
+        'critical': critical,
+        'warnings': warnings,
+        'info': info,
+        'score': score,
+        'employees': employees,
+        'total_employees': employees.count(),
+    })

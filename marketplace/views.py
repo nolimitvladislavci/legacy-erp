@@ -201,14 +201,14 @@ def cart_remove(request, key):
     if key in cart:
         del cart[key]
         request.session['marketplace_cart'] = cart
-        messages.success(request, 'Stavka uklonjena.')
+        messages.success(request, _('Stavka uklonjena.'))
     return redirect('marketplace:cart')
 
 
 @login_required
 def cart_clear(request):
     request.session['marketplace_cart'] = {}
-    messages.success(request, 'Kosarica ispraznjena.')
+    messages.success(request, _('Kosarica ispraznjena.'))
     return redirect('marketplace:catalog')
 
 
@@ -237,11 +237,11 @@ TEMP_ZONE_META = {
 def checkout(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nemate aktivnu firmu.')
+        messages.error(request, _('Nemate aktivnu firmu.'))
         return redirect('marketplace:cart')
     cart = request.session.get('marketplace_cart', {})
     if not cart:
-        messages.warning(request, 'Kosarica je prazna.')
+        messages.warning(request, _('Kosarica je prazna.'))
         return redirect('marketplace:catalog')
 
     if request.method == 'POST':
@@ -461,7 +461,7 @@ def reorder(request, pk):
     original = get_object_or_404(MarketplaceOrder, pk=pk)
     company = get_user_company(request)
     if not company or original.buyer_company != company:
-        messages.error(request, 'Nemate pristup ovoj narudzbi.')
+        messages.error(request, _('Nemate pristup ovoj narudzbi.'))
         return redirect('marketplace:my_orders')
 
     cart = {}
@@ -508,7 +508,7 @@ def order_detail(request, pk):
 def seller_dashboard(request):
     company = get_user_company(request)
     if not company:
-        messages.error(request, 'Nemate aktivnu firmu.')
+        messages.error(request, _('Nemate aktivnu firmu.'))
         return redirect('/')
     products = MarketplaceProduct.objects.filter(seller_company=company)
     all_sub_orders = SellerSubOrder.objects.filter(
@@ -582,11 +582,11 @@ def seller_order_action(request, pk):
     elif action == 'ready' and sub.status == 'confirmed':
         sub.status = 'ready'
         sub.save(update_fields=['status'])
-        messages.success(request, 'Oznaceno kao spremno za preuzimanje.')
+        messages.success(request, _('Oznaceno kao spremno za preuzimanje.'))
     elif action == 'reject' and sub.status == 'pending':
         sub.status = 'rejected'
         sub.save(update_fields=['status'])
-        messages.warning(request, 'Narudzba odbijena.')
+        messages.warning(request, _('Narudzba odbijena.'))
     return redirect('marketplace:seller_dashboard')
 
 
@@ -641,7 +641,7 @@ def legal_vault(request, pk):
     order = get_object_or_404(MarketplaceOrder, pk=pk)
     company = get_user_company(request)
     if not company or order.buyer_company != company:
-        messages.error(request, 'Nemate pristup ovoj narudzbi.')
+        messages.error(request, _('Nemate pristup ovoj narudzbi.'))
         return redirect('marketplace:my_orders')
 
     buf = io.BytesIO()
