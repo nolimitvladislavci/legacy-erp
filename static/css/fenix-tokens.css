@@ -1771,27 +1771,65 @@ html {
     width: 320px;
     background: var(--bg-card);
     border-left: 1px solid var(--border);
-    display: flex;
+    display: none;  /* Skriven po defaultu — otvara se JS-om */
     flex-direction: column;
     overflow-y: auto;
-    transition: transform 0.3s ease, width 0.3s ease;
-    z-index: 200;
-    position: fixed;
-    top: 52px;
-    right: 0;
-    bottom: 0;
-    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1050;
 }
 
-.shell-right.collapsed {
-    transform: translateX(100%);
-    overflow: hidden;
-    border: none;
+/* Desktop: side panel s desne strane */
+@media (min-width: 768px) {
+    .shell-right {
+        display: flex;
+        position: fixed;
+        top: 52px;
+        right: 0;
+        bottom: 0;
+        transform: translateX(100%);
+    }
+    .shell-right.open {
+        transform: translateX(0);
+        box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+    }
+    .shell-right.collapsed {
+        transform: translateX(100%);
+    }
 }
 
-.shell-right.open {
-    transform: translateX(0);
-    box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+/* Mobile: slide-up drawer od dna */
+@media (max-width: 767px) {
+    .shell-right {
+        display: flex;
+        position: fixed;
+        top: auto;
+        bottom: 56px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 70vh;
+        border-left: none;
+        border-top: 1px solid var(--border, #334155);
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+    }
+    .shell-right.open {
+        transform: translateY(0);
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+    }
+    .shell-right.collapsed {
+        transform: translateY(100%);
+    }
+    /* Drag handle na vrhu */
+    .shell-right .shell-right-header::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+        margin: 0 auto 10px;
+    }
 }
 
 .shell-right-header {
