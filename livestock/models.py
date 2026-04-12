@@ -86,8 +86,43 @@ class Livestock(models.Model):
     notes = models.TextField(blank=True)
     # ── Polja za kućne ljubimce / uzgajivače ──────────────────────────
     chip_number = models.CharField(max_length=20, blank=True,
-                                   verbose_name='Broj mikročipa',
-                                   help_text='15-znamenkasti ISO 11784/85 chip')
+                                   verbose_name='Broj mikrocipa / transpondera',
+                                   help_text='ISO 11784/85, 134.2 kHz. Ovce: bolus. Konji: vrat lijevo.')
+
+    # ── Zakonska identifikacija ──────────────────────────────────────
+    ID_METHOD_CHOICES = [
+        ('ear_tag',     'Usna markica'),
+        ('ear_tag_2',   'Usna markica (obje usi)'),
+        ('bolus',       'Bolus transponder (zeludac)'),
+        ('ear_chip',    'Elektronska usna markica'),
+        ('implant',     'Mikrocip (implant — konji)'),
+        ('tattoo',      'Tetoviranje (svinje)'),
+        ('ring',        'Nozni prsten (perad)'),
+    ]
+    id_method = models.CharField(max_length=15, choices=ID_METHOD_CHOICES,
+        default='ear_tag', verbose_name='Metoda identifikacije')
+    ear_tag_left = models.CharField(max_length=20, blank=True,
+        verbose_name='Markica lijevo uho',
+        help_text='Goveda: ista oznaka u oba uha')
+    ear_tag_right = models.CharField(max_length=20, blank=True,
+        verbose_name='Markica desno uho')
+    ear_tag_color = models.CharField(max_length=10, blank=True,
+        choices=[('yellow','Zuta (goveda/ovce)'),('red','Crvena (koze)'),('white','Bijela')],
+        verbose_name='Boja markice')
+    passport_number = models.CharField(max_length=30, blank=True,
+        verbose_name='Broj putovnice (konji)',
+        help_text='UELN 15-znamenkasti ili HR putovnica kopitara')
+    jibg_farm = models.ForeignKey('livestock.FarmIdentification',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='animals', verbose_name='Gospodarstvo (JIBG)')
+    
+    # Datumi evidencije
+    marked_at = models.DateField(null=True, blank=True,
+        verbose_name='Datum oznacavanja',
+        help_text='Ovce: unutar 9 mjeseci od rodenja')
+    registered_in_jrdz = models.BooleanField(default=False,
+        verbose_name='Evidentirano u JRDZ')
+    jrdz_registered_at = models.DateField(null=True, blank=True)
     pedigree_number = models.CharField(max_length=50, blank=True,
                                        verbose_name='Broj rodovnice')
     spol = models.CharField(max_length=1, choices=[('M','Mužjak'),('F','Ženka'),('N','Nepoznato')],
