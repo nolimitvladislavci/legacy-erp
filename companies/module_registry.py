@@ -267,6 +267,18 @@ MODULES = [
         'auto_for': ['stolarija', 'građevina', 'gradevina', 'fenster', 'joinery'],
     },
     {
+        'id': 'crovalidator',
+        'name': 'CroValidator',
+        'icon': 'fa-check-double',
+        'url': '/validator/',
+        'url_name': 'brochure_croxmlverify',
+        'category': 'integracije',
+        'tier': TIER_FREE,
+        'description': 'OIB, IBAN, JIBG, JZB, UELN, Chip, NKD — real-time validacija.',
+        'price_addon': 0,
+        'always_visible': True,
+    },
+    {
         'id': 'procurement',
         'name': 'Nabava',
         'icon': 'fa-file-invoice',

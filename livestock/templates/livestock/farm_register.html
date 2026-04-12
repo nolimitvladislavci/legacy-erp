@@ -155,5 +155,46 @@ function previewCard(input) {
     reader.readAsDataURL(input.files[0]);
   }
 }
+// JIBG real-time validacija
+var jibgField = document.querySelector('[name=jibg]');
+if (jibgField) {
+  jibgField.addEventListener('input', function() {
+    var v = this.value.replace(/\s/g,'').toUpperCase();
+    var el = this.nextElementSibling || document.createElement('div');
+    if (!this.nextElementSibling) {
+      el.style.cssText = 'font-size:.75rem;margin-top:4px';
+      this.parentNode.appendChild(el);
+    }
+    if (v.length < 4) { el.textContent = ''; return; }
+    fetch('/api/v1/validate/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({jibg: v})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.jibg && d.jibg.valid) {
+        el.innerHTML = '<span style="color:#22c55e"><i class="fas fa-check-circle"></i> ' + d.jibg.formatted + '</span>';
+      } else {
+        el.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> ' + (d.jibg ? d.jibg.error : 'Greska') + '</span>';
+      }
+    }).catch(function() {});
+  });
+}
+
+// Geolokacija
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var el = document.getElementById('geoStatus');
+    if (el) el.innerHTML = '<i class="fas fa-map-marker-alt me-1" style="color:#22c55e"></i> Lokacija: ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+    // Dodaj hidden polja
+    var form = document.querySelector('form');
+    var lat = document.createElement('input'); lat.type='hidden'; lat.name='latitude'; lat.value=pos.coords.latitude; form.appendChild(lat);
+    var lng = document.createElement('input'); lng.type='hidden'; lng.name='longitude'; lng.value=pos.coords.longitude; form.appendChild(lng);
+  }, function() {
+    var el = document.getElementById('geoStatus');
+    if (el) el.innerHTML = '<i class="fas fa-keyboard me-1"></i> GPS nedostupan';
+  }, {enableHighAccuracy:true, timeout:8000});
+}
 </script>
 {% endblock %}

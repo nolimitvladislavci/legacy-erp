@@ -279,7 +279,8 @@ def oib_lookup(oib):
     import requests
 
     # Validate OIB format
-    if not oib or len(oib) != 11 or not oib.isdigit():
+    from core.oib_validator import validate_oib_hr
+    if not oib or not validate_oib_hr(oib):
         return None
 
     # OIB checksum validation (ISO 7064, MOD 11,10)

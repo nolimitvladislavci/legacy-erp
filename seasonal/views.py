@@ -85,7 +85,8 @@ def worker_create(request):
     if request.method == 'POST':
         p = request.POST
         oib = p.get('oib', '').strip()
-        if len(oib) != 11 or not oib.isdigit():
+        from core.oib_validator import validate_oib_hr
+        if not validate_oib_hr(oib):
             messages.error(request, _('OIB mora biti točno 11 znamenki.'))
             return render(request, 'seasonal/worker_form.html',
                           {'nationality_choices': SeasonalWorker.NATIONALITY_CHOICES,

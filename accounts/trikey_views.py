@@ -50,7 +50,7 @@ def api_oib_lookup(request):
         # OIB valid ali firma nije u registru
         return JsonResponse({
             'found': False,
-            'oib_valid': len(oib) == 11 and oib.isdigit(),
+            'oib_valid': __import__('core.oib_validator', fromlist=['validate_oib_hr']).validate_oib_hr(oib) if oib else False,
             'message': 'Firma nije pronađena u Sudskom registru. Unesite podatke ručno.',
         })
 
@@ -86,7 +86,7 @@ def trikey_login(request):
             return render(request, 'accounts/trikey_login.html')
 
         # Get or create TriKey profile
-        trikey, _ = TriKeyProfile.objects.get_or_create(user=user)
+        trikey, _created = TriKeyProfile.objects.get_or_create(user=user)
 
         # Verify PIN
         try:
@@ -118,7 +118,7 @@ def trikey_login(request):
 @login_required
 def pin_setup(request):
     """Postavi ili promijeni PIN."""
-    trikey, _ = TriKeyProfile.objects.get_or_create(user=request.user)
+    trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         pin = request.POST.get('pin', '').strip()
@@ -169,7 +169,7 @@ def pin_setup(request):
 @login_required
 def passkey_register_options(request):
     """WebAuthn: Generate registration options (challenge)."""
-    trikey, _ = TriKeyProfile.objects.get_or_create(user=request.user)
+    trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     # Generate challenge
     import secrets, base64
@@ -207,7 +207,7 @@ def passkey_register_options(request):
 @require_POST
 def passkey_register_complete(request):
     """WebAuthn: Complete registration — store credential."""
-    trikey, _ = TriKeyProfile.objects.get_or_create(user=request.user)
+    trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     try:
         data = json.loads(request.body)
@@ -234,7 +234,7 @@ def passkey_register_complete(request):
 @require_POST
 def business_key_register(request):
     """Registriraj FINA cert i/ili ePosrednik API key."""
-    trikey, _ = TriKeyProfile.objects.get_or_create(user=request.user)
+    trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     fina_cert = request.FILES.get('fina_cert')
     api_key = request.POST.get('eposrednik_api_key', '').strip()
@@ -268,7 +268,7 @@ def business_key_register(request):
 @login_required
 def trikey_status(request):
     """Pregled stanja 3 ključa — koji su aktivni, koji nedostaju."""
-    trikey, _ = TriKeyProfile.objects.get_or_create(user=request.user)
+    trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     return render(request, 'accounts/trikey_status.html', {
         'trikey': trikey,
@@ -376,7 +376,7 @@ def quick_login(request):
                 'users': users, 'company': company,
             })
 
-        trikey, _ = TriKeyProfile.objects.get_or_create(user=user)
+        trikey, _created = TriKeyProfile.objects.get_or_create(user=user)
         try:
             if trikey.verify_pin(pin):
                 login(request, user, backend='core.auth_backends.EmailOrUsernameBackend')

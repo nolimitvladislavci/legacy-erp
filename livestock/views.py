@@ -619,9 +619,11 @@ def farm_register(request):
         if not jibg.startswith('HR'):
             jibg = 'HR' + jibg
 
+        from core.oib_validator import validate_jibg
+        jibg_result = validate_jibg(jibg)
         errors = []
-        if len(jibg) < 5:
-            errors.append('JIBG mora imati format HR + brojevi (npr. HR30157757)')
+        if not jibg_result['valid']:
+            errors.append(jibg_result['error'])
 
         if FarmIdentification.objects.filter(jibg=jibg).exists():
             errors.append(f'Gospodarstvo {jibg} je vec registrirano u sustavu.')
@@ -631,10 +633,14 @@ def farm_register(request):
                 'errors': errors, 'form': request.POST, 'company': company,
             })
 
+        lat = request.POST.get('latitude', '')
+        lng = request.POST.get('longitude', '')
         farm = FarmIdentification.objects.create(
             company=company,
             card_serial=request.POST.get('card_serial', '').strip(),
             jibg=jibg,
+            latitude=float(lat) if lat else None,
+            longitude=float(lng) if lng else None,
             tattoo_number=request.POST.get('tattoo_number', '').strip(),
             owner_name=request.POST.get('owner_name', '').strip(),
             farm_name=request.POST.get('farm_name', '').strip(),

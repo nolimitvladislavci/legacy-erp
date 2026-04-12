@@ -16,15 +16,34 @@ from core.oib_validator import (
 @csrf_exempt
 @require_POST
 def api_validate(request):
+    # Rate limit: 60 req/min po IP
+    ip = request.META.get('HTTP_X_REAL_IP', request.META.get('REMOTE_ADDR', ''))
+    try:
+        from django.core.cache import cache
+        key = f'cv_rate:{ip}'
+        count = cache.get(key, 0)
+        if count > 60:
+            return JsonResponse({'error': 'Rate limit — max 60 zahtjeva/min'}, status=429)
+        cache.set(key, count + 1, timeout=60)
+    except Exception:
+        pass
+
     try:
         data = json.loads(request.body)
     except Exception:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+    # Sanitize all string inputs — strip HTML/script tags
+    import re as _re
+    for key in data:
+        if isinstance(data[key], str):
+            data[key] = _re.sub(r'[<>&]', '', data[key])
+
     result = {}
 
     if 'oib' in data:
-        oib = str(data['oib']).strip()
+        import re as _re
+        oib = _re.sub(r'[<>&"\'\\]', '', str(data['oib']).strip())  # sanitize
         valid = validate_oib_hr(oib)
         result['oib'] = {
             'valid': valid,

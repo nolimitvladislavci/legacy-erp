@@ -110,7 +110,6 @@ urlpatterns = [
     path('vrtic/', include('kindergarten.urls', namespace='kindergarten')),
     path('dom/', include('eldercare.urls', namespace='eldercare')),
     path('lib/staff/', include('library.urls', namespace='library')),
-    path('livestock/', include('livestock.urls', namespace='livestock')),
     path('lovacki/', include('lovacki.urls', namespace='lovacki')),
     path('utilities/', include('utilities.urls', namespace='utilities')),
     path('komunalno/', include('komunalno.urls', namespace='komunalno')),
@@ -288,6 +287,7 @@ urlpatterns += i18n_patterns(
     path('superadmin/impersonate/stop/', views.stop_impersonation, name='stop_impersonation'),
     path('superadmin/promo/create/', views.superadmin_create_promo, name='superadmin_create_promo'),
     path('stolarija/', include('stolarija.urls', namespace='stolarija')),
+    path('livestock/', include('livestock.urls', namespace='livestock')),
     path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
     path('panel/detail/', views.panel_detail, name='panel_detail'),
@@ -469,6 +469,7 @@ handler500 = 'core.error_handlers.custom_500_handler'
 # ROOT FALLBACK — izvan i18n_patterns da pokrije goli '/' i '/login/'
 # Bez ovih ruta LocaleMiddleware ne može matchati / → 404 → redirect loop
 urlpatterns += [
+    path('_brand/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'brand_preview.html')),
     path('', views.smart_home, name='home_root'),
     path('login/', views.login_view, name='login_fallback'),
 ]
