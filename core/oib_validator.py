@@ -128,3 +128,106 @@ def validate_mbs(mbs: str) -> bool:
     """MBS: točno 8 znamenki."""
     mbs = mbs.strip()
     return bool(mbs and len(mbs) == 8 and mbs.isdigit())
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LIVESTOCK IDENTIFIKACIJA — JIBG, JZB, UELN, Tetovir
+# ═══════════════════════════════════════════════════════════════════════════
+
+def validate_jibg(jibg: str) -> dict:
+    """
+    JIBG — Jedinstveni identifikacijski broj gospodarstva.
+    Format: HR + 8 znamenki (npr. HR30157757).
+    Pravilnik NN 96/2015.
+    """
+    j = jibg.strip().upper().replace(' ', '')
+    if not j.startswith('HR'):
+        return {'valid': False, 'error': 'JIBG mora poceti s HR', 'value': j, 'formatted': j}
+    digits = j[2:]
+    if not digits.isdigit():
+        return {'valid': False, 'error': 'JIBG mora sadrzavati samo brojeve nakon HR', 'value': j, 'formatted': j}
+    if len(digits) < 6 or len(digits) > 12:
+        return {'valid': False, 'error': f'JIBG ima {len(digits)} znamenki — ocekivano 6-12', 'value': j, 'formatted': j}
+    formatted = f'HR {digits}'
+    return {'valid': True, 'error': None, 'value': j, 'formatted': formatted}
+
+
+def validate_jzb(jzb: str) -> dict:
+    """
+    JZB — Jedinstveni zivotinjski broj (goveda, ovce, koze).
+    Format: HR + 10 znamenki (npr. HR0123456789).
+    EU Regulation 1760/2000.
+    """
+    j = jzb.strip().upper().replace(' ', '')
+    if not j.startswith('HR'):
+        return {'valid': False, 'error': 'JZB mora poceti s HR', 'value': j}
+    digits = j[2:]
+    if not digits.isdigit() or len(digits) != 10:
+        return {'valid': False, 'error': 'JZB mora imati tocno 10 znamenki nakon HR', 'value': j}
+    formatted = f'HR {digits[:4]} {digits[4:]}'
+    return {'valid': True, 'error': None, 'value': j, 'formatted': formatted}
+
+
+def validate_ueln(ueln: str) -> dict:
+    """
+    UELN — Universal Equine Life Number (konji, magarci).
+    Format: 15 znakova (3 country + 3 database + 9 individual).
+    ISO/TS 26740, EC 504/2008.
+    """
+    u = ueln.strip().upper().replace(' ', '').replace('-', '')
+    if len(u) != 15:
+        return {'valid': False, 'error': f'UELN mora imati 15 znakova, ima {len(u)}', 'value': u}
+    if not u[:3].isalnum() or not u[3:6].isalnum():
+        return {'valid': False, 'error': 'UELN: prvih 6 znakova mora biti alfanumericko', 'value': u}
+    formatted = f'{u[:3]} {u[3:6]} {u[6:]}'
+    return {'valid': True, 'error': None, 'value': u, 'formatted': formatted}
+
+
+def validate_chip_iso(chip: str) -> dict:
+    """
+    Mikrocip/transponder — ISO 11784/11785.
+    Format: 15 znamenki. Prva 3 = drzavni kod (191 = Hrvatska).
+    134.2 kHz, FDX-B ili HDX.
+    """
+    c = chip.strip().replace(' ', '')
+    if not c.isdigit():
+        return {'valid': False, 'error': 'Chip mora sadrzavati samo brojeve', 'value': c}
+    if len(c) != 15:
+        return {'valid': False, 'error': f'ISO chip mora imati 15 znamenki, ima {len(c)}', 'value': c}
+    country_code = c[:3]
+    country_names = {
+        '191': 'Hrvatska', '276': 'Njemacka', '040': 'Austrija',
+        '705': 'Slovenija', '070': 'Bosna i Hercegovina',
+        '380': 'Italija', '826': 'UK', '250': 'Francuska',
+    }
+    country = country_names.get(country_code, f'Kod {country_code}')
+    formatted = f'{c[:3]} {c[3:7]} {c[7:11]} {c[11:]}'
+    return {
+        'valid': True, 'error': None, 'value': c,
+        'formatted': formatted,
+        'country_code': country_code, 'country': country,
+    }
+
+
+def validate_nkd(nkd: str) -> dict:
+    """
+    NKD — Nacionalna klasifikacija djelatnosti.
+    Format: XX.XX (npr. 01.41 = goveda, 01.46 = svinje).
+    """
+    n = nkd.strip()
+    import re
+    if not re.match(r'^\d{2}\.\d{2}$', n):
+        return {'valid': False, 'error': 'NKD format: XX.XX (npr. 01.41)', 'value': n}
+    nkd_names = {
+        '01.11': 'Uzgoj zitarica', '01.13': 'Uzgoj povrca',
+        '01.21': 'Uzgoj grozdja', '01.24': 'Uzgoj jezgr. voca',
+        '01.41': 'Uzgoj muznih krava', '01.42': 'Uzgoj goveda za meso',
+        '01.43': 'Uzgoj konja', '01.45': 'Uzgoj ovaca i koza',
+        '01.46': 'Uzgoj svinja', '01.47': 'Uzgoj peradi',
+        '01.49': 'Uzgoj ostalih zivotinja (pcele, zecevi)',
+        '56.10': 'Restorani', '56.30': 'Kafici i barovi',
+        '10.11': 'Prerada mesa', '10.51': 'Mljekare',
+        '47.11': 'Maloprodaja', '86.21': 'Opca med. praksa',
+    }
+    name = nkd_names.get(n, '')
+    return {'valid': True, 'error': None, 'value': n, 'name': name}
