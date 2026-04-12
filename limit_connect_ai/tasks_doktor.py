@@ -141,8 +141,11 @@ def _calculate_scores(raw):
 
 
 def _call_haiku(company, raw, scores, overall_score):
-    import anthropic
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    """
+    Claude Doktor AI — Haiku + Opus Advisor Strategy.
+    Haiku radi standardnu dijagnostiku (jeftino, brzo).
+    Za kritične anomalije (fiscal, cert, cash flow) konzultira Opus (max 1x).
+    """
     data = {
         "firma": raw.get("company_name"),
         "datum": raw.get("report_date"),
@@ -155,10 +158,29 @@ def _call_haiku(company, raw, scores, overall_score):
         "hzmo_cekanje": raw.get("pending_hzmo_count", 0),
         "cert_dana": raw.get("cert_days_left", 365),
     }
-    prompt = (
+
+    # Odredi treba li advisor (kritični problemi)
+    has_critical = (
+        raw.get("unfiscalized_count", 0) > 0 or
+        raw.get("cert_days_left", 365) < 30 or
+        raw.get("overdue_90_count", 0) > 5 or
+        overall_score < 40
+    )
+
+    system = (
         "Ti si iskusni hrvatski racunovoda i poslovni savjetnik. "
         "Analiziraj zdravstveno stanje firme. "
-        "Odgovori SAMO validnim JSON-om, bez ikakvih komentara ili markdown formatiranja. "
+    )
+    if has_critical:
+        system += (
+            "Imas pristup Opus advisoru — konzultiraj ga za: "
+            "zakonske rizike (fiskalizacija, certifikati, HZMO), "
+            "kriticne financijske probleme (cash flow, 90+ dana dugovanje), "
+            "i prijedloge za hitno djelovanje. "
+        )
+
+    prompt = (
+        "Odgovori SAMO validnim JSON-om, bez komentara ili markdown formatiranja. "
         "Format: "
         '{"summary": "2-3 recenice dijagnoze na hrvatskom. Konkretno.", '
         '"recommendations": ['
@@ -168,17 +190,34 @@ def _call_haiku(company, raw, scores, overall_score):
         "Generiraj 3-5 preporuka. "
         "PODACI: " + json.dumps(data, ensure_ascii=False)
     )
+
     try:
-        msg = client.messages.create(
-            model=HAIKU_MODEL, max_tokens=800,
-            messages=[{"role": "user", "content": prompt}])
-        text = msg.content[0].text.strip()
+        if has_critical:
+            # Advisor Strategy — Haiku + Opus za kritične
+            from core.anthropic_advisor import haiku_with_advisor
+            text = haiku_with_advisor(
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=800,
+                max_uses=1,
+                system=system,
+            )
+            logger.info('Claude Doktor: Advisor mode (critical=%s, score=%s)', has_critical, overall_score)
+        else:
+            # Samo Haiku — standardna dijagnostika
+            import anthropic
+            client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+            msg = client.messages.create(
+                model=HAIKU_MODEL, max_tokens=800,
+                system=system,
+                messages=[{"role": "user", "content": prompt}])
+            text = msg.content[0].text.strip()
+
         if "```" in text:
             parts = text.split("```")
             text = parts[1].lstrip("json").strip() if len(parts) > 1 else text
         return json.loads(text)
     except Exception as exc:
-        logger.warning("Haiku greska: %s", exc)
+        logger.warning("Doktor AI greska: %s", exc)
         return _fallback(raw, scores, overall_score)
 
 
