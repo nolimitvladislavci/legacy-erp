@@ -146,7 +146,23 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div>{% trans "LIMIT" %}<span>{% trans "CONNECT" %}</span></div>
+            {% if WL_ACTIVE and WL_LOGO %}
+                <img src="{{ WL_LOGO }}" alt="{{ WL_NAME }}"
+                     style="height:36px;max-width:160px;object-fit:contain;filter:brightness(1.1)">
+            {% elif request.company and request.company.logo %}
+                <img src="{{ request.company.logo.url }}" alt="{{ request.company.name }}"
+                     style="height:36px;max-width:160px;object-fit:contain">
+            {% elif WL_ACTIVE %}
+                <div style="font-size:.95rem;font-weight:800;color:var(--gold);letter-spacing:1px">{{ WL_NAME }}</div>
+            {% else %}
+                <a href="/hr/dashboard/" style="text-decoration:none;display:flex;align-items:center;gap:8px">
+                    <img src="/static/img/logo-v2-shield.svg" alt="LIMIT Connect"
+                         style="height:32px;width:auto">
+                    <div style="font-size:1rem;font-weight:800;color:var(--text);letter-spacing:1px;line-height:1.1">
+                        LIMIT<span style="color:var(--gold);font-weight:300"> CONNECT</span>
+                    </div>
+                </a>
+            {% endif %}
             <div class="d-flex fx-gap-2 align-items-center">
                 <button onclick="toggleSlimSidebar()" title="Smanji sidebar" style="padding:4px" class="slim-toggle-btn fx-border-none fx-text-dim fx-pointer fx-fs-base fx-bg-transparent"><i class="fas fa-compress-arrows-alt"></i></button>
                 <button class="sidebar-close" onclick="closeSidebar()">✕</button>
@@ -211,11 +227,13 @@
               <span class="fx-text-dark fx-fs-xs fx-fw-800 fx-rounded fx-ml-auto" style="background:#facc15;padding:1px 7px">{{ pending_claims_count }}</span>
             </a>
             {% endif %}
-            <a href="/panic/" onclick="closeSidebar()" class="fx-text-white fx-rounded fx-fw-bold fx-fs-body-sm text-center d-flex fx-gap-2 fx-no-underline align-items-center justify-content-center mb-1 fx-ls-2" style="background:linear-gradient(135deg,#b91c1c,#dc2626);padding:7px 12px"><i class="fas fa-shield-halved"></i> <span>INSPEKCIJA</span></a>
+            <div class="d-flex fx-gap-1 mb-1">
+              <a href="{% url 'companies:module_picker' %}" onclick="closeSidebar()" class="fx-flex-1 text-center fx-rounded fx-fs-caption fx-pointer fx-no-underline d-flex align-items-center justify-content-center fx-gap-1" style="padding:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:#c9a84c" title="Odaberi module"><i class="fas fa-th"></i> <span>Moduli</span></a>
+              <a href="{% url 'companies:settings' %}" onclick="closeSidebar()" class="fx-flex-1 text-center fx-rounded fx-fs-caption fx-pointer fx-no-underline d-flex align-items-center justify-content-center fx-gap-1" style="padding:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--text-dim)" title="Postavke"><i class="fas fa-cog"></i> <span>Postavke</span></a>
+            </div>
             <div class="d-flex fx-gap-1">
-              <a href="{% url 'companies:module_picker' %}" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Moduli"><i class="fas fa-th"></i></a>
-              <a href="{% url 'companies:settings' %}" onclick="closeSidebar()" class="text-center fx-fs-caption fx-flex-1" title="Postavke"><i class="fas fa-cog"></i></a>
-              <a href="/logout/" class="text-center fx-fs-caption fx-flex-1" title="Odjava"><i class="fas fa-sign-out-alt"></i></a>
+              <a href="{% url 'panic_button' %}" onclick="closeSidebar()" class="fx-flex-1 text-center fx-rounded fx-fs-caption fx-pointer fx-no-underline d-flex align-items-center justify-content-center fx-gap-1" style="padding:6px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);color:#94a3b8" title="Inspekcijski pristup"><i class="fas fa-shield-halved"></i></a>
+              <a href="{% url 'logout' %}" class="fx-flex-1 text-center fx-rounded fx-fs-caption fx-pointer fx-no-underline d-flex align-items-center justify-content-center fx-gap-1" style="padding:6px;background:rgba(255,255,255,.03);color:var(--text-dim)" title="Odjava"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
 
@@ -241,6 +259,13 @@
         <header class="shell-top topbar" role="banner">
             <div class="shell-top-brand">
                 <button class="hamburger" onclick="openSidebar()">☰</button>
+                {% if WL_ACTIVE and WL_LOGO %}
+                <img src="{{ WL_LOGO }}" alt="{{ WL_NAME }}"
+                     style="height:28px;max-width:120px;object-fit:contain;margin-right:8px;display:none" class="d-md-inline">
+                {% elif request.company and request.company.logo %}
+                <img src="{{ request.company.logo.url }}" alt="{{ request.company.name }}"
+                     style="height:28px;max-width:120px;object-fit:contain;margin-right:8px;display:none" class="d-md-inline">
+                {% endif %}
                 <div class="shell-top-search topbar-search" onclick="openCmdPalette()">
                     <i class="fas fa-search"></i>
                     <span>Pretrazi...</span>
