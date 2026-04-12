@@ -593,3 +593,99 @@ def generate_inspection_pdf(request):
     except Exception:
         # Fallback: return HTML
         return HttpResponse(html)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IKG — Registracija gospodarstva putem slike kartice
+# ═══════════════════════════════════════════════════════════════════════════
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.http import JsonResponse
+
+@login_required
+def farm_register(request):
+    """Slikaj IKG karticu → registriraj gospodarstvo."""
+    from .models import FarmIdentification
+    from core.company_utils import get_user_company
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+
+    if request.method == 'POST':
+        jibg = request.POST.get('jibg', '').strip().upper().replace(' ', '')
+        if not jibg.startswith('HR'):
+            jibg = 'HR' + jibg
+
+        errors = []
+        if len(jibg) < 5:
+            errors.append('JIBG mora imati format HR + brojevi (npr. HR30157757)')
+
+        if FarmIdentification.objects.filter(jibg=jibg).exists():
+            errors.append(f'Gospodarstvo {jibg} je vec registrirano u sustavu.')
+
+        if errors:
+            return render(request, 'livestock/farm_register.html', {
+                'errors': errors, 'form': request.POST, 'company': company,
+            })
+
+        farm = FarmIdentification.objects.create(
+            company=company,
+            card_serial=request.POST.get('card_serial', '').strip(),
+            jibg=jibg,
+            tattoo_number=request.POST.get('tattoo_number', '').strip(),
+            owner_name=request.POST.get('owner_name', '').strip(),
+            farm_name=request.POST.get('farm_name', '').strip(),
+            address=request.POST.get('address', '').strip(),
+            settlement=request.POST.get('settlement', '').strip(),
+            municipality=request.POST.get('municipality', '').strip(),
+            zip_code=request.POST.get('zip_code', '').strip(),
+            county=request.POST.get('county', '').strip(),
+            animal_types=request.POST.getlist('animal_types'),
+            created_by=request.user,
+        )
+
+        # Fotografija kartice
+        if request.FILES.get('card_photo_front'):
+            farm.card_photo_front = request.FILES['card_photo_front']
+        if request.FILES.get('card_photo_back'):
+            farm.card_photo_back = request.FILES['card_photo_back']
+        farm.save()
+
+        # Audit
+        try:
+            from core.models import BookingSignature
+            BookingSignature.log(request, 'create', target_obj=farm,
+                target_repr=f'IKG: {farm.jibg_display} — {farm.owner_name}',
+                changes={'animal_types': farm.animal_types})
+        except Exception:
+            pass
+
+        messages.success(request,
+            f'Gospodarstvo {farm.jibg_display} registrirano! '
+            f'Posjednik: {farm.owner_name}')
+        return redirect('livestock:farm_list')
+
+    # GET
+    existing = FarmIdentification.objects.filter(company=company)
+    return render(request, 'livestock/farm_register.html', {
+        'company': company,
+        'existing': existing,
+        'animal_types': FarmIdentification.ANIMAL_TYPES,
+        'form': {},
+    })
+
+
+@login_required
+def farm_list(request):
+    """Lista registriranih gospodarstava."""
+    from .models import FarmIdentification
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    farms = FarmIdentification.objects.filter(company=company)
+    return render(request, 'livestock/farm_list.html', {
+        'farms': farms,
+        'page_title': 'Gospodarstva',
+    })

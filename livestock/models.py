@@ -456,3 +456,106 @@ class InstitutionalAccessLog(models.Model):
     class Meta:
         db_table = 'livestock_institutional_log'
         ordering = ['-timestamp']
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IDENTIFIKACIJSKA KARTICA GOSPODARSTVA (IKG) — HPA / JRDZ
+# Zakon o veterinarstvu (NN 82/13), Pravilnik NN 96/2015
+# ═══════════════════════════════════════════════════════════════════════════
+
+class FarmIdentification(models.Model):
+    """
+    Identifikacijska kartica gospodarstva — IKG.
+    Jedna po JIBG-u (lokaciji). Vlasnik može imati više kartica.
+    
+    Podaci čitani s kartice:
+    - Serijski broj kartice (00234792)
+    - JIBG (HR 30157757)
+    - Ime i prezime posjednika
+    - Naziv gospodarstva
+    - Adresa, općina, županija
+    - Tetovirni broj (barcode)
+    """
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                related_name='farm_identifications')
+    
+    # Kartica
+    card_serial = models.CharField(max_length=20, verbose_name='Serijski broj kartice',
+        help_text='Npr. 00234792')
+    jibg = models.CharField(max_length=20, unique=True, verbose_name='JIBG',
+        help_text='Jedinstveni identifikacijski broj gospodarstva. Npr. HR 30157757')
+    tattoo_number = models.CharField(max_length=30, blank=True, verbose_name='Tetovirni broj',
+        help_text='Barcode na kartici')
+    
+    # Posjednik
+    owner_name = models.CharField(max_length=200, verbose_name='Ime i prezime posjednika')
+    farm_name = models.CharField(max_length=200, blank=True, verbose_name='Naziv gospodarstva')
+    
+    # Lokacija
+    address = models.CharField(max_length=200, verbose_name='Adresa')
+    settlement = models.CharField(max_length=100, blank=True, verbose_name='Naselje')
+    municipality = models.CharField(max_length=100, blank=True, verbose_name='Općina/Grad')
+    zip_code = models.CharField(max_length=10, blank=True, verbose_name='Poštanski broj')
+    county = models.CharField(max_length=100, blank=True, verbose_name='Županija')
+    
+    # GPS
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    # Fotografija kartice
+    card_photo_front = models.ImageField(upload_to='farm_id/cards/', null=True, blank=True,
+        verbose_name='Foto kartice (prednja strana)')
+    card_photo_back = models.ImageField(upload_to='farm_id/cards/', null=True, blank=True,
+        verbose_name='Foto kartice (stražnja strana)')
+    
+    # Vrste životinja na gospodarstvu
+    ANIMAL_TYPES = [
+        ('cattle', 'Goveda'),
+        ('pigs', 'Svinje'),
+        ('sheep', 'Ovce'),
+        ('goats', 'Koze'),
+        ('poultry', 'Perad'),
+        ('horses', 'Kopitari (konji, magarci)'),
+        ('bees', 'Pčele'),
+        ('rabbits', 'Kunići'),
+        ('fish', 'Ribe / školjke'),
+        ('game', 'Divljač (uzgoj)'),
+    ]
+    animal_types = models.JSONField(default=list, blank=True,
+        verbose_name='Vrste životinja',
+        help_text='Lista vrsta na gospodarstvu')
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    registered_at = models.DateField(null=True, blank=True,
+        verbose_name='Datum registracije u JRDZ')
+    
+    # ePosjednik pristup
+    eposjednik_username = models.CharField(max_length=50, blank=True,
+        verbose_name='ePosjednik korisničko ime')
+    eposjednik_active = models.BooleanField(default=False,
+        verbose_name='ePosjednik aktivan')
+    
+    # Audit
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                    null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = CompanyManager()
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Identifikacijska kartica gospodarstva'
+        verbose_name_plural = 'Identifikacijske kartice gospodarstva'
+    
+    def __str__(self):
+        return f'{self.jibg} — {self.owner_name} ({self.farm_name or self.address})'
+    
+    @property
+    def jibg_display(self):
+        """Format: HR 30157757"""
+        j = self.jibg.replace(' ', '').upper()
+        if j.startswith('HR') and len(j) > 2:
+            return f'HR {j[2:]}'
+        return j

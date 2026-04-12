@@ -5,6 +5,9 @@ from . import views_pets
 app_name = "livestock"
 
 urlpatterns = [
+    path('gospodarstvo/', views.farm_list, name='farm_list'),
+    path('gospodarstvo/novo/', views.farm_register, name='farm_register'),
+
     path("", views.livestock_list, name="list"),
     path("<int:pk>/", views.livestock_detail, name="detail"),
     path("create/", views.livestock_create, name="create"),

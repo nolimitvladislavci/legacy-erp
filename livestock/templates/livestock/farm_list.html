@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Gospodarstva{% endblock %}
+{% block page_title %}Gospodarstva{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+  <div class="d-flex justify-content-between align-items-center fx-mb-4">
+    <h2 class="fx-fw-bold fx-text-gold fx-mb-0">Moja gospodarstva</h2>
+    <a href="{% url 'livestock:farm_register' %}" class="btn-gold">
+      <i class="fas fa-plus me-1"></i> Registriraj novo
+    </a>
+  </div>
+
+  {% if farms %}
+  <div class="row g-3">
+    {% for f in farms %}
+    <div class="col-12 col-md-6">
+      <div class="fx-card" style="{% if not f.is_active %}opacity:.6{% endif %}">
+        <div class="fx-card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fx-text-gold fx-fw-bold" style="font-size:1.2rem">{{ f.jibg_display }}</div>
+              <div class="fw-bold">{{ f.owner_name }}</div>
+              {% if f.farm_name %}<div class="fx-text-muted" style="font-size:.85rem">{{ f.farm_name }}</div>{% endif %}
+              <div class="fx-text-muted" style="font-size:.82rem">{{ f.address }}{% if f.municipality %}, {{ f.municipality }}{% endif %}</div>
+              {% if f.county %}<div class="fx-text-muted" style="font-size:.75rem">{{ f.county }}</div>{% endif %}
+            </div>
+            {% if f.card_photo_front %}
+            <img src="{{ f.card_photo_front.url }}" style="height:60px;border-radius:8px;border:1px solid rgba(255,255,255,.1)">
+            {% endif %}
+          </div>
+          {% if f.animal_types %}
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+            {% for at in f.animal_types %}
+            <span class="badge" style="background:rgba(201,168,76,.15);color:#c9a84c;font-size:.7rem">{{ at }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="fx-text-muted" style="font-size:.7rem;margin-top:8px">
+            Kartica: {{ f.card_serial|default:"—" }} | Registrirano: {{ f.created_at|date:"d.m.Y" }}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="fx-card">
+    <div class="fx-card-body text-center fx-py-5 fx-text-muted">
+      <i class="fas fa-tractor fa-3x fx-text-gold opacity-25 d-block mb-3"></i>
+      Nema registriranih gospodarstava. Kliknite <strong>Registriraj novo</strong> i uslikajte IKG karticu.
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
