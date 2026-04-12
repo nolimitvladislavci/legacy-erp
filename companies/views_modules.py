@@ -40,7 +40,7 @@ def module_picker(request):
             config.sidebar_order = enabled  # order = selection order
             config.save()
             messages.success(request, f'Spremljeno! {len(enabled)} modula aktivno.')
-            return redirect('companies:module_picker')
+            return redirect('dashboard')
 
         elif action == 'ai_recommend':
             recommendations = _ai_recommend(company)

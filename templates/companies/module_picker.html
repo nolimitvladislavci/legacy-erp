@@ -227,7 +227,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // On submit: apply pending changes to checkboxes
-  document.getElementById('moduleForm').addEventListener('submit', function() {
+  document.getElementById('moduleForm').addEventListener('submit', function(e) {
+    // Primijeni pending promjene na checkboxe
     for (var mod in pendingChanges) {
       var cb = document.querySelector('.mp-cb[value="' + mod + '"]');
       if (cb) cb.checked = pendingChanges[mod];
@@ -235,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('btnSave');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Spremam...';
+    // Native submit — browser handles POST + redirect
   });
 
   updateCount();
