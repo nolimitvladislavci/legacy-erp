@@ -1371,7 +1371,7 @@ def pos_joker(request, terminal_id):
         'show_upgrade_banner': show_upgrade_banner,
         'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
         'is_gastro':          is_gastro,
-        'stock_alerts':       {i.pk: {'qty': float(i.quantity or 0), 'min': float(i.min_quantity or 5)} for i in inventory_items if (i.quantity or 999) <= (i.min_quantity or 5) * 1.5},
+        'stock_alerts':       {i.pk: {'qty': float(i.quantity or 0), 'min': float(i.min_quantity or 5)} for i in inventory_items if float(i.quantity or 999) <= float(i.min_quantity or 5) * 1.5},
         'pos_title':          POS_TITLE_MAP.get(terminal.pos_type, 'POS'),
     }
 
