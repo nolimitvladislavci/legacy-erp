@@ -4418,6 +4418,23 @@ def improvement_list(request):
                 category=category, priority=priority,
                 trojstvo_status='pending',
             )
+            # Screenshot upload
+            if request.FILES.get('screenshot'):
+                import os
+                from django.core.files.storage import default_storage
+                f = request.FILES['screenshot']
+                path = f'feedback/screenshots/{s.pk}_{f.name}'
+                saved = default_storage.save(path, f)
+                s.admin_note = f'[screenshot:{saved}] ' + s.admin_note
+                s.save(update_fields=['admin_note'])
+
+            # BookingSignature audit
+            try:
+                BookingSignature.log(request, 'create', target_obj=s,
+                    target_repr=f'Feedback: P{priority} {title[:50]}',
+                    changes={'category': category, 'priority': priority})
+            except Exception:
+                pass
             # Pokrenuti Trojstvo analizu (Haiku + Gemini konsenzus)
             try:
                 from pos.trojstvo_task import trojstvo_rijesi

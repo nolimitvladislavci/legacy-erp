@@ -289,6 +289,7 @@ urlpatterns += i18n_patterns(
     path('stolarija/', include('stolarija.urls', namespace='stolarija')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
     path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
+    path('feedback/', __import__('pos.views', fromlist=['improvement_list']).improvement_list, name='feedback'),
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
     path('panel/detail/', views.panel_detail, name='panel_detail'),
     path('accounts/', include('accounts.urls')),

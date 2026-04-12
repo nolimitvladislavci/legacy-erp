@@ -1,4 +1,4 @@
-{% extends "pos/base_pos.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 {% block title %}Knjiga boljitaka — Trojstvo{% endblock %}
 
@@ -35,7 +35,7 @@
   <p class="fx-text-muted fx-fs-base fx-mb-6">Prijavljeni problemi → Haiku + Gemini analiziraju → Ivan odlučuje</p>
 
   <!-- Forma -->
-  <form method="post" class="fx-bg-surface2 fx-rounded fx-p-125" style="margin-bottom:2rem;border:1px solid rgba(201,168,76,.2)">
+  <form method="post" enctype="multipart/form-data" class="fx-bg-surface2 fx-rounded fx-p-125" style="margin-bottom:2rem;border:1px solid rgba(201,168,76,.2)">
     {% csrf_token %}
     <div class="d-grid fx-gap-3 fx-mb-4" style="grid-template-columns:1fr 130px 80px">
       <input name="title" placeholder="Kratki naslov problema..." required
@@ -56,6 +56,15 @@
     </div>
     <textarea name="description" placeholder="Detaljan opis — što se događa, kad, gdje..." rows="3" required
               class="fx-w-full fx-rounded fx-bg-deep fx-text-white fx-fs-md fx-b2 fx-mb-4" style="box-sizing:border-box;padding:.65rem;font-family:inherit;resize:vertical"></textarea>
+    <!-- Screenshot -->
+    <div class="fx-mb-3">
+      <label class="d-inline-flex align-items-center gap-2 fx-pointer fx-rounded" style="padding:8px 14px;border:1px dashed rgba(201,168,76,.3);background:rgba(201,168,76,.03)">
+        <i class="fas fa-camera fx-text-gold"></i>
+        <span class="fx-fs-note fx-text-dim">Dodaj screenshot (opcionalno)</span>
+        <input type="file" name="screenshot" accept="image/*" capture="environment" class="d-none" onchange="this.previousElementSibling.textContent=this.files[0].name">
+      </label>
+    </div>
+
     <div class="d-flex fx-gap-3 align-items-center fx-flex-wrap fx-mb-3">
       <span class="fx-text-dim fx-fs-caption">Posalji na:</span>
       <label class="fx-pointer d-flex align-items-center fx-gap-1 fx-fs-md">
@@ -86,7 +95,7 @@
 
   <!-- Lista prijedloga -->
   {% for s in suggestions %}
-  <div class="ts-card ts-{{ s.trojstvo_status|default:'new' }}">
+  <div class="ts-card ts-{{ s.trojstvo_status|default:'new' }}" data-id="{{ s.pk }}">
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-start fx-gap-4">
@@ -160,3 +169,28 @@
   {% endfor %}
 </div>
 {% endblock %}
+
+<script>
+// Auto-poll trojstvo status za pending items
+(function() {
+  var pending = document.querySelectorAll('.ts-pending');
+  if (!pending.length) return;
+  
+  setInterval(function() {
+    pending.forEach(function(card) {
+      var id = card.dataset.id;
+      if (!id) return;
+      fetch('/hr/pos/improvements/' + id + '/update/', {
+        method: 'GET',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+      })
+      .then(function(r) { if (r.ok) return r.json(); })
+      .then(function(d) {
+        if (d && d.status && d.status !== 'pending') {
+          location.reload();
+        }
+      }).catch(function() {});
+    });
+  }, 10000); // Poll svakih 10s
+})();
+</script>
