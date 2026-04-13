@@ -33,6 +33,9 @@ urlpatterns = [
     path("ai/", views.ai_inbox, name="ai_inbox"),
     path("ai/<int:msg_id>/", views.ai_message_detail, name="ai_message_detail"),
     path("ai/simulate/", views.ai_simulate_inbound, name="ai_simulate"),
+    # PDF
+    path("ponuda/<int:offer_id>/pdf/", views.offer_pdf, name="offer_pdf"),
+    path("garancija-pdf/<int:warranty_id>/", views.warranty_pdf, name="warranty_pdf"),
     # API
     path("voice-parse/", views.voice_parse_api, name="voice_parse"),
     path("ponuda/<int:offer_id>/sign/", views.sign_offer, name="sign_offer"),

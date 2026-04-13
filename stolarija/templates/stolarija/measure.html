@@ -138,7 +138,7 @@
           </div>
           <div class="col-6">
             <label class="fx-label">Tip</label>
-            <select name="element_type" id="fType" class="fx-input">
+            <select name="element_type" id="fType" class="fx-input" onchange="toggleDynamicFields()">
               {% for val, label in element_types %}
               <option value="{{ val }}">{{ label }}</option>
               {% endfor %}
@@ -165,6 +165,84 @@
             <label class="fx-label">Dubina zida</label>
             <input type="number" name="depth_mm" class="fx-input" min="0" placeholder="mm">
           </div>
+
+          <!-- SOBNA VRATA polja (prikazuju se kad je tip=interior_door/door) -->
+          <div class="col-12" id="doorFields" style="display:none">
+            <div class="fx-card" style="border-color:rgba(201,168,76,.2);margin-top:4px">
+              <div class="fx-card-header" style="font-size:.82rem;padding:8px 12px">
+                <i class="fas fa-door-open me-1 fx-text-gold"></i> Polja za vrata
+              </div>
+              <div class="fx-card-body" style="padding:10px 12px">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="fx-label">Smjer otvaranja</label>
+                    <select name="swing_direction" id="fSwing" class="fx-input">
+                      <option value="">— odaberi —</option>
+                      {% for val, label in swing_directions %}
+                      <option value="{{ val }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="fx-label">Prostorija</label>
+                    <select name="door_position" id="fDoorPos" class="fx-input">
+                      <option value="">— odaberi —</option>
+                      {% for val, label in door_positions %}
+                      <option value="{{ val }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="fx-label">Debljina zida (mm)</label>
+                    <input type="number" name="wall_thickness_mm" id="fWallThick" class="fx-input" min="0" max="500" placeholder="npr. 100">
+                  </div>
+                  <div class="col-6">
+                    <label class="fx-label">Standard</label>
+                    <select name="door_standard" class="fx-input">
+                      <option value="">Auto-detect</option>
+                      <option value="DIN">DIN</option>
+                      <option value="HR">HR</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KOMARNIK polja -->
+          <div class="col-12" id="mosquitoFields" style="display:none">
+            <div class="fx-card" style="border-color:rgba(201,168,76,.2);margin-top:4px">
+              <div class="fx-card-header" style="font-size:.82rem;padding:8px 12px">
+                <i class="fas fa-bug me-1 fx-text-gold"></i> Polja za komarnik
+              </div>
+              <div class="fx-card-body" style="padding:10px 12px">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="fx-label">Tip mreze</label>
+                    <select name="mesh_type" id="fMesh" class="fx-input">
+                      <option value="">— odaberi —</option>
+                      <option value="pvc">PVC</option>
+                      <option value="alu">Aluminij</option>
+                      <option value="fiberglass">Fiberglass</option>
+                      <option value="plisse">Plise</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="fx-label">Tip montaze</label>
+                    <select name="mounting_type" id="fMount" class="fx-input">
+                      <option value="">— odaberi —</option>
+                      <option value="fixed_frame">Fiksni okvir</option>
+                      <option value="roller">Roletni</option>
+                      <option value="plisse">Plise</option>
+                      <option value="magnetic">Magnetni</option>
+                      <option value="velcro">Velcro</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="col-12">
             <label class="fx-label">Lokacija (npr. "spavaća soba, sjever")</label>
             <input type="text" name="location_note" class="fx-input" placeholder="Opcionalno">
@@ -206,7 +284,7 @@
               <span id="photoName" class="fx-text-muted" style="font-size:.78rem"></span>
             </div>
           </div>
-        </div>
+        </div><!-- /row -->
 
         <button type="submit" class="btn-gold w-100 mt-3" style="padding:14px;font-size:1rem" enctype="multipart/form-data">
           <i class="fas fa-plus me-1"></i> Dodaj mjerenje ✓
@@ -228,12 +306,25 @@
         <div>
           <div class="dim-display">Poz. {{ m.position_number }}: {{ m.width_mm }} × {{ m.height_mm }} mm</div>
           <div class="fx-text-muted" style="font-size:.82rem">
-            {{ m.get_element_type_display }} • {{ m.get_wing_config_display }}
-            • × {{ m.quantity }} kom
-            {% if m.location_note %} • {{ m.location_note }}{% endif %}
+            {{ m.get_element_type_display }} | {{ m.get_wing_config_display }}
+            | x {{ m.quantity }} kom
+            {% if m.location_note %} | {{ m.location_note }}{% endif %}
           </div>
+          {% if m.element_type == 'interior_door' or m.element_type == 'door' %}
           <div class="fx-text-muted" style="font-size:.75rem">
-            Površina: {{ m.total_area_m2 }} m²
+            {% if m.swing_direction %}{{ m.get_swing_direction_display }}{% endif %}
+            {% if m.door_position %} | {{ m.get_door_position_display }}{% endif %}
+            {% if m.wall_thickness_mm %} | Zid: {{ m.wall_thickness_mm }}mm{% endif %}
+          </div>
+          {% endif %}
+          {% if m.element_type == 'mosquito' %}
+          <div class="fx-text-muted" style="font-size:.75rem">
+            {% if m.mesh_type %}Mreza: {{ m.mesh_type }}{% endif %}
+            {% if m.mounting_type %} | Montaza: {{ m.mounting_type }}{% endif %}
+          </div>
+          {% endif %}
+          <div class="fx-text-muted" style="font-size:.75rem">
+            Povrsina: {{ m.total_area_m2 }} m2
             {% if m.confirmed %}<span class="text-success ms-2">✓ Potvrđeno</span>{% endif %}
           </div>
         </div>
@@ -352,6 +443,25 @@ function confirmAndFill() {
     const sel = document.getElementById('fWing');
     for (let o of sel.options) { if (o.value === p.wing_config) { o.selected = true; break; } }
   }
+  // Door fields from voice
+  if (p.swing_direction) {
+    var sw = document.getElementById('fSwing');
+    if (sw) { for (var k=0;k<sw.options.length;k++) { if(sw.options[k].value===p.swing_direction){sw.selectedIndex=k;break;} } }
+  }
+  if (p.door_position) {
+    var dp = document.getElementById('fDoorPos');
+    if (dp) { for (var k=0;k<dp.options.length;k++) { if(dp.options[k].value===p.door_position){dp.selectedIndex=k;break;} } }
+  }
+  if (p.wall_thickness_mm) { var wt=document.getElementById('fWallThick'); if(wt) wt.value=p.wall_thickness_mm; }
+  if (p.mesh_type) {
+    var mt = document.getElementById('fMesh');
+    if (mt) { for (var k=0;k<mt.options.length;k++) { if(mt.options[k].value===p.mesh_type){mt.selectedIndex=k;break;} } }
+  }
+  if (p.mounting_type) {
+    var mn = document.getElementById('fMount');
+    if (mn) { for (var k=0;k<mn.options.length;k++) { if(mn.options[k].value===p.mounting_type){mn.selectedIndex=k;break;} } }
+  }
+  toggleDynamicFields();
   confirmBox.style.display = 'none';
   document.getElementById('fWidth').focus();
 }
@@ -364,6 +474,15 @@ function resetVoice() {
 </script>
 
 <script>
+function toggleDynamicFields() {
+  var t = document.getElementById('fType').value;
+  document.getElementById('doorFields').style.display =
+    (t === 'interior_door' || t === 'door' || t === 'balcony_door') ? 'block' : 'none';
+  document.getElementById('mosquitoFields').style.display =
+    (t === 'mosquito') ? 'block' : 'none';
+}
+toggleDynamicFields();
+
 function previewPhoto(input) {
   var preview = document.getElementById('photoPreview');
   var nameEl = document.getElementById('photoName');

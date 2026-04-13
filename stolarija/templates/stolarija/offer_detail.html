@@ -45,6 +45,7 @@
               <th class="text-center">Dim. (mm)</th>
               <th class="text-center">Kom</th>
               <th class="text-center">Površina</th>
+              <th class="text-center">Vizual</th>
               <th class="text-end">Cijena</th>
             </tr>
           </thead>
@@ -62,6 +63,11 @@
               <td class="text-center fx-text-gold fw-bold">{{ m.width_mm }} × {{ m.height_mm }}</td>
               <td class="text-center">{{ m.quantity }}</td>
               <td class="text-center">{{ m.total_area_m2 }} m²</td>
+              <td class="text-center">
+                {% if m.svg %}
+                  <div style="max-width:120px;margin:0 auto">{{ m.svg|safe }}</div>
+                {% endif %}
+              </td>
               <td class="text-end">
                 {% if m.calculate_price %}
                   {{ m.calculate_price }} €
@@ -162,8 +168,11 @@
     <a href="{% url 'stolarija:session_detail' offer.session.pk %}" class="btn btn-outline-secondary">
       <i class="fas fa-arrow-left me-1"></i> Nazad
     </a>
-    <button class="btn-gold" onclick="window.print()" style="padding:10px 20px">
-      <i class="fas fa-print me-1"></i> Ispis / PDF
+    <a href="{% url 'stolarija:offer_pdf' offer.pk %}" class="btn-gold" style="padding:10px 20px;text-decoration:none" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i> PDF ponuda
+    </a>
+    <button class="btn btn-outline-secondary" onclick="window.print()" style="padding:10px 20px">
+      <i class="fas fa-print me-1"></i> Ispis
     </button>
     <a href="{% url 'stolarija:dashboard' %}" class="btn btn-outline-secondary">
       <i class="fas fa-home me-1"></i> Dashboard

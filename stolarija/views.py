@@ -37,12 +37,43 @@ def dashboard(request):
     offers = (
         WindowOffer.objects.filter(company=company).select_related("company", "session").order_by("-created_at")[:10]
     )
+    # Pipeline stats
+    from stolarija.models import (
+        InstallationOrder,
+        ProductionOrder,
+        ServiceVisit,
+        WindowWarranty,
+    )
+
+    today = timezone.now().date()
+    stats = {
+        "sessions_total": MeasurementSession.objects.filter(company=company).count(),
+        "offers_total": WindowOffer.objects.filter(company=company).count(),
+        "offers_accepted": WindowOffer.objects.filter(company=company, status="accepted").count(),
+        "production_active": ProductionOrder.objects.filter(company=company)
+        .exclude(status__in=["ready", "delivered"])
+        .count(),
+        "production_ready": ProductionOrder.objects.filter(company=company, status="ready").count(),
+        "installations_scheduled": InstallationOrder.objects.filter(company=company, status="scheduled").count(),
+        "installations_done": InstallationOrder.objects.filter(company=company, status="completed").count(),
+        "warranties_active": WindowWarranty.objects.filter(
+            session__company=company, handover_date__isnull=False
+        ).count(),
+        "services_upcoming": ServiceVisit.objects.filter(
+            warranty__session__company=company, completed__isnull=True, scheduled__gte=today
+        ).count(),
+        "services_overdue": ServiceVisit.objects.filter(
+            warranty__session__company=company, completed__isnull=True, scheduled__lt=today
+        ).count(),
+    }
+
     return render(
         request,
         "stolarija/dashboard.html",
         {
             "sessions": sessions,
             "offers": offers,
+            "stats": stats,
             "page_title": "Stolarija",
         },
     )
@@ -131,6 +162,14 @@ def measure(request, session_id):
                 ai_parsed=json.loads(request.POST.get("ai_parsed", "{}")),
                 photo_before=request.FILES.get("photo_before"),
                 confirmed=True,
+                # Sobna vrata polja
+                swing_direction=request.POST.get("swing_direction", ""),
+                door_position=request.POST.get("door_position", ""),
+                wall_thickness_mm=int(request.POST.get("wall_thickness_mm") or 0),
+                door_standard=request.POST.get("door_standard", ""),
+                # Komarnik polja
+                mesh_type=request.POST.get("mesh_type", ""),
+                mounting_type=request.POST.get("mounting_type", ""),
             )
             # AI Validator — "Drugi par očiju"
             from .validators import validate_measurement, validate_measurement_ai
@@ -167,6 +206,8 @@ def measure(request, session_id):
             "glasses": glasses,
             "element_types": Measurement.ELEMENT_TYPES,
             "wing_configs": Measurement.WING_CONFIGS,
+            "swing_directions": Measurement.SWING_DIRECTION,
+            "door_positions": Measurement.DOOR_POSITION,
             "page_title": f"Mjerenje — {session.address or 'Nova lokacija'}",
         },
     )
@@ -205,6 +246,7 @@ def voice_parse_api(request):
                     self.floor = 0
                     self.profile = None
                     self.pk = None
+                    self.wall_thickness_mm = p.get("wall_thickness_mm", 0)
 
             ai_warnings = validate_measurement(_TempM(parsed))
             parsed["warnings"] += [w["message"] for w in ai_warnings]
@@ -299,7 +341,39 @@ def generate_offer(request, session_id):
 def offer_detail(request, offer_id):
     company = _company(request)
     offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
-    measurements = offer.session.measurements.filter(confirmed=True)
+    measurements = list(offer.session.measurements.filter(confirmed=True))
+
+    # Generate SVG visualization for each measurement
+    from .svg_window import generate_window_svg, generate_door_svg, generate_mosquito_svg
+
+    for m in measurements:
+        if m.element_type == "interior_door" or m.element_type == "door":
+            m.svg = generate_door_svg(
+                m.width_mm,
+                m.height_mm,
+                wing_config=m.wing_config,
+                swing_direction=m.swing_direction or "inward",
+                element_type=m.element_type,
+            )
+        elif m.element_type == "mosquito":
+            m.svg = generate_mosquito_svg(
+                m.width_mm,
+                m.height_mm,
+                mounting_type=m.mounting_type or "fixed_frame",
+            )
+        else:
+            profile_color = "#4a5568"
+            if m.profile:
+                profile_color = {"alu": "#94a3b8", "pvc": "#e2e8f0", "wood": "#a16207"}.get(
+                    m.profile.material, "#4a5568"
+                )
+            m.svg = generate_window_svg(
+                m.width_mm,
+                m.height_mm,
+                wing_config=m.wing_config,
+                element_type=m.element_type,
+                profile_color=profile_color,
+            )
 
     return render(
         request,

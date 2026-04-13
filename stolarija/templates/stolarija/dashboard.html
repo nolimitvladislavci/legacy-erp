@@ -2,13 +2,13 @@
 {% load i18n %}
 
 {% block title %}Stolarija — LIMIT Connect{% endblock %}
-{% block page_title %}🪟 Stolarija{% endblock %}
+{% block page_title %}Stolarija{% endblock %}
 
 {% block content %}
 <div class="fx-container fx-py-4">
 
   <div class="d-flex justify-content-between align-items-center fx-mb-4">
-    <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-0">Mjerenja i ponude</h2>
+    <h2 class="fx-fs-h2 fx-fw-bold fx-text-gold fx-mb-0">Stolarija</h2>
     <a href="{% url 'stolarija:session_new' %}" class="btn-gold">
       <i class="fas fa-plus me-1"></i> Novo mjerenje
     </a>
@@ -19,6 +19,65 @@
     <div class="fx-alert fx-alert-{{ msg.tags }} fx-mb-3">{{ msg }}</div>
     {% endfor %}
   {% endif %}
+
+  <!-- Pipeline KPI -->
+  <div class="row g-2 fx-mb-4">
+    <div class="col-6 col-md-3">
+      <div class="fx-card text-center" style="padding:16px 8px">
+        <div style="font-size:2rem;font-weight:900;color:var(--gold)">{{ stats.sessions_total }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Mjerenja</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card text-center" style="padding:16px 8px">
+        <div style="font-size:2rem;font-weight:900;color:var(--gold)">{{ stats.offers_accepted }}/{{ stats.offers_total }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Ponude (prihv.)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card text-center" style="padding:16px 8px">
+        <div style="font-size:2rem;font-weight:900;color:var(--gold)">{{ stats.production_active }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">U proizvodnji</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fx-card text-center" style="padding:16px 8px">
+        <div style="font-size:2rem;font-weight:900;color:var(--gold)">{{ stats.warranties_active }}</div>
+        <div class="fx-text-muted" style="font-size:.75rem">Garancije</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brza navigacija -->
+  <div class="row g-2 fx-mb-4">
+    <div class="col-6 col-md-3">
+      <a href="{% url 'stolarija:warranty_list' %}" class="fx-card d-block text-center text-decoration-none" style="padding:12px">
+        <i class="fas fa-shield-alt fx-text-gold d-block" style="font-size:1.5rem;margin-bottom:4px"></i>
+        <span class="fx-text-muted" style="font-size:.8rem">Garancije ({{ stats.warranties_active }})</span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'stolarija:service_list' %}" class="fx-card d-block text-center text-decoration-none" style="padding:12px">
+        <i class="fas fa-wrench fx-text-gold d-block" style="font-size:1.5rem;margin-bottom:4px"></i>
+        <span class="fx-text-muted" style="font-size:.8rem">Servis
+          {% if stats.services_overdue %}<span class="badge bg-danger">{{ stats.services_overdue }}</span>{% endif %}
+          ({{ stats.services_upcoming }})
+        </span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'stolarija:risk_dashboard' %}" class="fx-card d-block text-center text-decoration-none" style="padding:12px">
+        <i class="fas fa-chart-line fx-text-gold d-block" style="font-size:1.5rem;margin-bottom:4px"></i>
+        <span class="fx-text-muted" style="font-size:.8rem">Risk analiza</span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{% url 'stolarija:ai_inbox' %}" class="fx-card d-block text-center text-decoration-none" style="padding:12px">
+        <i class="fas fa-robot fx-text-gold d-block" style="font-size:1.5rem;margin-bottom:4px"></i>
+        <span class="fx-text-muted" style="font-size:.8rem">AI inbox</span>
+      </a>
+    </div>
+  </div>
 
   <!-- Sesije mjerenja -->
   <div class="fx-card fx-mb-4">
@@ -35,7 +94,7 @@
               <th>Adresa / Lokacija</th>
               <th>Datum</th>
               <th>Stavki</th>
-              <th>Potvrđeno</th>
+              <th>Status</th>
               <th></th>
             </tr>
           </thead>
@@ -52,14 +111,14 @@
               <td><span class="badge fx-bg-surface">{{ s.total_items }}</span></td>
               <td>
                 {% if s.confirmed_items == s.total_items and s.total_items > 0 %}
-                  <span class="badge bg-success">✓ Sve</span>
+                  <span class="badge bg-success">Sve potvrdeno</span>
                 {% else %}
                   <span class="badge bg-warning text-dark">{{ s.confirmed_items }}/{{ s.total_items }}</span>
                 {% endif %}
               </td>
               <td class="text-end">
                 <a href="{% url 'stolarija:measure' s.pk %}" class="btn btn-sm btn-outline-secondary me-1">
-                  <i class="fas fa-plus"></i> Dodaj
+                  <i class="fas fa-plus"></i>
                 </a>
                 <a href="{% url 'stolarija:session_detail' s.pk %}" class="btn-gold" style="padding:4px 12px;font-size:.8rem">
                   Pregled
@@ -73,7 +132,7 @@
       {% else %}
       <div class="text-center fx-text-muted fx-py-5">
         <i class="fas fa-ruler-combined fa-3x fx-text-gold opacity-25 d-block mb-3"></i>
-        Nema sesija mjerenja. Klikni <strong>Novo mjerenje</strong> za početak.
+        Nema sesija mjerenja. Klikni <strong>Novo mjerenje</strong> za pocetak.
       </div>
       {% endif %}
     </div>
@@ -105,7 +164,7 @@
                   {{ o.get_status_display }}
                 </span>
               </td>
-              <td>{{ o.total_gross }} €</td>
+              <td>{{ o.total_gross }} EUR</td>
               <td>{{ o.created_at|date:"d.m.Y" }}</td>
               <td>
                 <a href="{% url 'stolarija:offer_detail' o.pk %}" class="btn-gold" style="padding:4px 12px;font-size:.8rem">
