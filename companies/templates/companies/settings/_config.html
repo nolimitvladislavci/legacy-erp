@@ -1,0 +1,187 @@
+{% load i18n %}
+active{% endif %}"
+       href="?tab=settings">
+      <i class="fas fa-cog me-1"></i>Postavke
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'employees' %}active{% endif %}"
+       href="?tab=employees">
+      <i class="fas fa-users me-1"></i>Zaposlenici
+      <span class="badge bg-secondary ms-1">{{ employees.count }}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'branches' %}active{% endif %}"
+       href="?tab=branches">
+      <i class="fas fa-store me-1"></i>Podružnice
+      <span class="badge bg-secondary ms-1">{{ branches.count }}</span>
+    </a>
+  </li>
+</ul>
+
+<!-- ═══ TAB: INFO ═══ -->
+{% if tab == 'info' or not tab %}
+<div class="stat-card p-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-building me-2 text-gold"></i>Podaci tvrtke</h5>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="info">
+    <div class="row g-3">
+
+      <div class="col-md-8">
+        <label class="form-label fw-semibold">Naziv tvrtke *</label>
+        <input type="text" name="name" class="form-control" value="{{ company.name }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">OIB / Steuer-Nr *</label>
+        <input type="text" name="oib" class="form-control" value="{{ company.oib }}" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Adresa</label>
+        <input type="text" name="address" class="form-control" value="{{ company.address }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Grad</label>
+        <input type="text" name="city" class="form-control" value="{{ company.city }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Poštanski broj</label>
+        <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Država</label>
+        <select name="country" class="form-select">
+          {% for val, lbl in country_choices %}
+          <option value="{{ val }}" {% if company.country == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Tip subjekta</label>
+        <select name="business_type" class="form-select">
+          {% for val, lbl in company.BusinessType.choices %}
+          <option value="{{ val }}" {% if company.business_type == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Valuta</label>
+        <select name="currency" class="form-select">
+          {% for val, lbl in company.Currency.choices %}
+          <option value="{{ val }}" {% if company.currency == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">IBAN</label>
+        <input type="text" name="iban" class="form-control font-monospace" value="{{ company.iban }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">PDV ID / VAT ID</label>
+        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}"
+               placeholder="npr. HR12345678901">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Porezni broj</label>
+        <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Fiskalni sustav</label>
+        <select name="fiscal_system" class="form-select">
+          {% for val, lbl in company.FiscalSystem.choices %}
+          <option value="{{ val }}" {% if company.fiscal_system == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">PDV status</label>
+        <select name="pdv_status" class="form-select">
+          {% for val, lbl in company.PDV_STATUS_CHOICES %}
+          <option value="{{ val }}" {% if company.pdv_status == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_vat_registered" id="vatReg"
+                 {% if company.is_vat_registered %}checked{% endif %}>
+          <label class="form-check-label" for="vatReg">U sustavu PDV-a</label>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Logo</label>
+        {% if company.logo %}
+        <div class="mb-2">
+          <img src="{{ company.logo.url }}" alt="Logo" style="max-height:60px;max-width:200px;" class="border rounded">
+        </div>
+        {% endif %}
+        <input type="file" name="logo" class="form-control" accept="image/*">
+      </div>
+
+    </div>
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi podatke
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<!-- ═══ TAB: SETTINGS ═══ -->
+{% if tab == 'settings' %}
+<div class="stat-card p-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-cog me-2 text-gold"></i>Aplikacijske postavke</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="settings">
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Zadana PDV stopa (%)</label>
+        <input type="number" name="default_tax_pct" class="form-control"
+               value="{{ settings_data.default_tax_pct|default:'25' }}" min="0" max="100" step="0.01">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Format broja računa</label>
+        <input type="text" name="invoice_number_format" class="form-control"
+               value="{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}"
+               placeholder="{YYYY}-{NUM}">
+        <small class="text-muted">Tokeni: {YYYY}, {YY}, {MM}, {NUM}</small>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Reply-To e-mail</label>
+        <input type="email" name="email_reply_to" class="form-control"
+               value="{{ settings_data.email_reply_to|default:'' }}"
+               placeholder="fakture@tvrtka.hr">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Radno vrijeme</label>
+        <input type="text" name="working_hours" class="form-control"
+               value="{{ settings_data.working_hours|default:'08:00-16:00' }}"
+               placeholder="08:00-16:00">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Jezik sučelja</label>
+        <select name="ui_language" class="form-select">
+          <option value="hr" {% if settings_data.ui_language == 'hr' or not settings_data.ui_language %}selected{% endif %}>Hrvatski</option>
+          <option value="de" {% if settings_data.ui_language == 'de' %}selected{% endif %}>Deutsch</option>
+          <option value="en" {% if settings_data.ui_language == 'en' %}selected{% endif %}>English</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="mt-4">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi postavke
+      </button>
+    </div>
+  </form>
+</div>

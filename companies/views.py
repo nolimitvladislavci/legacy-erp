@@ -115,6 +115,8 @@ def company_settings(request):
         return redirect("/")
 
     tab = request.GET.get("tab", "info")
+    # Map legacy tab names
+    if tab == "info": tab = "profile"
 
     # Tab: info
     if tab == "info" and request.method == "POST":
@@ -247,6 +249,7 @@ def company_settings(request):
         "branch_types": CompanyBranch.BRANCH_TYPES,
         "country_choices": Company.Country.choices,
         "settings_data": company.settings or {},
+        "module_count": CompanyModuleConfig.objects.filter(company=company).values_list("enabled_modules", flat=True).first().__len__() if CompanyModuleConfig.objects.filter(company=company).exists() else 0,
     })
 
 

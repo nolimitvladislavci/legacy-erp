@@ -1,0 +1,78 @@
+{% load i18n %}
+<div class="mb-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-shopping-cart me-2 text-gold"></i>{% trans "Webshop" %}</h5>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card text-center py-3">
+        <div class="h3 fw-bold text-gold mb-0">{{ webshop_stats.products|default:"0" }}</div>
+        <small class="text-muted">{% trans "Proizvodi" %}</small>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card text-center py-3">
+        <div class="h3 fw-bold mb-0" style="color:#22c55e">{{ webshop_stats.orders|default:"0" }}</div>
+        <small class="text-muted">{% trans "Narudžbe" %}</small>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card text-center py-3">
+        <div class="h3 fw-bold mb-0" style="color:#3b82f6">{{ webshop_stats.revenue|default:"0" }} €</div>
+        <small class="text-muted">{% trans "Prihod" %}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card mb-3">
+    <h6 class="fw-bold mb-3"><i class="fas fa-link me-2"></i>{% trans "Webshop link" %}</h6>
+    <div class="input-group">
+      <input type="text" class="form-control font-monospace" readonly
+             value="https://limit-connect.com/webshop/{{ company.booking_slug }}/" id="webshopUrl">
+      <button class="btn btn-gold" onclick="navigator.clipboard.writeText(document.getElementById('webshopUrl').value)">
+        <i class="fas fa-copy"></i>
+      </button>
+      <a href="/webshop/{{ company.booking_slug }}/" target="_blank" class="btn btn-outline-secondary">
+        <i class="fas fa-external-link-alt"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="stat-card mb-3">
+    <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2"></i>{% trans "Upravljanje" %}</h6>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/webshop/products/" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-box me-1"></i>{% trans "Proizvodi" %}
+      </a>
+      <a href="/webshop/orders/" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-shopping-bag me-1"></i>{% trans "Narudžbe" %}
+      </a>
+      <a href="/webshop/categories/" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-tags me-1"></i>{% trans "Kategorije" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <h6 class="fw-bold mb-3"><i class="fas fa-truck me-2"></i>{% trans "Dostava" %}</h6>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="tab" value="webshop">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{% trans "Metode dostave" %}</label>
+          <div class="form-check"><input class="form-check-input" type="checkbox" checked disabled><label class="form-check-label">{% trans "Osobno preuzimanje" %}</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" name="delivery_dpd"><label class="form-check-label">DPD</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" name="delivery_hp"><label class="form-check-label">{% trans "Hrvatska Pošta" %}</label></div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{% trans "Minimalna narudžba" %}</label>
+          <div class="input-group">
+            <input type="number" name="min_order" class="form-control" value="{{ settings_data.min_order|default:'0' }}" step="0.01">
+            <span class="input-group-text">€</span>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-gold mt-3"><i class="fas fa-save me-1"></i>{% trans "Spremi" %}</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,233 @@
+{% load i18n %}
+
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate
+      hx-post="{% url 'companies:settings_website' company.id %}"
+      hx-target="#settings-content"
+      hx-swap="innerHTML">
+    {% csrf_token %}
+
+    {# ── Website Status ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-globe me-2 text-gold"></i>{% trans "Website Status" %}</h5>
+                        <p class="text-muted mb-0 small">
+                            {% if settings_data.website_published %}
+                                {% trans "Your website is live and accessible to the public." %}
+                            {% else %}
+                                {% trans "Your website is in draft mode. Only you can see it." %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               id="websitePublished" name="website_published"
+                               {% if settings_data.website_published %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="websitePublished">
+                            {% if settings_data.website_published %}
+                                <span class="badge bg-success">{% trans "Published" %}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "Draft" %}</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Theme Selector ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-palette me-2 text-gold"></i>{% trans "Theme" %}</h5>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <label class="stat-card p-3 text-center d-block position-relative
+                          {% if settings_data.website_theme == 'generic' %}border-gold{% endif %}"
+                   style="cursor:pointer;">
+                <input type="radio" name="website_theme" value="generic"
+                       class="position-absolute opacity-0"
+                       {% if settings_data.website_theme == 'generic' %}checked{% endif %}>
+                <div class="mb-2"><i class="fas fa-layer-group fa-2x text-gold"></i></div>
+                <small class="fw-semibold">{% trans "Generic" %}</small>
+            </label>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <label class="stat-card p-3 text-center d-block position-relative
+                          {% if settings_data.website_theme == 'construction' %}border-gold{% endif %}"
+                   style="cursor:pointer;">
+                <input type="radio" name="website_theme" value="construction"
+                       class="position-absolute opacity-0"
+                       {% if settings_data.website_theme == 'construction' %}checked{% endif %}>
+                <div class="mb-2"><i class="fas fa-hard-hat fa-2x text-gold"></i></div>
+                <small class="fw-semibold">{% trans "Construction" %}</small>
+            </label>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <label class="stat-card p-3 text-center d-block position-relative
+                          {% if settings_data.website_theme == 'gastro' %}border-gold{% endif %}"
+                   style="cursor:pointer;">
+                <input type="radio" name="website_theme" value="gastro"
+                       class="position-absolute opacity-0"
+                       {% if settings_data.website_theme == 'gastro' %}checked{% endif %}>
+                <div class="mb-2"><i class="fas fa-utensils fa-2x text-gold"></i></div>
+                <small class="fw-semibold">{% trans "Gastro" %}</small>
+            </label>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <label class="stat-card p-3 text-center d-block position-relative
+                          {% if settings_data.website_theme == 'retail' %}border-gold{% endif %}"
+                   style="cursor:pointer;">
+                <input type="radio" name="website_theme" value="retail"
+                       class="position-absolute opacity-0"
+                       {% if settings_data.website_theme == 'retail' %}checked{% endif %}>
+                <div class="mb-2"><i class="fas fa-shopping-bag fa-2x text-gold"></i></div>
+                <small class="fw-semibold">{% trans "Retail" %}</small>
+            </label>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <label class="stat-card p-3 text-center d-block position-relative
+                          {% if settings_data.website_theme == 'services' %}border-gold{% endif %}"
+                   style="cursor:pointer;">
+                <input type="radio" name="website_theme" value="services"
+                       class="position-absolute opacity-0"
+                       {% if settings_data.website_theme == 'services' %}checked{% endif %}>
+                <div class="mb-2"><i class="fas fa-concierge-bell fa-2x text-gold"></i></div>
+                <small class="fw-semibold">{% trans "Services" %}</small>
+            </label>
+        </div>
+    </div>
+
+    {# ── Branding ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-paint-brush me-2 text-gold"></i>{% trans "Branding" %}</h5>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="primaryColor" class="form-label">{% trans "Primary Color" %}</label>
+            <div class="input-group">
+                <input type="color" class="form-control form-control-color" id="primaryColor"
+                       name="primary_color"
+                       value="{{ settings_data.primary_color|default:'#C8A45A' }}">
+                <input type="text" class="form-control" id="primaryColorHex"
+                       value="{{ settings_data.primary_color|default:'#C8A45A' }}" readonly>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="logoUpload" class="form-label">{% trans "Logo" %}</label>
+            <input type="file" class="form-control" id="logoUpload" name="logo"
+                   accept="image/png,image/jpeg,image/svg+xml">
+            <div class="form-text">{% trans "PNG, JPG or SVG. Max 2MB." %}</div>
+        </div>
+    </div>
+
+    {# ── Content ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-pen-fancy me-2 text-gold"></i>{% trans "Content" %}</h5>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="heroText" class="form-label">{% trans "Hero Text" %}</label>
+            <input type="text" class="form-control" id="heroText" name="hero_text"
+                   value="{{ settings_data.hero_text|default:'' }}"
+                   placeholder="{% trans 'Welcome to our business' %}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="aboutText" class="form-label">{% trans "About Text" %}</label>
+            <textarea class="form-control" id="aboutText" name="about_text" rows="4"
+                      placeholder="{% trans 'Tell visitors about your company...' %}">{{ settings_data.about_text|default:'' }}</textarea>
+        </div>
+    </div>
+
+    {# ── Social Links ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-share-alt me-2 text-gold"></i>{% trans "Social Links" %}</h5>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="socialFb" class="form-label"><i class="fab fa-facebook me-1"></i>Facebook</label>
+            <input type="url" class="form-control" id="socialFb" name="social_facebook"
+                   value="{{ settings_data.social_facebook|default:'' }}"
+                   placeholder="https://facebook.com/...">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="socialIg" class="form-label"><i class="fab fa-instagram me-1"></i>Instagram</label>
+            <input type="url" class="form-control" id="socialIg" name="social_instagram"
+                   value="{{ settings_data.social_instagram|default:'' }}"
+                   placeholder="https://instagram.com/...">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="socialLi" class="form-label"><i class="fab fa-linkedin me-1"></i>LinkedIn</label>
+            <input type="url" class="form-control" id="socialLi" name="social_linkedin"
+                   value="{{ settings_data.social_linkedin|default:'' }}"
+                   placeholder="https://linkedin.com/...">
+        </div>
+    </div>
+
+    {# ── Gallery ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-images me-2 text-gold"></i>{% trans "Gallery" %}</h5>
+            <div class="stat-card p-4 text-center" id="galleryDropZone"
+                 style="border: 2px dashed var(--bs-border-color); min-height: 160px;">
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3 d-block"></i>
+                <p class="text-muted mb-2">{% trans "Drag & drop images here, or click to browse" %}</p>
+                <input type="file" class="form-control mx-auto" id="galleryFiles" name="gallery_images"
+                       multiple accept="image/*" style="max-width: 320px;">
+                <div class="form-text">{% trans "JPG, PNG. Max 5MB each. Up to 20 images." %}</div>
+            </div>
+        </div>
+    </div>
+
+    {# ── SEO ── #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-search me-2 text-gold"></i>{% trans "SEO" %}</h5>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="seoTitle" class="form-label">{% trans "Page Title" %}</label>
+            <input type="text" class="form-control" id="seoTitle" name="seo_title"
+                   value="{{ settings_data.seo_title|default:'' }}" maxlength="70"
+                   placeholder="{% trans 'Your Business Name' %}">
+            <div class="form-text">{% trans "Max 70 characters" %}</div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="seoDesc" class="form-label">{% trans "Meta Description" %}</label>
+            <textarea class="form-control" id="seoDesc" name="seo_description" rows="2"
+                      maxlength="160"
+                      placeholder="{% trans 'Brief description of your business...' %}">{{ settings_data.seo_description|default:'' }}</textarea>
+            <div class="form-text">{% trans "Max 160 characters" %}</div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="seoKeywords" class="form-label">{% trans "Keywords" %}</label>
+            <input type="text" class="form-control" id="seoKeywords" name="seo_keywords"
+                   value="{{ settings_data.seo_keywords|default:'' }}"
+                   placeholder="{% trans 'keyword1, keyword2, keyword3' %}">
+            <div class="form-text">{% trans "Comma-separated" %}</div>
+        </div>
+    </div>
+
+    {# ── Actions ── #}
+    <div class="row">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            {% if company.booking_slug %}
+            <a href="/site/{{ company.booking_slug }}/" target="_blank" class="btn btn-outline-secondary">
+                <i class="fas fa-external-link-alt me-1"></i>{% trans "Preview Website" %}
+            </a>
+            {% else %}
+            <span></span>
+            {% endif %}
+            <button type="submit" class="btn btn-gold">
+                <i class="fas fa-save me-1"></i>{% trans "Save Changes" %}
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+document.getElementById('primaryColor')?.addEventListener('input', function() {
+    document.getElementById('primaryColorHex').value = this.value;
+});
+</script>

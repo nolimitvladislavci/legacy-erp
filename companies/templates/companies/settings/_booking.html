@@ -1,0 +1,349 @@
+{% load i18n %}
+
+{# ── Public Booking Link ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <h5 class="mb-3"><i class="fas fa-link me-2 text-gold"></i>{% trans "Public Booking Link" %}</h5>
+            <div class="input-group mb-2">
+                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                <input type="text" class="form-control" id="bookingUrl" readonly
+                       value="https://limit-connect.com/booking/{{ company.booking_slug }}/">
+                <button class="btn btn-gold" type="button" id="copyBookingUrl"
+                        onclick="navigator.clipboard.writeText(document.getElementById('bookingUrl').value); this.innerHTML='<i class=\'fas fa-check me-1\'></i>{% trans "Copied!" %}'; setTimeout(() => this.innerHTML='<i class=\'fas fa-copy me-1\'></i>{% trans "Copy" %}', 2000);">
+                    <i class="fas fa-copy me-1"></i>{% trans "Copy" %}
+                </button>
+            </div>
+            <p class="text-muted small mb-0">{% trans "Share this link with clients so they can book appointments online." %}</p>
+        </div>
+    </div>
+</div>
+
+{# ── QR Code ── #}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="stat-card p-4 text-center">
+            <h5 class="mb-3"><i class="fas fa-qrcode me-2 text-gold"></i>{% trans "QR Code" %}</h5>
+            <div class="border rounded p-4 mb-3 bg-light" style="min-height: 180px;">
+                <div id="qrPlaceholder" class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-qrcode fa-4x text-muted mb-2"></i>
+                    <small class="text-muted">https://limit-connect.com/booking/{{ company.booking_slug }}/</small>
+                </div>
+            </div>
+            <button class="btn btn-outline-secondary btn-sm"
+                    hx-post="{% url 'companies:settings_generate_qr' company.id %}"
+                    hx-target="#qrPlaceholder">
+                <i class="fas fa-magic me-1"></i>{% trans "Generate QR" %}
+            </button>
+            <button class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-download me-1"></i>{% trans "Download PNG" %}
+            </button>
+        </div>
+    </div>
+
+    {# ── Booking Theme ── #}
+    <div class="col-md-6">
+        <div class="stat-card p-4">
+            <h5 class="mb-3"><i class="fas fa-adjust me-2 text-gold"></i>{% trans "Booking Theme" %}</h5>
+            <div class="d-flex gap-3">
+                <label class="stat-card p-3 text-center flex-fill {% if settings_data.booking_theme == 'standard' %}border-gold{% endif %}"
+                       style="cursor:pointer;">
+                    <input type="radio" name="booking_theme" value="standard" class="d-none"
+                           {% if settings_data.booking_theme == 'standard' or not settings_data.booking_theme %}checked{% endif %}
+                           hx-post="{% url 'companies:settings_booking_theme' company.id %}"
+                           hx-vals='{"booking_theme": "standard"}'
+                           hx-target="#settings-content">
+                    <i class="fas fa-circle-half-stroke fa-2x text-secondary mb-2 d-block"></i>
+                    <small class="fw-semibold">{% trans "Standard" %}</small>
+                </label>
+                <label class="stat-card p-3 text-center flex-fill {% if settings_data.booking_theme == 'light' %}border-gold{% endif %}"
+                       style="cursor:pointer;">
+                    <input type="radio" name="booking_theme" value="light" class="d-none"
+                           {% if settings_data.booking_theme == 'light' %}checked{% endif %}
+                           hx-post="{% url 'companies:settings_booking_theme' company.id %}"
+                           hx-vals='{"booking_theme": "light"}'
+                           hx-target="#settings-content">
+                    <i class="fas fa-sun fa-2x text-warning mb-2 d-block"></i>
+                    <small class="fw-semibold">{% trans "Light" %}</small>
+                </label>
+                <label class="stat-card p-3 text-center flex-fill {% if settings_data.booking_theme == 'dark' %}border-gold{% endif %}"
+                       style="cursor:pointer;">
+                    <input type="radio" name="booking_theme" value="dark" class="d-none"
+                           {% if settings_data.booking_theme == 'dark' %}checked{% endif %}
+                           hx-post="{% url 'companies:settings_booking_theme' company.id %}"
+                           hx-vals='{"booking_theme": "dark"}'
+                           hx-target="#settings-content">
+                    <i class="fas fa-moon fa-2x text-dark mb-2 d-block"></i>
+                    <small class="fw-semibold">{% trans "Dark" %}</small>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Services ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-concierge-bell me-2 text-gold"></i>{% trans "Services" %}</h5>
+                <button class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                    <i class="fas fa-plus me-1"></i>{% trans "Add Service" %}
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Name" %}</th>
+                            <th class="text-center">{% trans "Duration" %}</th>
+                            <th class="text-center">{% trans "Price" %}</th>
+                            <th class="text-center">{% trans "Slot Duration" %}</th>
+                            <th class="text-center">{% trans "Active" %}</th>
+                            <th class="text-end">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in settings_data.services %}
+                        <tr>
+                            <td class="fw-semibold">{{ service.name }}</td>
+                            <td class="text-center">{{ service.duration }} min</td>
+                            <td class="text-center">{{ service.price }} &euro;</td>
+                            <td class="text-center">{{ service.slot_duration }} min</td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           {% if service.is_active %}checked{% endif %}
+                                           hx-post="{% url 'companies:settings_toggle_service' company.id service.id %}"
+                                           hx-target="#settings-content">
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary me-1"
+                                        title="{% trans 'Edit' %}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        title="{% trans 'Delete' %}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                {% trans "No services configured. Add your first service to enable booking." %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Resources ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-users-cog me-2 text-gold"></i>{% trans "Resources" %}</h5>
+                <button class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                    <i class="fas fa-plus me-1"></i>{% trans "Add Resource" %}
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Name" %}</th>
+                            <th class="text-center">{% trans "Type" %}</th>
+                            <th class="text-center">{% trans "Active" %}</th>
+                            <th class="text-end">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resource in settings_data.resources %}
+                        <tr>
+                            <td class="fw-semibold">{{ resource.name }}</td>
+                            <td class="text-center">
+                                {% if resource.type == 'worker' %}
+                                    <span class="badge bg-primary"><i class="fas fa-user me-1"></i>{% trans "Worker" %}</span>
+                                {% elif resource.type == 'room' %}
+                                    <span class="badge bg-info"><i class="fas fa-door-open me-1"></i>{% trans "Room" %}</span>
+                                {% elif resource.type == 'equipment' %}
+                                    <span class="badge bg-secondary"><i class="fas fa-tools me-1"></i>{% trans "Equipment" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           {% if resource.is_active %}checked{% endif %}
+                                           hx-post="{% url 'companies:settings_toggle_resource' company.id resource.id %}"
+                                           hx-target="#settings-content">
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary me-1"
+                                        title="{% trans 'Edit' %}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        title="{% trans 'Delete' %}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                {% trans "No resources configured. Add workers, rooms, or equipment." %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Working Hours ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <h5 class="mb-3"><i class="fas fa-clock me-2 text-gold"></i>{% trans "Working Hours" %}</h5>
+            <form hx-post="{% url 'companies:settings_working_hours' company.id %}"
+                  hx-target="#settings-content" hx-swap="innerHTML">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:120px;">{% trans "Day" %}</th>
+                                <th class="text-center">{% trans "Open" %}</th>
+                                <th class="text-center">{% trans "Start" %}</th>
+                                <th class="text-center">{% trans "End" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in settings_data.working_hours %}
+                            <tr>
+                                <td class="fw-semibold">{{ day.label }}</td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="day_{{ day.key }}_open"
+                                               {% if day.is_open %}checked{% endif %}>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <input type="time" class="form-control form-control-sm d-inline-block"
+                                           name="day_{{ day.key }}_start"
+                                           value="{{ day.start|default:'09:00' }}"
+                                           style="width: 130px;">
+                                </td>
+                                <td class="text-center">
+                                    <input type="time" class="form-control form-control-sm d-inline-block"
+                                           name="day_{{ day.key }}_end"
+                                           value="{{ day.end|default:'17:00' }}"
+                                           style="width: 130px;">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-gold">
+                        <i class="fas fa-save me-1"></i>{% trans "Save Working Hours" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Add Service Modal ── #}
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form hx-post="{% url 'companies:settings_add_service' company.id %}"
+                  hx-target="#settings-content" hx-swap="innerHTML">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2 text-gold"></i>{% trans "Add Service" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="serviceName" class="form-label">{% trans "Service Name" %}</label>
+                        <input type="text" class="form-control" id="serviceName" name="name" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="serviceDuration" class="form-label">{% trans "Duration (min)" %}</label>
+                            <input type="number" class="form-control" id="serviceDuration" name="duration"
+                                   min="5" step="5" value="60" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="servicePrice" class="form-label">{% trans "Price" %} (&euro;)</label>
+                            <input type="number" class="form-control" id="servicePrice" name="price"
+                                   min="0" step="0.01" value="0.00" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="serviceSlot" class="form-label">{% trans "Slot Duration (min)" %}</label>
+                            <input type="number" class="form-control" id="serviceSlot" name="slot_duration"
+                                   min="5" step="5" value="60" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-gold">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add Service" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Add Resource Modal ── #}
+<div class="modal fade" id="addResourceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form hx-post="{% url 'companies:settings_add_resource' company.id %}"
+                  hx-target="#settings-content" hx-swap="innerHTML">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2 text-gold"></i>{% trans "Add Resource" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="resourceName" class="form-label">{% trans "Resource Name" %}</label>
+                        <input type="text" class="form-control" id="resourceName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resourceType" class="form-label">{% trans "Type" %}</label>
+                        <select class="form-select" id="resourceType" name="type" required>
+                            <option value="worker">{% trans "Worker" %}</option>
+                            <option value="room">{% trans "Room" %}</option>
+                            <option value="equipment">{% trans "Equipment" %}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-gold">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add Resource" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

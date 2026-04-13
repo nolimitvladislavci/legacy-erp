@@ -1,0 +1,116 @@
+{% load i18n %}
+<div class="mb-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-file-contract me-2 text-gold"></i>{% trans "Fiskalizacija & Certifikati" %}</h5>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="fiscal">
+    <div class="stat-card mb-4">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{% trans "Fiskalni sustav" %}</label>
+          <select name="fiscal_system" class="form-select">
+            {% for val, lbl in company.FiscalSystem.choices %}
+            <option value="{{ val }}" {% if company.fiscal_system == val %}selected{% endif %}>{{ lbl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{% trans "PDV status" %}</label>
+          <select name="pdv_status" class="form-select">
+            {% for val, lbl in company.PDV_STATUS_CHOICES %}
+            <option value="{{ val }}" {% if company.pdv_status == val %}selected{% endif %}>{{ lbl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">VAT ID</label>
+          <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}" placeholder="HR12345678901">
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" name="is_vat_registered" id="vatFiscal"
+                   {% if company.is_vat_registered %}checked{% endif %}>
+            <label class="form-check-label" for="vatFiscal">{% trans "U sustavu PDV-a" %}</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" name="is_kleinunternehmer" id="kleinU"
+                   {% if company.is_kleinunternehmer %}checked{% endif %}>
+            <label class="form-check-label" for="kleinU">Kleinunternehmer (§19 UStG)</label>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-gold mt-3"><i class="fas fa-save me-1"></i>{% trans "Spremi" %}</button>
+    </div>
+  </form>
+
+  {# Certificates #}
+  <div class="stat-card mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-bold mb-0"><i class="fas fa-certificate me-2"></i>{% trans "Fiskalni certifikati" %}</h6>
+      <button class="btn btn-gold btn-sm" data-bs-toggle="collapse" data-bs-target="#uploadCert">
+        <i class="fas fa-upload me-1"></i>{% trans "Dodaj certifikat" %}
+      </button>
+    </div>
+
+    <div class="collapse mb-3" id="uploadCert">
+      <form method="post" enctype="multipart/form-data" class="border rounded p-3" style="border-color:#333 !important">
+        {% csrf_token %}
+        <input type="hidden" name="tab" value="fiscal">
+        <input type="hidden" name="action" value="upload_cert">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <input type="file" name="cert_file" class="form-control form-control-sm" accept=".p12,.pfx,.pem" required>
+          </div>
+          <div class="col-md-4">
+            <input type="password" name="cert_password" class="form-control form-control-sm" placeholder="{% trans 'Lozinka certifikata' %}">
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-gold btn-sm w-100">{% trans "Učitaj" %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if fiscal_certs %}
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr>
+          <th>{% trans "Certifikat" %}</th>
+          <th>{% trans "Lokacija" %}</th>
+          <th>{% trans "Vrijedi do" %}</th>
+          <th>{% trans "Status" %}</th>
+        </tr></thead>
+        <tbody>
+          {% for cert in fiscal_certs %}
+          <tr>
+            <td class="font-monospace small">{{ cert.serial_number|default:cert.pk|truncatechars:16 }}</td>
+            <td>{{ cert.location.name|default:"—" }}</td>
+            <td>{{ cert.valid_until|date:"d.m.Y" }}</td>
+            <td>
+              {% if cert.is_expired %}
+              <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>{% trans "Istekao" %}</span>
+              {% else %}
+              <span class="badge bg-success"><i class="fas fa-check me-1"></i>{% trans "Aktivan" %}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-4">
+      <i class="fas fa-certificate fa-2x mb-2 d-block" style="opacity:.3"></i>
+      <small>{% trans "Nema učitanih certifikata" %}</small>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="alert border-0" style="background:rgba(59,130,246,.08);border-radius:12px">
+    <i class="fas fa-info-circle me-2" style="color:#3b82f6"></i>
+    <small>{% trans "Fiskalni certifikati su potrebni za elektroničku fiskalizaciju računa. Certifikat izdaje FINA (HR), Bundeszentralamt für Steuern (DE), ili BMF (AT)." %}</small>
+  </div>
+</div>

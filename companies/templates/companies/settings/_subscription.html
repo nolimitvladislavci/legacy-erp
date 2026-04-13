@@ -1,0 +1,134 @@
+{% load i18n %}
+<div class="mb-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-crown me-2 text-gold"></i>{% trans "Pretplata & Plan" %}</h5>
+
+  {# Current Plan Card #}
+  <div class="stat-card mb-4" style="border-left:3px solid var(--gold)">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <div class="text-muted small mb-1">{% trans "Trenutni plan" %}</div>
+        <h4 class="fw-bold text-gold mb-1">{{ subscription.pricing_plan.name|default:subscription.plan|default:"—" }}</h4>
+        {% if subscription %}
+        <span class="badge bg-success">{% trans "Aktivan" %}</span>
+        {% if subscription.trial_ends %}
+        <span class="badge bg-warning text-dark ms-1">Trial do {{ subscription.trial_ends }}</span>
+        {% endif %}
+        {% else %}
+        <span class="badge bg-secondary">{% trans "Bez plana" %}</span>
+        {% endif %}
+      </div>
+      <div class="text-end">
+        {% if subscription %}
+        <div class="h3 fw-bold text-gold mb-0">{{ subscription.monthly_fee }} €</div>
+        <small class="text-muted">/{% trans "mjesečno" %}</small>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if subscription %}
+    <hr style="border-color: var(--border-color)">
+    <div class="row g-3 text-center">
+      <div class="col-4">
+        <small class="text-muted d-block">{% trans "Od" %}</small>
+        <strong>{{ subscription.valid_from }}</strong>
+      </div>
+      <div class="col-4">
+        <small class="text-muted d-block">{% trans "Do" %}</small>
+        <strong>{{ subscription.valid_until|default:"∞" }}</strong>
+      </div>
+      <div class="col-4">
+        <small class="text-muted d-block">{% trans "Ciklus" %}</small>
+        <strong>{{ subscription.get_billing_cycle_display|default:"Monthly" }}</strong>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# Usage Meters #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card py-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-muted"><i class="fas fa-users me-1"></i>{% trans "Korisnici" %}</small>
+          <small class="fw-bold">{{ usage.users }} / {{ plan_limits.max_users|default:"∞" }}</small>
+        </div>
+        <div class="progress" style="height:6px;background:rgba(255,255,255,.05)">
+          <div class="progress-bar bg-gold" style="width:{{ usage.users_pct|default:30 }}%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card py-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-muted"><i class="fas fa-file-invoice me-1"></i>{% trans "Fakture" %}</small>
+          <small class="fw-bold">{{ usage.invoices }} / {{ plan_limits.max_invoices|default:"∞" }}</small>
+        </div>
+        <div class="progress" style="height:6px;background:rgba(255,255,255,.05)">
+          <div class="progress-bar" style="width:{{ usage.invoices_pct|default:15 }}%;background:#3b82f6"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card py-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-muted"><i class="fas fa-hdd me-1"></i>{% trans "Pohrana" %}</small>
+          <small class="fw-bold">{{ usage.storage_mb|default:"—" }} MB / {{ plan_limits.storage_mb|default:"500" }} MB</small>
+        </div>
+        <div class="progress" style="height:6px;background:rgba(255,255,255,.05)">
+          <div class="progress-bar" style="width:{{ usage.storage_pct|default:10 }}%;background:#22c55e"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Plan Comparison #}
+  <h6 class="fw-bold mb-3"><i class="fas fa-layer-group me-2"></i>{% trans "Usporedi planove" %}</h6>
+  <div class="row g-3 mb-4">
+    {% for plan in all_plans %}
+    <div class="col-md-3">
+      <div class="stat-card text-center h-100 {% if plan.slug == current_plan_slug %}border border-gold{% endif %}"
+           style="{% if plan.is_popular %}border:2px solid var(--gold){% endif %}">
+        {% if plan.is_popular %}
+        <span class="badge bg-gold text-dark mb-2">{% trans "Najpopularniji" %}</span>
+        {% endif %}
+        <h5 class="fw-bold">{{ plan.name }}</h5>
+        <div class="h3 fw-bold text-gold">{{ plan.price_monthly }} €</div>
+        <small class="text-muted d-block mb-3">/{% trans "mjesečno" %}</small>
+
+        <ul class="list-unstyled text-start small">
+          <li><i class="fas fa-check text-success me-1"></i>{{ plan.max_users }} {% trans "korisnika" %}</li>
+          <li><i class="fas fa-check text-success me-1"></i>{{ plan.max_locations }} {% trans "lokacija" %}</li>
+          <li><i class="fas fa-check text-success me-1"></i>{{ plan.max_invoices_per_month }} {% trans "faktura/mj" %}</li>
+          {% if plan.has_fiscalization %}<li><i class="fas fa-check text-success me-1"></i>{% trans "Fiskalizacija" %}</li>{% endif %}
+          {% if plan.has_whatsapp %}<li><i class="fas fa-check text-success me-1"></i>WhatsApp</li>{% endif %}
+          {% if plan.has_api_access %}<li><i class="fas fa-check text-success me-1"></i>API</li>{% endif %}
+          {% if plan.has_premium_support %}<li><i class="fas fa-check text-success me-1"></i>{% trans "Premium podrška" %}</li>{% endif %}
+        </ul>
+
+        {% if plan.slug == current_plan_slug %}
+        <button class="btn btn-outline-secondary btn-sm w-100 mt-2" disabled>{% trans "Trenutni plan" %}</button>
+        {% elif plan.price_monthly > current_plan_price %}
+        <a href="/registration/upgrade/{{ plan.slug }}/" class="btn btn-gold btn-sm w-100 mt-2">
+          <i class="fas fa-arrow-up me-1"></i>{% trans "Nadogradi" %}
+        </a>
+        {% else %}
+        <button class="btn btn-outline-secondary btn-sm w-100 mt-2" disabled>{% trans "Niži plan" %}</button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Promo Code #}
+  <div class="stat-card">
+    <h6 class="fw-bold mb-3"><i class="fas fa-tag me-2"></i>{% trans "Promo kod" %}</h6>
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <input type="hidden" name="tab" value="subscription">
+      <input type="text" name="promo_code" class="form-control form-control-sm" placeholder="{% trans 'Unesite promo kod' %}" style="max-width:250px">
+      <button type="submit" name="action" value="apply_promo" class="btn btn-gold btn-sm">
+        <i class="fas fa-check me-1"></i>{% trans "Primijeni" %}
+      </button>
+    </form>
+  </div>
+</div>

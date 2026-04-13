@@ -1,0 +1,404 @@
+{% load i18n %}
+active{% endif %}"
+       href="?tab=employees">
+      <i class="fas fa-users me-1"></i>Zaposlenici
+      <span class="badge bg-secondary ms-1">{{ employees.count }}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'branches' %}active{% endif %}"
+       href="?tab=branches">
+      <i class="fas fa-store me-1"></i>Podružnice
+      <span class="badge bg-secondary ms-1">{{ branches.count }}</span>
+    </a>
+  </li>
+</ul>
+
+<!-- ═══ TAB: INFO ═══ -->
+{% if tab == 'info' or not tab %}
+<div class="stat-card p-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-building me-2 text-gold"></i>Podaci tvrtke</h5>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="info">
+    <div class="row g-3">
+
+      <div class="col-md-8">
+        <label class="form-label fw-semibold">Naziv tvrtke *</label>
+        <input type="text" name="name" class="form-control" value="{{ company.name }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">OIB / Steuer-Nr *</label>
+        <input type="text" name="oib" class="form-control" value="{{ company.oib }}" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Adresa</label>
+        <input type="text" name="address" class="form-control" value="{{ company.address }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Grad</label>
+        <input type="text" name="city" class="form-control" value="{{ company.city }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Poštanski broj</label>
+        <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Država</label>
+        <select name="country" class="form-select">
+          {% for val, lbl in country_choices %}
+          <option value="{{ val }}" {% if company.country == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Tip subjekta</label>
+        <select name="business_type" class="form-select">
+          {% for val, lbl in company.BusinessType.choices %}
+          <option value="{{ val }}" {% if company.business_type == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Valuta</label>
+        <select name="currency" class="form-select">
+          {% for val, lbl in company.Currency.choices %}
+          <option value="{{ val }}" {% if company.currency == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">IBAN</label>
+        <input type="text" name="iban" class="form-control font-monospace" value="{{ company.iban }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">PDV ID / VAT ID</label>
+        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}"
+               placeholder="npr. HR12345678901">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Porezni broj</label>
+        <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Fiskalni sustav</label>
+        <select name="fiscal_system" class="form-select">
+          {% for val, lbl in company.FiscalSystem.choices %}
+          <option value="{{ val }}" {% if company.fiscal_system == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">PDV status</label>
+        <select name="pdv_status" class="form-select">
+          {% for val, lbl in company.PDV_STATUS_CHOICES %}
+          <option value="{{ val }}" {% if company.pdv_status == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_vat_registered" id="vatReg"
+                 {% if company.is_vat_registered %}checked{% endif %}>
+          <label class="form-check-label" for="vatReg">U sustavu PDV-a</label>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Logo</label>
+        {% if company.logo %}
+        <div class="mb-2">
+          <img src="{{ company.logo.url }}" alt="Logo" style="max-height:60px;max-width:200px;" class="border rounded">
+        </div>
+        {% endif %}
+        <input type="file" name="logo" class="form-control" accept="image/*">
+      </div>
+
+    </div>
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi podatke
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<!-- ═══ TAB: SETTINGS ═══ -->
+{% if tab == 'settings' %}
+<div class="stat-card p-4">
+  <h5 class="fw-bold mb-4"><i class="fas fa-cog me-2 text-gold"></i>Aplikacijske postavke</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="settings">
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Zadana PDV stopa (%)</label>
+        <input type="number" name="default_tax_pct" class="form-control"
+               value="{{ settings_data.default_tax_pct|default:'25' }}" min="0" max="100" step="0.01">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Format broja računa</label>
+        <input type="text" name="invoice_number_format" class="form-control"
+               value="{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}"
+               placeholder="{YYYY}-{NUM}">
+        <small class="text-muted">Tokeni: {YYYY}, {YY}, {MM}, {NUM}</small>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Reply-To e-mail</label>
+        <input type="email" name="email_reply_to" class="form-control"
+               value="{{ settings_data.email_reply_to|default:'' }}"
+               placeholder="fakture@tvrtka.hr">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Radno vrijeme</label>
+        <input type="text" name="working_hours" class="form-control"
+               value="{{ settings_data.working_hours|default:'08:00-16:00' }}"
+               placeholder="08:00-16:00">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Jezik sučelja</label>
+        <select name="ui_language" class="form-select">
+          <option value="hr" {% if settings_data.ui_language == 'hr' or not settings_data.ui_language %}selected{% endif %}>Hrvatski</option>
+          <option value="de" {% if settings_data.ui_language == 'de' %}selected{% endif %}>Deutsch</option>
+          <option value="en" {% if settings_data.ui_language == 'en' %}selected{% endif %}>English</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="mt-4">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-save me-1"></i>Spremi postavke
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<!-- ═══ TAB: EMPLOYEES ═══ -->
+{% if tab == 'employees' %}
+<div class="stat-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0"><i class="fas fa-users me-2 text-gold"></i>Zaposlenici</h5>
+    <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+      <i class="fas fa-user-plus me-1"></i>Dodaj zaposlenika
+    </button>
+  </div>
+
+  <!-- Alert za poruke -->
+  <div id="empAlert" class="alert d-none mb-3"></div>
+
+  {% if employees %}
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Ime i prezime</th>
+          <th>E-mail</th>
+          <th>Uloga</th>
+          <th>Telefon</th>
+          <th>Status</th>
+          <th class="text-end">Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ep in employees %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="rounded-circle bg-gold d-flex align-items-center justify-content-center"
+                   style="width:36px;height:36px;min-width:36px;background:var(--gold, #c9a84c)!important;">
+                <span class="fw-bold text-dark" style="font-size:.9rem;">
+                  {{ ep.user.first_name|first|upper }}{{ ep.user.last_name|first|upper }}
+                </span>
+              </div>
+              <div>
+                <div class="fw-semibold">{{ ep.user.get_full_name|default:ep.user.username }}</div>
+                {% if ep.must_change_password %}
+                <small class="text-warning"><i class="fas fa-key me-1"></i>Mora promijeniti lozinku</small>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="text-muted">{{ ep.user.email }}</td>
+          <td>
+            <span class="badge
+              {% if ep.role == 'company_admin' %}bg-danger
+              {% elif ep.role == 'project_manager' %}bg-warning text-dark
+              {% elif ep.role == 'worker' %}bg-primary
+              {% else %}bg-secondary{% endif %}">
+              {{ ep.get_role_display }}
+            </span>
+          </td>
+          <td class="text-muted">{{ ep.phone|default:"—" }}</td>
+          <td>
+            {% if ep.user.is_active %}
+            <span class="badge bg-success">Aktivan</span>
+            {% else %}
+            <span class="badge bg-secondary">Neaktivan</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-light me-1"
+                    onclick="editEmployee({{ ep.pk }}, '{{ ep.user.first_name }}', '{{ ep.user.last_name }}', '{{ ep.user.email }}', '{{ ep.role }}', '{{ ep.phone }}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-warning me-1"
+                    onclick="changePassword({{ ep.pk }}, '{{ ep.user.get_full_name|default:ep.user.username }}')">
+              <i class="fas fa-key"></i>
+            </button>
+            <form method="POST" action="{% url 'companies:employee_toggle_active' ep.pk %}"
+                  class="d-inline" onsubmit="return confirm('Promijeni status zaposlenika?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm {% if ep.user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                <i class="fas {% if ep.user.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-users fa-3x mb-3"></i>
+    <p>Nema zaposlenika. Dodajte prvog zaposlenika.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal: Dodaj zaposlenika -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold">
+          <i class="fas fa-user-plus me-2 text-gold"></i>Dodaj zaposlenika
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">E-mail *</label>
+          <input type="email" id="newEmpEmail" class="form-control" placeholder="zaposlenik@tvrtka.hr">
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col">
+            <label class="form-label">Ime</label>
+            <input type="text" id="newEmpFirst" class="form-control">
+          </div>
+          <div class="col">
+            <label class="form-label">Prezime</label>
+            <input type="text" id="newEmpLast" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Uloga</label>
+          <select id="newEmpRole" class="form-select">
+            {% for val, lbl in role_choices %}
+            {% if val != 'superadmin' %}
+            <option value="{{ val }}" {% if val == 'worker' %}selected{% endif %}>{{ lbl }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Telefon</label>
+          <input type="tel" id="newEmpPhone" class="form-control" placeholder="+385 91 ...">
+        </div>
+        <div id="addEmpError" class="alert alert-danger d-none"></div>
+        <div id="addEmpSuccess" class="alert alert-success d-none"></div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-gold" onclick="submitAddEmployee()">
+          <i class="fas fa-save me-1"></i>Spremi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Uredi zaposlenika -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-edit me-2 text-gold"></i>Uredi zaposlenika</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editEmpPk">
+        <div class="row g-2 mb-3">
+          <div class="col">
+            <label class="form-label">Ime</label>
+            <input type="text" id="editEmpFirst" class="form-control">
+          </div>
+          <div class="col">
+            <label class="form-label">Prezime</label>
+            <input type="text" id="editEmpLast" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="editEmpEmail" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Uloga</label>
+          <select id="editEmpRole" class="form-select">
+            {% for val, lbl in role_choices %}
+            {% if val != 'superadmin' %}
+            <option value="{{ val }}">{{ lbl }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Telefon</label>
+          <input type="tel" id="editEmpPhone" class="form-control">
+        </div>
+        <div id="editEmpError" class="alert alert-danger d-none"></div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-gold" onclick="submitEditEmployee()">
+          <i class="fas fa-save me-1"></i>Spremi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Promijeni lozinku -->
+<div class="modal fade" id="changePwModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold"><i class="fas fa-key me-2 text-gold"></i>Promijeni lozinku</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pwEmpPk">
+        <p class="text-muted mb-3">Zaposljenik: <strong id="pwEmpName"></strong></p>
+        <div class="mb-3">
+          <label class="form-label">Nova lozinka (min. 8 znakova)</label>
+          <input type="password" id="newPwInput" class="form-control" minlength="8">
+        </div>
+        <div id="pwError" class="alert alert-danger d-none"></div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-warning" onclick="submitChangePassword()">
+          <i class="fas fa-key me-1"></i>Promijeni
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

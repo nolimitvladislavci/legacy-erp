@@ -1,0 +1,113 @@
+{% load i18n %}
+<nav class="command-center-nav" id="ccNav">
+  <div class="cc-nav-header d-none d-lg-block mb-3 px-3">
+    <div class="d-flex align-items-center gap-2">
+      {% if company.logo %}
+      <img src="{{ company.logo.url }}" alt="" class="rounded" style="width:32px;height:32px;object-fit:cover">
+      {% else %}
+      <div class="rounded d-flex align-items-center justify-content-center" style="width:32px;height:32px;background:var(--gold);color:#000;font-weight:700">
+        {{ company.name|first }}
+      </div>
+      {% endif %}
+      <div>
+        <div class="fw-bold text-truncate" style="max-width:140px;font-size:.85rem">{{ company.name }}</div>
+        <small class="text-muted" style="font-size:.7rem">{{ company.oib }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-nav-items">
+    <a href="?tab=profile" class="cc-nav-link {% if tab == 'profile' or tab == 'info' or not tab %}active{% endif %}"
+       hx-get="/companies/settings/tab/profile/" hx-target="#cc-content" hx-push-url="?tab=profile" hx-swap="innerHTML">
+      <i class="fas fa-building me-2"></i><span>{% trans "Profil tvrtke" %}</span>
+    </a>
+    <a href="?tab=config" class="cc-nav-link {% if tab == 'config' or tab == 'settings' %}active{% endif %}"
+       hx-get="/companies/settings/tab/config/" hx-target="#cc-content" hx-push-url="?tab=config" hx-swap="innerHTML">
+      <i class="fas fa-cog me-2"></i><span>{% trans "Postavke" %}</span>
+    </a>
+    <a href="?tab=employees" class="cc-nav-link {% if tab == 'employees' %}active{% endif %}"
+       hx-get="/companies/settings/tab/employees/" hx-target="#cc-content" hx-push-url="?tab=employees" hx-swap="innerHTML">
+      <i class="fas fa-users me-2"></i><span>{% trans "Zaposlenici" %}</span>
+    </a>
+    <a href="?tab=branches" class="cc-nav-link {% if tab == 'branches' %}active{% endif %}"
+       hx-get="/companies/settings/tab/branches/" hx-target="#cc-content" hx-push-url="?tab=branches" hx-swap="innerHTML">
+      <i class="fas fa-map-marker-alt me-2"></i><span>{% trans "Podružnice" %}</span>
+    </a>
+
+    <div class="cc-nav-divider"></div>
+
+    <a href="?tab=fiscal" class="cc-nav-link {% if tab == 'fiscal' %}active{% endif %}"
+       hx-get="/companies/settings/tab/fiscal/" hx-target="#cc-content" hx-push-url="?tab=fiscal" hx-swap="innerHTML">
+      <i class="fas fa-file-contract me-2"></i><span>{% trans "Fiskalizacija" %}</span>
+    </a>
+    <a href="?tab=subscription" class="cc-nav-link {% if tab == 'subscription' %}active{% endif %}"
+       hx-get="/companies/settings/tab/subscription/" hx-target="#cc-content" hx-push-url="?tab=subscription" hx-swap="innerHTML">
+      <i class="fas fa-crown me-2"></i><span>{% trans "Pretplata" %}</span>
+    </a>
+    <a href="?tab=modules" class="cc-nav-link {% if tab == 'modules' %}active{% endif %}"
+       hx-get="/companies/settings/tab/modules/" hx-target="#cc-content" hx-push-url="?tab=modules" hx-swap="innerHTML">
+      <i class="fas fa-th-large me-2"></i><span>{% trans "Moduli" %}</span>
+      <span class="badge bg-gold text-dark ms-auto" style="font-size:.6rem">{{ module_count|default:"72" }}</span>
+    </a>
+
+    <div class="cc-nav-divider"></div>
+
+    <a href="?tab=website" class="cc-nav-link {% if tab == 'website' %}active{% endif %}"
+       hx-get="/companies/settings/tab/website/" hx-target="#cc-content" hx-push-url="?tab=website" hx-swap="innerHTML">
+      <i class="fas fa-globe me-2"></i><span>{% trans "Website" %}</span>
+    </a>
+    <a href="?tab=webshop" class="cc-nav-link {% if tab == 'webshop' %}active{% endif %}"
+       hx-get="/companies/settings/tab/webshop/" hx-target="#cc-content" hx-push-url="?tab=webshop" hx-swap="innerHTML">
+      <i class="fas fa-shopping-cart me-2"></i><span>{% trans "Webshop" %}</span>
+    </a>
+    <a href="?tab=booking" class="cc-nav-link {% if tab == 'booking' %}active{% endif %}"
+       hx-get="/companies/settings/tab/booking/" hx-target="#cc-content" hx-push-url="?tab=booking" hx-swap="innerHTML">
+      <i class="fas fa-calendar-check me-2"></i><span>{% trans "Termini" %}</span>
+    </a>
+
+    <div class="cc-nav-divider"></div>
+
+    <a href="?tab=integrations" class="cc-nav-link {% if tab == 'integrations' %}active{% endif %}"
+       hx-get="/companies/settings/tab/integrations/" hx-target="#cc-content" hx-push-url="?tab=integrations" hx-swap="innerHTML">
+      <i class="fas fa-plug me-2"></i><span>{% trans "Integracije" %}</span>
+    </a>
+    <a href="?tab=ai" class="cc-nav-link {% if tab == 'ai' %}active{% endif %}"
+       hx-get="/companies/settings/tab/ai/" hx-target="#cc-content" hx-push-url="?tab=ai" hx-swap="innerHTML">
+      <i class="fas fa-robot me-2"></i><span>{% trans "AI" %}</span>
+      <span class="ms-auto" style="font-size:.7rem">✨</span>
+    </a>
+  </div>
+</nav>
+
+<style>
+.command-center-nav {
+  background: var(--card-bg, #1a1f2e);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(255,255,255,.08));
+  padding: .75rem 0;
+  position: sticky;
+  top: 80px;
+}
+.cc-nav-header { border-bottom: 1px solid var(--border-color, rgba(255,255,255,.08)); padding-bottom: .75rem; }
+.cc-nav-items { display: flex; flex-direction: column; gap: 2px; padding: 0 .5rem; }
+.cc-nav-divider { height: 1px; background: var(--border-color, rgba(255,255,255,.06)); margin: .4rem .75rem; }
+.cc-nav-link {
+  display: flex; align-items: center; padding: .5rem .75rem; border-radius: 8px;
+  color: var(--text-secondary, #94a3b8); text-decoration: none; font-size: .85rem;
+  transition: all .15s; white-space: nowrap;
+}
+.cc-nav-link:hover { background: rgba(201,168,76,.08); color: var(--gold, #c9a84c); }
+.cc-nav-link.active { background: rgba(201,168,76,.12); color: var(--gold, #c9a84c); font-weight: 600; }
+.cc-nav-link i { width: 20px; text-align: center; }
+.bg-gold { background: var(--gold, #c9a84c) !important; }
+
+@media (max-width: 991px) {
+  .command-center-nav { border-radius: 8px; padding: .5rem; }
+  .cc-nav-items { flex-direction: row; overflow-x: auto; gap: 4px; scrollbar-width: none; }
+  .cc-nav-items::-webkit-scrollbar { display: none; }
+  .cc-nav-link { padding: .4rem .6rem; font-size: .75rem; }
+  .cc-nav-link span:not(.badge) { display: none; }
+  .cc-nav-link i { margin: 0 !important; width: auto; font-size: 1rem; }
+  .cc-nav-divider { display: none; }
+}
+</style>

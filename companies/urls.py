@@ -70,3 +70,10 @@ urlpatterns += [
     # T&C Consent
     path('tc-consent/', views.tc_consent_view, name='tc_consent'),
 ]
+
+# ── Command Center HTMX Tab Endpoints ────────────────────────────────────
+from . import views_settings
+urlpatterns += [
+    path('settings/tab/<str:tab_name>/', views_settings.settings_tab, name='settings_tab'),
+    path('settings/toggle-module/', views_settings.toggle_module, name='toggle_module'),
+]

@@ -1,0 +1,145 @@
+{% load i18n %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fas fa-th-large me-2 text-gold"></i>{% trans "Moduli" %}</h5>
+    <div class="d-flex gap-2 align-items-center">
+      <input type="text" class="form-control form-control-sm" id="moduleSearch"
+             placeholder="{% trans 'Pretraži module...' %}" style="width:200px"
+             oninput="filterModules(this.value)">
+      <select class="form-select form-select-sm" id="moduleCategoryFilter" style="width:160px"
+              onchange="filterByCategory(this.value)">
+        <option value="">{% trans "Sve kategorije" %}</option>
+        {% for cat_id, cat in categories.items %}
+        <option value="{{ cat_id }}">{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  {# Usage summary #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card text-center py-2">
+        <div class="h4 fw-bold text-gold mb-0">{{ enabled_count|default:"0" }}</div>
+        <small class="text-muted">{% trans "Aktivni moduli" %}</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card text-center py-2">
+        <div class="h4 fw-bold mb-0" style="color:#22c55e">{{ free_count|default:"0" }}</div>
+        <small class="text-muted">{% trans "Besplatni" %}</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card text-center py-2">
+        <div class="h4 fw-bold mb-0" style="color:#3b82f6">{{ available_count|default:"0" }}</div>
+        <small class="text-muted">{% trans "Dostupni" %}</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card text-center py-2">
+        <div class="h4 fw-bold mb-0" style="color:#a855f7">{{ locked_count|default:"0" }}</div>
+        <small class="text-muted">{% trans "Premium" %}</small>
+      </div>
+    </div>
+  </div>
+
+  {# AI Recommendations #}
+  {% if ai_recommended %}
+  <div class="alert border-0 mb-4" style="background:rgba(201,168,76,.08);border-radius:12px">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span style="font-size:1.2rem">✨</span>
+      <strong>{% trans "AI preporuke za vašu djelatnost" %}</strong>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% for mod in ai_recommended %}
+      <span class="badge" style="background:rgba(201,168,76,.2);color:var(--gold)">
+        <i class="fas {{ mod.icon }} me-1"></i>{{ mod.name }}
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Module Grid #}
+  <div class="row g-3" id="moduleGrid">
+    {% for mod in all_modules %}
+    <div class="col-md-6 col-lg-4 module-card" data-category="{{ mod.category }}" data-name="{{ mod.name|lower }}">
+      <div class="stat-card h-100 position-relative {% if mod.is_locked %}module-locked{% endif %}"
+           style="{% if mod.is_enabled %}border-left: 3px solid var(--gold){% endif %}">
+
+        {# Tier badge #}
+        <div class="position-absolute" style="top:.75rem;right:.75rem">
+          <span class="badge" style="background:{{ mod.tier_color }};font-size:.6rem">
+            {{ mod.tier_name }}
+          </span>
+        </div>
+
+        {# Module info #}
+        <div class="d-flex align-items-start gap-3 mb-2">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:40px;height:40px;background:rgba(201,168,76,.1)">
+            <i class="fas {{ mod.icon }}" style="color:{{ mod.tier_color }};font-size:1.1rem"></i>
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <h6 class="fw-bold mb-0 text-truncate" style="font-size:.9rem">{{ mod.name }}</h6>
+            <small class="text-muted" style="font-size:.75rem">{{ mod.description|default:mod.category_name }}</small>
+          </div>
+        </div>
+
+        {# Toggle / Lock #}
+        {% if mod.is_locked %}
+        <div class="module-lock-overlay">
+          <i class="fas fa-lock me-1"></i>
+          <a href="?tab=subscription" class="text-gold text-decoration-none fw-bold" style="font-size:.8rem">
+            {% trans "Nadogradi na" %} {{ mod.tier_name }}
+          </a>
+        </div>
+        {% elif mod.always_on %}
+        <div class="text-end">
+          <span class="badge bg-success" style="font-size:.65rem"><i class="fas fa-check me-1"></i>{% trans "Uvijek aktivan" %}</span>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <small class="text-muted">{{ mod.url_prefix }}</small>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch"
+                   id="mod_{{ mod.id }}" {% if mod.is_enabled %}checked{% endif %}
+                   hx-post="/companies/settings/toggle-module/"
+                   hx-vals='{"module_id": "{{ mod.id }}"}'
+                   hx-target="#moduleGrid"
+                   hx-swap="none"
+                   hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+.module-locked .stat-card-inner { filter: blur(1px); opacity: .7; }
+.module-lock-overlay {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .5rem; border-radius: 8px; margin-top: .5rem;
+  background: rgba(201,168,76,.05); color: var(--text-secondary);
+  font-size: .8rem;
+}
+</style>
+
+<script>
+function filterModules(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.module-card').forEach(el => {
+    el.style.display = el.dataset.name.includes(q) ? '' : 'none';
+  });
+}
+function filterByCategory(cat) {
+  document.querySelectorAll('.module-card').forEach(el => {
+    el.style.display = (!cat || el.dataset.category === cat) ? '' : 'none';
+  });
+}
+</script>

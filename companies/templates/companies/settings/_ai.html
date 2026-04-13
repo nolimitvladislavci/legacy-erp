@@ -1,0 +1,257 @@
+{% load i18n %}
+
+{# ── AI Status ── #}
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4 text-center">
+            <div class="mb-2">
+                {% if settings_data.ai_active %}
+                    <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i>{% trans "Active" %}</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6"><i class="fas fa-pause-circle me-1"></i>{% trans "Inactive" %}</span>
+                {% endif %}
+            </div>
+            <h5 class="mb-1">{% trans "AI Status" %}</h5>
+            <p class="text-muted small mb-0">{% trans "Model" %}: Claude (Anthropic)</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4 text-center">
+            <div class="mb-2">
+                <i class="fas fa-coins fa-2x text-gold"></i>
+            </div>
+            <h5 class="mb-1">{{ settings_data.ai_tokens_used|default:"0" }}</h5>
+            <p class="text-muted small mb-0">{% trans "Tokens Used This Month" %}</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4 text-center">
+            <div class="mb-2">
+                <i class="fas fa-chart-line fa-2x text-gold"></i>
+            </div>
+            <h5 class="mb-1">{{ settings_data.ai_requests_count|default:"0" }}</h5>
+            <p class="text-muted small mb-0">{% trans "AI Requests This Month" %}</p>
+        </div>
+    </div>
+</div>
+
+{# ── AI Patrol ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-1"><i class="fas fa-shield-alt me-2 text-gold"></i>{% trans "AI Patrol" %}</h5>
+                    <p class="text-muted small mb-0">
+                        {% trans "Last run" %}:
+                        {% if settings_data.ai_patrol_last_run %}
+                            {{ settings_data.ai_patrol_last_run }}
+                        {% else %}
+                            <span class="text-muted">{% trans "Never" %}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-info fs-6">
+                        <i class="fas fa-flag me-1"></i>{{ settings_data.ai_patrol_findings|default:"0" }} {% trans "Findings" %}
+                    </span>
+                    <button class="btn btn-gold btn-sm"
+                            hx-post="{% url 'companies:settings_ai_patrol_run' company.id %}"
+                            hx-target="#settings-content"
+                            hx-indicator="#patrolSpinner">
+                        <span id="patrolSpinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>
+                        <i class="fas fa-play me-1"></i>{% trans "Run Now" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Trojstvo Status ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="mb-3"><i class="fas fa-brain me-2 text-gold"></i>{% trans "AI Trojstvo" %}</h5>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-1 text-warning"></i>Haiku
+                </h6>
+                {% if settings_data.trojstvo_haiku_active %}
+                    <span class="badge bg-success">{% trans "Online" %}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{% trans "Offline" %}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted small mb-2">{% trans "Fast scanner for real-time data checks and validations." %}</p>
+            <div class="d-flex justify-content-between small">
+                <span class="text-muted">{% trans "Tasks today" %}</span>
+                <span class="fw-semibold">{{ settings_data.trojstvo_haiku_tasks|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-microscope me-1 text-info"></i>Sonnet
+                </h6>
+                {% if settings_data.trojstvo_sonnet_active %}
+                    <span class="badge bg-success">{% trans "Online" %}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{% trans "Offline" %}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted small mb-2">{% trans "Deep analyzer for document processing and pattern detection." %}</p>
+            <div class="d-flex justify-content-between small">
+                <span class="text-muted">{% trans "Tasks today" %}</span>
+                <span class="fw-semibold">{{ settings_data.trojstvo_sonnet_tasks|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-crown me-1 text-gold"></i>Opus
+                </h6>
+                {% if settings_data.trojstvo_opus_active %}
+                    <span class="badge bg-success">{% trans "Online" %}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{% trans "Offline" %}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted small mb-2">{% trans "Strategic advisor for complex decisions and business optimization." %}</p>
+            <div class="d-flex justify-content-between small">
+                <span class="text-muted">{% trans "Tasks today" %}</span>
+                <span class="fw-semibold">{{ settings_data.trojstvo_opus_tasks|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Knowledge Base ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1"><i class="fas fa-book me-2 text-gold"></i>{% trans "Knowledge Base" %}</h5>
+                    <p class="text-muted small mb-0">
+                        {{ settings_data.kb_article_count|default:"0" }} {% trans "articles indexed" %}
+                    </p>
+                </div>
+                <a href="{% url 'companies:knowledge_base' company.id %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-cog me-1"></i>{% trans "Manage Articles" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── AI Suggested Improvements ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <h5 class="mb-3"><i class="fas fa-lightbulb me-2 text-gold"></i>{% trans "AI-Suggested Improvements" %}</h5>
+            <div class="list-group list-group-flush">
+                {% for suggestion in settings_data.ai_suggestions %}
+                <div class="list-group-item d-flex justify-content-between align-items-start px-0">
+                    <div class="me-3">
+                        <div class="fw-semibold mb-1">
+                            {% if suggestion.priority == 'high' %}
+                                <span class="badge bg-danger me-1">{% trans "High" %}</span>
+                            {% elif suggestion.priority == 'medium' %}
+                                <span class="badge bg-warning text-dark me-1">{% trans "Medium" %}</span>
+                            {% else %}
+                                <span class="badge bg-info me-1">{% trans "Low" %}</span>
+                            {% endif %}
+                            {{ suggestion.title }}
+                        </div>
+                        <p class="text-muted small mb-0">{{ suggestion.description }}</p>
+                    </div>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        <button class="btn btn-sm btn-outline-success"
+                                hx-post="{% url 'companies:settings_ai_accept' company.id suggestion.id %}"
+                                hx-target="#settings-content"
+                                title="{% trans 'Accept' %}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                hx-post="{% url 'companies:settings_ai_dismiss' company.id suggestion.id %}"
+                                hx-target="#settings-content"
+                                title="{% trans 'Dismiss' %}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-sparkles fa-2x mb-2 d-block"></i>
+                    <p class="mb-0">{% trans "No suggestions at this time. AI will analyze your data and provide recommendations." %}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Quick Actions ── #}
+<div class="row mb-4">
+    <div class="col-12">
+        <h5 class="mb-3"><i class="fas fa-rocket me-2 text-gold"></i>{% trans "Quick Actions" %}</h5>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <button class="stat-card p-4 text-center d-block w-100 border-0"
+                style="cursor:pointer;"
+                hx-post="{% url 'companies:ai_analyze_invoices' company.id %}"
+                hx-target="#aiActionResult"
+                hx-indicator="#qaSpinner1">
+            <i class="fas fa-file-invoice-dollar fa-2x text-gold mb-2 d-block"></i>
+            <h6 class="mb-1">{% trans "Analyze Invoices" %}</h6>
+            <p class="text-muted small mb-0">{% trans "AI review of recent invoices for anomalies." %}</p>
+            <span id="qaSpinner1" class="htmx-indicator spinner-border spinner-border-sm text-gold mt-2"></span>
+        </button>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <button class="stat-card p-4 text-center d-block w-100 border-0"
+                style="cursor:pointer;"
+                hx-post="{% url 'companies:ai_check_compliance' company.id %}"
+                hx-target="#aiActionResult"
+                hx-indicator="#qaSpinner2">
+            <i class="fas fa-clipboard-check fa-2x text-gold mb-2 d-block"></i>
+            <h6 class="mb-1">{% trans "Check Compliance" %}</h6>
+            <p class="text-muted small mb-0">{% trans "Verify regulatory compliance status." %}</p>
+            <span id="qaSpinner2" class="htmx-indicator spinner-border spinner-border-sm text-gold mt-2"></span>
+        </button>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <button class="stat-card p-4 text-center d-block w-100 border-0"
+                style="cursor:pointer;"
+                hx-post="{% url 'companies:ai_optimize_inventory' company.id %}"
+                hx-target="#aiActionResult"
+                hx-indicator="#qaSpinner3">
+            <i class="fas fa-boxes fa-2x text-gold mb-2 d-block"></i>
+            <h6 class="mb-1">{% trans "Optimize Inventory" %}</h6>
+            <p class="text-muted small mb-0">{% trans "Get AI recommendations for stock levels." %}</p>
+            <span id="qaSpinner3" class="htmx-indicator spinner-border spinner-border-sm text-gold mt-2"></span>
+        </button>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <button class="stat-card p-4 text-center d-block w-100 border-0"
+                style="cursor:pointer;"
+                hx-post="{% url 'companies:ai_generate_report' company.id %}"
+                hx-target="#aiActionResult"
+                hx-indicator="#qaSpinner4">
+            <i class="fas fa-chart-bar fa-2x text-gold mb-2 d-block"></i>
+            <h6 class="mb-1">{% trans "Generate Report" %}</h6>
+            <p class="text-muted small mb-0">{% trans "AI-powered business summary report." %}</p>
+            <span id="qaSpinner4" class="htmx-indicator spinner-border spinner-border-sm text-gold mt-2"></span>
+        </button>
+    </div>
+</div>
+
+{# ── Action Result Container ── #}
+<div id="aiActionResult" class="row mb-4"></div>
