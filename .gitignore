@@ -23,3 +23,8 @@ EU_FONDOVI_*.md
 minio-data/
 crna_kutija.md
 CRNA_KUTIJA.md
+*.exc_bak
+*.exc_bak*
+*.pid
+ai_analiza.txt
+minio-data/
