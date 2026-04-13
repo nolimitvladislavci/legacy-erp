@@ -125,11 +125,11 @@ msgstr "Microsoft sign in error."
 
 #, python-format
 msgid "%d otvorenih bonova automatski stornirano."
-msgstr ""
+msgstr "%d open vouchers automatically cancelled."
 
 #, python-format
 msgid "Device token \"%s\" kreiran. Spremi barcode u mobitel."
-msgstr ""
+msgstr "Device token \"%s\" created. Save the barcode to your mobile device."
 
 #, python-format
 #| msgid "Korisnički račun nije aktivan."
@@ -137,7 +137,7 @@ msgid "Token \"%s\" deaktiviran."
 msgstr "The user account is not active."
 
 msgid "Token ne postoji."
-msgstr ""
+msgstr "Token does not exist."
 
 #, python-format
 #| msgid "Deaktiviran"
@@ -157,7 +157,7 @@ msgid "Lozinka je netočna. Pokušajte ponovo."
 msgstr "Action failed. Please try again."
 
 msgid "Email adresa uspješno verificirana! Vaš račun je sada potpuno aktivan."
-msgstr ""
+msgstr "Email address successfully verified! Your account is now fully active."
 
 msgid ""
 "Verifikacijski link je istekao (72h). Prijavite se i kliknite \"Pošalji "
@@ -165,10 +165,10 @@ msgid ""
 msgstr ""
 
 msgid "Email adresa je vec verificirana. Mozete se normalno prijaviti."
-msgstr ""
+msgstr "Email address already verified. You can log in normally."
 
 msgid "Vas email je vec verificiran! Sve je u redu."
-msgstr ""
+msgstr "Your email is already verified! Everything is in order."
 
 msgid ""
 "Dosegnuli ste limit od 3 pokusaja u 24 sata. Provjerite spam mapu ili nas "
@@ -180,7 +180,7 @@ msgid "Nije moguće odrediti tvrtku."
 msgstr "Unable to mark as rejected."
 
 msgid "Račun je već zapečaćen u arhivu."
-msgstr ""
+msgstr "The account has already been sealed into the archive."
 
 #| msgid "Smjena zatvorena"
 msgid "Deaktivacija je već zatražena."
@@ -195,10 +195,10 @@ msgid "Grace period je istekao."
 msgstr "The link is invalid or has expired."
 
 msgid "Zahtjev poništen. Račun je ponovo potpuno aktivan."
-msgstr ""
+msgstr "Request cancelled. The account is fully active again."
 
 msgid "Samo superadmin može reaktivirati."
-msgstr ""
+msgstr "Only a superadmin can reactivate."
 
 #| msgid "Tvrtka već postoji u sustavu."
 msgid "Tvrtka nije pronađena."
@@ -206,7 +206,7 @@ msgstr "There are no companies in the system."
 
 #, python-format
 msgid "Firma %s reaktivirana! Svi podaci netaknuti."
-msgstr ""
+msgstr "Company %s reactivated! All data intact."
 
 msgid "Super Administrator"
 msgstr "Super Administrator"
@@ -436,7 +436,7 @@ msgid "Odustani"
 msgstr "Give up"
 
 msgid "Email i PIN su obavezni."
-msgstr ""
+msgstr "Email and PIN are required."
 
 #| msgid "Neispravan PIN."
 msgid "Neispravan email ili PIN."
@@ -451,28 +451,28 @@ msgid "PIN mora biti točno 6 znamenki."
 msgstr "OIB must have exactly 11 digits."
 
 msgid "PIN uspješno postavljen! 🔑"
-msgstr ""
+msgstr "PIN successfully set! 🔑"
 
 #| msgid "Provjerite certifikat i internetsku vezu. Pokušajte ponovo."
 msgid "Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo."
 msgstr "Check your certificate and internet connection. Try again."
 
 msgid "Niste unijeli niti certifikat niti API ključ."
-msgstr ""
+msgstr "Neither a certificate nor an API key was provided."
 
 #| msgid "Nije pronađen OIB"
 msgid "Email nije pronađen."
 msgstr "Last applications"
 
 msgid "TriKey profil ne postoji."
-msgstr ""
+msgstr "TriKey profile does not exist."
 
 #| msgid "Neispravan PIN."
 msgid "Neispravan Business Key."
 msgstr "Incorrect PIN."
 
 msgid "Novi PIN poslan na email. Provjerite inbox."
-msgstr ""
+msgstr "New PIN sent to your email. Please check your inbox."
 
 #| msgid "Odaberite tip i pritisnite gumb za otvaranje POS-a."
 msgid "Odaberite ime i unesite PIN."
@@ -490,7 +490,7 @@ msgid "Lozinka mora imati najmanje 8 znakova."
 msgstr "Password must have at least 8 characters."
 
 msgid "✓ Lozinka uspješno promijenjena."
-msgstr ""
+msgstr "✓ Password successfully changed."
 
 #| msgid "Provjerite email za verifikacijski link."
 msgid "Račun kreiran! Provjerite email za verifikaciju."
@@ -507,7 +507,7 @@ msgstr ""
 
 #, python-format
 msgid "Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi."
-msgstr ""
+msgstr "Selection saved: %d added, %d removed. Total: %d companies."
 
 #| msgid "Tvrtka nije pronađena. Molimo skenirajte QR kod ponovno."
 msgid "Tvrtka nije pronađena u sustavu. Provjerite podatke."
@@ -519,7 +519,7 @@ msgstr "Wrong code. Try again."
 
 #, python-format
 msgid "Prebaceno na: %s"
-msgstr ""
+msgstr "Switched to: %s"
 
 msgid "Novi Termin / Najam"
 msgstr "New Term / Rent"
@@ -690,7 +690,7 @@ msgid "Odabrani termin:"
 msgstr "Your accounts and appointments"
 
 msgid "Za rezervaciju termina potrebna je prijava ili registracija."
-msgstr ""
+msgstr "Login or registration is required to book an appointment."
 "Login or registration is required to book an appointment.To book an "
 "appointment, you need to log in or register. Your appointment has been saved."
 
@@ -795,7 +795,7 @@ msgstr "Documents"
 
 #, python-format
 msgid "Zaprimljeno — limeni broj %d"
-msgstr ""
+msgstr "Received — sheet number %d"
 
 #| msgid "Unos radnog vremena"
 msgid "Unos u karton spremljen."
@@ -834,7 +834,7 @@ msgid "Nema telefona ni emaila za slanje."
 msgstr "There are no scheduled appointments for today."
 
 msgid "Podsjetnici: {} email + {} WhatsApp (od {} termina)"
-msgstr ""
+msgstr "Reminders: {} email + {} WhatsApp (out of {} appointments)"
 
 msgid "Konverzija računa"
 msgstr "Account numbering"
@@ -1543,7 +1543,7 @@ msgid "Spremi →"
 msgstr "Save"
 
 msgid "Kartica kreirana uspješno."
-msgstr ""
+msgstr "Card created successfully."
 
 #| msgid "Projekt"
 msgid "Project "
@@ -1964,7 +1964,7 @@ msgid ""
 msgstr ""
 
 msgid "Synesis nije konfiguriran. Idite na Integracije → Synesis."
-msgstr ""
+msgstr "Synesis is not configured. Go to Integrations → Synesis."
 
 msgid "Osnovni podaci"
 msgstr "Basic data"
@@ -2498,7 +2498,7 @@ msgid "✅ Integracije spremljene."
 msgstr "Sale price"
 
 msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
-msgstr ""
+msgstr "You do not have permission for this action. Please contact your administrator."
 "You do not have permission for this action. Contact your administrator."
 
 #| msgid "Dokument vozila"
@@ -2510,7 +2510,7 @@ msgid "Stopa ažurirana."
 msgstr "There are no updates"
 
 msgid "Pretplata reaktivirana!"
-msgstr ""
+msgstr "Subscription reactivated!"
 
 #, python-format
 msgid ""
@@ -2530,7 +2530,7 @@ msgid "Uvjeti korištenja uspješno prihvaćeni. Hvala!"
 msgstr "Platform Terms of Use"
 
 msgid "Morate označiti polje za prihvaćanje uvjeta."
-msgstr ""
+msgstr "You must check the box to accept the terms."
 
 #| msgid "Podaci tvrtke"
 msgid "Podaci tvrtke spremljeni."
@@ -2553,13 +2553,13 @@ msgid "Bilješka dodana."
 msgstr "Notes for today..."
 
 msgid "Svi preporučeni moduli su već aktivni."
-msgstr ""
+msgstr "All recommended modules are already active."
 
 msgid "Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup."
 msgstr "No company assigned. Contact your administrator for access."
 
 msgid "Intelligence Dashboard je dostupan samo za umbrella korisnike."
-msgstr ""
+msgstr "The Intelligence Dashboard is available to umbrella users only."
 
 msgid "Niste povezani s tvrtkom."
 msgstr "You are not connected to a company."
@@ -2572,7 +2572,7 @@ msgid "Nemate ovlasti za ovu radnju."
 msgstr "There are no updates"
 
 msgid "Ako mislite da je greška, obratite se administratoru."
-msgstr ""
+msgstr "If you believe this is an error, please contact your administrator."
 
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup ovoj tvrtki."
@@ -2591,7 +2591,7 @@ msgid "Provjerite podatke i pokušajte ponovo."
 msgstr "Review the data and accept the terms."
 
 msgid "Za nastavak je potrebna prijava."
-msgstr ""
+msgstr "Login is required to continue."
 
 msgid "Prijavite se s emailom i lozinkom ili PIN-om."
 msgstr ""
