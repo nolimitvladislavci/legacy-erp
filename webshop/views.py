@@ -213,6 +213,7 @@ def order_status_change(request, pk):
 
 # ── REST ─────────────────────────────────────────────────────
 
+@extend_schema_view(list=extend_schema(tags=["Webshop"]))
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -225,11 +226,13 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Product.objects.filter(company=company)
         return Product.objects.none()
 
+@extend_schema_view(list=extend_schema(tags=["Webshop"]))
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+@extend_schema_view(list=extend_schema(tags=["Webshop"]))
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
@@ -241,6 +244,8 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 # ══════════════════════════════════════════════════════════════════════════════
 
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 
 def api_cart_add(request):

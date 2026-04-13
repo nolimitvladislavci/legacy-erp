@@ -247,6 +247,7 @@ def partner_oib_lookup(request):
     return JsonResponse(result.to_dict())
 
 
+@extend_schema_view(list=extend_schema(tags=["Partners"]))
 class PartnerViewSet(viewsets.ModelViewSet):
     serializer_class = PartnerSerializer
 
@@ -300,6 +301,8 @@ def api_quick_create(request):
 
 # ── Buyer Type Verification ───────────────────────────────────────
 import re
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 @login_required
 def buyer_type_verify(request):

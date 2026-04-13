@@ -11,10 +11,13 @@ from einvoice.api.serializers import (
 )
 # ArchiveService imported lazily to avoid boto3 at module load
 from einvoice.tasks.outbound_tasks import send_invoice_task
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 logger = logging.getLogger("propter.einvoice.api")
 
 
+@extend_schema_view(list=extend_schema(tags=["E-Invoice"]))
 class AS4MessageViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AS4MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -53,6 +56,7 @@ class AS4MessageViewSet(viewsets.ReadOnlyModelViewSet):
         return Response({"status": "queued", "message": "Poruka u redu za ponovo slanje"})
 
 
+@extend_schema_view(list=extend_schema(tags=["E-Invoice"]))
 class SmartMailboxViewSet(viewsets.ModelViewSet):
     serializer_class = InboundInvoiceSerializer
     permission_classes = [permissions.IsAuthenticated]

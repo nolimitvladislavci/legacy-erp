@@ -148,10 +148,12 @@ def stock_movement(request, pk):
     return redirect("inventory:detail", pk=pk)
 
 
+@extend_schema_view(list=extend_schema(tags=["Inventory"]))
 class InventoryItemViewSet(viewsets.ModelViewSet):
     queryset = InventoryItem.objects.all().select_related("company", "tax_rate", "livestock_animal")
     serializer_class = InventoryItemSerializer
 
+@extend_schema_view(list=extend_schema(tags=["Inventory"]))
 class StockMovementViewSet(viewsets.ModelViewSet):
     queryset = StockMovement.objects.all().select_related("item", "invoice", "production_order")
     serializer_class = StockMovementSerializer
@@ -166,6 +168,8 @@ from core.company_utils import get_user_company
 from core.tenant import get_current_company
 
 from .models import GoodsReceipt, GoodsReceiptItem
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 # ── PRIMKA VIEWS ───────────────────────────────────────────────────────────────
 

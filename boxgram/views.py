@@ -17,6 +17,8 @@ from .throttles import VoteRateThrottle, ImportRateThrottle
 from .tasks import generate_pet_qr, fetch_social_import
 import logging
 import json
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ class FeedPagination(PageNumberPagination):
     max_page_size = 100
 
 
+@extend_schema_view(list=extend_schema(tags=["Boxgram"]))
 class PetProfileViewSet(viewsets.ModelViewSet):
     queryset = PetProfile.objects.all().select_related("tenant", "owner", "company")
     serializer_class = PetProfileSerializer
@@ -96,6 +99,7 @@ class PetProfileViewSet(viewsets.ModelViewSet):
         })
 
 
+@extend_schema_view(list=extend_schema(tags=["Boxgram"]))
 class LifeEventViewSet(viewsets.ModelViewSet):
     queryset = LifeEvent.objects.all().select_related("pet")
     serializer_class = LifeEventSerializer
@@ -104,6 +108,7 @@ class LifeEventViewSet(viewsets.ModelViewSet):
     ordering = ['-date']
 
 
+@extend_schema_view(list=extend_schema(tags=["Boxgram"]))
 class CompetitionViewSet(viewsets.ModelViewSet):
     queryset = Competition.objects.all().select_related("tenant", "winner")
     serializer_class = CompetitionSerializer
@@ -146,6 +151,7 @@ class CompetitionViewSet(viewsets.ModelViewSet):
         return ip
 
 
+@extend_schema_view(list=extend_schema(tags=["Boxgram"]))
 class SocialImportViewSet(viewsets.ModelViewSet):
     queryset = SocialImport.objects.all().select_related("pet", "mapped_to")
     serializer_class = SocialImportSerializer

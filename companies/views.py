@@ -64,6 +64,7 @@ def company_edit(request, pk):
     return render(request, "companies/company_form.html", {"company": company, "action": "Uredi tvrtku"})
 
 
+@extend_schema_view(list=extend_schema(tags=["Companies"]))
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all().select_related("nkd_code", "umbrella_parent")
     serializer_class = CompanySerializer
@@ -616,6 +617,8 @@ def tax_rate_list(request):
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 @login_required
 def subscription_view(request):

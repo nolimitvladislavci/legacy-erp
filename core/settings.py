@@ -804,7 +804,15 @@ SPECTACULAR_SETTINGS = {
         {"name": "Inventory", "description": "Stock management, movements"},
         {"name": "Partners", "description": "Client & supplier management"},
         {"name": "Projects", "description": "Project tracking & budgets"},
-        {"name": "Worktime", "description": "Time tracking & timesheets"},
+        {"name": "Worktime", "description": "Time tracking, timesheets, payroll"},
+        {"name": "Companies", "description": "Company management, branches, umbrella"},
+        {"name": "Webshop", "description": "E-commerce — products, orders, cart"},
+        {"name": "Boxgram", "description": "Pet profiles, life events, competitions"},
+        {"name": "E-Invoice", "description": "PEPPOL AS4, UBL, smart mailbox"},
+        {"name": "Fitness", "description": "Gym members, check-ins"},
+        {"name": "Insurance", "description": "Insurance policies"},
+        {"name": "Fiscal", "description": "HR FINA CIS, DE TSE, AT RKSV"},
+        {"name": "Auth", "description": "Authentication, TriKey, device tokens"},
     ],
 }
 

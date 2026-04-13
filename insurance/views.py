@@ -12,8 +12,11 @@ from partners.models import Partner
 from .models import InsurancePolicy
 from .serializers import InsurancePolicySerializer
 from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
+
+@extend_schema_view(list=extend_schema(tags=["Insurance"]))
 class InsurancePolicyViewSet(viewsets.ModelViewSet):
     queryset = InsurancePolicy.objects.all()
     serializer_class = InsurancePolicySerializer

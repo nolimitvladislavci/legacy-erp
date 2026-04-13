@@ -8,6 +8,7 @@ from .models import *
 from .serializers import *
 
 
+@extend_schema_view(list=extend_schema(tags=["Worktime"]))
 class WorkGroupViewSet(viewsets.ModelViewSet):
     serializer_class = WorkGroupSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -16,6 +17,7 @@ class WorkGroupViewSet(viewsets.ModelViewSet):
         company = get_user_company(self.request)
         return WorkGroup.objects.filter(company=company).select_related("company", "manager", "members") if company else WorkGroup.objects.none()
 
+@extend_schema_view(list=extend_schema(tags=["Worktime"]))
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -24,6 +26,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         company = get_user_company(self.request)
         return Project.objects.filter(company=company).select_related("company", "work_group", "members") if company else Project.objects.none()
 
+@extend_schema_view(list=extend_schema(tags=["Worktime"]))
 class EmployeeProfileViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -32,6 +35,7 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
         company = get_user_company(self.request)
         return EmployeeProfile.objects.filter(company=company).select_related("company", "user", "work_group") if company else EmployeeProfile.objects.none()
 
+@extend_schema_view(list=extend_schema(tags=["Worktime"]))
 class TimeEntryViewSet(viewsets.ModelViewSet):
     serializer_class = TimeEntrySerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -133,6 +137,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status as drf_status
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 
 def _haversine(lat1, lon1, lat2, lon2):

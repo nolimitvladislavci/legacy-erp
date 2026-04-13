@@ -11,6 +11,8 @@ from rest_framework import permissions, viewsets
 from .models import Member, MemberCheckIn
 from .serializers import MemberCheckInSerializer, MemberSerializer
 from django.db import IntegrityError, DatabaseError
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 
 @login_required
@@ -156,11 +158,13 @@ def checkin_dashboard(request):
     })
 
 
+@extend_schema_view(list=extend_schema(tags=["Fitness"]))
 class MemberViewSet(viewsets.ModelViewSet):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+@extend_schema_view(list=extend_schema(tags=["Fitness"]))
 class MemberCheckInViewSet(viewsets.ModelViewSet):
     queryset = MemberCheckIn.objects.all()
     serializer_class = MemberCheckInSerializer

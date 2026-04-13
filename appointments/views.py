@@ -25,8 +25,11 @@ from partners.models import Partner
 from .forms import AppointmentForm
 from .models import BRANCH_TYPES, Appointment, BookingResource, BookingService, WorkingHours
 from .serializers import AppointmentSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
+
+@extend_schema_view(list=extend_schema(tags=["Appointments"]))
 class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [permissions.IsAuthenticated]

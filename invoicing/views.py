@@ -19,9 +19,12 @@ from core.company_utils import get_user_company
 
 from .models import Invoice, InvoiceItem
 from .serializers import InvoiceItemSerializer, InvoiceSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 
 # ── REST API
+@extend_schema_view(list=extend_schema(tags=["Invoicing"]))
 class InvoiceViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -31,6 +34,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         company = get_user_company(self.request)
         return Invoice.objects.filter(company=company).select_related("storno_of", "business_location", "operator") if company else Invoice.objects.none()
 
+@extend_schema_view(list=extend_schema(tags=["Invoicing"]))
 class InvoiceItemViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceItemSerializer
     permission_classes = [permissions.IsAuthenticated]

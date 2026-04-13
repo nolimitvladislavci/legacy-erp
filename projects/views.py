@@ -18,6 +18,8 @@ from partners.models import Partner
 
 from .models import Project, ProjectPhoto, ProjectUpdate
 from .serializers import ProjectPhotoSerializer, ProjectSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 
 
 @login_required
@@ -276,6 +278,7 @@ def project_team_remove(request, pk):
             pass
     return redirect('project_detail', pk=pk)
 
+@extend_schema_view(list=extend_schema(tags=["Projects"]))
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
