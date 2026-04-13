@@ -6,72 +6,117 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TrackedItem',
+            name="TrackedItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField()),
-                ('tracking_type', models.CharField(choices=[('food_order', 'Narudzba hrane'), ('delivery', 'Dostava'), ('intervention', 'Hitna intervencija'), ('work_order', 'Radni nalog'), ('expiry', 'Istek roka')], max_length=50)),
-                ('latitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('public_token', models.CharField(blank=True, max_length=32, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("object_id", models.PositiveIntegerField()),
+                (
+                    "tracking_type",
+                    models.CharField(
+                        choices=[
+                            ("food_order", "Narudzba hrane"),
+                            ("delivery", "Dostava"),
+                            ("intervention", "Hitna intervencija"),
+                            ("work_order", "Radni nalog"),
+                            ("expiry", "Istek roka"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("latitude", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("longitude", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("public_token", models.CharField(blank=True, max_length=32, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),
+                ),
             ],
             options={
-                'verbose_name': 'Praceni objekt',
-                'verbose_name_plural': 'Praceni objekti',
+                "verbose_name": "Praceni objekt",
+                "verbose_name_plural": "Praceni objekti",
             },
         ),
         migrations.CreateModel(
-            name='TrackingStatus',
+            name="TrackingStatus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tracking_type', models.CharField(choices=[('food_order', 'Narudzba hrane'), ('delivery', 'Dostava'), ('intervention', 'Hitna intervencija'), ('work_order', 'Radni nalog'), ('expiry', 'Istek roka')], max_length=50)),
-                ('name', models.CharField(max_length=100)),
-                ('slug', models.SlugField(max_length=100)),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('icon', models.CharField(blank=True, max_length=50)),
-                ('color', models.CharField(default='#c9a84c', max_length=20)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "tracking_type",
+                    models.CharField(
+                        choices=[
+                            ("food_order", "Narudzba hrane"),
+                            ("delivery", "Dostava"),
+                            ("intervention", "Hitna intervencija"),
+                            ("work_order", "Radni nalog"),
+                            ("expiry", "Istek roka"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("slug", models.SlugField(max_length=100)),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("icon", models.CharField(blank=True, max_length=50)),
+                ("color", models.CharField(default="#c9a84c", max_length=20)),
             ],
             options={
-                'verbose_name': 'Status pracenja',
-                'verbose_name_plural': 'Statusi pracenja',
-                'ordering': ['tracking_type', 'order'],
-                'unique_together': {('tracking_type', 'slug')},
+                "verbose_name": "Status pracenja",
+                "verbose_name_plural": "Statusi pracenja",
+                "ordering": ["tracking_type", "order"],
+                "unique_together": {("tracking_type", "slug")},
             },
         ),
         migrations.CreateModel(
-            name='TrackingEvent',
+            name="TrackingEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('note', models.TextField(blank=True)),
-                ('latitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('tracked_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='tracking.trackeditem')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tracking.trackingstatus')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("note", models.TextField(blank=True)),
+                ("latitude", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("longitude", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "tracked_item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="events", to="tracking.trackeditem"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "status",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="tracking.trackingstatus"),
+                ),
             ],
             options={
-                'verbose_name': 'Dogadaj pracenja',
-                'verbose_name_plural': 'Dogadaji pracenja',
-                'ordering': ['-created_at'],
+                "verbose_name": "Dogadaj pracenja",
+                "verbose_name_plural": "Dogadaji pracenja",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddField(
-            model_name='trackeditem',
-            name='current_status',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tracked_items', to='tracking.trackingstatus'),
+            model_name="trackeditem",
+            name="current_status",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="tracked_items",
+                to="tracking.trackingstatus",
+            ),
         ),
     ]

@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class CompanyMiddleware(MiddlewareMixin):
     """Inject current company into thread-local storage.
     Supports multi-company switching via session."""
+
     def process_request(self, request):
         if not request.user.is_authenticated:
             set_current_company(None)
@@ -21,11 +22,12 @@ class CompanyMiddleware(MiddlewareMixin):
             return None
 
         # Multi-company switching — session membership ima prioritet
-        membership_id = request.session.get('active_membership_id')
+        membership_id = request.session.get("active_membership_id")
         if membership_id:
             try:
                 from accounts.models import CompanyMembership
-                mem = CompanyMembership.objects.select_related('company').get(
+
+                mem = CompanyMembership.objects.select_related("company").get(
                     pk=membership_id, user=request.user, is_active=True
                 )
                 # Postavi direktno — zaobiđi get_user_company koji gleda profile
@@ -38,7 +40,7 @@ class CompanyMiddleware(MiddlewareMixin):
                 request.company = mem.company
                 return None
             except AttributeError:
-                request.session.pop('active_membership_id', None)
+                request.session.pop("active_membership_id", None)
 
         company = get_user_company(request)
         set_current_company(company)
@@ -52,14 +54,17 @@ class CompanyMiddleware(MiddlewareMixin):
 
 class RequestLoggingMiddleware(MiddlewareMixin):
     """Log all requests with timing. Warn on slow requests."""
+
     def process_request(self, request):
         import time
+
         request._start_time = time.monotonic()
         return None
 
     def process_response(self, request, response):
         import time
-        if hasattr(request, '_start_time'):
+
+        if hasattr(request, "_start_time"):
             duration = time.monotonic() - request._start_time
             if duration > 2.0:
                 logger.warning(f"SLOW {request.method} {request.path} {duration:.2f}s")
@@ -70,18 +75,19 @@ class RequestLoggingMiddleware(MiddlewareMixin):
 
 class SecurityHeadersMiddleware(MiddlewareMixin):
     """Add security headers to all responses."""
+
     def process_response(self, request, response):
         # Skip security headers for MCP endpoint (handled by nginx CORS)
-        if request.path.startswith('/mcp/'):
+        if request.path.startswith("/mcp/"):
             return response
-        response['X-Content-Type-Options'] = 'nosniff'
-        response['X-Frame-Options'] = 'SAMEORIGIN'
-        response['X-XSS-Protection'] = '1; mode=block'
-        response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-        response['Permissions-Policy'] = 'camera=(self), microphone=(), geolocation=(self)'
+        response["X-Content-Type-Options"] = "nosniff"
+        response["X-Frame-Options"] = "SAMEORIGIN"
+        response["X-XSS-Protection"] = "1; mode=block"
+        response["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response["Permissions-Policy"] = "camera=(self), microphone=(), geolocation=(self)"
         if not settings.DEBUG:
-            response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
-            response['Content-Security-Policy'] = (
+            response["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+            response["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
                 "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
@@ -97,18 +103,24 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
 
 class ForcePasswordChangeMiddleware(MiddlewareMixin):
     """Redirect users who need to change their password."""
+
     def process_request(self, request):
         if not request.user.is_authenticated:
             return None
         if request.user.is_superuser:
             return None
-        if request.path.startswith('/accounts/password/') or request.path.startswith('/accounts/logout') or request.path.startswith('/onboarding/'):
+        if (
+            request.path.startswith("/accounts/password/")
+            or request.path.startswith("/accounts/logout")
+            or request.path.startswith("/onboarding/")
+        ):
             return None
         try:
             profile = request.user.profile
-            if getattr(profile, 'must_change_password', False):
+            if getattr(profile, "must_change_password", False):
                 from django.shortcuts import redirect
-                return redirect('/accounts/password/change/')
+
+                return redirect("/accounts/password/change/")
         except ImportError:
             pass
         return None
@@ -120,7 +132,8 @@ class Force2FAMiddleware:
     FAL Faza 1: koristi RouteRegistry.is_public() umjesto path string matchinga.
     Rješava i18n bug: /hr/2fa/setup/ i /en/2fa/setup/ obje su PUBLIC.
     """
-    ENFORCED_ROLES = ('superadmin', 'company_admin', 'tenant_admin')
+
+    ENFORCED_ROLES = ("superadmin", "company_admin", "tenant_admin")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -129,7 +142,7 @@ class Force2FAMiddleware:
         from permissions.route_registry import RouteRegistry
 
         # Nelogirani → propusti
-        if not getattr(request, 'user', None) or not request.user.is_authenticated:
+        if not getattr(request, "user", None) or not request.user.is_authenticated:
             return self.get_response(request)
 
         # Javne rute (PUBLIC + AUTHENTICATED) → propusti bez provjere 2FA
@@ -137,8 +150,8 @@ class Force2FAMiddleware:
             return self.get_response(request)
 
         # 2FA setup/verify view — uvijek propusti (view_name check kao sigurnosna mreža)
-        view_name = getattr(getattr(request, 'resolver_match', None), 'url_name', '')
-        if view_name in ('setup_2fa', 'verify_2fa'):
+        view_name = getattr(getattr(request, "resolver_match", None), "url_name", "")
+        if view_name in ("setup_2fa", "verify_2fa"):
             return self.get_response(request)
 
         # Superuseri izuzeti od 2FA enforcement-a
@@ -162,21 +175,20 @@ class Force2FAMiddleware:
         from django.contrib import messages
         from django.shortcuts import redirect
 
-        system_message = 'Sustav zahtijeva obaveznu aktivaciju 2FA zaštite za administratore.'
+        system_message = "Sustav zahtijeva obaveznu aktivaciju 2FA zaštite za administratore."
         has_message = False
         storage = messages.get_messages(request)
         for msg in storage:
             if msg.message == system_message:
                 has_message = True
                 break
-        if hasattr(storage, "used"): storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
+        if hasattr(storage, "used"):
+            storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
 
         if not has_message:
             messages.warning(request, system_message, fail_silently=True)
 
-        return redirect('setup_2fa')
-
-
+        return redirect("setup_2fa")
 
 
 class ForceTCMiddleware:
@@ -187,7 +199,7 @@ class ForceTCMiddleware:
     Superadmini su izuzeti.
     """
 
-    TC_CURRENT_VERSION = 'v1.0-2026'
+    TC_CURRENT_VERSION = "v1.0-2026"
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -196,7 +208,7 @@ class ForceTCMiddleware:
         from permissions.route_registry import AccessLevel, RouteRegistry
 
         # Nelogirani → propusti
-        if not getattr(request, 'user', None) or not request.user.is_authenticated:
+        if not getattr(request, "user", None) or not request.user.is_authenticated:
             return self.get_response(request)
 
         # Javne i samo-authenticated rute ne trebaju TC consent
@@ -207,7 +219,7 @@ class ForceTCMiddleware:
         if request.user.is_superuser:
             return self.get_response(request)
 
-        company = getattr(request, 'current_company', None)
+        company = getattr(request, "current_company", None)
         if not company:
             try:
                 company = request.user.profile.company
@@ -223,21 +235,22 @@ class ForceTCMiddleware:
         from django.contrib import messages
         from django.shortcuts import redirect
 
-        msg = 'Potrebno je prihvatiti uvjete koristenja LIMIT Connect sustava prije nastavka.'
+        msg = "Potrebno je prihvatiti uvjete koristenja LIMIT Connect sustava prije nastavka."
         storage = messages.get_messages(request)
         has_msg = any(m.message == msg for m in storage)
         storage.used = False
         if not has_msg:
             messages.warning(request, msg, fail_silently=True)
 
-        return redirect('tc_consent')
+        return redirect("tc_consent")
 
 
 class ImpersonationMiddleware(MiddlewareMixin):
     """Allow superadmin to impersonate another company."""
+
     def process_request(self, request):
         if request.user.is_authenticated and request.user.is_superuser:
-            company_id = request.session.get('superadmin_as_company')
+            company_id = request.session.get("superadmin_as_company")
             if company_id:
                 request._impersonating_company_id = company_id
         return None
@@ -245,12 +258,14 @@ class ImpersonationMiddleware(MiddlewareMixin):
 
 class CompanyBranchMiddleware(MiddlewareMixin):
     """Attach current branch to request if set in session."""
+
     def process_request(self, request):
         if request.user.is_authenticated:
-            branch_id = request.session.get('active_branch_id')
+            branch_id = request.session.get("active_branch_id")
             if branch_id:
                 try:
                     from companies.models import CompanyBranch
+
                     request.active_branch = CompanyBranch.objects.get(pk=branch_id)
                 except ObjectDoesNotExist:
                     request.active_branch = None
@@ -267,17 +282,38 @@ class UserLanguageMiddleware(MiddlewareMixin):
     2. Redirects unprefixed URLs to language-prefixed URLs
        (e.g. /worktime/ -> /hr/worktime/ for Croatian users)
     """
+
     SKIP_PREFIXES = (
-        '/api/', '/static/', '/media/', '/admin/', '/i18n/',
-        '/push/', '/sw.js', '/manifest.json', '/offline.html',
-        '/burza/', '/marketplace/', '/delivery/', '/traceability/',
-        '/gastro-menu/', '/sos/', '/track/', '/rosetta/',
-        '/accounts/login/', '/notifications/',
-        '/firma/', '/pocni/', '/informacijski-posrednik/',
-        '/inspektor/', '/panic/', '/inspektor',
-        '/gov_export/', '/no-limit/', '/legal/',
+        "/api/",
+        "/static/",
+        "/media/",
+        "/admin/",
+        "/i18n/",
+        "/push/",
+        "/sw.js",
+        "/manifest.json",
+        "/offline.html",
+        "/burza/",
+        "/marketplace/",
+        "/delivery/",
+        "/traceability/",
+        "/gastro-menu/",
+        "/sos/",
+        "/track/",
+        "/rosetta/",
+        "/accounts/login/",
+        "/notifications/",
+        "/firma/",
+        "/pocni/",
+        "/informacijski-posrednik/",
+        "/inspektor/",
+        "/panic/",
+        "/inspektor",
+        "/gov_export/",
+        "/no-limit/",
+        "/legal/",
     )
-    LANG_PREFIXES = ('hr', 'en', 'de', 'tr', 'el')
+    LANG_PREFIXES = ("hr", "en", "de", "tr", "el")
 
     def process_request(self, request):
         if not request.user.is_authenticated:
@@ -291,9 +327,10 @@ class UserLanguageMiddleware(MiddlewareMixin):
         if not lang:
             try:
                 from core.company_utils import get_user_company
+
                 company = get_user_company(request)
                 if company:
-                    lang = company.ui_language or 'hr'
+                    lang = company.ui_language or "hr"
             except ImportError:
                 pass
 
@@ -306,10 +343,10 @@ class UserLanguageMiddleware(MiddlewareMixin):
             request._set_language_cookie = lang
 
         # Redirect unprefixed URLs for non-default languages
-        if lang in self.LANG_PREFIXES and request.method == 'GET':
+        if lang in self.LANG_PREFIXES and request.method == "GET":
             path = request.path
             # Already has correct prefix
-            if path.startswith('/' + lang + '/'):
+            if path.startswith("/" + lang + "/"):
                 return None
             # Skip non-i18n paths
             for prefix in self.SKIP_PREFIXES:
@@ -317,35 +354,36 @@ class UserLanguageMiddleware(MiddlewareMixin):
                     return None
             # Skip if path has another language prefix
             for lp in self.LANG_PREFIXES:
-                if path.startswith('/' + lp + '/'):
+                if path.startswith("/" + lp + "/"):
                     return None
             # Redirect to prefixed URL
             from django.shortcuts import redirect as _redir
-            new_url = '/' + lang + path
-            qs = request.META.get('QUERY_STRING', '')
+
+            new_url = "/" + lang + path
+            qs = request.META.get("QUERY_STRING", "")
             if qs:
-                new_url += '?' + qs
+                new_url += "?" + qs
             return _redir(new_url)
 
         return None
 
     def process_response(self, request, response):
-        lang = getattr(request, '_set_language_cookie', None)
+        lang = getattr(request, "_set_language_cookie", None)
         if lang:
             response.set_cookie(
-                settings.LANGUAGE_COOKIE_NAME, lang,
+                settings.LANGUAGE_COOKIE_NAME,
+                lang,
                 max_age=settings.LANGUAGE_COOKIE_AGE,
-                path='/', samesite='Lax',
+                path="/",
+                samesite="Lax",
             )
         return response
-
-
 
 
 class RateLimitMiddleware:
     """Redis-based rate limiting per IP — pametno po kontekstu."""
 
-    SKIP_PREFIXES = ('/static/', '/media/', '/favicon', '/manifest', '/sw.js', '/health/')
+    SKIP_PREFIXES = ("/static/", "/media/", "/favicon", "/manifest", "/sw.js", "/health/")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -358,35 +396,40 @@ class RateLimitMiddleware:
             if path.startswith(prefix):
                 return self.get_response(request)
 
-        ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
-        is_authenticated = getattr(request, 'user', None) and getattr(request.user, 'is_authenticated', False)
+        ip = request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR", "unknown")
+        is_authenticated = getattr(request, "user", None) and getattr(request.user, "is_authenticated", False)
 
         # Autenticirani korisnici — bez limita
         if is_authenticated:
             return self.get_response(request)
 
         # Whitelist IP-ova (admin, office) — bez limita
-        WHITELIST_IPS = getattr(settings, 'RATE_LIMIT_WHITELIST', [
-            '37.27.248.86',   # Server
-            '127.0.0.1',      # Localhost
-        ])
+        WHITELIST_IPS = getattr(
+            settings,
+            "RATE_LIMIT_WHITELIST",
+            [
+                "37.27.248.86",  # Server
+                "127.0.0.1",  # Localhost
+            ],
+        )
         if ip in WHITELIST_IPS:
             return self.get_response(request)
 
         # Login brute-force zaštita — striktno po IP+path
-        if ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
+        if ("/login/" in path or "/api/token/" in path or "/password/" in path) and request.method == "POST":
             limit, window = 20, 300  # 20 login pokusaja u 5 min (brute-force)
-            key = 'rl:%s:login' % ip
-        elif path.startswith('/api/'):
+            key = "rl:%s:login" % ip
+        elif path.startswith("/api/"):
             limit, window = 600, 60  # 600/min za API
-            key = 'rl:%s:api' % ip
+            key = "rl:%s:api" % ip
         else:
             limit, window = 1000, 60  # 1000/min za stranice (normalna navigacija)
-            key = 'rl:%s:page' % ip
+            key = "rl:%s:page" % ip
 
         try:
             import redis
-            broker = getattr(settings, 'CELERY_BROKER_URL', 'redis://localhost:6379/0')
+
+            broker = getattr(settings, "CELERY_BROKER_URL", "redis://localhost:6379/0")
             r = redis.Redis.from_url(broker)
             pipe = r.pipeline()
             pipe.incr(key)
@@ -394,16 +437,19 @@ class RateLimitMiddleware:
             count, _ = pipe.execute()
             if count > limit:
                 # API poziv → JSON
-                if (request.headers.get('Accept', '') == 'application/json'
-                        or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-                        or request.path.startswith('/api/')):
+                if (
+                    request.headers.get("Accept", "") == "application/json"
+                    or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+                    or request.path.startswith("/api/")
+                ):
                     from django.http import JsonResponse
-                    return JsonResponse({
-                        'error': 'Previše zahtjeva. Pričekajte minutu.',
-                        'retry_after': window
-                    }, status=429)
+
+                    return JsonResponse(
+                        {"error": "Previše zahtjeva. Pričekajte minutu.", "retry_after": window}, status=429
+                    )
                 # Preglednik → lijepa HTML stranica s odbrojačem
                 from django.http import HttpResponse
+
                 html = """<!DOCTYPE html>
 <html lang="hr">
 <head>
@@ -464,12 +510,11 @@ var t = setInterval(function(){{
 </script>
 </body>
 </html>""".format(seconds=window)
-                return HttpResponse(html, status=429, content_type='text/html; charset=utf-8')
+                return HttpResponse(html, status=429, content_type="text/html; charset=utf-8")
         except Exception:
             pass
 
         return self.get_response(request)
-
 
 
 class AdminLangRedirectMiddleware(MiddlewareMixin):
@@ -479,7 +524,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
     Also handles /rosetta/ and other admin-like paths.
     """
 
-    ADMIN_PREFIXES = ('/admin/', '/rosetta/')
+    ADMIN_PREFIXES = ("/admin/", "/rosetta/")
 
     def process_request(self, request):
         if not request.user.is_authenticated:
@@ -501,6 +546,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
         if not lang:
             try:
                 from core.company_utils import get_user_company
+
                 company = get_user_company(request)
                 if company:
                     lang = company.ui_language
@@ -509,6 +555,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
 
         if lang:
             from django.utils.translation import activate
+
             activate(lang)
             request.LANGUAGE_CODE = lang
 
@@ -518,6 +565,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
 # ═══════════════════════════════════════════════════════════════
 #  GRACEFUL ERROR HANDLER — Zero Friction Error Experience
 # ═══════════════════════════════════════════════════════════════
+
 
 class GracefulErrorMiddleware:
     """
@@ -529,22 +577,22 @@ class GracefulErrorMiddleware:
     """
 
     ERROR_MESSAGES = {
-        'default': 'Dogodila se neočekivana greška. Tim je obaviješten i radi na rješenju.',
-        'database': 'Privremeni problem s bazom podataka. Pokušajte ponovo za minutu.',
-        'permission': 'Nemate pristup ovom resursu. Kontaktirajte administratora.',
-        'timeout': 'Zahtjev je trajao predugo. Pokušajte ponovo.',
-        'validation': 'Podaci nisu ispravni. Provjerite unos i pokušajte ponovo.',
+        "default": "Dogodila se neočekivana greška. Tim je obaviješten i radi na rješenju.",
+        "database": "Privremeni problem s bazom podataka. Pokušajte ponovo za minutu.",
+        "permission": "Nemate pristup ovom resursu. Kontaktirajte administratora.",
+        "timeout": "Zahtjev je trajao predugo. Pokušajte ponovo.",
+        "validation": "Podaci nisu ispravni. Provjerite unos i pokušajte ponovo.",
     }
 
     EXCEPTION_MAP = {
-        'OperationalError': 'database',
-        'InterfaceError': 'database',
-        'DatabaseError': 'database',
-        'PermissionDenied': 'permission',
-        'Forbidden': 'permission',
-        'TimeoutError': 'timeout',
-        'ConnectionTimeout': 'timeout',
-        'ValidationError': 'validation',
+        "OperationalError": "database",
+        "InterfaceError": "database",
+        "DatabaseError": "database",
+        "PermissionDenied": "permission",
+        "Forbidden": "permission",
+        "TimeoutError": "timeout",
+        "ConnectionTimeout": "timeout",
+        "ValidationError": "validation",
     }
 
     def __init__(self, get_response):
@@ -575,18 +623,22 @@ class GracefulErrorMiddleware:
         # API/AJAX — ostavi, vraćaju JSON
         if self._is_api(request):
             return None
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return None
-        if 'application/json' in request.headers.get('Accept', ''):
+        if "application/json" in request.headers.get("Accept", ""):
             return None
 
         exc_name = type(exception).__name__
-        category = self.EXCEPTION_MAP.get(exc_name, 'default')
+        category = self.EXCEPTION_MAP.get(exc_name, "default")
         traceback_str = tb_module.format_exc()
 
         logger.error(
-            'GracefulError [%s] %s %s: %s\n%s',
-            category, request.method, request.path, exception, traceback_str,
+            "GracefulError [%s] %s %s: %s\n%s",
+            category,
+            request.method,
+            request.path,
+            exception,
+            traceback_str,
         )
 
         # Async alert trojci
@@ -602,54 +654,62 @@ class GracefulErrorMiddleware:
         from django.contrib import messages
         from django.shortcuts import redirect
 
-        msg = self.ERROR_MESSAGES.get(category, self.ERROR_MESSAGES['default'])
+        msg = self.ERROR_MESSAGES.get(category, self.ERROR_MESSAGES["default"])
         messages.error(request, msg)
 
-        referrer = request.META.get('HTTP_REFERER', '')
+        referrer = request.META.get("HTTP_REFERER", "")
         if referrer and request.build_absolute_uri() != referrer:
             from urllib.parse import urlparse
+
             parsed = urlparse(referrer)
-            if parsed.netloc == '' or parsed.netloc == request.get_host():
+            if parsed.netloc == "" or parsed.netloc == request.get_host():
                 return redirect(referrer)
 
-        return redirect('/')
+        return redirect("/")
 
     def _notify_team(self, request, exception, category, traceback_str):
         try:
-            user = request.user.username if request.user.is_authenticated else 'anonymous'
-            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip()
+            user = request.user.username if request.user.is_authenticated else "anonymous"
+            ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")).split(",")[0].strip()
             logger.error(
-                'Error [%s] %s %s by %s from %s: %s',
-                category, request.method, request.path, user, ip,
-                str(exception)[:200]
+                "Error [%s] %s %s by %s from %s: %s",
+                category,
+                request.method,
+                request.path,
+                user,
+                ip,
+                str(exception)[:200],
             )
         except (ValueError, TypeError) as e:
-            logger.warning('Failed to dispatch error notification: %s', e)
+            logger.warning("Failed to dispatch error notification: %s", e)
 
     def _audit_log(self, request, exception, category):
         try:
             from core.models import SystemAuditLog
+
             SystemAuditLog.objects.create(
                 user=request.user if request.user.is_authenticated else None,
-                company_id=getattr(request, 'company_id', None),
-                model_name='_system_error',
-                object_id='0',
-                action='error',
+                company_id=getattr(request, "company_id", None),
+                model_name="_system_error",
+                object_id="0",
+                action="error",
                 changes={
-                    'category': category,
-                    'exception': type(exception).__name__,
-                    'message': str(exception)[:500],
-                    'path': request.path,
-                    'method': request.method,
+                    "category": category,
+                    "exception": type(exception).__name__,
+                    "message": str(exception)[:500],
+                    "path": request.path,
+                    "method": request.method,
                 },
-                ip_address=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip(),
+                ip_address=request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
+                .split(",")[0]
+                .strip(),
             )
         except (IntegrityError, DatabaseError):
             pass
 
     @staticmethod
     def _is_api(request):
-        return '/api/' in request.path or request.path.startswith('/_dev/')
+        return "/api/" in request.path or request.path.startswith("/_dev/")
 
 
 class WhiteLabelMiddleware:
@@ -657,6 +717,7 @@ class WhiteLabelMiddleware:
     Detektira WhiteLabel konfiguraciju iz HTTP_HOST.
     Sprema u request.white_label (None ako nije WL request).
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -665,11 +726,11 @@ class WhiteLabelMiddleware:
 
         from companies.models import WhiteLabelConfig
 
-        host = request.META.get('HTTP_HOST', '').split(':')[0].lower()
-        cache_key = f'wl_config:{host}'
+        host = request.META.get("HTTP_HOST", "").split(":")[0].lower()
+        cache_key = f"wl_config:{host}"
 
-        wl = cache.get(cache_key, '__NOT_SET__')
-        if wl == '__NOT_SET__':
+        wl = cache.get(cache_key, "__NOT_SET__")
+        if wl == "__NOT_SET__":
             wl = WhiteLabelConfig.get_for_request(request)
             cache.set(cache_key, wl, timeout=3600)
 
@@ -679,14 +740,14 @@ class WhiteLabelMiddleware:
 
 class LicenseCheckMiddleware:
     """Blokira pristup za suspendirane distributere. GDPR export uvijek dostupan."""
-    BYPASS_PATHS = ('/admin/', '/static/', '/media/', '/pocni/', '/hr/gdpr/',
-                    '/hr/export/', '/mcp/', '/api/')
+
+    BYPASS_PATHS = ("/admin/", "/static/", "/media/", "/pocni/", "/hr/gdpr/", "/hr/export/", "/mcp/", "/api/")
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        wl = getattr(request, 'white_label', None)
+        wl = getattr(request, "white_label", None)
         if wl:
             try:
                 token = wl.license_token
@@ -694,9 +755,17 @@ class LicenseCheckMiddleware:
                 if not any(path.startswith(p) for p in self.BYPASS_PATHS):
                     if not token.is_usable():
                         from django.shortcuts import render
-                        return render(request, 'license/suspended.html', {
-                            'wl': wl, 'token': token, 'status': token.status,
-                        }, status=402)
+
+                        return render(
+                            request,
+                            "license/suspended.html",
+                            {
+                                "wl": wl,
+                                "token": token,
+                                "status": token.status,
+                            },
+                            status=402,
+                        )
                     elif token.days_until_expiry() < 7:
                         request.license_warning = True
                         request.license_days = token.days_until_expiry()

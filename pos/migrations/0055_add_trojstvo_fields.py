@@ -4,30 +4,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0054_add_gym_appointment_type'),
+        ("pos", "0054_add_gym_appointment_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='improvementsuggestion',
-            name='ai_resolution',
-            field=models.TextField(blank=True, verbose_name='Dogovoreno rješenje'),
+            model_name="improvementsuggestion",
+            name="ai_resolution",
+            field=models.TextField(blank=True, verbose_name="Dogovoreno rješenje"),
         ),
         migrations.AddField(
-            model_name='improvementsuggestion',
-            name='gemini_proposal',
-            field=models.TextField(blank=True, verbose_name='Gemini prijedlog'),
+            model_name="improvementsuggestion",
+            name="gemini_proposal",
+            field=models.TextField(blank=True, verbose_name="Gemini prijedlog"),
         ),
         migrations.AddField(
-            model_name='improvementsuggestion',
-            name='haiku_proposal',
-            field=models.TextField(blank=True, verbose_name='Haiku prijedlog'),
+            model_name="improvementsuggestion",
+            name="haiku_proposal",
+            field=models.TextField(blank=True, verbose_name="Haiku prijedlog"),
         ),
         migrations.AddField(
-            model_name='improvementsuggestion',
-            name='trojstvo_status',
-            field=models.CharField(blank=True, choices=[('', 'Nije pokrenuto'), ('pending', 'Analizira se...'), ('agreed', 'Dogovoreno'), ('conflict', 'Conflict — odlučuje Ivan'), ('error', 'Greška')], default='', max_length=20, verbose_name='Trojstvo status'),
+            model_name="improvementsuggestion",
+            name="trojstvo_status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", "Nije pokrenuto"),
+                    ("pending", "Analizira se..."),
+                    ("agreed", "Dogovoreno"),
+                    ("conflict", "Conflict — odlučuje Ivan"),
+                    ("error", "Greška"),
+                ],
+                default="",
+                max_length=20,
+                verbose_name="Trojstvo status",
+            ),
         ),
     ]

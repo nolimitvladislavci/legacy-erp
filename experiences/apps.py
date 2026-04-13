@@ -2,6 +2,6 @@ from django.apps import AppConfig
 
 
 class ExperiencesConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'experiences'
-    verbose_name = 'Agro-Turizam 360'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "experiences"
+    verbose_name = "Agro-Turizam 360"

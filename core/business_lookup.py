@@ -45,37 +45,38 @@ FINA_REGISTER_URL = "https://infobiz.fina.hr/Registration"
 
 # ─── NKD/WZ-Lookup (in-memory za brze upite bez DB hita) ─────────────────────
 _NKD_CACHE: dict[str, str] = {}  # {code: name_hr}
-_WZ_CACHE: dict[str, str] = {}   # {code: name_de}
+_WZ_CACHE: dict[str, str] = {}  # {code: name_de}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # RESULT DATACLASS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @dataclass
 class BusinessLookupResult:
     """Standardizirani rezultat lookup-a — isti format za sve države i izvore."""
 
     found: bool = False
-    source: str = ""          # "vies" | "fina_infobiz" | "unternehmensregister" | "database"
+    source: str = ""  # "vies" | "fina_infobiz" | "unternehmensregister" | "database"
     country: str = ""
 
     # Osnovni podaci
     name: str = ""
-    tax_id: str = ""          # OIB (HR) / USt-IdNr (DE) / UID (AT) / DDV (SI)
-    vat_id: str = ""          # EU PDV broj s prefiksom (HR12345.. / DE123..)
-    mb: str = ""              # Matični broj (HR) / HRB-Nummer (DE)
+    tax_id: str = ""  # OIB (HR) / USt-IdNr (DE) / UID (AT) / DDV (SI)
+    vat_id: str = ""  # EU PDV broj s prefiksom (HR12345.. / DE123..)
+    mb: str = ""  # Matični broj (HR) / HRB-Nummer (DE)
     address: str = ""
     city: str = ""
     zip_code: str = ""
 
     # Prošireni podaci
-    nkd: str = ""             # HR NKD šifra  (npr. "46.90")
-    nkd_name: str = ""        # Naziv djelatnosti
-    wz_code: str = ""         # DE WZ 2008 šifra
-    wz_name: str = ""         # Naziv WZ djelatnosti
-    status: str = ""          # "Aktivan" / "aktiv" / ...
-    size: str = ""            # "Mikro" / "Klein" / ...
+    nkd: str = ""  # HR NKD šifra  (npr. "46.90")
+    nkd_name: str = ""  # Naziv djelatnosti
+    wz_code: str = ""  # DE WZ 2008 šifra
+    wz_name: str = ""  # Naziv WZ djelatnosti
+    status: str = ""  # "Aktivan" / "aktiv" / ...
+    size: str = ""  # "Mikro" / "Klein" / ...
     founding_year: str = ""
 
     # Meta
@@ -115,11 +116,12 @@ class BusinessLookupResult:
 # GLAVNA FUNKCIJA — jedina koju trebate importati
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def lookup_business(
     tax_id: str,
     country: str = "HR",
-    company=None,         # Company model instanca — za FINA token
-    fina_token: str = "", # Ili direktno token
+    company=None,  # Company model instanca — za FINA token
+    fina_token: str = "",  # Ili direktno token
     timeout: int = 8,
 ) -> BusinessLookupResult:
     """
@@ -168,14 +170,15 @@ def lookup_business(
 # HR LOOKUP
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def _lookup_hr(oib: str, company, fina_token: str, timeout: int) -> BusinessLookupResult:
     """HR: VIES → FINA Info.BIZ → not_vat_registered fallback."""
 
     from core.oib_validator import validate_oib_hr
+
     if not validate_oib_hr(oib):
         return BusinessLookupResult(
-            found=False, country="HR", oib_valid=False,
-            error="Neispravan OIB format (MOD 11,10 provjera nije prošla)."
+            found=False, country="HR", oib_valid=False, error="Neispravan OIB format (MOD 11,10 provjera nije prošla)."
         )
 
     # Korak 1: VIES
@@ -211,9 +214,8 @@ def _lookup_hr(oib: str, company, fina_token: str, timeout: int) -> BusinessLook
             "OIB je formalno ispravan, ali firma nije pronađena u EU VIES registru "
             "(vjerojatno nije PDV obveznik — mikro poduzetnik, OPG, obrt). "
             "Unesite podatke ručno ili dodajte FINA Info.BIZ token u Postavkama."
-            if not token else
-            "Firma nije pronađena ni u VIES ni u FINA Info.BIZ registru. "
-            "Unesite podatke ručno."
+            if not token
+            else "Firma nije pronađena ni u VIES ni u FINA Info.BIZ registru. Unesite podatke ručno."
         ),
     )
 
@@ -221,6 +223,7 @@ def _lookup_hr(oib: str, company, fina_token: str, timeout: int) -> BusinessLook
 # ══════════════════════════════════════════════════════════════════════════════
 # DE LOOKUP
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def _lookup_de(full_vat: str, clean_vat: str, timeout: int) -> BusinessLookupResult:
     """
@@ -236,8 +239,10 @@ def _lookup_de(full_vat: str, clean_vat: str, timeout: int) -> BusinessLookupRes
     # VIES validacija formata
     if not re.match(r"^\d{9}$", vat_clean):
         return BusinessLookupResult(
-            found=False, country="DE", oib_valid=False,
-            error="Neispravan format USt-IdNr. Očekivano: DE + 9 znamenki (npr. DE119948368)."
+            found=False,
+            country="DE",
+            oib_valid=False,
+            error="Neispravan format USt-IdNr. Očekivano: DE + 9 znamenki (npr. DE119948368).",
         )
 
     # VIES lookup
@@ -271,11 +276,12 @@ def _lookup_de(full_vat: str, clean_vat: str, timeout: int) -> BusinessLookupRes
 # VIES (EU generički)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def _lookup_vies(country_code: str, vat_number: str, timeout: int = 8) -> BusinessLookupResult:
     """SOAP poziv prema EU VIES servisu."""
     soap = (
         '<?xml version="1.0" encoding="UTF-8"?>'
-        '<soapenv:Envelope'
+        "<soapenv:Envelope"
         ' xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"'
         ' xmlns:urn="urn:ec.europa.eu:taxud:vies:services:checkVat:types">'
         "<soapenv:Body><urn:checkVat>"
@@ -285,7 +291,8 @@ def _lookup_vies(country_code: str, vat_number: str, timeout: int = 8) -> Busine
     )
     try:
         r = requests.post(
-            VIES_URL, data=soap,
+            VIES_URL,
+            data=soap,
             headers={"Content-Type": "text/xml"},
             timeout=timeout,
         )
@@ -374,6 +381,7 @@ def _parse_vies_address(raw: str, country: str = "HR") -> dict:
 # FINA Info.BIZ
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def _lookup_fina(oib: str, api_token: str, timeout: int = 8) -> BusinessLookupResult:
     """FINA Info.BIZ lookup — koristi se kad VIES ne vrati rezultat."""
     headers = {
@@ -393,21 +401,22 @@ def _lookup_fina(oib: str, api_token: str, timeout: int = 8) -> BusinessLookupRe
                 return _parse_fina_response(r.json(), oib)
             elif r.status_code == 401:
                 return BusinessLookupResult(
-                    found=False, source="fina_infobiz",
-                    error="Neispravan FINA Info.BIZ API token. Provjerite token u Postavkama → Integracije."
+                    found=False,
+                    source="fina_infobiz",
+                    error="Neispravan FINA Info.BIZ API token. Provjerite token u Postavkama → Integracije.",
                 )
             elif r.status_code == 403:
                 return BusinessLookupResult(
-                    found=False, source="fina_infobiz",
-                    error="FINA API token nema dozvolu. Registrirajte se na %s" % FINA_REGISTER_URL
+                    found=False,
+                    source="fina_infobiz",
+                    error="FINA API token nema dozvolu. Registrirajte se na %s" % FINA_REGISTER_URL,
                 )
         except requests.Timeout:
             return BusinessLookupResult(found=False, source="fina_infobiz", error="FINA API timeout.")
         except requests.RequestException as exc:
             logger.warning("FINA lookup error OIB %s: %s", oib, exc)
 
-    return BusinessLookupResult(found=False, source="fina_infobiz",
-                                error="Firma nije pronađena u FINA Info.BIZ.")
+    return BusinessLookupResult(found=False, source="fina_infobiz", error="Firma nije pronađena u FINA Info.BIZ.")
 
 
 def _parse_fina_response(data: dict, oib: str) -> BusinessLookupResult:
@@ -455,6 +464,7 @@ def _parse_fina_response(data: dict, oib: str) -> BusinessLookupResult:
 # NKD / WZ ŠIFARNIK
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def _get_nkd_name(code: str) -> str:
     """Dohvati naziv HR NKD djelatnosti. Cache + DB fallback."""
     if not code:
@@ -464,6 +474,7 @@ def _get_nkd_name(code: str) -> str:
         return _NKD_CACHE[code]
     try:
         from companies.models import NKDCode
+
         obj = NKDCode.objects.filter(code=code).first()
         if obj:
             _NKD_CACHE[code] = obj.name_hr
@@ -488,6 +499,7 @@ def _get_wz_name(code: str) -> str:
         return _WZ_CACHE[code]
     try:
         from companies.models import NKDCode
+
         obj = NKDCode.objects.filter(code=code).first()
         if obj:
             name = obj.name_en or obj.name_hr
@@ -524,15 +536,11 @@ def get_nkd_choices_for_select(query: str = "", limit: int = 20) -> list[dict]:
     """
     try:
         from companies.models import NKDCode
+
         qs = NKDCode.objects.filter(is_active=True)
         if query:
-            qs = qs.filter(
-                models_Q_or_name(query)
-            )
-        return [
-            {"code": obj.code, "name": obj.name_hr, "level": obj.level}
-            for obj in qs[:limit]
-        ]
+            qs = qs.filter(models_Q_or_name(query))
+        return [{"code": obj.code, "name": obj.name_hr, "level": obj.level} for obj in qs[:limit]]
     except DatabaseError as exc:
         logger.warning("NKD choices error: %s", exc)
         return []
@@ -541,6 +549,7 @@ def get_nkd_choices_for_select(query: str = "", limit: int = 20) -> list[dict]:
 def models_Q_or_name(query: str):
     """Pomoćna funkcija — izbjegava circular import."""
     from django.db.models import Q
+
     return Q(code__icontains=query) | Q(name_hr__icontains=query) | Q(name_en__icontains=query)
 
 
@@ -548,12 +557,13 @@ def models_Q_or_name(query: str):
 # POMOĆNE FUNKCIJE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def _strip_country_prefix(tax_id: str, country: str) -> str:
     """HR12345 → 12345, DE119948368 → 119948368"""
     prefix_map = {"HR": "HR", "DE": "DE", "AT": "AT", "SI": "SI", "IT": "IT"}
     prefix = prefix_map.get(country, "")
     if prefix and tax_id.upper().startswith(prefix):
-        return tax_id[len(prefix):]
+        return tax_id[len(prefix) :]
     return tax_id
 
 
@@ -571,6 +581,7 @@ def _lookup_in_database(tax_id: str, country: str, company) -> Optional[Business
         return None
     try:
         from partners.models import Partner
+
         partner = Partner.objects.filter(company=company, oib=tax_id).first()
         if partner:
             return BusinessLookupResult(
@@ -592,6 +603,7 @@ def _lookup_in_database(tax_id: str, country: str, company) -> Optional[Business
 # ══════════════════════════════════════════════════════════════════════════════
 # CONVENIENCE — direktna upotreba u views.py
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def lookup_business_json(tax_id: str, country: str = "HR", company=None) -> dict:
     """Shortcut koji odmah vraća dict za JsonResponse."""

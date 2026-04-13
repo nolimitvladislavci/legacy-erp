@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udruge', '0013_flock_modul'),
+        ("udruge", "0013_flock_modul"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='golubinjak',
-            name='fotografija',
-            field=models.ImageField(blank=True, null=True, upload_to='golubinjaci/'),
+            model_name="golubinjak",
+            name="fotografija",
+            field=models.ImageField(blank=True, null=True, upload_to="golubinjaci/"),
         ),
     ]

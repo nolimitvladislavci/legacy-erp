@@ -17,12 +17,25 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = [
-            "doctype", "country", "status",
-            "date_issued", "date_due", "date_delivery",
-            "client_name", "client_address", "client_city",
-            "client_country", "client_oib", "client_email",
-            "payment_method", "currency", "iban", "swift",
-            "reference_number", "note", "internal_note",
+            "doctype",
+            "country",
+            "status",
+            "date_issued",
+            "date_due",
+            "date_delivery",
+            "client_name",
+            "client_address",
+            "client_city",
+            "client_country",
+            "client_oib",
+            "client_email",
+            "payment_method",
+            "currency",
+            "iban",
+            "swift",
+            "reference_number",
+            "note",
+            "internal_note",
             "nkd_code",
         ]
         widgets = {
@@ -37,9 +50,7 @@ class InvoiceForm(forms.ModelForm):
         due = self.cleaned_data.get("date_due")
         issued = self.cleaned_data.get("date_issued")
         if due and issued and due < issued.date():
-            raise ValidationError(
-                _("Datum dospijeća ne može biti prije datuma izdavanja.")
-            )
+            raise ValidationError(_("Datum dospijeća ne može biti prije datuma izdavanja."))
         return due
 
     def clean_client_oib(self):
@@ -61,8 +72,12 @@ class InvoiceItemForm(forms.ModelForm):
     class Meta:
         model = InvoiceItem
         fields = [
-            "description", "quantity", "unit",
-            "unit_price", "discount", "tax_rate",
+            "description",
+            "quantity",
+            "unit",
+            "unit_price",
+            "discount",
+            "tax_rate",
         ]
 
     def clean_quantity(self):
@@ -89,10 +104,7 @@ class InvoiceItemFormSet(forms.BaseInlineFormSet):
 
     def clean(self):
         super().clean()
-        valid_forms = [
-            f for f in self.forms
-            if f.cleaned_data and not f.cleaned_data.get("DELETE", False)
-        ]
+        valid_forms = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get("DELETE", False)]
         if not valid_forms:
             raise ValidationError(_("Račun mora imati barem jednu stavku."))
 

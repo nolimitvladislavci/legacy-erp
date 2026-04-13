@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tracking', '0003_shipment_fields'),
+        ("tracking", "0003_shipment_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='trackeditem',
-            name='delivery_method',
-            field=models.CharField(blank=True, choices=[('internal', 'Vlastito vozilo'), ('bus', 'Autobusna linija'), ('taxi', 'Taxi / brza dostava'), ('crowd', 'Crowd-shipping'), ('courier', 'Kurirska sluzba'), ('pickup', 'Osobno preuzimanje')], max_length=20, verbose_name='Nacin dostave'),
+            model_name="trackeditem",
+            name="delivery_method",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("internal", "Vlastito vozilo"),
+                    ("bus", "Autobusna linija"),
+                    ("taxi", "Taxi / brza dostava"),
+                    ("crowd", "Crowd-shipping"),
+                    ("courier", "Kurirska sluzba"),
+                    ("pickup", "Osobno preuzimanje"),
+                ],
+                max_length=20,
+                verbose_name="Nacin dostave",
+            ),
         ),
     ]

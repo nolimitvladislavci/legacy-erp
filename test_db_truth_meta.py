@@ -1,8 +1,8 @@
 import os
 import sys
 
-sys.path.append('/var/www/fina-connect')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+sys.path.append("/var/www/fina-connect")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
 import django
 
@@ -10,9 +10,10 @@ django.setup()
 
 from django.db import connection
 
-print("="*70)
+print("=" * 70)
 print(" FINA-CONNECT CHAOS MONKEY - META TEST (POSTGRESQL INTROSPEKCIJA)")
-print("="*70)
+print("=" * 70)
+
 
 def verify_database_constraints():
     with connection.cursor() as cursor:
@@ -67,6 +68,7 @@ def verify_database_constraints():
             print("    -> Bilo koji alat koji pristupa bazi direktno može upisati razliku.")
             print("    -> Python 'clean()' metoda je trenutno jedina, vrlo krhka linija obrane.")
 
+
 if __name__ == "__main__":
     verify_database_constraints()
-    print("="*70)
+    print("=" * 70)

@@ -5,21 +5,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('appointments', '0005_appointment_payment_method_appointment_total_price_and_more'),
-        ('companies', '0001_initial'),
+        ("appointments", "0005_appointment_payment_method_appointment_total_price_and_more"),
+        ("companies", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='appointment',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka'),
+            model_name="appointment",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="companies.company",
+                verbose_name="Tvrtka",
+            ),
         ),
         migrations.AddField(
-            model_name='bookingresource',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka'),
+            model_name="bookingresource",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="companies.company",
+                verbose_name="Tvrtka",
+            ),
         ),
     ]

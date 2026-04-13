@@ -31,6 +31,7 @@ HUMAN_REVIEW_THRESHOLD = Decimal("0.70")
 # Vendor history lookup
 # -----------------------------------------------
 
+
 def get_vendor_history(company, vendor_name, limit=5):
     """
     Find previous bookings for this vendor from JournalEntry + LedgerLine.
@@ -41,14 +42,11 @@ def get_vendor_history(company, vendor_name, limit=5):
     if not vendor_name or len(vendor_name) < 2:
         return []
 
-    previous = (
-        JournalEntry.objects.filter(
-            company=company,
-            description__icontains=vendor_name,
-            is_posted=True,
-        )
-        .order_by("-date")[:limit]
-    )
+    previous = JournalEntry.objects.filter(
+        company=company,
+        description__icontains=vendor_name,
+        is_posted=True,
+    ).order_by("-date")[:limit]
 
     patterns = []
     for entry in previous:
@@ -74,6 +72,7 @@ def get_vendor_history(company, vendor_name, limit=5):
 # -----------------------------------------------
 # Main proposal function
 # -----------------------------------------------
+
 
 def propose_booking(archive_entry):
     """
@@ -105,6 +104,7 @@ def propose_booking(archive_entry):
 # History-based proposal
 # -----------------------------------------------
 
+
 def _proposal_from_history(history, amount, vendor_name):
     """
     Build proposal by replicating the most common pattern from history.
@@ -117,13 +117,9 @@ def _proposal_from_history(history, amount, vendor_name):
         return None
 
     # Calculate total from template (use debit side total)
-    template_total = sum(
-        l["amount"] for l in template_lines if l["side"] == "debit"
-    )
+    template_total = sum(l["amount"] for l in template_lines if l["side"] == "debit")
     if template_total == 0:
-        template_total = sum(
-            l["amount"] for l in template_lines if l["side"] == "credit"
-        )
+        template_total = sum(l["amount"] for l in template_lines if l["side"] == "credit")
     if template_total == 0:
         return None
 
@@ -146,10 +142,7 @@ def _proposal_from_history(history, amount, vendor_name):
 
     # Check if all history patterns use the same accounts
     template_accounts = set(l["account"] for l in template_lines)
-    all_same = all(
-        set(l["account"] for l in h["lines"]) == template_accounts
-        for h in history[:3]
-    )
+    all_same = all(set(l["account"] for l in h["lines"]) == template_accounts for h in history[:3])
 
     confidence = Decimal("0.95") if all_same else Decimal("0.82")
 
@@ -157,9 +150,7 @@ def _proposal_from_history(history, amount, vendor_name):
         "debit": debit_lines,
         "credit": credit_lines,
         "confidence": float(confidence),
-        "reasoning": "Replicirano iz {} prethodnih knjiženja za {}".format(
-            len(history), vendor_name
-        ),
+        "reasoning": "Replicirano iz {} prethodnih knjiženja za {}".format(len(history), vendor_name),
         "auto_book": confidence >= AUTO_BOOK_THRESHOLD,
         "source": "history",
     }
@@ -169,6 +160,7 @@ def _proposal_from_history(history, amount, vendor_name):
 # AI-based proposal
 # -----------------------------------------------
 
+
 def _proposal_from_ai(archive_entry, history, company):
     """
     Use Claude AI to classify and propose booking.
@@ -176,12 +168,8 @@ def _proposal_from_ai(archive_entry, history, company):
     from konto.models import KontoAccount
 
     try:
-        accounts = KontoAccount.objects.filter(
-            company=company, is_active=True
-        ).values_list("code", "name")[:100]
-        account_list = "\n".join(
-            "{} - {}".format(code, name) for code, name in accounts
-        )
+        accounts = KontoAccount.objects.filter(company=company, is_active=True).values_list("code", "name")[:100]
+        account_list = "\n".join("{} - {}".format(code, name) for code, name in accounts)
     except DatabaseError:
         account_list = "Standardni HR kontni plan (RRiF)"
 
@@ -198,9 +186,7 @@ def _proposal_from_ai(archive_entry, history, company):
                 )
                 for l in h["lines"]
             )
-            history_text += "  {}: {} -> {}\n".format(
-                h["date"], h["description"], lines_str
-            )
+            history_text += "  {}: {} -> {}\n".format(h["date"], h["description"], lines_str)
 
     prompt = (
         "Ti si hrvatski ovlašteni računovođa. Predloži knjiženje za ovaj dokument.\n\n"
@@ -213,12 +199,12 @@ def _proposal_from_ai(archive_entry, history, company):
         "{history}\n"
         "Dostupni konti:\n{accounts}\n\n"
         "Odgovori ISKLJUČIVO u JSON formatu:\n"
-        '{{\n'
+        "{{\n"
         '  "debit": [{{"account": "XXXX", "amount": 0.00, "description": "..."}}],\n'
         '  "credit": [{{"account": "XXXX", "amount": 0.00, "description": "..."}}],\n'
         '  "confidence": 0.XX,\n'
         '  "reasoning": "Kratko obrazloženje"\n'
-        '}}\n\n'
+        "}}\n\n"
         "Pravila:\n"
         "- Ukupni debit MORA biti jednak ukupnom creditu\n"
         "- Za ulazne račune: troškovi na D, obveze dobavljaču na P, pretporez na D\n"
@@ -281,6 +267,7 @@ def _proposal_from_ai(archive_entry, history, company):
 # Fallback proposal
 # -----------------------------------------------
 
+
 def _fallback_proposal(archive_entry):
     """
     Fallback when AI is unavailable -- puts everything in human review queue.
@@ -335,9 +322,7 @@ def _fallback_proposal(archive_entry):
             "debit": [],
             "credit": [],
             "confidence": 0.0,
-            "reasoning": "Nepoznat tip dokumenta: {} — potrebna ručna klasifikacija".format(
-                source_type
-            ),
+            "reasoning": "Nepoznat tip dokumenta: {} — potrebna ručna klasifikacija".format(source_type),
             "auto_book": False,
             "source": "fallback",
         }
@@ -346,6 +331,7 @@ def _fallback_proposal(archive_entry):
 # -----------------------------------------------
 # Execute booking (create JournalEntry + LedgerLines)
 # -----------------------------------------------
+
 
 def _get_or_create_account(company, code, fallback_name=""):
     """Get or auto-create a KontoAccount by code for the company."""
@@ -371,11 +357,7 @@ def _get_or_create_account(company, code, fallback_name=""):
             account_type=account_type,
             is_active=True,
         )
-        logger.info(
-            "Auto-created KontoAccount {} - {} for company {}".format(
-                code, acct.name, company.pk
-            )
-        )
+        logger.info("Auto-created KontoAccount {} - {} for company {}".format(code, acct.name, company.pk))
         return acct
 
 
@@ -403,9 +385,7 @@ def _execute_booking(archive_entry, proposal):
     )
 
     for line in proposal.get("debit", []):
-        account = _get_or_create_account(
-            company, line["account"], line.get("description", "")
-        )
+        account = _get_or_create_account(company, line["account"], line.get("description", ""))
         LedgerLine.objects.create(
             journal_entry=journal,
             account=account,
@@ -415,9 +395,7 @@ def _execute_booking(archive_entry, proposal):
         )
 
     for line in proposal.get("credit", []):
-        account = _get_or_create_account(
-            company, line["account"], line.get("description", "")
-        )
+        account = _get_or_create_account(company, line["account"], line.get("description", ""))
         LedgerLine.objects.create(
             journal_entry=journal,
             account=account,
@@ -447,16 +425,13 @@ def _save_review(archive_entry, proposal):
         archive_entry.ai_proposal = proposal
         archive_entry.save(update_fields=["ai_proposal"])
     else:
-        logger.info(
-            "Review needed for ArhivaEntry {}: {}".format(
-                archive_entry.pk, json.dumps(proposal, default=str)
-            )
-        )
+        logger.info("Review needed for ArhivaEntry {}: {}".format(archive_entry.pk, json.dumps(proposal, default=str)))
 
 
 # -----------------------------------------------
 # Main entry point
 # -----------------------------------------------
+
 
 def process_archive_entry(archive_entry_id, auto_commit=False):
     """

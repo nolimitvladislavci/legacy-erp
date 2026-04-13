@@ -1,4 +1,5 @@
 """Webhook endpoint for posrednik status callbacks."""
+
 import json
 import logging
 

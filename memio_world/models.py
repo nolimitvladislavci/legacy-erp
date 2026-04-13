@@ -17,32 +17,35 @@ class WaitlistEntry(models.Model):
     memio.world waitlist — migrirana iz memio_pets.WaitlistEntry
     (samo zapisi koji su source='memio.world').
     """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
-    source = models.CharField(max_length=50, default='memio.world')
+    source = models.CharField(max_length=50, default="memio.world")
     interest = models.CharField(
-        max_length=30, blank=True, default='',
+        max_length=30,
+        blank=True,
+        default="",
         choices=[
-            ('timecapsule', 'TimeCapsule'),
-            ('familystory', 'Obiteljska priča'),
-            ('memoryvault', 'Memory Vault'),
-            ('general', 'Općenito'),
+            ("timecapsule", "TimeCapsule"),
+            ("familystory", "Obiteljska priča"),
+            ("memoryvault", "Memory Vault"),
+            ("general", "Općenito"),
         ],
-        help_text='Koji dio Memio Worlda zanima korisnika',
+        help_text="Koji dio Memio Worlda zanima korisnika",
     )
     ip = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    notified = models.BooleanField(default=False, help_text='Je li poslan launch email')
+    notified = models.BooleanField(default=False, help_text="Je li poslan launch email")
 
     class Meta:
-        app_label = 'memio_world'
-        verbose_name = _('Waitlist prijava')
-        verbose_name_plural = _('Waitlist prijave')
-        ordering = ['-created_at']
+        app_label = "memio_world"
+        verbose_name = _("Waitlist prijava")
+        verbose_name_plural = _("Waitlist prijave")
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'{self.email} ({self.source})'
+        return f"{self.email} ({self.source})"
 
 
 class TimeCapsule(models.Model):
@@ -50,34 +53,33 @@ class TimeCapsule(models.Model):
     Digitalna vremenska kapsula — poruka, mediji, datum otvaranja.
     Korisnik kreira kapsulu koja se "otvara" na zadani datum.
     """
+
     STATUS_CHOICES = [
-        ('draft', 'Nacrt'),
-        ('sealed', 'Zapečaćena'),
-        ('opened', 'Otvorena'),
-        ('expired', 'Istekla'),
+        ("draft", "Nacrt"),
+        ("sealed", "Zapečaćena"),
+        ("opened", "Otvorena"),
+        ("expired", "Istekla"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner_email = models.EmailField(help_text='Kreator kapsule')
+    owner_email = models.EmailField(help_text="Kreator kapsule")
     title = models.CharField(max_length=200)
-    message = models.TextField(blank=True, help_text='Tekstualna poruka')
-    media_urls = models.JSONField(default=list, blank=True,
-                                   help_text='Lista URL-ova na medije (slike, video, audio)')
-    recipients = models.JSONField(default=list, blank=True,
-                                   help_text='Email adrese primatelja')
-    open_date = models.DateField(help_text='Datum kad se kapsula otvara')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    message = models.TextField(blank=True, help_text="Tekstualna poruka")
+    media_urls = models.JSONField(default=list, blank=True, help_text="Lista URL-ova na medije (slike, video, audio)")
+    recipients = models.JSONField(default=list, blank=True, help_text="Email adrese primatelja")
+    open_date = models.DateField(help_text="Datum kad se kapsula otvara")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")
     created_at = models.DateTimeField(auto_now_add=True)
     opened_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        app_label = 'memio_world'
-        verbose_name = _('Vremenska kapsula')
-        verbose_name_plural = _('Vremenske kapsule')
-        ordering = ['open_date']
+        app_label = "memio_world"
+        verbose_name = _("Vremenska kapsula")
+        verbose_name_plural = _("Vremenske kapsule")
+        ordering = ["open_date"]
 
     def __str__(self):
-        return f'{self.title} → {self.open_date}'
+        return f"{self.title} → {self.open_date}"
 
 
 class MemoryVault(models.Model):
@@ -85,38 +87,38 @@ class MemoryVault(models.Model):
     Sigurni trezor sjećanja — enkriptirani dokumenti, fotografije,
     obiteljski recepti, važni datumi.
     """
+
     CATEGORY_CHOICES = [
-        ('photo', 'Fotografije'),
-        ('document', 'Dokumenti'),
-        ('recipe', 'Recepti'),
-        ('story', 'Priče'),
-        ('video', 'Video'),
-        ('audio', 'Audio'),
-        ('other', 'Ostalo'),
+        ("photo", "Fotografije"),
+        ("document", "Dokumenti"),
+        ("recipe", "Recepti"),
+        ("story", "Priče"),
+        ("video", "Video"),
+        ("audio", "Audio"),
+        ("other", "Ostalo"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_email = models.EmailField()
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
-    media_url = models.URLField(blank=True, help_text='URL na pohranjeni medij')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="other")
+    media_url = models.URLField(blank=True, help_text="URL na pohranjeni medij")
     file_size_bytes = models.BigIntegerField(default=0)
     is_encrypted = models.BooleanField(default=True)
-    shared_with = models.JSONField(default=list, blank=True,
-                                    help_text='Email adrese s kojima je podijeljeno')
+    shared_with = models.JSONField(default=list, blank=True, help_text="Email adrese s kojima je podijeljeno")
     tags = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'memio_world'
-        verbose_name = _('Memory Vault')
-        verbose_name_plural = _('Memory Vault stavke')
-        ordering = ['-created_at']
+        app_label = "memio_world"
+        verbose_name = _("Memory Vault")
+        verbose_name_plural = _("Memory Vault stavke")
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'{self.title} ({self.category})'
+        return f"{self.title} ({self.category})"
 
 
 class FamilyStory(models.Model):
@@ -124,28 +126,32 @@ class FamilyStory(models.Model):
     Obiteljske priče — tekst + mediji, generacijski lanac.
     Mogu se povezivati (roditelj → dijete priča).
     """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author_email = models.EmailField()
     title = models.CharField(max_length=200)
-    content = models.TextField(help_text='Markdown format')
+    content = models.TextField(help_text="Markdown format")
     media_urls = models.JSONField(default=list, blank=True)
     parent_story = models.ForeignKey(
-        'self', null=True, blank=True, on_delete=models.SET_NULL,
-        related_name='child_stories',
-        help_text='Roditelj priča (za generacijski lanac)',
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="child_stories",
+        help_text="Roditelj priča (za generacijski lanac)",
     )
-    location = models.CharField(max_length=200, blank=True, help_text='Gdje se priča dogodila')
+    location = models.CharField(max_length=200, blank=True, help_text="Gdje se priča dogodila")
     year_from = models.IntegerField(null=True, blank=True)
     year_to = models.IntegerField(null=True, blank=True)
-    is_public = models.BooleanField(default=False, help_text='Vidljivo svima ili samo obitelji')
+    is_public = models.BooleanField(default=False, help_text="Vidljivo svima ili samo obitelji")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'memio_world'
-        verbose_name = _('Obiteljska priča')
-        verbose_name_plural = _('Obiteljske priče')
-        ordering = ['-created_at']
+        app_label = "memio_world"
+        verbose_name = _("Obiteljska priča")
+        verbose_name_plural = _("Obiteljske priče")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -155,65 +161,72 @@ class FamilyStory(models.Model):
 # CHILD PROFILE + MEMORY ENTRY + MILESTONE (F3 task)
 # ════════════════════════════════════════════════════════════════
 
+
 class ChildProfile(models.Model):
     """Svako dijete = jedan digitalni pasoš."""
+
     VISIBILITY_CHOICES = [
-        ('private', 'Samo obitelj'),
-        ('family', 'Šira obitelj'),
-        ('public', 'Javno'),
+        ("private", "Samo obitelj"),
+        ("family", "Šira obitelj"),
+        ("public", "Javno"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
     birth_city = models.CharField(max_length=100, blank=True)
-    birth_country = models.CharField(max_length=2, default='HR')
-    photo = models.ImageField(upload_to='children/', null=True, blank=True)
+    birth_country = models.CharField(max_length=2, default="HR")
+    photo = models.ImageField(upload_to="children/", null=True, blank=True)
     guardian_emails = models.JSONField(
-        default=list, blank=True,
-        help_text='Email adrese roditelja/skrbnika (cross-db, bez FK)',
+        default=list,
+        blank=True,
+        help_text="Email adrese roditelja/skrbnika (cross-db, bez FK)",
     )
-    visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='private')
+    visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default="private")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'memio_world'
-        db_table = 'mw_child_profile'
-        verbose_name = _('Profil djeteta')
-        verbose_name_plural = _('Profili djece')
-        ordering = ['name']
+        app_label = "memio_world"
+        db_table = "mw_child_profile"
+        verbose_name = _("Profil djeteta")
+        verbose_name_plural = _("Profili djece")
+        ordering = ["name"]
 
     def __str__(self):
-        return f'{self.name} ({self.date_of_birth})'
+        return f"{self.name} ({self.date_of_birth})"
 
     @property
     def age(self):
         from datetime import date
+
         today = date.today()
-        return today.year - self.date_of_birth.year - (
-            (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+        return (
+            today.year
+            - self.date_of_birth.year
+            - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
         )
 
 
 class MemoryEntry(models.Model):
     """Jedan zapis u knjizi sjećanja."""
+
     ENTRY_TYPES = [
-        ('photo', 'Fotografija'),
-        ('video', 'Video'),
-        ('text', 'Priča/tekst'),
-        ('milestone', 'Postignuće'),
-        ('document', 'Dokument'),
-        ('drawing', 'Crtež'),
+        ("photo", "Fotografija"),
+        ("video", "Video"),
+        ("text", "Priča/tekst"),
+        ("milestone", "Postignuće"),
+        ("document", "Dokument"),
+        ("drawing", "Crtež"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='memories')
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="memories")
     entry_type = models.CharField(max_length=20, choices=ENTRY_TYPES)
     title = models.CharField(max_length=200)
     content = models.TextField(blank=True)
-    media_file = models.FileField(upload_to='memories/', null=True, blank=True)
-    entry_date = models.DateField(help_text='Datum sjećanja')
+    media_file = models.FileField(upload_to="memories/", null=True, blank=True)
+    entry_date = models.DateField(help_text="Datum sjećanja")
     age_at_entry = models.PositiveSmallIntegerField(null=True, blank=True)
     created_by_email = models.EmailField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -221,14 +234,14 @@ class MemoryEntry(models.Model):
     tags = models.CharField(max_length=500, blank=True)
 
     class Meta:
-        app_label = 'memio_world'
-        db_table = 'mw_memory_entry'
-        ordering = ['entry_date']
-        verbose_name = _('Sjećanje')
-        verbose_name_plural = _('Sjećanja')
+        app_label = "memio_world"
+        db_table = "mw_memory_entry"
+        ordering = ["entry_date"]
+        verbose_name = _("Sjećanje")
+        verbose_name_plural = _("Sjećanja")
 
     def __str__(self):
-        return f'{self.title} ({self.entry_date})'
+        return f"{self.title} ({self.entry_date})"
 
     def save(self, *args, **kwargs):
         if self.child and self.entry_date and not self.age_at_entry:
@@ -239,32 +252,33 @@ class MemoryEntry(models.Model):
 
 class Milestone(models.Model):
     """Prekretnice — 1. korak, 1. riječ, 1. dan škole..."""
+
     MILESTONE_TYPES = [
-        ('first_word', 'Prva riječ'),
-        ('first_step', 'Prvi korak'),
-        ('first_tooth', 'Prvi zubić'),
-        ('school_start', 'Polazak u školu'),
-        ('graduation', 'Završetak obrazovanja'),
-        ('sport', 'Sportski uspjeh'),
-        ('art', 'Umjetnički uspjeh'),
-        ('other', 'Ostalo'),
+        ("first_word", "Prva riječ"),
+        ("first_step", "Prvi korak"),
+        ("first_tooth", "Prvi zubić"),
+        ("school_start", "Polazak u školu"),
+        ("graduation", "Završetak obrazovanja"),
+        ("sport", "Sportski uspjeh"),
+        ("art", "Umjetnički uspjeh"),
+        ("other", "Ostalo"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='milestones')
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="milestones")
     milestone_type = models.CharField(max_length=30, choices=MILESTONE_TYPES)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     achieved_date = models.DateField()
-    photo = models.ImageField(upload_to='milestones/', null=True, blank=True)
+    photo = models.ImageField(upload_to="milestones/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        app_label = 'memio_world'
-        db_table = 'mw_milestone'
-        ordering = ['achieved_date']
-        verbose_name = _('Prekretnica')
-        verbose_name_plural = _('Prekretnice')
+        app_label = "memio_world"
+        db_table = "mw_milestone"
+        ordering = ["achieved_date"]
+        verbose_name = _("Prekretnica")
+        verbose_name_plural = _("Prekretnice")
 
     def __str__(self):
-        return f'{self.title} ({self.achieved_date})'
+        return f"{self.title} ({self.achieved_date})"

@@ -6,26 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0007_add_user_to_breeder'),
+        ("memio_pet", "0007_add_user_to_breeder"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AddAnimalToken',
+            name="AddAnimalToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(db_index=True, default=memio_pet.models._generate_add_animal_token, max_length=64, unique=True)),
-                ('email', models.EmailField(max_length=254)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('used_at', models.DateTimeField(blank=True, null=True)),
-                ('expires_at', models.DateTimeField()),
-                ('ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('breeder', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='add_tokens', to='memio_pet.breederprofile')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "token",
+                    models.CharField(
+                        db_index=True, default=memio_pet.models._generate_add_animal_token, max_length=64, unique=True
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("used_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField()),
+                ("ip", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "breeder",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="add_tokens",
+                        to="memio_pet.breederprofile",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'mp_add_animal_token',
+                "db_table": "mp_add_animal_token",
             },
         ),
     ]

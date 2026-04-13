@@ -4,66 +4,122 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('website', '0007_galleryimage_company_galleryimage_sort_order_and_more'),
+        ("website", "0007_galleryimage_company_galleryimage_sort_order_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KorpasRezervacija',
+            name="KorpasRezervacija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ime', models.CharField(max_length=100, verbose_name='Ime i prezime')),
-                ('telefon', models.CharField(max_length=20, verbose_name='Telefon')),
-                ('vrsta', models.CharField(choices=[('stol', 'Rezervacija stola'), ('sala', 'Najam sale (do 50 osoba)'), ('kusaonica', 'Kušaonica sira')], max_length=20, verbose_name='Vrsta rezervacije')),
-                ('datum', models.DateField(verbose_name='Datum')),
-                ('broj_gostiju', models.PositiveIntegerField(default=1, verbose_name='Broj gostiju')),
-                ('napomena', models.TextField(blank=True, verbose_name='Napomena / Posebni zahtjevi')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("ime", models.CharField(max_length=100, verbose_name="Ime i prezime")),
+                ("telefon", models.CharField(max_length=20, verbose_name="Telefon")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("stol", "Rezervacija stola"),
+                            ("sala", "Najam sale (do 50 osoba)"),
+                            ("kusaonica", "Kušaonica sira"),
+                        ],
+                        max_length=20,
+                        verbose_name="Vrsta rezervacije",
+                    ),
+                ),
+                ("datum", models.DateField(verbose_name="Datum")),
+                ("broj_gostiju", models.PositiveIntegerField(default=1, verbose_name="Broj gostiju")),
+                ("napomena", models.TextField(blank=True, verbose_name="Napomena / Posebni zahtjevi")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Široki Šor — Rezervacija',
-                'verbose_name_plural': 'Široki Šor — Rezervacije',
-                'ordering': ['datum'],
+                "verbose_name": "Široki Šor — Rezervacija",
+                "verbose_name_plural": "Široki Šor — Rezervacije",
+                "ordering": ["datum"],
             },
         ),
         migrations.CreateModel(
-            name='KorpasTermin',
+            name="KorpasTermin",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ime', models.CharField(max_length=100, verbose_name='Ime i prezime')),
-                ('telefon', models.CharField(max_length=20, verbose_name='Telefon')),
-                ('vrsta_vozila', models.CharField(choices=[('osobno', 'Osobno vozilo'), ('teretno', 'Teretno vozilo'), ('kombi', 'Kombi / Van'), ('ostalo', 'Ostalo')], max_length=20, verbose_name='Vrsta vozila')),
-                ('usluga', models.CharField(choices=[('vulkanizacija', 'Vulkanizacija (zamjena / balansiranje)'), ('mehanika', 'Mehanička dijagnostika'), ('obd', 'OBD dijagnostika (skeniranje)'), ('ulje', 'Zamjena ulja i filtera'), ('registracija', 'Priprema za tehnički pregled'), ('ugradnja', 'Ugradnja opreme'), ('ostalo', 'Ostalo')], max_length=30, verbose_name='Usluga')),
-                ('datum', models.DateField(verbose_name='Željeni datum')),
-                ('vrijeme', models.TimeField(verbose_name='Željeno vrijeme')),
-                ('napomena', models.TextField(blank=True, verbose_name='Napomena')),
-                ('status', models.CharField(choices=[('novi', 'Novi'), ('potvrdjen', 'Potvrđen'), ('obavljen', 'Obavljen'), ('otkazan', 'Otkazan')], default='novi', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("ime", models.CharField(max_length=100, verbose_name="Ime i prezime")),
+                ("telefon", models.CharField(max_length=20, verbose_name="Telefon")),
+                (
+                    "vrsta_vozila",
+                    models.CharField(
+                        choices=[
+                            ("osobno", "Osobno vozilo"),
+                            ("teretno", "Teretno vozilo"),
+                            ("kombi", "Kombi / Van"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        max_length=20,
+                        verbose_name="Vrsta vozila",
+                    ),
+                ),
+                (
+                    "usluga",
+                    models.CharField(
+                        choices=[
+                            ("vulkanizacija", "Vulkanizacija (zamjena / balansiranje)"),
+                            ("mehanika", "Mehanička dijagnostika"),
+                            ("obd", "OBD dijagnostika (skeniranje)"),
+                            ("ulje", "Zamjena ulja i filtera"),
+                            ("registracija", "Priprema za tehnički pregled"),
+                            ("ugradnja", "Ugradnja opreme"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        max_length=30,
+                        verbose_name="Usluga",
+                    ),
+                ),
+                ("datum", models.DateField(verbose_name="Željeni datum")),
+                ("vrijeme", models.TimeField(verbose_name="Željeno vrijeme")),
+                ("napomena", models.TextField(blank=True, verbose_name="Napomena")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("novi", "Novi"),
+                            ("potvrdjen", "Potvrđen"),
+                            ("obavljen", "Obavljen"),
+                            ("otkazan", "Otkazan"),
+                        ],
+                        default="novi",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Korpaš — Termin',
-                'verbose_name_plural': 'Korpaš — Termini',
-                'ordering': ['datum', 'vrijeme'],
+                "verbose_name": "Korpaš — Termin",
+                "verbose_name_plural": "Korpaš — Termini",
+                "ordering": ["datum", "vrijeme"],
             },
         ),
         migrations.CreateModel(
-            name='NoLimitPartner',
+            name="NoLimitPartner",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv_firme', models.CharField(max_length=200, verbose_name='Naziv firme')),
-                ('oib', models.CharField(blank=True, max_length=11, verbose_name='OIB')),
-                ('kontakt_osoba', models.CharField(max_length=100, verbose_name='Kontakt osoba')),
-                ('telefon', models.CharField(max_length=20, verbose_name='Telefon')),
-                ('adresa', models.CharField(max_length=200, verbose_name='Adresa')),
-                ('status', models.CharField(choices=[('prijava', 'Prijava'), ('aktivan', 'Aktivan'), ('odbijen', 'Odbijen')], default='prijava', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv_firme", models.CharField(max_length=200, verbose_name="Naziv firme")),
+                ("oib", models.CharField(blank=True, max_length=11, verbose_name="OIB")),
+                ("kontakt_osoba", models.CharField(max_length=100, verbose_name="Kontakt osoba")),
+                ("telefon", models.CharField(max_length=20, verbose_name="Telefon")),
+                ("adresa", models.CharField(max_length=200, verbose_name="Adresa")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("prijava", "Prijava"), ("aktivan", "Aktivan"), ("odbijen", "Odbijen")],
+                        default="prijava",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'No Limit — Partner prijava',
-                'verbose_name_plural': 'No Limit — Partner prijave',
-                'ordering': ['-created_at'],
+                "verbose_name": "No Limit — Partner prijava",
+                "verbose_name_plural": "No Limit — Partner prijave",
+                "ordering": ["-created_at"],
             },
         ),
     ]

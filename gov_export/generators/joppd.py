@@ -1,5 +1,6 @@
 """JOPPD Generator — adapter za postojeći payroll/joppd_generator.py"""
 
+
 class JOPPDGenerator:
     def generate(self, export):
         from payroll.joppd_generator import generate_joppd_xml
@@ -12,7 +13,7 @@ class JOPPDGenerator:
         ).first()
 
         if not run:
-            raise ValueError(f'Nema PayrollRun za {export.period_start}')
+            raise ValueError(f"Nema PayrollRun za {export.period_start}")
 
         payslips = Payslip.objects.filter(payroll_run=run)
         return generate_joppd_xml(export.company, run, payslips)

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0011_add_phone_email_web_to_company'),
+        ("companies", "0011_add_phone_email_web_to_company"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='swift',
-            field=models.CharField(blank=True, default='', max_length=11, verbose_name='BIC/SWIFT'),
+            model_name="company",
+            name="swift",
+            field=models.CharField(blank=True, default="", max_length=11, verbose_name="BIC/SWIFT"),
         ),
     ]

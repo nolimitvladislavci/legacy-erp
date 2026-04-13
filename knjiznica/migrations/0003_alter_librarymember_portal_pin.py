@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('knjiznica', '0002_badgedefinition_bookmeta_age_tier_and_more'),
+        ("knjiznica", "0002_badgedefinition_bookmeta_age_tier_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='librarymember',
-            name='portal_pin',
-            field=models.CharField(blank=True, help_text='4-6 znamenki za pristup roditeljskom portalu', max_length=128, verbose_name='PIN za portal'),
+            model_name="librarymember",
+            name="portal_pin",
+            field=models.CharField(
+                blank=True,
+                help_text="4-6 znamenki za pristup roditeljskom portalu",
+                max_length=128,
+                verbose_name="PIN za portal",
+            ),
         ),
     ]

@@ -4,20 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('borg_ops', '0001_initial'),
+        ("borg_ops", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cardactivity',
-            name='is_public_facing',
-            field=models.BooleanField(default=False, help_text='True = sigurno za prikaz klijentima (QR timeline, portal). False = samo interni.'),
+            model_name="cardactivity",
+            name="is_public_facing",
+            field=models.BooleanField(
+                default=False,
+                help_text="True = sigurno za prikaz klijentima (QR timeline, portal). False = samo interni.",
+            ),
         ),
         migrations.AddField(
-            model_name='cardactivity',
-            name='is_system_generated',
-            field=models.BooleanField(default=False, help_text='True = generiran automatski (transition_to). False = human unos.'),
+            model_name="cardactivity",
+            name="is_system_generated",
+            field=models.BooleanField(
+                default=False, help_text="True = generiran automatski (transition_to). False = human unos."
+            ),
         ),
     ]

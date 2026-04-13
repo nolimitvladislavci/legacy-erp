@@ -5,43 +5,115 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0024_partnership_model'),
-        ('pos', '0018_field_sales'),
+        ("companies", "0024_partnership_model"),
+        ("pos", "0018_field_sales"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='POSDailyReport',
+            name="POSDailyReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(verbose_name='Datum')),
-                ('total_revenue', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Ukupan promet')),
-                ('cash_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Gotovina')),
-                ('card_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Kartica')),
-                ('mobile_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Mobilno plaćanje')),
-                ('voucher_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Vaučeri')),
-                ('account_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Na račun')),
-                ('receipt_count', models.PositiveIntegerField(default=0, verbose_name='Broj računa')),
-                ('cancelled_count', models.PositiveIntegerField(default=0, verbose_name='Stornirani')),
-                ('average_ticket', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Prosječan račun')),
-                ('opening_cash', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Početna gotovina')),
-                ('closing_cash', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Završna gotovina')),
-                ('cash_difference', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Razlika gotovine')),
-                ('tax_breakdown', models.JSONField(blank=True, default=dict, help_text='{"25.00": {"base": 100, "tax": 25, "total": 125}, ...}', verbose_name='PDV razrada')),
-                ('cashier_breakdown', models.JSONField(blank=True, default=dict, help_text='{"Ana": {"count": 10, "total": 500}, ...}', verbose_name='Po blagajnicima')),
-                ('z_report_pdf', models.FileField(blank=True, upload_to='pos/zreports/%Y/%m/', verbose_name='Z-report PDF')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pos_daily_reports', to='companies.company', verbose_name='Tvrtka')),
-                ('session', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='daily_report', to='pos.possession', verbose_name='Smjena')),
-                ('terminal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='daily_reports', to='pos.posterminal', verbose_name='Terminal')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("date", models.DateField(verbose_name="Datum")),
+                (
+                    "total_revenue",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Ukupan promet"),
+                ),
+                (
+                    "cash_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Gotovina"),
+                ),
+                ("card_total", models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Kartica")),
+                (
+                    "mobile_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Mobilno plaćanje"),
+                ),
+                (
+                    "voucher_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Vaučeri"),
+                ),
+                (
+                    "account_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Na račun"),
+                ),
+                ("receipt_count", models.PositiveIntegerField(default=0, verbose_name="Broj računa")),
+                ("cancelled_count", models.PositiveIntegerField(default=0, verbose_name="Stornirani")),
+                (
+                    "average_ticket",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Prosječan račun"),
+                ),
+                (
+                    "opening_cash",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Početna gotovina"),
+                ),
+                (
+                    "closing_cash",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Završna gotovina"),
+                ),
+                (
+                    "cash_difference",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Razlika gotovine"),
+                ),
+                (
+                    "tax_breakdown",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='{"25.00": {"base": 100, "tax": 25, "total": 125}, ...}',
+                        verbose_name="PDV razrada",
+                    ),
+                ),
+                (
+                    "cashier_breakdown",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='{"Ana": {"count": 10, "total": 500}, ...}',
+                        verbose_name="Po blagajnicima",
+                    ),
+                ),
+                (
+                    "z_report_pdf",
+                    models.FileField(blank=True, upload_to="pos/zreports/%Y/%m/", verbose_name="Z-report PDF"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="pos_daily_reports",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "session",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="daily_report",
+                        to="pos.possession",
+                        verbose_name="Smjena",
+                    ),
+                ),
+                (
+                    "terminal",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="daily_reports",
+                        to="pos.posterminal",
+                        verbose_name="Terminal",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dnevni izvještaj POS',
-                'verbose_name_plural': 'Dnevni izvještaji POS',
-                'ordering': ['-date', '-created_at'],
-                'indexes': [models.Index(fields=['company', 'date'], name='pos_posdail_company_e527d2_idx'), models.Index(fields=['terminal', 'date'], name='pos_posdail_termina_836718_idx')],
+                "verbose_name": "Dnevni izvještaj POS",
+                "verbose_name_plural": "Dnevni izvještaji POS",
+                "ordering": ["-date", "-created_at"],
+                "indexes": [
+                    models.Index(fields=["company", "date"], name="pos_posdail_company_e527d2_idx"),
+                    models.Index(fields=["terminal", "date"], name="pos_posdail_termina_836718_idx"),
+                ],
             },
         ),
     ]

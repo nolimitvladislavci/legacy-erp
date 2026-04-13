@@ -7,6 +7,7 @@ from django.http import JsonResponse
 
 def rate_limit(max_requests, window_seconds, key_func=None):
     """Simple rate limiter using Django cache (Redis-backed)."""
+
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
@@ -38,11 +39,7 @@ def rate_limit(max_requests, window_seconds, key_func=None):
             if count >= max_requests:
                 retry_after = int(reset_at - now) + 1
                 response = JsonResponse(
-                    {
-                        "error": "Previše zahtjeva. Pokušajte ponovno za {} sekundi.".format(
-                            retry_after
-                        )
-                    },
+                    {"error": "Previše zahtjeva. Pokušajte ponovno za {} sekundi.".format(retry_after)},
                     status=429,
                 )
                 response["Retry-After"] = str(retry_after)

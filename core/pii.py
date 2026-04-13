@@ -10,6 +10,7 @@ Polja koja štitimo:
 
 Hybrid pristup: plaintext za search, encrypted za backup/audit.
 """
+
 import base64
 import logging
 from functools import lru_cache
@@ -17,50 +18,50 @@ from functools import lru_cache
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
 
-logger = logging.getLogger('pii')
+logger = logging.getLogger("pii")
 
 
 @lru_cache(maxsize=1)
 def _get_fernet():
-    key = getattr(settings, 'FIELD_ENCRYPTION_KEY', None) or getattr(settings, 'FERNET_KEY', None)
+    key = getattr(settings, "FIELD_ENCRYPTION_KEY", None) or getattr(settings, "FERNET_KEY", None)
     if not key:
-        logger.error('FIELD_ENCRYPTION_KEY nije postavljen! PII enkripcija onemogućena.')
+        logger.error("FIELD_ENCRYPTION_KEY nije postavljen! PII enkripcija onemogućena.")
         return None
     if isinstance(key, str):
         key = key.encode()
     try:
         return Fernet(key)
     except Exception as e:
-        logger.error('Fernet key error: %s', e)
+        logger.error("Fernet key error: %s", e)
         return None
 
 
 def encrypt_pii(plaintext: str) -> str:
     if not plaintext:
-        return ''
+        return ""
     f = _get_fernet()
     if not f:
-        return ''
+        return ""
     try:
-        token = f.encrypt(plaintext.encode('utf-8'))
-        return base64.urlsafe_b64encode(token).decode('ascii')
+        token = f.encrypt(plaintext.encode("utf-8"))
+        return base64.urlsafe_b64encode(token).decode("ascii")
     except ValueError as e:
-        logger.warning('PII encrypt failed: %s', e)
-        return ''
+        logger.warning("PII encrypt failed: %s", e)
+        return ""
 
 
 def decrypt_pii(ciphertext: str) -> str:
     if not ciphertext:
-        return ''
+        return ""
     f = _get_fernet()
     if not f:
-        return '[ENCRYPTED]'
+        return "[ENCRYPTED]"
     try:
-        token = base64.urlsafe_b64decode(ciphertext.encode('ascii'))
-        return f.decrypt(token).decode('utf-8')
+        token = base64.urlsafe_b64decode(ciphertext.encode("ascii"))
+        return f.decrypt(token).decode("utf-8")
     except (InvalidToken, Exception) as e:
-        logger.warning('PII decrypt failed: %s', e)
-        return '[ENCRYPTED]'
+        logger.warning("PII decrypt failed: %s", e)
+        return "[ENCRYPTED]"
 
 
 def encrypt_guest_pii(guest):
@@ -80,21 +81,28 @@ def encrypt_guest_pii(guest):
 
 
 def gdpr_erase_guest(guest):
-    guest.first_name = '[ERASED]'
-    guest.last_name = '[ERASED]'
-    guest.document_number = '[ERASED]'
-    guest.document_country = ''
-    guest.nationality = ''
+    guest.first_name = "[ERASED]"
+    guest.last_name = "[ERASED]"
+    guest.document_number = "[ERASED]"
+    guest.document_country = ""
+    guest.nationality = ""
     guest.date_of_birth = None
-    guest.save(update_fields=[
-        'first_name', 'last_name', 'document_number',
-        'document_country', 'nationality', 'date_of_birth',
-    ])
-    logger.info('GDPR erasure: Guest %s PII obrisano', guest.pk)
+    guest.save(
+        update_fields=[
+            "first_name",
+            "last_name",
+            "document_number",
+            "document_country",
+            "nationality",
+            "date_of_birth",
+        ]
+    )
+    logger.info("GDPR erasure: Guest %s PII obrisano", guest.pk)
 
 
 def batch_encrypt_guests(company=None, dry_run=False):
     from rental.models import Guest
+
     qs = Guest.objects.filter(pii_encrypted=False)
     if company:
         qs = qs.filter(booking__company=company)
@@ -103,10 +111,14 @@ def batch_encrypt_guests(company=None, dry_run=False):
     for guest in qs.iterator(chunk_size=100):
         if encrypt_guest_pii(guest):
             if not dry_run:
-                guest.save(update_fields=[
-                    'encrypted_document_number', 'encrypted_first_name',
-                    'encrypted_last_name', 'pii_encrypted',
-                ])
+                guest.save(
+                    update_fields=[
+                        "encrypted_document_number",
+                        "encrypted_first_name",
+                        "encrypted_last_name",
+                        "pii_encrypted",
+                    ]
+                )
             encrypted += 1
-    logger.info('Batch PII: %d/%d %s', encrypted, total, '(DRY)' if dry_run else 'encrypted')
-    return {'total': total, 'encrypted': encrypted}
+    logger.info("Batch PII: %d/%d %s", encrypted, total, "(DRY)" if dry_run else "encrypted")
+    return {"total": total, "encrypted": encrypted}

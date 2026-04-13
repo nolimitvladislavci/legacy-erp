@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('appointments', '0007_bookingservice_branch_dossier'),
+        ("appointments", "0007_bookingservice_branch_dossier"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='bookingservice',
-            name='requires_actor',
-            field=models.BooleanField(default=True, verbose_name='Zahtijeva izvrsitelja (radnika)'),
+            model_name="bookingservice",
+            name="requires_actor",
+            field=models.BooleanField(default=True, verbose_name="Zahtijeva izvrsitelja (radnika)"),
         ),
         migrations.AddField(
-            model_name='bookingservice',
-            name='requires_resource',
-            field=models.BooleanField(default=True, verbose_name='Zahtijeva fizicki resurs'),
+            model_name="bookingservice",
+            name="requires_resource",
+            field=models.BooleanField(default=True, verbose_name="Zahtijeva fizicki resurs"),
         ),
     ]

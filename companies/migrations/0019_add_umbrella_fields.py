@@ -5,30 +5,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0018_initial'),
+        ("companies", "0018_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_umbrella',
-            field=models.BooleanField(default=False, verbose_name='Umbrella tvrtka'),
+            model_name="company",
+            name="is_umbrella",
+            field=models.BooleanField(default=False, verbose_name="Umbrella tvrtka"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='umbrella_max_children',
-            field=models.PositiveIntegerField(default=0, verbose_name='Max podtvrtki'),
+            model_name="company",
+            name="umbrella_max_children",
+            field=models.PositiveIntegerField(default=0, verbose_name="Max podtvrtki"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='umbrella_monthly_fee',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Umbrella mj. naknada (EUR)'),
+            model_name="company",
+            name="umbrella_monthly_fee",
+            field=models.DecimalField(
+                decimal_places=2, default=0, max_digits=10, verbose_name="Umbrella mj. naknada (EUR)"
+            ),
         ),
         migrations.AddField(
-            model_name='company',
-            name='umbrella_parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='umbrella_children', to='companies.company', verbose_name='Nadredjena tvrtka (Umbrella)'),
+            model_name="company",
+            name="umbrella_parent",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="umbrella_children",
+                to="companies.company",
+                verbose_name="Nadredjena tvrtka (Umbrella)",
+            ),
         ),
     ]

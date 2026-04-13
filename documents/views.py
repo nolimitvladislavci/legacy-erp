@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Generic Document Views (kept in main views.py)
 # ════════════════════════════════════════════════════════════
 
+
 @login_required
 def document_list(request):
     # Redirect to Arhiva (unified document archive)
@@ -39,9 +40,13 @@ def document_list_legacy(request):
     doc_type = request.GET.get("doc_type", "")
     is_paid = request.GET.get("is_paid", "")
     company = get_user_company(request)
-    qs = Document.objects.filter(company=company).select_related("company", "partner").order_by("-date_issued") if company else Document.objects.none()
+    qs = (
+        Document.objects.filter(company=company).select_related("company", "partner").order_by("-date_issued")
+        if company
+        else Document.objects.none()
+    )
     if q:
-        qs = qs.filter(Q(doc_number__icontains=q)|Q(partner__name__icontains=q))
+        qs = qs.filter(Q(doc_number__icontains=q) | Q(partner__name__icontains=q))
     if doc_type:
         qs = qs.filter(doc_type=doc_type)
     if is_paid == "1":
@@ -50,10 +55,18 @@ def document_list_legacy(request):
         qs = qs.filter(is_paid=False)
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get("page"))
-    return render(request, "documents/document_list.html", {
-        "page_obj": page, "q": q, "doc_type": doc_type, "is_paid": is_paid,
-        "total": qs.count(), "type_choices": Document.TYPE_CHOICES,
-    })
+    return render(
+        request,
+        "documents/document_list.html",
+        {
+            "page_obj": page,
+            "q": q,
+            "doc_type": doc_type,
+            "is_paid": is_paid,
+            "total": qs.count(),
+            "type_choices": Document.TYPE_CHOICES,
+        },
+    )
 
 
 @login_required
@@ -62,8 +75,8 @@ def document_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-                return redirect('documents:list')
+                messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+                return redirect("documents:list")
             partner_id = request.POST.get("partner")
             partner = Partner.objects.get(pk=partner_id) if partner_id else None
             doc = Document(
@@ -84,15 +97,21 @@ def document_create(request):
             messages.success(request, f"Dokument {doc.doc_number} kreiran.")
             return redirect("documents:list")
         except ObjectDoesNotExist as e:
-            logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
+            logger.error("arhiva_upload FAILED: %s", e, exc_info=True)
             messages.error(request, str(e))
     company = get_user_company(request)
-    return render(request, "documents/document_form.html", {
-        "company": company,
-        "partners": Partner.objects.filter(company=company, is_active=True).order_by("name") if company else Partner.objects.none(),
-        "type_choices": Document.TYPE_CHOICES,
-        "action": "Novi dokument",
-    })
+    return render(
+        request,
+        "documents/document_form.html",
+        {
+            "company": company,
+            "partners": Partner.objects.filter(company=company, is_active=True).order_by("name")
+            if company
+            else Partner.objects.none(),
+            "type_choices": Document.TYPE_CHOICES,
+            "action": "Novi dokument",
+        },
+    )
 
 
 @login_required
@@ -118,6 +137,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         from core.company_utils import get_user_company
+
         company = get_user_company(self.request)
         if company:
             return Document.objects.filter(company=company).select_related("company", "partner")

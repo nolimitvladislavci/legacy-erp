@@ -1,4 +1,5 @@
 """Tests for core.exceptions — custom exception hierarchy."""
+
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -23,9 +24,15 @@ class TestExceptionHierarchy(TestCase):
     """Verify exception inheritance chain."""
 
     def test_all_inherit_from_business_error(self):
-        for exc_class in [InvoiceError, PaymentError, FiscalizationError,
-                          BookingConflictError, SessionError, WorkOrderError,
-                          ValidationError]:
+        for exc_class in [
+            InvoiceError,
+            PaymentError,
+            FiscalizationError,
+            BookingConflictError,
+            SessionError,
+            WorkOrderError,
+            ValidationError,
+        ]:
             self.assertTrue(issubclass(exc_class, BusinessError))
 
     def test_permission_denied_inherits(self):
@@ -73,11 +80,12 @@ class TestBusinessErrorMiddleware(TestCase):
         middleware.process_request(request)
         request.session.save()
         # Add messages
-        setattr(request, '_messages', FallbackStorage(request))
+        setattr(request, "_messages", FallbackStorage(request))
         return request
 
     def test_non_business_error_passthrough(self):
         from core.middleware import BusinessErrorMiddleware
+
         mw = BusinessErrorMiddleware(lambda r: None)
         request = self._get_request()
         result = mw.process_exception(request, ValueError("not business"))
@@ -85,6 +93,7 @@ class TestBusinessErrorMiddleware(TestCase):
 
     def test_business_error_caught(self):
         from core.middleware import BusinessErrorMiddleware
+
         mw = BusinessErrorMiddleware(lambda r: None)
         request = self._get_request("/invoicing/")
         request.META["HTTP_REFERER"] = "/invoicing/"

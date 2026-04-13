@@ -24,7 +24,7 @@ from core.company_utils import get_user_company
 from partners.models import Partner
 
 from .forms import AppointmentForm
-from .models import BRANCH_TYPES, Appointment, BookingResource, BookingService, WorkingHours
+from .models import BRANCH_TYPES, Appointment, BookingResource, BookingService, WorkingHours  # noqa: F401
 from .serializers import AppointmentSerializer
 
 
@@ -35,31 +35,57 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         from core.company_utils import get_user_company
+
         company = get_user_company(self.request)
-        return Appointment.objects.filter(company=company).select_related("company", "client", "employee") if company else Appointment.objects.none()
+        return (
+            Appointment.objects.filter(company=company).select_related("company", "client", "employee")
+            if company
+            else Appointment.objects.none()
+        )
 
 
 # ── INTERNI KALENDAR ────────────────────────────────────────
 
+
 @login_required
 def calendar_view(request):
     company = get_user_company(request)
-    clients = Partner.objects.filter(company=company, is_active=True).order_by("name") if company else Partner.objects.none()
-    resources = BookingResource.objects.filter(company=company, is_active=True).select_related("company").order_by("name") if company else BookingResource.objects.none()
-    services = BookingService.objects.filter(is_active=True, company=company).select_related("company").order_by("name") if company else BookingService.objects.none()
-    users = __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True)
-    return render(request, "appointments/calendar.html", {
-        "clients": clients,
-        "resources": resources,
-        "services": services,
-        "users": users,
-        "status_choices": Appointment.STATUS_CHOICES,
-        "type_choices": Appointment.TYPE_CHOICES,
-        "color_choices": [
-            ("#3b82f6", "Plava"), ("#10b981", "Zelena"), ("#f59e0b", "Žuta"),
-            ("#ef4444", "Crvena"), ("#8b5cf6", "Ljubičasta"), ("#c9a84c", "Zlatna"),
-        ],
-    })
+    clients = (
+        Partner.objects.filter(company=company, is_active=True).order_by("name") if company else Partner.objects.none()
+    )
+    resources = (
+        BookingResource.objects.filter(company=company, is_active=True).select_related("company").order_by("name")
+        if company
+        else BookingResource.objects.none()
+    )
+    services = (
+        BookingService.objects.filter(is_active=True, company=company).select_related("company").order_by("name")
+        if company
+        else BookingService.objects.none()
+    )
+    users = (
+        __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True)
+    )
+    return render(
+        request,
+        "appointments/calendar.html",
+        {
+            "clients": clients,
+            "resources": resources,
+            "services": services,
+            "users": users,
+            "status_choices": Appointment.STATUS_CHOICES,
+            "type_choices": Appointment.TYPE_CHOICES,
+            "color_choices": [
+                ("#3b82f6", "Plava"),
+                ("#10b981", "Zelena"),
+                ("#f59e0b", "Žuta"),
+                ("#ef4444", "Crvena"),
+                ("#8b5cf6", "Ljubičasta"),
+                ("#c9a84c", "Zlatna"),
+            ],
+        },
+    )
 
 
 @login_required
@@ -68,7 +94,11 @@ def api_events(request):
     start = request.GET.get("start")
     end = request.GET.get("end")
     company = get_user_company(request)
-    qs = Appointment.objects.filter(company=company).select_related("client", "resource", "service") if company else Appointment.objects.none()
+    qs = (
+        Appointment.objects.filter(company=company).select_related("client", "resource", "service")
+        if company
+        else Appointment.objects.none()
+    )
     if start:
         qs = qs.filter(end_time__gte=start)
     if end:
@@ -76,23 +106,25 @@ def api_events(request):
     events = []
     for app in qs:
         client_name = app.client.name if app.client else "Interno"
-        events.append({
-            "id": app.id,
-            "title": f"{app.title} ({client_name})",
-            "start": app.start_time.isoformat() if app.start_time else None,
-            "end": app.end_time.isoformat() if app.end_time else None,
-            "allDay": app.is_all_day,
-            "backgroundColor": app.color or "#3b82f6",
-            "borderColor": app.color or "#3b82f6",
-            "extendedProps": {
-                "type": app.get_appointment_type_display(),
-                "status": app.get_status_display(),
-                "status_code": app.status,
-                "resource_id": app.resource_id,
-                "client": client_name,
-                "description": app.description,
-            },
-        })
+        events.append(
+            {
+                "id": app.id,
+                "title": f"{app.title} ({client_name})",
+                "start": app.start_time.isoformat() if app.start_time else None,
+                "end": app.end_time.isoformat() if app.end_time else None,
+                "allDay": app.is_all_day,
+                "backgroundColor": app.color or "#3b82f6",
+                "borderColor": app.color or "#3b82f6",
+                "extendedProps": {
+                    "type": app.get_appointment_type_display(),
+                    "status": app.get_status_display(),
+                    "status_code": app.status,
+                    "resource_id": app.resource_id,
+                    "client": client_name,
+                    "description": app.description,
+                },
+            }
+        )
     return JsonResponse(events, safe=False)
 
 
@@ -104,7 +136,13 @@ def appointment_list(request):
     date_to = request.GET.get("date_to", "")
 
     company = get_user_company(request)
-    qs = Appointment.objects.filter(company=company).select_related("client", "resource", "employee").order_by("-start_time") if company else Appointment.objects.none()
+    qs = (
+        Appointment.objects.filter(company=company)
+        .select_related("client", "resource", "employee")
+        .order_by("-start_time")
+        if company
+        else Appointment.objects.none()
+    )
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(client__name__icontains=q) | Q(description__icontains=q))
     if status:
@@ -116,12 +154,19 @@ def appointment_list(request):
 
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get("page"))
-    return render(request, "appointments/appointment_list.html", {
-        "page_obj": page,
-        "q": q, "status": status, "date_from": date_from, "date_to": date_to,
-        "total": qs.count(),
-        "status_choices": Appointment.STATUS_CHOICES,
-    })
+    return render(
+        request,
+        "appointments/appointment_list.html",
+        {
+            "page_obj": page,
+            "q": q,
+            "status": status,
+            "date_from": date_from,
+            "date_to": date_to,
+            "total": qs.count(),
+            "status_choices": Appointment.STATUS_CHOICES,
+        },
+    )
 
 
 @login_required
@@ -134,6 +179,7 @@ def appointment_create(request):
                 appt.employee = request.user
             if not appt.company_id:
                 from core.company_utils import get_user_company
+
                 company = get_user_company(request)
                 if company:
                     appt.company = company
@@ -144,16 +190,26 @@ def appointment_create(request):
             messages.error(request, str(form.errors))
     else:
         form = AppointmentForm()
-    return render(request, "appointments/appointment_form.html", {
-        "form": form,
-        "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
-        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
-        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
-        "users": __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True),
-        "status_choices": Appointment.STATUS_CHOICES,
-        "type_choices": Appointment.TYPE_CHOICES,
-        "action": "Novi termin",
-    })
+    return render(
+        request,
+        "appointments/appointment_form.html",
+        {
+            "form": form,
+            "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
+            "resources": BookingResource.objects.filter(
+                is_active=True, company=get_user_company(request).select_related("company")
+            ),
+            "services": BookingService.objects.filter(
+                is_active=True, company=get_user_company(request).select_related("company")
+            ),
+            "users": __import__("django.contrib.auth", fromlist=["get_user_model"])
+            .get_user_model()
+            .objects.filter(is_active=True),
+            "status_choices": Appointment.STATUS_CHOICES,
+            "type_choices": Appointment.TYPE_CHOICES,
+            "action": "Novi termin",
+        },
+    )
 
 
 @login_required
@@ -169,17 +225,27 @@ def appointment_edit(request, pk):
             messages.error(request, str(form.errors))
     else:
         form = AppointmentForm(instance=appt)
-    return render(request, "appointments/appointment_form.html", {
-        "form": form,
-        "appt": appt,
-        "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
-        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
-        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
-        "users": __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True),
-        "status_choices": Appointment.STATUS_CHOICES,
-        "type_choices": Appointment.TYPE_CHOICES,
-        "action": "Uredi termin",
-    })
+    return render(
+        request,
+        "appointments/appointment_form.html",
+        {
+            "form": form,
+            "appt": appt,
+            "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
+            "resources": BookingResource.objects.filter(
+                is_active=True, company=get_user_company(request).select_related("company")
+            ),
+            "services": BookingService.objects.filter(
+                is_active=True, company=get_user_company(request).select_related("company")
+            ),
+            "users": __import__("django.contrib.auth", fromlist=["get_user_model"])
+            .get_user_model()
+            .objects.filter(is_active=True),
+            "status_choices": Appointment.STATUS_CHOICES,
+            "type_choices": Appointment.TYPE_CHOICES,
+            "action": "Uredi termin",
+        },
+    )
 
 
 @login_required
@@ -203,6 +269,7 @@ def appointment_status(request, pk):
         if new_status != old_st and new_status in ("confirmed", "cancelled", "completed", "no_show"):
             try:
                 from appointments.tasks import notify_appointment_status_change
+
                 notify_appointment_status_change.delay(appt.id, new_status)
             except ImportError:
                 pass
@@ -237,10 +304,16 @@ def api_appointments(request, pk=None):
 
 # ── JAVNI BOOKING PORTAL ────────────────────────────────────
 
+
 def public_booking_index(request):
     from companies.models import Company
+
     platform_company = Company.objects.filter(is_platform_owner=True).first()
-    services = BookingService.objects.filter(is_active=True, company=platform_company).select_related("company") if platform_company else BookingService.objects.none()
+    services = (
+        BookingService.objects.filter(is_active=True, company=platform_company).select_related("company")
+        if platform_company
+        else BookingService.objects.none()
+    )
     return render(request, "appointments/public/index.html", {"services": services})
 
 
@@ -260,19 +333,27 @@ def api_available_slots(request):
         return JsonResponse({"available": [], "unavailable": [], "slots": []})
     service = get_object_or_404(BookingService, id=service_id)
     weekday = target_date.weekday()
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
+    resources = BookingResource.objects.filter(
+        resource_type=service.resource_type, is_active=True, company=service.company
+    ).select_related("company")
     available_slots = set()
     unavailable_slots = set()
     service_duration = service.duration.total_seconds() / 60
     for resource in resources:
-        wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).select_related("resource").first()
+        wh = (
+            WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False)
+            .select_related("resource")
+            .first()
+        )
         if not wh:
             continue
         start_dt = datetime.combine(target_date, wh.start_time)
         end_dt = datetime.combine(target_date, wh.end_time)
-        existing_apps = list(Appointment.objects.filter(
-            resource=resource, start_time__date=target_date, status__in=["scheduled", "confirmed"]
-        ))
+        existing_apps = list(
+            Appointment.objects.filter(
+                resource=resource, start_time__date=target_date, status__in=["scheduled", "confirmed"]
+            )
+        )
         current_slot = start_dt
         while current_slot + timedelta(minutes=service_duration) <= end_dt:
             slot_end = current_slot + timedelta(minutes=service_duration)
@@ -304,6 +385,7 @@ def api_submit_public_booking(request):
 
         # ── VALIDACIJA ────────────────────────────────────────────────────────
         import re as _re
+
         errors = {}
 
         name = (data.get("name") or "").strip()
@@ -327,6 +409,7 @@ def api_submit_public_booking(request):
 
         # Datum: ne smije biti u prošlosti
         from django.utils import timezone as _tz
+
         target_date = parse_date(data.get("date", ""))
         if not target_date:
             errors["date"] = "Datum nije ispravan."
@@ -342,12 +425,17 @@ def api_submit_public_booking(request):
         end_time = start_time + timedelta(minutes=service.duration.total_seconds() / 60)
         # Klijent — gost ili prijavljeni korisnik (validacija je gore odradena)
         email = email or (request.user.email if request.user.is_authenticated else "")
-        name  = name  or (request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Gost")
+        name = name or (
+            request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Gost"
+        )
         # Get company from the booked service
         import uuid as _uuid
 
         from companies.models import Company
-        booking_company = service.company or Company.objects.filter(is_platform_owner=True).first() or Company.objects.first()
+
+        booking_company = (
+            service.company or Company.objects.filter(is_platform_owner=True).first() or Company.objects.first()
+        )
         # Try existing partner by email first, then create
         client = Partner.objects.filter(email=email, company=booking_company).first()
         if not client:
@@ -356,17 +444,24 @@ def api_submit_public_booking(request):
             # Generate unique placeholder OIB to avoid unique_together constraint
             placeholder_oib = f"B{_uuid.uuid4().hex[:10].upper()}"
             client = Partner(
-                name=name, email=email, company=booking_company,
-                phone=data.get("phone", ""), partner_type="KUPAC",
+                name=name,
+                email=email,
+                company=booking_company,
+                phone=data.get("phone", ""),
+                partner_type="KUPAC",
                 oib=placeholder_oib,
             )
             client.save()
-        resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=booking_company).select_related("company")
+        resources = BookingResource.objects.filter(
+            resource_type=service.resource_type, is_active=True, company=booking_company
+        ).select_related("company")
         assigned_resource = None
         for resource in resources:
             if not Appointment.objects.filter(
-                resource=resource, start_time__lt=end_time, end_time__gt=start_time,
-                status__in=["scheduled", "confirmed"]
+                resource=resource,
+                start_time__lt=end_time,
+                end_time__gt=start_time,
+                status__in=["scheduled", "confirmed"],
             ).exists():
                 assigned_resource = resource
                 break
@@ -374,9 +469,15 @@ def api_submit_public_booking(request):
             return JsonResponse({"error": "Termin je zauzet. Odaberite drugi."}, status=400)
         appointment = Appointment.objects.create(
             company=booking_company,
-            title=f"Online: {service.name}", client=client, service=service,
-            resource=assigned_resource, start_time=start_time, end_time=end_time,
-            appointment_type="service", status="scheduled", color="#10b981",
+            title=f"Online: {service.name}",
+            client=client,
+            service=service,
+            resource=assigned_resource,
+            start_time=start_time,
+            end_time=end_time,
+            appointment_type="service",
+            status="scheduled",
+            color="#10b981",
             total_price=service.price or 0,
             payment_method=data.get("payment_method", "invoice"),
             whatsapp_number=data.get("phone", "") or data.get("whatsapp", ""),
@@ -386,6 +487,7 @@ def api_submit_public_booking(request):
             from django.conf import settings
 
             from core.email_tasks import send_email_task
+
             dt_fmt = start_time.strftime("%d.%m.%Y u %H:%M")
             subject = f"Potvrda rezervacije — {service.name}"
             body = (
@@ -393,17 +495,15 @@ def api_submit_public_booking(request):
                 f"Vaša rezervacija je uspješno kreirana.\n\n"
                 f"  Usluga:  {service.name}\n"
                 f"  Termin:  {dt_fmt}\n"
-                f"  Trajanje:{int(service.duration.total_seconds()//60)} min\n"
+                f"  Trajanje:{int(service.duration.total_seconds() // 60)} min\n"
             )
             if service.price:
                 body += f"  Cijena:  {service.price} EUR\n"
-            body += (
-                "\nAko trebate otkazati ili promijeniti termin, kontaktirajte nas.\n\n"
-                "Hvala na povjerenju!\n"
-            )
+            body += "\nAko trebate otkazati ili promijeniti termin, kontaktirajte nas.\n\nHvala na povjerenju!\n"
             send_email_task.delay(
-                subject, body,
-                getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
+                subject,
+                body,
+                getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com"),
                 [email],
                 # async via celery
             )
@@ -415,13 +515,14 @@ def api_submit_public_booking(request):
             from django.contrib.auth.models import User as _U
 
             from notifications.services import notify_bulk
+
             staff = _U.objects.filter(is_staff=True)
             notify_bulk(
                 recipients=staff,
-                notification_type='appointment_confirmed',
-                title='Nova online rezervacija',
-                message=f'{service.name} - {start_time.strftime("%d.%m.%Y %H:%M")} ({name})',
-                url='/appointments/',
+                notification_type="appointment_confirmed",
+                title="Nova online rezervacija",
+                message=f"{service.name} - {start_time.strftime('%d.%m.%Y %H:%M')} ({name})",
+                url="/appointments/",
             )
         except DatabaseError:
             pass
@@ -430,36 +531,37 @@ def api_submit_public_booking(request):
         if wa_phone:
             try:
                 from core.whatsapp_tasks import send_whatsapp_text_task
+
                 dt_fmt = start_time.strftime("%d.%m.%Y u %H:%M")
                 track_url = "https://limit-connect.com/appointments/booking/track/%s/" % appointment.id
-                wa_msg = (
-                    "Rezervacija potvrdjena!\n\n"
-                    "Usluga: %s\n"
-                    "Termin: %s\n"
-                    "Trajanje: %d min\n"
-                ) % (service.name, dt_fmt, int(service.duration.total_seconds() // 60))
+                wa_msg = ("Rezervacija potvrdjena!\n\nUsluga: %s\nTermin: %s\nTrajanje: %d min\n") % (
+                    service.name,
+                    dt_fmt,
+                    int(service.duration.total_seconds() // 60),
+                )
                 if service.price:
                     wa_msg += "Cijena: %s EUR\n" % service.price
                 wa_msg += (
-                    "\nPratite status:\n%s\n\n"
-                    "Za otkazivanje odgovorite OTKAZI.\n"
-                    "Hvala na povjerenju!"
+                    "\nPratite status:\n%s\n\nZa otkazivanje odgovorite OTKAZI.\nHvala na povjerenju!"
                 ) % track_url
                 send_whatsapp_text_task.delay(wa_phone, wa_msg)
                 appointment.whatsapp_number = wa_phone
                 appointment.save(update_fields=["whatsapp_number"])
             except (ValueError, TypeError):
                 pass
-        return JsonResponse({"status": "success", "booking_id": appointment.id, "total_price": float(appointment.total_price or 0), "ics_url": ics_url})
+        return JsonResponse(
+            {
+                "status": "success",
+                "booking_id": appointment.id,
+                "total_price": float(appointment.total_price or 0),
+                "ics_url": ics_url,
+            }
+        )
     except (ValueError, TypeError) as e:
         return JsonResponse({"error": str(e)}, status=500)
 
 
 @require_GET
-
-
-
-
 # ════════════════════════════════════════════════════════════
 # BAKING FLOW — Prijemni formular + status + limeni broj
 # ════════════════════════════════════════════════════════════
@@ -468,29 +570,39 @@ def api_submit_public_booking(request):
 def baking_board(request):
     """Tabla za pekaru — sve aktivne narudzbe za pecenje."""
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
     if not company:
         from django.shortcuts import redirect
-        return redirect('/')
+
+        return redirect("/")
     today = timezone.now().date()
-    orders = Appointment.objects.filter(
-        company=company,
-        service__branch_type='bakery',
-        start_time__date__gte=today,
-        status__in=['scheduled', 'confirmed', 'in_progress'],
-    ).select_related('service', 'client', 'resource').order_by('start_time')
+    orders = (
+        Appointment.objects.filter(
+            company=company,
+            service__branch_type="bakery",
+            start_time__date__gte=today,
+            status__in=["scheduled", "confirmed", "in_progress"],
+        )
+        .select_related("service", "client", "resource")
+        .order_by("start_time")
+    )
 
     completed_today = Appointment.objects.filter(
         company=company,
-        service__branch_type='bakery',
+        service__branch_type="bakery",
         start_time__date=today,
-        status='completed',
+        status="completed",
     ).count()
 
-    return render(request, 'appointments/baking_board.html', {
-        'orders': orders,
-        'completed_today': completed_today,
-    })
+    return render(
+        request,
+        "appointments/baking_board.html",
+        {
+            "orders": orders,
+            "completed_today": completed_today,
+        },
+    )
 
 
 @login_required
@@ -499,75 +611,94 @@ def baking_intake(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     from django.contrib import messages
 
-    if request.method == 'POST':
-        appointment.token_number = int(request.POST.get('token_number', 0))
-        appointment.weight_kg = request.POST.get('weight_kg', 0) or 0
-        salt_val = request.POST.get('should_salt', '')
-        if salt_val == 'yes':
+    if request.method == "POST":
+        appointment.token_number = int(request.POST.get("token_number", 0))
+        appointment.weight_kg = request.POST.get("weight_kg", 0) or 0
+        salt_val = request.POST.get("should_salt", "")
+        if salt_val == "yes":
             appointment.should_salt = True
-        elif salt_val == 'no':
+        elif salt_val == "no":
             appointment.should_salt = False
         else:
             appointment.should_salt = None
-        appointment.intake_notes = request.POST.get('intake_notes', '')
+        appointment.intake_notes = request.POST.get("intake_notes", "")
         appointment.intake_at = timezone.now()
         appointment.intake_by = request.user
-        appointment.status = 'confirmed'
+        appointment.status = "confirmed"
         appointment.save()
 
         # WhatsApp — sirovinu zaprimili
-        _send_status_wa(appointment, 'Zaprimljeno! Limeni broj: %d. Javimo vam kad bude gotovo.' % appointment.token_number)
+        _send_status_wa(
+            appointment, "Zaprimljeno! Limeni broj: %d. Javimo vam kad bude gotovo." % appointment.token_number
+        )
 
-        messages.success(request, _('Zaprimljeno — limeni broj %d') % appointment.token_number)
-        return redirect('appointments:baking_board')
+        messages.success(request, _("Zaprimljeno — limeni broj %d") % appointment.token_number)
+        return redirect("appointments:baking_board")
 
     # Suggest next token number
     from django.db.models import Max
-    last_token = Appointment.objects.filter(
-        company=appointment.company,
-        start_time__date=timezone.now().date(),
-        token_number__gt=0,
-    ).aggregate(Max('token_number'))['token_number__max'] or 0
 
-    needs_salt = appointment.service.name.lower() in ['usluzno pecenje janjetine', 'usluzno pecenje odojka',
-                                                        'pecenje janjetine', 'pecenje odojka', 'janjetina', 'odojak']
+    last_token = (
+        Appointment.objects.filter(
+            company=appointment.company,
+            start_time__date=timezone.now().date(),
+            token_number__gt=0,
+        ).aggregate(Max("token_number"))["token_number__max"]
+        or 0
+    )
 
-    return render(request, 'appointments/baking_intake.html', {
-        'appointment': appointment,
-        'next_token': last_token + 1,
-        'needs_salt': needs_salt,
-    })
+    needs_salt = appointment.service.name.lower() in [
+        "usluzno pecenje janjetine",
+        "usluzno pecenje odojka",
+        "pecenje janjetine",
+        "pecenje odojka",
+        "janjetina",
+        "odojak",
+    ]
+
+    return render(
+        request,
+        "appointments/baking_intake.html",
+        {
+            "appointment": appointment,
+            "next_token": last_token + 1,
+            "needs_salt": needs_salt,
+        },
+    )
 
 
 @login_required
 def baking_status_update(request, pk):
     """Promjena statusa pecenja + WA obavijest."""
     appointment = get_object_or_404(Appointment, pk=pk)
-    new_status = request.POST.get('status', '')
+    new_status = request.POST.get("status", "")
     from django.contrib import messages
 
     status_messages = {
-        'in_progress': ('U peci! Pratite status na linku.', 'U pecenju'),
-        'completed': ('Gotovo! Mozete doci po preuzimanje. Limeni broj: %d.' % appointment.token_number, 'Gotovo za preuzimanje'),
-        'picked_up': ('Hvala na posjeti! Dodjite opet.', 'Preuzeto — zavrseno'),
+        "in_progress": ("U peci! Pratite status na linku.", "U pecenju"),
+        "completed": (
+            "Gotovo! Mozete doci po preuzimanje. Limeni broj: %d." % appointment.token_number,
+            "Gotovo za preuzimanje",
+        ),
+        "picked_up": ("Hvala na posjeti! Dodjite opet.", "Preuzeto — zavrseno"),
     }
 
-    if new_status == 'picked_up':
-        appointment.status = 'completed'
+    if new_status == "picked_up":
+        appointment.status = "completed"
         appointment.picked_up_at = timezone.now()
-    elif new_status in ('in_progress', 'completed'):
+    elif new_status in ("in_progress", "completed"):
         appointment.status = new_status
-        if new_status == 'completed':
+        if new_status == "completed":
             appointment.ready_at = timezone.now()
 
     appointment.save()
 
-    wa_msg, flash_msg = status_messages.get(new_status, ('', 'Status azuriran'))
+    wa_msg, flash_msg = status_messages.get(new_status, ("", "Status azuriran"))
     if wa_msg:
         _send_status_wa(appointment, wa_msg)
 
     messages.success(request, flash_msg)
-    return redirect('appointments:baking_board')
+    return redirect("appointments:baking_board")
 
 
 def _send_status_wa(appointment, message):
@@ -577,8 +708,9 @@ def _send_status_wa(appointment, message):
         return
     try:
         from core.whatsapp_tasks import send_whatsapp_text_task
-        track_url = 'https://limit-connect.com/appointments/booking/track/%d/' % appointment.pk
-        full_msg = '%s\n\nPratite: %s' % (message, track_url)
+
+        track_url = "https://limit-connect.com/appointments/booking/track/%d/" % appointment.pk
+        full_msg = "%s\n\nPratite: %s" % (message, track_url)
         send_whatsapp_text_task.delay(phone, full_msg)
     except ImportError:
         pass
@@ -587,38 +719,46 @@ def _send_status_wa(appointment, message):
 def booking_track(request, pk):
     """Public tracking page za rezervaciju — bez login-a."""
     appointment = get_object_or_404(Appointment, pk=pk)
-    return render(request, 'appointments/public/booking_track.html', {
-        'appointment': appointment,
-    })
+    return render(
+        request,
+        "appointments/public/booking_track.html",
+        {
+            "appointment": appointment,
+        },
+    )
+
 
 def api_booking_auth_check(request):
     """Vraća auth status i basic info o korisniku"""
     if request.user.is_authenticated:
-        return JsonResponse({
-            "authenticated": True,
-            "username": request.user.username,
-            "email": request.user.email,
-            "full_name": request.user.get_full_name() or request.user.username,
-        })
+        return JsonResponse(
+            {
+                "authenticated": True,
+                "username": request.user.username,
+                "email": request.user.email,
+                "full_name": request.user.get_full_name() or request.user.username,
+            }
+        )
     return JsonResponse({"authenticated": False})
 
 
 @csrf_exempt
 def api_booking_register(request):
     """AJAX registracija novog korisnika za booking portal"""
-    if request.method != 'POST':
+    if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
     try:
         from django.contrib.auth import get_user_model, login
         from django.contrib.auth.password_validation import validate_password
         from django.core.exceptions import ValidationError
+
         User = get_user_model()
         data = json.loads(request.body)
-        username  = data.get('username', '').strip()
-        email     = data.get('email', '').strip()
-        password  = data.get('password', '')
-        first     = data.get('first_name', '').strip()
-        last      = data.get('last_name', '').strip()
+        username = data.get("username", "").strip()
+        email = data.get("email", "").strip()
+        password = data.get("password", "")
+        first = data.get("first_name", "").strip()
+        last = data.get("last_name", "").strip()
 
         if not username or not password:
             return JsonResponse({"success": False, "error": "Korisničko ime i lozinka su obavezni."})
@@ -633,34 +773,28 @@ def api_booking_register(request):
             return JsonResponse({"success": False, "error": " ".join(ve.messages)})
 
         user = User.objects.create_user(
-            username=username, email=email, password=password,
-            first_name=first, last_name=last
+            username=username, email=email, password=password, first_name=first, last_name=last
         )
         login(request, user)
-        return JsonResponse({
-            "success": True,
-            "email": user.email,
-            "full_name": user.get_full_name() or user.username
-        })
+        return JsonResponse({"success": True, "email": user.email, "full_name": user.get_full_name() or user.username})
     except DatabaseError as e:
         return JsonResponse({"success": False, "error": str(e)})
 
 
 # ── ICS EXPORT ────────────────────────────────────────────────
 
+
 def download_ics(request, appointment_id):
     """Download .ics file for an appointment."""
     appointment = get_object_or_404(Appointment, id=appointment_id)
     from .ics_utils import generate_ics
+
     ics_content = generate_ics(appointment)
     response = HttpResponse(ics_content, content_type="text/calendar; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="termin-{appointment.id}.ics"'
     return response
 
 
-
-# ── TJEDNI RASPORED SLOBODNIH TERMINA ──────────────────────────────────────────
-
 @require_GET
 def api_slots_week(request):
     service_id = request.GET.get("service_id")
@@ -669,8 +803,9 @@ def api_slots_week(request):
         return JsonResponse({"error": "service_id obavezan"}, status=400)
     service = get_object_or_404(BookingService, id=service_id, is_active=True)
     step = service.slot_duration_minutes
-    dur  = service.duration_minutes
+    dur = service.duration_minutes
     from datetime import timedelta
+
     today = datetime.now().date()
     now_time = datetime.now().time()
     if week_start_str:
@@ -682,27 +817,28 @@ def api_slots_week(request):
         week_start = today - timedelta(days=today.weekday())
     DAYS_HR = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
     DAYS_FULL = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"]
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
+    resources = BookingResource.objects.filter(
+        resource_type=service.resource_type, is_active=True, company=service.company
+    ).select_related("company")
     days_data = []
     for day_offset in range(7):
         target_date = week_start + timedelta(days=day_offset)
         weekday = target_date.weekday()
-        is_today = (target_date == today)
-        is_past  = (target_date < today)
+        is_today = target_date == today
+        is_past = target_date < today
         all_available = set()
         all_unavailable = set()
         for resource in resources:
-            wh = WorkingHours.objects.filter(
-                resource=resource, day_of_week=weekday, is_day_off=False
-            ).first()
+            wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).first()
             if not wh:
                 continue
             start_dt = datetime.combine(target_date, wh.start_time)
-            end_dt   = datetime.combine(target_date, wh.end_time)
-            existing = list(Appointment.objects.filter(
-                resource=resource, start_time__date=target_date,
-                status__in=["scheduled", "confirmed"]
-            ))
+            end_dt = datetime.combine(target_date, wh.end_time)
+            existing = list(
+                Appointment.objects.filter(
+                    resource=resource, start_time__date=target_date, status__in=["scheduled", "confirmed"]
+                )
+            )
             current = start_dt
             while current + timedelta(minutes=dur) <= end_dt:
                 slot_end = current + timedelta(minutes=dur)
@@ -722,46 +858,63 @@ def api_slots_week(request):
         unavail = sorted(all_unavailable - all_available)
         all_slots = sorted(set(avail) | set(unavail))
         slots = [{"time": s, "available": s in avail, "label": s} for s in all_slots]
-        days_data.append({
-            "date": target_date.strftime("%Y-%m-%d"),
-            "weekday_short": DAYS_HR[weekday],
-            "weekday_full": DAYS_FULL[weekday],
-            "is_today": is_today,
-            "is_past": is_past,
-            "slots": slots,
-            "has_available": len(avail) > 0,
-        })
-    return JsonResponse({
-        "service_id": service.id,
-        "service_name": service.name,
-        "step_minutes": step,
-        "duration_min": dur,
-        "week_start": week_start.strftime("%Y-%m-%d"),
-        "days": days_data,
-    })
+        days_data.append(
+            {
+                "date": target_date.strftime("%Y-%m-%d"),
+                "weekday_short": DAYS_HR[weekday],
+                "weekday_full": DAYS_FULL[weekday],
+                "is_today": is_today,
+                "is_past": is_past,
+                "slots": slots,
+                "has_available": len(avail) > 0,
+            }
+        )
+    return JsonResponse(
+        {
+            "service_id": service.id,
+            "service_name": service.name,
+            "step_minutes": step,
+            "duration_min": dur,
+            "week_start": week_start.strftime("%Y-%m-%d"),
+            "days": days_data,
+        }
+    )
 
 
 # ── BOOKING WIZARD (javni) ──────────────────────────────────────────
 
+
 def public_booking_wizard(request, service_id):
     service = get_object_or_404(BookingService, id=service_id, is_active=True)
-    return render(request, "appointments/public/wizard.html", {
-        "service": service,
-    })
+    return render(
+        request,
+        "appointments/public/wizard.html",
+        {
+            "service": service,
+        },
+    )
 
 
 # ── KLIJENTSKI KARTON (FASCIKL) ──────────────────────────────────────────
 
+
 @login_required
 def dossier_list(request):
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
-    qs = __import__("appointments.models", fromlist=["ClientDossier"]).ClientDossier.objects.select_related("client").filter(company=company)
+    qs = (
+        __import__("appointments.models", fromlist=["ClientDossier"])
+        .ClientDossier.objects.select_related("client")
+        .filter(company=company)
+    )
     q = request.GET.get("q", "")
     if q:
         from django.db.models import Q as _Q
+
         qs = qs.filter(_Q(client__name__icontains=q))
     from django.core.paginator import Paginator as _Pag
+
     page = _Pag(qs, 30).get_page(request.GET.get("page"))
     return render(request, "appointments/dossier_list.html", {"page_obj": page, "q": q})
 
@@ -772,26 +925,34 @@ def dossier_detail(request, partner_id):
     from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
     from partners.models import Partner
+
     client = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
     dossier, created = ClientDossier.objects.get_or_create(
-        company=company, client=client,
-        defaults={"created_by": request.user}
+        company=company, client=client, defaults={"created_by": request.user}
     )
     entries = dossier.entries.select_related("appointment", "created_by").all()
-    recent_appointments = Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:10]
+    recent_appointments = (
+        Appointment.objects.filter(client=client)
+        .select_related("company", "client", "employee")
+        .order_by("-start_time")[:10]
+    )
     entry_type_filter = request.GET.get("type", "")
     if entry_type_filter:
         entries = entries.filter(entry_type=entry_type_filter)
-    return render(request, "appointments/dossier_detail.html", {
-        "dossier":             dossier,
-        "client":              client,
-        "entries":             entries,
-        "recent_appointments": recent_appointments,
-        "entry_type_filter":   entry_type_filter,
-        "entry_types":         DE.ENTRY_TYPES,
-        "created":             created,
-    })
+    return render(
+        request,
+        "appointments/dossier_detail.html",
+        {
+            "dossier": dossier,
+            "client": client,
+            "entries": entries,
+            "recent_appointments": recent_appointments,
+            "entry_type_filter": entry_type_filter,
+            "entry_types": DE.ENTRY_TYPES,
+            "created": created,
+        },
+    )
 
 
 @login_required
@@ -800,19 +961,20 @@ def dossier_entry_create(request, partner_id):
     from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
     from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
+
+    client = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
     dossier, _ = ClientDossier.objects.get_or_create(
-        company=company, client=client,
-        defaults={"created_by": request.user}
+        company=company, client=client, defaults={"created_by": request.user}
     )
     if request.method == "POST":
         import json as _json
+
         entry_type = request.POST.get("entry_type", "note")
-        title      = request.POST.get("title", "").strip()
-        content    = request.POST.get("content", "")
-        sd_raw     = request.POST.get("structured_data", "{}")
-        appt_id    = request.POST.get("appointment_id")
+        title = request.POST.get("title", "").strip()
+        content = request.POST.get("content", "")
+        sd_raw = request.POST.get("structured_data", "{}")
+        appt_id = request.POST.get("appointment_id")
         try:
             structured = _json.loads(sd_raw) if sd_raw else {}
         except (json.JSONDecodeError, ValueError):
@@ -836,16 +998,22 @@ def dossier_entry_create(request, partner_id):
         messages.success(request, _("Unos u karton spremljen."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     appointment_id = request.GET.get("appointment_id")
-    prefill_type   = request.GET.get("type", "note")
-    return render(request, "appointments/dossier_entry_form.html", {
-        "dossier":        dossier,
-        "client":         client,
-        "entry_types":    DE.ENTRY_TYPES,
-        "entry_type_icons": DE.ENTRY_ICONS,
-        "prefill_type":   prefill_type,
-        "appointment_id": appointment_id,
-        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
-    })
+    prefill_type = request.GET.get("type", "note")
+    return render(
+        request,
+        "appointments/dossier_entry_form.html",
+        {
+            "dossier": dossier,
+            "client": client,
+            "entry_types": DE.ENTRY_TYPES,
+            "entry_type_icons": DE.ENTRY_ICONS,
+            "prefill_type": prefill_type,
+            "appointment_id": appointment_id,
+            "appointments": Appointment.objects.filter(client=client)
+            .select_related("company", "client", "employee")
+            .order_by("-start_time")[:20],
+        },
+    )
 
 
 @login_required
@@ -854,310 +1022,17 @@ def dossier_entry_edit(request, partner_id, entry_id):
     from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
     from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
-    company = get_user_company(request)
-    dossier = get_object_or_404(ClientDossier, company=company, client=client)
-    entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
-    if request.method == "POST":
-        import json as _json
-        entry.entry_type = request.POST.get("entry_type", entry.entry_type)
-        entry.title      = request.POST.get("title", entry.title)
-        entry.content    = request.POST.get("content", entry.content)
-        sd_raw = request.POST.get("structured_data", "{}")
-        try:
-            entry.structured_data = _json.loads(sd_raw)
-        except (json.JSONDecodeError, ValueError):
-            pass
-        if request.FILES.get("file"):
-            entry.file = request.FILES["file"]
-        entry.save()
-        messages.success(request, _("Unos ažuriran."))
-        return redirect("appointments:dossier_detail", partner_id=partner_id)
-    import json as _json
-    return render(request, "appointments/dossier_entry_form.html", {
-        "dossier":        dossier,
-        "client":         client,
-        "entry":          entry,
-        "entry_types":    DE.ENTRY_TYPES,
-        "entry_type_icons": DE.ENTRY_ICONS,
-        "prefill_type":   entry.entry_type,
-        "sd_json":        _json.dumps(entry.structured_data, ensure_ascii=False),
-        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
-    })
 
-
-@login_required
-@require_POST
-def dossier_entry_delete(request, partner_id, entry_id):
-    from appointments.models import ClientDossier
-    from appointments.models import DossierEntry as DE
-    from core.company_utils import get_user_company
-    from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
-    dossier = get_object_or_404(ClientDossier, company=get_user_company(request), client=client)
-    entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
-    entry.delete()
-    messages.success(request, _("Unos obrisan."))
-    return redirect("appointments:dossier_detail", partner_id=partner_id)
-
-
-@login_required
-def service_list(request):
-    company = get_user_company(request)
-    if company:
-        services = BookingService.objects.filter(is_active=True, company=company).select_related("company").order_by("branch_type", "name")
-    else:
-        services = BookingService.objects.none()
-    return render(request, "appointments/service_list.html", {
-        "services": services,
-        "branch_types": dict(BRANCH_TYPES),
-    })
-
-
-@login_required
-def service_create(request):
-    from .forms import BookingServiceForm
-    if request.method == "POST":
-        form = BookingServiceForm(request.POST)
-        if form.is_valid():
-            svc = form.save(commit=False)
-            if not svc.company_id:
-                svc.company = get_user_company(request)
-            svc.save()
-            messages.success(request, _("Usluga kreirana: ") + svc.name)
-            return redirect("appointments:service_list")
-        else:
-            messages.error(request, str(form.errors))
-    else:
-        form = BookingServiceForm()
-    return render(request, "appointments/service_form.html", {
-        "form": form, "action": "Nova usluga",
-    })
-
-
-@login_required
-def service_edit(request, pk):
-    from .forms import BookingServiceForm
-    svc = get_object_or_404(BookingService, pk=pk)
-    if request.method == "POST":
-        form = BookingServiceForm(request.POST, instance=svc)
-        if form.is_valid():
-            form.save()
-            messages.success(request, _("Usluga ažurirana: ") + svc.name)
-            return redirect("appointments:service_list")
-        else:
-            messages.error(request, str(form.errors))
-    else:
-        form = BookingServiceForm(instance=svc)
-    return render(request, "appointments/service_form.html", {
-        "form": form, "svc": svc, "action": "Uredi uslugu",
-    })
-
-
-# ── TJEDNI RASPORED SLOBODNIH TERMINA ──────────────────────────────────────────
-
-@require_GET
-def api_slots_week(request):
-    service_id = request.GET.get("service_id")
-    week_start_str = request.GET.get("week_start")
-    if not service_id:
-        return JsonResponse({"error": "service_id obavezan"}, status=400)
-    service = get_object_or_404(BookingService, id=service_id, is_active=True)
-    step = service.slot_duration_minutes
-    dur  = service.duration_minutes
-    from datetime import timedelta
-    today = datetime.now().date()
-    now_time = datetime.now().time()
-    if week_start_str:
-        try:
-            week_start = parse_date(week_start_str)
-        except ValueError:
-            week_start = today - timedelta(days=today.weekday())
-    else:
-        week_start = today - timedelta(days=today.weekday())
-    DAYS_HR = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
-    DAYS_FULL = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"]
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
-    days_data = []
-    for day_offset in range(7):
-        target_date = week_start + timedelta(days=day_offset)
-        weekday = target_date.weekday()
-        is_today = (target_date == today)
-        is_past  = (target_date < today)
-        all_available = set()
-        all_unavailable = set()
-        for resource in resources:
-            wh = WorkingHours.objects.filter(
-                resource=resource, day_of_week=weekday, is_day_off=False
-            ).first()
-            if not wh:
-                continue
-            start_dt = datetime.combine(target_date, wh.start_time)
-            end_dt   = datetime.combine(target_date, wh.end_time)
-            existing = list(Appointment.objects.filter(
-                resource=resource, start_time__date=target_date,
-                status__in=["scheduled", "confirmed"]
-            ))
-            current = start_dt
-            while current + timedelta(minutes=dur) <= end_dt:
-                slot_end = current + timedelta(minutes=dur)
-                overlap = any(
-                    current < a.end_time.replace(tzinfo=None) and slot_end > a.start_time.replace(tzinfo=None)
-                    for a in existing
-                )
-                slot_str = current.strftime("%H:%M")
-                if is_today and current.time() <= now_time:
-                    overlap = True
-                if not overlap:
-                    all_available.add(slot_str)
-                else:
-                    all_unavailable.add(slot_str)
-                current += timedelta(minutes=step)
-        avail = sorted(all_available)
-        unavail = sorted(all_unavailable - all_available)
-        all_slots = sorted(set(avail) | set(unavail))
-        slots = [{"time": s, "available": s in avail, "label": s} for s in all_slots]
-        days_data.append({
-            "date": target_date.strftime("%Y-%m-%d"),
-            "weekday_short": DAYS_HR[weekday],
-            "weekday_full": DAYS_FULL[weekday],
-            "is_today": is_today,
-            "is_past": is_past,
-            "slots": slots,
-            "has_available": len(avail) > 0,
-        })
-    return JsonResponse({
-        "service_id": service.id,
-        "service_name": service.name,
-        "step_minutes": step,
-        "duration_min": dur,
-        "week_start": week_start.strftime("%Y-%m-%d"),
-        "days": days_data,
-    })
-
-
-# ── BOOKING WIZARD (javni) ──────────────────────────────────────────
-
-def public_booking_wizard(request, service_id):
-    service = get_object_or_404(BookingService, id=service_id, is_active=True)
-    return render(request, "appointments/public/wizard.html", {
-        "service": service,
-    })
-
-
-# ── KLIJENTSKI KARTON (FASCIKL) ──────────────────────────────────────────
-
-@login_required
-def dossier_list(request):
-    from core.company_utils import get_user_company
-    company = get_user_company(request)
-    qs = __import__("appointments.models", fromlist=["ClientDossier"]).ClientDossier.objects.select_related("client").filter(company=company)
-    q = request.GET.get("q", "")
-    if q:
-        from django.db.models import Q as _Q
-        qs = qs.filter(_Q(client__name__icontains=q))
-    from django.core.paginator import Paginator as _Pag
-    page = _Pag(qs, 30).get_page(request.GET.get("page"))
-    return render(request, "appointments/dossier_list.html", {"page_obj": page, "q": q})
-
-
-@login_required
-def dossier_detail(request, partner_id):
-    from appointments.models import ClientDossier
-    from appointments.models import DossierEntry as DE
-    from core.company_utils import get_user_company
-    from partners.models import Partner
     client = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
-    dossier, created = ClientDossier.objects.get_or_create(
-        company=company, client=client,
-        defaults={"created_by": request.user}
-    )
-    entries = dossier.entries.select_related("appointment", "created_by").all()
-    recent_appointments = Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:10]
-    entry_type_filter = request.GET.get("type", "")
-    if entry_type_filter:
-        entries = entries.filter(entry_type=entry_type_filter)
-    return render(request, "appointments/dossier_detail.html", {
-        "dossier":             dossier,
-        "client":              client,
-        "entries":             entries,
-        "recent_appointments": recent_appointments,
-        "entry_type_filter":   entry_type_filter,
-        "entry_types":         DE.ENTRY_TYPES,
-        "created":             created,
-    })
-
-
-@login_required
-def dossier_entry_create(request, partner_id):
-    from appointments.models import ClientDossier
-    from appointments.models import DossierEntry as DE
-    from core.company_utils import get_user_company
-    from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
-    company = get_user_company(request)
-    dossier, _ = ClientDossier.objects.get_or_create(
-        company=company, client=client,
-        defaults={"created_by": request.user}
-    )
-    if request.method == "POST":
-        import json as _json
-        entry_type = request.POST.get("entry_type", "note")
-        title      = request.POST.get("title", "").strip()
-        content    = request.POST.get("content", "")
-        sd_raw     = request.POST.get("structured_data", "{}")
-        appt_id    = request.POST.get("appointment_id")
-        try:
-            structured = _json.loads(sd_raw) if sd_raw else {}
-        except (json.JSONDecodeError, ValueError):
-            structured = {}
-        entry = DE(
-            dossier=dossier,
-            entry_type=entry_type,
-            title=title or "{}".format(dict(DE.ENTRY_TYPES).get(entry_type, "Unos")),
-            content=content,
-            structured_data=structured,
-            created_by=request.user,
-        )
-        if appt_id:
-            try:
-                entry.appointment_id = int(appt_id)
-            except (ValueError, TypeError):
-                pass
-        if request.FILES.get("file"):
-            entry.file = request.FILES["file"]
-        entry.save()
-        messages.success(request, _("Unos u karton spremljen."))
-        return redirect("appointments:dossier_detail", partner_id=partner_id)
-    appointment_id = request.GET.get("appointment_id")
-    prefill_type   = request.GET.get("type", "note")
-    return render(request, "appointments/dossier_entry_form.html", {
-        "dossier":        dossier,
-        "client":         client,
-        "entry_types":    DE.ENTRY_TYPES,
-        "entry_type_icons": DE.ENTRY_ICONS,
-        "prefill_type":   prefill_type,
-        "appointment_id": appointment_id,
-        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
-    })
-
-
-@login_required
-def dossier_entry_edit(request, partner_id, entry_id):
-    from appointments.models import ClientDossier
-    from appointments.models import DossierEntry as DE
-    from core.company_utils import get_user_company
-    from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
-    company = get_user_company(request)
     dossier = get_object_or_404(ClientDossier, company=company, client=client)
-    entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
+    entry = get_object_or_404(DE, pk=entry_id, dossier=dossier)
     if request.method == "POST":
         import json as _json
+
         entry.entry_type = request.POST.get("entry_type", entry.entry_type)
-        entry.title      = request.POST.get("title", entry.title)
-        entry.content    = request.POST.get("content", entry.content)
+        entry.title = request.POST.get("title", entry.title)
+        entry.content = request.POST.get("content", entry.content)
         sd_raw = request.POST.get("structured_data", "{}")
         try:
             entry.structured_data = _json.loads(sd_raw)
@@ -1169,16 +1044,23 @@ def dossier_entry_edit(request, partner_id, entry_id):
         messages.success(request, _("Unos ažuriran."))
         return redirect("appointments:dossier_detail", partner_id=partner_id)
     import json as _json
-    return render(request, "appointments/dossier_entry_form.html", {
-        "dossier":        dossier,
-        "client":         client,
-        "entry":          entry,
-        "entry_types":    DE.ENTRY_TYPES,
-        "entry_type_icons": DE.ENTRY_ICONS,
-        "prefill_type":   entry.entry_type,
-        "sd_json":        _json.dumps(entry.structured_data, ensure_ascii=False),
-        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
-    })
+
+    return render(
+        request,
+        "appointments/dossier_entry_form.html",
+        {
+            "dossier": dossier,
+            "client": client,
+            "entry": entry,
+            "entry_types": DE.ENTRY_TYPES,
+            "entry_type_icons": DE.ENTRY_ICONS,
+            "prefill_type": entry.entry_type,
+            "sd_json": _json.dumps(entry.structured_data, ensure_ascii=False),
+            "appointments": Appointment.objects.filter(client=client)
+            .select_related("company", "client", "employee")
+            .order_by("-start_time")[:20],
+        },
+    )
 
 
 @login_required
@@ -1188,9 +1070,10 @@ def dossier_entry_delete(request, partner_id, entry_id):
     from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
     from partners.models import Partner
-    client  = get_object_or_404(Partner, pk=partner_id)
+
+    client = get_object_or_404(Partner, pk=partner_id)
     dossier = get_object_or_404(ClientDossier, company=get_user_company(request), client=client)
-    entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
+    entry = get_object_or_404(DE, pk=entry_id, dossier=dossier)
     entry.delete()
     messages.success(request, _("Unos obrisan."))
     return redirect("appointments:dossier_detail", partner_id=partner_id)
@@ -1199,16 +1082,25 @@ def dossier_entry_delete(request, partner_id, entry_id):
 @login_required
 def service_list(request):
     company = get_user_company(request)
-    services = BookingService.objects.filter(company=company).select_related("company").order_by("branch_type", "name") if company else BookingService.objects.none()
-    return render(request, "appointments/service_list.html", {
-        "services": services,
-        "branch_types": dict(__import__("appointments.models", fromlist=["BRANCH_TYPES"]).BRANCH_TYPES),
-    })
+    services = (
+        BookingService.objects.filter(company=company).select_related("company").order_by("branch_type", "name")
+        if company
+        else BookingService.objects.none()
+    )
+    return render(
+        request,
+        "appointments/service_list.html",
+        {
+            "services": services,
+            "branch_types": dict(__import__("appointments.models", fromlist=["BRANCH_TYPES"]).BRANCH_TYPES),
+        },
+    )
 
 
 @login_required
 def service_create(request):
     from .forms import BookingServiceForm
+
     if request.method == "POST":
         form = BookingServiceForm(request.POST)
         if form.is_valid():
@@ -1222,14 +1114,20 @@ def service_create(request):
             messages.error(request, str(form.errors))
     else:
         form = BookingServiceForm()
-    return render(request, "appointments/service_form.html", {
-        "form": form, "action": "Nova usluga",
-    })
+    return render(
+        request,
+        "appointments/service_form.html",
+        {
+            "form": form,
+            "action": "Nova usluga",
+        },
+    )
 
 
 @login_required
 def service_edit(request, pk):
     from .forms import BookingServiceForm
+
     svc = get_object_or_404(BookingService, pk=pk)
     if request.method == "POST":
         form = BookingServiceForm(request.POST, instance=svc)
@@ -1241,23 +1139,36 @@ def service_edit(request, pk):
             messages.error(request, str(form.errors))
     else:
         form = BookingServiceForm(instance=svc)
-    return render(request, "appointments/service_form.html", {
-        "form": form, "svc": svc, "action": "Uredi uslugu",
-    })
+    return render(
+        request,
+        "appointments/service_form.html",
+        {
+            "form": form,
+            "svc": svc,
+            "action": "Uredi uslugu",
+        },
+    )
+
 
 # ── COMPANY-SCOPED PUBLIC BOOKING ─────────────────────────────
+
 
 def public_booking_by_slug(request, company_slug):
     """Public booking page scoped to a company via slug."""
     from companies.models import Company
+
     company = get_object_or_404(Company, booking_slug=company_slug)
     # Filter services by company FK (ORM migration applied)
     services = BookingService.objects.filter(company=company, is_active=True).select_related("company")
-    return render(request, "appointments/public/index.html", {
-        "services":        services,
-        "company":         company,
-        "booking_company": company,   # za booking_base.html brand
-    })
+    return render(
+        request,
+        "appointments/public/index.html",
+        {
+            "services": services,
+            "company": company,
+            "booking_company": company,  # za booking_base.html brand
+        },
+    )
 
 
 @login_required
@@ -1267,31 +1178,33 @@ def send_reminder(request, pk):
 
     from appointments.models import Appointment
     from appointments.tasks import _send_reminder_email, _send_reminder_whatsapp
+
     appt = get_object_or_404(Appointment, pk=pk)
     sent = []
-    wa = appt.whatsapp_number or (appt.client.phone if appt.client else '')
+    wa = appt.whatsapp_number or (appt.client.phone if appt.client else "")
     if wa:
         try:
             _send_reminder_whatsapp(appt, wa)
             appt.whatsapp_reminder_sent = True
-            sent.append('WhatsApp')
+            sent.append("WhatsApp")
         except Exception as e:
-            messages.error(request, _('WA greska: {}').format(e))
+            messages.error(request, _("WA greska: {}").format(e))
     if appt.client and appt.client.email:
         try:
             _send_reminder_email(appt)
             appt.email_reminder_sent = True
-            sent.append('Email')
+            sent.append("Email")
         except Exception as e:
-            messages.error(request, _('Email greska: {}').format(e))
+            messages.error(request, _("Email greska: {}").format(e))
     if sent:
         from django.utils import timezone
+
         appt.reminder_sent_at = timezone.now()
-        appt.save(update_fields=['whatsapp_reminder_sent','email_reminder_sent','reminder_sent_at'])
-        messages.success(request, _('Podsjetnik poslan: {}').format(', '.join(sent)))
+        appt.save(update_fields=["whatsapp_reminder_sent", "email_reminder_sent", "reminder_sent_at"])
+        messages.success(request, _("Podsjetnik poslan: {}").format(", ".join(sent)))
     elif not sent and not wa and not (appt.client and appt.client.email):
-        messages.warning(request, _('Nema telefona ni emaila za slanje.'))
-    return redirect(request.META.get('HTTP_REFERER', '/appointments/'))
+        messages.warning(request, _("Nema telefona ni emaila za slanje."))
+    return redirect(request.META.get("HTTP_REFERER", "/appointments/"))
 
 
 @login_required
@@ -1300,15 +1213,21 @@ def send_reminders_now(request):
     from django.shortcuts import redirect
 
     from appointments.tasks import send_appointment_reminders
+
     result = send_appointment_reminders()
-    messages.success(request, _('Podsjetnici: {} email + {} WhatsApp (od {} termina)').format(
-        result['email'], result['whatsapp'], result['total']))
-    return redirect(request.META.get('HTTP_REFERER', '/appointments/calendar/'))
+    messages.success(
+        request,
+        _("Podsjetnici: {} email + {} WhatsApp (od {} termina)").format(
+            result["email"], result["whatsapp"], result["total"]
+        ),
+    )
+    return redirect(request.META.get("HTTP_REFERER", "/appointments/calendar/"))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # POLYMORPHIC SCHEDULING — Double-Lock API
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @csrf_exempt
 @transaction.atomic
@@ -1332,21 +1251,21 @@ def api_book_double_lock(request):
         409: {error: str, code: "NO_ACTOR"|"NO_RESOURCE"}
         400: {error: str}
     """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST required'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Neispravan JSON.'}, status=400)
+        return JsonResponse({"error": "Neispravan JSON."}, status=400)
 
-    service_id = data.get('service_id')
-    date_str = data.get('date')
-    time_str = data.get('time')
-    client_name = data.get('name', '').strip()
+    service_id = data.get("service_id")
+    date_str = data.get("date")
+    time_str = data.get("time")
+    client_name = data.get("name", "").strip()
 
     if not all([service_id, date_str, time_str]):
-        return JsonResponse({'error': 'Nedostaju parametri: service_id, date, time.'}, status=400)
+        return JsonResponse({"error": "Nedostaju parametri: service_id, date, time."}, status=400)
 
     from appointments.scheduling import SchedulingError, book_slot
     from companies.models import Company
@@ -1354,17 +1273,17 @@ def api_book_double_lock(request):
     service = get_object_or_404(BookingService, id=service_id)
     target_date = parse_date(date_str)
     if not target_date:
-        return JsonResponse({'error': 'Neispravan datum.'}, status=400)
+        return JsonResponse({"error": "Neispravan datum."}, status=400)
 
     try:
         start_dt = timezone.make_aware(
-            __import__('datetime').datetime.strptime(f'{date_str} {time_str}', '%Y-%m-%d %H:%M')
+            __import__("datetime").datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
         )
     except ValueError:
-        return JsonResponse({'error': 'Neispravan format vremena.'}, status=400)
+        return JsonResponse({"error": "Neispravan format vremena."}, status=400)
 
     duration_min = service.duration.total_seconds() / 60
-    end_dt = start_dt + __import__('datetime').timedelta(minutes=duration_min)
+    end_dt = start_dt + __import__("datetime").timedelta(minutes=duration_min)
 
     # Determine company from the service being booked
     company = service.company
@@ -1379,19 +1298,21 @@ def api_book_double_lock(request):
 
     # Find or create client partner
     client = None
-    email = data.get('email', '').strip()
+    email = data.get("email", "").strip()
     if email:
         from partners.models import Partner
+
         client = Partner.objects.filter(email=email, company=company).first()
         if not client:
             import uuid as _uuid
+
             client = Partner.objects.create(
                 name=client_name or email,
                 email=email,
-                phone=data.get('phone', ''),
+                phone=data.get("phone", ""),
                 company=company,
-                partner_type='client',
-                oib=f'B{_uuid.uuid4().hex[:10].upper()}',
+                partner_type="client",
+                oib=f"B{_uuid.uuid4().hex[:10].upper()}",
             )
 
     try:
@@ -1404,20 +1325,25 @@ def api_book_double_lock(request):
             client_name=client_name,
             client_data=data,
         )
-        return JsonResponse({
-            'status': 'success',
-            'booking_id': appointment.pk,
-            'message': f'Termin zakazan: {service.name} u {time_str}.',
-            'total_price': float(appointment.total_price or 0),
-        })
+        return JsonResponse(
+            {
+                "status": "success",
+                "booking_id": appointment.pk,
+                "message": f"Termin zakazan: {service.name} u {time_str}.",
+                "total_price": float(appointment.total_price or 0),
+            }
+        )
     except SchedulingError as e:
-        return JsonResponse({
-            'error': e.message,
-            'code': e.code,
-            'detail': e.detail,
-        }, status=409)
+        return JsonResponse(
+            {
+                "error": e.message,
+                "code": e.code,
+                "detail": e.detail,
+            },
+            status=409,
+        )
     except (ValueError, TypeError) as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def api_check_double_lock(request):
@@ -1425,12 +1351,12 @@ def api_check_double_lock(request):
     GET /appointments/api/check-availability/?service_id=X&date=YYYY-MM-DD&time=HH:MM
     Quick availability check (non-locking).
     """
-    service_id = request.GET.get('service_id')
-    date_str = request.GET.get('date')
-    time_str = request.GET.get('time')
+    service_id = request.GET.get("service_id")
+    date_str = request.GET.get("date")
+    time_str = request.GET.get("time")
 
     if not all([service_id, date_str, time_str]):
-        return JsonResponse({'error': 'Nedostaju parametri.'}, status=400)
+        return JsonResponse({"error": "Nedostaju parametri."}, status=400)
 
     from appointments.scheduling import check_availability
     from companies.models import Company
@@ -1438,27 +1364,28 @@ def api_check_double_lock(request):
     service = get_object_or_404(BookingService, id=service_id)
     target_date = parse_date(date_str)
     if not target_date:
-        return JsonResponse({'available': False, 'reason': 'BAD_DATE'})
+        return JsonResponse({"available": False, "reason": "BAD_DATE"})
 
     try:
         start_dt = timezone.make_aware(
-            __import__('datetime').datetime.strptime(f'{date_str} {time_str}', '%Y-%m-%d %H:%M')
+            __import__("datetime").datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
         )
     except ValueError:
-        return JsonResponse({'available': False, 'reason': 'BAD_TIME'})
+        return JsonResponse({"available": False, "reason": "BAD_TIME"})
 
     duration_min = service.duration.total_seconds() / 60
-    end_dt = start_dt + __import__('datetime').timedelta(minutes=duration_min)
+    end_dt = start_dt + __import__("datetime").timedelta(minutes=duration_min)
 
     company = service.company or Company.objects.filter(is_platform_owner=True).first() or Company.objects.first()
 
     available, reason = check_availability(company, service, start_dt, end_dt)
-    return JsonResponse({'available': available, 'reason': reason})
+    return JsonResponse({"available": available, "reason": reason})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # POLYMORPHIC CALENDAR — Double-Lock Slot Generation
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @require_GET
 def api_double_lock_slots(request):
@@ -1502,7 +1429,8 @@ def api_double_lock_slots(request):
     # Gather working hours from ALL relevant resources
     weekday = target_date.weekday()
     wh_entries = WorkingHours.objects.filter(
-        day_of_week=weekday, is_day_off=False,
+        day_of_week=weekday,
+        is_day_off=False,
         resource__is_active=True,
     )
     if company:
@@ -1533,35 +1461,49 @@ def api_double_lock_slots(request):
             continue
 
         available, reason = check_availability(company, service, start_aware, end_aware)
-        slots.append({
-            "time": slot_time,
-            "available": available,
-            "reason": reason if not available else "",
-        })
+        slots.append(
+            {
+                "time": slot_time,
+                "available": available,
+                "reason": reason if not available else "",
+            }
+        )
         current += td(minutes=step)
 
-    return JsonResponse({
-        "slots": slots,
-        "service_name": service.name,
-        "duration_minutes": duration_min,
-        "date": date_str,
-    })
+    return JsonResponse(
+        {
+            "slots": slots,
+            "service_name": service.name,
+            "duration_minutes": duration_min,
+            "date": date_str,
+        }
+    )
 
 
 @login_required
 def booking_calendar_view(request):
     """Internal booking calendar with Double-Lock slot visualization."""
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
-    services = BookingService.objects.filter(is_active=True, company=company).select_related("company") if company else BookingService.objects.none()
-    return render(request, "appointments/booking_calendar.html", {
-        "services": services,
-    })
+    services = (
+        BookingService.objects.filter(is_active=True, company=company).select_related("company")
+        if company
+        else BookingService.objects.none()
+    )
+    return render(
+        request,
+        "appointments/booking_calendar.html",
+        {
+            "services": services,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BOOKING GUEST VERIFICATION — email + WhatsApp PIN + QR kod
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @csrf_exempt
 @require_POST
@@ -1574,21 +1516,21 @@ def api_booking_guest_register(request):
     from django.core.validators import validate_email
 
     try:
-        data   = json.loads(request.body)
-        name   = data.get('name', '').strip()
-        email  = data.get('email', '').strip().lower()
-        phone  = data.get('phone', '').strip()
-        company_slug = data.get('company_slug', '')
+        data = json.loads(request.body)
+        name = data.get("name", "").strip()
+        email = data.get("email", "").strip().lower()
+        phone = data.get("phone", "").strip()
+        company_slug = data.get("company_slug", "")
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     if not name or not email:
-        return JsonResponse({'error': 'Ime i email su obavezni.'}, status=400)
+        return JsonResponse({"error": "Ime i email su obavezni."}, status=400)
 
     try:
         validate_email(email)
     except ValidationError:
-        return JsonResponse({'error': 'Email adresa nije ispravna.'}, status=400)
+        return JsonResponse({"error": "Email adresa nije ispravna."}, status=400)
 
     # Nađi ili kreiraj gosta u bazi
     from django.db import connection as _conn
@@ -1607,7 +1549,7 @@ def api_booking_guest_register(request):
     # Provjeri postoji li već verificirani gost s tim emailom
     cursor.execute(
         "SELECT id, qr_token, is_verified FROM appointments_bookingguesttoken WHERE email=%s AND company_id=%s",
-        [email, str(company.id) if company else None]
+        [email, str(company.id) if company else None],
     )
     row = cursor.fetchone()
 
@@ -1615,43 +1557,43 @@ def api_booking_guest_register(request):
         guest_id = str(row[0])
         qr_token = row[1]
         # Već verificiran — vrati QR token direktno
-        return JsonResponse({'status': 'already_verified', 'qr_token': qr_token, 'guest_id': guest_id})
+        return JsonResponse({"status": "already_verified", "qr_token": qr_token, "guest_id": guest_id})
 
     # Kreiraj ili ažuriraj gosta
     qr_token = secrets.token_urlsafe(32)
     if row:
         guest_id = str(row[0])
         cursor.execute(
-            "UPDATE appointments_bookingguesttoken SET name=%s, phone=%s WHERE id=%s",
-            [name, phone, guest_id]
+            "UPDATE appointments_bookingguesttoken SET name=%s, phone=%s WHERE id=%s", [name, phone, guest_id]
         )
     else:
         import uuid as _uuid
+
         guest_id = str(_uuid.uuid4())
         cursor.execute(
             """INSERT INTO appointments_bookingguesttoken
                (id, name, email, phone, company_id, qr_token, is_verified, created_at)
                VALUES (%s, %s, %s, %s, %s, %s, FALSE, NOW())""",
-            [guest_id, name, email, phone,
-             str(company.id) if company else None, qr_token]
+            [guest_id, name, email, phone, str(company.id) if company else None, qr_token],
         )
     _conn.connection.commit()
 
     # Generiraj kratki PIN za email verifikaciju (6 znakova)
     email_token = secrets.token_urlsafe(24)
-    wa_pin      = str(secrets.randbelow(9000) + 1000)  # 4-znamenkasti PIN
+    wa_pin = str(secrets.randbelow(9000) + 1000)  # 4-znamenkasti PIN
 
     # Spremi u Redis cache (24h za email, 10min za WA PIN)
-    cache.set(f'bguest_email_{email_token}', guest_id, 60 * 60 * 24)
-    cache.set(f'bguest_wa_{guest_id}', wa_pin, 60 * 10)
+    cache.set(f"bguest_email_{email_token}", guest_id, 60 * 60 * 24)
+    cache.set(f"bguest_wa_{guest_id}", wa_pin, 60 * 10)
 
     # ── Email verification link ────────────────────────────────────────────────
-    base_url = 'https://limit-connect.com'
-    lang = data.get('lang', 'hr')
+    base_url = "https://limit-connect.com"
+    lang = data.get("lang", "hr")
     verify_url = f"{base_url}/{lang}/appointments/api/booking/verify-email/?t={email_token}"
 
     try:
         from core.email_tasks import send_email_task
+
         subject = f"Potvrdite rezervaciju — {company.name if company else 'Online booking'}"
         body_html = f"""
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px">
@@ -1665,34 +1607,38 @@ def api_booking_guest_register(request):
           <p style="color:#888;font-size:.85rem">Link vrijedi 24 sata.<br>
           Ako niste zatražili rezervaciju, ignorirajte ovaj email.</p>
           <hr style="border:none;border-top:1px solid #eee;margin:20px 0">
-          <p style="color:#888;font-size:.8rem">{company.name if company else ''}</p>
+          <p style="color:#888;font-size:.8rem">{company.name if company else ""}</p>
         </div>
         """
-        send_email_task.delay(subject, '', 'noreply@limit-connect.com', [email], html_message=body_html)
+        send_email_task.delay(subject, "", "noreply@limit-connect.com", [email], html_message=body_html)
     except ImportError as e:
-        logger.warning('Email send failed: %s', e)
+        logger.warning("Email send failed: %s", e)
 
     # ── WhatsApp PIN ───────────────────────────────────────────────────────────
     wa_sent = False
     if phone:
         try:
             from django.conf import settings as _s
-            if getattr(_s, 'WAHA_ENABLED', False):
+
+            if getattr(_s, "WAHA_ENABLED", False):
                 from core.whatsapp_tasks import send_whatsapp_text_task
-                company_name = company.name if company else 'Online booking'
+
+                company_name = company.name if company else "Online booking"
                 wa_msg = "PIN za rezervaciju\n\nVas PIN: " + str(wa_pin) + "\n\nVrijedi 10 minuta. - " + company_name
                 send_whatsapp_text_task.delay(phone, wa_msg)
                 wa_sent = True
         except ImportError as e:
-            logger.warning('WA PIN send failed: %s', e)
+            logger.warning("WA PIN send failed: %s", e)
 
-    return JsonResponse({
-        'status': 'verification_sent',
-        'email_sent': True,
-        'wa_sent': wa_sent,
-        'guest_id': guest_id,
-        'has_phone': bool(phone),
-    })
+    return JsonResponse(
+        {
+            "status": "verification_sent",
+            "email_sent": True,
+            "wa_sent": wa_sent,
+            "guest_id": guest_id,
+            "has_phone": bool(phone),
+        }
+    )
 
 
 @csrf_exempt
@@ -1701,37 +1647,38 @@ def api_booking_verify_email(request):
     from django.core.cache import cache
     from django.db import connection as _conn
 
-    token = request.GET.get('t', '').strip()
+    token = request.GET.get("t", "").strip()
     if not token:
-        return HttpResponse('<h2>Nevažeći link.</h2>', status=400)
+        return HttpResponse("<h2>Nevažeći link.</h2>", status=400)
 
-    guest_id = cache.get(f'bguest_email_{token}')
+    guest_id = cache.get(f"bguest_email_{token}")
     if not guest_id:
-        return HttpResponse('<h2>Link je istekao ili već iskorišten.</h2>', status=400)
+        return HttpResponse("<h2>Link je istekao ili već iskorišten.</h2>", status=400)
 
     # Markiraj kao verificiranog
     cursor = _conn.cursor()
     cursor.execute(
         "UPDATE appointments_bookingguesttoken SET is_verified=TRUE, last_used=NOW() WHERE id=%s RETURNING qr_token, name, company_id",
-        [guest_id]
+        [guest_id],
     )
     row = cursor.fetchone()
     _conn.connection.commit()
-    cache.delete(f'bguest_email_{token}')
+    cache.delete(f"bguest_email_{token}")
 
     if not row:
-        return HttpResponse('<h2>Gost nije pronađen.</h2>', status=404)
+        return HttpResponse("<h2>Gost nije pronađen.</h2>", status=404)
 
     qr_token, guest_name, company_id = row
 
     # Nađi booking_slug za redirect
-    slug = ''
+    slug = ""
     if company_id:
         cursor.execute("SELECT booking_slug FROM companies_company WHERE id=%s", [str(company_id)])
         r = cursor.fetchone()
-        if r: slug = r[0] or ''
+        if r:
+            slug = r[0] or ""
 
-    lang = request.LANGUAGE_CODE if hasattr(request, 'LANGUAGE_CODE') else 'hr'
+    lang = request.LANGUAGE_CODE if hasattr(request, "LANGUAGE_CODE") else "hr"
     redirect_url = f"/{lang}/appointments/booking/c/{slug}/?verified=1&guest={guest_id}&qr={qr_token}"
 
     return HttpResponse(f"""
@@ -1754,37 +1701,37 @@ def api_booking_verify_wa_pin(request):
     from django.db import connection as _conn
 
     try:
-        data     = json.loads(request.body)
-        guest_id = data.get('guest_id', '').strip()
-        pin      = data.get('pin', '').strip()
+        data = json.loads(request.body)
+        guest_id = data.get("guest_id", "").strip()
+        pin = data.get("pin", "").strip()
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     if not guest_id or not pin:
-        return JsonResponse({'error': 'Nedostaju podaci.'}, status=400)
+        return JsonResponse({"error": "Nedostaju podaci."}, status=400)
 
-    cached_pin = cache.get(f'bguest_wa_{guest_id}')
+    cached_pin = cache.get(f"bguest_wa_{guest_id}")
     if not cached_pin:
-        return JsonResponse({'error': 'PIN je istekao. Zatražite novi.'}, status=400)
+        return JsonResponse({"error": "PIN je istekao. Zatražite novi."}, status=400)
 
     if str(cached_pin) != str(pin):
-        return JsonResponse({'error': 'Pogrešan PIN.'}, status=400)
+        return JsonResponse({"error": "Pogrešan PIN."}, status=400)
 
     # Verificiraj gosta
     cursor = _conn.cursor()
     cursor.execute(
         "UPDATE appointments_bookingguesttoken SET is_verified=TRUE, last_used=NOW() WHERE id=%s RETURNING qr_token, name",
-        [guest_id]
+        [guest_id],
     )
     row = cursor.fetchone()
     _conn.connection.commit()
-    cache.delete(f'bguest_wa_{guest_id}')
+    cache.delete(f"bguest_wa_{guest_id}")
 
     if not row:
-        return JsonResponse({'error': 'Gost nije pronađen.'}, status=404)
+        return JsonResponse({"error": "Gost nije pronađen."}, status=404)
 
     qr_token, guest_name = row
-    return JsonResponse({'status': 'verified', 'qr_token': qr_token, 'name': guest_name})
+    return JsonResponse({"status": "verified", "qr_token": qr_token, "name": guest_name})
 
 
 @csrf_exempt
@@ -1792,49 +1739,49 @@ def api_booking_qr_login(request):
     """QR skeniranje — automatska prijava gosta po qr_token."""
     from django.db import connection as _conn
 
-    qr_token = request.GET.get('qr', '').strip()
+    qr_token = request.GET.get("qr", "").strip()
     if not qr_token:
-        return JsonResponse({'error': 'Nevažeći QR kod.'}, status=400)
+        return JsonResponse({"error": "Nevažeći QR kod."}, status=400)
 
     cursor = _conn.cursor()
     cursor.execute(
         """SELECT id, name, email, phone, is_verified, company_id
            FROM appointments_bookingguesttoken WHERE qr_token=%s""",
-        [qr_token]
+        [qr_token],
     )
     row = cursor.fetchone()
 
     if not row:
-        return JsonResponse({'error': 'QR kod nije pronađen.'}, status=404)
+        return JsonResponse({"error": "QR kod nije pronađen."}, status=404)
 
     guest_id, name, email, phone, is_verified, company_id = row
 
     if not is_verified:
-        return JsonResponse({'error': 'Profil nije verificiran.'}, status=403)
+        return JsonResponse({"error": "Profil nije verificiran."}, status=403)
 
     # Ažuriraj last_used
-    cursor.execute(
-        "UPDATE appointments_bookingguesttoken SET last_used=NOW() WHERE id=%s",
-        [guest_id]
-    )
+    cursor.execute("UPDATE appointments_bookingguesttoken SET last_used=NOW() WHERE id=%s", [guest_id])
     _conn.connection.commit()
 
     # Nađi booking_slug
-    slug = ''
+    slug = ""
     if company_id:
         cursor.execute("SELECT booking_slug FROM companies_company WHERE id=%s", [str(company_id)])
         r = cursor.fetchone()
-        if r: slug = r[0] or ''
+        if r:
+            slug = r[0] or ""
 
-    return JsonResponse({
-        'status': 'ok',
-        'guest_id': str(guest_id),
-        'name': name,
-        'email': email,
-        'phone': phone or '',
-        'qr_token': qr_token,
-        'booking_slug': slug,
-    })
+    return JsonResponse(
+        {
+            "status": "ok",
+            "guest_id": str(guest_id),
+            "name": name,
+            "email": email,
+            "phone": phone or "",
+            "qr_token": qr_token,
+            "booking_slug": slug,
+        }
+    )
 
 
 @csrf_exempt
@@ -1846,30 +1793,26 @@ def api_booking_generate_qr(request):
     import qrcode
     from django.db import connection as _conn
 
-    guest_id = request.GET.get('guest', '').strip()
+    guest_id = request.GET.get("guest", "").strip()
     if not guest_id:
-        return JsonResponse({'error': 'Nedostaje guest_id.'}, status=400)
+        return JsonResponse({"error": "Nedostaje guest_id."}, status=400)
 
     cursor = _conn.cursor()
-    cursor.execute(
-        "SELECT qr_token, name, is_verified FROM appointments_bookingguesttoken WHERE id=%s",
-        [guest_id]
-    )
+    cursor.execute("SELECT qr_token, name, is_verified FROM appointments_bookingguesttoken WHERE id=%s", [guest_id])
     row = cursor.fetchone()
     if not row or not row[2]:
-        return JsonResponse({'error': 'Gost nije pronađen ili nije verificiran.'}, status=404)
+        return JsonResponse({"error": "Gost nije pronađen ili nije verificiran."}, status=404)
 
     qr_token, name, _ = row
-    base_url   = 'https://limit-connect.com'
-    qr_url     = f"{base_url}/hr/appointments/api/booking/qr-login/?qr={qr_token}"
+    base_url = "https://limit-connect.com"
+    qr_url = f"{base_url}/hr/appointments/api/booking/qr-login/?qr={qr_token}"
 
     qr = qrcode.QRCode(version=2, box_size=8, border=2)
     qr.add_data(qr_url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color='#c9a84c', back_color='#0a0a0a')
+    img = qr.make_image(fill_color="#c9a84c", back_color="#0a0a0a")
     buf = io.BytesIO()
-    img.save(buf, format='PNG')
+    img.save(buf, format="PNG")
     img_b64 = _b64.b64encode(buf.getvalue()).decode()
 
-    return JsonResponse({'qr_image': img_b64, 'name': name, 'qr_url': qr_url})
-
+    return JsonResponse({"qr_image": img_b64, "name": name, "qr_url": qr_url})

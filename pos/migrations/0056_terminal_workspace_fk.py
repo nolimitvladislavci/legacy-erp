@@ -5,16 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0041_workspace_model'),
-        ('pos', '0055_add_trojstvo_fields'),
+        ("companies", "0041_workspace_model"),
+        ("pos", "0055_add_trojstvo_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterminal',
-            name='workspace',
-            field=models.ForeignKey(blank=True, help_text='Workspace type=PREMISE za fizičku lokaciju terminala', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='terminals', to='companies.workspace', verbose_name='Radni prostor (lokacija)'),
+            model_name="posterminal",
+            name="workspace",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Workspace type=PREMISE za fizičku lokaciju terminala",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="terminals",
+                to="companies.workspace",
+                verbose_name="Radni prostor (lokacija)",
+            ),
         ),
     ]

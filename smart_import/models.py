@@ -6,108 +6,130 @@ from core.managers import CompanyManager
 
 class ImportBatch(models.Model):
     STATUS = [
-        ("pending",    "Ceka obradu"),
+        ("pending", "Ceka obradu"),
         ("processing", "AI obrada u tijeku"),
-        ("ready",      "Spremno za pregled"),
-        ("confirmed",  "Pretvoreno u Primku"),
-        ("error",      "Greska"),
+        ("ready", "Spremno za pregled"),
+        ("confirmed", "Pretvoreno u Primku"),
+        ("error", "Greska"),
     ]
 
-    company   = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        null=True, blank=True, verbose_name="Tvrtka",
+    company = models.ForeignKey(
+        "companies.Company",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Tvrtka",
     )
     objects = CompanyManager()
 
-    supplier  = models.ForeignKey(
-        "partners.Partner", on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Dobavljac",
+    supplier = models.ForeignKey(
+        "partners.Partner",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Dobavljac",
     )
-    file      = models.FileField(upload_to="smart_import/%Y/%m/", verbose_name="Datoteka")
+    file = models.FileField(upload_to="smart_import/%Y/%m/", verbose_name="Datoteka")
     file_type = models.CharField(max_length=10, verbose_name="Tip datoteke")  # xml|pdf|image
-    status    = models.CharField(max_length=20, choices=STATUS, default="pending", verbose_name="Status")
-    raw_json  = models.JSONField(default=list, verbose_name="Izvuceni podaci")
+    status = models.CharField(max_length=20, choices=STATUS, default="pending", verbose_name="Status")
+    raw_json = models.JSONField(default=list, verbose_name="Izvuceni podaci")
     error_msg = models.TextField(blank=True, verbose_name="Poruka greske")
-    status_message = models.CharField(max_length=200, blank=True, default="",
-                                       verbose_name="Status poruka")
-    original_filename = models.CharField(max_length=255, blank=True, default="",
-                                          verbose_name="Originalni naziv datoteke")
+    status_message = models.CharField(max_length=200, blank=True, default="", verbose_name="Status poruka")
+    original_filename = models.CharField(
+        max_length=255, blank=True, default="", verbose_name="Originalni naziv datoteke"
+    )
     retry_count = models.PositiveIntegerField(default=0, verbose_name="Broj pokusaja")
-    processing_started_at = models.DateTimeField(null=True, blank=True,
-                                                  verbose_name="Pocetak obrade")
+    processing_started_at = models.DateTimeField(null=True, blank=True, verbose_name="Pocetak obrade")
 
     goods_receipt = models.OneToOneField(
-        "inventory.GoodsReceipt", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="import_batch",
+        "inventory.GoodsReceipt",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="import_batch",
         verbose_name="Primka",
     )
 
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         verbose_name="Kreirao",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name        = "Uvoz (batch)"
+        verbose_name = "Uvoz (batch)"
         verbose_name_plural = "Uvozi (batch)"
-        ordering            = ["-created_at"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"ImportBatch #{self.pk} \u2013 {self.get_status_display()}"
 
 
 class ImportBatchItem(models.Model):
-    batch          = models.ForeignKey(
-        ImportBatch, on_delete=models.CASCADE,
-        related_name="items", verbose_name="Batch",
+    batch = models.ForeignKey(
+        ImportBatch,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="Batch",
     )
-    row_index      = models.PositiveIntegerField(verbose_name="Redak")
-    vendor_name    = models.CharField(max_length=255, verbose_name="Naziv (dobavljac)")
-    quantity       = models.DecimalField(max_digits=10, decimal_places=3, default=1,
-                                         verbose_name="Kolicina")
-    purchase_price = models.DecimalField(max_digits=12, decimal_places=4, default=0,
-                                         verbose_name="Nabavna cijena/jed.")
+    row_index = models.PositiveIntegerField(verbose_name="Redak")
+    vendor_name = models.CharField(max_length=255, verbose_name="Naziv (dobavljac)")
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, default=1, verbose_name="Kolicina")
+    purchase_price = models.DecimalField(max_digits=12, decimal_places=4, default=0, verbose_name="Nabavna cijena/jed.")
 
-    matched_item    = models.ForeignKey(
-        "inventory.InventoryItem", on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Nas artikl",
+    matched_item = models.ForeignKey(
+        "inventory.InventoryItem",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Nas artikl",
     )
-    match_score     = models.FloatField(default=0, verbose_name="Score podudaranja")
-    is_manual       = models.BooleanField(default=False, verbose_name="Rucno spojeno")
-    margin_override = models.DecimalField(max_digits=6, decimal_places=2,
-                                          null=True, blank=True, verbose_name="Marza override (%)")
+    match_score = models.FloatField(default=0, verbose_name="Score podudaranja")
+    is_manual = models.BooleanField(default=False, verbose_name="Rucno spojeno")
+    margin_override = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Marza override (%)"
+    )
 
     class Meta:
-        verbose_name        = "Stavka uvoza"
+        verbose_name = "Stavka uvoza"
         verbose_name_plural = "Stavke uvoza"
-        ordering            = ["row_index"]
+        ordering = ["row_index"]
 
     def __str__(self):
         return f"{self.vendor_name} x {self.quantity}"
 
 
 class VendorItemMapping(models.Model):
-    company          = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        null=True, blank=True, verbose_name="Tvrtka",
+    company = models.ForeignKey(
+        "companies.Company",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Tvrtka",
     )
     objects = CompanyManager()
 
-    partner          = models.ForeignKey(
-        "partners.Partner", on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Dobavljac",
+    partner = models.ForeignKey(
+        "partners.Partner",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Dobavljac",
     )
     vendor_item_name = models.CharField(max_length=255, verbose_name="Naziv dobavljaca")
-    inventory_item   = models.ForeignKey(
-        "inventory.InventoryItem", on_delete=models.CASCADE,
+    inventory_item = models.ForeignKey(
+        "inventory.InventoryItem",
+        on_delete=models.CASCADE,
         verbose_name="Nas artikl",
     )
 
     class Meta:
-        verbose_name        = "Mapiranje naziva artikla"
+        verbose_name = "Mapiranje naziva artikla"
         verbose_name_plural = "Mapiranja naziva artikala"
-        unique_together     = [["company", "vendor_item_name", "partner"]]
+        unique_together = [["company", "vendor_item_name", "partner"]]
 
     def __str__(self):
         return f'"{self.vendor_item_name}" -> {self.inventory_item.name}'
@@ -118,20 +140,22 @@ from django.utils import timezone as _tz
 
 class GeminiUsageLog(models.Model):
     """Log svakog Gemini API poziva — budget kontrola i troškovni pregled."""
-    caller        = models.CharField(max_length=100, db_index=True,
-                        help_text="Modul koji je pozvao AI (invoice_text, smart_import...)")
-    model         = models.CharField(max_length=60, default="gemini-2.0-flash")
-    input_tokens  = models.IntegerField(default=0)
+
+    caller = models.CharField(
+        max_length=100, db_index=True, help_text="Modul koji je pozvao AI (invoice_text, smart_import...)"
+    )
+    model = models.CharField(max_length=60, default="gemini-2.0-flash")
+    input_tokens = models.IntegerField(default=0)
     output_tokens = models.IntegerField(default=0)
-    cost_eur      = models.DecimalField(max_digits=10, decimal_places=8, default=0)
-    success       = models.BooleanField(default=True)
-    input_hash    = models.CharField(max_length=16, blank=True)
-    called_at     = models.DateTimeField(default=_tz.now, db_index=True)
+    cost_eur = models.DecimalField(max_digits=10, decimal_places=8, default=0)
+    success = models.BooleanField(default=True)
+    input_hash = models.CharField(max_length=16, blank=True)
+    called_at = models.DateTimeField(default=_tz.now, db_index=True)
 
     class Meta:
-        verbose_name        = "Gemini poziv"
+        verbose_name = "Gemini poziv"
         verbose_name_plural = "Gemini pozivi"
-        ordering            = ["-called_at"]
+        ordering = ["-called_at"]
 
     def __str__(self):
         return f"{self.called_at:%Y-%m-%d %H:%M} | {self.caller} | {self.input_tokens}t | {'OK' if self.success else 'ERR'}"
@@ -139,6 +163,7 @@ class GeminiUsageLog(models.Model):
     @classmethod
     def daily_summary(cls):
         from django.db.models import Count, Sum
+
         today = _tz.now().date()
         return cls.objects.filter(called_at__date=today).aggregate(
             total_calls=Count("id"),
@@ -153,24 +178,28 @@ class CompanyMailbox(models.Model):
     Per-company email konfiguracija za Email Rampu.
     Svaki mailbox pripada jednoj firmi — IMAP se koristi za primanje računa.
     """
+
     PROTOCOL_CHOICES = [
         ("imap", "IMAP"),
         ("webhook", "Webhook (Push)"),
     ]
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        related_name="mailboxes", verbose_name="Tvrtka",
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="mailboxes",
+        verbose_name="Tvrtka",
     )
     email_address = models.EmailField(verbose_name="Email adresa", unique=True)
     protocol = models.CharField(
-        max_length=10, choices=PROTOCOL_CHOICES, default="imap",
+        max_length=10,
+        choices=PROTOCOL_CHOICES,
+        default="imap",
         verbose_name="Protokol",
     )
 
     # IMAP settings
-    imap_server = models.CharField(max_length=255, default="imap.gmail.com", blank=True,
-                                   verbose_name="IMAP server")
+    imap_server = models.CharField(max_length=255, default="imap.gmail.com", blank=True, verbose_name="IMAP server")
     imap_port = models.PositiveIntegerField(default=993, verbose_name="IMAP port")
     imap_password = models.CharField(max_length=255, blank=True, verbose_name="App Password")
     imap_folder = models.CharField(max_length=100, default="INBOX", verbose_name="Folder")
@@ -195,9 +224,9 @@ class CompanyMailbox(models.Model):
         return f"{self.email_address} → {self.company.name}"
 
 
-
 class FailedImport(models.Model):
     """Log neuspjelih uvoza - privici koji su preskoceni zbog greske."""
+
     company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, null=True, blank=True)
     email_subject = models.CharField(max_length=500, blank=True)
     email_sender = models.CharField(max_length=255, blank=True)
@@ -215,18 +244,28 @@ class FailedImport(models.Model):
     def __str__(self):
         return f"{self.filename} - {self.error_message[:50]}"
 
+
 class ProblemReport(models.Model):
     """Korisnicka prijava problema s uvozom."""
+
     batch = models.ForeignKey(
-        ImportBatch, on_delete=models.CASCADE,
-        related_name="problem_reports", verbose_name="Batch",
+        ImportBatch,
+        on_delete=models.CASCADE,
+        related_name="problem_reports",
+        verbose_name="Batch",
     )
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        null=True, blank=True, verbose_name="Tvrtka",
+        "companies.Company",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Tvrtka",
     )
     reported_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         verbose_name="Prijavio",
     )
     description = models.TextField(verbose_name="Opis problema")
@@ -245,47 +284,53 @@ class ProblemReport(models.Model):
 
 # ── Predarhiva: StagingBatch za bulk OCR ──────────────────────────────
 
+
 class StagingBatch(models.Model):
     """
     Predkomora — skup slika/fajlova koji čekaju AI obradu.
     Marija učita 1000 slika, vidi ih u pregledu, klikne "Pokreni".
     Gemini ih obrađuje redom, s rate limitom, s live progressom.
     """
+
     STATUS_CHOICES = [
-        ('pending', 'Čeka pokretanje'),
-        ('queued', 'U redu za obradu'),
-        ('processing', 'AI obrađuje'),
-        ('paused', 'Pauzirano'),
-        ('done', 'Završeno'),
-        ('done_with_errors', 'Završeno s greškama'),
+        ("pending", "Čeka pokretanje"),
+        ("queued", "U redu za obradu"),
+        ("processing", "AI obrađuje"),
+        ("paused", "Pauzirano"),
+        ("done", "Završeno"),
+        ("done_with_errors", "Završeno s greškama"),
     ]
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='staging_batches',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="staging_batches",
     )
     objects = CompanyManager()
-    title = models.CharField(max_length=200, blank=True, default='',
-        help_text='Npr. "Računi veljača 2026"')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    title = models.CharField(max_length=200, blank=True, default="", help_text='Npr. "Računi veljača 2026"')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     total_files = models.IntegerField(default=0)
     processed_files = models.IntegerField(default=0)
     failed_files = models.IntegerField(default=0)
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
-    last_message = models.CharField(max_length=500, blank=True, default='',
-        help_text='Zadnja AI poruka — razmišljanje na glas')
+    last_message = models.CharField(
+        max_length=500, blank=True, default="", help_text="Zadnja AI poruka — razmišljanje na glas"
+    )
 
     class Meta:
-        verbose_name = 'Staging batch'
-        verbose_name_plural = 'Staging batchevi'
-        ordering = ['-created_at']
+        verbose_name = "Staging batch"
+        verbose_name_plural = "Staging batchevi"
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'Staging #{self.pk} — {self.title or "Bez naziva"} ({self.get_status_display()})'
+        return f"Staging #{self.pk} — {self.title or 'Bez naziva'} ({self.get_status_display()})"
 
     @property
     def progress_pct(self):
@@ -301,36 +346,41 @@ class StagingBatch(models.Model):
 
 class StagingFile(models.Model):
     """Jedan fajl unutar StagingBatcha."""
+
     STATUS_CHOICES = [
-        ('pending', 'Čeka'),
-        ('processing', 'AI čita'),
-        ('done', 'Obrađeno'),
-        ('error', 'Greška'),
-        ('skipped', 'Preskočeno'),
+        ("pending", "Čeka"),
+        ("processing", "AI čita"),
+        ("done", "Obrađeno"),
+        ("error", "Greška"),
+        ("skipped", "Preskočeno"),
     ]
     staging_batch = models.ForeignKey(
-        StagingBatch, on_delete=models.CASCADE, related_name='files',
+        StagingBatch,
+        on_delete=models.CASCADE,
+        related_name="files",
     )
-    file = models.FileField(upload_to='staging/%Y/%m/')
+    file = models.FileField(upload_to="staging/%Y/%m/")
     original_filename = models.CharField(max_length=255, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     result_batch = models.ForeignKey(
-        ImportBatch, on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='staging_source',
+        ImportBatch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="staging_source",
     )
-    ai_message = models.CharField(max_length=500, blank=True,
-        help_text='Što je AI rekao za ovaj fajl')
+    ai_message = models.CharField(max_length=500, blank=True, help_text="Što je AI rekao za ovaj fajl")
     error_msg = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = 'Staging fajl'
-        verbose_name_plural = 'Staging fajlovi'
-        ordering = ['created_at']
+        verbose_name = "Staging fajl"
+        verbose_name_plural = "Staging fajlovi"
+        ordering = ["created_at"]
 
     def __str__(self):
-        return f'{self.original_filename} ({self.get_status_display()})'
+        return f"{self.original_filename} ({self.get_status_display()})"
 
 
 class StagingFileHeader(models.Model):
@@ -339,50 +389,59 @@ class StagingFileHeader(models.Model):
     Sadrži meta-podatke računa (OIB, iznos, datum, broj) — odvojeno od stavki.
     Inovacija: auto-match Partner po OIB-u, jedan-klik URA kreacija.
     """
+
     staging_file = models.OneToOneField(
-        StagingFile, on_delete=models.CASCADE, related_name='header',
+        StagingFile,
+        on_delete=models.CASCADE,
+        related_name="header",
     )
     # Dobavljač
-    supplier_name = models.CharField(max_length=255, blank=True, verbose_name='Dobavljač (AI)')
-    supplier_oib  = models.CharField(max_length=20,  blank=True, verbose_name='OIB dobavljača')
+    supplier_name = models.CharField(max_length=255, blank=True, verbose_name="Dobavljač (AI)")
+    supplier_oib = models.CharField(max_length=20, blank=True, verbose_name="OIB dobavljača")
     matched_partner = models.ForeignKey(
-        'partners.Partner', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='staging_headers',
-        verbose_name='Sparen partner (auto-OIB)',
+        "partners.Partner",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="staging_headers",
+        verbose_name="Sparen partner (auto-OIB)",
     )
     # Dokument
-    invoice_number = models.CharField(max_length=100, blank=True, verbose_name='Broj računa')
-    invoice_date   = models.DateField(null=True, blank=True, verbose_name='Datum računa')
+    invoice_number = models.CharField(max_length=100, blank=True, verbose_name="Broj računa")
+    invoice_date = models.DateField(null=True, blank=True, verbose_name="Datum računa")
     # Iznosi
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='Ukupan iznos')
-    vat_amount   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='PDV iznos')
-    base_amount  = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='Osnovica')
-    currency     = models.CharField(max_length=5, default='EUR', blank=True)
+    total_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="Ukupan iznos"
+    )
+    vat_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="PDV iznos")
+    base_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="Osnovica")
+    currency = models.CharField(max_length=5, default="EUR", blank=True)
     # AI confidence
-    confidence   = models.FloatField(default=0.0, help_text='AI sigurnost 0.0-1.0')
-    needs_review = models.BooleanField(default=False, verbose_name='Treba provjeru')
-    raw_header   = models.JSONField(default=dict, blank=True, help_text='Sirovi AI output za zaglavlje')
-    created_at   = models.DateTimeField(auto_now_add=True)
+    confidence = models.FloatField(default=0.0, help_text="AI sigurnost 0.0-1.0")
+    needs_review = models.BooleanField(default=False, verbose_name="Treba provjeru")
+    raw_header = models.JSONField(default=dict, blank=True, help_text="Sirovi AI output za zaglavlje")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Zaglavlje staging fajla'
-        verbose_name_plural = 'Zaglavlja staging fajlova'
+        verbose_name = "Zaglavlje staging fajla"
+        verbose_name_plural = "Zaglavlja staging fajlova"
 
     def __str__(self):
-        return f'{self.supplier_name} | {self.invoice_number} | {self.total_amount} {self.currency}'
+        return f"{self.supplier_name} | {self.invoice_number} | {self.total_amount} {self.currency}"
 
     def auto_match_partner(self):
         """Pronađi Partner po OIB-u — poziva se iz Celery taska."""
         if not self.supplier_oib:
             return None
         from partners.models import Partner
+
         try:
             p = Partner.objects.get(
                 company=self.staging_file.staging_batch.company,
                 oib=self.supplier_oib,
             )
             self.matched_partner = p
-            self.save(update_fields=['matched_partner'])
+            self.save(update_fields=["matched_partner"])
             return p
         except Partner.DoesNotExist:
             return None
@@ -392,37 +451,40 @@ class StagingFileHeader(models.Model):
 # FenixInboxItem — Centralni dokumentni router
 # ════════════════════════════════════════════════════════════
 
+
 class FenixInboxItem(models.Model):
     """Svaki dokument koji uđe u sustav prolazi kroz Fenix Inbox."""
+
     TIP_CHOICES = [
-        ('ura', 'Ulazni račun URA'),
-        ('ira', 'Izlazni račun IRA'),
-        ('interna', 'Interna isprava'),
-        ('nepoznato', 'Nepoznato - pregled'),
+        ("ura", "Ulazni račun URA"),
+        ("ira", "Izlazni račun IRA"),
+        ("interna", "Interna isprava"),
+        ("nepoznato", "Nepoznato - pregled"),
     ]
     IZVOR_CHOICES = [
-        ('email', 'Email import'),
-        ('scan', 'FenixScan upload'),
-        ('upload', 'Ručni upload'),
-        ('pos', 'POS bon auto'),
-        ('invoice', 'Račun auto'),
-        ('staging', 'Staging batch'),
+        ("email", "Email import"),
+        ("scan", "FenixScan upload"),
+        ("upload", "Ručni upload"),
+        ("pos", "POS bon auto"),
+        ("invoice", "Račun auto"),
+        ("staging", "Staging batch"),
     ]
     STATUS_CHOICES = [
-        ('novo', 'Novo'),
-        ('klasificira', 'AI klasificira'),
-        ('ceka', 'Čeka Mariju'),
-        ('usmjereno', 'Usmjereno'),
-        ('arhivirano', 'Arhivirano'),
-        ('greska', 'Greška'),
+        ("novo", "Novo"),
+        ("klasificira", "AI klasificira"),
+        ("ceka", "Čeka Mariju"),
+        ("usmjereno", "Usmjereno"),
+        ("arhivirano", "Arhivirano"),
+        ("greska", "Greška"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
-                                related_name='fenix_inbox', verbose_name='Tvrtka')
+    company = models.ForeignKey(
+        "companies.Company", on_delete=models.CASCADE, related_name="fenix_inbox", verbose_name="Tvrtka"
+    )
     objects = CompanyManager()
     izvor = models.CharField(max_length=20, choices=IZVOR_CHOICES)
     tip = models.CharField(max_length=20, choices=TIP_CHOICES, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='novo')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="novo")
 
     arhiva_entry_id = models.IntegerField(null=True, blank=True)
     staging_file_id = models.IntegerField(null=True, blank=True)
@@ -433,28 +495,26 @@ class FenixInboxItem(models.Model):
     doc_broj = models.CharField(max_length=200, blank=True)
     partner_naziv = models.CharField(max_length=200, blank=True)
     iznos = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
-    valuta = models.CharField(max_length=5, default='EUR', blank=True)
+    valuta = models.CharField(max_length=5, default="EUR", blank=True)
     datum_dokumenta = models.DateField(null=True, blank=True)
 
     ai_tip_confidence = models.FloatField(default=0.0)
     ai_summary = models.TextField(blank=True)
     ai_prijedlog = models.JSONField(null=True, blank=True)
 
-    usmjereno_na = models.CharField(max_length=50, blank=True,
-                                     help_text='inventory / konto / arhiva / propter')
+    usmjereno_na = models.CharField(max_length=50, blank=True, help_text="inventory / konto / arhiva / propter")
     usmjereno_at = models.DateTimeField(null=True, blank=True)
-    obradjeno_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
-                                      null=True, blank=True)
+    obradjeno_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Fenix Inbox stavka'
-        verbose_name_plural = 'Fenix Inbox'
-        ordering = ['-created_at']
+        verbose_name = "Fenix Inbox stavka"
+        verbose_name_plural = "Fenix Inbox"
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['company', 'status'], name='fenix_inbox_co_status_idx'),
-            models.Index(fields=['company', 'created_at'], name='fenix_inbox_co_date_idx'),
+            models.Index(fields=["company", "status"], name="fenix_inbox_co_status_idx"),
+            models.Index(fields=["company", "created_at"], name="fenix_inbox_co_date_idx"),
         ]
 
     def __str__(self):
@@ -463,9 +523,9 @@ class FenixInboxItem(models.Model):
     @property
     def izvor_url(self):
         if self.invoice_id:
-            return f'/invoicing/{self.invoice_id}/'
+            return f"/invoicing/{self.invoice_id}/"
         if self.pos_receipt_id:
-            return f'/pos/receipt/{self.pos_receipt_id}/'
+            return f"/pos/receipt/{self.pos_receipt_id}/"
         if self.arhiva_entry_id:
-            return f'/documents/arhiva/?entry={self.arhiva_entry_id}'
-        return ''
+            return f"/documents/arhiva/?entry={self.arhiva_entry_id}"
+        return ""

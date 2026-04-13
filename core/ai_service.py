@@ -16,17 +16,16 @@ from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
-GEMINI_MODEL          = "gemini-2.5-flash"
-DAILY_CALL_LIMIT      = 200
-HOURLY_CALL_LIMIT     = 30
-DAILY_TOKEN_LIMIT     = 500_000
-MAX_INPUT_CHARS       = 8_000
-COST_PER_INPUT_TOKEN  = Decimal("0.000000075")
+GEMINI_MODEL = "gemini-2.5-flash"
+DAILY_CALL_LIMIT = 200
+HOURLY_CALL_LIMIT = 30
+DAILY_TOKEN_LIMIT = 500_000
+MAX_INPUT_CHARS = 8_000
+COST_PER_INPUT_TOKEN = Decimal("0.000000075")
 COST_PER_OUTPUT_TOKEN = Decimal("0.0000003")
 
 
 class AICallBudget:
-
     def check(self, caller=""):
         try:
             from datetime import timedelta
@@ -35,16 +34,21 @@ class AICallBudget:
             from django.utils import timezone
 
             from smart_import.gemini_log import GeminiUsageLog
-            now      = timezone.now()
+
+            now = timezone.now()
             hour_ago = now - timedelta(hours=1)
-            daily    = GeminiUsageLog.objects.filter(called_at__date=now.date()).aggregate(
-                           calls=Count("id"), tokens=Sum("input_tokens"))
-            hourly   = GeminiUsageLog.objects.filter(called_at__gte=hour_ago).count()
-            dc = daily["calls"]  or 0
+            daily = GeminiUsageLog.objects.filter(called_at__date=now.date()).aggregate(
+                calls=Count("id"), tokens=Sum("input_tokens")
+            )
+            hourly = GeminiUsageLog.objects.filter(called_at__gte=hour_ago).count()
+            dc = daily["calls"] or 0
             dt = daily["tokens"] or 0
             if dc >= DAILY_CALL_LIMIT:
                 logger.warning("AIBudget BLOCK daily_calls=%d caller=%s", dc, caller)
-                return {"allowed": False, "reason": f"Dnevni limit AI poziva ({dc}/{DAILY_CALL_LIMIT}). Reset sutra u ponoć."}
+                return {
+                    "allowed": False,
+                    "reason": f"Dnevni limit AI poziva ({dc}/{DAILY_CALL_LIMIT}). Reset sutra u ponoć.",
+                }
             if hourly >= HOURLY_CALL_LIMIT:
                 logger.warning("AIBudget BLOCK hourly=%d caller=%s", hourly, caller)
                 return {"allowed": False, "reason": f"Satni limit ({hourly}/{HOURLY_CALL_LIMIT}). Pričekaj malo."}
@@ -59,12 +63,16 @@ class AICallBudget:
     def log(self, caller, model, input_tokens, output_tokens, success, input_hash=""):
         try:
             from smart_import.gemini_log import GeminiUsageLog
-            cost = (Decimal(input_tokens) * COST_PER_INPUT_TOKEN +
-                    Decimal(output_tokens) * COST_PER_OUTPUT_TOKEN)
+
+            cost = Decimal(input_tokens) * COST_PER_INPUT_TOKEN + Decimal(output_tokens) * COST_PER_OUTPUT_TOKEN
             GeminiUsageLog.objects.create(
-                caller=caller, model=model,
-                input_tokens=input_tokens, output_tokens=output_tokens,
-                cost_eur=cost, success=success, input_hash=input_hash,
+                caller=caller,
+                model=model,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                cost_eur=cost,
+                success=success,
+                input_hash=input_hash,
             )
         except (ValueError, TypeError) as e:
             logger.error("AICallBudget.log error: %s", e)
@@ -74,18 +82,18 @@ budget = AICallBudget()
 
 
 class CircuitBreakerAI:
-
     def __init__(self):
-        self.api_key   = os.getenv("GEMINI_API_KEY")
+        self.api_key = os.getenv("GEMINI_API_KEY")
         self.is_active = bool(self.api_key)
-        self.model     = GEMINI_MODEL
-        self._client   = None
+        self.model = GEMINI_MODEL
+        self._client = None
         if not self.is_active:
             logger.warning("GEMINI_API_KEY nije postavljen. AI modul isključen.")
 
     def _get_client(self):
         if self._client is None:
             from google import genai
+
             self._client = genai.Client(api_key=self.api_key)
         return self._client
 
@@ -95,8 +103,10 @@ class CircuitBreakerAI:
     def _parse_json(self, text):
         t = text.strip()
         for prefix in ("```json", "```"):
-            if t.startswith(prefix): t = t[len(prefix):]
-        if t.endswith("```"): t = t[:-3]
+            if t.startswith(prefix):
+                t = t[len(prefix) :]
+        if t.endswith("```"):
+            t = t[:-3]
         return json.loads(t.strip())
 
     def _est(self, text):
@@ -113,9 +123,9 @@ class CircuitBreakerAI:
         prompt = (
             "Analiziraj tekst racuna i vrati ISKLJUCIVO validan JSON objekt, "
             "bez ikakvih dodatnih rijeci ili markdown formatiranja.\n\n"
-            "Struktura: {\"dobavljac\": \"Ime\", \"oib\": \"OIB ili null\", "
-            "\"ukupni_iznos\": 1234.56, \"valuta\": \"EUR\", "
-            "\"datum_izdavanja\": \"YYYY-MM-DD\"}\n\n"
+            'Struktura: {"dobavljac": "Ime", "oib": "OIB ili null", '
+            '"ukupni_iznos": 1234.56, "valuta": "EUR", '
+            '"datum_izdavanja": "YYYY-MM-DD"}\n\n'
             f"Tekst racuna:\n{trimmed}"
         )
         ein, suc, eout = self._est(prompt), False, 0
@@ -143,25 +153,28 @@ class CircuitBreakerAI:
         chk = budget.check(caller)
         if not chk["allowed"]:
             return {"status": "budget_exceeded", "message": chk["reason"]}
-        try: sz = os.path.getsize(image_path)
-        except Exception: sz = 0
+        try:
+            sz = os.path.getsize(image_path)
+        except Exception:
+            sz = 0
         h = self._hash(f"{image_path}:{sz}")
         prompt = (
             "Analiziraj ovu sliku racuna i vrati ISKLJUCIVO validan JSON objekt, "
             "bez ikakvih dodatnih rijeci ili markdown formatiranja.\n\n"
-            "Struktura: {\"dobavljac\": \"Ime (npr. INA)\", \"oib\": \"OIB ili null\", "
-            "\"ukupni_iznos\": 1234.56, \"valuta\": \"EUR\", "
-            "\"datum_izdavanja\": \"YYYY-MM-DD\"}"
+            'Struktura: {"dobavljac": "Ime (npr. INA)", "oib": "OIB ili null", '
+            '"ukupni_iznos": 1234.56, "valuta": "EUR", '
+            '"datum_izdavanja": "YYYY-MM-DD"}'
         )
         ein, suc, eout = self._est(prompt) + 500, False, 0
         try:
             from PIL import Image as PILImage
+
             img = PILImage.open(image_path)
-            r   = self._get_client().models.generate_content(model=self.model, contents=[prompt, img])
+            r = self._get_client().models.generate_content(model=self.model, contents=[prompt, img])
             res = self._parse_json(r.text)
             res["status"] = "success"
             eout = self._est(r.text)
-            suc  = True
+            suc = True
             return res
         except json.JSONDecodeError as e:
             logger.error("AI JSON parse (image) caller=%s: %s", caller, e)
@@ -175,10 +188,14 @@ class CircuitBreakerAI:
     def status(self):
         chk = budget.check("status_check")
         return {
-            "active": self.is_active, "model": self.model, "budget": chk,
-            "limits": {"daily_calls": DAILY_CALL_LIMIT,
-                       "hourly_calls": HOURLY_CALL_LIMIT,
-                       "daily_tokens": DAILY_TOKEN_LIMIT},
+            "active": self.is_active,
+            "model": self.model,
+            "budget": chk,
+            "limits": {
+                "daily_calls": DAILY_CALL_LIMIT,
+                "hourly_calls": HOURLY_CALL_LIMIT,
+                "daily_tokens": DAILY_TOKEN_LIMIT,
+            },
         }
 
 

@@ -5,19 +5,19 @@ from .constants import MODULE_URL_MAP
 
 class SubscriptionMiddleware:
     ALWAYS_ALLOWED_PREFIXES = (
-        '/admin/',
-        '/accounts/',
-        '/register/',
-        '/superadmin/',
-        '/static/',
-        '/media/',
-        '/dashboard/',
-        '/companies/',
-        '/permissions/',
-        '/website/',
-        '/grosmarkt/',
-        '/api/grosmarkt/',
-        '/',
+        "/admin/",
+        "/accounts/",
+        "/register/",
+        "/superadmin/",
+        "/static/",
+        "/media/",
+        "/dashboard/",
+        "/companies/",
+        "/permissions/",
+        "/website/",
+        "/grosmarkt/",
+        "/api/grosmarkt/",
+        "/",
     )
 
     def __init__(self, get_response):
@@ -37,7 +37,7 @@ class SubscriptionMiddleware:
             return False
         path = request.path
         for prefix in self.ALWAYS_ALLOWED_PREFIXES:
-            if path == prefix or (prefix != '/' and path.startswith(prefix)):
+            if path == prefix or (prefix != "/" and path.startswith(prefix)):
                 return False
         return self._get_required_module(request.path) is not None
 
@@ -51,7 +51,7 @@ class SubscriptionMiddleware:
         required_module = self._get_required_module(request.path)
         if not required_module:
             return None
-        company = getattr(request, 'company', None)
+        company = getattr(request, "company", None)
         if not company:
             try:
                 company = request.user.profile.company
@@ -60,13 +60,13 @@ class SubscriptionMiddleware:
         if not company:
             return None
         # Platform owner bypass — all modules unlocked
-        if getattr(company, 'is_platform_owner', False):
+        if getattr(company, "is_platform_owner", False):
             return None
         # Superadmin impersonating — bypass subscription check
-        if getattr(request, 'impersonation_active', False):
+        if getattr(request, "impersonation_active", False):
             return None
         try:
-            subscription = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+            subscription = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
         except DatabaseError:
             return None
 

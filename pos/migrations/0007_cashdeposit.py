@@ -6,28 +6,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0006_expirybatch_gastroorder_gastroorderitem_table_and_more'),
+        ("pos", "0006_expirybatch_gastroorder_gastroorderitem_table_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CashDeposit',
+            name="CashDeposit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deposit_type', models.CharField(choices=[('deposit', 'Polog'), ('withdrawal', 'Isplata')], default='deposit', max_length=10, verbose_name='Vrsta')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Iznos (€)')),
-                ('note', models.CharField(blank=True, max_length=200, verbose_name='Napomena')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('operator', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cash_deposits', to=settings.AUTH_USER_MODEL, verbose_name='Operater')),
-                ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cash_deposits', to='pos.possession', verbose_name='Smjena')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "deposit_type",
+                    models.CharField(
+                        choices=[("deposit", "Polog"), ("withdrawal", "Isplata")],
+                        default="deposit",
+                        max_length=10,
+                        verbose_name="Vrsta",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Iznos (€)")),
+                ("note", models.CharField(blank=True, max_length=200, verbose_name="Napomena")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "operator",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="cash_deposits",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Operater",
+                    ),
+                ),
+                (
+                    "session",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cash_deposits",
+                        to="pos.possession",
+                        verbose_name="Smjena",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Polog/Isplata',
-                'verbose_name_plural': 'Polozi/Isplate',
-                'ordering': ['-created_at'],
+                "verbose_name": "Polog/Isplata",
+                "verbose_name_plural": "Polozi/Isplate",
+                "ordering": ["-created_at"],
             },
         ),
     ]

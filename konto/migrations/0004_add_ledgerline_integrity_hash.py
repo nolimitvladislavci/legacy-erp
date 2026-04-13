@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('konto', '0003_bank_account_nullable'),
+        ("konto", "0003_bank_account_nullable"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ledgerline',
-            name='integrity_hash',
-            field=models.CharField(blank=True, default='', help_text='SHA-256 chain za GoBD audit', max_length=64, verbose_name='Integrity Hash'),
+            model_name="ledgerline",
+            name="integrity_hash",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="SHA-256 chain za GoBD audit",
+                max_length=64,
+                verbose_name="Integrity Hash",
+            ),
         ),
     ]

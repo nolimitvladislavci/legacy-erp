@@ -5,35 +5,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('partners', '0005_alter_partner_partner_type_agentreferral_agentpayout'),
-        ('smart_import', '0006_add_staging_batch'),
+        ("partners", "0005_alter_partner_partner_type_agentreferral_agentpayout"),
+        ("smart_import", "0006_add_staging_batch"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StagingFileHeader',
+            name="StagingFileHeader",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('supplier_name', models.CharField(blank=True, max_length=255, verbose_name='Dobavljač (AI)')),
-                ('supplier_oib', models.CharField(blank=True, max_length=20, verbose_name='OIB dobavljača')),
-                ('invoice_number', models.CharField(blank=True, max_length=100, verbose_name='Broj računa')),
-                ('invoice_date', models.DateField(blank=True, null=True, verbose_name='Datum računa')),
-                ('total_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Ukupan iznos')),
-                ('vat_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='PDV iznos')),
-                ('base_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Osnovica')),
-                ('currency', models.CharField(blank=True, default='EUR', max_length=5)),
-                ('confidence', models.FloatField(default=0.0, help_text='AI sigurnost 0.0-1.0')),
-                ('needs_review', models.BooleanField(default=False, verbose_name='Treba provjeru')),
-                ('raw_header', models.JSONField(blank=True, default=dict, help_text='Sirovi AI output za zaglavlje')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('matched_partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='staging_headers', to='partners.partner', verbose_name='Sparen partner (auto-OIB)')),
-                ('staging_file', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='header', to='smart_import.stagingfile')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("supplier_name", models.CharField(blank=True, max_length=255, verbose_name="Dobavljač (AI)")),
+                ("supplier_oib", models.CharField(blank=True, max_length=20, verbose_name="OIB dobavljača")),
+                ("invoice_number", models.CharField(blank=True, max_length=100, verbose_name="Broj računa")),
+                ("invoice_date", models.DateField(blank=True, null=True, verbose_name="Datum računa")),
+                (
+                    "total_amount",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="Ukupan iznos"
+                    ),
+                ),
+                (
+                    "vat_amount",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="PDV iznos"
+                    ),
+                ),
+                (
+                    "base_amount",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="Osnovica"
+                    ),
+                ),
+                ("currency", models.CharField(blank=True, default="EUR", max_length=5)),
+                ("confidence", models.FloatField(default=0.0, help_text="AI sigurnost 0.0-1.0")),
+                ("needs_review", models.BooleanField(default=False, verbose_name="Treba provjeru")),
+                ("raw_header", models.JSONField(blank=True, default=dict, help_text="Sirovi AI output za zaglavlje")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "matched_partner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="staging_headers",
+                        to="partners.partner",
+                        verbose_name="Sparen partner (auto-OIB)",
+                    ),
+                ),
+                (
+                    "staging_file",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="header",
+                        to="smart_import.stagingfile",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zaglavlje staging fajla',
-                'verbose_name_plural': 'Zaglavlja staging fajlova',
+                "verbose_name": "Zaglavlje staging fajla",
+                "verbose_name_plural": "Zaglavlja staging fajlova",
             },
         ),
     ]

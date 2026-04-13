@@ -5,25 +5,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0017_livestock_animal_fk'),
+        ("inventory", "0017_livestock_animal_fk"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='goodsreceiptitem',
-            name='batch_number',
-            field=models.CharField(blank=True, help_text='LOT oznaka sa ambalaže dobavljača', max_length=100, verbose_name='Broj sarze / LOT'),
+            model_name="goodsreceiptitem",
+            name="batch_number",
+            field=models.CharField(
+                blank=True,
+                help_text="LOT oznaka sa ambalaže dobavljača",
+                max_length=100,
+                verbose_name="Broj sarze / LOT",
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceiptitem',
-            name='expiry_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Datum isteka roka'),
+            model_name="goodsreceiptitem",
+            name="expiry_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Datum isteka roka"),
         ),
         migrations.AddField(
-            model_name='goodsreceiptitem',
-            name='stock_batch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='goods_receipt_items', to='inventory.stockbatch', verbose_name='Kreirana sarža'),
+            model_name="goodsreceiptitem",
+            name="stock_batch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="goods_receipt_items",
+                to="inventory.stockbatch",
+                verbose_name="Kreirana sarža",
+            ),
         ),
     ]

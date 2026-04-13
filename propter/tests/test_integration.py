@@ -5,6 +5,7 @@ Propter integracija -- testovi za:
   - BillingPeriod auto-close logika
   - PropterConfig views HTTP response
 """
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -19,6 +20,7 @@ def make_company(oib=None):
     import uuid
 
     from companies.models import Company
+
     return Company.objects.create(
         name="Integ Test d.o.o.",
         oib=oib or str(uuid.uuid4().int)[:11],
@@ -86,6 +88,7 @@ class TestPropterViews(TestCase):
 
     def setUp(self):
         import uuid
+
         self.company = make_company(str(uuid.uuid4().int)[:11])
         self.user = User.objects.create_user(
             username="propter_test_user",
@@ -131,6 +134,7 @@ class TestAutoClosePrevious(TestCase):
     def test_auto_close_previous_empty(self):
         """Ako nema OPEN perioda, treba vratiti praznu listu."""
         from propter.services.aggregate import auto_close_previous
+
         results = auto_close_previous()
         self.assertIsInstance(results, list)
 

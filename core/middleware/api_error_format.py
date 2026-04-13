@@ -3,6 +3,7 @@ core/middleware/api_error_format.py
 Standardizes all JSON error responses from /api/ endpoints to:
   {"status": "error", "code": <http_code>, "message": "..."}
 """
+
 import json
 import logging
 
@@ -28,8 +29,8 @@ class ApiErrorFormatMiddleware:
         if response.status_code < 400:
             return response
 
-        content_type = response.get('Content-Type', '')
-        if 'application/json' not in content_type:
+        content_type = response.get("Content-Type", "")
+        if "application/json" not in content_type:
             return response
 
         try:
@@ -38,24 +39,24 @@ class ApiErrorFormatMiddleware:
             return response
 
         # Already in standard format
-        if 'status' in data and 'code' in data and 'message' in data:
+        if "status" in data and "code" in data and "message" in data:
             return response
 
         # Normalize
         normalized = {
-            'status': 'error',
-            'code': response.status_code,
-            'message': data.get('error') or data.get('detail') or data.get('message') or str(data),
+            "status": "error",
+            "code": response.status_code,
+            "message": data.get("error") or data.get("detail") or data.get("message") or str(data),
         }
 
         # Preserve extra fields (like 'difference_pct', 'code' from CartError, etc.)
         for key in data:
-            if key not in ('error', 'detail', 'status'):
+            if key not in ("error", "detail", "status"):
                 normalized[key] = data[key]
 
-        response.content = json.dumps(normalized, ensure_ascii=False).encode('utf-8')
+        response.content = json.dumps(normalized, ensure_ascii=False).encode("utf-8")
         return response
 
     @staticmethod
     def _is_api_request(request):
-        return '/api/' in request.path
+        return "/api/" in request.path

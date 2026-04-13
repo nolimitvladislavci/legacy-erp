@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0022_improvement_suggestion'),
+        ("pos", "0022_improvement_suggestion"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterminal',
-            name='category_filter',
-            field=models.CharField(blank=True, help_text='Comma-separated: food,drink,dessert ili prazno=sve. Optika: product,service', max_length=200, verbose_name='Filter kategorija'),
+            model_name="posterminal",
+            name="category_filter",
+            field=models.CharField(
+                blank=True,
+                help_text="Comma-separated: food,drink,dessert ili prazno=sve. Optika: product,service",
+                max_length=200,
+                verbose_name="Filter kategorija",
+            ),
         ),
     ]

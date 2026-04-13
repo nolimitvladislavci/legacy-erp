@@ -146,10 +146,7 @@ TOOLS = [
     {
         "name": "analyze_inventory_value",
         "description": "Sinteticki pregled skladista: ukupna vrijednost zaliha (nabavna i prodajna) te artikli ispod minimalne razine (low stock).",
-        "input_schema": {
-            "type": "object",
-            "properties": {}
-        }
+        "input_schema": {"type": "object", "properties": {}},
     },
     {
         "name": "get_cashflow_summary",
@@ -158,22 +155,19 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "year": {"type": "integer", "description": "Godina (npr. 2026). Prazno = trenutna."},
-                "month": {"type": "integer", "description": "Mjesec (1-12). Prazno = trenutni."}
-            }
-        }
+                "month": {"type": "integer", "description": "Mjesec (1-12). Prazno = trenutni."},
+            },
+        },
     },
     {
         "name": "get_pending_payments",
         "description": "Sinteticki pregled placanja na cekanju (pending/processing). Sigurnosno izolirano.",
-        "input_schema": {
-            "type": "object",
-            "properties": {}
-        }
+        "input_schema": {"type": "object", "properties": {}},
     },
     {
         "name": "run_system_health_check",
         "description": "Pokrece provjeru zdravlja sustava: baza podataka, Redis cache, Celery worker, disk prostor, zadnji error u logu. Vraca status svakog servisa.",
-        "input_schema": {"type": "object", "properties": {}}
+        "input_schema": {"type": "object", "properties": {}},
     },
     {
         "name": "validate_pos_math",
@@ -191,14 +185,14 @@ TOOLS = [
                             "qty": {"type": "number"},
                             "price": {"type": "number"},
                             "tax_rate": {"type": "number", "description": "PDV stopa (25, 13, 5)"},
-                            "discount_pct": {"type": "number", "description": "Popust u postocima (0-100)"}
-                        }
-                    }
+                            "discount_pct": {"type": "number", "description": "Popust u postocima (0-100)"},
+                        },
+                    },
                 },
-                "amount_paid": {"type": "number", "description": "Iznos koji kupac placa (za izracun kusura)"}
+                "amount_paid": {"type": "number", "description": "Iznos koji kupac placa (za izracun kusura)"},
             },
-            "required": ["items"]
-        }
+            "required": ["items"],
+        },
     },
     {
         "name": "run_test_suite",
@@ -208,15 +202,15 @@ TOOLS = [
             "properties": {
                 "module": {
                     "type": "string",
-                    "description": "Naziv test modula (npr. 'tests.test_pos_propter_integration'). Prazno = svi testovi."
+                    "description": "Naziv test modula (npr. 'tests.test_pos_propter_integration'). Prazno = svi testovi.",
                 }
-            }
-        }
+            },
+        },
     },
     {
         "name": "audit_data_integrity",
         "description": "Provjerava integritet podataka: orphan zapisi (profili bez korisnika, racuni bez sesija), duplikati, nekonzistentni statusi. Vraca listu problema.",
-        "input_schema": {"type": "object", "properties": {}}
+        "input_schema": {"type": "object", "properties": {}},
     },
     {
         "name": "explain_business_flow",
@@ -226,11 +220,11 @@ TOOLS = [
             "properties": {
                 "flow": {
                     "type": "string",
-                    "description": "Naziv toka: pos, propter, fiscal, eracun, inventory, payments, smart_import"
+                    "description": "Naziv toka: pos, propter, fiscal, eracun, inventory, payments, smart_import",
                 }
             },
-            "required": ["flow"]
-        }
+            "required": ["flow"],
+        },
     },
     {
         "name": "get_worktime_report",
@@ -244,10 +238,13 @@ TOOLS = [
                 "project_code": {"type": "string", "description": "Kod projekta npr. PRJ-001 (opcionalno)"},
                 "date_from": {"type": "string", "description": "Pocetak perioda YYYY-MM-DD (default: prvi u mjesecu)"},
                 "date_to": {"type": "string", "description": "Kraj perioda YYYY-MM-DD (default: danas)"},
-                "status": {"type": "string", "description": "Filter po statusu: APPROVED, PENDING, DRAFT, all (default: all)"},
-                "only_unbilled": {"type": "boolean", "description": "Samo neobracunati sati (default: false)"}
-            }
-        }
+                "status": {
+                    "type": "string",
+                    "description": "Filter po statusu: APPROVED, PENDING, DRAFT, all (default: all)",
+                },
+                "only_unbilled": {"type": "boolean", "description": "Samo neobracunati sati (default: false)"},
+            },
+        },
     },
     {
         "name": "preview_invoice_from_hours",
@@ -256,14 +253,20 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "project_code": {"type": "string", "description": "Kod projekta (obavezno ako nema user_id)"},
-                "user_id": {"type": "integer", "description": "ID radnika (opcionalno - filtrira sate samo tog radnika)"},
+                "user_id": {
+                    "type": "integer",
+                    "description": "ID radnika (opcionalno - filtrira sate samo tog radnika)",
+                },
                 "date_from": {"type": "string", "description": "Od datuma YYYY-MM-DD"},
                 "date_to": {"type": "string", "description": "Do datuma YYYY-MM-DD"},
                 "tax_rate": {"type": "number", "description": "PDV stopa (default: 25)"},
-                "group_by": {"type": "string", "description": "Grupiranje stavki: 'worker' (po radniku), 'task' (po tipu zadatka), 'day' (po danu). Default: worker"}
+                "group_by": {
+                    "type": "string",
+                    "description": "Grupiranje stavki: 'worker' (po radniku), 'task' (po tipu zadatka), 'day' (po danu). Default: worker",
+                },
             },
-            "required": ["project_code"]
-        }
+            "required": ["project_code"],
+        },
     },
     {
         "name": "create_invoice_from_hours",
@@ -276,12 +279,15 @@ TOOLS = [
                 "date_from": {"type": "string", "description": "Od datuma YYYY-MM-DD"},
                 "date_to": {"type": "string", "description": "Do datuma YYYY-MM-DD"},
                 "tax_rate": {"type": "number", "description": "PDV stopa (default: 25)"},
-                "client_name": {"type": "string", "description": "Naziv klijenta (override, inace se koristi project.client_name)"},
+                "client_name": {
+                    "type": "string",
+                    "description": "Naziv klijenta (override, inace se koristi project.client_name)",
+                },
                 "note": {"type": "string", "description": "Napomena na racunu"},
-                "payment_days": {"type": "integer", "description": "Rok placanja u danima (default: 15)"}
+                "payment_days": {"type": "integer", "description": "Rok placanja u danima (default: 15)"},
             },
-            "required": ["project_code"]
-        }
+            "required": ["project_code"],
+        },
     },
     # --- Fenix Intelligence v2 tools (CC Code) ---
     {
@@ -293,18 +299,12 @@ TOOLS = [
                 "tip": {
                     "type": "string",
                     "description": "Tip: eu_fond, hr_poticaj, bio_certifikacija, sve (default: sve)",
-                    "enum": ["eu_fond", "hr_poticaj", "bio_certifikacija", "sve"]
+                    "enum": ["eu_fond", "hr_poticaj", "bio_certifikacija", "sve"],
                 },
-                "rok_dana": {
-                    "type": "integer",
-                    "description": "Fondovi koji isticu za N dana (default: 90)"
-                },
-                "samo_aktivni": {
-                    "type": "boolean",
-                    "description": "Samo aktivni natjecaji (default: true)"
-                }
-            }
-        }
+                "rok_dana": {"type": "integer", "description": "Fondovi koji isticu za N dana (default: 90)"},
+                "samo_aktivni": {"type": "boolean", "description": "Samo aktivni natjecaji (default: true)"},
+            },
+        },
     },
     {
         "name": "get_livestock_status",
@@ -315,10 +315,10 @@ TOOLS = [
                 "detalji": {
                     "type": "string",
                     "description": "Sto prikazati: pregled, zdravlje, mlijeko, usjevi (default: pregled)",
-                    "enum": ["pregled", "zdravlje", "mlijeko", "usjevi"]
+                    "enum": ["pregled", "zdravlje", "mlijeko", "usjevi"],
                 }
-            }
-        }
+            },
+        },
     },
     {
         "name": "create_futures_listing",
@@ -328,19 +328,13 @@ TOOLS = [
             "properties": {
                 "crop_plan_id": {
                     "type": "integer",
-                    "description": "ID CropPlana ciji visak objavljujemo (iz get_livestock_status usjevi)"
+                    "description": "ID CropPlana ciji visak objavljujemo (iz get_livestock_status usjevi)",
                 },
-                "cijena_eur_t": {
-                    "type": "number",
-                    "description": "Cijena u EUR po toni (OPG postavlja)"
-                },
-                "napomena": {
-                    "type": "string",
-                    "description": "Napomena za listing (opcionalno)"
-                }
+                "cijena_eur_t": {"type": "number", "description": "Cijena u EUR po toni (OPG postavlja)"},
+                "napomena": {"type": "string", "description": "Napomena za listing (opcionalno)"},
             },
-            "required": ["crop_plan_id"]
-        }
+            "required": ["crop_plan_id"],
+        },
     },
     {
         "name": "get_compliance_warnings",
@@ -351,10 +345,10 @@ TOOLS = [
                 "kategorija": {
                     "type": "string",
                     "description": "Kategorija: sve, pdv, dokumenti, clanarine, livestock, fondovi (default: sve)",
-                    "enum": ["sve", "pdv", "dokumenti", "clanarine", "livestock", "fondovi"]
+                    "enum": ["sve", "pdv", "dokumenti", "clanarine", "livestock", "fondovi"],
                 }
-            }
-        }
+            },
+        },
     },
     # CC Code prijedlog: get_intelligence_results -- korisnik pita "sto si nasao?" / "ima li novih pronalazaka"
     {
@@ -366,13 +360,10 @@ TOOLS = [
                 "status": {
                     "type": "string",
                     "description": "Filter po statusu: novo, obavljeno, odbaceno, sve (default: novo)",
-                    "enum": ["novo", "obavljeno", "odbaceno", "sve"]
+                    "enum": ["novo", "obavljeno", "odbaceno", "sve"],
                 },
-                "limit": {
-                    "type": "integer",
-                    "description": "Maksimalan broj rezultata (default: 10)"
-                }
-            }
-        }
+                "limit": {"type": "integer", "description": "Maksimalan broj rezultata (default: 10)"},
+            },
+        },
     },
 ]

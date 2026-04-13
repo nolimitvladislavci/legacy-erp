@@ -1,13 +1,14 @@
 """
 marketplace/tasks.py — Celery taskovi za Ghost Inventory i notifikacije.
 """
+
 import logging
 
 from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
 
-logger = logging.getLogger('marketplace')
+logger = logging.getLogger("marketplace")
 
 
 @shared_task(bind=True, soft_time_limit=120)
@@ -17,6 +18,7 @@ def ghost_inventory_cleanup(self):
     Sprečava "ghost inventory" — proizvode koji više nisu dostupni.
     """
     from marketplace.services.marketplace_bridge import deactivate_expired_listings
+
     return deactivate_expired_listings()
 
 
@@ -38,16 +40,14 @@ def send_expiry_reminders(self):
             from core.whatsapp import send_text
 
             # Nađi admina seller company
-            admin_profile = UserProfile.objects.filter(
-                company=product.seller_company
-            ).select_related('user').first()
+            admin_profile = UserProfile.objects.filter(company=product.seller_company).select_related("user").first()
 
             if admin_profile and admin_profile.user:
-                phone = getattr(admin_profile, 'phone', '') or ''
+                phone = getattr(admin_profile, "phone", "") or ""
                 if phone:
                     msg = (
                         f'🔔 Vaš listing "{product.name}" na tržnici ističe uskoro. '
-                        f'Još dostupno? Posjetite tržnicu za produljenje.'
+                        f"Još dostupno? Posjetite tržnicu za produljenje."
                     )
                     send_text(
                         phone=phone,
@@ -56,11 +56,10 @@ def send_expiry_reminders(self):
                     )
                     notified += 1
         except DatabaseError as e:
-            logger.warning('Expiry reminder %s: %s', product.pk, e)
+            logger.warning("Expiry reminder %s: %s", product.pk, e)
 
-    logger.info('Expiry reminders: %d notified of %d expiring', notified, expiring.count())
-    return {'expiring': expiring.count(), 'notified': notified}
-
+    logger.info("Expiry reminders: %d notified of %d expiring", notified, expiring.count())
+    return {"expiring": expiring.count(), "notified": notified}
 
 
 @shared_task(bind=True, soft_time_limit=120)
@@ -96,18 +95,13 @@ def expiry_gastro_bridge_check(self):
             from accounts.models import UserProfile
             from core.whatsapp import send_text
 
-            admin_profile = UserProfile.objects.filter(
-                company=product.seller_company
-            ).select_related("user").first()
+            admin_profile = UserProfile.objects.filter(company=product.seller_company).select_related("user").first()
 
             if admin_profile and admin_profile.user:
                 phone = getattr(admin_profile, "phone", "") or ""
                 if phone:
                     bridge_url = f"https://limit-connect.com/marketplace/gastro-bridge/{product.pk}/"
-                    msg = (
-                        f"LAST CALL: {product.name} istice za ~4h na trznici. "
-                        f"→ {bridge_url}"
-                    )
+                    msg = f"LAST CALL: {product.name} istice za ~4h na trznici. → {bridge_url}"
                     send_text(phone=phone, message=msg, company_id=str(product.seller_company.pk))
                     bridged += 1
         except DatabaseError as e:
@@ -134,39 +128,38 @@ def finalize_ended_auctions(self):
     now = timezone.now()
     ended = MarketplaceProduct.objects.filter(
         is_auction=True,
-        auction_status__in=('active', 'ending_soon'),
+        auction_status__in=("active", "ending_soon"),
         expires_at__isnull=False,
         expires_at__lt=now,
     )
 
-    results = {'finalized': 0, 'no_bids': 0, 'errors': 0}
+    results = {"finalized": 0, "no_bids": 0, "errors": 0}
 
     for product in ended:
         try:
-            winning_bid = product.bids.order_by('-amount').first()
+            winning_bid = product.bids.order_by("-amount").first()
 
             if winning_bid:
                 # Mark winning bid
                 winning_bid.is_winning = True
-                winning_bid.save(update_fields=['is_winning'])
+                winning_bid.save(update_fields=["is_winning"])
 
                 # Update product
-                product.auction_status = 'sold'
+                product.auction_status = "sold"
                 product.is_available = False
-                product.save(update_fields=['auction_status', 'is_available'])
+                product.save(update_fields=["auction_status", "is_available"])
 
                 # Generate draft invoice
                 try:
                     from invoicing.models import Invoice, InvoiceLine
+
                     invoice = Invoice.objects.create(
                         company=product.seller_company,
                         partner_name=winning_bid.bidder_company.name,
-                        partner_oib=getattr(winning_bid.bidder_company, 'oib', ''),
-                        invoice_type='predracun',
-                        status='draft',
-                        notes='Aukcija goluba %s — Winning bid: %s EUR' % (
-                            product.name, winning_bid.amount
-                        ),
+                        partner_oib=getattr(winning_bid.bidder_company, "oib", ""),
+                        invoice_type="predracun",
+                        status="draft",
+                        notes="Aukcija goluba %s — Winning bid: %s EUR" % (product.name, winning_bid.amount),
                     )
                     InvoiceLine.objects.create(
                         invoice=invoice,
@@ -176,24 +169,26 @@ def finalize_ended_auctions(self):
                         vat_rate=25,
                     )
                     invoice.recalculate()
-                    logger.info('Auction invoice #%s for product %s', invoice.pk, product.pk)
+                    logger.info("Auction invoice #%s for product %s", invoice.pk, product.pk)
                 except (IntegrityError, DatabaseError) as e:
-                    logger.warning('Auction invoice failed for %s: %s', product.pk, e)
+                    logger.warning("Auction invoice failed for %s: %s", product.pk, e)
 
                 # Update golub status if source is Golub
-                if product.source_model == 'Golub' and product.source_id:
+                if product.source_model == "Golub" and product.source_id:
                     try:
                         from udruge.models import Golub
+
                         golub = Golub.objects.get(pk=product.source_id)
                         golub.aktivan = False
-                        golub.napomena = (golub.napomena or '') + (
-                            '\nPRODANO na aukciji %s — Kupac: %s, Cijena: %s EUR' % (
-                                now.strftime('%d.%m.%Y %H:%M'),
+                        golub.napomena = (golub.napomena or "") + (
+                            "\nPRODANO na aukciji %s — Kupac: %s, Cijena: %s EUR"
+                            % (
+                                now.strftime("%d.%m.%Y %H:%M"),
                                 winning_bid.bidder_company.name,
                                 winning_bid.amount,
                             )
                         )
-                        golub.save(update_fields=['aktivan', 'napomena'])
+                        golub.save(update_fields=["aktivan", "napomena"])
                     except ObjectDoesNotExist:
                         pass
 
@@ -203,49 +198,47 @@ def finalize_ended_auctions(self):
                     from core.whatsapp import send_text
 
                     # Notify seller
-                    seller_profile = UserProfile.objects.filter(
-                        company=product.seller_company
-                    ).first()
-                    if seller_profile and getattr(seller_profile, 'phone', ''):
+                    seller_profile = UserProfile.objects.filter(company=product.seller_company).first()
+                    if seller_profile and getattr(seller_profile, "phone", ""):
                         send_text(
                             phone=seller_profile.phone,
                             message=(
                                 'PRODANO! Golub "%s" prodan za %s EUR.\n'
-                                'Kupac: %s\n'
-                                'Predracun kreiran. Dogovorite transport.'
-                            ) % (product.name, winning_bid.amount, winning_bid.bidder_company.name),
+                                "Kupac: %s\n"
+                                "Predracun kreiran. Dogovorite transport."
+                            )
+                            % (product.name, winning_bid.amount, winning_bid.bidder_company.name),
                             company_id=str(product.seller_company.pk),
                         )
 
                     # Notify buyer
-                    buyer_profile = UserProfile.objects.filter(
-                        company=winning_bid.bidder_company
-                    ).first()
-                    if buyer_profile and getattr(buyer_profile, 'phone', ''):
+                    buyer_profile = UserProfile.objects.filter(company=winning_bid.bidder_company).first()
+                    if buyer_profile and getattr(buyer_profile, "phone", ""):
                         send_text(
                             phone=buyer_profile.phone,
                             message=(
                                 'Cestitamo! Pobijedili ste na aukciji za "%s" — %s EUR.\n'
-                                'Predracun ce stici na email. Kontaktirajte prodavaca za transport.'
-                            ) % (product.name, winning_bid.amount),
+                                "Predracun ce stici na email. Kontaktirajte prodavaca za transport."
+                            )
+                            % (product.name, winning_bid.amount),
                             company_id=str(winning_bid.bidder_company.pk),
                         )
                 except DatabaseError as e:
-                    logger.warning('Auction notification failed: %s', e)
+                    logger.warning("Auction notification failed: %s", e)
 
-                results['finalized'] += 1
+                results["finalized"] += 1
 
             else:
                 # No bids — mark as no_bids
-                product.auction_status = 'no_bids'
+                product.auction_status = "no_bids"
                 product.is_available = False
-                product.save(update_fields=['auction_status', 'is_available'])
-                results['no_bids'] += 1
+                product.save(update_fields=["auction_status", "is_available"])
+                results["no_bids"] += 1
 
         except ObjectDoesNotExist as e:
-            logger.error('Auction finalize error for product %s: %s', product.pk, e, exc_info=True)
-            results['errors'] += 1
+            logger.error("Auction finalize error for product %s: %s", product.pk, e, exc_info=True)
+            results["errors"] += 1
 
     if any(results.values()):
-        logger.info('Auction finalization: %s', results)
+        logger.info("Auction finalization: %s", results)
     return results

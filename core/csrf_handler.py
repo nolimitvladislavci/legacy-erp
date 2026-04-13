@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
 
 
-def csrf_failure_view(request, reason=''):
+def csrf_failure_view(request, reason=""):
     """
     CSRF token istekao ili nedostaje.
 
@@ -10,23 +10,26 @@ def csrf_failure_view(request, reason=''):
     Normalna forma → HTML stranica s auto-retry (bez korisničke radnje).
     """
     is_ajax = (
-        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-        or request.headers.get('Accept', '').startswith('application/json')
-        or request.headers.get('HX-Request')
-        or request.content_type == 'application/json'
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.headers.get("Accept", "").startswith("application/json")
+        or request.headers.get("HX-Request")
+        or request.content_type == "application/json"
     )
 
     # AJAX / HTMX → JSON, JS rješava
     if is_ajax:
         new_token = get_token(request)
-        return JsonResponse({
-            'csrf_error': True,
-            'new_token': new_token,
-            'message': 'Sigurnosni token osvježen. Pokušajte ponovo.',
-        }, status=200)
+        return JsonResponse(
+            {
+                "csrf_error": True,
+                "new_token": new_token,
+                "message": "Sigurnosni token osvježen. Pokušajte ponovo.",
+            },
+            status=200,
+        )
 
     # Normalna forma → auto-retry HTML stranica
-    referer = request.META.get('HTTP_REFERER', '/')
+    referer = request.META.get("HTTP_REFERER", "/")
     new_token = get_token(request)
 
     html = f"""<!DOCTYPE html>
@@ -76,4 +79,4 @@ setTimeout(function() {{
 
 def csrf_token_view(request):
     """Endpoint za dohvat svježeg CSRF tokena (AJAX)."""
-    return JsonResponse({'token': get_token(request)})
+    return JsonResponse({"token": get_token(request)})

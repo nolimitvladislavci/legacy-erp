@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0001_nkd_pos_integration'),
+        ("pos", "0001_nkd_pos_integration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='fiscal_datetime',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Datum/vrijeme fiskalizacije'),
+            model_name="posreceipt",
+            name="fiscal_datetime",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Datum/vrijeme fiskalizacije"),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='jir',
-            field=models.CharField(blank=True, max_length=40, null=True, verbose_name='JIR (Jedinstveni identifikator računa)'),
+            model_name="posreceipt",
+            name="jir",
+            field=models.CharField(
+                blank=True, max_length=40, null=True, verbose_name="JIR (Jedinstveni identifikator računa)"
+            ),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='zki',
-            field=models.CharField(blank=True, max_length=32, null=True, verbose_name='ZKI (Zaštitni kod izdavatelja)'),
+            model_name="posreceipt",
+            name="zki",
+            field=models.CharField(blank=True, max_length=32, null=True, verbose_name="ZKI (Zaštitni kod izdavatelja)"),
         ),
     ]

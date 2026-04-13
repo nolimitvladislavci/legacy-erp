@@ -6,15 +6,15 @@ Graceful Degradation:
   - Pisanje: ako je plaintext, kriptira; ako je već ciphertext, ostavlja.
   - Data migration: .save() na postojećem redu automatski kriptira plaintext.
 """
+
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
 from django.db import models
 
 
 class FernetEncryptedCharField(models.CharField):
-
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('max_length', 255)
+        kwargs.setdefault("max_length", 255)
         super().__init__(*args, **kwargs)
 
     @property
@@ -49,6 +49,6 @@ class FernetEncryptedCharField(models.CharField):
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
-        if kwargs.get('max_length') == 255:
-            del kwargs['max_length']
+        if kwargs.get("max_length") == 255:
+            del kwargs["max_length"]
         return name, path, args, kwargs

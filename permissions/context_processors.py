@@ -5,6 +5,7 @@ Context processors for permissions and subscription module gating.
 
 class _AllModulesSet:
     """A set-like object where __contains__ always returns True (for superusers)."""
+
     def __contains__(self, item):
         return True
 
@@ -18,8 +19,8 @@ class _AllModulesSet:
 def permissions_context(request):
     """Add user_permissions and user_role to template context."""
     return {
-        'user_permissions': getattr(request, 'user_permissions', set()),
-        'user_role': getattr(request, 'user_role', None),
+        "user_permissions": getattr(request, "user_permissions", set()),
+        "user_role": getattr(request, "user_role", None),
     }
 
 
@@ -43,24 +44,24 @@ def _get_plan_info(company):
 
 def subscription_context(request):
     """Expose allowed_modules and is_company_admin to all templates."""
-    if not hasattr(request, 'user') or not request.user.is_authenticated:
+    if not hasattr(request, "user") or not request.user.is_authenticated:
         return {
-            'allowed_modules': set(),
-            'is_company_admin': False,
-            'active_plan_name': '',
-            'active_plan_slug': '',
+            "allowed_modules": set(),
+            "is_company_admin": False,
+            "active_plan_name": "",
+            "active_plan_slug": "",
         }
 
     if request.user.is_superuser:
         return {
-            'allowed_modules': _AllModulesSet(),
-            'is_company_admin': True,
-            'active_plan_name': 'Super Admin',
-            'active_plan_slug': 'superadmin',
+            "allowed_modules": _AllModulesSet(),
+            "is_company_admin": True,
+            "active_plan_name": "Super Admin",
+            "active_plan_slug": "superadmin",
         }
 
     # Determine company (impersonation-aware)
-    company = getattr(request, 'impersonated_company', None)
+    company = getattr(request, "impersonated_company", None)
     if not company:
         try:
             company = request.user.profile.company
@@ -72,15 +73,16 @@ def subscription_context(request):
         try:
             if company.is_platform_owner:
                 from registration.constants import PLAN_MODULES
+
                 _all = set()
                 for _mods in PLAN_MODULES.values():
                     _all.update(_mods)
                 plan_name, plan_slug = _get_plan_info(company)
                 return {
-                    'allowed_modules': _all or _AllModulesSet(),
-                    'is_company_admin': True,
-                    'active_plan_name': plan_name,
-                    'active_plan_slug': plan_slug,
+                    "allowed_modules": _all or _AllModulesSet(),
+                    "is_company_admin": True,
+                    "active_plan_name": plan_name,
+                    "active_plan_slug": plan_slug,
                 }
         except DatabaseError:
             pass
@@ -91,7 +93,7 @@ def subscription_context(request):
         # Upgrade banner handles upsell, not sidebar visibility.
         try:
             # 1. Start with subscription modules
-            sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+            sub = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
             if sub:
                 modules = set(sub.allowed_modules)
         except DatabaseError:
@@ -101,6 +103,7 @@ def subscription_context(request):
         # If user enabled 21 modules in picker, show all 21.
         try:
             from companies.models import CompanyModuleConfig
+
             config = CompanyModuleConfig.objects.filter(company=company).first()
             if config and config.enabled_modules:
                 picker_set = set(config.enabled_modules)
@@ -109,13 +112,13 @@ def subscription_context(request):
             pass
 
         # 3. Always include core modules
-        modules |= {'pos', 'partners', 'inventory', 'invoicing', 'documents', 'konto'}
+        modules |= {"pos", "partners", "inventory", "invoicing", "documents", "konto"}
 
     # is_company_admin: superadmin/company_admin role or is_staff
     is_admin = request.user.is_staff
     if not is_admin:
         try:
-            is_admin = request.user.profile.role in ('superadmin', 'company_admin')
+            is_admin = request.user.profile.role in ("superadmin", "company_admin")
         except AttributeError:
             pass
 
@@ -123,8 +126,8 @@ def subscription_context(request):
     plan_name, plan_slug = _get_plan_info(company)
 
     return {
-        'allowed_modules': modules,
-        'is_company_admin': is_admin,
-        'active_plan_name': plan_name,
-        'active_plan_slug': plan_slug,
+        "allowed_modules": modules,
+        "is_company_admin": is_admin,
+        "active_plan_name": plan_name,
+        "active_plan_slug": plan_slug,
     }

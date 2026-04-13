@@ -5,61 +5,107 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('udruge', '0010_branitelji_lov_modeli'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("udruge", "0010_branitelji_lov_modeli"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Zadrugar',
+            name="Zadrugar",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('oib', models.CharField(blank=True, max_length=11)),
-                ('adresa', models.TextField(blank=True)),
-                ('datum_pristupanja', models.DateField()),
-                ('datum_istupanja', models.DateField(blank=True, null=True)),
-                ('uloga', models.CharField(choices=[('osnivac', 'Osnivač'), ('redovni', 'Redovni zadrugar'), ('pridruzeni', 'Pridruženi zadrugar'), ('pocasni', 'Počasni zadrugar')], default='redovni', max_length=20)),
-                ('status', models.CharField(choices=[('aktivan', 'Aktivan'), ('mirovanje', 'Mirovanje'), ('istupio', 'Istupio'), ('iskljucen', 'Isključen')], default='aktivan', max_length=20)),
-                ('clanski_ulog_eur', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('udjeli_postotak', models.DecimalField(decimal_places=4, default=0, max_digits=6)),
-                ('ukupni_prinos_eur', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=30)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='zadrugari', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                ("oib", models.CharField(blank=True, max_length=11)),
+                ("adresa", models.TextField(blank=True)),
+                ("datum_pristupanja", models.DateField()),
+                ("datum_istupanja", models.DateField(blank=True, null=True)),
+                (
+                    "uloga",
+                    models.CharField(
+                        choices=[
+                            ("osnivac", "Osnivač"),
+                            ("redovni", "Redovni zadrugar"),
+                            ("pridruzeni", "Pridruženi zadrugar"),
+                            ("pocasni", "Počasni zadrugar"),
+                        ],
+                        default="redovni",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("aktivan", "Aktivan"),
+                            ("mirovanje", "Mirovanje"),
+                            ("istupio", "Istupio"),
+                            ("iskljucen", "Isključen"),
+                        ],
+                        default="aktivan",
+                        max_length=20,
+                    ),
+                ),
+                ("clanski_ulog_eur", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("udjeli_postotak", models.DecimalField(decimal_places=4, default=0, max_digits=6)),
+                ("ukupni_prinos_eur", models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=30)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="zadrugari", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zadrugar',
-                'db_table': 'udruge_zadrugar',
-                'ordering': ['last_name', 'first_name'],
+                "verbose_name": "Zadrugar",
+                "db_table": "udruge_zadrugar",
+                "ordering": ["last_name", "first_name"],
             },
         ),
         migrations.CreateModel(
-            name='ZadruznRevizija',
+            name="ZadruznRevizija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('godina', models.PositiveSmallIntegerField()),
-                ('revizor_ime', models.CharField(max_length=200)),
-                ('revizor_firma', models.CharField(blank=True, max_length=200)),
-                ('datum_pocetak', models.DateField()),
-                ('datum_zavrsetak', models.DateField(blank=True, null=True)),
-                ('nalaz', models.TextField(blank=True)),
-                ('ocjena', models.CharField(blank=True, choices=[('uredna', 'Poslovanje uredno'), ('napomene', 'S napomenama'), ('neuredna', 'Neuredna')], max_length=20)),
-                ('izvjestaj_pdf', models.FileField(blank=True, upload_to='zadruge/revizija/%Y/')),
-                ('sljedeca_revizija', models.DateField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='zadruznrevizije', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("godina", models.PositiveSmallIntegerField()),
+                ("revizor_ime", models.CharField(max_length=200)),
+                ("revizor_firma", models.CharField(blank=True, max_length=200)),
+                ("datum_pocetak", models.DateField()),
+                ("datum_zavrsetak", models.DateField(blank=True, null=True)),
+                ("nalaz", models.TextField(blank=True)),
+                (
+                    "ocjena",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("uredna", "Poslovanje uredno"),
+                            ("napomene", "S napomenama"),
+                            ("neuredna", "Neuredna"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("izvjestaj_pdf", models.FileField(blank=True, upload_to="zadruge/revizija/%Y/")),
+                ("sljedeca_revizija", models.DateField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="zadruznrevizije",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zadružna revizija',
-                'db_table': 'udruge_zadruzna_revizija',
-                'ordering': ['-godina'],
+                "verbose_name": "Zadružna revizija",
+                "db_table": "udruge_zadruzna_revizija",
+                "ordering": ["-godina"],
             },
         ),
     ]

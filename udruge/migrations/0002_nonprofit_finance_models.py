@@ -6,90 +6,168 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0026_company_fiscal_exempt'),
-        ('udruge', '0001_initial'),
+        ("companies", "0026_company_fiscal_exempt"),
+        ("udruge", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Clanarina',
+            name="Clanarina",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period_start', models.DateField(verbose_name='Pocetak perioda')),
-                ('period_end', models.DateField(verbose_name='Kraj perioda')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Iznos (EUR)')),
-                ('payment_method', models.CharField(choices=[('gotovina', 'Gotovina'), ('virman', 'Virman / IBAN uplata'), ('pos', 'POS (neprofitni bon)'), ('online', 'Online')], default='gotovina', max_length=20)),
-                ('status', models.CharField(choices=[('placena', 'Placena'), ('ceka', 'Ceka uplatu'), ('kasni', 'Kasni'), ('otpisana', 'Otpisana')], default='ceka', max_length=20)),
-                ('paid_at', models.DateTimeField(blank=True, null=True, verbose_name='Datum uplate')),
-                ('receipt_number', models.CharField(blank=True, max_length=50, verbose_name='Broj priznanice')),
-                ('note', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('clan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clanarine', to='udruge.clan')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clanarine', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("period_start", models.DateField(verbose_name="Pocetak perioda")),
+                ("period_end", models.DateField(verbose_name="Kraj perioda")),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Iznos (EUR)")),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("gotovina", "Gotovina"),
+                            ("virman", "Virman / IBAN uplata"),
+                            ("pos", "POS (neprofitni bon)"),
+                            ("online", "Online"),
+                        ],
+                        default="gotovina",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("placena", "Placena"),
+                            ("ceka", "Ceka uplatu"),
+                            ("kasni", "Kasni"),
+                            ("otpisana", "Otpisana"),
+                        ],
+                        default="ceka",
+                        max_length=20,
+                    ),
+                ),
+                ("paid_at", models.DateTimeField(blank=True, null=True, verbose_name="Datum uplate")),
+                ("receipt_number", models.CharField(blank=True, max_length=50, verbose_name="Broj priznanice")),
+                ("note", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "clan",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="clanarine", to="udruge.clan"
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="clanarine", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'udruge_clanarina',
-                'ordering': ['-period_start'],
+                "db_table": "udruge_clanarina",
+                "ordering": ["-period_start"],
             },
         ),
         migrations.CreateModel(
-            name='Donacija',
+            name="Donacija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('donor_name', models.CharField(max_length=200, verbose_name='Ime donatora')),
-                ('donor_oib', models.CharField(blank=True, max_length=11, verbose_name='OIB donatora')),
-                ('donor_type', models.CharField(choices=[('fizicka', 'Fizicka osoba'), ('pravna', 'Pravna osoba'), ('anonimno', 'Anonimno')], default='fizicka', max_length=20)),
-                ('donor_address', models.CharField(blank=True, max_length=255)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Iznos (EUR)')),
-                ('purpose', models.CharField(blank=True, max_length=255, verbose_name='Namjena donacije')),
-                ('date', models.DateField(default=django.utils.timezone.now, verbose_name='Datum donacije')),
-                ('potvrda_number', models.CharField(blank=True, max_length=50, verbose_name='Broj potvrde')),
-                ('potvrda_issued', models.BooleanField(default=False, verbose_name='Potvrda izdana')),
-                ('potvrda_issued_at', models.DateTimeField(blank=True, null=True)),
-                ('note', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='donacije', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("donor_name", models.CharField(max_length=200, verbose_name="Ime donatora")),
+                ("donor_oib", models.CharField(blank=True, max_length=11, verbose_name="OIB donatora")),
+                (
+                    "donor_type",
+                    models.CharField(
+                        choices=[("fizicka", "Fizicka osoba"), ("pravna", "Pravna osoba"), ("anonimno", "Anonimno")],
+                        default="fizicka",
+                        max_length=20,
+                    ),
+                ),
+                ("donor_address", models.CharField(blank=True, max_length=255)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Iznos (EUR)")),
+                ("purpose", models.CharField(blank=True, max_length=255, verbose_name="Namjena donacije")),
+                ("date", models.DateField(default=django.utils.timezone.now, verbose_name="Datum donacije")),
+                ("potvrda_number", models.CharField(blank=True, max_length=50, verbose_name="Broj potvrde")),
+                ("potvrda_issued", models.BooleanField(default=False, verbose_name="Potvrda izdana")),
+                ("potvrda_issued_at", models.DateTimeField(blank=True, null=True)),
+                ("note", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="donacije", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'udruge_donacija',
-                'ordering': ['-date'],
+                "db_table": "udruge_donacija",
+                "ordering": ["-date"],
             },
         ),
         migrations.CreateModel(
-            name='KnjigaPrimitaka',
+            name="KnjigaPrimitaka",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('redni_broj', models.PositiveIntegerField(verbose_name='R.br.')),
-                ('datum', models.DateField(verbose_name='Datum')),
-                ('opis', models.CharField(max_length=255, verbose_name='Opis primitka/izdatka')),
-                ('vrsta', models.CharField(choices=[('primitak', 'Primitak'), ('izdatak', 'Izdatak')], max_length=10)),
-                ('izvor', models.CharField(choices=[('clanarina', 'Clanarina'), ('donacija', 'Donacija'), ('dotacija', 'Dotacija / Grant'), ('prodaja', 'Prodaja (gospodarska)'), ('placa', 'Placa'), ('materijal', 'Materijalni troskovi'), ('rezije', 'Rezije'), ('ostalo', 'Ostalo')], default='ostalo', max_length=20)),
-                ('iznos', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Iznos (EUR)')),
-                ('dokument', models.CharField(blank=True, max_length=100, verbose_name='Broj dokumenta')),
-                ('napomena', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('clanarina', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='udruge.clanarina')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='knjiga_primitaka', to='companies.company')),
-                ('donacija', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='udruge.donacija')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("redni_broj", models.PositiveIntegerField(verbose_name="R.br.")),
+                ("datum", models.DateField(verbose_name="Datum")),
+                ("opis", models.CharField(max_length=255, verbose_name="Opis primitka/izdatka")),
+                ("vrsta", models.CharField(choices=[("primitak", "Primitak"), ("izdatak", "Izdatak")], max_length=10)),
+                (
+                    "izvor",
+                    models.CharField(
+                        choices=[
+                            ("clanarina", "Clanarina"),
+                            ("donacija", "Donacija"),
+                            ("dotacija", "Dotacija / Grant"),
+                            ("prodaja", "Prodaja (gospodarska)"),
+                            ("placa", "Placa"),
+                            ("materijal", "Materijalni troskovi"),
+                            ("rezije", "Rezije"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        default="ostalo",
+                        max_length=20,
+                    ),
+                ),
+                ("iznos", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Iznos (EUR)")),
+                ("dokument", models.CharField(blank=True, max_length=100, verbose_name="Broj dokumenta")),
+                ("napomena", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "clanarina",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="udruge.clanarina"
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="knjiga_primitaka",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "donacija",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="udruge.donacija"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'udruge_knjiga_primitaka',
-                'ordering': ['datum', 'redni_broj'],
+                "db_table": "udruge_knjiga_primitaka",
+                "ordering": ["datum", "redni_broj"],
             },
         ),
         migrations.AddIndex(
-            model_name='clanarina',
-            index=models.Index(fields=['company', 'status'], name='udruge_clan_company_8bd681_idx'),
+            model_name="clanarina",
+            index=models.Index(fields=["company", "status"], name="udruge_clan_company_8bd681_idx"),
         ),
         migrations.AddIndex(
-            model_name='donacija',
-            index=models.Index(fields=['company', 'date'], name='udruge_dona_company_d359bc_idx'),
+            model_name="donacija",
+            index=models.Index(fields=["company", "date"], name="udruge_dona_company_d359bc_idx"),
         ),
         migrations.AlterUniqueTogether(
-            name='knjigaprimitaka',
-            unique_together={('company', 'redni_broj', 'datum')},
+            name="knjigaprimitaka",
+            unique_together={("company", "redni_broj", "datum")},
         ),
     ]

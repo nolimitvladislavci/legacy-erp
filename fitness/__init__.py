@@ -1,4 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
 
-default_app_config = 'fitness.apps.FitnessConfig'
+default_app_config = "fitness.apps.FitnessConfig"

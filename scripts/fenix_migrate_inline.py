@@ -130,7 +130,7 @@ FONT_SIZE_MAP = {
     '0.9rem': 'fx-fs-md', '.9rem': 'fx-fs-md',
     '0.95rem': 'fx-fs-normal', '.95rem': 'fx-fs-normal',
     '1rem': 'fx-fs-lg',
-    '1.1rem': 'fx-fs-xl', '1.1rem': 'fx-fs-xl',
+    '1.1rem': 'fx-fs-xl',
     '1.2rem': 'fx-fs-2xl',
     '1.3rem': 'fx-fs-3xl',
     '1.4rem': 'fx-fs-4xl',

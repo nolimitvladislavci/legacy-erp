@@ -6,11 +6,12 @@ Trigger: POSReceipt paid s artiklima koji imaju inventory_item.
 Skip: training, nulti iznos, bez inventarnih artikala, duplikati.
 NIKAD ne blokira POS — sve u try/except na pozivnoj strani.
 """
+
 import logging
 
 from django.db import models
 
-logger = logging.getLogger('pos.otpremnica')
+logger = logging.getLogger("pos.otpremnica")
 
 
 def pos_receipt_to_otpremnica(receipt):
@@ -19,7 +20,7 @@ def pos_receipt_to_otpremnica(receipt):
     Automatski — korisnik ništa ne radi.
     """
     # Skip: training receipts
-    if getattr(receipt, 'is_training', False):
+    if getattr(receipt, "is_training", False):
         return None
 
     # Skip: nulti iznos
@@ -28,10 +29,13 @@ def pos_receipt_to_otpremnica(receipt):
 
     # Provjeri ima li inventarnih artikala
     from pos.models import POSReceiptItem
-    items_with_inv = list(POSReceiptItem.objects.filter(
-        receipt=receipt,
-        inventory_item__isnull=False,
-    ).select_related('inventory_item'))
+
+    items_with_inv = list(
+        POSReceiptItem.objects.filter(
+            receipt=receipt,
+            inventory_item__isnull=False,
+        ).select_related("inventory_item")
+    )
 
     if not items_with_inv:
         return None  # Usluge/radovi ne trebaju otpremnicu
@@ -46,8 +50,8 @@ def pos_receipt_to_otpremnica(receipt):
     bp = BillingPeriod.get_or_create_current(company)
 
     # Kupac info
-    recipient_name = getattr(receipt, 'buyer_name', '') or 'Gotovinski kupac'
-    recipient_oib = getattr(receipt, 'buyer_oib', '') or ''
+    recipient_name = getattr(receipt, "buyer_name", "") or "Gotovinski kupac"
+    recipient_oib = getattr(receipt, "buyer_oib", "") or ""
 
     otp = Otpremnica.objects.create(
         company=company,
@@ -69,20 +73,23 @@ def pos_receipt_to_otpremnica(receipt):
         OtpremnicaItem.objects.create(
             otpremnica=otp,
             line_number=i,
-            description=item.description or (item.inventory_item.name if item.inventory_item else ''),
+            description=item.description or (item.inventory_item.name if item.inventory_item else ""),
             quantity=item.quantity,
-            unit='EA',
+            unit="EA",
             unit_price=item.unit_price,
             tax_rate=item.tax_rate or 25,
             line_total=item.total_price or (item.unit_price * item.quantity),
         )
 
     # Ažuriraj BillingPeriod counter
-    BillingPeriod.objects.filter(pk=bp.pk).update(
-        otpremnica_count=models.F('otpremnica_count') + 1
-    )
+    BillingPeriod.objects.filter(pk=bp.pk).update(otpremnica_count=models.F("otpremnica_count") + 1)
 
-    logger.info('OTP-%s kreirana iz POS bona #%s (%s EUR, %d stavki)',
-                otp.number, receipt.receipt_number, receipt.total, len(items_with_inv))
+    logger.info(
+        "OTP-%s kreirana iz POS bona #%s (%s EUR, %d stavki)",
+        otp.number,
+        receipt.receipt_number,
+        receipt.total,
+        len(items_with_inv),
+    )
 
     return otp

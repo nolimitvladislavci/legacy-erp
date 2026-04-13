@@ -1,6 +1,7 @@
 """
 Permission Manager - Core permission checking logic
 """
+
 from django.core.cache import cache
 from django.db import DatabaseError, models
 
@@ -23,6 +24,7 @@ class PermissionManager:
         except DatabaseError:
             pass
         from django.core.cache import cache
+
         cache_key = f"user_perms_{user.pk}_{company.pk if company else 0}"
         cached = cache.get(cache_key)
         if cached:
@@ -80,16 +82,10 @@ class PermissionManager:
     @classmethod
     def get_user_role(cls, user, company=None):
         """Get user's primary role"""
-        query = UserRole.objects.filter(
-            user=user,
-            is_primary=True,
-            role__is_active=True
-        ).select_related('role')
+        query = UserRole.objects.filter(user=user, is_primary=True, role__is_active=True).select_related("role")
 
         if company:
-            query = query.filter(
-                models.Q(company=company) | models.Q(company__isnull=True)
-            )
+            query = query.filter(models.Q(company=company) | models.Q(company__isnull=True))
 
         ur = query.first()
         return ur.role if ur and ur.is_valid() else None
@@ -107,13 +103,7 @@ class PermissionManager:
             UserRole.objects.filter(user=user, company=company).update(is_primary=False)
 
         user_role, created = UserRole.objects.get_or_create(
-            user=user,
-            role=role,
-            company=company,
-            defaults={
-                'is_primary': is_primary,
-                'created_by': created_by
-            }
+            user=user, role=role, company=company, defaults={"is_primary": is_primary, "created_by": created_by}
         )
 
         return user_role
@@ -127,6 +117,7 @@ class PermissionManager:
 
         # Clear company-specific caches
         from companies.models import Company
+
         for company in Company.objects.all():
             cache_key = f"user_perms_{user.id}_company_{company.id}"
             cache.delete(cache_key)

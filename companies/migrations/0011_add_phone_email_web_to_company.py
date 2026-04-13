@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0010_add_platform_owner'),
+        ("companies", "0010_add_platform_owner"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='email',
-            field=models.EmailField(blank=True, max_length=254, verbose_name='E-mail'),
+            model_name="company",
+            name="email",
+            field=models.EmailField(blank=True, max_length=254, verbose_name="E-mail"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='mobile',
-            field=models.CharField(blank=True, max_length=50, verbose_name='Mobitel'),
+            model_name="company",
+            name="mobile",
+            field=models.CharField(blank=True, max_length=50, verbose_name="Mobitel"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='phone',
-            field=models.CharField(blank=True, max_length=50, verbose_name='Telefon'),
+            model_name="company",
+            name="phone",
+            field=models.CharField(blank=True, max_length=50, verbose_name="Telefon"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='website_url',
-            field=models.URLField(blank=True, verbose_name='Web stranica'),
+            model_name="company",
+            name="website_url",
+            field=models.URLField(blank=True, verbose_name="Web stranica"),
         ),
     ]

@@ -24,6 +24,7 @@ DVA ZAKONA KOJA POŠTUJEMO:
 
 BORG VETO: Svako polje u ovom fajlu dolazi iz cat models.py — nula pretpostavki.
 """
+
 import logging
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
@@ -33,13 +34,14 @@ from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
-_Q = Decimal('0.01')
-ZERO = Decimal('0.00')
+_Q = Decimal("0.01")
+ZERO = Decimal("0.00")
 
 
 @dataclass
 class QuarterlyBreakdown:
     """Primitci rastavljeni po kvartalima — source of truth za PO-SD."""
+
     q1: Decimal = ZERO
     q2: Decimal = ZERO
     q3: Decimal = ZERO
@@ -63,39 +65,33 @@ class QuarterlyBreakdown:
 
     @property
     def invoice_count(self) -> int:
-        return (
-            self.q1_invoice_count + self.q2_invoice_count
-            + self.q3_invoice_count + self.q4_invoice_count
-        )
+        return self.q1_invoice_count + self.q2_invoice_count + self.q3_invoice_count + self.q4_invoice_count
 
     @property
     def pos_count(self) -> int:
-        return (
-            self.q1_pos_count + self.q2_pos_count
-            + self.q3_pos_count + self.q4_pos_count
-        )
+        return self.q1_pos_count + self.q2_pos_count + self.q3_pos_count + self.q4_pos_count
 
     def to_dict(self) -> dict:
         return {
-            'q1_primitak': float(self.q1),
-            'q2_primitak': float(self.q2),
-            'q3_primitak': float(self.q3),
-            'q4_primitak': float(self.q4),
-            'ukupni_primitak': float(self.total),
-            'q1_invoice_count': self.q1_invoice_count,
-            'q2_invoice_count': self.q2_invoice_count,
-            'q3_invoice_count': self.q3_invoice_count,
-            'q4_invoice_count': self.q4_invoice_count,
-            'q1_pos_count': self.q1_pos_count,
-            'q2_pos_count': self.q2_pos_count,
-            'q3_pos_count': self.q3_pos_count,
-            'q4_pos_count': self.q4_pos_count,
-            'total_invoices': self.invoice_count,
-            'total_pos_receipts': self.pos_count,
-            'tips_excluded': float(self.tips_excluded),
-            'training_excluded': float(self.training_excluded),
-            'storno_excluded': float(self.storno_excluded),
-            'sources': self.sources,
+            "q1_primitak": float(self.q1),
+            "q2_primitak": float(self.q2),
+            "q3_primitak": float(self.q3),
+            "q4_primitak": float(self.q4),
+            "ukupni_primitak": float(self.total),
+            "q1_invoice_count": self.q1_invoice_count,
+            "q2_invoice_count": self.q2_invoice_count,
+            "q3_invoice_count": self.q3_invoice_count,
+            "q4_invoice_count": self.q4_invoice_count,
+            "q1_pos_count": self.q1_pos_count,
+            "q2_pos_count": self.q2_pos_count,
+            "q3_pos_count": self.q3_pos_count,
+            "q4_pos_count": self.q4_pos_count,
+            "total_invoices": self.invoice_count,
+            "total_pos_receipts": self.pos_count,
+            "tips_excluded": float(self.tips_excluded),
+            "training_excluded": float(self.training_excluded),
+            "storno_excluded": float(self.storno_excluded),
+            "sources": self.sources,
         }
 
 
@@ -133,11 +129,14 @@ class PrefillEngine:
         breakdown.q4 = breakdown.q4.quantize(_Q, rounding=ROUND_HALF_UP)
 
         logger.info(
-            'PrefillEngine: %s/%d — ukupno %.2f EUR '
-            '(inv=%d, pos=%d, tips_excl=%.2f, training_excl=%.2f)',
-            self.company.name, self.year, breakdown.total,
-            breakdown.invoice_count, breakdown.pos_count,
-            breakdown.tips_excluded, breakdown.training_excluded,
+            "PrefillEngine: %s/%d — ukupno %.2f EUR (inv=%d, pos=%d, tips_excl=%.2f, training_excl=%.2f)",
+            self.company.name,
+            self.year,
+            breakdown.total,
+            breakdown.invoice_count,
+            breakdown.pos_count,
+            breakdown.tips_excluded,
+            breakdown.training_excluded,
         )
 
         return breakdown
@@ -154,39 +153,45 @@ class PrefillEngine:
         # Dohvati sve PLAĆENE račune ove firme za ovu godinu
         # doctype IN ('R', 'RN', 'FA') — samo izlazni računi (ne URA, ne ponude)
         # Isključi: storno, odobrenje, otkazano
-        invoices = Invoice.objects.filter(
-            company=self.company,
-            status='PAID',
-            doctype__in=['R', 'RN', 'FA'],
-        ).exclude(
-            invoice_type__in=['storno', 'odobrenje'],
-        ).exclude(
-            storno_of__isnull=False,  # Račun koji JE storno drugog
-        ).exclude(
-            status='STORNO',
-        ).exclude(
-            status='CANCELLED',
+        invoices = (
+            Invoice.objects.filter(
+                company=self.company,
+                status="PAID",
+                doctype__in=["R", "RN", "FA"],
+            )
+            .exclude(
+                invoice_type__in=["storno", "odobrenje"],
+            )
+            .exclude(
+                storno_of__isnull=False,  # Račun koji JE storno drugog
+            )
+            .exclude(
+                status="STORNO",
+            )
+            .exclude(
+                status="CANCELLED",
+            )
         )
 
         # Za svaki invoice, nađi datum naplate
         paid_events = {}
         events = InvoiceEvent.objects.filter(
             invoice__in=invoices,
-            event_type='paid',
-        ).values('invoice_id', 'created_at')
+            event_type="paid",
+        ).values("invoice_id", "created_at")
         for ev in events:
-            paid_events[ev['invoice_id']] = ev['created_at']
+            paid_events[ev["invoice_id"]] = ev["created_at"]
 
         storno_total = ZERO
         for inv in invoices:
             # Datum naplate — caka #2
             paid_date = paid_events.get(inv.pk)
             if paid_date:
-                effective_date = paid_date.date() if hasattr(paid_date, 'date') else paid_date
+                effective_date = paid_date.date() if hasattr(paid_date, "date") else paid_date
             else:
                 # Fallback: date_issued (većina paušalaca naplaćuje odmah)
                 dt = inv.date_issued
-                effective_date = dt.date() if hasattr(dt, 'date') else dt
+                effective_date = dt.date() if hasattr(dt, "date") else dt
 
             # Filter po godini (na temelju datuma naplate!)
             if effective_date.year != self.year:
@@ -215,7 +220,7 @@ class PrefillEngine:
 
         breakdown.storno_excluded += storno_total
         if invoices.exists():
-            breakdown.sources.append('invoicing')
+            breakdown.sources.append("invoicing")
 
     def _aggregate_pos(self, breakdown: QuarterlyBreakdown):
         """
@@ -230,11 +235,11 @@ class PrefillEngine:
         # Dohvati sve PLAĆENE, ne-training bonove za ovu firmu i godinu
         receipts = POSReceipt.objects.filter(
             session__terminal__company=self.company,
-            status='paid',
+            status="paid",
             is_training=False,
             paid_at__year=self.year,
         ).exclude(
-            status__in=['cancelled'],
+            status__in=["cancelled"],
         )
 
         # Refunded bonovi — parent_receipt is not null, negativni primitci
@@ -243,7 +248,6 @@ class PrefillEngine:
         # to je storno bon — ignoriramo ga jer ima negativan total.
 
         tips_total = ZERO
-        training_total = ZERO
 
         for receipt in receipts:
             # paid_at je naš datum (caka #2 — načelo blagajne)
@@ -255,7 +259,6 @@ class PrefillEngine:
             # Izračunaj iznos BEZ napojnica (caka #1)
             # Dohvati sve stavke ovog bona
             items = receipt.items.all()
-            tip_amount = ZERO
             non_tip_total = ZERO
 
             for item in items:
@@ -289,8 +292,7 @@ class PrefillEngine:
 
         breakdown.tips_excluded += tips_total
         if receipts.exists():
-            breakdown.sources.append('pos')
-
+            breakdown.sources.append("pos")
 
     def get_confidence_scores(self, breakdown: QuarterlyBreakdown) -> dict:
         """
@@ -303,15 +305,16 @@ class PrefillEngine:
           - Djelomično (samo invoice ILI samo POS, a firma koristi oba) → 0.8
         """
         from datetime import date as dt_date
+
         today = dt_date.today()
         scores = {}
 
         for q_num in range(1, 5):
             q_end_month = q_num * 3
 
-            amount_key = f'q{q_num}_primitak'
-            inv_count = getattr(breakdown, f'q{q_num}_invoice_count', 0)
-            pos_count = getattr(breakdown, f'q{q_num}_pos_count', 0)
+            amount_key = f"q{q_num}_primitak"
+            inv_count = getattr(breakdown, f"q{q_num}_invoice_count", 0)
+            pos_count = getattr(breakdown, f"q{q_num}_pos_count", 0)
             has_data = inv_count > 0 or pos_count > 0
 
             if not breakdown.sources:
@@ -336,28 +339,30 @@ class PrefillEngine:
         try:
             prev_breakdown = prev_engine.aggregate()
         except DatabaseError:
-            return {'available': False, 'reason': 'Nema podataka za prošlu godinu.'}
+            return {"available": False, "reason": "Nema podataka za prošlu godinu."}
 
         if prev_breakdown.total == ZERO:
-            return {'available': False, 'reason': 'Prošlogodišnji primitci su 0.'}
+            return {"available": False, "reason": "Prošlogodišnji primitci su 0."}
 
         delta = {
-            'available': True,
-            'prev_year': self.year - 1,
-            'prev_total': float(prev_breakdown.total),
-            'current_total': float(current_breakdown.total),
-            'quarters': {},
-            'alerts': [],
+            "available": True,
+            "prev_year": self.year - 1,
+            "prev_total": float(prev_breakdown.total),
+            "current_total": float(current_breakdown.total),
+            "quarters": {},
+            "alerts": [],
         }
 
-        total_pct = float(
-            ((current_breakdown.total - prev_breakdown.total) / prev_breakdown.total * 100)
-        ) if prev_breakdown.total else 0
-        delta['total_change_pct'] = round(total_pct, 1)
+        total_pct = (
+            float(((current_breakdown.total - prev_breakdown.total) / prev_breakdown.total * 100))
+            if prev_breakdown.total
+            else 0
+        )
+        delta["total_change_pct"] = round(total_pct, 1)
 
         for q_num in range(1, 5):
-            curr_q = getattr(current_breakdown, f'q{q_num}')
-            prev_q = getattr(prev_breakdown, f'q{q_num}')
+            curr_q = getattr(current_breakdown, f"q{q_num}")
+            prev_q = getattr(prev_breakdown, f"q{q_num}")
 
             if prev_q > ZERO:
                 pct = float(((curr_q - prev_q) / prev_q * 100))
@@ -366,22 +371,24 @@ class PrefillEngine:
             else:
                 pct = 0.0
 
-            delta['quarters'][f'q{q_num}'] = {
-                'current': float(curr_q),
-                'previous': float(prev_q),
-                'change_pct': round(pct, 1),
+            delta["quarters"][f"q{q_num}"] = {
+                "current": float(curr_q),
+                "previous": float(prev_q),
+                "change_pct": round(pct, 1),
             }
 
             if abs(pct) > 30 and prev_q > ZERO:
-                direction = 'veći' if pct > 0 else 'manji'
-                delta['alerts'].append({
-                    'quarter': q_num,
-                    'message': (
-                        f'Primitci u Q{q_num} ({curr_q:,.2f} EUR) su {abs(pct):.0f}% '
-                        f'{direction} od Q{q_num} {self.year - 1}. ({prev_q:,.2f} EUR). '
-                        f'Provjerite jesu li svi računi uneseni.'
-                    ),
-                })
+                direction = "veći" if pct > 0 else "manji"
+                delta["alerts"].append(
+                    {
+                        "quarter": q_num,
+                        "message": (
+                            f"Primitci u Q{q_num} ({curr_q:,.2f} EUR) su {abs(pct):.0f}% "
+                            f"{direction} od Q{q_num} {self.year - 1}. ({prev_q:,.2f} EUR). "
+                            f"Provjerite jesu li svi računi uneseni."
+                        ),
+                    }
+                )
 
         return delta
 
@@ -392,20 +399,20 @@ class PrefillEngine:
 
         # Pokušaj naći vlasnika/korisnika firme
         from django.contrib.auth.models import User
+
         try:
             user = User.objects.filter(
-                Q(employee_profile__company=company)
-                | Q(created_invoices__company=company)
+                Q(employee_profile__company=company) | Q(created_invoices__company=company)
             ).first()
         except DatabaseError:
             pass
 
         return {
-            'oib': company.oib or '',
-            'naziv_obrta': company.name or '',
-            'adresa': f'{company.address}, {company.zip_code} {company.city}'.strip(', '),
-            'ime_prezime': user.get_full_name() if user else '',
-            'porezna_godina': self.year,
+            "oib": company.oib or "",
+            "naziv_obrta": company.name or "",
+            "adresa": f"{company.address}, {company.zip_code} {company.city}".strip(", "),
+            "ime_prezime": user.get_full_name() if user else "",
+            "porezna_godina": self.year,
         }
 
     def _aggregate_rental(self, breakdown):
@@ -490,4 +497,3 @@ class PrefillEngine:
                 breakdown.q4_invoice_count += 1
 
         breakdown.sources.append("rental_booking")
-

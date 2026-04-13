@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('synesis', '0001_initial'),
+        ("synesis", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='synesisconfig',
-            name='pos_db_path',
-            field=models.CharField(blank=True, default='', help_text='Npr. C:\\Synesis\\POS\\SynesisPOS.mdb', max_length=500, verbose_name='Putanja do SynesisPOS baze (kasa)'),
+            model_name="synesisconfig",
+            name="pos_db_path",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Npr. C:\\Synesis\\POS\\SynesisPOS.mdb",
+                max_length=500,
+                verbose_name="Putanja do SynesisPOS baze (kasa)",
+            ),
         ),
     ]

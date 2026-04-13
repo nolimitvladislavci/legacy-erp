@@ -4,20 +4,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0002_inspection_token'),
+        ("core", "0002_inspection_token"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='inspectiontoken',
-            name='scope',
-            field=models.CharField(choices=[('porezna', 'Porezna inspekcija'), ('pos', 'POS / Fiskalizacija'), ('radna', 'Radna inspekcija'), ('sanitarna', 'Sanitarna inspekcija'), ('hapih', 'HAPIH — Knjiga lijekova'), ('jrdz', 'JRDZ — Registar životinja'), ('vetis', 'VetIS — Vet knjiga'), ('prigovori', 'Knjiga prigovora i utisaka'), ('all', 'Potpuni pristup (sve)')], default='all', max_length=20),
+            model_name="inspectiontoken",
+            name="scope",
+            field=models.CharField(
+                choices=[
+                    ("porezna", "Porezna inspekcija"),
+                    ("pos", "POS / Fiskalizacija"),
+                    ("radna", "Radna inspekcija"),
+                    ("sanitarna", "Sanitarna inspekcija"),
+                    ("hapih", "HAPIH — Knjiga lijekova"),
+                    ("jrdz", "JRDZ — Registar životinja"),
+                    ("vetis", "VetIS — Vet knjiga"),
+                    ("prigovori", "Knjiga prigovora i utisaka"),
+                    ("all", "Potpuni pristup (sve)"),
+                ],
+                default="all",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='systemauditlog',
-            name='action',
-            field=models.CharField(choices=[('create', 'Kreiranje'), ('update', 'Ažuriranje'), ('delete', 'Brisanje'), ('read', 'Pristup')], max_length=10),
+            model_name="systemauditlog",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("create", "Kreiranje"),
+                    ("update", "Ažuriranje"),
+                    ("delete", "Brisanje"),
+                    ("read", "Pristup"),
+                ],
+                max_length=10,
+            ),
         ),
     ]

@@ -6,6 +6,7 @@ Features:
 - Prometheus metrics
 - Bulk send support
 """
+
 import logging
 
 from celery import shared_task
@@ -154,8 +155,7 @@ def process_retry_queue():
 
     # Process retryable messages
     retry_ids = list(
-        AS4Message.objects.filter(status=MessageStatus.RETRY, next_retry_at__lte=now)
-        .values_list("id", flat=True)[:50]
+        AS4Message.objects.filter(status=MessageStatus.RETRY, next_retry_at__lte=now).values_list("id", flat=True)[:50]
     )
     for msg_id in retry_ids:
         send_invoice_task.delay(str(msg_id))

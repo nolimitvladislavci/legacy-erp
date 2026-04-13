@@ -5,20 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0005_dsfinvk_flags'),
+        ("inventory", "0005_dsfinvk_flags"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inventoryitem',
-            name='linked_pfand_item',
-            field=models.ForeignKey(blank=True, help_text='Ako je postavljeno, pri prodaji ovog artikla automatski se dodaje Pfand stavka.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='parent_articles', to='inventory.inventoryitem', verbose_name='Vezani Pfand artikl'),
+            model_name="inventoryitem",
+            name="linked_pfand_item",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Ako je postavljeno, pri prodaji ovog artikla automatski se dodaje Pfand stavka.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="parent_articles",
+                to="inventory.inventoryitem",
+                verbose_name="Vezani Pfand artikl",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='pfand_tax_override',
-            field=models.DecimalField(decimal_places=2, default=19, help_text='Obično 19% za Leergut u DE. Ostavite 19 ako niste sigurni.', max_digits=5, verbose_name='PDV stopa Pfanda (%)'),
+            model_name="inventoryitem",
+            name="pfand_tax_override",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=19,
+                help_text="Obično 19% za Leergut u DE. Ostavite 19 ako niste sigurni.",
+                max_digits=5,
+                verbose_name="PDV stopa Pfanda (%)",
+            ),
         ),
     ]

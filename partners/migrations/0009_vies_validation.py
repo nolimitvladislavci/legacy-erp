@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('partners', '0008_auto_buyer_type_fields'),
+        ("partners", "0008_auto_buyer_type_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='partner',
-            name='vies_address',
-            field=models.CharField(blank=True, max_length=500, verbose_name='VIES adresa'),
+            model_name="partner",
+            name="vies_address",
+            field=models.CharField(blank=True, max_length=500, verbose_name="VIES adresa"),
         ),
         migrations.AddField(
-            model_name='partner',
-            name='vies_checked_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='VIES provjera'),
+            model_name="partner",
+            name="vies_checked_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="VIES provjera"),
         ),
         migrations.AddField(
-            model_name='partner',
-            name='vies_name',
-            field=models.CharField(blank=True, max_length=255, verbose_name='VIES naziv'),
+            model_name="partner",
+            name="vies_name",
+            field=models.CharField(blank=True, max_length=255, verbose_name="VIES naziv"),
         ),
         migrations.AddField(
-            model_name='partner',
-            name='vies_valid',
-            field=models.BooleanField(default=None, null=True, verbose_name='VIES validan'),
+            model_name="partner",
+            name="vies_valid",
+            field=models.BooleanField(default=None, null=True, verbose_name="VIES validan"),
         ),
     ]

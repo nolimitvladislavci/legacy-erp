@@ -4,45 +4,55 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0002_paypal'),
+        ("payments", "0002_paypal"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='payment',
-            new_name='payments_pa_company_2bfc7c_idx',
-            old_name='payments_pa_company_idx',
+            model_name="payment",
+            new_name="payments_pa_company_2bfc7c_idx",
+            old_name="payments_pa_company_idx",
         ),
         migrations.RenameIndex(
-            model_name='payment',
-            new_name='payments_pa_source_35dd40_idx',
-            old_name='payments_pa_source_idx',
+            model_name="payment",
+            new_name="payments_pa_source_35dd40_idx",
+            old_name="payments_pa_source_idx",
         ),
         migrations.RenameIndex(
-            model_name='payment',
-            new_name='payments_pa_externa_e9415f_idx',
-            old_name='payments_pa_extern_idx',
+            model_name="payment",
+            new_name="payments_pa_externa_e9415f_idx",
+            old_name="payments_pa_extern_idx",
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='crypto_currency',
-            field=models.CharField(blank=True, help_text='BTC, ETH, LTC, itd.', max_length=10, verbose_name='Kripto valuta'),
+            model_name="payment",
+            name="crypto_currency",
+            field=models.CharField(
+                blank=True, help_text="BTC, ETH, LTC, itd.", max_length=10, verbose_name="Kripto valuta"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='external_id',
-            field=models.CharField(blank=True, help_text='Stripe PaymentIntent ID ili BTCPay Invoice ID', max_length=300, verbose_name='Vanjski ID'),
+            model_name="payment",
+            name="external_id",
+            field=models.CharField(
+                blank=True,
+                help_text="Stripe PaymentIntent ID ili BTCPay Invoice ID",
+                max_length=300,
+                verbose_name="Vanjski ID",
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='external_url',
-            field=models.URLField(blank=True, help_text='Stripe checkout URL ili BTCPay invoice URL', verbose_name='Vanjski URL'),
+            model_name="payment",
+            name="external_url",
+            field=models.URLField(
+                blank=True, help_text="Stripe checkout URL ili BTCPay invoice URL", verbose_name="Vanjski URL"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='source_id',
-            field=models.CharField(blank=True, help_text='PK narudzbe, fakture, itd.', max_length=100, verbose_name='ID izvora'),
+            model_name="payment",
+            name="source_id",
+            field=models.CharField(
+                blank=True, help_text="PK narudzbe, fakture, itd.", max_length=100, verbose_name="ID izvora"
+            ),
         ),
     ]

@@ -36,9 +36,9 @@ def sync_open_items(company, user=None):
     # IRA — potraživanja (kupci nam duguju)
     ira_invoices = Invoice.objects.filter(
         company=company,
-        direction='outgoing',
-        status__in=('sent', 'overdue', 'partially_paid'),
-    ).select_related('partner')
+        direction="outgoing",
+        status__in=("sent", "overdue", "partially_paid"),
+    ).select_related("partner")
 
     for inv in ira_invoices:
         if not inv.partner:
@@ -49,15 +49,15 @@ def sync_open_items(company, user=None):
             company=company,
             document_number=inv.number,
             defaults={
-                'partner': inv.partner,
-                'direction': 'receivable',
-                'document_type': inv.invoice_type,
-                'document_date': inv.issue_date,
-                'due_date': inv.due_date or inv.issue_date,
-                'original_amount': inv.total,
-                'paid_amount': Decimal('0'),
-                'currency': inv.currency,
-                'invoice': inv,
+                "partner": inv.partner,
+                "direction": "receivable",
+                "document_type": inv.invoice_type,
+                "document_date": inv.issue_date,
+                "due_date": inv.due_date or inv.issue_date,
+                "original_amount": inv.total,
+                "paid_amount": Decimal("0"),
+                "currency": inv.currency,
+                "invoice": inv,
             },
         )
         if was_created:
@@ -65,19 +65,23 @@ def sync_open_items(company, user=None):
 
     # Zatvori plaćene
     paid = Invoice.objects.filter(
-        company=company, direction='outgoing', status='paid',
-    ).values_list('number', flat=True)
+        company=company,
+        direction="outgoing",
+        status="paid",
+    ).values_list("number", flat=True)
 
     closed = OpenItem.objects.filter(
-        company=company, document_number__in=paid, is_closed=False,
+        company=company,
+        document_number__in=paid,
+        is_closed=False,
     ).update(is_closed=True, closed_at=timezone.now())
 
     # URA — obveze (mi dugujemo dobavljaču)
     ura_invoices = Invoice.objects.filter(
         company=company,
-        direction='incoming',
-        status__in=('sent', 'overdue', 'partially_paid'),
-    ).select_related('partner')
+        direction="incoming",
+        status__in=("sent", "overdue", "partially_paid"),
+    ).select_related("partner")
 
     for inv in ura_invoices:
         if not inv.partner:
@@ -88,22 +92,22 @@ def sync_open_items(company, user=None):
             company=company,
             document_number=inv.number,
             defaults={
-                'partner': inv.partner,
-                'direction': 'payable',
-                'document_type': inv.invoice_type,
-                'document_date': inv.issue_date,
-                'due_date': inv.due_date or inv.issue_date,
-                'original_amount': inv.total,
-                'paid_amount': Decimal('0'),
-                'currency': inv.currency,
-                'invoice': inv,
+                "partner": inv.partner,
+                "direction": "payable",
+                "document_type": inv.invoice_type,
+                "document_date": inv.issue_date,
+                "due_date": inv.due_date or inv.issue_date,
+                "original_amount": inv.total,
+                "paid_amount": Decimal("0"),
+                "currency": inv.currency,
+                "invoice": inv,
             },
         )
         if was_created:
             created += 1
 
-    logger.info(f'Saldakonti sync: +{created} created, {closed} closed, {skipped} skipped')
-    return {'created': created, 'closed': closed, 'skipped': skipped}
+    logger.info(f"Saldakonti sync: +{created} created, {closed} closed, {skipped} skipped")
+    return {"created": created, "closed": closed, "skipped": skipped}
 
 
 def aging_summary(company, direction=None):
@@ -116,44 +120,49 @@ def aging_summary(company, direction=None):
         items = items.filter(direction=direction)
 
     buckets = {
-        'current': Decimal('0'),
-        '1-30': Decimal('0'),
-        '31-60': Decimal('0'),
-        '61-90': Decimal('0'),
-        '90+': Decimal('0'),
+        "current": Decimal("0"),
+        "1-30": Decimal("0"),
+        "31-60": Decimal("0"),
+        "61-90": Decimal("0"),
+        "90+": Decimal("0"),
     }
-    partner_breakdown = defaultdict(lambda: {
-        'partner': None,
-        'current': Decimal('0'), '1-30': Decimal('0'),
-        '31-60': Decimal('0'), '61-90': Decimal('0'),
-        '90+': Decimal('0'), 'total': Decimal('0'),
-        'items_count': 0,
-    })
+    partner_breakdown = defaultdict(
+        lambda: {
+            "partner": None,
+            "current": Decimal("0"),
+            "1-30": Decimal("0"),
+            "31-60": Decimal("0"),
+            "61-90": Decimal("0"),
+            "90+": Decimal("0"),
+            "total": Decimal("0"),
+            "items_count": 0,
+        }
+    )
 
-    for item in items.select_related('partner'):
+    for item in items.select_related("partner"):
         bucket = item.aging_bucket
         remaining = item.remaining
         buckets[bucket] += remaining
 
         pb = partner_breakdown[item.partner_id]
-        pb['partner'] = item.partner
+        pb["partner"] = item.partner
         pb[bucket] += remaining
-        pb['total'] += remaining
-        pb['items_count'] += 1
+        pb["total"] += remaining
+        pb["items_count"] += 1
 
     total = sum(buckets.values())
 
     # Sort partners by total descending
     partners_sorted = sorted(
         partner_breakdown.values(),
-        key=lambda x: -x['total'],
+        key=lambda x: -x["total"],
     )
 
     return {
-        'buckets': buckets,
-        'total': total,
-        'partners': partners_sorted,
-        'items_count': items.count(),
+        "buckets": buckets,
+        "total": total,
+        "partners": partners_sorted,
+        "items_count": items.count(),
     }
 
 
@@ -167,17 +176,15 @@ def generate_ios(company, partner, report_date=None, user=None):
         report_date = date.today()
 
     items = OpenItem.objects.filter(
-        company=company, partner=partner, is_closed=False,
-    ).order_by('document_date')
+        company=company,
+        partner=partner,
+        is_closed=False,
+    ).order_by("document_date")
 
-    total_receivable = items.filter(direction='receivable').aggregate(
-        s=Sum('original_amount'))['s'] or Decimal('0')
-    total_payable = items.filter(direction='payable').aggregate(
-        s=Sum('original_amount'))['s'] or Decimal('0')
-    paid_receivable = items.filter(direction='receivable').aggregate(
-        s=Sum('paid_amount'))['s'] or Decimal('0')
-    paid_payable = items.filter(direction='payable').aggregate(
-        s=Sum('paid_amount'))['s'] or Decimal('0')
+    total_receivable = items.filter(direction="receivable").aggregate(s=Sum("original_amount"))["s"] or Decimal("0")
+    total_payable = items.filter(direction="payable").aggregate(s=Sum("original_amount"))["s"] or Decimal("0")
+    paid_receivable = items.filter(direction="receivable").aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
+    paid_payable = items.filter(direction="payable").aggregate(s=Sum("paid_amount"))["s"] or Decimal("0")
 
     net_receivable = total_receivable - paid_receivable
     net_payable = total_payable - paid_payable
@@ -194,17 +201,23 @@ def generate_ios(company, partner, report_date=None, user=None):
         created_by=user,
     )
 
-    logger.info(f'IOS generated: {partner.name}, balance={net_balance} EUR, {items.count()} items')
+    logger.info(f"IOS generated: {partner.name}, balance={net_balance} EUR, {items.count()} items")
     return report
 
 
 def bulk_ios_generate(company, user=None):
     """Generiraj IOS za sve partnere s otvorenim stavkama."""
-    partner_ids = OpenItem.objects.filter(
-        company=company, is_closed=False,
-    ).values_list('partner_id', flat=True).distinct()
+    partner_ids = (
+        OpenItem.objects.filter(
+            company=company,
+            is_closed=False,
+        )
+        .values_list("partner_id", flat=True)
+        .distinct()
+    )
 
     from partners.models import Partner
+
     reports = []
     for pid in partner_ids:
         partner = Partner.objects.get(pk=pid)
@@ -215,25 +228,25 @@ def bulk_ios_generate(company, user=None):
 
 
 @transaction.atomic
-def register_payment(open_item, amount, user=None, reference=''):
+def register_payment(open_item, amount, user=None, reference=""):
     """
     Registriraj uplatu na otvorenu stavku.
     Ako je amount >= remaining, zatvori stavku.
     """
     if amount <= 0:
-        raise ValueError('Iznos mora biti pozitivan')
+        raise ValueError("Iznos mora biti pozitivan")
     if amount > open_item.remaining:
-        raise ValueError(f'Iznos ({amount}) veći od preostalog ({open_item.remaining})')
+        raise ValueError(f"Iznos ({amount}) veći od preostalog ({open_item.remaining})")
 
     open_item.paid_amount += amount
     if open_item.paid_amount >= open_item.original_amount:
         open_item.is_closed = True
         open_item.closed_at = timezone.now()
 
-    open_item.save(update_fields=['paid_amount', 'is_closed', 'closed_at', 'updated_at'])
+    open_item.save(update_fields=["paid_amount", "is_closed", "closed_at", "updated_at"])
 
     logger.info(
-        f'Payment registered: {open_item.document_number} +{amount} EUR '
-        f'(remaining: {open_item.remaining}, closed: {open_item.is_closed})'
+        f"Payment registered: {open_item.document_number} +{amount} EUR "
+        f"(remaining: {open_item.remaining}, closed: {open_item.is_closed})"
     )
     return open_item

@@ -4,20 +4,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('livestock', '0004_add_pet_fields'),
+        ("livestock", "0004_add_pet_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='livestock',
-            name='status',
-            field=models.CharField(choices=[('aktivno', 'Aktivno'), ('gravidno', 'Gravidno'), ('zasuseno', 'Zasuseno'), ('tov', 'U tovu'), ('prodano', 'Prodano'), ('uginulo', 'Uginulo'), ('izluceno', 'Izluceno'), ('u_azilu', 'U azilu'), ('karantena', 'Karantena'), ('rezerviran', 'Rezerviran'), ('udomljen', 'Udomljen'), ('eutanaziran', 'Eutanaziran')], default='aktivno', max_length=15),
+            model_name="livestock",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("aktivno", "Aktivno"),
+                    ("gravidno", "Gravidno"),
+                    ("zasuseno", "Zasuseno"),
+                    ("tov", "U tovu"),
+                    ("prodano", "Prodano"),
+                    ("uginulo", "Uginulo"),
+                    ("izluceno", "Izluceno"),
+                    ("u_azilu", "U azilu"),
+                    ("karantena", "Karantena"),
+                    ("rezerviran", "Rezerviran"),
+                    ("udomljen", "Udomljen"),
+                    ("eutanaziran", "Eutanaziran"),
+                ],
+                default="aktivno",
+                max_length=15,
+            ),
         ),
         migrations.AlterField(
-            model_name='livestock',
-            name='vrsta',
-            field=models.CharField(choices=[('krava', 'Krava (muzara)'), ('junica', 'Junica'), ('tele', 'Tele'), ('bik', 'Bik'), ('vo', 'Vo (tov)'), ('ovca', 'Ovca'), ('janje', 'Janje'), ('ovan', 'Ovan'), ('koza', 'Koza'), ('kozle', 'Kozle'), ('jarac', 'Jarac'), ('svinja', 'Svinja'), ('prasac', 'Prasac'), ('krmaca', 'Krmača'), ('nerast', 'Nerast'), ('kokoska', 'Kokoška / Peradar'), ('purica', 'Purica'), ('patka', 'Patka'), ('guska', 'Guska'), ('pas', 'Pas'), ('macka', 'Mačka'), ('konj', 'Konj'), ('zec', 'Zec'), ('ostalo_ljubimac', 'Ostalo (ljubimac)')], default='krava', max_length=15),
+            model_name="livestock",
+            name="vrsta",
+            field=models.CharField(
+                choices=[
+                    ("krava", "Krava (muzara)"),
+                    ("junica", "Junica"),
+                    ("tele", "Tele"),
+                    ("bik", "Bik"),
+                    ("vo", "Vo (tov)"),
+                    ("ovca", "Ovca"),
+                    ("janje", "Janje"),
+                    ("ovan", "Ovan"),
+                    ("koza", "Koza"),
+                    ("kozle", "Kozle"),
+                    ("jarac", "Jarac"),
+                    ("svinja", "Svinja"),
+                    ("prasac", "Prasac"),
+                    ("krmaca", "Krmača"),
+                    ("nerast", "Nerast"),
+                    ("kokoska", "Kokoška / Peradar"),
+                    ("purica", "Purica"),
+                    ("patka", "Patka"),
+                    ("guska", "Guska"),
+                    ("pas", "Pas"),
+                    ("macka", "Mačka"),
+                    ("konj", "Konj"),
+                    ("zec", "Zec"),
+                    ("ostalo_ljubimac", "Ostalo (ljubimac)"),
+                ],
+                default="krava",
+                max_length=15,
+            ),
         ),
     ]

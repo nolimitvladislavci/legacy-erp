@@ -6,38 +6,110 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0041_workspace_model'),
-        ('core', '0005_memio_cro_validated'),
+        ("companies", "0041_workspace_model"),
+        ("core", "0005_memio_cro_validated"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BookingSignature',
+            name="BookingSignature",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('book', 'Knjiženje'), ('unbook', 'Odknjižavanje'), ('delete', 'Brisanje'), ('storno', 'Storno'), ('export', 'Izvoz podataka'), ('switch', 'Promjena konteksta'), ('login', 'Prijava'), ('logout', 'Odjava'), ('create', 'Kreiranje'), ('update', 'Ažuriranje'), ('fiscal', 'Fiskalizacija'), ('print', 'Ispis'), ('send', 'Slanje (email/WhatsApp)'), ('approve', 'Odobravanje'), ('view_sensitive', 'Pristup osjetljivim podacima')], db_index=True, max_length=20)),
-                ('target_model', models.CharField(db_index=True, max_length=100)),
-                ('target_id', models.CharField(blank=True, max_length=100)),
-                ('target_repr', models.CharField(blank=True, help_text='Čovjeku čitljiv opis objekta (npr. "Račun R-2026-0042")', max_length=300)),
-                ('changes', models.JSONField(blank=True, default=dict, help_text='Samo promijenjeni fieldovi: {"amount": {"old": 100, "new": 150}}')),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.CharField(blank=True, max_length=300)),
-                ('session_key', models.CharField(blank=True, max_length=100)),
-                ('pin_verified', models.BooleanField(default=False, help_text='True ako je korisnik potvrdio PIN za ovu akciju')),
-                ('integrity_hash', models.CharField(db_index=True, help_text='SHA256(user+action+target+timestamp+SECRET_SALT)', max_length=64)),
-                ('timestamp', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='booking_signatures', to='companies.company')),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='booking_signatures', to=settings.AUTH_USER_MODEL)),
-                ('workspace', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='booking_signatures', to='companies.workspace')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("book", "Knjiženje"),
+                            ("unbook", "Odknjižavanje"),
+                            ("delete", "Brisanje"),
+                            ("storno", "Storno"),
+                            ("export", "Izvoz podataka"),
+                            ("switch", "Promjena konteksta"),
+                            ("login", "Prijava"),
+                            ("logout", "Odjava"),
+                            ("create", "Kreiranje"),
+                            ("update", "Ažuriranje"),
+                            ("fiscal", "Fiskalizacija"),
+                            ("print", "Ispis"),
+                            ("send", "Slanje (email/WhatsApp)"),
+                            ("approve", "Odobravanje"),
+                            ("view_sensitive", "Pristup osjetljivim podacima"),
+                        ],
+                        db_index=True,
+                        max_length=20,
+                    ),
+                ),
+                ("target_model", models.CharField(db_index=True, max_length=100)),
+                ("target_id", models.CharField(blank=True, max_length=100)),
+                (
+                    "target_repr",
+                    models.CharField(
+                        blank=True, help_text='Čovjeku čitljiv opis objekta (npr. "Račun R-2026-0042")', max_length=300
+                    ),
+                ),
+                (
+                    "changes",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='Samo promijenjeni fieldovi: {"amount": {"old": 100, "new": 150}}',
+                    ),
+                ),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.CharField(blank=True, max_length=300)),
+                ("session_key", models.CharField(blank=True, max_length=100)),
+                (
+                    "pin_verified",
+                    models.BooleanField(default=False, help_text="True ako je korisnik potvrdio PIN za ovu akciju"),
+                ),
+                (
+                    "integrity_hash",
+                    models.CharField(
+                        db_index=True, help_text="SHA256(user+action+target+timestamp+SECRET_SALT)", max_length=64
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="booking_signatures",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="booking_signatures",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "workspace",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="booking_signatures",
+                        to="companies.workspace",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Audit potpis',
-                'verbose_name_plural': 'Audit potpisi',
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['user', 'timestamp'], name='core_bookin_user_id_fc7ed8_idx'), models.Index(fields=['company', 'timestamp'], name='core_bookin_company_acde75_idx'), models.Index(fields=['action', 'timestamp'], name='core_bookin_action_a51d13_idx'), models.Index(fields=['target_model', 'target_id'], name='core_bookin_target__1f9ed4_idx')],
+                "verbose_name": "Audit potpis",
+                "verbose_name_plural": "Audit potpisi",
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(fields=["user", "timestamp"], name="core_bookin_user_id_fc7ed8_idx"),
+                    models.Index(fields=["company", "timestamp"], name="core_bookin_company_acde75_idx"),
+                    models.Index(fields=["action", "timestamp"], name="core_bookin_action_a51d13_idx"),
+                    models.Index(fields=["target_model", "target_id"], name="core_bookin_target__1f9ed4_idx"),
+                ],
             },
         ),
     ]

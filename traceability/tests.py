@@ -1,4 +1,5 @@
 """Tests for Traceability module."""
+
 from decimal import Decimal
 
 from django.test import TestCase
@@ -12,6 +13,7 @@ class TraceabilityTest(TestCase):
     def setUp(self):
         self.company = Company.objects.create(name="Trace Co", oib="15151515151")
         from marketplace.models import MarketplaceProduct
+
         self.product = MarketplaceProduct.objects.create(
             seller_company=self.company,
             name="Organic Cheese",

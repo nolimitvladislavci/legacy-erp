@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0030_komitent_manager'),
+        ("companies", "0030_komitent_manager"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='has_signed_tc_consent',
-            field=models.BooleanField(default=False, help_text='Mora biti True da sustav smije agregirati podatke ove firme.', verbose_name='Potpisao T&C (GDPR čl.6b)'),
+            model_name="company",
+            name="has_signed_tc_consent",
+            field=models.BooleanField(
+                default=False,
+                help_text="Mora biti True da sustav smije agregirati podatke ove firme.",
+                verbose_name="Potpisao T&C (GDPR čl.6b)",
+            ),
         ),
         migrations.AddField(
-            model_name='company',
-            name='tc_consent_signed_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Datum potpisivanja T&C'),
+            model_name="company",
+            name="tc_consent_signed_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Datum potpisivanja T&C"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='tc_consent_version',
-            field=models.CharField(blank=True, default='', help_text='Npr. v2.1-2026', max_length=20, verbose_name='Verzija T&C'),
+            model_name="company",
+            name="tc_consent_version",
+            field=models.CharField(
+                blank=True, default="", help_text="Npr. v2.1-2026", max_length=20, verbose_name="Verzija T&C"
+            ),
         ),
     ]

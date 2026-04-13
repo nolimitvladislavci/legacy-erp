@@ -6,5 +6,5 @@ from .models import Partner
 class PartnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Partner
-        fields = '__all__'
-        read_only_fields = ('cached_balance',)
+        fields = "__all__"
+        read_only_fields = ("cached_balance",)

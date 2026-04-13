@@ -10,70 +10,80 @@ Creates 4 groups:
 
 Then assigns existing users to groups based on their profile.role.
 """
+
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 
 # Permission mappings per group
 GROUP_PERMISSIONS = {
-    'Radnik': {
+    "Radnik": {
         # Workers: view own worktime, appointments, projects
-        'worktime': ['view_worktimeentry', 'add_worktimeentry', 'change_worktimeentry'],
-        'appointments': ['view_appointment'],
-        'projects': ['view_project', 'view_task'],
-        'pos': ['view_possession', 'add_possession', 'change_possession', 'view_positem'],
-        'invoicing': ['view_invoice'],
-        'inventory': ['view_inventoryitem', 'view_stockmovement'],
-        'documents': ['view_document'],
+        "worktime": ["view_worktimeentry", "add_worktimeentry", "change_worktimeentry"],
+        "appointments": ["view_appointment"],
+        "projects": ["view_project", "view_task"],
+        "pos": ["view_possession", "add_possession", "change_possession", "view_positem"],
+        "invoicing": ["view_invoice"],
+        "inventory": ["view_inventoryitem", "view_stockmovement"],
+        "documents": ["view_document"],
     },
-    'Voditelj': {
+    "Voditelj": {
         # Managers: everything workers can + manage team
-        'worktime': ['view_worktimeentry', 'add_worktimeentry', 'change_worktimeentry',
-                     'delete_worktimeentry', 'view_worktimesummary'],
-        'appointments': ['view_appointment', 'add_appointment', 'change_appointment',
-                        'delete_appointment'],
-        'projects': ['view_project', 'add_project', 'change_project',
-                    'view_task', 'add_task', 'change_task'],
-        'pos': ['view_possession', 'add_possession', 'change_possession',
-                'delete_possession', 'view_positem', 'add_positem'],
-        'invoicing': ['view_invoice', 'add_invoice'],
-        'inventory': ['view_inventoryitem', 'view_stockmovement', 'add_stockmovement'],
-        'documents': ['view_document', 'add_document', 'change_document'],
-        'partners': ['view_partner'],
+        "worktime": [
+            "view_worktimeentry",
+            "add_worktimeentry",
+            "change_worktimeentry",
+            "delete_worktimeentry",
+            "view_worktimesummary",
+        ],
+        "appointments": ["view_appointment", "add_appointment", "change_appointment", "delete_appointment"],
+        "projects": ["view_project", "add_project", "change_project", "view_task", "add_task", "change_task"],
+        "pos": [
+            "view_possession",
+            "add_possession",
+            "change_possession",
+            "delete_possession",
+            "view_positem",
+            "add_positem",
+        ],
+        "invoicing": ["view_invoice", "add_invoice"],
+        "inventory": ["view_inventoryitem", "view_stockmovement", "add_stockmovement"],
+        "documents": ["view_document", "add_document", "change_document"],
+        "partners": ["view_partner"],
     },
-    'Admin': {
+    "Admin": {
         # Company admins: full CRUD on most things
-        'worktime': '*',
-        'appointments': '*',
-        'projects': '*',
-        'pos': '*',
-        'invoicing': '*',
-        'inventory': '*',
-        'documents': '*',
-        'partners': '*',
-        'konto': '*',
-        'payroll': '*',
-        'eracun': '*',
+        "worktime": "*",
+        "appointments": "*",
+        "projects": "*",
+        "pos": "*",
+        "invoicing": "*",
+        "inventory": "*",
+        "documents": "*",
+        "partners": "*",
+        "konto": "*",
+        "payroll": "*",
+        "eracun": "*",
     },
-    'Superadmin': {
+    "Superadmin": {
         # Everything
-        '__all__': True,
+        "__all__": True,
     },
 }
 
 # Map profile roles to groups
 ROLE_TO_GROUP = {
-    'worker': 'Radnik',
-    'employee': 'Radnik',
-    'project_manager': 'Voditelj',
-    'company_admin': 'Admin',
-    'superadmin': 'Superadmin',
-    'partner': 'Radnik',
-    'investor': 'Radnik',
+    "worker": "Radnik",
+    "employee": "Radnik",
+    "project_manager": "Voditelj",
+    "company_admin": "Admin",
+    "superadmin": "Superadmin",
+    "partner": "Radnik",
+    "investor": "Radnik",
 }
 
 
 class Command(BaseCommand):
-    help = 'Setup RBAC groups and assign users based on profile roles.'
+    help = "Setup RBAC groups and assign users based on profile roles."
 
     def handle(self, *args, **options):
         created_groups = 0
@@ -83,20 +93,18 @@ class Command(BaseCommand):
             group, created = Group.objects.get_or_create(name=group_name)
             if created:
                 created_groups += 1
-                self.stdout.write(f'  Created group: {group_name}')
+                self.stdout.write(f"  Created group: {group_name}")
 
-            if app_perms.get('__all__'):
+            if app_perms.get("__all__"):
                 # Superadmin gets ALL permissions
                 group.permissions.set(Permission.objects.all())
-                self.stdout.write(f'    -> {Permission.objects.count()} permissions (all)')
+                self.stdout.write(f"    -> {Permission.objects.count()} permissions (all)")
             else:
                 perms = []
                 for app_label, codenames in app_perms.items():
-                    if codenames == '*':
+                    if codenames == "*":
                         # All permissions for this app
-                        app_perms_qs = Permission.objects.filter(
-                            content_type__app_label=app_label
-                        )
+                        app_perms_qs = Permission.objects.filter(content_type__app_label=app_label)
                         perms.extend(app_perms_qs)
                     else:
                         for codename in codenames:
@@ -118,10 +126,11 @@ class Command(BaseCommand):
                                     perms.append(perm)
 
                 group.permissions.set(perms)
-                self.stdout.write(f'    -> {len(perms)} permissions')
+                self.stdout.write(f"    -> {len(perms)} permissions")
 
         # Assign users to groups
         from django.contrib.auth.models import User
+
         for user in User.objects.all():
             try:
                 role = user.profile.role
@@ -140,10 +149,10 @@ class Command(BaseCommand):
                 if not user.groups.filter(pk=group.pk).exists():
                     user.groups.add(group)
                     assigned_users += 1
-                    self.stdout.write(f'  {user.username} -> {group_name}')
+                    self.stdout.write(f"  {user.username} -> {group_name}")
             except Group.DoesNotExist:
                 pass
 
-        self.stdout.write(self.style.SUCCESS(
-            f'\nDone: {created_groups} groups created, {assigned_users} users assigned'
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(f"\nDone: {created_groups} groups created, {assigned_users} users assigned")
+        )

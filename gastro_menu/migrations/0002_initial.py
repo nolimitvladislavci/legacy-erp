@@ -5,23 +5,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('gastro_menu', '0001_initial'),
-        ('marketplace', '0001_initial'),
+        ("gastro_menu", "0001_initial"),
+        ("marketplace", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='menuitemingredient',
-            name='marketplace_product',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='used_in_dishes', to='marketplace.marketplaceproduct', verbose_name='Proizvod s tržnice'),
+            model_name="menuitemingredient",
+            name="marketplace_product",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="used_in_dishes",
+                to="marketplace.marketplaceproduct",
+                verbose_name="Proizvod s tržnice",
+            ),
         ),
         migrations.AddField(
-            model_name='menuitemingredient',
-            name='menu_item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ingredients', to='gastro_menu.menuitem'),
+            model_name="menuitemingredient",
+            name="menu_item",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="ingredients", to="gastro_menu.menuitem"
+            ),
         ),
     ]

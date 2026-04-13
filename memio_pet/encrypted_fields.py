@@ -10,13 +10,14 @@ Doktrina "boje u vreći":
 Ako Hrvoje uzme DB dump: dobiva AES-128-CBC šifrat.
 Bez ključa → neupotrebljivi bajt niz.
 """
+
 import logging
 import os
 
 from cryptography.fernet import Fernet, InvalidToken
 from django.db import models
 
-logger = logging.getLogger('memio_pet.security')
+logger = logging.getLogger("memio_pet.security")
 
 _MEMIO_FERNET_KEY = None
 
@@ -24,11 +25,12 @@ _MEMIO_FERNET_KEY = None
 def _get_fernet():
     global _MEMIO_FERNET_KEY
     if _MEMIO_FERNET_KEY is None:
-        key = os.environ.get('MEMIO_PETS_FERNET_KEY', '')
+        key = os.environ.get("MEMIO_PETS_FERNET_KEY", "")
         if not key:
             logger.critical("MEMIO_PETS_FERNET_KEY nije postavljen! PII podaci NEĆE biti kriptirani!")
             # Fallback: koristi ERP ključ (bolje nego plaintext)
             from django.conf import settings
+
             key = settings.FERNET_KEY
         _MEMIO_FERNET_KEY = Fernet(key.encode())
     return _MEMIO_FERNET_KEY
@@ -42,7 +44,7 @@ class MemioEncryptedField(models.CharField):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('max_length', 512)
+        kwargs.setdefault("max_length", 512)
         super().__init__(*args, **kwargs)
 
     def from_db_value(self, value, expression, connection):
@@ -73,6 +75,6 @@ class MemioEncryptedField(models.CharField):
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
-        if kwargs.get('max_length') == 512:
-            del kwargs['max_length']
+        if kwargs.get("max_length") == 512:
+            del kwargs["max_length"]
         return name, path, args, kwargs

@@ -5,83 +5,196 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('invoicing', '0034_alter_invoice_doctype_alter_invoiceitem_section_and_more'),
-        ('udruge', '0014_golubinjak_fotografija'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("invoicing", "0034_alter_invoice_doctype_alter_invoiceitem_section_and_more"),
+        ("udruge", "0014_golubinjak_fotografija"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GlazbenaSkola',
+            name="GlazbenaSkola",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vrsta', models.CharField(choices=[('privatna', 'Privatna glazbena škola'), ('udruga', 'Glazbena škola pri udruzi (KUD)'), ('opcinska', 'Općinska / gradska škola'), ('studij', 'Privatni studio / instruktor')], default='udruga', max_length=20)),
-                ('naziv_skole', models.CharField(blank=True, max_length=200)),
-                ('instrumenti', models.JSONField(blank=True, default=list, help_text='["Klavir", "Gitara", "Violina", "Pjevanje", "Solfeggio"]')),
-                ('skolska_godina_start', models.DateField(blank=True, null=True)),
-                ('skolska_godina_end', models.DateField(blank=True, null=True)),
-                ('fakturira_roditelje', models.BooleanField(default=True)),
-                ('pdv_na_nastavu', models.BooleanField(default=False, help_text='Glazbeno obrazovanje je PDV oslobođeno (čl.40 ZPDV) ako je u registru')),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='glazbena_skola', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("privatna", "Privatna glazbena škola"),
+                            ("udruga", "Glazbena škola pri udruzi (KUD)"),
+                            ("opcinska", "Općinska / gradska škola"),
+                            ("studij", "Privatni studio / instruktor"),
+                        ],
+                        default="udruga",
+                        max_length=20,
+                    ),
+                ),
+                ("naziv_skole", models.CharField(blank=True, max_length=200)),
+                (
+                    "instrumenti",
+                    models.JSONField(
+                        blank=True, default=list, help_text='["Klavir", "Gitara", "Violina", "Pjevanje", "Solfeggio"]'
+                    ),
+                ),
+                ("skolska_godina_start", models.DateField(blank=True, null=True)),
+                ("skolska_godina_end", models.DateField(blank=True, null=True)),
+                ("fakturira_roditelje", models.BooleanField(default=True)),
+                (
+                    "pdv_na_nastavu",
+                    models.BooleanField(
+                        default=False, help_text="Glazbeno obrazovanje je PDV oslobođeno (čl.40 ZPDV) ako je u registru"
+                    ),
+                ),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="glazbena_skola",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Glazbena škola',
+                "verbose_name": "Glazbena škola",
             },
         ),
         migrations.CreateModel(
-            name='GlazbeniUcenik',
+            name="GlazbeniUcenik",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ime', models.CharField(max_length=100)),
-                ('prezime', models.CharField(max_length=100)),
-                ('datum_rodenja', models.DateField(blank=True, null=True)),
-                ('oib_roditelja', models.CharField(blank=True, max_length=11)),
-                ('kontakt_roditelj', models.CharField(blank=True, max_length=200)),
-                ('telefon', models.CharField(blank=True, max_length=20)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('instrument', models.CharField(blank=True, help_text='Primarni instrument / predmet', max_length=100)),
-                ('razina', models.CharField(choices=[('pripremni', 'Pripremni tečaj'), ('osnovna_1_3', 'Osnovna razina (1-3 god.)'), ('srednja_4_6', 'Srednja razina (4-6 god.)'), ('napredna', 'Napredna razina'), ('odrasli', 'Odrasli polaznik')], default='osnovna_1_3', max_length=20)),
-                ('datum_upisa', models.DateField(auto_now_add=True)),
-                ('je_aktivan', models.BooleanField(default=True)),
-                ('napomene', models.TextField(blank=True)),
-                ('clan', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='glazbeni_ucenik', to='udruge.clan')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='glazbeni_ucenici', to='companies.company')),
-                ('instruktor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='ucenici', to='udruge.clan')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("ime", models.CharField(max_length=100)),
+                ("prezime", models.CharField(max_length=100)),
+                ("datum_rodenja", models.DateField(blank=True, null=True)),
+                ("oib_roditelja", models.CharField(blank=True, max_length=11)),
+                ("kontakt_roditelj", models.CharField(blank=True, max_length=200)),
+                ("telefon", models.CharField(blank=True, max_length=20)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("instrument", models.CharField(blank=True, help_text="Primarni instrument / predmet", max_length=100)),
+                (
+                    "razina",
+                    models.CharField(
+                        choices=[
+                            ("pripremni", "Pripremni tečaj"),
+                            ("osnovna_1_3", "Osnovna razina (1-3 god.)"),
+                            ("srednja_4_6", "Srednja razina (4-6 god.)"),
+                            ("napredna", "Napredna razina"),
+                            ("odrasli", "Odrasli polaznik"),
+                        ],
+                        default="osnovna_1_3",
+                        max_length=20,
+                    ),
+                ),
+                ("datum_upisa", models.DateField(auto_now_add=True)),
+                ("je_aktivan", models.BooleanField(default=True)),
+                ("napomene", models.TextField(blank=True)),
+                (
+                    "clan",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="glazbeni_ucenik",
+                        to="udruge.clan",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="glazbeni_ucenici",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "instruktor",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="ucenici",
+                        to="udruge.clan",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Glazbeni učenik',
-                'verbose_name_plural': 'Glazbeni učenici',
-                'db_table': 'udruge_glazbeni_ucenik',
-                'ordering': ['prezime', 'ime'],
+                "verbose_name": "Glazbeni učenik",
+                "verbose_name_plural": "Glazbeni učenici",
+                "db_table": "udruge_glazbeni_ucenik",
+                "ordering": ["prezime", "ime"],
             },
         ),
         migrations.CreateModel(
-            name='SatGlazbene',
+            name="SatGlazbene",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('datum', models.DateField()),
-                ('pocetak', models.TimeField()),
-                ('trajanje_min', models.PositiveSmallIntegerField(default=45)),
-                ('vrsta', models.CharField(choices=[('individualni', 'Individualni sat'), ('grupni', 'Grupna nastava'), ('nastup', 'Nastup / Ispit'), ('proba', 'Proba ansambla')], default='individualni', max_length=20)),
-                ('je_odrzan', models.BooleanField(default=True)),
-                ('razlog_izostanka', models.CharField(blank=True, max_length=200)),
-                ('gradivo', models.CharField(blank=True, help_text='Što je rađeno: ljestvice, komad, tehnika...', max_length=500)),
-                ('biljeska_instruktora', models.TextField(blank=True)),
-                ('ocjena', models.PositiveSmallIntegerField(blank=True, help_text='1-5, opcijalno', null=True)),
-                ('fakturiran', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sati_glazbene', to='companies.company')),
-                ('instruktor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='odrzani_sati', to='udruge.clan')),
-                ('invoice_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='glazbeni_sati', to='invoicing.invoiceitem')),
-                ('ucenik', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sati', to='udruge.glazbeniucenik')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("datum", models.DateField()),
+                ("pocetak", models.TimeField()),
+                ("trajanje_min", models.PositiveSmallIntegerField(default=45)),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("individualni", "Individualni sat"),
+                            ("grupni", "Grupna nastava"),
+                            ("nastup", "Nastup / Ispit"),
+                            ("proba", "Proba ansambla"),
+                        ],
+                        default="individualni",
+                        max_length=20,
+                    ),
+                ),
+                ("je_odrzan", models.BooleanField(default=True)),
+                ("razlog_izostanka", models.CharField(blank=True, max_length=200)),
+                (
+                    "gradivo",
+                    models.CharField(
+                        blank=True, help_text="Što je rađeno: ljestvice, komad, tehnika...", max_length=500
+                    ),
+                ),
+                ("biljeska_instruktora", models.TextField(blank=True)),
+                ("ocjena", models.PositiveSmallIntegerField(blank=True, help_text="1-5, opcijalno", null=True)),
+                ("fakturiran", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sati_glazbene",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "instruktor",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="odrzani_sati",
+                        to="udruge.clan",
+                    ),
+                ),
+                (
+                    "invoice_item",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="glazbeni_sati",
+                        to="invoicing.invoiceitem",
+                    ),
+                ),
+                (
+                    "ucenik",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="sati", to="udruge.glazbeniucenik"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sat glazbene škole',
-                'verbose_name_plural': 'Sati glazbene škole',
-                'db_table': 'udruge_sat_glazbene',
-                'ordering': ['-datum', '-pocetak'],
+                "verbose_name": "Sat glazbene škole",
+                "verbose_name_plural": "Sati glazbene škole",
+                "db_table": "udruge_sat_glazbene",
+                "ordering": ["-datum", "-pocetak"],
             },
         ),
     ]

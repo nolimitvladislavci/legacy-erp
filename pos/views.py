@@ -28,17 +28,17 @@ logger = logging.getLogger(__name__)
 
 def _recalculate(receipt):
     items = list(receipt.items.all())
-    subtotal = Decimal('0')
-    tax_total = Decimal('0')
+    subtotal = Decimal("0")
+    tax_total = Decimal("0")
     for item in items:
         net = item.quantity * item.unit_price * (1 - item.discount_percent / 100)
         tax = net * item.tax_rate / 100
         subtotal += net
         tax_total += tax
-    receipt.subtotal   = round(subtotal, 2)
+    receipt.subtotal = round(subtotal, 2)
     receipt.tax_amount = round(tax_total, 2)
-    receipt.total      = round(subtotal + tax_total - receipt.discount, 2)
-    receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+    receipt.total = round(subtotal + tax_total - receipt.discount, 2)
+    receipt.save(update_fields=["subtotal", "tax_amount", "total"])
 
 
 # ── Tenant Isolation Helper ─────────────────────────────────────────
@@ -50,18 +50,20 @@ def _check_tenant(request, obj):
     """
     company = get_user_company(request)
     if not company:
-        return None, JsonResponse({'ok': False, 'error': 'No company context'}, status=400)
+        return None, JsonResponse({"ok": False, "error": "No company context"}, status=400)
     # Determine obj's company
     obj_company = None
-    if hasattr(obj, 'company_id'):
+    if hasattr(obj, "company_id"):
         obj_company = obj.company
-    elif hasattr(obj, 'terminal'):
+    elif hasattr(obj, "terminal"):
         obj_company = obj.terminal.company
-    elif hasattr(obj, 'session'):
+    elif hasattr(obj, "session"):
         obj_company = obj.session.terminal.company
     if obj_company and obj_company.pk != company.pk:
         raise Http404
     return company, None
+
+
 # ────────────────────────────────────────────────────────────────────
 
 
@@ -70,33 +72,55 @@ def dashboard(request):
     company = get_user_company(request)
     if company:
         # Otvorena smjena prvo
-        open_sess = POSSession.objects.filter(
-            terminal__company=company, status='open'
-        ).select_related('terminal').first()
+        open_sess = (
+            POSSession.objects.filter(terminal__company=company, status="open").select_related("terminal").first()
+        )
         if open_sess:
-            return redirect('pos:pos_joker', terminal_id=open_sess.terminal_id)
+            return redirect("pos:pos_joker", terminal_id=open_sess.terminal_id)
         # Inače prvi aktivni terminal
-        t = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").order_by('id').first()
+        t = (
+            POSTerminal.objects.filter(company=company, is_active=True)
+            .select_related("company", "workspace", "business_location")
+            .order_by("id")
+            .first()
+        )
         if t:
-            return redirect('pos:pos_joker', terminal_id=t.pk)
-    terminals = POSTerminal.objects.filter(company=company, is_active=True).prefetch_related(
-        models.Prefetch('sessions', queryset=POSSession.objects.filter(status=POSSession.Status.OPEN).select_related("terminal", "operator", "active_cashiers"), to_attr='_open_sessions')
-    ) if company else POSTerminal.objects.none()
+            return redirect("pos:pos_joker", terminal_id=t.pk)
+    terminals = (
+        POSTerminal.objects.filter(company=company, is_active=True).prefetch_related(
+            models.Prefetch(
+                "sessions",
+                queryset=POSSession.objects.filter(status=POSSession.Status.OPEN).select_related(
+                    "terminal", "operator", "active_cashiers"
+                ),
+                to_attr="_open_sessions",
+            )
+        )
+        if company
+        else POSTerminal.objects.none()
+    )
     for t in terminals:
         t.active_session = t._open_sessions[0] if t._open_sessions else None
-    return render(request, 'pos/dashboard.html', {'terminals': terminals})
+    return render(request, "pos/dashboard.html", {"terminals": terminals})
 
 
 @login_required
 def terminal_detail(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company, err = _check_tenant(request, terminal)
-    if err: return err
+    if err:
+        return err
     active_session = terminal.sessions.filter(status=POSSession.Status.OPEN).first()
-    recent_sessions = terminal.sessions.order_by('-opened_at')[:15]
-    return render(request, 'pos/terminal.html', {
-        'terminal': terminal, 'active_session': active_session, 'recent_sessions': recent_sessions,
-    })
+    recent_sessions = terminal.sessions.order_by("-opened_at")[:15]
+    return render(
+        request,
+        "pos/terminal.html",
+        {
+            "terminal": terminal,
+            "active_session": active_session,
+            "recent_sessions": recent_sessions,
+        },
+    )
 
 
 @login_required
@@ -107,22 +131,28 @@ def open_session(request, terminal_id):
     # select_for_update: serializes session creation per terminal (race condition fix)
     terminal = get_object_or_404(POSTerminal.objects.select_for_update(), pk=terminal_id)
     company, err = _check_tenant(request, terminal)
-    if err: return err
+    if err:
+        return err
     # POSSettings guard — ne dopusti otvaranje smjene bez konfiguracije
     from .models import POSSettings
+
     if not POSSettings.objects.filter(company=company).select_related("company").exists():
-        messages.error(request, _('POS sustav nije konfiguriran. Otvorite Postavke → POS ili kontaktirajte administratora.'))
-        return redirect('pos:terminal_detail', terminal_id=terminal_id)
+        messages.error(
+            request, _("POS sustav nije konfiguriran. Otvorite Postavke → POS ili kontaktirajte administratora.")
+        )
+        return redirect("pos:terminal_detail", terminal_id=terminal_id)
     # OIB Hard-Stop — blagajnik BEZ OIB-a ne smije otvoriti smjenu
     # Zakon o fiskalizaciji cl. 9: OIB operatera obavezan na svakom racunu
     try:
         from worktime.models import EmployeeProfile
+
         ep = EmployeeProfile.objects.filter(user=request.user, company=company).first()
         if ep and not ep.tax_id:
-            messages.error(request,
-                'OIB nije unesen — ne mozete otvoriti smjenu. '
-                'Javite se voditelju. (Zakon o fiskalizaciji cl. 9)')
-            return redirect('pos:terminal_detail', terminal_id=terminal_id)
+            messages.error(
+                request,
+                "OIB nije unesen — ne mozete otvoriti smjenu. Javite se voditelju. (Zakon o fiskalizaciji cl. 9)",
+            )
+            return redirect("pos:terminal_detail", terminal_id=terminal_id)
     except DatabaseError:
         pass
 
@@ -134,63 +164,81 @@ def open_session(request, terminal_id):
         from django.utils import timezone as _tz
 
         from worktime.models import TimeEntry
+
         _ws = _tz.now().date() - _td(days=_tz.now().weekday())
-        _wh = TimeEntry.objects.filter(
-            user=request.user, company=company, date__gte=_ws
-        ).aggregate(s=_Sum('duration'))['s'] or 0
+        _wh = (
+            TimeEntry.objects.filter(user=request.user, company=company, date__gte=_ws).aggregate(s=_Sum("duration"))[
+                "s"
+            ]
+            or 0
+        )
         if float(_wh) >= 50:
-            messages.warning(request,
-                f'Upozorenje: {_wh}h ovaj tjedan (ZOR limit 50h). Nastavak zahtijeva odobrenje voditelja.')
+            messages.warning(
+                request, f"Upozorenje: {_wh}h ovaj tjedan (ZOR limit 50h). Nastavak zahtijeva odobrenje voditelja."
+            )
     except (ValueError, TypeError):
         pass
 
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
-        messages.warning(request, _('Terminal vec ima otvorenu smjenu. Zatvorite je prije otvaranja nove.'))
-        return redirect('pos:terminal_detail', terminal_id=terminal_id)
+        messages.warning(request, _("Terminal vec ima otvorenu smjenu. Zatvorite je prije otvaranja nove."))
+        return redirect("pos:terminal_detail", terminal_id=terminal_id)
     from django.db.models import Max
-    max_num = terminal.sessions.aggregate(m=Max('session_number'))['m'] or 0
+
+    max_num = terminal.sessions.aggregate(m=Max("session_number"))["m"] or 0
     next_num = max_num + 1
-    opening_cash = Decimal(request.POST.get('opening_cash', '0') or '0')
+    opening_cash = Decimal(request.POST.get("opening_cash", "0") or "0")
     session = POSSession.objects.create(
-        terminal=terminal, operator=request.user,
-        session_number=next_num, opening_cash=opening_cash,
+        terminal=terminal,
+        operator=request.user,
+        session_number=next_num,
+        opening_cash=opening_cash,
         status=POSSession.Status.OPEN,
     )
     # Audit: POS session open
     try:
         BookingSignature.log(
-            request, 'create',
+            request,
+            "create",
             target_obj=session,
-            target_repr=f'POS Open: {terminal.name} #{session.session_number}',
+            target_repr=f"POS Open: {terminal.name} #{session.session_number}",
             changes={
-                'terminal': terminal.name,
-                'terminal_code': terminal.terminal_code,
-                'session_number': session.session_number,
-                'opening_cash': str(session.opening_cash),
-                'workspace': str(terminal.workspace) if terminal.workspace else None,
+                "terminal": terminal.name,
+                "terminal_code": terminal.terminal_code,
+                "session_number": session.session_number,
+                "opening_cash": str(session.opening_cash),
+                "workspace": str(terminal.workspace) if terminal.workspace else None,
             },
         )
     except (ValueError, TypeError):
         pass
-    messages.success(request, _('Smjena #{n} otvorena! Skenirajte artikle za kreiranje bona.').format(n=session.session_number))
-    return redirect('pos:session_detail', session_id=session.pk)
+    messages.success(
+        request, _("Smjena #{n} otvorena! Skenirajte artikle za kreiranje bona.").format(n=session.session_number)
+    )
+    return redirect("pos:session_detail", session_id=session.pk)
 
 
 @login_required
 def session_detail(request, session_id):
     session = get_object_or_404(POSSession, pk=session_id)
     company, err = _check_tenant(request, session)
-    if err: return err
-    open_receipts = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']).order_by('-created_at')
+    if err:
+        return err
+    open_receipts = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, "ISSUED"]).order_by("-created_at")
 
     # Auto-redirect: ako je session open i ima tocno 1 otvoren bon, idi direktno na njega
     if session.status == POSSession.Status.OPEN and open_receipts.count() == 1:
-        return redirect('pos:receipt_detail', receipt_id=open_receipts.first().pk)
+        return redirect("pos:receipt_detail", receipt_id=open_receipts.first().pk)
 
-    paid_receipts = session.receipts.filter(status=POSReceipt.Status.PAID).order_by('-paid_at')[:30]
-    return render(request, 'pos/session.html', {
-        'session': session, 'open_receipts': open_receipts, 'paid_receipts': paid_receipts,
-    })
+    paid_receipts = session.receipts.filter(status=POSReceipt.Status.PAID).order_by("-paid_at")[:30]
+    return render(
+        request,
+        "pos/session.html",
+        {
+            "session": session,
+            "open_receipts": open_receipts,
+            "paid_receipts": paid_receipts,
+        },
+    )
 
 
 @login_required
@@ -199,39 +247,51 @@ def session_detail(request, session_id):
 def close_session(request, session_id):
     session = get_object_or_404(POSSession, pk=session_id)
     company, err = _check_tenant(request, session)
-    if err: return err
+    if err:
+        return err
     if session.status != POSSession.Status.OPEN:
-        messages.warning(request, _('Ova smjena je već zatvorena. Otvorite novu za nastavak rada.'))
-        return redirect('pos:session_detail', session_id=session_id)
-    open_count = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']).count()
+        messages.warning(request, _("Ova smjena je već zatvorena. Otvorite novu za nastavak rada."))
+        return redirect("pos:session_detail", session_id=session_id)
+    open_count = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, "ISSUED"]).count()
     if open_count:
-        messages.error(request, _('Nije moguće zatvoriti: {n} bonova čeka naplatu. Naplatite ili obrišite ih.').format(n=open_count))
-        return redirect('pos:session_detail', session_id=session_id)
+        messages.error(
+            request,
+            _("Nije moguće zatvoriti: {n} bonova čeka naplatu. Naplatite ili obrišite ih.").format(n=open_count),
+        )
+        return redirect("pos:session_detail", session_id=session_id)
     # Provjera: prazna smjena?
     paid_count = session.receipts.filter(status=POSReceipt.Status.PAID).count()
-    force = request.POST.get('force_close', '')
+    force = request.POST.get("force_close", "")
     if paid_count == 0 and not force:
-        messages.warning(request, _('Zatvarate smjenu bez ijednog bona. Kliknite ponovo za potvrdu.'))
+        messages.warning(request, _("Zatvarate smjenu bez ijednog bona. Kliknite ponovo za potvrdu."))
         # Set flag da sljedeći PUT prolazi
         from django.shortcuts import render
-        return render(request, 'pos/session.html', {
-            'session': session,
-            'open_receipts': session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']),
-            'paid_receipts': session.receipts.filter(status=POSReceipt.Status.PAID).order_by('-paid_at')[:30],
-            'confirm_empty_close': True,
-        })
 
-    closing_cash = Decimal(request.POST.get('closing_cash', '0') or '0')
-    session.closing_cash = closing_cash; session.closed_at = now()
-    session.status = POSSession.Status.CLOSED; session.save()
+        return render(
+            request,
+            "pos/session.html",
+            {
+                "session": session,
+                "open_receipts": session.receipts.filter(status__in=[POSReceipt.Status.OPEN, "ISSUED"]),
+                "paid_receipts": session.receipts.filter(status=POSReceipt.Status.PAID).order_by("-paid_at")[:30],
+                "confirm_empty_close": True,
+            },
+        )
+
+    closing_cash = Decimal(request.POST.get("closing_cash", "0") or "0")
+    session.closing_cash = closing_cash
+    session.closed_at = now()
+    session.status = POSSession.Status.CLOSED
+    session.save()
 
     # Auto clock-out svih blagajnika u smjeni
     try:
         from pos.worktime_bridge import session_close_all_cashiers
+
         session_close_all_cashiers(session)
     except ImportError:
         pass
-    messages.success(request, _('Smjena #{n} zatvorena. Z-izvještaj je generiran.').format(n=session.session_number))
+    messages.success(request, _("Smjena #{n} zatvorena. Z-izvještaj je generiran.").format(n=session.session_number))
 
     # Auto Otpremnica per bon → Propter
     try:
@@ -245,7 +305,7 @@ def close_session(request, session_id):
             Otpremnica.objects.filter(
                 company=company,
                 pos_receipt_id__in=[str(r.pk) for r in paid_receipts],
-            ).values_list('pos_receipt_id', flat=True)
+            ).values_list("pos_receipt_id", flat=True)
         )
         for receipt in paid_receipts:
             rid = str(receipt.pk)
@@ -255,42 +315,45 @@ def close_session(request, session_id):
                 company=company,
                 billing_period=period,
                 pos_receipt_id=rid,
-                source='pos',
-                number=f'OTP-POS/{receipt.receipt_number}',
+                source="pos",
+                number=f"OTP-POS/{receipt.receipt_number}",
                 issue_date=receipt.paid_at.date() if receipt.paid_at else _tz.now().date(),
-                recipient_name=receipt.buyer_name or 'Maloprodajni kupac',
-                recipient_oib=receipt.buyer_oib or '',
-                status='issued',
+                recipient_name=receipt.buyer_name or "Maloprodajni kupac",
+                recipient_oib=receipt.buyer_oib or "",
+                status="issued",
                 total=receipt.total,
                 subtotal=receipt.subtotal,
                 tax_amount=receipt.tax_amount,
             )
     except Exception as _oe:
         import logging
-        logging.getLogger('pos').warning(f'Propter Otpremnica auto: {_oe}')
+
+        logging.getLogger("pos").warning(f"Propter Otpremnica auto: {_oe}")
 
     # POS Pulse — analyze session close
     try:
         from pos.pulse import analyze_session_close
+
         analyze_session_close(session)
     except ImportError:
         pass
     # Audit: session close with financial snapshot
     try:
         BookingSignature.log(
-            request, 'logout',
+            request,
+            "logout",
             target_obj=session,
-            target_repr=f'Close POS: {session.terminal.name} #{session.session_number}',
+            target_repr=f"Close POS: {session.terminal.name} #{session.session_number}",
             changes={
-                'opening_cash': str(session.opening_cash),
-                'closing_cash': str(session.closing_cash),
-                'total_receipts': session.receipts.filter(status='paid').count(),
-                'status': session.status,
-            }
+                "opening_cash": str(session.opening_cash),
+                "closing_cash": str(session.closing_cash),
+                "total_receipts": session.receipts.filter(status="paid").count(),
+                "status": session.status,
+            },
         )
     except DatabaseError:
         pass
-    return redirect('pos:session_detail', session_id=session.pk)
+    return redirect("pos:session_detail", session_id=session.pk)
 
 
 @login_required
@@ -300,35 +363,41 @@ def new_receipt(request, session_id):
     # select_for_update: serializes receipt creation per session (race condition fix)
     session = get_object_or_404(POSSession.objects.select_for_update(), pk=session_id)
     if session.status != POSSession.Status.OPEN:
-        messages.error(request, _('Ova smjena je zatvorena. Otvorite novu smjenu za nastavak rada.'))
-        return redirect('pos:session_detail', session_id=session_id)
+        messages.error(request, _("Ova smjena je zatvorena. Otvorite novu smjenu za nastavak rada."))
+        return redirect("pos:session_detail", session_id=session_id)
     from django.db.models import Max
-    max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
+
+    max_num = session.receipts.aggregate(m=Max("receipt_number"))["m"] or 0
     next_num = max_num + 1
     receipt = POSReceipt.objects.create(
-        session=session, receipt_number=next_num,
-        table_number=request.POST.get('table_number', ''),
-        note=request.POST.get('note', ''),
+        session=session,
+        receipt_number=next_num,
+        table_number=request.POST.get("table_number", ""),
+        note=request.POST.get("note", ""),
     )
-    return redirect('pos:receipt_detail', receipt_id=receipt.pk)
+    return redirect("pos:receipt_detail", receipt_id=receipt.pk)
 
 
 @login_required
 def receipt_detail(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
-    items = receipt.items.select_related('inventory_item').all()
+    items = receipt.items.select_related("inventory_item").all()
     company = receipt.session.terminal.company  # Fix: koristi company iz terminala
-    inventory_items = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate').order_by('name')[:300] if company else InventoryItem.objects.none()
+    inventory_items = (
+        InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate").order_by("name")[:300]
+        if company
+        else InventoryItem.objects.none()
+    )
 
     # Top 12 najprodavanijih artikala za brze tipke
     from django.db.models import Count
+
     top_item_ids = (
-        POSReceiptItem.objects
-        .filter(receipt__session__terminal__company=company)
-        .values('inventory_item_id')
-        .annotate(cnt=Count('id'))
-        .order_by('-cnt')
-        .values_list('inventory_item_id', flat=True)[:12]
+        POSReceiptItem.objects.filter(receipt__session__terminal__company=company)
+        .values("inventory_item_id")
+        .annotate(cnt=Count("id"))
+        .order_by("-cnt")
+        .values_list("inventory_item_id", flat=True)[:12]
     )
     quick_items = []
     if top_item_ids:
@@ -339,15 +408,24 @@ def receipt_detail(request, receipt_id):
     # Ako nema dovoljno prodanih, dopuni abecedno
     if len(quick_items) < 12:
         existing_ids = {i.pk for i in quick_items}
-        filler = InventoryItem.objects.filter(company=company, is_active=True).exclude(pk__in=existing_ids).order_by('name')[:12 - len(quick_items)]
+        filler = (
+            InventoryItem.objects.filter(company=company, is_active=True)
+            .exclude(pk__in=existing_ids)
+            .order_by("name")[: 12 - len(quick_items)]
+        )
         quick_items.extend(filler)
 
-    return render(request, 'pos/receipt.html', {
-        'receipt': receipt, 'items': items,
-        'inventory_items': inventory_items,
-        'quick_items': quick_items,
-        'payment_methods': POSPaymentLine.Method.choices,
-    })
+    return render(
+        request,
+        "pos/receipt.html",
+        {
+            "receipt": receipt,
+            "items": items,
+            "inventory_items": inventory_items,
+            "quick_items": quick_items,
+            "payment_methods": POSPaymentLine.Method.choices,
+        },
+    )
 
 
 @login_required
@@ -355,32 +433,44 @@ def receipt_detail(request, receipt_id):
 def add_item(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     if receipt.status != POSReceipt.Status.OPEN:
-        messages.warning(request, _('Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+        messages.warning(request, _("Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
     try:
-        quantity = Decimal(request.POST.get('quantity', '1') or '1')
-        unit_price = Decimal(request.POST.get('unit_price', '0') or '0')
-        tax_rate = Decimal(request.POST.get('tax_rate', '25') or '25')
-        discount_pct = Decimal(request.POST.get('discount_percent', '0') or '0')
+        quantity = Decimal(request.POST.get("quantity", "1") or "1")
+        unit_price = Decimal(request.POST.get("unit_price", "0") or "0")
+        tax_rate = Decimal(request.POST.get("tax_rate", "25") or "25")
+        discount_pct = Decimal(request.POST.get("discount_percent", "0") or "0")
     except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
-        messages.error(request, _('Neispravan broj. Provjerite količinu i cijenu.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
-    description = request.POST.get('description', '').strip()
-    barcode = request.POST.get('barcode', '').strip()
-    inventory_id = request.POST.get('inventory_item_id', '').strip()
-    kwargs = dict(receipt=receipt, description=description, quantity=quantity,
-                  unit_price=unit_price, tax_rate=tax_rate, discount_percent=discount_pct, barcode=barcode)
+        messages.error(request, _("Neispravan broj. Provjerite količinu i cijenu."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
+    description = request.POST.get("description", "").strip()
+    barcode = request.POST.get("barcode", "").strip()
+    inventory_id = request.POST.get("inventory_item_id", "").strip()
+    kwargs = dict(
+        receipt=receipt,
+        description=description,
+        quantity=quantity,
+        unit_price=unit_price,
+        tax_rate=tax_rate,
+        discount_percent=discount_pct,
+        barcode=barcode,
+    )
     if inventory_id:
         try:
             inv = InventoryItem.objects.get(pk=inventory_id)
-            kwargs['inventory_item'] = inv
-            if not description: kwargs['description'] = inv.name
-            if not barcode: kwargs['barcode'] = inv.barcode or ''
-            if unit_price == 0: kwargs['unit_price'] = inv.unit_price or Decimal('0')
+            kwargs["inventory_item"] = inv
+            if not description:
+                kwargs["description"] = inv.name
+            if not barcode:
+                kwargs["barcode"] = inv.barcode or ""
+            if unit_price == 0:
+                kwargs["unit_price"] = inv.unit_price or Decimal("0")
             if inv.tax_rate_id:
-                try: kwargs['tax_rate'] = inv.tax_rate.rate
-                except Exception: pass
+                try:
+                    kwargs["tax_rate"] = inv.tax_rate.rate
+                except Exception:
+                    pass
 
             # ── KARENCA HARD BLOCK (LOT-level preciznost) ───────────
             # Zakon o higijeni hrane: proizvodi iz jata pod aktivnom
@@ -388,24 +478,25 @@ def add_item(request, receipt_id):
             # Blokada ide po StockBatch (LOT), NE po cijelom artiklu.
             # Jato A pod karencom ≠ blokada jaja iz Jata B.
             # ────────────────────────────────────────────────────────
-            batch_id = request.POST.get('stock_batch_id', '').strip()
+            batch_id = request.POST.get("stock_batch_id", "").strip()
             karenca_blocked = False
 
             # Provjera 1: Ako je odabran specifični LOT/batch
             if batch_id:
                 try:
                     from inventory.models import StockBatch
-                    batch = StockBatch.objects.select_related('source_flock').get(pk=int(batch_id))
+
+                    batch = StockBatch.objects.select_related("source_flock").get(pk=int(batch_id))
                     if batch.source_flock and batch.source_flock.has_active_karenca:
                         flock = batch.source_flock
                         karenca_end = flock.karenca_end_date
-                        end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
+                        end_str = karenca_end.strftime("%d.%m.%Y") if karenca_end else "?"
                         messages.error(
                             request,
-                            f'ZABRANJENO: LOT {batch.batch_number} dolazi iz jata '
+                            f"ZABRANJENO: LOT {batch.batch_number} dolazi iz jata "
                             f'"{flock.naziv}" koje je pod aktivnom karencom do {end_str}. '
-                            f'Odaberite LOT iz drugog jata ili pričekajte istek karence. '
-                            f'(Zakon o higijeni hrane)'
+                            f"Odaberite LOT iz drugog jata ili pričekajte istek karence. "
+                            f"(Zakon o higijeni hrane)",
                         )
                         karenca_blocked = True
                 except (ValueError, TypeError):
@@ -417,47 +508,44 @@ def add_item(request, receipt_id):
                     flock = inv.source_flock
                     if flock and flock.has_active_karenca:
                         karenca_end = flock.karenca_end_date
-                        end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
+                        end_str = karenca_end.strftime("%d.%m.%Y") if karenca_end else "?"
                         # Provjeri ima li DRUGIH LOT-ova koji NISU pod karencom
                         from inventory.models import StockBatch
+
                         safe_lots = StockBatch.objects.filter(
-                            item=inv, quarantine_status='active', quantity__gt=0
-                        ).exclude(
-                            source_flock__in=flock.__class__.objects.filter(
-                                pk=flock.pk
-                            )
-                        )
+                            item=inv, quarantine_status="active", quantity__gt=0
+                        ).exclude(source_flock__in=flock.__class__.objects.filter(pk=flock.pk))
                         if safe_lots.exists():
-                            lot_names = ', '.join(safe_lots.values_list('batch_number', flat=True)[:5])
+                            lot_names = ", ".join(safe_lots.values_list("batch_number", flat=True)[:5])
                             messages.warning(
                                 request,
                                 f'UPOZORENJE: Jato "{flock.naziv}" pod karencom do {end_str}. '
-                                f'Ali postoje LOT-ovi iz drugih jata: {lot_names}. '
-                                f'Odaberite ispravan LOT pri prodaji.'
+                                f"Ali postoje LOT-ovi iz drugih jata: {lot_names}. "
+                                f"Odaberite ispravan LOT pri prodaji.",
                             )
                         else:
                             messages.error(
                                 request,
                                 f'ZABRANJENO: Svi LOT-ovi artikla "{inv.name}" dolaze iz '
-                                f'jata pod karencom (do {end_str}). Prodaja nije dozvoljena.'
+                                f"jata pod karencom (do {end_str}). Prodaja nije dozvoljena.",
                             )
                             karenca_blocked = True
                 except DatabaseError:
                     pass
 
             if karenca_blocked:
-                return redirect('pos:receipt_detail', receipt_id=receipt_id)
+                return redirect("pos:receipt_detail", receipt_id=receipt_id)
         except InventoryItem.DoesNotExist:
             pass
-    if not kwargs.get('description'):
-        messages.error(request, _('Unesite naziv artikla.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
-    item = POSReceiptItem.objects.create(**kwargs)
+    if not kwargs.get("description"):
+        messages.error(request, _("Unesite naziv artikla."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
+    POSReceiptItem.objects.create(**kwargs)
     _recalculate(receipt)
 
     # ── Korisnicke poruke ──
-    desc = kwargs.get('description', 'Artikl')
-    messages.success(request, _('{d} x{q} dodano na bon.').format(d=desc, q=quantity))
+    desc = kwargs.get("description", "Artikl")
+    messages.success(request, _("{d} x{q} dodano na bon.").format(d=desc, q=quantity))
 
     # ── Stock upozorenje ──
     if inventory_id:
@@ -466,19 +554,28 @@ def add_item(request, receipt_id):
             stock = inv_item.quantity or 0
             min_qty = inv_item.min_quantity or 0
             if stock <= 0:
-                messages.warning(request, _('{d} — zaliha je 0! Nastavite samo ako imate robu fizički na lageru.').format(d=desc))
+                messages.warning(
+                    request, _("{d} — zaliha je 0! Nastavite samo ako imate robu fizički na lageru.").format(d=desc)
+                )
             elif min_qty > 0 and stock <= min_qty:
-                messages.warning(request, _('Niska zaliha: {d} — preostalo {s} {u}. Naručite novu količinu.').format(d=desc, s=stock, u=inv_item.unit))
+                messages.warning(
+                    request,
+                    _("Niska zaliha: {d} — preostalo {s} {u}. Naručite novu količinu.").format(
+                        d=desc, s=stock, u=inv_item.unit
+                    ),
+                )
             # Upozorenje za visok rabat
             if discount_pct > 20:
-                messages.info(request, _('Popust {p}%% na {d}. Provjerite je li ispravan.').format(p=discount_pct, d=desc))
+                messages.info(
+                    request, _("Popust {p}%% na {d}. Provjerite je li ispravan.").format(p=discount_pct, d=desc)
+                )
             # Upozorenje za 0 cijenu
-            if kwargs.get('unit_price', 0) == 0:
-                messages.warning(request, _('Cijena za {d} je 0.00 EUR — provjerite je li ispravna.').format(d=desc))
+            if kwargs.get("unit_price", 0) == 0:
+                messages.warning(request, _("Cijena za {d} je 0.00 EUR — provjerite je li ispravna.").format(d=desc))
         except ObjectDoesNotExist:
             pass
 
-    return redirect('pos:receipt_detail', receipt_id=receipt_id)
+    return redirect("pos:receipt_detail", receipt_id=receipt_id)
 
 
 @login_required
@@ -487,12 +584,13 @@ def remove_item(request, receipt_id, item_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     item = get_object_or_404(POSReceiptItem, pk=item_id, receipt=receipt)
     if receipt.status != POSReceipt.Status.OPEN:
-        messages.warning(request, _('Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
-    item_name = item.description or 'Artikl'
-    item.delete(); _recalculate(receipt)
-    messages.success(request, _('{n} uklonjen s bona.').format(n=item_name))
-    return redirect('pos:receipt_detail', receipt_id=receipt_id)
+        messages.warning(request, _("Ovaj bon je zatvoren. Kreirajte novi bon za novu prodaju."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
+    item_name = item.description or "Artikl"
+    item.delete()
+    _recalculate(receipt)
+    messages.success(request, _("{n} uklonjen s bona.").format(n=item_name))
+    return redirect("pos:receipt_detail", receipt_id=receipt_id)
 
 
 @login_required
@@ -500,67 +598,75 @@ def remove_item(request, receipt_id, item_id):
 @transaction.atomic
 def process_payment(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
-    if receipt.status not in [POSReceipt.Status.OPEN, 'ISSUED']:
-        messages.warning(request, _('Ovaj bon je već zatvoren. Kreirajte novi bon.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+    if receipt.status not in [POSReceipt.Status.OPEN, "ISSUED"]:
+        messages.warning(request, _("Ovaj bon je već zatvoren. Kreirajte novi bon."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
     if not receipt.items.exists():
-        messages.error(request, _('Bon je prazan. Dodajte artikle prije naplate — skenirajte ili pretražite.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+        messages.error(request, _("Bon je prazan. Dodajte artikle prije naplate — skenirajte ili pretražite."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
     if receipt.total <= 0:
-        messages.warning(request, _('Ukupan iznos je 0.00 EUR. Provjerite stavke na bonu.'))
+        messages.warning(request, _("Ukupan iznos je 0.00 EUR. Provjerite stavke na bonu."))
     # Multi-cashier
-    cashier_id = request.POST.get('cashier_id')
+    cashier_id = request.POST.get("cashier_id")
     if cashier_id and not receipt.cashier_id:
         from pos.models import POSCashier
+
         company = receipt.session.terminal.company
-        cashier_obj = POSCashier.objects.filter(id=cashier_id, company=company, is_active=True).select_related("company", "user").first()
+        cashier_obj = (
+            POSCashier.objects.filter(id=cashier_id, company=company, is_active=True)
+            .select_related("company", "user")
+            .first()
+        )
         if cashier_obj:
             receipt.cashier = cashier_obj
-            receipt.save(update_fields=['cashier'])
+            receipt.save(update_fields=["cashier"])
             receipt.session.active_cashiers.add(cashier_obj)
 
-    method = request.POST.get('payment_method', POSPaymentLine.Method.CASH)
+    method = request.POST.get("payment_method", POSPaymentLine.Method.CASH)
     try:
-        amount_paid = Decimal(request.POST.get('amount_paid', str(receipt.total)) or str(receipt.total))
+        amount_paid = Decimal(request.POST.get("amount_paid", str(receipt.total)) or str(receipt.total))
     except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
         amount_paid = receipt.total
     amount_paid = max(amount_paid, receipt.total)  # never less than total
-    change = max(Decimal('0'), amount_paid - receipt.total)
+    change = max(Decimal("0"), amount_paid - receipt.total)
     with transaction.atomic():
         POSPaymentLine.objects.create(receipt=receipt, method=method, amount=receipt.total, change_given=change)
         receipt.status = POSReceipt.Status.PAID
         receipt.paid_at = now()
-        receipt.save(update_fields=['status', 'paid_at'])
+        receipt.save(update_fields=["status", "paid_at"])
         # Smanji zalihu (direktan artikl)
         from inventory.models import StockMovement as _SM
-        for _pitem in receipt.items.select_related('inventory_item').all():
+
+        for _pitem in receipt.items.select_related("inventory_item").all():
             if _pitem.inventory_item_id:
                 _SM.objects.create(
                     item_id=_pitem.inventory_item_id,
-                    movement_type='out',
+                    movement_type="out",
                     quantity=_pitem.quantity,
                     unit_price=_pitem.unit_price,
-                    reason=f'POS bon #{receipt.receipt_number}',
+                    reason=f"POS bon #{receipt.receipt_number}",
                     performed_by=request.user,
                 )
                 # BOM auto-deduction: ako artikl ima aktivnu sastavnicu
                 try:
                     from calculator.models import BOM as _BOM
-                    _boms = _BOM.objects.filter(company=receipt.session.terminal.company,
+
+                    _boms = _BOM.objects.filter(
+                        company=receipt.session.terminal.company,
                         article_id=_pitem.inventory_item_id,
                         is_active=True,
-                    ).prefetch_related('items__material')
+                    ).prefetch_related("items__material")
                     for _bom in _boms:
                         _sold_qty = _pitem.quantity / (_bom.yield_quantity or 1)
-                        for _bi in _bom.items.select_related('material').all():
+                        for _bi in _bom.items.select_related("material").all():
                             _deduct = _bi.net_quantity * _sold_qty
                             _SM.objects.create(
                                 item=_bi.material,
-                                movement_type='out',
+                                movement_type="out",
                                 quantity=_deduct,
                                 unit_price=_bi.material.purchase_price,
-                                reason=f'BOM — POS bon #{receipt.receipt_number}',
+                                reason=f"BOM — POS bon #{receipt.receipt_number}",
                                 performed_by=request.user,
                             )
                 except (IntegrityError, DatabaseError):
@@ -569,25 +675,32 @@ def process_payment(request, receipt_id):
     # ── Fiskalizacija (ne blokira plaćanje ako FINA ne odgovori) ──────────────
     try:
         from fiscal.service import fiscalize_pos_receipt
+
         jir = fiscalize_pos_receipt(receipt)
         if jir:
-            messages.success(request,
-                f'Bon #{receipt.receipt_number} plaćen i fiskaliziran. '
-                f'JIR: {jir[:8]}… | Kusur: €{change:.2f}')
+            messages.success(
+                request, f"Bon #{receipt.receipt_number} plaćen i fiskaliziran. JIR: {jir[:8]}… | Kusur: €{change:.2f}"
+            )
         else:
-            messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
+            messages.success(request, _("Bon #{n} plaćen! Kusur: €{c:.2f}").format(n=receipt.receipt_number, c=change))
     except ImportError as _fisk_err:
-        logger.warning(f'Fiskalizacija bon #{receipt.receipt_number}: {_fisk_err}')
-        messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
-        messages.warning(request, f'Fiskalizacija nije uspjela: {str(_fisk_err)[:120]}')
+        logger.warning(f"Fiskalizacija bon #{receipt.receipt_number}: {_fisk_err}")
+        messages.success(request, _("Bon #{n} plaćen! Kusur: €{c:.2f}").format(n=receipt.receipt_number, c=change))
+        messages.warning(request, f"Fiskalizacija nije uspjela: {str(_fisk_err)[:120]}")
 
     # Audit: payment/fiscal
     try:
-        BookingSignature.log(request, 'fiscal', target_model='POSReceipt', target_id=str(receipt_id), target_repr=f'Receipt #{receipt_id}')
+        BookingSignature.log(
+            request,
+            "fiscal",
+            target_model="POSReceipt",
+            target_id=str(receipt_id),
+            target_repr=f"Receipt #{receipt_id}",
+        )
     except (ValueError, TypeError):
         pass
 
-    return redirect('pos:session_detail', session_id=receipt.session_id)
+    return redirect("pos:session_detail", session_id=receipt.session_id)
 
 
 @login_required
@@ -595,43 +708,47 @@ def process_payment(request, receipt_id):
 def cancel_receipt(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     if receipt.status == POSReceipt.Status.PAID:
-        messages.error(request, _('Plaćeni bon se ne može stornirati.'))
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+        messages.error(request, _("Plaćeni bon se ne može stornirati."))
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
     # PIN provjera za storno (ako postoji cashier s can_void)
     from .models import POSCashier
-    pin = request.POST.get('pin', '').strip()
+
+    pin = request.POST.get("pin", "").strip()
     company = receipt.session.terminal.company
-    cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True).select_related("company", "user")
+    cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True).select_related(
+        "company", "user"
+    )
     if cashiers_with_void.exists():
         if not pin:
-            messages.error(request, _('PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika.'))
-            return redirect('pos:receipt_detail', receipt_id=receipt_id)
+            messages.error(request, _("PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika."))
+            return redirect("pos:receipt_detail", receipt_id=receipt_id)
         pin_ok = any(c.check_pin(pin) for c in cashiers_with_void)
         if not pin_ok:
-            messages.error(request, _('Neispravan PIN. Storno odbijen.'))
-            return redirect('pos:receipt_detail', receipt_id=receipt_id)
-    reason = request.POST.get('cancel_reason', '').strip()[:200]
+            messages.error(request, _("Neispravan PIN. Storno odbijen."))
+            return redirect("pos:receipt_detail", receipt_id=receipt_id)
+    reason = request.POST.get("cancel_reason", "").strip()[:200]
     receipt.status = POSReceipt.Status.CANCELLED
     receipt.cancel_reason = reason
-    receipt.save(update_fields=['status', 'cancel_reason'])
+    receipt.save(update_fields=["status", "cancel_reason"])
     # Audit: POS storno
     try:
         BookingSignature.log(
-            request, 'storno',
+            request,
+            "storno",
             target_obj=receipt,
-            target_repr=f'Storno bon #{receipt.global_number or receipt.receipt_number}',
+            target_repr=f"Storno bon #{receipt.global_number or receipt.receipt_number}",
             changes={
-                'receipt_number': receipt.receipt_number,
-                'global_number': receipt.global_number,
-                'total': str(receipt.total),
-                'reason': reason,
-                'workspace': str(receipt.session.terminal.workspace) if receipt.session.terminal.workspace else None,
+                "receipt_number": receipt.receipt_number,
+                "global_number": receipt.global_number,
+                "total": str(receipt.total),
+                "reason": reason,
+                "workspace": str(receipt.session.terminal.workspace) if receipt.session.terminal.workspace else None,
             },
         )
     except (ValueError, TypeError):
         pass
-    messages.warning(request, f'Bon #{receipt.receipt_number} storniran.' + (f' Razlog: {reason}' if reason else ''))
-    return redirect('pos:session_detail', session_id=receipt.session_id)
+    messages.warning(request, f"Bon #{receipt.receipt_number} storniran." + (f" Razlog: {reason}" if reason else ""))
+    return redirect("pos:session_detail", session_id=receipt.session_id)
 
 
 @require_POST
@@ -643,9 +760,9 @@ def receipt_update_buyer(request, receipt_id):
     if err:
         return err
 
-    buyer_oib = request.POST.get('buyer_oib', '').strip()[:13]
-    buyer_name = request.POST.get('buyer_name', '').strip()[:200]
-    buyer_address = request.POST.get('buyer_address', '').strip()[:300]
+    buyer_oib = request.POST.get("buyer_oib", "").strip()[:13]
+    buyer_name = request.POST.get("buyer_name", "").strip()[:200]
+    buyer_address = request.POST.get("buyer_address", "").strip()[:300]
 
     # OIB mod11 validation (if provided and looks like HR OIB)
     if buyer_oib and len(buyer_oib) == 11 and buyer_oib.isdigit():
@@ -657,16 +774,16 @@ def receipt_update_buyer(request, receipt_id):
             a = (a * 2) % 11
         ctrl = (11 - a) % 10
         if ctrl != int(buyer_oib[10]):
-            return JsonResponse({'error': 'Neispravan OIB (kontrolna znamenka)'}, status=400)
+            return JsonResponse({"error": "Neispravan OIB (kontrolna znamenka)"}, status=400)
 
     receipt.buyer_oib = buyer_oib
     receipt.buyer_name = buyer_name
     receipt.buyer_address = buyer_address
     if buyer_oib:
         receipt.is_r1 = True
-    receipt.save(update_fields=['buyer_oib', 'buyer_name', 'buyer_address', 'is_r1'])
+    receipt.save(update_fields=["buyer_oib", "buyer_name", "buyer_address", "is_r1"])
 
-    return JsonResponse({'ok': True, 'buyer_oib': receipt.buyer_oib, 'is_r1': receipt.is_r1})
+    return JsonResponse({"ok": True, "buyer_oib": receipt.buyer_oib, "is_r1": receipt.is_r1})
 
 
 def ai_barcode_lookup(request):
@@ -674,229 +791,314 @@ def ai_barcode_lookup(request):
     import json
     import os
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError) as e:
         logger.debug("Exception in pos.views:%d: %s", 447, e)  # BORG
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    code = data.get('code', '').strip()
-    image = data.get('image', '')
+    data.get("code", "").strip()
+    image = data.get("image", "")
 
     if not image:
-        return JsonResponse({'code': '', 'name': '', 'note': 'Nema slike'})
+        return JsonResponse({"code": "", "name": "", "note": "Nema slike"})
 
     # Gemini Vision — bolji za barkodove i prepoznavanje proizvoda
-    api_key = os.environ.get('GEMINI_API_KEY', '')
+    api_key = os.environ.get("GEMINI_API_KEY", "")
     if api_key:
         try:
             from google import genai
+
             client = genai.Client(api_key=api_key)
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=[{
-                    'role': 'user',
-                    'parts': [
-                        {'text': (
-                            'Analiziraj ovu sliku proizvoda iz trgovine. '
-                            'Trebam:\n'
-                            '1. BARKOD — procitaj EAN/UPC barkod ako je vidljiv (brojevi ispod crta)\n'
-                            '2. NAZIV — prepoznaj koji je proizvod (proizvodac + naziv + gramaza)\n'
-                            '3. CIJENA — procijeni maloprodajnu cijenu u EUR ako mozes\n'
-                            '4. KATEGORIJA — food, drink, dessert ili special\n'
-                            '\n'
-                            'Odgovori SAMO u JSON formatu:\n'
-                            '{"code": "1234567890123", "name": "Proizvod 500g", "price": 2.50, "category": "food"}\n'
-                            '\n'
-                            'Ako ne vidis barkod, ostavi code prazan ali svejedno prepoznaj proizvod.\n'
-                            'Ako ne mozes nista prepoznati, vrati: {"code": "", "name": "", "price": 0, "category": "food"}'
-                        )},
-                        {'inline_data': {'mime_type': 'image/jpeg', 'data': image}},
-                    ],
-                }],
+                model="gemini-2.5-flash",
+                contents=[
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": (
+                                    "Analiziraj ovu sliku proizvoda iz trgovine. "
+                                    "Trebam:\n"
+                                    "1. BARKOD — procitaj EAN/UPC barkod ako je vidljiv (brojevi ispod crta)\n"
+                                    "2. NAZIV — prepoznaj koji je proizvod (proizvodac + naziv + gramaza)\n"
+                                    "3. CIJENA — procijeni maloprodajnu cijenu u EUR ako mozes\n"
+                                    "4. KATEGORIJA — food, drink, dessert ili special\n"
+                                    "\n"
+                                    "Odgovori SAMO u JSON formatu:\n"
+                                    '{"code": "1234567890123", "name": "Proizvod 500g", "price": 2.50, "category": "food"}\n'
+                                    "\n"
+                                    "Ako ne vidis barkod, ostavi code prazan ali svejedno prepoznaj proizvod.\n"
+                                    'Ako ne mozes nista prepoznati, vrati: {"code": "", "name": "", "price": 0, "category": "food"}'
+                                )
+                            },
+                            {"inline_data": {"mime_type": "image/jpeg", "data": image}},
+                        ],
+                    }
+                ],
             )
             text = response.text.strip()
-            if text.startswith('```'):
-                text = text.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+            if text.startswith("```"):
+                text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
             result = json.loads(text)
 
-            ai_code = str(result.get('code', '')).strip()
-            ai_name = str(result.get('name', '')).strip()
-            ai_price = result.get('price', 0)
-            ai_category = result.get('category', 'food')
+            ai_code = str(result.get("code", "")).strip()
+            ai_name = str(result.get("name", "")).strip()
+            ai_price = result.get("price", 0)
+            ai_category = result.get("category", "food")
 
             # Ako je AI procitao barkod, probaj naci u bazi
             if ai_code:
                 company = get_user_company(request)
                 if company:
                     from inventory.models import InventoryItem
+
                     try:
                         item = InventoryItem.objects.get(barcode=ai_code, company=company, is_active=True)
                         tax_val = 25
                         if item.tax_rate_id:
-                            try: tax_val = float(item.tax_rate.rate)
+                            try:
+                                tax_val = float(item.tax_rate.rate)
                             except Exception as e:  # BORG: was bare except pass
                                 logger.debug("Exception in pos.views:%d: %s", 505, e)  # BORG
-                        return JsonResponse({
-                            'found': True, 'code': ai_code, 'name': item.name,
-                            'id': str(item.pk), 'price': str(item.unit_price), 'tax_rate': tax_val
-                        })
+                        return JsonResponse(
+                            {
+                                "found": True,
+                                "code": ai_code,
+                                "name": item.name,
+                                "id": str(item.pk),
+                                "price": str(item.unit_price),
+                                "tax_rate": tax_val,
+                            }
+                        )
                     except InventoryItem.DoesNotExist:
                         pass
 
-            return JsonResponse({
-                'code': ai_code, 'name': ai_name,
-                'price': ai_price, 'category': ai_category,
-            })
+            return JsonResponse(
+                {
+                    "code": ai_code,
+                    "name": ai_name,
+                    "price": ai_price,
+                    "category": ai_category,
+                }
+            )
 
         except (ValueError, TypeError) as e:
-            logger.warning('Gemini barcode failed: %s', e)
+            logger.warning("Gemini barcode failed: %s", e)
 
     # Fallback Claude Haiku
-    anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if anthropic_key and image:
         try:
             import anthropic
+
             client = anthropic.Anthropic(api_key=anthropic_key)
             resp = client.messages.create(
-                model='claude-haiku-4-5-20251001',
+                model="claude-haiku-4-5-20251001",
                 max_tokens=300,
-                messages=[{
-                    'role': 'user',
-                    'content': [
-                        {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': image}},
-                        {'type': 'text', 'text': (
-                            'Prepoznaj proizvod na slici. Vrati JSON: '
-                            '{"code": "barkod ako vidis", "name": "naziv proizvoda", "price": cijena, "category": "food/drink/dessert/special"}'
-                        )}
-                    ]
-                }]
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": image}},
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Prepoznaj proizvod na slici. Vrati JSON: "
+                                    '{"code": "barkod ako vidis", "name": "naziv proizvoda", "price": cijena, "category": "food/drink/dessert/special"}'
+                                ),
+                            },
+                        ],
+                    }
+                ],
             )
             text = resp.content[0].text.strip()
-            if text.startswith('```'):
-                text = text.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+            if text.startswith("```"):
+                text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
             return JsonResponse(json.loads(text))
         except (json.JSONDecodeError, ValueError) as e:
-            logger.warning('Claude barcode failed: %s', e)
+            logger.warning("Claude barcode failed: %s", e)
 
-    return JsonResponse({'code': '', 'name': '', 'price': 0, 'category': 'food'})
+    return JsonResponse({"code": "", "name": "", "price": 0, "category": "food"})
 
 
 def barcode_lookup(request):
-    barcode = request.GET.get('barcode', '').strip()
+    barcode = request.GET.get("barcode", "").strip()
     if not barcode:
-        return JsonResponse({'found': False})
+        return JsonResponse({"found": False})
     try:
         item = InventoryItem.objects.get(barcode=barcode, is_active=True, company=company)
         tax_rate_val = 25
         if item.tax_rate_id:
-            try: tax_rate_val = float(item.tax_rate.rate)
-            except Exception: pass
-        return JsonResponse({'found': True, 'id': str(item.pk), 'name': item.name,
-                             'unit': item.unit, 'price': str(item.unit_price), 'tax_rate': str(tax_rate_val)})
+            try:
+                tax_rate_val = float(item.tax_rate.rate)
+            except Exception:
+                pass
+        return JsonResponse(
+            {
+                "found": True,
+                "id": str(item.pk),
+                "name": item.name,
+                "unit": item.unit,
+                "price": str(item.unit_price),
+                "tax_rate": str(tax_rate_val),
+            }
+        )
     except InventoryItem.DoesNotExist:
-        return JsonResponse({'found': False})
+        return JsonResponse({"found": False})
+
 
 @login_required
 def new_terminal(request):
     """Create a new POS terminal — 3-step wizard: Tax rates → Cashier → Type = GO."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('pos:dashboard')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("pos:dashboard")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         import secrets
         from decimal import Decimal
 
-        pos_type = request.POST.get('pos_type', 'quick').strip()
-        if pos_type not in ('quick', 'retail', 'restaurant', 'field', 'service', 'reception'):
-            pos_type = 'quick'
+        pos_type = request.POST.get("pos_type", "quick").strip()
+        if pos_type not in ("quick", "retail", "restaurant", "field", "service", "reception"):
+            pos_type = "quick"
 
         # Cashier
-        cashier_first = request.POST.get('cashier_first', '').strip()
-        cashier_last = request.POST.get('cashier_last', '').strip()
-        cashier_name = f'{cashier_first} {cashier_last}'.strip() or 'Blagajnik'
-        cashier_oib = request.POST.get('cashier_oib', '').strip()
-        cashier_pin = request.POST.get('cashier_pin', '').strip()
-        opening_cash = Decimal(request.POST.get('opening_cash', '0') or '0')
+        cashier_first = request.POST.get("cashier_first", "").strip()
+        cashier_last = request.POST.get("cashier_last", "").strip()
+        cashier_name = f"{cashier_first} {cashier_last}".strip() or "Blagajnik"
+        cashier_oib = request.POST.get("cashier_oib", "").strip()
+        cashier_pin = request.POST.get("cashier_pin", "").strip()
+        opening_cash = Decimal(request.POST.get("opening_cash", "0") or "0")
 
         cashier = POSCashier.objects.create(
-            company=company, name=cashier_name, oib=cashier_oib,
+            company=company,
+            name=cashier_name,
+            oib=cashier_oib,
         )
-        if cashier_pin and hasattr(cashier, 'set_pin'):
+        if cashier_pin and hasattr(cashier, "set_pin"):
             cashier.set_pin(cashier_pin)
             cashier.save()
 
         # Terminal
-        type_labels = {'quick': 'Brza blagajna', 'retail': 'Maloprodaja', 'restaurant': 'Restoran',
-                      'field': 'Terenska', 'service': 'Usluge', 'reception': 'Recepcija'}
-        terminal_code = f'{pos_type[:3].upper()}{secrets.token_hex(2).upper()}'
-        count = POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").count() + 1
+        type_labels = {
+            "quick": "Brza blagajna",
+            "retail": "Maloprodaja",
+            "restaurant": "Restoran",
+            "field": "Terenska",
+            "service": "Usluge",
+            "reception": "Recepcija",
+        }
+        terminal_code = f"{pos_type[:3].upper()}{secrets.token_hex(2).upper()}"
+        count = (
+            POSTerminal.objects.filter(company=company)
+            .select_related("company", "workspace", "business_location")
+            .count()
+            + 1
+        )
         terminal = POSTerminal.objects.create(
             company=company,
-            name=f'{type_labels.get(pos_type, "Blagajna")} {count}',
+            name=f"{type_labels.get(pos_type, 'Blagajna')} {count}",
             terminal_code=terminal_code,
-            pos_type=pos_type, is_active=True,
+            pos_type=pos_type,
+            is_active=True,
         )
 
         # Open session
         session = POSSession.objects.create(
-            terminal=terminal, operator=request.user,
-            session_number=1, opening_cash=opening_cash,
-            status='open',
+            terminal=terminal,
+            operator=request.user,
+            session_number=1,
+            opening_cash=opening_cash,
+            status="open",
         )
         session.active_cashiers.add(cashier)
 
         messages.success(request, f'POS "{terminal.name}" spreman!')
 
-        if pos_type == 'restaurant':
-            return redirect('pos:restaurant_pos', terminal_id=terminal.pk)
+        if pos_type == "restaurant":
+            return redirect("pos:restaurant_pos", terminal_id=terminal.pk)
         else:
-            return redirect('pos:quick_pos', terminal_id=terminal.pk)
+            return redirect("pos:quick_pos", terminal_id=terminal.pk)
 
     # GET — prepare wizard context
     from companies.models import TaxRate
-    country = getattr(company, 'country', 'HR') or 'HR'
+
+    country = getattr(company, "country", "HR") or "HR"
 
     # Auto-seed tax rates if missing
     if not TaxRate.objects.filter(country=country).exists():
-        if country in ('DE', 'AT'):
-            for name, rate in [('PDV 19% (Standard)', 19), ('PDV 7% (Snižena)', 7), ('PDV 0% (Oslobođeno)', 0)]:
-                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
-        elif country == 'SI':
-            for name, rate in [('DDV 22%', 22), ('DDV 9.5%', 9.5), ('Oproščeno', 0)]:
-                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+        if country in ("DE", "AT"):
+            for name, rate in [("PDV 19% (Standard)", 19), ("PDV 7% (Snižena)", 7), ("PDV 0% (Oslobođeno)", 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={"name": name})
+        elif country == "SI":
+            for name, rate in [("DDV 22%", 22), ("DDV 9.5%", 9.5), ("Oproščeno", 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={"name": name})
         else:
-            for name, rate in [('PDV 25%', 25), ('PDV 13%', 13), ('PDV 5%', 5), ('Oslobođeno 0%', 0)]:
-                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+            for name, rate in [("PDV 25%", 25), ("PDV 13%", 13), ("PDV 5%", 5), ("Oslobođeno 0%", 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={"name": name})
 
-    tax_rates = TaxRate.objects.filter(country=country).order_by('-rate')
+    tax_rates = TaxRate.objects.filter(country=country).order_by("-rate")
 
     pos_types = [
-        {'value': 'quick', 'label': 'Brza blagajna', 'icon': '⚡', 'color': '#c9a84c',
-         'desc': 'Najbrzi put do naplate. Idealno za pekare, kioske, market.'},
-        {'value': 'retail', 'label': 'Maloprodaja', 'icon': '🏪', 'color': '#60a5fa',
-         'desc': 'Barkod skener, kategorije, inventura. Za ducane i trgovine.'},
-        {'value': 'restaurant', 'label': 'Restoran', 'icon': '🍽️', 'color': '#f97316',
-         'desc': 'Stolovi, narudzbe, kuhinja (KDS). Za ugostitelje.'},
-        {'value': 'field', 'label': 'Terenska', 'icon': '🚚', 'color': '#22c55e',
-         'desc': 'Utovar, ruta, prodaja na terenu, povratnica.'},
-        {'value': 'service', 'label': 'Usluge', 'icon': '🔧', 'color': '#a78bfa',
-         'desc': 'Za servise, frizere, trenere. Satnica + usluga.'},
-        {'value': 'reception', 'label': 'Recepcija', 'icon': '🏨', 'color': '#f472b6',
-         'desc': 'Za hotele, apartmane, kampove.'},
+        {
+            "value": "quick",
+            "label": "Brza blagajna",
+            "icon": "⚡",
+            "color": "#c9a84c",
+            "desc": "Najbrzi put do naplate. Idealno za pekare, kioske, market.",
+        },
+        {
+            "value": "retail",
+            "label": "Maloprodaja",
+            "icon": "🏪",
+            "color": "#60a5fa",
+            "desc": "Barkod skener, kategorije, inventura. Za ducane i trgovine.",
+        },
+        {
+            "value": "restaurant",
+            "label": "Restoran",
+            "icon": "🍽️",
+            "color": "#f97316",
+            "desc": "Stolovi, narudzbe, kuhinja (KDS). Za ugostitelje.",
+        },
+        {
+            "value": "field",
+            "label": "Terenska",
+            "icon": "🚚",
+            "color": "#22c55e",
+            "desc": "Utovar, ruta, prodaja na terenu, povratnica.",
+        },
+        {
+            "value": "service",
+            "label": "Usluge",
+            "icon": "🔧",
+            "color": "#a78bfa",
+            "desc": "Za servise, frizere, trenere. Satnica + usluga.",
+        },
+        {
+            "value": "reception",
+            "label": "Recepcija",
+            "icon": "🏨",
+            "color": "#f472b6",
+            "desc": "Za hotele, apartmane, kampove.",
+        },
     ]
 
-    return render(request, 'pos/new_terminal.html', {
-        'company': company,
-        'pos_types': pos_types,
-        'tax_rates': tax_rates,
-        'country': country,
-    })
+    return render(
+        request,
+        "pos/new_terminal.html",
+        {
+            "company": company,
+            "pos_types": pos_types,
+            "tax_rates": tax_rates,
+            "country": country,
+        },
+    )
 
 
 @login_required
@@ -904,12 +1106,15 @@ def session_zreport(request, session_id):
     """Generate Z-report PDF for a closed session."""
     session = get_object_or_404(POSSession, pk=session_id)
     company, err = _check_tenant(request, session)
-    if err: return err
+    if err:
+        return err
     if session.status == POSSession.Status.OPEN:
-        messages.error(request, _('Smjena mora biti zatvorena prije generiranja Z-reporta.'))
-        return redirect('pos:session_detail', session_id=session_id)
+        messages.error(request, _("Smjena mora biti zatvorena prije generiranja Z-reporta."))
+        return redirect("pos:session_detail", session_id=session_id)
 
-    paid_receipts = list(session.receipts.filter(status=POSReceipt.Status.PAID).prefetch_related('items', 'payment_lines'))
+    paid_receipts = list(
+        session.receipts.filter(status=POSReceipt.Status.PAID).prefetch_related("items", "payment_lines")
+    )
     cancelled_receipts = session.receipts.filter(status=POSReceipt.Status.CANCELLED)
 
     # Payment method breakdown
@@ -917,7 +1122,7 @@ def session_zreport(request, session_id):
     for r in paid_receipts:
         for line in r.payment_lines.all():
             m = line.method
-            payment_breakdown[m] = payment_breakdown.get(m, Decimal('0')) + line.amount
+            payment_breakdown[m] = payment_breakdown.get(m, Decimal("0")) + line.amount
     method_labels = dict(POSPaymentLine.Method.choices)
     payment_rows = [(method_labels.get(m, m), amt) for m, amt in payment_breakdown.items()]
 
@@ -927,50 +1132,52 @@ def session_zreport(request, session_id):
         for item in r.items.all():
             rate = item.tax_rate if item.tax_rate is not None else Decimal("0")
             if rate not in tax_breakdown:
-                tax_breakdown[rate] = {'base': Decimal('0'), 'tax': Decimal('0'), 'total': Decimal('0')}
+                tax_breakdown[rate] = {"base": Decimal("0"), "tax": Decimal("0"), "total": Decimal("0")}
             net = item.quantity * item.unit_price * (1 - item.discount_percent / 100)
             tax = net * rate / 100
-            tax_breakdown[rate]['base'] += net
-            tax_breakdown[rate]['tax'] += tax
-            tax_breakdown[rate]['total'] += net + tax
+            tax_breakdown[rate]["base"] += net
+            tax_breakdown[rate]["tax"] += tax
+            tax_breakdown[rate]["total"] += net + tax
     tax_rows = sorted(tax_breakdown.items(), key=lambda x: x[0] if x[0] is not None else 0)
 
     # Mark as Z_DONE
     if session.status == POSSession.Status.CLOSED:
         session.status = POSSession.Status.Z_DONE
-        session.save(update_fields=['status'])
+        session.save(update_fields=["status"])
 
     # Cash deposits/withdrawals
     from .models import CashDeposit
-    deposits = CashDeposit.objects.filter(session=session).select_related('session').order_by('created_at')
-    total_deposits    = sum(d.amount for d in deposits if d.deposit_type == 'deposit')
-    total_withdrawals = sum(d.amount for d in deposits if d.deposit_type == 'withdrawal')
+
+    deposits = CashDeposit.objects.filter(session=session).select_related("session").order_by("created_at")
+    total_deposits = sum(d.amount for d in deposits if d.deposit_type == "deposit")
+    total_withdrawals = sum(d.amount for d in deposits if d.deposit_type == "withdrawal")
 
     ctx = {
-        'session': session,
-        'paid_count': len(paid_receipts),
-        'cancelled_count': cancelled_receipts.count(),
-        'payment_rows': payment_rows,
-        'tax_rows': tax_rows,
-        'company': session.terminal.company,
-        'deposits': deposits,
-        'total_deposits': total_deposits,
-        'total_withdrawals': total_withdrawals,
+        "session": session,
+        "paid_count": len(paid_receipts),
+        "cancelled_count": cancelled_receipts.count(),
+        "payment_rows": payment_rows,
+        "tax_rows": tax_rows,
+        "company": session.terminal.company,
+        "deposits": deposits,
+        "total_deposits": total_deposits,
+        "total_withdrawals": total_withdrawals,
     }
-    template = get_template('pos/zreport_pdf.html')
+    template = get_template("pos/zreport_pdf.html")
     html = template.render(ctx)
-    result = BytesIO()
+    BytesIO()
     try:
         import weasyprint
+
         pdf_bytes = weasyprint.HTML(string=html, base_url=settings.BASE_DIR).write_pdf()
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename="Z-report-S{session.session_number}.pdf"'
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'inline; filename="Z-report-S{session.session_number}.pdf"'
         return response
-        messages.error(request, _('Generiranje PDF-a nije uspjelo. Pokušajte ponovo.'))
+        messages.error(request, _("Generiranje PDF-a nije uspjelo. Pokušajte ponovo."))
     except Exception as e:
         logger.exception("Unexpected error", exc_info=True)
-        messages.error(request, f'PDF greska: {e}')
-    return redirect('pos:session_detail', session_id=session_id)
+        messages.error(request, f"PDF greska: {e}")
+    return redirect("pos:session_detail", session_id=session_id)
 
 
 @login_required
@@ -982,12 +1189,14 @@ def receipt_pdf(request, receipt_id):
     """
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     company, err = _check_tenant(request, receipt)
-    if err: return err
-    fmt = request.GET.get('format', '')
+    if err:
+        return err
+    fmt = request.GET.get("format", "")
     items = receipt.items.all()
 
     # FINA QR kod (zakonski obavezan)
     from pos.utils import generate_receipt_qr_base64
+
     fina_qr_b64 = generate_receipt_qr_base64(receipt)
 
     # BusinessLocation za PP oznaku
@@ -995,73 +1204,74 @@ def receipt_pdf(request, receipt_id):
 
     # PDV razrada po stopama (zakonski obavezna na računu)
     from decimal import Decimal
+
     tax_breakdown = {}
     for item in items:
-        rate = item.tax_rate if item.tax_rate is not None else Decimal('0')
-        rate_str = '%s%%' % rate
+        rate = item.tax_rate if item.tax_rate is not None else Decimal("0")
+        rate_str = "%s%%" % rate
         if rate_str not in tax_breakdown:
-            tax_breakdown[rate_str] = {'base': Decimal('0'), 'tax': Decimal('0'), 'total': Decimal('0')}
+            tax_breakdown[rate_str] = {"base": Decimal("0"), "tax": Decimal("0"), "total": Decimal("0")}
         if rate > 0:
             net = item.total_price / (1 + rate / 100)
             tax_amt = item.total_price - net
         else:
             net = item.total_price
-            tax_amt = Decimal('0')
-        tax_breakdown[rate_str]['base'] += net
-        tax_breakdown[rate_str]['tax'] += tax_amt
-        tax_breakdown[rate_str]['total'] += item.total_price
+            tax_amt = Decimal("0")
+        tax_breakdown[rate_str]["base"] += net
+        tax_breakdown[rate_str]["tax"] += tax_amt
+        tax_breakdown[rate_str]["total"] += item.total_price
 
     ctx = {
-        'receipt': receipt,
-        'items': items,
-        'company': receipt.session.terminal.company,
-        'payment_lines': receipt.payment_lines.all(),
-        'terminal': receipt.session.terminal,
-        'fina_qr_b64': fina_qr_b64,
-        'business_location': bl,
-        'tax_breakdown': tax_breakdown,
-        'consumption_tax': receipt.consumption_tax_amount if receipt.consumption_tax_amount else None,
+        "receipt": receipt,
+        "items": items,
+        "company": receipt.session.terminal.company,
+        "payment_lines": receipt.payment_lines.all(),
+        "terminal": receipt.session.terminal,
+        "fina_qr_b64": fina_qr_b64,
+        "business_location": bl,
+        "tax_breakdown": tax_breakdown,
+        "consumption_tax": receipt.consumption_tax_amount if receipt.consumption_tax_amount else None,
     }
 
-    if fmt == 'thermal':
+    if fmt == "thermal":
         # Browser-based thermal view — auto window.print() fires on load
-        return render(request, 'pos/receipt_thermal.html', ctx)
+        return render(request, "pos/receipt_thermal.html", ctx)
 
-    elif fmt == 'a4':
+    elif fmt == "a4":
         # A4 PDF via xhtml2pdf
         from django.template.loader import get_template as _gt
-        tmpl = _gt('pos/receipt_a4_pdf.html')
+
+        tmpl = _gt("pos/receipt_a4_pdf.html")
         html = tmpl.render(ctx)
         try:
             import weasyprint
+
             pdf_bytes = weasyprint.HTML(string=html, base_url=settings.BASE_DIR).write_pdf()
-            response = HttpResponse(pdf_bytes, content_type='application/pdf')
-            response['Content-Disposition'] = (
-                f'inline; filename="bon-{receipt.receipt_number}-a4.pdf"'
-            )
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            response["Content-Disposition"] = f'inline; filename="bon-{receipt.receipt_number}-a4.pdf"'
             return response
-            messages.error(request, _('Generiranje PDF-a nije uspjelo. Pokušajte ponovo.'))
+            messages.error(request, _("Generiranje PDF-a nije uspjelo. Pokušajte ponovo."))
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
-            messages.error(request, f'PDF greška: {e}')
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+            messages.error(request, f"PDF greška: {e}")
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
 
     else:
         # Legacy: thermal PDF via xhtml2pdf
-        template = get_template('pos/receipt_pdf.html')
+        template = get_template("pos/receipt_pdf.html")
         html = template.render(ctx)
         try:
             import weasyprint
+
             pdf_bytes = weasyprint.HTML(string=html, base_url=settings.BASE_DIR).write_pdf()
-            response = HttpResponse(pdf_bytes, content_type='application/pdf')
-            response['Content-Disposition'] = (
-                f'inline; filename="bon-{receipt.receipt_number}.pdf"'
-            )
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            response["Content-Disposition"] = f'inline; filename="bon-{receipt.receipt_number}.pdf"'
             return response
         except Exception as e:
             logger.exception("Unexpected error", exc_info=True)
-            messages.error(request, f'PDF greška: {e}')
-        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+            messages.error(request, f"PDF greška: {e}")
+        return redirect("pos:receipt_detail", receipt_id=receipt_id)
+
 
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -1070,15 +1280,51 @@ from django.views.decorators.http import require_POST
 # ── QUICK POS ─────────────────────────────────────────────────────────────────
 
 POS_TYPE_META = [
-    {'value': 'quick',      'label': 'Brza blagajna', 'icon': '⚡', 'desc': 'Najbrži put do naplate. Pekare, kiosci, marketi.', 'recommended': True},
-    {'value': 'retail',     'label': 'Maloprodaja',   'icon': '🏪', 'desc': 'Barkod, kategorije, inventura. Dućani.', 'recommended': False},
-    {'value': 'restaurant', 'label': 'Restoran',      'icon': '🍽', 'desc': 'Stolovi, narudžbe, kuhinja (KDS).', 'recommended': False},
-    {'value': 'field',      'label': 'Terenska',      'icon': '🚚', 'desc': 'Utovar, ruta, prodaja na terenu.', 'recommended': False},
-    {'value': 'service',    'label': 'Usluge',        'icon': '🔧', 'desc': 'Satnica, usluge, frizerski saloni.', 'recommended': False},
-    {'value': 'reception',  'label': 'Recepcija',     'icon': '🏨', 'desc': 'Hoteli, apartmani, kampovi.', 'recommended': False},
+    {
+        "value": "quick",
+        "label": "Brza blagajna",
+        "icon": "⚡",
+        "desc": "Najbrži put do naplate. Pekare, kiosci, marketi.",
+        "recommended": True,
+    },
+    {
+        "value": "retail",
+        "label": "Maloprodaja",
+        "icon": "🏪",
+        "desc": "Barkod, kategorije, inventura. Dućani.",
+        "recommended": False,
+    },
+    {
+        "value": "restaurant",
+        "label": "Restoran",
+        "icon": "🍽",
+        "desc": "Stolovi, narudžbe, kuhinja (KDS).",
+        "recommended": False,
+    },
+    {
+        "value": "field",
+        "label": "Terenska",
+        "icon": "🚚",
+        "desc": "Utovar, ruta, prodaja na terenu.",
+        "recommended": False,
+    },
+    {
+        "value": "service",
+        "label": "Usluge",
+        "icon": "🔧",
+        "desc": "Satnica, usluge, frizerski saloni.",
+        "recommended": False,
+    },
+    {
+        "value": "reception",
+        "label": "Recepcija",
+        "icon": "🏨",
+        "desc": "Hoteli, apartmani, kampovi.",
+        "recommended": False,
+    },
 ]
 
-_POS_ICON = {t['value']: t['icon'] for t in POS_TYPE_META}
+_POS_ICON = {t["value"]: t["icon"] for t in POS_TYPE_META}
 
 
 @login_required
@@ -1093,148 +1339,156 @@ def quick_pos_redirect(request):
     """
     company = get_user_company(request)
     if not company:
-        return redirect('pos:dashboard')
+        return redirect("pos:dashboard")
 
-    terminals = list(POSTerminal.objects.filter(
-        company=company, is_active=True
-    ).order_by('name'))
+    terminals = list(POSTerminal.objects.filter(company=company, is_active=True).order_by("name"))
 
     if not terminals:
-        return redirect('pos:dashboard')
+        return redirect("pos:dashboard")
 
     # ── Slučaj 1: Točno jedan terminal → direktno bez pitanja ──
     if len(terminals) == 1:
-        return redirect('pos:pos_joker', terminal_id=terminals[0].pk)
+        return redirect("pos:pos_joker", terminal_id=terminals[0].pk)
 
     # ── Slučaj 2: Ima otvorena smjena → idi tamo odmah ──
     for t in terminals:
         if t.sessions.filter(status=POSSession.Status.OPEN).exists():
-            return redirect('pos:pos_joker', terminal_id=t.pk)
+            return redirect("pos:pos_joker", terminal_id=t.pk)
 
     # ── Slučaj 3: Više terminala bez sesije → smart selector ──
     for t in terminals:
-        t.icon = _POS_ICON.get(t.pos_type, '🖥')
+        t.icon = _POS_ICON.get(t.pos_type, "🖥")
         t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()
 
-    return render(request, 'pos/selector.html', {
-        'company': company,
-        'terminals': terminals,
-        'pos_types': POS_TYPE_META,
-    })
+    return render(
+        request,
+        "pos/selector.html",
+        {
+            "company": company,
+            "terminals": terminals,
+            "pos_types": POS_TYPE_META,
+        },
+    )
 
 
 @login_required
 def quick_pos(request, terminal_id):
     """Legacy view — redirects to unified Joker POS."""
-    return redirect('pos:pos_joker', terminal_id=terminal_id)
+    return redirect("pos:pos_joker", terminal_id=terminal_id)
 
 
 def _quick_pos_legacy(request, terminal_id):
     """Original quick_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company = terminal.company
-    session  = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
+    session = (
+        POSSession.objects.filter(terminal=terminal, status="open")
+        .select_related("terminal", "operator", "active_cashiers")
+        .first()
+    )
 
     # ── STROGA PROVJERA: samo 1 aktivan POS (besplatni plan) ──
     # Knjigovođa (role=bookkeeper/superadmin) može svugdje bez limita
     is_bookkeeper = False
     try:
-        role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
-        is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
+        role = request.user.userprofile.role if hasattr(request.user, "userprofile") else ""
+        is_bookkeeper = role in ("superadmin", "bookkeeper", "company_admin", "accountant") or request.user.is_superuser
     except AttributeError:
         pass
 
     if not session and not is_bookkeeper:
-        other_open = POSSession.objects.filter(
-            terminal__company=company, status='open'
-        ).exclude(terminal=terminal).select_related('terminal').first()
+        other_open = (
+            POSSession.objects.filter(terminal__company=company, status="open")
+            .exclude(terminal=terminal)
+            .select_related("terminal")
+            .first()
+        )
 
         if other_open:
             try:
-                sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+                sub = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
                 max_terminals = 1
                 if sub and sub.pricing_plan:
                     max_terminals = sub.pricing_plan.max_locations or 1
             except DatabaseError:
                 max_terminals = 1
 
-            open_count = POSSession.objects.filter(
-                terminal__company=company, status='open'
-            ).count()
+            open_count = POSSession.objects.filter(terminal__company=company, status="open").count()
 
             if open_count >= max_terminals:
-                return render(request, 'pos/upgrade_terminal.html', {
-                    'current_terminal': other_open.terminal,
-                    'current_session': other_open,
-                    'wanted_terminal': terminal,
-                    'max_terminals': max_terminals,
-                    'company': company,
-                })
+                return render(
+                    request,
+                    "pos/upgrade_terminal.html",
+                    {
+                        "current_terminal": other_open.terminal,
+                        "current_session": other_open,
+                        "wanted_terminal": terminal,
+                        "max_terminals": max_terminals,
+                        "company": company,
+                    },
+                )
 
     # Auto-otvori sesiju ako ne postoji — redirect na terminal za unos pologa
     if not session and request.user.is_authenticated:
-        messages.warning(request, _('Unesite početnu gotovinu prije otvaranja blagajne.'))
-        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
+        messages.warning(request, _("Unesite početnu gotovinu prije otvaranja blagajne."))
+        return redirect("pos:terminal_detail", terminal_id=terminal.pk)
 
     try:
         from inventory.models import InventoryItem
+
         qs = InventoryItem.objects.filter(company=company, is_active=True)
         # Terminal category filter (optika vidi product+service, restoran food+drink itd.)
         if terminal.category_filter:
-            cats = [c.strip() for c in terminal.category_filter.split(',') if c.strip()]
+            cats = [c.strip() for c in terminal.category_filter.split(",") if c.strip()]
             if cats:
                 qs = qs.filter(category__in=cats)
-        inventory_items = list(
-            qs.select_related('tax_rate')
-            .order_by('name')[:300]
-        )
+        inventory_items = list(qs.select_related("tax_rate").order_by("name")[:300])
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
     # Build categories list
-    cats = sorted(set(
-        getattr(i, 'category', '') or 'Ostalo'
-        for i in inventory_items
-    ))
+    cats = sorted(set(getattr(i, "category", "") or "Ostalo" for i in inventory_items))
 
     from pos.models import POSCashier
-    cashiers = list(
-        POSCashier.objects.filter(company=company, is_active=True).select_related('user').order_by('name')
-    )
+
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related("user").order_by("name"))
 
     try:
         from django.urls import reverse
+
         # reverse() uz i18n_patterns vec vraca /hr/pos/... ne treba dodavati lang prefix
-        report_url = reverse('pos:cashier_report_html', args=[session.id]) if session else '#'
+        report_url = reverse("pos:cashier_report_html", args=[session.id]) if session else "#"
     except ImportError:
-        report_url = '#'
+        report_url = "#"
 
     # Top 12 najprodavanijih = brze tipke
     quick_items = []
     try:
         from django.db.models import Count
+
         top_ids = list(
-            POSReceiptItem.objects
-            .filter(receipt__session__terminal__company=company, receipt__status='paid')
+            POSReceiptItem.objects.filter(receipt__session__terminal__company=company, receipt__status="paid")
             .exclude(is_tip=True)
-            .values('inventory_item_id')
-            .annotate(cnt=Count('id'))
-            .order_by('-cnt')
-            .values_list('inventory_item_id', flat=True)[:12]
+            .values("inventory_item_id")
+            .annotate(cnt=Count("id"))
+            .order_by("-cnt")
+            .values_list("inventory_item_id", flat=True)[:12]
         )
         if top_ids:
-            items_map = {i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related('tax_rate')}
+            items_map = {
+                i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related("tax_rate")
+            }
             quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
         if len(quick_items) < 12:
             existing = {i.pk for i in quick_items}
             # Filler - filtriraj po category_filter terminala
             filler_qs = InventoryItem.objects.filter(company=company, is_active=True).exclude(pk__in=existing)
             if terminal.category_filter:
-                cat_list = [c2.strip() for c2 in terminal.category_filter.split(',') if c2.strip()]
+                cat_list = [c2.strip() for c2 in terminal.category_filter.split(",") if c2.strip()]
                 if cat_list:
                     filler_qs = filler_qs.filter(category__in=cat_list)
-            filler = list(filler_qs.select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
+            filler = list(filler_qs.select_related("tax_rate").order_by("name")[: 12 - len(quick_items)])
             quick_items.extend(filler)
     except DatabaseError:
         pass
@@ -1243,35 +1497,45 @@ def _quick_pos_legacy(request, terminal_id):
     show_upgrade_banner = False
     try:
         from registration.models import CompanySubscription
+
         sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
-        if sub and sub.plan in ('starter', 'micro'):
-            active_terms = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").count()
+        if sub and sub.plan in ("starter", "micro"):
+            active_terms = (
+                POSTerminal.objects.filter(company=company, is_active=True)
+                .select_related("company", "workspace", "business_location")
+                .count()
+            )
             if active_terms > 1:
                 show_upgrade_banner = True
     except DatabaseError:
         pass
 
-    return render(request, 'pos/quick.html', {
-        'terminal':           terminal,
-        'session':            session,
-        'inventory_items':    inventory_items,
-        'quick_items':        quick_items,
-        'categories':         cats,
-        'cashiers':           cashiers,
-        'session_report_url': report_url,
-        'show_upgrade_banner': show_upgrade_banner,
-        'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
-    })
+    return render(
+        request,
+        "pos/quick.html",
+        {
+            "terminal": terminal,
+            "session": session,
+            "inventory_items": inventory_items,
+            "quick_items": quick_items,
+            "categories": cats,
+            "cashiers": cashiers,
+            "session_report_url": report_url,
+            "show_upgrade_banner": show_upgrade_banner,
+            "quick_actions_json": json.dumps(terminal.get_quick_actions()),
+        },
+    )
+
 
 # ── POS JOKER — Unified Interface ─────────────────────────────────────────────
 
 POS_TITLE_MAP = {
-    'quick': 'Brza blagajna',
-    'retail': 'Maloprodaja',
-    'restaurant': 'Restoran',
-    'field': 'Terenska prodaja',
-    'service': 'Usluge',
-    'reception': 'Recepcija',
+    "quick": "Brza blagajna",
+    "retail": "Maloprodaja",
+    "restaurant": "Restoran",
+    "field": "Terenska prodaja",
+    "service": "Usluge",
+    "reception": "Recepcija",
 }
 
 
@@ -1283,43 +1547,52 @@ def pos_joker(request, terminal_id):
     """
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company = terminal.company
-    session = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
-    is_gastro = terminal.pos_type == 'restaurant'
+    session = (
+        POSSession.objects.filter(terminal=terminal, status="open")
+        .select_related("terminal", "operator", "active_cashiers")
+        .first()
+    )
+    is_gastro = terminal.pos_type == "restaurant"
 
     # ── STROGA PROVJERA: samo N aktivnih POS-ova po planu ──
     is_bookkeeper = False
     try:
-        role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
-        is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
+        role = request.user.userprofile.role if hasattr(request.user, "userprofile") else ""
+        is_bookkeeper = role in ("superadmin", "bookkeeper", "company_admin", "accountant") or request.user.is_superuser
     except AttributeError:
         pass
 
     if not session and not is_bookkeeper:
-        other_open = POSSession.objects.filter(
-            terminal__company=company, status='open'
-        ).exclude(terminal=terminal).select_related('terminal').first()
+        other_open = (
+            POSSession.objects.filter(terminal__company=company, status="open")
+            .exclude(terminal=terminal)
+            .select_related("terminal")
+            .first()
+        )
 
         if other_open:
             try:
-                sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+                sub = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
                 max_terminals = 1
                 if sub and sub.pricing_plan:
                     max_terminals = sub.pricing_plan.max_locations or 1
             except DatabaseError:
                 max_terminals = 1
 
-            open_count = POSSession.objects.filter(
-                terminal__company=company, status='open'
-            ).count()
+            open_count = POSSession.objects.filter(terminal__company=company, status="open").count()
 
             if open_count >= max_terminals:
-                return render(request, 'pos/upgrade_terminal.html', {
-                    'current_terminal': other_open.terminal,
-                    'current_session': other_open,
-                    'wanted_terminal': terminal,
-                    'max_terminals': max_terminals,
-                    'company': company,
-                })
+                return render(
+                    request,
+                    "pos/upgrade_terminal.html",
+                    {
+                        "current_terminal": other_open.terminal,
+                        "current_session": other_open,
+                        "wanted_terminal": terminal,
+                        "max_terminals": max_terminals,
+                        "company": company,
+                    },
+                )
 
     # Cashier Gate handles session opening — ne redirectamo više
     # Gate modal se otvara na JS strani kad nema aktivne smjene
@@ -1328,47 +1601,56 @@ def pos_joker(request, terminal_id):
     # ── Inventory ──
     try:
         from inventory.models import InventoryItem
+
         qs = InventoryItem.objects.filter(company=company, is_active=True)
         if terminal.category_filter:
-            cat_list = [c.strip() for c in terminal.category_filter.split(',') if c.strip()]
+            cat_list = [c.strip() for c in terminal.category_filter.split(",") if c.strip()]
             if cat_list:
                 qs = qs.filter(category__in=cat_list)
-        inventory_items = list(qs.select_related('tax_rate').order_by('name')[:300])
+        inventory_items = list(qs.select_related("tax_rate").order_by("name")[:300])
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
-    cats = sorted(set(getattr(i, 'category', '') or 'Ostalo' for i in inventory_items))
+    cats = sorted(set(getattr(i, "category", "") or "Ostalo" for i in inventory_items))
 
     from pos.models import POSCashier
-    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related('user').order_by('name'))
+
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related("user").order_by("name"))
 
     try:
         from django.urls import reverse
-        report_url = reverse('pos:cashier_report_html', args=[session.id]) if session else '#'
+
+        report_url = reverse("pos:cashier_report_html", args=[session.id]) if session else "#"
     except ImportError:
-        report_url = '#'
+        report_url = "#"
 
     # Top 12 najprodavanijih = brze tipke
     quick_items = []
     try:
         from django.db.models import Count
+
         top_ids = list(
-            POSReceiptItem.objects
-            .filter(receipt__session__terminal__company=company, receipt__status='paid')
+            POSReceiptItem.objects.filter(receipt__session__terminal__company=company, receipt__status="paid")
             .exclude(is_tip=True)
-            .values('inventory_item_id')
-            .annotate(cnt=Count('id'))
-            .order_by('-cnt')
-            .values_list('inventory_item_id', flat=True)[:12]
+            .values("inventory_item_id")
+            .annotate(cnt=Count("id"))
+            .order_by("-cnt")
+            .values_list("inventory_item_id", flat=True)[:12]
         )
         if top_ids:
-            items_map = {i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related('tax_rate')}
+            items_map = {
+                i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related("tax_rate")
+            }
             quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
         if len(quick_items) < 12:
             existing = {i.pk for i in quick_items}
-            filler = list(InventoryItem.objects.filter(company=company, is_active=True)
-                         .exclude(pk__in=existing).select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
+            filler = list(
+                InventoryItem.objects.filter(company=company, is_active=True)
+                .exclude(pk__in=existing)
+                .select_related("tax_rate")
+                .order_by("name")[: 12 - len(quick_items)]
+            )
             quick_items.extend(filler)
     except DatabaseError:
         pass
@@ -1377,36 +1659,42 @@ def pos_joker(request, terminal_id):
     show_upgrade_banner = False
     try:
         from registration.models import CompanySubscription
+
         sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
-        if sub and sub.plan in ('starter', 'micro'):
-            active_terms = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").count()
+        if sub and sub.plan in ("starter", "micro"):
+            active_terms = (
+                POSTerminal.objects.filter(company=company, is_active=True)
+                .select_related("company", "workspace", "business_location")
+                .count()
+            )
             if active_terms > 1:
                 show_upgrade_banner = True
     except DatabaseError:
         pass
 
     ctx = {
-        'terminal':           terminal,
-        'session':            session,
-        'inventory_items':    inventory_items,
-        'quick_items':        quick_items,
-        'categories':         cats,
-        'cashiers':           cashiers,
-        'session_report_url': report_url,
-        'show_upgrade_banner': show_upgrade_banner,
-        'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
-        'is_gastro':          is_gastro,
-        'stock_alerts':       {i.pk: {'qty': float(i.quantity or 0), 'min': float(i.min_quantity or 5)} for i in inventory_items if float(i.quantity or 999) <= float(i.min_quantity or 5) * 1.5},
-        'pos_title':          POS_TITLE_MAP.get(terminal.pos_type, 'POS'),
+        "terminal": terminal,
+        "session": session,
+        "inventory_items": inventory_items,
+        "quick_items": quick_items,
+        "categories": cats,
+        "cashiers": cashiers,
+        "session_report_url": report_url,
+        "show_upgrade_banner": show_upgrade_banner,
+        "quick_actions_json": json.dumps(terminal.get_quick_actions()),
+        "is_gastro": is_gastro,
+        "stock_alerts": {
+            i.pk: {"qty": float(i.quantity or 0), "min": float(i.min_quantity or 5)}
+            for i in inventory_items
+            if float(i.quantity or 999) <= float(i.min_quantity or 5) * 1.5
+        },
+        "pos_title": POS_TITLE_MAP.get(terminal.pos_type, "POS"),
     }
 
     # ── Gastro: tables + open receipts ──
     if is_gastro and session:
         open_receipts = list(
-            session.receipts
-            .filter(status='open')
-            .prefetch_related('items')
-            .order_by('table_number', 'receipt_number')
+            session.receipts.filter(status="open").prefetch_related("items").order_by("table_number", "receipt_number")
         )
         receipt_by_num = {}
         for r in open_receipts:
@@ -1416,13 +1704,11 @@ def pos_joker(request, terminal_id):
                     receipt_by_num[n] = r
                 except ValueError:
                     pass
-        tables = [{'num': i, 'receipt': receipt_by_num.get(i)} for i in range(1, 21)]
-        ctx['open_receipts'] = open_receipts
-        ctx['tables'] = tables
+        tables = [{"num": i, "receipt": receipt_by_num.get(i)} for i in range(1, 21)]
+        ctx["open_receipts"] = open_receipts
+        ctx["tables"] = tables
 
-    return render(request, 'pos/joker.html', ctx)
-
-
+    return render(request, "pos/joker.html", ctx)
 
 
 @require_POST
@@ -1435,7 +1721,7 @@ def quick_pay(request, session_id):
     is_qr = qr_session_id == session_id
 
     if not is_qr and not request.user.is_authenticated:
-        return JsonResponse({'ok': False, 'error': 'Login required'}, status=403)
+        return JsonResponse({"ok": False, "error": "Login required"}, status=403)
 
     if is_qr:
         sess = get_object_or_404(POSSession, pk=session_id, status="open")
@@ -1446,53 +1732,58 @@ def quick_pay(request, session_id):
         user = request.user
 
     if not company:
-        return JsonResponse({'ok': False, 'error': 'Nema konteksta tvrtke'}, status=400)
+        return JsonResponse({"ok": False, "error": "Nema konteksta tvrtke"}, status=400)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
 
     # Inject session_id from URL
-    data['session_id'] = session_id
+    data["session_id"] = session_id
 
     try:
         result = CheckoutService.process_receipt(company=company, user=user, payload=data)
-        return JsonResponse({
-            'ok': True,
-            'receipt_id': result['receipt_id'],
-            'receipt_number': result['receipt_number'],
-            'total': result['total'],
-            'change': result['change'],
-            'print_url': result.get('print_url', ''),
-            'public_url': receipt_public_url(result['receipt_id']),
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "receipt_id": result["receipt_id"],
+                "receipt_number": result["receipt_number"],
+                "total": result["total"],
+                "change": result["change"],
+                "print_url": result.get("print_url", ""),
+                "public_url": receipt_public_url(result["receipt_id"]),
+            }
+        )
     except CheckoutValidationError as e:
-        return JsonResponse({'ok': False, 'error': e.message, 'code': e.code}, status=400)
+        return JsonResponse({"ok": False, "error": e.message, "code": e.code}, status=400)
     except KeyError as e:
-        logger.error('quick_pay greska: %s', e, exc_info=True)
-        return JsonResponse({'ok': False, 'error': 'Sistemska greska pri naplati'}, status=500)
+        logger.error("quick_pay greska: %s", e, exc_info=True)
+        return JsonResponse({"ok": False, "error": "Sistemska greska pri naplati"}, status=500)
+
 
 # ── RESTAURANT POS ────────────────────────────────────────────────────────────
+
 
 @login_required
 def restaurant_pos(request, terminal_id):
     """Legacy view — redirects to unified Joker POS."""
-    return redirect('pos:pos_joker', terminal_id=terminal_id)
+    return redirect("pos:pos_joker", terminal_id=terminal_id)
 
 
 def _restaurant_pos_legacy(request, terminal_id):
     """Original restaurant_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
-    session  = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
+    session = (
+        POSSession.objects.filter(terminal=terminal, status="open")
+        .select_related("terminal", "operator", "active_cashiers")
+        .first()
+    )
 
     open_receipts = []
     if session:
         open_receipts = list(
-            session.receipts
-            .filter(status='open')
-            .prefetch_related('items')
-            .order_by('table_number', 'receipt_number')
+            session.receipts.filter(status="open").prefetch_related("items").order_by("table_number", "receipt_number")
         )
 
     # Build structured tables list (1-20 fixed + any extras)
@@ -1509,52 +1800,62 @@ def _restaurant_pos_legacy(request, terminal_id):
 
     tables = []
     for i in range(1, 21):
-        tables.append({'num': i, 'receipt': receipt_by_num.get(i)})
+        tables.append({"num": i, "receipt": receipt_by_num.get(i)})
 
     # Inventory for autocomplete
     try:
         from inventory.models import InventoryItem
+
         company = get_user_company(request)
         inventory_items = list(
             InventoryItem.objects.filter(company=company, is_active=True)
-            .select_related('tax_rate')
-            .order_by('name')[:300]
+            .select_related("tax_rate")
+            .order_by("name")[:300]
         )
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
-    return render(request, 'pos/restaurant.html', {
-        'terminal':        terminal,
-        'session':         session,
-        'open_receipts':   open_receipts,
-        'tables':          tables,
-        'inventory_items': inventory_items,
-    })
+    return render(
+        request,
+        "pos/restaurant.html",
+        {
+            "terminal": terminal,
+            "session": session,
+            "open_receipts": open_receipts,
+            "tables": tables,
+            "inventory_items": inventory_items,
+        },
+    )
 
 
 # ── RESTAURANT: JSON receipt detail ───────────────────────────────────────
+
 
 @login_required
 def receipt_json(request, receipt_id):
     """Return receipt data as JSON for restaurant panel."""
     from decimal import Decimal
+
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
-    items = list(receipt.items.values(
-        'id', 'description', 'quantity', 'unit_price', 'tax_rate', 'total_price'))
+    items = list(receipt.items.values("id", "description", "quantity", "unit_price", "tax_rate", "total_price"))
+
     # Convert Decimal to str for JSON
     def _d(v):
         return str(v) if isinstance(v, Decimal) else v
+
     items_out = [{k: _d(v) for k, v in it.items()} for it in items]
-    return JsonResponse({
-        'ok': True,
-        'receipt_id': receipt.pk,
-        'receipt_number': receipt.receipt_number,
-        'total': str(receipt.total),
-        'subtotal': str(getattr(receipt, 'subtotal', receipt.total)),
-        'tax_amount': str(getattr(receipt, 'tax_amount', Decimal('0'))),
-        'items': items_out,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "receipt_id": receipt.pk,
+            "receipt_number": receipt.receipt_number,
+            "total": str(receipt.total),
+            "subtotal": str(getattr(receipt, "subtotal", receipt.total)),
+            "tax_amount": str(getattr(receipt, "tax_amount", Decimal("0"))),
+            "items": items_out,
+        }
+    )
 
 
 @login_required
@@ -1562,52 +1863,54 @@ def receipt_json(request, receipt_id):
 def receipt_add_item(request, receipt_id):
     """AJAX: add one item to an open receipt (restaurant POS)."""
     from decimal import Decimal, InvalidOperation
-    receipt = get_object_or_404(POSReceipt, pk=receipt_id, status='open')
+
+    receipt = get_object_or_404(POSReceipt, pk=receipt_id, status="open")
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
 
     try:
-        is_tip = bool(data.get('is_tip', False))
-        is_tip_employer = bool(data.get('is_tip_employer', False))
+        is_tip = bool(data.get("is_tip", False))
+        is_tip_employer = bool(data.get("is_tip_employer", False))
         # Napojnica za radnika uvijek 0% PDV (neoporezivo)
-        tax_for_item = Decimal('0') if is_tip else Decimal(str(data.get('tax_rate', 25)))
+        tax_for_item = Decimal("0") if is_tip else Decimal(str(data.get("tax_rate", 25)))
         item_obj = POSReceiptItem.objects.create(
             receipt=receipt,
-            inventory_item_id=data.get('inventory_item_id') or None,
-            description=str(data.get('description', ''))[:200],
-            quantity=Decimal(str(data.get('quantity', 1))),
-            unit='kom',
-            unit_price=Decimal(str(data.get('unit_price', 0))),
+            inventory_item_id=data.get("inventory_item_id") or None,
+            description=str(data.get("description", ""))[:200],
+            quantity=Decimal(str(data.get("quantity", 1))),
+            unit="kom",
+            unit_price=Decimal(str(data.get("unit_price", 0))),
             tax_rate=tax_for_item,
             is_tip=is_tip,
             is_tip_employer=is_tip_employer,
         )
     except (InvalidOperation, Exception) as e:
-        return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
 
     # ── Auto-Pfand: ako artikl ima linked_pfand_item, dodaj kauciju ──────────
     try:
         pfand_inv = None
-        inv_id = data.get('inventory_item_id')
+        inv_id = data.get("inventory_item_id")
         if inv_id:
             from inventory.models import InventoryItem
+
             try:
-                inv = InventoryItem.objects.select_related('linked_pfand_item').get(pk=inv_id)
+                inv = InventoryItem.objects.select_related("linked_pfand_item").get(pk=inv_id)
                 pfand_inv = inv.linked_pfand_item
             except InventoryItem.DoesNotExist:
                 pass
         if pfand_inv:
-            pfand_qty   = item_obj.quantity
-            pfand_tax   = pfand_inv.pfand_tax_override
+            pfand_qty = item_obj.quantity
+            pfand_tax = pfand_inv.pfand_tax_override
             POSReceiptItem.objects.create(
                 receipt=receipt,
                 inventory_item=pfand_inv,
                 description=pfand_inv.name,
                 quantity=pfand_qty,
-                unit='kom',
+                unit="kom",
                 unit_price=pfand_inv.unit_price,
                 tax_rate=pfand_tax,
                 is_pfand_return=False,
@@ -1616,19 +1919,23 @@ def receipt_add_item(request, receipt_id):
         logger.warning("Auto-pfand failed", exc_info=True)
 
     receipt.recalculate()
-    items = list(receipt.items.values(
-        'id', 'description', 'quantity', 'unit_price', 'tax_rate', 'total_price'))
+    items = list(receipt.items.values("id", "description", "quantity", "unit_price", "tax_rate", "total_price"))
+
     def _d(v):
         from decimal import Decimal
+
         return str(v) if isinstance(v, Decimal) else v
+
     items_out = [{k: _d(v) for k, v in it.items()} for it in items]
-    return JsonResponse({
-        'ok': True,
-        'total': str(receipt.total),
-        'subtotal': str(getattr(receipt, 'subtotal', receipt.total)),
-        'tax_amount': str(getattr(receipt, 'tax_amount', Decimal('0'))),
-        'items': items_out,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "total": str(receipt.total),
+            "subtotal": str(getattr(receipt, "subtotal", receipt.total)),
+            "tax_amount": str(getattr(receipt, "tax_amount", Decimal("0"))),
+            "items": items_out,
+        }
+    )
 
 
 @login_required
@@ -1636,60 +1943,64 @@ def receipt_add_item(request, receipt_id):
 def receipt_pay(request, receipt_id):
     """AJAX: pay an existing open receipt (restaurant POS)."""
     from decimal import Decimal
-    receipt = get_object_or_404(POSReceipt, pk=receipt_id, status='open')
+
+    receipt = get_object_or_404(POSReceipt, pk=receipt_id, status="open")
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
 
-    method      = data.get('method', 'CASH')
-    amount_paid = Decimal(str(data.get('amount_paid', '0') or '0'))
+    method = data.get("method", "CASH")
+    amount_paid = Decimal(str(data.get("amount_paid", "0") or "0"))
 
-    if method == 'CARD':
+    if method == "CARD":
         amount_paid = receipt.total
 
     amount_paid = max(amount_paid, receipt.total)  # never less than total
-    change = max(Decimal('0'), amount_paid - receipt.total)
+    change = max(Decimal("0"), amount_paid - receipt.total)
     POSPaymentLine.objects.create(
         receipt=receipt,
         method=method,
         amount=amount_paid,
         change_given=change,
     )
-    receipt.status  = POSReceipt.Status.PAID
+    receipt.status = POSReceipt.Status.PAID
     receipt.paid_at = timezone.now()
     receipt.save()
 
     try:
         from fiscal.service import fiscalize_pos_receipt
+
         fiscalize_pos_receipt(receipt)
     except ImportError:
         logger.warning("Suppressed error", exc_info=True)
 
-    return JsonResponse({
-        'ok': True,
-        'receipt_number': receipt.receipt_number,
-        'total': str(receipt.total),
-        'change': str(change),
-        'print_url': f'/pos/receipt/{receipt.pk}/pdf/?format=thermal',
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "receipt_number": receipt.receipt_number,
+            "total": str(receipt.total),
+            "change": str(change),
+            "print_url": f"/pos/receipt/{receipt.pk}/pdf/?format=thermal",
+        }
+    )
 
 
 @login_required
 @require_POST
 def new_receipt_ajax(request, session_id):
     """AJAX: open a new receipt for a table (restaurant POS)."""
-    session = get_object_or_404(POSSession, pk=session_id, status='open')
+    session = get_object_or_404(POSSession, pk=session_id, status="open")
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         data = {}
 
-    table_number = data.get('table_number') or None
+    table_number = data.get("table_number") or None
 
-    last = session.receipts.order_by('-receipt_number').first()
+    last = session.receipts.order_by("-receipt_number").first()
     receipt_number = (last.receipt_number + 1) if last else 1
 
     receipt = POSReceipt.objects.create(
@@ -1697,10 +2008,11 @@ def new_receipt_ajax(request, session_id):
         receipt_number=receipt_number,
         table_number=table_number,
     )
-    return JsonResponse({'ok': True, 'receipt_id': receipt.pk, 'receipt_number': receipt.receipt_number})
+    return JsonResponse({"ok": True, "receipt_id": receipt.pk, "receipt_number": receipt.receipt_number})
 
 
 # ══ POS SETTINGS VIEWS ══════════════════════════════════════════════════════════
+
 
 @login_required
 def pos_settings(request):
@@ -1715,7 +2027,8 @@ def pos_settings(request):
     # Superadmin: koristi firmu iz URL ?company= ili iz zadnjeg terminala
     if request.user.is_superuser:
         from companies.models import Company
-        cid = request.GET.get('company', '')
+
+        cid = request.GET.get("company", "")
         if cid:
             try:
                 company = Company.objects.get(pk=cid)
@@ -1724,25 +2037,34 @@ def pos_settings(request):
         if not company or not InventoryItem.objects.filter(company=company, is_active=True).exists():
             # Fallback: firma s najvise artikala
             from django.db.models import Count as _C
-            top = (InventoryItem.objects.filter(is_active=True)
-                   .values('company').annotate(cnt=_C('id')).order_by('-cnt').first())
+
+            top = (
+                InventoryItem.objects.filter(is_active=True)
+                .values("company")
+                .annotate(cnt=_C("id"))
+                .order_by("-cnt")
+                .first()
+            )
             if top:
-                company = Company.objects.get(pk=top['company'])
+                company = Company.objects.get(pk=top["company"])
     if not company:
         from companies.models import Company
-        company = Company.objects.filter(is_active=True).order_by('name').first()
+
+        company = Company.objects.filter(is_active=True).order_by("name").first()
     if not company:
-        return redirect('pos:dashboard')
+        return redirect("pos:dashboard")
 
     from .models import POSCashier as _PC
     from .models import POSSettings as _PS
+
     settings_obj, _ = _PS.objects.get_or_create(company=company)
     cashiers = list(_PC.objects.filter(company=company, is_active=True))
 
     # Tax rates
     try:
         from companies.models import TaxRate
-        tax_rates = list(TaxRate.objects.all().values('id', 'name', 'rate'))
+
+        tax_rates = list(TaxRate.objects.all().values("id", "name", "rate"))
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         tax_rates = []
@@ -1750,10 +2072,11 @@ def pos_settings(request):
     # Inventory items (first 200)
     try:
         from inventory.models import InventoryItem
+
         inv_items = list(
             InventoryItem.objects.filter(company=company, is_active=True)
-            .select_related('tax_rate')
-            .order_by('name')[:200]
+            .select_related("tax_rate")
+            .order_by("name")[:200]
         )
         cat_choices = InventoryItem.CATEGORY_CHOICES
     except DatabaseError:
@@ -1765,13 +2088,13 @@ def pos_settings(request):
     thirty_ago = date.today() - timedelta(days=30)
     try:
         daily_rev = list(
-            POSReceipt.objects
-            .filter(session__terminal__company=company, status='paid',
-                    paid_at__isnull=False, paid_at__date__gte=thirty_ago)
-            .annotate(day=TruncDate('paid_at'))
-            .values('day')
-            .annotate(total=Sum('total'), count=Count('id'))
-            .order_by('day')
+            POSReceipt.objects.filter(
+                session__terminal__company=company, status="paid", paid_at__isnull=False, paid_at__date__gte=thirty_ago
+            )
+            .annotate(day=TruncDate("paid_at"))
+            .values("day")
+            .annotate(total=Sum("total"), count=Count("id"))
+            .order_by("day")
         )
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
@@ -1779,11 +2102,10 @@ def pos_settings(request):
 
     try:
         top_items = list(
-            POSReceiptItem.objects
-            .filter(receipt__session__terminal__company=company, receipt__status='paid')
-            .values('description')
-            .annotate(qty=Sum('quantity'), revenue=Sum('total_price'))
-            .order_by('-revenue')[:10]
+            POSReceiptItem.objects.filter(receipt__session__terminal__company=company, receipt__status="paid")
+            .values("description")
+            .annotate(qty=Sum("quantity"), revenue=Sum("total_price"))
+            .order_by("-revenue")[:10]
         )
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
@@ -1791,125 +2113,138 @@ def pos_settings(request):
 
     try:
         cashier_rev = list(
-            POSReceipt.objects
-            .filter(session__terminal__company=company, status='paid')
-            .values('session__operator__first_name', 'session__operator__last_name',
-                    'session__operator__username')
-            .annotate(revenue=Sum('total'), count=Count('id'))
-            .order_by('-revenue')[:10]
+            POSReceipt.objects.filter(session__terminal__company=company, status="paid")
+            .values("session__operator__first_name", "session__operator__last_name", "session__operator__username")
+            .annotate(revenue=Sum("total"), count=Count("id"))
+            .order_by("-revenue")[:10]
         )
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         cashier_rev = []
 
-    chart_labels = _json.dumps([str(r['day']) for r in daily_rev])
-    chart_data   = _json.dumps([float(r['total']) for r in daily_rev])
+    chart_labels = _json.dumps([str(r["day"]) for r in daily_rev])
+    chart_data = _json.dumps([float(r["total"]) for r in daily_rev])
 
-    return render(request, 'pos/settings.html', {
-        'settings_obj': settings_obj,
-        'cashiers':     cashiers,
-        'tax_rates':    tax_rates,
-        'inv_items':    inv_items,
-        'cat_choices':  cat_choices,
-        'top_items':    top_items,
-        'cashier_rev':  cashier_rev,
-        'chart_labels': chart_labels,
-        'chart_data':   chart_data,
-    })
+    return render(
+        request,
+        "pos/settings.html",
+        {
+            "settings_obj": settings_obj,
+            "cashiers": cashiers,
+            "tax_rates": tax_rates,
+            "inv_items": inv_items,
+            "cat_choices": cat_choices,
+            "top_items": top_items,
+            "cashier_rev": cashier_rev,
+            "chart_labels": chart_labels,
+            "chart_data": chart_data,
+        },
+    )
 
 
 @login_required
 @require_POST
 def settings_save_printer(request):
     from .models import POSSettings as _PS
+
     company = get_current_company()
     s, _ = _PS.objects.get_or_create(company=company)
-    s.printer_type = request.POST.get('printer_type', 'thermal_usb')
-    s.printer_ip   = request.POST.get('printer_ip', '').strip()
+    s.printer_type = request.POST.get("printer_type", "thermal_usb")
+    s.printer_ip = request.POST.get("printer_ip", "").strip()
     try:
-        s.printer_port = int(request.POST.get('printer_port', 9100))
+        s.printer_port = int(request.POST.get("printer_port", 9100))
     except ValueError:
         s.printer_port = 9100
     # BEZ PAPIRA delivery fields
-    rd = request.POST.get('receipt_delivery', '')
+    rd = request.POST.get("receipt_delivery", "")
     if rd:
         s.receipt_delivery = rd
-    ap = request.POST.get('auto_print', '')
+    ap = request.POST.get("auto_print", "")
     if ap:
-        s.auto_print = ap == '1'
-    dk = request.POST.get('drawer_kick', '')
+        s.auto_print = ap == "1"
+    dk = request.POST.get("drawer_kick", "")
     if dk:
-        s.drawer_kick = dk == '1'
-    wm = request.POST.get('whatsapp_msg', '')
+        s.drawer_kick = dk == "1"
+    wm = request.POST.get("whatsapp_msg", "")
     if wm:
         s.whatsapp_default_msg = wm
-    es = request.POST.get('email_subject', '')
+    es = request.POST.get("email_subject", "")
     if es:
         s.receipt_email_subject = es
     s.save()
-    return JsonResponse({'ok': True, 'message': 'Postavke spremljene'})
+    return JsonResponse({"ok": True, "message": "Postavke spremljene"})
 
 
 @login_required
 @require_POST
 def settings_save_fiscal(request):
     from .models import POSSettings as _PS
+
     company = get_current_company()
     s, _ = _PS.objects.get_or_create(company=company)
-    if 'fiscal_cert' in request.FILES:
+    if "fiscal_cert" in request.FILES:
         if s.fiscal_cert:
             try:
                 s.fiscal_cert.delete(save=False)
             except Exception:
                 logger.warning("Suppressed error", exc_info=True)
-        s.fiscal_cert = request.FILES['fiscal_cert']
-    pwd = request.POST.get('fiscal_cert_password', '').strip()
+        s.fiscal_cert = request.FILES["fiscal_cert"]
+    pwd = request.POST.get("fiscal_cert_password", "").strip()
     if pwd:
         s.fiscal_cert_password = pwd
-    s.fiscal_oib    = request.POST.get('fiscal_oib', '').strip()
-    s.fiscal_active = request.POST.get('fiscal_active') == '1'
+    s.fiscal_oib = request.POST.get("fiscal_oib", "").strip()
+    s.fiscal_active = request.POST.get("fiscal_active") == "1"
     s.save()
-    return JsonResponse({
-        'ok':       True,
-        'message':  'Fiskalizacijske postavke spremljene',
-        'has_cert': bool(s.fiscal_cert),
-        'active':   s.fiscal_active,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "message": "Fiskalizacijske postavke spremljene",
+            "has_cert": bool(s.fiscal_cert),
+            "active": s.fiscal_active,
+        }
+    )
 
 
 @login_required
 @require_POST
 def settings_test_fiscal(request):
     from .models import POSSettings as _PS
+
     company = get_current_company()
     s, _ = _PS.objects.get_or_create(company=company)
     if not s.fiscal_cert:
-        return JsonResponse({'ok': False, 'error': 'Nije učitan certifikat (.p12)'})
+        return JsonResponse({"ok": False, "error": "Nije učitan certifikat (.p12)"})
     if not s.fiscal_oib or len(s.fiscal_oib) != 11:
-        return JsonResponse({'ok': False, 'error': 'OIB mora imati točno 11 znamenki'})
+        return JsonResponse({"ok": False, "error": "OIB mora imati točno 11 znamenki"})
     try:
         size = s.fiscal_cert.size
-        name = s.fiscal_cert.name.split('/')[-1]
+        name = s.fiscal_cert.name.split("/")[-1]
         # Try loading via fiskalizacija module
         try:
             from fiscal.service import fiscalize_pos_receipt as _fr  # noqa
-            msg = f'Certifikat OK ({name}, {size} B). Fiskalizacija modul dostupan.'
+
+            msg = f"Certifikat OK ({name}, {size} B). Fiskalizacija modul dostupan."
         except ImportError:
-            msg = f'Certifikat učitan ({name}, {size} B). Fiskalizacija modul nije konfiguriran.'
-        return JsonResponse({'ok': True, 'message': msg})
+            msg = f"Certifikat učitan ({name}, {size} B). Fiskalizacija modul nije konfiguriran."
+        return JsonResponse({"ok": True, "message": msg})
     except ImportError as e:
         logger.exception("Unexpected error", exc_info=True)
-        return JsonResponse({'ok': False, 'error': str(e)})
+        return JsonResponse({"ok": False, "error": str(e)})
 
 
 @login_required
 def settings_test_print(request):
     from django.utils import timezone as _tz
+
     company = get_current_company()
-    return render(request, 'pos/test_print.html', {
-        'company': company,
-        'now':     _tz.now(),
-    })
+    return render(
+        request,
+        "pos/test_print.html",
+        {
+            "company": company,
+            "now": _tz.now(),
+        },
+    )
 
 
 @login_required
@@ -1919,80 +2254,85 @@ def cashier_save(request):
     from decimal import Decimal, InvalidOperation
 
     from .models import POSCashier as _PC
+
     company = get_current_company()
-    cashier_id = request.POST.get('id') or None
-    name = request.POST.get('name', '').strip()
-    pin  = request.POST.get('pin', '').strip()
+    cashier_id = request.POST.get("id") or None
+    name = request.POST.get("name", "").strip()
+    pin = request.POST.get("pin", "").strip()
     if not name:
-        return JsonResponse({'ok': False, 'error': 'Ime blagajnika je obavezno'})
+        return JsonResponse({"ok": False, "error": "Ime blagajnika je obavezno"})
     if cashier_id:
         cashier = get_object_or_404(_PC, pk=cashier_id, company=company)
     else:
         if not (pin and len(pin) == 4 and pin.isdigit()):
-            return JsonResponse({'ok': False, 'error': 'PIN mora biti točno 4 znamenke'})
+            return JsonResponse({"ok": False, "error": "PIN mora biti točno 4 znamenke"})
         cashier = _PC(company=company)
     cashier.name = name
     if pin and len(pin) == 4 and pin.isdigit():
         cashier.pin_hash = hashlib.sha256(pin.encode()).hexdigest()
-    cashier.can_void     = request.POST.get('can_void') == '1'
-    cashier.can_discount = request.POST.get('can_discount') == '1'
+    cashier.can_void = request.POST.get("can_void") == "1"
+    cashier.can_discount = request.POST.get("can_discount") == "1"
     try:
-        cashier.max_discount_percent = Decimal(request.POST.get('max_discount_percent', '0'))
+        cashier.max_discount_percent = Decimal(request.POST.get("max_discount_percent", "0"))
     except InvalidOperation:
-        cashier.max_discount_percent = Decimal('0')
+        cashier.max_discount_percent = Decimal("0")
     cashier.save()
-    return JsonResponse({
-        'ok':   True,
-        'id':   cashier.pk,
-        'name': cashier.name,
-        'can_void':     cashier.can_void,
-        'can_discount': cashier.can_discount,
-        'max_discount_percent': str(cashier.max_discount_percent),
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": cashier.pk,
+            "name": cashier.name,
+            "can_void": cashier.can_void,
+            "can_discount": cashier.can_discount,
+            "max_discount_percent": str(cashier.max_discount_percent),
+        }
+    )
 
 
 @login_required
 @require_POST
 def cashier_delete(request, cashier_id):
     from .models import POSCashier as _PC
+
     cashier = get_object_or_404(_PC, pk=cashier_id, company=get_current_company())
     cashier.is_active = False
     cashier.save()
-    return JsonResponse({'ok': True})
+    return JsonResponse({"ok": True})
 
 
 @login_required
 @require_POST
 def inventory_item_save(request):
     from decimal import Decimal, InvalidOperation
+
     try:
         from inventory.models import InventoryItem
     except ImportError:
-        return JsonResponse({'ok': False, 'error': 'Inventory modul nije dostupan'})
+        return JsonResponse({"ok": False, "error": "Inventory modul nije dostupan"})
     company = get_current_company()
-    item_id = request.POST.get('id') or None
-    name = request.POST.get('name', '').strip()
+    item_id = request.POST.get("id") or None
+    name = request.POST.get("name", "").strip()
     if not name:
-        return JsonResponse({'ok': False, 'error': 'Naziv artikla je obavezan'})
+        return JsonResponse({"ok": False, "error": "Naziv artikla je obavezan"})
     if item_id:
         item = get_object_or_404(InventoryItem, pk=item_id)
     else:
         item = InventoryItem(company=company)
-    item.name     = name
-    item.sku      = request.POST.get('sku', '').strip()
-    item.barcode  = request.POST.get('barcode', '').strip()
-    item.category = request.POST.get('category', 'other').strip()
-    item.unit     = request.POST.get('unit', 'kom').strip() or 'kom'
-    item.description = request.POST.get('description', '').strip()
+    item.name = name
+    item.sku = request.POST.get("sku", "").strip()
+    item.barcode = request.POST.get("barcode", "").strip()
+    item.category = request.POST.get("category", "other").strip()
+    item.unit = request.POST.get("unit", "kom").strip() or "kom"
+    item.description = request.POST.get("description", "").strip()
     try:
-        item.purchase_price = Decimal(request.POST.get('purchase_price', '0').replace(',', '.'))
+        item.purchase_price = Decimal(request.POST.get("purchase_price", "0").replace(",", "."))
     except InvalidOperation:
-        item.purchase_price = Decimal('0')
+        item.purchase_price = Decimal("0")
     try:
-        item.unit_price = Decimal(request.POST.get('unit_price', '0').replace(',', '.'))
+        item.unit_price = Decimal(request.POST.get("unit_price", "0").replace(",", "."))
     except InvalidOperation:
-        item.unit_price = Decimal('0')
-    tax_rate_id = request.POST.get('tax_rate_id')
+        item.unit_price = Decimal("0")
+    tax_rate_id = request.POST.get("tax_rate_id")
     if tax_rate_id:
         try:
             item.tax_rate_id = int(tax_rate_id)
@@ -2000,15 +2340,17 @@ def inventory_item_save(request):
             pass
     item.is_active = True
     item.save()
-    return JsonResponse({
-        'ok':       True,
-        'id':       item.pk,
-        'name':     item.name,
-        'sku':      item.sku,
-        'barcode':  item.barcode,
-        'unit_price':     str(item.unit_price),
-        'purchase_price': str(item.purchase_price),
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": item.pk,
+            "name": item.name,
+            "sku": item.sku,
+            "barcode": item.barcode,
+            "unit_price": str(item.unit_price),
+            "purchase_price": str(item.purchase_price),
+        }
+    )
 
 
 @login_required
@@ -2017,58 +2359,57 @@ def inventory_csv_import(request):
     import csv
     import io
     from decimal import Decimal, InvalidOperation
+
     try:
         from companies.models import TaxRate
         from inventory.models import InventoryItem
     except ImportError:
-        return JsonResponse({'ok': False, 'error': 'Inventory modul nije dostupan'})
+        return JsonResponse({"ok": False, "error": "Inventory modul nije dostupan"})
     company = get_current_company()
-    csv_file = request.FILES.get('csv_file')
+    csv_file = request.FILES.get("csv_file")
     if not csv_file:
-        return JsonResponse({'ok': False, 'error': 'Nema datoteke'})
+        return JsonResponse({"ok": False, "error": "Nema datoteke"})
     try:
         raw = csv_file.read()
         try:
-            content = raw.decode('utf-8-sig')
+            content = raw.decode("utf-8-sig")
         except UnicodeDecodeError:
-            content = raw.decode('latin-1')
+            content = raw.decode("latin-1")
         # Detect delimiter
-        first_line = content.split('\n')[0]
-        delimiter = ';' if first_line.count(';') > first_line.count(',') else ','
+        first_line = content.split("\n")[0]
+        delimiter = ";" if first_line.count(";") > first_line.count(",") else ","
         reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
         created = updated = errors = 0
         for row in reader:
             try:
-                name = (row.get('name') or row.get('naziv') or row.get('Naziv') or '').strip()
+                name = (row.get("name") or row.get("naziv") or row.get("Naziv") or "").strip()
                 if not name:
                     continue
-                sku = (row.get('sku') or row.get('sifra') or row.get('SKU') or '').strip()
+                sku = (row.get("sku") or row.get("sifra") or row.get("SKU") or "").strip()
                 if sku:
-                    item, new = InventoryItem.objects.get_or_create(
-                        company=company, sku=sku, defaults={'name': name}
-                    )
+                    item, new = InventoryItem.objects.get_or_create(company=company, sku=sku, defaults={"name": name})
                 else:
-                    item, new = InventoryItem.objects.get_or_create(
-                        company=company, name=name
-                    )
-                item.name    = name
-                item.sku     = sku
-                item.barcode = (row.get('barcode') or row.get('barkod') or '').strip()
-                item.category = (row.get('category') or row.get('kategorija') or 'other').strip() or 'other'
-                item.unit    = (row.get('unit') or row.get('jmj') or 'kom').strip() or 'kom'
-                def _dec(key_list, default='0'):
+                    item, new = InventoryItem.objects.get_or_create(company=company, name=name)
+                item.name = name
+                item.sku = sku
+                item.barcode = (row.get("barcode") or row.get("barkod") or "").strip()
+                item.category = (row.get("category") or row.get("kategorija") or "other").strip() or "other"
+                item.unit = (row.get("unit") or row.get("jmj") or "kom").strip() or "kom"
+
+                def _dec(key_list, default="0"):
                     for k in key_list:
-                        v = row.get(k, '').strip()
+                        v = row.get(k, "").strip()
                         if v:
                             try:
-                                return Decimal(v.replace(',', '.'))
+                                return Decimal(v.replace(",", "."))
                             except InvalidOperation:
                                 pass
                     return Decimal(default)
-                item.purchase_price = _dec(['purchase_price', 'nabavna_cijena', 'nabavna'])
-                item.unit_price     = _dec(['unit_price', 'prodajna_cijena', 'prodajna'])
+
+                item.purchase_price = _dec(["purchase_price", "nabavna_cijena", "nabavna"])
+                item.unit_price = _dec(["unit_price", "prodajna_cijena", "prodajna"])
                 # Tax rate
-                tax_pct = _dec(['tax_rate', 'pdv', 'PDV'], '25')
+                tax_pct = _dec(["tax_rate", "pdv", "PDV"], "25")
                 tax_obj = TaxRate.objects.filter(rate=tax_pct).first()
                 if tax_obj:
                     item.tax_rate = tax_obj
@@ -2081,16 +2422,18 @@ def inventory_csv_import(request):
             except (ValueError, TypeError):
                 logger.warning("Suppressed error", exc_info=True)
                 errors += 1
-        return JsonResponse({
-            'ok':      True,
-            'created': created,
-            'updated': updated,
-            'errors':  errors,
-            'message': f'Uvoz završen: {created} novih, {updated} ažuriranih, {errors} grešaka',
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "created": created,
+                "updated": updated,
+                "errors": errors,
+                "message": f"Uvoz završen: {created} novih, {updated} ažuriranih, {errors} grešaka",
+            }
+        )
     except (ValueError, TypeError) as e:
         logger.exception("Unexpected error", exc_info=True)
-        return JsonResponse({'ok': False, 'error': str(e)})
+        return JsonResponse({"ok": False, "error": str(e)})
 
 
 @login_required
@@ -2101,70 +2444,78 @@ def reports_export(request):
     from django.db.models import Count, Sum
     from django.db.models.functions import TruncDate
     from django.http import HttpResponse
-    fmt   = request.GET.get('format', 'csv')
-    rtype = request.GET.get('type', 'daily')
-    days  = max(1, min(365, int(request.GET.get('days', 30))))
-    company    = get_current_company()
+
+    fmt = request.GET.get("format", "csv")
+    rtype = request.GET.get("type", "daily")
+    days = max(1, min(365, int(request.GET.get("days", 30))))
+    company = get_current_company()
     start_date = date.today() - timedelta(days=days)
-    if rtype == 'daily':
+    if rtype == "daily":
         qs = (
-            POSReceipt.objects
-            .filter(session__terminal__company=company, status='paid',
-                    paid_at__isnull=False, paid_at__date__gte=start_date)
-            .annotate(day=TruncDate('paid_at'))
-            .values('day')
-            .annotate(total=Sum('total'), count=Count('id'))
-            .order_by('day')
+            POSReceipt.objects.filter(
+                session__terminal__company=company, status="paid", paid_at__isnull=False, paid_at__date__gte=start_date
+            )
+            .annotate(day=TruncDate("paid_at"))
+            .values("day")
+            .annotate(total=Sum("total"), count=Count("id"))
+            .order_by("day")
         )
-        headers = ['Datum', 'Broj bonova', 'Ukupno (EUR)']
-        rows = [(str(r['day']), r['count'], f"{float(r['total']):.2f}") for r in qs]
-        fname = f'pos_dnevni_{date.today()}'
-    elif rtype == 'items':
+        headers = ["Datum", "Broj bonova", "Ukupno (EUR)"]
+        rows = [(str(r["day"]), r["count"], f"{float(r['total']):.2f}") for r in qs]
+        fname = f"pos_dnevni_{date.today()}"
+    elif rtype == "items":
         qs = (
-            POSReceiptItem.objects
-            .filter(receipt__session__terminal__company=company, receipt__status='paid',
-                    receipt__paid_at__isnull=False, receipt__paid_at__date__gte=start_date)
-            .values('description')
-            .annotate(qty=Sum('quantity'), revenue=Sum('total_price'))
-            .order_by('-revenue')[:100]
+            POSReceiptItem.objects.filter(
+                receipt__session__terminal__company=company,
+                receipt__status="paid",
+                receipt__paid_at__isnull=False,
+                receipt__paid_at__date__gte=start_date,
+            )
+            .values("description")
+            .annotate(qty=Sum("quantity"), revenue=Sum("total_price"))
+            .order_by("-revenue")[:100]
         )
-        headers = ['Artikal', 'Količina', 'Prihod (EUR)']
-        rows = [(r['description'], f"{float(r['qty']):.3f}", f"{float(r['revenue']):.2f}") for r in qs]
-        fname = f'pos_artikli_{date.today()}'
-    elif rtype == 'cashiers':
+        headers = ["Artikal", "Količina", "Prihod (EUR)"]
+        rows = [(r["description"], f"{float(r['qty']):.3f}", f"{float(r['revenue']):.2f}") for r in qs]
+        fname = f"pos_artikli_{date.today()}"
+    elif rtype == "cashiers":
         qs = (
-            POSReceipt.objects
-            .filter(session__terminal__company=company, status='paid',
-                    paid_at__isnull=False, paid_at__date__gte=start_date)
-            .values('session__operator__first_name', 'session__operator__last_name',
-                    'session__operator__username')
-            .annotate(revenue=Sum('total'), count=Count('id'))
-            .order_by('-revenue')
+            POSReceipt.objects.filter(
+                session__terminal__company=company, status="paid", paid_at__isnull=False, paid_at__date__gte=start_date
+            )
+            .values("session__operator__first_name", "session__operator__last_name", "session__operator__username")
+            .annotate(revenue=Sum("total"), count=Count("id"))
+            .order_by("-revenue")
         )
-        headers = ['Blagajnik', 'Broj bonova', 'Ukupni prihod (EUR)']
+        headers = ["Blagajnik", "Broj bonova", "Ukupni prihod (EUR)"]
         rows = []
         for r in qs:
-            name = f"{r.get('session__operator__first_name','')} {r.get('session__operator__last_name','')}".strip() or r.get('session__operator__username', '?')
-            rows.append((name, r['count'], f"{float(r['revenue']):.2f}"))
-        fname = f'pos_blagajnici_{date.today()}'
+            name = (
+                f"{r.get('session__operator__first_name', '')} {r.get('session__operator__last_name', '')}".strip()
+                or r.get("session__operator__username", "?")
+            )
+            rows.append((name, r["count"], f"{float(r['revenue']):.2f}"))
+        fname = f"pos_blagajnici_{date.today()}"
     else:
-        return HttpResponse('Nepoznat tip izvještaja', status=400)
-    if fmt == 'xlsx':
+        return HttpResponse("Nepoznat tip izvještaja", status=400)
+    if fmt == "xlsx":
         try:
             from io import BytesIO
 
             import openpyxl
+
             wb = openpyxl.Workbook()
             ws = wb.active
-            ws.title = 'Izvještaj'
+            ws.title = "Izvještaj"
             # Header style
             from openpyxl.styles import Alignment, Font, PatternFill
-            header_fill = PatternFill(start_color='1a1a1a', end_color='1a1a1a', fill_type='solid')
+
+            header_fill = PatternFill(start_color="1a1a1a", end_color="1a1a1a", fill_type="solid")
             for col, h in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=h)
-                cell.font      = Font(bold=True, color='C9A84C')
-                cell.fill      = header_fill
-                cell.alignment = Alignment(horizontal='center')
+                cell.font = Font(bold=True, color="C9A84C")
+                cell.fill = header_fill
+                cell.alignment = Alignment(horizontal="center")
             for row in rows:
                 ws.append(list(row))
             for col in ws.columns:
@@ -2174,17 +2525,17 @@ def reports_export(request):
             buf.seek(0)
             resp = HttpResponse(
                 buf.read(),
-                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-            resp['Content-Disposition'] = f'attachment; filename="{fname}.xlsx"'
+            resp["Content-Disposition"] = f'attachment; filename="{fname}.xlsx"'
             return resp
         except ImportError:
             pass  # fall through to CSV
     # CSV (default / fallback)
-    resp = HttpResponse(content_type='text/csv; charset=utf-8')
-    resp['Content-Disposition'] = f'attachment; filename="{fname}.csv"'
-    resp.write('\ufeff')
-    writer = _csv.writer(resp, delimiter=';')
+    resp = HttpResponse(content_type="text/csv; charset=utf-8")
+    resp["Content-Disposition"] = f'attachment; filename="{fname}.csv"'
+    resp.write("\ufeff")
+    writer = _csv.writer(resp, delimiter=";")
     writer.writerow(headers)
     writer.writerows(rows)
     return resp
@@ -2194,15 +2545,18 @@ def reports_export(request):
 # GASTRO POS — Dashboard, Kitchen Display, Orders
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @login_required
 def gastro_dashboard(request):
     """Table grid + active orders. Annotates tables with active order for colour coding."""
     from .models import GastroOrder, Table
-    tables = list(Table.objects.filter(is_active=True).select_related("company", "branch").order_by('floor', 'name'))
+
+    tables = list(Table.objects.filter(is_active=True).select_related("company", "branch").order_by("floor", "name"))
     active_orders = list(
-        GastroOrder.objects.filter(
-            status__in=['new', 'confirmed', 'preparing', 'ready', 'delivering']
-        ).select_related('table').prefetch_related('items__inventory_item').order_by('created_at')
+        GastroOrder.objects.filter(status__in=["new", "confirmed", "preparing", "ready", "delivering"])
+        .select_related("table")
+        .prefetch_related("items__inventory_item")
+        .order_by("created_at")
     )
     table_order_map = {}
     for o in active_orders:
@@ -2210,33 +2564,46 @@ def gastro_dashboard(request):
             table_order_map[o.table_id] = o
     for t in tables:
         t.active_order = table_order_map.get(t.pk)
-    return render(request, 'pos/gastro/dashboard.html', {
-        'tables': tables,
-        'active_orders': active_orders,
-    })
+    return render(
+        request,
+        "pos/gastro/dashboard.html",
+        {
+            "tables": tables,
+            "active_orders": active_orders,
+        },
+    )
 
 
 @login_required
 def gastro_table_order(request, table_id):
     """Manage order for a specific table."""
     from .models import GastroOrder, Table
+
     table = get_object_or_404(Table, pk=table_id)
-    active_order = GastroOrder.objects.filter(
-        table=table, status__in=['new', 'confirmed', 'preparing', 'ready']
-    ).prefetch_related('items__inventory_item').first()
+    active_order = (
+        GastroOrder.objects.filter(table=table, status__in=["new", "confirmed", "preparing", "ready"])
+        .prefetch_related("items__inventory_item")
+        .first()
+    )
     company = get_user_company(request)
-    items = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate').order_by('name')[:300]
-    return render(request, 'pos/gastro/table_order.html', {
-        'table': table,
-        'order': active_order,
-        'inventory_items': items,
-    })
+    items = (
+        InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate").order_by("name")[:300]
+    )
+    return render(
+        request,
+        "pos/gastro/table_order.html",
+        {
+            "table": table,
+            "order": active_order,
+            "inventory_items": items,
+        },
+    )
 
 
 @login_required
 def gastro_kitchen(request):
     """Kitchen Display System — renders the kitchen template."""
-    return render(request, 'pos/gastro/kitchen.html')
+    return render(request, "pos/gastro/kitchen.html")
 
 
 @login_required
@@ -2245,32 +2612,38 @@ def gastro_kitchen_api(request):
     from django.utils import timezone as tz
 
     from .models import GastroOrder
-    orders = GastroOrder.objects.filter(
-        status__in=['new', 'confirmed', 'preparing']
-    ).select_related('table').prefetch_related('items__inventory_item').order_by('created_at')
+
+    orders = (
+        GastroOrder.objects.filter(status__in=["new", "confirmed", "preparing"])
+        .select_related("table")
+        .prefetch_related("items__inventory_item")
+        .order_by("created_at")
+    )
     data = []
     for o in orders:
-        data.append({
-            'id': o.pk,
-            'table': o.table.name if o.table else 'N/A',
-            'floor': o.table.floor if o.table else '',
-            'status': o.status,
-            'status_display': o.get_status_display(),
-            'notes': o.notes,
-            'guest_name': o.guest_name,
-            'created_at': o.created_at.isoformat(),
-            'wait_minutes': int((tz.now() - o.created_at).total_seconds() / 60),
-            'items': [
-                {
-                    'name': i.inventory_item.name if i.inventory_item else 'N/A',
-                    'quantity': str(i.quantity),
-                    'notes': i.notes,
-                    'is_ready': i.is_ready,
-                }
-                for i in o.items.all()
-            ],
-        })
-    return JsonResponse({'ok': True, 'orders': data})
+        data.append(
+            {
+                "id": o.pk,
+                "table": o.table.name if o.table else "N/A",
+                "floor": o.table.floor if o.table else "",
+                "status": o.status,
+                "status_display": o.get_status_display(),
+                "notes": o.notes,
+                "guest_name": o.guest_name,
+                "created_at": o.created_at.isoformat(),
+                "wait_minutes": int((tz.now() - o.created_at).total_seconds() / 60),
+                "items": [
+                    {
+                        "name": i.inventory_item.name if i.inventory_item else "N/A",
+                        "quantity": str(i.quantity),
+                        "notes": i.notes,
+                        "is_ready": i.is_ready,
+                    }
+                    for i in o.items.all()
+                ],
+            }
+        )
+    return JsonResponse({"ok": True, "orders": data})
 
 
 @login_required
@@ -2278,24 +2651,25 @@ def gastro_kitchen_api(request):
 def gastro_order_update(request, order_id):
     """Change order status."""
     from .models import GastroOrder
+
     order = get_object_or_404(GastroOrder, pk=order_id)
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
-    new_status = data.get('status')
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+    new_status = data.get("status")
     valid = dict(GastroOrder.STATUS_CHOICES)
     if new_status and new_status in valid:
         order.status = new_status
-        order.save(update_fields=['status', 'updated_at'])
-        if order.table and new_status in ('paid', 'cancelled'):
+        order.save(update_fields=["status", "updated_at"])
+        if order.table and new_status in ("paid", "cancelled"):
             order.table.is_occupied = False
-            order.table.save(update_fields=['is_occupied'])
-        elif order.table and new_status not in ('paid', 'cancelled', 'delivered'):
+            order.table.save(update_fields=["is_occupied"])
+        elif order.table and new_status not in ("paid", "cancelled", "delivered"):
             order.table.is_occupied = True
-            order.table.save(update_fields=['is_occupied'])
-        return JsonResponse({'ok': True, 'status': order.get_status_display()})
-    return JsonResponse({'ok': False, 'error': 'Invalid status'}, status=400)
+            order.table.save(update_fields=["is_occupied"])
+        return JsonResponse({"ok": True, "status": order.get_status_display()})
+    return JsonResponse({"ok": False, "error": "Invalid status"}, status=400)
 
 
 @login_required
@@ -2324,30 +2698,32 @@ def table_checkout(request, table_id):
 
     # Sve aktivne narudžbe za stol
     orders = GastroOrder.objects.filter(
-        table=table, status__in=['delivered', 'ready', 'confirmed', 'preparing', 'new']
-    ).prefetch_related('items__inventory_item')
+        table=table, status__in=["delivered", "ready", "confirmed", "preparing", "new"]
+    ).prefetch_related("items__inventory_item")
 
     # Skupi sve stavke u flat listu
     all_items = []
     for order in orders:
-        for item in order.items.select_related('inventory_item'):
+        for item in order.items.select_related("inventory_item"):
             inv = item.inventory_item
-            price = inv.unit_price if inv else Decimal('0')
-            tax = inv.tax_rate.rate if inv and inv.tax_rate else Decimal('25')
-            all_items.append({
-                'order_item_id': item.pk,
-                'order_id': order.pk,
-                'name': inv.name if inv else 'Artikl',
-                'quantity': item.quantity,
-                'unit_price': price,
-                'tax_rate': tax,
-                'notes': item.notes,
-                'total': price * item.quantity,
-            })
+            price = inv.unit_price if inv else Decimal("0")
+            tax = inv.tax_rate.rate if inv and inv.tax_rate else Decimal("25")
+            all_items.append(
+                {
+                    "order_item_id": item.pk,
+                    "order_id": order.pk,
+                    "name": inv.name if inv else "Artikl",
+                    "quantity": item.quantity,
+                    "unit_price": price,
+                    "tax_rate": tax,
+                    "notes": item.notes,
+                    "total": price * item.quantity,
+                }
+            )
 
-    grand_total = sum(i['total'] for i in all_items)
+    grand_total = sum(i["total"] for i in all_items)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         """
         POST data format:
         {
@@ -2360,54 +2736,65 @@ def table_checkout(request, table_id):
         try:
             data = json.loads(request.body)
         except (json.JSONDecodeError, ValueError):
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-        bills = data.get('bills', [])
+        bills = data.get("bills", [])
         if not bills:
-            return JsonResponse({'error': 'Nema računa za kreiranje'}, status=400)
+            return JsonResponse({"error": "Nema računa za kreiranje"}, status=400)
 
         # Nađi aktivan terminal i sesiju
-        terminal = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").first()
+        terminal = (
+            POSTerminal.objects.filter(company=company, is_active=True)
+            .select_related("company", "workspace", "business_location")
+            .first()
+        )
         if not terminal:
-            return JsonResponse({'error': 'Nema aktivnog terminala'}, status=400)
-        session = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
+            return JsonResponse({"error": "Nema aktivnog terminala"}, status=400)
+        session = (
+            POSSession.objects.filter(terminal=terminal, status="open")
+            .select_related("terminal", "operator", "active_cashiers")
+            .first()
+        )
         if not session:
-            return JsonResponse({'error': 'Nema otvorene smjene'}, status=400)
+            return JsonResponse({"error": "Nema otvorene smjene"}, status=400)
 
         created_receipts = []
         for bill in bills:
-            guest_name = bill.get('guest', 'Gost')
-            method = bill.get('method', 'CASH')
-            item_ids = bill.get('items', [])
+            guest_name = bill.get("guest", "Gost")
+            method = bill.get("method", "CASH")
+            item_ids = bill.get("items", [])
             if not item_ids:
                 continue
 
             # Kreiraj receipt
             from django.utils import timezone
+
             next_num = (session.receipts.count() or 0) + 1
             receipt = POSReceipt.objects.create(
                 session=session,
                 receipt_number=next_num,
                 table_number=table.name,
-                note='Stol %s — %s' % (table.name, guest_name),
-                status='paid',
+                note="Stol %s — %s" % (table.name, guest_name),
+                status="paid",
                 paid_at=timezone.now(),
             )
 
-            receipt_total = Decimal('0')
+            receipt_total = Decimal("0")
             for oi_id in item_ids:
                 try:
-                    oi = GastroOrderItem.objects.select_related('inventory_item', 'inventory_item__tax_rate').get(pk=oi_id)
+                    oi = GastroOrderItem.objects.select_related("inventory_item", "inventory_item__tax_rate").get(
+                        pk=oi_id
+                    )
                 except GastroOrderItem.DoesNotExist:
                     continue
                 inv = oi.inventory_item
-                price = inv.unit_price if inv else Decimal('0')
-                tax = inv.tax_rate.rate if inv and inv.tax_rate else Decimal('25')
+                price = inv.unit_price if inv else Decimal("0")
+                tax = inv.tax_rate.rate if inv and inv.tax_rate else Decimal("25")
                 line_total = price * oi.quantity
                 POSReceiptItem.objects.create(
                     receipt=receipt,
                     inventory_item=inv,
-                    description=inv.name if inv else '',
+                    description=inv.name if inv else "",
                     quantity=oi.quantity,
                     unit_price=price,
                     tax_rate=tax,
@@ -2416,7 +2803,7 @@ def table_checkout(request, table_id):
                 receipt_total += line_total
 
             # Update receipt totals
-            tax_amount = receipt_total * Decimal('0.2')  # approx, real calc from items
+            tax_amount = receipt_total * Decimal("0.2")  # approx, real calc from items
             receipt.total = receipt_total
             receipt.subtotal = receipt_total - tax_amount
             receipt.tax_amount = tax_amount
@@ -2429,46 +2816,56 @@ def table_checkout(request, table_id):
                 amount=receipt_total,
             )
 
-            created_receipts.append({
-                'receipt_id': receipt.pk,
-                'guest': guest_name,
-                'total': str(receipt_total),
-                'method': method,
-            })
+            created_receipts.append(
+                {
+                    "receipt_id": receipt.pk,
+                    "guest": guest_name,
+                    "total": str(receipt_total),
+                    "method": method,
+                }
+            )
 
         # Fiskalizacija svih racuna
         for cr in created_receipts:
             try:
                 from fiscal.service import fiscalize_pos_receipt
-                r = POSReceipt.objects.get(pk=cr['receipt_id'])
+
+                r = POSReceipt.objects.get(pk=cr["receipt_id"])
                 jir = fiscalize_pos_receipt(r)
                 if jir:
-                    cr['jir'] = jir[:12]
+                    cr["jir"] = jir[:12]
             except ObjectDoesNotExist as e:
                 import logging
-                logging.getLogger('pos').warning('Fiskalizacija table checkout: %s' % e)
-                cr['jir'] = None
+
+                logging.getLogger("pos").warning("Fiskalizacija table checkout: %s" % e)
+                cr["jir"] = None
 
         # Zatvori narudžbe i oslobodi stol
         for order in orders:
-            order.status = 'paid'
-            order.save(update_fields=['status', 'updated_at'])
+            order.status = "paid"
+            order.save(update_fields=["status", "updated_at"])
         table.is_occupied = False
-        table.save(update_fields=['is_occupied'])
+        table.save(update_fields=["is_occupied"])
 
-        return JsonResponse({
-            'ok': True,
-            'receipts': created_receipts,
-            'table': table.name,
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "receipts": created_receipts,
+                "table": table.name,
+            }
+        )
 
     # GET — renderaj checkout stranicu
-    return render(request, 'pos/gastro/table_checkout.html', {
-        'table': table,
-        'orders': orders,
-        'all_items': all_items,
-        'grand_total': grand_total,
-    })
+    return render(
+        request,
+        "pos/gastro/table_checkout.html",
+        {
+            "table": table,
+            "orders": orders,
+            "all_items": all_items,
+            "grand_total": grand_total,
+        },
+    )
 
 
 @login_required
@@ -2476,58 +2873,71 @@ def table_checkout(request, table_id):
 def gastro_order_add_item(request, order_id):
     """Add item to a gastro order."""
     from .models import GastroOrder, GastroOrderItem
+
     order = get_object_or_404(GastroOrder, pk=order_id)
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
-    inv_id = data.get('inventory_item_id')
-    qty = Decimal(str(data.get('quantity', 1)))
-    notes = data.get('notes', '')
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+    inv_id = data.get("inventory_item_id")
+    qty = Decimal(str(data.get("quantity", 1)))
+    notes = data.get("notes", "")
     item = GastroOrderItem.objects.create(
         order=order,
         inventory_item_id=inv_id,
         quantity=qty,
         notes=notes,
     )
-    return JsonResponse({
-        'ok': True,
-        'item_id': item.pk,
-        'name': item.inventory_item.name if item.inventory_item else '',
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "item_id": item.pk,
+            "name": item.inventory_item.name if item.inventory_item else "",
+        }
+    )
 
 
 def gastro_order_public(request, token):
     """Public tracking page for guest (no login)."""
     from .models import GastroOrder
+
     order = get_object_or_404(GastroOrder, tracking_token=token)
-    items = order.items.select_related('inventory_item').all()
-    return render(request, 'pos/gastro/public_tracking.html', {
-        'order': order,
-        'items': items,
-    })
+    items = order.items.select_related("inventory_item").all()
+    return render(
+        request,
+        "pos/gastro/public_tracking.html",
+        {
+            "order": order,
+            "items": items,
+        },
+    )
 
 
 def gastro_qr(request, qr_code):
     """QR code menu + ordering (no login required)."""
     from .models import GastroOrder, GastroOrderItem, Table
-    table = get_object_or_404(Table.objects.unscoped(), qr_code=qr_code, is_active=True)
-    items = InventoryItem.objects.unscoped().filter(
-        company=table.company, is_active=True, category__in=["food","drink","dessert","special"]
-    ).select_related('tax_rate').order_by('category', 'name')
 
-    if request.method == 'POST':
+    table = get_object_or_404(Table.objects.unscoped(), qr_code=qr_code, is_active=True)
+    items = (
+        InventoryItem.objects.unscoped()
+        .filter(company=table.company, is_active=True, category__in=["food", "drink", "dessert", "special"])
+        .select_related("tax_rate")
+        .order_by("category", "name")
+    )
+
+    if request.method == "POST":
         import json
+
         try:
-            cart = json.loads(request.POST.get('cart', '[]'))
-            guest_name = request.POST.get('guest_name', '').strip()
-            guest_email = request.POST.get('guest_email', '').strip()
-            notes = request.POST.get('notes', '').strip()
+            cart = json.loads(request.POST.get("cart", "[]"))
+            guest_name = request.POST.get("guest_name", "").strip()
+            guest_email = request.POST.get("guest_email", "").strip()
+            notes = request.POST.get("notes", "").strip()
 
             if not cart:
-                return JsonResponse({'error': 'Kosara je prazna.'}, status=400)
+                return JsonResponse({"error": "Kosara je prazna."}, status=400)
             if not guest_name:
-                return JsonResponse({'error': 'Ime je obavezno.'}, status=400)
+                return JsonResponse({"error": "Ime je obavezno."}, status=400)
 
             # B-08 FIX: transaction.atomic + select_for_update za race condition
             with transaction.atomic():
@@ -2537,36 +2947,43 @@ def gastro_qr(request, qr_code):
                     guest_name=guest_name,
                     guest_email=guest_email,
                     notes=notes,
-                    status='new',
+                    status="new",
                 )
                 table.is_occupied = True
-                table.save(update_fields=['is_occupied'])
+                table.save(update_fields=["is_occupied"])
 
                 for item in cart:
-                    inv_item = InventoryItem.objects.unscoped().filter(
-                        pk=item['id'], company=table.company, is_active=True, category__in=["food","drink","dessert","special"]
-                    ).first()
+                    inv_item = (
+                        InventoryItem.objects.unscoped()
+                        .filter(
+                            pk=item["id"],
+                            company=table.company,
+                            is_active=True,
+                            category__in=["food", "drink", "dessert", "special"],
+                        )
+                        .first()
+                    )
                     if inv_item:
-                        qty = int(item.get('qty', 1))
-                        is_gastro = inv_item.category in ('food', 'drink', 'dessert', 'special')
-                        allow_neg = getattr(table.company, 'allow_negative_stock', True)
+                        qty = int(item.get("qty", 1))
+                        is_gastro = inv_item.category in ("food", "drink", "dessert", "special")
+                        allow_neg = getattr(table.company, "allow_negative_stock", True)
                         if is_gastro and not allow_neg:
                             # B-08: Lock row to prevent race condition
                             locked = InventoryItem.objects.select_for_update().get(pk=inv_item.pk)
                             if locked.quantity < qty:
-                                raise ValueError(f'{locked.name} nije dostupan (dostupno: {locked.quantity})')
+                                raise ValueError(f"{locked.name} nije dostupan (dostupno: {locked.quantity})")
                             locked.quantity = locked.quantity - qty
-                            locked.save(update_fields=['quantity'])
+                            locked.save(update_fields=["quantity"])
                         elif is_gastro:
                             # Allow negative stock — still lock to prevent inconsistency
                             locked = InventoryItem.objects.select_for_update().get(pk=inv_item.pk)
                             locked.quantity = locked.quantity - qty
-                            locked.save(update_fields=['quantity'])
+                            locked.save(update_fields=["quantity"])
                         GastroOrderItem.objects.create(
                             order=order,
                             inventory_item=inv_item,
                             quantity=qty,
-                            notes=item.get('notes', ''),
+                            notes=item.get("notes", ""),
                         )
                         # Auto-pfand: add deposit item if linked
                         if inv_item.linked_pfand_item:
@@ -2574,80 +2991,92 @@ def gastro_qr(request, qr_code):
                                 order=order,
                                 inventory_item=inv_item.linked_pfand_item,
                                 quantity=qty,
-                                notes='Povratna ambalaza',
+                                notes="Povratna ambalaza",
                             )
 
             # Payment processing
-            payment_method = request.POST.get('payment_method', 'cash')
+            payment_method = request.POST.get("payment_method", "cash")
             payment_url = None
-            if payment_method in ('stripe', 'btcpay'):
+            if payment_method in ("stripe", "btcpay"):
                 try:
                     from decimal import Decimal
 
                     from payments.services import create_payment
+
                     total = sum(
                         (i.inventory_item.unit_price or 0) * i.quantity
-                        for i in order.items.select_related('inventory_item').all()
+                        for i in order.items.select_related("inventory_item").all()
                     )
-                    base_url = request.build_absolute_uri('/').rstrip('/')
+                    base_url = request.build_absolute_uri("/").rstrip("/")
                     payment = create_payment(
                         company=table.company,
-                        source='gastro_qr',
+                        source="gastro_qr",
                         source_id=str(order.pk),
                         amount=Decimal(str(total)),
                         method=payment_method,
                         customer_email=guest_email,
                         customer_name=guest_name,
-                        description=f'Narudzba #{order.pk} - {table.name}',
-                        success_url=base_url + f'/pos/gastro/order/{order.tracking_token}/',
+                        description=f"Narudzba #{order.pk} - {table.name}",
+                        success_url=base_url + f"/pos/gastro/order/{order.tracking_token}/",
                         cancel_url=base_url + request.path,
                     )
                     if payment.external_url:
                         payment_url = payment.external_url
                 except (ValueError, TypeError) as e:
                     import logging
+
                     logging.getLogger(__name__).warning("Payment init failed: %s", e)
 
             # Loyalty: increment stamps
             if guest_email:
                 try:
                     from .models import GuestLoyalty, LoyaltyProgram
-                    programs = LoyaltyProgram.objects.filter(company=table.company, is_active=True, category__in=["food","drink","dessert","special"]).select_related("company")
+
+                    programs = LoyaltyProgram.objects.filter(
+                        company=table.company, is_active=True, category__in=["food", "drink", "dessert", "special"]
+                    ).select_related("company")
                     for prog in programs:
                         loyalty, _ = GuestLoyalty.objects.get_or_create(
-                            company=table.company, program=prog, guest_email=guest_email,
-                            defaults={'guest_name': guest_name}
+                            company=table.company,
+                            program=prog,
+                            guest_email=guest_email,
+                            defaults={"guest_name": guest_name},
                         )
                         loyalty.stamps += 1
                         loyalty.total_spent += sum(
                             (i.inventory_item.unit_price or 0) * i.quantity
-                            for i in order.items.select_related('inventory_item').all()
+                            for i in order.items.select_related("inventory_item").all()
                         )
                         loyalty.save()
                 except (IntegrityError, DatabaseError):
                     pass
             resp_data = {
-                'ok': True,
-                'tracking_url': f'/pos/gastro/order/{order.tracking_token}/',
-                'order_id': order.pk,
+                "ok": True,
+                "tracking_url": f"/pos/gastro/order/{order.tracking_token}/",
+                "order_id": order.pk,
             }
             if payment_url:
-                resp_data['payment_url'] = payment_url
+                resp_data["payment_url"] = payment_url
             return JsonResponse(resp_data)
         except ValueError as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=400)
         except (IntegrityError, DatabaseError) as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({"error": str(e)}, status=500)
 
-    return render(request, 'pos/gastro/qr_menu.html', {
-        'table': table,
-        'inventory_items': items,
-    })
+    return render(
+        request,
+        "pos/gastro/qr_menu.html",
+        {
+            "table": table,
+            "inventory_items": items,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # EXPIRY TRACKING — Dashboard, Add, API
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @login_required
 def expiry_dashboard(request):
@@ -2655,33 +3084,37 @@ def expiry_dashboard(request):
     from datetime import date
 
     from .models import ExpiryBatch
-    batches = ExpiryBatch.objects.filter(is_removed=False).select_related(
-        'inventory_item'
-    ).order_by('expiry_date')
+
+    batches = ExpiryBatch.objects.filter(is_removed=False).select_related("inventory_item").order_by("expiry_date")
     today = date.today()
     expired = [b for b in batches if b.is_expired]
     today_exp = [b for b in batches if b.expiry_date == today]
     warning = [b for b in batches if b.is_warning and not b.is_expired and b.expiry_date != today]
     ok_items = [b for b in batches if b.days_until_expiry > b.alert_days_before]
-    return render(request, 'pos/expiry/dashboard.html', {
-        'expired': expired,
-        'today_exp': today_exp,
-        'warning': warning,
-        'ok_items': ok_items,
-    })
+    return render(
+        request,
+        "pos/expiry/dashboard.html",
+        {
+            "expired": expired,
+            "today_exp": today_exp,
+            "warning": warning,
+            "ok_items": ok_items,
+        },
+    )
 
 
 @login_required
 def expiry_add(request):
     """Add a batch with expiry date."""
     from .models import ExpiryBatch
+
     company = get_current_company()
-    if request.method == 'POST':
-        inv_id = request.POST.get('inventory_item_id')
-        batch_number = request.POST.get('batch_number', '')
-        qty = Decimal(request.POST.get('quantity', '0') or '0')
-        expiry_date = request.POST.get('expiry_date')
-        alert_days = int(request.POST.get('alert_days_before', '3') or '3')
+    if request.method == "POST":
+        inv_id = request.POST.get("inventory_item_id")
+        batch_number = request.POST.get("batch_number", "")
+        qty = Decimal(request.POST.get("quantity", "0") or "0")
+        expiry_date = request.POST.get("expiry_date")
+        alert_days = int(request.POST.get("alert_days_before", "3") or "3")
         ExpiryBatch.objects.create(
             company=company,
             inventory_item_id=inv_id,
@@ -2690,31 +3123,34 @@ def expiry_add(request):
             expiry_date=expiry_date,
             alert_days_before=alert_days,
         )
-        messages.success(request, _('Sarzni rok dodan.'))
-        return redirect('pos:expiry_dashboard')
+        messages.success(request, _("Sarzni rok dodan."))
+        return redirect("pos:expiry_dashboard")
     company = get_user_company(request)
-    items = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate').order_by('name')
-    return render(request, 'pos/expiry/add.html', {'items': items})
+    items = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate").order_by("name")
+    return render(request, "pos/expiry/add.html", {"items": items})
 
 
 @login_required
 def expiry_alerts_api(request):
     """JSON alerts for notification badge."""
     from .models import ExpiryBatch
-    batches = ExpiryBatch.objects.filter(is_removed=False).select_related('inventory_item')
+
+    batches = ExpiryBatch.objects.filter(is_removed=False).select_related("inventory_item")
     alerts = []
     for b in batches:
         if b.is_expired or b.is_warning:
-            alerts.append({
-                'id': b.pk,
-                'item_name': b.inventory_item.name,
-                'batch_number': b.batch_number,
-                'expiry_date': str(b.expiry_date),
-                'days_until_expiry': b.days_until_expiry,
-                'is_expired': b.is_expired,
-                'quantity': str(b.quantity),
-            })
-    return JsonResponse({'ok': True, 'alerts': alerts, 'count': len(alerts)})
+            alerts.append(
+                {
+                    "id": b.pk,
+                    "item_name": b.inventory_item.name,
+                    "batch_number": b.batch_number,
+                    "expiry_date": str(b.expiry_date),
+                    "days_until_expiry": b.days_until_expiry,
+                    "is_expired": b.is_expired,
+                    "quantity": str(b.quantity),
+                }
+            )
+    return JsonResponse({"ok": True, "alerts": alerts, "count": len(alerts)})
 
 
 @login_required
@@ -2722,44 +3158,46 @@ def expiry_alerts_api(request):
 def article_quick_create(request):
     import json
     from decimal import Decimal, InvalidOperation
+
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         data = request.POST
 
-    name = (data.get('name') or '').strip()
+    name = (data.get("name") or "").strip()
     if not name:
-        return JsonResponse({'ok': False, 'error': 'Naziv je obavezan.'}, status=400)
+        return JsonResponse({"ok": False, "error": "Naziv je obavezan."}, status=400)
 
     company = get_current_company()
     if not company:
-        return JsonResponse({'ok': False, 'error': 'Nema aktivne firme.'}, status=403)
+        return JsonResponse({"ok": False, "error": "Nema aktivne firme."}, status=403)
 
     try:
         from companies.models import TaxRate
         from inventory.models import InventoryItem
     except ImportError:
-        return JsonResponse({'ok': False, 'error': 'Inventory modul nije dostupan.'}, status=500)
+        return JsonResponse({"ok": False, "error": "Inventory modul nije dostupan."}, status=500)
 
     # Generate SKU from name if not provided
-    sku = (data.get('sku') or '').strip()
+    sku = (data.get("sku") or "").strip()
     if not sku:
         import re
-        base_sku = re.sub(r'[^A-Z0-9]', '', name.upper())[:10] or 'ART'
+
+        base_sku = re.sub(r"[^A-Z0-9]", "", name.upper())[:10] or "ART"
         sku = base_sku
         counter = 1
         while InventoryItem.objects.filter(company=company, sku=sku).exists():
-            sku = f'{base_sku}{counter}'
+            sku = f"{base_sku}{counter}"
             counter += 1
 
     try:
-        unit_price = Decimal(str(data.get('price') or '0').replace(',', '.'))
+        unit_price = Decimal(str(data.get("price") or "0").replace(",", "."))
     except InvalidOperation:
-        unit_price = Decimal('0')
+        unit_price = Decimal("0")
 
     tax_rate = None
-    tax_rate_id = data.get('tax_rate_id')
+    tax_rate_id = data.get("tax_rate_id")
     if tax_rate_id:
         try:
             tax_rate = TaxRate.objects.get(pk=int(tax_rate_id))
@@ -2770,24 +3208,27 @@ def article_quick_create(request):
         company=company,
         name=name,
         sku=sku,
-        category=(data.get('category') or 'other'),
-        unit=(data.get('unit') or 'kom'),
+        category=(data.get("category") or "other"),
+        unit=(data.get("unit") or "kom"),
         unit_price=unit_price,
         tax_rate=tax_rate,
         is_active=True,
     )
     item.save()
 
-    return JsonResponse({
-        'ok': True,
-        'id': item.pk,
-        'name': item.name,
-        'sku': item.sku,
-        'unit': item.unit,
-        'unit_price': str(item.unit_price),
-        'tax_rate': str(tax_rate.rate) if tax_rate else None,
-        'created': True,
-    }, status=201)
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": item.pk,
+            "name": item.name,
+            "sku": item.sku,
+            "unit": item.unit,
+            "unit_price": str(item.unit_price),
+            "tax_rate": str(tax_rate.rate) if tax_rate else None,
+            "created": True,
+        },
+        status=201,
+    )
 
 
 @login_required
@@ -2796,7 +3237,8 @@ def article_search(request):
     from django.db.models import Q
 
     from inventory.models import InventoryItem
-    q = request.GET.get('q', '').strip()
+
+    q = request.GET.get("q", "").strip()
     company = get_current_company()
     if not company:
         # Superusers don't have thread-local company — fall back to profile
@@ -2805,33 +3247,34 @@ def article_search(request):
         except AttributeError:
             logger.warning("Suppressed error", exc_info=True)
     if not company:
-        return JsonResponse({'articles': []})
+        return JsonResponse({"articles": []})
     qs = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate")
     if q:
-        qs = qs.filter(
-            Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q)
-        )
+        qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q))
     articles = []
-    for item in qs.select_related('tax_rate')[:50]:
-        articles.append({
-            'id':             item.pk,
-            'name':           item.name,
-            'sku':            item.sku,
-            'barcode':        item.barcode,
-            'price':          str(item.unit_price),
-            'purchase_price': str(item.purchase_price),
-            'tax_rate':       str(item.tax_rate.rate) if item.tax_rate else '25',
-            'unit':           item.unit,
-            'category':       item.get_category_display(),
-            'stock_qty':      str(item.quantity),
-        })
-    return JsonResponse({'articles': articles})
+    for item in qs.select_related("tax_rate")[:50]:
+        articles.append(
+            {
+                "id": item.pk,
+                "name": item.name,
+                "sku": item.sku,
+                "barcode": item.barcode,
+                "price": str(item.unit_price),
+                "purchase_price": str(item.purchase_price),
+                "tax_rate": str(item.tax_rate.rate) if item.tax_rate else "25",
+                "unit": item.unit,
+                "category": item.get_category_display(),
+                "stock_qty": str(item.quantity),
+            }
+        )
+    return JsonResponse({"articles": articles})
 
 
 # ══════════════════════════════════════════════════════════════
 # STANDARDIZIRANI API ENDPOINTI (Gemini JSON Ugovor A/B/C)
 # Paralelni s postojećim — ne dira stari kod
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def api_pos_items(request):
@@ -2841,59 +3284,67 @@ def api_pos_items(request):
     """
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'status': 'error', 'error': {'code': 'NO_COMPANY', 'message': 'Nema konteksta tvrtke'}}, status=400)
+        return JsonResponse(
+            {"status": "error", "error": {"code": "NO_COMPANY", "message": "Nema konteksta tvrtke"}}, status=400
+        )
 
     from django.core.paginator import Paginator
-    q = request.GET.get('search', '').strip()
-    category = request.GET.get('category', '').strip()
-    page_num = int(request.GET.get('page', 1))
-    per_page = int(request.GET.get('per_page', 50))
+
+    q = request.GET.get("search", "").strip()
+    category = request.GET.get("category", "").strip()
+    page_num = int(request.GET.get("page", 1))
+    per_page = int(request.GET.get("per_page", 50))
     per_page = min(per_page, 100)  # Max 100
 
-    qs = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate')
+    qs = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate")
     if q:
         from django.db.models import Q as _Q
+
         qs = qs.filter(_Q(name__icontains=q) | _Q(sku__icontains=q) | _Q(barcode__icontains=q))
     if category:
         qs = qs.filter(category=category)
-    qs = qs.order_by('name')
+    qs = qs.order_by("name")
 
     paginator = Paginator(qs, per_page)
     page = paginator.get_page(page_num)
 
     items = []
     for item in page:
-        items.append({
-            'id': item.pk,
-            'name': item.name,
-            'sku': item.sku,
-            'barcode': item.barcode or '',
-            'price': float(item.unit_price),
-            'purchase_price': float(item.purchase_price),
-            'tax_rate': float(item.tax_rate.rate) if item.tax_rate else 25.0,
-            'unit': item.unit,
-            'category': item.category,
-            'category_display': item.get_category_display(),
-            'stock_qty': float(item.quantity),
-            'is_weighable': item.is_weighable,
-            'is_low_stock': item.is_low_stock,
-            'image_url': item.image.url if item.image else '',
-        })
+        items.append(
+            {
+                "id": item.pk,
+                "name": item.name,
+                "sku": item.sku,
+                "barcode": item.barcode or "",
+                "price": float(item.unit_price),
+                "purchase_price": float(item.purchase_price),
+                "tax_rate": float(item.tax_rate.rate) if item.tax_rate else 25.0,
+                "unit": item.unit,
+                "category": item.category,
+                "category_display": item.get_category_display(),
+                "stock_qty": float(item.quantity),
+                "is_weighable": item.is_weighable,
+                "is_low_stock": item.is_low_stock,
+                "image_url": item.image.url if item.image else "",
+            }
+        )
 
-    return JsonResponse({
-        'status': 'success',
-        'data': {
-            'items': items,
-            'pagination': {
-                'current_page': page.number,
-                'total_pages': paginator.num_pages,
-                'has_next': page.has_next(),
-                'has_previous': page.has_previous(),
-                'total_items': paginator.count,
-                'per_page': per_page,
+    return JsonResponse(
+        {
+            "status": "success",
+            "data": {
+                "items": items,
+                "pagination": {
+                    "current_page": page.number,
+                    "total_pages": paginator.num_pages,
+                    "has_next": page.has_next(),
+                    "has_previous": page.has_previous(),
+                    "total_items": paginator.count,
+                    "per_page": per_page,
+                },
             },
-        },
-    })
+        }
+    )
 
 
 @login_required
@@ -2904,40 +3355,48 @@ def api_pos_checkout(request):
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'status': 'error', 'error': {'code': 'NO_COMPANY', 'message': 'Nema konteksta tvrtke'}}, status=400)
+        return JsonResponse(
+            {"status": "error", "error": {"code": "NO_COMPANY", "message": "Nema konteksta tvrtke"}}, status=400
+        )
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'status': 'error', 'error': {'code': 'INVALID_JSON', 'message': 'Neispravan JSON'}}, status=400)
+        return JsonResponse(
+            {"status": "error", "error": {"code": "INVALID_JSON", "message": "Neispravan JSON"}}, status=400
+        )
 
     try:
         result = CheckoutService.process_receipt(company=company, user=request.user, payload=data)
-        return JsonResponse({'status': 'success', 'data': result})
+        return JsonResponse({"status": "success", "data": result})
     except CheckoutValidationError as e:
-        return JsonResponse({'status': 'error', 'error': {'code': e.code, 'message': e.message}}, status=400)
+        return JsonResponse({"status": "error", "error": {"code": e.code, "message": e.message}}, status=400)
     except Exception as e:
-        logger.error('POS checkout greska: %s', e, exc_info=True)
-        return JsonResponse({'status': 'error', 'error': {'code': 'SYS_ERROR', 'message': 'Sistemska greska pri naplati'}}, status=500)
+        logger.error("POS checkout greska: %s", e, exc_info=True)
+        return JsonResponse(
+            {"status": "error", "error": {"code": "SYS_ERROR", "message": "Sistemska greska pri naplati"}}, status=500
+        )
 
 
 @login_required
 def cash_deposit(request, session_id):
     """Upiši polog ili isplatu gotovine za aktivnu smjenu."""
     from .models import CashDeposit
+
     session = get_object_or_404(POSSession, pk=session_id)
     if session.status != POSSession.Status.OPEN:
-        messages.error(request, _('Polog/isplata je moguća samo na otvorenoj smjeni.'))
-        return redirect('pos:session_detail', session_id=session_id)
+        messages.error(request, _("Polog/isplata je moguća samo na otvorenoj smjeni."))
+        return redirect("pos:session_detail", session_id=session_id)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             from decimal import Decimal
-            amount = Decimal(request.POST.get('amount', '0'))
-            dtype  = request.POST.get('deposit_type', 'deposit')
-            note   = request.POST.get('note', '')
+
+            amount = Decimal(request.POST.get("amount", "0"))
+            dtype = request.POST.get("deposit_type", "deposit")
+            note = request.POST.get("note", "")
             if amount <= 0:
-                messages.error(request, _('Iznos mora biti pozitivan.'))
+                messages.error(request, _("Iznos mora biti pozitivan."))
             else:
                 CashDeposit.objects.create(
                     session=session,
@@ -2946,18 +3405,22 @@ def cash_deposit(request, session_id):
                     amount=amount,
                     note=note,
                 )
-                label = 'Polog' if dtype == 'deposit' else 'Isplata'
-                messages.success(request, f'{label} {amount:.2f} EUR evidentiran.')
+                label = "Polog" if dtype == "deposit" else "Isplata"
+                messages.success(request, f"{label} {amount:.2f} EUR evidentiran.")
         except (ValueError, TypeError):
             logger.exception("Unexpected error", exc_info=True)
-            messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
-        return redirect('pos:session_detail', session_id=session_id)
+            messages.error(request, _("Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku."))
+        return redirect("pos:session_detail", session_id=session_id)
 
-    deposits = CashDeposit.objects.filter(session=session).select_related('session').order_by('-created_at')
-    return render(request, 'pos/cash_deposit.html', {
-        'session': session,
-        'deposits': deposits,
-    })
+    deposits = CashDeposit.objects.filter(session=session).select_related("session").order_by("-created_at")
+    return render(
+        request,
+        "pos/cash_deposit.html",
+        {
+            "session": session,
+            "deposits": deposits,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════
@@ -2965,6 +3428,7 @@ def cash_deposit(request, session_id):
 # BLAGAJNIČKI IZVJEŠTAJ — Globalni, sa svim zakonskim info
 # HR: Pravilnik o fiskalizaciji, Zakon o PDV-u
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def cashier_full_report(request, session_id):
@@ -2981,34 +3445,39 @@ def cashier_full_report(request, session_id):
     try:
         context = ReportingService.generate_cashier_report(session, company)
     except ReportingError:
-        messages.warning(request, _('Smjena mora biti zatvorena za generiranje izvještaja.'))
-        return redirect('pos:session_detail', session_id=session_id)
+        messages.warning(request, _("Smjena mora biti zatvorena za generiranje izvještaja."))
+        return redirect("pos:session_detail", session_id=session_id)
 
-    fmt = request.GET.get('format', 'html')
-    if fmt == 'json':
+    fmt = request.GET.get("format", "html")
+    if fmt == "json":
         return JsonResponse(ReportingService.to_json(context))
 
-    if fmt == 'pdf':
+    if fmt == "pdf":
         from django.template.loader import render_to_string
-        html = render_to_string('pos/cashier_full_report_pdf.html', context)
+
+        html = render_to_string("pos/cashier_full_report_pdf.html", context)
         try:
             from io import BytesIO
 
             from xhtml2pdf import pisa
+
             buf = BytesIO()
             pisa.CreatePDF(html, dest=buf)
             buf.seek(0)
-            response = HttpResponse(buf.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'inline; filename="blagajnicki_izvjestaj_S%d.pdf"' % session.session_number
+            response = HttpResponse(buf.read(), content_type="application/pdf")
+            response["Content-Disposition"] = (
+                'inline; filename="blagajnicki_izvjestaj_S%d.pdf"' % session.session_number
+            )
             return response
         except ImportError:
             return HttpResponse(html)
 
-    return render(request, 'pos/cashier_full_report.html', context)
+    return render(request, "pos/cashier_full_report.html", context)
 
 
 # REFUND — Povrat novca gostu (vraća robu, dobiva novac)
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def refund_receipt(request, receipt_id):
@@ -3021,109 +3490,114 @@ def refund_receipt(request, receipt_id):
     company = get_user_company(request)
     original = get_object_or_404(POSReceipt, pk=receipt_id)
     company_chk, err = _check_tenant(request, original)
-    if err: return err
+    if err:
+        return err
 
-    if original.status not in ('paid',):
-        return JsonResponse({'error': 'Samo plaćeni računi se mogu refundirati'}, status=400)
+    if original.status not in ("paid",):
+        return JsonResponse({"error": "Samo plaćeni računi se mogu refundirati"}, status=400)
     if original.parent_receipt_id:
-        return JsonResponse({'error': 'Storno bona se ne može ponovo stornirati'}, status=400)
+        return JsonResponse({"error": "Storno bona se ne može ponovo stornirati"}, status=400)
 
     # Izračunaj već refundirane količine (double-refund guard)
     already_refunded = {}
-    for ref_receipt in original.refund_receipts.exclude(status='cancelled'):
+    for ref_receipt in original.refund_receipts.exclude(status="cancelled"):
         for ri in ref_receipt.items.all():
-            key = ri.description.replace('POVRAT: ', '')
-            already_refunded[key] = already_refunded.get(key, Decimal('0')) + abs(ri.quantity)
+            key = ri.description.replace("POVRAT: ", "")
+            already_refunded[key] = already_refunded.get(key, Decimal("0")) + abs(ri.quantity)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         items = []
-        for ri in original.items.select_related('inventory_item'):
-            desc = ri.description or (ri.inventory_item.name if ri.inventory_item else '')
-            refunded_qty = already_refunded.get(desc, Decimal('0'))
+        for ri in original.items.select_related("inventory_item"):
+            desc = ri.description or (ri.inventory_item.name if ri.inventory_item else "")
+            refunded_qty = already_refunded.get(desc, Decimal("0"))
             remaining_qty = ri.quantity - refunded_qty
             if remaining_qty <= 0:
                 continue  # Već potpuno refundirano
-            items.append({
-                'id': ri.pk,
-                'name': desc,
-                'quantity': float(ri.quantity),
-                'refunded': float(refunded_qty),
-                'remaining': float(remaining_qty),
-                'unit_price': float(ri.unit_price),
-                'total': float(ri.total_price),
-                'is_tip': ri.is_tip,
-                'is_pfand': ri.is_pfand_return,
-            })
-        return JsonResponse({
-            'ok': True,
-            'receipt_number': original.receipt_number,
-            'total': float(original.total),
-            'paid_at': original.paid_at.isoformat() if original.paid_at else '',
-            'items': items,
-            'is_fully_refunded': len(items) == 0,
-        })
+            items.append(
+                {
+                    "id": ri.pk,
+                    "name": desc,
+                    "quantity": float(ri.quantity),
+                    "refunded": float(refunded_qty),
+                    "remaining": float(remaining_qty),
+                    "unit_price": float(ri.unit_price),
+                    "total": float(ri.total_price),
+                    "is_tip": ri.is_tip,
+                    "is_pfand": ri.is_pfand_return,
+                }
+            )
+        return JsonResponse(
+            {
+                "ok": True,
+                "receipt_number": original.receipt_number,
+                "total": float(original.total),
+                "paid_at": original.paid_at.isoformat() if original.paid_at else "",
+                "items": items,
+                "is_fully_refunded": len(items) == 0,
+            }
+        )
 
     # POST — kreira refund
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    refund_items = data.get('items', [])
-    reason = data.get('reason', 'Povrat robe')[:255]
+    refund_items = data.get("items", [])
+    reason = data.get("reason", "Povrat robe")[:255]
     if not refund_items:
-        return JsonResponse({'error': 'Odaberi stavke za povrat'}, status=400)
+        return JsonResponse({"error": "Odaberi stavke za povrat"}, status=400)
 
     # Nađi aktivnu sesiju
-    session = POSSession.objects.filter(
-        terminal__company=company, status='open'
-    ).first()
+    session = POSSession.objects.filter(terminal__company=company, status="open").first()
     if not session:
-        return JsonResponse({'error': 'Nema otvorene smjene'}, status=400)
+        return JsonResponse({"error": "Nema otvorene smjene"}, status=400)
 
     from django.utils import timezone as tz
-    last_r = session.receipts.order_by('-receipt_number').first()
+
+    last_r = session.receipts.order_by("-receipt_number").first()
     next_rn = (last_r.receipt_number + 1) if last_r else 1
 
     refund_receipt = POSReceipt.objects.create(
         session=session,
         receipt_number=next_rn,
-        note='STORNO — Originalni bon #%d | %s' % (original.receipt_number, reason),
-        status='refunded',
+        note="STORNO — Originalni bon #%d | %s" % (original.receipt_number, reason),
+        status="refunded",
         paid_at=tz.now(),
         parent_receipt=original,  # Event-sourced link
         cancel_reason=reason,
     )
 
     from inventory.models import StockMovement as _SM
-    _Q = Decimal('0.01')
-    refund_total = Decimal('0')
+
+    _Q = Decimal("0.01")
+    refund_total = Decimal("0")
     items_returned = 0
     for ri_data in refund_items:
         try:
-            orig_item = original.items.get(pk=ri_data.get('item_id'))
+            orig_item = original.items.get(pk=ri_data.get("item_id"))
         except POSReceiptItem.DoesNotExist:
             continue
-        req_qty = Decimal(str(ri_data.get('quantity', 0)))
+        req_qty = Decimal(str(ri_data.get("quantity", 0)))
         if req_qty <= 0:
             continue
 
         # Double-refund guard: provjeri preostalu količinu
-        desc = orig_item.description or ''
-        already = already_refunded.get(desc, Decimal('0'))
+        desc = orig_item.description or ""
+        already = already_refunded.get(desc, Decimal("0"))
         max_qty = orig_item.quantity - already
         qty = min(req_qty, max_qty)
         if qty <= 0:
             continue
 
-        net = (qty * orig_item.unit_price * (1 - orig_item.discount_percent / 100))
+        net = qty * orig_item.unit_price * (1 - orig_item.discount_percent / 100)
         tax = net * orig_item.tax_rate / 100
         total_price = -(net + tax).quantize(_Q, rounding=ROUND_HALF_UP)
 
         POSReceiptItem.objects.create(
             receipt=refund_receipt,
             inventory_item=orig_item.inventory_item,
-            description='POVRAT: %s' % desc,
+            description="POVRAT: %s" % desc,
             quantity=qty,
             unit_price=-orig_item.unit_price,
             discount_percent=orig_item.discount_percent,
@@ -3137,50 +3611,56 @@ def refund_receipt(request, receipt_id):
         if orig_item.inventory_item and orig_item.inventory_item.is_stockable:
             _SM.objects.create(
                 item=orig_item.inventory_item,
-                movement_type='in',
+                movement_type="in",
                 quantity=qty,
                 unit_price=orig_item.unit_price,
-                reason='Storno gosta — POS bon #%d' % original.receipt_number,
+                reason="Storno gosta — POS bon #%d" % original.receipt_number,
                 performed_by=request.user,
             )
 
     refund_receipt.subtotal = refund_total
-    refund_receipt.tax_amount = Decimal('0')  # Already included in negative total
+    refund_receipt.tax_amount = Decimal("0")  # Already included in negative total
     refund_receipt.total = refund_total
-    refund_receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+    refund_receipt.save(update_fields=["subtotal", "tax_amount", "total"])
 
     # Recalculate properly
     refund_receipt.recalculate()
-    refund_receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+    refund_receipt.save(update_fields=["subtotal", "tax_amount", "total"])
 
     # Payment line negativna — istim načinom kao originalni
     orig_method = original.payment_lines.first()
-    method = orig_method.method if orig_method else 'CASH'
+    method = orig_method.method if orig_method else "CASH"
     POSPaymentLine.objects.create(
-        receipt=refund_receipt, method=method, amount=refund_receipt.total,
+        receipt=refund_receipt,
+        method=method,
+        amount=refund_receipt.total,
     )
 
     # Hash chain — storno bon ulazi u lanac kao i svaki drugi
     try:
         from pos.hashchain import append_receipt
+
         append_receipt(refund_receipt)
     except ImportError as e:
-        logger.warning('Hash chain append failed for refund #%d: %s', refund_receipt.pk, e)
+        logger.warning("Hash chain append failed for refund #%d: %s", refund_receipt.pk, e)
 
-    return JsonResponse({
-        'ok': True,
-        'refund_receipt_id': refund_receipt.pk,
-        'refund_receipt_number': refund_receipt.receipt_number,
-        'parent_receipt_id': original.pk,
-        'parent_receipt_number': original.receipt_number,
-        'refund_total': str(refund_receipt.total),
-        'items_returned': items_returned,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "refund_receipt_id": refund_receipt.pk,
+            "refund_receipt_number": refund_receipt.receipt_number,
+            "parent_receipt_id": original.pk,
+            "parent_receipt_number": original.receipt_number,
+            "refund_total": str(refund_receipt.total),
+            "items_returned": items_returned,
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════════
 # PFAND RETURN — Gost vraća ambalažu, dobiva novac natrag
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 @require_POST
@@ -3193,66 +3673,78 @@ def pfand_return(request):
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    pfand_id = data.get('pfand_item_id')
-    qty = Decimal(str(data.get('quantity', 1)))
-    session_id = data.get('session_id')
+    pfand_id = data.get("pfand_item_id")
+    qty = Decimal(str(data.get("quantity", 1)))
+    session_id = data.get("session_id")
 
-    pfand_item = InventoryItem.objects.filter(
-        pk=pfand_id, company=company, is_pfand=True
-    ).first()
+    pfand_item = InventoryItem.objects.filter(pk=pfand_id, company=company, is_pfand=True).first()
     if not pfand_item:
-        return JsonResponse({'error': 'Pfand artikl ne postoji'}, status=404)
+        return JsonResponse({"error": "Pfand artikl ne postoji"}, status=404)
 
-    session = POSSession.objects.filter(pk=session_id, status='open').select_related("terminal", "operator", "active_cashiers").first()
+    session = (
+        POSSession.objects.filter(pk=session_id, status="open")
+        .select_related("terminal", "operator", "active_cashiers")
+        .first()
+    )
     if not session:
-        return JsonResponse({'error': 'Nema otvorene smjene'}, status=400)
+        return JsonResponse({"error": "Nema otvorene smjene"}, status=400)
 
     from django.utils import timezone as tz
+
     # Kreiraj "povrat ambalaže" račun
-    last_r = session.receipts.order_by('-receipt_number').first()
+    last_r = session.receipts.order_by("-receipt_number").first()
     next_rn = (last_r.receipt_number + 1) if last_r else 1
 
     receipt = POSReceipt.objects.create(
-        session=session, receipt_number=next_rn,
-        note='Povrat ambalaže: %s x%s' % (pfand_item.name, qty),
-        status='paid', paid_at=tz.now(),
+        session=session,
+        receipt_number=next_rn,
+        note="Povrat ambalaže: %s x%s" % (pfand_item.name, qty),
+        status="paid",
+        paid_at=tz.now(),
     )
     amount = -(pfand_item.unit_price * qty)  # Negativan
     POSReceiptItem.objects.create(
         receipt=receipt,
         inventory_item=pfand_item,
-        description='POVRAT: %s' % pfand_item.name,
+        description="POVRAT: %s" % pfand_item.name,
         quantity=qty,
         unit_price=-pfand_item.unit_price,
-        tax_rate=pfand_item.pfand_tax_override or Decimal('25'),
+        tax_rate=pfand_item.pfand_tax_override or Decimal("25"),
         total_price=amount,
         is_pfand_return=True,
     )
     receipt.total = amount
     receipt.save()
-    POSPaymentLine.objects.create(receipt=receipt, method='CASH', amount=amount)
+    POSPaymentLine.objects.create(receipt=receipt, method="CASH", amount=amount)
     # Vrati u zalihu
     # Vrati u zalihu (in = ambalaža se vraća na skladište)
     from inventory.models import StockMovement as _SM2
+
     _SM2.objects.create(
-        item=pfand_item, movement_type='in', quantity=qty,
+        item=pfand_item,
+        movement_type="in",
+        quantity=qty,
         unit_price=pfand_item.unit_price,
-        reason='Pfand povrat od gosta', performed_by=request.user,
+        reason="Pfand povrat od gosta",
+        performed_by=request.user,
     )
 
-    return JsonResponse({
-        'ok': True,
-        'receipt_id': receipt.pk,
-        'amount': str(amount),
-        'item': pfand_item.name,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "receipt_id": receipt.pk,
+            "amount": str(amount),
+            "item": pfand_item.name,
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════════
 # NAPOJNICA IZVJEŠTAJ — po konobaru
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def tip_report(request):
@@ -3260,8 +3752,8 @@ def tip_report(request):
     company = get_user_company(request)
     from datetime import date, timedelta
 
-    date_from = request.GET.get('from', '')
-    date_to = request.GET.get('to', '')
+    date_from = request.GET.get("from", "")
+    date_to = request.GET.get("to", "")
     try:
         d_from = date.fromisoformat(date_from) if date_from else date.today() - timedelta(days=30)
         d_to = date.fromisoformat(date_to) if date_to else date.today()
@@ -3273,64 +3765,73 @@ def tip_report(request):
     tips = POSReceiptItem.objects.filter(
         is_tip=True,
         receipt__session__terminal__company=company,
-        receipt__status='paid',
+        receipt__status="paid",
         receipt__paid_at__date__gte=d_from,
         receipt__paid_at__date__lte=d_to,
-    ).select_related('receipt', 'receipt__cashier')
+    ).select_related("receipt", "receipt__cashier")
 
     # Grupiraj po blagajniku
     by_cashier = {}
-    total_tips = Decimal('0')
+    total_tips = Decimal("0")
     for tip in tips:
-        cashier_name = tip.receipt.cashier.name if tip.receipt.cashier else tip.receipt.note or 'Nepoznat'
+        cashier_name = tip.receipt.cashier.name if tip.receipt.cashier else tip.receipt.note or "Nepoznat"
         if cashier_name not in by_cashier:
-            by_cashier[cashier_name] = {'count': 0, 'total': Decimal('0'), 'receipts': []}
-        by_cashier[cashier_name]['count'] += 1
-        by_cashier[cashier_name]['total'] += tip.total_price
-        by_cashier[cashier_name]['receipts'].append({
-            'receipt_id': tip.receipt.pk,
-            'date': tip.receipt.paid_at.strftime('%d.%m.%Y %H:%M') if tip.receipt.paid_at else '',
-            'amount': str(tip.total_price),
-        })
+            by_cashier[cashier_name] = {"count": 0, "total": Decimal("0"), "receipts": []}
+        by_cashier[cashier_name]["count"] += 1
+        by_cashier[cashier_name]["total"] += tip.total_price
+        by_cashier[cashier_name]["receipts"].append(
+            {
+                "receipt_id": tip.receipt.pk,
+                "date": tip.receipt.paid_at.strftime("%d.%m.%Y %H:%M") if tip.receipt.paid_at else "",
+                "amount": str(tip.total_price),
+            }
+        )
         total_tips += tip.total_price
 
-    if request.GET.get('format') == 'json':
+    if request.GET.get("format") == "json":
         result = {}
         for name, data in by_cashier.items():
-            result[name] = {'count': data['count'], 'total': str(data['total'])}
-        return JsonResponse({
-            'ok': True,
-            'period': '%s — %s' % (d_from.isoformat(), d_to.isoformat()),
-            'total_tips': str(total_tips),
-            'by_cashier': result,
-        })
+            result[name] = {"count": data["count"], "total": str(data["total"])}
+        return JsonResponse(
+            {
+                "ok": True,
+                "period": "%s — %s" % (d_from.isoformat(), d_to.isoformat()),
+                "total_tips": str(total_tips),
+                "by_cashier": result,
+            }
+        )
 
-    return render(request, 'pos/tip_report.html', {
-        'by_cashier': by_cashier,
-        'total_tips': total_tips,
-        'date_from': d_from.isoformat(),
-        'date_to': d_to.isoformat(),
-    })
+    return render(
+        request,
+        "pos/tip_report.html",
+        {
+            "by_cashier": by_cashier,
+            "total_tips": total_tips,
+            "date_from": d_from.isoformat(),
+            "date_to": d_to.isoformat(),
+        },
+    )
 
 
 # ── PFAND ITEMS API ──────────────────────────────────────────────────────────
+
 
 @login_required
 def pfand_items_api(request):
     """Return list of pfand (returnable deposit) items for this company."""
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'ok': False, 'items': []})
+        return JsonResponse({"ok": False, "items": []})
     items = list(
-        InventoryItem.objects.filter(company=company, is_pfand=True, is_active=True)
-        .values('id', 'name', 'unit_price')
+        InventoryItem.objects.filter(company=company, is_pfand=True, is_active=True).values("id", "name", "unit_price")
     )
     for it in items:
-        it['unit_price'] = str(it['unit_price'])
-    return JsonResponse({'ok': True, 'items': items})
+        it["unit_price"] = str(it["unit_price"])
+    return JsonResponse({"ok": True, "items": items})
 
 
 # ── VOUCHER VIEWS ─────────────────────────────────────────────────────────────
+
 
 @login_required
 def voucher_list(request):
@@ -3342,32 +3843,33 @@ def voucher_list(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('pos:dashboard')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("pos:dashboard")
 
-    if request.method == 'POST':
-        amount_str = request.POST.get('amount', '').strip()
-        expiry_str = request.POST.get('expiry_date', '').strip()
-        notes      = request.POST.get('notes', '').strip()[:200]
+    if request.method == "POST":
+        amount_str = request.POST.get("amount", "").strip()
+        expiry_str = request.POST.get("expiry_date", "").strip()
+        notes = request.POST.get("notes", "").strip()[:200]
         try:
             amount = Decimal(amount_str)
             if amount <= 0:
-                raise ValueError('Iznos mora biti > 0')
+                raise ValueError("Iznos mora biti > 0")
         except (ValueError, TypeError):
-            messages.error(request, _('Nevažeći iznos.'))
-            return redirect('pos:voucher_list')
+            messages.error(request, _("Nevažeći iznos."))
+            return redirect("pos:voucher_list")
 
         expiry = None
         if expiry_str:
             try:
                 from datetime import datetime
-                expiry = datetime.strptime(expiry_str, '%Y-%m-%d').date()
+
+                expiry = datetime.strptime(expiry_str, "%Y-%m-%d").date()
             except ValueError:
-                messages.error(request, _('Nevažeći datum isteka.'))
-                return redirect('pos:voucher_list')
+                messages.error(request, _("Nevažeći datum isteka."))
+                return redirect("pos:voucher_list")
 
         year = date.today().year
-        code = f'BON-{year}-{_uuid.uuid4().hex[:6].upper()}'
+        code = f"BON-{year}-{_uuid.uuid4().hex[:6].upper()}"
         Voucher.objects.create(
             company=company,
             code=code,
@@ -3377,38 +3879,46 @@ def voucher_list(request):
             notes=notes,
             created_by=request.user,
         )
-        messages.success(request, f'Vaučer {code} kreiran ({amount:.2f} EUR).')
-        return redirect('pos:voucher_list')
+        messages.success(request, f"Vaučer {code} kreiran ({amount:.2f} EUR).")
+        return redirect("pos:voucher_list")
 
-    vouchers = Voucher.objects.filter(company=company).select_related("company", "sold_receipt", "created_by").order_by('-created_at')
-    return render(request, 'pos/vouchers.html', {'vouchers': vouchers})
+    vouchers = (
+        Voucher.objects.filter(company=company)
+        .select_related("company", "sold_receipt", "created_by")
+        .order_by("-created_at")
+    )
+    return render(request, "pos/vouchers.html", {"vouchers": vouchers})
 
 
 @login_required
 def voucher_check_api(request):
     """AJAX: check voucher balance by code."""
     from .models import Voucher
-    code = request.GET.get('code', '').strip().upper()
+
+    code = request.GET.get("code", "").strip().upper()
     if not code:
-        return JsonResponse({'ok': False, 'error': 'Nema koda'})
+        return JsonResponse({"ok": False, "error": "Nema koda"})
     company = get_user_company(request)
     try:
         v = Voucher.objects.get(code=code, company=company)
-        return JsonResponse({
-            'ok': True,
-            'code': v.code,
-            'remaining': str(v.remaining),
-            'original_amount': str(v.original_amount),
-            'is_active': v.is_active,
-            'is_expired': v.is_expired,
-            'is_usable': v.is_usable,
-            'expiry_date': str(v.expiry_date) if v.expiry_date else None,
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "code": v.code,
+                "remaining": str(v.remaining),
+                "original_amount": str(v.original_amount),
+                "is_active": v.is_active,
+                "is_expired": v.is_expired,
+                "is_usable": v.is_usable,
+                "expiry_date": str(v.expiry_date) if v.expiry_date else None,
+            }
+        )
     except Voucher.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Vaučer nije pronađen'})
+        return JsonResponse({"ok": False, "error": "Vaučer nije pronađen"})
 
 
 # ── FISKALNA SOBA ─────────────────────────────────────────────────────────────
+
 
 @login_required
 def fiscal_room(request):
@@ -3422,19 +3932,26 @@ def fiscal_room(request):
 
     company = get_user_company(request)
     threshold = now() - timedelta(hours=36)
-    pending_qs = POSReceipt.objects.filter(
-        session__terminal__company=company,
-        status='paid'
-    ).filter(Q(jir__isnull=True) | Q(jir=''))
+    pending_qs = POSReceipt.objects.filter(session__terminal__company=company, status="paid").filter(
+        Q(jir__isnull=True) | Q(jir="")
+    )
 
-    last_logs = FiscalLog.objects.filter(config__company=company).select_related('config').order_by('-created_at')[:20] if company else FiscalLog.objects.none()
+    last_logs = (
+        FiscalLog.objects.filter(config__company=company).select_related("config").order_by("-created_at")[:20]
+        if company
+        else FiscalLog.objects.none()
+    )
 
-    return render(request, 'fiscal/room.html', {
-        'pending_count':  pending_qs.count(),
-        'critical_count': pending_qs.filter(created_at__lt=threshold).count(),
-        'pending_list':   pending_qs.order_by('created_at')[:50],
-        'last_logs':      last_logs,
-    })
+    return render(
+        request,
+        "fiscal/room.html",
+        {
+            "pending_count": pending_qs.count(),
+            "critical_count": pending_qs.filter(created_at__lt=threshold).count(),
+            "pending_list": pending_qs.order_by("created_at")[:50],
+            "last_logs": last_logs,
+        },
+    )
 
 
 @login_required
@@ -3446,10 +3963,9 @@ def fiscal_room_sync(request):
     from pos.services import _attempt_fiscalization
 
     company = get_user_company(request)
-    pending = POSReceipt.objects.filter(
-        session__terminal__company=company,
-        status='paid'
-    ).filter(Q(jir__isnull=True) | Q(jir=''))
+    pending = POSReceipt.objects.filter(session__terminal__company=company, status="paid").filter(
+        Q(jir__isnull=True) | Q(jir="")
+    )
 
     ok = fail = 0
     for r in pending:
@@ -3459,65 +3975,80 @@ def fiscal_room_sync(request):
         else:
             fail += 1
 
-    return JsonResponse({
-        'ok': True,
-        'synced': ok,
-        'failed': fail,
-        'message': f'Uspješno: {ok}, Neuspješno: {fail}',
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "synced": ok,
+            "failed": fail,
+            "message": f"Uspješno: {ok}, Neuspješno: {fail}",
+        }
+    )
 
 
 @login_required
 def fiscal_status_api(request):
     """AJAX: broj PAID računa koji čekaju fiskalizaciju — per company."""
     from django.db.models import Q
+
     company = get_user_company(request)
-    pending = POSReceipt.objects.filter(
-        session__terminal__company=company,
-        status='paid'
-    ).filter(Q(jir__isnull=True) | Q(jir='')).count()
-    return JsonResponse({'pending': pending})
+    pending = (
+        POSReceipt.objects.filter(session__terminal__company=company, status="paid")
+        .filter(Q(jir__isnull=True) | Q(jir=""))
+        .count()
+    )
+    return JsonResponse({"pending": pending})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # WAITER SYSTEM — Shift, Heartbeat, Claim, Deliver
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @login_required
 def waiter_app(request):
     """Waiter PWA dashboard — shows active orders, claim/deliver buttons."""
     from .models import GastroOrder, WaiterShift
+
     company = get_user_company(request)
     if not company:
-        return render(request, 'pos/waiter/app.html', {'error': 'Nema tvrtke'})
+        return render(request, "pos/waiter/app.html", {"error": "Nema tvrtke"})
 
     # Get or check active shift
-    active_shift = WaiterShift.objects.filter(
-        user=request.user, company=company, is_active=True
-    ).first()
+    active_shift = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).first()
 
     # Active orders
-    orders = GastroOrder.objects.filter(
-        company=company,
-        status__in=['new', 'confirmed', 'preparing', 'ready']
-    ).select_related('table', 'claimed_by').prefetch_related('items__inventory_item').order_by('created_at')
+    orders = (
+        GastroOrder.objects.filter(company=company, status__in=["new", "confirmed", "preparing", "ready"])
+        .select_related("table", "claimed_by")
+        .prefetch_related("items__inventory_item")
+        .order_by("created_at")
+    )
 
     my_orders = [o for o in orders if o.claimed_by == request.user]
-    available_orders = [o for o in orders if o.status == 'ready' and not o.claimed_by]
-    kitchen_orders = [o for o in orders if o.status in ('new', 'confirmed', 'preparing')]
+    available_orders = [o for o in orders if o.status == "ready" and not o.claimed_by]
+    kitchen_orders = [o for o in orders if o.status in ("new", "confirmed", "preparing")]
 
     # Tables for QR display
     from .models import Table
-    tables = Table.objects.filter(company=company, is_active=True).select_related("company", "branch").order_by('floor', 'name')
 
-    return render(request, 'pos/waiter/app.html', {
-        'active_shift': active_shift,
-        'my_orders': my_orders,
-        'available_orders': available_orders,
-        'kitchen_orders': kitchen_orders,
-        'company': company,
-        'tables': tables,
-    })
+    tables = (
+        Table.objects.filter(company=company, is_active=True)
+        .select_related("company", "branch")
+        .order_by("floor", "name")
+    )
+
+    return render(
+        request,
+        "pos/waiter/app.html",
+        {
+            "active_shift": active_shift,
+            "my_orders": my_orders,
+            "available_orders": available_orders,
+            "kitchen_orders": kitchen_orders,
+            "company": company,
+            "tables": tables,
+        },
+    )
 
 
 @login_required
@@ -3527,19 +4058,24 @@ def waiter_shift_toggle(request):
     from django.utils import timezone
 
     from .models import WaiterShift
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema tvrtke'}, status=400)
+        return JsonResponse({"error": "Nema tvrtke"}, status=400)
 
-    active = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).select_related("user", "company").first()
+    active = (
+        WaiterShift.objects.filter(user=request.user, company=company, is_active=True)
+        .select_related("user", "company")
+        .first()
+    )
     if active:
         active.is_active = False
         active.ended_at = timezone.now()
-        active.save(update_fields=['is_active', 'ended_at'])
-        return JsonResponse({'ok': True, 'action': 'ended', 'duration': active.duration_display})
+        active.save(update_fields=["is_active", "ended_at"])
+        return JsonResponse({"ok": True, "action": "ended", "duration": active.duration_display})
     else:
         shift = WaiterShift.objects.create(user=request.user, company=company)
-        return JsonResponse({'ok': True, 'action': 'started', 'shift_id': shift.pk})
+        return JsonResponse({"ok": True, "action": "started", "shift_id": shift.pk})
 
 
 @login_required
@@ -3549,17 +4085,22 @@ def waiter_heartbeat(request):
     from django.utils import timezone
 
     from .models import WaiterShift
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'ok': False}, status=400)
+        return JsonResponse({"ok": False}, status=400)
 
-    shift = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).select_related("user", "company").first()
+    shift = (
+        WaiterShift.objects.filter(user=request.user, company=company, is_active=True)
+        .select_related("user", "company")
+        .first()
+    )
     if shift:
         shift.last_heartbeat = timezone.now()
         shift.heartbeat_count += 1
-        shift.save(update_fields=['last_heartbeat', 'heartbeat_count'])
-        return JsonResponse({'ok': True, 'count': shift.heartbeat_count})
-    return JsonResponse({'ok': False, 'error': 'Nema aktivne smjene'}, status=400)
+        shift.save(update_fields=["last_heartbeat", "heartbeat_count"])
+        return JsonResponse({"ok": True, "count": shift.heartbeat_count})
+    return JsonResponse({"ok": False, "error": "Nema aktivne smjene"}, status=400)
 
 
 @login_required
@@ -3569,23 +4110,24 @@ def waiter_claim_order(request, order_id):
     from django.utils import timezone
 
     from .models import GastroOrder, WaiterShift
+
     order = get_object_or_404(GastroOrder, pk=order_id)
 
     if order.claimed_by and order.claimed_by != request.user:
-        return JsonResponse({'error': 'Narudzba je vec preuzeta.'}, status=400)
+        return JsonResponse({"error": "Narudzba je vec preuzeta."}, status=400)
 
     order.claimed_by = request.user
     order.claimed_at = timezone.now()
-    order.status = 'delivering'
-    order.save(update_fields=['claimed_by', 'claimed_at', 'status', 'updated_at'])
+    order.status = "delivering"
+    order.save(update_fields=["claimed_by", "claimed_at", "status", "updated_at"])
 
     # Update shift stats
-    WaiterShift.objects.filter(
-        user=request.user, is_active=True
-    ).update(total_orders_claimed=models.F('total_orders_claimed') + 1)
+    WaiterShift.objects.filter(user=request.user, is_active=True).update(
+        total_orders_claimed=models.F("total_orders_claimed") + 1
+    )
 
     name = request.user.get_full_name() or request.user.username
-    return JsonResponse({'ok': True, 'waiter': name})
+    return JsonResponse({"ok": True, "waiter": name})
 
 
 @login_required
@@ -3595,34 +4137,40 @@ def waiter_deliver_order(request, order_id):
     from django.utils import timezone
 
     from .models import GastroOrder, WaiterShift
+
     order = get_object_or_404(GastroOrder, pk=order_id)
 
     order.delivered_by = request.user
     order.delivered_at = timezone.now()
-    order.status = 'delivered'
-    order.save(update_fields=['delivered_by', 'delivered_at', 'status', 'updated_at'])
+    order.status = "delivered"
+    order.save(update_fields=["delivered_by", "delivered_at", "status", "updated_at"])
 
     # Update shift stats
-    WaiterShift.objects.filter(
-        user=request.user, is_active=True
-    ).update(total_orders_delivered=models.F('total_orders_delivered') + 1)
+    WaiterShift.objects.filter(user=request.user, is_active=True).update(
+        total_orders_delivered=models.F("total_orders_delivered") + 1
+    )
 
     name = request.user.get_full_name() or request.user.username
-    return JsonResponse({'ok': True, 'waiter': name})
+    return JsonResponse({"ok": True, "waiter": name})
 
 
 @login_required
 def waiter_shift_log(request):
     """Manager view: all waiter shifts with heartbeat status."""
     from .models import WaiterShift
+
     company = get_user_company(request)
-    shifts = WaiterShift.objects.filter(company=company).select_related('user').order_by('-started_at')[:50]
+    shifts = WaiterShift.objects.filter(company=company).select_related("user").order_by("-started_at")[:50]
     active_shifts = [s for s in shifts if s.is_active]
     past_shifts = [s for s in shifts if not s.is_active]
-    return render(request, 'pos/waiter/shift_log.html', {
-        'active_shifts': active_shifts,
-        'past_shifts': past_shifts,
-    })
+    return render(
+        request,
+        "pos/waiter/shift_log.html",
+        {
+            "active_shifts": active_shifts,
+            "past_shifts": past_shifts,
+        },
+    )
 
 
 def kitchen_tablet(request, token):
@@ -3630,10 +4178,11 @@ def kitchen_tablet(request, token):
     URL: /pos/gastro/kds/<company_token>/
     Always-on tablet screen showing orders."""
     from companies.models import Company
+
     company = Company.objects.filter(id=token).first()
     if not company:
-        return render(request, 'pos/waiter/kds.html', {'error': 'Nepoznat token'})
-    return render(request, 'pos/waiter/kds.html', {'company': company, 'token': token})
+        return render(request, "pos/waiter/kds.html", {"error": "Nepoznat token"})
+    return render(request, "pos/waiter/kds.html", {"company": company, "token": token})
 
 
 def kitchen_tablet_api(request, token):
@@ -3643,74 +4192,86 @@ def kitchen_tablet_api(request, token):
     from companies.models import Company
 
     from .models import GastroOrder
+
     company = Company.objects.filter(id=token).first()
     if not company:
-        return JsonResponse({'error': 'Invalid token'}, status=404)
+        return JsonResponse({"error": "Invalid token"}, status=404)
 
-    orders = GastroOrder.objects.filter(
-        company=company,
-        status__in=['new', 'confirmed', 'preparing', 'ready']
-    ).select_related('table', 'claimed_by').prefetch_related('items__inventory_item').order_by('created_at')
+    orders = (
+        GastroOrder.objects.filter(company=company, status__in=["new", "confirmed", "preparing", "ready"])
+        .select_related("table", "claimed_by")
+        .prefetch_related("items__inventory_item")
+        .order_by("created_at")
+    )
 
     data = []
     for o in orders:
-        waiter_name = ''
+        waiter_name = ""
         if o.claimed_by:
             waiter_name = o.claimed_by.get_full_name() or o.claimed_by.username
-        data.append({
-            'id': o.pk,
-            'table': o.table.name if o.table else 'N/A',
-            'floor': o.table.floor if o.table else '',
-            'status': o.status,
-            'guest_name': o.guest_name,
-            'notes': o.notes,
-            'waiter': waiter_name,
-            'created_at': o.created_at.isoformat(),
-            'wait_minutes': int((tz.now() - o.created_at).total_seconds() / 60),
-            'items': [
-                {'name': i.inventory_item.name if i.inventory_item else '?', 'qty': str(i.quantity), 'notes': i.notes}
-                for i in o.items.all()
-            ],
-        })
-    return JsonResponse({'ok': True, 'orders': data})
+        data.append(
+            {
+                "id": o.pk,
+                "table": o.table.name if o.table else "N/A",
+                "floor": o.table.floor if o.table else "",
+                "status": o.status,
+                "guest_name": o.guest_name,
+                "notes": o.notes,
+                "waiter": waiter_name,
+                "created_at": o.created_at.isoformat(),
+                "wait_minutes": int((tz.now() - o.created_at).total_seconds() / 60),
+                "items": [
+                    {
+                        "name": i.inventory_item.name if i.inventory_item else "?",
+                        "qty": str(i.quantity),
+                        "notes": i.notes,
+                    }
+                    for i in o.items.all()
+                ],
+            }
+        )
+    return JsonResponse({"ok": True, "orders": data})
 
 
 # CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 def kitchen_tablet_action(request, token, order_id):
     """Kitchen tablet changes order status (confirm/ready) — no login."""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     from companies.models import Company
 
     from .models import GastroOrder
+
     company = Company.objects.filter(id=token).first()
     if not company:
-        return JsonResponse({'error': 'Invalid'}, status=404)
+        return JsonResponse({"error": "Invalid"}, status=404)
 
-    order = GastroOrder.objects.filter(pk=order_id, company=company).select_related("company", "table", "receipt").first()
+    order = (
+        GastroOrder.objects.filter(pk=order_id, company=company).select_related("company", "table", "receipt").first()
+    )
     if not order:
-        return JsonResponse({'error': 'Not found'}, status=404)
+        return JsonResponse({"error": "Not found"}, status=404)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         data = {}
 
-    new_status = data.get('status', '')
+    new_status = data.get("status", "")
     # Tablet can only: confirm, start preparing, mark ready
-    allowed = {'confirmed', 'preparing', 'ready'}
+    allowed = {"confirmed", "preparing", "ready"}
     if new_status not in allowed:
-        return JsonResponse({'error': 'Nedozvoljeni status'}, status=400)
+        return JsonResponse({"error": "Nedozvoljeni status"}, status=400)
 
     # Track koji kuhar je obradio (ako je skenirao barcode)
-    cook_name = data.get('cook_name', '')
+    cook_name = data.get("cook_name", "")
     if cook_name:
-        order.notes = ('%s | Kuhar: %s' % (order.notes or '', cook_name)).strip(' |')
+        order.notes = ("%s | Kuhar: %s" % (order.notes or "", cook_name)).strip(" |")
 
     order.status = new_status
-    order.save(update_fields=['status', 'updated_at', 'notes'])
-    return JsonResponse({'ok': True, 'status': new_status, 'cook': cook_name})
+    order.save(update_fields=["status", "updated_at", "notes"])
+    return JsonResponse({"ok": True, "status": new_status, "cook": cook_name})
 
 
 @csrf_exempt
@@ -3720,8 +4281,8 @@ def kitchen_cook_scan(request, token):
     POST {barcode_data: "LC-DEV-XXXXXXXX"}
     Returns {ok, cook_name, shift_started}
     """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     import json as _json
 
     from accounts.models import DeviceToken
@@ -3729,74 +4290,76 @@ def kitchen_cook_scan(request, token):
 
     company = Company.objects.filter(id=token).first()
     if not company:
-        return JsonResponse({'error': 'Invalid token'}, status=404)
+        return JsonResponse({"error": "Invalid token"}, status=404)
 
     try:
         data = _json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         data = {}
 
-    barcode = data.get('barcode_data', '').strip()
+    barcode = data.get("barcode_data", "").strip()
     if not barcode:
-        return JsonResponse({'error': 'barcode_data obavezan'}, status=400)
+        return JsonResponse({"error": "barcode_data obavezan"}, status=400)
 
-    dt = DeviceToken.objects.filter(
-        barcode_data=barcode, company=company, is_active=True
-    ).select_related('user').first()
+    dt = (
+        DeviceToken.objects.filter(barcode_data=barcode, company=company, is_active=True).select_related("user").first()
+    )
     if not dt:
-        return JsonResponse({'error': 'Nepoznat barcode'}, status=404)
+        return JsonResponse({"error": "Nepoznat barcode"}, status=404)
 
     # Pokreni radno vrijeme za kuhara
     from pos.worktime_bridge import device_login_start_all
-    ip = request.META.get('HTTP_X_REAL_IP', request.META.get('REMOTE_ADDR', ''))
+
+    ip = request.META.get("HTTP_X_REAL_IP", request.META.get("REMOTE_ADDR", ""))
     result = device_login_start_all(dt, ip_address=ip)
 
     from django.utils import timezone
+
     dt.last_used_at = timezone.now()
     dt.last_ip = ip
-    dt.save(update_fields=['last_used_at', 'last_ip'])
+    dt.save(update_fields=["last_used_at", "last_ip"])
 
-    return JsonResponse({
-        'ok': True,
-        'cook_name': dt.user.get_full_name() or dt.user.username,
-        'started': result.get('started', []),
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "cook_name": dt.user.get_full_name() or dt.user.username,
+            "started": result.get("started", []),
+        }
+    )
 
 
 # ── Gastro Reviews ──────────────────────────────────────────────────────────────
 
+
 def gastro_order_review(request, tracking_token):
     """Guest submits review after order delivered/paid."""
     from .models import GastroOrder, GastroReview
+
     order = get_object_or_404(GastroOrder, tracking_token=tracking_token)
 
     # Check if already reviewed
-    if hasattr(order, 'review'):
-        return render(request, 'pos/gastro/review_thanks.html', {
-            'order': order, 'review': order.review
-        })
+    if hasattr(order, "review"):
+        return render(request, "pos/gastro/review_thanks.html", {"order": order, "review": order.review})
 
-    if request.method == 'POST':
-        rating = int(request.POST.get('rating', 5))
+    if request.method == "POST":
+        rating = int(request.POST.get("rating", 5))
         rating = max(1, min(5, rating))
 
         review = GastroReview.objects.create(
             company=order.company,
             order=order,
-            guest_name=order.guest_name or 'Gost',
-            guest_email=order.guest_email or '',
+            guest_name=order.guest_name or "Gost",
+            guest_email=order.guest_email or "",
             rating=rating,
-            comment=request.POST.get('comment', '').strip(),
-            food_rating=int(request.POST.get('food_rating') or 0) or None,
-            service_rating=int(request.POST.get('service_rating') or 0) or None,
-            ambience_rating=int(request.POST.get('ambience_rating') or 0) or None,
+            comment=request.POST.get("comment", "").strip(),
+            food_rating=int(request.POST.get("food_rating") or 0) or None,
+            service_rating=int(request.POST.get("service_rating") or 0) or None,
+            ambience_rating=int(request.POST.get("ambience_rating") or 0) or None,
         )
 
-        return render(request, 'pos/gastro/review_thanks.html', {
-            'order': order, 'review': review
-        })
+        return render(request, "pos/gastro/review_thanks.html", {"order": order, "review": review})
 
-    return render(request, 'pos/gastro/review_form.html', {'order': order})
+    return render(request, "pos/gastro/review_form.html", {"order": order})
 
 
 def gastro_reviews_public(request, company_id):
@@ -3811,19 +4374,23 @@ def gastro_reviews_public(request, company_id):
     reviews = GastroReview.objects.filter(company=company, is_published=True).select_related("company", "order")
 
     stats = reviews.aggregate(
-        avg_rating=Avg('rating'),
-        avg_food=Avg('food_rating'),
-        avg_service=Avg('service_rating'),
-        avg_ambience=Avg('ambience_rating'),
+        avg_rating=Avg("rating"),
+        avg_food=Avg("food_rating"),
+        avg_service=Avg("service_rating"),
+        avg_ambience=Avg("ambience_rating"),
     )
 
-    return render(request, 'pos/gastro/reviews_public.html', {
-        'company': company,
-        'reviews': reviews[:50],
-        'stats': stats,
-        'total': reviews.count(),
-        'tv_mode': request.GET.get('tv') == '1',
-    })
+    return render(
+        request,
+        "pos/gastro/reviews_public.html",
+        {
+            "company": company,
+            "reviews": reviews[:50],
+            "stats": stats,
+            "total": reviews.count(),
+            "tv_mode": request.GET.get("tv") == "1",
+        },
+    )
 
 
 @login_required
@@ -3836,21 +4403,23 @@ def cashier_pin_verify(request):
 
     from pos.models import POSCashier
 
-    body = json.loads(request.body) if request.content_type == 'application/json' else request.POST
-    pin = body.get('pin', '')
-    session_id = body.get('session_id', '')
+    body = json.loads(request.body) if request.content_type == "application/json" else request.POST
+    pin = body.get("pin", "")
+    session_id = body.get("session_id", "")
 
     if not pin:
-        return JsonResponse({'ok': False, 'error': 'PIN je obavezan'})
+        return JsonResponse({"ok": False, "error": "PIN je obavezan"})
 
     # Rate limiting: max 5 pokusaja po IP u 60 sekundi
-    ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
-    if ',' in ip:
-        ip = ip.split(',')[0].strip()
-    rate_key = 'pin_attempts:%s' % ip
+    ip = request.META.get("HTTP_X_REAL_IP") or request.META.get(
+        "HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")
+    )
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    rate_key = "pin_attempts:%s" % ip
     attempts = cache.get(rate_key, 0)
     if attempts >= 5:
-        return JsonResponse({'ok': False, 'error': 'Previše pokušaja. Pričekajte 60 sekundi.'}, status=429)
+        return JsonResponse({"ok": False, "error": "Previše pokušaja. Pričekajte 60 sekundi."}, status=429)
 
     company = get_user_company(request)
     cashiers = POSCashier.objects.filter(company=company, is_active=True).select_related("company", "user")
@@ -3863,22 +4432,30 @@ def cashier_pin_verify(request):
             # Track cashier in session
             if session_id:
                 from pos.models import POSSession
-                session = POSSession.objects.filter(id=session_id, status='open').select_related("terminal", "operator", "active_cashiers").first()
+
+                session = (
+                    POSSession.objects.filter(id=session_id, status="open")
+                    .select_related("terminal", "operator", "active_cashiers")
+                    .first()
+                )
                 if session:
                     session.active_cashiers.add(cashier)
 
             # Auto clock-in za worktime evidenciju
             from pos.worktime_bridge import cashier_clock_in
+
             cashier_clock_in(cashier)
 
-            return JsonResponse({
-                'ok': True,
-                'cashier_id': cashier.id,
-                'cashier_name': cashier.name,
-                'can_void': cashier.can_void,
-                'can_discount': cashier.can_discount,
-                'max_discount': float(cashier.max_discount_percent),
-            })
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "cashier_id": cashier.id,
+                    "cashier_name": cashier.name,
+                    "can_void": cashier.can_void,
+                    "can_discount": cashier.can_discount,
+                    "max_discount": float(cashier.max_discount_percent),
+                }
+            )
 
     # Increment rate limit on failure (atomski)
     try:
@@ -3886,58 +4463,67 @@ def cashier_pin_verify(request):
     except ValueError:
         cache.set(rate_key, 1, 60)
     remaining = max(0, 4 - attempts)
-    return JsonResponse({'ok': False, 'error': 'Neispravan PIN. Preostalo pokusaja: %d' % remaining})
+    return JsonResponse({"ok": False, "error": "Neispravan PIN. Preostalo pokusaja: %d" % remaining})
 
 
 # ════════════════════════════════════════════════════════════
 # WEBSHOP — Roba od jučer + javna stranica
 # ════════════════════════════════════════════════════════════
 
+
 def webshop_public(request, slug):
     """Javna webshop stranica za firmu."""
     from companies.models import Company
     from inventory.models import InventoryItem
+
     company = Company.objects.filter(booking_slug=slug).first()
     if not company:
-        company = Company.objects.filter(name__icontains=slug.replace('-',' ')[:20]).first()
+        company = Company.objects.filter(name__icontains=slug.replace("-", " ")[:20]).first()
     if not company:
         from django.http import Http404
+
         raise Http404
 
-    items = InventoryItem.objects.filter(
-        company=company, is_active=True, webshop_visible=True
-    ).order_by('category', 'name')
+    items = InventoryItem.objects.filter(company=company, is_active=True, webshop_visible=True).order_by(
+        "category", "name"
+    )
 
     # Roba od jučer
     from datetime import date
+
     today = date.today()
     from django.db import connection as _conn
+
     cursor = _conn.cursor()
     cursor.execute(
-        'SELECT d.id, d.inventory_item_id, d.original_price, d.discount_price, d.discount_pct, '
-        'd.quantity_available, d.production_date, d.expiry_date, d.is_vacuum_packed, d.storage_instructions, '
-        'i.name, i.category, i.image '
-        'FROM pos_dailydiscount d JOIN inventory_inventoryitem i ON d.inventory_item_id = i.id '
-        'WHERE d.company_id = %s AND d.is_active = TRUE AND d.expiry_date >= %s '
-        'ORDER BY d.expiry_date, i.name',
-        [str(company.id), today]
+        "SELECT d.id, d.inventory_item_id, d.original_price, d.discount_price, d.discount_pct, "
+        "d.quantity_available, d.production_date, d.expiry_date, d.is_vacuum_packed, d.storage_instructions, "
+        "i.name, i.category, i.image "
+        "FROM pos_dailydiscount d JOIN inventory_inventoryitem i ON d.inventory_item_id = i.id "
+        "WHERE d.company_id = %s AND d.is_active = TRUE AND d.expiry_date >= %s "
+        "ORDER BY d.expiry_date, i.name",
+        [str(company.id), today],
     )
     columns = [col[0] for col in cursor.description]
     yesterday_items = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     categories = {}
     for item in items:
-        cat = item.get_category_display() if hasattr(item, 'get_category_display') else (item.category or 'Ostalo')
+        cat = item.get_category_display() if hasattr(item, "get_category_display") else (item.category or "Ostalo")
         if cat not in categories:
             categories[cat] = []
         categories[cat].append(item)
 
-    return render(request, 'pos/webshop_public.html', {
-        'company': company,
-        'categories': categories,
-        'yesterday_items': yesterday_items,
-        'today': today,
-    })
+    return render(
+        request,
+        "pos/webshop_public.html",
+        {
+            "company": company,
+            "categories": categories,
+            "yesterday_items": yesterday_items,
+            "today": today,
+        },
+    )
 
 
 @login_required
@@ -3952,26 +4538,27 @@ def yesterday_manage(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('/')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("/")
 
     today = date.today()
     yesterday = today - timedelta(days=1)
 
-    if request.method == 'POST':
-        action = request.POST.get('action', '')
+    if request.method == "POST":
+        action = request.POST.get("action", "")
 
-        if action == 'add':
-            item_ids = request.POST.getlist('item_id')
-            quantities = request.POST.getlist('quantity')
-            discount = int(request.POST.get('discount_pct', 50))
-            is_vacuum = 'vacuum' in request.POST
-            shelf_days = int(request.POST.get('shelf_days', 2))
+        if action == "add":
+            item_ids = request.POST.getlist("item_id")
+            quantities = request.POST.getlist("quantity")
+            discount = int(request.POST.get("discount_pct", 50))
+            is_vacuum = "vacuum" in request.POST
+            shelf_days = int(request.POST.get("shelf_days", 2))
 
             cursor = _conn.cursor()
             added = 0
             for item_id, qty in zip(item_ids, quantities):
-                if not item_id or not qty: continue
+                if not item_id or not qty:
+                    continue
                 try:
                     item = InventoryItem.objects.get(pk=int(item_id), company=company)
                     orig = float(item.unit_price or 0)
@@ -3979,62 +4566,85 @@ def yesterday_manage(request):
                     exp = yesterday + timedelta(days=shelf_days)
 
                     cursor.execute(
-                        'INSERT INTO pos_dailydiscount '
-                        '(company_id, inventory_item_id, original_price, discount_price, discount_pct, '
-                        'quantity_available, production_date, expiry_date, is_vacuum_packed, '
-                        'storage_instructions, is_active, created_by_id) '
-                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE, %s)',
-                        [str(company.id), item.pk, orig, disc, discount,
-                         float(qty), yesterday, exp, is_vacuum,
-                         'Vakumirano. Čuvati na hladnom.' if is_vacuum else 'Čuvati na suhom i hladnom mjestu. Potrošiti do %s.' % exp.strftime('%d.%m.%Y'),
-                         request.user.pk]
+                        "INSERT INTO pos_dailydiscount "
+                        "(company_id, inventory_item_id, original_price, discount_price, discount_pct, "
+                        "quantity_available, production_date, expiry_date, is_vacuum_packed, "
+                        "storage_instructions, is_active, created_by_id) "
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE, %s)",
+                        [
+                            str(company.id),
+                            item.pk,
+                            orig,
+                            disc,
+                            discount,
+                            float(qty),
+                            yesterday,
+                            exp,
+                            is_vacuum,
+                            "Vakumirano. Čuvati na hladnom."
+                            if is_vacuum
+                            else "Čuvati na suhom i hladnom mjestu. Potrošiti do %s." % exp.strftime("%d.%m.%Y"),
+                            request.user.pk,
+                        ],
                     )
                     added += 1
                 except ObjectDoesNotExist as e:
                     messages.error(request, str(e)[:100])
             messages.success(request, _('%d artikala dodano u "Roba od jučer".') % added)
 
-        elif action == 'deactivate':
-            dd_id = request.POST.get('dd_id')
+        elif action == "deactivate":
+            dd_id = request.POST.get("dd_id")
             cursor = _conn.cursor()
-            cursor.execute('UPDATE pos_dailydiscount SET is_active = FALSE WHERE id = %s AND company_id = %s',
-                           [dd_id, str(company.id)])
-            messages.success(request, _('Uklonjeno iz ponude.'))
+            cursor.execute(
+                "UPDATE pos_dailydiscount SET is_active = FALSE WHERE id = %s AND company_id = %s",
+                [dd_id, str(company.id)],
+            )
+            messages.success(request, _("Uklonjeno iz ponude."))
 
-        return redirect('pos:yesterday_manage')
+        return redirect("pos:yesterday_manage")
 
     # Active yesterday items
     cursor = _conn.cursor()
     cursor.execute(
-        'SELECT d.id, i.name, i.category, d.original_price, d.discount_price, d.discount_pct, '
-        'd.quantity_available, d.production_date, d.expiry_date, d.is_vacuum_packed, d.created_at '
-        'FROM pos_dailydiscount d JOIN inventory_inventoryitem i ON d.inventory_item_id = i.id '
-        'WHERE d.company_id = %s AND d.is_active = TRUE ORDER BY d.expiry_date',
-        [str(company.id)]
+        "SELECT d.id, i.name, i.category, d.original_price, d.discount_price, d.discount_pct, "
+        "d.quantity_available, d.production_date, d.expiry_date, d.is_vacuum_packed, d.created_at "
+        "FROM pos_dailydiscount d JOIN inventory_inventoryitem i ON d.inventory_item_id = i.id "
+        "WHERE d.company_id = %s AND d.is_active = TRUE ORDER BY d.expiry_date",
+        [str(company.id)],
     )
     cols = [c[0] for c in cursor.description]
     active_items = [dict(zip(cols, row)) for row in cursor.fetchall()]
 
     # All inventory items for adding
-    all_items = InventoryItem.objects.filter(company=company, is_active=True, category='food').select_related('tax_rate').order_by('name')
+    all_items = (
+        InventoryItem.objects.filter(company=company, is_active=True, category="food")
+        .select_related("tax_rate")
+        .order_by("name")
+    )
 
-    return render(request, 'pos/yesterday_manage.html', {
-        'active_items': active_items,
-        'all_items': all_items,
-        'today': today,
-        'yesterday': yesterday,
-    })
+    return render(
+        request,
+        "pos/yesterday_manage.html",
+        {
+            "active_items": active_items,
+            "all_items": all_items,
+            "today": today,
+            "yesterday": yesterday,
+        },
+    )
 
 
 @login_required
 def cashier_report(request, session_id, cashier_id):
     """AJAX: Izvjestaj prometa za jednog blagajnika u smjeni."""
     from django.db import connection
-    session = get_object_or_404(POSSession, pk=session_id)
+
+    get_object_or_404(POSSession, pk=session_id)
     cashier = get_object_or_404(POSCashier, pk=cashier_id)
 
     with connection.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 COUNT(DISTINCT r.id)                                          AS racuna,
                 COALESCE(SUM(pl.amount) FILTER (WHERE pl.method='CASH'),  0) AS gotovina,
@@ -4048,49 +4658,53 @@ def cashier_report(request, session_id, cashier_id):
             WHERE r.session_id = %s
               AND r.cashier_id  = %s
               AND r.status      = 'paid'
-        """, [session_id, cashier_id])
+        """,
+            [session_id, cashier_id],
+        )
         row = cur.fetchone()
 
     racuna, gotovina, kartica, vavceri, ukupno, prvi, zadnji = row
 
     # Zadnjih 10 računa ovog blagajnika
-    receipts = (
-        POSReceipt.objects
-        .filter(session_id=session_id, cashier_id=cashier_id, status='paid')
-        .order_by('-paid_at')[:10]
-    )
+    receipts = POSReceipt.objects.filter(session_id=session_id, cashier_id=cashier_id, status="paid").order_by(
+        "-paid_at"
+    )[:10]
 
     def fmt(dt):
-        return dt.strftime('%H:%M') if dt else '-'
+        return dt.strftime("%H:%M") if dt else "-"
 
-    return JsonResponse({
-        'cashier':   cashier.name,
-        'racuna':    racuna or 0,
-        'gotovina':  str(gotovina or 0),
-        'kartica':   str(kartica  or 0),
-        'vavceri':   str(vavceri  or 0),
-        'ukupno':    str(ukupno   or 0),
-        'prvi':      fmt(prvi),
-        'zadnji':    fmt(zadnji),
-        'receipts':  [
-            {
-                'broj':    r.receipt_number,
-                'ukupno':  str(r.total),
-                'vrijeme': fmt(r.paid_at),
-            }
-            for r in receipts
-        ],
-    })
+    return JsonResponse(
+        {
+            "cashier": cashier.name,
+            "racuna": racuna or 0,
+            "gotovina": str(gotovina or 0),
+            "kartica": str(kartica or 0),
+            "vavceri": str(vavceri or 0),
+            "ukupno": str(ukupno or 0),
+            "prvi": fmt(prvi),
+            "zadnji": fmt(zadnji),
+            "receipts": [
+                {
+                    "broj": r.receipt_number,
+                    "ukupno": str(r.total),
+                    "vrijeme": fmt(r.paid_at),
+                }
+                for r in receipts
+            ],
+        }
+    )
 
 
 @login_required
 def cashier_report_html(request, session_id):
     """HTML: Izvjestaj svih blagajnika u smjeni — za managera."""
     from django.db import connection
+
     session = get_object_or_404(POSSession, pk=session_id)
 
     with connection.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 COALESCE(c.name, 'Nepoznat')                                   AS blagajnik,
                 COUNT(DISTINCT r.id)                                           AS racuna,
@@ -4107,39 +4721,48 @@ def cashier_report_html(request, session_id):
             WHERE r.session_id = %s AND r.status = 'paid'
             GROUP BY r.cashier_id, c.name
             ORDER BY ukupno DESC
-        """, [session_id])
+        """,
+            [session_id],
+        )
         rows = cur.fetchall()
 
     def fmt(dt):
-        if not dt: return '-'
-        if hasattr(dt, 'astimezone'):
+        if not dt:
+            return "-"
+        if hasattr(dt, "astimezone"):
             dt = dt.astimezone()
-        return dt.strftime('%H:%M')
+        return dt.strftime("%H:%M")
 
     cashiers = []
     total_gotovina = total_kartica = total_ukupno = 0
     for row in rows:
-        cashiers.append({
-            'name':      row[0],
-            'racuna':    row[1],
-            'gotovina':  float(row[2] or 0),
-            'kartica':   float(row[3] or 0),
-            'vavceri':   float(row[4] or 0),
-            'ukupno':    float(row[5] or 0),
-            'prvi':      fmt(row[6]),
-            'zadnji':    fmt(row[7]),
-        })
+        cashiers.append(
+            {
+                "name": row[0],
+                "racuna": row[1],
+                "gotovina": float(row[2] or 0),
+                "kartica": float(row[3] or 0),
+                "vavceri": float(row[4] or 0),
+                "ukupno": float(row[5] or 0),
+                "prvi": fmt(row[6]),
+                "zadnji": fmt(row[7]),
+            }
+        )
         total_gotovina += float(row[2] or 0)
-        total_kartica  += float(row[3] or 0)
-        total_ukupno   += float(row[5] or 0)
+        total_kartica += float(row[3] or 0)
+        total_ukupno += float(row[5] or 0)
 
-    return render(request, 'pos/cashier_report.html', {
-        'session':         session,
-        'cashiers':        cashiers,
-        'total_gotovina':  total_gotovina,
-        'total_kartica':   total_kartica,
-        'total_ukupno':    total_ukupno,
-    })
+    return render(
+        request,
+        "pos/cashier_report.html",
+        {
+            "session": session,
+            "cashiers": cashiers,
+            "total_gotovina": total_gotovina,
+            "total_kartica": total_kartica,
+            "total_ukupno": total_ukupno,
+        },
+    )
 
 
 @login_required
@@ -4153,47 +4776,49 @@ def api_quick_add_item(request):
     from core.company_utils import get_user_company
     from inventory.models import InventoryItem
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema firme'}, status=400)
+        return JsonResponse({"error": "Nema firme"}, status=400)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError) as e:
         logger.debug("Exception in pos.views:%d: %s", 3895, e)  # BORG
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    name = data.get('name', '').strip()
-    price = data.get('price', 0)
-    category = data.get('category', 'food')
-    tax_rate_pct = data.get('tax_rate', 25)
-    barcode = data.get('barcode', '').strip()
+    name = data.get("name", "").strip()
+    price = data.get("price", 0)
+    category = data.get("category", "food")
+    tax_rate_pct = data.get("tax_rate", 25)
+    barcode = data.get("barcode", "").strip()
 
     if not name:
-        return JsonResponse({'error': 'Naziv je obavezan'}, status=400)
+        return JsonResponse({"error": "Naziv je obavezan"}, status=400)
 
     # Find or create tax rate
     tax_obj = None
     try:
         from companies.models import TaxRate
+
         tax_obj = TaxRate.objects.filter(rate=tax_rate_pct).first()
     except DatabaseError:
         pass
 
     # Generiraj unikatan SKU: POS- + zadnjih 6 znakova barkoda ili random
     import uuid as _uuid
+
     if barcode:
         sku_suffix = barcode[-6:]
     else:
         sku_suffix = _uuid.uuid4().hex[:6].upper()
-    base_sku = 'POS-' + sku_suffix
+    base_sku = "POS-" + sku_suffix
     sku = base_sku
     counter = 1
     while InventoryItem.objects.filter(company=company, sku=sku).exists():
-        sku = base_sku + '-' + str(counter)
+        sku = base_sku + "-" + str(counter)
         counter += 1
 
     item = InventoryItem(
@@ -4203,7 +4828,7 @@ def api_quick_add_item(request):
         unit_price=price,
         purchase_price=0,
         category=category,
-        barcode=barcode if barcode else '',
+        barcode=barcode if barcode else "",
         is_active=True,
         quantity=0,
         webshop_visible=True,
@@ -4212,32 +4837,37 @@ def api_quick_add_item(request):
         item.tax_rate = tax_obj
     item.save()
 
-    return JsonResponse({
-        'id': item.pk,
-        'name': item.name,
-        'price': str(item.unit_price),
-        'category': item.category,
-        'barcode': barcode,
-    })
-
-
+    return JsonResponse(
+        {
+            "id": item.pk,
+            "name": item.name,
+            "price": str(item.unit_price),
+            "category": item.category,
+            "barcode": barcode,
+        }
+    )
 
 
 # ═══ API: Dohvat pojedinacnog artikla (fallback za brze tipke) ═══
 @login_required
 def pos_item_api(request, item_id):
     from inventory.models import InventoryItem
+
     company = get_user_company(request)
     try:
         item = InventoryItem.objects.get(id=item_id, company=company, is_active=True)
-        return JsonResponse({
-            'id': str(item.id), 'name': item.name,
-            'price': str(item.unit_price),
-            'tax': str(item.tax_rate.rate) if item.tax_rate else '25',
-            'sku': item.sku or '', 'bc': item.barcode or ''
-        })
+        return JsonResponse(
+            {
+                "id": str(item.id),
+                "name": item.name,
+                "price": str(item.unit_price),
+                "tax": str(item.tax_rate.rate) if item.tax_rate else "25",
+                "sku": item.sku or "",
+                "bc": item.barcode or "",
+            }
+        )
     except InventoryItem.DoesNotExist:
-        return JsonResponse({'error': 'not found'}, status=404)
+        return JsonResponse({"error": "not found"}, status=404)
 
 
 # ═══ POSDailyReport — lista + mjesecni summary ═══
@@ -4248,43 +4878,48 @@ def daily_reports_list(request):
     from pos.models import POSDailyReport
 
     company = get_user_company(request)
-    qs = POSDailyReport.objects.filter(company=company).select_related('terminal', 'session')
+    qs = POSDailyReport.objects.filter(company=company).select_related("terminal", "session")
 
-    month_str = request.GET.get('month', '')
+    month_str = request.GET.get("month", "")
     if month_str:
         try:
-            year, month = month_str.split('-')
+            year, month = month_str.split("-")
             qs = qs.filter(date__year=int(year), date__month=int(month))
         except (ValueError, TypeError):
             pass
 
-    reports = qs.order_by('-date')[:100]
+    reports = qs.order_by("-date")[:100]
 
     monthly = (
-        POSDailyReport.objects.filter(company=company).select_related("company", "terminal", "session")
-        .extra(select={'month': "to_char(date, 'YYYY-MM')"})
-        .values('month')
+        POSDailyReport.objects.filter(company=company)
+        .select_related("company", "terminal", "session")
+        .extra(select={"month": "to_char(date, 'YYYY-MM')"})
+        .values("month")
         .annotate(
-            total_revenue=Sum('total_revenue'),
-            total_cash=Sum('cash_total'),
-            total_card=Sum('card_total'),
-            receipt_count=Sum('receipt_count'),
+            total_revenue=Sum("total_revenue"),
+            total_cash=Sum("cash_total"),
+            total_card=Sum("card_total"),
+            receipt_count=Sum("receipt_count"),
         )
-        .order_by('-month')[:12]
+        .order_by("-month")[:12]
     )
 
-    return render(request, 'pos/daily_reports.html', {
-        'reports': reports,
-        'monthly': monthly,
-        'current_month': month_str,
-    })
+    return render(
+        request,
+        "pos/daily_reports.html",
+        {
+            "reports": reports,
+            "monthly": monthly,
+            "current_month": month_str,
+        },
+    )
 
 
 # ═══ KDS Cook Logout ═══
 @csrf_exempt
 def kitchen_cook_logout(request, token):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     import json as _json
 
     from accounts.models import DeviceToken
@@ -4292,71 +4927,78 @@ def kitchen_cook_logout(request, token):
 
     company = Company.objects.filter(id=token).first()
     if not company:
-        return JsonResponse({'error': 'Invalid token'}, status=404)
+        return JsonResponse({"error": "Invalid token"}, status=404)
 
     try:
         data = _json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         data = {}
 
-    barcode = data.get('barcode_data', '').strip()
+    barcode = data.get("barcode_data", "").strip()
     if not barcode:
-        return JsonResponse({'error': 'barcode_data obavezan'}, status=400)
+        return JsonResponse({"error": "barcode_data obavezan"}, status=400)
 
-    dt = DeviceToken.objects.filter(
-        barcode_data=barcode, company=company, is_active=True
-    ).select_related('user').first()
+    dt = (
+        DeviceToken.objects.filter(barcode_data=barcode, company=company, is_active=True).select_related("user").first()
+    )
     if not dt:
-        return JsonResponse({'error': 'Nepoznat barcode'}, status=404)
+        return JsonResponse({"error": "Nepoznat barcode"}, status=404)
 
     from pos.worktime_bridge import device_logout_stop_all
+
     result = device_logout_stop_all(dt.user, dt.company)
 
-    return JsonResponse({
-        'ok': True,
-        'cook_name': dt.user.get_full_name() or dt.user.username,
-        'stopped': result.get('stopped', []),
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "cook_name": dt.user.get_full_name() or dt.user.username,
+            "stopped": result.get("stopped", []),
+        }
+    )
 
 
 # ═══ DeviceToken: Create ═══
 @login_required
 def device_token_create(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     from accounts.models import DeviceToken
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema tvrtke'}, status=400)
+        return JsonResponse({"error": "Nema tvrtke"}, status=400)
 
-    device_name = request.POST.get('device_name', 'Test uredaj')
+    device_name = request.POST.get("device_name", "Test uredaj")
     dt = DeviceToken.objects.create(
         user=request.user,
         company=company,
         device_name=device_name,
     )
-    return JsonResponse({
-        'ok': True,
-        'token': str(dt.token),
-        'barcode_data': dt.barcode_data,
-        'device_name': dt.device_name,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "token": str(dt.token),
+            "barcode_data": dt.barcode_data,
+            "device_name": dt.device_name,
+        }
+    )
 
 
 # ═══ DeviceToken: Panic deactivate ═══
 @login_required
 def device_token_panic(request, token_id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     from accounts.models import DeviceToken
+
     company = get_user_company(request)
     try:
         dt = DeviceToken.objects.get(pk=token_id, company=company)
         dt.is_active = False
-        dt.save(update_fields=['is_active'])
-        return JsonResponse({'ok': True, 'deactivated': str(dt.token)})
+        dt.save(update_fields=["is_active"])
+        return JsonResponse({"ok": True, "deactivated": str(dt.token)})
     except DeviceToken.DoesNotExist:
-        return JsonResponse({'error': 'Token ne postoji'}, status=404)
+        return JsonResponse({"error": "Token ne postoji"}, status=404)
 
 
 # ═══ DeviceToken: Lista s expiry ═══
@@ -4367,40 +5009,43 @@ def device_token_list(request):
     from accounts.models import DeviceToken
 
     company = get_user_company(request)
-    tokens = DeviceToken.objects.filter(company=company).select_related('user', 'cashier')
+    tokens = DeviceToken.objects.filter(company=company).select_related("user", "cashier")
 
     token_data = []
     now = timezone.now()
     for dt in tokens:
         days_since_use = (now - dt.last_used_at).days if dt.last_used_at else None
         is_expired = days_since_use is not None and days_since_use > 90
-        token_data.append({
-            'id': dt.pk,
-            'user': dt.user.get_full_name() or dt.user.username,
-            'device_name': dt.device_name,
-            'barcode_data': dt.barcode_data,
-            'is_active': dt.is_active,
-            'is_expired': is_expired,
-            'days_since_use': days_since_use,
-            'last_used': dt.last_used_at.isoformat() if dt.last_used_at else None,
-            'created': dt.created_at.isoformat(),
-        })
+        token_data.append(
+            {
+                "id": dt.pk,
+                "user": dt.user.get_full_name() or dt.user.username,
+                "device_name": dt.device_name,
+                "barcode_data": dt.barcode_data,
+                "is_active": dt.is_active,
+                "is_expired": is_expired,
+                "days_since_use": days_since_use,
+                "last_used": dt.last_used_at.isoformat() if dt.last_used_at else None,
+                "created": dt.created_at.isoformat(),
+            }
+        )
 
-    return JsonResponse({'tokens': token_data})
-
+    return JsonResponse({"tokens": token_data})
 
 
 # ═══ Knjiga boljitaka ═══
-IVAN_PHONE = '4915771998747'  # WhatsApp DE broj
+IVAN_PHONE = "4915771998747"  # WhatsApp DE broj
+
 
 def _zlatno_dugme_notify_ivan(suggestion):
     """Notificira Ivana WhatsApp-om kad korisnik pošalje prijedlog."""
     try:
         from core.whatsapp import send_text
-        author_name = suggestion.author.get_full_name() if suggestion.author else 'Anonimno'
-        company_name = suggestion.company.name if suggestion.company else '?'
-        priority_labels = {1: '🔴 KRITIČNO', 2: '🟠 Visoko', 3: '🟡 Srednje', 4: '🔵 Nisko', 5: '⚪ Ideja'}
-        prio = priority_labels.get(suggestion.priority, f'P{suggestion.priority}')
+
+        author_name = suggestion.author.get_full_name() if suggestion.author else "Anonimno"
+        company_name = suggestion.company.name if suggestion.company else "?"
+        priority_labels = {1: "🔴 KRITIČNO", 2: "🟠 Visoko", 3: "🟡 Srednje", 4: "🔵 Nisko", 5: "⚪ Ideja"}
+        prio = priority_labels.get(suggestion.priority, f"P{suggestion.priority}")
         msg = (
             f"💡 NOVO ZLATNO DUGME\n"
             f"Firma: {company_name}\n"
@@ -4413,87 +5058,97 @@ def _zlatno_dugme_notify_ivan(suggestion):
         send_text(IVAN_PHONE, msg)
     except ImportError as e:
         import logging
-        logging.getLogger('whatsapp').warning('Zlatno dugme Ivan notify failed: %s', e)
+
+        logging.getLogger("whatsapp").warning("Zlatno dugme Ivan notify failed: %s", e)
 
 
 def _zlatno_dugme_notify_user(suggestion):
     """Notificira korisnika WhatsApp-om kad Ivan promijeni status prijedloga."""
     try:
         from core.whatsapp import normalize_phone, send_text
+
         author = suggestion.author
         if not author:
             return
-        phone = ''
+        phone = ""
         try:
-            phone = normalize_phone(author.profile.phone or '')
+            phone = normalize_phone(author.profile.phone or "")
         except AttributeError:
             pass
         if not phone:
             return
         status_labels = {
-            'reviewed':  '👀 Pregledano — obrađujemo vaš prijedlog.',
-            'accepted':  '✅ Prihvaćeno — vaš prijedlog ulazi u razvoj!',
-            'done':      '🚀 Riješeno — poboljšanje je u živom sustavu!',
-            'rejected':  '❌ Odbijeno — hvala na prijedlogu.',
+            "reviewed": "👀 Pregledano — obrađujemo vaš prijedlog.",
+            "accepted": "✅ Prihvaćeno — vaš prijedlog ulazi u razvoj!",
+            "done": "🚀 Riješeno — poboljšanje je u živom sustavu!",
+            "rejected": "❌ Odbijeno — hvala na prijedlogu.",
         }
         label = status_labels.get(suggestion.status)
         if not label:
             return
-        msg = (
-            f"LIMIT Connect — ažuriranje vašeg prijedloga:\n\n"
-            f"📝 {suggestion.title}\n"
-            f"Status: {label}\n"
-        )
+        msg = f"LIMIT Connect — ažuriranje vašeg prijedloga:\n\n📝 {suggestion.title}\nStatus: {label}\n"
         if suggestion.admin_note:
             msg += f"Komentar: {suggestion.admin_note}\n"
         msg += "\nHvala što pomažete poboljšati sustav!"
         send_text(phone, msg)
     except AttributeError as e:
         import logging
-        logging.getLogger('whatsapp').warning('Zlatno dugme user notify failed: %s', e)
+
+        logging.getLogger("whatsapp").warning("Zlatno dugme user notify failed: %s", e)
 
 
 @login_required
 def improvement_list(request):
     from pos.models import ImprovementSuggestion
+
     company = get_user_company(request)
     suggestions = ImprovementSuggestion.objects.filter(company=company).select_related("company", "author")
 
-    if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        desc = request.POST.get('description', '').strip()
-        category = request.POST.get('category', 'other')
-        priority = int(request.POST.get('priority', '3') or '3')
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        desc = request.POST.get("description", "").strip()
+        category = request.POST.get("category", "other")
+        priority = int(request.POST.get("priority", "3") or "3")
         if title and desc:
             s = ImprovementSuggestion.objects.create(
-                company=company, author=request.user,
-                title=title, description=desc,
-                category=category, priority=priority,
-                trojstvo_status='pending',
+                company=company,
+                author=request.user,
+                title=title,
+                description=desc,
+                category=category,
+                priority=priority,
+                trojstvo_status="pending",
             )
             # Screenshot upload
-            if request.FILES.get('screenshot'):
+            if request.FILES.get("screenshot"):
                 from django.core.files.storage import default_storage
-                f = request.FILES['screenshot']
-                path = f'feedback/screenshots/{s.pk}_{f.name}'
+
+                f = request.FILES["screenshot"]
+                path = f"feedback/screenshots/{s.pk}_{f.name}"
                 saved = default_storage.save(path, f)
-                s.admin_note = f'[screenshot:{saved}] ' + s.admin_note
-                s.save(update_fields=['admin_note'])
+                s.admin_note = f"[screenshot:{saved}] " + s.admin_note
+                s.save(update_fields=["admin_note"])
 
             # BookingSignature audit
             try:
-                BookingSignature.log(request, 'create', target_obj=s,
-                    target_repr=f'Feedback: P{priority} {title[:50]}',
-                    changes={'category': category, 'priority': priority})
+                BookingSignature.log(
+                    request,
+                    "create",
+                    target_obj=s,
+                    target_repr=f"Feedback: P{priority} {title[:50]}",
+                    changes={"category": category, "priority": priority},
+                )
             except Exception:
                 pass
             # Pokrenuti Trojstvo analizu (Haiku + Gemini konsenzus)
             try:
                 from pos.trojstvo_task import trojstvo_rijesi
+
                 trojstvo_rijesi.delay(s.pk)
             except ImportError as e:
                 import logging
-                logging.getLogger('trojstvo').error('Task dispatch greska: %s', e)
+
+                logging.getLogger("trojstvo").error("Task dispatch greska: %s", e)
 
             # WhatsApp notifikacija Ivanu
             try:
@@ -4502,52 +5157,61 @@ def improvement_list(request):
                 pass
 
             # Odabir slanja
-            send_method = request.POST.get('send_method', 'none')
-            if send_method == 'whatsapp':
+            send_method = request.POST.get("send_method", "none")
+            if send_method == "whatsapp":
                 try:
                     from core.whatsapp import send_text
-                    send_text(IVAN_PHONE,
-                        f'Zlatno dugme: {title}\n{desc[:200]}\nPrioritet: P{s.priority}\nFirma: {company.name}')
+
+                    send_text(
+                        IVAN_PHONE,
+                        f"Zlatno dugme: {title}\n{desc[:200]}\nPrioritet: P{s.priority}\nFirma: {company.name}",
+                    )
                 except ImportError:
                     pass
-            elif send_method == 'email':
+            elif send_method == "email":
                 try:
                     from django.core.mail import send_mail
+
                     send_mail(
-                        subject=f'Zlatno dugme: {title} (P{s.priority})',
-                        message=f'{desc}\n\nFirma: {company.name}\nAutor: {request.user.get_full_name()}',
+                        subject=f"Zlatno dugme: {title} (P{s.priority})",
+                        message=f"{desc}\n\nFirma: {company.name}\nAutor: {request.user.get_full_name()}",
                         from_email=None,
-                        recipient_list=['viskovic.bau@gmail.com'],
+                        recipient_list=["viskovic.bau@gmail.com"],
                         fail_silently=True,
                     )
                 except ImportError:
                     pass
 
-            messages.success(request, _('Prijavljeno! Haiku i Gemini analiziraju...'))
-            return redirect('pos:improvement_list')
+            messages.success(request, _("Prijavljeno! Haiku i Gemini analiziraju..."))
+            return redirect("pos:improvement_list")
 
-    return render(request, 'pos/improvement_list.html', {
-        'suggestions': suggestions,
-    })
+    return render(
+        request,
+        "pos/improvement_list.html",
+        {
+            "suggestions": suggestions,
+        },
+    )
 
 
 @login_required
 def improvement_update(request, pk):
     from pos.models import ImprovementSuggestion
+
     company = get_user_company(request)
     if request.user.is_superuser:
         s = get_object_or_404(ImprovementSuggestion, pk=pk)
     else:
         s = get_object_or_404(ImprovementSuggestion, pk=pk, company=company)
-    if request.method == 'POST':
+    if request.method == "POST":
         old_status = s.status
-        s.status = request.POST.get('status', s.status)
-        s.admin_note = request.POST.get('admin_note', s.admin_note)
-        s.save(update_fields=['status', 'admin_note', 'updated_at'])
+        s.status = request.POST.get("status", s.status)
+        s.admin_note = request.POST.get("admin_note", s.admin_note)
+        s.save(update_fields=["status", "admin_note", "updated_at"])
         if s.status != old_status:
             _zlatno_dugme_notify_user(s)
-        return JsonResponse({'ok': True, 'status': s.status, 'status_display': s.get_status_display()})
-    return JsonResponse({'error': 'POST only'}, status=405)
+        return JsonResponse({"ok": True, "status": s.status, "status_display": s.get_status_display()})
+    return JsonResponse({"error": "POST only"}, status=405)
 
 
 # ═══ Onboarding Wizard ═══
@@ -4563,59 +5227,72 @@ def onboarding_wizard(request):
     """
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Nema tvrtke.'))
-        return redirect('core:dashboard')
+        messages.error(request, _("Nema tvrtke."))
+        return redirect("core:dashboard")
 
     from inventory.models import InventoryItem
     from pos.models import POSCashier, POSSettings, POSTerminal
 
     steps = [
         {
-            'name': 'Tvrtka',
-            'done': bool(company.oib and company.address),
-            'url': '/hr/companies/edit/',
-            'desc': 'Unesite OIB, adresu i podatke tvrtke',
+            "name": "Tvrtka",
+            "done": bool(company.oib and company.address),
+            "url": "/hr/companies/edit/",
+            "desc": "Unesite OIB, adresu i podatke tvrtke",
         },
         {
-            'name': 'POS terminal',
-            'done': POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").exists(),
-            'url': '/hr/pos/terminal/new/',
-            'desc': 'Kreirajte prvi POS terminal (blagajna)',
+            "name": "POS terminal",
+            "done": POSTerminal.objects.filter(company=company)
+            .select_related("company", "workspace", "business_location")
+            .exists(),
+            "url": "/hr/pos/terminal/new/",
+            "desc": "Kreirajte prvi POS terminal (blagajna)",
         },
         {
-            'name': 'Artikli',
-            'done': InventoryItem.objects.filter(company=company).count() >= 5,
-            'url': '/hr/pos/settings/',
-            'desc': 'Dodajte artikle (rucno ili CSV import)',
+            "name": "Artikli",
+            "done": InventoryItem.objects.filter(company=company).count() >= 5,
+            "url": "/hr/pos/settings/",
+            "desc": "Dodajte artikle (rucno ili CSV import)",
         },
         {
-            'name': 'Blagajnik',
-            'done': POSCashier.objects.filter(company=company).select_related("company", "user").exists(),
-            'url': '/hr/pos/cashier/setup/',
-            'desc': 'Dodajte blagajnika s PIN-om i OIB-om (zakonska obaveza)',
+            "name": "Blagajnik",
+            "done": POSCashier.objects.filter(company=company).select_related("company", "user").exists(),
+            "url": "/hr/pos/cashier/setup/",
+            "desc": "Dodajte blagajnika s PIN-om i OIB-om (zakonska obaveza)",
         },
         {
-            'name': 'Fiskalizacija',
-            'done': bool(getattr(POSSettings.objects.filter(company=company).select_related("company").first(), 'fiscal_active', False)),
-            'url': '/hr/pos/settings/',
-            'desc': 'Postavite FINA certifikat za fiskalizaciju',
+            "name": "Fiskalizacija",
+            "done": bool(
+                getattr(
+                    POSSettings.objects.filter(company=company).select_related("company").first(),
+                    "fiscal_active",
+                    False,
+                )
+            ),
+            "url": "/hr/pos/settings/",
+            "desc": "Postavite FINA certifikat za fiskalizaciju",
         },
     ]
 
-    completed = sum(1 for s in steps if s['done'])
+    completed = sum(1 for s in steps if s["done"])
     total = len(steps)
 
-    return render(request, 'pos/onboarding.html', {
-        'steps': steps,
-        'completed': completed,
-        'total': total,
-        'progress': int(completed / total * 100) if total else 0,
-    })
+    return render(
+        request,
+        "pos/onboarding.html",
+        {
+            "steps": steps,
+            "completed": completed,
+            "total": total,
+            "progress": int(completed / total * 100) if total else 0,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════
 # BLAGAJNIK SETUP — Onboarding wizard korak
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def cashier_setup(request):
@@ -4623,51 +5300,59 @@ def cashier_setup(request):
     Koristi se iz onboarding wizarda i POS settings."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Nema tvrtke.'))
-        return redirect('core:dashboard')
+        messages.error(request, _("Nema tvrtke."))
+        return redirect("core:dashboard")
 
     error = None
-    if request.method == 'POST':
-        name = request.POST.get('cashier_name', '').strip()
-        oib = request.POST.get('cashier_oib', '').strip()
-        pin = request.POST.get('cashier_pin', '').strip()
-        pin2 = request.POST.get('cashier_pin2', '').strip()
+    if request.method == "POST":
+        name = request.POST.get("cashier_name", "").strip()
+        oib = request.POST.get("cashier_oib", "").strip()
+        pin = request.POST.get("cashier_pin", "").strip()
+        pin2 = request.POST.get("cashier_pin2", "").strip()
 
         if not name:
-            error = 'Unesite ime blagajnika.'
+            error = "Unesite ime blagajnika."
         elif oib and len(oib) != 11:
-            error = 'OIB mora imati točno 11 znamenki.'
+            error = "OIB mora imati točno 11 znamenki."
         elif not pin or len(pin) < 4:
-            error = 'PIN mora imati najmanje 4 znamenke.'
+            error = "PIN mora imati najmanje 4 znamenke."
         elif pin != pin2:
-            error = 'PIN-ovi se ne podudaraju.'
+            error = "PIN-ovi se ne podudaraju."
         else:
             cashier = POSCashier(company=company, name=name, oib=oib, is_active=True)
             cashier.save()
-            if hasattr(cashier, 'set_pin'):
+            if hasattr(cashier, "set_pin"):
                 cashier.set_pin(pin)
-                cashier.save(update_fields=['pin_hash'])
-            messages.success(request, f'Blagajnik {name} kreiran.')
-            next_url = request.POST.get('next') or request.GET.get('next') or '/hr/pos/onboarding/'
+                cashier.save(update_fields=["pin_hash"])
+            messages.success(request, f"Blagajnik {name} kreiran.")
+            next_url = request.POST.get("next") or request.GET.get("next") or "/hr/pos/onboarding/"
             return redirect(next_url)
 
-    return render(request, 'pos/cashier_setup.html', {
-        'error': error,
-        'next': request.GET.get('next', '/hr/pos/onboarding/'),
-    })
+    return render(
+        request,
+        "pos/cashier_setup.html",
+        {
+            "error": error,
+            "next": request.GET.get("next", "/hr/pos/onboarding/"),
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════
 # KNJIGA PRIGOVORA — Zakonska evidencija (čl. 10 ZZP)
 # ══════════════════════════════════════════════════════════════
 
+
 @login_required
 def prigovori_list(request):
     """Knjiga boljitaka — HTML prikaz + modal za unos."""
     company = get_user_company(request)
     from .models import KnjigaPrigovora
-    prigovori = KnjigaPrigovora.objects.filter(company=company).select_related("company", "responded_by", "archive_blob")
-    return render(request, 'pos/prigovori.html', {'prigovori': prigovori, 'company': company})
+
+    prigovori = KnjigaPrigovora.objects.filter(company=company).select_related(
+        "company", "responded_by", "archive_blob"
+    )
+    return render(request, "pos/prigovori.html", {"prigovori": prigovori, "company": company})
 
 
 @login_required
@@ -4676,79 +5361,85 @@ def prigovori_api(request):
     company = get_user_company(request)
     from .models import KnjigaPrigovora
 
-    if request.method == 'GET':
+    if request.method == "GET":
         data = []
-        for p in KnjigaPrigovora.objects.filter(company=company).select_related("company", "responded_by", "archive_blob"):
-            data.append({
-                'id': p.pk,
-                'redni_broj': p.redni_broj,
-                'record_type': p.record_type,
-                'datum_primitka': p.datum_primitka.isoformat(),
-                'ime': p.ime_potrosaca,
-                'kontakt': p.kontakt,
-                'consumer_email': p.consumer_email,
-                'consumer_phone': p.consumer_phone,
-                'opis': p.opis_prigovora,
-                'odgovor': p.odgovor,
-                'datum_odgovora': p.datum_odgovora.isoformat() if p.datum_odgovora else None,
-                'needs_response': p.needs_response,
-                'rok_istekao': p.rok_istekao,
-                'dana_do_roka': p.dana_do_roka,
-                'star_rating': p.star_rating,
-                'source_module': p.source_module,
-                'language': p.language,
-                'ai_category': p.ai_category,
-                'ai_sentiment': p.ai_sentiment,
-                'ai_priority': p.ai_priority,
-                'ai_suggested_response': p.ai_suggested_response,
-                'has_audio': bool(p.audio_recording),
-                'has_signature': bool(p.signature),
-                'is_escalated': p.is_escalated,
-                'response_channel': p.response_channel,
-                'integrity_hash': p.integrity_hash[:16] if p.integrity_hash else '',
-                'integrity_valid': p.verify_integrity() if p.integrity_hash else None,
-                'ses_metadata': p.ses_metadata,
-                'whatsapp_consent': p.whatsapp_consent,
-                'moderation_passed': p.moderation_passed,
-                'moderation_note': p.moderation_note,
-            })
-        return JsonResponse({'status': 'success', 'data': data})
+        for p in KnjigaPrigovora.objects.filter(company=company).select_related(
+            "company", "responded_by", "archive_blob"
+        ):
+            data.append(
+                {
+                    "id": p.pk,
+                    "redni_broj": p.redni_broj,
+                    "record_type": p.record_type,
+                    "datum_primitka": p.datum_primitka.isoformat(),
+                    "ime": p.ime_potrosaca,
+                    "kontakt": p.kontakt,
+                    "consumer_email": p.consumer_email,
+                    "consumer_phone": p.consumer_phone,
+                    "opis": p.opis_prigovora,
+                    "odgovor": p.odgovor,
+                    "datum_odgovora": p.datum_odgovora.isoformat() if p.datum_odgovora else None,
+                    "needs_response": p.needs_response,
+                    "rok_istekao": p.rok_istekao,
+                    "dana_do_roka": p.dana_do_roka,
+                    "star_rating": p.star_rating,
+                    "source_module": p.source_module,
+                    "language": p.language,
+                    "ai_category": p.ai_category,
+                    "ai_sentiment": p.ai_sentiment,
+                    "ai_priority": p.ai_priority,
+                    "ai_suggested_response": p.ai_suggested_response,
+                    "has_audio": bool(p.audio_recording),
+                    "has_signature": bool(p.signature),
+                    "is_escalated": p.is_escalated,
+                    "response_channel": p.response_channel,
+                    "integrity_hash": p.integrity_hash[:16] if p.integrity_hash else "",
+                    "integrity_valid": p.verify_integrity() if p.integrity_hash else None,
+                    "ses_metadata": p.ses_metadata,
+                    "whatsapp_consent": p.whatsapp_consent,
+                    "moderation_passed": p.moderation_passed,
+                    "moderation_note": p.moderation_note,
+                }
+            )
+        return JsonResponse({"status": "success", "data": data})
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
         except (json.JSONDecodeError, ValueError):
-            return JsonResponse({'status': 'error', 'error': {'message': 'Invalid JSON'}}, status=400)
+            return JsonResponse({"status": "error", "error": {"message": "Invalid JSON"}}, status=400)
 
-        action = data.get('action', '')
+        action = data.get("action", "")
 
-        if action == 'create':
-            ime = data.get('ime', '').strip()
-            opis = data.get('opis', '').strip()
+        if action == "create":
+            ime = data.get("ime", "").strip()
+            opis = data.get("opis", "").strip()
             if not ime or not opis:
-                return JsonResponse({'status': 'error', 'error': {'message': 'Ime i opis su obavezni'}}, status=400)
+                return JsonResponse({"status": "error", "error": {"message": "Ime i opis su obavezni"}}, status=400)
             p = KnjigaPrigovora.objects.create(
                 company=company,
                 ime_potrosaca=ime[:200],
-                kontakt=data.get('kontakt', '')[:200],
+                kontakt=data.get("kontakt", "")[:200],
                 opis_prigovora=opis,
-                id_photo=data.get('id_photo', '') or '',
-                signature=data.get('signature', '') or '',
-                voice_input=bool(data.get('voice_input', False)),
+                id_photo=data.get("id_photo", "") or "",
+                signature=data.get("signature", "") or "",
+                voice_input=bool(data.get("voice_input", False)),
                 created_by=request.user,
             )
 
             # Audio recording (base64 WebM → file)
-            audio_b64 = data.get('audio_recording', '')
+            audio_b64 = data.get("audio_recording", "")
             if audio_b64:
                 import base64
 
                 from django.core.files.base import ContentFile
+
                 try:
-                    audio_data = base64.b64decode(audio_b64.split(',')[-1])
+                    audio_data = base64.b64decode(audio_b64.split(",")[-1])
                     p.audio_recording.save(
-                        'prigovor_%d.webm' % p.redni_broj,
-                        ContentFile(audio_data), save=True,
+                        "prigovor_%d.webm" % p.redni_broj,
+                        ContentFile(audio_data),
+                        save=True,
                     )
                 except ValueError:
                     pass
@@ -4756,28 +5447,32 @@ def prigovori_api(request):
             # Trigger AI analysis (async Celery)
             try:
                 from pos.tasks import ai_analyze_prigovor
+
                 ai_analyze_prigovor.delay(p.pk)
             except ImportError:
                 pass
 
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Prigovor #%d zaprimljen. AI analiza u tijeku.' % p.redni_broj,
-                'integrity_hash': p.integrity_hash,
-            })
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "message": "Prigovor #%d zaprimljen. AI analiza u tijeku." % p.redni_broj,
+                    "integrity_hash": p.integrity_hash,
+                }
+            )
 
-        elif action == 'odgovori':
+        elif action == "odgovori":
             from django.utils import timezone as tz
+
             try:
-                p = KnjigaPrigovora.objects.get(pk=data.get('id'), company=company)
+                p = KnjigaPrigovora.objects.get(pk=data.get("id"), company=company)
             except KnjigaPrigovora.DoesNotExist:
-                return JsonResponse({'status': 'error', 'error': {'message': 'Prigovor ne postoji'}}, status=404)
-            p.odgovor = data.get('odgovor', '')
+                return JsonResponse({"status": "error", "error": {"message": "Prigovor ne postoji"}}, status=404)
+            p.odgovor = data.get("odgovor", "")
             p.datum_odgovora = tz.now().date()
             p.save()
-            return JsonResponse({'status': 'success', 'message': 'Odgovor evidentiran na prigovor #%d.' % p.redni_broj})
+            return JsonResponse({"status": "success", "message": "Odgovor evidentiran na prigovor #%d." % p.redni_broj})
 
-        return JsonResponse({'status': 'error', 'error': {'message': 'Nepoznata akcija'}}, status=400)
+        return JsonResponse({"status": "error", "error": {"message": "Nepoznata akcija"}}, status=400)
 
 
 @login_required
@@ -4786,59 +5481,70 @@ def knjiga_prigovora_pdf(request):
     company = get_user_company(request)
     from .models import KnjigaPrigovora
 
-    all_records = KnjigaPrigovora.objects.filter(company=company).select_related('company').order_by('redni_broj')
-    prigovori = all_records.filter(record_type__in=['prigovor', 'reklamacija'])
-    pohvale = all_records.filter(record_type__in=['pohvala', 'utisak', 'prijedlog'])
+    all_records = KnjigaPrigovora.objects.filter(company=company).select_related("company").order_by("redni_broj")
+    prigovori = all_records.filter(record_type__in=["prigovor", "reklamacija"])
+    pohvale = all_records.filter(record_type__in=["pohvala", "utisak", "prijedlog"])
 
     # Detect language
-    lang = request.GET.get('lang', '')
+    lang = request.GET.get("lang", "")
     if not lang:
-        lang = 'de' if getattr(company, 'country', '') == 'DE' else 'hr'
+        lang = "de" if getattr(company, "country", "") == "DE" else "hr"
 
     from django.template.loader import render_to_string
-    html = render_to_string('pos/knjiga_prigovora_pdf.html', {
-        'prigovori': prigovori,
-        'pohvale': pohvale,
-        'prigovori_count': prigovori.count(),
-        'pohvale_count': pohvale.count(),
-        'company': company,
-        'lang': lang,
-    })
+
+    html = render_to_string(
+        "pos/knjiga_prigovora_pdf.html",
+        {
+            "prigovori": prigovori,
+            "pohvale": pohvale,
+            "prigovori_count": prigovori.count(),
+            "pohvale_count": pohvale.count(),
+            "company": company,
+            "lang": lang,
+        },
+    )
     try:
         from io import BytesIO
 
         from xhtml2pdf import pisa
+
         buf = BytesIO()
         pisa.CreatePDF(html, dest=buf)
         buf.seek(0)
-        response = HttpResponse(buf.read(), content_type='application/pdf')
-        response['Content-Disposition'] = 'inline; filename="Knjiga_Prigovora_%s.pdf"' % (company.name or 'firma')
+        response = HttpResponse(buf.read(), content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="Knjiga_Prigovora_%s.pdf"' % (company.name or "firma")
         return response
     except ImportError:
         return HttpResponse(html)
-
 
 
 # ═══════════════════════════════════════════════════════════════
 # BEZ PAPIRA — Receipt delivery system
 # ═══════════════════════════════════════════════════════════════
 
+
 @login_required
 def receipt_list(request):
     """Lista svih racuna za ispis/pregled/naknadni WhatsApp."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('pos:dashboard')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("pos:dashboard")
 
-    receipts = POSReceipt.objects.filter(
-        session__terminal__company=company
-    ).select_related('session__terminal', 'cashier').order_by('-created_at')[:200]
+    receipts = (
+        POSReceipt.objects.filter(session__terminal__company=company)
+        .select_related("session__terminal", "cashier")
+        .order_by("-created_at")[:200]
+    )
 
-    return render(request, 'pos/receipt_list.html', {
-        'receipts': receipts,
-        'company': company,
-    })
+    return render(
+        request,
+        "pos/receipt_list.html",
+        {
+            "receipts": receipts,
+            "company": company,
+        },
+    )
 
 
 @login_required
@@ -4849,38 +5555,38 @@ def receipt_deliver(request, receipt_id):
     """
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     company = receipt.session.terminal.company
-    settings = getattr(company, 'pos_settings', None)
+    settings = getattr(company, "pos_settings", None)
 
     result = {
-        'receipt_id': receipt.pk,
-        'receipt_number': receipt.receipt_number,
-        'delivery_mode': settings.receipt_delivery if settings else 'thermal',
-        'urls': {},
+        "receipt_id": receipt.pk,
+        "receipt_number": receipt.receipt_number,
+        "delivery_mode": settings.receipt_delivery if settings else "thermal",
+        "urls": {},
     }
 
-    base = f'/hr/pos/receipt/{receipt.pk}'
+    base = f"/hr/pos/receipt/{receipt.pk}"
 
     # Thermal print URL
-    result['urls']['thermal'] = f'{base}/pdf/?format=thermal'
+    result["urls"]["thermal"] = f"{base}/pdf/?format=thermal"
 
     # A4 PDF URL
-    result['urls']['a4'] = f'{base}/pdf/?format=a4'
+    result["urls"]["a4"] = f"{base}/pdf/?format=a4"
 
     # WhatsApp share URL
-    result['urls']['whatsapp'] = f'{base}/whatsapp/'
+    result["urls"]["whatsapp"] = f"{base}/whatsapp/"
 
     # Email URL
-    result['urls']['email'] = f'{base}/email/'
+    result["urls"]["email"] = f"{base}/email/"
 
     # QR kod za gosta (public link)
-    result['urls']['qr'] = receipt_public_url(receipt.pk)
+    result["urls"]["qr"] = receipt_public_url(receipt.pk)
 
     # Drawer kick
     if settings and settings.drawer_kick:
-        result['drawer_kick'] = True
-        result['urls']['drawer'] = f'{base}/drawer-kick/'
+        result["drawer_kick"] = True
+        result["urls"]["drawer"] = f"{base}/drawer-kick/"
 
-    result['public_url'] = receipt_public_url(receipt.pk)
+    result["public_url"] = receipt_public_url(receipt.pk)
     return JsonResponse(result)
 
 
@@ -4896,58 +5602,62 @@ def receipt_whatsapp(request, receipt_id):
     # Security: provjeri da korisnik pripada istoj tvrtki
     user_company = get_user_company(request)
     if user_company and user_company.pk != company.pk:
-        return JsonResponse({'error': 'Nemate pristup ovom racunu'}, status=403)
-    settings = getattr(company, 'pos_settings', None)
+        return JsonResponse({"error": "Nemate pristup ovom racunu"}, status=403)
+    settings = getattr(company, "pos_settings", None)
 
     items_text = []
     for item in receipt.items.all():
-        items_text.append(f'{item.description} x{item.quantity} = EUR{item.total_price:.2f}')
+        items_text.append(f"{item.description} x{item.quantity} = EUR{item.total_price:.2f}")
 
-    msg_header = settings.whatsapp_default_msg if settings else 'Hvala na posjetu! Evo Vas racun:'
+    msg_header = settings.whatsapp_default_msg if settings else "Hvala na posjetu! Evo Vas racun:"
     receipt_url = request.build_absolute_uri(receipt_public_url(receipt.pk))
 
     msg = f"""{msg_header}
 
 {chr(9989)} *{company.name}*
 Racun #{receipt.receipt_number}
-Datum: {receipt.created_at.strftime('%d.%m.%Y %H:%M')}
+Datum: {receipt.created_at.strftime("%d.%m.%Y %H:%M")}
 
-{'%0A'.join(items_text) if len(items_text) <= 10 else f'{len(items_text)} stavki'}
+{"%0A".join(items_text) if len(items_text) <= 10 else f"{len(items_text)} stavki"}
 
 *UKUPNO: EUR{receipt.total:.2f}*
-Placeno: {receipt.payment_lines.first().get_method_display() if receipt.payment_lines.exists() else 'N/A'}
+Placeno: {receipt.payment_lines.first().get_method_display() if receipt.payment_lines.exists() else "N/A"}
 
-{f'ZKI: {receipt.zki[:16]}...' if receipt.zki else ''}
-{f'JIR: {receipt.jir[:16]}...' if receipt.jir else ''}
+{f"ZKI: {receipt.zki[:16]}..." if receipt.zki else ""}
+{f"JIR: {receipt.jir[:16]}..." if receipt.jir else ""}
 
 {chr(128279)} Digitalni racun: {receipt_url}"""
 
-    if request.method == 'POST':
-        phone = request.POST.get('phone', '').strip()
+    if request.method == "POST":
+        phone = request.POST.get("phone", "").strip()
         if phone:
             # Clean phone number — preserve international prefix
-            phone = phone.replace(' ', '').replace('-', '')
-            if phone.startswith('+'):
+            phone = phone.replace(" ", "").replace("-", "")
+            if phone.startswith("+"):
                 phone = phone[1:]  # strip + but keep country code
-            elif phone.startswith('00'):
+            elif phone.startswith("00"):
                 phone = phone[2:]  # 00385 → 385
-            elif phone.startswith('0'):
-                phone = '385' + phone[1:]  # 091... → 38591...
+            elif phone.startswith("0"):
+                phone = "385" + phone[1:]  # 091... → 38591...
             # Only add 385 if it looks like a local HR number (no country code)
-            if len(phone) <= 10 and not phone.startswith(('385', '49', '43', '386', '44', '39', '33')):
-                phone = '385' + phone.lstrip('0')
+            if len(phone) <= 10 and not phone.startswith(("385", "49", "43", "386", "44", "39", "33")):
+                phone = "385" + phone.lstrip("0")
             import urllib.parse
-            wa_url = f'https://wa.me/{phone}?text={urllib.parse.quote(msg)}'
-            return JsonResponse({'ok': True, 'wa_url': wa_url, 'phone': phone})
-        return JsonResponse({'error': 'phone required'}, status=400)
+
+            wa_url = f"https://wa.me/{phone}?text={urllib.parse.quote(msg)}"
+            return JsonResponse({"ok": True, "wa_url": wa_url, "phone": phone})
+        return JsonResponse({"error": "phone required"}, status=400)
 
     # GET: return message for copy/share
     import urllib.parse
-    return JsonResponse({
-        'message': msg,
-        'share_url': f'https://wa.me/?text={urllib.parse.quote(msg)}',
-        'receipt_url': receipt_url,
-    })
+
+    return JsonResponse(
+        {
+            "message": msg,
+            "share_url": f"https://wa.me/?text={urllib.parse.quote(msg)}",
+            "receipt_url": receipt_url,
+        }
+    )
 
 
 @login_required
@@ -4961,15 +5671,15 @@ def receipt_email(request, receipt_id):
     # Security: provjeri da korisnik pripada istoj tvrtki
     user_company = get_user_company(request)
     if user_company and user_company.pk != company.pk:
-        return JsonResponse({'error': 'Nemate pristup ovom racunu'}, status=403)
-    settings = getattr(company, 'pos_settings', None)
+        return JsonResponse({"error": "Nemate pristup ovom racunu"}, status=403)
+    settings = getattr(company, "pos_settings", None)
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
-    email_to = request.POST.get('email', '').strip()
-    if not email_to or '@' not in email_to:
-        return JsonResponse({'error': 'Valid email required'}, status=400)
+    email_to = request.POST.get("email", "").strip()
+    if not email_to or "@" not in email_to:
+        return JsonResponse({"error": "Valid email required"}, status=400)
 
     try:
         from django.core.mail import EmailMessage
@@ -4977,49 +5687,55 @@ def receipt_email(request, receipt_id):
 
         items = receipt.items.all()
         from pos.utils import generate_receipt_qr_base64
+
         fina_qr = generate_receipt_qr_base64(receipt)
         bl = receipt.session.terminal.business_location
 
         ctx = {
-            'receipt': receipt, 'items': items, 'company': company,
-            'payment_lines': receipt.payment_lines.all(),
-            'terminal': receipt.session.terminal,
-            'fina_qr_b64': fina_qr, 'business_location': bl,
+            "receipt": receipt,
+            "items": items,
+            "company": company,
+            "payment_lines": receipt.payment_lines.all(),
+            "terminal": receipt.session.terminal,
+            "fina_qr_b64": fina_qr,
+            "business_location": bl,
         }
 
-        subject = (settings.receipt_email_subject if settings else 'Vas racun - {company}')
-        subject = subject.replace('{company}', company.name)
-        subject = subject.replace('{number}', str(receipt.receipt_number))
+        subject = settings.receipt_email_subject if settings else "Vas racun - {company}"
+        subject = subject.replace("{company}", company.name)
+        subject = subject.replace("{number}", str(receipt.receipt_number))
 
         # Render A4 HTML
-        tmpl = _gt('pos/receipt_a4_pdf.html')
+        tmpl = _gt("pos/receipt_a4_pdf.html")
         html_body = tmpl.render(ctx)
 
         # Try to generate PDF attachment
         pdf_bytes = None
         try:
             import weasyprint
+
             pdf_bytes = weasyprint.HTML(string=html_body).write_pdf()
         except Exception:
             pass
 
         email = EmailMessage(
             subject=subject,
-            body=f'Postovani,\n\nU prilogu je Vas racun #{receipt.receipt_number} iz {company.name}.\n\nUkupno: EUR{receipt.total:.2f}\n\nHvala na posjetu!\n\n--\n{company.name}',
+            body=f"Postovani,\n\nU prilogu je Vas racun #{receipt.receipt_number} iz {company.name}.\n\nUkupno: EUR{receipt.total:.2f}\n\nHvala na posjetu!\n\n--\n{company.name}",
             from_email=None,  # uses DEFAULT_FROM_EMAIL
             to=[email_to],
         )
 
         if pdf_bytes:
-            email.attach(f'racun-{receipt.receipt_number}.pdf', pdf_bytes, 'application/pdf')
+            email.attach(f"racun-{receipt.receipt_number}.pdf", pdf_bytes, "application/pdf")
 
         email.send()
-        return JsonResponse({'ok': True, 'sent_to': email_to})
+        return JsonResponse({"ok": True, "sent_to": email_to})
 
     except Exception as e:
         import logging
-        logging.getLogger('pos').error(f'Email send failed: {e}')
-        return JsonResponse({'error': str(e)[:200]}, status=500)
+
+        logging.getLogger("pos").error(f"Email send failed: {e}")
+        return JsonResponse({"error": str(e)[:200]}, status=500)
 
 
 def receipt_public(request, receipt_id, token=None):
@@ -5032,27 +5748,37 @@ def receipt_public(request, receipt_id, token=None):
     import hmac
 
     from django.conf import settings as _s
+
     expected = hmac.new(_s.SECRET_KEY[:32].encode(), str(receipt_id).encode(), hashlib.sha256).hexdigest()[:12]
-    token = (token or request.GET.get('t', '')).strip().rstrip('/').strip()
+    token = (token or request.GET.get("t", "")).strip().rstrip("/").strip()
     # Strip any junk scanners might append
     import re as _re
-    token = _re.sub(r'[^a-f0-9]', '', token)
+
+    token = _re.sub(r"[^a-f0-9]", "", token)
     if token != expected:
         from django.http import HttpResponseForbidden
-        return HttpResponseForbidden('Neispravan link. Skenirajte QR kod ponovo.')
+
+        return HttpResponseForbidden("Neispravan link. Skenirajte QR kod ponovo.")
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     items = receipt.items.all()
     company = receipt.session.terminal.company
 
     from pos.utils import generate_receipt_qr_base64
+
     fina_qr = generate_receipt_qr_base64(receipt)
 
-    return render(request, 'pos/receipt_public.html', {
-        'receipt': receipt, 'items': items, 'company': company,
-        'payment_lines': receipt.payment_lines.all(),
-        'terminal': receipt.session.terminal,
-        'fina_qr_b64': fina_qr,
-    })
+    return render(
+        request,
+        "pos/receipt_public.html",
+        {
+            "receipt": receipt,
+            "items": items,
+            "company": company,
+            "payment_lines": receipt.payment_lines.all(),
+            "terminal": receipt.session.terminal,
+            "fina_qr_b64": fina_qr,
+        },
+    )
 
 
 def receipt_public_token(receipt_id):
@@ -5061,14 +5787,14 @@ def receipt_public_token(receipt_id):
     import hmac
 
     from django.conf import settings as _s
+
     return hmac.new(_s.SECRET_KEY[:32].encode(), str(receipt_id).encode(), hashlib.sha256).hexdigest()[:12]
 
 
 def receipt_public_url(receipt_id):
     """Puni URL za public receipt s tokenom u path-u (Google Lens compatible)."""
     token = receipt_public_token(receipt_id)
-    return f'/pos/r/{receipt_id}/{token}/'
-
+    return f"/pos/r/{receipt_id}/{token}/"
 
 
 @login_required
@@ -5079,29 +5805,30 @@ def receipt_drawer_kick(request, receipt_id):
     """
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     company = receipt.session.terminal.company
-    settings = getattr(company, 'pos_settings', None)
+    settings = getattr(company, "pos_settings", None)
 
     if not settings or not settings.drawer_kick:
-        return JsonResponse({'error': 'Drawer kick disabled'}, status=400)
+        return JsonResponse({"error": "Drawer kick disabled"}, status=400)
 
     ip = settings.printer_ip
     port = settings.printer_port or 9100
 
     if not ip:
-        return JsonResponse({'error': 'Printer IP not configured'}, status=400)
+        return JsonResponse({"error": "Printer IP not configured"}, status=400)
 
     try:
         import socket
+
         # ESC/POS drawer kick command: ESC p 0 25 250
-        cmd = b'\x1b\x70\x00\x19\xfa'
+        cmd = b"\x1b\x70\x00\x19\xfa"
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(3)
         sock.connect((ip, port))
         sock.send(cmd)
         sock.close()
-        return JsonResponse({'ok': True, 'message': 'Ladica otvorena'})
+        return JsonResponse({"ok": True, "message": "Ladica otvorena"})
     except Exception as e:
-        return JsonResponse({'error': f'Drawer kick failed: {e}'}, status=500)
+        return JsonResponse({"error": f"Drawer kick failed: {e}"}, status=500)
 
 
 @login_required
@@ -5109,26 +5836,31 @@ def pos_delivery_settings(request):
     """API za dohvat delivery postavki za trenutnu tvrtku."""
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'No company'}, status=400)
-    settings = getattr(company, 'pos_settings', None)
+        return JsonResponse({"error": "No company"}, status=400)
+    settings = getattr(company, "pos_settings", None)
     if not settings:
-        return JsonResponse({
-            'delivery_mode': 'thermal',
-            'auto_print': True,
-            'drawer_kick': False,
-        })
-    return JsonResponse({
-        'delivery_mode': settings.receipt_delivery,
-        'auto_print': settings.auto_print,
-        'drawer_kick': settings.drawer_kick,
-        'printer_type': settings.printer_type,
-        'whatsapp_msg': settings.whatsapp_default_msg,
-    })
+        return JsonResponse(
+            {
+                "delivery_mode": "thermal",
+                "auto_print": True,
+                "drawer_kick": False,
+            }
+        )
+    return JsonResponse(
+        {
+            "delivery_mode": settings.receipt_delivery,
+            "auto_print": settings.auto_print,
+            "drawer_kick": settings.drawer_kick,
+            "printer_type": settings.printer_type,
+            "whatsapp_msg": settings.whatsapp_default_msg,
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════════
 # REVOLUT — Kartično plaćanje putem mobitela
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 @require_POST
@@ -5138,20 +5870,23 @@ def revolut_pay(request, receipt_id):
     POST → vraća {checkout_url, qr_data} za prikaz gostu.
     """
     from pos.revolut_service import create_payment_link, is_configured
+
     if not is_configured():
-        return JsonResponse({'ok': False, 'error': 'Revolut nije konfiguriran. Dodaj REVOLUT_API_KEY u .env'}, status=400)
+        return JsonResponse(
+            {"ok": False, "error": "Revolut nije konfiguriran. Dodaj REVOLUT_API_KEY u .env"}, status=400
+        )
 
     company = get_user_company(request)
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
 
-    callback = request.build_absolute_uri('/pos/revolut/success/')
+    callback = request.build_absolute_uri("/pos/revolut/success/")
     result = create_payment_link(receipt, company, callback_url=callback)
 
-    if result.get('ok'):
+    if result.get("ok"):
         # Spremi payment_id na receipt za tracking
-        receipt.card_reference = result.get('payment_id', '')[:100] if hasattr(receipt, 'card_reference') else ''
-        receipt.note = (receipt.note or '') + ' | Revolut: ' + result.get('payment_id', '')[:20]
-        receipt.save(update_fields=['note'])
+        receipt.card_reference = result.get("payment_id", "")[:100] if hasattr(receipt, "card_reference") else ""
+        receipt.note = (receipt.note or "") + " | Revolut: " + result.get("payment_id", "")[:20]
+        receipt.save(update_fields=["note"])
 
     return JsonResponse(result)
 
@@ -5167,26 +5902,28 @@ def revolut_status(request, receipt_id):
 
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     # Izvuci payment_id iz note
-    payment_id = ''
-    if receipt.note and 'Revolut:' in receipt.note:
-        payment_id = receipt.note.split('Revolut:')[-1].strip().split()[0]
+    payment_id = ""
+    if receipt.note and "Revolut:" in receipt.note:
+        payment_id = receipt.note.split("Revolut:")[-1].strip().split()[0]
 
     if not payment_id:
-        return JsonResponse({'status': 'error', 'error': 'Nema Revolut payment ID'})
+        return JsonResponse({"status": "error", "error": "Nema Revolut payment ID"})
 
     result = check_payment_status(payment_id)
 
     # Ako je completed — zatvori bon
-    if result.get('status') == 'completed' and receipt.status != 'paid':
+    if result.get("status") == "completed" and receipt.status != "paid":
         from django.utils import timezone as tz
-        receipt.status = 'paid'
+
+        receipt.status = "paid"
         receipt.paid_at = tz.now()
         receipt.save()
         POSPaymentLine.objects.get_or_create(
-            receipt=receipt, method='REVOLUT',
-            defaults={'amount': receipt.total},
+            receipt=receipt,
+            method="REVOLUT",
+            defaults={"amount": receipt.total},
         )
-        result['receipt_closed'] = True
+        result["receipt_closed"] = True
 
     return JsonResponse(result)
 
@@ -5197,46 +5934,49 @@ def revolut_webhook(request):
     Revolut webhook — prima notifikaciju o plaćanju.
     POST od Revolut servera kad gost plati.
     """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     from pos.revolut_service import verify_webhook_signature
-    sig = request.headers.get('Revolut-Signature', '')
+
+    sig = request.headers.get("Revolut-Signature", "")
 
     if not verify_webhook_signature(request.body, sig):
-        return JsonResponse({'error': 'Invalid signature'}, status=403)
+        return JsonResponse({"error": "Invalid signature"}, status=403)
 
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    event_type = data.get('event', '')
-    order_data = data.get('order', {})
-    order_id = order_data.get('id', '')
-    state = order_data.get('state', '')
-    ext_ref = order_data.get('merchant_order_ext_ref', '')
+    event_type = data.get("event", "")
+    order_data = data.get("order", {})
+    order_id = order_data.get("id", "")
+    state = order_data.get("state", "")
+    ext_ref = order_data.get("merchant_order_ext_ref", "")
 
-    logger.info('Revolut webhook: event=%s order=%s state=%s ref=%s', event_type, order_id, state, ext_ref)
+    logger.info("Revolut webhook: event=%s order=%s state=%s ref=%s", event_type, order_id, state, ext_ref)
 
-    if state == 'COMPLETED' and ext_ref.startswith('POS-'):
-        receipt_id = int(ext_ref.replace('POS-', ''))
+    if state == "COMPLETED" and ext_ref.startswith("POS-"):
+        receipt_id = int(ext_ref.replace("POS-", ""))
         try:
             from django.utils import timezone as tz
+
             receipt = POSReceipt.objects.get(pk=receipt_id)
-            if receipt.status != 'paid':
-                receipt.status = 'paid'
+            if receipt.status != "paid":
+                receipt.status = "paid"
                 receipt.paid_at = tz.now()
                 receipt.save()
                 POSPaymentLine.objects.get_or_create(
-                    receipt=receipt, method='REVOLUT',
-                    defaults={'amount': receipt.total},
+                    receipt=receipt,
+                    method="REVOLUT",
+                    defaults={"amount": receipt.total},
                 )
-                logger.info('Revolut webhook: receipt #%d paid via Revolut', receipt_id)
+                logger.info("Revolut webhook: receipt #%d paid via Revolut", receipt_id)
         except POSReceipt.DoesNotExist:
-            logger.warning('Revolut webhook: receipt #%d not found', receipt_id)
+            logger.warning("Revolut webhook: receipt #%d not found", receipt_id)
 
-    return JsonResponse({'ok': True})
+    return JsonResponse({"ok": True})
 
 
 @login_required
@@ -5244,43 +5984,48 @@ def revolut_qr(request, receipt_id):
     """Generiraj QR kod za Revolut payment link."""
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     # Izvuci checkout_url
-    payment_id = ''
-    if receipt.note and 'Revolut:' in receipt.note:
-        payment_id = receipt.note.split('Revolut:')[-1].strip().split()[0]
+    payment_id = ""
+    if receipt.note and "Revolut:" in receipt.note:
+        payment_id = receipt.note.split("Revolut:")[-1].strip().split()[0]
 
     if not payment_id:
-        return JsonResponse({'error': 'Nema payment linka'}, status=400)
+        return JsonResponse({"error": "Nema payment linka"}, status=400)
 
-    checkout_url = 'https://checkout.revolut.com/pay/%s' % payment_id
+    checkout_url = "https://checkout.revolut.com/pay/%s" % payment_id
 
     import base64
     from io import BytesIO
 
     import qrcode
+
     qr = qrcode.make(checkout_url, box_size=6, border=2)
     buf = BytesIO()
-    qr.save(buf, format='PNG')
+    qr.save(buf, format="PNG")
     buf.seek(0)
     qr_b64 = base64.b64encode(buf.read()).decode()
 
-    return JsonResponse({
-        'ok': True,
-        'qr_b64': qr_b64,
-        'checkout_url': checkout_url,
-    })
-
+    return JsonResponse(
+        {
+            "ok": True,
+            "qr_b64": qr_b64,
+            "checkout_url": checkout_url,
+        }
+    )
 
 
 @login_required
 def session_report_json(request, session_id):
     """Z-report za cijelu sesiju (svi blagajnici)."""
     from django.db import connection
+
     session = get_object_or_404(POSSession, pk=session_id)
     company, err = _check_tenant(request, session)
-    if err: return err
+    if err:
+        return err
 
     with connection.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 COUNT(DISTINCT r.id)                                          AS racuna,
                 COALESCE(SUM(pl.amount) FILTER (WHERE pl.method='CASH'),  0) AS gotovina,
@@ -5294,42 +6039,41 @@ def session_report_json(request, session_id):
             LEFT JOIN pos_pospaymentline pl ON pl.receipt_id = r.id
             WHERE r.session_id = %s
               AND r.status      = 'paid'
-        """, [session_id])
+        """,
+            [session_id],
+        )
         row = cur.fetchone()
 
     racuna, gotovina, kartica, vavceri, ostalo, ukupno, prvi, zadnji = row
 
-    receipts = (
-        POSReceipt.objects
-        .filter(session_id=session_id, status='paid')
-        .order_by('-paid_at')[:15]
-    )
+    receipts = POSReceipt.objects.filter(session_id=session_id, status="paid").order_by("-paid_at")[:15]
 
     def fmt(dt):
-        return dt.strftime('%H:%M') if dt else '-'
+        return dt.strftime("%H:%M") if dt else "-"
 
     terminal = session.terminal
-    return JsonResponse({
-        'cashier':   'Svi blagajnici',
-        'terminal':  terminal.name,
-        'racuna':    racuna or 0,
-        'gotovina':  str(gotovina or 0),
-        'kartica':   str(kartica  or 0),
-        'vavceri':   str(vavceri  or 0),
-        'ostalo':    str(ostalo   or 0),
-        'ukupno':    str(ukupno   or 0),
-        'prvi':      fmt(prvi),
-        'zadnji':    fmt(zadnji),
-        'receipts':  [
-            {
-                'broj':    r.receipt_number,
-                'ukupno':  str(r.total),
-                'vrijeme': fmt(r.paid_at),
-            }
-            for r in receipts
-        ],
-    })
-
+    return JsonResponse(
+        {
+            "cashier": "Svi blagajnici",
+            "terminal": terminal.name,
+            "racuna": racuna or 0,
+            "gotovina": str(gotovina or 0),
+            "kartica": str(kartica or 0),
+            "vavceri": str(vavceri or 0),
+            "ostalo": str(ostalo or 0),
+            "ukupno": str(ukupno or 0),
+            "prvi": fmt(prvi),
+            "zadnji": fmt(zadnji),
+            "receipts": [
+                {
+                    "broj": r.receipt_number,
+                    "ukupno": str(r.total),
+                    "vrijeme": fmt(r.paid_at),
+                }
+                for r in receipts
+            ],
+        }
+    )
 
 
 @login_required
@@ -5338,16 +6082,17 @@ def dsfinvk_export(request):
     from datetime import date, timedelta
 
     from django.http import HttpResponse
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Keine Firma'}, status=400)
+        return JsonResponse({"error": "Keine Firma"}, status=400)
 
     # Only for DE companies
-    if company.country not in ('DE', 'AT'):
-        return JsonResponse({'error': 'DSFinV-K ist nur fuer DE/AT Firmen'}, status=400)
+    if company.country not in ("DE", "AT"):
+        return JsonResponse({"error": "DSFinV-K ist nur fuer DE/AT Firmen"}, status=400)
 
-    date_from = request.GET.get('from', '')
-    date_to = request.GET.get('to', '')
+    date_from = request.GET.get("from", "")
+    date_to = request.GET.get("to", "")
 
     if date_from:
         date_from = date.fromisoformat(date_from)
@@ -5362,13 +6107,13 @@ def dsfinvk_export(request):
         date_to = date.today()
 
     from pos.dsfinvk_export import generate_dsfinvk_export
+
     zip_bytes = generate_dsfinvk_export(company, date_from, date_to)
 
-    filename = 'DSFinV-K_%s_%s_%s.zip' % (company.oib, date_from.isoformat(), date_to.isoformat())
-    response = HttpResponse(zip_bytes, content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    filename = "DSFinV-K_%s_%s_%s.zip" % (company.oib, date_from.isoformat(), date_to.isoformat())
+    response = HttpResponse(zip_bytes, content_type="application/zip")
+    response["Content-Disposition"] = 'attachment; filename="%s"' % filename
     return response
-
 
 
 @login_required
@@ -5377,12 +6122,13 @@ def kassenbuch_download(request):
     from datetime import date
 
     from django.http import HttpResponse
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema firme'}, status=400)
+        return JsonResponse({"error": "Nema firme"}, status=400)
 
-    date_from = request.GET.get('from', '')
-    date_to = request.GET.get('to', '')
+    date_from = request.GET.get("from", "")
+    date_to = request.GET.get("to", "")
 
     if date_from:
         date_from = date.fromisoformat(date_from)
@@ -5394,17 +6140,19 @@ def kassenbuch_download(request):
         date_to = date.today()
 
     from pos.kassenbuch import generate_kassenbuch
+
     xlsx = generate_kassenbuch(company, date_from, date_to)
 
-    is_de = company.country in ('DE', 'AT')
-    prefix = 'Kassenbuch' if is_de else 'Blagajnicki_dnevnik'
-    filename = '%s_%s_%s_%s.xlsx' % (prefix, company.oib, date_from.isoformat(), date_to.isoformat())
-    response = HttpResponse(xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    is_de = company.country in ("DE", "AT")
+    prefix = "Kassenbuch" if is_de else "Blagajnicki_dnevnik"
+    filename = "%s_%s_%s_%s.xlsx" % (prefix, company.oib, date_from.isoformat(), date_to.isoformat())
+    response = HttpResponse(xlsx, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="%s"' % filename
     return response
 
 
 # ── QR INSTANT OPEN — zero-login terminal activation ──────────────────────────
+
 
 @csrf_exempt
 def pos_qr_open(request, token):
@@ -5428,6 +6176,7 @@ def pos_qr_open(request, token):
 
     # Find or create qr_operator user
     from django.contrib.auth.models import User
+
     qr_user, _ = User.objects.get_or_create(
         username=f"qr_operator_{company.pk}",
         defaults={
@@ -5439,7 +6188,11 @@ def pos_qr_open(request, token):
     )
 
     # Find open session or create new one
-    session = POSSession.objects.filter(terminal=terminal, status="open").select_related("terminal", "operator", "active_cashiers").first()
+    session = (
+        POSSession.objects.filter(terminal=terminal, status="open")
+        .select_related("terminal", "operator", "active_cashiers")
+        .first()
+    )
     if not session:
         last = terminal.sessions.order_by("-session_number").first()
         next_num = (last.session_number + 1) if last else 1
@@ -5454,6 +6207,7 @@ def pos_qr_open(request, token):
     # Log access
     try:
         from superadmin_ai.models import AIActionLog
+
         AIActionLog.objects.create(
             company=company,
             module="pos",
@@ -5510,10 +6264,12 @@ def qr_session(request, session_id):
     cats = sorted(set(getattr(i, "category", "") or "Ostalo" for i in inventory_items))
 
     from pos.models import POSCashier
+
     cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related("user").order_by("name"))
 
     try:
         from django.urls import reverse
+
         report_url = reverse("pos:cashier_report_html", args=[session.id])
     except ImportError:
         report_url = "#"
@@ -5522,9 +6278,9 @@ def qr_session(request, session_id):
     quick_items = []
     try:
         from django.db.models import Count
+
         top_ids = list(
-            POSReceiptItem.objects
-            .filter(receipt__session__terminal__company=company, receipt__status="paid")
+            POSReceiptItem.objects.filter(receipt__session__terminal__company=company, receipt__status="paid")
             .exclude(is_tip=True)
             .values("inventory_item_id")
             .annotate(cnt=Count("id"))
@@ -5532,7 +6288,9 @@ def qr_session(request, session_id):
             .values_list("inventory_item_id", flat=True)[:12]
         )
         if top_ids:
-            items_map = {i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related("tax_rate")}
+            items_map = {
+                i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related("tax_rate")
+            }
             quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
         if len(quick_items) < 12:
             existing = {i.pk for i in quick_items}
@@ -5546,16 +6304,20 @@ def qr_session(request, session_id):
     except DatabaseError:
         pass
 
-    return render(request, "pos/quick.html", {
-        "terminal": terminal,
-        "session": session,
-        "inventory_items": inventory_items,
-        "quick_items": quick_items,
-        "categories": cats,
-        "cashiers": cashiers,
-        "session_report_url": report_url,
-        "qr_mode": True,
-    })
+    return render(
+        request,
+        "pos/quick.html",
+        {
+            "terminal": terminal,
+            "session": session,
+            "inventory_items": inventory_items,
+            "quick_items": quick_items,
+            "categories": cats,
+            "cashiers": cashiers,
+            "session_report_url": report_url,
+            "qr_mode": True,
+        },
+    )
 
 
 @csrf_exempt
@@ -5580,18 +6342,18 @@ def qr_quick_pay(request, session_id):
     data["session_id"] = session_id
 
     try:
-        result = CheckoutService.process_receipt(
-            company=company, user=session.operator, payload=data
+        result = CheckoutService.process_receipt(company=company, user=session.operator, payload=data)
+        return JsonResponse(
+            {
+                "ok": True,
+                "receipt_id": result["receipt_id"],
+                "receipt_number": result["receipt_number"],
+                "total": result["total"],
+                "change": result["change"],
+                "print_url": result.get("print_url", ""),
+                "public_url": receipt_public_url(result["receipt_id"]),
+            }
         )
-        return JsonResponse({
-            "ok": True,
-            "receipt_id": result["receipt_id"],
-            "receipt_number": result["receipt_number"],
-            "total": result["total"],
-            "change": result["change"],
-            "print_url": result.get("print_url", ""),
-            "public_url": receipt_public_url(result["receipt_id"]),
-        })
     except CheckoutValidationError as e:
         return JsonResponse({"ok": False, "error": e.message, "code": e.code}, status=400)
     except KeyError as e:
@@ -5603,6 +6365,7 @@ def qr_quick_pay(request, session_id):
 #  KIOSK — Robot prodavač (touchscreen 15")
 # ═══════════════════════════════════════════════════════
 
+
 def kiosk_view(request, token):
     """
     Kiosk mode — touchscreen 15", full-screen, bez logina.
@@ -5612,44 +6375,52 @@ def kiosk_view(request, token):
     company = terminal.company
 
     from inventory.models import InventoryItem
-    items = InventoryItem.objects.filter(
-        company=company, is_active=True, webshop_visible=True
-    ).order_by('category', 'name')
 
-    categories = sorted(set(i.category or 'ostalo' for i in items))
+    items = InventoryItem.objects.filter(company=company, is_active=True, webshop_visible=True).order_by(
+        "category", "name"
+    )
 
-    return render(request, 'pos/kiosk.html', {
-        'company': company,
-        'terminal': terminal,
-        'items': items,
-        'categories': categories,
-    })
+    categories = sorted(set(i.category or "ostalo" for i in items))
+
+    return render(
+        request,
+        "pos/kiosk.html",
+        {
+            "company": company,
+            "terminal": terminal,
+            "items": items,
+            "categories": categories,
+        },
+    )
 
 
 # ── Cashier Gate API ──────────────────────────────────────────────────────────
+
 
 @login_required
 @require_POST
 def verify_cashier_pin(request):
     """Verify cashier PIN for Cashier Gate modal."""
     import json
+
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
-    cashier_id = data.get('cashier_id')
-    pin = str(data.get('pin', '')).strip()
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+    cashier_id = data.get("cashier_id")
+    pin = str(data.get("pin", "")).strip()
     if not cashier_id or not pin:
-        return JsonResponse({'ok': False, 'error': 'Missing cashier_id or pin'})
+        return JsonResponse({"ok": False, "error": "Missing cashier_id or pin"})
     from pos.models import POSCashier
+
     company = get_user_company(request)
     try:
         cashier = POSCashier.objects.get(pk=cashier_id, company=company, is_active=True)
     except POSCashier.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Cashier not found'})
+        return JsonResponse({"ok": False, "error": "Cashier not found"})
     if cashier.check_pin(pin):
-        return JsonResponse({'ok': True, 'name': cashier.name, 'oib': cashier.oib})
-    return JsonResponse({'ok': False, 'error': 'Invalid PIN'})
+        return JsonResponse({"ok": True, "name": cashier.name, "oib": cashier.oib})
+    return JsonResponse({"ok": False, "error": "Invalid PIN"})
 
 
 @login_required
@@ -5657,23 +6428,25 @@ def verify_cashier_pin(request):
 def update_cashier_oib(request):
     """Update cashier OIB from Cashier Gate (inline fix for missing OIB)."""
     import json
+
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
-    cashier_id = data.get('cashier_id')
-    oib = str(data.get('oib', '')).strip()
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+    cashier_id = data.get("cashier_id")
+    oib = str(data.get("oib", "")).strip()
     if not cashier_id or len(oib) != 11 or not oib.isdigit():
-        return JsonResponse({'ok': False, 'error': 'Invalid OIB (must be 11 digits)'})
+        return JsonResponse({"ok": False, "error": "Invalid OIB (must be 11 digits)"})
     from pos.models import POSCashier
+
     company = get_user_company(request)
     try:
         cashier = POSCashier.objects.get(pk=cashier_id, company=company)
     except POSCashier.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Cashier not found'})
+        return JsonResponse({"ok": False, "error": "Cashier not found"})
     cashier.oib = oib
-    cashier.save(update_fields=['oib'])
-    return JsonResponse({'ok': True})
+    cashier.save(update_fields=["oib"])
+    return JsonResponse({"ok": True})
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -5681,6 +6454,7 @@ def update_cashier_oib(request):
 # Zakon o lokalnim porezima (NN 115/16, čl.20-22)
 # Predaje se JLS-u do 20. u mjesecu za prethodni mjesec
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 @login_required
 def pp_mi_po_report(request):
@@ -5696,16 +6470,16 @@ def pp_mi_po_report(request):
     try:
         pos_settings = company.pos_settings
         if not pos_settings.consumption_tax_active:
-            messages.warning(request, _('Porez na potrošnju nije aktiviran za ovu tvrtku.'))
-            return redirect('pos_dashboard')
+            messages.warning(request, _("Porez na potrošnju nije aktiviran za ovu tvrtku."))
+            return redirect("pos_dashboard")
     except Exception:
-        messages.error(request, _('POS postavke nisu konfigurirane.'))
-        return redirect('pos_dashboard')
+        messages.error(request, _("POS postavke nisu konfigurirane."))
+        return redirect("pos_dashboard")
 
     # Mjesec/godina iz parametara (default: prethodni mjesec)
     now = timezone.now()
-    year = int(request.GET.get('year', now.year if now.month > 1 else now.year - 1))
-    month = int(request.GET.get('month', now.month - 1 if now.month > 1 else 12))
+    year = int(request.GET.get("year", now.year if now.month > 1 else now.year - 1))
+    month = int(request.GET.get("month", now.month - 1 if now.month > 1 else 12))
 
     _, last_day = calendar.monthrange(year, month)
     period_start = timezone.datetime(year, month, 1, tzinfo=timezone.utc)
@@ -5714,7 +6488,7 @@ def pp_mi_po_report(request):
     # Dohvati sve plaćene račune s PP u tom periodu
     receipts = POSReceipt.objects.filter(
         session__terminal__company=company,
-        status='paid',
+        status="paid",
         paid_at__gte=period_start,
         paid_at__lte=period_end,
         consumption_tax_amount__gt=0,
@@ -5722,26 +6496,25 @@ def pp_mi_po_report(request):
 
     # Agregati
     agg = receipts.aggregate(
-        total_consumption_tax=Sum('consumption_tax_amount'),
-        total_subtotal=Sum('subtotal'),
-        receipt_count=Count('id'),
+        total_consumption_tax=Sum("consumption_tax_amount"),
+        total_subtotal=Sum("subtotal"),
+        receipt_count=Count("id"),
     )
 
-    total_ct = agg['total_consumption_tax'] or Decimal('0')
-    total_base = agg['total_subtotal'] or Decimal('0')
-    receipt_count = agg['receipt_count'] or 0
+    total_ct = agg["total_consumption_tax"] or Decimal("0")
+    total_base = agg["total_subtotal"] or Decimal("0")
+    receipt_count = agg["receipt_count"] or 0
 
     # Dnevni breakdown za tablicu
     daily = (
-        receipts
-        .extra(select={'day': "DATE(paid_at)"})
-        .values('day')
+        receipts.extra(select={"day": "DATE(paid_at)"})
+        .values("day")
         .annotate(
-            daily_base=Sum('subtotal'),
-            daily_tax=Sum('consumption_tax_amount'),
-            daily_count=Count('id'),
+            daily_base=Sum("subtotal"),
+            daily_tax=Sum("consumption_tax_amount"),
+            daily_count=Count("id"),
         )
-        .order_by('day')
+        .order_by("day")
     )
 
     # Deadline: 20. sljedećeg mjeseca
@@ -5749,39 +6522,40 @@ def pp_mi_po_report(request):
         deadline_month, deadline_year = 1, year + 1
     else:
         deadline_month, deadline_year = month + 1, year
-    deadline = f'{deadline_year}-{deadline_month:02d}-20'
+    deadline = f"{deadline_year}-{deadline_month:02d}-20"
 
     # Mjeseci za navigaciju
     months = []
     for m in range(1, 13):
-        months.append({'num': m, 'name': calendar.month_name[m]})
+        months.append({"num": m, "name": calendar.month_name[m]})
 
     ctx = {
-        'company': company,
-        'pos_settings': pos_settings,
-        'year': year,
-        'month': month,
-        'month_name': calendar.month_name[month],
-        'period_start': period_start,
-        'period_end': period_end,
-        'total_base': total_base,
-        'total_consumption_tax': total_ct,
-        'receipt_count': receipt_count,
-        'tax_rate': pos_settings.consumption_tax_rate,
-        'jls_name': pos_settings.consumption_tax_jls_name,
-        'daily_breakdown': list(daily),
-        'deadline': deadline,
-        'months': months,
-        'years': list(range(2024, now.year + 1)),
+        "company": company,
+        "pos_settings": pos_settings,
+        "year": year,
+        "month": month,
+        "month_name": calendar.month_name[month],
+        "period_start": period_start,
+        "period_end": period_end,
+        "total_base": total_base,
+        "total_consumption_tax": total_ct,
+        "receipt_count": receipt_count,
+        "tax_rate": pos_settings.consumption_tax_rate,
+        "jls_name": pos_settings.consumption_tax_jls_name,
+        "daily_breakdown": list(daily),
+        "deadline": deadline,
+        "months": months,
+        "years": list(range(2024, now.year + 1)),
     }
 
-    return render(request, 'pos/pp_mi_po_report.html', ctx)
+    return render(request, "pos/pp_mi_po_report.html", ctx)
 
 
 # ══════════════════════════════════════════════════════════════
 # API: SEARCH ARTIKALA — pretraži cijelu bazu, ne samo DOM
 # Rješava problem 300-artikal limita na tražilici
 # ══════════════════════════════════════════════════════════════
+
 
 @login_required
 def api_item_search(request):
@@ -5793,13 +6567,13 @@ def api_item_search(request):
 
     from inventory.models import InventoryItem
 
-    q = request.GET.get('q', '').strip()
-    terminal_id = request.GET.get('terminal_id')
-    limit = min(int(request.GET.get('limit', 30)), 100)
+    q = request.GET.get("q", "").strip()
+    terminal_id = request.GET.get("terminal_id")
+    limit = min(int(request.GET.get("limit", 30)), 100)
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'items': []})
+        return JsonResponse({"items": []})
 
     qs = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate")
 
@@ -5808,7 +6582,7 @@ def api_item_search(request):
         try:
             t = POSTerminal.objects.get(pk=terminal_id, company=company)
             if t.category_filter:
-                cats = [c.strip() for c in t.category_filter.split(',') if c.strip()]
+                cats = [c.strip() for c in t.category_filter.split(",") if c.strip()]
                 if cats:
                     qs = qs.filter(category__in=cats)
         except POSTerminal.DoesNotExist:
@@ -5816,27 +6590,26 @@ def api_item_search(request):
 
     if q:
         from django.db.models import Q
-        qs = qs.filter(
-            Q(name__icontains=q) |
-            Q(sku__icontains=q) |
-            Q(barcode__icontains=q)
-        )
+
+        qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q))
 
     items = []
-    for item in qs.select_related('tax_rate').order_by('name')[:limit]:
-        items.append({
-            'id': item.id,
-            'name': item.name,
-            'sku': item.sku or '',
-            'price': float(item.unit_price),
-            'tax_rate': float(item.tax_rate.rate) if item.tax_rate else 25.0,
-            'category': item.category or '',
-            'unit': getattr(item, 'unit', 'kom'),
-            'barcode': getattr(item, 'barcode', '') or '',
-            'stock': float(getattr(item, 'quantity', 0) or 0),
-        })
+    for item in qs.select_related("tax_rate").order_by("name")[:limit]:
+        items.append(
+            {
+                "id": item.id,
+                "name": item.name,
+                "sku": item.sku or "",
+                "price": float(item.unit_price),
+                "tax_rate": float(item.tax_rate.rate) if item.tax_rate else 25.0,
+                "category": item.category or "",
+                "unit": getattr(item, "unit", "kom"),
+                "barcode": getattr(item, "barcode", "") or "",
+                "stock": float(getattr(item, "quantity", 0) or 0),
+            }
+        )
 
-    return JsonResponse({'items': items, 'total': qs.count(), 'q': q})
+    return JsonResponse({"items": items, "total": qs.count(), "q": q})
 
 
 @login_required
@@ -5847,16 +6620,16 @@ def api_ai_upsell(request):
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'suggestions': []})
+        return JsonResponse({"suggestions": []})
 
     try:
         data = json.loads(request.body)
-        item_ids = data.get('items', [])
+        item_ids = data.get("items", [])
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'suggestions': []})
+        return JsonResponse({"suggestions": []})
 
     suggestions = get_upsell_suggestions(company, item_ids)
-    return JsonResponse({'suggestions': suggestions})
+    return JsonResponse({"suggestions": suggestions})
 
 
 @login_required
@@ -5869,56 +6642,65 @@ def api_fenix_camera(request):
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'sku': None, 'error': 'No company'})
+        return JsonResponse({"sku": None, "error": "No company"})
 
-    image = request.FILES.get('image')
+    image = request.FILES.get("image")
     if not image:
-        return JsonResponse({'sku': None, 'error': 'No image'})
+        return JsonResponse({"sku": None, "error": "No image"})
 
-    api_key = getattr(_settings, 'ANTHROPIC_API_KEY', '')
+    api_key = getattr(_settings, "ANTHROPIC_API_KEY", "")
     if not api_key:
-        return JsonResponse({'sku': None, 'error': 'AI not configured'})
+        return JsonResponse({"sku": None, "error": "AI not configured"})
 
     try:
         import anthropic
+
         image_b64 = base64.b64encode(image.read()).decode()
 
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
-            model='claude-haiku-4-5-20251001',
+            model="claude-haiku-4-5-20251001",
             max_tokens=150,
-            messages=[{
-                'role': 'user',
-                'content': [
-                    {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': image_b64}},
-                    {'type': 'text', 'text': (
-                        'Slika prikazuje proizvod ili barcode. '
-                        'Ako vidiš barcode → pročitaj brojeve. '
-                        'Ako vidiš naziv proizvoda → izvuci naziv. '
-                        'Odgovori SAMO JSON: {"type":"barcode","value":"123"} ili {"type":"name","value":"Coca Cola"}'
-                    )},
-                ],
-            }],
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": image_b64}},
+                        {
+                            "type": "text",
+                            "text": (
+                                "Slika prikazuje proizvod ili barcode. "
+                                "Ako vidiš barcode → pročitaj brojeve. "
+                                "Ako vidiš naziv proizvoda → izvuci naziv. "
+                                'Odgovori SAMO JSON: {"type":"barcode","value":"123"} ili {"type":"name","value":"Coca Cola"}'
+                            ),
+                        },
+                    ],
+                }
+            ],
         )
 
         raw = msg.content[0].text.strip()
         data = json.loads(raw)
 
         from inventory.models import InventoryItem
+
         sku = None
-        if data.get('type') == 'barcode' and data.get('value'):
-            sku = InventoryItem.objects.filter(company=company, barcode=data['value'], is_active=True).first()
+        if data.get("type") == "barcode" and data.get("value"):
+            sku = InventoryItem.objects.filter(company=company, barcode=data["value"], is_active=True).first()
             if not sku:
-                sku = InventoryItem.objects.filter(company=company, sku=data['value'], is_active=True).first()
-        elif data.get('type') == 'name' and data.get('value'):
-            sku = InventoryItem.objects.filter(company=company, name__icontains=data['value'], is_active=True).first()
+                sku = InventoryItem.objects.filter(company=company, sku=data["value"], is_active=True).first()
+        elif data.get("type") == "name" and data.get("value"):
+            sku = InventoryItem.objects.filter(company=company, name__icontains=data["value"], is_active=True).first()
 
         if sku:
-            return JsonResponse({
-                'sku': {'id': sku.pk, 'name': sku.name, 'price': str(sku.unit_price), 'sku': sku.sku or ''},
-                'ocr': data,
-            })
-        return JsonResponse({'sku': None, 'ocr': data})
+            return JsonResponse(
+                {
+                    "sku": {"id": sku.pk, "name": sku.name, "price": str(sku.unit_price), "sku": sku.sku or ""},
+                    "ocr": data,
+                }
+            )
+        return JsonResponse({"sku": None, "ocr": data})
 
     except Exception as e:
-        return JsonResponse({'sku': None, 'error': str(e)[:100]})
+        return JsonResponse({"sku": None, "error": str(e)[:100]})

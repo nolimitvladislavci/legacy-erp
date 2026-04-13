@@ -10,6 +10,7 @@ core/tests.py — Integration testovi za kritične tokove.
 Run:
     python manage.py test core --verbosity=2
 """
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -24,18 +25,19 @@ NO_HTTPS = override_settings(SECURE_SSL_REDIRECT=False)
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def make_company(oib="33322211190"):
     from companies.models import Company
+
     return Company.objects.get_or_create(
         oib=oib,
-        defaults=dict(name="Core Test GmbH", country="DE",
-                      city="Hamburg", zip_code="20095"),
+        defaults=dict(name="Core Test GmbH", country="DE", city="Hamburg", zip_code="20095"),
     )[0]
 
 
-def make_user(company, username="core_admin", role="company_admin",
-              must_change=False, is_superuser=False):
+def make_user(company, username="core_admin", role="company_admin", must_change=False, is_superuser=False):
     from accounts.models import UserProfile
+
     user = User.objects.create_user(
         username=username,
         email=f"{username}@core-test.de",
@@ -44,7 +46,9 @@ def make_user(company, username="core_admin", role="company_admin",
         is_staff=is_superuser,
     )
     UserProfile.objects.create(
-        user=user, company=company, role=role,
+        user=user,
+        company=company,
+        role=role,
         must_change_password=must_change,
     )
     return user
@@ -52,14 +56,18 @@ def make_user(company, username="core_admin", role="company_admin",
 
 def make_tax_rate(country="DE", rate=Decimal("19.00"), name="MwSt 19%"):
     from companies.models import TaxRate
+
     obj, _ = TaxRate.objects.get_or_create(
-        country=country, rate=rate, defaults=dict(name=name),
+        country=country,
+        rate=rate,
+        defaults=dict(name=name),
     )
     return obj
 
 
 def make_invoice_profile(company, prefix="TST"):
     from invoicing.fiscal_models import InvoiceProfile
+
     profile, _ = InvoiceProfile.objects.get_or_create(
         company=company,
         invoice_prefix=prefix,
@@ -76,6 +84,7 @@ def make_invoice_profile(company, prefix="TST"):
 
 def make_subscription(company):
     from registration.models import CompanySubscription
+
     return CompanySubscription.objects.create(
         company=company,
         plan="enterprise",
@@ -90,14 +99,14 @@ def make_subscription(company):
 # TEST 1 — ForcePasswordChange middleware
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @NO_HTTPS
 class ForcePasswordChangeTest(TestCase):
     """ForcePasswordChangeMiddleware redirects must_change_password users."""
 
     def setUp(self):
         self.company = make_company()
-        self.user = make_user(self.company, username="force_pw_user",
-                              must_change=True)
+        self.user = make_user(self.company, username="force_pw_user", must_change=True)
         self.c = Client()
         self.c.login(username="force_pw_user", password="TestPass2026!")
 
@@ -113,11 +122,14 @@ class ForcePasswordChangeTest(TestCase):
 
     def test_password_change_clears_flag(self):
         """Valid password change POST clears must_change_password flag."""
-        r = self.c.post("/accounts/password/", {
-            "old_password":  "TestPass2026!",
-            "new_password1": "NewSecurePass2026!",
-            "new_password2": "NewSecurePass2026!",
-        })
+        r = self.c.post(
+            "/accounts/password/",
+            {
+                "old_password": "TestPass2026!",
+                "new_password1": "NewSecurePass2026!",
+                "new_password2": "NewSecurePass2026!",
+            },
+        )
         # Should redirect after successful change
         self.assertIn(r.status_code, (200, 302))
         self.user.profile.refresh_from_db()
@@ -126,8 +138,10 @@ class ForcePasswordChangeTest(TestCase):
     def test_superadmin_not_redirected(self):
         """Superadmin with must_change_password=True is NOT redirected."""
         superadmin = make_user(
-            self.company, username="super_force_pw",
-            must_change=True, is_superuser=True,
+            self.company,
+            username="super_force_pw",
+            must_change=True,
+            is_superuser=True,
         )
         c = Client()
         c.login(username="super_force_pw", password="TestPass2026!")
@@ -141,6 +155,7 @@ class ForcePasswordChangeTest(TestCase):
 # TEST 2 — Invoice create + recalculate
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class InvoiceFlowTest(TestCase):
     """Invoice model: numbering, recalculate, status choices."""
 
@@ -152,6 +167,7 @@ class InvoiceFlowTest(TestCase):
     def test_invoice_profile_generates_number(self):
         """get_next_number() returns VIS-style prefix-year-NNNN format."""
         from django.utils import timezone
+
         year = timezone.now().year
         number = self.profile.get_next_number(doctype="R")
         self.assertIn(str(year), number)
@@ -166,6 +182,7 @@ class InvoiceFlowTest(TestCase):
         from django.utils import timezone as tz
 
         from invoicing.models import Invoice, InvoiceItem
+
         inv = Invoice.objects.create(
             company=self.company,
             number="TST-RECALC-001",
@@ -212,15 +229,16 @@ class InvoiceFlowTest(TestCase):
     def test_invoice_status_choices(self):
         """All expected STATUS_CHOICES values exist."""
         from invoicing.models import Invoice
+
         choices = dict(Invoice.STATUS_CHOICES)
         for expected in ("DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"):
-            self.assertIn(expected, choices,
-                          f"Status '{expected}' not in STATUS_CHOICES")
+            self.assertIn(expected, choices, f"Status '{expected}' not in STATUS_CHOICES")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TEST 3 — POS payment flow
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class POSFlowTest(TestCase):
     """POS: session open, receipt creation, payment, total calculation."""
@@ -230,6 +248,7 @@ class POSFlowTest(TestCase):
         self.user = make_user(self.company, username="pos_operator")
         self.tax = make_tax_rate()
         from pos.models import POSSession, POSTerminal
+
         self.terminal = POSTerminal.objects.create(
             company=self.company,
             name="Test Kasa",
@@ -251,6 +270,7 @@ class POSFlowTest(TestCase):
     def test_create_receipt_and_pay(self):
         """Receipt OPEN → add items → set PAID → total is correct."""
         from pos.models import POSReceipt, POSReceiptItem
+
         receipt = POSReceipt.objects.create(
             session=self.session,
             receipt_number=1,
@@ -286,20 +306,30 @@ class POSFlowTest(TestCase):
     def test_session_total_sales(self):
         """session.total_sales() == sum of PAID receipts."""
         from pos.models import POSReceipt
+
         POSReceipt.objects.create(
-            session=self.session, receipt_number=1,
-            status="paid", subtotal=Decimal("100.00"),
-            tax_amount=Decimal("19.00"), total=Decimal("119.00"),
+            session=self.session,
+            receipt_number=1,
+            status="paid",
+            subtotal=Decimal("100.00"),
+            tax_amount=Decimal("19.00"),
+            total=Decimal("119.00"),
         )
         POSReceipt.objects.create(
-            session=self.session, receipt_number=2,
-            status="paid", subtotal=Decimal("50.00"),
-            tax_amount=Decimal("9.50"), total=Decimal("59.50"),
+            session=self.session,
+            receipt_number=2,
+            status="paid",
+            subtotal=Decimal("50.00"),
+            tax_amount=Decimal("9.50"),
+            total=Decimal("59.50"),
         )
         POSReceipt.objects.create(
-            session=self.session, receipt_number=3,
-            status="open", subtotal=Decimal("80.00"),
-            tax_amount=Decimal("15.20"), total=Decimal("95.20"),
+            session=self.session,
+            receipt_number=3,
+            status="open",
+            subtotal=Decimal("80.00"),
+            tax_amount=Decimal("15.20"),
+            total=Decimal("95.20"),
         )
         total_paid = self.session.total_sales
         # Only PAID receipts: 119 + 59.5 = 178.50
@@ -309,6 +339,7 @@ class POSFlowTest(TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # TEST 4 — Employee create via companies settings
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @NO_HTTPS
 class EmployeeCreateTest(TestCase):
@@ -325,13 +356,16 @@ class EmployeeCreateTest(TestCase):
 
     def test_create_employee_ok(self):
         """POST valid data → JSON ok=True, user created, must_change_password=True."""
-        r = self.c.post(self.url, {
-            "email":      "new.employee@core-test.de",
-            "first_name": "Novi",
-            "last_name":  "Zaposlenik",
-            "role":       "worker",
-            "phone":      "+385911234567",
-        })
+        r = self.c.post(
+            self.url,
+            {
+                "email": "new.employee@core-test.de",
+                "first_name": "Novi",
+                "last_name": "Zaposlenik",
+                "role": "worker",
+                "phone": "+385911234567",
+            },
+        )
         self.assertEqual(r.status_code, 200)
         d = r.json()
         self.assertTrue(d.get("ok"), d)
@@ -341,12 +375,15 @@ class EmployeeCreateTest(TestCase):
 
     def test_duplicate_email_rejected(self):
         """POST with existing email → JSON error, status 400."""
-        r = self.c.post(self.url, {
-            "email":      "emp_admin@core-test.de",  # already exists
-            "first_name": "Duplicate",
-            "last_name":  "User",
-            "role":       "worker",
-        })
+        r = self.c.post(
+            self.url,
+            {
+                "email": "emp_admin@core-test.de",  # already exists
+                "first_name": "Duplicate",
+                "last_name": "User",
+                "role": "worker",
+            },
+        )
         self.assertEqual(r.status_code, 400)
         d = r.json()
         self.assertIn("error", d)
@@ -355,8 +392,11 @@ class EmployeeCreateTest(TestCase):
         """Worker POSTing to employee_create → 403."""
         c2 = Client()
         c2.login(username="emp_worker", password="TestPass2026!")
-        r = c2.post(self.url, {
-            "email": "hacker@test.de",
-            "role":  "worker",
-        })
+        r = c2.post(
+            self.url,
+            {
+                "email": "hacker@test.de",
+                "role": "worker",
+            },
+        )
         self.assertEqual(r.status_code, 403)

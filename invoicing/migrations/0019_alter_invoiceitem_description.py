@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0018_invoiceitem_description_longer'),
+        ("invoicing", "0018_invoiceitem_description_longer"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoiceitem',
-            name='description',
-            field=models.TextField(default='', verbose_name='Opis'),
+            model_name="invoiceitem",
+            name="description",
+            field=models.TextField(default="", verbose_name="Opis"),
         ),
     ]

@@ -1,4 +1,5 @@
 """Project forms — validation for project CRUD."""
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -8,11 +9,18 @@ from .models import Project
 
 class ProjectForm(forms.ModelForm):
     """Project create/edit form."""
+
     class Meta:
         model = Project
         fields = [
-            "name", "description", "status", "client",
-            "manager", "budget", "start_date", "end_date",
+            "name",
+            "description",
+            "status",
+            "client",
+            "manager",
+            "budget",
+            "start_date",
+            "end_date",
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),

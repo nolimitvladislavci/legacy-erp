@@ -6,57 +6,69 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('appointments', '0011_add_company_to_bookingservice'),
-        ('companies', '0023_add_booking_theme'),
+        ("appointments", "0011_add_company_to_bookingservice"),
+        ("companies", "0023_add_booking_theme"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='appointment',
-            name='intake_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Zaprimljeno'),
+            model_name="appointment",
+            name="intake_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Zaprimljeno"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='intake_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='intakes', to=settings.AUTH_USER_MODEL, verbose_name='Zaprimio'),
+            model_name="appointment",
+            name="intake_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="intakes",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Zaprimio",
+            ),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='intake_notes',
-            field=models.TextField(blank=True, default='', verbose_name='Napomena prijema'),
+            model_name="appointment",
+            name="intake_notes",
+            field=models.TextField(blank=True, default="", verbose_name="Napomena prijema"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='picked_up_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Preuzeto'),
+            model_name="appointment",
+            name="picked_up_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Preuzeto"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='ready_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Gotovo'),
+            model_name="appointment",
+            name="ready_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Gotovo"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='should_salt',
-            field=models.BooleanField(blank=True, null=True, verbose_name='Soliti'),
+            model_name="appointment",
+            name="should_salt",
+            field=models.BooleanField(blank=True, null=True, verbose_name="Soliti"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='token_number',
-            field=models.IntegerField(default=0, verbose_name='Limeni broj'),
+            model_name="appointment",
+            name="token_number",
+            field=models.IntegerField(default=0, verbose_name="Limeni broj"),
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='weight_kg',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Tezina (kg)'),
+            model_name="appointment",
+            name="weight_kg",
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name="Tezina (kg)"),
         ),
         migrations.AddField(
-            model_name='bookingservice',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='booking_services', to='companies.company'),
+            model_name="bookingservice",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="booking_services",
+                to="companies.company",
+            ),
         ),
     ]

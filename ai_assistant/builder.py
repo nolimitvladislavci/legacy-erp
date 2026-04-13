@@ -4,6 +4,7 @@ Split-screen IDE: chat lijevo, code preview desno.
 Čita kontekst modula prije AI poziva za anti-halucinaciju.
 Gemini 2.5 Pro za code generation, PendingAIAction za sigurnost.
 """
+
 import json
 import logging
 import os
@@ -23,7 +24,8 @@ from .models import Conversation, Message
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = '/var/www/fina-connect'
+BASE_DIR = "/var/www/fina-connect"
+
 
 # ── Guard ──
 def _is_builder_user(user):
@@ -36,11 +38,11 @@ def get_module_context(module_name):
     context_parts = []
     base_path = os.path.join(BASE_DIR, module_name)
 
-    for filename in ['models.py', 'views.py', 'forms.py', 'urls.py']:
+    for filename in ["models.py", "views.py", "forms.py", "urls.py"]:
         fpath = os.path.join(base_path, filename)
         if os.path.exists(fpath):
             try:
-                with open(fpath, 'r', encoding='utf-8') as f:
+                with open(fpath, "r", encoding="utf-8") as f:
                     content = f.read()
                 # Limitiraj na 5000 znakova po fajlu za token ekonomiju
                 if len(content) > 5000:
@@ -50,10 +52,10 @@ def get_module_context(module_name):
                 pass
 
     # Template-i (lista naziva)
-    template_dir = os.path.join(BASE_DIR, 'templates', module_name)
+    template_dir = os.path.join(BASE_DIR, "templates", module_name)
     if os.path.isdir(template_dir):
         try:
-            templates = [f for f in os.listdir(template_dir) if f.endswith('.html')]
+            templates = [f for f in os.listdir(template_dir) if f.endswith(".html")]
             if templates:
                 context_parts.append(f"--- {module_name} templates ---\n" + "\n".join(templates))
         except Exception:
@@ -66,24 +68,28 @@ def get_module_context(module_name):
 # BUILDER VIEW — Split-screen IDE
 # ══════════════════════════════════════════
 
+
 @login_required
 @user_passes_test(_is_builder_user)
 def builder_page(request):
     """Prikazuje Katana IDE sučelje."""
-    modules = AIModulePermission.objects.filter(company=None).order_by('module')
-    conversations = Conversation.objects.filter(
-        user=request.user, is_active=True, module_context='builder'
-    )[:20]
-    return render(request, 'ai_assistant/builder_page.html', {
-        'modules': modules,
-        'conversations': conversations,
-        'is_builder': True,
-    })
+    modules = AIModulePermission.objects.filter(company=None).order_by("module")
+    conversations = Conversation.objects.filter(user=request.user, is_active=True, module_context="builder")[:20]
+    return render(
+        request,
+        "ai_assistant/builder_page.html",
+        {
+            "modules": modules,
+            "conversations": conversations,
+            "is_builder": True,
+        },
+    )
 
 
 # ══════════════════════════════════════════
 # GENERATE — Gemini 2.5 Pro s kontekstom
 # ══════════════════════════════════════════
+
 
 @login_required
 @user_passes_test(_is_builder_user)
@@ -92,14 +98,13 @@ def builder_generate(request):
     """Čita kontekst modula, šalje Gemini-ju, vraća strukturirani prijedlog."""
     try:
         data = json.loads(request.body)
-        user_prompt = data.get('prompt', '').strip()
-        target_module = data.get('module', '').strip()
+        user_prompt = data.get("prompt", "").strip()
+        target_module = data.get("module", "").strip()
 
         if not user_prompt or not target_module:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Prazan zahtjev ili nije odabran ciljani modul.'
-            }, status=400)
+            return JsonResponse(
+                {"status": "error", "message": "Prazan zahtjev ili nije odabran ciljani modul."}, status=400
+            )
 
         # Čitaj kontekst modula
         module_context = get_module_context(target_module)
@@ -109,39 +114,35 @@ def builder_generate(request):
         if result is None:
             result = _call_claude(user_prompt, target_module, module_context)
 
-        if result.get('error'):
-            return JsonResponse({
-                'status': 'error',
-                'message': result['error']
-            }, status=500)
+        if result.get("error"):
+            return JsonResponse({"status": "error", "message": result["error"]}, status=500)
 
         # Formiranje konačnog koda za preview
         proposed_code = ""
-        if result.get('model_code'):
+        if result.get("model_code"):
             proposed_code += f"### MODELS.PY ###\n{result['model_code']}\n\n"
-        if result.get('view_code'):
+        if result.get("view_code"):
             proposed_code += f"### VIEWS.PY ###\n{result['view_code']}\n\n"
-        if result.get('html_code'):
+        if result.get("html_code"):
             proposed_code += f"### TEMPLATE ###\n{result['html_code']}"
 
         if not proposed_code.strip():
-            proposed_code = result.get('raw_response', 'AI nije generirao kod.')
+            proposed_code = result.get("raw_response", "AI nije generirao kod.")
 
-        return JsonResponse({
-            'status': 'success',
-            'message': 'AI je uspješno generirao kod. Pregledajte prijedlog.',
-            'description': result.get('description', ''),
-            'proposed_code': proposed_code,
-            'target_module': target_module,
-            'action_type': result.get('action_type', 'modify'),
-        })
+        return JsonResponse(
+            {
+                "status": "success",
+                "message": "AI je uspješno generirao kod. Pregledajte prijedlog.",
+                "description": result.get("description", ""),
+                "proposed_code": proposed_code,
+                "target_module": target_module,
+                "action_type": result.get("action_type", "modify"),
+            }
+        )
 
     except (json.JSONDecodeError, ValueError) as e:
         logger.error("Builder generate error: %s", traceback.format_exc())
-        return JsonResponse({
-            'status': 'error',
-            'message': f'Sistemska greška: {str(e)}'
-        }, status=500)
+        return JsonResponse({"status": "error", "message": f"Sistemska greška: {str(e)}"}, status=500)
 
 
 def _call_gemini(prompt, module, context):
@@ -149,12 +150,12 @@ def _call_gemini(prompt, module, context):
     try:
         import google.generativeai as genai
 
-        api_key = os.environ.get('GEMINI_API_KEY', '')
+        api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:
             return None  # Fallback na Claude
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-pro')
+        model = genai.GenerativeModel("gemini-2.5-pro")
 
         system_instruction = f"""Ti si vrhunski Django inženjer za LIMIT Connect ERP sustav.
 Ciljani modul za modifikaciju je: {module}
@@ -176,11 +177,11 @@ Vrati ISKLJUČIVO čisti JSON (bez markdown backticks) sa ključevima:
         text = response.text.strip()
 
         # Čišćenje markdown wrappera
-        if text.startswith('```json'):
+        if text.startswith("```json"):
             text = text[7:]
-        if text.startswith('```'):
+        if text.startswith("```"):
             text = text[3:]
-        if text.endswith('```'):
+        if text.endswith("```"):
             text = text[:-3]
         text = text.strip()
 
@@ -188,9 +189,9 @@ Vrati ISKLJUČIVO čisti JSON (bez markdown backticks) sa ključevima:
             return json.loads(text)
         except json.JSONDecodeError:
             return {
-                'description': 'AI je vratio odgovor ali ne u JSON formatu.',
-                'raw_response': text,
-                'action_type': 'modify',
+                "description": "AI je vratio odgovor ali ne u JSON formatu.",
+                "raw_response": text,
+                "action_type": "modify",
             }
 
     except ImportError:
@@ -218,26 +219,27 @@ Bez markdown backticks. Odgovaraj na hrvatskom.""",
         )
 
         text = response.content[0].text.strip()
-        if text.startswith('```'):
-            text = text.split('\n', 1)[1] if '\n' in text else text[3:]
-        if text.endswith('```'):
+        if text.startswith("```"):
+            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+        if text.endswith("```"):
             text = text[:-3]
 
         try:
             return json.loads(text.strip())
         except json.JSONDecodeError:
             return {
-                'description': 'Claude odgovor:',
-                'raw_response': text,
-                'action_type': 'modify',
+                "description": "Claude odgovor:",
+                "raw_response": text,
+                "action_type": "modify",
             }
     except (json.JSONDecodeError, ValueError) as e:
-        return {'error': f'Ni Gemini ni Claude nisu dostupni: {str(e)}'}
+        return {"error": f"Ni Gemini ni Claude nisu dostupni: {str(e)}"}
 
 
 # ══════════════════════════════════════════
 # QUEUE — Šalje u PendingAIAction
 # ══════════════════════════════════════════
+
 
 @login_required
 @user_passes_test(_is_builder_user)
@@ -246,16 +248,13 @@ def builder_queue(request):
     """Šalje pregledani kod u red čekanja za superadmin odobrenje."""
     try:
         data = json.loads(request.body)
-        target_module = data.get('module', '')
-        proposed_code = data.get('code', '')
-        description = data.get('description', '')
-        action_type = data.get('action_type', 'modify')
+        target_module = data.get("module", "")
+        proposed_code = data.get("code", "")
+        description = data.get("description", "")
+        action_type = data.get("action_type", "modify")
 
         if not proposed_code or not target_module:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Nedostaju podaci za kreiranje zahtjeva.'
-            }, status=400)
+            return JsonResponse({"status": "error", "message": "Nedostaju podaci za kreiranje zahtjeva."}, status=400)
 
         action = PendingAIAction.objects.create(
             company=None,
@@ -264,11 +263,11 @@ def builder_queue(request):
             description=description,
             proposed_code=proposed_code,
             payload={
-                'source': 'katana_builder',
-                'requested_by': request.user.get_full_name() or request.user.username,
-                'requested_at': timezone.now().isoformat(),
+                "source": "katana_builder",
+                "requested_by": request.user.get_full_name() or request.user.username,
+                "requested_at": timezone.now().isoformat(),
             },
-            status='pending',
+            status="pending",
         )
 
         # Audit log
@@ -277,25 +276,25 @@ def builder_queue(request):
             module=target_module,
             action_type=action_type,
             access_level=AIModulePermission.ACCESS_ASSISTED,
-            outcome='queued',
+            outcome="queued",
             user=request.user,
-            details={'action_id': str(action.id), 'source': 'katana_builder'},
+            details={"action_id": str(action.id), "source": "katana_builder"},
         )
 
-        return JsonResponse({
-            'status': 'success',
-            'message': f'Promjena poslana u Red čekanja (ID: {str(action.id)[:8]}...). Čeka odobrenje superadmina.',
-        })
+        return JsonResponse(
+            {
+                "status": "success",
+                "message": f"Promjena poslana u Red čekanja (ID: {str(action.id)[:8]}...). Čeka odobrenje superadmina.",
+            }
+        )
     except (json.JSONDecodeError, ValueError) as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 # ══════════════════════════════════════════
 # CHAT API — konverzacijski mod (existing)
 # ══════════════════════════════════════════
+
 
 @login_required
 @user_passes_test(_is_builder_user)
@@ -320,7 +319,9 @@ def builder_api(request):
         conversation = get_object_or_404(Conversation, id=conv_id, user=request.user)
     else:
         conversation = Conversation.objects.create(
-            user=request.user, title=user_message[:80], module_context='builder',
+            user=request.user,
+            title=user_message[:80],
+            module_context="builder",
         )
 
     Message.objects.create(conversation=conversation, role="user", content=user_message)
@@ -349,11 +350,16 @@ Za generiranje koda, uputi ih da koriste Katana Engine (lijevi panel → odaberi
         tokens = 0
 
     Message.objects.create(
-        conversation=conversation, role="assistant", content=final_content, tokens_used=tokens,
+        conversation=conversation,
+        role="assistant",
+        content=final_content,
+        tokens_used=tokens,
     )
 
-    return JsonResponse({
-        "content": final_content,
-        "conversation_id": conversation.id,
-        "tokens": tokens,
-    })
+    return JsonResponse(
+        {
+            "content": final_content,
+            "conversation_id": conversation.id,
+            "tokens": tokens,
+        }
+    )

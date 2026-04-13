@@ -6,132 +6,149 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0001_initial'),
-        ('partners', '0001_initial'),
-        ('projects', '0001_initial'),
+        ("companies", "0001_initial"),
+        ("partners", "0001_initial"),
+        ("projects", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='project',
-            options={'verbose_name': 'Projekt', 'verbose_name_plural': 'Projekti'},
+            name="project",
+            options={"verbose_name": "Projekt", "verbose_name_plural": "Projekti"},
         ),
         migrations.AlterModelOptions(
-            name='projectphoto',
+            name="projectphoto",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='projectupdate',
+            name="projectupdate",
             options={},
         ),
         migrations.RemoveField(
-            model_name='project',
-            name='cover_image',
+            model_name="project",
+            name="cover_image",
         ),
         migrations.RemoveField(
-            model_name='projectphoto',
-            name='location_gps',
+            model_name="projectphoto",
+            name="location_gps",
         ),
         migrations.RemoveField(
-            model_name='projectphoto',
-            name='taken_at',
+            model_name="projectphoto",
+            name="taken_at",
         ),
         migrations.AlterField(
-            model_name='project',
-            name='budget',
+            model_name="project",
+            name="budget",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=14),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='client',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='partners.partner'),
+            model_name="project",
+            name="client",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="partners.partner"
+            ),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.company'),
+            model_name="project",
+            name="company",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="companies.company"
+            ),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='end_date',
+            model_name="project",
+            name="end_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='is_public',
+            model_name="project",
+            name="is_public",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='manager',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='managed_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="manager",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="managed_projects",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='start_date',
+            model_name="project",
+            name="start_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='status',
-            field=models.CharField(default='planning', max_length=20),
+            model_name="project",
+            name="status",
+            field=models.CharField(default="planning", max_length=20),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='team',
-            field=models.ManyToManyField(blank=True, related_name='team_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="team",
+            field=models.ManyToManyField(blank=True, related_name="team_projects", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
-            model_name='projectphoto',
-            name='caption',
+            model_name="projectphoto",
+            name="caption",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterField(
-            model_name='projectphoto',
-            name='image',
-            field=models.ImageField(upload_to='projects/photos/'),
+            model_name="projectphoto",
+            name="image",
+            field=models.ImageField(upload_to="projects/photos/"),
         ),
         migrations.AlterField(
-            model_name='projectphoto',
-            name='is_public',
+            model_name="projectphoto",
+            name="is_public",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='projectphoto',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='projects.project'),
+            model_name="projectphoto",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="photos", to="projects.project"
+            ),
         ),
         migrations.AlterField(
-            model_name='projectphoto',
-            name='uploaded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="projectphoto",
+            name="uploaded_by",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterField(
-            model_name='projectupdate',
-            name='author',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="projectupdate",
+            name="author",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterField(
-            model_name='projectupdate',
-            name='content',
+            model_name="projectupdate",
+            name="content",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='projectupdate',
-            name='is_public',
+            model_name="projectupdate",
+            name="is_public",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='projectupdate',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='updates', to='projects.project'),
+            model_name="projectupdate",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="updates", to="projects.project"
+            ),
         ),
         migrations.AlterField(
-            model_name='projectupdate',
-            name='title',
+            model_name="projectupdate",
+            name="title",
             field=models.CharField(max_length=200),
         ),
     ]

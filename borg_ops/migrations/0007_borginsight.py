@@ -5,34 +5,61 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('borg_ops', '0006_borgautonomytracker'),
-        ('companies', '0034_vault_deactivation_fields'),
-        ('limit_connect_ai', '0007_tenantregulatoryimpact'),
+        ("borg_ops", "0006_borgautonomytracker"),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("limit_connect_ai", "0007_tenantregulatoryimpact"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BorgInsight',
+            name="BorgInsight",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('insight_type', models.CharField(choices=[('vat_impact', 'Utjecaj PDV promjene'), ('regulation_impact', 'Utjecaj regulacije'), ('cost_trend', 'Trend troskova'), ('revenue_risk', 'Rizik prihoda'), ('compliance_gap', 'Compliance praznina')], max_length=30)),
-                ('title', models.CharField(max_length=200)),
-                ('summary', models.TextField()),
-                ('data', models.JSONField(blank=True, default=dict, help_text='Strukturirani rezultati simulacije')),
-                ('confidence_score', models.FloatField(default=0.5, help_text='0.0=nisko, 1.0=visoko')),
-                ('is_acknowledged', models.BooleanField(default=False)),
-                ('acknowledged_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='borg_insights', to='companies.company')),
-                ('regulatory_update', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='borg_insights', to='limit_connect_ai.regulatoryupdate')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "insight_type",
+                    models.CharField(
+                        choices=[
+                            ("vat_impact", "Utjecaj PDV promjene"),
+                            ("regulation_impact", "Utjecaj regulacije"),
+                            ("cost_trend", "Trend troskova"),
+                            ("revenue_risk", "Rizik prihoda"),
+                            ("compliance_gap", "Compliance praznina"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("summary", models.TextField()),
+                ("data", models.JSONField(blank=True, default=dict, help_text="Strukturirani rezultati simulacije")),
+                ("confidence_score", models.FloatField(default=0.5, help_text="0.0=nisko, 1.0=visoko")),
+                ("is_acknowledged", models.BooleanField(default=False)),
+                ("acknowledged_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="borg_insights",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "regulatory_update",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="borg_insights",
+                        to="limit_connect_ai.regulatoryupdate",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'BORG Insight',
-                'verbose_name_plural': 'BORG Insights',
-                'db_table': 'borg_insight',
-                'ordering': ['-created_at'],
+                "verbose_name": "BORG Insight",
+                "verbose_name_plural": "BORG Insights",
+                "db_table": "borg_insight",
+                "ordering": ["-created_at"],
             },
         ),
     ]

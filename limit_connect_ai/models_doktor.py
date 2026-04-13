@@ -2,8 +2,9 @@ from django.db import models
 
 
 class DiagnosisReport(models.Model):
-    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE,
-        related_name="diagnosis_reports", verbose_name="Firma")
+    company = models.ForeignKey(
+        "companies.Company", on_delete=models.CASCADE, related_name="diagnosis_reports", verbose_name="Firma"
+    )
     report_date = models.DateField(verbose_name="Datum izvjestaja")
     overall_score = models.PositiveSmallIntegerField(default=0)
     score_delta = models.SmallIntegerField(default=0)
@@ -16,7 +17,7 @@ class DiagnosisReport(models.Model):
     ai_summary = models.TextField(blank=True)
     recommendations = models.JSONField(default=list, blank=True)
     raw_data = models.JSONField(default=dict, blank=True)
-    STATUS_CHOICES = [("pending","Na cekanju"),("done","Gotovo"),("error","Greska")]
+    STATUS_CHOICES = [("pending", "Na cekanju"), ("done", "Gotovo"), ("error", "Greska")]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     error_message = models.TextField(blank=True)
     notification_sent = models.BooleanField(default=False)
@@ -34,9 +35,12 @@ class DiagnosisReport(models.Model):
 
     @property
     def status_label(self):
-        if self.overall_score >= 80: return ("green", "Dobro")
-        elif self.overall_score >= 60: return ("amber", "Umjereno")
-        else: return ("red", "Kriticno")
+        if self.overall_score >= 80:
+            return ("green", "Dobro")
+        elif self.overall_score >= 60:
+            return ("amber", "Umjereno")
+        else:
+            return ("red", "Kriticno")
 
     @property
     def red_recommendations(self):

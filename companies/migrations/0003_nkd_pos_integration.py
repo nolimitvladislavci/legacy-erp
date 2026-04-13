@@ -5,33 +5,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0002_upgrade_company_add_taxrate'),
+        ("companies", "0002_upgrade_company_add_taxrate"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='NKDCode',
+            name="NKDCode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(db_index=True, help_text='Npr. A, 47, 47.1, 47.11', max_length=10, unique=True, verbose_name='Šifra NKD')),
-                ('level', models.CharField(choices=[('section', 'Odjeljak (A–U)'), ('division', 'Područje (XX)'), ('group', 'Razred (XX.X)'), ('class', 'Podrazred (XX.XX)')], max_length=10, verbose_name='Razina')),
-                ('section', models.CharField(db_index=True, max_length=2, verbose_name='Odjeljak (A–U)')),
-                ('name_hr', models.CharField(max_length=500, verbose_name='Naziv (HR)')),
-                ('name_en', models.CharField(blank=True, max_length=500, verbose_name='Naziv (EN)')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivna')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='companies.nkdcode', verbose_name='Nadređena kategorija')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "code",
+                    models.CharField(
+                        db_index=True,
+                        help_text="Npr. A, 47, 47.1, 47.11",
+                        max_length=10,
+                        unique=True,
+                        verbose_name="Šifra NKD",
+                    ),
+                ),
+                (
+                    "level",
+                    models.CharField(
+                        choices=[
+                            ("section", "Odjeljak (A–U)"),
+                            ("division", "Područje (XX)"),
+                            ("group", "Razred (XX.X)"),
+                            ("class", "Podrazred (XX.XX)"),
+                        ],
+                        max_length=10,
+                        verbose_name="Razina",
+                    ),
+                ),
+                ("section", models.CharField(db_index=True, max_length=2, verbose_name="Odjeljak (A–U)")),
+                ("name_hr", models.CharField(max_length=500, verbose_name="Naziv (HR)")),
+                ("name_en", models.CharField(blank=True, max_length=500, verbose_name="Naziv (EN)")),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivna")),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="children",
+                        to="companies.nkdcode",
+                        verbose_name="Nadređena kategorija",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'NKD šifra',
-                'verbose_name_plural': 'NKD šifarnik',
-                'ordering': ['code'],
+                "verbose_name": "NKD šifra",
+                "verbose_name_plural": "NKD šifarnik",
+                "ordering": ["code"],
             },
         ),
         migrations.AddField(
-            model_name='company',
-            name='nkd_code',
-            field=models.ForeignKey(blank=True, help_text='Nacionalna klasifikacija djelatnosti (npr. 56.10 – Restorani)', null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.nkdcode', verbose_name='NKD djelatnost'),
+            model_name="company",
+            name="nkd_code",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Nacionalna klasifikacija djelatnosti (npr. 56.10 – Restorani)",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="companies.nkdcode",
+                verbose_name="NKD djelatnost",
+            ),
         ),
     ]

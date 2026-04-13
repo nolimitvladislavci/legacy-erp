@@ -4,24 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0004_alter_addon_options_alter_booking_options_and_more'),
+        ("premium_booking", "0004_alter_addon_options_alter_booking_options_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name']},
+            name="resource",
+            options={"ordering": ["group", "name"]},
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='payment_method',
-            field=models.CharField(choices=[('invoice', 'Uplata po ponudi'), ('revolut', 'Revolut Pay')], default='invoice', max_length=20),
+            model_name="booking",
+            name="payment_method",
+            field=models.CharField(
+                choices=[("invoice", "Uplata po ponudi"), ("revolut", "Revolut Pay")], default="invoice", max_length=20
+            ),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='group',
-            field=models.CharField(choices=[('construction', 'Gradnja (Strojevi i Radnici)'), ('housing', 'Stanovanje (Sobe i Garsonjere)'), ('business', 'Poslovni prostori (Uredi i Restoran)')], max_length=20, verbose_name='Grupa'),
+            model_name="resource",
+            name="group",
+            field=models.CharField(
+                choices=[
+                    ("construction", "Gradnja (Strojevi i Radnici)"),
+                    ("housing", "Stanovanje (Sobe i Garsonjere)"),
+                    ("business", "Poslovni prostori (Uredi i Restoran)"),
+                ],
+                max_length=20,
+                verbose_name="Grupa",
+            ),
         ),
     ]

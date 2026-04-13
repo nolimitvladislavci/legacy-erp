@@ -5,20 +5,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0015_gastroreview'),
+        ("pos", "0015_gastroreview"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='cashier',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='receipts', to='pos.poscashier', verbose_name='Blagajnik'),
+            model_name="posreceipt",
+            name="cashier",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="receipts",
+                to="pos.poscashier",
+                verbose_name="Blagajnik",
+            ),
         ),
         migrations.AddField(
-            model_name='possession',
-            name='active_cashiers',
-            field=models.ManyToManyField(blank=True, related_name='sessions_worked', to='pos.poscashier', verbose_name='Blagajnici u smjeni'),
+            model_name="possession",
+            name="active_cashiers",
+            field=models.ManyToManyField(
+                blank=True, related_name="sessions_worked", to="pos.poscashier", verbose_name="Blagajnici u smjeni"
+            ),
         ),
     ]

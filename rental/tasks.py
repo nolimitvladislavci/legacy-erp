@@ -6,6 +6,7 @@ rental/tasks.py — Celery taskovi za Rental modul
 3. annual_limit_check — tjedno, 40k prag provjera
 4. gdpr_cleanup_guest_docs — dnevno, briši dokumente 24h nakon check-outa
 """
+
 import logging
 
 from celery import shared_task
@@ -22,9 +23,13 @@ def daily_landlord_brief(self):
     from rental.ai_assistant import generate_landlord_daily_brief
     from rental.models import Property
 
-    company_ids = Property.objects.filter(
-        is_active=True,
-    ).values_list('company_id', flat=True).distinct()
+    company_ids = (
+        Property.objects.filter(
+            is_active=True,
+        )
+        .values_list("company_id", flat=True)
+        .distinct()
+    )
 
     sent = 0
     for cid in company_ids:
@@ -34,17 +39,18 @@ def daily_landlord_brief(self):
             # WhatsApp
             try:
                 from core.whatsapp import send_text
-                phone = getattr(company, 'phone', '')
+
+                phone = getattr(company, "phone", "")
                 if phone:
                     send_text(phone, brief)
                     sent += 1
             except ImportError:
                 pass
-            logger.info('Landlord brief sent for %s', company.name)
+            logger.info("Landlord brief sent for %s", company.name)
         except ObjectDoesNotExist as e:
-            logger.warning('Landlord brief failed for company %s: %s', cid, e)
+            logger.warning("Landlord brief failed for company %s: %s", cid, e)
 
-    return {'companies': len(company_ids), 'sent': sent}
+    return {"companies": len(company_ids), "sent": sent}
 
 
 @shared_task(bind=True, soft_time_limit=60)
@@ -56,22 +62,28 @@ def check_evisitor_pending(self):
 
     cutoff = timezone.now() - timedelta(hours=20)
 
-    pending = Booking.objects.filter(
-        status='checked_in',
-        actual_check_in__lte=cutoff,
-        guests__evisitor_synced=False,
-    ).distinct().select_related('rental_property__company')
+    pending = (
+        Booking.objects.filter(
+            status="checked_in",
+            actual_check_in__lte=cutoff,
+            guests__evisitor_synced=False,
+        )
+        .distinct()
+        .select_related("rental_property__company")
+    )
 
     count = 0
     for booking in pending:
         hours_since = (timezone.now() - booking.actual_check_in).total_seconds() / 3600
         logger.warning(
-            'eVisitor PENDING: %s at %s — %.0fh since check-in',
-            booking.guest_name, booking.rental_property.name, hours_since,
+            "eVisitor PENDING: %s at %s — %.0fh since check-in",
+            booking.guest_name,
+            booking.rental_property.name,
+            hours_since,
         )
         count += 1
 
-    return {'pending': count}
+    return {"pending": count}
 
 
 @shared_task(bind=True, soft_time_limit=60)
@@ -81,29 +93,34 @@ def annual_limit_check(self):
     from rental.ai_assistant import check_annual_limit_warning
     from rental.models import Property
 
-    company_ids = Property.objects.filter(
-        is_active=True,
-    ).values_list('company_id', flat=True).distinct()
+    company_ids = (
+        Property.objects.filter(
+            is_active=True,
+        )
+        .values_list("company_id", flat=True)
+        .distinct()
+    )
 
     alerts = 0
     for cid in company_ids:
         try:
             company = Company.objects.get(pk=cid)
             result = check_annual_limit_warning(company)
-            if result.get('warning_level') in ('CRITICAL', 'HIGH'):
-                logger.warning('40K LIMIT: %s — %s', company.name, result['message'])
+            if result.get("warning_level") in ("CRITICAL", "HIGH"):
+                logger.warning("40K LIMIT: %s — %s", company.name, result["message"])
                 try:
                     from core.whatsapp import send_text
-                    phone = getattr(company, 'phone', '')
+
+                    phone = getattr(company, "phone", "")
                     if phone:
-                        send_text(phone, result['message'])
+                        send_text(phone, result["message"])
                         alerts += 1
                 except ImportError:
                     pass
         except ObjectDoesNotExist as e:
-            logger.warning('Limit check failed for %s: %s', cid, e)
+            logger.warning("Limit check failed for %s: %s", cid, e)
 
-    return {'checked': len(company_ids), 'alerts': alerts}
+    return {"checked": len(company_ids), "alerts": alerts}
 
 
 @shared_task(bind=True, soft_time_limit=120)
@@ -123,11 +140,11 @@ def gdpr_cleanup_guest_docs(self):
             if doc.image:
                 doc.image.delete(save=False)
             doc.ocr_raw = {}
-            doc.save(update_fields=['ocr_raw'])
+            doc.save(update_fields=["ocr_raw"])
             count += 1
         except Exception as e:
-            logger.warning('GDPR cleanup failed for doc %s: %s', doc.pk, e)
+            logger.warning("GDPR cleanup failed for doc %s: %s", doc.pk, e)
 
     if count:
-        logger.info('GDPR cleanup: %d guest documents purged', count)
-    return {'purged': count}
+        logger.info("GDPR cleanup: %d guest documents purged", count)
+    return {"purged": count}

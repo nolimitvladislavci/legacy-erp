@@ -6,40 +6,60 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0007_alter_companyregistration_selected_plan_and_more'),
+        ("registration", "0007_alter_companyregistration_selected_plan_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SalesLead',
+            name="SalesLead",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company_name', models.CharField(max_length=200)),
-                ('oib', models.CharField(blank=True, max_length=20)),
-                ('contact_name', models.CharField(max_length=200)),
-                ('contact_email', models.EmailField(blank=True, max_length=254)),
-                ('contact_phone', models.CharField(max_length=50)),
-                ('address', models.CharField(blank=True, max_length=255)),
-                ('city', models.CharField(blank=True, max_length=100)),
-                ('country', models.CharField(default='HR', max_length=5)),
-                ('business_type', models.CharField(default='obrt', max_length=30)),
-                ('plan', models.CharField(default='professional', max_length=30)),
-                ('modules', models.JSONField(blank=True, default=list)),
-                ('signature_b64', models.TextField(blank=True)),
-                ('signed_at', models.DateTimeField(blank=True, null=True)),
-                ('signed_by', models.CharField(blank=True, max_length=200)),
-                ('status', models.CharField(choices=[('draft', 'U pripremi'), ('signed', 'Potpisan'), ('active', 'Aktivan'), ('rejected', 'Odbijen')], default='draft', max_length=20)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('agent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sales_leads', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("company_name", models.CharField(max_length=200)),
+                ("oib", models.CharField(blank=True, max_length=20)),
+                ("contact_name", models.CharField(max_length=200)),
+                ("contact_email", models.EmailField(blank=True, max_length=254)),
+                ("contact_phone", models.CharField(max_length=50)),
+                ("address", models.CharField(blank=True, max_length=255)),
+                ("city", models.CharField(blank=True, max_length=100)),
+                ("country", models.CharField(default="HR", max_length=5)),
+                ("business_type", models.CharField(default="obrt", max_length=30)),
+                ("plan", models.CharField(default="professional", max_length=30)),
+                ("modules", models.JSONField(blank=True, default=list)),
+                ("signature_b64", models.TextField(blank=True)),
+                ("signed_at", models.DateTimeField(blank=True, null=True)),
+                ("signed_by", models.CharField(blank=True, max_length=200)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "U pripremi"),
+                            ("signed", "Potpisan"),
+                            ("active", "Aktivan"),
+                            ("rejected", "Odbijen"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "agent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="sales_leads",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sales Lead',
-                'verbose_name_plural': 'Sales Leads',
-                'ordering': ['-created_at'],
+                "verbose_name": "Sales Lead",
+                "verbose_name_plural": "Sales Leads",
+                "ordering": ["-created_at"],
             },
         ),
     ]

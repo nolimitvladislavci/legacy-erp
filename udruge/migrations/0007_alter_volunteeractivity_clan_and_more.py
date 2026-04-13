@@ -5,40 +5,50 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udruge', '0006_volunteeractivity'),
+        ("udruge", "0006_volunteeractivity"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='clan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='volunteer_activities', to='udruge.clan', verbose_name='Volonter'),
+            model_name="volunteeractivity",
+            name="clan",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="volunteer_activities",
+                to="udruge.clan",
+                verbose_name="Volonter",
+            ),
         ),
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='date',
-            field=models.DateField(verbose_name='Datum'),
+            model_name="volunteeractivity",
+            name="date",
+            field=models.DateField(verbose_name="Datum"),
         ),
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='hours',
-            field=models.DecimalField(decimal_places=2, max_digits=5, verbose_name='Broj sati'),
+            model_name="volunteeractivity",
+            name="hours",
+            field=models.DecimalField(decimal_places=2, max_digits=5, verbose_name="Broj sati"),
         ),
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="volunteeractivity",
+            name="id",
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID"),
         ),
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='inkind_rate_eur',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Fer trzisna vrijednost sata volonterskog rada za EU izvjestaj', max_digits=8, verbose_name='In-kind satnica (EUR)'),
+            model_name="volunteeractivity",
+            name="inkind_rate_eur",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="Fer trzisna vrijednost sata volonterskog rada za EU izvjestaj",
+                max_digits=8,
+                verbose_name="In-kind satnica (EUR)",
+            ),
         ),
         migrations.AlterField(
-            model_name='volunteeractivity',
-            name='title',
-            field=models.CharField(max_length=200, verbose_name='Naziv aktivnosti'),
+            model_name="volunteeractivity",
+            name="title",
+            field=models.CharField(max_length=200, verbose_name="Naziv aktivnosti"),
         ),
     ]

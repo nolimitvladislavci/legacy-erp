@@ -1,6 +1,7 @@
 """
 limit_connect_ai/views_ai_actions.py — AI akcije review views
 """
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -30,10 +31,14 @@ def review_action(request, action_id):
     action.save(update_fields=["is_reviewed", "reviewed_by", "reviewed_at", "review_note"])
 
     # HTMX fragment — vrati samo ovaj redak označen kao pregledano
-    return render(request, "ai_assistant/partials/ai_action_row_reviewed.html", {
-        "action": action,
-        "request": request,
-    })
+    return render(
+        request,
+        "ai_assistant/partials/ai_action_row_reviewed.html",
+        {
+            "action": action,
+            "request": request,
+        },
+    )
 
 
 @login_required
@@ -46,13 +51,21 @@ def ai_actions_list(request):
     unreviewed = AIAction.objects.filter(company=company, is_reviewed=False).count()
 
     if request.headers.get("HX-Request"):
-        return render(request, "ai_assistant/partials/ai_activity_widget.html", {
-            "actions": actions[:10],
-            "unreviewed": unreviewed,
-            "request": request,
-        })
+        return render(
+            request,
+            "ai_assistant/partials/ai_activity_widget.html",
+            {
+                "actions": actions[:10],
+                "unreviewed": unreviewed,
+                "request": request,
+            },
+        )
 
-    return render(request, "limit_connect_ai/ai_actions_list.html", {
-        "actions": actions,
-        "unreviewed": unreviewed,
-    })
+    return render(
+        request,
+        "limit_connect_ai/ai_actions_list.html",
+        {
+            "actions": actions,
+            "unreviewed": unreviewed,
+        },
+    )

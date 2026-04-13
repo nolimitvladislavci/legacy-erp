@@ -20,14 +20,12 @@ urlpatterns = [
     # Phase 11: Polymorphic Cart
     path("api/cart/add/", views.api_cart_add, name="api_cart_add"),
     path("", include(router.urls)),
-
     # Javni webshop po kompaniji
-    path('shop/<slug:company_slug>/',                    views.public_shop,             name='public_shop'),
-    path('shop/<slug:company_slug>/proizvod/<int:pk>/',  views.public_product,          name='public_product'),
-    path('shop/<slug:company_slug>/kosara/',             views.public_cart,             name='public_cart'),
-    path('shop/<slug:company_slug>/kosara/dodaj/',       views.public_cart_add,         name='public_cart_add'),
-    path('shop/<slug:company_slug>/kosara/ukloni/',      views.public_cart_remove,      name='public_cart_remove'),
-    path('shop/<slug:company_slug>/naruci/',             views.public_checkout,         name='public_checkout'),
-    path('shop/<slug:company_slug>/naruci/potvrdi/',     views.public_checkout_submit,  name='public_checkout_submit'),
-
+    path("shop/<slug:company_slug>/", views.public_shop, name="public_shop"),
+    path("shop/<slug:company_slug>/proizvod/<int:pk>/", views.public_product, name="public_product"),
+    path("shop/<slug:company_slug>/kosara/", views.public_cart, name="public_cart"),
+    path("shop/<slug:company_slug>/kosara/dodaj/", views.public_cart_add, name="public_cart_add"),
+    path("shop/<slug:company_slug>/kosara/ukloni/", views.public_cart_remove, name="public_cart_remove"),
+    path("shop/<slug:company_slug>/naruci/", views.public_checkout, name="public_checkout"),
+    path("shop/<slug:company_slug>/naruci/potvrdi/", views.public_checkout_submit, name="public_checkout_submit"),
 ]

@@ -4,40 +4,76 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0024_invoice_issuer_oib_longer'),
+        ("invoicing", "0024_invoice_issuer_oib_longer"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='archive_hash',
-            field=models.CharField(blank=True, default='', help_text='SHA-256 hash originalnog zapisa za integritet', max_length=64, verbose_name='Archive hash'),
+            model_name="invoice",
+            name="archive_hash",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="SHA-256 hash originalnog zapisa za integritet",
+                max_length=64,
+                verbose_name="Archive hash",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='deletion_protected_until',
-            field=models.DateField(blank=True, help_text='Zakonska obveza čuvanja (11 godina od izdavanja)', null=True, verbose_name='Zaštita od brisanja do'),
+            model_name="invoice",
+            name="deletion_protected_until",
+            field=models.DateField(
+                blank=True,
+                help_text="Zakonska obveza čuvanja (11 godina od izdavanja)",
+                null=True,
+                verbose_name="Zaštita od brisanja do",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='is_locked',
-            field=models.BooleanField(default=False, help_text='Synesis arhivske fakture se ne mogu editirati', verbose_name='Zaključano'),
+            model_name="invoice",
+            name="is_locked",
+            field=models.BooleanField(
+                default=False, help_text="Synesis arhivske fakture se ne mogu editirati", verbose_name="Zaključano"
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='synesis_id',
-            field=models.CharField(blank=True, default='', help_text='Originalni ID iz Synesis MDB baze', max_length=50, verbose_name='Synesis ID'),
+            model_name="invoice",
+            name="synesis_id",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Originalni ID iz Synesis MDB baze",
+                max_length=50,
+                verbose_name="Synesis ID",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='synesis_year',
-            field=models.PositiveIntegerField(blank=True, help_text='Godina iz koje je uvezena faktura', null=True, verbose_name='Synesis godina'),
+            model_name="invoice",
+            name="synesis_year",
+            field=models.PositiveIntegerField(
+                blank=True, help_text="Godina iz koje je uvezena faktura", null=True, verbose_name="Synesis godina"
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='source',
-            field=models.CharField(blank=True, choices=[('wizard_field', 'Terenski wizard'), ('wizard_office', 'Uredski wizard'), ('pos', 'POS'), ('api', 'API'), ('import', 'Import'), ('synesis', 'Synesis arhiva'), ('manual', 'Ručni unos'), ('duplicate', 'Duplikat'), ('from_quote', 'Iz ponude')], default='manual', max_length=20, verbose_name='Izvor'),
+            model_name="invoice",
+            name="source",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("wizard_field", "Terenski wizard"),
+                    ("wizard_office", "Uredski wizard"),
+                    ("pos", "POS"),
+                    ("api", "API"),
+                    ("import", "Import"),
+                    ("synesis", "Synesis arhiva"),
+                    ("manual", "Ručni unos"),
+                    ("duplicate", "Duplikat"),
+                    ("from_quote", "Iz ponude"),
+                ],
+                default="manual",
+                max_length=20,
+                verbose_name="Izvor",
+            ),
         ),
     ]

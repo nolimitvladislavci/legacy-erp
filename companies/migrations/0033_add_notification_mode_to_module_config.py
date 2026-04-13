@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0032_p0_landlord_units'),
+        ("companies", "0032_p0_landlord_units"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='companymoduleconfig',
-            name='notification_mode',
-            field=models.CharField(choices=[('digest', 'Tjedni digest (ponedjeljak 08:00)'), ('realtime', 'Real-time notifikacije'), ('off', 'Isključeno')], default='digest', help_text='digest=tjedni email, realtime=odmah, off=bez notifikacija', max_length=10, verbose_name='Način notifikacija'),
+            model_name="companymoduleconfig",
+            name="notification_mode",
+            field=models.CharField(
+                choices=[
+                    ("digest", "Tjedni digest (ponedjeljak 08:00)"),
+                    ("realtime", "Real-time notifikacije"),
+                    ("off", "Isključeno"),
+                ],
+                default="digest",
+                help_text="digest=tjedni email, realtime=odmah, off=bez notifikacija",
+                max_length=10,
+                verbose_name="Način notifikacija",
+            ),
         ),
     ]

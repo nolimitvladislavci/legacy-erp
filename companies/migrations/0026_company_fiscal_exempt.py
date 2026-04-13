@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0025_add_opg_udruga_business_types'),
+        ("companies", "0025_add_opg_udruga_business_types"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='fiscal_exempt',
-            field=models.BooleanField(default=False, help_text='Samo za neprofitne udruge izvan sustava PDV-a (NN 133/12). Računi se generiraju normalno ali se ne šalju u FINA CIS.', verbose_name='Izuzeto od fiskalizacije'),
+            model_name="company",
+            name="fiscal_exempt",
+            field=models.BooleanField(
+                default=False,
+                help_text="Samo za neprofitne udruge izvan sustava PDV-a (NN 133/12). Računi se generiraju normalno ali se ne šalju u FINA CIS.",
+                verbose_name="Izuzeto od fiskalizacije",
+            ),
         ),
     ]

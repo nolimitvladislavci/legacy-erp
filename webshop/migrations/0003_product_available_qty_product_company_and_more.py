@@ -6,83 +6,122 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0016_company_no_show_tolerance_minutes'),
-        ('webshop', '0002_product_inventory_item'),
+        ("companies", "0016_company_no_show_tolerance_minutes"),
+        ("webshop", "0002_product_inventory_item"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='available_qty',
-            field=models.IntegerField(default=0, verbose_name='Dostupna kolicina'),
+            model_name="product",
+            name="available_qty",
+            field=models.IntegerField(default=0, verbose_name="Dostupna kolicina"),
         ),
         migrations.AddField(
-            model_name='product',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='webshop_products', to='companies.company', verbose_name='Tvrtka'),
+            model_name="product",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="webshop_products",
+                to="companies.company",
+                verbose_name="Tvrtka",
+            ),
         ),
         migrations.AddField(
-            model_name='product',
-            name='domain_attrs',
-            field=models.JSONField(blank=True, default=dict, verbose_name='Domenski atributi'),
+            model_name="product",
+            name="domain_attrs",
+            field=models.JSONField(blank=True, default=dict, verbose_name="Domenski atributi"),
         ),
         migrations.AddField(
-            model_name='product',
-            name='expiry_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Rok trajanja'),
+            model_name="product",
+            name="expiry_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Rok trajanja"),
         ),
         migrations.AddField(
-            model_name='product',
-            name='packaging_capacity_kg',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Kapacitet ambalaze (kg)'),
+            model_name="product",
+            name="packaging_capacity_kg",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Kapacitet ambalaze (kg)"
+            ),
         ),
         migrations.AddField(
-            model_name='product',
-            name='packaging_unit',
-            field=models.CharField(blank=True, max_length=50, verbose_name='Ambalaza'),
+            model_name="product",
+            name="packaging_unit",
+            field=models.CharField(blank=True, max_length=50, verbose_name="Ambalaza"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='category',
-            field=models.CharField(choices=[('FOOD', 'Hrana / Grosmarkt'), ('OPTICS', 'Optika / Medicinski'), ('EQUIPMENT', 'Oprema / Alat'), ('SERVICE', 'Usluga'), ('OTHER', 'Ostalo')], default='OTHER', max_length=20, verbose_name='Domenski tip'),
+            model_name="product",
+            name="category",
+            field=models.CharField(
+                choices=[
+                    ("FOOD", "Hrana / Grosmarkt"),
+                    ("OPTICS", "Optika / Medicinski"),
+                    ("EQUIPMENT", "Oprema / Alat"),
+                    ("SERVICE", "Usluga"),
+                    ("OTHER", "Ostalo"),
+                ],
+                default="OTHER",
+                max_length=20,
+                verbose_name="Domenski tip",
+            ),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='name',
-            field=models.CharField(max_length=300, verbose_name='Naziv'),
+            model_name="product",
+            name="name",
+            field=models.CharField(max_length=300, verbose_name="Naziv"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='price',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Cijena'),
+            model_name="product",
+            name="price",
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Cijena"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='sku',
-            field=models.CharField(max_length=100, unique=True, verbose_name='SKU'),
+            model_name="product",
+            name="sku",
+            field=models.CharField(max_length=100, unique=True, verbose_name="SKU"),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='stock',
-            field=models.IntegerField(default=0, verbose_name='Zaliha (legacy)'),
+            model_name="product",
+            name="stock",
+            field=models.IntegerField(default=0, verbose_name="Zaliha (legacy)"),
         ),
         migrations.CreateModel(
-            name='CartItem',
+            name="CartItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField(default=1)),
-                ('item_attributes', models.JSONField(blank=True, default=dict, verbose_name='Atributi stavke (SPH, CYL, itd.)')),
-                ('locked_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cart_items', to='webshop.product')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cart_items', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("quantity", models.IntegerField(default=1)),
+                (
+                    "item_attributes",
+                    models.JSONField(blank=True, default=dict, verbose_name="Atributi stavke (SPH, CYL, itd.)"),
+                ),
+                ("locked_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="cart_items", to="webshop.product"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cart_items",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka kosrice',
-                'verbose_name_plural': 'Stavke kosrice',
+                "verbose_name": "Stavka kosrice",
+                "verbose_name_plural": "Stavke kosrice",
             },
         ),
     ]

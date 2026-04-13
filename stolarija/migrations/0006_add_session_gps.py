@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('stolarija', '0005_add_door_mosquito_fields'),
+        ("stolarija", "0005_add_door_mosquito_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='measurementsession',
-            name='latitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='GPS lat'),
+            model_name="measurementsession",
+            name="latitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="GPS lat"),
         ),
         migrations.AddField(
-            model_name='measurementsession',
-            name='longitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='GPS lng'),
+            model_name="measurementsession",
+            name="longitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="GPS lng"),
         ),
     ]

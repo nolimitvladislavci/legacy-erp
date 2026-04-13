@@ -4,15 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0031_add_tc_consent_gdpr_fields'),
+        ("companies", "0031_add_tc_consent_gdpr_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='company',
-            name='business_type',
-            field=models.CharField(choices=[('doo', 'd.o.o. (Društvo s ograničenom odgovornošću)'), ('jdoo', 'j.d.o.o. (Jednostavno d.o.o.)'), ('dd', 'd.d. (Dioničko društvo)'), ('obrt', 'Obrt'), ('gmbh', 'GmbH'), ('ag', 'AG (Aktiengesellschaft)'), ('einzelunternehmen', 'Einzelunternehmen'), ('opg', 'OPG (Obiteljsko poljoprivredno gospodarstvo)'), ('udruga', 'Udruga'), ('zadruga', 'Zadruga'), ('ustanova', 'Ustanova'), ('iznajmljivac', 'Iznajmljivač (fizička osoba)'), ('other', 'Ostalo')], default='doo', max_length=30, verbose_name='Tip poslovnog subjekta'),
+            model_name="company",
+            name="business_type",
+            field=models.CharField(
+                choices=[
+                    ("doo", "d.o.o. (Društvo s ograničenom odgovornošću)"),
+                    ("jdoo", "j.d.o.o. (Jednostavno d.o.o.)"),
+                    ("dd", "d.d. (Dioničko društvo)"),
+                    ("obrt", "Obrt"),
+                    ("gmbh", "GmbH"),
+                    ("ag", "AG (Aktiengesellschaft)"),
+                    ("einzelunternehmen", "Einzelunternehmen"),
+                    ("opg", "OPG (Obiteljsko poljoprivredno gospodarstvo)"),
+                    ("udruga", "Udruga"),
+                    ("zadruga", "Zadruga"),
+                    ("ustanova", "Ustanova"),
+                    ("iznajmljivac", "Iznajmljivač (fizička osoba)"),
+                    ("other", "Ostalo"),
+                ],
+                default="doo",
+                max_length=30,
+                verbose_name="Tip poslovnog subjekta",
+            ),
         ),
     ]

@@ -2,6 +2,7 @@
 Tests for pos/hashchain.py — cryptographic audit trail.
 Hash chain integrity, tamper detection, daily anchor, training exclusion.
 """
+
 import uuid
 from decimal import Decimal
 
@@ -20,39 +21,43 @@ from pos.hashchain import (
 
 # ── Helper factories ──────────────────────────────────────────────────────
 
+
 def _make_company():
     from companies.models import Company
+
     return Company.objects.create(
-        name='HashChain Test Co ' + str(uuid.uuid4())[:8],
-        oib='HC' + str(uuid.uuid4().int)[:9],
+        name="HashChain Test Co " + str(uuid.uuid4())[:8],
+        oib="HC" + str(uuid.uuid4().int)[:9],
     )
 
 
 def _make_terminal(company, code=None):
     from pos.models import POSTerminal
-    code = code or ('T' + str(uuid.uuid4().int)[:5])
+
+    code = code or ("T" + str(uuid.uuid4().int)[:5])
     return POSTerminal.objects.create(
         company=company,
-        name='Terminal ' + code,
+        name="Terminal " + code,
         terminal_code=code,
     )
 
 
 def _make_session(terminal, user, number=1):
     from pos.models import POSSession
+
     return POSSession.objects.create(
         terminal=terminal,
         operator=user,
         session_number=number,
-        status='open',
-        opening_cash=Decimal('0'),
+        status="open",
+        opening_cash=Decimal("0"),
     )
 
 
-def _make_receipt(session, number=1, total=Decimal('100.00'), status='paid',
-                  is_training=False):
+def _make_receipt(session, number=1, total=Decimal("100.00"), status="paid", is_training=False):
     from pos.models import POSReceipt
-    subtotal = (total / Decimal('1.25')).quantize(Decimal('0.01'))
+
+    subtotal = (total / Decimal("1.25")).quantize(Decimal("0.01"))
     tax = total - subtotal
     receipt = POSReceipt.objects.create(
         session=session,
@@ -63,15 +68,15 @@ def _make_receipt(session, number=1, total=Decimal('100.00'), status='paid',
         status=status,
         paid_at=timezone.now(),
         is_training=is_training,
-        zki='ZKI-TEST',
-        jir='JIR-TEST',
+        zki="ZKI-TEST",
+        jir="JIR-TEST",
     )
     return receipt
 
 
-def _add_item(receipt, description='Test item', quantity=1, unit_price=Decimal('80.00'),
-              tax_rate=Decimal('25.00')):
+def _add_item(receipt, description="Test item", quantity=1, unit_price=Decimal("80.00"), tax_rate=Decimal("25.00")):
     from pos.models import POSReceiptItem
+
     return POSReceiptItem.objects.create(
         receipt=receipt,
         description=description,
@@ -85,11 +90,11 @@ def _add_item(receipt, description='Test item', quantity=1, unit_price=Decimal('
 # Core hash chain tests
 # ══════════════════════════════════════════════════════════════════════════
 
-class TestAppendReceipt(TestCase):
 
+class TestAppendReceipt(TestCase):
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('hashtest', password='test123')
+        self.user = User.objects.create_user("hashtest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -102,7 +107,7 @@ class TestAppendReceipt(TestCase):
 
         self.assertEqual(ChainLink.objects.count(), 1)
         self.assertEqual(link.sequence, 1)
-        self.assertEqual(link.prev_hash, '0' * 64)
+        self.assertEqual(link.prev_hash, "0" * 64)
         self.assertTrue(len(link.chain_hash) == 64)
         self.assertEqual(link.receipt, receipt)
 
@@ -111,7 +116,7 @@ class TestAppendReceipt(TestCase):
         links = []
         for i in range(1, 4):
             r = _make_receipt(self.session, number=i, total=Decimal(str(10 * i)))
-            _add_item(r, description=f'Item {i}', unit_price=Decimal(str(8 * i)))
+            _add_item(r, description=f"Item {i}", unit_price=Decimal(str(8 * i)))
             links.append(append_receipt(r))
 
         self.assertEqual(links[1].prev_hash, links[0].chain_hash)
@@ -122,17 +127,16 @@ class TestAppendReceipt(TestCase):
 
 
 class TestVerifyChain(TestCase):
-
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('verifytest', password='test123')
+        self.user = User.objects.create_user("verifytest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
     def _build_chain(self, count=5):
         for i in range(1, count + 1):
             r = _make_receipt(self.session, number=i, total=Decimal(str(10 + i)))
-            _add_item(r, description=f'Item {i}', unit_price=Decimal(str(8 + i)))
+            _add_item(r, description=f"Item {i}", unit_price=Decimal(str(8 + i)))
             append_receipt(r)
 
     def test_intact_chain(self):
@@ -147,9 +151,7 @@ class TestVerifyChain(TestCase):
         """Test 4: tampered payload_hash causes verify_chain to detect break."""
         self._build_chain(3)
         # Tamper with sequence 2
-        ChainLink.objects.filter(company=self.company, sequence=2).update(
-            payload_hash='a' * 64
-        )
+        ChainLink.objects.filter(company=self.company, sequence=2).update(payload_hash="a" * 64)
         is_valid, break_point, total = verify_chain(self.company)
         self.assertFalse(is_valid)
         self.assertEqual(break_point, 2)
@@ -157,10 +159,9 @@ class TestVerifyChain(TestCase):
 
 
 class TestVerifySingle(TestCase):
-
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('singletest', password='test123')
+        self.user = User.objects.create_user("singletest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -173,12 +174,13 @@ class TestVerifySingle(TestCase):
 
     def test_modified_receipt(self):
         """Test 6: verify_single returns False after receipt total is changed."""
-        r = _make_receipt(self.session, number=1, total=Decimal('100.00'))
+        r = _make_receipt(self.session, number=1, total=Decimal("100.00"))
         _add_item(r)
         append_receipt(r)
         # Modify total directly in DB
         from pos.models import POSReceipt
-        POSReceipt.objects.filter(pk=r.pk).update(total=Decimal('9999.99'))
+
+        POSReceipt.objects.filter(pk=r.pk).update(total=Decimal("9999.99"))
         r.refresh_from_db()
         self.assertFalse(verify_single(r))
 
@@ -192,10 +194,9 @@ class TestVerifySingle(TestCase):
 
 
 class TestDailyAnchorHash(TestCase):
-
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('anchortest', password='test123')
+        self.user = User.objects.create_user("anchortest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -203,7 +204,7 @@ class TestDailyAnchorHash(TestCase):
         """Test 8: daily_anchor_hash returns 64-char hex string."""
         for i in range(1, 4):
             r = _make_receipt(self.session, number=i, total=Decimal(str(10 + i)))
-            _add_item(r, description=f'Anchor item {i}')
+            _add_item(r, description=f"Anchor item {i}")
             append_receipt(r)
 
         anchor = daily_anchor_hash(self.company)
@@ -217,25 +218,24 @@ class TestDailyAnchorHash(TestCase):
 
 
 class TestSha256Determinism(TestCase):
-
     def test_same_input_same_hash(self):
         """Test 10: _sha256 is deterministic."""
-        self.assertEqual(_sha256('test'), _sha256('test'))
+        self.assertEqual(_sha256("test"), _sha256("test"))
 
     def test_different_input_different_hash(self):
         """Test 10b: _sha256 case-sensitive."""
-        self.assertNotEqual(_sha256('test'), _sha256('Test'))
+        self.assertNotEqual(_sha256("test"), _sha256("Test"))
 
 
 # ══════════════════════════════════════════════════════════════════════════
 # PLG Virus — chain_link_safe property
 # ══════════════════════════════════════════════════════════════════════════
 
-class TestChainLinkSafe(TestCase):
 
+class TestChainLinkSafe(TestCase):
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('safetest', password='test123')
+        self.user = User.objects.create_user("safetest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -258,12 +258,13 @@ class TestChainLinkSafe(TestCase):
 # Checkout integration — training receipts NOT in chain
 # ══════════════════════════════════════════════════════════════════════════
 
+
 class TestCheckoutChainIntegration(TestCase):
     """Test 13: checkout skips chain for training receipts, adds for normal."""
 
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('checkouttest', password='test123')
+        self.user = User.objects.create_user("checkouttest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -291,12 +292,13 @@ class TestCheckoutChainIntegration(TestCase):
 # Chain integrity — multiple receipts cross-validation
 # ══════════════════════════════════════════════════════════════════════════
 
+
 class TestChainIntegrityCrossReceipts(TestCase):
     """End-to-end chain integrity across many receipts."""
 
     def setUp(self):
         self.company = _make_company()
-        self.user = User.objects.create_user('crosstest', password='test123')
+        self.user = User.objects.create_user("crosstest", password="test123")
         self.terminal = _make_terminal(self.company)
         self.session = _make_session(self.terminal, self.user)
 
@@ -304,7 +306,7 @@ class TestChainIntegrityCrossReceipts(TestCase):
         """10 receipts form valid chain, verify passes."""
         for i in range(1, 11):
             r = _make_receipt(self.session, number=i, total=Decimal(str(10 * i)))
-            _add_item(r, description=f'Bulk item {i}', unit_price=Decimal(str(8 * i)))
+            _add_item(r, description=f"Bulk item {i}", unit_price=Decimal(str(8 * i)))
             append_receipt(r)
 
         is_valid, bp, total = verify_chain(self.company)
@@ -315,13 +317,11 @@ class TestChainIntegrityCrossReceipts(TestCase):
         """Tampering with link 5 out of 10 breaks chain at 5."""
         for i in range(1, 11):
             r = _make_receipt(self.session, number=i, total=Decimal(str(10 * i)))
-            _add_item(r, description=f'Tamper item {i}', unit_price=Decimal(str(8 * i)))
+            _add_item(r, description=f"Tamper item {i}", unit_price=Decimal(str(8 * i)))
             append_receipt(r)
 
         # Tamper link 5
-        ChainLink.objects.filter(company=self.company, sequence=5).update(
-            chain_hash='b' * 64
-        )
+        ChainLink.objects.filter(company=self.company, sequence=5).update(chain_hash="b" * 64)
 
         is_valid, bp, total = verify_chain(self.company)
         self.assertFalse(is_valid)

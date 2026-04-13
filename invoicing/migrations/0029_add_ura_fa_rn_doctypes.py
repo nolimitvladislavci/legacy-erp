@@ -4,15 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0028_add_invoice_types_hr'),
+        ("invoicing", "0028_add_invoice_types_hr"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='source',
-            field=models.CharField(blank=True, choices=[('wizard_field', 'Terenski wizard'), ('wizard_office', 'Uredski wizard'), ('pos', 'POS'), ('api', 'API'), ('import', 'Import'), ('synesis', 'Synesis arhiva'), ('manual', 'Ručni unos'), ('duplicate', 'Duplikat'), ('from_quote', 'Iz ponude'), ('eracun', 'e-Racun')], default='manual', max_length=20, verbose_name='Izvor'),
+            model_name="invoice",
+            name="source",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("wizard_field", "Terenski wizard"),
+                    ("wizard_office", "Uredski wizard"),
+                    ("pos", "POS"),
+                    ("api", "API"),
+                    ("import", "Import"),
+                    ("synesis", "Synesis arhiva"),
+                    ("manual", "Ručni unos"),
+                    ("duplicate", "Duplikat"),
+                    ("from_quote", "Iz ponude"),
+                    ("eracun", "e-Racun"),
+                ],
+                default="manual",
+                max_length=20,
+                verbose_name="Izvor",
+            ),
         ),
     ]

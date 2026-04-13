@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0014_add_cart_snapshot'),
+        ("companies", "0014_add_cart_snapshot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='geofence_radius',
-            field=models.PositiveIntegerField(default=200, help_text='Maksimalna udaljenost za clock-in (metara)', verbose_name='Geofence radius (m)'),
+            model_name="company",
+            name="geofence_radius",
+            field=models.PositiveIntegerField(
+                default=200, help_text="Maksimalna udaljenost za clock-in (metara)", verbose_name="Geofence radius (m)"
+            ),
         ),
         migrations.AddField(
-            model_name='company',
-            name='latitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='GPS Latitude'),
+            model_name="company",
+            name="latitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="GPS Latitude"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='longitude',
-            field=models.FloatField(blank=True, null=True, verbose_name='GPS Longitude'),
+            model_name="company",
+            name="longitude",
+            field=models.FloatField(blank=True, null=True, verbose_name="GPS Longitude"),
         ),
     ]

@@ -4,45 +4,64 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tracking', '0002_object_id_to_charfield'),
+        ("tracking", "0002_object_id_to_charfield"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='trackeditem',
-            name='delivered_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Isporuka'),
+            model_name="trackeditem",
+            name="delivered_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Isporuka"),
         ),
         migrations.AddField(
-            model_name='trackeditem',
-            name='dispatched_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Polazak'),
+            model_name="trackeditem",
+            name="dispatched_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Polazak"),
         ),
         migrations.AddField(
-            model_name='trackeditem',
-            name='driver_name',
-            field=models.CharField(blank=True, max_length=100, verbose_name='Vozač'),
+            model_name="trackeditem",
+            name="driver_name",
+            field=models.CharField(blank=True, max_length=100, verbose_name="Vozač"),
         ),
         migrations.AddField(
-            model_name='trackeditem',
-            name='tracking_url',
-            field=models.URLField(blank=True, verbose_name='Vanjski tracking link'),
+            model_name="trackeditem",
+            name="tracking_url",
+            field=models.URLField(blank=True, verbose_name="Vanjski tracking link"),
         ),
         migrations.AddField(
-            model_name='trackeditem',
-            name='vehicle_plate',
-            field=models.CharField(blank=True, max_length=20, verbose_name='Registracija'),
+            model_name="trackeditem",
+            name="vehicle_plate",
+            field=models.CharField(blank=True, max_length=20, verbose_name="Registracija"),
         ),
         migrations.AlterField(
-            model_name='trackeditem',
-            name='tracking_type',
-            field=models.CharField(choices=[('food_order', 'Narudzba hrane'), ('delivery', 'Dostava'), ('intervention', 'Hitna intervencija'), ('work_order', 'Radni nalog'), ('expiry', 'Istek roka'), ('shipment', 'Otpremnica / Isporuka')], max_length=50),
+            model_name="trackeditem",
+            name="tracking_type",
+            field=models.CharField(
+                choices=[
+                    ("food_order", "Narudzba hrane"),
+                    ("delivery", "Dostava"),
+                    ("intervention", "Hitna intervencija"),
+                    ("work_order", "Radni nalog"),
+                    ("expiry", "Istek roka"),
+                    ("shipment", "Otpremnica / Isporuka"),
+                ],
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
-            model_name='trackingstatus',
-            name='tracking_type',
-            field=models.CharField(choices=[('food_order', 'Narudzba hrane'), ('delivery', 'Dostava'), ('intervention', 'Hitna intervencija'), ('work_order', 'Radni nalog'), ('expiry', 'Istek roka'), ('shipment', 'Otpremnica / Isporuka')], max_length=50),
+            model_name="trackingstatus",
+            name="tracking_type",
+            field=models.CharField(
+                choices=[
+                    ("food_order", "Narudzba hrane"),
+                    ("delivery", "Dostava"),
+                    ("intervention", "Hitna intervencija"),
+                    ("work_order", "Radni nalog"),
+                    ("expiry", "Istek roka"),
+                    ("shipment", "Otpremnica / Isporuka"),
+                ],
+                max_length=50,
+            ),
         ),
     ]

@@ -9,15 +9,14 @@ Baze:
 Pravilo: app_label određuje bazu. Nema cross-baza FK-ova.
 """
 
-
-MEMIO_PET_APPS = {'memio_pet'}
-MEMIO_WORLD_APPS = {'memio_world'}
+MEMIO_PET_APPS = {"memio_pet"}
+MEMIO_WORLD_APPS = {"memio_world"}
 
 # Unija svih ne-default app_label-ova
 _ROUTED_APPS = {
-    'memio_pet': 'memio_pets',
-    'memio_world': 'memio_world',
-    'memio_farm': 'memio_farm',
+    "memio_pet": "memio_pets",
+    "memio_world": "memio_world",
+    "memio_farm": "memio_farm",
 }
 
 
@@ -41,8 +40,8 @@ class MultiDbRouter:
         Dozvoli relacije unutar iste baze.
         Zabrani cross-baza relacije.
         """
-        db1 = _ROUTED_APPS.get(obj1._meta.app_label, 'default')
-        db2 = _ROUTED_APPS.get(obj2._meta.app_label, 'default')
+        db1 = _ROUTED_APPS.get(obj1._meta.app_label, "default")
+        db2 = _ROUTED_APPS.get(obj2._meta.app_label, "default")
         return db1 == db2
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
@@ -50,7 +49,7 @@ class MultiDbRouter:
         if target_db:
             return db == target_db
         # Non-routed apps samo u default
-        if db in ('memio_pets', 'memio_world', 'memio_farm'):
+        if db in ("memio_pets", "memio_world", "memio_farm"):
             return False
         return None
 

@@ -4,30 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0032_voucher_type_fields'),
+        ("pos", "0032_voucher_type_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='buyer_address',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Adresa kupca'),
+            model_name="posreceipt",
+            name="buyer_address",
+            field=models.CharField(blank=True, max_length=255, verbose_name="Adresa kupca"),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='buyer_name',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Naziv kupca (R1)'),
+            model_name="posreceipt",
+            name="buyer_name",
+            field=models.CharField(blank=True, max_length=200, verbose_name="Naziv kupca (R1)"),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='buyer_oib',
-            field=models.CharField(blank=True, help_text='Za R1 racun — OIB tvrtke kupca', max_length=20, verbose_name='OIB kupca (R1)'),
+            model_name="posreceipt",
+            name="buyer_oib",
+            field=models.CharField(
+                blank=True, help_text="Za R1 racun — OIB tvrtke kupca", max_length=20, verbose_name="OIB kupca (R1)"
+            ),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='is_r1',
-            field=models.BooleanField(default=False, help_text='Racun s podacima kupca — za knjizenje reprezentacije', verbose_name='R1 racun'),
+            model_name="posreceipt",
+            name="is_r1",
+            field=models.BooleanField(
+                default=False, help_text="Racun s podacima kupca — za knjizenje reprezentacije", verbose_name="R1 racun"
+            ),
         ),
     ]

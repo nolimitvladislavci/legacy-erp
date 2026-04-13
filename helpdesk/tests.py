@@ -1,4 +1,5 @@
 """Tests for Helpdesk module."""
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 

@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DynamicMenuConfig(AppConfig):
-    name = 'dynamic_menu'
+    name = "dynamic_menu"

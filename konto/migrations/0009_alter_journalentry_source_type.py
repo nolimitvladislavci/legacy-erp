@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('konto', '0008_period_lock_triggers'),
+        ("konto", "0008_period_lock_triggers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='journalentry',
-            name='source_type',
-            field=models.CharField(blank=True, choices=[('invoice', 'Račun'), ('bank_statement', 'Bankovni izvod'), ('manual', 'Ručno knjiženje'), ('payroll', 'Obračun plaća'), ('pos', 'POS promet'), ('correction', 'Ispravak'), ('depreciation', 'Amortizacija')], max_length=30),
+            model_name="journalentry",
+            name="source_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("invoice", "Račun"),
+                    ("bank_statement", "Bankovni izvod"),
+                    ("manual", "Ručno knjiženje"),
+                    ("payroll", "Obračun plaća"),
+                    ("pos", "POS promet"),
+                    ("correction", "Ispravak"),
+                    ("depreciation", "Amortizacija"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

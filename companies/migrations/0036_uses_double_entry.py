@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0035_shelter_fields'),
+        ("companies", "0035_shelter_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='uses_double_entry',
-            field=models.BooleanField(default=False, help_text='Članarina i Donacija auto-kreiraju JournalEntry. Obvezno za udruge s prihodima > 30.000 EUR.', verbose_name='Dvojno knjigovodstvo'),
+            model_name="company",
+            name="uses_double_entry",
+            field=models.BooleanField(
+                default=False,
+                help_text="Članarina i Donacija auto-kreiraju JournalEntry. Obvezno za udruge s prihodima > 30.000 EUR.",
+                verbose_name="Dvojno knjigovodstvo",
+            ),
         ),
     ]

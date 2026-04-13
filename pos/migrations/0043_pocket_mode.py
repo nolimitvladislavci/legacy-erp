@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0042_alter_knjigaprigovora_ai_category_and_more'),
+        ("pos", "0042_alter_knjigaprigovora_ai_category_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='possettings',
-            name='pocket_location_label',
-            field=models.CharField(blank=True, default='POKRETNA PRODAJA', help_text='Za čl.28a Zakona o fiskalizaciji', max_length=100, verbose_name='Oznaka prostora (fiskalizacija)'),
+            model_name="possettings",
+            name="pocket_location_label",
+            field=models.CharField(
+                blank=True,
+                default="POKRETNA PRODAJA",
+                help_text="Za čl.28a Zakona o fiskalizaciji",
+                max_length=100,
+                verbose_name="Oznaka prostora (fiskalizacija)",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='pocket_mode',
-            field=models.BooleanField(default=False, help_text='Mobitel kao jedini uređaj. Auto: digital receipt, bez printera, pokretna prodaja, offline-first.', verbose_name='Pocket Mode'),
+            model_name="possettings",
+            name="pocket_mode",
+            field=models.BooleanField(
+                default=False,
+                help_text="Mobitel kao jedini uređaj. Auto: digital receipt, bez printera, pokretna prodaja, offline-first.",
+                verbose_name="Pocket Mode",
+            ),
         ),
     ]

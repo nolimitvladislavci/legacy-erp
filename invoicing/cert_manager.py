@@ -3,6 +3,7 @@ invoicing/cert_manager.py
 Upravljanje fiskalnim certifikatima: validacija .p12, parsiranje metapodataka,
 testiranje veze prema CIS serveru.
 """
+
 import logging
 import os
 import tempfile
@@ -28,10 +29,10 @@ def validate_and_save_cert(instance, file_obj, password: str) -> dict:
     except ImportError:
         # cryptography nije instaliran — prihvati certifikat bez validacije
         logger.warning("cryptography paket nije dostupan — cert se sprema bez parsiranja")
-        instance.cert_name = file_obj.name or 'Certifikat'
+        instance.cert_name = file_obj.name or "Certifikat"
         instance.cert_file = file_obj
         instance.is_valid = False
-        return {'ok': True, 'info': {'warning': 'Nije moguće parsirati metapodatke'}}
+        return {"ok": True, "info": {"warning": "Nije moguće parsirati metapodatke"}}
 
     try:
         raw = file_obj.read()
@@ -39,47 +40,52 @@ def validate_and_save_cert(instance, file_obj, password: str) -> dict:
 
         pw_bytes = password.encode() if password else None
 
-        private_key, cert, chain = pkcs12.load_key_and_certificates(
-            raw, pw_bytes, default_backend()
-        )
+        private_key, cert, chain = pkcs12.load_key_and_certificates(raw, pw_bytes, default_backend())
 
         # Izvuci metapodatke
         subject = cert.subject
-        subject_str = ', '.join(f"{attr.oid.dotted_string}={attr.value}" for attr in subject)
+        subject_str = ", ".join(f"{attr.oid.dotted_string}={attr.value}" for attr in subject)
 
         # Pokušaj naći CN i OIB iz subject-a
-        cert_name = _attr(subject, '2.5.4.3') or file_obj.name or 'Certifikat'
-        oib_candidate = _attr(subject, '2.5.4.5') or ''  # serialNumber
+        cert_name = _attr(subject, "2.5.4.3") or file_obj.name or "Certifikat"
+        oib_candidate = _attr(subject, "2.5.4.5") or ""  # serialNumber
         if not oib_candidate:
             # Pokušaj iz CN-a
             import re
-            cn = _attr(subject, '2.5.4.3') or ''
-            m = re.search(r'\d{11}', cn)
+
+            cn = _attr(subject, "2.5.4.3") or ""
+            m = re.search(r"\d{11}", cn)
             if m:
                 oib_candidate = m.group()
 
         instance.cert_name = cert_name[:200]
         instance.oib = oib_candidate[:11]
         instance.cert_subject = subject_str[:500]
-        instance.valid_from = cert.not_valid_before_utc if hasattr(cert, 'not_valid_before_utc') else _naive_to_aware(cert.not_valid_before)
-        instance.valid_until = cert.not_valid_after_utc if hasattr(cert, 'not_valid_after_utc') else _naive_to_aware(cert.not_valid_after)
+        instance.valid_from = (
+            cert.not_valid_before_utc
+            if hasattr(cert, "not_valid_before_utc")
+            else _naive_to_aware(cert.not_valid_before)
+        )
+        instance.valid_until = (
+            cert.not_valid_after_utc if hasattr(cert, "not_valid_after_utc") else _naive_to_aware(cert.not_valid_after)
+        )
         instance.is_valid = True
         instance.cert_password = password
         instance.cert_file = file_obj
 
         return {
-            'ok': True,
-            'info': {
-                'cert_name': cert_name,
-                'oib': oib_candidate,
-                'valid_from': str(instance.valid_from),
-                'valid_until': str(instance.valid_until),
-            }
+            "ok": True,
+            "info": {
+                "cert_name": cert_name,
+                "oib": oib_candidate,
+                "valid_from": str(instance.valid_from),
+                "valid_until": str(instance.valid_until),
+            },
         }
 
     except IOError as e:
         logger.warning("Certifikat nije valjan: %s", e)
-        return {'ok': False, 'error': str(e)}
+        return {"ok": False, "error": str(e)}
 
 
 def test_cert_against_cis(instance, use_production: bool = False) -> dict:
@@ -106,7 +112,7 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
         cert_path = None
         try:
             if instance.cert_file:
-                with tempfile.NamedTemporaryFile(suffix='.p12', delete=False) as tmp:
+                with tempfile.NamedTemporaryFile(suffix=".p12", delete=False) as tmp:
                     for chunk in instance.cert_file.chunks():
                         tmp.write(chunk)
                     cert_path = tmp.name
@@ -122,13 +128,13 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
 </soapenv:Envelope>"""
 
             headers = {
-                'Content-Type': 'text/xml; charset=UTF-8',
-                'SOAPAction': '""',
+                "Content-Type": "text/xml; charset=UTF-8",
+                "SOAPAction": '""',
             }
 
             resp = requests.post(
                 endpoint,
-                data=soap_body.encode('utf-8'),
+                data=soap_body.encode("utf-8"),
                 headers=headers,
                 timeout=10,
                 verify=False,  # CIS koristi FINA certifikat — možemo skipati verify za echo
@@ -136,9 +142,9 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
 
             ok = resp.status_code < 500
             return {
-                'ok': ok,
-                'message': f'HTTP {resp.status_code}',
-                'status_code': resp.status_code,
+                "ok": ok,
+                "message": f"HTTP {resp.status_code}",
+                "status_code": resp.status_code,
             }
 
         finally:
@@ -148,25 +154,27 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
     except OSError as e:
         logger.warning("CIS test neuspješan: %s", e)
         return {
-            'ok': False,
-            'message': str(e),
-            'status_code': None,
+            "ok": False,
+            "message": str(e),
+            "status_code": None,
         }
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
+
 def _attr(subject, oid_dotted: str) -> str:
     """Izvuci vrijednost atributa iz X.509 subject-a po OID-u."""
     try:
-        from cryptography import x509
-        from cryptography.x509.oid import NameOID
+        from cryptography import x509  # noqa: F401
+        from cryptography.x509.oid import NameOID  # noqa: F401
+
         for attr in subject:
             if attr.oid.dotted_string == oid_dotted:
                 return attr.value
     except ImportError:
         pass
-    return ''
+    return ""
 
 
 def _naive_to_aware(dt):
@@ -174,6 +182,7 @@ def _naive_to_aware(dt):
     if dt is None:
         return None
     import datetime
+
     if dt.tzinfo is None:
         return dt.replace(tzinfo=datetime.timezone.utc)
     return dt

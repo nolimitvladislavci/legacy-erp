@@ -6,31 +6,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('marketplace', '0007_add_cart_snapshot'),
+        ("marketplace", "0007_add_cart_snapshot"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='marketplaceorderitem',
-            name='actual_quantity',
-            field=models.DecimalField(blank=True, decimal_places=3, max_digits=10, null=True, verbose_name='Stvarna kolicina (vaganje)'),
+            model_name="marketplaceorderitem",
+            name="actual_quantity",
+            field=models.DecimalField(
+                blank=True, decimal_places=3, max_digits=10, null=True, verbose_name="Stvarna kolicina (vaganje)"
+            ),
         ),
         migrations.AddField(
-            model_name='marketplaceorderitem',
-            name='actual_total',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Stvarni iznos (nakon vaganja)'),
+            model_name="marketplaceorderitem",
+            name="actual_total",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="Stvarni iznos (nakon vaganja)"
+            ),
         ),
         migrations.AddField(
-            model_name='marketplaceorderitem',
-            name='packed_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Pakirano'),
+            model_name="marketplaceorderitem",
+            name="packed_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Pakirano"),
         ),
         migrations.AddField(
-            model_name='marketplaceorderitem',
-            name='packed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='packed_items', to=settings.AUTH_USER_MODEL, verbose_name='Pakirao'),
+            model_name="marketplaceorderitem",
+            name="packed_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="packed_items",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Pakirao",
+            ),
         ),
     ]

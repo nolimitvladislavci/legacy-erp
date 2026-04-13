@@ -6,139 +6,282 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0006_company_booking_slug'),
-        ('invoicing', '0013_add_source_project_photo_gross'),
+        ("companies", "0006_company_booking_slug"),
+        ("invoicing", "0013_add_source_project_photo_gross"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BankAccount',
+            name="BankAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='npr. Glavno Poslovanje - PBZ', max_length=200, verbose_name='Naziv')),
-                ('iban', models.CharField(max_length=34, verbose_name='IBAN')),
-                ('bank_name', models.CharField(max_length=100, verbose_name='Banka')),
-                ('swift', models.CharField(blank=True, max_length=11, verbose_name='SWIFT/BIC')),
-                ('currency', models.CharField(default='EUR', max_length=3, verbose_name='Valuta')),
-                ('opening_balance', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Početni saldo')),
-                ('current_balance', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Trenutni saldo')),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_primary', models.BooleanField(default=False, verbose_name='Primarni račun')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bank_accounts', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "name",
+                    models.CharField(help_text="npr. Glavno Poslovanje - PBZ", max_length=200, verbose_name="Naziv"),
+                ),
+                ("iban", models.CharField(max_length=34, verbose_name="IBAN")),
+                ("bank_name", models.CharField(max_length=100, verbose_name="Banka")),
+                ("swift", models.CharField(blank=True, max_length=11, verbose_name="SWIFT/BIC")),
+                ("currency", models.CharField(default="EUR", max_length=3, verbose_name="Valuta")),
+                (
+                    "opening_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Početni saldo"),
+                ),
+                (
+                    "current_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Trenutni saldo"),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_primary", models.BooleanField(default=False, verbose_name="Primarni račun")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bank_accounts",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Žiro račun',
-                'verbose_name_plural': 'Žiro računi',
-                'ordering': ['-is_primary', 'name'],
+                "verbose_name": "Žiro račun",
+                "verbose_name_plural": "Žiro računi",
+                "ordering": ["-is_primary", "name"],
             },
         ),
         migrations.CreateModel(
-            name='BankTransaction',
+            name="BankTransaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_date', models.DateField(verbose_name='Datum transakcije')),
-                ('value_date', models.DateField(blank=True, null=True, verbose_name='Datum valute')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=14, verbose_name='Iznos')),
-                ('transaction_type', models.CharField(choices=[('inflow', 'Uplata (priljev)'), ('outflow', 'Isplata (odljev)')], max_length=10)),
-                ('counterparty_name', models.CharField(blank=True, max_length=300, verbose_name='Platitelj/Primatelj')),
-                ('counterparty_iban', models.CharField(blank=True, max_length=34, verbose_name='IBAN platitelja/primatelja')),
-                ('description', models.TextField(blank=True, verbose_name='Opis plaćanja')),
-                ('reference_number', models.CharField(blank=True, max_length=100, verbose_name='Poziv na broj')),
-                ('status', models.CharField(choices=[('unmatched', 'Nepariran'), ('matched', 'Pariran'), ('ignored', 'Ignoriran')], default='unmatched', max_length=20)),
-                ('is_booked', models.BooleanField(default=False, verbose_name='Proknjiženo')),
-                ('import_batch', models.CharField(blank=True, help_text='ID importa za grupiranje', max_length=100)),
-                ('external_id', models.CharField(blank=True, help_text='ID iz banke za dedup', max_length=200)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('bank_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='konto.bankaccount')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('matched_invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='bank_transactions', to='invoicing.invoice', verbose_name='Pariran račun')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("transaction_date", models.DateField(verbose_name="Datum transakcije")),
+                ("value_date", models.DateField(blank=True, null=True, verbose_name="Datum valute")),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=14, verbose_name="Iznos")),
+                (
+                    "transaction_type",
+                    models.CharField(
+                        choices=[("inflow", "Uplata (priljev)"), ("outflow", "Isplata (odljev)")], max_length=10
+                    ),
+                ),
+                ("counterparty_name", models.CharField(blank=True, max_length=300, verbose_name="Platitelj/Primatelj")),
+                (
+                    "counterparty_iban",
+                    models.CharField(blank=True, max_length=34, verbose_name="IBAN platitelja/primatelja"),
+                ),
+                ("description", models.TextField(blank=True, verbose_name="Opis plaćanja")),
+                ("reference_number", models.CharField(blank=True, max_length=100, verbose_name="Poziv na broj")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("unmatched", "Nepariran"), ("matched", "Pariran"), ("ignored", "Ignoriran")],
+                        default="unmatched",
+                        max_length=20,
+                    ),
+                ),
+                ("is_booked", models.BooleanField(default=False, verbose_name="Proknjiženo")),
+                ("import_batch", models.CharField(blank=True, help_text="ID importa za grupiranje", max_length=100)),
+                ("external_id", models.CharField(blank=True, help_text="ID iz banke za dedup", max_length=200)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "bank_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="transactions", to="konto.bankaccount"
+                    ),
+                ),
+                ("company", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="companies.company")),
+                (
+                    "matched_invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="bank_transactions",
+                        to="invoicing.invoice",
+                        verbose_name="Pariran račun",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Bankovna transakcija',
-                'verbose_name_plural': 'Bankovne transakcije',
-                'ordering': ['-transaction_date', '-id'],
+                "verbose_name": "Bankovna transakcija",
+                "verbose_name_plural": "Bankovne transakcije",
+                "ordering": ["-transaction_date", "-id"],
             },
         ),
         migrations.CreateModel(
-            name='JournalEntry',
+            name="JournalEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('entry_number', models.CharField(max_length=50, verbose_name='Broj temeljnice')),
-                ('date', models.DateField(verbose_name='Datum knjiženja')),
-                ('description', models.CharField(max_length=300, verbose_name='Opis')),
-                ('source_type', models.CharField(blank=True, choices=[('invoice', 'Račun'), ('bank_statement', 'Bankovni izvod'), ('manual', 'Ručno knjiženje'), ('payroll', 'Obračun plaća'), ('pos', 'POS promet'), ('correction', 'Ispravak')], max_length=30)),
-                ('is_posted', models.BooleanField(default=False, verbose_name='Proknjiženo')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='journal_entries', to='companies.company')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('source_invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='journal_entries', to='invoicing.invoice')),
-                ('source_transaction', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='journal_entries', to='konto.banktransaction')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("entry_number", models.CharField(max_length=50, verbose_name="Broj temeljnice")),
+                ("date", models.DateField(verbose_name="Datum knjiženja")),
+                ("description", models.CharField(max_length=300, verbose_name="Opis")),
+                (
+                    "source_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("invoice", "Račun"),
+                            ("bank_statement", "Bankovni izvod"),
+                            ("manual", "Ručno knjiženje"),
+                            ("payroll", "Obračun plaća"),
+                            ("pos", "POS promet"),
+                            ("correction", "Ispravak"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("is_posted", models.BooleanField(default=False, verbose_name="Proknjiženo")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="journal_entries",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "source_invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="journal_entries",
+                        to="invoicing.invoice",
+                    ),
+                ),
+                (
+                    "source_transaction",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="journal_entries",
+                        to="konto.banktransaction",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Temeljnica',
-                'verbose_name_plural': 'Temeljnice',
-                'ordering': ['-date', '-id'],
+                "verbose_name": "Temeljnica",
+                "verbose_name_plural": "Temeljnice",
+                "ordering": ["-date", "-id"],
             },
         ),
         migrations.CreateModel(
-            name='KontoAccount',
+            name="KontoAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(help_text='npr. 1000, 1200, 2200, 4000, 7000', max_length=10, verbose_name='Šifra konta')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv konta')),
-                ('account_type', models.CharField(choices=[('asset', 'Imovina'), ('liability', 'Obveze'), ('equity', 'Kapital'), ('income', 'Prihodi'), ('expense', 'Rashodi')], max_length=20, verbose_name='Vrsta konta')),
-                ('is_active', models.BooleanField(default=True)),
-                ('description', models.TextField(blank=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='konto_accounts', to='companies.company')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='children', to='konto.kontoaccount', verbose_name='Nadređeni konto')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "code",
+                    models.CharField(
+                        help_text="npr. 1000, 1200, 2200, 4000, 7000", max_length=10, verbose_name="Šifra konta"
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv konta")),
+                (
+                    "account_type",
+                    models.CharField(
+                        choices=[
+                            ("asset", "Imovina"),
+                            ("liability", "Obveze"),
+                            ("equity", "Kapital"),
+                            ("income", "Prihodi"),
+                            ("expense", "Rashodi"),
+                        ],
+                        max_length=20,
+                        verbose_name="Vrsta konta",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="konto_accounts",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="children",
+                        to="konto.kontoaccount",
+                        verbose_name="Nadređeni konto",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Konto',
-                'verbose_name_plural': 'Kontni plan',
-                'ordering': ['code'],
+                "verbose_name": "Konto",
+                "verbose_name_plural": "Kontni plan",
+                "ordering": ["code"],
             },
         ),
         migrations.AddField(
-            model_name='bankaccount',
-            name='konto_account',
-            field=models.ForeignKey(blank=True, help_text='npr. 1000 - Žiro račun u banci', null=True, on_delete=django.db.models.deletion.SET_NULL, to='konto.kontoaccount', verbose_name='Konto'),
+            model_name="bankaccount",
+            name="konto_account",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="npr. 1000 - Žiro račun u banci",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="konto.kontoaccount",
+                verbose_name="Konto",
+            ),
         ),
         migrations.CreateModel(
-            name='LedgerLine',
+            name="LedgerLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('side', models.CharField(choices=[('debit', 'Duguje'), ('credit', 'Potražuje')], max_length=6)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=14)),
-                ('description', models.CharField(blank=True, max_length=200)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='ledgerline_entries', to='konto.kontoaccount')),
-                ('journal_entry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lines', to='konto.journalentry')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("side", models.CharField(choices=[("debit", "Duguje"), ("credit", "Potražuje")], max_length=6)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=14)),
+                ("description", models.CharField(blank=True, max_length=200)),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="ledgerline_entries",
+                        to="konto.kontoaccount",
+                    ),
+                ),
+                (
+                    "journal_entry",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lines", to="konto.journalentry"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka knjiženja',
-                'verbose_name_plural': 'Stavke knjiženja',
+                "verbose_name": "Stavka knjiženja",
+                "verbose_name_plural": "Stavke knjiženja",
             },
         ),
         migrations.AddIndex(
-            model_name='banktransaction',
-            index=models.Index(fields=['company', '-transaction_date'], name='konto_bankt_company_fd5cef_idx'),
+            model_name="banktransaction",
+            index=models.Index(fields=["company", "-transaction_date"], name="konto_bankt_company_fd5cef_idx"),
         ),
         migrations.AddIndex(
-            model_name='banktransaction',
-            index=models.Index(fields=['status', 'company'], name='konto_bankt_status_f20644_idx'),
+            model_name="banktransaction",
+            index=models.Index(fields=["status", "company"], name="konto_bankt_status_f20644_idx"),
         ),
         migrations.AddIndex(
-            model_name='banktransaction',
-            index=models.Index(fields=['reference_number'], name='konto_bankt_referen_dea138_idx'),
+            model_name="banktransaction",
+            index=models.Index(fields=["reference_number"], name="konto_bankt_referen_dea138_idx"),
         ),
         migrations.AlterUniqueTogether(
-            name='kontoaccount',
-            unique_together={('company', 'code')},
+            name="kontoaccount",
+            unique_together={("company", "code")},
         ),
     ]

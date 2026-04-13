@@ -92,6 +92,7 @@ class Command(BaseCommand):
         # 4. Označi AzilPrijava kao contacted (ako postoji)
         try:
             from no_limit.models import AzilPrijava
+
             prijave = AzilPrijava.objects.filter(email=email, contacted=False)
             count = prijave.update(contacted=True)
             if count:

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 """Quick test script za social import modul"""
+
 import os
 import sys
 
 import django
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
-sys.path.insert(0, '/var/www/fina-connect')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+sys.path.insert(0, "/var/www/fina-connect")
 django.setup()
 
 from boxgram.services.social_import import _extract_youtube_id, detect_platform, fetch_oembed
@@ -16,12 +17,12 @@ from boxgram.services.social_import import _extract_youtube_id, detect_platform,
 def test_detect_platform():
     """Test detektovanja platforme"""
     tests = [
-        ('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube'),
-        ('https://youtu.be/dQw4w9WgXcQ', 'youtube'),
-        ('https://www.tiktok.com/@user/video/123', 'tiktok'),
-        ('https://www.facebook.com/photo.php?fbid=123', 'facebook'),
-        ('https://www.instagram.com/p/ABC123/', 'instagram'),
-        ('https://www.example.com', None),
+        ("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "youtube"),
+        ("https://youtu.be/dQw4w9WgXcQ", "youtube"),
+        ("https://www.tiktok.com/@user/video/123", "tiktok"),
+        ("https://www.facebook.com/photo.php?fbid=123", "facebook"),
+        ("https://www.instagram.com/p/ABC123/", "instagram"),
+        ("https://www.example.com", None),
     ]
 
     passed = 0
@@ -35,12 +36,13 @@ def test_detect_platform():
 
     return passed, len(tests)
 
+
 def test_youtube_id_extraction():
     """Test ekstrakcije YouTube ID-a"""
     tests = [
-        ('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'),
-        ('https://youtu.be/dQw4w9WgXcQ', 'dQw4w9WgXcQ'),
-        ('https://youtube.com/watch?v=abc123&t=10', 'abc123'),
+        ("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "dQw4w9WgXcQ"),
+        ("https://youtu.be/dQw4w9WgXcQ", "dQw4w9WgXcQ"),
+        ("https://youtube.com/watch?v=abc123&t=10", "abc123"),
     ]
 
     passed = 0
@@ -54,11 +56,12 @@ def test_youtube_id_extraction():
 
     return passed, len(tests)
 
+
 def test_fetch_oembed():
     """Test fetch_oembed sa nevalidnim URL-ovima"""
     tests = [
-        ('https://invalid.domain.xyz/video', False),  # Invalid domain
-        ('https://www.example.com/video', False),     # No oEmbed endpoint
+        ("https://invalid.domain.xyz/video", False),  # Invalid domain
+        ("https://www.example.com/video", False),  # No oEmbed endpoint
     ]
 
     passed = 0
@@ -72,6 +75,7 @@ def test_fetch_oembed():
 
     return passed, len(tests)
 
+
 def test_social_import_model():
     """Test SocialImport modela"""
     import uuid
@@ -82,34 +86,20 @@ def test_social_import_model():
     from companies.models import Company
 
     # Setup
-    company = Company.objects.create(
-        name=f'TestCo{uuid.uuid4().hex[:8]}',
-        oib=f'{uuid.uuid4().hex[:11]}'
-    )
+    company = Company.objects.create(name=f"TestCo{uuid.uuid4().hex[:8]}", oib=f"{uuid.uuid4().hex[:11]}")
     user = User.objects.create_user(
-        username=f'user{uuid.uuid4().hex[:8]}',
-        email=f'test{uuid.uuid4().hex[:8]}@example.com',
-        password='pass123'
+        username=f"user{uuid.uuid4().hex[:8]}", email=f"test{uuid.uuid4().hex[:8]}@example.com", password="pass123"
     )
     pet = PetProfile.objects.create(
-        tenant=company,
-        owner=user,
-        name='TestPet',
-        species='pas',
-        slug=f'pet{uuid.uuid4().hex[:8]}'
+        tenant=company, owner=user, name="TestPet", species="pas", slug=f"pet{uuid.uuid4().hex[:8]}"
     )
 
     passed = 0
     total = 4
 
     # Test 1: Create
-    url = f'https://youtube.com/watch?v={uuid.uuid4().hex[:8]}'
-    import1 = SocialImport.objects.create(
-        pet=pet,
-        platform='youtube',
-        source_url=url,
-        status='pending'
-    )
+    url = f"https://youtube.com/watch?v={uuid.uuid4().hex[:8]}"
+    import1 = SocialImport.objects.create(pet=pet, platform="youtube", source_url=url, status="pending")
     if import1.id is not None:
         print("✓ Create SocialImport")
         passed += 1
@@ -125,24 +115,24 @@ def test_social_import_model():
         print("✗ Duplicate detection failed")
 
     # Test 3: Status transition
-    import1.status = 'rejected'
+    import1.status = "rejected"
     import1.save()
-    if import1.status == 'rejected':
+    if import1.status == "rejected":
         print("✓ Status transition works")
         passed += 1
     else:
         print("✗ Status transition failed")
 
     # Test 4: Raw data storage
-    test_data = {'title': 'Test', 'author': 'Author'}
+    test_data = {"title": "Test", "author": "Author"}
     import2 = SocialImport.objects.create(
         pet=pet,
-        platform='tiktok',
-        source_url=f'https://tiktok.com/video/{uuid.uuid4().hex[:8]}',
-        status='pending',
-        raw_data=test_data
+        platform="tiktok",
+        source_url=f"https://tiktok.com/video/{uuid.uuid4().hex[:8]}",
+        status="pending",
+        raw_data=test_data,
     )
-    if import2.raw_data.get('title') == 'Test':
+    if import2.raw_data.get("title") == "Test":
         print("✓ Raw data storage works")
         passed += 1
     else:
@@ -150,7 +140,8 @@ def test_social_import_model():
 
     return passed, total
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("=" * 60)
     print("SOCIAL IMPORT SERVICE TESTS")
     print("=" * 60)

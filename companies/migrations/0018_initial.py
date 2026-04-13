@@ -4,19 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0017_allow_negative_stock'),
+        ("companies", "0017_allow_negative_stock"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='company',
-            name='allow_negative_stock',
+            model_name="company",
+            name="allow_negative_stock",
         ),
         migrations.AddField(
-            model_name='nkdcode',
-            name='allow_negative_stock',
-            field=models.BooleanField(default=True, help_text='Ako je uključeno, prodaja je moguća i kad je stanje 0.', verbose_name='Dozvoli negativne zalihe'),
+            model_name="nkdcode",
+            name="allow_negative_stock",
+            field=models.BooleanField(
+                default=True,
+                help_text="Ako je uključeno, prodaja je moguća i kad je stanje 0.",
+                verbose_name="Dozvoli negativne zalihe",
+            ),
         ),
     ]

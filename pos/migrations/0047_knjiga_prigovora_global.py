@@ -6,115 +6,194 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0046_lot_traceability_eu178'),
+        ("pos", "0046_lot_traceability_eu178"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='knjigaprigovora',
-            options={'ordering': ['-redni_broj'], 'verbose_name': 'Zapis (prigovor/utisak)', 'verbose_name_plural': 'Knjiga prigovora i utisaka'},
+            name="knjigaprigovora",
+            options={
+                "ordering": ["-redni_broj"],
+                "verbose_name": "Zapis (prigovor/utisak)",
+                "verbose_name_plural": "Knjiga prigovora i utisaka",
+            },
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='client_ip',
-            field=models.GenericIPAddressField(blank=True, null=True, verbose_name='IP adresa'),
+            model_name="knjigaprigovora",
+            name="client_ip",
+            field=models.GenericIPAddressField(blank=True, null=True, verbose_name="IP adresa"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='consumer_email',
-            field=models.EmailField(blank=True, help_text='Za slanje potvrde i odgovora', max_length=254, verbose_name='E-mail potrošača'),
+            model_name="knjigaprigovora",
+            name="consumer_email",
+            field=models.EmailField(
+                blank=True, help_text="Za slanje potvrde i odgovora", max_length=254, verbose_name="E-mail potrošača"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='consumer_phone',
-            field=models.CharField(blank=True, max_length=30, verbose_name='Telefon / WhatsApp'),
+            model_name="knjigaprigovora",
+            name="consumer_phone",
+            field=models.CharField(blank=True, max_length=30, verbose_name="Telefon / WhatsApp"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='device_info',
-            field=models.CharField(blank=True, help_text='User-Agent + screen resolution', max_length=500, verbose_name='Uređaj'),
+            model_name="knjigaprigovora",
+            name="device_info",
+            field=models.CharField(
+                blank=True, help_text="User-Agent + screen resolution", max_length=500, verbose_name="Uređaj"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='escalated_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Eskalirano u'),
+            model_name="knjigaprigovora",
+            name="escalated_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Eskalirano u"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='escalation_reason',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Razlog eskalacije'),
+            model_name="knjigaprigovora",
+            name="escalation_reason",
+            field=models.CharField(blank=True, max_length=200, verbose_name="Razlog eskalacije"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='gps_latitude',
-            field=models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True, verbose_name='GPS širina'),
+            model_name="knjigaprigovora",
+            name="gps_latitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=7, max_digits=10, null=True, verbose_name="GPS širina"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='gps_longitude',
-            field=models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True, verbose_name='GPS dužina'),
+            model_name="knjigaprigovora",
+            name="gps_longitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=7, max_digits=10, null=True, verbose_name="GPS dužina"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='is_escalated',
-            field=models.BooleanField(default=False, verbose_name='Eskalirano'),
+            model_name="knjigaprigovora",
+            name="is_escalated",
+            field=models.BooleanField(default=False, verbose_name="Eskalirano"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='is_public',
-            field=models.BooleanField(default=False, help_text='Prikazuje se na web stranici / widgetu', verbose_name='Javno vidljivo'),
+            model_name="knjigaprigovora",
+            name="is_public",
+            field=models.BooleanField(
+                default=False, help_text="Prikazuje se na web stranici / widgetu", verbose_name="Javno vidljivo"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='language',
-            field=models.CharField(choices=[('hr', 'Hrvatski'), ('de', 'Deutsch'), ('en', 'English')], default='hr', max_length=2, verbose_name='Jezik / Sprache'),
+            model_name="knjigaprigovora",
+            name="language",
+            field=models.CharField(
+                choices=[("hr", "Hrvatski"), ("de", "Deutsch"), ("en", "English")],
+                default="hr",
+                max_length=2,
+                verbose_name="Jezik / Sprache",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='public_display_name',
-            field=models.CharField(blank=True, help_text='Npr. "Marko P." umjesto punog imena', max_length=100, verbose_name='Ime za prikaz'),
+            model_name="knjigaprigovora",
+            name="public_display_name",
+            field=models.CharField(
+                blank=True,
+                help_text='Npr. "Marko P." umjesto punog imena',
+                max_length=100,
+                verbose_name="Ime za prikaz",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='record_type',
-            field=models.CharField(choices=[('prigovor', 'Prigovor / Beschwerde'), ('pohvala', 'Pohvala / Lob'), ('utisak', 'Utisak / Eindruck'), ('reklamacija', 'Reklamacija / Reklamation'), ('prijedlog', 'Prijedlog poboljšanja / Verbesserungsvorschlag')], default='prigovor', max_length=20, verbose_name='Vrsta zapisa'),
+            model_name="knjigaprigovora",
+            name="record_type",
+            field=models.CharField(
+                choices=[
+                    ("prigovor", "Prigovor / Beschwerde"),
+                    ("pohvala", "Pohvala / Lob"),
+                    ("utisak", "Utisak / Eindruck"),
+                    ("reklamacija", "Reklamacija / Reklamation"),
+                    ("prijedlog", "Prijedlog poboljšanja / Verbesserungsvorschlag"),
+                ],
+                default="prigovor",
+                max_length=20,
+                verbose_name="Vrsta zapisa",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='responded_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='responded_prigovori', to=settings.AUTH_USER_MODEL, verbose_name='Odgovorio/la'),
+            model_name="knjigaprigovora",
+            name="responded_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="responded_prigovori",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Odgovorio/la",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='response_channel',
-            field=models.CharField(blank=True, choices=[('email', 'E-mail'), ('whatsapp', 'WhatsApp'), ('post', 'Pošta / Post'), ('phone', 'Telefon / Telefon'), ('in_person', 'Osobno / Persönlich')], max_length=15, verbose_name='Kanal odgovora'),
+            model_name="knjigaprigovora",
+            name="response_channel",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("email", "E-mail"),
+                    ("whatsapp", "WhatsApp"),
+                    ("post", "Pošta / Post"),
+                    ("phone", "Telefon / Telefon"),
+                    ("in_person", "Osobno / Persönlich"),
+                ],
+                max_length=15,
+                verbose_name="Kanal odgovora",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='response_sent_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Odgovor poslan'),
+            model_name="knjigaprigovora",
+            name="response_sent_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Odgovor poslan"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='signature_timestamp',
-            field=models.DateTimeField(blank=True, help_text='Točan trenutak kada je potpis stavljen', null=True, verbose_name='Vrijeme potpisa'),
+            model_name="knjigaprigovora",
+            name="signature_timestamp",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Točan trenutak kada je potpis stavljen",
+                null=True,
+                verbose_name="Vrijeme potpisa",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='source_module',
-            field=models.CharField(choices=[('pos', 'POS'), ('invoicing', 'Fakturiranje'), ('rental', 'Smještaj / Vermietung'), ('delivery', 'Dostava / Lieferung'), ('marketplace', 'Tržnica / Marktplatz'), ('webshop', 'Webshop'), ('work_orders', 'Radni nalozi / Aufträge'), ('appointments', 'Termini / Termine'), ('fitness', 'Fitness'), ('gastro', 'Gastronomija / Gastronomie'), ('general', 'Općenito / Allgemein'), ('qr', 'QR kod (potrošač)')], default='pos', max_length=20, verbose_name='Izvorni modul'),
+            model_name="knjigaprigovora",
+            name="source_module",
+            field=models.CharField(
+                choices=[
+                    ("pos", "POS"),
+                    ("invoicing", "Fakturiranje"),
+                    ("rental", "Smještaj / Vermietung"),
+                    ("delivery", "Dostava / Lieferung"),
+                    ("marketplace", "Tržnica / Marktplatz"),
+                    ("webshop", "Webshop"),
+                    ("work_orders", "Radni nalozi / Aufträge"),
+                    ("appointments", "Termini / Termine"),
+                    ("fitness", "Fitness"),
+                    ("gastro", "Gastronomija / Gastronomie"),
+                    ("general", "Općenito / Allgemein"),
+                    ("qr", "QR kod (potrošač)"),
+                ],
+                default="pos",
+                max_length=20,
+                verbose_name="Izvorni modul",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='source_url',
-            field=models.URLField(blank=True, help_text='URL stranice s koje je prigovor poslan', verbose_name='Izvorni URL'),
+            model_name="knjigaprigovora",
+            name="source_url",
+            field=models.URLField(
+                blank=True, help_text="URL stranice s koje je prigovor poslan", verbose_name="Izvorni URL"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='star_rating',
-            field=models.PositiveSmallIntegerField(blank=True, help_text='Zvjezdice — samo za pohvale i utiske', null=True, verbose_name='Ocjena (1-5)'),
+            model_name="knjigaprigovora",
+            name="star_rating",
+            field=models.PositiveSmallIntegerField(
+                blank=True, help_text="Zvjezdice — samo za pohvale i utiske", null=True, verbose_name="Ocjena (1-5)"
+            ),
         ),
     ]

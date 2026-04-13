@@ -4,6 +4,7 @@ Core business logic — dashboard statistics, impersonation, health checks.
 Pure functions that aggregate data across modules.
 No request/response dependency (except impersonation which needs session).
 """
+
 import logging
 from datetime import timedelta
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── Company Dashboard Stats ─────────────────────────────────
+
 
 def get_company_dashboard_stats(company, user) -> dict:
     """
@@ -44,20 +46,24 @@ def _invoice_stats(company, month_start) -> dict:
     """Invoice aggregation for dashboard."""
     try:
         from invoicing.models import Invoice
+
         qs = Invoice.objects.all()
         if company:
             qs = qs.filter(company=company)
 
         return {
-            "total_invoiced": qs.filter(
-                doctype="R", status__in=("SENT", "PAID", "UNPAID", "OVERDUE")
-            ).aggregate(s=__import__("django.db.models", fromlist=["Sum"]).Sum("total"))["s"] or 0,
-            "unpaid": qs.filter(
-                doctype="R", status__in=("UNPAID", "OVERDUE")
-            ).aggregate(s=__import__("django.db.models", fromlist=["Sum"]).Sum("total"))["s"] or 0,
-            "paid_month": qs.filter(
-                doctype="R", status="PAID", date_issued__date__gte=month_start
-            ).aggregate(s=__import__("django.db.models", fromlist=["Sum"]).Sum("total"))["s"] or 0,
+            "total_invoiced": qs.filter(doctype="R", status__in=("SENT", "PAID", "UNPAID", "OVERDUE")).aggregate(
+                s=__import__("django.db.models", fromlist=["Sum"]).Sum("total")
+            )["s"]
+            or 0,
+            "unpaid": qs.filter(doctype="R", status__in=("UNPAID", "OVERDUE")).aggregate(
+                s=__import__("django.db.models", fromlist=["Sum"]).Sum("total")
+            )["s"]
+            or 0,
+            "paid_month": qs.filter(doctype="R", status="PAID", date_issued__date__gte=month_start).aggregate(
+                s=__import__("django.db.models", fromlist=["Sum"]).Sum("total")
+            )["s"]
+            or 0,
             "recent_invoices": list(qs.filter(doctype="R").select_related("company").order_by("-date_issued")[:8]),
             "pending_offers": qs.filter(doctype="PO", status__in=("DRAFT", "SENT")).count(),
         }
@@ -88,11 +94,14 @@ def _project_stats(company) -> dict:
     """Project aggregation."""
     try:
         from projects.models import Project
+
         qs = Project.objects.all()
         if company:
             qs = qs.filter(company=company)
         return {
-            "projects": list(qs.filter(status__in=("active", "in_progress", "open")).select_related("company").order_by("-id")[:5]),
+            "projects": list(
+                qs.filter(status__in=("active", "in_progress", "open")).select_related("company").order_by("-id")[:5]
+            ),
             "total_projects": qs.exclude(status__in=("completed", "cancelled")).count(),
         }
     except DatabaseError as e:
@@ -104,6 +113,7 @@ def _partner_stats(company) -> dict:
     """Partner count."""
     try:
         from partners.models import Partner
+
         qs = Partner.objects.all()
         if company:
             qs = qs.filter(company=company)
@@ -176,6 +186,7 @@ def _pos_stats(today) -> dict:
 
 # ── Superadmin Stats ────────────────────────────────────────
 
+
 def get_superadmin_stats() -> dict:
     """Aggregate platform-wide statistics for superadmin."""
     from django.contrib.auth.models import User
@@ -188,9 +199,7 @@ def get_superadmin_stats() -> dict:
             "total_companies": Company.objects.count(),
             "active_companies": Company.objects.count(),
             "companies_list": list(
-                Company.objects.all()
-                .order_by("name")
-                .values("id", "name", "oib", "created_at")[:50]
+                Company.objects.all().order_by("name").values("id", "name", "oib", "created_at")[:50]
             ),
         }
     except DatabaseError as e:
@@ -199,6 +208,7 @@ def get_superadmin_stats() -> dict:
 
 
 # ── Impersonation ───────────────────────────────────────────
+
 
 def start_impersonation(admin_user, target_company_id: int) -> dict:
     """
@@ -209,6 +219,7 @@ def start_impersonation(admin_user, target_company_id: int) -> dict:
         raise PermissionError("Samo administratori mogu koristiti impersonaciju.")
 
     from companies.models import Company
+
     target = Company.objects.get(pk=target_company_id)
 
     logger.info("Impersonation started: admin=%s → company=%s", admin_user.pk, target.name)
@@ -216,8 +227,7 @@ def start_impersonation(admin_user, target_company_id: int) -> dict:
     return {
         "impersonate_company_id": target.pk,
         "impersonate_company_name": target.name,
-        "original_company_id": getattr(admin_user, "profile", None)
-        and admin_user.profile.company_id,
+        "original_company_id": getattr(admin_user, "profile", None) and admin_user.profile.company_id,
     }
 
 

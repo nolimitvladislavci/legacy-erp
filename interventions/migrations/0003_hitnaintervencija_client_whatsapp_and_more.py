@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('interventions', '0002_add_gps_fields'),
+        ("interventions", "0002_add_gps_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hitnaintervencija',
-            name='client_whatsapp',
-            field=models.CharField(blank=True, max_length=50, verbose_name='WhatsApp klijenta'),
+            model_name="hitnaintervencija",
+            name="client_whatsapp",
+            field=models.CharField(blank=True, max_length=50, verbose_name="WhatsApp klijenta"),
         ),
         migrations.AddField(
-            model_name='hitnaintervencija',
-            name='whatsapp_notification_sent',
+            model_name="hitnaintervencija",
+            name="whatsapp_notification_sent",
             field=models.BooleanField(default=False),
         ),
     ]

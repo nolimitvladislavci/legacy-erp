@@ -4,15 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0033_r1_buyer_fields'),
+        ("pos", "0033_r1_buyer_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterminal',
-            name='access_token',
-            field=models.CharField(blank=True, help_text='Auto-generiran. QR kod na zidu - skeniraj, blagajna se otvori.', max_length=32, null=True, unique=True, verbose_name='QR pristupni token'),
+            model_name="posterminal",
+            name="access_token",
+            field=models.CharField(
+                blank=True,
+                help_text="Auto-generiran. QR kod na zidu - skeniraj, blagajna se otvori.",
+                max_length=32,
+                null=True,
+                unique=True,
+                verbose_name="QR pristupni token",
+            ),
         ),
     ]

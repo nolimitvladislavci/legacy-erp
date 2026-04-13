@@ -4,35 +4,59 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0025_prigovor_voice_id_sig'),
+        ("pos", "0025_prigovor_voice_id_sig"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='possettings',
-            name='auto_print',
-            field=models.BooleanField(default=True, help_text='Automatski ispiši nakon naplate (false = ispis samo na gumb)', verbose_name='Auto ispis'),
+            model_name="possettings",
+            name="auto_print",
+            field=models.BooleanField(
+                default=True,
+                help_text="Automatski ispiši nakon naplate (false = ispis samo na gumb)",
+                verbose_name="Auto ispis",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='drawer_kick',
-            field=models.BooleanField(default=False, help_text='Pošalji ESC/POS komandu za otvaranje ladice za novac', verbose_name='Otvori ladicu'),
+            model_name="possettings",
+            name="drawer_kick",
+            field=models.BooleanField(
+                default=False,
+                help_text="Pošalji ESC/POS komandu za otvaranje ladice za novac",
+                verbose_name="Otvori ladicu",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='receipt_delivery',
-            field=models.CharField(choices=[('thermal', 'Termalni ispis (80mm)'), ('a4', 'A4 ispis'), ('email', 'Email račun'), ('whatsapp', 'WhatsApp račun'), ('qr', 'QR kod na stolu (gost skenira)'), ('none', 'Bez ispisa (BEZ PAPIRA)')], default='thermal', help_text='Kako se račun dostavlja gostu nakon naplate', max_length=12, verbose_name='Dostava računa'),
+            model_name="possettings",
+            name="receipt_delivery",
+            field=models.CharField(
+                choices=[
+                    ("thermal", "Termalni ispis (80mm)"),
+                    ("a4", "A4 ispis"),
+                    ("email", "Email račun"),
+                    ("whatsapp", "WhatsApp račun"),
+                    ("qr", "QR kod na stolu (gost skenira)"),
+                    ("none", "Bez ispisa (BEZ PAPIRA)"),
+                ],
+                default="thermal",
+                help_text="Kako se račun dostavlja gostu nakon naplate",
+                max_length=12,
+                verbose_name="Dostava računa",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='receipt_email_subject',
-            field=models.CharField(blank=True, default='Vas racun - {company}', max_length=100, verbose_name='Email subject'),
+            model_name="possettings",
+            name="receipt_email_subject",
+            field=models.CharField(
+                blank=True, default="Vas racun - {company}", max_length=100, verbose_name="Email subject"
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='whatsapp_default_msg',
-            field=models.CharField(blank=True, default='Hvala na posjetu! Evo Vas racun:', max_length=200, verbose_name='WhatsApp poruka'),
+            model_name="possettings",
+            name="whatsapp_default_msg",
+            field=models.CharField(
+                blank=True, default="Hvala na posjetu! Evo Vas racun:", max_length=200, verbose_name="WhatsApp poruka"
+            ),
         ),
     ]

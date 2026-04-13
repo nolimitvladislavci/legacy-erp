@@ -26,23 +26,34 @@ def index(request):
     q = request.GET.get("q", "")
     status_f = request.GET.get("status", "")
     company = get_user_company(request)
-    qs = Project.objects.filter(company=company).select_related("client", "company", "manager").order_by("-created_at") if company else Project.objects.none()
+    qs = (
+        Project.objects.filter(company=company).select_related("client", "company", "manager").order_by("-created_at")
+        if company
+        else Project.objects.none()
+    )
     if q:
-        qs = qs.filter(Q(name__icontains=q)|Q(code__icontains=q)|Q(location__icontains=q))
+        qs = qs.filter(Q(name__icontains=q) | Q(code__icontains=q) | Q(location__icontains=q))
     if status_f:
         qs = qs.filter(status=status_f)
 
     STATUS_CHOICES = [
-        ("planning", "Planiranje"), ("active", "Aktivan"),
-        ("on_hold", "Pauza"), ("completed", "Završen"), ("cancelled", "Otkazan"),
+        ("planning", "Planiranje"),
+        ("active", "Aktivan"),
+        ("on_hold", "Pauza"),
+        ("completed", "Završen"),
+        ("cancelled", "Otkazan"),
     ]
-    return render(request, "projects/project_list.html", {
-        "projects": qs,
-        "q": q,
-        "status_f": status_f,
-        "status_choices": STATUS_CHOICES,
-        "total": qs.count(),
-    })
+    return render(
+        request,
+        "projects/project_list.html",
+        {
+            "projects": qs,
+            "q": q,
+            "status_f": status_f,
+            "status_choices": STATUS_CHOICES,
+            "total": qs.count(),
+        },
+    )
 
 
 @login_required
@@ -57,6 +68,7 @@ def project_detail(request, pk):
     try:
         from worktime.models import Project as WTProject
         from worktime.models import TimeEntry
+
         wt_proj = WTProject.objects.filter(code=project.code).first()
         if wt_proj:
             work_entries = TimeEntry.objects.filter(project=wt_proj).order_by("-date")[:10]
@@ -71,6 +83,7 @@ def project_detail(request, pk):
         try:
             from worktime.models import Project as WTProject
             from worktime.models import TimeEntry
+
             wt_proj = WTProject.objects.filter(code=project.code).first()
             if wt_proj:
                 cost = 0
@@ -86,33 +99,35 @@ def project_detail(request, pk):
             pass
 
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
     team_members = project.team.all()
     # Filtriraj radnike po firmi PROJEKTA (ne po prijavljenom useru)
-    workers_qs = User.objects.filter(is_active=True).exclude(
-        pk__in=team_members.values_list('pk', flat=True)
-    )
+    workers_qs = User.objects.filter(is_active=True).exclude(pk__in=team_members.values_list("pk", flat=True))
     if project.company:
         try:
             from accounts.models import UserProfile
-            company_user_ids = UserProfile.objects.filter(
-                company=project.company
-            ).values_list('user_id', flat=True)
+
+            company_user_ids = UserProfile.objects.filter(company=project.company).values_list("user_id", flat=True)
             workers_qs = workers_qs.filter(pk__in=company_user_ids)
         except DatabaseError:
             pass
-    all_workers = workers_qs.order_by('first_name', 'last_name')
+    all_workers = workers_qs.order_by("first_name", "last_name")
 
-    return render(request, "projects/project_detail.html", {
-        "project": project,
-        "photos": photos,
-        "updates": updates,
-        "work_entries": work_entries,
-        "total_hours": total_hours,
-        "budget_used_pct": budget_used_pct,
-        "team_members": team_members,
-        "all_workers": all_workers,
-    })
+    return render(
+        request,
+        "projects/project_detail.html",
+        {
+            "project": project,
+            "photos": photos,
+            "updates": updates,
+            "work_entries": work_entries,
+            "total_hours": total_hours,
+            "budget_used_pct": budget_used_pct,
+            "team_members": team_members,
+            "all_workers": all_workers,
+        },
+    )
 
 
 @login_required
@@ -137,8 +152,10 @@ def project_create(request):
                 p.manager = User.objects.get(pk=manager_id)
             start = request.POST.get("start_date")
             end = request.POST.get("end_date")
-            if start: p.start_date = start
-            if end: p.end_date = end
+            if start:
+                p.start_date = start
+            if end:
+                p.end_date = end
             p.save()
             messages.success(request, f"Projekt {p.name} kreiran.")
             next_url = request.POST.get("next") or request.GET.get("next") or ""
@@ -148,17 +165,24 @@ def project_create(request):
         except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     next_url = request.GET.get("next", "")
-    return render(request, "projects/project_form.html", {
-        "companies": [get_user_company(request)] if get_user_company(request) else [],
-        "clients": Partner.objects.filter(is_active=True).order_by("name"),
-        "managers": User.objects.filter(is_active=True).order_by("first_name"),
-        "next_url": next_url,
-        "action": "Novi projekt",
-        "status_choices": [
-            ("planning","Planiranje"),("active","Aktivan"),
-            ("on_hold","Pauza"),("completed","Završen"),("cancelled","Otkazan"),
-        ],
-    })
+    return render(
+        request,
+        "projects/project_form.html",
+        {
+            "companies": [get_user_company(request)] if get_user_company(request) else [],
+            "clients": Partner.objects.filter(is_active=True).order_by("name"),
+            "managers": User.objects.filter(is_active=True).order_by("first_name"),
+            "next_url": next_url,
+            "action": "Novi projekt",
+            "status_choices": [
+                ("planning", "Planiranje"),
+                ("active", "Aktivan"),
+                ("on_hold", "Pauza"),
+                ("completed", "Završen"),
+                ("cancelled", "Otkazan"),
+            ],
+        },
+    )
 
 
 @login_required
@@ -180,24 +204,33 @@ def project_edit(request, pk):
             project.manager = User.objects.get(pk=manager_id) if manager_id else None
             start = request.POST.get("start_date")
             end = request.POST.get("end_date")
-            if start: project.start_date = start
-            if end: project.end_date = end
+            if start:
+                project.start_date = start
+            if end:
+                project.end_date = end
             project.save()
             messages.success(request, f"Projekt {project.name} ažuriran.")
             return redirect("project_detail", pk=project.pk)
         except ObjectDoesNotExist as e:
             messages.error(request, str(e))
-    return render(request, "projects/project_form.html", {
-        "project": project,
-        "companies": [get_user_company(request)] if get_user_company(request) else [],
-        "clients": Partner.objects.filter(is_active=True).order_by("name"),
-        "managers": User.objects.filter(is_active=True).order_by("first_name"),
-        "action": "Uredi projekt",
-        "status_choices": [
-            ("planning","Planiranje"),("active","Aktivan"),
-            ("on_hold","Pauza"),("completed","Završen"),("cancelled","Otkazan"),
-        ],
-    })
+    return render(
+        request,
+        "projects/project_form.html",
+        {
+            "project": project,
+            "companies": [get_user_company(request)] if get_user_company(request) else [],
+            "clients": Partner.objects.filter(is_active=True).order_by("name"),
+            "managers": User.objects.filter(is_active=True).order_by("first_name"),
+            "action": "Uredi projekt",
+            "status_choices": [
+                ("planning", "Planiranje"),
+                ("active", "Aktivan"),
+                ("on_hold", "Pauza"),
+                ("completed", "Završen"),
+                ("cancelled", "Otkazan"),
+            ],
+        },
+    )
 
 
 @login_required
@@ -237,7 +270,6 @@ def project_update_add(request, pk):
     return redirect("project_detail", pk=pk)
 
 
-
 @login_required
 @require_POST
 @login_required
@@ -246,18 +278,19 @@ def project_team_add(request, pk):
     """Add a user to project team."""
     project = get_object_or_404(Project, pk=pk)
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
-    user_id = request.POST.get('user_id', '').strip()
+    user_id = request.POST.get("user_id", "").strip()
     if not user_id:
-        messages.error(request, _('Odaberi radnika iz liste.'))
-        return redirect('project_detail', pk=pk)
+        messages.error(request, _("Odaberi radnika iz liste."))
+        return redirect("project_detail", pk=pk)
     try:
         user = User.objects.get(pk=user_id)
         project.team.add(user)
-        messages.success(request, f'✅ {user.get_full_name() or user.username} dodan u tim.')
+        messages.success(request, f"✅ {user.get_full_name() or user.username} dodan u tim.")
     except User.DoesNotExist:
-        messages.error(request, _('Korisnik nije pronađen.'))
-    return redirect('project_detail', pk=pk)
+        messages.error(request, _("Korisnik nije pronađen."))
+    return redirect("project_detail", pk=pk)
 
 
 @login_required
@@ -266,16 +299,18 @@ def project_team_remove(request, pk):
     """Remove a user from project team."""
     project = get_object_or_404(Project, pk=pk)
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
-    user_id = request.POST.get('user_id')
+    user_id = request.POST.get("user_id")
     if user_id:
         try:
             user = User.objects.get(pk=user_id)
             project.team.remove(user)
-            messages.success(request, f'{user.get_full_name() or user.username} uklonjen iz tima.')
+            messages.success(request, f"{user.get_full_name() or user.username} uklonjen iz tima.")
         except User.DoesNotExist:
             pass
-    return redirect('project_detail', pk=pk)
+    return redirect("project_detail", pk=pk)
+
 
 @extend_schema_view(list=extend_schema(tags=["Projects"]))
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -286,5 +321,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class ProjectPhotoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return ProjectPhoto.objects.all()
+
     def get_serializer_class(self):
         return ProjectPhotoSerializer

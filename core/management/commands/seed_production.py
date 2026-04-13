@@ -11,6 +11,7 @@ za funkcionalan sustav:
   6. Kontni plan (via seed_chart_of_accounts ako postoji)
   7. Pricing planovi (via seed_pricing_plans)
 """
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import DatabaseError, transaction
@@ -34,9 +35,7 @@ class Command(BaseCommand):
 
         # ── 1. Superadmin ────────────────────────────────────────────────────
         if not force and User.objects.filter(is_superuser=True).exists():
-            self.stdout.write(self.style.WARNING(
-                "⚠  Superadmin already exists. Use --force to re-run."
-            ))
+            self.stdout.write(self.style.WARNING("⚠  Superadmin already exists. Use --force to re-run."))
         else:
             admin, created = User.objects.get_or_create(
                 username="ivan.medija@gmail.com",
@@ -57,6 +56,7 @@ class Command(BaseCommand):
                 admin.save()
 
             from accounts.models import UserProfile
+
             profile, _ = UserProfile.objects.get_or_create(
                 user=admin,
                 defaults={"role": "company_admin"},
@@ -64,12 +64,11 @@ class Command(BaseCommand):
             profile.must_change_password = True
             profile.save(update_fields=["must_change_password"])
 
-            self.stdout.write(self.style.SUCCESS(
-                "✅ Superadmin: ivan.medija@gmail.com  (mora promijeniti lozinku)"
-            ))
+            self.stdout.write(self.style.SUCCESS("✅ Superadmin: ivan.medija@gmail.com  (mora promijeniti lozinku)"))
 
         # ── 2. Firma VISKOVIC NIKSA ──────────────────────────────────────────
         from companies.models import BusinessProfile, Company
+
         company, created = Company.objects.get_or_create(
             name="VISKOVIC NIKSA",
             defaults={
@@ -84,9 +83,7 @@ class Command(BaseCommand):
             },
         )
         if created:
-            self.stdout.write(self.style.SUCCESS(
-                "✅ Firma: VISKOVIC NIKSA, Herrenberg DE"
-            ))
+            self.stdout.write(self.style.SUCCESS("✅ Firma: VISKOVIC NIKSA, Herrenberg DE"))
         else:
             self.stdout.write(self.style.WARNING("⚠  Firma VISKOVIC NIKSA already exists"))
 
@@ -94,6 +91,7 @@ class Command(BaseCommand):
         admin = User.objects.filter(is_superuser=True).order_by("id").first()
         if admin:
             from accounts.models import UserProfile
+
             profile, _ = UserProfile.objects.get_or_create(user=admin)
             if not profile.company:
                 profile.company = company
@@ -126,6 +124,7 @@ class Command(BaseCommand):
         # ── 5. Pricing planovi ────────────────────────────────────────────────
         try:
             from django.core.management import call_command
+
             call_command("seed_pricing_plans", verbosity=0)
             self.stdout.write(self.style.SUCCESS("✅ Pricing planovi kreirani"))
         except ImportError as e:
@@ -134,6 +133,7 @@ class Command(BaseCommand):
         # ── 6. Enterprise pretplata ───────────────────────────────────────────
         try:
             from registration.models import CompanySubscription, PricingPlan
+
             enterprise = PricingPlan.objects.filter(slug="enterprise").first()
             if enterprise:
                 sub, created = CompanySubscription.objects.get_or_create(
@@ -156,6 +156,7 @@ class Command(BaseCommand):
         # ── 7. Žiro račun (Commerzbank) ────────────────────────────────────────
         try:
             from konto.models import BankAccount
+
             ba, created = BankAccount.objects.get_or_create(
                 company=company,
                 iban="DE10603400710803121300",
@@ -175,12 +176,15 @@ class Command(BaseCommand):
         # ── 8. Kontni plan ────────────────────────────────────────────────────
         try:
             from django.core.management import call_command
+
             call_command("seed_chart_of_accounts", verbosity=0)
             self.stdout.write(self.style.SUCCESS("✅ Kontni plan kreiran"))
         except ImportError as e:
             self.stdout.write(self.style.WARNING(f"⚠  seed_chart_of_accounts: {e}"))
 
-        self.stdout.write("\n" + self.style.SUCCESS(
-            "🎉 Production seed završen! "
-            "Prijavi se na /login/ s: ivan.medija@gmail.com / s5Jtkn66!"
-        ))
+        self.stdout.write(
+            "\n"
+            + self.style.SUCCESS(
+                "🎉 Production seed završen! Prijavi se na /login/ s: ivan.medija@gmail.com / s5Jtkn66!"
+            )
+        )

@@ -45,7 +45,7 @@ for w in data.get("ai_warnings", []):
     print(f"  [{w['level']}] {w['message']}")
 
 # Validate
-assert data["ok"] == True, "Report not OK"
+assert data["ok"], "Report not OK"
 assert len(data["payment_breakdown"]) > 0, "No payments"
 assert len(data["tax_breakdown"]) > 0, "No tax"
 assert len(data["cashier_breakdown"]) > 0, "No cashiers"

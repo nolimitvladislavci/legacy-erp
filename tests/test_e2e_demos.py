@@ -2,6 +2,7 @@
 End-to-end demo scenario tests — Autoservis, Frizer, Restoran.
 Verifies complete workflows for sales tour demos.
 """
+
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 
@@ -15,6 +16,7 @@ class AutoservisE2ETest(TestCase):
         self.company = Company.objects.create(name="Demo Autoservis d.o.o.", oib="11111111111")
         self.user = User.objects.create_user("autoservis_demo", password="test123", is_staff=True)
         from accounts.models import UserProfile
+
         try:
             p = UserProfile.objects.get(user=self.user)
             p.company = self.company
@@ -52,6 +54,7 @@ class FrizerE2ETest(TestCase):
         self.company = Company.objects.create(name="Demo Frizer d.o.o.", oib="22222222222")
         self.user = User.objects.create_user("frizer_demo", password="test123", is_staff=True)
         from accounts.models import UserProfile
+
         try:
             p = UserProfile.objects.get(user=self.user)
             p.company = self.company
@@ -91,6 +94,7 @@ class RestoranE2ETest(TestCase):
         self.company = Company.objects.create(name="Demo Restoran d.o.o.", oib="33333333333")
         self.user = User.objects.create_user("restoran_demo", password="test123", is_staff=True)
         from accounts.models import UserProfile
+
         try:
             p = UserProfile.objects.get(user=self.user)
             p.company = self.company

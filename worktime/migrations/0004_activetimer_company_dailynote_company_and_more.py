@@ -5,51 +5,98 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0006_company_booking_slug'),
-        ('worktime', '0003_projectphoto'),
+        ("companies", "0006_company_booking_slug"),
+        ("worktime", "0003_projectphoto"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='activetimer',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='active_timers', to='companies.company'),
+            model_name="activetimer",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="active_timers",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='dailynote',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='daily_notes', to='companies.company'),
+            model_name="dailynote",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="daily_notes",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='employeeprofile',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='employee_profiles', to='companies.company'),
+            model_name="employeeprofile",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="employee_profiles",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='project',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='worktime_projects', to='companies.company'),
+            model_name="project",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="worktime_projects",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='projectphoto',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='project_photos', to='companies.company'),
+            model_name="projectphoto",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="project_photos",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentry',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to='companies.company'),
+            model_name="timeentry",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="time_entries",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentrytemplate',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='time_templates', to='companies.company'),
+            model_name="timeentrytemplate",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="time_templates",
+                to="companies.company",
+            ),
         ),
         migrations.AddField(
-            model_name='workgroup',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='work_groups', to='companies.company'),
+            model_name="workgroup",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="work_groups",
+                to="companies.company",
+            ),
         ),
     ]

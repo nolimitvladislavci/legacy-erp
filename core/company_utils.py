@@ -13,22 +13,21 @@ def get_user_company(request=None):
     if company:
         return company
     # 2. Superadmin impersonating a company — read from session
-    if request and getattr(request.user, 'is_superuser', False):
-        company_id = (
-            request.session.get('impersonated_company_id') or
-            request.session.get('superadmin_as_company')
-        )
+    if request and getattr(request.user, "is_superuser", False):
+        company_id = request.session.get("impersonated_company_id") or request.session.get("superadmin_as_company")
         if company_id:
             from companies.models import Company
+
             try:
                 return Company.objects.get(pk=company_id)
             except ObjectDoesNotExist:
                 pass
     # 2b. Umbrella admin viewing a child company
     if request and request.user.is_authenticated:
-        umbrella_cid = request.session.get('umbrella_as_company')
+        umbrella_cid = request.session.get("umbrella_as_company")
         if umbrella_cid:
             from companies.models import Company
+
             try:
                 child = Company.objects.get(pk=umbrella_cid)
                 # Verify the user's own company is indeed umbrella parent
@@ -37,7 +36,7 @@ def get_user_company(request=None):
                     return child
                 else:
                     # Invalid - clear session
-                    del request.session['umbrella_as_company']
+                    del request.session["umbrella_as_company"]
             except ObjectDoesNotExist:
                 pass
     # 3. Fallback to profile.company
@@ -49,7 +48,7 @@ def get_user_company(request=None):
     return None
 
 
-def company_queryset(model_class, request=None, company_field='company'):
+def company_queryset(model_class, request=None, company_field="company"):
     company = get_user_company(request)
     if not company:
         return model_class.objects.none()

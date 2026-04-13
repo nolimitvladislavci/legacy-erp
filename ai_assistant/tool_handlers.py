@@ -2,6 +2,7 @@
 Tool handler implementations. Each function receives (params, user, company)
 and returns a dict/list that will be JSON-serialized as tool_result.
 """
+
 import logging
 from datetime import date, timedelta
 
@@ -55,6 +56,7 @@ def handle_tool_call(tool_name, params, user, company):
 
 def _search_articles(params, user, company):
     from inventory.models import InventoryItem
+
     query = params.get("query", "")
     category = params.get("category", "")
     qs = InventoryItem.objects.filter(company=company, is_active=True)
@@ -73,6 +75,7 @@ def _search_articles(params, user, company):
 
 def _get_expiring_articles(params, user, company):
     from pos.models import ExpiryBatch
+
     days = params.get("days_ahead", 7)
     cutoff = date.today() + timedelta(days=days)
     batches = ExpiryBatch.objects.filter(
@@ -83,19 +86,22 @@ def _get_expiring_articles(params, user, company):
         batches = batches.filter(company=company)
     result = []
     for b in batches[:20]:
-        result.append({
-            "article": b.inventory_item.name if b.inventory_item else "N/A",
-            "batch": b.batch_number,
-            "expiry_date": str(b.expiry_date),
-            "quantity": float(b.quantity),
-            "is_expired": b.is_expired,
-            "days_left": b.days_until_expiry,
-        })
+        result.append(
+            {
+                "article": b.inventory_item.name if b.inventory_item else "N/A",
+                "batch": b.batch_number,
+                "expiry_date": str(b.expiry_date),
+                "quantity": float(b.quantity),
+                "is_expired": b.is_expired,
+                "days_left": b.days_until_expiry,
+            }
+        )
     return {"count": len(result), "batches": result}
 
 
 def _get_today_revenue(params, user, company):
     from pos.models import POSReceipt
+
     today = timezone.now().date()
     qs = POSReceipt.objects.filter(
         session__terminal__company=company,
@@ -116,6 +122,7 @@ def _get_today_revenue(params, user, company):
 
 def _get_active_orders(params, user, company):
     from pos.models import GastroOrder
+
     status = params.get("status", "")
     qs = GastroOrder.objects.exclude(status__in=["paid", "cancelled"])
     if company:
@@ -124,18 +131,21 @@ def _get_active_orders(params, user, company):
         qs = qs.filter(status=status)
     orders = []
     for o in qs[:20]:
-        orders.append({
-            "id": o.id,
-            "table": getattr(o, "table_number", ""),
-            "status": o.status,
-            "total": float(getattr(o, "total", 0) or 0),
-            "created": str(o.created_at) if hasattr(o, "created_at") else "",
-        })
+        orders.append(
+            {
+                "id": o.id,
+                "table": getattr(o, "table_number", ""),
+                "status": o.status,
+                "total": float(getattr(o, "total", 0) or 0),
+                "created": str(o.created_at) if hasattr(o, "created_at") else "",
+            }
+        )
     return {"count": len(orders), "orders": orders}
 
 
 def _get_burza_leads(params, user, company):
     from burza.models import ProjectLead
+
     status = params.get("status", "")
     limit = params.get("limit", 10)
     qs = ProjectLead.objects.filter(company=company)
@@ -143,17 +153,20 @@ def _get_burza_leads(params, user, company):
         qs = qs.filter(status=status)
     leads = []
     for lead in qs[:limit]:
-        leads.append({
-            "id": lead.id,
-            "title": lead.title,
-            "category": getattr(lead, "category", ""),
-            "status": lead.status,
-        })
+        leads.append(
+            {
+                "id": lead.id,
+                "title": lead.title,
+                "category": getattr(lead, "category", ""),
+                "status": lead.status,
+            }
+        )
     return {"count": qs.count(), "leads": leads}
 
 
 def _get_worktime_summary(params, user, company):
     from worktime.models import TimeEntry
+
     period = params.get("period", "today")
     today = date.today()
     if period == "week":
@@ -180,6 +193,7 @@ def _get_worktime_summary(params, user, company):
 
 def _get_upcoming_appointments(params, user, company):
     from appointments.models import Appointment
+
     days = params.get("days_ahead", 7)
     now = timezone.now()
     cutoff = now + timedelta(days=days)
@@ -191,36 +205,40 @@ def _get_upcoming_appointments(params, user, company):
     ).select_related("service", "resource")
     appts = []
     for a in qs[:20]:
-        appts.append({
-            "id": a.id,
-            "title": a.title,
-            "start": a.start_time.strftime("%d.%m.%Y %H:%M"),
-            "end": a.end_time.strftime("%d.%m.%Y %H:%M") if a.end_time else "",
-            "service": a.service.name if a.service else "",
-            "resource": a.resource.name if a.resource else "",
-            "status": a.status,
-        })
+        appts.append(
+            {
+                "id": a.id,
+                "title": a.title,
+                "start": a.start_time.strftime("%d.%m.%Y %H:%M"),
+                "end": a.end_time.strftime("%d.%m.%Y %H:%M") if a.end_time else "",
+                "service": a.service.name if a.service else "",
+                "resource": a.resource.name if a.resource else "",
+                "status": a.status,
+            }
+        )
     return {"count": qs.count(), "appointments": appts}
 
 
 def _get_active_interventions(params, user, company):
     from interventions.models import HitnaIntervencija
-    qs = HitnaIntervencija.objects.filter(company=company).exclude(
-        status__in=["RIJESENO", "FAKTURIRANO"]
-    )
+
+    qs = HitnaIntervencija.objects.filter(company=company).exclude(status__in=["RIJESENO", "FAKTURIRANO"])
     items = []
     for i in qs[:20]:
-        items.append({
-            "id": i.id,
-            "title": getattr(i, "title", str(i)),
-            "status": i.status,
-            "category": getattr(i, "category", ""),
-        })
+        items.append(
+            {
+                "id": i.id,
+                "title": getattr(i, "title", str(i)),
+                "status": i.status,
+                "category": getattr(i, "category", ""),
+            }
+        )
     return {"count": qs.count(), "interventions": items}
 
 
 def _get_outreach_contacts(params, user, company):
     from outreach.models import Contact
+
     status = params.get("status", "")
     limit = params.get("limit", 10)
     qs = Contact.objects.filter(company=company)
@@ -228,19 +246,22 @@ def _get_outreach_contacts(params, user, company):
         qs = qs.filter(status=status)
     contacts = []
     for c in qs[:limit]:
-        contacts.append({
-            "id": c.id,
-            "name": c.name,
-            "firm": getattr(c, "firm_name", ""),
-            "email": c.email,
-            "status": getattr(c, "status", ""),
-            "type": getattr(c, "contact_type", ""),
-        })
+        contacts.append(
+            {
+                "id": c.id,
+                "name": c.name,
+                "firm": getattr(c, "firm_name", ""),
+                "email": c.email,
+                "status": getattr(c, "status", ""),
+                "type": getattr(c, "contact_type", ""),
+            }
+        )
     return {"count": qs.count(), "contacts": contacts}
 
 
 def _get_tracking_status(params, user, company):
     from tracking.models import TrackedItem
+
     token = params.get("token", "")
     if not token:
         return {"error": "Token je obavezan"}
@@ -257,6 +278,7 @@ def _get_tracking_status(params, user, company):
 
 # ── ERP Analytics Tools (AIR-GAPPED) ────────────────────────
 
+
 def _analyze_inventory_value(params, user, company):
     """Sinteticki pregled skladista."""
     from django.db.models import F, FloatField, Sum
@@ -266,25 +288,27 @@ def _analyze_inventory_value(params, user, company):
     qs = InventoryItem.objects.filter(company=company, is_active=True)
 
     agg = qs.aggregate(
-        total_purchase=Sum(F('quantity') * F('purchase_price'), output_field=FloatField()),
-        total_selling=Sum(F('quantity') * F('unit_price'), output_field=FloatField()),
+        total_purchase=Sum(F("quantity") * F("purchase_price"), output_field=FloatField()),
+        total_selling=Sum(F("quantity") * F("unit_price"), output_field=FloatField()),
     )
 
     low_stock = []
-    for item in qs.filter(quantity__lte=F('min_quantity'), min_quantity__gt=0)[:20]:
-        low_stock.append({
-            "sku": item.sku,
-            "name": item.name,
-            "quantity": float(item.quantity),
-            "min_required": float(item.min_quantity),
-        })
+    for item in qs.filter(quantity__lte=F("min_quantity"), min_quantity__gt=0)[:20]:
+        low_stock.append(
+            {
+                "sku": item.sku,
+                "name": item.name,
+                "quantity": float(item.quantity),
+                "min_required": float(item.min_quantity),
+            }
+        )
 
     return {
         "total_items": qs.count(),
-        "warehouse_purchase_value_eur": round(agg['total_purchase'] or 0, 2),
-        "warehouse_selling_value_eur": round(agg['total_selling'] or 0, 2),
-        "potential_margin_eur": round((agg['total_selling'] or 0) - (agg['total_purchase'] or 0), 2),
-        "low_stock_count": qs.filter(quantity__lte=F('min_quantity'), min_quantity__gt=0).count(),
+        "warehouse_purchase_value_eur": round(agg["total_purchase"] or 0, 2),
+        "warehouse_selling_value_eur": round(agg["total_selling"] or 0, 2),
+        "potential_margin_eur": round((agg["total_selling"] or 0) - (agg["total_purchase"] or 0), 2),
+        "low_stock_count": qs.filter(quantity__lte=F("min_quantity"), min_quantity__gt=0).count(),
         "low_stock_items": low_stock,
     }
 
@@ -302,22 +326,18 @@ def _get_cashflow_summary(params, user, company):
 
     qs = Transaction.objects.filter(company=company, date__year=year, date__month=month)
 
-    income = qs.filter(direction='income').aggregate(
-        total=Sum('amount'), count=Count('id')
-    )
-    expense = qs.filter(direction='expense').aggregate(
-        total=Sum('amount'), count=Count('id')
-    )
+    income = qs.filter(direction="income").aggregate(total=Sum("amount"), count=Count("id"))
+    expense = qs.filter(direction="expense").aggregate(total=Sum("amount"), count=Count("id"))
 
-    inc_total = float(income['total'] or 0)
-    exp_total = float(expense['total'] or 0)
+    inc_total = float(income["total"] or 0)
+    exp_total = float(expense["total"] or 0)
 
     return {
         "period": f"{month:02d}/{year}",
         "income_eur": round(inc_total, 2),
-        "income_count": income['count'],
+        "income_count": income["count"],
         "expense_eur": round(exp_total, 2),
-        "expense_count": expense['count'],
+        "expense_count": expense["count"],
         "net_cashflow_eur": round(inc_total - exp_total, 2),
         "total_transactions": qs.count(),
         "note": "Sinteticki izvjestaj. AI nema pristup pojedinacnim IBAN racunima niti alatima za iniciranje placanja.",
@@ -330,26 +350,29 @@ def _get_pending_payments(params, user, company):
 
     from payments.models import Payment
 
-    qs = Payment.objects.filter(company=company, status__in=['pending', 'processing'])
+    qs = Payment.objects.filter(company=company, status__in=["pending", "processing"])
 
     by_method = []
     for code, name in Payment.METHOD_CHOICES:
         sub = qs.filter(method=code)
         if sub.exists():
-            by_method.append({
-                "method": name,
-                "count": sub.count(),
-                "amount_eur": float(sub.aggregate(s=Sum('amount'))['s'] or 0),
-            })
+            by_method.append(
+                {
+                    "method": name,
+                    "count": sub.count(),
+                    "amount_eur": float(sub.aggregate(s=Sum("amount"))["s"] or 0),
+                }
+            )
 
     return {
         "pending_count": qs.count(),
-        "pending_total_eur": float(qs.aggregate(s=Sum('amount'))['s'] or 0),
+        "pending_total_eur": float(qs.aggregate(s=Sum("amount"))["s"] or 0),
         "by_method": by_method,
     }
 
 
 # ── AI Diagnostic & Testing Tools ───────────────────────────
+
 
 def _run_system_health_check(params, user, company):
     if not user.is_superuser:
@@ -357,11 +380,13 @@ def _run_system_health_check(params, user, company):
     """Provjera zdravlja svih servisa."""
     import shutil
     import subprocess
+
     results = {}
 
     # 1. Database
     try:
         from django.db import connection
+
         with connection.cursor() as c:
             c.execute("SELECT 1")
         results["database"] = {"status": "OK", "engine": connection.vendor}
@@ -371,6 +396,7 @@ def _run_system_health_check(params, user, company):
     # 2. Redis
     try:
         from django.core.cache import cache
+
         cache.set("_health_check", "ok", 5)
         val = cache.get("_health_check")
         results["redis_cache"] = {"status": "OK" if val == "ok" else "DEGRADED"}
@@ -380,9 +406,11 @@ def _run_system_health_check(params, user, company):
     # 3. Celery
     try:
         from django_celery_results.models import TaskResult
+
         last = TaskResult.objects.order_by("-date_done").first()
         if last:
             from django.utils import timezone
+
             age = (timezone.now() - last.date_done).total_seconds()
             results["celery"] = {
                 "status": "OK" if age < 3600 else "WARNING (no recent tasks)",
@@ -409,6 +437,7 @@ def _run_system_health_check(params, user, company):
     # 5. Last error in log
     try:
         import os
+
         log_path = "/var/www/fina-connect/logs/django.log"
         if not os.path.exists(log_path):
             log_path = "/var/www/fina-connect/logs/gunicorn_error.log"
@@ -429,7 +458,10 @@ def _run_system_health_check(params, user, company):
     try:
         result = subprocess.run(
             ["/var/www/fina-connect/venv/bin/python", "manage.py", "showmigrations", "--plan"],
-            capture_output=True, text=True, cwd="/var/www/fina-connect", timeout=15
+            capture_output=True,
+            text=True,
+            cwd="/var/www/fina-connect",
+            timeout=15,
         )
         unapplied = [l.strip() for l in result.stdout.splitlines() if l.strip().startswith("[ ]")]
         results["migrations"] = {
@@ -472,16 +504,18 @@ def _validate_pos_math(params, user, company):
         tax = tax.quantize(Decimal("0.01"), ROUND_HALF_UP)
         gross = gross.quantize(Decimal("0.01"), ROUND_HALF_UP)
 
-        line_items.append({
-            "name": name,
-            "qty": float(qty),
-            "unit_price": float(price),
-            "discount_pct": float(discount),
-            "tax_rate": float(tax_rate),
-            "net": float(net),
-            "tax": float(tax),
-            "gross": float(gross),
-        })
+        line_items.append(
+            {
+                "name": name,
+                "qty": float(qty),
+                "unit_price": float(price),
+                "discount_pct": float(discount),
+                "tax_rate": float(tax_rate),
+                "net": float(net),
+                "tax": float(tax),
+                "gross": float(gross),
+            }
+        )
 
         subtotal += net
         tax_total += tax
@@ -490,10 +524,10 @@ def _validate_pos_math(params, user, company):
     change = max(Decimal("0"), amount_paid - total) if amount_paid else Decimal("0")
 
     # Cross-check sa POS engine
-    engine_match = True
     engine_note = ""
     try:
-        from pos.services import recalculate_receipt
+        from pos.services import recalculate_receipt  # noqa: F401
+
         engine_note = "POS engine dostupan za provjeru"
     except ImportError:
         engine_note = "POS engine nije dostupan za cross-check"
@@ -526,10 +560,7 @@ def _run_test_suite(params, user, company):
         cmd.append("tests")
 
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True,
-            cwd="/var/www/fina-connect", timeout=120
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd="/var/www/fina-connect", timeout=120)
 
         output = result.stderr or result.stdout
         lines = output.strip().splitlines()
@@ -552,10 +583,9 @@ def _run_test_suite(params, user, company):
         for line in lines:
             if " ... " in line:
                 parts = line.split(" ... ")
-                test_results.append({
-                    "test": parts[0].strip()[-80:],
-                    "result": parts[1].strip() if len(parts) > 1 else "?"
-                })
+                test_results.append(
+                    {"test": parts[0].strip()[-80:], "result": parts[1].strip() if len(parts) > 1 else "?"}
+                )
 
         # Extract failures
         failures = []
@@ -595,9 +625,12 @@ def _audit_data_integrity(params, user, company):
     # 1. POS: Receipts bez sesije
     try:
         from pos.models import POSReceipt
+
         orphan_receipts = POSReceipt.objects.filter(session__isnull=True).count()
         if orphan_receipts:
-            issues.append({"type": "orphan", "model": "POSReceipt", "count": orphan_receipts, "desc": "Racuni bez POS sesije"})
+            issues.append(
+                {"type": "orphan", "model": "POSReceipt", "count": orphan_receipts, "desc": "Racuni bez POS sesije"}
+            )
     except DatabaseError:
         pass
 
@@ -606,21 +639,36 @@ def _audit_data_integrity(params, user, company):
         from django.utils import timezone
 
         from pos.models import POSSession
+
         old_sessions = POSSession.objects.filter(
-            status=POSSession.Status.OPEN,
-            opened_at__lt=timezone.now() - timezone.timedelta(hours=24)
+            status=POSSession.Status.OPEN, opened_at__lt=timezone.now() - timezone.timedelta(hours=24)
         ).count()
         if old_sessions:
-            issues.append({"type": "stale", "model": "POSSession", "count": old_sessions, "desc": "Otvorene sesije starije od 24h"})
+            issues.append(
+                {
+                    "type": "stale",
+                    "model": "POSSession",
+                    "count": old_sessions,
+                    "desc": "Otvorene sesije starije od 24h",
+                }
+            )
     except DatabaseError:
         pass
 
     # 3. Propter: Otpremnice without billing period
     try:
         from propter.models import Otpremnica
+
         orphan_otp = Otpremnica.objects.filter(billing_period__isnull=True).count()
         if orphan_otp:
-            issues.append({"type": "orphan", "model": "Otpremnica", "count": orphan_otp, "desc": "Otpremnice bez obracunskog perioda"})
+            issues.append(
+                {
+                    "type": "orphan",
+                    "model": "Otpremnica",
+                    "count": orphan_otp,
+                    "desc": "Otpremnice bez obracunskog perioda",
+                }
+            )
     except DatabaseError:
         pass
 
@@ -629,30 +677,51 @@ def _audit_data_integrity(params, user, company):
         from django.utils import timezone
 
         from propter.models import BillingPeriod
+
         now = timezone.now()
-        stale_periods = BillingPeriod.objects.filter(
-            status=BillingPeriod.Status.OPEN
-        ).exclude(year=now.year, month=now.month).count()
+        stale_periods = (
+            BillingPeriod.objects.filter(status=BillingPeriod.Status.OPEN)
+            .exclude(year=now.year, month=now.month)
+            .count()
+        )
         if stale_periods:
-            issues.append({"type": "stale", "model": "BillingPeriod", "count": stale_periods, "desc": "Otvoreni periodi iz proslih mjeseci (trebali bi biti zatvoreni)"})
+            issues.append(
+                {
+                    "type": "stale",
+                    "model": "BillingPeriod",
+                    "count": stale_periods,
+                    "desc": "Otvoreni periodi iz proslih mjeseci (trebali bi biti zatvoreni)",
+                }
+            )
     except DatabaseError:
         pass
 
     # 5. Invoices with zero total
     try:
         from invoicing.models import Invoice
-        zero_inv = Invoice.objects.filter(company=company, total=0).exclude(status='DRAFT').count()
+
+        zero_inv = Invoice.objects.filter(company=company, total=0).exclude(status="DRAFT").count()
         if zero_inv:
-            issues.append({"type": "suspicious", "model": "Invoice", "count": zero_inv, "desc": "Fakture s iznosom 0 (ne-draft)"})
+            issues.append(
+                {"type": "suspicious", "model": "Invoice", "count": zero_inv, "desc": "Fakture s iznosom 0 (ne-draft)"}
+            )
     except DatabaseError:
         pass
 
     # 6. Inventory: Negative stock
     try:
         from inventory.models import InventoryItem
+
         neg = InventoryItem.objects.filter(company=company, quantity__lt=0).count()
         if neg:
-            issues.append({"type": "negative_stock", "model": "InventoryItem", "count": neg, "desc": "Artikli s negativnom zalihom"})
+            issues.append(
+                {
+                    "type": "negative_stock",
+                    "model": "InventoryItem",
+                    "count": neg,
+                    "desc": "Artikli s negativnom zalihom",
+                }
+            )
     except DatabaseError:
         pass
 
@@ -661,17 +730,29 @@ def _audit_data_integrity(params, user, company):
         from django.db.models import Count
 
         from partners.models import Partner
-        dupes = Partner.objects.filter(company=company).values("oib").annotate(
-            cnt=Count("id")
-        ).filter(cnt__gt=1, oib__gt="")
+
+        dupes = (
+            Partner.objects.filter(company=company)
+            .values("oib")
+            .annotate(cnt=Count("id"))
+            .filter(cnt__gt=1, oib__gt="")
+        )
         if dupes.exists():
-            issues.append({"type": "duplicate", "model": "Partner", "count": dupes.count(), "desc": "Partneri s duplikatnim OIB-om"})
+            issues.append(
+                {
+                    "type": "duplicate",
+                    "model": "Partner",
+                    "count": dupes.count(),
+                    "desc": "Partneri s duplikatnim OIB-om",
+                }
+            )
     except DatabaseError:
         pass
 
     # 8. e-Racun without items
     try:
         from eracun.models import ERacun
+
         empty_er = ERacun.objects.filter(company=company, items__isnull=True).count()
         if empty_er:
             issues.append({"type": "empty", "model": "ERacun", "count": empty_er, "desc": "e-Racuni bez stavki"})
@@ -800,6 +881,7 @@ def _explain_business_flow(params, user, company):
 
 
 # ── Worktime -> Invoice Pipeline Tools ──────────────────────
+
 
 def _build_timeentry_queryset(params, company):
     """Helper: gradi TimeEntry queryset iz parametara."""
@@ -958,44 +1040,50 @@ def _preview_invoice_from_hours(params, user, company):
     # Grupiraj stavke
     items = []
     if group_by == "worker":
-        groups = qs.values("user__username", "user__first_name", "user__last_name").annotate(
-            hours=Sum("duration"), amount=Sum("billing_amount")
-        ).order_by("user__last_name")
+        groups = (
+            qs.values("user__username", "user__first_name", "user__last_name")
+            .annotate(hours=Sum("duration"), amount=Sum("billing_amount"))
+            .order_by("user__last_name")
+        )
         for g in groups:
             name = f"{g['user__first_name']} {g['user__last_name']}".strip() or g["user__username"]
             hours = g["hours"] or Decimal("0")
             rate = (g["amount"] / hours).quantize(Decimal("0.01")) if hours else project.hourly_rate
-            items.append({
-                "description": f"Rad: {name} — {project.name}",
-                "quantity": float(hours),
-                "unit": "h",
-                "unit_price": float(rate),
-                "total": float(g["amount"] or 0),
-            })
+            items.append(
+                {
+                    "description": f"Rad: {name} — {project.name}",
+                    "quantity": float(hours),
+                    "unit": "h",
+                    "unit_price": float(rate),
+                    "total": float(g["amount"] or 0),
+                }
+            )
     elif group_by == "task":
-        groups = qs.values("task_type").annotate(
-            hours=Sum("duration"), amount=Sum("billing_amount")
-        ).order_by("task_type")
+        groups = (
+            qs.values("task_type").annotate(hours=Sum("duration"), amount=Sum("billing_amount")).order_by("task_type")
+        )
         for g in groups:
-            items.append({
-                "description": f"{g['task_type']} — {project.name}",
-                "quantity": float(g["hours"] or 0),
-                "unit": "h",
-                "unit_price": float((g["amount"] / g["hours"]).quantize(Decimal("0.01"))) if g["hours"] else 0,
-                "total": float(g["amount"] or 0),
-            })
+            items.append(
+                {
+                    "description": f"{g['task_type']} — {project.name}",
+                    "quantity": float(g["hours"] or 0),
+                    "unit": "h",
+                    "unit_price": float((g["amount"] / g["hours"]).quantize(Decimal("0.01"))) if g["hours"] else 0,
+                    "total": float(g["amount"] or 0),
+                }
+            )
     elif group_by == "day":
-        groups = qs.values("date").annotate(
-            hours=Sum("duration"), amount=Sum("billing_amount")
-        ).order_by("date")
+        groups = qs.values("date").annotate(hours=Sum("duration"), amount=Sum("billing_amount")).order_by("date")
         for g in groups:
-            items.append({
-                "description": f"{g['date']} — {project.name}",
-                "quantity": float(g["hours"] or 0),
-                "unit": "h",
-                "unit_price": float((g["amount"] / g["hours"]).quantize(Decimal("0.01"))) if g["hours"] else 0,
-                "total": float(g["amount"] or 0),
-            })
+            items.append(
+                {
+                    "description": f"{g['date']} — {project.name}",
+                    "quantity": float(g["hours"] or 0),
+                    "unit": "h",
+                    "unit_price": float((g["amount"] / g["hours"]).quantize(Decimal("0.01"))) if g["hours"] else 0,
+                    "total": float(g["amount"] or 0),
+                }
+            )
 
     subtotal = sum(i["total"] for i in items)
     tax = round(subtotal * float(tax_rate) / 100, 2)
@@ -1088,9 +1176,11 @@ def _create_invoice_from_hours(params, user, company):
         )
 
         # Grupiraj po radniku
-        groups = qs.values(
-            "user_id", "user__username", "user__first_name", "user__last_name"
-        ).annotate(hours=Sum("duration"), amount=Sum("billing_amount")).order_by("user__last_name")
+        groups = (
+            qs.values("user_id", "user__username", "user__first_name", "user__last_name")
+            .annotate(hours=Sum("duration"), amount=Sum("billing_amount"))
+            .order_by("user__last_name")
+        )
 
         subtotal = Decimal("0")
         for g in groups:
@@ -1141,6 +1231,7 @@ def _create_invoice_from_hours(params, user, company):
 
 # --- Fenix Intelligence v2 handlers (CC Code) ---
 
+
 def _get_fund_opportunities(params, user, company):
     """Dohvati relevantne EU fondove i HR poticaje. READ-ONLY, s 24h cacheom."""
     try:
@@ -1148,67 +1239,70 @@ def _get_fund_opportunities(params, user, company):
         from django.utils import timezone as tz
 
         from intelligence.models import FundOpportunity
+
         today = tz.now().date()
 
-        tip = params.get('tip', 'sve')
-        rok_dana = params.get('rok_dana', 90)
-        samo_aktivni = params.get('samo_aktivni', True)
+        tip = params.get("tip", "sve")
+        rok_dana = params.get("rok_dana", 90)
+        samo_aktivni = params.get("samo_aktivni", True)
 
-        biz_type = getattr(company, 'business_type', 'doo') if company else 'doo'
-        cache_key = f'fund_opps_{biz_type}_{tip}_{rok_dana}'
+        biz_type = getattr(company, "business_type", "doo") if company else "doo"
+        cache_key = f"fund_opps_{biz_type}_{tip}_{rok_dana}"
         cached = cache.get(cache_key)
         if cached:
             return cached
 
         qs = FundOpportunity.objects.all()
         if samo_aktivni:
-            qs = qs.filter(status='aktivan')
-        if tip != 'sve':
-            tip_map = {'eu_fond': 'eu', 'hr_poticaj': 'hr', 'bio_certifikacija': 'bio'}
+            qs = qs.filter(status="aktivan")
+        if tip != "sve":
+            tip_map = {"eu_fond": "eu", "hr_poticaj": "hr", "bio_certifikacija": "bio"}
             prefix = tip_map.get(tip, tip)
-            if prefix == 'bio':
-                qs = qs.filter(kljucne_rijeci__contains=['bio'])
+            if prefix == "bio":
+                qs = qs.filter(kljucne_rijeci__contains=["bio"])
             else:
                 qs = qs.filter(tip__startswith=prefix)
         if rok_dana:
             qs = qs.filter(rok_prijave__lte=today + timedelta(days=rok_dana))
 
-        if company and biz_type == 'opg':
-            qs = qs.filter(ciljna_skupina__in=['opg', 'svi'])
-        elif company and biz_type in ('udruga', 'kud', 'sport'):
-            qs = qs.filter(ciljna_skupina__in=['udruga', 'svi'])
+        if company and biz_type == "opg":
+            qs = qs.filter(ciljna_skupina__in=["opg", "svi"])
+        elif company and biz_type in ("udruga", "kud", "sport"):
+            qs = qs.filter(ciljna_skupina__in=["udruga", "svi"])
 
         rezultati = []
-        for f in qs.order_by('rok_prijave')[:10]:
+        for f in qs.order_by("rok_prijave")[:10]:
             days = f.days_until_deadline
-            rezultati.append({
-                'naziv': f.naziv,
-                'tip': f.get_tip_display(),
-                'tijelo': f.tijelo,
-                'iznos_max_eur': float(f.iznos_max_eur) if f.iznos_max_eur else None,
-                'rok_prijave': str(f.rok_prijave) if f.rok_prijave else None,
-                'preostalo_dana': days,
-                'hitno': f.hitno,
-                'ai_summary': f.ai_summary[:200] if f.ai_summary else '',
-                'checklist': f.ai_checklist[:3] if f.ai_checklist else [],
-                'url': f.url,
-            })
+            rezultati.append(
+                {
+                    "naziv": f.naziv,
+                    "tip": f.get_tip_display(),
+                    "tijelo": f.tijelo,
+                    "iznos_max_eur": float(f.iznos_max_eur) if f.iznos_max_eur else None,
+                    "rok_prijave": str(f.rok_prijave) if f.rok_prijave else None,
+                    "preostalo_dana": days,
+                    "hitno": f.hitno,
+                    "ai_summary": f.ai_summary[:200] if f.ai_summary else "",
+                    "checklist": f.ai_checklist[:3] if f.ai_checklist else [],
+                    "url": f.url,
+                }
+            )
 
         result = {
-            'ukupno': qs.count(),
-            'prikazano': len(rezultati),
-            'fondovi': rezultati,
-            'napomena': f'Firma: {company.name} ({biz_type})' if company else 'Nema firme',
+            "ukupno": qs.count(),
+            "prikazano": len(rezultati),
+            "fondovi": rezultati,
+            "napomena": f"Firma: {company.name} ({biz_type})" if company else "Nema firme",
         }
 
-        if any(r.get('hitno') for r in rezultati):
+        if any(r.get("hitno") for r in rezultati):
             return result
         cache.set(cache_key, result, timeout=86400)
         return result
     except ImportError:
         return {
-            'error': 'Intelligence modul jos nije instaliran.',
-            'info': 'Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.',
+            "error": "Intelligence modul jos nije instaliran.",
+            "info": "Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.",
         }
 
 
@@ -1218,217 +1312,237 @@ def _get_livestock_status(params, user, company):
         from django.db.models import Sum
 
         from livestock.models import CropPlan, HealthRecord, Livestock, MilkRecord
-        today = timezone.now().date()
-        detalji = params.get('detalji', 'pregled')
 
-        if company and getattr(company, 'business_type', '') != 'opg':
-            return {'info': 'Livestock modul dostupan samo za OPG firme.'}
+        today = timezone.now().date()
+        detalji = params.get("detalji", "pregled")
+
+        if company and getattr(company, "business_type", "") != "opg":
+            return {"info": "Livestock modul dostupan samo za OPG firme."}
 
         if not company:
-            return {'error': 'Nema aktivne firme.'}
+            return {"error": "Nema aktivne firme."}
 
         grla = Livestock.objects.filter(company=company)
 
-        if detalji == 'pregled':
+        if detalji == "pregled":
             return {
-                'ukupno_grla': grla.count(),
-                'aktivnih': grla.filter(status='aktivno').count(),
-                'gravidnih': grla.filter(status='gravidno').count(),
-                'teli_uskoro': grla.filter(
-                    expected_calving__lte=today + timedelta(days=21),
-                    expected_calving__gte=today, status='gravidno'
+                "ukupno_grla": grla.count(),
+                "aktivnih": grla.filter(status="aktivno").count(),
+                "gravidnih": grla.filter(status="gravidno").count(),
+                "teli_uskoro": grla.filter(
+                    expected_calving__lte=today + timedelta(days=21), expected_calving__gte=today, status="gravidno"
                 ).count(),
-                'u_karenciji': HealthRecord.objects.filter(
-                    animal__company=company,
-                    karencija_do__gte=today
-                ).count(),
-                'bio_grla': grla.filter(is_organic=True).count(),
+                "u_karenciji": HealthRecord.objects.filter(animal__company=company, karencija_do__gte=today).count(),
+                "bio_grla": grla.filter(is_organic=True).count(),
             }
-        elif detalji == 'zdravlje':
-            alarmi = HealthRecord.objects.filter(
-                animal__company=company,
-                karencija_do__gte=today
-            ).select_related('animal')[:10]
+        elif detalji == "zdravlje":
+            alarmi = HealthRecord.objects.filter(animal__company=company, karencija_do__gte=today).select_related(
+                "animal"
+            )[:10]
             return {
-                'u_karenciji': [
+                "u_karenciji": [
                     {
-                        'grlo': r.animal.ear_tag,
-                        'lijek': r.lijek,
-                        'karencija_do': str(r.karencija_do),
-                        'preostalo_dana': (r.karencija_do - today).days,
-                    } for r in alarmi
+                        "grlo": r.animal.ear_tag,
+                        "lijek": r.lijek,
+                        "karencija_do": str(r.karencija_do),
+                        "preostalo_dana": (r.karencija_do - today).days,
+                    }
+                    for r in alarmi
                 ]
             }
-        elif detalji == 'mlijeko':
+        elif detalji == "mlijeko":
             jucer = today - timedelta(days=1)
             mr = MilkRecord.objects.filter(animal__company=company, datum=jucer)
-            agg = mr.aggregate(ukupno=Sum('ukupno_l'))
+            agg = mr.aggregate(ukupno=Sum("ukupno_l"))
             return {
-                'datum': str(jucer),
-                'ukupno_litara': float(agg['ukupno'] or 0),
-                'broj_krava': mr.count(),
-                'prosjek_po_kravi': round(float(agg['ukupno'] or 0) / max(mr.count(), 1), 2),
+                "datum": str(jucer),
+                "ukupno_litara": float(agg["ukupno"] or 0),
+                "broj_krava": mr.count(),
+                "prosjek_po_kravi": round(float(agg["ukupno"] or 0) / max(mr.count(), 1), 2),
             }
-        elif detalji == 'usjevi':
-            planovi = CropPlan.objects.filter(company=company).order_by('-godina')[:5]
+        elif detalji == "usjevi":
+            planovi = CropPlan.objects.filter(company=company).order_by("-godina")[:5]
             return {
-                'planovi': [
+                "planovi": [
                     {
-                        'id': p.pk,
-                        'kultura': p.get_kultura_display(),
-                        'godina': p.godina,
-                        'status': p.get_status_display(),
-                        'za_prodaju': p.za_prodaju,
-                        'visak_t': float(p.procijenjeni_visak_t) if p.procijenjeni_visak_t else None,
-                        'auto_listing_spreman': p.auto_listing_ready,
-                    } for p in planovi
+                        "id": p.pk,
+                        "kultura": p.get_kultura_display(),
+                        "godina": p.godina,
+                        "status": p.get_status_display(),
+                        "za_prodaju": p.za_prodaju,
+                        "visak_t": float(p.procijenjeni_visak_t) if p.procijenjeni_visak_t else None,
+                        "auto_listing_spreman": p.auto_listing_ready,
+                    }
+                    for p in planovi
                 ]
             }
-        return {'error': f'Nepoznati detalji: {detalji}'}
+        return {"error": f"Nepoznati detalji: {detalji}"}
     except ImportError:
-        return {'error': 'Livestock modul jos nije instaliran.'}
+        return {"error": "Livestock modul jos nije instaliran."}
 
 
 def _create_futures_listing(params, user, company):
     """ASSISTED: Objavi visak usjeva na Burzi. Prolazi kroz AIGate."""
     try:
         from superadmin_ai.services import AIGate
+
         gate = AIGate()
-        crop_plan_id = params.get('crop_plan_id')
+        crop_plan_id = params.get("crop_plan_id")
         result = gate.check(
             company=company,
-            module='marketplace',
-            action_type='create_futures_listing',
+            module="marketplace",
+            action_type="create_futures_listing",
             user=user,
-            description=f'AI zeli kreirati FuturesListing za crop_plan_id={crop_plan_id}',
+            description=f"AI zeli kreirati FuturesListing za crop_plan_id={crop_plan_id}",
         )
         if result.blocked:
-            return {'error': result.message, 'blocked': True}
+            return {"error": result.message, "blocked": True}
         if result.queued:
             return {
-                'status': 'QUEUED',
-                'message': 'Zahtjev je poslan na odobrenje. Potvrdi u AI Cockpitu.',
-                'pending_action_id': str(result.pending_action.id) if result.pending_action else None,
+                "status": "QUEUED",
+                "message": "Zahtjev je poslan na odobrenje. Potvrdi u AI Cockpitu.",
+                "pending_action_id": str(result.pending_action.id) if result.pending_action else None,
             }
         try:
             from intelligence.services import create_futures_listing_from_crop
             from livestock.models import CropPlan
-            plan = CropPlan.objects.get(pk=params['crop_plan_id'], company=company)
-            if params.get('cijena_eur_t'):
-                plan._override_price = params['cijena_eur_t']
+
+            plan = CropPlan.objects.get(pk=params["crop_plan_id"], company=company)
+            if params.get("cijena_eur_t"):
+                plan._override_price = params["cijena_eur_t"]
             created = create_futures_listing_from_crop(plan)
             return {
-                'status': 'CREATED' if created else 'ALREADY_EXISTS',
-                'kultura': plan.get_kultura_display(),
-                'visak_t': float(plan.procijenjeni_visak_t) if plan.procijenjeni_visak_t else None,
+                "status": "CREATED" if created else "ALREADY_EXISTS",
+                "kultura": plan.get_kultura_display(),
+                "visak_t": float(plan.procijenjeni_visak_t) if plan.procijenjeni_visak_t else None,
             }
         except ObjectDoesNotExist as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
     except ImportError:
-        return {'error': 'SuperadminAI ili Intelligence modul nije instaliran.'}
+        return {"error": "SuperadminAI ili Intelligence modul nije instaliran."}
 
 
 def _get_compliance_warnings(params, user, company):
     """Prediktivna compliance provjera. READ-ONLY -- skenira sve module."""
     today = timezone.now().date()
-    kategorija = params.get('kategorija', 'sve')
+    kategorija = params.get("kategorija", "sve")
     upozorenja = []
 
     if not company:
-        return {'error': 'Nema aktivne firme.'}
+        return {"error": "Nema aktivne firme."}
 
-    if kategorija in ('sve', 'pdv'):
+    if kategorija in ("sve", "pdv"):
         try:
-            if getattr(company, 'is_nonprofit', False) or getattr(company, 'business_type', '') in ('udruga',):
+            if getattr(company, "is_nonprofit", False) or getattr(company, "business_type", "") in ("udruga",):
                 from invoicing.models import Invoice
-                promet = Invoice.objects.filter(
-                    company=company, date__year=today.year, status='paid'
-                ).aggregate(s=Sum('total_amount'))['s'] or 0
+
+                promet = (
+                    Invoice.objects.filter(company=company, date__year=today.year, status="paid").aggregate(
+                        s=Sum("total_amount")
+                    )["s"]
+                    or 0
+                )
                 if float(promet) > 25000:
-                    upozorenja.append({
-                        'tip': 'pdv_granica',
-                        'razina': 'warning' if float(promet) < 28000 else 'critical',
-                        'poruka': f'Promet {promet:.0f} EUR -- granica za PDV obveznika je 30.000 EUR',
-                        'akcija': 'Konzultirajte poreznog savjetnika',
-                    })
+                    upozorenja.append(
+                        {
+                            "tip": "pdv_granica",
+                            "razina": "warning" if float(promet) < 28000 else "critical",
+                            "poruka": f"Promet {promet:.0f} EUR -- granica za PDV obveznika je 30.000 EUR",
+                            "akcija": "Konzultirajte poreznog savjetnika",
+                        }
+                    )
         except (ValueError, TypeError):
             pass
 
-    if kategorija in ('sve', 'dokumenti'):
+    if kategorija in ("sve", "dokumenti"):
         try:
             from delivery.models import VehicleDocument
+
             vd = VehicleDocument.objects.filter(
-                vehicle__company=company,
-                valid_until__lte=today + timedelta(days=30)
-            ).order_by('valid_until')[:5]
+                vehicle__company=company, valid_until__lte=today + timedelta(days=30)
+            ).order_by("valid_until")[:5]
             for d in vd:
-                upozorenja.append({
-                    'tip': 'dokument_vozila',
-                    'razina': 'critical' if d.is_expired else 'warning',
-                    'poruka': f'{d.vehicle.plate_number}: {d.get_doc_type_display()} istice {d.valid_until}',
-                    'preostalo_dana': d.days_until_expiry,
-                })
+                upozorenja.append(
+                    {
+                        "tip": "dokument_vozila",
+                        "razina": "critical" if d.is_expired else "warning",
+                        "poruka": f"{d.vehicle.plate_number}: {d.get_doc_type_display()} istice {d.valid_until}",
+                        "preostalo_dana": d.days_until_expiry,
+                    }
+                )
         except DatabaseError:
             pass
 
-    if kategorija in ('sve', 'clanarine'):
+    if kategorija in ("sve", "clanarine"):
         try:
             from udruge.models import Clan
+
             uskoro = Clan.objects.filter(
-                company=company, status='aktivan',
+                company=company,
+                status="aktivan",
                 membership_expires__lte=today + timedelta(days=14),
                 membership_expires__gte=today,
             ).count()
             if uskoro:
-                upozorenja.append({
-                    'tip': 'clanstvo_istice',
-                    'razina': 'warning',
-                    'poruka': f'{uskoro} clanova ima clanstvo koje istice za 14 dana',
-                    'akcija': 'Posalji WhatsApp podsjetnik (send_expiry_reminders)',
-                })
+                upozorenja.append(
+                    {
+                        "tip": "clanstvo_istice",
+                        "razina": "warning",
+                        "poruka": f"{uskoro} clanova ima clanstvo koje istice za 14 dana",
+                        "akcija": "Posalji WhatsApp podsjetnik (send_expiry_reminders)",
+                    }
+                )
         except DatabaseError:
             pass
 
-    if kategorija in ('sve', 'livestock'):
+    if kategorija in ("sve", "livestock"):
         try:
             from livestock.models import HealthRecord
+
             karencija = HealthRecord.objects.filter(
                 animal__company=company,
                 karencija_do__gte=today,
             ).count()
             if karencija:
-                upozorenja.append({
-                    'tip': 'karencija_goveda',
-                    'razina': 'critical',
-                    'poruka': f'{karencija} grla u karenciji -- mlijeko i meso NE smiju u prodaju!',
-                    'akcija': 'Provjeri ear tagove u livestock modulu',
-                })
+                upozorenja.append(
+                    {
+                        "tip": "karencija_goveda",
+                        "razina": "critical",
+                        "poruka": f"{karencija} grla u karenciji -- mlijeko i meso NE smiju u prodaju!",
+                        "akcija": "Provjeri ear tagove u livestock modulu",
+                    }
+                )
         except DatabaseError:
             pass
 
-    if kategorija in ('sve', 'fondovi'):
+    if kategorija in ("sve", "fondovi"):
         try:
             from intelligence.models import FundOpportunity
+
             hitni = FundOpportunity.objects.filter(
-                status='aktivan',
+                status="aktivan",
                 rok_prijave__lte=today + timedelta(days=14),
                 rok_prijave__gte=today,
             ).count()
             if hitni:
-                upozorenja.append({
-                    'tip': 'fond_rok',
-                    'razina': 'warning',
-                    'poruka': f'{hitni} natjecaj/a istice za 14 dana',
-                    'akcija': 'Provjeri get_fund_opportunities za detalje',
-                })
+                upozorenja.append(
+                    {
+                        "tip": "fond_rok",
+                        "razina": "warning",
+                        "poruka": f"{hitni} natjecaj/a istice za 14 dana",
+                        "akcija": "Provjeri get_fund_opportunities za detalje",
+                    }
+                )
         except DatabaseError:
             pass
 
     return {
-        'ukupno_upozorenja': len(upozorenja),
-        'status': 'CLEAN' if not upozorenja else ('CRITICAL' if any(u['razina'] == 'critical' for u in upozorenja) else 'WARNING'),
-        'upozorenja': upozorenja,
-        'firma': company.name,
+        "ukupno_upozorenja": len(upozorenja),
+        "status": "CLEAN"
+        if not upozorenja
+        else ("CRITICAL" if any(u["razina"] == "critical" for u in upozorenja) else "WARNING"),
+        "upozorenja": upozorenja,
+        "firma": company.name,
     }
 
 
@@ -1437,37 +1551,40 @@ def _get_intelligence_results(params, user, company):
     """Dohvati najnovije Intelligence pronalaske za firmu. READ-ONLY."""
     try:
         from intelligence.models import IntelligenceResult
-        status_filter = params.get('status', 'novo')
-        limit = params.get('limit', 10)
+
+        status_filter = params.get("status", "novo")
+        limit = params.get("limit", 10)
 
         if not company:
-            return {'error': 'Nema aktivne firme.'}
+            return {"error": "Nema aktivne firme."}
 
         qs = IntelligenceResult.objects.filter(job__company=company)
-        if status_filter != 'sve':
+        if status_filter != "sve":
             qs = qs.filter(status=status_filter)
 
         rezultati = []
-        for r in qs.order_by('-ai_relevantnost', '-created_at')[:limit]:
-            rezultati.append({
-                'naslov': r.naslov,
-                'summary': r.summary[:300] if r.summary else '',
-                'url': r.url,
-                'relevantnost': r.ai_relevantnost,
-                'status': r.get_status_display(),
-                'izvor': r.source.naziv if r.source else 'Nepoznat',
-                'datum': str(r.created_at.date()),
-                'promo_tekst': r.promo_tekst[:200] if r.promo_tekst else '',
-            })
+        for r in qs.order_by("-ai_relevantnost", "-created_at")[:limit]:
+            rezultati.append(
+                {
+                    "naslov": r.naslov,
+                    "summary": r.summary[:300] if r.summary else "",
+                    "url": r.url,
+                    "relevantnost": r.ai_relevantnost,
+                    "status": r.get_status_display(),
+                    "izvor": r.source.naziv if r.source else "Nepoznat",
+                    "datum": str(r.created_at.date()),
+                    "promo_tekst": r.promo_tekst[:200] if r.promo_tekst else "",
+                }
+            )
 
         return {
-            'ukupno': qs.count(),
-            'prikazano': len(rezultati),
-            'rezultati': rezultati,
-            'firma': company.name,
+            "ukupno": qs.count(),
+            "prikazano": len(rezultati),
+            "rezultati": rezultati,
+            "firma": company.name,
         }
     except ImportError:
         return {
-            'error': 'Intelligence modul jos nije instaliran.',
-            'info': 'Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.',
+            "error": "Intelligence modul jos nije instaliran.",
+            "info": "Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.",
         }

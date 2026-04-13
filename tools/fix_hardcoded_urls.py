@@ -9,21 +9,22 @@ Pokretanje:
   python3 tools/fix_hardcoded_urls.py --scan       # samo izvjestaj
   python3 tools/fix_hardcoded_urls.py --fix         # popravi sve
 """
+
 import re
 import sys
 from pathlib import Path
 
-BASE_DIR = Path('/var/www/fina-connect')
+BASE_DIR = Path("/var/www/fina-connect")
 TEMPLATE_DIRS = [
-    BASE_DIR / 'templates',
+    BASE_DIR / "templates",
 ]
 # Dodaj app template dirs
 for app_dir in BASE_DIR.iterdir():
-    t = app_dir / 'templates'
+    t = app_dir / "templates"
     if t.is_dir():
         TEMPLATE_DIRS.append(t)
 
-SKIP_DIRS = {'venv', 'node_modules', '.git', '__pycache__', 'backups'}
+SKIP_DIRS = {"venv", "node_modules", ".git", "__pycache__", "backups"}
 
 # ═══════════════════════════════════════════════════════════════
 # Mapiranje: hardkodirani URL → Django {% url %} tag
@@ -31,26 +32,23 @@ SKIP_DIRS = {'venv', 'node_modules', '.git', '__pycache__', 'backups'}
 # Samo sigurne zamjene — URL-ovi koji sigurno postoje
 URL_MAP = {
     # Auth
-    'href="/login/"':        "href=\"{% url 'login' %}\"",
-    'href="/register/"':     "href=\"{% url 'accounts:quick_register' %}\"",
-    'action="/login/"':      "action=\"{% url 'login' %}\"",
-    "href='/login/'":        "href=\"{% url 'login' %}\"",
-    "href='/register/'":     "href=\"{% url 'accounts:quick_register' %}\"",
-
+    'href="/login/"': "href=\"{% url 'login' %}\"",
+    'href="/register/"': "href=\"{% url 'accounts:quick_register' %}\"",
+    'action="/login/"': "action=\"{% url 'login' %}\"",
+    "href='/login/'": "href=\"{% url 'login' %}\"",
+    "href='/register/'": "href=\"{% url 'accounts:quick_register' %}\"",
     # Dashboard
-    'href="/dashboard/"':    "href=\"{% url 'dashboard' %}\"",
-    'href="/"':              "href=\"{% url 'dashboard' %}\"",
-
+    'href="/dashboard/"': "href=\"{% url 'dashboard' %}\"",
+    'href="/"': "href=\"{% url 'dashboard' %}\"",
     # Core modules
-    'href="/pos/"':          "href=\"{% url 'pos:terminal' %}\"",
-    'href="/partners/"':     "href=\"{% url 'partners:partner_list' %}\"",
-    'href="/invoicing/"':    "href=\"{% url 'invoicing:invoice_list' %}\"",
-    'href="/inventory/"':    "href=\"{% url 'inventory:item_list' %}\"",
-    'href="/worktime/"':     "href=\"{% url 'worktime:dashboard' %}\"",
+    'href="/pos/"': "href=\"{% url 'pos:terminal' %}\"",
+    'href="/partners/"': "href=\"{% url 'partners:partner_list' %}\"",
+    'href="/invoicing/"': "href=\"{% url 'invoicing:invoice_list' %}\"",
+    'href="/inventory/"': "href=\"{% url 'inventory:item_list' %}\"",
+    'href="/worktime/"': "href=\"{% url 'worktime:dashboard' %}\"",
     'href="/appointments/"': "href=\"{% url 'appointments:booking_list' %}\"",
-    'href="/ai/"':           "href=\"{% url 'ai_cockpit' %}\"",
+    'href="/ai/"': "href=\"{% url 'ai_cockpit' %}\"",
     'href="/smart-import/"': "href=\"{% url 'smart_import:upload' %}\"",
-
     # Actions
     'action="/smart-import/"': "action=\"{% url 'smart_import:upload' %}\"",
 }
@@ -58,29 +56,29 @@ URL_MAP = {
 # Pattern za href="/nesto/" koji NIJE {% url %}
 HARDCODED_PATTERN = re.compile(
     r'(?:href|action)=["\']/((?!static|media|cdn|i18n|admin|__debug__|favicon|manifest|sw\.js|offline)[a-z0-9_/-]+)["\']',
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 
 def scan_file(filepath):
     """Skenira fajl za hardkodirane URL-ove."""
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
     except (FileNotFoundError, IOError):
         return []
 
     hits = []
-    for i, line in enumerate(content.split('\n'), 1):
+    for i, line in enumerate(content.split("\n"), 1):
         # Skip lines that already use {% url %}
-        if '{% url' in line or '{%url' in line:
+        if "{% url" in line or "{%url" in line:
             continue
         # Skip comments
-        if line.strip().startswith('{#') or line.strip().startswith('<!--'):
+        if line.strip().startswith("{#") or line.strip().startswith("<!--"):
             continue
 
         for match in HARDCODED_PATTERN.finditer(line):
-            url = '/' + match.group(1)
+            url = "/" + match.group(1)
             full_match = match.group(0)
             hits.append((i, url, full_match))
 
@@ -90,12 +88,11 @@ def scan_file(filepath):
 def fix_file(filepath, dry_run=False):
     """Zamjenjuje poznate hardkodirane URL-ove sa {% url %} tagovima."""
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
     except (FileNotFoundError, IOError):
         return 0
 
-    original = content
     changes = 0
 
     for old, new in URL_MAP.items():
@@ -105,7 +102,7 @@ def fix_file(filepath, dry_run=False):
             changes += count
 
     if changes > 0 and not dry_run:
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
     return changes
@@ -113,10 +110,11 @@ def fix_file(filepath, dry_run=False):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='BORG: Fix hardcoded URLs in templates')
-    parser.add_argument('--scan', action='store_true', help='Samo skeniraj')
-    parser.add_argument('--fix', action='store_true', help='Popravi poznate URL-ove')
-    parser.add_argument('--top', type=int, default=30, help='Top N za prikaz')
+
+    parser = argparse.ArgumentParser(description="BORG: Fix hardcoded URLs in templates")
+    parser.add_argument("--scan", action="store_true", help="Samo skeniraj")
+    parser.add_argument("--fix", action="store_true", help="Popravi poznate URL-ove")
+    parser.add_argument("--top", type=int, default=30, help="Top N za prikaz")
     args = parser.parse_args()
 
     if not args.scan and not args.fix:
@@ -124,7 +122,7 @@ def main():
 
     all_files = []
     for td in TEMPLATE_DIRS:
-        all_files.extend(td.rglob('*.html'))
+        all_files.extend(td.rglob("*.html"))
 
     # Deduplicate
     all_files = list(set(all_files))
@@ -150,27 +148,27 @@ def main():
     # Sort by frequency
     sorted_urls = sorted(results.items(), key=lambda x: -len(x[1]))
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("BORG SCAN: Hardcoded URLs in templates")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Ukupno hardkodiranih URL-ova: {total_hits}")
     print(f"Ukupno fajlova:               {len(files_with_hits)}")
-    print(f'Poznati za auto-fix:          {len(URL_MAP)} mapiranja')
-    print(f"{'='*60}\n")
+    print(f"Poznati za auto-fix:          {len(URL_MAP)} mapiranja")
+    print(f"{'=' * 60}\n")
 
-    for url, locations in sorted_urls[:args.top]:
+    for url, locations in sorted_urls[: args.top]:
         fixable = any(url in k for k in URL_MAP)
         marker = " ✓ AUTO-FIX" if fixable else ""
         print(f"  {len(locations):3d}×  {url}{marker}")
         for fpath, line, full in locations[:3]:
             print(f"        {fpath}:{line}")
         if len(locations) > 3:
-            print(f"        ... +{len(locations)-3} više")
+            print(f"        ... +{len(locations) - 3} više")
 
     if args.fix:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("FIXING known URLs...")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         fixed_total = 0
         for f in all_files:
@@ -182,10 +180,10 @@ def main():
                 print(f"  FIXED {n:3d}  {f.relative_to(BASE_DIR)}")
                 fixed_total += n
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Popravljeno: {fixed_total} hardkodiranih URL-ova")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

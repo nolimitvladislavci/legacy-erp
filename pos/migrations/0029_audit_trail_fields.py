@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0028_nonprofit_activity_flag'),
+        ("pos", "0028_nonprofit_activity_flag"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='client_ip',
-            field=models.GenericIPAddressField(blank=True, null=True, verbose_name='IP adresa'),
+            model_name="posreceipt",
+            name="client_ip",
+            field=models.GenericIPAddressField(blank=True, null=True, verbose_name="IP adresa"),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='client_ua',
-            field=models.CharField(blank=True, max_length=300, verbose_name='User Agent'),
+            model_name="posreceipt",
+            name="client_ua",
+            field=models.CharField(blank=True, max_length=300, verbose_name="User Agent"),
         ),
     ]

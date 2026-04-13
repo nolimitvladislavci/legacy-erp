@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0007_add_inspection_protocol'),
+        ("core", "0007_add_inspection_protocol"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inspectionprotocol',
-            name='badge_photo',
-            field=models.ImageField(blank=True, null=True, upload_to='inspection/badges/', verbose_name='Fotografija znacke'),
+            model_name="inspectionprotocol",
+            name="badge_photo",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="inspection/badges/", verbose_name="Fotografija znacke"
+            ),
         ),
         migrations.AddField(
-            model_name='inspectionprotocol',
-            name='warrant_photo',
-            field=models.ImageField(blank=True, null=True, upload_to='inspection/warrants/', verbose_name='Fotografija naloga/rjesenja'),
+            model_name="inspectionprotocol",
+            name="warrant_photo",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="inspection/warrants/", verbose_name="Fotografija naloga/rjesenja"
+            ),
         ),
     ]

@@ -8,6 +8,7 @@ Banka čita barkod → sva polja se auto-popune → klijent samo potvrdi.
 
 Spec: HUB-3A v1.03 (HUBCG, 2015)
 """
+
 import base64
 import io
 import logging
@@ -16,9 +17,9 @@ from decimal import Decimal
 logger = logging.getLogger(__name__)
 
 # HUB-3A header (obavezan)
-HUB3A_HEADER = 'HRVHUB30'
-HUB3A_CURRENCY = 'EUR'
-HUB3A_PAY_CODE = 'OTHR'  # Ostala plaćanja
+HUB3A_HEADER = "HRVHUB30"
+HUB3A_CURRENCY = "EUR"
+HUB3A_PAY_CODE = "OTHR"  # Ostala plaćanja
 
 
 def build_hub3a_string(
@@ -46,23 +47,23 @@ def build_hub3a_string(
     amount_str = str(cents).zfill(15)
 
     lines = [
-        HUB3A_HEADER,                          # 1. Header
-        HUB3A_CURRENCY,                         # 2. Valuta
-        amount_str,                             # 3. Iznos (centi, 15 znakova)
-        _trunc(sender_name, 30),                # 4. Platitelj ime
-        _trunc(sender_address, 27),             # 5. Platitelj adresa
-        _trunc(sender_city, 27),                # 6. Platitelj mjesto
-        _trunc(receiver_name, 25),              # 7. Primatelj ime
-        _trunc(receiver_address, 25),           # 8. Primatelj adresa
-        _trunc(receiver_city, 27),              # 9. Primatelj mjesto
-        receiver_iban.replace(' ', ''),          # 10. IBAN primatelja
-        model.replace(' ', ''),                 # 11. Model plaćanja
-        _trunc(reference.replace(' ', ''), 22), # 12. Poziv na broj
-        HUB3A_PAY_CODE,                         # 13. Šifra namjene
-        _trunc(description, 35),                # 14. Opis plaćanja
+        HUB3A_HEADER,  # 1. Header
+        HUB3A_CURRENCY,  # 2. Valuta
+        amount_str,  # 3. Iznos (centi, 15 znakova)
+        _trunc(sender_name, 30),  # 4. Platitelj ime
+        _trunc(sender_address, 27),  # 5. Platitelj adresa
+        _trunc(sender_city, 27),  # 6. Platitelj mjesto
+        _trunc(receiver_name, 25),  # 7. Primatelj ime
+        _trunc(receiver_address, 25),  # 8. Primatelj adresa
+        _trunc(receiver_city, 27),  # 9. Primatelj mjesto
+        receiver_iban.replace(" ", ""),  # 10. IBAN primatelja
+        model.replace(" ", ""),  # 11. Model plaćanja
+        _trunc(reference.replace(" ", ""), 22),  # 12. Poziv na broj
+        HUB3A_PAY_CODE,  # 13. Šifra namjene
+        _trunc(description, 35),  # 14. Opis plaćanja
     ]
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def generate_hub3a_image(hub3a_string: str, scale: int = 3) -> bytes:
@@ -77,7 +78,7 @@ def generate_hub3a_image(hub3a_string: str, scale: int = 3) -> bytes:
     img = render_image(codes, scale=scale, ratio=3, padding=5)
 
     buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer.read()
 
@@ -85,7 +86,7 @@ def generate_hub3a_image(hub3a_string: str, scale: int = 3) -> bytes:
 def generate_hub3a_base64(hub3a_string: str, scale: int = 3) -> str:
     """Base64 PNG za embedding u HTML/PDF."""
     png = generate_hub3a_image(hub3a_string, scale)
-    return base64.b64encode(png).decode('ascii')
+    return base64.b64encode(png).decode("ascii")
 
 
 def build_tz_membership_hub3a(data: dict) -> dict:
@@ -93,7 +94,7 @@ def build_tz_membership_hub3a(data: dict) -> dict:
     Gradi HUB-3A za uplatu TZ članarine.
 
     Args:
-        data: dict iz generate_tz2_data() 
+        data: dict iz generate_tz2_data()
 
     Returns: {
         'hub3a_string': str,
@@ -105,35 +106,35 @@ def build_tz_membership_hub3a(data: dict) -> dict:
         'rates': [{'r': 1, 'amount': ..., 'hub3a_base64': ...}, ...]
     }
     """
-    profile = data['profile']
-    company = data['company']
-    year = data['year']
+    profile = data["profile"]
+    company = data["company"]
+    year = data["year"]
 
     # IBAN turističke zajednice — iz company.settings ili profila
-    settings = getattr(company, 'settings', None) or {}
-    tz_iban = settings.get('tz_iban', '')
-    tz_name = profile.tz_name or 'Turistička zajednica'
+    settings = getattr(company, "settings", None) or {}
+    tz_iban = settings.get("tz_iban", "")
+    tz_name = profile.tz_name or "Turistička zajednica"
 
     if not tz_iban:
-        logger.warning('TZ IBAN nije konfiguriran za %s', company.name)
-        return {'error': 'TZ IBAN nije konfiguriran u postavkama firme.'}
+        logger.warning("TZ IBAN nije konfiguriran za %s", company.name)
+        return {"error": "TZ IBAN nije konfiguriran u postavkama firme."}
 
     # Model i poziv na broj
-    model = 'HR68'
-    oib = company.oib or ''
-    reference = f'5327-{oib}-{year}'
+    model = "HR68"
+    oib = company.oib or ""
+    reference = f"5327-{oib}-{year}"
 
     sender_name = profile.full_name
-    sender_address = company.address or ''
-    sender_city = f'{company.zip_code} {company.city}'.strip()
+    sender_address = company.address or ""
+    sender_city = f"{company.zip_code} {company.city}".strip()
 
     # Parsaj TZ adresu iz settings ili fallback
-    tz_address = settings.get('tz_address', '')
-    tz_city = settings.get('tz_city', '')
+    tz_address = settings.get("tz_address", "")
+    tz_city = settings.get("tz_city", "")
 
     # Generiraj za ukupan iznos
     total_string = build_hub3a_string(
-        amount=data['tz_fee_total'],
+        amount=data["tz_fee_total"],
         sender_name=sender_name,
         sender_address=sender_address,
         sender_city=sender_city,
@@ -143,16 +144,16 @@ def build_tz_membership_hub3a(data: dict) -> dict:
         receiver_iban=tz_iban,
         model=model,
         reference=reference,
-        purpose='OTHR',
-        description=f'TZ clanarina {year}',
+        purpose="OTHR",
+        description=f"TZ clanarina {year}",
     )
 
     # Generiraj za svaku ratu
     rates_with_barcode = []
-    for rate in data['tz_rates']:
-        rate_ref = f'5327-{oib}-{year}-R{rate["r"]}'
+    for rate in data["tz_rates"]:
+        rate_ref = f"5327-{oib}-{year}-R{rate['r']}"
         rate_string = build_hub3a_string(
-            amount=rate['amount'],
+            amount=rate["amount"],
             sender_name=sender_name,
             sender_address=sender_address,
             sender_city=sender_city,
@@ -162,30 +163,32 @@ def build_tz_membership_hub3a(data: dict) -> dict:
             receiver_iban=tz_iban,
             model=model,
             reference=rate_ref,
-            purpose='OTHR',
-            description=f'TZ clanarina {year} rata {rate["r"]}',
+            purpose="OTHR",
+            description=f"TZ clanarina {year} rata {rate['r']}",
         )
-        rates_with_barcode.append({
-            **rate,
-            'hub3a_base64': generate_hub3a_base64(rate_string),
-            'reference': rate_ref,
-        })
+        rates_with_barcode.append(
+            {
+                **rate,
+                "hub3a_base64": generate_hub3a_base64(rate_string),
+                "reference": rate_ref,
+            }
+        )
 
     return {
-        'hub3a_string': total_string,
-        'hub3a_base64': generate_hub3a_base64(total_string),
-        'iban': tz_iban,
-        'model': model,
-        'reference': reference,
-        'amount': data['tz_fee_total'],
-        'rates': rates_with_barcode,
+        "hub3a_string": total_string,
+        "hub3a_base64": generate_hub3a_base64(total_string),
+        "iban": tz_iban,
+        "model": model,
+        "reference": reference,
+        "amount": data["tz_fee_total"],
+        "rates": rates_with_barcode,
     }
 
 
 def _trunc(s: str, maxlen: int) -> str:
     """Skrati string na maxlen, zamijeni HR dijakritike za barkod safety."""
     if not s:
-        return ''
+        return ""
     # HUB-3A dopušta UTF-8, ali neke banke imaju probleme
     # Za sigurnost ostavimo originalne znakove
     return s[:maxlen]

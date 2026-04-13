@@ -6,53 +6,85 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0031_add_tc_consent_gdpr_fields'),
-        ('documents', '0015_alter_conversionrecord_ai_model'),
+        ("companies", "0031_add_tc_consent_gdpr_fields"),
+        ("documents", "0015_alter_conversionrecord_ai_model"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ScanBatch',
+            name="ScanBatch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('collecting', 'Prikupljanje'), ('processing', 'OCR obrada'), ('grouping', 'AI grupiranje'), ('ready', 'Spreman za arhivu'), ('done', 'Arhivirano'), ('error', 'Greška')], default='collecting', max_length=20)),
-                ('total_images', models.PositiveIntegerField(default=0)),
-                ('total_size_kb', models.PositiveIntegerField(default=0)),
-                ('total_documents', models.PositiveIntegerField(default=0)),
-                ('error_message', models.TextField(blank=True, default='')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='scan_batches', to='companies.company')),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("collecting", "Prikupljanje"),
+                            ("processing", "OCR obrada"),
+                            ("grouping", "AI grupiranje"),
+                            ("ready", "Spreman za arhivu"),
+                            ("done", "Arhivirano"),
+                            ("error", "Greška"),
+                        ],
+                        default="collecting",
+                        max_length=20,
+                    ),
+                ),
+                ("total_images", models.PositiveIntegerField(default=0)),
+                ("total_size_kb", models.PositiveIntegerField(default=0)),
+                ("total_documents", models.PositiveIntegerField(default=0)),
+                ("error_message", models.TextField(blank=True, default="")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="scan_batches", to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+                ),
             ],
             options={
-                'verbose_name': 'Scan Batch',
-                'verbose_name_plural': 'Scan Batches',
-                'ordering': ['-created_at'],
+                "verbose_name": "Scan Batch",
+                "verbose_name_plural": "Scan Batches",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='ScanBatchImage',
+            name="ScanBatchImage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='scan_batches/%Y/%m/')),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('original_filename', models.CharField(blank=True, default='', max_length=255)),
-                ('file_size_kb', models.PositiveIntegerField(default=0)),
-                ('document_group', models.PositiveIntegerField(blank=True, help_text='Koji dokument (1, 2, 3...)', null=True)),
-                ('page_in_group', models.PositiveIntegerField(blank=True, help_text='Koja stranica unutar dokumenta', null=True)),
-                ('ai_confidence', models.FloatField(blank=True, null=True)),
-                ('extracted_text', models.TextField(blank=True, default='')),
-                ('extracted_data', models.JSONField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='documents.scanbatch')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("image", models.ImageField(upload_to="scan_batches/%Y/%m/")),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("original_filename", models.CharField(blank=True, default="", max_length=255)),
+                ("file_size_kb", models.PositiveIntegerField(default=0)),
+                (
+                    "document_group",
+                    models.PositiveIntegerField(blank=True, help_text="Koji dokument (1, 2, 3...)", null=True),
+                ),
+                (
+                    "page_in_group",
+                    models.PositiveIntegerField(blank=True, help_text="Koja stranica unutar dokumenta", null=True),
+                ),
+                ("ai_confidence", models.FloatField(blank=True, null=True)),
+                ("extracted_text", models.TextField(blank=True, default="")),
+                ("extracted_data", models.JSONField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "batch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="images", to="documents.scanbatch"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Scan slika',
-                'ordering': ['batch', 'order'],
+                "verbose_name": "Scan slika",
+                "ordering": ["batch", "order"],
             },
         ),
     ]

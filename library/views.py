@@ -4,6 +4,7 @@ LIMIT e-Knjiznica — Views.
 Dashboard, katalog, posudba/vracanje, clanovi, ISBN lookup,
 import wizard, QR scan, statistika.
 """
+
 import json
 import re
 from datetime import timedelta
@@ -40,6 +41,7 @@ def _company(request):
 # DASHBOARD
 # ══════════════════════════════════════════════════════════
 
+
 @login_required
 def dashboard(request):
     company = _company(request)
@@ -51,10 +53,12 @@ def dashboard(request):
     active_members = LibraryMember.objects.filter(company=company, status="active").count()
 
     active_loans = Loan.objects.filter(
-        member__company=company, returned_date__isnull=True,
+        member__company=company,
+        returned_date__isnull=True,
     ).count()
     overdue_loans = Loan.objects.filter(
-        member__company=company, returned_date__isnull=True,
+        member__company=company,
+        returned_date__isnull=True,
         due_date__lt=today,
     ).count()
 
@@ -62,32 +66,42 @@ def dashboard(request):
     popular = Book.objects.filter(company=company).order_by("-times_borrowed")[:5]
 
     # Zadnjih 10 posudbi
-    recent_loans = Loan.objects.filter(
-        member__company=company,
-    ).select_related("member", "copy__book").order_by("-borrowed_date")[:10]
+    recent_loans = (
+        Loan.objects.filter(
+            member__company=company,
+        )
+        .select_related("member", "copy__book")
+        .order_by("-borrowed_date")[:10]
+    )
 
     # Rezervacije na cekanju
     pending_reservations = Reservation.objects.filter(
-        member__company=company, status="pending",
+        member__company=company,
+        status="pending",
     ).count()
 
-    return render(request, "library/dashboard.html", {
-        "total_books": total_books,
-        "total_copies": total_copies,
-        "available_copies": available_copies,
-        "active_members": active_members,
-        "active_loans": active_loans,
-        "overdue_loans": overdue_loans,
-        "popular": popular,
-        "recent_loans": recent_loans,
-        "pending_reservations": pending_reservations,
-        "today": today,
-    })
+    return render(
+        request,
+        "library/dashboard.html",
+        {
+            "total_books": total_books,
+            "total_copies": total_copies,
+            "available_copies": available_copies,
+            "active_members": active_members,
+            "active_loans": active_loans,
+            "overdue_loans": overdue_loans,
+            "popular": popular,
+            "recent_loans": recent_loans,
+            "pending_reservations": pending_reservations,
+            "today": today,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # KATALOG
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def book_list(request):
@@ -98,24 +112,28 @@ def book_list(request):
     qs = Book.objects.filter(company=company).prefetch_related("authors")
     if q:
         qs = qs.filter(
-            Q(title__icontains=q) |
-            Q(isbn_13__icontains=q) |
-            Q(isbn_10__icontains=q) |
-            Q(authors__last_name__icontains=q) |
-            Q(publisher__icontains=q)
+            Q(title__icontains=q)
+            | Q(isbn_13__icontains=q)
+            | Q(isbn_10__icontains=q)
+            | Q(authors__last_name__icontains=q)
+            | Q(publisher__icontains=q)
         ).distinct()
     if cat:
         qs = qs.filter(category_id=cat)
 
     categories = Category.objects.filter(company=company)
 
-    return render(request, "library/book_list.html", {
-        "books": qs[:100],
-        "query": q,
-        "categories": categories,
-        "cat_filter": cat,
-        "total": qs.count(),
-    })
+    return render(
+        request,
+        "library/book_list.html",
+        {
+            "books": qs[:100],
+            "query": q,
+            "categories": categories,
+            "cat_filter": cat,
+            "total": qs.count(),
+        },
+    )
 
 
 @login_required
@@ -123,17 +141,25 @@ def book_detail(request, pk):
     company = _company(request)
     book = get_object_or_404(Book, pk=pk, company=company)
     copies = book.copies.all()
-    recent_loans = Loan.objects.filter(
-        copy__book=book,
-    ).select_related("member").order_by("-borrowed_date")[:10]
+    recent_loans = (
+        Loan.objects.filter(
+            copy__book=book,
+        )
+        .select_related("member")
+        .order_by("-borrowed_date")[:10]
+    )
     reservations = book.reservations.filter(status="pending")
 
-    return render(request, "library/book_detail.html", {
-        "book": book,
-        "copies": copies,
-        "recent_loans": recent_loans,
-        "reservations": reservations,
-    })
+    return render(
+        request,
+        "library/book_detail.html",
+        {
+            "book": book,
+            "copies": copies,
+            "recent_loans": recent_loans,
+            "reservations": reservations,
+        },
+    )
 
 
 @login_required
@@ -167,7 +193,9 @@ def book_create(request):
             first = parts[0]
             last = parts[1] if len(parts) > 1 else ""
             author, _ = Author.objects.get_or_create(
-                company=company, first_name=first, last_name=last,
+                company=company,
+                first_name=first,
+                last_name=last,
             )
             book.authors.add(author)
 
@@ -175,7 +203,8 @@ def book_create(request):
         barcode = d.get("barcode", "").strip()
         if barcode:
             BookCopy.objects.create(
-                book=book, barcode=barcode,
+                book=book,
+                barcode=barcode,
                 location=d.get("location", "").strip(),
                 status="available",
             )
@@ -183,14 +212,20 @@ def book_create(request):
         messages.success(request, f'Knjiga "{book.title}" dodana u katalog.')
         return redirect("library:book_detail", pk=book.pk)
 
-    return render(request, "library/book_form.html", {
-        "categories": categories, "mode": "create",
-    })
+    return render(
+        request,
+        "library/book_form.html",
+        {
+            "categories": categories,
+            "mode": "create",
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # ISBN AUTO-FILL (OpenLibrary API)
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def isbn_lookup(request):
@@ -221,19 +256,21 @@ def isbn_lookup(request):
                 gdata = json.loads(resp.read().decode())
             if gdata.get("totalItems", 0) > 0:
                 vol = gdata["items"][0]["volumeInfo"]
-                return JsonResponse({
-                    "found": True,
-                    "source": "google",
-                    "title": vol.get("title", ""),
-                    "subtitle": vol.get("subtitle", ""),
-                    "authors": ", ".join(vol.get("authors", [])),
-                    "publisher": vol.get("publisher", ""),
-                    "publish_year": vol.get("publishedDate", "")[:4],
-                    "pages": vol.get("pageCount"),
-                    "description": vol.get("description", "")[:500],
-                    "cover_url": vol.get("imageLinks", {}).get("thumbnail", ""),
-                    "language": vol.get("language", ""),
-                })
+                return JsonResponse(
+                    {
+                        "found": True,
+                        "source": "google",
+                        "title": vol.get("title", ""),
+                        "subtitle": vol.get("subtitle", ""),
+                        "authors": ", ".join(vol.get("authors", [])),
+                        "publisher": vol.get("publisher", ""),
+                        "publish_year": vol.get("publishedDate", "")[:4],
+                        "pages": vol.get("pageCount"),
+                        "description": vol.get("description", "")[:500],
+                        "cover_url": vol.get("imageLinks", {}).get("thumbnail", ""),
+                        "language": vol.get("language", ""),
+                    }
+                )
         except (json.JSONDecodeError, ValueError):
             pass
         return JsonResponse({"found": False, "error": "Knjiga nije pronadjena"})
@@ -242,25 +279,28 @@ def isbn_lookup(request):
     authors = ", ".join(a.get("name", "") for a in info.get("authors", []))
     cover = info.get("cover", {}).get("medium", "")
 
-    return JsonResponse({
-        "found": True,
-        "source": "openlibrary",
-        "title": info.get("title", ""),
-        "subtitle": info.get("subtitle", ""),
-        "authors": authors,
-        "publisher": info.get("publishers", [{}])[0].get("name", "") if info.get("publishers") else "",
-        "publish_year": str(info.get("publish_date", ""))[-4:],
-        "pages": info.get("number_of_pages"),
-        "description": "",
-        "cover_url": cover,
-        "language": "",
-        "openlibrary_key": info.get("key", ""),
-    })
+    return JsonResponse(
+        {
+            "found": True,
+            "source": "openlibrary",
+            "title": info.get("title", ""),
+            "subtitle": info.get("subtitle", ""),
+            "authors": authors,
+            "publisher": info.get("publishers", [{}])[0].get("name", "") if info.get("publishers") else "",
+            "publish_year": str(info.get("publish_date", ""))[-4:],
+            "pages": info.get("number_of_pages"),
+            "description": "",
+            "cover_url": cover,
+            "language": "",
+            "openlibrary_key": info.get("key", ""),
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # POSUDBA / VRACANJE
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def loan_checkout(request):
@@ -272,11 +312,11 @@ def loan_checkout(request):
         barcode = request.POST.get("barcode", "").strip()
 
         # Pronadji clana po broju, QR tokenu, ili OIB-u
-        member = LibraryMember.objects.filter(company=company).filter(
-            Q(member_number=member_input) |
-            Q(qr_token=member_input) |
-            Q(oib=member_input)
-        ).first()
+        member = (
+            LibraryMember.objects.filter(company=company)
+            .filter(Q(member_number=member_input) | Q(qr_token=member_input) | Q(oib=member_input))
+            .first()
+        )
 
         if not member:
             messages.error(request, _("Clan nije pronadjen."))
@@ -308,7 +348,7 @@ def loan_checkout(request):
             loan_days = member.membership_type.loan_days
         due = timezone.now().date() + timedelta(days=loan_days)
 
-        loan = Loan.objects.create(
+        Loan.objects.create(
             member=member,
             copy=copy,
             due_date=due,
@@ -325,7 +365,7 @@ def loan_checkout(request):
 
         messages.success(
             request,
-            f'{copy.book.title} posudjena clanu {member}. Rok: {due.strftime("%d.%m.%Y")}',
+            f"{copy.book.title} posudjena clanu {member}. Rok: {due.strftime('%d.%m.%Y')}",
         )
         return redirect("library:loan_checkout")
 
@@ -346,9 +386,14 @@ def loan_return(request):
             messages.error(request, f"Primjerak '{barcode}' nije pronadjen.")
             return redirect("library:loan_return")
 
-        loan = Loan.objects.filter(
-            copy=copy, returned_date__isnull=True,
-        ).select_related("member").first()
+        loan = (
+            Loan.objects.filter(
+                copy=copy,
+                returned_date__isnull=True,
+            )
+            .select_related("member")
+            .first()
+        )
 
         if not loan:
             messages.warning(request, f"Nema aktivne posudbe za '{barcode}'.")
@@ -373,9 +418,14 @@ def loan_return(request):
             )
 
         # Check reservations
-        pending_res = Reservation.objects.filter(
-            book=copy.book, status="pending",
-        ).order_by("reserved_date").first()
+        pending_res = (
+            Reservation.objects.filter(
+                book=copy.book,
+                status="pending",
+            )
+            .order_by("reserved_date")
+            .first()
+        )
         if pending_res:
             pending_res.status = "ready"
             pending_res.pickup_deadline = timezone.now().date() + timedelta(days=3)
@@ -392,11 +442,15 @@ def loan_return(request):
             "days_overdue": loan.days_overdue,
             "fine": loan.fine_amount,
         }
-        messages.success(request, f'{copy.book.title} vracena od {loan.member}.')
+        messages.success(request, f"{copy.book.title} vracena od {loan.member}.")
 
-    return render(request, "library/loan_return.html", {
-        "returned_info": returned_info,
-    })
+    return render(
+        request,
+        "library/loan_return.html",
+        {
+            "returned_info": returned_info,
+        },
+    )
 
 
 @login_required
@@ -414,13 +468,14 @@ def loan_renew(request, pk):
         loan.due_date = timezone.now().date() + timedelta(days=days)
         loan.renewed_count += 1
         loan.save(update_fields=["due_date", "renewed_count"])
-        messages.success(request, f'Produljeno do {loan.due_date.strftime("%d.%m.%Y")}.')
+        messages.success(request, f"Produljeno do {loan.due_date.strftime('%d.%m.%Y')}.")
     return redirect(request.META.get("HTTP_REFERER", reverse("library:dashboard")))
 
 
 # ══════════════════════════════════════════════════════════
 # CLANOVI
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def member_list(request):
@@ -433,17 +488,18 @@ def member_list(request):
         qs = qs.filter(status=status)
     if q:
         qs = qs.filter(
-            Q(first_name__icontains=q) |
-            Q(last_name__icontains=q) |
-            Q(member_number__icontains=q) |
-            Q(oib__icontains=q)
+            Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(member_number__icontains=q) | Q(oib__icontains=q)
         )
 
-    return render(request, "library/member_list.html", {
-        "members": qs[:100],
-        "query": q,
-        "status_filter": status,
-    })
+    return render(
+        request,
+        "library/member_list.html",
+        {
+            "members": qs[:100],
+            "query": q,
+            "status_filter": status,
+        },
+    )
 
 
 @login_required
@@ -451,15 +507,21 @@ def member_detail(request, pk):
     company = _company(request)
     member = get_object_or_404(LibraryMember, pk=pk, company=company)
     active_loans = member.loans.filter(returned_date__isnull=True).select_related("copy__book")
-    history = member.loans.filter(returned_date__isnull=False).select_related("copy__book").order_by("-returned_date")[:20]
+    history = (
+        member.loans.filter(returned_date__isnull=False).select_related("copy__book").order_by("-returned_date")[:20]
+    )
     reservations = member.reservations.filter(status__in=["pending", "ready"])
 
-    return render(request, "library/member_detail.html", {
-        "member": member,
-        "active_loans": active_loans,
-        "history": history,
-        "reservations": reservations,
-    })
+    return render(
+        request,
+        "library/member_detail.html",
+        {
+            "member": member,
+            "active_loans": active_loans,
+            "history": history,
+            "reservations": reservations,
+        },
+    )
 
 
 @login_required
@@ -493,27 +555,35 @@ def member_create(request):
         messages.success(request, f"Clan {member} upisan. Broj: {member.member_number}")
         return redirect("library:member_detail", pk=member.pk)
 
-    return render(request, "library/member_form.html", {
-        "types": types, "mode": "create",
-    })
+    return render(
+        request,
+        "library/member_form.html",
+        {
+            "types": types,
+            "mode": "create",
+        },
+    )
 
 
 @login_required
 def member_qr(request, pk):
     """QR iskaznica clana (JSON za frontend rendering)."""
     member = get_object_or_404(LibraryMember, pk=pk, company=_company(request))
-    return JsonResponse({
-        "member_number": member.member_number,
-        "name": str(member),
-        "qr_data": str(member.qr_token),
-        "membership_type": str(member.membership_type) if member.membership_type else "",
-        "valid_until": member.membership_end.isoformat() if member.membership_end else "",
-    })
+    return JsonResponse(
+        {
+            "member_number": member.member_number,
+            "name": str(member),
+            "qr_data": str(member.qr_token),
+            "membership_type": str(member.membership_type) if member.membership_type else "",
+            "valid_until": member.membership_end.isoformat() if member.membership_end else "",
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # QR SCAN (za posudbu — AJAX)
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def qr_scan_member(request):
@@ -523,22 +593,25 @@ def qr_scan_member(request):
     member = LibraryMember.objects.filter(company=company, qr_token=token).first()
     if not member:
         return JsonResponse({"found": False})
-    return JsonResponse({
-        "found": True,
-        "id": member.pk,
-        "name": str(member),
-        "member_number": member.member_number,
-        "status": member.status,
-        "can_borrow": member.can_borrow,
-        "active_loans": member.active_loans_count,
-        "max_books": member.membership_type.max_books if member.membership_type else 5,
-        "outstanding_fines": str(member.outstanding_fines),
-    })
+    return JsonResponse(
+        {
+            "found": True,
+            "id": member.pk,
+            "name": str(member),
+            "member_number": member.member_number,
+            "status": member.status,
+            "can_borrow": member.can_borrow,
+            "active_loans": member.active_loans_count,
+            "max_books": member.membership_type.max_books if member.membership_type else 5,
+            "outstanding_fines": str(member.outstanding_fines),
+        }
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # STATISTIKA
 # ══════════════════════════════════════════════════════════
+
 
 @login_required
 def statistics(request):
@@ -567,33 +640,50 @@ def statistics(request):
     top_members = LibraryMember.objects.filter(company=company).order_by("-total_borrowed")[:10]
 
     # Po kategorijama
-    cat_stats = Category.objects.filter(company=company).annotate(
-        book_count=Count("books"),
-    ).order_by("-book_count")[:10]
+    cat_stats = (
+        Category.objects.filter(company=company)
+        .annotate(
+            book_count=Count("books"),
+        )
+        .order_by("-book_count")[:10]
+    )
 
-    return render(request, "library/statistics.html", {
-        "monthly_stats": monthly_stats,
-        "top_books": top_books,
-        "top_members": top_members,
-        "cat_stats": cat_stats,
-    })
+    return render(
+        request,
+        "library/statistics.html",
+        {
+            "monthly_stats": monthly_stats,
+            "top_books": top_books,
+            "top_members": top_members,
+            "cat_stats": cat_stats,
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════
 # OVERDUE MANAGEMENT
 # ══════════════════════════════════════════════════════════
 
+
 @login_required
 def overdue_list(request):
     company = _company(request)
     today = timezone.now().date()
-    overdue = Loan.objects.filter(
-        member__company=company,
-        returned_date__isnull=True,
-        due_date__lt=today,
-    ).select_related("member", "copy__book").order_by("due_date")
+    overdue = (
+        Loan.objects.filter(
+            member__company=company,
+            returned_date__isnull=True,
+            due_date__lt=today,
+        )
+        .select_related("member", "copy__book")
+        .order_by("due_date")
+    )
 
-    return render(request, "library/overdue_list.html", {
-        "overdue_loans": overdue,
-        "today": today,
-    })
+    return render(
+        request,
+        "library/overdue_list.html",
+        {
+            "overdue_loans": overdue,
+            "today": today,
+        },
+    )

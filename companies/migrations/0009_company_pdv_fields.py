@@ -4,20 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0008_onboarding_progress'),
+        ("companies", "0008_onboarding_progress"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_kleinunternehmer',
-            field=models.BooleanField(default=False, help_text='DE: oslobođen PDV-a prema §19 UStG ako god.prihodi < 22.000 EUR', verbose_name='Kleinunternehmer §19 UStG'),
+            model_name="company",
+            name="is_kleinunternehmer",
+            field=models.BooleanField(
+                default=False,
+                help_text="DE: oslobođen PDV-a prema §19 UStG ako god.prihodi < 22.000 EUR",
+                verbose_name="Kleinunternehmer §19 UStG",
+            ),
         ),
         migrations.AddField(
-            model_name='company',
-            name='pdv_status',
-            field=models.CharField(choices=[('none', 'Nije u sustavu PDV-a'), ('obveznik', 'Obveznik PDV-a'), ('pausalic', 'Paušalac (HR §90)'), ('kleinunternehmer', 'Kleinunternehmer (DE §19 UStG)')], default='none', max_length=20, verbose_name='PDV status'),
+            model_name="company",
+            name="pdv_status",
+            field=models.CharField(
+                choices=[
+                    ("none", "Nije u sustavu PDV-a"),
+                    ("obveznik", "Obveznik PDV-a"),
+                    ("pausalic", "Paušalac (HR §90)"),
+                    ("kleinunternehmer", "Kleinunternehmer (DE §19 UStG)"),
+                ],
+                default="none",
+                max_length=20,
+                verbose_name="PDV status",
+            ),
         ),
     ]

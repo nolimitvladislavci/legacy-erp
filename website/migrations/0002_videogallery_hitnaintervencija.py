@@ -6,64 +6,137 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('website', '0001_initial'),
+        ("website", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='VideoGallery',
+            name="VideoGallery",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naslov_hr', models.CharField(max_length=200, verbose_name='Naslov (HR)')),
-                ('naslov_de', models.CharField(blank=True, max_length=200, verbose_name='Naslov (DE)')),
-                ('naslov_en', models.CharField(blank=True, max_length=200, verbose_name='Naslov (EN)')),
-                ('opis_hr', models.TextField(blank=True, verbose_name='Opis (HR)')),
-                ('opis_de', models.TextField(blank=True, verbose_name='Opis (DE)')),
-                ('opis_en', models.TextField(blank=True, verbose_name='Opis (EN)')),
-                ('embed_url', models.URLField(blank=True, help_text='Npr. https://www.youtube.com/watch?v=...', verbose_name='YouTube / Vimeo URL')),
-                ('video_file', models.FileField(blank=True, null=True, upload_to='website/videos/', verbose_name='Video datoteka (.mp4)')),
-                ('thumbnail', models.ImageField(blank=True, null=True, upload_to='website/video_thumbs/', verbose_name='Thumbnail')),
-                ('kategorija', models.CharField(choices=[('bau', 'Visković BAU'), ('wildberg', 'Wildberg'), ('najam', 'VG Najam'), ('webshop', 'VG Shop'), ('projekt', 'Projekt reference'), ('tim', 'Tim / Ekipa'), ('ostalo', 'Ostalo')], default='ostalo', max_length=20, verbose_name='Kategorija')),
-                ('trajanje', models.CharField(blank=True, help_text='Npr. 2:34', max_length=20, verbose_name='Trajanje')),
-                ('redoslijed', models.PositiveIntegerField(default=0, verbose_name='Redoslijed')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivno')),
-                ('is_featured', models.BooleanField(default=False, verbose_name='Istaknuto')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naslov_hr", models.CharField(max_length=200, verbose_name="Naslov (HR)")),
+                ("naslov_de", models.CharField(blank=True, max_length=200, verbose_name="Naslov (DE)")),
+                ("naslov_en", models.CharField(blank=True, max_length=200, verbose_name="Naslov (EN)")),
+                ("opis_hr", models.TextField(blank=True, verbose_name="Opis (HR)")),
+                ("opis_de", models.TextField(blank=True, verbose_name="Opis (DE)")),
+                ("opis_en", models.TextField(blank=True, verbose_name="Opis (EN)")),
+                (
+                    "embed_url",
+                    models.URLField(
+                        blank=True,
+                        help_text="Npr. https://www.youtube.com/watch?v=...",
+                        verbose_name="YouTube / Vimeo URL",
+                    ),
+                ),
+                (
+                    "video_file",
+                    models.FileField(
+                        blank=True, null=True, upload_to="website/videos/", verbose_name="Video datoteka (.mp4)"
+                    ),
+                ),
+                (
+                    "thumbnail",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="website/video_thumbs/", verbose_name="Thumbnail"
+                    ),
+                ),
+                (
+                    "kategorija",
+                    models.CharField(
+                        choices=[
+                            ("bau", "Visković BAU"),
+                            ("wildberg", "Wildberg"),
+                            ("najam", "VG Najam"),
+                            ("webshop", "VG Shop"),
+                            ("projekt", "Projekt reference"),
+                            ("tim", "Tim / Ekipa"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        default="ostalo",
+                        max_length=20,
+                        verbose_name="Kategorija",
+                    ),
+                ),
+                (
+                    "trajanje",
+                    models.CharField(blank=True, help_text="Npr. 2:34", max_length=20, verbose_name="Trajanje"),
+                ),
+                ("redoslijed", models.PositiveIntegerField(default=0, verbose_name="Redoslijed")),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivno")),
+                ("is_featured", models.BooleanField(default=False, verbose_name="Istaknuto")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Video',
-                'verbose_name_plural': 'Video galerija',
-                'ordering': ['redoslijed', '-created_at'],
+                "verbose_name": "Video",
+                "verbose_name_plural": "Video galerija",
+                "ordering": ["redoslijed", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='HitnaIntervencija',
+            name="HitnaIntervencija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ime', models.CharField(max_length=120, verbose_name='Ime i prezime')),
-                ('telefon', models.CharField(max_length=50, verbose_name='Telefon')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='E-mail')),
-                ('adresa', models.CharField(blank=True, max_length=255, verbose_name='Adresa')),
-                ('grad', models.CharField(blank=True, max_length=100, verbose_name='Grad')),
-                ('drzava', models.CharField(default='DE', max_length=10, verbose_name='Država')),
-                ('vrsta', models.CharField(choices=[('voda', 'Voda / Poplave'), ('elektrika', 'Elektrika'), ('grijanje', 'Grijanje / Klima'), ('fasada', 'Fasada / Krov'), ('ostalo', 'Ostalo')], default='ostalo', max_length=20, verbose_name='Vrsta intervencije')),
-                ('opis', models.TextField(verbose_name='Opis problema')),
-                ('hitnost', models.BooleanField(default=True, verbose_name='Hitan slučaj (odmah)')),
-                ('status', models.CharField(choices=[('novo', 'Novi zahtjev'), ('kontaktiran', 'Kontaktiran'), ('u_radu', 'U radu'), ('zavrseno', 'Završeno'), ('otkazano', 'Otkazano')], default='novo', max_length=20, verbose_name='Status')),
-                ('napomena', models.TextField(blank=True, verbose_name='Interna napomena')),
-                ('ip_adresa', models.GenericIPAddressField(blank=True, null=True)),
-                ('jezik', models.CharField(default='de', max_length=5, verbose_name='Jezik')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('dodijeljeno', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='hitne_intervencije', to=settings.AUTH_USER_MODEL, verbose_name='Dodijeljeno')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("ime", models.CharField(max_length=120, verbose_name="Ime i prezime")),
+                ("telefon", models.CharField(max_length=50, verbose_name="Telefon")),
+                ("email", models.EmailField(blank=True, max_length=254, verbose_name="E-mail")),
+                ("adresa", models.CharField(blank=True, max_length=255, verbose_name="Adresa")),
+                ("grad", models.CharField(blank=True, max_length=100, verbose_name="Grad")),
+                ("drzava", models.CharField(default="DE", max_length=10, verbose_name="Država")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("voda", "Voda / Poplave"),
+                            ("elektrika", "Elektrika"),
+                            ("grijanje", "Grijanje / Klima"),
+                            ("fasada", "Fasada / Krov"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        default="ostalo",
+                        max_length=20,
+                        verbose_name="Vrsta intervencije",
+                    ),
+                ),
+                ("opis", models.TextField(verbose_name="Opis problema")),
+                ("hitnost", models.BooleanField(default=True, verbose_name="Hitan slučaj (odmah)")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("novo", "Novi zahtjev"),
+                            ("kontaktiran", "Kontaktiran"),
+                            ("u_radu", "U radu"),
+                            ("zavrseno", "Završeno"),
+                            ("otkazano", "Otkazano"),
+                        ],
+                        default="novo",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("napomena", models.TextField(blank=True, verbose_name="Interna napomena")),
+                ("ip_adresa", models.GenericIPAddressField(blank=True, null=True)),
+                ("jezik", models.CharField(default="de", max_length=5, verbose_name="Jezik")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "dodijeljeno",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="hitne_intervencije",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Dodijeljeno",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Hitna intervencija',
-                'verbose_name_plural': 'Hitne intervencije',
-                'ordering': ['-created_at'],
+                "verbose_name": "Hitna intervencija",
+                "verbose_name_plural": "Hitne intervencije",
+                "ordering": ["-created_at"],
             },
         ),
     ]

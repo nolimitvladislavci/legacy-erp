@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0012_prevent_duplicate_archive'),
+        ("documents", "0012_prevent_duplicate_archive"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='arhivaentry',
-            name='arhiva_unique_doc_per_company',
+            model_name="arhivaentry",
+            name="arhiva_unique_doc_per_company",
         ),
     ]

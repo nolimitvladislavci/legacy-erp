@@ -4,28 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AzilPrijava',
+            name="AzilPrijava",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv', models.CharField(max_length=200, verbose_name='Naziv azila/udruge')),
-                ('email', models.EmailField(max_length=254, verbose_name='Email kontakt')),
-                ('grad', models.CharField(max_length=100)),
-                ('poruka', models.TextField(blank=True, default='')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('contacted', models.BooleanField(default=False)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv", models.CharField(max_length=200, verbose_name="Naziv azila/udruge")),
+                ("email", models.EmailField(max_length=254, verbose_name="Email kontakt")),
+                ("grad", models.CharField(max_length=100)),
+                ("poruka", models.TextField(blank=True, default="")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("contacted", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name': 'Prijava azila',
-                'verbose_name_plural': 'Prijave azila',
-                'ordering': ['-created_at'],
+                "verbose_name": "Prijava azila",
+                "verbose_name_plural": "Prijave azila",
+                "ordering": ["-created_at"],
             },
         ),
     ]

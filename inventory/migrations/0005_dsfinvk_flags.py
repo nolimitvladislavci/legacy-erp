@@ -4,30 +4,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0004_goodsreceipt_goodsreceiptitem_pricechange'),
+        ("inventory", "0004_goodsreceipt_goodsreceiptitem_pricechange"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inventoryitem',
-            name='dsfinvk_gv_typ',
-            field=models.CharField(blank=True, help_text='Prazno = automatski Umsatz. Samo za posebne slucajeve.', max_length=30, verbose_name='DSFinV-K GV_TYP override'),
+            model_name="inventoryitem",
+            name="dsfinvk_gv_typ",
+            field=models.CharField(
+                blank=True,
+                help_text="Prazno = automatski Umsatz. Samo za posebne slucajeve.",
+                max_length=30,
+                verbose_name="DSFinV-K GV_TYP override",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='is_pfand',
-            field=models.BooleanField(default=False, help_text='Kaucija za casu/bocu — DSFinV-K GV_TYP=Umsatz, SKR03=8404', verbose_name='Pfand (povratna ambalaza)'),
+            model_name="inventoryitem",
+            name="is_pfand",
+            field=models.BooleanField(
+                default=False,
+                help_text="Kaucija za casu/bocu — DSFinV-K GV_TYP=Umsatz, SKR03=8404",
+                verbose_name="Pfand (povratna ambalaza)",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='is_tip',
-            field=models.BooleanField(default=False, help_text='Napojnica za radnika — DSFinV-K GV_TYP=TrinkgeldAN, UST=0pct', verbose_name='Napojnica radnika (TrinkgeldAN)'),
+            model_name="inventoryitem",
+            name="is_tip",
+            field=models.BooleanField(
+                default=False,
+                help_text="Napojnica za radnika — DSFinV-K GV_TYP=TrinkgeldAN, UST=0pct",
+                verbose_name="Napojnica radnika (TrinkgeldAN)",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='is_tip_employer',
-            field=models.BooleanField(default=False, help_text='Napojnica za vlasnika — DSFinV-K GV_TYP=TrinkgeldAG, UST=19pct', verbose_name='Napojnica vlasnika (TrinkgeldAG)'),
+            model_name="inventoryitem",
+            name="is_tip_employer",
+            field=models.BooleanField(
+                default=False,
+                help_text="Napojnica za vlasnika — DSFinV-K GV_TYP=TrinkgeldAG, UST=19pct",
+                verbose_name="Napojnica vlasnika (TrinkgeldAG)",
+            ),
         ),
     ]

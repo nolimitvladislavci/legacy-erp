@@ -14,6 +14,7 @@ Dva pravna entiteta:
   DE klijenti → Viskovic Bau (StNr: 56447/32919, Herrenberg)
                ILI Konjik d.o.o. ako Viskovic nema Softwarevertrieb
 """
+
 import uuid
 
 from django.conf import settings
@@ -23,6 +24,7 @@ from django.utils import timezone
 
 class ServiceProvider(models.Model):
     """Pravni entitet koji pruža uslugu (izdaje ugovor/račun)."""
+
     slug = models.SlugField(max_length=30, unique=True)
     name = models.CharField(max_length=200)
     legal_form = models.CharField(max_length=50)  # d.o.o., GmbH, etc.
@@ -37,14 +39,11 @@ class ServiceProvider(models.Model):
     bank_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField()
     phone = models.CharField(max_length=30, blank=True)
-    represented_by = models.CharField(max_length=200, blank=True,
-        help_text="Zastupnik/Geschäftsführer")
+    represented_by = models.CharField(max_length=200, blank=True, help_text="Zastupnik/Geschäftsführer")
 
     # Sposobnost — može li izdavati software licence
-    can_sell_software = models.BooleanField(default=False,
-        help_text="Ima registriranu djelatnost prodaje softwera")
-    gewerbeschein_note = models.TextField(blank=True,
-        help_text="Status Gewerbeschein / Izvod iz sudskog registra")
+    can_sell_software = models.BooleanField(default=False, help_text="Ima registriranu djelatnost prodaje softwera")
+    gewerbeschein_note = models.TextField(blank=True, help_text="Status Gewerbeschein / Izvod iz sudskog registra")
 
     is_active = models.BooleanField(default=True)
 
@@ -86,17 +85,22 @@ class ServiceAgreement(models.Model):
 
     # Strane ugovora
     provider = models.ForeignKey(
-        ServiceProvider, on_delete=models.PROTECT,
+        ServiceProvider,
+        on_delete=models.PROTECT,
         related_name="agreements",
         help_text="Pružatelj usluge (Konjik ili Viskovic Bau)",
     )
     client_company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="service_agreements",
     )
     subscription = models.ForeignKey(
-        "registration.CompanySubscription", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="agreements",
+        "registration.CompanySubscription",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="agreements",
     )
 
     # Tip i status
@@ -108,8 +112,7 @@ class ServiceAgreement(models.Model):
     valid_from = models.DateField()
     valid_until = models.DateField(null=True, blank=True)
     auto_renew = models.BooleanField(default=True)
-    notice_period_days = models.PositiveIntegerField(default=30,
-        help_text="Otkazni rok u danima")
+    notice_period_days = models.PositiveIntegerField(default=30, help_text="Otkazni rok u danima")
 
     # Financije
     monthly_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -118,16 +121,18 @@ class ServiceAgreement(models.Model):
     billing_email = models.EmailField(blank=True)
 
     # Uvjeti
-    terms_version = models.CharField(max_length=20, default="2026.1",
-        help_text="Verzija Općih uvjeta korištenja")
+    terms_version = models.CharField(max_length=20, default="2026.1", help_text="Verzija Općih uvjeta korištenja")
     gdpr_consent = models.BooleanField(default=False)
     gdpr_consent_at = models.DateTimeField(null=True, blank=True)
 
     # Digitalni potpis
     signed_by_name = models.CharField(max_length=200, blank=True)
     signed_by_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="signed_agreements",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="signed_agreements",
     )
     signed_at = models.DateTimeField(null=True, blank=True)
     signed_ip = models.GenericIPAddressField(null=True, blank=True)
@@ -171,7 +176,8 @@ class CompanyDocument(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="company_documents",
     )
     doc_type = models.CharField(max_length=20, choices=DocType.choices)
@@ -181,8 +187,10 @@ class CompanyDocument(models.Model):
     valid_until = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     uploaded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

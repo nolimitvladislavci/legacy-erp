@@ -2,6 +2,7 @@
 Mandate (Punomoć) views — upravljanje e-Račun mandatima.
 Marija vidi sve punomoći, kreira nove, bulk umbrella.
 """
+
 import logging
 
 from django.contrib import messages
@@ -11,13 +12,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-logger = logging.getLogger('eracun.mandate')
+logger = logging.getLogger("eracun.mandate")
 
 
 @login_required
 def mandate_list(request):
     """GET /eracun/mandati/ — lista svih punomoći za kompaniju."""
     from einvoice.models.mandate import Mandate
+
     user_co = request.user.profile.company
 
     if request.user.is_superuser:
@@ -25,19 +27,23 @@ def mandate_list(request):
     else:
         mandates = Mandate.objects.filter(agent_company=user_co)
 
-    mandates = mandates.select_related('principal_company', 'agent_company').order_by('-created_at')
+    mandates = mandates.select_related("principal_company", "agent_company").order_by("-created_at")
 
     stats = {
-        'draft': mandates.filter(status='draft').count(),
-        'signed': mandates.filter(status='signed').count(),
-        'active': mandates.filter(status='active').count(),
-        'total': mandates.count(),
+        "draft": mandates.filter(status="draft").count(),
+        "signed": mandates.filter(status="signed").count(),
+        "active": mandates.filter(status="active").count(),
+        "total": mandates.count(),
     }
 
-    return render(request, 'eracun/mandate_list.html', {
-        'mandates': mandates,
-        'stats': stats,
-    })
+    return render(
+        request,
+        "eracun/mandate_list.html",
+        {
+            "mandates": mandates,
+            "stats": stats,
+        },
+    )
 
 
 @login_required
@@ -46,34 +52,34 @@ def mandate_create(request):
     from companies.models import Company
     from einvoice.models.mandate import Mandate, MandateStatus, MandateType
 
-    if request.method != 'POST':
+    if request.method != "POST":
         # GET — prikaži formu s listom umbrella firmi
         user_co = request.user.profile.company
-        children = Company.objects.filter(umbrella_parent=user_co).order_by('name')
-        return render(request, 'eracun/mandate_create.html', {'children': children})
+        children = Company.objects.filter(umbrella_parent=user_co).order_by("name")
+        return render(request, "eracun/mandate_create.html", {"children": children})
 
-    principal_id = request.POST.get('principal_id')
+    principal_id = request.POST.get("principal_id")
     principal = get_object_or_404(Company, id=principal_id)
     agent = request.user.profile.company
 
     # Check duplicate
     if Mandate.objects.filter(principal_company=principal, agent_company=agent).exists():
-        messages.warning(request, f'Punomoć za {principal.name} već postoji.')
-        return redirect('eracun:mandate_list')
+        messages.warning(request, f"Punomoć za {principal.name} već postoji.")
+        return redirect("eracun:mandate_list")
 
-    mandate = Mandate.objects.create(
+    Mandate.objects.create(
         principal_company=principal,
-        principal_oib=principal.oib or '',
+        principal_oib=principal.oib or "",
         agent_company=agent,
-        agent_oib=agent.oib or '',
+        agent_oib=agent.oib or "",
         mandate_type=MandateType.FULL,
         status=MandateStatus.DRAFT,
         valid_from=timezone.now().date(),
         created_by=request.user,
     )
 
-    messages.success(request, f'Punomoć kreirana za {principal.name}. Status: nacrt.')
-    return redirect('eracun:mandate_list')
+    messages.success(request, f"Punomoć kreirana za {principal.name}. Status: nacrt.")
+    return redirect("eracun:mandate_list")
 
 
 @login_required
@@ -82,14 +88,14 @@ def mandate_activate(request, pk):
     from einvoice.models.mandate import Mandate, MandateStatus
 
     mandate = get_object_or_404(Mandate, pk=pk)
-    if mandate.status not in ('draft', 'signed'):
-        messages.error(request, _('Mandat nije u statusu za aktivaciju.'))
-        return redirect('eracun:mandate_list')
+    if mandate.status not in ("draft", "signed"):
+        messages.error(request, _("Mandat nije u statusu za aktivaciju."))
+        return redirect("eracun:mandate_list")
 
     mandate.status = MandateStatus.ACTIVE
-    mandate.save(update_fields=['status', 'updated_at'])
-    messages.success(request, f'Punomoć za {mandate.principal_company.name} aktivirana.')
-    return redirect('eracun:mandate_list')
+    mandate.save(update_fields=["status", "updated_at"])
+    messages.success(request, f"Punomoć za {mandate.principal_company.name} aktivirana.")
+    return redirect("eracun:mandate_list")
 
 
 @login_required
@@ -99,8 +105,8 @@ def mandate_revoke(request, pk):
 
     mandate = get_object_or_404(Mandate, pk=pk)
     mandate.revoke()
-    messages.warning(request, f'Punomoć za {mandate.principal_company.name} opozvana.')
-    return redirect('eracun:mandate_list')
+    messages.warning(request, f"Punomoć za {mandate.principal_company.name} opozvana.")
+    return redirect("eracun:mandate_list")
 
 
 @login_required
@@ -109,8 +115,8 @@ def mandate_bulk_umbrella(request):
     from companies.models import Company
     from einvoice.models.mandate import Mandate, MandateStatus, MandateType
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     agent = request.user.profile.company
     children = Company.objects.filter(umbrella_parent=agent)
@@ -125,9 +131,9 @@ def mandate_bulk_umbrella(request):
 
         Mandate.objects.create(
             principal_company=firm,
-            principal_oib=firm.oib or '',
+            principal_oib=firm.oib or "",
             agent_company=agent,
-            agent_oib=agent.oib or '',
+            agent_oib=agent.oib or "",
             mandate_type=MandateType.FULL,
             status=MandateStatus.DRAFT,
             valid_from=timezone.now().date(),
@@ -135,10 +141,12 @@ def mandate_bulk_umbrella(request):
         )
         created += 1
 
-    return JsonResponse({
-        'ok': True,
-        'created': created,
-        'already_exists': already,
-        'total': children.count(),
-        'message': f'Kreirano {created} punomoći. Vlasnici moraju potpisati.',
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "created": created,
+            "already_exists": already,
+            "total": children.count(),
+            "message": f"Kreirano {created} punomoći. Vlasnici moraju potpisati.",
+        }
+    )

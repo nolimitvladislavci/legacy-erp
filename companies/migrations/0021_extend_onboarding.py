@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0020_add_umbrella_relation'),
+        ("companies", "0020_add_umbrella_relation"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='onboardingprogress',
-            name='ai_intro_completed',
+            model_name="onboardingprogress",
+            name="ai_intro_completed",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='onboardingprogress',
-            name='ai_intro_shown',
+            model_name="onboardingprogress",
+            name="ai_intro_shown",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='onboardingprogress',
-            name='first_employee_added',
+            model_name="onboardingprogress",
+            name="first_employee_added",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='onboardingprogress',
-            name='first_item_added',
+            model_name="onboardingprogress",
+            name="first_item_added",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='onboardingprogress',
-            name='pos_configured',
+            model_name="onboardingprogress",
+            name="pos_configured",
             field=models.BooleanField(default=False),
         ),
     ]

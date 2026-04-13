@@ -5,36 +5,74 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0023_add_booking_theme'),
-        ('delivery', '0007_warehouse_hub'),
+        ("companies", "0023_add_booking_theme"),
+        ("delivery", "0007_warehouse_hub"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DeliveryZone',
+            name="DeliveryZone",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Naziv zone')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('price', models.DecimalField(decimal_places=2, max_digits=8, verbose_name='Cijena dostave (EUR)')),
-                ('min_distance_km', models.DecimalField(decimal_places=1, default=0, max_digits=5, verbose_name='Min udaljenost (km)')),
-                ('max_distance_km', models.DecimalField(decimal_places=1, default=0, max_digits=5, verbose_name='Max udaljenost (km)')),
-                ('free_delivery_above', models.DecimalField(blank=True, decimal_places=2, help_text='Ako narudzba prelazi ovaj iznos, dostava je besplatna.', max_digits=8, null=True, verbose_name='Besplatna dostava iznad (EUR)')),
-                ('delivery_time_from', models.TimeField(blank=True, null=True, verbose_name='Dostava od')),
-                ('delivery_time_to', models.TimeField(blank=True, null=True, verbose_name='Dostava do')),
-                ('delivery_days', models.CharField(default='mon,tue,wed,thu,fri,sat', help_text='Odvojeno zarezima: mon,tue,wed,thu,fri,sat,sun', max_length=50, verbose_name='Dani dostave')),
-                ('postal_codes', models.TextField(blank=True, help_text='Odvojeno zarezima, npr: 31431,31400,31000', verbose_name='Postanski brojevi')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivna')),
-                ('sort_order', models.IntegerField(default=0, verbose_name='Redoslijed')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='delivery_zones', to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=100, verbose_name="Naziv zone")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                ("price", models.DecimalField(decimal_places=2, max_digits=8, verbose_name="Cijena dostave (EUR)")),
+                (
+                    "min_distance_km",
+                    models.DecimalField(decimal_places=1, default=0, max_digits=5, verbose_name="Min udaljenost (km)"),
+                ),
+                (
+                    "max_distance_km",
+                    models.DecimalField(decimal_places=1, default=0, max_digits=5, verbose_name="Max udaljenost (km)"),
+                ),
+                (
+                    "free_delivery_above",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="Ako narudzba prelazi ovaj iznos, dostava je besplatna.",
+                        max_digits=8,
+                        null=True,
+                        verbose_name="Besplatna dostava iznad (EUR)",
+                    ),
+                ),
+                ("delivery_time_from", models.TimeField(blank=True, null=True, verbose_name="Dostava od")),
+                ("delivery_time_to", models.TimeField(blank=True, null=True, verbose_name="Dostava do")),
+                (
+                    "delivery_days",
+                    models.CharField(
+                        default="mon,tue,wed,thu,fri,sat",
+                        help_text="Odvojeno zarezima: mon,tue,wed,thu,fri,sat,sun",
+                        max_length=50,
+                        verbose_name="Dani dostave",
+                    ),
+                ),
+                (
+                    "postal_codes",
+                    models.TextField(
+                        blank=True,
+                        help_text="Odvojeno zarezima, npr: 31431,31400,31000",
+                        verbose_name="Postanski brojevi",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivna")),
+                ("sort_order", models.IntegerField(default=0, verbose_name="Redoslijed")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="delivery_zones",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zona dostave',
-                'verbose_name_plural': 'Zone dostave',
-                'ordering': ['sort_order', 'price'],
+                "verbose_name": "Zona dostave",
+                "verbose_name_plural": "Zone dostave",
+                "ordering": ["sort_order", "price"],
             },
         ),
     ]

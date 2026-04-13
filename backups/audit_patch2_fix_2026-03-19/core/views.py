@@ -197,7 +197,7 @@ def superadmin_dashboard(request):
     User = get_user_model()
     today = timezone.now().date()
     month_start = today.replace(day=1)
-    year_start = today.replace(month=1, day=1)
+    today.replace(month=1, day=1)
 
     total_users = User.objects.count()
     active_users = User.objects.filter(is_active=True).count()
@@ -894,19 +894,18 @@ def company_dashboard(request):
         appt_qs = Appointment.objects.filter(start_time__date=today)
         if company:
             appt_qs = appt_qs.filter(company=company)
-        today_appointments = appt_qs.order_by('start_time')[:8]
-        total_appointments_month = Appointment.objects.filter(start_time__date__gte=month_start).count()
+        appt_qs.order_by('start_time')[:8]
+        Appointment.objects.filter(start_time__date__gte=month_start).count()
     except Exception:
-        today_appointments = []
-        total_appointments_month = 0
+        pass
 
     try:
         from pos.models import POSReceipt
         pos_qs = POSReceipt.objects.unscoped()
-        pos_revenue_today = pos_qs.filter(created_at__date=today).aggregate(s=Sum('total_amount'))['s'] or 0
-        pos_count_today = pos_qs.filter(created_at__date=today).count()
+        pos_qs.filter(created_at__date=today).aggregate(s=Sum('total_amount'))['s'] or 0
+        pos_qs.filter(created_at__date=today).count()
     except Exception:
-        pos_revenue_today = pos_count_today = 0
+        pass
 
     # ── Worker clock-in status ───────────────────────────────────────────────
     worker_status = []
@@ -1336,7 +1335,7 @@ def partner_dashboard(request):
     from django.db.models import Sum
     from django.utils import timezone
 
-    today = timezone.now().date()
+    timezone.now().date()
 
     # 1. Invoices
     try:

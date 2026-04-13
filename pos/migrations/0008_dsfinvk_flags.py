@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0007_cashdeposit'),
+        ("pos", "0007_cashdeposit"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='is_pfand_return',
-            field=models.BooleanField(default=False, help_text='Negativan iznos — DSFinV-K GV_TYP=Pfandrueckzahlung', verbose_name='Povrat Pfanda'),
+            model_name="posreceiptitem",
+            name="is_pfand_return",
+            field=models.BooleanField(
+                default=False,
+                help_text="Negativan iznos — DSFinV-K GV_TYP=Pfandrueckzahlung",
+                verbose_name="Povrat Pfanda",
+            ),
         ),
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='is_tip',
-            field=models.BooleanField(default=False, help_text='DSFinV-K GV_TYP=TrinkgeldAN ili TrinkgeldAG', verbose_name='Napojnica'),
+            model_name="posreceiptitem",
+            name="is_tip",
+            field=models.BooleanField(
+                default=False, help_text="DSFinV-K GV_TYP=TrinkgeldAN ili TrinkgeldAG", verbose_name="Napojnica"
+            ),
         ),
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='is_tip_employer',
-            field=models.BooleanField(default=False, verbose_name='Napojnica vlasnika (AG)'),
+            model_name="posreceiptitem",
+            name="is_tip_employer",
+            field=models.BooleanField(default=False, verbose_name="Napojnica vlasnika (AG)"),
         ),
     ]

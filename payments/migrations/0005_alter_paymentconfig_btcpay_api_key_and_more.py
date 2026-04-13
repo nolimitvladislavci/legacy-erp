@@ -5,55 +5,54 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0004_add_revolut_gateway'),
+        ("payments", "0004_add_revolut_gateway"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='btcpay_api_key',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='BTCPay API Key'),
+            model_name="paymentconfig",
+            name="btcpay_api_key",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="BTCPay API Key"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='paypal_client_id',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='PayPal Client ID'),
+            model_name="paymentconfig",
+            name="paypal_client_id",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="PayPal Client ID"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='paypal_secret',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='PayPal Secret'),
+            model_name="paymentconfig",
+            name="paypal_secret",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="PayPal Secret"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='revolut_api_key',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Revolut API Key'),
+            model_name="paymentconfig",
+            name="revolut_api_key",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Revolut API Key"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='revolut_merchant_id',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Revolut Merchant ID'),
+            model_name="paymentconfig",
+            name="revolut_merchant_id",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Revolut Merchant ID"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='revolut_webhook_secret',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Revolut Webhook Secret'),
+            model_name="paymentconfig",
+            name="revolut_webhook_secret",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Revolut Webhook Secret"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='stripe_public_key',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Stripe Publishable Key'),
+            model_name="paymentconfig",
+            name="stripe_public_key",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Stripe Publishable Key"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='stripe_secret_key',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Stripe Secret Key'),
+            model_name="paymentconfig",
+            name="stripe_secret_key",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Stripe Secret Key"),
         ),
         migrations.AlterField(
-            model_name='paymentconfig',
-            name='stripe_webhook_secret',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='Stripe Webhook Secret'),
+            model_name="paymentconfig",
+            name="stripe_webhook_secret",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="Stripe Webhook Secret"),
         ),
     ]

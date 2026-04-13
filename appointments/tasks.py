@@ -1,6 +1,7 @@
 """
 Celery tasks for appointment reminders and status notifications.
 """
+
 import logging
 from datetime import timedelta
 
@@ -49,9 +50,7 @@ def send_appointment_reminders():
 
         if appt.email_reminder_sent or appt.whatsapp_reminder_sent:
             appt.reminder_sent_at = timezone.now()
-            appt.save(update_fields=[
-                "email_reminder_sent", "whatsapp_reminder_sent", "reminder_sent_at"
-            ])
+            appt.save(update_fields=["email_reminder_sent", "whatsapp_reminder_sent", "reminder_sent_at"])
 
     logger.info(f"Reminders: {sent_email} email, {sent_wa} WA (of {upcoming.count()} appts)")
     return {"email": sent_email, "whatsapp": sent_wa, "total": upcoming.count()}
@@ -80,7 +79,8 @@ def _send_reminder_email(appt):
     body += "\nAko trebate otkazati, kontaktirajte nas sto prije.\n\nHvala!\n"
 
     send_email_task.delay(
-        subject, body,
+        subject,
+        body,
         getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@fina-connect.hr"),
         [appt.client.email],
     )
@@ -92,11 +92,7 @@ def _send_reminder_whatsapp(appt, phone):
     dt = appt.start_time.strftime("%d.%m.%Y u %H:%M")
     service_name = appt.service.name if appt.service else appt.title
 
-    msg = (
-        f"Podsjetnik na termin sutra\n\n"
-        f"*{service_name}*\n"
-        f"{dt}\n"
-    )
+    msg = f"Podsjetnik na termin sutra\n\n*{service_name}*\n{dt}\n"
     if appt.total_price:
         msg += f"{appt.total_price} EUR\n"
     msg += "\nAko trebate otkazati, javite nam se."
@@ -124,7 +120,7 @@ def notify_appointment_status_change(appointment_id, new_status):
         "confirmed": "Potvrdjen",
         "cancelled": "Otkazan",
         "completed": "Zavrsen",
-        "no_show":   "Nije se pojavio",
+        "no_show": "Nije se pojavio",
     }
     label = STATUS_HR.get(new_status, new_status)
 
@@ -150,7 +146,8 @@ def notify_appointment_status_change(appointment_id, new_status):
 
         try:
             send_email_task.delay(
-                subject, body,
+                subject,
+                body,
                 getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@fina-connect.hr"),
                 [appt.client.email],
             )
@@ -161,16 +158,17 @@ def notify_appointment_status_change(appointment_id, new_status):
     wa = appt.whatsapp_number or (appt.client.phone if appt.client else "")
     if wa:
         from core.whatsapp_tasks import send_whatsapp_text_task
+
         try:
             # Bakery-specific messages
-            is_bakery = appt.service and getattr(appt.service, 'branch_type', '') == 'bakery'
+            is_bakery = appt.service and getattr(appt.service, "branch_type", "") == "bakery"
             if is_bakery:
                 bakery_msgs = {
-                    'confirmed': 'Termin POTVRDEN! ' + service_name + ' — ' + dt + '. Donijeti namirnice na vrijeme!',
-                    'completed': 'Vase pecenje je GOTOVO! ' + service_name + ' — Dodite pokupiti dok je toplo!',
-                    'cancelled': 'Termin otkazan: ' + service_name + ' ' + dt + '. Za novi termin javite se.',
+                    "confirmed": "Termin POTVRDEN! " + service_name + " — " + dt + ". Donijeti namirnice na vrijeme!",
+                    "completed": "Vase pecenje je GOTOVO! " + service_name + " — Dodite pokupiti dok je toplo!",
+                    "cancelled": "Termin otkazan: " + service_name + " " + dt + ". Za novi termin javite se.",
                 }
-                msg = bakery_msgs.get(new_status, 'Status: ' + label + ' — ' + service_name)
+                msg = bakery_msgs.get(new_status, "Status: " + label + " — " + service_name)
             else:
                 msg = "Termin " + label.lower() + "\n" + service_name + "\n" + dt
             send_whatsapp_text_task.delay(wa, msg)

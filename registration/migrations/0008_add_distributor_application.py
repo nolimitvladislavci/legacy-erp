@@ -7,39 +7,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0007_add_disability_ambassador'),
+        ("registration", "0007_add_disability_ambassador"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DistributorApplication',
+            name="DistributorApplication",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('company_name', models.CharField(max_length=200, verbose_name='Naziv tvrtke')),
-                ('oib', models.CharField(blank=True, max_length=20, verbose_name='OIB')),
-                ('contact_name', models.CharField(max_length=200, verbose_name='Kontakt osoba')),
-                ('email', models.EmailField(max_length=254, verbose_name='Email')),
-                ('phone', models.CharField(max_length=50, verbose_name='Telefon')),
-                ('city', models.CharField(blank=True, max_length=100)),
-                ('country', models.CharField(default='HR', max_length=5)),
-                ('existing_clients', models.PositiveIntegerField(default=0, verbose_name='Koliko klijenata trenutno imate?')),
-                ('target_segment', models.CharField(blank=True, max_length=200, verbose_name='Ciljni segment (obrti, ugostiteljstvo, udruge...)')),
-                ('motivation', models.TextField(blank=True, verbose_name='Zašto želite postati distributer?')),
-                ('website', models.URLField(blank=True)),
-                ('status', models.CharField(choices=[('pending', 'Na čekanju'), ('approved', 'Odobreno'), ('rejected', 'Odbijeno')], default='pending', max_length=15)),
-                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
-                ('rejection_reason', models.TextField(blank=True)),
-                ('whitelabel_subdomain', models.CharField(blank=True, max_length=50, verbose_name='WhiteLabel subdomena (automatski)')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("company_name", models.CharField(max_length=200, verbose_name="Naziv tvrtke")),
+                ("oib", models.CharField(blank=True, max_length=20, verbose_name="OIB")),
+                ("contact_name", models.CharField(max_length=200, verbose_name="Kontakt osoba")),
+                ("email", models.EmailField(max_length=254, verbose_name="Email")),
+                ("phone", models.CharField(max_length=50, verbose_name="Telefon")),
+                ("city", models.CharField(blank=True, max_length=100)),
+                ("country", models.CharField(default="HR", max_length=5)),
+                (
+                    "existing_clients",
+                    models.PositiveIntegerField(default=0, verbose_name="Koliko klijenata trenutno imate?"),
+                ),
+                (
+                    "target_segment",
+                    models.CharField(
+                        blank=True, max_length=200, verbose_name="Ciljni segment (obrti, ugostiteljstvo, udruge...)"
+                    ),
+                ),
+                ("motivation", models.TextField(blank=True, verbose_name="Zašto želite postati distributer?")),
+                ("website", models.URLField(blank=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("pending", "Na čekanju"), ("approved", "Odobreno"), ("rejected", "Odbijeno")],
+                        default="pending",
+                        max_length=15,
+                    ),
+                ),
+                ("reviewed_at", models.DateTimeField(blank=True, null=True)),
+                ("rejection_reason", models.TextField(blank=True)),
+                (
+                    "whitelabel_subdomain",
+                    models.CharField(blank=True, max_length=50, verbose_name="WhiteLabel subdomena (automatski)"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "reviewed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Distributer prijava',
-                'verbose_name_plural': 'Distributer prijave',
-                'ordering': ['-created_at'],
+                "verbose_name": "Distributer prijava",
+                "verbose_name_plural": "Distributer prijave",
+                "ordering": ["-created_at"],
             },
         ),
     ]

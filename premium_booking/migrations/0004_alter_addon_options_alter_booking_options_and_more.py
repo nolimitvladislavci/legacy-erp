@@ -5,151 +5,162 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0003_alter_addon_applicable_groups'),
+        ("premium_booking", "0003_alter_addon_applicable_groups"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='addon',
+            name="addon",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='booking',
+            name="booking",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name'], 'verbose_name': 'Premium Resurs'},
+            name="resource",
+            options={"ordering": ["group", "name"], "verbose_name": "Premium Resurs"},
         ),
         migrations.RemoveField(
-            model_name='addon',
-            name='applicable_groups',
+            model_name="addon",
+            name="applicable_groups",
         ),
         migrations.RemoveField(
-            model_name='addon',
-            name='description',
+            model_name="addon",
+            name="description",
         ),
         migrations.RemoveField(
-            model_name='booking',
-            name='user',
+            model_name="booking",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='payment',
-            name='transaction_id',
+            model_name="payment",
+            name="transaction_id",
         ),
         migrations.AlterField(
-            model_name='addon',
-            name='icon',
-            field=models.CharField(blank=True, help_text='Font Awesome ikona', max_length=50),
+            model_name="addon",
+            name="icon",
+            field=models.CharField(blank=True, help_text="Font Awesome ikona", max_length=50),
         ),
         migrations.AlterField(
-            model_name='addon',
-            name='name',
+            model_name="addon",
+            name="name",
             field=models.CharField(max_length=100),
         ),
         migrations.AlterField(
-            model_name='addon',
-            name='price',
+            model_name="addon",
+            name="price",
             field=models.DecimalField(decimal_places=2, max_digits=8),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='end_time',
+            model_name="booking",
+            name="end_time",
             field=models.DateTimeField(),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='guest_email',
+            model_name="booking",
+            name="guest_email",
             field=models.EmailField(max_length=254),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='guest_name',
+            model_name="booking",
+            name="guest_name",
             field=models.CharField(max_length=200),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='guest_phone',
+            model_name="booking",
+            name="guest_phone",
             field=models.CharField(max_length=20),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='payment_method',
-            field=models.CharField(choices=[('invoice', 'Službena ponuda'), ('revolut', 'Revolut Pay')], default='invoice', max_length=20),
+            model_name="booking",
+            name="payment_method",
+            field=models.CharField(
+                choices=[("invoice", "Službena ponuda"), ("revolut", "Revolut Pay")], default="invoice", max_length=20
+            ),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='resource',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='premium_booking.resource'),
+            model_name="booking",
+            name="resource",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="premium_booking.resource"),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='start_time',
+            model_name="booking",
+            name="start_time",
             field=models.DateTimeField(),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Čeka potvrdu'), ('confirmed', 'Potvrđeno'), ('cancelled', 'Otkazano')], default='pending', max_length=20),
+            model_name="booking",
+            name="status",
+            field=models.CharField(
+                choices=[("pending", "Čeka potvrdu"), ("confirmed", "Potvrđeno"), ("cancelled", "Otkazano")],
+                default="pending",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='total_price',
+            model_name="booking",
+            name="total_price",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='whatsapp_number',
+            model_name="booking",
+            name="whatsapp_number",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='base_price',
+            model_name="resource",
+            name="base_price",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='capacity',
+            model_name="resource",
+            name="capacity",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='description',
+            model_name="resource",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='group',
-            field=models.CharField(choices=[('construction', 'Gradnja'), ('housing', 'Stanovanje'), ('business', 'Poslovni prostori')], max_length=20, verbose_name='Grupa'),
+            model_name="resource",
+            name="group",
+            field=models.CharField(
+                choices=[("construction", "Gradnja"), ("housing", "Stanovanje"), ("business", "Poslovni prostori")],
+                max_length=20,
+                verbose_name="Grupa",
+            ),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to='resources/'),
+            model_name="resource",
+            name="image",
+            field=models.ImageField(blank=True, null=True, upload_to="resources/"),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='is_active',
+            model_name="resource",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='min_duration',
+            model_name="resource",
+            name="min_duration",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='name',
-            field=models.CharField(max_length=200, verbose_name='Naziv'),
+            model_name="resource",
+            name="name",
+            field=models.CharField(max_length=200, verbose_name="Naziv"),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='unit',
-            field=models.CharField(choices=[('hour', 'Sat'), ('day', 'Dan'), ('month', 'Mjesec')], default='day', max_length=10),
+            model_name="resource",
+            name="unit",
+            field=models.CharField(
+                choices=[("hour", "Sat"), ("day", "Dan"), ("month", "Mjesec")], default="day", max_length=10
+            ),
         ),
         migrations.DeleteModel(
-            name='Invoice',
+            name="Invoice",
         ),
     ]

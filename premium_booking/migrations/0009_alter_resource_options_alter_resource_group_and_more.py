@@ -4,24 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0008_alter_resource_options_booking_created_at_and_more'),
+        ("premium_booking", "0008_alter_resource_options_booking_created_at_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name']},
+            name="resource",
+            options={"ordering": ["group", "name"]},
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='group',
-            field=models.CharField(choices=[('construction', 'Gradnja (Strojevi i Radnici)'), ('housing', 'Stanovanje (Sobe i Garsonjere)'), ('business', 'Poslovni prostori (Uredi i Restoran)')], max_length=20),
+            model_name="resource",
+            name="group",
+            field=models.CharField(
+                choices=[
+                    ("construction", "Gradnja (Strojevi i Radnici)"),
+                    ("housing", "Stanovanje (Sobe i Garsonjere)"),
+                    ("business", "Poslovni prostori (Uredi i Restoran)"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='name',
+            model_name="resource",
+            name="name",
             field=models.CharField(max_length=200),
         ),
     ]

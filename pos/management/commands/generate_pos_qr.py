@@ -6,6 +6,7 @@ Usage:
     python manage.py generate_pos_qr --company "UVIJEK FRIŠKO"
     python manage.py generate_pos_qr  # all terminals
 """
+
 import io
 import os
 
@@ -96,12 +97,7 @@ class Command(BaseCommand):
             c.save()
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"Terminal: {terminal.name}\n"
-                    f"  URL: {url}\n"
-                    f"  QR:  {png_path}\n"
-                    f"  PDF: {pdf_path}\n"
-                )
+                self.style.SUCCESS(f"Terminal: {terminal.name}\n  URL: {url}\n  QR:  {png_path}\n  PDF: {pdf_path}\n")
             )
 
         self.stdout.write(self.style.SUCCESS("Done."))

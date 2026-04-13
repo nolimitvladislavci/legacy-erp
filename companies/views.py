@@ -72,6 +72,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 # === COMPANY SETTINGS ========================================================
 
 import secrets
@@ -102,7 +103,7 @@ def _require_strict_admin(request):
         profile = request.user.profile
     except AttributeError:
         return None, None
-    if profile.role not in ('company_admin', 'superadmin', 'tenant_admin') and not profile.user.is_superuser:
+    if profile.role not in ("company_admin", "superadmin", "tenant_admin") and not profile.user.is_superuser:
         return None, None
     return profile, profile.company
 
@@ -116,7 +117,15 @@ def company_settings(request):
 
     tab = request.GET.get("tab", "info")
     # Map legacy tab names
-    if tab == "info": tab = "profile"
+    if tab == "info":
+        tab = "profile"
+
+    # Delegate new tabs to views_settings (rich context + POST handlers)
+    NEW_TABS = ("modules", "subscription", "fiscal", "website", "webshop", "booking", "integrations", "ai")
+    if tab in NEW_TABS:
+        from .views_settings import settings_full_page
+
+        return settings_full_page(request, tab, profile, company)
 
     # Tab: info
     if tab == "info" and request.method == "POST":
@@ -144,6 +153,7 @@ def company_settings(request):
         if nkd_id:
             try:
                 from .models import NKDCode
+
                 company.nkd_code = NKDCode.objects.get(pk=nkd_id)
             except ObjectDoesNotExist:
                 pass
@@ -180,10 +190,15 @@ def company_settings(request):
         company.is_vat_registered = request.POST.get("is_vat_registered") == "1"
         company.is_kleinunternehmer = request.POST.get("is_kleinunternehmer") == "1"
         company.vat_id = request.POST.get("vat_id", company.vat_id)
-        company.save(update_fields=[
-            "fiscal_system", "pdv_status", "is_vat_registered",
-            "is_kleinunternehmer", "vat_id",
-        ])
+        company.save(
+            update_fields=[
+                "fiscal_system",
+                "pdv_status",
+                "is_vat_registered",
+                "is_kleinunternehmer",
+                "vat_id",
+            ]
+        )
         messages.success(request, _("Fiskalne postavke su azurirane."))
         return redirect("/companies/settings/?tab=fiscal")
 
@@ -199,6 +214,7 @@ def company_settings(request):
     }
     try:
         from invoicing.models import Invoice
+
         usage["invoices"] = Invoice.objects.filter(company=company).count()
     except DatabaseError:
         pass
@@ -209,15 +225,15 @@ def company_settings(request):
         from django.utils import timezone as _tz
 
         from invoicing.fiscal_models import FiscalCertificate
+
         fiscal_certs = list(
-            FiscalCertificate.objects.filter(company=company).select_related('location').order_by('-uploaded_at')
+            FiscalCertificate.objects.filter(company=company).select_related("location").order_by("-uploaded_at")
         )
         _now = _tz.now()
         for c in fiscal_certs:
             c.is_expired = c.valid_until and c.valid_until < _now
     except DatabaseError:
         pass
-
 
     # Tab: integrations — API tokeni i vanjske integracije
     if tab == "integrations" and request.method == "POST":
@@ -233,25 +249,37 @@ def company_settings(request):
         messages.success(request, _("✅ Integracije spremljene."))
         return redirect("/companies/settings/?tab=integrations")
 
-    return render(request, "companies/settings.html", {
-        "company": company,
-        "tab": tab,
-        "fina_token_masked": __import__('partners.fina_infobiz', fromlist=['mask_token']).mask_token(
-            (company.settings or {}).get('fina_infobiz_token', '')
-        ) if (company.settings or {}).get('fina_infobiz_token') else '',
-        "has_fina_token": bool((company.settings or {}).get('fina_infobiz_token')),
-        "employees": employees,
-        "branches": branches,
-        "subscription": sub,
-        "usage": usage,
-        "fiscal_certs": fiscal_certs,
-        "role_choices": [r for r in UserProfile.ROLE_CHOICES if r[0] != "superadmin"] if not getattr(profile, "is_superadmin", False) else UserProfile.ROLE_CHOICES,
-        "branch_types": CompanyBranch.BRANCH_TYPES,
-        "country_choices": Company.Country.choices,
-        "settings_data": company.settings or {},
-        "module_count": CompanyModuleConfig.objects.filter(company=company).values_list("enabled_modules", flat=True).first().__len__() if CompanyModuleConfig.objects.filter(company=company).exists() else 0,
-    })
-
+    return render(
+        request,
+        "companies/settings.html",
+        {
+            "company": company,
+            "tab": tab,
+            "fina_token_masked": __import__("partners.fina_infobiz", fromlist=["mask_token"]).mask_token(
+                (company.settings or {}).get("fina_infobiz_token", "")
+            )
+            if (company.settings or {}).get("fina_infobiz_token")
+            else "",
+            "has_fina_token": bool((company.settings or {}).get("fina_infobiz_token")),
+            "employees": employees,
+            "branches": branches,
+            "subscription": sub,
+            "usage": usage,
+            "fiscal_certs": fiscal_certs,
+            "role_choices": [r for r in UserProfile.ROLE_CHOICES if r[0] != "superadmin"]
+            if not getattr(profile, "is_superadmin", False)
+            else UserProfile.ROLE_CHOICES,
+            "branch_types": CompanyBranch.BRANCH_TYPES,
+            "country_choices": Company.Country.choices,
+            "settings_data": company.settings or {},
+            "module_count": CompanyModuleConfig.objects.filter(company=company)
+            .values_list("enabled_modules", flat=True)
+            .first()
+            .__len__()
+            if CompanyModuleConfig.objects.filter(company=company).exists()
+            else 0,
+        },
+    )
 
 
 @login_required
@@ -275,6 +303,7 @@ def employee_create(request):
         return JsonResponse({"error": "Email je obavezan."}, status=400)
 
     from django.contrib.auth.models import User
+
     if User.objects.filter(email=email).exists():
         return JsonResponse({"error": "Korisnik s tim emailom vec postoji."}, status=400)
 
@@ -289,17 +318,25 @@ def employee_create(request):
         counter += 1
 
     user = User.objects.create_user(
-        username=username, email=email, password=temp_pw,
-        first_name=first_name, last_name=last_name,
+        username=username,
+        email=email,
+        password=temp_pw,
+        first_name=first_name,
+        last_name=last_name,
     )
     if role in ("company_admin", "project_manager"):
         user.is_staff = True
         user.save()
 
-    up, created = UserProfile.objects.get_or_create(user=user, defaults={
-        "company": company, "role": role, "phone": phone,
-        "must_change_password": True,
-    })
+    up, created = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={
+            "company": company,
+            "role": role,
+            "phone": phone,
+            "must_change_password": True,
+        },
+    )
     if not created:
         up.company = company
         up.role = role
@@ -309,20 +346,33 @@ def employee_create(request):
 
     # Sync CompanyMembership
     from accounts.models import CompanyMembership
+
     CompanyMembership.objects.update_or_create(
-        user=user, company=company,
-        defaults={"role": role, "is_default": not CompanyMembership.objects.filter(user=user).exclude(company=company).exists()}
+        user=user,
+        company=company,
+        defaults={
+            "role": role,
+            "is_default": not CompanyMembership.objects.filter(user=user).exclude(company=company).exists(),
+        },
     )
 
     try:
         from django.core.mail import send_mail
+
         send_mail(
             "Vas pristup - " + company.name,
-            "Postovani " + first_name + ",\n\nKreiran je korisnicki racun za LIMIT Connect.\n\n"
-            + "Email: " + email + "\nLozinka: " + temp_pw + "\n\n"
+            "Postovani "
+            + first_name
+            + ",\n\nKreiran je korisnicki racun za LIMIT Connect.\n\n"
+            + "Email: "
+            + email
+            + "\nLozinka: "
+            + temp_pw
+            + "\n\n"
             + "Prijavite se na: https://limit-connect.com/login/\n"
             + "Prilikom prve prijave bit cete zamoljeni da promijenite lozinku.\n\n"
-            + "Pozdrav,\n" + company.name,
+            + "Pozdrav,\n"
+            + company.name,
             "noreply@limit-connect.com",
             [email],
             fail_silently=True,
@@ -331,15 +381,16 @@ def employee_create(request):
         pass
 
     # ── EmployeeProfile — kreira se ako je attr_worker ili attr_manager ──
-    attr_worker  = request.POST.get("attr_worker")
+    attr_worker = request.POST.get("attr_worker")
     attr_manager = request.POST.get("attr_manager")
-    is_manager   = request.POST.get("is_manager") == "1"
+    is_manager = request.POST.get("is_manager") == "1"
 
     if attr_worker or attr_manager:
         try:
             from decimal import Decimal
 
             from worktime.models import EmployeeProfile
+
             ep, ep_created = EmployeeProfile.objects.get_or_create(
                 user=user,
                 defaults={
@@ -356,19 +407,22 @@ def employee_create(request):
                     "is_volunteer": bool(request.POST.get("is_volunteer")),
                     "date_hired": request.POST.get("date_hired") or None,
                     "phone": phone,
-                }
+                },
             )
             if not ep_created:
                 ep.company = company
                 ep.tax_id = request.POST.get("tax_id", "").strip()[:11] or ep.tax_id
                 ep.bank_account = request.POST.get("bank_account", "").strip() or ep.bank_account
                 ep.is_manager = is_manager
-                ep.save(update_fields=["company","tax_id","bank_account","is_manager"])
+                ep.save(update_fields=["company", "tax_id", "bank_account", "is_manager"])
         except (ValueError, TypeError) as e:
             import logging
+
             logging.getLogger("companies").warning("EmployeeProfile create failed: %s", e)
 
-    return JsonResponse({"ok": True, "message": "Zaposlenik " + first_name + " " + last_name + " kreiran.", "temp_password": temp_pw})
+    return JsonResponse(
+        {"ok": True, "message": "Zaposlenik " + first_name + " " + last_name + " kreiran.", "temp_password": temp_pw}
+    )
 
 
 @login_required
@@ -474,21 +528,21 @@ def branch_toggle_active(request, pk):
     return JsonResponse({"ok": True, "message": "Podruznica " + status + "."})
 
 
-
 @login_required
 @require_POST
 def onboarding_dismiss(request):
     try:
         profile, company = _require_company_admin(request)
     except (ValueError, TypeError):
-        return JsonResponse({'ok': False}, status=403)
+        return JsonResponse({"ok": False}, status=403)
     if not company:
-        return JsonResponse({'ok': False}, status=403)
+        return JsonResponse({"ok": False}, status=403)
     from .models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
     ob.dismissed = True
-    ob.save(update_fields=['dismissed', 'updated_at'])
-    return JsonResponse({'ok': True})
+    ob.save(update_fields=["dismissed", "updated_at"])
+    return JsonResponse({"ok": True})
 
 
 @login_required
@@ -497,12 +551,15 @@ def nkd_search(request):
     from django.http import JsonResponse
 
     from .models import NKDCode
+
     q = request.GET.get("q", "").strip()
     level = request.GET.get("level", "")
     if not q or len(q) < 2:
         return JsonResponse([], safe=False)
-    qs = NKDCode.objects.filter(is_active=True).select_related("parent").filter(
-        Q(name_hr__icontains=q) | Q(code__icontains=q) | Q(name_en__icontains=q)
+    qs = (
+        NKDCode.objects.filter(is_active=True)
+        .select_related("parent")
+        .filter(Q(name_hr__icontains=q) | Q(code__icontains=q) | Q(name_en__icontains=q))
     )
     if level:
         qs = qs.filter(level=level)
@@ -516,36 +573,40 @@ def branch_save_redirect(request, pk=None):
     """Wrapper around branch_save that redirects instead of returning JSON."""
     profile, company = _require_company_admin(request)
     if not company:
-        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
-        return redirect('/companies/settings/?tab=branches')
+        messages.error(request, _("Nemate ovlasti za ovu radnju. Obratite se administratoru."))
+        return redirect("/companies/settings/?tab=branches")
 
     if pk:
         from .models import CompanyBranch
+
         branch = get_object_or_404(CompanyBranch, pk=pk, parent_company=company)
     else:
         from .models import CompanyBranch
+
         branch = CompanyBranch(parent_company=company)
 
-    branch.name = request.POST.get('name', '').strip()
-    branch.branch_code = request.POST.get('branch_code', '').strip()
-    branch.branch_type = request.POST.get('branch_type', 'other')
-    branch.address = request.POST.get('address', '').strip()
-    branch.city = request.POST.get('city', '').strip()
-    branch.phone = request.POST.get('phone', '').strip()
-    branch.email = request.POST.get('email', '').strip()
+    branch.name = request.POST.get("name", "").strip()
+    branch.branch_code = request.POST.get("branch_code", "").strip()
+    branch.branch_type = request.POST.get("branch_type", "other")
+    branch.address = request.POST.get("address", "").strip()
+    branch.city = request.POST.get("city", "").strip()
+    branch.phone = request.POST.get("phone", "").strip()
+    branch.email = request.POST.get("email", "").strip()
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         branch.save()
         if is_ajax:
             from django.http import JsonResponse
-            return JsonResponse({'ok': True, 'name': branch.name, 'pk': branch.pk})
-        messages.success(request, f'Podružnica {branch.name} spremljena.')
+
+            return JsonResponse({"ok": True, "name": branch.name, "pk": branch.pk})
+        messages.success(request, f"Podružnica {branch.name} spremljena.")
     except (IntegrityError, DatabaseError) as e:
         if is_ajax:
             from django.http import JsonResponse
-            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
-        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
-    return redirect('/companies/settings/?tab=branches')
+
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
+        messages.error(request, _("Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku."))
+    return redirect("/companies/settings/?tab=branches")
 
 
 @login_required
@@ -554,15 +615,16 @@ def branch_toggle_redirect(request, pk):
     """Toggle branch active status and redirect."""
     profile, company = _require_company_admin(request)
     if not company:
-        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
-        return redirect('/companies/settings/?tab=branches')
+        messages.error(request, _("Nemate ovlasti za ovu radnju. Obratite se administratoru."))
+        return redirect("/companies/settings/?tab=branches")
     from .models import CompanyBranch
+
     branch = get_object_or_404(CompanyBranch, pk=pk, parent_company=company)
     branch.is_active = not branch.is_active
-    branch.save(update_fields=['is_active'])
-    status_str = 'aktivirana' if branch.is_active else 'deaktivirana'
-    messages.success(request, f'Podružnica {status_str}.')
-    return redirect('/companies/settings/?tab=branches')
+    branch.save(update_fields=["is_active"])
+    status_str = "aktivirana" if branch.is_active else "deaktivirana"
+    messages.success(request, f"Podružnica {status_str}.")
+    return redirect("/companies/settings/?tab=branches")
 
 
 @login_required
@@ -571,15 +633,15 @@ def employee_toggle_redirect(request, pk):
     """Toggle employee active status and redirect (form-friendly)."""
     profile, company = _require_strict_admin(request)
     if not company:
-        messages.error(request, _('Nemate ovlasti za ovu radnju. Obratite se administratoru.'))
-        return redirect('/companies/settings/?tab=employees')
+        messages.error(request, _("Nemate ovlasti za ovu radnju. Obratite se administratoru."))
+        return redirect("/companies/settings/?tab=employees")
     up = get_object_or_404(UserProfile, pk=pk, company=company)
     up.user.is_active = not up.user.is_active
     up.user.save()
-    status_str = 'aktiviran' if up.user.is_active else 'deaktiviran'
+    status_str = "aktiviran" if up.user.is_active else "deaktiviran"
     name = up.user.get_full_name() or up.user.username
-    messages.success(request, f'Korisnik {name} {status_str}.')
-    return redirect('/companies/settings/?tab=employees')
+    messages.success(request, f"Korisnik {name} {status_str}.")
+    return redirect("/companies/settings/?tab=employees")
 
 
 @login_required
@@ -587,37 +649,37 @@ def tax_rate_list(request):
     from core.company_utils import get_user_company
 
     from .models import TaxRate
+
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('/')
-    country = getattr(company, 'country', 'HR') or 'HR'
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("/")
+    country = getattr(company, "country", "HR") or "HR"
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'add':
-            name = request.POST.get('name', '').strip()
-            rate = request.POST.get('rate', '25')
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "add":
+            name = request.POST.get("name", "").strip()
+            rate = request.POST.get("rate", "25")
             if name:
-                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={"name": name})
                 messages.success(request, f'Stopa "{name}" dodana.')
-        elif action == 'delete':
-            tid = request.POST.get('tax_id')
+        elif action == "delete":
+            tid = request.POST.get("tax_id")
             TaxRate.objects.filter(pk=tid, country=country).delete()
-            messages.success(request, _('Stopa obrisana.'))
-        elif action == 'edit':
-            tid = request.POST.get('tax_id')
+            messages.success(request, _("Stopa obrisana."))
+        elif action == "edit":
+            tid = request.POST.get("tax_id")
             t = TaxRate.objects.filter(pk=tid, country=country).first()
             if t:
-                t.name = request.POST.get('name', t.name)
-                t.rate = request.POST.get('rate', t.rate)
+                t.name = request.POST.get("name", t.name)
+                t.rate = request.POST.get("rate", t.rate)
                 t.save()
-                messages.success(request, _('Stopa ažurirana.'))
-        return redirect('companies:tax_rates')
+                messages.success(request, _("Stopa ažurirana."))
+        return redirect("companies:tax_rates")
 
-    rates = TaxRate.objects.filter(country=country).order_by('-rate')
-    return render(request, 'companies/tax_rates.html', {'rates': rates, 'country': country})
-
+    rates = TaxRate.objects.filter(country=country).order_by("-rate")
+    return render(request, "companies/tax_rates.html", {"rates": rates, "country": country})
 
 
 # ── PRETPLATA / SUBSCRIPTION ──────────────────────────────────
@@ -629,49 +691,65 @@ from django.views.decorators.http import require_POST
 @login_required
 def subscription_view(request):
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
     if not company:
         from django.shortcuts import redirect
-        return redirect('dashboard')
+
+        return redirect("dashboard")
 
     from registration.models import CompanySubscription
+
     sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
 
     from django.shortcuts import render
-    return render(request, 'companies/subscription.html', {
-        'company': company,
-        'subscription': sub,
-    })
+
+    return render(
+        request,
+        "companies/subscription.html",
+        {
+            "company": company,
+            "subscription": sub,
+        },
+    )
 
 
 @login_required
 @require_POST
 def subscription_cancel(request):
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema firme'}, status=400)
+        return JsonResponse({"error": "Nema firme"}, status=400)
 
     from registration.models import CompanySubscription
+
     sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
     if not sub:
-        return JsonResponse({'error': 'Nema aktivne pretplate'}, status=400)
+        return JsonResponse({"error": "Nema aktivne pretplate"}, status=400)
 
-    action = request.POST.get('action', 'cancel')
-    if action == 'reactivate':
+    action = request.POST.get("action", "cancel")
+    if action == "reactivate":
         sub.reactivate()
         from django.contrib import messages
-        messages.success(request, _('Pretplata reaktivirana!'))
+
+        messages.success(request, _("Pretplata reaktivirana!"))
     else:
         sub.cancel()
         from django.contrib import messages
-        messages.success(request, _('Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna.') % sub.valid_until)
+
+        messages.success(
+            request, _("Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna.") % sub.valid_until
+        )
 
     from django.shortcuts import redirect
-    return redirect('companies:subscription')
+
+    return redirect("companies:subscription")
 
 
 # ── T&C Consent ──────────────────────────────────────────────────────────────
+
 
 @login_required
 def tc_consent_view(request):
@@ -682,60 +760,72 @@ def tc_consent_view(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s firmom.'))
-        return redirect('dashboard')
+        messages.error(request, _("Niste povezani s firmom."))
+        return redirect("dashboard")
 
     if company.has_signed_tc_consent:
-        messages.info(request, _('Uvjeti su već prihvaćeni.'))
-        return redirect('dashboard')
+        messages.info(request, _("Uvjeti su već prihvaćeni."))
+        return redirect("dashboard")
 
-    if request.method == 'POST':
-        if request.POST.get('accept_tc') == 'on':
+    if request.method == "POST":
+        if request.POST.get("accept_tc") == "on":
             company.has_signed_tc_consent = True
             company.tc_consent_signed_at = timezone.now()
-            company.tc_consent_version = '1.0'
-            company.save(update_fields=[
-                'has_signed_tc_consent',
-                'tc_consent_signed_at',
-                'tc_consent_version',
-            ])
-            messages.success(request, _('Uvjeti korištenja uspješno prihvaćeni. Hvala!'))
-            return redirect('dashboard')
+            company.tc_consent_version = "1.0"
+            company.save(
+                update_fields=[
+                    "has_signed_tc_consent",
+                    "tc_consent_signed_at",
+                    "tc_consent_version",
+                ]
+            )
+            messages.success(request, _("Uvjeti korištenja uspješno prihvaćeni. Hvala!"))
+            return redirect("dashboard")
         else:
-            messages.warning(request, _('Morate označiti polje za prihvaćanje uvjeta.'))
+            messages.warning(request, _("Morate označiti polje za prihvaćanje uvjeta."))
 
-    return render(request, 'companies/tc_consent_document.html', {
-        'company': company,
-    })
+    return render(
+        request,
+        "companies/tc_consent_document.html",
+        {
+            "company": company,
+        },
+    )
 
 
 # ════════════════════════════════════════════════════════════
 # DRON2: Setup Wizard — async profil completiranje
 # ════════════════════════════════════════════════════════════
 
+
 @login_required
 def setup_wizard(request):
     """Setup wizard — 5 sekcija, svaka neovisna."""
     from core.company_utils import get_user_company
+
     company = get_user_company(request)
     if not company:
-        return redirect('/')
+        return redirect("/")
 
     sections = {
-        'company': bool(company.name and not company.is_draft),
-        'fiscal': bool(company.oib and len(company.oib) == 11 and not company.oib.startswith('DRAFT')),
-        'contact': bool(company.phone or company.email),
-        'logo': bool(company.logo) if hasattr(company, 'logo') else False,
-        'team': company.users.count() > 1 if hasattr(company, 'users') else False,
+        "company": bool(company.name and not company.is_draft),
+        "fiscal": bool(company.oib and len(company.oib) == 11 and not company.oib.startswith("DRAFT")),
+        "contact": bool(company.phone or company.email),
+        "logo": bool(company.logo) if hasattr(company, "logo") else False,
+        "team": company.users.count() > 1 if hasattr(company, "users") else False,
     }
     completion = int(sum(sections.values()) / max(len(sections), 1) * 100)
 
-    return render(request, 'companies/setup_wizard.html', {
-        'sections': sections,
-        'completion': completion,
-        'company': company,
-        'page_title': 'Postavljanje profila',
-    })
+    return render(
+        request,
+        "companies/setup_wizard.html",
+        {
+            "sections": sections,
+            "completion": completion,
+            "company": company,
+            "page_title": "Postavljanje profila",
+        },
+    )
 
 
 @login_required
@@ -743,27 +833,32 @@ def setup_wizard_company(request):
     """Sekcija A: Podaci tvrtke (naziv, OIB, adresa)."""
     company = get_user_company(request)
     if not company:
-        return redirect('/')
+        return redirect("/")
 
-    if request.method == 'POST':
-        company.name = request.POST.get('name', company.name).strip()
-        oib = request.POST.get('oib', '').strip()
-        if oib and not oib.startswith('DRAFT'):
+    if request.method == "POST":
+        company.name = request.POST.get("name", company.name).strip()
+        oib = request.POST.get("oib", "").strip()
+        if oib and not oib.startswith("DRAFT"):
             company.oib = oib
-        company.address = request.POST.get('address', '').strip()
-        company.city = request.POST.get('city', '').strip()
-        company.zip_code = request.POST.get('zip_code', '').strip()
-        company.country = request.POST.get('country', 'HR')
-        company.industry = request.POST.get('industry', 'other')
+        company.address = request.POST.get("address", "").strip()
+        company.city = request.POST.get("city", "").strip()
+        company.zip_code = request.POST.get("zip_code", "").strip()
+        company.country = request.POST.get("country", "HR")
+        company.industry = request.POST.get("industry", "other")
         company.is_draft = False
         company.save()
-        messages.success(request, _('Podaci tvrtke spremljeni.'))
-        return redirect('companies:setup_wizard')
+        messages.success(request, _("Podaci tvrtke spremljeni."))
+        return redirect("companies:setup_wizard")
 
-    return render(request, 'companies/setup_wizard.html', {
-        'edit_section': 'company', 'company': company,
-        'page_title': 'Podaci tvrtke',
-    })
+    return render(
+        request,
+        "companies/setup_wizard.html",
+        {
+            "edit_section": "company",
+            "company": company,
+            "page_title": "Podaci tvrtke",
+        },
+    )
 
 
 @login_required
@@ -771,20 +866,25 @@ def setup_wizard_contact(request):
     """Sekcija B: Kontakt podaci."""
     company = get_user_company(request)
     if not company:
-        return redirect('/')
+        return redirect("/")
 
-    if request.method == 'POST':
-        company.phone = request.POST.get('phone', '').strip()
-        company.email = request.POST.get('email', '').strip()
-        company.website = request.POST.get('website', '').strip()
-        company.save(update_fields=['phone', 'email', 'website'])
-        messages.success(request, _('Kontakt podaci spremljeni.'))
-        return redirect('companies:setup_wizard')
+    if request.method == "POST":
+        company.phone = request.POST.get("phone", "").strip()
+        company.email = request.POST.get("email", "").strip()
+        company.website = request.POST.get("website", "").strip()
+        company.save(update_fields=["phone", "email", "website"])
+        messages.success(request, _("Kontakt podaci spremljeni."))
+        return redirect("companies:setup_wizard")
 
-    return render(request, 'companies/setup_wizard.html', {
-        'edit_section': 'contact', 'company': company,
-        'page_title': 'Kontakt',
-    })
+    return render(
+        request,
+        "companies/setup_wizard.html",
+        {
+            "edit_section": "contact",
+            "company": company,
+            "page_title": "Kontakt",
+        },
+    )
 
 
 @login_required
@@ -792,29 +892,35 @@ def setup_wizard_fiscal(request):
     """Sekcija C: IBAN + Fiskalizacija."""
     company = get_user_company(request)
     if not company:
-        return redirect('/')
+        return redirect("/")
 
-    if request.method == 'POST':
-        oib = request.POST.get('oib', '').strip()
+    if request.method == "POST":
+        oib = request.POST.get("oib", "").strip()
         if oib and len(oib) >= 9:
             company.oib = oib
-        iban = request.POST.get('iban', '').strip()
+        iban = request.POST.get("iban", "").strip()
         if iban:
             company.iban = iban
         company.is_draft = False
         company.save()
-        messages.success(request, _('Fiskalni podaci spremljeni.'))
-        return redirect('companies:setup_wizard')
+        messages.success(request, _("Fiskalni podaci spremljeni."))
+        return redirect("companies:setup_wizard")
 
-    return render(request, 'companies/setup_wizard.html', {
-        'edit_section': 'fiscal', 'company': company,
-        'page_title': 'Fiskalizacija',
-    })
+    return render(
+        request,
+        "companies/setup_wizard.html",
+        {
+            "edit_section": "fiscal",
+            "company": company,
+            "page_title": "Fiskalizacija",
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # WORKSPACE — Radni prostor views
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 @login_required
 def workspace_home(request):
@@ -832,10 +938,10 @@ def workspace_home(request):
 
     if not workspaces.exists() and request.user.is_superuser:
         # Superadmin bez workspace-a → admin view
-        return redirect('companies:workspace_admin')
+        return redirect("companies:workspace_admin")
 
     # Ako ima točno 1 workspace, koristi ga. Inače prikaži izbor.
-    active_ws_id = request.session.get('active_workspace_id')
+    active_ws_id = request.session.get("active_workspace_id")
     active_ws = None
 
     if active_ws_id:
@@ -843,31 +949,34 @@ def workspace_home(request):
 
     if not active_ws and workspaces.count() == 1:
         active_ws = workspaces.first()
-        request.session['active_workspace_id'] = active_ws.id
+        request.session["active_workspace_id"] = active_ws.id
 
     if not active_ws and workspaces.count() > 1:
         # Prikaži izbor workspace-a
-        return render(request, 'companies/workspace_select.html', {
-            'workspaces': workspaces,
-        })
+        return render(
+            request,
+            "companies/workspace_select.html",
+            {
+                "workspaces": workspaces,
+            },
+        )
 
     if not active_ws:
         # Nema workspace-a — prikaži poruku
-        return render(request, 'companies/workspace_empty.html')
+        return render(request, "companies/workspace_empty.html")
 
     # Dohvati klijente iz aktivnog workspace-a s statistikama
-    clients_qs = active_ws.clients.all().order_by('name')
+    clients_qs = active_ws.clients.all().order_by("name")
     clients = []
     total_docs = 0
 
     # Auto-ensure memberships for workspace clients
     from accounts.models import CompanyMembership
+
     for client_company in clients_qs:
         try:
             CompanyMembership.objects.unscoped().update_or_create(
-                user=request.user,
-                company=client_company,
-                defaults={'role': 'company_admin', 'is_active': True}
+                user=request.user, company=client_company, defaults={"role": "company_admin", "is_active": True}
             )
         except DatabaseError:
             pass  # Skip if any DB issue
@@ -876,13 +985,12 @@ def workspace_home(request):
     for c in clients_qs:
         try:
             stats = ArhivaEntry.objects.filter(company=c).aggregate(
-                doc_count=Count('id'),
-                pending_count=Count('id', filter=Q(is_booked=False))
+                doc_count=Count("id"), pending_count=Count("id", filter=Q(is_booked=False))
             )
         except DatabaseError:
-            stats = {'doc_count': 0, 'pending_count': 0}
-        c.doc_count = stats['doc_count'] or 0
-        c.pending_count = stats['pending_count'] or 0
+            stats = {"doc_count": 0, "pending_count": 0}
+        c.doc_count = stats["doc_count"] or 0
+        c.pending_count = stats["pending_count"] or 0
         total_docs += c.doc_count
         total_pending += c.pending_count
         clients.append(c)
@@ -890,30 +998,40 @@ def workspace_home(request):
     # Ostali workeri na istom workspace-u
     coworkers = active_ws.workers.exclude(id=request.user.id)
 
-    return render(request, 'companies/workspace_home.html', {
-        'workspace': active_ws,
-        'workspaces': workspaces,
-        'clients': clients,
-        'coworkers': coworkers,
-        'total_docs': total_docs,
-        'total_pending': total_pending,
-        'total_booked': total_docs - total_pending,
-    })
+    return render(
+        request,
+        "companies/workspace_home.html",
+        {
+            "workspace": active_ws,
+            "workspaces": workspaces,
+            "clients": clients,
+            "coworkers": coworkers,
+            "total_docs": total_docs,
+            "total_pending": total_pending,
+            "total_booked": total_docs - total_pending,
+        },
+    )
 
 
 @login_required
 def workspace_switch(request, ws_id):
     """Prebaci se na drugi workspace."""
     from companies.models import Workspace
-    ws = Workspace.objects.filter(id=ws_id, workers=request.user, is_active=True).select_related("company", "workers", "clients").first()
+
+    ws = (
+        Workspace.objects.filter(id=ws_id, workers=request.user, is_active=True)
+        .select_related("company", "workers", "clients")
+        .first()
+    )
     if ws:
-        request.session['active_workspace_id'] = ws.id
-    return redirect('companies:workspace_home')
+        request.session["active_workspace_id"] = ws.id
+    return redirect("companies:workspace_home")
 
 
 @login_required
 def workspace_enter_client(request, client_id):
     from core.models import BookingSignature
+
     """Uđi u kontekst klijenta iz workspace-a → switch_company."""
     from accounts.models import CompanyMembership
     from companies.models import Company, Workspace
@@ -921,36 +1039,37 @@ def workspace_enter_client(request, client_id):
     # Provjeri da je klijent u nekom od korisnikovih workspace-a
     user_client_ids = set()
     for ws in Workspace.get_for_user(request.user):
-        user_client_ids.update(ws.clients.values_list('id', flat=True))
+        user_client_ids.update(ws.clients.values_list("id", flat=True))
 
     # Superadmin može svugdje
     if not request.user.is_superuser and client_id not in user_client_ids:
         from django.http import HttpResponseForbidden
+
         return HttpResponseForbidden("Nemate pristup ovom klijentu.")
 
     # Osiguraj CompanyMembership
     company = Company.objects.filter(id=client_id).select_related("nkd_code", "umbrella_parent").first()
     if not company:
         from django.http import Http404
+
         raise Http404
 
     mem, created = CompanyMembership.objects.unscoped().update_or_create(
-        user=request.user, company=company,
-        defaults={'role': 'company_admin', 'is_active': True}
+        user=request.user, company=company, defaults={"role": "company_admin", "is_active": True}
     )
 
     # Switch session
-    request.session['active_membership_id'] = mem.id
-    request.session['workspace_client_id'] = str(client_id)
+    request.session["active_membership_id"] = mem.id
+    request.session["workspace_client_id"] = str(client_id)
 
     # Audit log
     try:
-        BookingSignature.log(request, 'switch', target_obj=company, target_repr=f'Switch to: {company.name}')
+        BookingSignature.log(request, "switch", target_obj=company, target_repr=f"Switch to: {company.name}")
     except Exception:
         pass
 
     # Redirect na dashboard klijenta ili arhivu
-    next_url = request.GET.get('next', '/hr/dashboard/')
+    next_url = request.GET.get("next", "/hr/dashboard/")
     return redirect(next_url)
 
 
@@ -969,118 +1088,137 @@ def workspace_admin(request):
 
     # Pronađi maticu
     if request.user.is_superuser:
-        matica = Company.objects.filter(name__icontains='konjik').select_related("nkd_code", "umbrella_parent").first()
+        matica = Company.objects.filter(name__icontains="konjik").select_related("nkd_code", "umbrella_parent").first()
         if not matica:
-            matica = request.company if hasattr(request, 'company') else None
+            matica = request.company if hasattr(request, "company") else None
     else:
-        matica = getattr(request, 'company', None)
+        matica = getattr(request, "company", None)
 
     if not matica:
         from django.http import HttpResponseForbidden
+
         return HttpResponseForbidden("Nema matice.")
 
     # API za CRUD
-    if request.method == 'POST' and request.headers.get('Content-Type', '').startswith('application/json'):
+    if request.method == "POST" and request.headers.get("Content-Type", "").startswith("application/json"):
         data = json.loads(request.body)
-        action = data.get('action')
+        action = data.get("action")
 
-        if action == 'add_workspace':
+        if action == "add_workspace":
             count = Workspace.objects.filter(company=matica).select_related("company", "workers", "clients").count()
-            colors = ['#c9a84c','#22c55e','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#ef4444','#84cc16','#64748b']
+            colors = [
+                "#c9a84c",
+                "#22c55e",
+                "#3b82f6",
+                "#f97316",
+                "#ec4899",
+                "#8b5cf6",
+                "#06b6d4",
+                "#ef4444",
+                "#84cc16",
+                "#64748b",
+            ]
             ws = Workspace.objects.create(
                 company=matica,
-                name=data.get('name', f'Prostor {count + 1}'),
-                type=data.get('type', 'desk'),
+                name=data.get("name", f"Prostor {count + 1}"),
+                type=data.get("type", "desk"),
                 color=colors[count % len(colors)],
                 position=count + 1,
             )
-            return JsonResponse({'ok': True, 'id': ws.id, 'name': ws.name})
+            return JsonResponse({"ok": True, "id": ws.id, "name": ws.name})
 
-        if action == 'rename_workspace':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
-            ws.name = data.get('name', ws.name)[:100]
-            ws.save(update_fields=['name', 'updated_at'])
-            return JsonResponse({'ok': True})
+        if action == "rename_workspace":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
+            ws.name = data.get("name", ws.name)[:100]
+            ws.save(update_fields=["name", "updated_at"])
+            return JsonResponse({"ok": True})
 
-        if action == 'set_type':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
-            ws.type = data.get('type', ws.type)
-            ws.save(update_fields=['type', 'updated_at'])
-            return JsonResponse({'ok': True})
+        if action == "set_type":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
+            ws.type = data.get("type", ws.type)
+            ws.save(update_fields=["type", "updated_at"])
+            return JsonResponse({"ok": True})
 
-        if action == 'add_worker':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+        if action == "add_worker":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
             from django.contrib.auth.models import User
-            user = User.objects.get(id=data['user_id'])
+
+            user = User.objects.get(id=data["user_id"])
             ws.workers.add(user)
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
 
-        if action == 'remove_worker':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
-            ws.workers.remove(data['user_id'])
-            return JsonResponse({'ok': True})
+        if action == "remove_worker":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
+            ws.workers.remove(data["user_id"])
+            return JsonResponse({"ok": True})
 
-        if action == 'add_client':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
-            company = Company.objects.get(id=data['company_id'])
+        if action == "add_client":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
+            company = Company.objects.get(id=data["company_id"])
             ws.clients.add(company)
-            return JsonResponse({'ok': True, 'client_count': ws.client_count})
+            return JsonResponse({"ok": True, "client_count": ws.client_count})
 
-        if action == 'remove_client':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
-            ws.clients.remove(data['company_id'])
-            return JsonResponse({'ok': True, 'client_count': ws.client_count})
+        if action == "remove_client":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
+            ws.clients.remove(data["company_id"])
+            return JsonResponse({"ok": True, "client_count": ws.client_count})
 
-        if action == 'delete_workspace':
-            ws = Workspace.objects.get(id=data['ws_id'], company=matica)
+        if action == "delete_workspace":
+            ws = Workspace.objects.get(id=data["ws_id"], company=matica)
             ws.clients.clear()
             ws.workers.clear()
             ws.delete()
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
 
-        return JsonResponse({'error': 'Unknown action'}, status=400)
+        return JsonResponse({"error": "Unknown action"}, status=400)
 
     # GET — render admin page
-    workspaces = Workspace.objects.filter(
-        company=matica
-    ).prefetch_related('clients', 'workers').order_by('position')
+    workspaces = Workspace.objects.filter(company=matica).prefetch_related("clients", "workers").order_by("position")
 
     # Slobodni klijenti (nisu na nijednom workspace-u)
     assigned_ids = set()
     for ws in workspaces:
-        assigned_ids.update(ws.clients.values_list('id', flat=True))
+        assigned_ids.update(ws.clients.values_list("id", flat=True))
 
-    partner_ids = set(CompanyPartnership.objects.filter(
-        partner_company=matica, valid_until__isnull=True
-    ).values_list('managed_company_id', flat=True))
+    partner_ids = set(
+        CompanyPartnership.objects.filter(partner_company=matica, valid_until__isnull=True).values_list(
+            "managed_company_id", flat=True
+        )
+    )
 
     # Svi partneri su dostupni za dodjelu (isti klijent može biti u više workspace-a)
     # Npr. UF radi jedna knjigovođa, financijsko druga
-    slobodni = Company.objects.filter(id__in=partner_ids).select_related("nkd_code", "umbrella_parent").order_by('name')
+    slobodni = Company.objects.filter(id__in=partner_ids).select_related("nkd_code", "umbrella_parent").order_by("name")
     # Označi koji su već dodijeljeni (za vizualni indikator u UI)
     for s in slobodni:
         s.already_assigned = s.id in assigned_ids
 
     # Dostupni radnici
     radnici = [
-        m.user for m in CompanyMembership.objects.filter(
-            company=matica, is_active=True
-        ).select_related('user').exclude(user__is_superuser=True)
+        m.user
+        for m in CompanyMembership.objects.filter(company=matica, is_active=True)
+        .select_related("user")
+        .exclude(user__is_superuser=True)
     ]
 
-    return render(request, 'companies/workspace_admin.html', {
-        'matica': matica,
-        'workspaces': workspaces,
-        'slobodni': slobodni,
-        'slobodni_count': slobodni.count(),
-        'radnici': radnici,
-        'ukupno_klijenata': len(partner_ids),
-    })
+    return render(
+        request,
+        "companies/workspace_admin.html",
+        {
+            "matica": matica,
+            "workspaces": workspaces,
+            "slobodni": slobodni,
+            "slobodni_count": slobodni.count(),
+            "radnici": radnici,
+            "ukupno_klijenata": len(partner_ids),
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # FAZA 5: ONBOARDING WIZARD — 4 koraka
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 @login_required
 def employee_onboard(request, pk=None):
@@ -1096,100 +1234,133 @@ def employee_onboard(request, pk=None):
 
     company = get_user_company(request)
     if not company:
-        return redirect('/')
+        return redirect("/")
 
     # Existing employee ili novi
     ep = None
     if pk:
         ep = get_object_or_404(EmployeeProfile, pk=pk, company=company)
 
-    step = request.POST.get('step', request.GET.get('step', '1'))
+    step = request.POST.get("step", request.GET.get("step", "1"))
 
-    if request.method == 'POST':
-
+    if request.method == "POST":
         # ── KORAK 1: Identitet ──
-        if step == '1':
-            first_name = request.POST.get('first_name', '').strip()
-            last_name = request.POST.get('last_name', '').strip()
-            email = request.POST.get('email', '').strip()
-            oib = request.POST.get('oib', '').strip()
-            iban = request.POST.get('iban', '').strip()
-            phone = request.POST.get('phone', '').strip()
-            hourly_rate = request.POST.get('hourly_rate', '20')
-            date_hired = request.POST.get('date_hired', '')
+        if step == "1":
+            first_name = request.POST.get("first_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
+            email = request.POST.get("email", "").strip()
+            oib = request.POST.get("oib", "").strip()
+            iban = request.POST.get("iban", "").strip()
+            phone = request.POST.get("phone", "").strip()
+            hourly_rate = request.POST.get("hourly_rate", "20")
+            date_hired = request.POST.get("date_hired", "")
 
             errors = []
-            if not first_name: errors.append('Ime je obavezno.')
-            if not last_name: errors.append('Prezime je obavezno.')
+            if not first_name:
+                errors.append("Ime je obavezno.")
+            if not last_name:
+                errors.append("Prezime je obavezno.")
 
             # OIB validacija (MOD11)
             if oib and len(oib) == 11 and oib.isdigit():
                 a = 10
                 for ch in oib[:10]:
                     a = (a + int(ch)) % 10
-                    if a == 0: a = 10
+                    if a == 0:
+                        a = 10
                     a = (a * 2) % 11
                 ctrl = (11 - a) % 10
                 if ctrl != int(oib[10]):
-                    errors.append(f'OIB {oib} — neispravan (kontrolna znamenka).')
+                    errors.append(f"OIB {oib} — neispravan (kontrolna znamenka).")
 
             if errors:
-                return render(request, 'companies/onboard_wizard.html', {
-                    'step': '1', 'errors': errors, 'form': request.POST,
-                    'employee': ep, 'company': company,
-                })
+                return render(
+                    request,
+                    "companies/onboard_wizard.html",
+                    {
+                        "step": "1",
+                        "errors": errors,
+                        "form": request.POST,
+                        "employee": ep,
+                        "company": company,
+                    },
+                )
 
             # Spremi u sesiju
-            request.session['onb_first_name'] = first_name
-            request.session['onb_last_name'] = last_name
-            request.session['onb_email'] = email
-            request.session['onb_oib'] = oib
-            request.session['onb_iban'] = iban
-            request.session['onb_phone'] = phone
-            request.session['onb_hourly_rate'] = hourly_rate
-            request.session['onb_date_hired'] = date_hired
+            request.session["onb_first_name"] = first_name
+            request.session["onb_last_name"] = last_name
+            request.session["onb_email"] = email
+            request.session["onb_oib"] = oib
+            request.session["onb_iban"] = iban
+            request.session["onb_phone"] = phone
+            request.session["onb_hourly_rate"] = hourly_rate
+            request.session["onb_date_hired"] = date_hired
 
-            return render(request, 'companies/onboard_wizard.html', {
-                'step': '2', 'company': company, 'employee': ep,
-                'workspaces': company.workspaces.all(),
-                'terminals': company.pos_terminals.filter(is_active=True),
-            })
+            return render(
+                request,
+                "companies/onboard_wizard.html",
+                {
+                    "step": "2",
+                    "company": company,
+                    "employee": ep,
+                    "workspaces": company.workspaces.all(),
+                    "terminals": company.pos_terminals.filter(is_active=True),
+                },
+            )
 
         # ── KORAK 2: Pristup ──
-        elif step == '2':
-            request.session['onb_role'] = request.POST.get('role', 'worker')
-            request.session['onb_workspace'] = request.POST.get('workspace', '')
-            request.session['onb_terminal'] = request.POST.get('terminal', '')
+        elif step == "2":
+            request.session["onb_role"] = request.POST.get("role", "worker")
+            request.session["onb_workspace"] = request.POST.get("workspace", "")
+            request.session["onb_terminal"] = request.POST.get("terminal", "")
 
-            return render(request, 'companies/onboard_wizard.html', {
-                'step': '3', 'company': company, 'employee': ep,
-                'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
-            })
+            return render(
+                request,
+                "companies/onboard_wizard.html",
+                {
+                    "step": "3",
+                    "company": company,
+                    "employee": ep,
+                    "name": f"{request.session.get('onb_first_name', '')} {request.session.get('onb_last_name', '')}",
+                },
+            )
 
         # ── KORAK 3: PIN ──
-        elif step == '3':
-            pin = request.POST.get('pin', '').strip()
+        elif step == "3":
+            pin = request.POST.get("pin", "").strip()
             if len(pin) < 4:
-                return render(request, 'companies/onboard_wizard.html', {
-                    'step': '3', 'errors': ['PIN mora imati min. 4 znamenke.'],
-                    'company': company, 'employee': ep,
-                    'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
-                })
-            request.session['onb_pin'] = pin
+                return render(
+                    request,
+                    "companies/onboard_wizard.html",
+                    {
+                        "step": "3",
+                        "errors": ["PIN mora imati min. 4 znamenke."],
+                        "company": company,
+                        "employee": ep,
+                        "name": f"{request.session.get('onb_first_name', '')} {request.session.get('onb_last_name', '')}",
+                    },
+                )
+            request.session["onb_pin"] = pin
 
-            return render(request, 'companies/onboard_wizard.html', {
-                'step': '4', 'company': company, 'employee': ep,
-                'summary': {
-                    'name': f"{request.session.get('onb_first_name','')} {request.session.get('onb_last_name','')}",
-                    'oib': request.session.get('onb_oib', ''),
-                    'iban': request.session.get('onb_iban', ''),
-                    'role': request.session.get('onb_role', 'worker'),
-                    'pin': '●●●●' + pin[-2:] if len(pin) > 2 else '●●●●',
+            return render(
+                request,
+                "companies/onboard_wizard.html",
+                {
+                    "step": "4",
+                    "company": company,
+                    "employee": ep,
+                    "summary": {
+                        "name": f"{request.session.get('onb_first_name', '')} {request.session.get('onb_last_name', '')}",
+                        "oib": request.session.get("onb_oib", ""),
+                        "iban": request.session.get("onb_iban", ""),
+                        "role": request.session.get("onb_role", "worker"),
+                        "pin": "●●●●" + pin[-2:] if len(pin) > 2 else "●●●●",
+                    },
                 },
-            })
+            )
 
         # ── KORAK 4: Potvrda + kreiranje ──
-        elif step == '4':
+        elif step == "4":
             import secrets
             import string
 
@@ -1198,18 +1369,18 @@ def employee_onboard(request, pk=None):
 
             from accounts.models import CompanyMembership, UserProfile
 
-            fn = request.session.get('onb_first_name', '')
-            ln = request.session.get('onb_last_name', '')
-            email = request.session.get('onb_email', '')
-            oib = request.session.get('onb_oib', '')
-            iban = request.session.get('onb_iban', '')
-            phone = request.session.get('onb_phone', '')
-            hourly_rate = request.session.get('onb_hourly_rate', '20')
-            date_hired = request.session.get('onb_date_hired', '')
-            role = request.session.get('onb_role', 'worker')
-            workspace_id = request.session.get('onb_workspace', '')
-            terminal_id = request.session.get('onb_terminal', '')
-            pin = request.session.get('onb_pin', '')
+            fn = request.session.get("onb_first_name", "")
+            ln = request.session.get("onb_last_name", "")
+            email = request.session.get("onb_email", "")
+            oib = request.session.get("onb_oib", "")
+            iban = request.session.get("onb_iban", "")
+            phone = request.session.get("onb_phone", "")
+            hourly_rate = request.session.get("onb_hourly_rate", "20")
+            date_hired = request.session.get("onb_date_hired", "")
+            role = request.session.get("onb_role", "worker")
+            workspace_id = request.session.get("onb_workspace", "")
+            request.session.get("onb_terminal", "")
+            pin = request.session.get("onb_pin", "")
 
             with transaction.atomic():
                 # User
@@ -1217,57 +1388,67 @@ def employee_onboard(request, pk=None):
                     user = ep.user
                     user.first_name = fn
                     user.last_name = ln
-                    if email: user.email = email
+                    if email:
+                        user.email = email
                     user.save()
                 else:
-                    base_un = (email.split('@')[0] if email else f'{fn}_{ln}').lower().replace('.', '_')[:25]
+                    base_un = (email.split("@")[0] if email else f"{fn}_{ln}").lower().replace(".", "_")[:25]
                     username = base_un
                     i = 1
                     while User.objects.filter(username=username).exists():
-                        username = f'{base_un}{i}'; i += 1
-                    temp_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+                        username = f"{base_un}{i}"
+                        i += 1
+                    temp_pw = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
                     user = User.objects.create_user(
-                        username=username, email=email or '', password=temp_pw,
-                        first_name=fn, last_name=ln,
+                        username=username,
+                        email=email or "",
+                        password=temp_pw,
+                        first_name=fn,
+                        last_name=ln,
                     )
 
                 # UserProfile
                 up, _ = UserProfile.objects.update_or_create(
                     user=user,
-                    defaults={'company': company, 'role': role, 'phone': phone},
+                    defaults={"company": company, "role": role, "phone": phone},
                 )
 
                 # CompanyMembership
                 CompanyMembership.objects.update_or_create(
-                    user=user, company=company,
-                    defaults={'role': role, 'is_active': True, 'is_default': True},
+                    user=user,
+                    company=company,
+                    defaults={"role": role, "is_active": True, "is_default": True},
                 )
 
                 # EmployeeProfile
                 import datetime
                 from decimal import Decimal
+
                 ep_defaults = {
-                    'company': company,
-                    'hourly_rate': Decimal(hourly_rate or '20'),
-                    'phone': phone,
-                    'bank_account': iban,
-                    'tax_id': oib,
+                    "company": company,
+                    "hourly_rate": Decimal(hourly_rate or "20"),
+                    "phone": phone,
+                    "bank_account": iban,
+                    "tax_id": oib,
                 }
                 if date_hired:
                     try:
-                        ep_defaults['date_hired'] = datetime.datetime.strptime(date_hired, '%Y-%m-%d').date()
+                        ep_defaults["date_hired"] = datetime.datetime.strptime(date_hired, "%Y-%m-%d").date()
                     except ValueError:
                         pass
                 ep_obj, _ = EmployeeProfile.objects.update_or_create(
-                    user=user, defaults=ep_defaults,
+                    user=user,
+                    defaults=ep_defaults,
                 )
 
                 # PIN
                 if pin:
                     from pos.models import POSCashier
+
                     cashier, _ = POSCashier.objects.get_or_create(
-                        company=company, user=user,
-                        defaults={'name': f'{fn} {ln}', 'can_void': False, 'can_discount': False},
+                        company=company,
+                        user=user,
+                        defaults={"name": f"{fn} {ln}", "can_void": False, "can_discount": False},
                     )
                     cashier.set_pin(pin)
                     cashier.save()
@@ -1275,6 +1456,7 @@ def employee_onboard(request, pk=None):
                 # Workspace
                 if workspace_id:
                     from companies.models import Workspace
+
                     try:
                         ws = Workspace.objects.get(pk=workspace_id, company=company)
                         ws.workers.add(user)
@@ -1284,34 +1466,50 @@ def employee_onboard(request, pk=None):
                 # Audit
                 try:
                     from core.models import BookingSignature
-                    BookingSignature.log(request, 'create',
+
+                    BookingSignature.log(
+                        request,
+                        "create",
                         target_obj=ep_obj,
-                        target_repr=f'Onboarding: {fn} {ln} ({role})',
+                        target_repr=f"Onboarding: {fn} {ln} ({role})",
                         changes={
-                            'oib': bool(oib), 'iban': bool(iban),
-                            'pin': bool(pin), 'workspace': workspace_id,
-                        })
+                            "oib": bool(oib),
+                            "iban": bool(iban),
+                            "pin": bool(pin),
+                            "workspace": workspace_id,
+                        },
+                    )
                 except ImportError:
                     pass
 
             # Cleanup session
             for k in list(request.session.keys()):
-                if k.startswith('onb_'):
+                if k.startswith("onb_"):
                     del request.session[k]
 
-            messages.success(request, f'{fn} {ln} uspješno dodan! OIB: {"✓" if oib else "—"} | IBAN: {"✓" if iban else "—"} | PIN: {"✓" if pin else "—"}')
-            return redirect('companies:settings')
+            messages.success(
+                request,
+                f"{fn} {ln} uspješno dodan! OIB: {'✓' if oib else '—'} | IBAN: {'✓' if iban else '—'} | PIN: {'✓' if pin else '—'}",
+            )
+            return redirect("companies:settings")
 
     # GET — korak 1
-    return render(request, 'companies/onboard_wizard.html', {
-        'step': '1', 'company': company, 'employee': ep,
-        'form': {},
-    })
+    return render(
+        request,
+        "companies/onboard_wizard.html",
+        {
+            "step": "1",
+            "company": company,
+            "employee": ep,
+            "form": {},
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════
 # EMPLOYEE OFFBOARDING — Kontroliran process odjave radnika
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 @require_POST
@@ -1323,15 +1521,15 @@ def employee_offboard(request, pk):
 
     profile, company = _require_strict_admin(request)
     if not company:
-        return JsonResponse({'error': 'Forbidden'}, status=403)
+        return JsonResponse({"error": "Forbidden"}, status=403)
 
     ep = get_object_or_404(EmployeeProfile, pk=pk, company=company)
 
     if ep.is_terminated:
-        return JsonResponse({'error': _('Radnik je već odjavljen.')}, status=400)
+        return JsonResponse({"error": _("Radnik je već odjavljen.")}, status=400)
 
-    reason = request.POST.get('reason', 'mutual')
-    term_date = request.POST.get('terminated_at', '')
+    reason = request.POST.get("reason", "mutual")
+    term_date = request.POST.get("terminated_at", "")
 
     # Terminate
     ep.terminate(reason=reason, terminated_at=term_date or None)
@@ -1340,44 +1538,49 @@ def employee_offboard(request, pk):
     open_sessions = 0
     try:
         from pos.models import POSSession
-        open_sessions = POSSession.objects.filter(
-            operator=ep.user, status='open'
-        ).count()
+
+        open_sessions = POSSession.objects.filter(operator=ep.user, status="open").count()
     except DatabaseError:
         pass
 
     # Audit
     try:
         from core.models import BookingSignature
+
         BookingSignature.log(
-            request, 'delete',
-            target_model='EmployeeProfile',
+            request,
+            "delete",
+            target_model="EmployeeProfile",
             target_id=str(ep.pk),
-            target_repr=f'Offboarding: {ep.user.get_full_name()} ({reason})',
+            target_repr=f"Offboarding: {ep.user.get_full_name()} ({reason})",
         )
     except ImportError:
         pass
 
-    messages.success(request, _(
-        '{name} je odjavljen. PIN deaktiviran. IBAN se arhivira za 30 dana.'
-    ).format(name=ep.user.get_full_name()))
+    messages.success(
+        request,
+        _("{name} je odjavljen. PIN deaktiviran. IBAN se arhivira za 30 dana.").format(name=ep.user.get_full_name()),
+    )
 
-    return JsonResponse({
-        'ok': True,
-        'checklist': {
-            'pin_deactivated': True,
-            'user_deactivated': True,
-            'iban_vault_scheduled': '30 dana',
-            'oib_retained': '11 godina (ZOR + fiskalizacija)',
-            'fiscal_records': 'nepromjenjivo',
-            'open_pos_sessions': open_sessions,
+    return JsonResponse(
+        {
+            "ok": True,
+            "checklist": {
+                "pin_deactivated": True,
+                "user_deactivated": True,
+                "iban_vault_scheduled": "30 dana",
+                "oib_retained": "11 godina (ZOR + fiskalizacija)",
+                "fiscal_records": "nepromjenjivo",
+                "open_pos_sessions": open_sessions,
+            },
         }
-    })
+    )
 
 
 # ═══════════════════════════════════════════════════════════════
 # COMPLIANCE MONITOR — Admin vidi sve HR/pravne flagove
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def compliance_monitor(request):
@@ -1392,13 +1595,14 @@ def compliance_monitor(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('/')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("/")
 
     alerts = []
     employees = EmployeeProfile.objects.filter(
-        company=company, is_terminated=False,
-    ).select_related('user')
+        company=company,
+        is_terminated=False,
+    ).select_related("user")
 
     week_start = timezone.now().date() - timedelta(days=timezone.now().weekday())
 
@@ -1408,31 +1612,38 @@ def compliance_monitor(request):
             # Check if this person is actually a POS cashier
             try:
                 from pos.models import POSCashier
-                is_cashier = POSCashier.objects.filter(
-                    user=ep.user, is_active=True
-                ).exists()
+
+                is_cashier = POSCashier.objects.filter(user=ep.user, is_active=True).exists()
             except DatabaseError:
                 is_cashier = False
 
-            level = 'critical' if is_cashier else 'warning'
-            msg = _('Nema OIB! Radi na kasi — kazna do 66.000€') if is_cashier else _('Nema OIB — preporučeno za evidenciju')
-            alerts.append({
-                'level': level,
-                'employee': ep,
-                'message': msg,
-                'action_url': f'/hr/companies/settings/employee/{ep.pk}/edit/',
-                'action_label': _('Unesi OIB'),
-            })
+            level = "critical" if is_cashier else "warning"
+            msg = (
+                _("Nema OIB! Radi na kasi — kazna do 66.000€")
+                if is_cashier
+                else _("Nema OIB — preporučeno za evidenciju")
+            )
+            alerts.append(
+                {
+                    "level": level,
+                    "employee": ep,
+                    "message": msg,
+                    "action_url": f"/hr/companies/settings/employee/{ep.pk}/edit/",
+                    "action_label": _("Unesi OIB"),
+                }
+            )
 
         # KRITIČNO: nema IBAN a treba primiti plaću
         if not ep.bank_account and not ep.is_volunteer and not ep.iban_archived:
-            alerts.append({
-                'level': 'warning',
-                'employee': ep,
-                'message': _('Nema IBAN — ne može primiti plaću'),
-                'action_url': f'/hr/companies/settings/employee/{ep.pk}/edit/',
-                'action_label': _('Unesi IBAN'),
-            })
+            alerts.append(
+                {
+                    "level": "warning",
+                    "employee": ep,
+                    "message": _("Nema IBAN — ne može primiti plaću"),
+                    "action_url": f"/hr/companies/settings/employee/{ep.pk}/edit/",
+                    "action_label": _("Unesi IBAN"),
+                }
+            )
 
         # UPOZORENJE: PIN star > 90 dana
         try:
@@ -1440,63 +1651,79 @@ def compliance_monitor(request):
             if tk.pin_set_at:
                 days = (timezone.now() - tk.pin_set_at).days
                 if days > 90:
-                    alerts.append({
-                        'level': 'info',
-                        'employee': ep,
-                        'message': _('PIN star {d} dana — preporuka rotacija').format(d=days),
-                        'action_url': None,
-                        'action_label': None,
-                    })
+                    alerts.append(
+                        {
+                            "level": "info",
+                            "employee": ep,
+                            "message": _("PIN star {d} dana — preporuka rotacija").format(d=days),
+                            "action_url": None,
+                            "action_label": None,
+                        }
+                    )
         except (ValueError, KeyError):
             pass
 
         # UPOZORENJE: prekovremeni > 42h ovaj tjedan (ZOR čl. 96 upozorenje na 42, limit 50)
         try:
             from worktime.models import TimeEntry
-            week_hours = TimeEntry.objects.filter(
-                user=ep.user, date__gte=week_start,
-            ).aggregate(total=Sum('duration'))['total'] or 0
+
+            week_hours = (
+                TimeEntry.objects.filter(
+                    user=ep.user,
+                    date__gte=week_start,
+                ).aggregate(total=Sum("duration"))["total"]
+                or 0
+            )
             if float(week_hours) > 42:
-                alerts.append({
-                    'level': 'warning' if float(week_hours) < 50 else 'critical',
-                    'employee': ep,
-                    'message': _('{h:.0f}h ovaj tjedan — ZOR limit 50h').format(h=float(week_hours)),
-                    'action_url': None,
-                    'action_label': None,
-                })
+                alerts.append(
+                    {
+                        "level": "warning" if float(week_hours) < 50 else "critical",
+                        "employee": ep,
+                        "message": _("{h:.0f}h ovaj tjedan — ZOR limit 50h").format(h=float(week_hours)),
+                        "action_url": None,
+                        "action_label": None,
+                    }
+                )
         except (ValueError, TypeError):
             pass
 
     # Disputed revisions
     try:
         from worktime.models import TimeLogRevision
+
         open_disputes = TimeLogRevision.objects.filter(
             company=company,
             disputed_by__isnull=False,
             dispute_resolved=False,
         ).count()
         if open_disputes:
-            alerts.append({
-                'level': 'warning',
-                'employee': None,
-                'message': _('{n} prigovora na izmjene sati čeka rješenje').format(n=open_disputes),
-                'action_url': '/hr/worktime/ts/manager/',
-                'action_label': _('Pregledaj prigovore'),
-            })
+            alerts.append(
+                {
+                    "level": "warning",
+                    "employee": None,
+                    "message": _("{n} prigovora na izmjene sati čeka rješenje").format(n=open_disputes),
+                    "action_url": "/hr/worktime/ts/manager/",
+                    "action_label": _("Pregledaj prigovore"),
+                }
+            )
     except DatabaseError:
         pass
 
-    critical = [a for a in alerts if a['level'] == 'critical']
-    warnings = [a for a in alerts if a['level'] == 'warning']
-    info = [a for a in alerts if a['level'] == 'info']
+    critical = [a for a in alerts if a["level"] == "critical"]
+    warnings = [a for a in alerts if a["level"] == "warning"]
+    info = [a for a in alerts if a["level"] == "info"]
     score = max(0, 100 - len(critical) * 20 - len(warnings) * 5 - len(info) * 1)
 
-    return render(request, 'companies/compliance_monitor.html', {
-        'alerts': alerts,
-        'critical': critical,
-        'warnings': warnings,
-        'info': info,
-        'score': score,
-        'employees': employees,
-        'total_employees': employees.count(),
-    })
+    return render(
+        request,
+        "companies/compliance_monitor.html",
+        {
+            "alerts": alerts,
+            "critical": critical,
+            "warnings": warnings,
+            "info": info,
+            "score": score,
+            "employees": employees,
+            "total_employees": employees.count(),
+        },
+    )

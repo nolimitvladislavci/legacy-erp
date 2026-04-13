@@ -49,6 +49,7 @@ def prijava_azila(request):
             AzilPrijava.objects.create(naziv=naziv, email=email, grad=grad, poruka=poruka)
             try:
                 from core.whatsapp import send_whatsapp
+
                 wa_number = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
                 if wa_number:
                     send_whatsapp(wa_number, f"Nov azil: {naziv}, {grad} ({email})")

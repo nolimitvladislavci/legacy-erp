@@ -1,4 +1,5 @@
 """Tests for Payments module."""
+
 from decimal import Decimal
 
 from django.test import TestCase
@@ -44,6 +45,7 @@ class PaymentTest(TestCase):
             source="webshop",
         )
         import uuid
+
         self.assertIsInstance(payment.pk, uuid.UUID)
 
     def test_payment_default_status(self):

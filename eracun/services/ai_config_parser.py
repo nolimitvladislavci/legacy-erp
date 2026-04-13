@@ -3,6 +3,7 @@ eracun/services/ai_config_parser.py
 AI-powered parser for posrednik configuration.
 Extracts API keys, URLs, credentials from emails/documents.
 """
+
 import json
 import logging
 import re
@@ -17,34 +18,34 @@ def parse_posrednik_config(text):
     Works WITHOUT AI — pure regex. AI version below as enhancement.
     """
     result = {
-        'posrednik_type': '',
-        'posrednik_api_url': '',
-        'posrednik_api_key': '',
-        'posrednik_api_secret': '',
-        'posrednik_username': '',
-        'posrednik_password': '',
-        'posrednik_company_id': '',
+        "posrednik_type": "",
+        "posrednik_api_url": "",
+        "posrednik_api_key": "",
+        "posrednik_api_secret": "",
+        "posrednik_username": "",
+        "posrednik_password": "",
+        "posrednik_company_id": "",
     }
 
     text_lower = text.lower()
 
     # Detect posrednik type
-    if 'fina' in text_lower and ('peppol' in text_lower or 'eracun' in text_lower or 'e-racun' in text_lower):
-        result['posrednik_type'] = 'fina'
-    elif 'moj-eracun' in text_lower or 'mojeracun' in text_lower or 'moj eracun' in text_lower:
-        result['posrednik_type'] = 'moj_eracun'
-    elif 'pondi' in text_lower or 'eposlovanje' in text_lower:
-        result['posrednik_type'] = 'pondi'
+    if "fina" in text_lower and ("peppol" in text_lower or "eracun" in text_lower or "e-racun" in text_lower):
+        result["posrednik_type"] = "fina"
+    elif "moj-eracun" in text_lower or "mojeracun" in text_lower or "moj eracun" in text_lower:
+        result["posrednik_type"] = "moj_eracun"
+    elif "pondi" in text_lower or "eposlovanje" in text_lower:
+        result["posrednik_type"] = "pondi"
     else:
-        result['posrednik_type'] = 'custom'
+        result["posrednik_type"] = "custom"
 
     # Extract URLs
     urls = re.findall(r'https?://[^\s<>"{}|\\^`\[\]]+', text)
-    api_urls = [u for u in urls if 'api' in u.lower() or 'endpoint' in u.lower() or 'service' in u.lower()]
+    api_urls = [u for u in urls if "api" in u.lower() or "endpoint" in u.lower() or "service" in u.lower()]
     if api_urls:
-        result['posrednik_api_url'] = api_urls[0]
+        result["posrednik_api_url"] = api_urls[0]
     elif urls:
-        result['posrednik_api_url'] = urls[0]
+        result["posrednik_api_url"] = urls[0]
 
     # Extract API key patterns
     key_patterns = [
@@ -54,7 +55,7 @@ def parse_posrednik_config(text):
     for pat in key_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
-            result['posrednik_api_key'] = m.group(1).strip().strip("\"\'")
+            result["posrednik_api_key"] = m.group(1).strip().strip("\"'")
             break
 
     # Extract secret
@@ -64,7 +65,7 @@ def parse_posrednik_config(text):
     for pat in secret_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
-            result['posrednik_api_secret'] = m.group(1).strip().strip("\"\'")
+            result["posrednik_api_secret"] = m.group(1).strip().strip("\"'")
             break
 
     # Extract username
@@ -74,7 +75,7 @@ def parse_posrednik_config(text):
     for pat in user_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
-            result['posrednik_username'] = m.group(1).strip().strip("\"\'")
+            result["posrednik_username"] = m.group(1).strip().strip("\"'")
             break
 
     # Extract password
@@ -84,30 +85,30 @@ def parse_posrednik_config(text):
     for pat in pwd_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
-            result['posrednik_password'] = m.group(1).strip().strip("\"\'")
+            result["posrednik_password"] = m.group(1).strip().strip("\"'")
             break
 
     # Extract company/participant ID
     id_patterns = [
         r'(?:participant[_\s]?id|company[_\s]?id|peppol[_\s]?id|id[_\s]?firme|identifikator)\s*[:=]\s*["\'\s]*([A-Za-z0-9:_\-]{5,50})',
-        r'(?:0192|9934):[0-9]{11}',  # Peppol participant ID format
+        r"(?:0192|9934):[0-9]{11}",  # Peppol participant ID format
     ]
     for pat in id_patterns:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
             val = m.group(1) if m.lastindex else m.group(0)
-            result['posrednik_company_id'] = val.strip().strip("\"\'")
+            result["posrednik_company_id"] = val.strip().strip("\"'")
             break
 
     # Extract OIB if present
-    oib_match = re.search(r'OIB\s*[:=]?\s*(\d{11})', text)
+    oib_match = re.search(r"OIB\s*[:=]?\s*(\d{11})", text)
     if oib_match:
-        result['_oib'] = oib_match.group(1)
+        result["_oib"] = oib_match.group(1)
 
     # Confidence score
-    filled = sum(1 for v in result.values() if v and v != 'custom')
-    result['_confidence'] = round(filled / 7, 2)
-    result['_source'] = 'regex_parser'
+    filled = sum(1 for v in result.values() if v and v != "custom")
+    result["_confidence"] = round(filled / 7, 2)
+    result["_source"] = "regex_parser"
 
     return result
 
@@ -123,12 +124,12 @@ def parse_posrednik_config_ai(text):
 
         import google.generativeai as genai
 
-        api_key = os.environ.get('GEMINI_API_KEY', '')
+        api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:
             return parse_posrednik_config(text)
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = f"""Iz sljedeceg teksta izvuci podatke za konfiguraciju e-racun posrednika.
 Vrati SAMO JSON bez markdown formatiranja, sa ovim poljima:
@@ -149,18 +150,18 @@ TEKST:
         raw = response.text.strip()
 
         # Clean markdown
-        if raw.startswith('```'):
-            raw = raw.split('\n', 1)[1] if '\n' in raw else raw[3:]
-        if raw.endswith('```'):
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
+        if raw.endswith("```"):
             raw = raw[:-3]
-        if raw.startswith('json'):
+        if raw.startswith("json"):
             raw = raw[4:]
 
         result = json.loads(raw.strip())
-        result['_confidence'] = 0.9
-        result['_source'] = 'gemini_ai'
+        result["_confidence"] = 0.9
+        result["_source"] = "gemini_ai"
         return result
 
     except (json.JSONDecodeError, ValueError) as e:
-        logger.warning(f'AI config parser failed: {e}, falling back to regex')
+        logger.warning(f"AI config parser failed: {e}, falling back to regex")
         return parse_posrednik_config(text)

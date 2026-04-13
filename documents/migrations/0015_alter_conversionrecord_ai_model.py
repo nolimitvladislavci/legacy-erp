@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0014_add_barcode_to_arhiva'),
+        ("documents", "0014_add_barcode_to_arhiva"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='ai_model',
-            field=models.CharField(default='gemini-2.5-flash', help_text='Override via settings.CONVERSION_AI_MODEL', max_length=200, verbose_name='AI model'),
+            model_name="conversionrecord",
+            name="ai_model",
+            field=models.CharField(
+                default="gemini-2.5-flash",
+                help_text="Override via settings.CONVERSION_AI_MODEL",
+                max_length=200,
+                verbose_name="AI model",
+            ),
         ),
     ]

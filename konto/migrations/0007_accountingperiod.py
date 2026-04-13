@@ -6,32 +6,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('konto', '0006_alter_ledgerline_amount'),
+        ("companies", "0021_extend_onboarding"),
+        ("konto", "0006_alter_ledgerline_amount"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AccountingPeriod',
+            name="AccountingPeriod",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.PositiveIntegerField()),
-                ('month', models.PositiveSmallIntegerField()),
-                ('is_locked', models.BooleanField(default=False)),
-                ('locked_at', models.DateTimeField(blank=True, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('locked_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='locked_periods', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("year", models.PositiveIntegerField()),
+                ("month", models.PositiveSmallIntegerField()),
+                ("is_locked", models.BooleanField(default=False)),
+                ("locked_at", models.DateTimeField(blank=True, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("company", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="companies.company")),
+                (
+                    "locked_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="locked_periods",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Obračunsko razdoblje',
-                'verbose_name_plural': 'Obračunska razdoblja',
-                'ordering': ['-year', '-month'],
-                'unique_together': {('company', 'year', 'month')},
+                "verbose_name": "Obračunsko razdoblje",
+                "verbose_name_plural": "Obračunska razdoblja",
+                "ordering": ["-year", "-month"],
+                "unique_together": {("company", "year", "month")},
             },
         ),
     ]

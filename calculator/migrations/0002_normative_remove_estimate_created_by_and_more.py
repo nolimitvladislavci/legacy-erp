@@ -5,77 +5,89 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('calculator', '0001_initial'),
-        ('projects', '0001_initial'),
+        ("calculator", "0001_initial"),
+        ("projects", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Normative',
+            name="Normative",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name='Naziv normativa')),
-                ('unit', models.CharField(default='m2', max_length=20, verbose_name='Jedinica mjere')),
-                ('base_price', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Cijena materijala')),
-                ('estimated_labor_hours', models.FloatField(verbose_name='Procjena sati rada po jedinici')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255, verbose_name="Naziv normativa")),
+                ("unit", models.CharField(default="m2", max_length=20, verbose_name="Jedinica mjere")),
+                ("base_price", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Cijena materijala")),
+                ("estimated_labor_hours", models.FloatField(verbose_name="Procjena sati rada po jedinici")),
             ],
         ),
         migrations.RemoveField(
-            model_name='estimate',
-            name='created_by',
+            model_name="estimate",
+            name="created_by",
         ),
         migrations.RemoveField(
-            model_name='estimate',
-            name='project_template',
+            model_name="estimate",
+            name="project_template",
         ),
         migrations.RemoveField(
-            model_name='estimatelineitem',
-            name='estimate',
+            model_name="estimatelineitem",
+            name="estimate",
         ),
         migrations.RemoveField(
-            model_name='estimatelineitem',
-            name='labor_category',
+            model_name="estimatelineitem",
+            name="labor_category",
         ),
         migrations.RemoveField(
-            model_name='publiccalculatorconfig',
-            name='visible_categories',
+            model_name="publiccalculatorconfig",
+            name="visible_categories",
         ),
         migrations.CreateModel(
-            name='Calculation',
+            name="Calculation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('margin_percentage', models.FloatField(default=20.0, verbose_name='Dodatna marža (%)')),
-                ('project', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='calculation', to='projects.project')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("margin_percentage", models.FloatField(default=20.0, verbose_name="Dodatna marža (%)")),
+                (
+                    "project",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="calculation", to="projects.project"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CalculationItem',
+            name="CalculationItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(max_length=255, verbose_name='Opis stavke')),
-                ('quantity', models.FloatField(default=1.0, verbose_name='Količina')),
-                ('unit_price_material', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Cijena materijala')),
-                ('labor_hours', models.FloatField(verbose_name='Sati rada')),
-                ('labor_rate', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Satnica rada (EUR)')),
-                ('calculation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='calculator.calculation')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("description", models.CharField(max_length=255, verbose_name="Opis stavke")),
+                ("quantity", models.FloatField(default=1.0, verbose_name="Količina")),
+                (
+                    "unit_price_material",
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Cijena materijala"),
+                ),
+                ("labor_hours", models.FloatField(verbose_name="Sati rada")),
+                ("labor_rate", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Satnica rada (EUR)")),
+                (
+                    "calculation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="items", to="calculator.calculation"
+                    ),
+                ),
             ],
         ),
         migrations.DeleteModel(
-            name='ProjectTemplate',
+            name="ProjectTemplate",
         ),
         migrations.DeleteModel(
-            name='Estimate',
+            name="Estimate",
         ),
         migrations.DeleteModel(
-            name='EstimateLineItem',
+            name="EstimateLineItem",
         ),
         migrations.DeleteModel(
-            name='LaborCategory',
+            name="LaborCategory",
         ),
         migrations.DeleteModel(
-            name='PublicCalculatorConfig',
+            name="PublicCalculatorConfig",
         ),
     ]

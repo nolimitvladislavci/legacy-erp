@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0016_tax_status_field'),
+        ("invoicing", "0016_tax_status_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='issuer_swift',
-            field=models.CharField(blank=True, default='', max_length=11, verbose_name='Issuer BIC/SWIFT'),
+            model_name="invoice",
+            name="issuer_swift",
+            field=models.CharField(blank=True, default="", max_length=11, verbose_name="Issuer BIC/SWIFT"),
         ),
     ]

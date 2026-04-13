@@ -4,91 +4,94 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0001_initial'),
+        ("invoicing", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='address',
+            model_name="fiscalconfig",
+            name="address",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='cert_password',
+            model_name="fiscalconfig",
+            name="cert_password",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='company_name',
+            model_name="fiscalconfig",
+            name="company_name",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='default_due_days',
+            model_name="fiscalconfig",
+            name="default_due_days",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='default_iban',
+            model_name="fiscalconfig",
+            name="default_iban",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='default_swift',
+            model_name="fiscalconfig",
+            name="default_swift",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='email_from',
+            model_name="fiscalconfig",
+            name="email_from",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='footer_note_de',
+            model_name="fiscalconfig",
+            name="footer_note_de",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='footer_note_hr',
+            model_name="fiscalconfig",
+            name="footer_note_hr",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='invoice_prefix_de',
+            model_name="fiscalconfig",
+            name="invoice_prefix_de",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='oib',
+            model_name="fiscalconfig",
+            name="oib",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='pdv_id',
+            model_name="fiscalconfig",
+            name="pdv_id",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='pdv_registered',
+            model_name="fiscalconfig",
+            name="pdv_registered",
         ),
         migrations.RemoveField(
-            model_name='fiscalconfig',
-            name='updated_at',
+            model_name="fiscalconfig",
+            name="updated_at",
         ),
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='cert_file',
-            field=models.FileField(blank=True, help_text='Učitajte .p12 certifikat direktno', null=True, upload_to='certs/'),
+            model_name="fiscalconfig",
+            name="cert_file",
+            field=models.FileField(
+                blank=True, help_text="Učitajte .p12 certifikat direktno", null=True, upload_to="certs/"
+            ),
         ),
         migrations.AlterField(
-            model_name='fiscalconfig',
-            name='cert_path',
-            field=models.CharField(blank=True, default='/var/www/fina-connect/certs/fina_cert.p12', max_length=255, null=True),
+            model_name="fiscalconfig",
+            name="cert_path",
+            field=models.CharField(
+                blank=True, default="/var/www/fina-connect/certs/fina_cert.p12", max_length=255, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='fiscalconfig',
-            name='invoice_prefix_hr',
-            field=models.CharField(default='KNJ', max_length=10),
+            model_name="fiscalconfig",
+            name="invoice_prefix_hr",
+            field=models.CharField(default="KNJ", max_length=10),
         ),
         migrations.AlterField(
-            model_name='fiscalconfig',
-            name='next_invoice_number',
+            model_name="fiscalconfig",
+            name="next_invoice_number",
             field=models.IntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='fiscalconfig',
-            name='use_production',
+            model_name="fiscalconfig",
+            name="use_production",
             field=models.BooleanField(default=False),
         ),
     ]

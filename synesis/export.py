@@ -5,6 +5,7 @@ GET /api/synesis/export/{token}/ → returns JSON with items/partners to write b
 Each record has an 'action' field: 'update' or 'insert'.
 The sync script on Windows reads this and writes into Storage.mdb.
 """
+
 import json
 
 from django.http import JsonResponse
@@ -35,6 +36,7 @@ def synesis_export_api(request, token):
         return JsonResponse({"error": "GET only"}, status=405)
 
     from synesis.models import SynesisConfig
+
     try:
         cfg = SynesisConfig.objects.select_related("company").get(api_token=token, is_active=True)
     except SynesisConfig.DoesNotExist:
@@ -49,20 +51,23 @@ def synesis_export_api(request, token):
 
     # Mark as exported
     from synesis.models import SynesisExportQueue
-    SynesisExportQueue.objects.filter(
-        company=company, is_exported=False
-    ).update(is_exported=True, exported_at=timezone.now())
+
+    SynesisExportQueue.objects.filter(company=company, is_exported=False).update(
+        is_exported=True, exported_at=timezone.now()
+    )
 
     pkv_export = _export_pkv(company)
 
-    return JsonResponse({
-        "items": items_export,
-        "partners": partners_export,
-        "calculations": calculations_export,
-        "pkv": pkv_export,
-        "timestamp": timezone.now().isoformat(),
-        "total": len(items_export) + len(partners_export) + len(calculations_export) + len(pkv_export),
-    })
+    return JsonResponse(
+        {
+            "items": items_export,
+            "partners": partners_export,
+            "calculations": calculations_export,
+            "pkv": pkv_export,
+            "timestamp": timezone.now().isoformat(),
+            "total": len(items_export) + len(partners_export) + len(calculations_export) + len(pkv_export),
+        }
+    )
 
 
 @csrf_exempt
@@ -76,6 +81,7 @@ def synesis_export_confirm(request, token):
         return JsonResponse({"error": "POST only"}, status=405)
 
     from synesis.models import SynesisConfig, SynesisExportQueue
+
     try:
         cfg = SynesisConfig.objects.select_related("company").get(api_token=token, is_active=True)
     except SynesisConfig.DoesNotExist:
@@ -87,9 +93,9 @@ def synesis_export_confirm(request, token):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    count = SynesisExportQueue.objects.filter(
-        company=cfg.company, pk__in=confirmed
-    ).update(is_confirmed=True, confirmed_at=timezone.now())
+    count = SynesisExportQueue.objects.filter(company=cfg.company, pk__in=confirmed).update(
+        is_confirmed=True, confirmed_at=timezone.now()
+    )
 
     return JsonResponse({"confirmed": count})
 
@@ -97,9 +103,10 @@ def synesis_export_confirm(request, token):
 def _export_items(company):
     """Get pending item changes to push to Synesis."""
     from synesis.models import SynesisExportQueue
-    pending = SynesisExportQueue.objects.filter(
-        company=company, export_type='item', is_exported=False
-    ).order_by('created_at')
+
+    pending = SynesisExportQueue.objects.filter(company=company, export_type="item", is_exported=False).order_by(
+        "created_at"
+    )
 
     results = []
     for q in pending:
@@ -117,9 +124,10 @@ def _export_items(company):
 def _export_partners(company):
     """Get pending partner changes to push to Synesis."""
     from synesis.models import SynesisExportQueue
-    pending = SynesisExportQueue.objects.filter(
-        company=company, export_type='partner', is_exported=False
-    ).order_by('created_at')
+
+    pending = SynesisExportQueue.objects.filter(company=company, export_type="partner", is_exported=False).order_by(
+        "created_at"
+    )
 
     results = []
     for q in pending:
@@ -133,12 +141,14 @@ def _export_partners(company):
         results.append(entry)
     return results
 
+
 def _export_calculations(company):
     """Get pending calculation exports to push to Synesis."""
     from synesis.models import SynesisExportQueue
-    pending = SynesisExportQueue.objects.filter(
-        company=company, export_type='calculation', is_exported=False
-    ).order_by('created_at')
+
+    pending = SynesisExportQueue.objects.filter(company=company, export_type="calculation", is_exported=False).order_by(
+        "created_at"
+    )
     results = []
     for q in pending:
         entry = {
@@ -157,17 +167,18 @@ def _export_calculations(company):
 def _export_pkv(company):
     """Get pending PKV exports to push to Synesis RETAIL table."""
     from synesis.models import SynesisExportQueue
-    pending = SynesisExportQueue.objects.filter(
-        company=company, export_type='pkv', is_exported=False
-    ).order_by('created_at')
+
+    pending = SynesisExportQueue.objects.filter(company=company, export_type="pkv", is_exported=False).order_by(
+        "created_at"
+    )
     results = []
     for q in pending:
         entry = {
             "queue_id": q.pk,
-            "action":   q.action,
+            "action": q.action,
             "erp_object_id": q.erp_object_id,
-            "description":   q.description,
-            "fields":        q.payload,
+            "description": q.description,
+            "fields": q.payload,
         }
         if q.synesis_id:
             entry["synesis_id"] = q.synesis_id

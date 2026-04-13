@@ -4,15 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0011_alter_activityevent_action_anomalyreport'),
+        ("worktime", "0011_alter_activityevent_action_anomalyreport"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='activityevent',
-            name='action',
-            field=models.CharField(choices=[('GENESIS_SCAN', 'Genesis QR sken'), ('PALLET_SCAN', 'Sken palete'), ('WEIGHT_EVENT', 'Vaganje'), ('DELIVERY_SCAN', 'Sken isporuke'), ('PHOTO', 'Fotografija'), ('APP_ACTION', 'Akcija u aplikaciji'), ('VEHICLE_START', 'Pokretanje vozila'), ('MANUAL_CHECK', 'Rucna provjera'), ('POS_CHECKOUT', 'POS Naplata'), ('POS_VOID', 'POS Storno'), ('POS_OPEN_SHIFT', 'POS Otvaranje smjene'), ('POS_CLOSE_SHIFT', 'POS Zatvaranje smjene'), ('GOODS_RECEIPT', 'Primka potvrđena'), ('TRANSFER_OUT', 'Izdatnica potvrđena'), ('INVENTURA_COMPLETE', 'Inventura završena'), ('ARCHIVE_UPLOAD', 'Dokument arhiviran')], max_length=30),
+            model_name="activityevent",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("GENESIS_SCAN", "Genesis QR sken"),
+                    ("PALLET_SCAN", "Sken palete"),
+                    ("WEIGHT_EVENT", "Vaganje"),
+                    ("DELIVERY_SCAN", "Sken isporuke"),
+                    ("PHOTO", "Fotografija"),
+                    ("APP_ACTION", "Akcija u aplikaciji"),
+                    ("VEHICLE_START", "Pokretanje vozila"),
+                    ("MANUAL_CHECK", "Rucna provjera"),
+                    ("POS_CHECKOUT", "POS Naplata"),
+                    ("POS_VOID", "POS Storno"),
+                    ("POS_OPEN_SHIFT", "POS Otvaranje smjene"),
+                    ("POS_CLOSE_SHIFT", "POS Zatvaranje smjene"),
+                    ("GOODS_RECEIPT", "Primka potvrđena"),
+                    ("TRANSFER_OUT", "Izdatnica potvrđena"),
+                    ("INVENTURA_COMPLETE", "Inventura završena"),
+                    ("ARCHIVE_UPLOAD", "Dokument arhiviran"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

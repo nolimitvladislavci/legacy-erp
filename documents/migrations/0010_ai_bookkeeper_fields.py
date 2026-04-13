@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0009_arhivaentry_archive_number_and_more'),
+        ("documents", "0009_arhivaentry_archive_number_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='arhivaentry',
-            name='ai_proposal',
-            field=models.JSONField(blank=True, null=True, verbose_name='AI prijedlog knjiženja'),
+            model_name="arhivaentry",
+            name="ai_proposal",
+            field=models.JSONField(blank=True, null=True, verbose_name="AI prijedlog knjiženja"),
         ),
         migrations.AddField(
-            model_name='arhivaentry',
-            name='is_booked',
-            field=models.BooleanField(default=False, verbose_name='Proknjiženo'),
+            model_name="arhivaentry",
+            name="is_booked",
+            field=models.BooleanField(default=False, verbose_name="Proknjiženo"),
         ),
     ]

@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0044_add_parent_receipt'),
+        ("pos", "0044_add_parent_receipt"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterminal',
-            name='quick_actions',
-            field=models.JSONField(blank=True, default=list, help_text='JSON lista akcija. Prazno = auto-generiranje po pos_type.', verbose_name='Brze tipke (QuickActions)'),
+            model_name="posterminal",
+            name="quick_actions",
+            field=models.JSONField(
+                blank=True,
+                default=list,
+                help_text="JSON lista akcija. Prazno = auto-generiranje po pos_type.",
+                verbose_name="Brze tipke (QuickActions)",
+            ),
         ),
     ]

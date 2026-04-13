@@ -4,45 +4,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0008_integrity_hash_deletion_protection'),
+        ("documents", "0008_integrity_hash_deletion_protection"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='arhivaentry',
-            name='archive_number',
-            field=models.CharField(blank=True, db_index=True, default='', max_length=50, unique=True, verbose_name='Evidencijski broj'),
+            model_name="arhivaentry",
+            name="archive_number",
+            field=models.CharField(
+                blank=True, db_index=True, default="", max_length=50, unique=True, verbose_name="Evidencijski broj"
+            ),
         ),
         migrations.AlterField(
-            model_name='arhivaentry',
-            name='source_type',
-            field=models.CharField(choices=[('invoice_out', 'Izlazni račun'), ('invoice_in', 'Ulazni račun (smart import)'), ('eracun', 'e-Račun (FINA/XML)'), ('document', 'Dokument (ručni upload)'), ('fiscal_cert', 'FINA certifikat'), ('otpremnica', 'Otpremnica'), ('primka', 'Primka'), ('otkupni_blok', 'Otkupni blok'), ('cmr', 'CMR'), ('pos_receipt', 'POS račun')], max_length=30, verbose_name='Tip izvora'),
+            model_name="arhivaentry",
+            name="source_type",
+            field=models.CharField(
+                choices=[
+                    ("invoice_out", "Izlazni račun"),
+                    ("invoice_in", "Ulazni račun (smart import)"),
+                    ("eracun", "e-Račun (FINA/XML)"),
+                    ("document", "Dokument (ručni upload)"),
+                    ("fiscal_cert", "FINA certifikat"),
+                    ("otpremnica", "Otpremnica"),
+                    ("primka", "Primka"),
+                    ("otkupni_blok", "Otkupni blok"),
+                    ("cmr", "CMR"),
+                    ("pos_receipt", "POS račun"),
+                ],
+                max_length=30,
+                verbose_name="Tip izvora",
+            ),
         ),
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='ai_confidence',
-            field=models.CharField(choices=[('high', 'Visoko (>90%)'), ('medium', 'Srednje (70-90%)'), ('low', 'Nisko (<70%)')], default='medium', max_length=30, verbose_name='Pouzdanost AI'),
+            model_name="conversionrecord",
+            name="ai_confidence",
+            field=models.CharField(
+                choices=[("high", "Visoko (>90%)"), ("medium", "Srednje (70-90%)"), ("low", "Nisko (<70%)")],
+                default="medium",
+                max_length=30,
+                verbose_name="Pouzdanost AI",
+            ),
         ),
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='ai_model',
-            field=models.CharField(default='gemini-2.5-flash', max_length=200, verbose_name='AI model'),
+            model_name="conversionrecord",
+            name="ai_model",
+            field=models.CharField(default="gemini-2.5-flash", max_length=200, verbose_name="AI model"),
         ),
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='ai_prompt_version',
-            field=models.CharField(default='v1.0', max_length=50, verbose_name='Verzija prompta'),
+            model_name="conversionrecord",
+            name="ai_prompt_version",
+            field=models.CharField(default="v1.0", max_length=50, verbose_name="Verzija prompta"),
         ),
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='original_hash',
-            field=models.CharField(max_length=128, verbose_name='SHA-256 originala'),
+            model_name="conversionrecord",
+            name="original_hash",
+            field=models.CharField(max_length=128, verbose_name="SHA-256 originala"),
         ),
         migrations.AlterField(
-            model_name='conversionrecord',
-            name='xml_hash',
-            field=models.CharField(blank=True, max_length=128, verbose_name='SHA-256 XML-a'),
+            model_name="conversionrecord",
+            name="xml_hash",
+            field=models.CharField(blank=True, max_length=128, verbose_name="SHA-256 XML-a"),
         ),
     ]

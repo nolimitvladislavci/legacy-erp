@@ -9,257 +9,530 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
+        ("companies", "0034_vault_deactivation_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Author',
+            name="Author",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100, verbose_name='Ime')),
-                ('last_name', models.CharField(max_length=100, verbose_name='Prezime')),
-                ('bio', models.TextField(blank=True, verbose_name='Biografija')),
-                ('birth_year', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('death_year', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('openlibrary_id', models.CharField(blank=True, db_index=True, max_length=50)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_authors', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("first_name", models.CharField(max_length=100, verbose_name="Ime")),
+                ("last_name", models.CharField(max_length=100, verbose_name="Prezime")),
+                ("bio", models.TextField(blank=True, verbose_name="Biografija")),
+                ("birth_year", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("death_year", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("openlibrary_id", models.CharField(blank=True, db_index=True, max_length=50)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lib_authors", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Autor',
-                'verbose_name_plural': 'Autori',
-                'ordering': ['last_name', 'first_name'],
+                "verbose_name": "Autor",
+                "verbose_name_plural": "Autori",
+                "ordering": ["last_name", "first_name"],
             },
         ),
         migrations.CreateModel(
-            name='Book',
+            name="Book",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(db_index=True, max_length=500, verbose_name='Naslov')),
-                ('subtitle', models.CharField(blank=True, max_length=500, verbose_name='Podnaslov')),
-                ('isbn_13', models.CharField(blank=True, db_index=True, max_length=13, verbose_name='ISBN-13')),
-                ('isbn_10', models.CharField(blank=True, max_length=10, verbose_name='ISBN-10')),
-                ('publisher', models.CharField(blank=True, max_length=200, verbose_name='Izdavac')),
-                ('publish_year', models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='Godina izdanja')),
-                ('language', models.CharField(default='hr', max_length=5, verbose_name='Jezik')),
-                ('pages', models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='Stranica')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('cover_url', models.URLField(blank=True, verbose_name='URL naslovnice')),
-                ('cover_image', models.ImageField(blank=True, upload_to='library/covers/', verbose_name='Naslovnica')),
-                ('openlibrary_key', models.CharField(blank=True, db_index=True, max_length=50)),
-                ('openlibrary_data', models.JSONField(blank=True, default=dict)),
-                ('times_borrowed', models.PositiveIntegerField(default=0, verbose_name='Puta posudjena')),
-                ('rating_avg', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=3, verbose_name='Prosjecna ocjena')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('authors', models.ManyToManyField(blank=True, related_name='books', to='library.author')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_books', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("title", models.CharField(db_index=True, max_length=500, verbose_name="Naslov")),
+                ("subtitle", models.CharField(blank=True, max_length=500, verbose_name="Podnaslov")),
+                ("isbn_13", models.CharField(blank=True, db_index=True, max_length=13, verbose_name="ISBN-13")),
+                ("isbn_10", models.CharField(blank=True, max_length=10, verbose_name="ISBN-10")),
+                ("publisher", models.CharField(blank=True, max_length=200, verbose_name="Izdavac")),
+                (
+                    "publish_year",
+                    models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Godina izdanja"),
+                ),
+                ("language", models.CharField(default="hr", max_length=5, verbose_name="Jezik")),
+                ("pages", models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Stranica")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                ("cover_url", models.URLField(blank=True, verbose_name="URL naslovnice")),
+                ("cover_image", models.ImageField(blank=True, upload_to="library/covers/", verbose_name="Naslovnica")),
+                ("openlibrary_key", models.CharField(blank=True, db_index=True, max_length=50)),
+                ("openlibrary_data", models.JSONField(blank=True, default=dict)),
+                ("times_borrowed", models.PositiveIntegerField(default=0, verbose_name="Puta posudjena")),
+                (
+                    "rating_avg",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=3, verbose_name="Prosjecna ocjena"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("authors", models.ManyToManyField(blank=True, related_name="books", to="library.author")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lib_books", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Knjiga',
-                'verbose_name_plural': 'Knjige',
-                'ordering': ['title'],
+                "verbose_name": "Knjiga",
+                "verbose_name_plural": "Knjige",
+                "ordering": ["title"],
             },
         ),
         migrations.CreateModel(
-            name='BookCopy',
+            name="BookCopy",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('barcode', models.CharField(help_text='Jedinstveni identifikator primjerka', max_length=50, unique=True, verbose_name='Barcode/Signatura')),
-                ('status', models.CharField(choices=[('available', 'Dostupna'), ('borrowed', 'Posudjena'), ('reserved', 'Rezervirana'), ('damaged', 'Ostecena'), ('lost', 'Izgubljena'), ('discarded', 'Otpisana'), ('reference', 'Referentna (ne posudjuje se)')], default='available', max_length=12)),
-                ('condition', models.CharField(choices=[('new', 'Nova'), ('good', 'Dobro'), ('fair', 'Prosjecno'), ('worn', 'Istrosena')], default='good', max_length=20)),
-                ('location', models.CharField(blank=True, help_text='Npr. Polica A3, Kat 2', max_length=100, verbose_name='Lokacija')),
-                ('acquisition_date', models.DateField(blank=True, null=True, verbose_name='Datum nabave')),
-                ('acquisition_price', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Cijena nabave')),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='copies', to='library.book')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "barcode",
+                    models.CharField(
+                        help_text="Jedinstveni identifikator primjerka",
+                        max_length=50,
+                        unique=True,
+                        verbose_name="Barcode/Signatura",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("available", "Dostupna"),
+                            ("borrowed", "Posudjena"),
+                            ("reserved", "Rezervirana"),
+                            ("damaged", "Ostecena"),
+                            ("lost", "Izgubljena"),
+                            ("discarded", "Otpisana"),
+                            ("reference", "Referentna (ne posudjuje se)"),
+                        ],
+                        default="available",
+                        max_length=12,
+                    ),
+                ),
+                (
+                    "condition",
+                    models.CharField(
+                        choices=[("new", "Nova"), ("good", "Dobro"), ("fair", "Prosjecno"), ("worn", "Istrosena")],
+                        default="good",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "location",
+                    models.CharField(
+                        blank=True, help_text="Npr. Polica A3, Kat 2", max_length=100, verbose_name="Lokacija"
+                    ),
+                ),
+                ("acquisition_date", models.DateField(blank=True, null=True, verbose_name="Datum nabave")),
+                (
+                    "acquisition_price",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Cijena nabave"
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "book",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="copies", to="library.book"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Primjerak',
-                'verbose_name_plural': 'Primjerci',
-                'ordering': ['barcode'],
+                "verbose_name": "Primjerak",
+                "verbose_name_plural": "Primjerci",
+                "ordering": ["barcode"],
             },
         ),
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Naziv')),
-                ('udk_code', models.CharField(blank=True, help_text='Univerzalna decimalna klasifikacija', max_length=30, verbose_name='UDK')),
-                ('icon', models.CharField(blank=True, default='bi-book', max_length=30)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_categories', to='companies.company')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='children', to='library.category', verbose_name='Nadkategorija')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=100, verbose_name="Naziv")),
+                (
+                    "udk_code",
+                    models.CharField(
+                        blank=True, help_text="Univerzalna decimalna klasifikacija", max_length=30, verbose_name="UDK"
+                    ),
+                ),
+                ("icon", models.CharField(blank=True, default="bi-book", max_length=30)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lib_categories",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="children",
+                        to="library.category",
+                        verbose_name="Nadkategorija",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Kategorija',
-                'verbose_name_plural': 'Kategorije',
-                'ordering': ['name'],
-            },
-        ),
-        migrations.AddField(
-            model_name='book',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='books', to='library.category', verbose_name='Kategorija'),
-        ),
-        migrations.CreateModel(
-            name='DigitalAsset',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('format', models.CharField(choices=[('epub', 'EPUB'), ('pdf', 'PDF')], max_length=5)),
-                ('source', models.CharField(choices=[('publisher', 'Od nakladnika (legalno)'), ('public_domain', 'Javna domena (70+ god)')], max_length=15)),
-                ('file', models.FileField(blank=True, upload_to='library/digital/')),
-                ('publisher_license', models.CharField(blank=True, max_length=200, verbose_name='Licenca nakladnika')),
-                ('max_concurrent_loans', models.PositiveSmallIntegerField(default=1, verbose_name='Max istovremenih posudbi')),
-                ('license_expires', models.DateField(blank=True, null=True)),
-                ('total_loans_allowed', models.PositiveIntegerField(blank=True, help_text='Ukupan broj posudbi prije isteka licence', null=True)),
-                ('loans_used', models.PositiveIntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='digital_assets', to='library.book')),
-            ],
-            options={
-                'verbose_name': 'Digitalni sadrzaj',
-                'verbose_name_plural': 'Digitalni sadrzaji',
-            },
-        ),
-        migrations.CreateModel(
-            name='ImportBatch',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file_name', models.CharField(max_length=200)),
-                ('uploaded_file', models.FileField(upload_to='library/imports/')),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('uploaded', 'Ucitano'), ('mapped', 'Mapirano'), ('validated', 'Validirano'), ('imported', 'Uvezeno'), ('failed', 'Neuspjelo')], default='uploaded', max_length=12)),
-                ('column_mapping', models.JSONField(blank=True, default=dict, help_text='Excel kolona -> polje u sustavu')),
-                ('total_rows', models.PositiveIntegerField(default=0)),
-                ('valid_rows', models.PositiveIntegerField(default=0)),
-                ('error_rows', models.PositiveIntegerField(default=0)),
-                ('warning_rows', models.PositiveIntegerField(default=0)),
-                ('duplicate_rows', models.PositiveIntegerField(default=0)),
-                ('validation_log', models.JSONField(blank=True, default=list)),
-                ('books_created', models.PositiveIntegerField(default=0)),
-                ('books_updated', models.PositiveIntegerField(default=0)),
-                ('copies_created', models.PositiveIntegerField(default=0)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_imports', to='companies.company')),
-                ('uploaded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lib_import_batches', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Import fonda',
-                'verbose_name_plural': 'Importi fonda',
-                'ordering': ['-uploaded_at'],
-            },
-        ),
-        migrations.CreateModel(
-            name='LibraryMember',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100, verbose_name='Ime')),
-                ('last_name', models.CharField(max_length=100, verbose_name='Prezime')),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=30)),
-                ('oib', models.CharField(blank=True, max_length=13, verbose_name='OIB')),
-                ('date_of_birth', models.DateField(blank=True, null=True, verbose_name='Datum rodjenja')),
-                ('address', models.CharField(blank=True, max_length=300)),
-                ('member_number', models.CharField(max_length=20, unique=True, verbose_name='Clanski broj')),
-                ('qr_token', models.UUIDField(default=uuid.uuid4, help_text='UUID za QR iskaznicu — skenira se na posudbi', unique=True)),
-                ('status', models.CharField(choices=[('active', 'Aktivan'), ('expired', 'Istekla clanarina'), ('suspended', 'Suspendiran'), ('blocked', 'Blokiran (dugovanje)')], default='active', max_length=10)),
-                ('membership_start', models.DateField(verbose_name='Pocetak clanarine')),
-                ('membership_end', models.DateField(blank=True, null=True, verbose_name='Kraj clanarine')),
-                ('total_borrowed', models.PositiveIntegerField(default=0)),
-                ('total_fines', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=8)),
-                ('fines_paid', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=8)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_members', to='companies.company')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lib_memberships', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Clan knjiznice',
-                'verbose_name_plural': 'Clanovi knjiznice',
-                'ordering': ['last_name', 'first_name'],
-            },
-        ),
-        migrations.CreateModel(
-            name='DigitalLoan',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('borrowed_date', models.DateTimeField(auto_now_add=True)),
-                ('due_date', models.DateTimeField()),
-                ('returned_date', models.DateTimeField(blank=True, null=True)),
-                ('watermark_token', models.UUIDField(default=uuid.uuid4, unique=True)),
-                ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='loans', to='library.digitalasset')),
-                ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='digital_loans', to='library.librarymember')),
-            ],
-            options={
-                'verbose_name': 'Digitalna posudba',
-                'verbose_name_plural': 'Digitalne posudbe',
-                'ordering': ['-borrowed_date'],
-            },
-        ),
-        migrations.CreateModel(
-            name='Loan',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('borrowed_date', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Datum posudbe')),
-                ('due_date', models.DateField(verbose_name='Rok vracanja')),
-                ('returned_date', models.DateTimeField(blank=True, null=True, verbose_name='Datum vracanja')),
-                ('status', models.CharField(choices=[('active', 'Aktivna'), ('returned', 'Vracena'), ('overdue', 'Prekoracena'), ('lost', 'Izgubljena')], default='active', max_length=10)),
-                ('renewed_count', models.PositiveSmallIntegerField(default=0, verbose_name='Broj produljenja')),
-                ('fine_amount', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6, verbose_name='Iznos kazne')),
-                ('copy', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='loans', to='library.bookcopy')),
-                ('issued_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='issued_loans', to=settings.AUTH_USER_MODEL)),
-                ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='loans', to='library.librarymember')),
-            ],
-            options={
-                'verbose_name': 'Posudba',
-                'verbose_name_plural': 'Posudbe',
-                'ordering': ['-borrowed_date'],
-            },
-        ),
-        migrations.CreateModel(
-            name='MembershipType',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Naziv')),
-                ('max_books', models.PositiveSmallIntegerField(default=5, verbose_name='Max knjiga istovremeno')),
-                ('loan_days', models.PositiveSmallIntegerField(default=21, verbose_name='Rok posudbe (dana)')),
-                ('annual_fee', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6, verbose_name='Godisnja clanarina (EUR)')),
-                ('daily_late_fee', models.DecimalField(decimal_places=2, default=Decimal('0.10'), max_digits=4, verbose_name='Kazna po danu kasnjenja (EUR)')),
-                ('can_reserve', models.BooleanField(default=True, verbose_name='Moze rezervirati')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lib_membership_types', to='companies.company')),
-            ],
-            options={
-                'verbose_name': 'Tip clanarine',
-                'verbose_name_plural': 'Tipovi clanarine',
+                "verbose_name": "Kategorija",
+                "verbose_name_plural": "Kategorije",
+                "ordering": ["name"],
             },
         ),
         migrations.AddField(
-            model_name='librarymember',
-            name='membership_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='members', to='library.membershiptype'),
+            model_name="book",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="books",
+                to="library.category",
+                verbose_name="Kategorija",
+            ),
         ),
         migrations.CreateModel(
-            name='Reservation',
+            name="DigitalAsset",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reserved_date', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('pending', 'Ceka'), ('ready', 'Spremna za preuzimanje'), ('fulfilled', 'Preuzeta'), ('cancelled', 'Otkazana'), ('expired', 'Istekla')], default='pending', max_length=10)),
-                ('notified_date', models.DateTimeField(blank=True, null=True)),
-                ('pickup_deadline', models.DateField(blank=True, null=True)),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reservations', to='library.book')),
-                ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reservations', to='library.librarymember')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("format", models.CharField(choices=[("epub", "EPUB"), ("pdf", "PDF")], max_length=5)),
+                (
+                    "source",
+                    models.CharField(
+                        choices=[("publisher", "Od nakladnika (legalno)"), ("public_domain", "Javna domena (70+ god)")],
+                        max_length=15,
+                    ),
+                ),
+                ("file", models.FileField(blank=True, upload_to="library/digital/")),
+                ("publisher_license", models.CharField(blank=True, max_length=200, verbose_name="Licenca nakladnika")),
+                (
+                    "max_concurrent_loans",
+                    models.PositiveSmallIntegerField(default=1, verbose_name="Max istovremenih posudbi"),
+                ),
+                ("license_expires", models.DateField(blank=True, null=True)),
+                (
+                    "total_loans_allowed",
+                    models.PositiveIntegerField(
+                        blank=True, help_text="Ukupan broj posudbi prije isteka licence", null=True
+                    ),
+                ),
+                ("loans_used", models.PositiveIntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "book",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="digital_assets", to="library.book"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Rezervacija',
-                'verbose_name_plural': 'Rezervacije',
-                'ordering': ['reserved_date'],
+                "verbose_name": "Digitalni sadrzaj",
+                "verbose_name_plural": "Digitalni sadrzaji",
+            },
+        ),
+        migrations.CreateModel(
+            name="ImportBatch",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("file_name", models.CharField(max_length=200)),
+                ("uploaded_file", models.FileField(upload_to="library/imports/")),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("uploaded", "Ucitano"),
+                            ("mapped", "Mapirano"),
+                            ("validated", "Validirano"),
+                            ("imported", "Uvezeno"),
+                            ("failed", "Neuspjelo"),
+                        ],
+                        default="uploaded",
+                        max_length=12,
+                    ),
+                ),
+                (
+                    "column_mapping",
+                    models.JSONField(blank=True, default=dict, help_text="Excel kolona -> polje u sustavu"),
+                ),
+                ("total_rows", models.PositiveIntegerField(default=0)),
+                ("valid_rows", models.PositiveIntegerField(default=0)),
+                ("error_rows", models.PositiveIntegerField(default=0)),
+                ("warning_rows", models.PositiveIntegerField(default=0)),
+                ("duplicate_rows", models.PositiveIntegerField(default=0)),
+                ("validation_log", models.JSONField(blank=True, default=list)),
+                ("books_created", models.PositiveIntegerField(default=0)),
+                ("books_updated", models.PositiveIntegerField(default=0)),
+                ("copies_created", models.PositiveIntegerField(default=0)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lib_imports", to="companies.company"
+                    ),
+                ),
+                (
+                    "uploaded_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="lib_import_batches",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Import fonda",
+                "verbose_name_plural": "Importi fonda",
+                "ordering": ["-uploaded_at"],
+            },
+        ),
+        migrations.CreateModel(
+            name="LibraryMember",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("first_name", models.CharField(max_length=100, verbose_name="Ime")),
+                ("last_name", models.CharField(max_length=100, verbose_name="Prezime")),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=30)),
+                ("oib", models.CharField(blank=True, max_length=13, verbose_name="OIB")),
+                ("date_of_birth", models.DateField(blank=True, null=True, verbose_name="Datum rodjenja")),
+                ("address", models.CharField(blank=True, max_length=300)),
+                ("member_number", models.CharField(max_length=20, unique=True, verbose_name="Clanski broj")),
+                (
+                    "qr_token",
+                    models.UUIDField(
+                        default=uuid.uuid4, help_text="UUID za QR iskaznicu — skenira se na posudbi", unique=True
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Aktivan"),
+                            ("expired", "Istekla clanarina"),
+                            ("suspended", "Suspendiran"),
+                            ("blocked", "Blokiran (dugovanje)"),
+                        ],
+                        default="active",
+                        max_length=10,
+                    ),
+                ),
+                ("membership_start", models.DateField(verbose_name="Pocetak clanarine")),
+                ("membership_end", models.DateField(blank=True, null=True, verbose_name="Kraj clanarine")),
+                ("total_borrowed", models.PositiveIntegerField(default=0)),
+                ("total_fines", models.DecimalField(decimal_places=2, default=Decimal("0"), max_digits=8)),
+                ("fines_paid", models.DecimalField(decimal_places=2, default=Decimal("0"), max_digits=8)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lib_members", to="companies.company"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="lib_memberships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Clan knjiznice",
+                "verbose_name_plural": "Clanovi knjiznice",
+                "ordering": ["last_name", "first_name"],
+            },
+        ),
+        migrations.CreateModel(
+            name="DigitalLoan",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("borrowed_date", models.DateTimeField(auto_now_add=True)),
+                ("due_date", models.DateTimeField()),
+                ("returned_date", models.DateTimeField(blank=True, null=True)),
+                ("watermark_token", models.UUIDField(default=uuid.uuid4, unique=True)),
+                (
+                    "asset",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="loans", to="library.digitalasset"
+                    ),
+                ),
+                (
+                    "member",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="digital_loans",
+                        to="library.librarymember",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Digitalna posudba",
+                "verbose_name_plural": "Digitalne posudbe",
+                "ordering": ["-borrowed_date"],
+            },
+        ),
+        migrations.CreateModel(
+            name="Loan",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "borrowed_date",
+                    models.DateTimeField(default=django.utils.timezone.now, verbose_name="Datum posudbe"),
+                ),
+                ("due_date", models.DateField(verbose_name="Rok vracanja")),
+                ("returned_date", models.DateTimeField(blank=True, null=True, verbose_name="Datum vracanja")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Aktivna"),
+                            ("returned", "Vracena"),
+                            ("overdue", "Prekoracena"),
+                            ("lost", "Izgubljena"),
+                        ],
+                        default="active",
+                        max_length=10,
+                    ),
+                ),
+                ("renewed_count", models.PositiveSmallIntegerField(default=0, verbose_name="Broj produljenja")),
+                (
+                    "fine_amount",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=6, verbose_name="Iznos kazne"
+                    ),
+                ),
+                (
+                    "copy",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="loans", to="library.bookcopy"
+                    ),
+                ),
+                (
+                    "issued_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="issued_loans",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "member",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="loans", to="library.librarymember"
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Posudba",
+                "verbose_name_plural": "Posudbe",
+                "ordering": ["-borrowed_date"],
+            },
+        ),
+        migrations.CreateModel(
+            name="MembershipType",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=100, verbose_name="Naziv")),
+                ("max_books", models.PositiveSmallIntegerField(default=5, verbose_name="Max knjiga istovremeno")),
+                ("loan_days", models.PositiveSmallIntegerField(default=21, verbose_name="Rok posudbe (dana)")),
+                (
+                    "annual_fee",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=6, verbose_name="Godisnja clanarina (EUR)"
+                    ),
+                ),
+                (
+                    "daily_late_fee",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=Decimal("0.10"),
+                        max_digits=4,
+                        verbose_name="Kazna po danu kasnjenja (EUR)",
+                    ),
+                ),
+                ("can_reserve", models.BooleanField(default=True, verbose_name="Moze rezervirati")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lib_membership_types",
+                        to="companies.company",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Tip clanarine",
+                "verbose_name_plural": "Tipovi clanarine",
+            },
+        ),
+        migrations.AddField(
+            model_name="librarymember",
+            name="membership_type",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="members",
+                to="library.membershiptype",
+            ),
+        ),
+        migrations.CreateModel(
+            name="Reservation",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("reserved_date", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Ceka"),
+                            ("ready", "Spremna za preuzimanje"),
+                            ("fulfilled", "Preuzeta"),
+                            ("cancelled", "Otkazana"),
+                            ("expired", "Istekla"),
+                        ],
+                        default="pending",
+                        max_length=10,
+                    ),
+                ),
+                ("notified_date", models.DateTimeField(blank=True, null=True)),
+                ("pickup_deadline", models.DateField(blank=True, null=True)),
+                (
+                    "book",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="reservations", to="library.book"
+                    ),
+                ),
+                (
+                    "member",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reservations",
+                        to="library.librarymember",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Rezervacija",
+                "verbose_name_plural": "Rezervacije",
+                "ordering": ["reserved_date"],
             },
         ),
     ]

@@ -6,16 +6,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('rental', '0006_pgcrypto_pii_encryption'),
+        ("rental", "0006_pgcrypto_pii_encryption"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='property',
-            name='owner',
-            field=models.ForeignKey(blank=True, help_text='Osoba kojoj prihod od najma osobno pripada (≠ firma)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='owned_properties', to=settings.AUTH_USER_MODEL, verbose_name='Vlasnik / Iznajmljivač'),
+            model_name="property",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Osoba kojoj prihod od najma osobno pripada (≠ firma)",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="owned_properties",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Vlasnik / Iznajmljivač",
+            ),
         ),
     ]

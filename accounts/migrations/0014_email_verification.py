@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0013_gps_certified_categories'),
+        ("accounts", "0013_gps_certified_categories"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='email_verified',
-            field=models.BooleanField(default=False, verbose_name='Email verificiran'),
+            model_name="userprofile",
+            name="email_verified",
+            field=models.BooleanField(default=False, verbose_name="Email verificiran"),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='email_verified_at',
+            model_name="userprofile",
+            name="email_verified_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

@@ -13,6 +13,7 @@ Izvor podataka (prioritet):
 Za pausalce koji koriste rental modul, TrafficRecord je zakonski relevantan.
 Za ostale pausalce, Invoice je primarni izvor.
 """
+
 import logging
 from datetime import date
 from decimal import Decimal
@@ -24,6 +25,7 @@ logger = logging.getLogger("tax_wizard.auto_fill")
 
 _Q = Decimal("0.01")
 ZERO = Decimal("0.00")
+
 
 # Quarter date ranges
 def _quarter_range(year, quarter):
@@ -176,6 +178,7 @@ def auto_fill_posd(company, year, prefer_source="auto"):
     if prefer_source == "auto":
         # Provjeri rental prvo (ako ima TrafficRecord)
         from rental.models import TrafficRecord
+
         has_rental = TrafficRecord.objects.filter(company=company, date__year=year).exists()
 
         if has_rental:
@@ -184,18 +187,24 @@ def auto_fill_posd(company, year, prefer_source="auto"):
         else:
             # Fallback na invoicing
             data = aggregate_invoice_income(company, year)
-            sources_checked.append({"name": "invoicing", "records": data.get("invoice_count", 0), "total": str(data["total"])})
+            sources_checked.append(
+                {"name": "invoicing", "records": data.get("invoice_count", 0), "total": str(data["total"])}
+            )
 
             if data["total"] == ZERO:
                 # Fallback na POS
                 data = aggregate_pos_income(company, year)
-                sources_checked.append({"name": "pos", "records": data.get("receipt_count", 0), "total": str(data["total"])})
+                sources_checked.append(
+                    {"name": "pos", "records": data.get("receipt_count", 0), "total": str(data["total"])}
+                )
     elif prefer_source == "rental":
         data = aggregate_rental_income(company, year)
         sources_checked.append({"name": "rental", "records": data["record_count"], "total": str(data["total"])})
     elif prefer_source == "invoicing":
         data = aggregate_invoice_income(company, year)
-        sources_checked.append({"name": "invoicing", "records": data.get("invoice_count", 0), "total": str(data["total"])})
+        sources_checked.append(
+            {"name": "invoicing", "records": data.get("invoice_count", 0), "total": str(data["total"])}
+        )
     elif prefer_source == "pos":
         data = aggregate_pos_income(company, year)
         sources_checked.append({"name": "pos", "records": data.get("receipt_count", 0), "total": str(data["total"])})

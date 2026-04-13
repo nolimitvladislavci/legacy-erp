@@ -16,17 +16,19 @@ Sigurnost:
   - Audit log u SystemAuditLog
   - Striktno polja-validirani JSON payloadi
 """
+
 import logging
 from decimal import Decimal, InvalidOperation
 
 from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone as tz
 
-logger = logging.getLogger('ai_executor')
+logger = logging.getLogger("ai_executor")
 
 
 class AIExecutionError(Exception):
     """Greška pri parsiranju ili izvršavanju AI payloada."""
+
     def __init__(self, code, message):
         self.code = code
         self.message = message
@@ -55,61 +57,59 @@ class AIOperativeExecutor:
         from superadmin_ai.models import AIActionLog, PendingAIAction
 
         # Lock redak — sprječava duplo izvršavanje
-        action = PendingAIAction.objects.select_for_update().get(
-            pk=pending_action_id, status='approved'
-        )
+        action = PendingAIAction.objects.select_for_update().get(pk=pending_action_id, status="approved")
 
         module = action.module
         payload = action.payload
 
         handlers = {
-            'b2b_procurement': cls._handle_b2b_procurement,
-            'dynamic_pricing': cls._handle_dynamic_pricing,
-            'haccp_logistics': cls._handle_haccp_logistics,
+            "b2b_procurement": cls._handle_b2b_procurement,
+            "dynamic_pricing": cls._handle_dynamic_pricing,
+            "haccp_logistics": cls._handle_haccp_logistics,
         }
 
         handler = handlers.get(module)
         if not handler:
-            raise AIExecutionError('UNKNOWN_MODULE', 'Nepoznat executor modul: %s' % module)
+            raise AIExecutionError("UNKNOWN_MODULE", "Nepoznat executor modul: %s" % module)
 
         try:
             result = handler(action.company, payload, system_user)
 
             # Označi kao izvršeno
-            action.status = 'executed'
+            action.status = "executed"
             action.reviewed_at = tz.now()
             action.result = result
-            action.save(update_fields=['status', 'reviewed_at', 'result'])
+            action.save(update_fields=["status", "reviewed_at", "result"])
 
             # Audit log
             AIActionLog.objects.create(
                 company=action.company,
                 module=module,
-                action_type='ai_execute_%s' % action.action_type,
+                action_type="ai_execute_%s" % action.action_type,
                 access_level=4,  # COUNCIL
-                outcome='executed',
+                outcome="executed",
                 user=system_user,
                 details={
-                    'action_id': str(action.pk),
-                    'result': result,
+                    "action_id": str(action.pk),
+                    "result": result,
                 },
             )
 
-            logger.info('[AI EXECUTOR] Action %s executed: %s', action.pk, module)
+            logger.info("[AI EXECUTOR] Action %s executed: %s", action.pk, module)
             return result
 
         except AIExecutionError:
-            action.status = 'expired'
-            action.review_note = 'Execution failed'
-            action.save(update_fields=['status', 'review_note'])
+            action.status = "expired"
+            action.review_note = "Execution failed"
+            action.save(update_fields=["status", "review_note"])
             raise
 
         except (IntegrityError, DatabaseError) as e:
-            action.status = 'expired'
-            action.review_note = 'Execution error: %s' % str(e)[:200]
-            action.save(update_fields=['status', 'review_note'])
-            logger.critical('[AI EXECUTOR] Fatal error on action %s: %s', action.pk, e, exc_info=True)
-            raise AIExecutionError('EXEC_FAILED', str(e)[:200])
+            action.status = "expired"
+            action.review_note = "Execution error: %s" % str(e)[:200]
+            action.save(update_fields=["status", "review_note"])
+            logger.critical("[AI EXECUTOR] Fatal error on action %s: %s", action.pk, e, exc_info=True)
+            raise AIExecutionError("EXEC_FAILED", str(e)[:200])
 
     # ── B2B Procurement ────────────────────────────────────────
 
@@ -123,48 +123,46 @@ class AIOperativeExecutor:
         from partners.models import Partner
         from procurement.models import PurchaseOrder, PurchaseOrderItem
 
-        supplier_id = payload.get('supplier_id')
-        items_data = payload.get('items', [])
+        supplier_id = payload.get("supplier_id")
+        items_data = payload.get("items", [])
 
         if not supplier_id:
-            raise AIExecutionError('NO_SUPPLIER', 'Nedostaje supplier_id u payloadu.')
+            raise AIExecutionError("NO_SUPPLIER", "Nedostaje supplier_id u payloadu.")
         if not items_data:
-            raise AIExecutionError('NO_ITEMS', 'Nedostaje items u payloadu.')
+            raise AIExecutionError("NO_ITEMS", "Nedostaje items u payloadu.")
 
         supplier = Partner.objects.filter(pk=supplier_id, company=company).first()
         if not supplier:
-            raise AIExecutionError('SUPPLIER_NOT_FOUND', 'Dobavljač #%s ne postoji.' % supplier_id)
+            raise AIExecutionError("SUPPLIER_NOT_FOUND", "Dobavljač #%s ne postoji." % supplier_id)
 
         # Kreiraj PO
         po = PurchaseOrder(
             company=company,
             supplier=supplier,
             created_by=system_user,
-            status='draft',
-            priority=payload.get('priority', 'normal'),
-            notes='AI auto-generated PO',
+            status="draft",
+            priority=payload.get("priority", "normal"),
+            notes="AI auto-generated PO",
         )
         po.po_number = po.generate_po_number()
         po.save()
 
         for item_data in items_data:
-            sku = item_data.get('sku', '')
-            qty = item_data.get('qty', 0)
+            sku = item_data.get("sku", "")
+            qty = item_data.get("qty", 0)
 
             if not sku or not qty:
                 continue
 
             inv_item = InventoryItem.objects.filter(sku=sku, company=company).first()
             if not inv_item:
-                raise AIExecutionError(
-                    'ITEM_NOT_FOUND', 'Artikl SKU: %s ne postoji u sustavu.' % sku
-                )
+                raise AIExecutionError("ITEM_NOT_FOUND", "Artikl SKU: %s ne postoji u sustavu." % sku)
 
             try:
                 quantity = Decimal(str(qty))
-                price = inv_item.purchase_price or Decimal('0')
+                price = inv_item.purchase_price or Decimal("0")
             except (InvalidOperation, ValueError):
-                raise AIExecutionError('INVALID_QTY', 'Neispravna količina za SKU: %s' % sku)
+                raise AIExecutionError("INVALID_QTY", "Neispravna količina za SKU: %s" % sku)
 
             PurchaseOrderItem.objects.create(
                 purchase_order=po,
@@ -172,24 +170,29 @@ class AIOperativeExecutor:
                 description=inv_item.name,
                 sku=inv_item.sku,
                 quantity=quantity,
-                unit=inv_item.unit or 'kom',
+                unit=inv_item.unit or "kom",
                 unit_price=price,
-                tax_rate=Decimal('25'),
+                tax_rate=Decimal("25"),
             )
 
         po.recalculate()
 
         # Audit u SystemAuditLog
-        cls._audit(system_user, company, 'AI_PO_CREATED',
-                   'procurement.PurchaseOrder', str(po.pk),
-                   'AI generirao PO %s za %s (%s EUR)' % (po.po_number, supplier.name, po.total))
+        cls._audit(
+            system_user,
+            company,
+            "AI_PO_CREATED",
+            "procurement.PurchaseOrder",
+            str(po.pk),
+            "AI generirao PO %s za %s (%s EUR)" % (po.po_number, supplier.name, po.total),
+        )
 
         return {
-            'po_id': po.pk,
-            'po_number': po.po_number,
-            'supplier': supplier.name,
-            'total': str(po.total),
-            'items_count': po.items.count(),
+            "po_id": po.pk,
+            "po_number": po.po_number,
+            "supplier": supplier.name,
+            "total": str(po.total),
+            "items_count": po.items.count(),
         }
 
     # ── Dynamic Pricing ────────────────────────────────────────
@@ -202,21 +205,21 @@ class AIOperativeExecutor:
         """
         from marketplace.models import CategoryDiscount
 
-        category_id = payload.get('category_id')
-        discount_pct = payload.get('discount_percent')
+        category_id = payload.get("category_id")
+        discount_pct = payload.get("discount_percent")
 
         if not category_id or not discount_pct:
-            raise AIExecutionError('MISSING_FIELDS', 'Nedostaje category_id ili discount_percent.')
+            raise AIExecutionError("MISSING_FIELDS", "Nedostaje category_id ili discount_percent.")
 
         try:
             pct = Decimal(str(discount_pct))
         except (InvalidOperation, ValueError):
-            raise AIExecutionError('INVALID_DISCOUNT', 'Neispravan postotak: %s' % discount_pct)
+            raise AIExecutionError("INVALID_DISCOUNT", "Neispravan postotak: %s" % discount_pct)
 
         if pct > 50:
-            raise AIExecutionError('DISCOUNT_TOO_HIGH', 'AI ne smije dati popust > 50%%. Traženo: %s%%' % pct)
+            raise AIExecutionError("DISCOUNT_TOO_HIGH", "AI ne smije dati popust > 50%%. Traženo: %s%%" % pct)
 
-        days = int(payload.get('days', 7))
+        int(payload.get("days", 7))
 
         discount = CategoryDiscount.objects.create(
             seller_company=company,
@@ -225,16 +228,21 @@ class AIOperativeExecutor:
             is_active=True,
         )
 
-        reason = payload.get('reason', 'AI optimizacija zaliha')
-        cls._audit(system_user, company, 'AI_DISCOUNT_APPLIED',
-                   'marketplace.CategoryDiscount', str(discount.pk),
-                   'AI primijenio %s%% popust na kategoriju #%s: %s' % (pct, category_id, reason))
+        reason = payload.get("reason", "AI optimizacija zaliha")
+        cls._audit(
+            system_user,
+            company,
+            "AI_DISCOUNT_APPLIED",
+            "marketplace.CategoryDiscount",
+            str(discount.pk),
+            "AI primijenio %s%% popust na kategoriju #%s: %s" % (pct, category_id, reason),
+        )
 
         return {
-            'discount_id': discount.pk,
-            'category_id': category_id,
-            'discount_percent': str(pct),
-            'reason': reason,
+            "discount_id": discount.pk,
+            "category_id": category_id,
+            "discount_percent": str(pct),
+            "reason": reason,
         }
 
     # ── HACCP Logistics ────────────────────────────────────────
@@ -247,55 +255,62 @@ class AIOperativeExecutor:
         """
         from delivery.models import HACCPIncident
 
-        incident_id = payload.get('incident_id')
+        incident_id = payload.get("incident_id")
         if not incident_id:
-            raise AIExecutionError('NO_INCIDENT', 'Nedostaje incident_id.')
+            raise AIExecutionError("NO_INCIDENT", "Nedostaje incident_id.")
 
-        incident = HACCPIncident.objects.select_related('smart_box').filter(
-            pk=incident_id
-        ).first()
+        incident = HACCPIncident.objects.select_related("smart_box").filter(pk=incident_id).first()
 
         if not incident:
-            raise AIExecutionError('INCIDENT_NOT_FOUND', 'HACCP incident #%s ne postoji.' % incident_id)
+            raise AIExecutionError("INCIDENT_NOT_FOUND", "HACCP incident #%s ne postoji." % incident_id)
 
-        reason = payload.get('reason', 'AI automatska intervencija')
+        reason = payload.get("reason", "AI automatska intervencija")
 
         # Blokiraj SmartBox
         box = incident.smart_box
         if box:
-            box.haccp_status = 'blocked'
+            box.haccp_status = "blocked"
             box.haccp_blocked_at = tz.now()
-            box.save(update_fields=['haccp_status', 'haccp_blocked_at'])
+            box.save(update_fields=["haccp_status", "haccp_blocked_at"])
 
         # Zatvori incident
-        incident.severity = 'blocked'
+        incident.severity = "blocked"
         incident.is_resolved = True
         incident.resolved_by = system_user
-        incident.resolution_note = 'AI RESOLUTION: %s' % reason
+        incident.resolution_note = "AI RESOLUTION: %s" % reason
         incident.resolved_at = tz.now()
-        incident.save(update_fields=[
-            'severity', 'is_resolved', 'resolved_by',
-            'resolution_note', 'resolved_at',
-        ])
+        incident.save(
+            update_fields=[
+                "severity",
+                "is_resolved",
+                "resolved_by",
+                "resolution_note",
+                "resolved_at",
+            ]
+        )
 
         # Blokiraj goods receipt
         from delivery.services.cold_chain import ColdChainService
+
         blocked_receipts = []
         if box:
             blocked_receipts = ColdChainService.block_goods_receipt(box.pk)
 
-        cls._audit(system_user, company, 'AI_HACCP_INTERVENTION',
-                   'delivery.HACCPIncident', str(incident.pk),
-                   'AI blokirao SmartBox %s i otpisao robu: %s' % (
-                       box.box_id if box else '?', reason
-                   ))
+        cls._audit(
+            system_user,
+            company,
+            "AI_HACCP_INTERVENTION",
+            "delivery.HACCPIncident",
+            str(incident.pk),
+            "AI blokirao SmartBox %s i otpisao robu: %s" % (box.box_id if box else "?", reason),
+        )
 
         return {
-            'incident_id': incident.pk,
-            'box_id': box.box_id if box else None,
-            'box_blocked': True if box else False,
-            'receipts_blocked': blocked_receipts,
-            'reason': reason,
+            "incident_id": incident.pk,
+            "box_id": box.box_id if box else None,
+            "box_blocked": True if box else False,
+            "receipts_blocked": blocked_receipts,
+            "reason": reason,
         }
 
     # ── Audit Helper ───────────────────────────────────────────
@@ -305,6 +320,7 @@ class AIOperativeExecutor:
         """Zapiši u SystemAuditLog."""
         try:
             from core.models import SystemAuditLog
+
             SystemAuditLog.objects.create(
                 user=user,
                 company=company,
@@ -312,7 +328,7 @@ class AIOperativeExecutor:
                 model_name=model_name,
                 object_id=object_id,
                 object_repr=description[:300],
-                changes={'ai_executor': True, 'description': description},
+                changes={"ai_executor": True, "description": description},
             )
         except (IntegrityError, DatabaseError):
-            logger.warning('AI executor audit failed', exc_info=True)
+            logger.warning("AI executor audit failed", exc_info=True)

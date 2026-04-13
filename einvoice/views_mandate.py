@@ -9,6 +9,7 @@ Endpoints:
   - mandate_activate:      POST   registriraj mandat kod FINA (superadmin)
   - mandate_revoke:        POST   opozovi mandat
 """
+
 import json
 import logging
 from datetime import date
@@ -41,21 +42,34 @@ def mandate_list(request):
     if not company:
         from django.contrib import messages
         from django.utils.translation import gettext as _
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
+
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
         return redirect("dashboard")
 
-    mandates = Mandate.objects.filter(
-        agent_company=company,
-    ).select_related(
-        "principal_company", "agent_company", "created_by",
-    ).order_by("-created_at")
+    mandates = (
+        Mandate.objects.filter(
+            agent_company=company,
+        )
+        .select_related(
+            "principal_company",
+            "agent_company",
+            "created_by",
+        )
+        .order_by("-created_at")
+    )
 
     # Also show mandates where this company is the principal
-    mandates_given = Mandate.objects.filter(
-        principal_company=company,
-    ).select_related(
-        "principal_company", "agent_company", "created_by",
-    ).order_by("-created_at")
+    mandates_given = (
+        Mandate.objects.filter(
+            principal_company=company,
+        )
+        .select_related(
+            "principal_company",
+            "agent_company",
+            "created_by",
+        )
+        .order_by("-created_at")
+    )
 
     stats = {
         "held_total": mandates.count(),
@@ -64,13 +78,17 @@ def mandate_list(request):
         "given_active": mandates_given.filter(status=MandateStatus.ACTIVE).count(),
     }
 
-    return render(request, "einvoice/mandate_list.html", {
-        "mandates_held": mandates,
-        "mandates_given": mandates_given,
-        "stats": stats,
-        "company": company,
-        "is_superadmin": request.user.is_superuser,
-    })
+    return render(
+        request,
+        "einvoice/mandate_list.html",
+        {
+            "mandates_held": mandates,
+            "mandates_given": mandates_given,
+            "stats": stats,
+            "company": company,
+            "is_superadmin": request.user.is_superuser,
+        },
+    )
 
 
 @login_required
@@ -112,6 +130,7 @@ def mandate_create(request):
         return JsonResponse({"error": "principal_company_id je obavezan."}, status=400)
 
     from companies.models import Company
+
     try:
         principal = Company.objects.get(pk=principal_company_id)
     except Company.DoesNotExist:
@@ -120,9 +139,12 @@ def mandate_create(request):
     # Validate mandate_type
     valid_types = [c[0] for c in MandateType.choices]
     if mandate_type not in valid_types:
-        return JsonResponse({
-            "error": f"Nevažeći tip punomoći. Dozvoljeno: {', '.join(valid_types)}",
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": f"Nevažeći tip punomoći. Dozvoljeno: {', '.join(valid_types)}",
+            },
+            status=400,
+        )
 
     # Parse dates
     try:
@@ -147,9 +169,12 @@ def mandate_create(request):
         status__in=[MandateStatus.DRAFT, MandateStatus.SIGNED, MandateStatus.ACTIVE],
     ).first()
     if existing:
-        return JsonResponse({
-            "error": f"Aktivan mandat već postoji (ID: {existing.id}, status: {existing.get_status_display()}).",
-        }, status=409)
+        return JsonResponse(
+            {
+                "error": f"Aktivan mandat već postoji (ID: {existing.id}, status: {existing.get_status_display()}).",
+            },
+            status=409,
+        )
 
     # Create mandate
     mandate = Mandate.objects.create(
@@ -167,18 +192,26 @@ def mandate_create(request):
 
     logger.info(
         "mandate_create: user=%s created mandate=%s principal=%s(%s) agent=%s(%s)",
-        request.user, mandate.id, principal.name, principal.oib, company.name, company.oib,
+        request.user,
+        mandate.id,
+        principal.name,
+        principal.oib,
+        company.name,
+        company.oib,
     )
 
-    return JsonResponse({
-        "id": str(mandate.id),
-        "status": mandate.status,
-        "principal": principal.name,
-        "agent": company.name,
-        "mandate_type": mandate.mandate_type,
-        "pdf_url": f"/einvoice/mandates/{mandate.id}/pdf/",
-        "message": "Mandat kreiran. Preuzmite PDF, potpišite, i uploadajte.",
-    }, status=201)
+    return JsonResponse(
+        {
+            "id": str(mandate.id),
+            "status": mandate.status,
+            "principal": principal.name,
+            "agent": company.name,
+            "mandate_type": mandate.mandate_type,
+            "pdf_url": f"/einvoice/mandates/{mandate.id}/pdf/",
+            "message": "Mandat kreiran. Preuzmite PDF, potpišite, i uploadajte.",
+        },
+        status=201,
+    )
 
 
 @login_required
@@ -228,9 +261,12 @@ def mandate_upload_signed(request, mandate_id):
             return JsonResponse({"error": "Nemate pristup ovom mandatu."}, status=403)
 
     if mandate.status not in (MandateStatus.DRAFT, MandateStatus.SIGNED):
-        return JsonResponse({
-            "error": f"Mandat nije u statusu za upload (trenutni: {mandate.get_status_display()}).",
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": f"Mandat nije u statusu za upload (trenutni: {mandate.get_status_display()}).",
+            },
+            status=400,
+        )
 
     uploaded_file = request.FILES.get("document")
     if not uploaded_file:
@@ -239,13 +275,17 @@ def mandate_upload_signed(request, mandate_id):
     # Validate file type
     allowed_types = [
         "application/pdf",
-        "image/jpeg", "image/png", "image/tiff",
+        "image/jpeg",
+        "image/png",
+        "image/tiff",
     ]
     if uploaded_file.content_type not in allowed_types:
-        return JsonResponse({
-            "error": f"Nedozvoljeni tip datoteke: {uploaded_file.content_type}. "
-                     f"Dozvoljeno: PDF, JPEG, PNG, TIFF.",
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": f"Nedozvoljeni tip datoteke: {uploaded_file.content_type}. Dozvoljeno: PDF, JPEG, PNG, TIFF.",
+            },
+            status=400,
+        )
 
     # Limit file size (10 MB)
     if uploaded_file.size > 10 * 1024 * 1024:
@@ -257,14 +297,17 @@ def mandate_upload_signed(request, mandate_id):
 
     logger.info(
         "mandate_upload_signed: user=%s uploaded signed doc for mandate=%s",
-        request.user, mandate_id,
+        request.user,
+        mandate_id,
     )
 
-    return JsonResponse({
-        "id": str(mandate.id),
-        "status": mandate.status,
-        "message": "Potpisana punomoć uploadana. Čeka registraciju kod FINA.",
-    })
+    return JsonResponse(
+        {
+            "id": str(mandate.id),
+            "status": mandate.status,
+            "message": "Potpisana punomoć uploadana. Čeka registraciju kod FINA.",
+        }
+    )
 
 
 @login_required
@@ -282,10 +325,13 @@ def mandate_activate(request, mandate_id):
     mandate = get_object_or_404(Mandate, pk=mandate_id)
 
     if mandate.status != MandateStatus.SIGNED:
-        return JsonResponse({
-            "error": f"Mandat mora biti u statusu 'Potpisan' za aktivaciju "
-                     f"(trenutni: {mandate.get_status_display()}).",
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": f"Mandat mora biti u statusu 'Potpisan' za aktivaciju "
+                f"(trenutni: {mandate.get_status_display()}).",
+            },
+            status=400,
+        )
 
     # Parse optional FINA reference
     fina_ref = ""
@@ -303,22 +349,32 @@ def mandate_activate(request, mandate_id):
     mandate.is_active = True
     if fina_ref:
         mandate.fina_mandate_id = fina_ref
-    mandate.save(update_fields=[
-        "status", "registered_with_fina", "fina_registered_at",
-        "is_active", "fina_mandate_id", "updated_at",
-    ])
+    mandate.save(
+        update_fields=[
+            "status",
+            "registered_with_fina",
+            "fina_registered_at",
+            "is_active",
+            "fina_mandate_id",
+            "updated_at",
+        ]
+    )
 
     logger.info(
         "mandate_activate: superuser=%s activated mandate=%s fina_ref=%s",
-        request.user, mandate_id, fina_ref,
+        request.user,
+        mandate_id,
+        fina_ref,
     )
 
-    return JsonResponse({
-        "id": str(mandate.id),
-        "status": mandate.status,
-        "fina_registered_at": now.isoformat(),
-        "message": "Mandat aktiviran i registriran kod FINA.",
-    })
+    return JsonResponse(
+        {
+            "id": str(mandate.id),
+            "status": mandate.status,
+            "fina_registered_at": now.isoformat(),
+            "message": "Mandat aktiviran i registriran kod FINA.",
+        }
+    )
 
 
 @login_required
@@ -332,9 +388,11 @@ def mandate_revoke(request, mandate_id):
     mandate = get_object_or_404(Mandate, pk=mandate_id)
 
     # Check access: principal, agent, or superadmin
-    if (mandate.principal_company_id != company.id
-            and mandate.agent_company_id != company.id
-            and not request.user.is_superuser):
+    if (
+        mandate.principal_company_id != company.id
+        and mandate.agent_company_id != company.id
+        and not request.user.is_superuser
+    ):
         return JsonResponse({"error": "Nemate pristup ovom mandatu."}, status=403)
 
     if mandate.status == MandateStatus.REVOKED:
@@ -344,11 +402,14 @@ def mandate_revoke(request, mandate_id):
 
     logger.info(
         "mandate_revoke: user=%s revoked mandate=%s",
-        request.user, mandate_id,
+        request.user,
+        mandate_id,
     )
 
-    return JsonResponse({
-        "id": str(mandate.id),
-        "status": mandate.status,
-        "message": "Mandat opozvan.",
-    })
+    return JsonResponse(
+        {
+            "id": str(mandate.id),
+            "status": mandate.status,
+            "message": "Mandat opozvan.",
+        }
+    )

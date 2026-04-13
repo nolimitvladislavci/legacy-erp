@@ -6,6 +6,7 @@ Extracted from views.py to enable:
 - Reuse across views, API, Celery tasks
 - Clear separation of concerns
 """
+
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Optional
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 # ── Receipt Calculation ─────────────────────────────────────
 
+
 def recalculate_receipt(receipt: "POSReceipt") -> None:
     """Recalculate receipt totals from items. Saves to DB."""
     items = list(receipt.items.all())
@@ -36,7 +38,7 @@ def recalculate_receipt(receipt: "POSReceipt") -> None:
         tax = net * item.tax_rate / 100
         subtotal += net
         tax_total += tax
-    _Q = Decimal('0.01')
+    _Q = Decimal("0.01")
     receipt.subtotal = subtotal.quantize(_Q, rounding=ROUND_HALF_UP)
     receipt.tax_amount = tax_total.quantize(_Q, rounding=ROUND_HALF_UP)
     receipt.total = (subtotal + tax_total - receipt.discount).quantize(_Q, rounding=ROUND_HALF_UP)
@@ -44,6 +46,7 @@ def recalculate_receipt(receipt: "POSReceipt") -> None:
 
 
 # ── Session Management ──────────────────────────────────────
+
 
 def open_session(terminal: "POSTerminal", user: "User", opening_cash: Decimal = Decimal("0")) -> "POSSession":
     """Open a new POS session on terminal. Returns session or raises."""
@@ -86,18 +89,23 @@ def close_session(session: "POSSession", closing_cash: Decimal = Decimal("0")) -
     # Blagajnicki maksimum (Zakon o blagajnickom poslovanju)
     try:
         company = session.terminal.company
-        cash_limit = getattr(company, 'cash_register_limit', None)
+        cash_limit = getattr(company, "cash_register_limit", None)
         if cash_limit and closing_cash > cash_limit:
             logger.warning(
-                '[BLAGAJNA] Session #%d: closing_cash=%.2f > limit=%.2f',
-                session.session_number, closing_cash, cash_limit
+                "[BLAGAJNA] Session #%d: closing_cash=%.2f > limit=%.2f",
+                session.session_number,
+                closing_cash,
+                cash_limit,
             )
             from core.models import SystemAuditLog
+
             SystemAuditLog.objects.create(
-                company=company, action='cash_limit_exceeded',
-                model_name='pos.POSSession', object_id=str(session.pk),
-                object_repr='Blagajnicki maksimum prekoracen: %.2f / %.2f EUR' % (closing_cash, cash_limit),
-                changes={'closing_cash': str(closing_cash), 'limit': str(cash_limit)},
+                company=company,
+                action="cash_limit_exceeded",
+                model_name="pos.POSSession",
+                object_id=str(session.pk),
+                object_repr="Blagajnicki maksimum prekoracen: %.2f / %.2f EUR" % (closing_cash, cash_limit),
+                changes={"closing_cash": str(closing_cash), "limit": str(cash_limit)},
             )
     except (IntegrityError, DatabaseError):
         pass
@@ -106,6 +114,7 @@ def close_session(session: "POSSession", closing_cash: Decimal = Decimal("0")) -
 
 
 # ── Receipt Creation ────────────────────────────────────────
+
 
 def create_receipt(session: "POSSession", table_number: str = "", note: str = "") -> "POSReceipt":
     """Create a new receipt in session. Returns receipt."""
@@ -124,10 +133,16 @@ def create_receipt(session: "POSSession", table_number: str = "", note: str = ""
     return receipt
 
 
-def add_receipt_item(receipt: "POSReceipt", inventory_item_id: Optional[int], description: str,
-                     quantity: Decimal, unit_price: Decimal,
-                     unit: str = "kom", tax_rate: Decimal = Decimal("25"),
-                     discount_percent: Decimal = Decimal("0")) -> "POSReceiptItem":
+def add_receipt_item(
+    receipt: "POSReceipt",
+    inventory_item_id: Optional[int],
+    description: str,
+    quantity: Decimal,
+    unit_price: Decimal,
+    unit: str = "kom",
+    tax_rate: Decimal = Decimal("25"),
+    discount_percent: Decimal = Decimal("0"),
+) -> "POSReceiptItem":
     """Add item to receipt. Returns created item."""
     from pos.models import POSReceiptItem
 
@@ -157,9 +172,9 @@ def remove_receipt_item(receipt: "POSReceipt", item_id: int) -> bool:
 
 # ── Payment Processing ──────────────────────────────────────
 
+
 @transaction.atomic
-def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
-                    user: "User | None" = None) -> dict:
+def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal, user: "User | None" = None) -> dict:
     """
     Process payment for receipt.
     Creates payment line, updates inventory, attempts fiscalization.
@@ -196,13 +211,17 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
     # Auto-create Otpremnica (non-blocking, Sprint 1B)
     try:
         from pos.services._otpremnica_bridge import pos_receipt_to_otpremnica
+
         pos_receipt_to_otpremnica(receipt)
     except ImportError as e:
-        logger.warning('pos_receipt_to_otpremnica failed: %s', e)
+        logger.warning("pos_receipt_to_otpremnica failed: %s", e)
 
     logger.info(
         "Payment processed: receipt=%d method=%s total=%.2f jir=%s",
-        receipt.receipt_number, method, receipt.total, jir or "none"
+        receipt.receipt_number,
+        method,
+        receipt.total,
+        jir or "none",
     )
 
     return {
@@ -215,9 +234,14 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
 
 
 @transaction.atomic
-def quick_pay(session: "POSSession", items_data: list[dict], method: str = "CASH",
-              amount_paid: Decimal = Decimal("0"),
-              cashier_name: str = "", user: "User | None" = None) -> dict:
+def quick_pay(
+    session: "POSSession",
+    items_data: list[dict],
+    method: str = "CASH",
+    amount_paid: Decimal = Decimal("0"),
+    cashier_name: str = "",
+    user: "User | None" = None,
+) -> dict:
     """
     One-shot: create receipt + add items + pay.
     Used by quick POS and restaurant POS.
@@ -253,9 +277,11 @@ def quick_pay(session: "POSSession", items_data: list[dict], method: str = "CASH
 
 # ── Internal Helpers ────────────────────────────────────────
 
+
 def _deduct_inventory(receipt: "POSReceipt", user: "User | None" = None) -> int:
     """Deduct inventory for all items in receipt. Returns count of movements."""
     from inventory.models import StockMovement
+
     count = 0
 
     for item in receipt.items.select_related("inventory_item").all():
@@ -315,6 +341,7 @@ def _attempt_fiscalization(receipt: "POSReceipt") -> str | None:
     """Attempt fiscal registration. Returns JIR or None."""
     try:
         from fiscal.service import fiscalize_pos_receipt
+
         jir = fiscalize_pos_receipt(receipt)
         return jir
     except ImportError as e:
@@ -323,6 +350,7 @@ def _attempt_fiscalization(receipt: "POSReceipt") -> str | None:
 
 
 # ── Z-Report ────────────────────────────────────────────────
+
 
 def generate_zreport(session: "POSSession") -> dict:
     """Generate Z-report data for a session."""

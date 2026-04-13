@@ -6,12 +6,13 @@ AI vraća: {intent: "bee_log", target_module: "livestock",
            fields: {hive_id: 3, weight_kg: 12, treatment: "oksalna kiselina"},
            confidence: 0.95}
 """
+
 import json
 import logging
 
 from django.conf import settings
 
-logger = logging.getLogger('fenix_input')
+logger = logging.getLogger("fenix_input")
 
 # Kontekst za AI — što sustav podržava
 SYSTEM_PROMPT = """Ti si AI asistent za LIMIT Connect ERP sustav.
@@ -48,13 +49,14 @@ Ulaz: "Rex je dobio cjepivo protiv bjesnoće"
 """
 
 
-def interpret_message(raw_text, channel='voice', user=None, company=None):
+def interpret_message(raw_text, channel="voice", user=None, company=None):
     """
     Šalje tekst Claude API-ju za interpretaciju.
     Vraća dict s parsiranim podacima.
     """
     try:
         import anthropic
+
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
         # Dodaj kontekst korisnika/firme
@@ -63,9 +65,9 @@ def interpret_message(raw_text, channel='voice', user=None, company=None):
             user_context += f"\nFirma: {company.name} (tip: {getattr(company, 'company_type', 'unknown')})"
         if user:
             user_context += f"\nKorisnik: {user.get_full_name() or user.username}"
-        if channel == 'sms':
+        if channel == "sms":
             user_context += "\nKanal: SMS od IoT uređaja — očekuj strukturirane senzorske podatke"
-        elif channel == 'voice':
+        elif channel == "voice":
             user_context += "\nKanal: Glasovni unos — prirodni jezik, moguće greške u transkripciji"
 
         response = client.messages.create(
@@ -77,19 +79,21 @@ def interpret_message(raw_text, channel='voice', user=None, company=None):
 
         result_text = response.content[0].text.strip()
         # Očisti markdown wrapping ako postoji
-        if result_text.startswith('```'):
-            result_text = result_text.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
 
         parsed = json.loads(result_text)
-        logger.info(f'AI interpreted [{channel}]: {raw_text[:50]}... → {parsed.get("intent")} (conf={parsed.get("confidence")})')
+        logger.info(
+            f"AI interpreted [{channel}]: {raw_text[:50]}... → {parsed.get('intent')} (conf={parsed.get('confidence')})"
+        )
         return parsed
 
     except json.JSONDecodeError as e:
-        logger.warning(f'AI returned invalid JSON: {e}')
-        return {'intent': 'parse_error', 'confidence': 0, 'error': str(e)}
+        logger.warning(f"AI returned invalid JSON: {e}")
+        return {"intent": "parse_error", "confidence": 0, "error": str(e)}
     except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f'AI interpretation failed: {e}')
-        return {'intent': 'error', 'confidence': 0, 'error': str(e)}
+        logger.error(f"AI interpretation failed: {e}")
+        return {"intent": "error", "confidence": 0, "error": str(e)}
 
 
 def parse_sms_by_pattern(raw_text, pattern):
@@ -98,6 +102,7 @@ def parse_sms_by_pattern(raw_text, pattern):
     Brže od AI-a, za poznate formate senzora.
     """
     import re
+
     if not pattern:
         return None
     match = re.search(pattern, raw_text)

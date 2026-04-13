@@ -30,35 +30,35 @@ def policy_list(request):
 
     qs = InsurancePolicy.objects.select_related("partner").order_by("-start_date")
     if q:
-        qs = qs.filter(
-            Q(policy_number__icontains=q) |
-            Q(insurer__icontains=q) |
-            Q(partner__name__icontains=q)
-        )
+        qs = qs.filter(Q(policy_number__icontains=q) | Q(insurer__icontains=q) | Q(partner__name__icontains=q))
     if ins_type:
         qs = qs.filter(insurance_type=ins_type)
     if status:
         qs = qs.filter(status=status)
 
     today = timezone.now().date()
-    expiring_soon = qs.filter(
-        status="active", end_date__lte=today + timezone.timedelta(days=30)
-    ).count()
+    expiring_soon = qs.filter(status="active", end_date__lte=today + timezone.timedelta(days=30)).count()
     total_premium = qs.filter(status="active").aggregate(s=Sum("premium"))["s"] or 0
 
     paginator = Paginator(qs, 25)
     page = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "insurance/policy_list.html", {
-        "page_obj": page,
-        "q": q, "ins_type": ins_type, "status": status,
-        "total": qs.count(),
-        "active_count": qs.filter(status="active").count(),
-        "expiring_soon": expiring_soon,
-        "total_premium": total_premium,
-        "type_choices": InsurancePolicy.TYPE_CHOICES,
-        "status_choices": InsurancePolicy.STATUS_CHOICES,
-    })
+    return render(
+        request,
+        "insurance/policy_list.html",
+        {
+            "page_obj": page,
+            "q": q,
+            "ins_type": ins_type,
+            "status": status,
+            "total": qs.count(),
+            "active_count": qs.filter(status="active").count(),
+            "expiring_soon": expiring_soon,
+            "total_premium": total_premium,
+            "type_choices": InsurancePolicy.TYPE_CHOICES,
+            "status_choices": InsurancePolicy.STATUS_CHOICES,
+        },
+    )
 
 
 @login_required
@@ -83,12 +83,16 @@ def policy_create(request):
             return redirect("insurance:list")
         except ObjectDoesNotExist as e:
             messages.error(request, str(e))
-    return render(request, "insurance/policy_form.html", {
-        "partners": Partner.objects.filter(is_active=True).order_by("name"),
-        "type_choices": InsurancePolicy.TYPE_CHOICES,
-        "status_choices": InsurancePolicy.STATUS_CHOICES,
-        "action": "Nova polica",
-    })
+    return render(
+        request,
+        "insurance/policy_form.html",
+        {
+            "partners": Partner.objects.filter(is_active=True).order_by("name"),
+            "type_choices": InsurancePolicy.TYPE_CHOICES,
+            "status_choices": InsurancePolicy.STATUS_CHOICES,
+            "action": "Nova polica",
+        },
+    )
 
 
 @login_required
@@ -112,13 +116,17 @@ def policy_edit(request, pk):
             return redirect("insurance:list")
         except ObjectDoesNotExist as e:
             messages.error(request, str(e))
-    return render(request, "insurance/policy_form.html", {
-        "policy": policy,
-        "partners": Partner.objects.filter(is_active=True).order_by("name"),
-        "type_choices": InsurancePolicy.TYPE_CHOICES,
-        "status_choices": InsurancePolicy.STATUS_CHOICES,
-        "action": "Uredi policu",
-    })
+    return render(
+        request,
+        "insurance/policy_form.html",
+        {
+            "policy": policy,
+            "partners": Partner.objects.filter(is_active=True).order_by("name"),
+            "type_choices": InsurancePolicy.TYPE_CHOICES,
+            "status_choices": InsurancePolicy.STATUS_CHOICES,
+            "action": "Uredi policu",
+        },
+    )
 
 
 @login_required

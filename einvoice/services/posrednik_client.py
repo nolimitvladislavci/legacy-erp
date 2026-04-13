@@ -1,4 +1,5 @@
 """FINA Posrednik Integration — Phase 1 transport backend."""
+
 import logging
 
 import httpx
@@ -62,7 +63,9 @@ class PosrednikClient:
         except httpx.HTTPStatusError as e:
             error_body = e.response.text
             logger.error(f"Posrednik submission failed: {e.response.status_code} - {error_body}")
-            message.transition_to(MessageStatus.SEND_FAILED, detail=f"HTTP {e.response.status_code}: {error_body[:500]}")
+            message.transition_to(
+                MessageStatus.SEND_FAILED, detail=f"HTTP {e.response.status_code}: {error_body[:500]}"
+            )
             raise PosrednikError("SUBMISSION_FAILED", f"HTTP {e.response.status_code}: {error_body[:200]}")
 
         except httpx.RequestError as e:

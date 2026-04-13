@@ -79,7 +79,9 @@ class SmartMailboxViewSet(viewsets.ModelViewSet):
     def approve(self, request, pk=None):
         inbound = self.get_object()
         if inbound.status in ("BOOKED", "REJECTED"):
-            return Response({"error": f"Racun je vec {inbound.get_status_display()}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": f"Racun je vec {inbound.get_status_display()}"}, status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = InboundApproveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         konto = serializer.validated_data["konto"]
@@ -99,6 +101,7 @@ class SmartMailboxViewSet(viewsets.ModelViewSet):
 
         try:
             from einvoice.services.archive_service import ArchiveService
+
             archive_svc = ArchiveService()
             archive_svc.archive_message(inbound.as4_message)
         except ImportError as e:
@@ -123,6 +126,7 @@ def verify_archive(request, sha256_hash):
     if len(sha256_hash) != 64:
         return Response({"error": "SHA-256 hash mora imati 64 znaka"}, status=status.HTTP_400_BAD_REQUEST)
     from einvoice.services.archive_service import ArchiveService
+
     archive_svc = ArchiveService()
     result = archive_svc.verify_document(sha256_hash)
     return Response(result)

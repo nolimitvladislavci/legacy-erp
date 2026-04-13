@@ -1,5 +1,6 @@
 """Legal document archive with SHA-256 integrity verification.
 Croatian law requires 11 years of invoice retention."""
+
 import hashlib
 import uuid
 
@@ -9,14 +10,17 @@ from django.utils import timezone
 
 class DocumentArchive(models.Model):
     """Immutable archive record for e-invoices. Once created, NEVER modified."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="document_archives",
     )
     as4_message = models.OneToOneField(
-        "einvoice.AS4Message", on_delete=models.CASCADE,
+        "einvoice.AS4Message",
+        on_delete=models.CASCADE,
         related_name="archive",
     )
 
@@ -78,5 +82,6 @@ class DocumentArchive(models.Model):
     @classmethod
     def calculate_retention_date(cls, invoice_date=None):
         from datetime import date
+
         base = invoice_date or date.today()
         return date(base.year + 11, 12, 31)

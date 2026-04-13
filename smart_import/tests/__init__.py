@@ -3,6 +3,7 @@ Comprehensive tests for Smart Import (AIP) module.
 Covers: models, services, tasks, views — full functionality + logic + edge cases.
 Run: python manage.py test smart_import --verbosity=2
 """
+
 import json
 import os
 import tempfile
@@ -35,6 +36,7 @@ from smart_import.models import (
 # HELPERS
 # ============================================================================
 
+
 def _make_company(name="Test Co", oib="11111111111"):
     return Company.objects.create(name=name, oib=oib)
 
@@ -44,9 +46,12 @@ def _make_user(username="testuser", password="testpass123"):
 
 
 def _make_tax_rate(rate=25):
-    return TaxRate.objects.get_or_create(rate=Decimal(str(rate)), defaults={
-        "name": "PDV {}%".format(rate),
-    })[0]
+    return TaxRate.objects.get_or_create(
+        rate=Decimal(str(rate)),
+        defaults={
+            "name": "PDV {}%".format(rate),
+        },
+    )[0]
 
 
 def _make_inventory_item(company, name="Test Item", purchase_price="10.00", tax_rate=None):
@@ -139,6 +144,7 @@ def _make_generic_xml():
 # MODEL TESTS
 # ============================================================================
 
+
 class ImportBatchModelTest(TestCase):
     def setUp(self):
         self.company = _make_company()
@@ -189,9 +195,11 @@ class ImportBatchItemModelTest(TestCase):
 
     def test_item_creation(self):
         item = ImportBatchItem.objects.create(
-            batch=self.batch, row_index=0,
+            batch=self.batch,
+            row_index=0,
             vendor_name="Coca Cola 0.5L",
-            quantity=Decimal("10"), purchase_price=Decimal("1.5000"),
+            quantity=Decimal("10"),
+            purchase_price=Decimal("1.5000"),
         )
         self.assertEqual(item.vendor_name, "Coca Cola 0.5L")
         self.assertEqual(item.quantity, Decimal("10"))
@@ -200,8 +208,10 @@ class ImportBatchItemModelTest(TestCase):
 
     def test_item_str(self):
         item = ImportBatchItem.objects.create(
-            batch=self.batch, row_index=0,
-            vendor_name="Test", quantity=Decimal("5"),
+            batch=self.batch,
+            row_index=0,
+            vendor_name="Test",
+            quantity=Decimal("5"),
         )
         self.assertIn("Test", str(item))
         self.assertIn("5", str(item))
@@ -242,6 +252,7 @@ class VendorItemMappingModelTest(TestCase):
             inventory_item=self.inv_item,
         )
         from django.db import IntegrityError
+
         with self.assertRaises(IntegrityError):
             VendorItemMapping.objects.create(
                 company=self.company,
@@ -253,13 +264,17 @@ class VendorItemMappingModelTest(TestCase):
         p1 = _make_partner(self.company, name="Supplier A")
         p2 = _make_partner(self.company, name="Supplier B")
         VendorItemMapping.objects.create(
-            company=self.company, partner=p1,
-            vendor_item_name="ITEM_X", inventory_item=self.inv_item,
+            company=self.company,
+            partner=p1,
+            vendor_item_name="ITEM_X",
+            inventory_item=self.inv_item,
         )
         # Same name, different partner — should work
         m2 = VendorItemMapping.objects.create(
-            company=self.company, partner=p2,
-            vendor_item_name="ITEM_X", inventory_item=self.inv_item,
+            company=self.company,
+            partner=p2,
+            vendor_item_name="ITEM_X",
+            inventory_item=self.inv_item,
         )
         self.assertIsNotNone(m2.pk)
 
@@ -283,12 +298,18 @@ class GeminiUsageLogModelTest(TestCase):
 
     def test_daily_summary_with_data(self):
         GeminiUsageLog.objects.create(
-            caller="test", input_tokens=100, output_tokens=50,
-            cost_eur=Decimal("0.001"), success=True,
+            caller="test",
+            input_tokens=100,
+            output_tokens=50,
+            cost_eur=Decimal("0.001"),
+            success=True,
         )
         GeminiUsageLog.objects.create(
-            caller="test", input_tokens=200, output_tokens=100,
-            cost_eur=Decimal("0.002"), success=False,
+            caller="test",
+            input_tokens=200,
+            output_tokens=100,
+            cost_eur=Decimal("0.002"),
+            success=False,
         )
         summary = GeminiUsageLog.daily_summary()
         self.assertEqual(summary["total_calls"], 2)
@@ -315,12 +336,15 @@ class CompanyMailboxModelTest(TestCase):
 
     def test_mailbox_email_unique(self):
         CompanyMailbox.objects.create(
-            company=self.company, email_address="unique@test.com",
+            company=self.company,
+            email_address="unique@test.com",
         )
         from django.db import IntegrityError
+
         with self.assertRaises(IntegrityError):
             CompanyMailbox.objects.create(
-                company=self.company, email_address="unique@test.com",
+                company=self.company,
+                email_address="unique@test.com",
             )
 
 
@@ -331,7 +355,8 @@ class ProblemReportModelTest(TestCase):
 
     def test_report_creation(self):
         r = ProblemReport.objects.create(
-            batch=self.batch, company=self.company,
+            batch=self.batch,
+            company=self.company,
             description="Stavke nisu prepoznate",
         )
         self.assertFalse(r.resolved)
@@ -339,7 +364,9 @@ class ProblemReportModelTest(TestCase):
 
     def test_report_cascade_on_batch_delete(self):
         ProblemReport.objects.create(
-            batch=self.batch, company=self.company, description="test",
+            batch=self.batch,
+            company=self.company,
+            description="test",
         )
         self.batch.delete()
         self.assertEqual(ProblemReport.objects.count(), 0)
@@ -360,11 +387,13 @@ class FailedImportModelTest(TestCase):
 # SERVICES TESTS
 # ============================================================================
 
+
 class ParseXmlUblTest(TestCase):
     """Test XML parsing with UBL e-Racun format."""
 
     def test_parse_ubl_invoice(self):
         from smart_import.services import parse_xml
+
         xml_content = _make_xml_ubl()
         with tempfile.NamedTemporaryFile(suffix=".xml", delete=False, mode="w", encoding="utf-8") as f:
             f.write(xml_content)
@@ -385,6 +414,7 @@ class ParseXmlUblTest(TestCase):
 
     def test_parse_generic_xml(self):
         from smart_import.services import parse_xml
+
         xml_content = _make_generic_xml()
         with tempfile.NamedTemporaryFile(suffix=".xml", delete=False, mode="w", encoding="utf-8") as f:
             f.write(xml_content)
@@ -399,6 +429,7 @@ class ParseXmlUblTest(TestCase):
 
     def test_parse_empty_xml(self):
         from smart_import.services import parse_xml
+
         with tempfile.NamedTemporaryFile(suffix=".xml", delete=False, mode="w") as f:
             f.write('<?xml version="1.0"?><empty/>')
             f.flush()
@@ -408,6 +439,7 @@ class ParseXmlUblTest(TestCase):
 
     def test_parse_xml_missing_name_skips_row(self):
         from smart_import.services import parse_xml
+
         xml = """<?xml version="1.0"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -438,39 +470,48 @@ class ToDecimalTest(TestCase):
 
     def test_normal_number(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("15.50"), "15.50")
 
     def test_comma_decimal(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("1.234,56"), "1234.56")
 
     def test_none_returns_default(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal(None, 1), "1")
 
     def test_garbage_returns_default(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("abc", 0), "0")
 
     def test_negative_number(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("-5.00"), "-5.00")
 
     def test_currency_symbol_stripped(self):
         from smart_import.services import _to_decimal
+
         result = _to_decimal("€15.00")
         self.assertEqual(result, "15.00")
 
     def test_integer(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal(42), "42")
 
     def test_decimal_input(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal(Decimal("3.14")), "3.14")
 
     def test_empty_string(self):
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("", 0), "0")
 
 
@@ -479,6 +520,7 @@ class ParseJsonRowsTest(TestCase):
 
     def test_valid_json_array(self):
         from smart_import.services import _parse_json_rows
+
         raw = '[{"vendor_name": "Mlijeko", "quantity": 10, "purchase_price": 1.20}]'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
@@ -486,6 +528,7 @@ class ParseJsonRowsTest(TestCase):
 
     def test_json_with_markdown_fences(self):
         from smart_import.services import _parse_json_rows
+
         raw = '```json\n[{"vendor_name": "Kruh", "quantity": 5, "purchase_price": 0.80}]\n```'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
@@ -493,20 +536,24 @@ class ParseJsonRowsTest(TestCase):
 
     def test_json_with_extra_text(self):
         from smart_import.services import _parse_json_rows
+
         raw = 'Here are the items:\n[{"vendor_name": "A", "quantity": 1, "purchase_price": 2}]\nDone.'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
 
     def test_empty_json(self):
         from smart_import.services import _parse_json_rows
+
         self.assertEqual(_parse_json_rows("[]"), [])
 
     def test_invalid_json(self):
         from smart_import.services import _parse_json_rows
+
         self.assertEqual(_parse_json_rows("not json at all"), [])
 
     def test_skips_items_without_name(self):
         from smart_import.services import _parse_json_rows
+
         raw = '[{"vendor_name": "", "quantity": 1}, {"vendor_name": "Real", "quantity": 2}]'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
@@ -515,6 +562,7 @@ class ParseJsonRowsTest(TestCase):
     def test_alternative_name_field(self):
         """AI sometimes returns 'name' instead of 'vendor_name'."""
         from smart_import.services import _parse_json_rows
+
         raw = '[{"name": "Alt Name", "quantity": 1, "purchase_price": 5}]'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
@@ -523,6 +571,7 @@ class ParseJsonRowsTest(TestCase):
     def test_alternative_price_field(self):
         """AI sometimes returns 'price' instead of 'purchase_price'."""
         from smart_import.services import _parse_json_rows
+
         raw = '[{"vendor_name": "Item", "quantity": 1, "price": 9.99}]'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
@@ -530,12 +579,14 @@ class ParseJsonRowsTest(TestCase):
 
     def test_non_dict_items_skipped(self):
         from smart_import.services import _parse_json_rows
+
         raw = '[{"vendor_name": "Good"}, "bad", 123, null]'
         rows = _parse_json_rows(raw)
         self.assertEqual(len(rows), 1)
 
     def test_not_a_list(self):
         from smart_import.services import _parse_json_rows
+
         raw = '{"vendor_name": "single item"}'
         rows = _parse_json_rows(raw)
         self.assertEqual(rows, [])
@@ -554,16 +605,20 @@ class MatchItemsTest(TestCase):
     def test_exact_mapping_match(self):
         """VendorItemMapping with score 1.0 takes priority."""
         from smart_import.services import match_items
+
         supplier = _make_partner(self.company)
         VendorItemMapping.objects.create(
-            company=self.company, partner=supplier,
+            company=self.company,
+            partner=supplier,
             vendor_item_name="COCA COLA PET 0,5L",
             inventory_item=self.coca_cola,
         )
         batch = ImportBatch.objects.create(company=self.company, supplier=supplier)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0,
-            vendor_name="COCA COLA PET 0,5L", quantity=Decimal("10"),
+            batch=batch,
+            row_index=0,
+            vendor_name="COCA COLA PET 0,5L",
+            quantity=Decimal("10"),
         )
         match_items(batch)
         item = batch.items.first()
@@ -572,10 +627,13 @@ class MatchItemsTest(TestCase):
 
     def test_fuzzy_match_high_similarity(self):
         from smart_import.services import match_items
+
         batch = ImportBatch.objects.create(company=self.company)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0,
-            vendor_name="Coca-Cola 0.5 L", quantity=Decimal("10"),
+            batch=batch,
+            row_index=0,
+            vendor_name="Coca-Cola 0.5 L",
+            quantity=Decimal("10"),
         )
         match_items(batch)
         item = batch.items.first()
@@ -584,10 +642,13 @@ class MatchItemsTest(TestCase):
 
     def test_fuzzy_match_low_similarity_returns_none(self):
         from smart_import.services import match_items
+
         batch = ImportBatch.objects.create(company=self.company)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0,
-            vendor_name="XYZZY COMPLETELY DIFFERENT THING", quantity=Decimal("1"),
+            batch=batch,
+            row_index=0,
+            vendor_name="XYZZY COMPLETELY DIFFERENT THING",
+            quantity=Decimal("1"),
         )
         match_items(batch)
         item = batch.items.first()
@@ -599,6 +660,7 @@ class MatchItemsTest(TestCase):
 
     def test_multiple_items_matched(self):
         from smart_import.services import match_items
+
         batch = ImportBatch.objects.create(company=self.company)
         ImportBatchItem.objects.create(batch=batch, row_index=0, vendor_name="Coca-Cola 0.5L")
         ImportBatchItem.objects.create(batch=batch, row_index=1, vendor_name="Fanta 1L")
@@ -610,6 +672,7 @@ class MatchItemsTest(TestCase):
 
     def test_mapping_case_insensitive(self):
         from smart_import.services import match_items
+
         VendorItemMapping.objects.create(
             company=self.company,
             vendor_item_name="fanta 1l",
@@ -625,6 +688,7 @@ class MatchItemsTest(TestCase):
     def test_no_inventory_items(self):
         """Company with no inventory items — nothing crashes."""
         from smart_import.services import match_items
+
         empty_co = _make_company("Empty Co", "22222222222")
         batch = ImportBatch.objects.create(company=empty_co)
         ImportBatchItem.objects.create(batch=batch, row_index=0, vendor_name="Something")
@@ -640,6 +704,7 @@ class ImageEncodingTest(TestCase):
         from PIL import Image as PILImage
 
         from smart_import.services import _encode_image
+
         # Create a small test image
         img = PILImage.new("RGB", (100, 100), color="red")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
@@ -651,6 +716,7 @@ class ImageEncodingTest(TestCase):
         self.assertEqual(media_type, "image/jpeg")
         # Verify it's valid base64
         import base64
+
         decoded = base64.standard_b64decode(b64)
         self.assertGreater(len(decoded), 0)
 
@@ -658,6 +724,7 @@ class ImageEncodingTest(TestCase):
         from PIL import Image as PILImage
 
         from smart_import.services import _encode_image
+
         img = PILImage.new("RGB", (100, 100), color="blue")
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             img.save(f, format="PNG")
@@ -671,6 +738,7 @@ class ImageEncodingTest(TestCase):
         from PIL import Image as PILImage
 
         from smart_import.services import _encode_image
+
         img = PILImage.new("RGBA", (100, 100), color=(255, 0, 0, 128))
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             img.save(f, format="PNG")
@@ -683,6 +751,7 @@ class ImageEncodingTest(TestCase):
         from PIL import Image as PILImage
 
         from smart_import.services import _encode_image_enhanced
+
         img = PILImage.new("RGB", (200, 200), color="white")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
             img.save(f, format="JPEG")
@@ -694,6 +763,7 @@ class ImageEncodingTest(TestCase):
 
     def test_encode_nonexistent_file(self):
         from smart_import.services import _encode_image
+
         b64, mt = _encode_image("/nonexistent/path/image.jpg")
         self.assertIsNone(b64)
         self.assertIsNone(mt)
@@ -703,6 +773,7 @@ class ImageEncodingTest(TestCase):
         from PIL import Image as PILImage
 
         from smart_import.services import _encode_image
+
         img = PILImage.new("RGB", (4000, 3000), color="green")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
             img.save(f, format="JPEG")
@@ -712,6 +783,7 @@ class ImageEncodingTest(TestCase):
         self.assertIsNotNone(b64)
         # Decode and check size
         import base64
+
         decoded = base64.standard_b64decode(b64)
         result_img = PILImage.open(BytesIO(decoded))
         self.assertLessEqual(max(result_img.size), 2048)
@@ -722,9 +794,11 @@ class PdfTextExtractionTest(TestCase):
 
     def test_extract_empty_pdf(self):
         from smart_import.services import _extract_pdf_text
+
         # Create a minimal valid PDF (no text)
         try:
             from reportlab.pdfgen import canvas
+
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
                 c = canvas.Canvas(f.name)
                 c.drawString(72, 700, "")
@@ -738,8 +812,10 @@ class PdfTextExtractionTest(TestCase):
 
     def test_extract_pdf_with_text(self):
         from smart_import.services import _extract_pdf_text
+
         try:
             from reportlab.pdfgen import canvas
+
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
                 c = canvas.Canvas(f.name)
                 c.drawString(72, 700, "RACUN BR: 2025-001")
@@ -757,11 +833,13 @@ class PdfTextExtractionTest(TestCase):
 # TASK TESTS
 # ============================================================================
 
+
 class LockingTest(TestCase):
     """Test Redis-based locking mechanism."""
 
     def test_acquire_and_release(self):
         from smart_import.tasks import _acquire_lock, _release_lock
+
         self.assertTrue(_acquire_lock(999))
         # Second acquire should fail
         self.assertFalse(_acquire_lock(999))
@@ -772,6 +850,7 @@ class LockingTest(TestCase):
 
     def test_release_nonexistent_lock(self):
         from smart_import.tasks import _release_lock
+
         # Should not raise
         _release_lock(88888)
 
@@ -792,6 +871,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="xml")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -807,6 +887,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="pdf")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -821,6 +902,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="image")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -837,6 +919,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="image")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -853,6 +936,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="image")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -861,6 +945,7 @@ class ProcessImportBatchTaskTest(TestCase):
 
     def test_nonexistent_batch(self):
         from smart_import.tasks import process_import_batch
+
         # Should not raise
         process_import_batch(999999)
 
@@ -870,6 +955,7 @@ class ProcessImportBatchTaskTest(TestCase):
         statuses_seen = []
 
         original_save = ImportBatch.save
+
         def tracking_save(self_batch, *args, **kwargs):
             original_save(self_batch, *args, **kwargs)
             statuses_seen.append(self_batch.status)
@@ -879,8 +965,9 @@ class ProcessImportBatchTaskTest(TestCase):
         ]
         batch = _make_batch(self.company, file_type="pdf")
 
-        with patch.object(ImportBatch, 'save', tracking_save):
+        with patch.object(ImportBatch, "save", tracking_save):
             from smart_import.tasks import process_import_batch
+
             process_import_batch(batch.pk)
 
         self.assertIn("processing", statuses_seen)
@@ -895,6 +982,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertEqual(batch.retry_count, 0)
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -912,6 +1000,7 @@ class ProcessImportBatchTaskTest(TestCase):
         ]
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         batch.refresh_from_db()
@@ -925,6 +1014,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch = _make_batch(self.company, file_type="pdf")
 
         from smart_import.tasks import process_import_batch
+
         process_import_batch(batch.pk)
 
         # Should not have been processed
@@ -939,7 +1029,8 @@ class DetectStaleBatchesTest(TestCase):
 
     def test_stale_batch_marked_error(self):
         batch = ImportBatch.objects.create(
-            company=self.company, status="processing",
+            company=self.company,
+            status="processing",
         )
         # Make it old
         ImportBatch.objects.filter(pk=batch.pk).update(
@@ -947,6 +1038,7 @@ class DetectStaleBatchesTest(TestCase):
         )
 
         from smart_import.tasks import detect_stale_batches
+
         result = detect_stale_batches()
 
         batch.refresh_from_db()
@@ -956,11 +1048,13 @@ class DetectStaleBatchesTest(TestCase):
 
     def test_fresh_batch_not_touched(self):
         batch = ImportBatch.objects.create(
-            company=self.company, status="processing",
+            company=self.company,
+            status="processing",
         )
         # Created just now — should NOT be stale
 
         from smart_import.tasks import detect_stale_batches
+
         result = detect_stale_batches()
 
         batch.refresh_from_db()
@@ -969,13 +1063,15 @@ class DetectStaleBatchesTest(TestCase):
 
     def test_ready_batch_not_touched(self):
         batch = ImportBatch.objects.create(
-            company=self.company, status="ready",
+            company=self.company,
+            status="ready",
         )
         ImportBatch.objects.filter(pk=batch.pk).update(
             created_at=timezone.now() - timedelta(minutes=60),
         )
 
         from smart_import.tasks import detect_stale_batches
+
         detect_stale_batches()
 
         batch.refresh_from_db()
@@ -983,13 +1079,15 @@ class DetectStaleBatchesTest(TestCase):
 
     def test_pending_stale_also_caught(self):
         batch = ImportBatch.objects.create(
-            company=self.company, status="pending",
+            company=self.company,
+            status="pending",
         )
         ImportBatch.objects.filter(pk=batch.pk).update(
             created_at=timezone.now() - timedelta(minutes=10),
         )
 
         from smart_import.tasks import detect_stale_batches
+
         detect_stale_batches()
 
         batch.refresh_from_db()
@@ -1018,6 +1116,7 @@ class MultipageProcessTest(TestCase):
 
         # Page 1 has item A (no price), Page 2 has item A (with price) + item B
         call_count = [0]
+
         def side_effect(path):
             call_count[0] += 1
             if call_count[0] == 1:
@@ -1029,10 +1128,12 @@ class MultipageProcessTest(TestCase):
                     {"vendor_name": "Item A", "quantity": "1", "purchase_price": "5.00"},
                     {"vendor_name": "Item B", "quantity": "2", "purchase_price": "3.00"},
                 ]
+
         mock_parse_image.side_effect = side_effect
 
         batch = ImportBatch.objects.create(
-            company=self.company, file_type="multipage",
+            company=self.company,
+            file_type="multipage",
             raw_json={"page_paths": paths},
         )
         batch.file.save("test.jpg", ContentFile(b"dummy"), save=True)
@@ -1056,6 +1157,7 @@ class MultipageProcessTest(TestCase):
 # VIEW TESTS
 # ============================================================================
 
+
 class UploadViewTest(TestCase):
     def setUp(self):
         self.company = _make_company()
@@ -1064,14 +1166,17 @@ class UploadViewTest(TestCase):
         from django.contrib.auth.models import User
 
         from core.company_utils import get_user_company
+
         # Create UserProfile or UserRole linking user to company
         try:
             from core.models import UserProfile
+
             UserProfile.objects.get_or_create(user=self.user, defaults={"company": self.company})
         except (ImportError, Exception):
             pass
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except (ImportError, Exception):
             pass
@@ -1116,14 +1221,17 @@ class BatchStatusApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
 
     def test_status_api_returns_json(self):
         batch = ImportBatch.objects.create(
-            company=self.company, status="ready",
-            status_message="Gotovo!", file_type="pdf",
+            company=self.company,
+            status="ready",
+            status_message="Gotovo!",
+            file_type="pdf",
         )
         batch.file.save("test.pdf", ContentFile(b"x"), save=True)
         ImportBatchItem.objects.create(batch=batch, row_index=0, vendor_name="Item")
@@ -1143,6 +1251,7 @@ class RetryBatchApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1181,6 +1290,7 @@ class ReportProblemApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1205,6 +1315,7 @@ class SaveMappingApiTest(TestCase):
         self.inv_item = _make_inventory_item(self.company, "Mapped Item", tax_rate=self.tax)
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1212,24 +1323,31 @@ class SaveMappingApiTest(TestCase):
     def test_save_mapping(self):
         batch = _make_batch(self.company, status="ready")
         bi = ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="External Name",
+            batch=batch,
+            row_index=0,
+            vendor_name="External Name",
         )
 
         self.client.login(username="testuser", password="testpass123")
         url = "/hr/smart-import/{}/save-mapping/".format(batch.pk)
-        response = self.client.post(url, {
-            "batch_item_id": bi.pk,
-            "inventory_item_id": self.inv_item.pk,
-        })
+        response = self.client.post(
+            url,
+            {
+                "batch_item_id": bi.pk,
+                "inventory_item_id": self.inv_item.pk,
+            },
+        )
         if response.status_code == 200:
             bi.refresh_from_db()
             self.assertEqual(bi.matched_item, self.inv_item)
             self.assertEqual(bi.match_score, 1.0)
             self.assertTrue(bi.is_manual)
             # VendorItemMapping should exist
-            self.assertTrue(VendorItemMapping.objects.filter(
-                vendor_item_name="External Name",
-            ).exists())
+            self.assertTrue(
+                VendorItemMapping.objects.filter(
+                    vendor_item_name="External Name",
+                ).exists()
+            )
 
 
 class UpdateItemApiTest(TestCase):
@@ -1238,6 +1356,7 @@ class UpdateItemApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1245,18 +1364,24 @@ class UpdateItemApiTest(TestCase):
     def test_update_item_fields(self):
         batch = _make_batch(self.company, status="ready")
         bi = ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Old",
-            quantity=Decimal("1"), purchase_price=Decimal("10"),
+            batch=batch,
+            row_index=0,
+            vendor_name="Old",
+            quantity=Decimal("1"),
+            purchase_price=Decimal("10"),
         )
 
         self.client.login(username="testuser", password="testpass123")
         url = "/hr/smart-import/{}/update-item/".format(batch.pk)
-        response = self.client.post(url, {
-            "item_id": bi.pk,
-            "vendor_name": "New Name",
-            "quantity": "5",
-            "purchase_price": "20.50",
-        })
+        response = self.client.post(
+            url,
+            {
+                "item_id": bi.pk,
+                "vendor_name": "New Name",
+                "quantity": "5",
+                "purchase_price": "20.50",
+            },
+        )
         if response.status_code == 200:
             bi.refresh_from_db()
             self.assertEqual(bi.vendor_name, "New Name")
@@ -1270,6 +1395,7 @@ class DeleteItemApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1277,7 +1403,9 @@ class DeleteItemApiTest(TestCase):
     def test_delete_item(self):
         batch = _make_batch(self.company, status="ready")
         bi = ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Delete Me",
+            batch=batch,
+            row_index=0,
+            vendor_name="Delete Me",
         )
 
         self.client.login(username="testuser", password="testpass123")
@@ -1293,6 +1421,7 @@ class AddItemApiTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1301,11 +1430,14 @@ class AddItemApiTest(TestCase):
         batch = _make_batch(self.company, status="ready")
         self.client.login(username="testuser", password="testpass123")
         url = "/hr/smart-import/{}/add-item/".format(batch.pk)
-        response = self.client.post(url, {
-            "vendor_name": "New Item",
-            "quantity": "3",
-            "purchase_price": "7.50",
-        })
+        response = self.client.post(
+            url,
+            {
+                "vendor_name": "New Item",
+                "quantity": "3",
+                "purchase_price": "7.50",
+            },
+        )
         if response.status_code == 200:
             self.assertEqual(batch.items.count(), 1)
             item = batch.items.first()
@@ -1340,6 +1472,7 @@ class ConfirmViewTest(TestCase):
         self.supplier = _make_partner(self.company)
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1347,9 +1480,13 @@ class ConfirmViewTest(TestCase):
     def test_confirm_creates_goods_receipt(self):
         batch = _make_batch(self.company, status="ready", supplier=self.supplier)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Item",
-            quantity=Decimal("10"), purchase_price=Decimal("5.00"),
-            matched_item=self.inv_item, match_score=0.9,
+            batch=batch,
+            row_index=0,
+            vendor_name="Item",
+            quantity=Decimal("10"),
+            purchase_price=Decimal("5.00"),
+            matched_item=self.inv_item,
+            match_score=0.9,
         )
 
         self.client.login(username="testuser", password="testpass123")
@@ -1369,7 +1506,9 @@ class ConfirmViewTest(TestCase):
     def test_confirm_no_matched_items_shows_error(self):
         batch = _make_batch(self.company, status="ready")
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Unmatched",
+            batch=batch,
+            row_index=0,
+            vendor_name="Unmatched",
             matched_item=None,
         )
 
@@ -1384,9 +1523,13 @@ class ConfirmViewTest(TestCase):
     def test_confirm_saves_manual_mappings(self):
         batch = _make_batch(self.company, status="ready", supplier=self.supplier)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Manual Map Item",
-            quantity=Decimal("1"), purchase_price=Decimal("1"),
-            matched_item=self.inv_item, match_score=1.0,
+            batch=batch,
+            row_index=0,
+            vendor_name="Manual Map Item",
+            quantity=Decimal("1"),
+            purchase_price=Decimal("1"),
+            matched_item=self.inv_item,
+            match_score=1.0,
             is_manual=True,
         )
 
@@ -1396,17 +1539,23 @@ class ConfirmViewTest(TestCase):
 
         batch.refresh_from_db()
         if batch.status == "confirmed":
-            self.assertTrue(VendorItemMapping.objects.filter(
-                vendor_item_name="Manual Map Item",
-                inventory_item=self.inv_item,
-            ).exists())
+            self.assertTrue(
+                VendorItemMapping.objects.filter(
+                    vendor_item_name="Manual Map Item",
+                    inventory_item=self.inv_item,
+                ).exists()
+            )
 
     def test_confirm_with_margin_override(self):
         batch = _make_batch(self.company, status="ready", supplier=self.supplier)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Margin Item",
-            quantity=Decimal("5"), purchase_price=Decimal("10"),
-            matched_item=self.inv_item, match_score=0.9,
+            batch=batch,
+            row_index=0,
+            vendor_name="Margin Item",
+            quantity=Decimal("5"),
+            purchase_price=Decimal("10"),
+            matched_item=self.inv_item,
+            match_score=0.9,
             margin_override=Decimal("50.00"),
         )
 
@@ -1427,6 +1576,7 @@ class UpdateSupplierApiTest(TestCase):
         self.supplier = _make_partner(self.company, name="New Supplier")
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1502,6 +1652,7 @@ class ManualEntryViewTest(TestCase):
         self.user = _make_user()
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1517,14 +1668,17 @@ class ManualEntryViewTest(TestCase):
         batch = _make_batch(self.company, status="error")
         self.client.login(username="testuser", password="testpass123")
         url = "/hr/smart-import/{}/manual-entry/".format(batch.pk)
-        response = self.client.post(url, {
-            "doc_number": "TEST-001",
-            "partner_name": "Dobavljac Test",
-            "amount": "150.00",
-            "doc_date": "2025-12-01",
-            "source_type": "invoice_in",
-            "description": "Testni rucni unos",
-        })
+        response = self.client.post(
+            url,
+            {
+                "doc_number": "TEST-001",
+                "partner_name": "Dobavljac Test",
+                "amount": "150.00",
+                "doc_date": "2025-12-01",
+                "source_type": "invoice_in",
+                "description": "Testni rucni unos",
+            },
+        )
         if response.status_code == 302:
             batch.refresh_from_db()
             self.assertEqual(batch.status, "confirmed")
@@ -1535,12 +1689,14 @@ class ManualEntryViewTest(TestCase):
 # EMAIL RAMPA TESTS
 # ============================================================================
 
+
 class EmailRampaSkipLogicTest(TestCase):
     """Test the filename/size/inline filtering logic in fetch_invoices_from_email."""
 
     def test_skip_filename_regex(self):
         """Test the SKIP_FILENAME_RE regex used in fetch_invoices_from_email."""
         import re
+
         SKIP_FILENAME_RE = re.compile(
             r"^(icon|logo|badge|warning|banner|signature|footer|header|spacer|pixel|tracking)[_\-.]",
             re.IGNORECASE,
@@ -1565,9 +1721,14 @@ class EmailRampaSkipLogicTest(TestCase):
     def test_allowed_extensions(self):
         """Verify all expected extensions are in ALLOWED_EXTS."""
         ALLOWED_EXTS = {
-            ".xml": "xml", ".pdf": "pdf",
-            ".jpg": "image", ".jpeg": "image", ".png": "image",
-            ".webp": "image", ".heic": "image", ".heif": "image",
+            ".xml": "xml",
+            ".pdf": "pdf",
+            ".jpg": "image",
+            ".jpeg": "image",
+            ".png": "image",
+            ".webp": "image",
+            ".heic": "image",
+            ".heif": "image",
         }
         self.assertIn(".xml", ALLOWED_EXTS)
         self.assertIn(".pdf", ALLOWED_EXTS)
@@ -1583,6 +1744,7 @@ class EmailRampaSkipLogicTest(TestCase):
 # INTEGRATION TESTS — End-to-end flow
 # ============================================================================
 
+
 class EndToEndXmlFlowTest(TestCase):
     """Full flow: upload XML → process → stage → confirm → GoodsReceipt."""
 
@@ -1597,6 +1759,7 @@ class EndToEndXmlFlowTest(TestCase):
         self.water = _make_inventory_item(self.company, "Mineralna voda Jana 0.5L", "0.80", self.tax)
         try:
             from companies.models import UserRole
+
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
         except DatabaseError:
             pass
@@ -1616,8 +1779,10 @@ class EndToEndXmlFlowTest(TestCase):
 
         # 2. Create batch + items
         batch = ImportBatch.objects.create(
-            company=self.company, supplier=self.supplier,
-            file_type="xml", status="ready",
+            company=self.company,
+            supplier=self.supplier,
+            file_type="xml",
+            status="ready",
         )
         batch.file.save("test.xml", ContentFile(xml_content.encode()), save=True)
         batch.raw_json = rows
@@ -1625,7 +1790,8 @@ class EndToEndXmlFlowTest(TestCase):
 
         for i, row in enumerate(rows):
             ImportBatchItem.objects.create(
-                batch=batch, row_index=i,
+                batch=batch,
+                row_index=i,
                 vendor_name=row["vendor_name"],
                 quantity=row["quantity"],
                 purchase_price=row["purchase_price"],
@@ -1645,8 +1811,10 @@ class EndToEndXmlFlowTest(TestCase):
 
         # 4. Simulate confirm
         receipt = GoodsReceipt.objects.create(
-            company=self.company, supplier=self.supplier,
-            date=timezone.now().date(), status="draft",
+            company=self.company,
+            supplier=self.supplier,
+            date=timezone.now().date(),
+            status="draft",
             created_by=self.user,
         )
         for bi in matched:
@@ -1680,38 +1848,47 @@ class ControlAmountTest(TestCase):
 
     def test_control_amount_diff_calculation(self):
         batch = ImportBatch.objects.create(
-            company=self.company, file_type="pdf", status="ready",
+            company=self.company,
+            file_type="pdf",
+            status="ready",
             raw_json={"control_amount": "100.00"},
         )
         # Items sum to 95.00 (diff = -5.00)
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="A",
-            quantity=Decimal("10"), purchase_price=Decimal("5.00"),
+            batch=batch,
+            row_index=0,
+            vendor_name="A",
+            quantity=Decimal("10"),
+            purchase_price=Decimal("5.00"),
         )
         ImportBatchItem.objects.create(
-            batch=batch, row_index=1, vendor_name="B",
-            quantity=Decimal("9"), purchase_price=Decimal("5.00"),
+            batch=batch,
+            row_index=1,
+            vendor_name="B",
+            quantity=Decimal("9"),
+            purchase_price=Decimal("5.00"),
         )
 
-        items_total = sum(
-            (bi.purchase_price * bi.quantity) for bi in batch.items.all()
-        )
+        items_total = sum((bi.purchase_price * bi.quantity) for bi in batch.items.all())
         control_amount = Decimal("100.00")
         diff = items_total - control_amount
         self.assertEqual(diff, Decimal("-5.00"))
 
     def test_control_amount_exact_match(self):
         batch = ImportBatch.objects.create(
-            company=self.company, file_type="xml", status="ready",
+            company=self.company,
+            file_type="xml",
+            status="ready",
             raw_json={"control_amount": "50.00"},
         )
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="A",
-            quantity=Decimal("10"), purchase_price=Decimal("5.00"),
+            batch=batch,
+            row_index=0,
+            vendor_name="A",
+            quantity=Decimal("10"),
+            purchase_price=Decimal("5.00"),
         )
-        items_total = sum(
-            (bi.purchase_price * bi.quantity) for bi in batch.items.all()
-        )
+        items_total = sum((bi.purchase_price * bi.quantity) for bi in batch.items.all())
         diff = items_total - Decimal("50.00")
         self.assertEqual(diff, Decimal("0.00"))
 
@@ -1720,12 +1897,14 @@ class ControlAmountTest(TestCase):
 # EDGE CASE / REGRESSION TESTS
 # ============================================================================
 
+
 class EdgeCaseTests(TestCase):
     """Regression tests for known issues."""
 
     def test_regex_hyphen_in_character_class(self):
         """Regression: escaped hyphen fix in SKIP_FILENAME_RE (was crashing)."""
         import re
+
         # This was the bug: [_\-.]  — should not crash
         pattern = re.compile(
             r"^(icon|logo|badge|warning|banner|signature|footer|header|spacer|pixel|tracking)[_\-.]",
@@ -1739,10 +1918,14 @@ class EdgeCaseTests(TestCase):
         """Confirming batch with 0 matched items should not create GoodsReceipt."""
         company = _make_company()
         batch = ImportBatch.objects.create(
-            company=company, file_type="pdf", status="ready",
+            company=company,
+            file_type="pdf",
+            status="ready",
         )
         ImportBatchItem.objects.create(
-            batch=batch, row_index=0, vendor_name="Unmatched",
+            batch=batch,
+            row_index=0,
+            vendor_name="Unmatched",
             matched_item=None,
         )
         matched = batch.items.filter(matched_item__isnull=False)
@@ -1751,6 +1934,7 @@ class EdgeCaseTests(TestCase):
     def test_decimal_comma_handling(self):
         """Croatian invoices use comma as decimal separator."""
         from smart_import.services import _to_decimal
+
         self.assertEqual(_to_decimal("1.234,56"), "1234.56")
         self.assertEqual(_to_decimal("0,99"), "0.99")
 
@@ -1759,12 +1943,14 @@ class EdgeCaseTests(TestCase):
         company = _make_company()
         # List format
         b1 = ImportBatch.objects.create(
-            company=company, raw_json=[{"vendor_name": "A"}],
+            company=company,
+            raw_json=[{"vendor_name": "A"}],
         )
         self.assertIsInstance(b1.raw_json, list)
         # Dict format (multipage / control amount)
         b2 = ImportBatch.objects.create(
-            company=company, raw_json={"control_amount": "100", "page_paths": []},
+            company=company,
+            raw_json={"control_amount": "100", "page_paths": []},
         )
         self.assertIsInstance(b2.raw_json, dict)
 
@@ -1772,7 +1958,8 @@ class EdgeCaseTests(TestCase):
         """original_filename should be saved for tracking."""
         company = _make_company()
         batch = ImportBatch.objects.create(
-            company=company, original_filename="Račun-Dobavljač_2025.pdf",
+            company=company,
+            original_filename="Račun-Dobavljač_2025.pdf",
         )
         self.assertEqual(batch.original_filename, "Račun-Dobavljač_2025.pdf")
 
@@ -1802,6 +1989,8 @@ class EdgeCaseTests(TestCase):
         batch = ImportBatch.objects.create(company=company)
         description = "" or "Korisnik prijavio problem s uvozom (bez opisa)"
         report = ProblemReport.objects.create(
-            batch=batch, company=company, description=description,
+            batch=batch,
+            company=company,
+            description=description,
         )
         self.assertIn("bez opisa", report.description)

@@ -2,6 +2,7 @@
 invoicing/services/storno.py
 Storno (cancellation) logic — creates reverse invoice.
 """
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -9,7 +10,7 @@ from .events import log_invoice_event
 
 
 @transaction.atomic
-def create_storno(original, user=None, ip_address=None, cancel_reason=''):
+def create_storno(original, user=None, ip_address=None, cancel_reason=""):
     """
     Create a storno invoice for the original.
 
@@ -18,14 +19,14 @@ def create_storno(original, user=None, ip_address=None, cancel_reason=''):
     """
     from invoicing.models import Invoice, InvoiceItem
 
-    if original.status == 'STORNO':
-        return {'success': False, 'message': 'Racun je vec storniran'}
+    if original.status == "STORNO":
+        return {"success": False, "message": "Racun je vec storniran"}
 
     storno = Invoice.objects.create(
         company=original.company,
-        doctype='S',
+        doctype="S",
         country=original.country,
-        number=f'S-{original.number}',
+        number=f"S-{original.number}",
         date_issued=timezone.now(),
         client_name=original.client_name,
         client_address=original.client_address,
@@ -42,9 +43,9 @@ def create_storno(original, user=None, ip_address=None, cancel_reason=''):
         tax_percent=original.tax_percent,
         tax_amount=-original.tax_amount,
         total=-original.total,
-        note=f'Storno racuna {original.number}',
+        note=f"Storno racuna {original.number}",
         storno_of=original,
-        status='DRAFT',
+        status="DRAFT",
         created_by=user,
         cancel_reason=cancel_reason,
     )
@@ -52,7 +53,7 @@ def create_storno(original, user=None, ip_address=None, cancel_reason=''):
     for item in original.items.all():
         InvoiceItem.objects.create(
             invoice=storno,
-            description=f'[STORNO] {item.description}',
+            description=f"[STORNO] {item.description}",
             quantity=-item.quantity,
             unit=item.unit,
             unit_price=item.unit_price,
@@ -60,13 +61,18 @@ def create_storno(original, user=None, ip_address=None, cancel_reason=''):
             tax_rate=item.tax_rate,
         )
 
-    original.status = 'STORNO'
+    original.status = "STORNO"
     original.cancel_reason = cancel_reason
-    original.save(update_fields=['status', 'cancel_reason'])
+    original.save(update_fields=["status", "cancel_reason"])
 
-    log_invoice_event(original, 'storno', f'Storniran — kreiran {storno.number}',
-                      detail=cancel_reason, actor=user, ip_address=ip_address)
-    log_invoice_event(storno, 'created', f'Storno kreiran za {original.number}',
-                      actor=user, ip_address=ip_address)
+    log_invoice_event(
+        original,
+        "storno",
+        f"Storniran — kreiran {storno.number}",
+        detail=cancel_reason,
+        actor=user,
+        ip_address=ip_address,
+    )
+    log_invoice_event(storno, "created", f"Storno kreiran za {original.number}", actor=user, ip_address=ip_address)
 
-    return {'success': True, 'storno_invoice': storno, 'message': f'Storno {storno.number} kreiran'}
+    return {"success": True, "storno_invoice": storno, "message": f"Storno {storno.number} kreiran"}

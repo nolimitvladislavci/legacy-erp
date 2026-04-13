@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0008_saleslead'),
+        ("registration", "0008_saleslead"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='saleslead',
-            name='commission_percent',
-            field=models.DecimalField(decimal_places=2, default=15, max_digits=5, verbose_name='Provizija %'),
+            model_name="saleslead",
+            name="commission_percent",
+            field=models.DecimalField(decimal_places=2, default=15, max_digits=5, verbose_name="Provizija %"),
         ),
         migrations.AddField(
-            model_name='saleslead',
-            name='ref_code',
-            field=models.CharField(blank=True, max_length=50, verbose_name='Referral kod'),
+            model_name="saleslead",
+            name="ref_code",
+            field=models.CharField(blank=True, max_length=50, verbose_name="Referral kod"),
         ),
     ]

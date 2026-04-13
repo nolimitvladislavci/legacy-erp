@@ -13,6 +13,7 @@ Za cross-company upite (Django admin, reports, seeding):
     MyModel.objects.unscoped().all()
     MyModel.objects.unscoped().filter(...)
 """
+
 import threading
 
 from django.db import models
@@ -33,9 +34,9 @@ class CompanyManager(models.Manager):
         if company is not None:
             # Check which FK name this model uses for company
             model_fields = {f.name for f in self.model._meta.get_fields()}
-            if 'company' in model_fields:
+            if "company" in model_fields:
                 qs = qs.filter(company=company)
-            elif 'parent_company' in model_fields:
+            elif "parent_company" in model_fields:
                 qs = qs.filter(parent_company=company)
             # Models without company or parent_company FK → no auto-filter
         return qs
@@ -58,7 +59,7 @@ _branch_local = threading.local()
 
 def get_current_branch():
     """Return the active CompanyBranch for the current thread, or None."""
-    return getattr(_branch_local, 'branch', None)
+    return getattr(_branch_local, "branch", None)
 
 
 def set_current_branch(branch):
@@ -70,6 +71,7 @@ def clear_current_branch():
 
 
 # ── Active (Soft-Delete) Manager ─────────────────────────────────────────────
+
 
 class ActiveQuerySet(models.QuerySet):
     """QuerySet that filters to active records only."""
@@ -83,6 +85,7 @@ class ActiveQuerySet(models.QuerySet):
     def soft_delete(self):
         """Bulk soft-delete all records in queryset."""
         from django.utils import timezone
+
         return self.update(is_active=False, deactivated_at=timezone.now())
 
     def reactivate(self):
@@ -115,6 +118,7 @@ class ActiveManager(models.Manager):
 
 # ── Company + Active combined Manager ────────────────────────────────────────
 
+
 class CompanyActiveManager(CompanyManager):
     """Combines company-scoping with soft-delete filtering.
 
@@ -128,7 +132,7 @@ class CompanyActiveManager(CompanyManager):
     def get_queryset(self):
         qs = super().get_queryset()
         model_fields = {f.name for f in self.model._meta.get_fields()}
-        if 'is_active' in model_fields:
+        if "is_active" in model_fields:
             qs = qs.filter(is_active=True)
         return qs
 

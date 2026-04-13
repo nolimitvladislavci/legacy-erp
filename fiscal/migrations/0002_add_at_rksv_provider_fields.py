@@ -4,40 +4,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('fiscal', '0001_initial'),
+        ("fiscal", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fiscalconfiguration',
-            name='rksv_aes_key',
-            field=models.CharField(blank=True, help_text='AES-256 Schlüssel (hex) für Umsatzzähler', max_length=64),
+            model_name="fiscalconfiguration",
+            name="rksv_aes_key",
+            field=models.CharField(blank=True, help_text="AES-256 Schlüssel (hex) für Umsatzzähler", max_length=64),
         ),
         migrations.AddField(
-            model_name='fiscalconfiguration',
-            name='rksv_api_key',
-            field=models.CharField(blank=True, help_text='RKSV signing API Key', max_length=255),
+            model_name="fiscalconfiguration",
+            name="rksv_api_key",
+            field=models.CharField(blank=True, help_text="RKSV signing API Key", max_length=255),
         ),
         migrations.AddField(
-            model_name='fiscalconfiguration',
-            name='rksv_api_secret',
-            field=models.CharField(blank=True, help_text='RKSV signing API Secret', max_length=255),
+            model_name="fiscalconfiguration",
+            name="rksv_api_secret",
+            field=models.CharField(blank=True, help_text="RKSV signing API Secret", max_length=255),
         ),
         migrations.AddField(
-            model_name='fiscalconfiguration',
-            name='rksv_cert_serial',
-            field=models.CharField(blank=True, help_text='Zertifikat-Seriennummer', max_length=100),
+            model_name="fiscalconfiguration",
+            name="rksv_cert_serial",
+            field=models.CharField(blank=True, help_text="Zertifikat-Seriennummer", max_length=100),
         ),
         migrations.AddField(
-            model_name='fiscalconfiguration',
-            name='rksv_kassen_id',
-            field=models.CharField(blank=True, help_text='Kassen-ID (FinanzOnline)', max_length=50),
+            model_name="fiscalconfiguration",
+            name="rksv_kassen_id",
+            field=models.CharField(blank=True, help_text="Kassen-ID (FinanzOnline)", max_length=50),
         ),
         migrations.AlterField(
-            model_name='fiscalconfiguration',
-            name='provider',
-            field=models.CharField(choices=[('hr_fina', 'Hrvatska - FINA CIS'), ('de_tse', 'Deutschland - KassenSichV/TSE'), ('at_rksv', 'Österreich - RKSV'), ('none', 'Bez fiskalizacije')], default='none', max_length=20),
+            model_name="fiscalconfiguration",
+            name="provider",
+            field=models.CharField(
+                choices=[
+                    ("hr_fina", "Hrvatska - FINA CIS"),
+                    ("de_tse", "Deutschland - KassenSichV/TSE"),
+                    ("at_rksv", "Österreich - RKSV"),
+                    ("none", "Bez fiskalizacije"),
+                ],
+                default="none",
+                max_length=20,
+            ),
         ),
     ]

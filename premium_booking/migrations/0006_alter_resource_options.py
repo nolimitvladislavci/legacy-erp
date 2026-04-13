@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0005_alter_resource_options_alter_booking_payment_method_and_more'),
+        ("premium_booking", "0005_alter_resource_options_alter_booking_payment_method_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name'], 'verbose_name': 'Premium Resurs'},
+            name="resource",
+            options={"ordering": ["group", "name"], "verbose_name": "Premium Resurs"},
         ),
     ]

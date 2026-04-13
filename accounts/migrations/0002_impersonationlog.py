@@ -4,7 +4,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0001_initial"),
         ("companies", "0004_business_profiles"),
@@ -20,18 +19,24 @@ class Migration(migrations.Migration):
                 ("ended_at", models.DateTimeField(blank=True, null=True, verbose_name="Kraj")),
                 ("ip_address", models.GenericIPAddressField(blank=True, null=True, verbose_name="IP adresa")),
                 ("actions_count", models.IntegerField(default=0, verbose_name="Broj akcija")),
-                ("company", models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE,
-                    related_name="impersonation_logs",
-                    to="companies.company",
-                    verbose_name="Tvrtka",
-                )),
-                ("superadmin", models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE,
-                    related_name="impersonation_sessions",
-                    to=settings.AUTH_USER_MODEL,
-                    verbose_name="Superadmin",
-                )),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="impersonation_logs",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "superadmin",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="impersonation_sessions",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Superadmin",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "Log impersonacije",

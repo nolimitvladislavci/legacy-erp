@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 MODEL = "claude-haiku-4-5-20251001"
 # Pricing: $0.80/MTok input, $4.00/MTok output (claude-haiku-4-5-20251001, 2025)
-COST_INPUT_PER_TOKEN  = 0.80 / 1_000_000   # USD
-COST_OUTPUT_PER_TOKEN = 4.0  / 1_000_000   # USD
+COST_INPUT_PER_TOKEN = 0.80 / 1_000_000  # USD
+COST_OUTPUT_PER_TOKEN = 4.0 / 1_000_000  # USD
 
 
 def estimate_cost(input_tokens: int, output_tokens: int) -> float:
@@ -20,6 +20,7 @@ def estimate_cost(input_tokens: int, output_tokens: int) -> float:
 def get_claude_client():
     """Return an Anthropic client using the API key from environment."""
     import anthropic
+
     api_key = os.environ.get("ANTHROPIC_API_KEY", "") or getattr(settings, "ANTHROPIC_API_KEY", "")
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY is not configured — set it in .env")
@@ -86,18 +87,17 @@ Ako postoje kriticna upozorenja -- navedi ih odmah, bez cekanja.
 """
 
 
-
 def _build_contextual_system_prompt(user, company):
     """Prosiruje SYSTEM_PROMPT s kontekstom korisnika i firme."""
     if not company:
         return SYSTEM_PROMPT
 
-    biz_type = getattr(company, 'business_type', '')
+    biz_type = getattr(company, "business_type", "")
     biz_labels = {
-        'opg': 'OPG (Obiteljsko poljoprivredno gospodarstvo)',
-        'udruga': 'Udruga',
-        'doo': 'd.o.o.',
-        'obrt': 'Obrt',
+        "opg": "OPG (Obiteljsko poljoprivredno gospodarstvo)",
+        "udruga": "Udruga",
+        "doo": "d.o.o.",
+        "obrt": "Obrt",
     }
 
     ctx = f"""
@@ -107,13 +107,14 @@ def _build_contextual_system_prompt(user, company):
 - Firma: {company.name}
 - Tip: {biz_labels.get(biz_type, biz_type)}
 - OIB: {company.oib}
-- Drzava: {getattr(company, 'country', 'HR')}
+- Drzava: {getattr(company, "country", "HR")}
 """
 
     # OPG context
-    if biz_type == 'opg':
+    if biz_type == "opg":
         try:
             from livestock.models import CropPlan, Livestock
+
             grla = Livestock.objects.filter(company=company).count()
             planovi = CropPlan.objects.filter(company=company, godina__gte=2026).count()
             ctx += f"- Farma: {grla} grla goveda, {planovi} aktivnih planova sjetve\n"
@@ -125,13 +126,9 @@ def _build_contextual_system_prompt(user, company):
         from django.utils import timezone
 
         from intelligence.models import FundOpportunity, IntelligenceResult
-        novi = IntelligenceResult.objects.filter(
-            job__company=company, status='novo'
-        ).count()
-        fondovi = FundOpportunity.objects.filter(
-            status='aktivan',
-            rok_prijave__gte=timezone.now().date()
-        ).count()
+
+        novi = IntelligenceResult.objects.filter(job__company=company, status="novo").count()
+        fondovi = FundOpportunity.objects.filter(status="aktivan", rok_prijave__gte=timezone.now().date()).count()
         if novi or fondovi:
             ctx += f"- Intelligence: {novi} novih pronalazaka, {fondovi} aktivnih natjecaja\n"
     except DatabaseError:
@@ -140,8 +137,8 @@ def _build_contextual_system_prompt(user, company):
     # RAG: dohvati relevantne članke iz baze znanja
     try:
         kb = retrieve_knowledge(
-            module_context=getattr(company, 'business_type', ''),
-            query='',  # Query se dodaje u chat_api
+            module_context=getattr(company, "business_type", ""),
+            query="",  # Query se dodaje u chat_api
         )
         ctx += kb
     except (AttributeError, TypeError):
@@ -183,11 +180,13 @@ def chat_with_claude(messages, tools=None, system=None, user=None):
         if block.type == "text":
             content_text += block.text
         elif block.type == "tool_use":
-            tool_calls.append({
-                "id": block.id,
-                "name": block.name,
-                "input": block.input,
-            })
+            tool_calls.append(
+                {
+                    "id": block.id,
+                    "name": block.name,
+                    "input": block.input,
+                }
+            )
 
     return {
         "content": content_text,
@@ -200,7 +199,7 @@ def chat_with_claude(messages, tools=None, system=None, user=None):
     }
 
 
-def retrieve_knowledge(module_context='', query='', limit=5):
+def retrieve_knowledge(module_context="", query="", limit=5):
     """
     RAG retrieval — dohvati relevantne članke iz KnowledgeArticle.
     Koristi keyword matching + module filter.
@@ -213,16 +212,16 @@ def retrieve_knowledge(module_context='', query='', limit=5):
 
     # Module filter iz page context-a
     module_map = {
-        'experiences': 'experiences',
-        'pos': 'pos',
-        'inventory': 'inventory',
-        'invoicing': 'invoicing',
-        'borg': 'borg',
-        'udruge': 'udruge',
-        'marketplace': 'marketplace',
-        'work-orders': 'work_orders',
-        'recall': 'experiences',
-        'rental': 'rental',
+        "experiences": "experiences",
+        "pos": "pos",
+        "inventory": "inventory",
+        "invoicing": "invoicing",
+        "borg": "borg",
+        "udruge": "udruge",
+        "marketplace": "marketplace",
+        "work-orders": "work_orders",
+        "recall": "experiences",
+        "rental": "rental",
     }
     detected_module = None
     for keyword, module in module_map.items():
@@ -232,7 +231,7 @@ def retrieve_knowledge(module_context='', query='', limit=5):
 
     if detected_module:
         # Prioritet: modul-specifični + general
-        qs = qs.filter(Q(module=detected_module) | Q(module='general') | Q(module='compliance'))
+        qs = qs.filter(Q(module=detected_module) | Q(module="general") | Q(module="compliance"))
 
     # Keyword search iz query-ja
     if query:
@@ -244,10 +243,10 @@ def retrieve_knowledge(module_context='', query='', limit=5):
         if q_filter:
             qs = qs.filter(q_filter)
 
-    articles = qs.order_by('priority')[:limit]
+    articles = qs.order_by("priority")[:limit]
 
     if not articles:
-        return ''
+        return ""
 
     kb_text = "\n\n## Baza znanja (RAG) — koristi ove podatke za točan odgovor:\n"
     for art in articles:

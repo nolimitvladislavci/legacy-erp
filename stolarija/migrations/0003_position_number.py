@@ -4,19 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('stolarija', '0002_phase456_production_install_handover'),
+        ("stolarija", "0002_phase456_production_install_handover"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='measurement',
-            options={'ordering': ['position_number', 'floor', 'id'], 'verbose_name': 'Mjerenje', 'verbose_name_plural': 'Mjerenja'},
+            name="measurement",
+            options={
+                "ordering": ["position_number", "floor", "id"],
+                "verbose_name": "Mjerenje",
+                "verbose_name_plural": "Mjerenja",
+            },
         ),
         migrations.AddField(
-            model_name='measurement',
-            name='position_number',
-            field=models.PositiveSmallIntegerField(default=0, help_text='Automatski redni broj pozicije unutar sesije', verbose_name='Pozicija br.'),
+            model_name="measurement",
+            name="position_number",
+            field=models.PositiveSmallIntegerField(
+                default=0, help_text="Automatski redni broj pozicije unutar sesije", verbose_name="Pozicija br."
+            ),
         ),
     ]

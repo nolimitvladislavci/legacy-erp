@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         tse_end_time            — Kraj TSE transakcije
         tse_error               — Zadnja greška (ako TSE padne, naplata ide dalje)
     """
+
     dependencies = [
         ("pos", "0030_order_source_field"),
     ]
@@ -93,4 +94,3 @@ class Migration(migrations.Migration):
             ),
         ),
     ]
-

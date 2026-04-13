@@ -1,4 +1,5 @@
 """Smart Mailbox — Rule-Based Auto-Classification (Phase 1)."""
+
 import logging
 from datetime import date
 
@@ -20,7 +21,8 @@ class SmartMailboxService:
         ubl_data = self._parse_ubl(message.ubl_xml)
 
         inbound = InboundInvoice(
-            company=message.company, as4_message=message,
+            company=message.company,
+            as4_message=message,
             invoice_number=ubl_data["invoice_number"],
             issue_date=ubl_data["issue_date"],
             due_date=ubl_data.get("due_date"),
@@ -56,7 +58,9 @@ class SmartMailboxService:
             MessageStatus.PROCESSED,
             detail=f"Klasificirano: konto {classification['konto']} ({classification['confidence']:.0%})",
         )
-        logger.info(f"Processed: {inbound.invoice_number} from {inbound.supplier_name} -> konto {classification['konto']}")
+        logger.info(
+            f"Processed: {inbound.invoice_number} from {inbound.supplier_name} -> konto {classification['konto']}"
+        )
         return inbound
 
     def _parse_ubl(self, ubl_xml):
@@ -89,28 +93,35 @@ class SmartMailboxService:
             base_el = ts.find("cbc:TaxableAmount", UBL_NS)
             amount_el = ts.find("cbc:TaxAmount", UBL_NS)
             if rate_el is not None:
-                tax_breakdown.append({
-                    "rate": float(rate_el.text or 0),
-                    "base": float(base_el.text if base_el is not None else 0),
-                    "amount": float(amount_el.text if amount_el is not None else 0),
-                })
+                tax_breakdown.append(
+                    {
+                        "rate": float(rate_el.text or 0),
+                        "base": float(base_el.text if base_el is not None else 0),
+                        "amount": float(amount_el.text if amount_el is not None else 0),
+                    }
+                )
 
         line_items = []
         for line in tree.findall(".//cac:InvoiceLine", UBL_NS):
-            line_items.append({
-                "line_id": line.findtext("cbc:ID", namespaces=UBL_NS) or "",
-                "name": line.findtext("cac:Item/cbc:Name", namespaces=UBL_NS) or "",
-                "quantity": float(line.findtext("cbc:InvoicedQuantity", namespaces=UBL_NS) or 0),
-                "amount": float(line.findtext("cbc:LineExtensionAmount", namespaces=UBL_NS) or 0),
-            })
+            line_items.append(
+                {
+                    "line_id": line.findtext("cbc:ID", namespaces=UBL_NS) or "",
+                    "name": line.findtext("cac:Item/cbc:Name", namespaces=UBL_NS) or "",
+                    "quantity": float(line.findtext("cbc:InvoicedQuantity", namespaces=UBL_NS) or 0),
+                    "amount": float(line.findtext("cbc:LineExtensionAmount", namespaces=UBL_NS) or 0),
+                }
+            )
 
         addr_parts = []
         street = _text(".//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName")
         city = _text(".//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName")
         postal = _text(".//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:PostalZone")
-        if street: addr_parts.append(street)
-        if postal and city: addr_parts.append(f"{postal} {city}")
-        elif city: addr_parts.append(city)
+        if street:
+            addr_parts.append(street)
+        if postal and city:
+            addr_parts.append(f"{postal} {city}")
+        elif city:
+            addr_parts.append(city)
 
         return {
             "invoice_number": _text("cbc:ID"),
@@ -136,10 +147,16 @@ class SmartMailboxService:
         cost_center = ""
 
         # Rule 1: Supplier History
-        previous = InboundInvoice.objects.filter(
-            company=inbound.company, supplier_tax_id=inbound.supplier_tax_id,
-            status=InboundInvoice.ProcessingStatus.BOOKED,
-        ).exclude(final_konto="").order_by("-booked_at").first()
+        previous = (
+            InboundInvoice.objects.filter(
+                company=inbound.company,
+                supplier_tax_id=inbound.supplier_tax_id,
+                status=InboundInvoice.ProcessingStatus.BOOKED,
+            )
+            .exclude(final_konto="")
+            .order_by("-booked_at")
+            .first()
+        )
 
         if previous:
             konto = previous.final_konto
@@ -147,10 +164,16 @@ class SmartMailboxService:
             cost_center = previous.final_cost_center
             confidence = 0.85
             reason = f"Isti dobavljac ({inbound.supplier_name}) prethodno proknjizen na konto {konto}"
-            distinct = InboundInvoice.objects.filter(
-                company=inbound.company, supplier_tax_id=inbound.supplier_tax_id,
-                status=InboundInvoice.ProcessingStatus.BOOKED,
-            ).exclude(final_konto="").values_list("final_konto", flat=True).distinct()
+            distinct = (
+                InboundInvoice.objects.filter(
+                    company=inbound.company,
+                    supplier_tax_id=inbound.supplier_tax_id,
+                    status=InboundInvoice.ProcessingStatus.BOOKED,
+                )
+                .exclude(final_konto="")
+                .values_list("final_konto", flat=True)
+                .distinct()
+            )
             if distinct.count() == 1:
                 confidence = 0.95
                 reason += " (uvijek isti konto)"
@@ -213,7 +236,10 @@ class SmartMailboxService:
                 vat_treatment = "PARTIAL_DEDUCTION"
 
         return {
-            "konto": konto, "konto_name": konto_name,
-            "cost_center": cost_center, "vat_treatment": vat_treatment,
-            "confidence": confidence, "reason": reason,
+            "konto": konto,
+            "konto_name": konto_name,
+            "cost_center": cost_center,
+            "vat_treatment": vat_treatment,
+            "confidence": confidence,
+            "reason": reason,
         }

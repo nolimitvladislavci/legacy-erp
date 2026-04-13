@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0003_fiscalconfig_default_iban'),
+        ("invoicing", "0003_fiscalconfig_default_iban"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='address',
-            field=models.CharField(default='Ulica 1', max_length=255, verbose_name='Adresa'),
+            model_name="fiscalconfig",
+            name="address",
+            field=models.CharField(default="Ulica 1", max_length=255, verbose_name="Adresa"),
         ),
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='city',
-            field=models.CharField(default='Zagreb', max_length=100, verbose_name='Grad'),
+            model_name="fiscalconfig",
+            name="city",
+            field=models.CharField(default="Zagreb", max_length=100, verbose_name="Grad"),
         ),
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='company_name',
-            field=models.CharField(default='Tvoja Tvrtka d.o.o.', max_length=255, verbose_name='Naziv tvrtke'),
+            model_name="fiscalconfig",
+            name="company_name",
+            field=models.CharField(default="Tvoja Tvrtka d.o.o.", max_length=255, verbose_name="Naziv tvrtke"),
         ),
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='oib',
-            field=models.CharField(default='00000000000', max_length=11, verbose_name='OIB'),
+            model_name="fiscalconfig",
+            name="oib",
+            field=models.CharField(default="00000000000", max_length=11, verbose_name="OIB"),
         ),
     ]

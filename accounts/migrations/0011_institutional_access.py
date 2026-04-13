@@ -4,20 +4,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0010_devicetoken_expires_at_devicetoken_label'),
+        ("accounts", "0010_devicetoken_expires_at_devicetoken_label"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='companymembership',
-            name='role',
-            field=models.CharField(choices=[('superadmin', 'Super Administrator'), ('tenant_admin', 'Tenant Admin (krovna firma)'), ('company_admin', 'Admin tvrtke'), ('project_manager', 'Voditelj projekta'), ('worker', 'Radnik'), ('investor', 'Investitor'), ('partner', 'Partner / Klijent'), ('veterinar', 'Veterinar'), ('racunovodja', 'Racunovodja / Steuerberater'), ('inspektor', 'Inspektor'), ('revizor', 'Revizor')], default='worker', max_length=30),
+            model_name="companymembership",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("superadmin", "Super Administrator"),
+                    ("tenant_admin", "Tenant Admin (krovna firma)"),
+                    ("company_admin", "Admin tvrtke"),
+                    ("project_manager", "Voditelj projekta"),
+                    ("worker", "Radnik"),
+                    ("investor", "Investitor"),
+                    ("partner", "Partner / Klijent"),
+                    ("veterinar", "Veterinar"),
+                    ("racunovodja", "Racunovodja / Steuerberater"),
+                    ("inspektor", "Inspektor"),
+                    ("revizor", "Revizor"),
+                ],
+                default="worker",
+                max_length=30,
+            ),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='role',
-            field=models.CharField(choices=[('superadmin', 'Super Administrator'), ('tenant_admin', 'Tenant Admin (krovna firma)'), ('company_admin', 'Admin tvrtke'), ('project_manager', 'Voditelj projekta'), ('worker', 'Radnik'), ('investor', 'Investitor'), ('partner', 'Partner / Klijent'), ('veterinar', 'Veterinar'), ('racunovodja', 'Racunovodja / Steuerberater'), ('inspektor', 'Inspektor'), ('revizor', 'Revizor')], default='worker', max_length=30, verbose_name='Uloga'),
+            model_name="userprofile",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("superadmin", "Super Administrator"),
+                    ("tenant_admin", "Tenant Admin (krovna firma)"),
+                    ("company_admin", "Admin tvrtke"),
+                    ("project_manager", "Voditelj projekta"),
+                    ("worker", "Radnik"),
+                    ("investor", "Investitor"),
+                    ("partner", "Partner / Klijent"),
+                    ("veterinar", "Veterinar"),
+                    ("racunovodja", "Racunovodja / Steuerberater"),
+                    ("inspektor", "Inspektor"),
+                    ("revizor", "Revizor"),
+                ],
+                default="worker",
+                max_length=30,
+                verbose_name="Uloga",
+            ),
         ),
     ]

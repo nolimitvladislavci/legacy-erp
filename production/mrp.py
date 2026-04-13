@@ -40,17 +40,17 @@ def mrp_run(company, horizon_days=30, user=None):
         ProductionOrder,
     )
 
-    run_id = f'MRP-{timezone.now().strftime("%Y%m%d-%H%M%S")}'
-    horizon_end = date.today() + timedelta(days=horizon_days)
+    run_id = f"MRP-{timezone.now().strftime('%Y%m%d-%H%M%S')}"
+    date.today() + timedelta(days=horizon_days)
 
     # 1. Dohvati aktivne naloge koji trebaju materijal
     active_orders = ProductionOrder.objects.filter(
         company=company,
-        status__in=('confirmed', 'in_progress'),
-    ).select_related('bom')
+        status__in=("confirmed", "in_progress"),
+    ).select_related("bom")
 
     if not active_orders.exists():
-        return {'run_id': run_id, 'planned_orders': [], 'message': 'Nema aktivnih naloga.'}
+        return {"run_id": run_id, "planned_orders": [], "message": "Nema aktivnih naloga."}
 
     # 2. Izračunaj gross requirements (recursive BOM explosion)
     gross_requirements = {}  # item_id → total quantity needed
@@ -59,18 +59,13 @@ def mrp_run(company, horizon_days=30, user=None):
         multiplier = order.planned_quantity / order.bom.output_quantity
         exploded = order.bom.explode(multiplier)
         for line in exploded:
-            if not line['is_subassembly']:
-                item_id = line['item'].pk
-                gross_requirements[item_id] = (
-                    gross_requirements.get(item_id, Decimal('0')) + line['quantity']
-                )
+            if not line["is_subassembly"]:
+                item_id = line["item"].pk
+                gross_requirements[item_id] = gross_requirements.get(item_id, Decimal("0")) + line["quantity"]
 
     # 3. Dohvati on-hand stock
     item_ids = list(gross_requirements.keys())
-    items = {
-        i.pk: i for i in
-        InventoryItem.objects.filter(pk__in=item_ids, company=company)
-    }
+    items = {i.pk: i for i in InventoryItem.objects.filter(pk__in=item_ids, company=company)}
 
     # 4. Net requirements = gross - on_hand
     net_requirements = {}
@@ -78,36 +73,41 @@ def mrp_run(company, horizon_days=30, user=None):
         item = items.get(item_id)
         if not item:
             continue
-        on_hand = getattr(item, 'quantity', Decimal('0'))
+        on_hand = getattr(item, "quantity", Decimal("0"))
         # Oduzmi i već planirane (nepotvrđene) naloge
         already_planned = MRPPlannedOrder.objects.filter(
-            company=company, item=item, status='planned',
-        ).aggregate(total=models.Sum('quantity'))['total'] or Decimal('0')
+            company=company,
+            item=item,
+            status="planned",
+        ).aggregate(total=models.Sum("quantity"))["total"] or Decimal("0")
 
         net = gross - on_hand - already_planned
-        if net > Decimal('0'):
+        if net > Decimal("0"):
             net_requirements[item_id] = {
-                'item': item,
-                'gross': gross,
-                'on_hand': on_hand,
-                'already_planned': already_planned,
-                'net': net,
+                "item": item,
+                "gross": gross,
+                "on_hand": on_hand,
+                "already_planned": already_planned,
+                "net": net,
             }
 
     # 5. Generiraj MRPPlannedOrder za svaki net requirement
     # Obriši stare planned (nekorištene) iz prošlih runova
     MRPPlannedOrder.objects.filter(
-        company=company, status='planned',
+        company=company,
+        status="planned",
     ).delete()
 
     planned_orders = []
     for item_id, req in net_requirements.items():
-        item = req['item']
-        lead_time = getattr(item, 'lead_time_days', DEFAULT_LEAD_TIME_DAYS) or DEFAULT_LEAD_TIME_DAYS
+        item = req["item"]
+        lead_time = getattr(item, "lead_time_days", DEFAULT_LEAD_TIME_DAYS) or DEFAULT_LEAD_TIME_DAYS
 
         # Provjeri ima li item BOM → produce, inače → purchase
         has_bom = BillOfMaterials.objects.filter(
-            company=company, output_item=item, status='active',
+            company=company,
+            output_item=item,
+            status="active",
         ).exists()
 
         # Earliest needed: najraniji planned_start od aktivnih naloga koji koriste ovaj item
@@ -123,34 +123,36 @@ def mrp_run(company, horizon_days=30, user=None):
         bom_ref = None
         if has_bom:
             bom_ref = BillOfMaterials.objects.filter(
-                company=company, output_item=item, status='active',
+                company=company,
+                output_item=item,
+                status="active",
             ).first()
 
         po = MRPPlannedOrder.objects.create(
             company=company,
             item=item,
-            order_type='produce' if has_bom else 'purchase',
-            quantity=req['net'],
+            order_type="produce" if has_bom else "purchase",
+            quantity=req["net"],
             needed_by=needed_by,
             order_date=order_date,
             bom=bom_ref,
-            status='planned',
+            status="planned",
             mrp_run_id=run_id,
         )
         planned_orders.append(po)
 
     logger.info(
-        f'MRP Run {run_id}: {len(active_orders)} orders, '
-        f'{len(gross_requirements)} items, {len(planned_orders)} planned orders'
+        f"MRP Run {run_id}: {len(active_orders)} orders, "
+        f"{len(gross_requirements)} items, {len(planned_orders)} planned orders"
     )
 
     return {
-        'run_id': run_id,
-        'active_orders': active_orders.count(),
-        'items_checked': len(gross_requirements),
-        'items_short': len(net_requirements),
-        'planned_orders': planned_orders,
-        'message': f'MRP završen: {len(planned_orders)} planiranih naloga generirano.',
+        "run_id": run_id,
+        "active_orders": active_orders.count(),
+        "items_checked": len(gross_requirements),
+        "items_short": len(net_requirements),
+        "planned_orders": planned_orders,
+        "message": f"MRP završen: {len(planned_orders)} planiranih naloga generirano.",
     }
 
 
@@ -167,37 +169,40 @@ def create_purchase_suggestions(company):
 
     purchase_plans = MRPPlannedOrder.objects.filter(
         company=company,
-        order_type='purchase',
-        status='planned',
-    ).select_related('item')
+        order_type="purchase",
+        status="planned",
+    ).select_related("item")
 
     suggestions = []
     for po in purchase_plans:
         item = po.item
-        supplier = getattr(item, 'supplier', None) or getattr(item, 'default_supplier', '')
-        suggestions.append({
-            'item': item,
-            'item_name': item.name,
-            'item_sku': getattr(item, 'sku', ''),
-            'quantity': po.quantity,
-            'needed_by': po.needed_by,
-            'order_date': po.order_date,
-            'supplier': str(supplier) if supplier else 'Nepoznat',
-            'estimated_cost': po.quantity * (getattr(item, 'purchase_price', None) or getattr(item, 'unit_price', Decimal('0'))),
-            'mrp_planned_order_id': str(po.pk),
-        })
+        supplier = getattr(item, "supplier", None) or getattr(item, "default_supplier", "")
+        suggestions.append(
+            {
+                "item": item,
+                "item_name": item.name,
+                "item_sku": getattr(item, "sku", ""),
+                "quantity": po.quantity,
+                "needed_by": po.needed_by,
+                "order_date": po.order_date,
+                "supplier": str(supplier) if supplier else "Nepoznat",
+                "estimated_cost": po.quantity
+                * (getattr(item, "purchase_price", None) or getattr(item, "unit_price", Decimal("0"))),
+                "mrp_planned_order_id": str(po.pk),
+            }
+        )
 
     # Grupiraj po dobavljaču
     by_supplier = {}
     for s in suggestions:
-        key = s['supplier']
+        key = s["supplier"]
         by_supplier.setdefault(key, []).append(s)
 
     return {
-        'suggestions': suggestions,
-        'by_supplier': by_supplier,
-        'total_items': len(suggestions),
-        'total_cost': sum(s['estimated_cost'] for s in suggestions),
+        "suggestions": suggestions,
+        "by_supplier": by_supplier,
+        "total_items": len(suggestions),
+        "total_cost": sum(s["estimated_cost"] for s in suggestions),
     }
 
 
@@ -207,8 +212,8 @@ def calculate_workstation_load(company, days_ahead=14):
     """
     from production.models import ProductionStep, Workstation
 
-    horizon = date.today() + timedelta(days=days_ahead)
-    workstations = Workstation.objects.filter(company=company, status='active')
+    date.today() + timedelta(days=days_ahead)
+    workstations = Workstation.objects.filter(company=company, status="active")
 
     load = []
     for ws in workstations:
@@ -216,21 +221,32 @@ def calculate_workstation_load(company, days_ahead=14):
         available_hours = 8 * days_ahead
 
         # Planirani sati (iz koraka na aktivnim nalozima)
-        planned_minutes = ProductionStep.objects.filter(
-            workstation=ws,
-            order__status__in=('confirmed', 'in_progress'),
-            status__in=('pending', 'in_progress'),
-        ).aggregate(total=models.Sum('estimated_minutes'))['total'] or 0
+        planned_minutes = (
+            ProductionStep.objects.filter(
+                workstation=ws,
+                order__status__in=("confirmed", "in_progress"),
+                status__in=("pending", "in_progress"),
+            ).aggregate(total=models.Sum("estimated_minutes"))["total"]
+            or 0
+        )
 
         planned_hours = planned_minutes / 60
         utilization = (planned_hours / available_hours * 100) if available_hours else 0
 
-        load.append({
-            'workstation': ws,
-            'available_hours': available_hours,
-            'planned_hours': round(planned_hours, 1),
-            'utilization_percent': round(utilization, 1),
-            'status': 'overloaded' if utilization > 100 else 'high' if utilization > 80 else 'normal' if utilization > 30 else 'idle',
-        })
+        load.append(
+            {
+                "workstation": ws,
+                "available_hours": available_hours,
+                "planned_hours": round(planned_hours, 1),
+                "utilization_percent": round(utilization, 1),
+                "status": "overloaded"
+                if utilization > 100
+                else "high"
+                if utilization > 80
+                else "normal"
+                if utilization > 30
+                else "idle",
+            }
+        )
 
-    return sorted(load, key=lambda x: -x['utilization_percent'])
+    return sorted(load, key=lambda x: -x["utilization_percent"])

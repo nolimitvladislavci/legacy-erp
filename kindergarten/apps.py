@@ -2,6 +2,6 @@ from django.apps import AppConfig
 
 
 class KindergartenConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'kindergarten'
-    verbose_name = 'Vrtić'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "kindergarten"
+    verbose_name = "Vrtić"

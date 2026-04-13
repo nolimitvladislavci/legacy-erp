@@ -6,46 +6,103 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0035_shelter_fields'),
-        ('smart_import', '0007_add_staging_file_header'),
+        ("companies", "0035_shelter_fields"),
+        ("smart_import", "0007_add_staging_file_header"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FenixInboxItem',
+            name="FenixInboxItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('izvor', models.CharField(choices=[('email', 'Email import'), ('scan', 'FenixScan upload'), ('upload', 'Ručni upload'), ('pos', 'POS bon auto'), ('invoice', 'Račun auto'), ('staging', 'Staging batch')], max_length=20)),
-                ('tip', models.CharField(blank=True, choices=[('ura', 'Ulazni račun URA'), ('ira', 'Izlazni račun IRA'), ('interna', 'Interna isprava'), ('nepoznato', 'Nepoznato - pregled')], max_length=20)),
-                ('status', models.CharField(choices=[('novo', 'Novo'), ('klasificira', 'AI klasificira'), ('ceka', 'Čeka Mariju'), ('usmjereno', 'Usmjereno'), ('arhivirano', 'Arhivirano'), ('greska', 'Greška')], default='novo', max_length=20)),
-                ('arhiva_entry_id', models.IntegerField(blank=True, null=True)),
-                ('staging_file_id', models.IntegerField(blank=True, null=True)),
-                ('import_batch_id', models.IntegerField(blank=True, null=True)),
-                ('invoice_id', models.IntegerField(blank=True, null=True)),
-                ('pos_receipt_id', models.IntegerField(blank=True, null=True)),
-                ('doc_broj', models.CharField(blank=True, max_length=200)),
-                ('partner_naziv', models.CharField(blank=True, max_length=200)),
-                ('iznos', models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True)),
-                ('valuta', models.CharField(blank=True, default='EUR', max_length=5)),
-                ('datum_dokumenta', models.DateField(blank=True, null=True)),
-                ('ai_tip_confidence', models.FloatField(default=0.0)),
-                ('ai_summary', models.TextField(blank=True)),
-                ('ai_prijedlog', models.JSONField(blank=True, null=True)),
-                ('usmjereno_na', models.CharField(blank=True, help_text='inventory / konto / arhiva / propter', max_length=50)),
-                ('usmjereno_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fenix_inbox', to='companies.company', verbose_name='Tvrtka')),
-                ('obradjeno_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "izvor",
+                    models.CharField(
+                        choices=[
+                            ("email", "Email import"),
+                            ("scan", "FenixScan upload"),
+                            ("upload", "Ručni upload"),
+                            ("pos", "POS bon auto"),
+                            ("invoice", "Račun auto"),
+                            ("staging", "Staging batch"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "tip",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("ura", "Ulazni račun URA"),
+                            ("ira", "Izlazni račun IRA"),
+                            ("interna", "Interna isprava"),
+                            ("nepoznato", "Nepoznato - pregled"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("novo", "Novo"),
+                            ("klasificira", "AI klasificira"),
+                            ("ceka", "Čeka Mariju"),
+                            ("usmjereno", "Usmjereno"),
+                            ("arhivirano", "Arhivirano"),
+                            ("greska", "Greška"),
+                        ],
+                        default="novo",
+                        max_length=20,
+                    ),
+                ),
+                ("arhiva_entry_id", models.IntegerField(blank=True, null=True)),
+                ("staging_file_id", models.IntegerField(blank=True, null=True)),
+                ("import_batch_id", models.IntegerField(blank=True, null=True)),
+                ("invoice_id", models.IntegerField(blank=True, null=True)),
+                ("pos_receipt_id", models.IntegerField(blank=True, null=True)),
+                ("doc_broj", models.CharField(blank=True, max_length=200)),
+                ("partner_naziv", models.CharField(blank=True, max_length=200)),
+                ("iznos", models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True)),
+                ("valuta", models.CharField(blank=True, default="EUR", max_length=5)),
+                ("datum_dokumenta", models.DateField(blank=True, null=True)),
+                ("ai_tip_confidence", models.FloatField(default=0.0)),
+                ("ai_summary", models.TextField(blank=True)),
+                ("ai_prijedlog", models.JSONField(blank=True, null=True)),
+                (
+                    "usmjereno_na",
+                    models.CharField(blank=True, help_text="inventory / konto / arhiva / propter", max_length=50),
+                ),
+                ("usmjereno_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fenix_inbox",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "obradjeno_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fenix Inbox stavka',
-                'verbose_name_plural': 'Fenix Inbox',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['company', 'status'], name='fenix_inbox_co_status_idx'), models.Index(fields=['company', 'created_at'], name='fenix_inbox_co_date_idx')],
+                "verbose_name": "Fenix Inbox stavka",
+                "verbose_name_plural": "Fenix Inbox",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(fields=["company", "status"], name="fenix_inbox_co_status_idx"),
+                    models.Index(fields=["company", "created_at"], name="fenix_inbox_co_date_idx"),
+                ],
             },
         ),
     ]

@@ -6,46 +6,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0010_alter_inventoryitem_category'),
+        ("inventory", "0010_alter_inventoryitem_category"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='condition_notes',
-            field=models.TextField(blank=True, help_text='Oštećenja, manjak, nesukladnosti', verbose_name='Napomena o stanju'),
+            model_name="goodsreceipt",
+            name="condition_notes",
+            field=models.TextField(
+                blank=True, help_text="Oštećenja, manjak, nesukladnosti", verbose_name="Napomena o stanju"
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='is_consignment',
-            field=models.BooleanField(default=False, help_text='Roba na čuvanje/prodaju za tuđi račun', verbose_name='Konsignacija'),
+            model_name="goodsreceipt",
+            name="is_consignment",
+            field=models.BooleanField(
+                default=False, help_text="Roba na čuvanje/prodaju za tuđi račun", verbose_name="Konsignacija"
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='linked_invoice_number',
-            field=models.CharField(blank=True, help_text='Broj fakture dobavljača', max_length=100, verbose_name='Broj ulaznog računa'),
+            model_name="goodsreceipt",
+            name="linked_invoice_number",
+            field=models.CharField(
+                blank=True, help_text="Broj fakture dobavljača", max_length=100, verbose_name="Broj ulaznog računa"
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='receipt_type',
-            field=models.CharField(choices=[('supplier', 'Primka od dobavljača'), ('return', 'Povratna primka'), ('transfer', 'Međuskladišnica (ulaz)'), ('inventory', 'Inventurni višak'), ('consignment', 'Konsignacijska primka'), ('complaint', 'Reklamacijska primka')], default='supplier', max_length=30, verbose_name='Vrsta primke'),
+            model_name="goodsreceipt",
+            name="receipt_type",
+            field=models.CharField(
+                choices=[
+                    ("supplier", "Primka od dobavljača"),
+                    ("return", "Povratna primka"),
+                    ("transfer", "Međuskladišnica (ulaz)"),
+                    ("inventory", "Inventurni višak"),
+                    ("consignment", "Konsignacijska primka"),
+                    ("complaint", "Reklamacijska primka"),
+                ],
+                default="supplier",
+                max_length=30,
+                verbose_name="Vrsta primke",
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='received_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Datum/vrijeme prijema'),
+            model_name="goodsreceipt",
+            name="received_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Datum/vrijeme prijema"),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='received_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='goods_received', to=settings.AUTH_USER_MODEL, verbose_name='Primio robu'),
+            model_name="goodsreceipt",
+            name="received_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="goods_received",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Primio robu",
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceipt',
-            name='warehouse',
-            field=models.CharField(blank=True, default='Glavno skladište', max_length=100, verbose_name='Skladište'),
+            model_name="goodsreceipt",
+            name="warehouse",
+            field=models.CharField(blank=True, default="Glavno skladište", max_length=100, verbose_name="Skladište"),
         ),
     ]

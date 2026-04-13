@@ -5,14 +5,16 @@ from .models import TaxCalendar, TaxFormType, TaxSubmission
 
 @admin.register(TaxFormType)
 class TaxFormTypeAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'frequency', 'deadline_day')
+    list_display = ("code", "name", "frequency", "deadline_day")
+
 
 @admin.register(TaxSubmission)
 class TaxSubmissionAdmin(admin.ModelAdmin):
-    list_display = ('company', 'form_type', 'period_year', 'period_month', 'status', 'deadline_date')
-    list_filter = ('status', 'form_type', 'period_year')
+    list_display = ("company", "form_type", "period_year", "period_month", "status", "deadline_date")
+    list_filter = ("status", "form_type", "period_year")
+
 
 @admin.register(TaxCalendar)
 class TaxCalendarAdmin(admin.ModelAdmin):
-    list_display = ('company', 'form_type', 'period_year', 'period_month', 'deadline', 'is_completed')
-    list_filter = ('is_completed', 'form_type')
+    list_display = ("company", "form_type", "period_year", "period_month", "deadline", "is_completed")
+    list_filter = ("is_completed", "form_type")

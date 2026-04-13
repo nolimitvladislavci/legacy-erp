@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0013_grosmarkt_partner'),
+        ("companies", "0013_grosmarkt_partner"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='company',
-            name='grosmarkt_description',
-            field=models.TextField(blank=True, help_text='Kratki opis za grosmarkt-online.eu kartice', max_length=300, verbose_name='Grosmarkt Beschreibung (DE)'),
+            model_name="company",
+            name="grosmarkt_description",
+            field=models.TextField(
+                blank=True,
+                help_text="Kratki opis za grosmarkt-online.eu kartice",
+                max_length=300,
+                verbose_name="Grosmarkt Beschreibung (DE)",
+            ),
         ),
     ]

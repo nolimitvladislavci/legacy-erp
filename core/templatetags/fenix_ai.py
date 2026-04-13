@@ -8,6 +8,7 @@ Korištenje:
     {% ai_status_pill "done" %}
     {% ai_summary_widget company=company limit=5 %}
 """
+
 from django import template
 from django.utils.html import format_html, mark_safe
 
@@ -21,9 +22,7 @@ def ai_badge(action, confidence=None, model=None, review_url=None):
     """
     conf_html = ""
     if confidence is not None:
-        conf_html = format_html(
-            ' <span style="font-weight:700;opacity:.85;">({}%)</span>', confidence
-        )
+        conf_html = format_html(' <span style="font-weight:700;opacity:.85;">({}%)</span>', confidence)
 
     review_html = ""
     if review_url:
@@ -54,10 +53,10 @@ def ai_status_pill(status):
     Status pill: pending | processing | done | failed
     """
     cfg = {
-        "pending":    ("&#x23F3;", "rgba(245,158,11,.12)", "#d97706"),
-        "processing": ("&#x2699;",  "rgba(59,130,246,.12)", "#2563eb"),
-        "done":       ("&#x2713;",  "rgba(34,197,94,.12)",  "#16a34a"),
-        "failed":     ("&#x2717;",  "rgba(239,68,68,.12)",  "#dc2626"),
+        "pending": ("&#x23F3;", "rgba(245,158,11,.12)", "#d97706"),
+        "processing": ("&#x2699;", "rgba(59,130,246,.12)", "#2563eb"),
+        "done": ("&#x2713;", "rgba(34,197,94,.12)", "#16a34a"),
+        "failed": ("&#x2717;", "rgba(239,68,68,.12)", "#dc2626"),
     }
     icon, bg, color = cfg.get(status, cfg["pending"])
     return format_html(
@@ -65,7 +64,10 @@ def ai_status_pill(status):
         "border-radius:12px;font-size:.7rem;font-weight:600;"
         'display:inline-flex;align-items:center;gap:.25rem;">'
         "{} {}</span>",
-        bg, color, mark_safe(icon), status,
+        bg,
+        color,
+        mark_safe(icon),
+        status,
     )
 
 
@@ -116,7 +118,7 @@ def ai_inline_note(text, icon="🤖"):
     {% ai_inline_note "Auto-detektirano iz OIB-a" %}
     """
     return format_html(
-        '<small style="color:#7c3aed;font-size:.72rem;display:block;margin-top:.2rem;">'
-        "{} {}</small>",
-        icon, text,
+        '<small style="color:#7c3aed;font-size:.72rem;display:block;margin-top:.2rem;">{} {}</small>',
+        icon,
+        text,
     )

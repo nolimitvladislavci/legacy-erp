@@ -6,38 +6,84 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0042_remove_konjikstol'),
-        ('worktime', '0019_add_personal_allowance'),
+        ("companies", "0042_remove_konjikstol"),
+        ("worktime", "0019_add_personal_allowance"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TimeLogRevision',
+            name="TimeLogRevision",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('changed_at', models.DateTimeField(auto_now_add=True)),
-                ('field_name', models.CharField(max_length=50)),
-                ('old_value', models.CharField(max_length=200)),
-                ('new_value', models.CharField(max_length=200)),
-                ('reason', models.CharField(blank=True, help_text='Obavezno za inspektora rada', max_length=300, verbose_name='Razlog izmjene')),
-                ('disputed_at', models.DateTimeField(blank=True, null=True)),
-                ('dispute_note', models.TextField(blank=True)),
-                ('dispute_resolved', models.BooleanField(default=False)),
-                ('dispute_resolved_at', models.DateTimeField(blank=True, null=True)),
-                ('changed_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='time_revisions_made', to=settings.AUTH_USER_MODEL)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('dispute_resolved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='time_disputes_resolved', to=settings.AUTH_USER_MODEL)),
-                ('disputed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='time_disputes', to=settings.AUTH_USER_MODEL)),
-                ('time_entry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='revisions', to='worktime.timeentry')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("changed_at", models.DateTimeField(auto_now_add=True)),
+                ("field_name", models.CharField(max_length=50)),
+                ("old_value", models.CharField(max_length=200)),
+                ("new_value", models.CharField(max_length=200)),
+                (
+                    "reason",
+                    models.CharField(
+                        blank=True,
+                        help_text="Obavezno za inspektora rada",
+                        max_length=300,
+                        verbose_name="Razlog izmjene",
+                    ),
+                ),
+                ("disputed_at", models.DateTimeField(blank=True, null=True)),
+                ("dispute_note", models.TextField(blank=True)),
+                ("dispute_resolved", models.BooleanField(default=False)),
+                ("dispute_resolved_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "changed_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="time_revisions_made",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
+                (
+                    "dispute_resolved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="time_disputes_resolved",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "disputed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="time_disputes",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "time_entry",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="revisions", to="worktime.timeentry"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Revizija radnog sata',
-                'verbose_name_plural': 'Revizije radnih sati',
-                'ordering': ['-changed_at'],
-                'indexes': [models.Index(fields=['time_entry', '-changed_at'], name='worktime_ti_time_en_1c936c_idx'), models.Index(fields=['company', '-changed_at'], name='worktime_ti_company_985cfd_idx')],
+                "verbose_name": "Revizija radnog sata",
+                "verbose_name_plural": "Revizije radnih sati",
+                "ordering": ["-changed_at"],
+                "indexes": [
+                    models.Index(fields=["time_entry", "-changed_at"], name="worktime_ti_time_en_1c936c_idx"),
+                    models.Index(fields=["company", "-changed_at"], name="worktime_ti_company_985cfd_idx"),
+                ],
             },
         ),
     ]

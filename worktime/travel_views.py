@@ -18,9 +18,11 @@ def travel_order_list(request):
     status_filter = request.GET.get("status")
     if status_filter:
         qs = qs.filter(status=status_filter)
-    return render(request, "worktime/travel_order_list.html", {
-        "orders": qs, "current_status": status_filter,
-        "statuses": TravelOrder.STATUS_CHOICES})
+    return render(
+        request,
+        "worktime/travel_order_list.html",
+        {"orders": qs, "current_status": status_filter, "statuses": TravelOrder.STATUS_CHOICES},
+    )
 
 
 @login_required
@@ -43,28 +45,41 @@ def travel_order_create(request):
         employee_id = request.POST.get("employee")
         if employee_id:
             from django.contrib.auth.models import User
+
             order.employee = User.objects.get(id=employee_id)
         order.save()
         messages.success(request, f"Putni nalog {order.order_number} kreiran.")
         return redirect("worktime:travel_order_detail", pk=order.pk)
     from django.contrib.auth.models import User
+
     employees = User.objects.filter(is_active=True).order_by("last_name")
-    return render(request, "worktime/travel_order_form.html", {
-        "employees": employees, "transport_types": TravelOrder.TRANSPORT_CHOICES})
+    return render(
+        request,
+        "worktime/travel_order_form.html",
+        {"employees": employees, "transport_types": TravelOrder.TRANSPORT_CHOICES},
+    )
 
 
 @login_required
 def travel_order_detail(request, pk):
     company = get_user_company(request)
     order = get_object_or_404(TravelOrder, pk=pk, company=company)
-    can_approve = request.user.is_staff or (hasattr(request.user, "employeeprofile") and request.user.employeeprofile.is_manager)
+    can_approve = request.user.is_staff or (
+        hasattr(request.user, "employeeprofile") and request.user.employeeprofile.is_manager
+    )
     expenses = order.expenses.all()
     expenses_total = sum(e.amount for e in expenses)
-    return render(request, "worktime/travel_order_detail.html", {
-        "order": order, "can_approve": can_approve,
-        "expenses": expenses, "expenses_total": expenses_total,
-        "expense_types": TravelExpense.EXPENSE_TYPES,
-    })
+    return render(
+        request,
+        "worktime/travel_order_detail.html",
+        {
+            "order": order,
+            "can_approve": can_approve,
+            "expenses": expenses,
+            "expenses_total": expenses_total,
+            "expense_types": TravelExpense.EXPENSE_TYPES,
+        },
+    )
 
 
 @login_required
@@ -114,6 +129,7 @@ def travel_expense_add(request, pk):
 def travel_order_pdf(request, pk):
     """Generira print-ready HTML za putni nalog (A4 za ispis/PDF)."""
     from django.http import HttpResponse
+
     company = get_user_company(request)
     order = get_object_or_404(TravelOrder, pk=pk, company=company)
     expenses = order.expenses.all()
@@ -158,16 +174,25 @@ th{background:#f0f0f0;font-weight:bold}
 <tr><td>Dnevnice (%s dana x %s EUR/dan)</td><td style="text-align:right">%s</td></tr>
 <tr><td>Ostali troskovi</td><td style="text-align:right">%s</td></tr>""" % (
         order.order_number,
-        company.name, company.oib or '-',
-        company.address or '', company.zip_code or '', company.city or '',
-        order.order_number, order.get_status_display(),
-        order.employee.get_full_name() if order.employee else '-',
-        order.destination, order.purpose or '-',
-        order.departure_date.strftime('%d.%m.%Y %H:%M') if order.departure_date else '-',
-        order.return_date.strftime('%d.%m.%Y %H:%M') if order.return_date else '-',
+        company.name,
+        company.oib or "-",
+        company.address or "",
+        company.zip_code or "",
+        company.city or "",
+        order.order_number,
+        order.get_status_display(),
+        order.employee.get_full_name() if order.employee else "-",
+        order.destination,
+        order.purpose or "-",
+        order.departure_date.strftime("%d.%m.%Y %H:%M") if order.departure_date else "-",
+        order.return_date.strftime("%d.%m.%Y %H:%M") if order.return_date else "-",
         order.get_transport_type_display(),
-        order.distance_km, order.mileage_rate, order.mileage_total,
-        order.per_diem_days, order.per_diem_rate, order.per_diem_total,
+        order.distance_km,
+        order.mileage_rate,
+        order.mileage_total,
+        order.per_diem_days,
+        order.per_diem_rate,
+        order.per_diem_total,
         order.other_costs,
     )
 
@@ -175,14 +200,20 @@ th{background:#f0f0f0;font-weight:bold}
     if expenses:
         for exp in expenses:
             html += '<tr><td>%s: %s</td><td style="text-align:right">%s</td></tr>' % (
-                exp.get_expense_type_display(), exp.description, exp.amount)
+                exp.get_expense_type_display(),
+                exp.description,
+                exp.amount,
+            )
 
     grand_total = order.total_cost + expenses_total
-    html += """<tr class="total-row"><td><strong>UKUPNO</strong></td><td style="text-align:right"><strong>%s EUR</strong></td></tr>
-</table>""" % grand_total
+    html += (
+        """<tr class="total-row"><td><strong>UKUPNO</strong></td><td style="text-align:right"><strong>%s EUR</strong></td></tr>
+</table>"""
+        % grand_total
+    )
 
     if order.notes:
-        html += '<p><strong>Napomene:</strong> %s</p>' % order.notes
+        html += "<p><strong>Napomene:</strong> %s</p>" % order.notes
 
     html += """
 <div class="signatures">
@@ -191,8 +222,8 @@ th{background:#f0f0f0;font-weight:bold}
 <div class="sig-box"><div class="sig-line">Blagajnik</div></div>
 </div>
 <div class="footer">Ispis: %s | LIMIT Connect — limit-connect.com</div>
-</body></html>""" % timezone.now().strftime('%d.%m.%Y %H:%M')
+</body></html>""" % timezone.now().strftime("%d.%m.%Y %H:%M")
 
-    response = HttpResponse(html, content_type='text/html; charset=utf-8')
-    response['Content-Disposition'] = 'inline; filename="PN-%s.html"' % order.order_number
+    response = HttpResponse(html, content_type="text/html; charset=utf-8")
+    response["Content-Disposition"] = 'inline; filename="PN-%s.html"' % order.order_number
     return response

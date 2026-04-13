@@ -1,4 +1,5 @@
 """Asset Depreciation Engine."""
+
 from datetime import date
 from decimal import Decimal
 
@@ -24,6 +25,7 @@ def calculate_monthly_depreciation(asset):
 def run_monthly_depreciation(company, year, month):
     from konto.models import JournalEntry, KontoAccount, LedgerLine
     from konto.services import _next_entry_number
+
     assets = Asset.objects.filter(company=company, status="active")
     entries = []
     for asset in assets:
@@ -38,22 +40,36 @@ def run_monthly_depreciation(company, year, month):
         remaining = max_dep - asset.accumulated_depreciation
         if monthly_amount > remaining:
             monthly_amount = remaining
-        dep_acct, _ = KontoAccount.objects.get_or_create(company=company, code="4300",
-            defaults={"name": "Amortizacija dugotrajne imovine", "account_type": "expense"})
-        contra_acct, _ = KontoAccount.objects.get_or_create(company=company, code="0290",
-            defaults={"name": "Ispravak vrijednosti imovine", "account_type": "asset"})
+        dep_acct, _ = KontoAccount.objects.get_or_create(
+            company=company,
+            code="4300",
+            defaults={"name": "Amortizacija dugotrajne imovine", "account_type": "expense"},
+        )
+        contra_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code="0290", defaults={"name": "Ispravak vrijednosti imovine", "account_type": "asset"}
+        )
         entry_number = _next_entry_number(company, "DEP")
-        je = JournalEntry.objects.create(company=company, entry_number=entry_number,
+        je = JournalEntry.objects.create(
+            company=company,
+            entry_number=entry_number,
             date=date(year, month, 1),
             description=f"Amortizacija: {asset.name} ({asset.asset_code})",
-            source_type="depreciation", is_posted=True)
+            source_type="depreciation",
+            is_posted=True,
+        )
         LedgerLine.objects.create(journal_entry=je, account=dep_acct, side="debit", amount=monthly_amount)
         LedgerLine.objects.create(journal_entry=je, account=contra_acct, side="credit", amount=monthly_amount)
         asset.accumulated_depreciation += monthly_amount
         asset.current_value = asset.purchase_price - asset.accumulated_depreciation
         asset.last_depreciation_date = date(year, month, 1)
         asset.save(update_fields=["accumulated_depreciation", "current_value", "last_depreciation_date"])
-        DepreciationLog.objects.create(company=company, asset=asset, year=year, month=month,
-            amount=monthly_amount, journal_entry_number=entry_number)
+        DepreciationLog.objects.create(
+            company=company,
+            asset=asset,
+            year=year,
+            month=month,
+            amount=monthly_amount,
+            journal_entry_number=entry_number,
+        )
         entries.append(je)
     return entries

@@ -3,6 +3,7 @@
 Flow: Generate UBL → Validate → Route → Submit
 Each step creates an audit event on the AS4Message.
 """
+
 import logging
 
 from einvoice.models import AS4Message, MessageDirection, MessageStatus
@@ -37,11 +38,14 @@ class OutboundPipeline:
         sender_oib = company.oib if company else ""
 
         # Step 1: Check for existing message
-        existing = AS4Message.objects.filter(
-            invoice=invoice, direction=MessageDirection.OUTBOUND,
-        ).exclude(
-            status__in=[MessageStatus.CANCELLED, MessageStatus.REJECTED]
-        ).first()
+        existing = (
+            AS4Message.objects.filter(
+                invoice=invoice,
+                direction=MessageDirection.OUTBOUND,
+            )
+            .exclude(status__in=[MessageStatus.CANCELLED, MessageStatus.REJECTED])
+            .first()
+        )
         if existing and not existing.is_terminal:
             logger.info(f"Invoice {invoice.number} already has active AS4Message {existing.id}")
             return existing

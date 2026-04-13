@@ -3,8 +3,8 @@ import sys
 
 import django
 
-sys.path.append('/var/www/fina-connect')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+sys.path.append("/var/www/fina-connect")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
 from django.db import transaction
@@ -29,10 +29,10 @@ def apply_integrity():
         print(f"  - Uklonjeno {count_empty} računa bez stavki i {count_zero} računa s 0.00 iznosom.")
 
     # 2. Arhitektonska zaštita u views.py
-    views_path = '/var/www/fina-connect/invoicing/views.py'
+    views_path = "/var/www/fina-connect/invoicing/views.py"
     os.system(f"cp {views_path} {views_path}.integrity.bak")
 
-    with open(views_path, 'r', encoding='utf-8') as f:
+    with open(views_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     # Logika koja provjerava prisutnost stavki prije finalnog save-a
@@ -47,11 +47,12 @@ def apply_integrity():
     if "if not items_data" not in content:
         # Ubacujemo provjeru u invoice_save funkciju
         content = content.replace("def invoice_save(request):", f"def invoice_save(request):{item_validation}")
-        with open(views_path, 'w', encoding='utf-8') as f:
+        with open(views_path, "w", encoding="utf-8") as f:
             f.write(content)
         print("  - Backend zaštita protiv praznih računa implementirana.")
 
     print("✅ Fakturiranje je sada osigurano na razini poslovne logike.")
+
 
 if __name__ == "__main__":
     apply_integrity()

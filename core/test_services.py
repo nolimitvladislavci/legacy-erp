@@ -1,8 +1,9 @@
 """Tests for core.services — dashboard stats unit tests."""
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from core.services import (
+from core.services_dashboard import (
     get_company_dashboard_stats,
     get_superadmin_stats,
     start_impersonation,
@@ -15,6 +16,7 @@ User = get_user_model()
 class TestCompanyDashboardStats(TestCase):
     def setUp(self):
         from companies.models import Company
+
         self.company = Company.objects.create(name="Test Dashboard Co", oib="88888888888")
         self.user = User.objects.create_user("dashtest", password="test123")
 
@@ -45,6 +47,7 @@ class TestSuperadminStats(TestCase):
 class TestImpersonation(TestCase):
     def setUp(self):
         from companies.models import Company
+
         self.admin = User.objects.create_user("admin_imp", password="t", is_staff=True)
         self.regular = User.objects.create_user("regular_imp", password="t")
         self.company = Company.objects.create(name="Target Co", oib="99999999991")

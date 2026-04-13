@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0005_assign_company_to_existing'),
+        ("worktime", "0005_assign_company_to_existing"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='timeentry',
-            name='rejection_reason',
-            field=models.TextField(blank=True, verbose_name='Razlog odbijanja'),
+            model_name="timeentry",
+            name="rejection_reason",
+            field=models.TextField(blank=True, verbose_name="Razlog odbijanja"),
         ),
     ]

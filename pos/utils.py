@@ -1,11 +1,12 @@
 """
 POS Utility functions — QR kodovi, formatiranje, pomoćne funkcije.
 """
+
 import base64
 import logging
 from io import BytesIO
 
-logger = logging.getLogger('pos')
+logger = logging.getLogger("pos")
 
 
 def generate_fina_qr_base64(zki, receipt_date, total_amount):
@@ -30,18 +31,16 @@ def generate_fina_qr_base64(zki, receipt_date, total_amount):
         import qrcode
 
         # Format datuma: YYYYMMDD_HHMM
-        if hasattr(receipt_date, 'astimezone'):
-            formatted_date = receipt_date.astimezone().strftime('%Y%m%d_%H%M')
+        if hasattr(receipt_date, "astimezone"):
+            formatted_date = receipt_date.astimezone().strftime("%Y%m%d_%H%M")
         else:
-            formatted_date = receipt_date.strftime('%Y%m%d_%H%M')
+            formatted_date = receipt_date.strftime("%Y%m%d_%H%M")
 
         # Iznos: uvijek 2 decimale, točka kao separator
-        formatted_amount = '%.2f' % float(total_amount)
+        formatted_amount = "%.2f" % float(total_amount)
 
         # URL po FINA specifikaciji
-        qr_data = 'https://porezna.gov.hr/rn?z=%s&d=%s&i=%s' % (
-            zki, formatted_date, formatted_amount
-        )
+        qr_data = "https://porezna.gov.hr/rn?z=%s&d=%s&i=%s" % (zki, formatted_date, formatted_amount)
 
         qr = qrcode.QRCode(
             version=1,
@@ -52,14 +51,14 @@ def generate_fina_qr_base64(zki, receipt_date, total_amount):
         qr.add_data(qr_data)
         qr.make(fit=True)
 
-        img = qr.make_image(fill_color='black', back_color='white')
+        img = qr.make_image(fill_color="black", back_color="white")
         buf = BytesIO()
-        img.save(buf, format='PNG')
+        img.save(buf, format="PNG")
         buf.seek(0)
         return base64.b64encode(buf.read()).decode()
 
     except (ValueError, TypeError) as e:
-        logger.error('FINA QR generiranje neuspješno: %s', e)
+        logger.error("FINA QR generiranje neuspješno: %s", e)
         return None
 
 

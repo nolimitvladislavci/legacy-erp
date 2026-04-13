@@ -11,6 +11,7 @@ Koristi se:
 3. Tjedni compliance check
 4. WhatsApp notifikacija: "Pronašli smo N prilika za uštedu od X EUR"
 """
+
 import logging
 from decimal import Decimal
 
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── MAIN ENTRY POINT ─────────────────────────────────────────────────────────
+
 
 def match_opportunities_for_company(company):
     """
@@ -47,14 +49,18 @@ def match_opportunities_for_company(company):
     now = timezone.now().date()
 
     # Dohvati sve aktivne olakšice (neistekle)
-    opportunities = LegalOpportunity.objects.filter(
-        is_active=True,
-    ).filter(
-        Q(deadline__isnull=True) | Q(deadline__gte=now),
-    ).select_related('impact_domain', 'regulatory_update')
+    opportunities = (
+        LegalOpportunity.objects.filter(
+            is_active=True,
+        )
+        .filter(
+            Q(deadline__isnull=True) | Q(deadline__gte=now),
+        )
+        .select_related("impact_domain", "regulatory_update")
+    )
 
     matches = []
-    total_savings = Decimal('0')
+    total_savings = Decimal("0")
 
     for opp in opportunities:
         # ── Provjera domain match ────────────────────────────────────
@@ -73,54 +79,59 @@ def match_opportunities_for_company(company):
             company=company,
             opportunity=opp,
             defaults={
-                'calculated_savings': savings,
-                'status': 'identified',
+                "calculated_savings": savings,
+                "status": "identified",
             },
         )
 
         if not created:
             # Reaktiviraj expired match ili ažuriraj savings
-            if match.status == 'expired':
-                match.status = 'identified'
+            if match.status == "expired":
+                match.status = "identified"
             if match.calculated_savings != savings:
                 match.calculated_savings = savings
-            match.save(update_fields=['calculated_savings', 'status'])
+            match.save(update_fields=["calculated_savings", "status"])
 
         if savings > 0:
             total_savings += savings
-            matches.append({
-                'opportunity_id': str(opp.pk),
-                'name': opp.name,
-                'type': opp.get_opportunity_type_display(),
-                'type_key': opp.opportunity_type,
-                'savings_eur': float(savings),
-                'deadline': str(opp.deadline) if opp.deadline else None,
-                'days_left': (opp.deadline - now).days if opp.deadline else None,
-                'match_id': str(match.pk),
-                'is_new': created,
-                'description': opp.description[:200],
-                'url': opp.url,
-            })
+            matches.append(
+                {
+                    "opportunity_id": str(opp.pk),
+                    "name": opp.name,
+                    "type": opp.get_opportunity_type_display(),
+                    "type_key": opp.opportunity_type,
+                    "savings_eur": float(savings),
+                    "deadline": str(opp.deadline) if opp.deadline else None,
+                    "days_left": (opp.deadline - now).days if opp.deadline else None,
+                    "match_id": str(match.pk),
+                    "is_new": created,
+                    "description": opp.description[:200],
+                    "url": opp.url,
+                }
+            )
 
     result = {
-        'company_id': str(company.pk),
-        'company_name': company.name,
-        'total_savings': total_savings,
-        'count': len(matches),
-        'matches': sorted(matches, key=lambda m: m['savings_eur'], reverse=True),
-        'scanned_at': timezone.now().isoformat(),
+        "company_id": str(company.pk),
+        "company_name": company.name,
+        "total_savings": total_savings,
+        "count": len(matches),
+        "matches": sorted(matches, key=lambda m: m["savings_eur"], reverse=True),
+        "scanned_at": timezone.now().isoformat(),
     }
 
     if matches:
         logger.info(
-            '[BORG] %s: %d prilika, %.2f EUR ustede',
-            company.name, len(matches), total_savings,
+            "[BORG] %s: %d prilika, %.2f EUR ustede",
+            company.name,
+            len(matches),
+            total_savings,
         )
 
     return result
 
 
 # ── Backward-compatible aliases ──────────────────────────────────────────────
+
 
 def scan_company(company):
     """Alias za match_opportunities_for_company()."""
@@ -135,25 +146,28 @@ def scan_all_companies():
     companies = Company.objects.all()
     total_companies = companies.count()
 
-    logger.info('[BORG] Pocinjem scan %d firmi...', total_companies)
+    logger.info("[BORG] Pocinjem scan %d firmi...", total_companies)
 
     for i, company in enumerate(companies, 1):
         try:
             result = match_opportunities_for_company(company)
-            if result['count'] > 0:
+            if result["count"] > 0:
                 results.append(result)
         except Exception as e:
-            logger.warning('[BORG] Scan failed za %s: %s', company.name, e)
+            logger.warning("[BORG] Scan failed za %s: %s", company.name, e)
 
         if i % 20 == 0:
-            logger.info('[BORG] Progress: %d/%d firmi', i, total_companies)
+            logger.info("[BORG] Progress: %d/%d firmi", i, total_companies)
 
-    total_savings = sum(r['total_savings'] for r in results)
-    total_matches = sum(r['count'] for r in results)
+    total_savings = sum(r["total_savings"] for r in results)
+    total_matches = sum(r["count"] for r in results)
 
     logger.info(
-        '[BORG] Scan zavrsen: %d/%d firmi s prilikama, %d matcheva, %.2f EUR ukupno',
-        len(results), total_companies, total_matches, total_savings,
+        "[BORG] Scan zavrsen: %d/%d firmi s prilikama, %d matcheva, %.2f EUR ukupno",
+        len(results),
+        total_companies,
+        total_matches,
+        total_savings,
     )
     return results
 
@@ -165,7 +179,7 @@ def generate_onboarding_report(company):
     """
     result = match_opportunities_for_company(company)
 
-    if result['count'] == 0:
+    if result["count"] == 0:
         return (
             f"Dobrodosli u LIMIT Connect, {company.name}!\n\n"
             f"Trenutno nema aktivnih olaksica za vas profil, "
@@ -180,13 +194,13 @@ def generate_onboarding_report(company):
         "",
     ]
 
-    for i, m in enumerate(result['matches'][:5], 1):
-        deadline_str = f" (rok: {m['deadline']})" if m['deadline'] else ""
+    for i, m in enumerate(result["matches"][:5], 1):
+        deadline_str = f" (rok: {m['deadline']})" if m["deadline"] else ""
         lines.append(f"{i}. *{m['name']}*")
         lines.append(f"   {m['type']} | Usteda: {m['savings_eur']:,.2f} EUR{deadline_str}")
         lines.append("")
 
-    if result['count'] > 5:
+    if result["count"] > 5:
         lines.append(f"... i jos {result['count'] - 5} prilika.")
         lines.append("")
 
@@ -197,6 +211,7 @@ def generate_onboarding_report(company):
 
 
 # ── INTERNAL: Domain matching ────────────────────────────────────────────────
+
 
 def _company_matches_opportunity(company, opportunity):
     """
@@ -228,29 +243,29 @@ def _domain_matches(company, domain):
     Ključno: nkd_code=None → NE isključuj (ne možemo potvrditi da ne pripada).
     """
     # Country check
-    if domain.country != '*' and getattr(company, 'country', 'HR') != domain.country:
+    if domain.country != "*" and getattr(company, "country", "HR") != domain.country:
         return False
 
     # NKD check — FK na NKDCode objekt
     if domain.nkd_codes:
-        nkd_fk = getattr(company, 'nkd_code', None)
+        nkd_fk = getattr(company, "nkd_code", None)
         if nkd_fk is not None:
-            company_nkd = nkd_fk.code if hasattr(nkd_fk, 'code') else str(nkd_fk)
+            company_nkd = nkd_fk.code if hasattr(nkd_fk, "code") else str(nkd_fk)
             if company_nkd not in domain.nkd_codes:
                 return False
         # nkd_fk is None → propusti (ne isključuj nepoznato)
 
     # Business type check
     if domain.business_types:
-        if getattr(company, 'business_type', '') not in domain.business_types:
+        if getattr(company, "business_type", "") not in domain.business_types:
             return False
 
     # VAT check
-    if domain.requires_vat and not getattr(company, 'is_vat_registered', True):
+    if domain.requires_vat and not getattr(company, "is_vat_registered", True):
         return False
 
     # Employee count check
-    num_emp = getattr(company, 'num_employees', None)
+    num_emp = getattr(company, "num_employees", None)
     if num_emp is not None:
         if domain.min_employees and num_emp < domain.min_employees:
             return False
@@ -262,34 +277,35 @@ def _domain_matches(company, domain):
 
 # ── INTERNAL: Eligibility criteria ───────────────────────────────────────────
 
+
 def _check_eligibility(company, criteria):
     """Provjeri JSON eligibility_criteria s firminim podacima."""
     if not criteria:
         return True
 
     # Max employees
-    max_emp = criteria.get('max_employees')
+    max_emp = criteria.get("max_employees")
     if max_emp is not None:
-        num_emp = getattr(company, 'num_employees', None)
+        num_emp = getattr(company, "num_employees", None)
         if num_emp is not None and num_emp > max_emp:
             return False
 
     # Min annual revenue
-    min_revenue = criteria.get('min_annual_revenue')
+    min_revenue = criteria.get("min_annual_revenue")
     if min_revenue:
-        revenue = getattr(company, 'annual_revenue', None)
+        revenue = getattr(company, "annual_revenue", None)
         if revenue is not None and revenue < min_revenue:
             return False
 
     # Requires VAT
-    if criteria.get('requires_vat'):
-        if not getattr(company, 'is_vat_registered', True):
+    if criteria.get("requires_vat"):
+        if not getattr(company, "is_vat_registered", True):
             return False
 
     # Min employees
-    min_emp = criteria.get('min_employees')
+    min_emp = criteria.get("min_employees")
     if min_emp:
-        num_emp = getattr(company, 'num_employees', None)
+        num_emp = getattr(company, "num_employees", None)
         if num_emp is not None and num_emp < min_emp:
             return False
 
@@ -297,6 +313,7 @@ def _check_eligibility(company, criteria):
 
 
 # ── INTERNAL: Savings calculation ────────────────────────────────────────────
+
 
 def _calculate_savings(company, opportunity):
     """
@@ -310,22 +327,22 @@ def _calculate_savings(company, opportunity):
     if formula:
         try:
             context = {
-                'num_employees': getattr(company, 'num_employees', 5) or 5,
-                'annual_revenue': float(getattr(company, 'annual_revenue', 100000) or 100000),
-                'bruto_placa': 1200,
-                'min': min,
-                'max': max,
-                'abs': abs,
+                "num_employees": getattr(company, "num_employees", 5) or 5,
+                "annual_revenue": float(getattr(company, "annual_revenue", 100000) or 100000),
+                "bruto_placa": 1200,
+                "min": min,
+                "max": max,
+                "abs": abs,
             }
             result = eval(formula, {"__builtins__": {}}, context)  # noqa: S307
-            calculated = Decimal(str(result)).quantize(Decimal('0.01'))
+            calculated = Decimal(str(result)).quantize(Decimal("0.01"))
             if calculated > 0:
                 return calculated
         except (ValueError, TypeError) as e:
-            logger.debug('Formula eval failed za %s: %s', opportunity.name, e)
+            logger.debug("Formula eval failed za %s: %s", opportunity.name, e)
 
     # Fallback na typical
     if opportunity.typical_savings_eur and opportunity.typical_savings_eur > 0:
         return opportunity.typical_savings_eur
 
-    return Decimal('0')
+    return Decimal("0")

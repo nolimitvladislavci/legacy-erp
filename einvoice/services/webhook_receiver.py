@@ -3,6 +3,7 @@
 Instead of polling every 60s, the posrednik can push status updates to us.
 Security: HMAC signature verification on every payload.
 """
+
 import hashlib
 import hmac
 import logging
@@ -58,7 +59,7 @@ def process_webhook_payload(payload):
         "errorMessage": null
     }
     """
-    event_type = payload.get("event", "")
+    payload.get("event", "")
     external_id = payload.get("messageId", "")
     new_status_raw = payload.get("status", "")
     error_msg = payload.get("errorMessage", "")
@@ -126,6 +127,7 @@ def process_webhook_payload(payload):
         # Archive on delivery
         try:
             from einvoice.services.archive_service import ArchiveService
+
             ArchiveService().archive_message(message)
         except ImportError as e:
             logger.error(f"Archive failed after webhook delivery: {e}")

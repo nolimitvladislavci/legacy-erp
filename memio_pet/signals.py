@@ -8,6 +8,7 @@ Svaki put kad se:
   - Review verificira
 ... automatski se kreira VerificationLog sa SHA-256 snapshotom.
 """
+
 import hashlib
 import json
 import logging
@@ -18,9 +19,12 @@ from django.dispatch import receiver
 logger = logging.getLogger("memio_pet")
 
 
-def _create_verification_log(verification_type, snapshot_data, animal=None, breeder=None, veterinar=None, verified_by="System (auto)"):
+def _create_verification_log(
+    verification_type, snapshot_data, animal=None, breeder=None, veterinar=None, verified_by="System (auto)"
+):
     """Helper za kreiranje VerificationLog s SHA-256."""
     from memio_pet.models import VerificationLog
+
     raw = json.dumps(snapshot_data, sort_keys=True, ensure_ascii=False, default=str)
     sha = hashlib.sha256(raw.encode()).hexdigest()
 
@@ -41,10 +45,15 @@ def on_breeder_save(sender, instance, created, **kwargs):
     """Kad se breeder verificira (is_cro_validated promijeni u True)."""
     if instance.is_cro_validated:
         from memio_pet.models import VerificationLog
-        exists = VerificationLog.objects.using("memio_pets").filter(
-            breeder=instance,
-            verification_type="breeder_oib",
-        ).exists()
+
+        exists = (
+            VerificationLog.objects.using("memio_pets")
+            .filter(
+                breeder=instance,
+                verification_type="breeder_oib",
+            )
+            .exists()
+        )
         if not exists:
             _create_verification_log(
                 verification_type="breeder_oib",
@@ -122,53 +131,57 @@ def on_animal_chip_registered(sender, instance, created, **kwargs):
         )
 
 
-@receiver(post_save, sender='memio_pet.RawFoodListing')
+@receiver(post_save, sender="memio_pet.RawFoodListing")
 def on_barf_listing_created(sender, instance, created, **kwargs):
     """Nova BARF ponuda → notificiraj uzgajivače u radijusu."""
-    if created and instance.status == 'available':
+    if created and instance.status == "available":
         try:
             from memio_pet.tasks import notify_barf_breeders
+
             notify_barf_breeders.delay(instance.pk)
         except ImportError as e:
             import logging
-            logging.getLogger('memio_pet').warning('BARF signal: %s', e)
+
+            logging.getLogger("memio_pet").warning("BARF signal: %s", e)
 
 
-@receiver(post_save, sender='memio_pet.AnimalProfile')
+@receiver(post_save, sender="memio_pet.AnimalProfile")
 def on_animal_status_uginulo(sender, instance, **kwargs):
     """Kad status = uginulo → kreiraj MemorialProfile automatski."""
-    if instance.status != 'uginulo':
+    if instance.status != "uginulo":
         return
 
     from memio_pet.models import MemorialProfile
-    db = 'memio_pets'
+
+    db = "memio_pets"
     memorial, created = MemorialProfile.objects.using(db).get_or_create(
         animal=instance,
         defaults={
-            'date_of_death': instance.updated_at.date()
-            if hasattr(instance, 'updated_at') and instance.updated_at
+            "date_of_death": instance.updated_at.date()
+            if hasattr(instance, "updated_at") and instance.updated_at
             else None,
-        }
+        },
     )
     if created:
         logger.info("MemorialProfile kreiran za %s (pk=%s)", instance.name, instance.pk)
         # Email vlasniku
         try:
             from django.core.mail import send_mail
+
             breeder = instance.breeder
             if breeder and breeder.email:
                 identifier = instance.chip_number or instance.ear_tag
                 send_mail(
-                    subject=f'Memorijal za {instance.name} — Memio.pet',
+                    subject=f"Memorijal za {instance.name} — Memio.pet",
                     message=(
-                        f'Dragi {breeder.name},\n\n'
-                        f'Stranica sjećanja za {instance.name} je kreirana:\n'
-                        f'https://memio.pet/pas/{identifier}/\n\n'
-                        f'Možete dodati posmrtnu poruku i urediti memorijal.\n\n'
-                        f'Naše najdublje sućuti.\n'
-                        f'— Memio.pet tim'
+                        f"Dragi {breeder.name},\n\n"
+                        f"Stranica sjećanja za {instance.name} je kreirana:\n"
+                        f"https://memio.pet/pas/{identifier}/\n\n"
+                        f"Možete dodati posmrtnu poruku i urediti memorijal.\n\n"
+                        f"Naše najdublje sućuti.\n"
+                        f"— Memio.pet tim"
                     ),
-                    from_email='noreply@memio.pet',
+                    from_email="noreply@memio.pet",
                     recipient_list=[breeder.email],
                     fail_silently=True,
                 )
@@ -177,6 +190,7 @@ def on_animal_status_uginulo(sender, instance, **kwargs):
         # Celery podsjetnik za zakonsku odjavu (10 dana)
         try:
             from memio_pet.tasks import send_odjava_reminder
+
             send_odjava_reminder.apply_async(
                 args=[str(instance.pk)],
                 countdown=10 * 24 * 3600,

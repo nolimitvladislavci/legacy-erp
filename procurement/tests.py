@@ -1,4 +1,5 @@
 """Tests for Procurement module."""
+
 from decimal import Decimal
 
 from django.test import TestCase

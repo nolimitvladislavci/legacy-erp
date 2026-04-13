@@ -5,48 +5,95 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('appointments', '0003_bookingresource_appointment_appointment_type_and_more'),
+        ("appointments", "0003_bookingresource_appointment_appointment_type_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BookingService',
+            name="BookingService",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, verbose_name='Naziv usluge (npr. Kontrola vida, Dijagnostika)')),
-                ('description', models.TextField(blank=True, verbose_name='Opis usluge')),
-                ('duration', models.DurationField(verbose_name='Trajanje usluge (HH:MM:SS)')),
-                ('price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cijena (EUR)')),
-                ('resource_type', models.CharField(choices=[('ljudstvo', 'Ljudski resurs (Radnik, Majstor)'), ('nekretnina', 'Nekretnina (Soba, Garsonjera, Restoran)'), ('oprema', 'Oprema / Vozilo / Aparat')], default='ljudstvo', max_length=50, verbose_name='Vezano za tip resursa')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivno za javnost')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "name",
+                    models.CharField(max_length=150, verbose_name="Naziv usluge (npr. Kontrola vida, Dijagnostika)"),
+                ),
+                ("description", models.TextField(blank=True, verbose_name="Opis usluge")),
+                ("duration", models.DurationField(verbose_name="Trajanje usluge (HH:MM:SS)")),
+                (
+                    "price",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True, verbose_name="Cijena (EUR)"
+                    ),
+                ),
+                (
+                    "resource_type",
+                    models.CharField(
+                        choices=[
+                            ("ljudstvo", "Ljudski resurs (Radnik, Majstor)"),
+                            ("nekretnina", "Nekretnina (Soba, Garsonjera, Restoran)"),
+                            ("oprema", "Oprema / Vozilo / Aparat"),
+                        ],
+                        default="ljudstvo",
+                        max_length=50,
+                        verbose_name="Vezano za tip resursa",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivno za javnost")),
             ],
             options={
-                'verbose_name': 'Usluga',
-                'verbose_name_plural': 'Usluge',
+                "verbose_name": "Usluga",
+                "verbose_name_plural": "Usluge",
             },
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='service',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='appointments.bookingservice', verbose_name='Odabrana usluga'),
+            model_name="appointment",
+            name="service",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="appointments.bookingservice",
+                verbose_name="Odabrana usluga",
+            ),
         ),
         migrations.CreateModel(
-            name='WorkingHours',
+            name="WorkingHours",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('day_of_week', models.IntegerField(choices=[(0, 'Ponedjeljak'), (1, 'Utorak'), (2, 'Srijeda'), (3, 'Četvrtak'), (4, 'Petak'), (5, 'Subota'), (6, 'Nedjelja')], verbose_name='Dan u tjednu')),
-                ('start_time', models.TimeField(verbose_name='Početak rada')),
-                ('end_time', models.TimeField(verbose_name='Kraj rada')),
-                ('is_day_off', models.BooleanField(default=False, verbose_name='Neradni dan')),
-                ('resource', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='working_hours', to='appointments.bookingresource', verbose_name='Resurs')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "day_of_week",
+                    models.IntegerField(
+                        choices=[
+                            (0, "Ponedjeljak"),
+                            (1, "Utorak"),
+                            (2, "Srijeda"),
+                            (3, "Četvrtak"),
+                            (4, "Petak"),
+                            (5, "Subota"),
+                            (6, "Nedjelja"),
+                        ],
+                        verbose_name="Dan u tjednu",
+                    ),
+                ),
+                ("start_time", models.TimeField(verbose_name="Početak rada")),
+                ("end_time", models.TimeField(verbose_name="Kraj rada")),
+                ("is_day_off", models.BooleanField(default=False, verbose_name="Neradni dan")),
+                (
+                    "resource",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="working_hours",
+                        to="appointments.bookingresource",
+                        verbose_name="Resurs",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Radno vrijeme',
-                'verbose_name_plural': 'Radna vremena',
-                'ordering': ['resource', 'day_of_week'],
-                'unique_together': {('resource', 'day_of_week')},
+                "verbose_name": "Radno vrijeme",
+                "verbose_name_plural": "Radna vremena",
+                "ordering": ["resource", "day_of_week"],
+                "unique_together": {("resource", "day_of_week")},
             },
         ),
     ]

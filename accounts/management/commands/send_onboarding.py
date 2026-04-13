@@ -6,6 +6,7 @@ Usage:
     python manage.py send_onboarding <company_uuid> --dry-run
     python manage.py send_onboarding <company_uuid> --password CustomPass123!
 """
+
 import secrets
 import string
 
@@ -70,9 +71,7 @@ class Command(BaseCommand):
         mode_label = "DRY RUN" if dry_run else "LIVE"
         self.stdout.write(f"Mode: {mode_label}\n")
 
-        profiles = UserProfile.objects.filter(
-            company=company
-        ).select_related("user")
+        profiles = UserProfile.objects.filter(company=company).select_related("user")
 
         if not profiles.exists():
             self.stdout.write(self.style.WARNING("No users found for this company."))
@@ -85,16 +84,12 @@ class Command(BaseCommand):
             user = profile.user
 
             if user.last_login is not None and not force:
-                self.stdout.write(
-                    f"  SKIP  {user.username} ({user.email}) -- already logged in ({user.last_login})"
-                )
+                self.stdout.write(f"  SKIP  {user.username} ({user.email}) -- already logged in ({user.last_login})")
                 skipped_count += 1
                 continue
 
             if not user.email:
-                self.stdout.write(
-                    self.style.WARNING(f"  SKIP  {user.username} -- no email address")
-                )
+                self.stdout.write(self.style.WARNING(f"  SKIP  {user.username} -- no email address"))
                 skipped_count += 1
                 continue
 
@@ -109,9 +104,7 @@ class Command(BaseCommand):
             }
 
             if dry_run:
-                self.stdout.write(
-                    f"  WOULD SEND  {user.username} <{user.email}> (pass: {temp_password})"
-                )
+                self.stdout.write(f"  WOULD SEND  {user.username} <{user.email}> (pass: {temp_password})")
                 sent_count += 1
                 continue
 
@@ -120,9 +113,7 @@ class Command(BaseCommand):
             user.save(update_fields=["password"])
 
             # Render HTML email
-            html_message = render_to_string(
-                "email/welcome_onboarding.html", context
-            )
+            html_message = render_to_string("email/welcome_onboarding.html", context)
             plain_message = (
                 f"Dobrodosli u LIMIT Connect, {user_name}!\n\n"
                 f"Tvrtka: {company.name}\n"
@@ -141,23 +132,13 @@ class Command(BaseCommand):
                     html_message=html_message,
                     fail_silently=False,
                 )
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"  SENT  {user.username} <{user.email}>"
-                    )
-                )
+                self.stdout.write(self.style.SUCCESS(f"  SENT  {user.username} <{user.email}>"))
                 sent_count += 1
             except Exception as e:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"  FAIL  {user.username} <{user.email}> -- {e}"
-                    )
-                )
+                self.stdout.write(self.style.ERROR(f"  FAIL  {user.username} <{user.email}> -- {e}"))
 
         action = "Would send" if dry_run else "Sent"
         self.stdout.write(f"\n{action}: {sent_count}")
         self.stdout.write(f"Skipped: {skipped_count}")
         if dry_run:
-            self.stdout.write(self.style.WARNING(
-                "\nThis was a dry run. Use without --dry-run to actually send."
-            ))
+            self.stdout.write(self.style.WARNING("\nThis was a dry run. Use without --dry-run to actually send."))

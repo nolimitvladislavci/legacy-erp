@@ -5,30 +5,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0027_dunning_history'),
+        ("invoicing", "0027_dunning_history"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='invoice_type',
-            field=models.CharField(choices=[('racun', 'Račun'), ('avansni', 'Avansni račun (predujam)'), ('storno', 'Storno račun'), ('odobrenje', 'Knjižno odobrenje'), ('zaduzenje', 'Knjižno zaduženje'), ('zbirni', 'Zbirni račun'), ('vlastita_potrosnja', 'Vlastita potrošnja'), ('zavrsni', 'Završni račun')], default='racun', max_length=30, verbose_name='Vrsta računa'),
+            model_name="invoice",
+            name="invoice_type",
+            field=models.CharField(
+                choices=[
+                    ("racun", "Račun"),
+                    ("avansni", "Avansni račun (predujam)"),
+                    ("storno", "Storno račun"),
+                    ("odobrenje", "Knjižno odobrenje"),
+                    ("zaduzenje", "Knjižno zaduženje"),
+                    ("zbirni", "Zbirni račun"),
+                    ("vlastita_potrosnja", "Vlastita potrošnja"),
+                    ("zavrsni", "Završni račun"),
+                ],
+                default="racun",
+                max_length=30,
+                verbose_name="Vrsta računa",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='place_of_supply',
-            field=models.CharField(choices=[('domestic', 'Tuzemni'), ('intra_eu_b2b', 'Intra-EU B2B (reverse charge)'), ('intra_eu_b2c', 'Intra-EU B2C (OSS)'), ('export', 'Izvoz (izvan EU)')], default='domestic', max_length=20, verbose_name='Mjesto oporezivanja'),
+            model_name="invoice",
+            name="place_of_supply",
+            field=models.CharField(
+                choices=[
+                    ("domestic", "Tuzemni"),
+                    ("intra_eu_b2b", "Intra-EU B2B (reverse charge)"),
+                    ("intra_eu_b2c", "Intra-EU B2C (OSS)"),
+                    ("export", "Izvoz (izvan EU)"),
+                ],
+                default="domestic",
+                max_length=20,
+                verbose_name="Mjesto oporezivanja",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='related_invoice',
-            field=models.ForeignKey(blank=True, help_text='Za storno → original, za završni → avansni', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='related_invoices', to='invoicing.invoice', verbose_name='Povezani račun'),
+            model_name="invoice",
+            name="related_invoice",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Za storno → original, za završni → avansni",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="related_invoices",
+                to="invoicing.invoice",
+                verbose_name="Povezani račun",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='tax_classification',
-            field=models.CharField(choices=[('R1', 'R1 — obveznik PDV-a'), ('R2', 'R2 — mali porezni obveznik')], default='R1', max_length=5, verbose_name='Porezna oznaka'),
+            model_name="invoice",
+            name="tax_classification",
+            field=models.CharField(
+                choices=[("R1", "R1 — obveznik PDV-a"), ("R2", "R2 — mali porezni obveznik")],
+                default="R1",
+                max_length=5,
+                verbose_name="Porezna oznaka",
+            ),
         ),
     ]

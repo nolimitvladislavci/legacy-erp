@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0018_fix_mileage_de'),
+        ("worktime", "0018_fix_mileage_de"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='employeeprofile',
-            name='personal_allowance',
-            field=models.DecimalField(decimal_places=2, default=Decimal('560.00'), help_text='Zakonski: 560 EUR bazni. Uvecani za djecu, invalidnost, etc.', max_digits=10, verbose_name='Osobni odbitak (EUR/mj)'),
+            model_name="employeeprofile",
+            name="personal_allowance",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("560.00"),
+                help_text="Zakonski: 560 EUR bazni. Uvecani za djecu, invalidnost, etc.",
+                max_digits=10,
+                verbose_name="Osobni odbitak (EUR/mj)",
+            ),
         ),
     ]

@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('borg_ops', '0002_cardactivity_is_public_facing_and_more'),
+        ("borg_ops", "0002_cardactivity_is_public_facing_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cardactivity',
-            name='is_public_facing',
-            field=models.BooleanField(db_index=True, default=False, help_text='Ako True, ovaj zapis se prikazuje na javnom QR traceability linka.', verbose_name='Javno vidljivo'),
+            model_name="cardactivity",
+            name="is_public_facing",
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                help_text="Ako True, ovaj zapis se prikazuje na javnom QR traceability linka.",
+                verbose_name="Javno vidljivo",
+            ),
         ),
         migrations.AlterField(
-            model_name='cardactivity',
-            name='is_system_generated',
-            field=models.BooleanField(db_index=True, default=True, help_text='Ako False, zapis je ručno unio korisnik i ne smije biti javno vidljiv.', verbose_name='Generirano od sustava'),
+            model_name="cardactivity",
+            name="is_system_generated",
+            field=models.BooleanField(
+                db_index=True,
+                default=True,
+                help_text="Ako False, zapis je ručno unio korisnik i ne smije biti javno vidljiv.",
+                verbose_name="Generirano od sustava",
+            ),
         ),
     ]

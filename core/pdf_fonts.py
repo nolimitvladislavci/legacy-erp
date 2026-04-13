@@ -23,14 +23,15 @@ def register_pdf_fonts():
 
     import os
 
-    font_dir = '/usr/share/fonts/truetype/dejavu'
-    regular = os.path.join(font_dir, 'DejaVuSans.ttf')
-    bold = os.path.join(font_dir, 'DejaVuSans-Bold.ttf')
+    font_dir = "/usr/share/fonts/truetype/dejavu"
+    regular = os.path.join(font_dir, "DejaVuSans.ttf")
+    bold = os.path.join(font_dir, "DejaVuSans-Bold.ttf")
 
     if not os.path.exists(regular):
         import logging
+
         logging.getLogger(__name__).warning(
-            'DejaVu Sans font not found at %s — Croatian PDF chars may be broken', regular
+            "DejaVu Sans font not found at %s — Croatian PDF chars may be broken", regular
         )
         return
 
@@ -40,20 +41,20 @@ def register_pdf_fonts():
     from reportlab.pdfbase.ttfonts import TTFont
 
     try:
-        pdfmetrics.registerFont(TTFont('DejaVuSans', regular))
+        pdfmetrics.registerFont(TTFont("DejaVuSans", regular))
     except Exception:
         pass  # Already registered
     try:
-        pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', bold))
+        pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", bold))
     except Exception:
         logger.exception("Unexpected error in: pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', ")
 
     registerFontFamily(
-        'DejaVuSans',
-        normal='DejaVuSans',
-        bold='DejaVuSans-Bold',
-        italic='DejaVuSans',
-        boldItalic='DejaVuSans-Bold',
+        "DejaVuSans",
+        normal="DejaVuSans",
+        bold="DejaVuSans-Bold",
+        italic="DejaVuSans",
+        boldItalic="DejaVuSans-Bold",
     )
 
     # 2. Override xhtml2pdf's DEFAULT_FONT mapping so that any CSS
@@ -63,19 +64,19 @@ def register_pdf_fonts():
         from xhtml2pdf.default import DEFAULT_FONT
 
         overrides = {
-            'dejavu': 'DejaVuSans',
-            'dejavusans': 'DejaVuSans',
-            'dejavu sans': 'DejaVuSans',
-            'helvetica': 'DejaVuSans',
-            'helvetica-bold': 'DejaVuSans-Bold',
-            'helvetica-boldoblique': 'DejaVuSans-Bold',
-            'helvetica-oblique': 'DejaVuSans',
-            'arial': 'DejaVuSans',
-            'sans': 'DejaVuSans',
-            'sansserif': 'DejaVuSans',
-            'sans-serif': 'DejaVuSans',
-            'verdana': 'DejaVuSans',
-            'geneva': 'DejaVuSans',
+            "dejavu": "DejaVuSans",
+            "dejavusans": "DejaVuSans",
+            "dejavu sans": "DejaVuSans",
+            "helvetica": "DejaVuSans",
+            "helvetica-bold": "DejaVuSans-Bold",
+            "helvetica-boldoblique": "DejaVuSans-Bold",
+            "helvetica-oblique": "DejaVuSans",
+            "arial": "DejaVuSans",
+            "sans": "DejaVuSans",
+            "sansserif": "DejaVuSans",
+            "sans-serif": "DejaVuSans",
+            "verdana": "DejaVuSans",
+            "geneva": "DejaVuSans",
         }
         DEFAULT_FONT.update(overrides)
     except ImportError:

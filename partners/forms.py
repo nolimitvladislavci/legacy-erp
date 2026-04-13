@@ -1,4 +1,5 @@
 """Partner forms — validation for partner CRUD."""
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -8,12 +9,21 @@ from .models import Partner
 
 class PartnerForm(forms.ModelForm):
     """Partner create/edit form."""
+
     class Meta:
         model = Partner
         fields = [
-            "name", "email", "phone", "address", "city",
-            "zip_code", "country", "oib", "vat_id",
-            "partner_type", "is_active",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "city",
+            "zip_code",
+            "country",
+            "oib",
+            "vat_id",
+            "partner_type",
+            "is_active",
         ]
         widgets = {
             "address": forms.Textarea(attrs={"rows": 2}),
@@ -27,6 +37,7 @@ class PartnerForm(forms.ModelForm):
 
     def clean_oib(self):
         from core.oib_validator import validate_oib_hr
+
         oib = self.cleaned_data.get("oib", "").strip()
         if not oib:
             return oib
@@ -42,6 +53,7 @@ class PartnerForm(forms.ModelForm):
 
 class PartnerFilterForm(forms.Form):
     """Partner list filter form."""
+
     q = forms.CharField(required=False, label=_("Pretraži"))
     partner_type = forms.ChoiceField(
         choices=[("", _("Svi tipovi")), ("client", _("Klijent")), ("supplier", _("Dobavljač"))],

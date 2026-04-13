@@ -6,33 +6,80 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0039_add_license_token'),
+        ("companies", "0039_add_license_token"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KonjikStol',
+            name="KonjikStol",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('broj', models.PositiveSmallIntegerField(verbose_name='Broj stola')),
-                ('naziv', models.CharField(blank=True, help_text='Npr. "Stol 1" ili "Dežurni stol"', max_length=50, verbose_name='Naziv')),
-                ('boja', models.CharField(choices=[('#c9a84c', 'Zlatna'), ('#22c55e', 'Zelena'), ('#3b82f6', 'Plava'), ('#f97316', 'Narančasta'), ('#ec4899', 'Ružičasta'), ('#8b5cf6', 'Ljubičasta'), ('#06b6d4', 'Tirkizna'), ('#ef4444', 'Crvena'), ('#84cc16', 'Vapno'), ('#64748b', 'Siva')], default='#c9a84c', max_length=20, verbose_name='Boja')),
-                ('aktivan', models.BooleanField(default=True, verbose_name='Aktivan')),
-                ('napomena', models.TextField(blank=True, verbose_name='Napomena')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('komitenti', models.ManyToManyField(blank=True, related_name='stol_komitenti', to='companies.company', verbose_name='Komitenti')),
-                ('referent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='stol', to=settings.AUTH_USER_MODEL, verbose_name='Referent')),
-                ('ured', models.ForeignKey(help_text='Firma-ured kojoj stol pripada (Konjik d.o.o.)', on_delete=django.db.models.deletion.CASCADE, related_name='stolovi', to='companies.company', verbose_name='Ured')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("broj", models.PositiveSmallIntegerField(verbose_name="Broj stola")),
+                (
+                    "naziv",
+                    models.CharField(
+                        blank=True, help_text='Npr. "Stol 1" ili "Dežurni stol"', max_length=50, verbose_name="Naziv"
+                    ),
+                ),
+                (
+                    "boja",
+                    models.CharField(
+                        choices=[
+                            ("#c9a84c", "Zlatna"),
+                            ("#22c55e", "Zelena"),
+                            ("#3b82f6", "Plava"),
+                            ("#f97316", "Narančasta"),
+                            ("#ec4899", "Ružičasta"),
+                            ("#8b5cf6", "Ljubičasta"),
+                            ("#06b6d4", "Tirkizna"),
+                            ("#ef4444", "Crvena"),
+                            ("#84cc16", "Vapno"),
+                            ("#64748b", "Siva"),
+                        ],
+                        default="#c9a84c",
+                        max_length=20,
+                        verbose_name="Boja",
+                    ),
+                ),
+                ("aktivan", models.BooleanField(default=True, verbose_name="Aktivan")),
+                ("napomena", models.TextField(blank=True, verbose_name="Napomena")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "komitenti",
+                    models.ManyToManyField(
+                        blank=True, related_name="stol_komitenti", to="companies.company", verbose_name="Komitenti"
+                    ),
+                ),
+                (
+                    "referent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="stol",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Referent",
+                    ),
+                ),
+                (
+                    "ured",
+                    models.ForeignKey(
+                        help_text="Firma-ured kojoj stol pripada (Konjik d.o.o.)",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="stolovi",
+                        to="companies.company",
+                        verbose_name="Ured",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stol',
-                'verbose_name_plural': 'Stolovi',
-                'ordering': ['broj'],
-                'unique_together': {('ured', 'broj')},
+                "verbose_name": "Stol",
+                "verbose_name_plural": "Stolovi",
+                "ordering": ["broj"],
+                "unique_together": {("ured", "broj")},
             },
         ),
     ]

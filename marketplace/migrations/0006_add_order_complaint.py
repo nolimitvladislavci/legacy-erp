@@ -6,35 +6,115 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0020_invoice_cancel_reason'),
-        ('marketplace', '0005_add_smart_cart_fields'),
+        ("invoicing", "0020_invoice_cancel_reason"),
+        ("marketplace", "0005_add_smart_cart_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OrderComplaint',
+            name="OrderComplaint",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reason', models.CharField(choices=[('damaged', 'Osteceno'), ('wrong_item', 'Krivi artikl'), ('wrong_qty', 'Kriva kolicina'), ('expired', 'Istekao rok'), ('temp_breach', 'Prekid hladnog lanca'), ('quality', 'Losa kvaliteta'), ('other', 'Ostalo')], max_length=20, verbose_name='Razlog')),
-                ('description', models.TextField(blank=True, verbose_name='Opis problema')),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='marketplace/complaints/', verbose_name='Fotografija')),
-                ('status', models.CharField(choices=[('open', 'Otvorena'), ('acknowledged', 'Primljena'), ('replacement_sent', 'Zamjena poslana'), ('refunded', 'Povrat novca'), ('rejected', 'Odbijena'), ('closed', 'Zatvorena')], default='open', max_length=20)),
-                ('resolution_note', models.TextField(blank=True, verbose_name='Biljeska o rjesenju')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('resolved_at', models.DateTimeField(blank=True, null=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Prijavio')),
-                ('item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complaints', to='marketplace.marketplaceorderitem', verbose_name='Stavka')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='complaints', to='marketplace.marketplaceorder', verbose_name='Narudzba')),
-                ('replacement_order', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='replacement_for_complaints', to='marketplace.marketplaceorder', verbose_name='Zamjenska narudzba')),
-                ('storno_invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complaint_stornos', to='invoicing.invoice', verbose_name='Storno racun')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "reason",
+                    models.CharField(
+                        choices=[
+                            ("damaged", "Osteceno"),
+                            ("wrong_item", "Krivi artikl"),
+                            ("wrong_qty", "Kriva kolicina"),
+                            ("expired", "Istekao rok"),
+                            ("temp_breach", "Prekid hladnog lanca"),
+                            ("quality", "Losa kvaliteta"),
+                            ("other", "Ostalo"),
+                        ],
+                        max_length=20,
+                        verbose_name="Razlog",
+                    ),
+                ),
+                ("description", models.TextField(blank=True, verbose_name="Opis problema")),
+                (
+                    "photo",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="marketplace/complaints/", verbose_name="Fotografija"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Otvorena"),
+                            ("acknowledged", "Primljena"),
+                            ("replacement_sent", "Zamjena poslana"),
+                            ("refunded", "Povrat novca"),
+                            ("rejected", "Odbijena"),
+                            ("closed", "Zatvorena"),
+                        ],
+                        default="open",
+                        max_length=20,
+                    ),
+                ),
+                ("resolution_note", models.TextField(blank=True, verbose_name="Biljeska o rjesenju")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("resolved_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Prijavio",
+                    ),
+                ),
+                (
+                    "item",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="complaints",
+                        to="marketplace.marketplaceorderitem",
+                        verbose_name="Stavka",
+                    ),
+                ),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="complaints",
+                        to="marketplace.marketplaceorder",
+                        verbose_name="Narudzba",
+                    ),
+                ),
+                (
+                    "replacement_order",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="replacement_for_complaints",
+                        to="marketplace.marketplaceorder",
+                        verbose_name="Zamjenska narudzba",
+                    ),
+                ),
+                (
+                    "storno_invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="complaint_stornos",
+                        to="invoicing.invoice",
+                        verbose_name="Storno racun",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Reklamacija',
-                'verbose_name_plural': 'Reklamacije',
-                'ordering': ['-created_at'],
+                "verbose_name": "Reklamacija",
+                "verbose_name_plural": "Reklamacije",
+                "ordering": ["-created_at"],
             },
         ),
     ]

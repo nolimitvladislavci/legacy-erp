@@ -12,7 +12,7 @@ Primjer korištenja u template-u:
 
   <!-- Uz fakturu/dokument: -->
   {% camera_btn field_id="id_dokument" doc_type="invoice" label="Skeniraj fakturu" %}
-  
+
   <!-- Učitaj iz arhive (bez kamere): -->
   {% archive_btn field_id="id_fotografija" label="Učitaj iz arhive" %}
 
@@ -22,6 +22,7 @@ Parametri:
   label     — tekst gumba (default: "Skeniraj")
   size      — "sm" | "md" (default: "sm")
 """
+
 from django import template
 from django.utils.html import format_html
 
@@ -29,16 +30,16 @@ register = template.Library()
 
 
 @register.simple_tag
-def camera_btn(field_id='', doc_type='general', label='Skeniraj', size='sm'):
+def camera_btn(field_id="", doc_type="general", label="Skeniraj", size="sm"):
     """
     Inline kamera gumb uz input polje.
     Otvara FenixScan modal i po završetku popunjava ciljno polje.
     """
-    btn_class = 'btn btn-sm btn-outline-info' if size == 'sm' else 'btn btn-outline-info'
-    btn_id = f'cam-btn-{field_id}'
+    btn_class = "btn btn-sm btn-outline-info" if size == "sm" else "btn btn-outline-info"
+    btn_id = f"cam-btn-{field_id}"
 
     return format_html(
-        '''<button type="button"
+        """<button type="button"
             id="{btn_id}"
             class="{btn_class}"
             style="white-space:nowrap"
@@ -72,25 +73,25 @@ def camera_btn(field_id='', doc_type='general', label='Skeniraj', size='sm'):
             }};
         }}
         document.getElementById('{btn_id}').dataset.label = '{label}';
-        </script>''',
+        </script>""",
         btn_id=btn_id,
         btn_class=btn_class,
         field_id=field_id,
         doc_type=doc_type,
-        label=label
+        label=label,
     )
 
 
 @register.simple_tag
-def archive_btn(field_id='', label='Učitaj iz arhive', size='sm'):
+def archive_btn(field_id="", label="Učitaj iz arhive", size="sm"):
     """
     Gumb za učitavanje dokumenta iz arhive (bez kamere).
     Link na /documents/arhiva/ s povratkom na trenutnu stranicu.
     """
-    btn_class = 'btn btn-sm btn-outline-secondary' if size == 'sm' else 'btn btn-outline-secondary'
+    btn_class = "btn btn-sm btn-outline-secondary" if size == "sm" else "btn btn-outline-secondary"
 
     return format_html(
-        '''<button type="button"
+        """<button type="button"
             class="{btn_class}"
             style="white-space:nowrap"
             title="Odaberi dokument iz arhive"
@@ -121,25 +122,25 @@ def archive_btn(field_id='', label='Učitaj iz arhive', size='sm'):
                 }});
             }};
         }}
-        </script>''',
+        </script>""",
         btn_class=btn_class,
         field_id=field_id,
-        label=label
+        label=label,
     )
 
 
-@register.inclusion_tag('core/partials/camera_input_group.html')
-def camera_input_group(field, doc_type='general', show_archive=True):
+@register.inclusion_tag("core/partials/camera_input_group.html")
+def camera_input_group(field, doc_type="general", show_archive=True):
     """
     Kompletan input group: [input field] [📷 Skeniraj] [📁 Arhiva]
-    
+
     Primjer:
       {% camera_input_group form.oib doc_type="id_card" %}
       {% camera_input_group form.fotografija doc_type="azil_zivotinja" show_archive=True %}
     """
     return {
-        'field': field,
-        'doc_type': doc_type,
-        'show_archive': show_archive,
-        'field_id': f'id_{field.html_name}' if hasattr(field, 'html_name') else 'field',
+        "field": field,
+        "doc_type": doc_type,
+        "show_archive": show_archive,
+        "field_id": f"id_{field.html_name}" if hasattr(field, "html_name") else "field",
     }

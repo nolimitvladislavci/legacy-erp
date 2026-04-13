@@ -5,31 +5,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0018_initial'),
-        ('pos', '0014_alter_guestloyalty_id_alter_loyaltyprogram_id_and_more'),
+        ("companies", "0018_initial"),
+        ("pos", "0014_alter_guestloyalty_id_alter_loyaltyprogram_id_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GastroReview',
+            name="GastroReview",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('guest_name', models.CharField(max_length=100)),
-                ('guest_email', models.EmailField(blank=True, max_length=254)),
-                ('rating', models.PositiveSmallIntegerField()),
-                ('comment', models.TextField(blank=True)),
-                ('food_rating', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('service_rating', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('ambience_rating', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('is_published', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('order', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='review', to='pos.gastroorder')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("guest_name", models.CharField(max_length=100)),
+                ("guest_email", models.EmailField(blank=True, max_length=254)),
+                ("rating", models.PositiveSmallIntegerField()),
+                ("comment", models.TextField(blank=True)),
+                ("food_rating", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("service_rating", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("ambience_rating", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("is_published", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("company", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="companies.company")),
+                (
+                    "order",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="review", to="pos.gastroorder"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

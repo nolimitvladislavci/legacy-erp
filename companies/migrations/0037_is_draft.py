@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0036_uses_double_entry'),
+        ("companies", "0036_uses_double_entry"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_draft',
-            field=models.BooleanField(default=False, verbose_name='Draft (nepotpuna registracija)'),
+            model_name="company",
+            name="is_draft",
+            field=models.BooleanField(default=False, verbose_name="Draft (nepotpuna registracija)"),
         ),
     ]

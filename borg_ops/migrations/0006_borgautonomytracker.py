@@ -5,30 +5,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('borg_ops', '0005_borgbriefingconfig_borgauditentry'),
-        ('companies', '0034_vault_deactivation_fields'),
+        ("borg_ops", "0005_borgbriefingconfig_borgauditentry"),
+        ("companies", "0034_vault_deactivation_fields"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BorgAutonomyTracker',
+            name="BorgAutonomyTracker",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('autonomy_level', models.CharField(choices=[('suggest_only', 'Samo prijedlozi'), ('semi_auto', 'Polu-automatski'), ('trusted', 'Provjereni')], default='suggest_only', max_length=20)),
-                ('auto_approved_streak', models.PositiveIntegerField(default=0)),
-                ('last_rejection_date', models.DateField(blank=True, null=True)),
-                ('last_checkpoint_date', models.DateField(blank=True, null=True)),
-                ('category_approvals', models.JSONField(blank=True, default=dict, help_text='Counter per kategorija: {"invoice_reminder": 45, "stock_alert": 12}')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='borg_autonomy', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "autonomy_level",
+                    models.CharField(
+                        choices=[
+                            ("suggest_only", "Samo prijedlozi"),
+                            ("semi_auto", "Polu-automatski"),
+                            ("trusted", "Provjereni"),
+                        ],
+                        default="suggest_only",
+                        max_length=20,
+                    ),
+                ),
+                ("auto_approved_streak", models.PositiveIntegerField(default=0)),
+                ("last_rejection_date", models.DateField(blank=True, null=True)),
+                ("last_checkpoint_date", models.DateField(blank=True, null=True)),
+                (
+                    "category_approvals",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='Counter per kategorija: {"invoice_reminder": 45, "stock_alert": 12}',
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="borg_autonomy",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'BORG Autonomy Tracker',
-                'verbose_name_plural': 'BORG Autonomy Trackers',
-                'db_table': 'borg_autonomy_tracker',
+                "verbose_name": "BORG Autonomy Tracker",
+                "verbose_name_plural": "BORG Autonomy Trackers",
+                "db_table": "borg_autonomy_tracker",
             },
         ),
     ]

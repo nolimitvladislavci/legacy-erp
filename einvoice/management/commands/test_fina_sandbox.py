@@ -14,6 +14,7 @@ Usage:
     python manage.py test_fina_sandbox
     python manage.py test_fina_sandbox --live   # When real sandbox available
 """
+
 import hashlib
 import logging
 import os
@@ -116,12 +117,15 @@ class Command(BaseCommand):
             key, cert, chain = load_key_and_certificates(p12_data, password)
 
             import datetime
+
             now = datetime.datetime.now(datetime.timezone.utc)
             days_left = (cert.not_valid_after_utc - now).days
 
             self._ok(f"Subject: {cert.subject.rfc4514_string()}")
             self._ok(f"Issuer:  {cert.issuer.rfc4514_string()}")
-            self._ok(f"Valid:   {cert.not_valid_before_utc.date()} → {cert.not_valid_after_utc.date()} ({days_left} days)")
+            self._ok(
+                f"Valid:   {cert.not_valid_before_utc.date()} → {cert.not_valid_after_utc.date()} ({days_left} days)"
+            )
             self._ok(f"Key:     {type(key).__name__}")
 
             if days_left < 0:
@@ -141,9 +145,13 @@ class Command(BaseCommand):
             self._ok(f"PEM extracted: {cert_pem}")
 
             return {
-                "ok": True, "company": company, "config": config,
-                "cert_path": cert_pem, "key_path": key_pem,
-                "days_left": days_left, "subject": cert.subject.rfc4514_string(),
+                "ok": True,
+                "company": company,
+                "config": config,
+                "cert_path": cert_pem,
+                "key_path": key_pem,
+                "days_left": days_left,
+                "subject": cert.subject.rfc4514_string(),
             }
 
         except (FileNotFoundError, PermissionError, IOError) as e:
@@ -158,9 +166,7 @@ class Command(BaseCommand):
         company = Company.objects.filter(oib=oib).first()
 
         # Try existing draft eRacun
-        eracun = ERacun.objects.filter(
-            company=company, status="draft"
-        ).order_by("-created_at").first()
+        eracun = ERacun.objects.filter(company=company, status="draft").order_by("-created_at").first()
 
         if eracun:
             self._ok(f"Using existing draft: {eracun.invoice_number}")
@@ -172,6 +178,7 @@ class Command(BaseCommand):
         # Create test eRacun
         self._warn("No draft eRacun found — creating test")
         import uuid
+
         test_number = f"SANDBOX-{uuid.uuid4().hex[:6].upper()}"
 
         eracun = ERacun.objects.create(
@@ -202,6 +209,7 @@ class Command(BaseCommand):
 
         # Add line item
         from eracun.models import ERacunItem
+
         ERacunItem.objects.create(
             eracun=eracun,
             line_number=1,
@@ -216,6 +224,7 @@ class Command(BaseCommand):
 
         # Tax summary
         from eracun.models import ERacunTaxSummary
+
         ERacunTaxSummary.objects.create(
             eracun=eracun,
             tax_category="S",
@@ -231,6 +240,7 @@ class Command(BaseCommand):
         self._header("STEP 3: UBL 2.1 Generation (CIUS-HR 2025)")
         try:
             from eracun.services.ubl_generator import generate_ubl_xml
+
             xml_bytes = generate_ubl_xml(eracun)
             xml_str = xml_bytes.decode("utf-8") if isinstance(xml_bytes, bytes) else xml_bytes
 
@@ -265,6 +275,7 @@ class Command(BaseCommand):
         except Exception as e:
             self._error(f"UBL generation failed: {e}")
             import traceback
+
             traceback.print_exc()
             return {"ok": False}
 
@@ -272,6 +283,7 @@ class Command(BaseCommand):
         self._header("STEP 4: 3-Stage Validation")
         try:
             from einvoice.services.ubl_validator import validate_ubl
+
             result = validate_ubl(xml_str, strict=False)
 
             self._ok(f"Valid: {result.is_valid}")
@@ -299,6 +311,7 @@ class Command(BaseCommand):
         self._header("STEP 5: mTLS Certificate Readiness")
         try:
             import httpx
+
             # Test that httpx can load the cert
             client = httpx.Client(
                 cert=(cert_pem, key_pem),
@@ -328,11 +341,12 @@ class Command(BaseCommand):
 
     def _step_submit_echo(self, results):
         self._header("STEP 6: Echo Submit (Local Simulation)")
-        xml = results["ubl"]["xml"]
+        results["ubl"]["xml"]
         sha = results["ubl"]["sha256"]
 
         # Simulate what PosrednikClient.submit() would do
         import uuid
+
         fake_message_id = f"ECHO-{uuid.uuid4().hex[:12].upper()}"
 
         self._ok("Simulated submit:")
@@ -379,7 +393,9 @@ class Command(BaseCommand):
         self.stdout.write(f"\n  Time: {elapsed:.2f}s")
 
         if results.get("validation", {}).get("valid") is False:
-            self.stdout.write(self.style.WARNING(f"\n  Validation had {len(results['validation'].get('errors', []))} errors"))
+            self.stdout.write(
+                self.style.WARNING(f"\n  Validation had {len(results['validation'].get('errors', []))} errors")
+            )
             self.stdout.write(self.style.WARNING("  Fix errors before live submission"))
 
         if all_pass:

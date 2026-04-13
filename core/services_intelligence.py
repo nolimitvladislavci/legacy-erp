@@ -4,6 +4,7 @@ Partner Intelligence — cross-company aggregation without breaking tenant isola
 All queries use raw SQL with GROUP BY oib for performance.
 No FK rewiring, no cross-tenant data mutation — read-only aggregation.
 """
+
 import logging
 
 from django.db import connection
@@ -19,7 +20,7 @@ def get_intelligence_stats(company_ids: list) -> dict:
     if not company_ids:
         return _empty_stats()
 
-    placeholders = ','.join(['%s'] * len(company_ids))
+    placeholders = ",".join(["%s"] * len(company_ids))
     ids = [str(c) for c in company_ids]
 
     stats = {}
@@ -36,11 +37,12 @@ def search_partner_global(oib: str, company_ids: list) -> list:
     if not company_ids or not oib:
         return []
 
-    placeholders = ','.join(['%s'] * len(company_ids))
+    placeholders = ",".join(["%s"] * len(company_ids))
     ids = [str(c) for c in company_ids]
 
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT p.id, p.name, p.oib, p.city, p.buyer_type,
                    p.is_vat_registered, p.cached_balance, p.email, p.phone, p.iban,
                    c.name as company_name, c.id as company_id,
@@ -51,7 +53,9 @@ def search_partner_global(oib: str, company_ids: list) -> list:
             JOIN companies_company c ON c.id = p.company_id
             WHERE p.oib = %s AND p.company_id IN ({placeholders})
             ORDER BY c.name
-        """, [oib] + ids)
+        """,
+            [oib] + ids,
+        )
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
@@ -59,7 +63,8 @@ def search_partner_global(oib: str, company_ids: list) -> list:
 def _top_partners(placeholders, ids):
     """Top 15 partners by aggregated unpaid balance across companies."""
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT p.oib, p.name,
                    COUNT(DISTINCT p.company_id) as in_companies,
                    COALESCE(SUM(inv.unpaid), 0) as total_unpaid,
@@ -80,12 +85,15 @@ def _top_partners(placeholders, ids):
             HAVING COALESCE(SUM(inv.total_invoiced), 0) > 0
             ORDER BY total_unpaid DESC
             LIMIT 15
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         top_debtors = [dict(zip(cols, row)) for row in cur.fetchall()]
 
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT p.oib, p.name,
                    COUNT(DISTINCT p.company_id) as in_companies,
                    COALESCE(SUM(inv.total_invoiced), 0) as total_invoiced
@@ -102,26 +110,31 @@ def _top_partners(placeholders, ids):
             HAVING COALESCE(SUM(inv.total_invoiced), 0) > 0
             ORDER BY total_invoiced DESC
             LIMIT 15
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         top_by_volume = [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    return {'top_debtors': top_debtors, 'top_by_volume': top_by_volume}
+    return {"top_debtors": top_debtors, "top_by_volume": top_by_volume}
 
 
 def _buyer_type_distribution(placeholders, ids):
     """Buyer type distribution across all companies."""
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT buyer_type, COUNT(*) as cnt,
                    ROUND(COUNT(*) * 100.0 / NULLIF(SUM(COUNT(*)) OVER(), 0), 1) as pct
             FROM partners_partner
             WHERE company_id IN ({placeholders})
             GROUP BY buyer_type
             ORDER BY cnt DESC
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
-        return {'buyer_types': [dict(zip(cols, row)) for row in cur.fetchall()]}
+        return {"buyer_types": [dict(zip(cols, row)) for row in cur.fetchall()]}
 
 
 def _anomalies(placeholders, ids):
@@ -129,7 +142,8 @@ def _anomalies(placeholders, ids):
     Detect inconsistencies: same OIB with different buyer_types or names.
     """
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT oib,
                    array_agg(DISTINCT name) as names,
                    array_agg(DISTINCT buyer_type) as buyer_types,
@@ -142,12 +156,15 @@ def _anomalies(placeholders, ids):
             HAVING COUNT(DISTINCT buyer_type) > 1
             ORDER BY COUNT(DISTINCT buyer_type) DESC
             LIMIT 20
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         type_mismatches = [dict(zip(cols, row)) for row in cur.fetchall()]
 
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT oib,
                    array_agg(DISTINCT name ORDER BY name) as names,
                    COUNT(DISTINCT name) as name_count,
@@ -159,22 +176,25 @@ def _anomalies(placeholders, ids):
             HAVING COUNT(DISTINCT name) > 1
             ORDER BY COUNT(DISTINCT name) DESC
             LIMIT 20
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         name_mismatches = [dict(zip(cols, row)) for row in cur.fetchall()]
 
     return {
-        'type_mismatches': type_mismatches,
-        'type_mismatch_count': len(type_mismatches),
-        'name_mismatches': name_mismatches,
-        'name_mismatch_count': len(name_mismatches),
+        "type_mismatches": type_mismatches,
+        "type_mismatch_count": len(type_mismatches),
+        "name_mismatches": name_mismatches,
+        "name_mismatch_count": len(name_mismatches),
     }
 
 
 def _vat_overview(placeholders, ids):
     """VAT registration overview by unique OIB."""
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT
                 COUNT(DISTINCT oib) as total_unique_oib,
                 COUNT(DISTINCT CASE WHEN is_vat_registered THEN oib END) as vat_registered,
@@ -186,16 +206,19 @@ def _vat_overview(placeholders, ids):
             FROM partners_partner
             WHERE company_id IN ({placeholders})
               AND oib ~ '^\\d{{11}}$'
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         row = cur.fetchone()
-        return {'vat_overview': dict(zip(cols, row)) if row else {}}
+        return {"vat_overview": dict(zip(cols, row)) if row else {}}
 
 
 def _data_quality(placeholders, ids):
     """Data completeness metrics."""
     with connection.cursor() as cur:
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT
                 COUNT(*) as total,
                 SUM(CASE WHEN email != '' THEN 1 ELSE 0 END) as has_email,
@@ -206,27 +229,32 @@ def _data_quality(placeholders, ids):
                 SUM(CASE WHEN oib LIKE 'SYN-%%' THEN 1 ELSE 0 END) as synesis_oib
             FROM partners_partner
             WHERE company_id IN ({placeholders})
-        """, ids)
+        """,
+            ids,
+        )
         cols = [c[0] for c in cur.description]
         row = cur.fetchone()
         dq = dict(zip(cols, row)) if row else {}
 
-    total = dq.get('total', 1) or 1
-    dq['email_pct'] = round(dq.get('has_email', 0) * 100 / total, 1)
-    dq['phone_pct'] = round(dq.get('has_phone', 0) * 100 / total, 1)
-    dq['address_pct'] = round(dq.get('has_address', 0) * 100 / total, 1)
-    dq['iban_pct'] = round(dq.get('has_iban', 0) * 100 / total, 1)
-    dq['oib_pct'] = round(dq.get('has_valid_oib', 0) * 100 / total, 1)
+    total = dq.get("total", 1) or 1
+    dq["email_pct"] = round(dq.get("has_email", 0) * 100 / total, 1)
+    dq["phone_pct"] = round(dq.get("has_phone", 0) * 100 / total, 1)
+    dq["address_pct"] = round(dq.get("has_address", 0) * 100 / total, 1)
+    dq["iban_pct"] = round(dq.get("has_iban", 0) * 100 / total, 1)
+    dq["oib_pct"] = round(dq.get("has_valid_oib", 0) * 100 / total, 1)
 
-    return {'data_quality': dq}
+    return {"data_quality": dq}
 
 
 def _empty_stats():
     return {
-        'top_debtors': [], 'top_by_volume': [],
-        'buyer_types': [],
-        'type_mismatches': [], 'type_mismatch_count': 0,
-        'name_mismatches': [], 'name_mismatch_count': 0,
-        'vat_overview': {},
-        'data_quality': {},
+        "top_debtors": [],
+        "top_by_volume": [],
+        "buyer_types": [],
+        "type_mismatches": [],
+        "type_mismatch_count": 0,
+        "name_mismatches": [],
+        "name_mismatch_count": 0,
+        "vat_overview": {},
+        "data_quality": {},
     }

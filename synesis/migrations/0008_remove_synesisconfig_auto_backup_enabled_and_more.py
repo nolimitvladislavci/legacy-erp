@@ -4,38 +4,37 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('synesis', '0007_synesisconfig_connect_folders'),
+        ("synesis", "0007_synesisconfig_connect_folders"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='auto_backup_enabled',
+            model_name="synesisconfig",
+            name="auto_backup_enabled",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='backup_retention_days',
+            model_name="synesisconfig",
+            name="backup_retention_days",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='connect_base_path',
+            model_name="synesisconfig",
+            name="connect_base_path",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='invoices_total',
+            model_name="synesisconfig",
+            name="invoices_total",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='last_backup_at',
+            model_name="synesisconfig",
+            name="last_backup_at",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='last_backup_path',
+            model_name="synesisconfig",
+            name="last_backup_path",
         ),
         migrations.RemoveField(
-            model_name='synesisconfig',
-            name='last_sync_invoices',
+            model_name="synesisconfig",
+            name="last_sync_invoices",
         ),
     ]

@@ -2,6 +2,7 @@
 delivery/tests/test_pick_and_pack.py — Warehouse safety tests
 6.2 Scale Tolerance, 6.3 Anti-Crush, 6.4 Packaging Lock
 """
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -16,40 +17,47 @@ class WeightToleranceTest(TestCase):
 
     def test_within_tolerance_passes(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('5.5'), Decimal('5.0'))
-        self.assertTrue(ok, 'Weight within 10% should pass')
-        self.assertEqual(err, '')
+
+        ok, err = _check_weight_tolerance(Decimal("5.5"), Decimal("5.0"))
+        self.assertTrue(ok, "Weight within 10% should pass")
+        self.assertEqual(err, "")
 
     def test_exact_match_passes(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('5.0'), Decimal('5.0'))
+
+        ok, err = _check_weight_tolerance(Decimal("5.0"), Decimal("5.0"))
         self.assertTrue(ok)
 
     def test_at_boundary_passes(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('6.0'), Decimal('5.0'))
-        self.assertTrue(ok, '20% deviation is at boundary, should pass')
+
+        ok, err = _check_weight_tolerance(Decimal("6.0"), Decimal("5.0"))
+        self.assertTrue(ok, "20% deviation is at boundary, should pass")
 
     def test_over_tolerance_blocked(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('6.25'), Decimal('5.0'))
-        self.assertFalse(ok, 'Weight 25% over should be blocked')
-        self.assertIn('tolerancija', err.lower())
+
+        ok, err = _check_weight_tolerance(Decimal("6.25"), Decimal("5.0"))
+        self.assertFalse(ok, "Weight 25% over should be blocked")
+        self.assertIn("tolerancija", err.lower())
 
     def test_under_tolerance_blocked(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('3.5'), Decimal('5.0'))
-        self.assertFalse(ok, 'Weight 30% under should be blocked')
+
+        ok, err = _check_weight_tolerance(Decimal("3.5"), Decimal("5.0"))
+        self.assertFalse(ok, "Weight 30% under should be blocked")
 
     def test_fat_finger_triple_blocked(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('15.25'), Decimal('5.0'))
-        self.assertFalse(ok, 'Fat finger 3x should be blocked')
+
+        ok, err = _check_weight_tolerance(Decimal("15.25"), Decimal("5.0"))
+        self.assertFalse(ok, "Fat finger 3x should be blocked")
 
     def test_zero_ordered_passes(self):
         from delivery.warehouse_views import _check_weight_tolerance
-        ok, err = _check_weight_tolerance(Decimal('1.0'), Decimal('0'))
-        self.assertTrue(ok, 'Zero ordered should not crash')
+
+        ok, err = _check_weight_tolerance(Decimal("1.0"), Decimal("0"))
+        self.assertTrue(ok, "Zero ordered should not crash")
 
 
 class AntiCrushTest(TestCase):
@@ -60,29 +68,38 @@ class AntiCrushTest(TestCase):
         from companies.models import Company
         from marketplace.models import MarketplaceCategory, MarketplaceProduct
 
-        cls.company = Company.objects.create(name='Test Warehouse Co', oib='99999999901')
-        cls.buyer = Company.objects.create(name='Test Buyer Co', oib='99999999911')
-        cls.user = User.objects.create_user(username='packer1', password='test123')
+        cls.company = Company.objects.create(name="Test Warehouse Co", oib="99999999901")
+        cls.buyer = Company.objects.create(name="Test Buyer Co", oib="99999999911")
+        cls.user = User.objects.create_user(username="packer1", password="test123")
 
-        cat = MarketplaceCategory.objects.create(name='Test Cat', slug='test-cat')
+        cat = MarketplaceCategory.objects.create(name="Test Cat", slug="test-cat")
 
         cls.salad = MarketplaceProduct.objects.create(
             seller_company=cls.company,
-            name='Salata', slug='test-salata',
-            unit_price=Decimal('2.50'),
-            is_fragile=True, is_heavy=False, category=cat,
+            name="Salata",
+            slug="test-salata",
+            unit_price=Decimal("2.50"),
+            is_fragile=True,
+            is_heavy=False,
+            category=cat,
         )
         cls.potatoes = MarketplaceProduct.objects.create(
             seller_company=cls.company,
-            name='Krumpir 25kg', slug='test-krumpir-25kg',
-            unit_price=Decimal('1.20'),
-            is_fragile=False, is_heavy=True, category=cat,
+            name="Krumpir 25kg",
+            slug="test-krumpir-25kg",
+            unit_price=Decimal("1.20"),
+            is_fragile=False,
+            is_heavy=True,
+            category=cat,
         )
         cls.milk = MarketplaceProduct.objects.create(
             seller_company=cls.company,
-            name='Mlijeko', slug='test-mlijeko',
-            unit_price=Decimal('1.50'),
-            is_fragile=False, is_heavy=False, category=cat,
+            name="Mlijeko",
+            slug="test-mlijeko",
+            unit_price=Decimal("1.50"),
+            is_fragile=False,
+            is_heavy=False,
+            category=cat,
         )
 
     def _make_order_with_rollwagen(self, qr_code, packed_product=None):
@@ -91,16 +108,16 @@ class AntiCrushTest(TestCase):
 
         order = MarketplaceOrder.objects.create(
             buyer_company=self.buyer,
-            status='confirmed',
+            status="confirmed",
         )
         if packed_product:
             MarketplaceOrderItem.objects.create(
                 order=order,
                 product=packed_product,
                 seller_company=self.company,
-                quantity=Decimal('5.0'),
+                quantity=Decimal("5.0"),
                 unit_price=packed_product.unit_price,
-                total=Decimal('12.50'),
+                total=Decimal("12.50"),
                 packed_at=timezone.now(),
                 packed_by=self.user,
             )
@@ -118,16 +135,18 @@ class AntiCrushTest(TestCase):
 
     def test_heavy_on_fragile_blocked(self):
         from delivery.warehouse_views import _check_anti_crush
-        order, rw = self._make_order_with_rollwagen('RW-CRUSH-TEST', self.salad)
+
+        order, rw = self._make_order_with_rollwagen("RW-CRUSH-TEST", self.salad)
         ok, err = _check_anti_crush(rw, self.potatoes)
-        self.assertFalse(ok, 'Heavy on fragile should be blocked')
-        self.assertIn('ANTI-CRUSH', err)
+        self.assertFalse(ok, "Heavy on fragile should be blocked")
+        self.assertIn("ANTI-CRUSH", err)
 
     def test_light_on_fragile_allowed(self):
         from delivery.warehouse_views import _check_anti_crush
-        order, rw = self._make_order_with_rollwagen('RW-LIGHT-TEST', self.salad)
+
+        order, rw = self._make_order_with_rollwagen("RW-LIGHT-TEST", self.salad)
         ok, err = _check_anti_crush(rw, self.milk)
-        self.assertTrue(ok, 'Non-heavy item on fragile should be allowed')
+        self.assertTrue(ok, "Non-heavy item on fragile should be allowed")
 
     def test_heavy_on_empty_rollwagen_allowed(self):
         from delivery.models import ConsolidatedDelivery, Rollwagen
@@ -139,11 +158,11 @@ class AntiCrushTest(TestCase):
         )
         rw = Rollwagen.objects.create(
             consolidated_delivery=cd,
-            qr_code='RW-EMPTY-TEST',
+            qr_code="RW-EMPTY-TEST",
             bound_order=None,
         )
         ok, err = _check_anti_crush(rw, self.potatoes)
-        self.assertTrue(ok, 'Heavy on empty rollwagen should be allowed')
+        self.assertTrue(ok, "Heavy on empty rollwagen should be allowed")
 
 
 class PackagingLockTest(TestCase):
@@ -152,26 +171,29 @@ class PackagingLockTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         from companies.models import Company
-        cls.company = Company.objects.create(name='Lock Test Co', oib='99999999902')
-        cls.buyer = Company.objects.create(name='Lock Buyer Co', oib='99999999912')
-        cls.user = User.objects.create_user(username='driver1', password='test123')
+
+        cls.company = Company.objects.create(name="Lock Test Co", oib="99999999902")
+        cls.buyer = Company.objects.create(name="Lock Buyer Co", oib="99999999912")
+        cls.user = User.objects.create_user(username="driver1", password="test123")
 
     def test_order_without_rollwagen_has_no_packaging(self):
         from delivery.models import Rollwagen
         from marketplace.models import MarketplaceOrder
 
         order = MarketplaceOrder.objects.create(
-            buyer_company=self.buyer, status='confirmed',
+            buyer_company=self.buyer,
+            status="confirmed",
         )
         has_rollwagen = Rollwagen.objects.filter(bound_order=order).exists()
-        self.assertFalse(has_rollwagen, 'Order should have no rollwagen initially')
+        self.assertFalse(has_rollwagen, "Order should have no rollwagen initially")
 
     def test_order_with_rollwagen_has_packaging(self):
         from delivery.models import ConsolidatedDelivery, Rollwagen
         from marketplace.models import MarketplaceOrder
 
         order = MarketplaceOrder.objects.create(
-            buyer_company=self.buyer, status='confirmed',
+            buyer_company=self.buyer,
+            status="confirmed",
         )
         cd = ConsolidatedDelivery.objects.create(
             hub_company=self.company,
@@ -179,9 +201,9 @@ class PackagingLockTest(TestCase):
         )
         Rollwagen.objects.create(
             consolidated_delivery=cd,
-            qr_code='RW-PKG-LOCK',
+            qr_code="RW-PKG-LOCK",
             bound_order=order,
-            packaging_count={'ifco': 3},
+            packaging_count={"ifco": 3},
         )
         has_rollwagen = Rollwagen.objects.filter(bound_order=order).exists()
-        self.assertTrue(has_rollwagen, 'Order with bound rollwagen should pass')
+        self.assertTrue(has_rollwagen, "Order with bound rollwagen should pass")

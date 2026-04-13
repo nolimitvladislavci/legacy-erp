@@ -12,4 +12,5 @@ class AzilPrijavaAdmin(admin.ModelAdmin):
 
     def oznaci_contacted(self, request, queryset):
         queryset.update(contacted=True)
+
     oznaci_contacted.short_description = "Oznaci kao kontaktirano"

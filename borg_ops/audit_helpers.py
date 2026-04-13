@@ -5,18 +5,28 @@ Koristi se iz bilo kojeg modula:
     from borg_ops.audit_helpers import log_borg_audit
     log_borg_audit(company, 'FISCAL', 'Fiskalizacija uspjesna', document=receipt)
 """
+
 import logging
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import DatabaseError, IntegrityError
 
-logger = logging.getLogger('borg.audit')
+logger = logging.getLogger("borg.audit")
 
 
-def log_borg_audit(company, entry_type, summary, severity='INFO',
-                   document=None, regulatory_update=None,
-                   legal_reference='', verification_type='',
-                   verification_result=None, user=None, metadata=None):
+def log_borg_audit(
+    company,
+    entry_type,
+    summary,
+    severity="INFO",
+    document=None,
+    regulatory_update=None,
+    legal_reference="",
+    verification_type="",
+    verification_result=None,
+    user=None,
+    metadata=None,
+):
     """
     Kreiraj immutable BorgAuditEntry.
 
@@ -62,8 +72,8 @@ def log_borg_audit(company, entry_type, summary, severity='INFO',
             created_by=user,
         )
         entry.save()
-        logger.debug('BorgAuditEntry created: [%s] %s', entry_type, summary[:80])
+        logger.debug("BorgAuditEntry created: [%s] %s", entry_type, summary[:80])
         return entry
     except (IntegrityError, DatabaseError) as e:
-        logger.error('BorgAuditEntry creation failed: %s', e)
+        logger.error("BorgAuditEntry creation failed: %s", e)
         return None

@@ -6,77 +6,164 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0001_initial'),
-        ('partners', '0001_initial'),
+        ("companies", "0001_initial"),
+        ("partners", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv projekta')),
-                ('code', models.CharField(max_length=30, unique=True, verbose_name='Šifra')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('location', models.CharField(blank=True, max_length=255, verbose_name='Lokacija')),
-                ('status', models.CharField(choices=[('planning', 'Planiranje'), ('active', 'Aktivno'), ('paused', 'Pauzirano'), ('completed', 'Završeno'), ('cancelled', 'Otkazano')], default='planning', max_length=20, verbose_name='Status')),
-                ('start_date', models.DateField(blank=True, null=True, verbose_name='Početak')),
-                ('end_date', models.DateField(blank=True, null=True, verbose_name='Planirani kraj')),
-                ('budget', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Budžet (EUR)')),
-                ('is_public', models.BooleanField(default=False, verbose_name='Vidljivo investitorima')),
-                ('cover_image', models.ImageField(blank=True, null=True, upload_to='projects/covers/', verbose_name='Naslovna slika')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('client', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='client_projects', to='partners.partner', verbose_name='Klijent/Investitor')),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.company', verbose_name='Tvrtka')),
-                ('manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='managed_projects', to=settings.AUTH_USER_MODEL, verbose_name='Voditelj')),
-                ('team', models.ManyToManyField(blank=True, related_name='team_projects', to=settings.AUTH_USER_MODEL, verbose_name='Tim')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv projekta")),
+                ("code", models.CharField(max_length=30, unique=True, verbose_name="Šifra")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                ("location", models.CharField(blank=True, max_length=255, verbose_name="Lokacija")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("planning", "Planiranje"),
+                            ("active", "Aktivno"),
+                            ("paused", "Pauzirano"),
+                            ("completed", "Završeno"),
+                            ("cancelled", "Otkazano"),
+                        ],
+                        default="planning",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("start_date", models.DateField(blank=True, null=True, verbose_name="Početak")),
+                ("end_date", models.DateField(blank=True, null=True, verbose_name="Planirani kraj")),
+                (
+                    "budget",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Budžet (EUR)"),
+                ),
+                ("is_public", models.BooleanField(default=False, verbose_name="Vidljivo investitorima")),
+                (
+                    "cover_image",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="projects/covers/", verbose_name="Naslovna slika"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="client_projects",
+                        to="partners.partner",
+                        verbose_name="Klijent/Investitor",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "manager",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="managed_projects",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Voditelj",
+                    ),
+                ),
+                (
+                    "team",
+                    models.ManyToManyField(
+                        blank=True, related_name="team_projects", to=settings.AUTH_USER_MODEL, verbose_name="Tim"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Projekt',
-                'verbose_name_plural': 'Projekti',
-                'ordering': ['-created_at'],
+                "verbose_name": "Projekt",
+                "verbose_name_plural": "Projekti",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='ProjectPhoto',
+            name="ProjectPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='projects/photos/', verbose_name='Fotografija')),
-                ('caption', models.CharField(blank=True, max_length=255, verbose_name='Opis')),
-                ('location_gps', models.CharField(blank=True, max_length=100, verbose_name='GPS')),
-                ('is_public', models.BooleanField(default=False, verbose_name='Vidljivo investitorima')),
-                ('taken_at', models.DateTimeField(blank=True, null=True, verbose_name='Snimljeno')),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='projects.project', verbose_name='Projekt')),
-                ('uploaded_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Uploadao')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("image", models.ImageField(upload_to="projects/photos/", verbose_name="Fotografija")),
+                ("caption", models.CharField(blank=True, max_length=255, verbose_name="Opis")),
+                ("location_gps", models.CharField(blank=True, max_length=100, verbose_name="GPS")),
+                ("is_public", models.BooleanField(default=False, verbose_name="Vidljivo investitorima")),
+                ("taken_at", models.DateTimeField(blank=True, null=True, verbose_name="Snimljeno")),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="photos",
+                        to="projects.project",
+                        verbose_name="Projekt",
+                    ),
+                ),
+                (
+                    "uploaded_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Uploadao",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fotografija projekta',
-                'verbose_name_plural': 'Fotografije projekta',
-                'ordering': ['-uploaded_at'],
+                "verbose_name": "Fotografija projekta",
+                "verbose_name_plural": "Fotografije projekta",
+                "ordering": ["-uploaded_at"],
             },
         ),
         migrations.CreateModel(
-            name='ProjectUpdate',
+            name="ProjectUpdate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Naslov')),
-                ('content', models.TextField(verbose_name='Sadržaj')),
-                ('is_public', models.BooleanField(default=False, verbose_name='Vidljivo investitorima')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Autor')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='updates', to='projects.project', verbose_name='Projekt')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("title", models.CharField(max_length=200, verbose_name="Naslov")),
+                ("content", models.TextField(verbose_name="Sadržaj")),
+                ("is_public", models.BooleanField(default=False, verbose_name="Vidljivo investitorima")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "author",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Autor",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="updates",
+                        to="projects.project",
+                        verbose_name="Projekt",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Ažuriranje projekta',
-                'verbose_name_plural': 'Ažuriranja projekta',
-                'ordering': ['-created_at'],
+                "verbose_name": "Ažuriranje projekta",
+                "verbose_name_plural": "Ažuriranja projekta",
+                "ordering": ["-created_at"],
             },
         ),
     ]

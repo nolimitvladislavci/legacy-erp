@@ -7,43 +7,93 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('worktime', '0009_activityevent_timelog'),
+        ("companies", "0021_extend_onboarding"),
+        ("worktime", "0009_activityevent_timelog"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TravelOrder',
+            name="TravelOrder",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_number', models.CharField(max_length=50)),
-                ('destination', models.CharField(max_length=255)),
-                ('purpose', models.TextField()),
-                ('departure_date', models.DateTimeField()),
-                ('return_date', models.DateTimeField()),
-                ('transport_type', models.CharField(choices=[('car_personal', 'Osobni automobil'), ('car_company', 'Službeni automobil'), ('bus', 'Autobus'), ('train', 'Vlak'), ('plane', 'Avion'), ('other', 'Ostalo')], default='car_personal', max_length=50)),
-                ('distance_km', models.DecimalField(decimal_places=1, default=0, max_digits=8)),
-                ('per_diem_rate', models.DecimalField(decimal_places=2, default=Decimal('26.55'), max_digits=8)),
-                ('per_diem_days', models.DecimalField(decimal_places=1, default=0, max_digits=5)),
-                ('per_diem_total', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('mileage_rate', models.DecimalField(decimal_places=2, default=Decimal('0.40'), max_digits=5)),
-                ('mileage_total', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('other_costs', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('total_cost', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('status', models.CharField(choices=[('draft', 'Nacrt'), ('approved', 'Odobren'), ('completed', 'Završen'), ('cancelled', 'Otkazan')], default='draft', max_length=20)),
-                ('approved_at', models.DateTimeField(blank=True, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('approved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_travel_orders', to=settings.AUTH_USER_MODEL)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='travel_orders', to='companies.company')),
-                ('employee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='travel_orders', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("order_number", models.CharField(max_length=50)),
+                ("destination", models.CharField(max_length=255)),
+                ("purpose", models.TextField()),
+                ("departure_date", models.DateTimeField()),
+                ("return_date", models.DateTimeField()),
+                (
+                    "transport_type",
+                    models.CharField(
+                        choices=[
+                            ("car_personal", "Osobni automobil"),
+                            ("car_company", "Službeni automobil"),
+                            ("bus", "Autobus"),
+                            ("train", "Vlak"),
+                            ("plane", "Avion"),
+                            ("other", "Ostalo"),
+                        ],
+                        default="car_personal",
+                        max_length=50,
+                    ),
+                ),
+                ("distance_km", models.DecimalField(decimal_places=1, default=0, max_digits=8)),
+                ("per_diem_rate", models.DecimalField(decimal_places=2, default=Decimal("26.55"), max_digits=8)),
+                ("per_diem_days", models.DecimalField(decimal_places=1, default=0, max_digits=5)),
+                ("per_diem_total", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                ("mileage_rate", models.DecimalField(decimal_places=2, default=Decimal("0.40"), max_digits=5)),
+                ("mileage_total", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                ("other_costs", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                ("total_cost", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Nacrt"),
+                            ("approved", "Odobren"),
+                            ("completed", "Završen"),
+                            ("cancelled", "Otkazan"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                    ),
+                ),
+                ("approved_at", models.DateTimeField(blank=True, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "approved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="approved_travel_orders",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="travel_orders",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "employee",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="travel_orders",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-departure_date'],
-                'unique_together': {('company', 'order_number')},
+                "ordering": ["-departure_date"],
+                "unique_together": {("company", "order_number")},
             },
         ),
     ]

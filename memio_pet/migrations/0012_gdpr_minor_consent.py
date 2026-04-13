@@ -5,40 +5,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0011_rawfoodlisting_donates_to_shelters_and_more'),
+        ("memio_pet", "0011_rawfoodlisting_donates_to_shelters_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='breederprofile',
-            name='consent_given_at',
+            model_name="breederprofile",
+            name="consent_given_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='breederprofile',
-            name='consent_sent_at',
+            model_name="breederprofile",
+            name="consent_sent_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='breederprofile',
-            name='consent_token',
+            model_name="breederprofile",
+            name="consent_token",
             field=models.CharField(blank=True, db_index=True, max_length=64),
         ),
         migrations.AddField(
-            model_name='breederprofile',
-            name='date_of_birth',
-            field=models.DateField(blank=True, null=True, verbose_name='Datum rođenja korisnika'),
+            model_name="breederprofile",
+            name="date_of_birth",
+            field=models.DateField(blank=True, null=True, verbose_name="Datum rođenja korisnika"),
         ),
         migrations.AddField(
-            model_name='breederprofile',
-            name='parent_email',
-            field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True, verbose_name='Email roditelja/skrbnika'),
+            model_name="breederprofile",
+            name="parent_email",
+            field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True, verbose_name="Email roditelja/skrbnika"),
         ),
         migrations.AddField(
-            model_name='breederprofile',
-            name='parental_consent',
-            field=models.BooleanField(default=False, verbose_name='Pristanak roditelja'),
+            model_name="breederprofile",
+            name="parental_consent",
+            field=models.BooleanField(default=False, verbose_name="Pristanak roditelja"),
         ),
     ]

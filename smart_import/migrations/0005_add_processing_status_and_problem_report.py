@@ -6,54 +6,90 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0023_add_booking_theme'),
-        ('smart_import', '0004_failedimport'),
+        ("companies", "0023_add_booking_theme"),
+        ("smart_import", "0004_failedimport"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='importbatch',
-            name='original_filename',
-            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Originalni naziv datoteke'),
+            model_name="importbatch",
+            name="original_filename",
+            field=models.CharField(blank=True, default="", max_length=255, verbose_name="Originalni naziv datoteke"),
         ),
         migrations.AddField(
-            model_name='importbatch',
-            name='processing_started_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Pocetak obrade'),
+            model_name="importbatch",
+            name="processing_started_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Pocetak obrade"),
         ),
         migrations.AddField(
-            model_name='importbatch',
-            name='retry_count',
-            field=models.PositiveIntegerField(default=0, verbose_name='Broj pokusaja'),
+            model_name="importbatch",
+            name="retry_count",
+            field=models.PositiveIntegerField(default=0, verbose_name="Broj pokusaja"),
         ),
         migrations.AddField(
-            model_name='importbatch',
-            name='status_message',
-            field=models.CharField(blank=True, default='', max_length=200, verbose_name='Status poruka'),
+            model_name="importbatch",
+            name="status_message",
+            field=models.CharField(blank=True, default="", max_length=200, verbose_name="Status poruka"),
         ),
         migrations.AlterField(
-            model_name='importbatch',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Ceka obradu'), ('processing', 'AI obrada u tijeku'), ('ready', 'Spremno za pregled'), ('confirmed', 'Pretvoreno u Primku'), ('error', 'Greska')], default='pending', max_length=20, verbose_name='Status'),
+            model_name="importbatch",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Ceka obradu"),
+                    ("processing", "AI obrada u tijeku"),
+                    ("ready", "Spremno za pregled"),
+                    ("confirmed", "Pretvoreno u Primku"),
+                    ("error", "Greska"),
+                ],
+                default="pending",
+                max_length=20,
+                verbose_name="Status",
+            ),
         ),
         migrations.CreateModel(
-            name='ProblemReport',
+            name="ProblemReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.TextField(verbose_name='Opis problema')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('resolved', models.BooleanField(default=False, verbose_name='Rijeseno')),
-                ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='problem_reports', to='smart_import.importbatch', verbose_name='Batch')),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka')),
-                ('reported_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Prijavio')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("description", models.TextField(verbose_name="Opis problema")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("resolved", models.BooleanField(default=False, verbose_name="Rijeseno")),
+                (
+                    "batch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="problem_reports",
+                        to="smart_import.importbatch",
+                        verbose_name="Batch",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "reported_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Prijavio",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Prijava problema',
-                'verbose_name_plural': 'Prijave problema',
-                'ordering': ['-created_at'],
+                "verbose_name": "Prijava problema",
+                "verbose_name_plural": "Prijave problema",
+                "ordering": ["-created_at"],
             },
         ),
     ]

@@ -9,6 +9,7 @@ VAZNO: Financijski zapisi (fakture, knjizenja, fiskalni racuni) se NE brisu
 jer su zasticeni Zakonom o racunovodstvu (11 godina). Umjesto toga,
 osobni podaci se zamjenjuju placeholder vrijednostima.
 """
+
 import json
 import logging
 
@@ -74,6 +75,7 @@ class GDPRExportService:
         # CompanyMembership
         try:
             from accounts.models import CompanyMembership
+
             memberships = CompanyMembership.objects.filter(user=user).select_related("company")
             data["company_memberships"] = [
                 {"company": m.company.name, "role": m.role, "is_active": m.is_active, "joined_at": m.joined_at}
@@ -85,9 +87,16 @@ class GDPRExportService:
         # DeviceToken
         try:
             from accounts.models import DeviceToken
+
             tokens = DeviceToken.objects.filter(user=user)
             data["device_tokens"] = [
-                {"device_name": t.device_name, "is_active": t.is_active, "created_at": t.created_at, "last_used_at": t.last_used_at, "last_ip": t.last_ip}
+                {
+                    "device_name": t.device_name,
+                    "is_active": t.is_active,
+                    "created_at": t.created_at,
+                    "last_used_at": t.last_used_at,
+                    "last_ip": t.last_ip,
+                }
                 for t in tokens
             ]
         except DatabaseError:
@@ -96,10 +105,10 @@ class GDPRExportService:
         # Login pokusaji (zadnjih 100)
         try:
             from accounts.auth_models import LoginAttempt
+
             attempts = LoginAttempt.objects.filter(email=user.email).order_by("-attempted_at")[:100]
             data["recent_login_activity"] = [
-                {"time": a.attempted_at, "ip": a.ip_address, "success": a.success, "method": a.method}
-                for a in attempts
+                {"time": a.attempted_at, "ip": a.ip_address, "success": a.success, "method": a.method} for a in attempts
             ]
         except DatabaseError:
             pass
@@ -140,6 +149,7 @@ class GDPRAnonymizationService:
             has_payroll = False
             try:
                 from payroll.models import PayrollRun
+
                 has_payroll = PayrollRun.objects.filter(company=ep.company).exists()
             except DatabaseError:
                 pass
@@ -161,6 +171,7 @@ class GDPRAnonymizationService:
         # 3. DeviceToken brisanje
         try:
             from accounts.models import DeviceToken
+
             count = DeviceToken.objects.filter(user=user).count()
             DeviceToken.objects.filter(user=user).delete()
             if count:
@@ -182,6 +193,7 @@ class GDPRAnonymizationService:
         # 5. Audit zapis -- dokaz GDPR brisanja
         try:
             from core.models import SystemAuditLog
+
             SystemAuditLog.objects.create(
                 user=None,
                 company=None,

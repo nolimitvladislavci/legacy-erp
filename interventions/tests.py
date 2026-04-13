@@ -11,6 +11,7 @@ interventions/tests.py — Integration tests for Hitna Intervencija module.
 Run:
     python manage.py test interventions --verbosity=2
 """
+
 import json
 import uuid
 
@@ -28,18 +29,20 @@ NO_HTTPS = override_settings(SECURE_SSL_REDIRECT=False)
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def make_company(oib="55544433321"):
     from companies.models import Company
+
     return Company.objects.get_or_create(
         oib=oib,
-        defaults=dict(name="Krizna Ekipa d.o.o.", country="HR",
-                      city="Zagreb", zip_code="10000"),
+        defaults=dict(name="Krizna Ekipa d.o.o.", country="HR", city="Zagreb", zip_code="10000"),
     )[0]
 
 
 def make_subscription(company):
     """Create an active CompanySubscription with interventions module enabled."""
     from registration.models import CompanySubscription
+
     return CompanySubscription.objects.create(
         company=company,
         plan="enterprise",
@@ -52,6 +55,7 @@ def make_subscription(company):
 
 def make_user_with_profile(company, username, role="worker", is_superuser=False):
     from accounts.models import UserProfile
+
     user = User.objects.create_user(
         username=username,
         email=f"{username}@test.hr",
@@ -65,6 +69,7 @@ def make_user_with_profile(company, username, role="worker", is_superuser=False)
 
 def make_interv(company, title="Poplava u podrumu", status="NOVO", assigned_to=None):
     from interventions.models import HitnaIntervencija
+
     return HitnaIntervencija.objects.create(
         company=company,
         title=title,
@@ -81,42 +86,45 @@ def make_interv(company, title="Poplava u podrumu", status="NOVO", assigned_to=N
 # TEST 1 — Model, properties, assign_worker
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class HitnaIntervencijaModelTest(TestCase):
     """Model-level tests: choices, properties, assign_worker."""
 
     def setUp(self):
         self.company = make_company()
-        self.worker  = make_user_with_profile(self.company, "radnik_test")
-        self.interv  = make_interv(self.company)
+        self.worker = make_user_with_profile(self.company, "radnik_test")
+        self.interv = make_interv(self.company)
 
     def test_status_choices(self):
         """All 7 status choices must exist."""
         from interventions.models import HitnaIntervencija
-        expected = {'NOVO', 'DODIJELJENO', 'NA_PUTU', 'NA_LOKACIJI',
-                    'RIJESENO', 'ESKALIRANO', 'FAKTURIRANO'}
-        actual   = set(HitnaIntervencija.Status.values)
+
+        expected = {"NOVO", "DODIJELJENO", "NA_PUTU", "NA_LOKACIJI", "RIJESENO", "ESKALIRANO", "FAKTURIRANO"}
+        actual = set(HitnaIntervencija.Status.values)
         self.assertEqual(expected, actual)
 
     def test_category_choices(self):
         """All 5 category choices must exist."""
         from interventions.models import HitnaIntervencija
-        expected = {'voda', 'struja', 'plin', 'kljucar', 'ostalo'}
-        actual   = set(HitnaIntervencija.Category.values)
+
+        expected = {"voda", "struja", "plin", "kljucar", "ostalo"}
+        actual = set(HitnaIntervencija.Category.values)
         self.assertEqual(expected, actual)
 
     def test_tracking_url(self):
         """`tracking_url` must return the correct public path."""
-        expected = f'/track/{self.interv.tracking_token}/'
+        expected = f"/track/{self.interv.tracking_token}/"
         self.assertEqual(self.interv.tracking_url, expected)
 
     def test_status_color(self):
         """`status_color` returns a hex string for each status."""
         from interventions.models import HitnaIntervencija
+
         for status in HitnaIntervencija.Status.values:
             self.interv.status = status
             color = self.interv.status_color
             self.assertTrue(
-                color.startswith('#') and len(color) in (4, 7),
+                color.startswith("#") and len(color) in (4, 7),
                 f"Bad color '{color}' for status {status}",
             )
 
@@ -126,13 +134,13 @@ class HitnaIntervencijaModelTest(TestCase):
         self.interv.assign_worker(self.worker, ttl_minutes=5)
         self.interv.refresh_from_db()
 
-        self.assertEqual(self.interv.status, 'DODIJELJENO')
+        self.assertEqual(self.interv.status, "DODIJELJENO")
         self.assertEqual(self.interv.assigned_to, self.worker)
         self.assertIsNotNone(self.interv.ttl_expires_at)
         # TTL should be ~5 minutes in the future
         diff = (self.interv.ttl_expires_at - before).total_seconds()
-        self.assertGreater(diff, 290)   # at least 4m50s
-        self.assertLess(diff, 310)       # at most 5m10s
+        self.assertGreater(diff, 290)  # at least 4m50s
+        self.assertLess(diff, 310)  # at most 5m10s
 
     def test_elapsed_minutes(self):
         """`elapsed_minutes` returns a non-negative integer."""
@@ -145,6 +153,7 @@ class HitnaIntervencijaModelTest(TestCase):
 # TEST 2 — AJAX status update
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @NO_HTTPS
 class InterventionStatusTest(TestCase):
     """Tests for the update_status AJAX endpoint."""
@@ -152,8 +161,7 @@ class InterventionStatusTest(TestCase):
     def setUp(self):
         self.company = make_company(oib="55544433322")
         make_subscription(self.company)
-        self.dispatcher = make_user_with_profile(self.company, "dispatcher1",
-                                                  role="company_admin")
+        self.dispatcher = make_user_with_profile(self.company, "dispatcher1", role="company_admin")
         self.interv = make_interv(self.company)
         self.client = Client()
         self.client.login(username="dispatcher1", password="TestPass2026!")
@@ -208,6 +216,7 @@ class InterventionStatusTest(TestCase):
 # TEST 3 — GPS coordinate tracking
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @NO_HTTPS
 class InterventionGPSTest(TestCase):
     """Tests for the gps_update AJAX endpoint."""
@@ -215,10 +224,10 @@ class InterventionGPSTest(TestCase):
     def setUp(self):
         self.company = make_company(oib="55544433323")
         make_subscription(self.company)
-        self.worker   = make_user_with_profile(self.company, "worker_gps", role="worker")
-        self.other    = make_user_with_profile(self.company, "worker_other", role="worker")
-        self.interv   = make_interv(self.company, assigned_to=self.worker)
-        self.url      = f"/interventions/{self.interv.pk}/gps/"
+        self.worker = make_user_with_profile(self.company, "worker_gps", role="worker")
+        self.other = make_user_with_profile(self.company, "worker_other", role="worker")
+        self.interv = make_interv(self.company, assigned_to=self.worker)
+        self.url = f"/interventions/{self.interv.pk}/gps/"
 
     def _post_gps(self, user, lat=45.815, lng=15.982):
         c = Client()
@@ -247,9 +256,7 @@ class InterventionGPSTest(TestCase):
 
     def test_gps_update_superadmin_ok(self):
         """Superadmin can update GPS on any intervention."""
-        superadmin = make_user_with_profile(
-            self.company, "superadmin_gps", role="superadmin", is_superuser=True
-        )
+        superadmin = make_user_with_profile(self.company, "superadmin_gps", role="superadmin", is_superuser=True)
         r = self._post_gps(superadmin, lat=46.0, lng=16.0)
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.json()["ok"])
@@ -259,14 +266,15 @@ class InterventionGPSTest(TestCase):
 # TEST 4 — Public client tracking page
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @NO_HTTPS
 class InterventionTrackingTest(TestCase):
     """Tests for the public tracking_view (no login required)."""
 
     def setUp(self):
         self.company = make_company(oib="55544433324")
-        self.interv  = make_interv(self.company, status="NA_PUTU")
-        self.url     = f"/track/{self.interv.tracking_token}/"
+        self.interv = make_interv(self.company, status="NA_PUTU")
+        self.url = f"/track/{self.interv.tracking_token}/"
 
     def test_tracking_view_public(self):
         """Tracking page is accessible without login."""
@@ -301,6 +309,7 @@ class InterventionTrackingTest(TestCase):
 # TEST 5 — Public intervention form (SOS)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @NO_HTTPS
 class PublicInterventionTest(TestCase):
     """Tests for the public_intervention form (no login required)."""
@@ -317,15 +326,19 @@ class PublicInterventionTest(TestCase):
     def test_public_form_post_creates_intervention(self):
         """Valid POST creates intervention and redirects to tracking page."""
         from interventions.models import HitnaIntervencija
+
         before_count = HitnaIntervencija.objects.unscoped().count()
-        r = self.c.post("/interventions/public/", {
-            "client_name":  "Iva Ivić",
-            "client_phone": "0981234567",
-            "address":      "Gajeva 10, Zagreb",
-            "category":     "struja",
-            "title":        "Nestalo struje",
-            "description":  "Cijeli stan bez struje.",
-        })
+        r = self.c.post(
+            "/interventions/public/",
+            {
+                "client_name": "Iva Ivić",
+                "client_phone": "0981234567",
+                "address": "Gajeva 10, Zagreb",
+                "category": "struja",
+                "title": "Nestalo struje",
+                "description": "Cijeli stan bez struje.",
+            },
+        )
         # Should redirect to tracking page (302 → /track/<uuid>/)
         self.assertEqual(r.status_code, 302)
         self.assertIn("/track/", r["Location"])

@@ -7,78 +7,139 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0001_initial'),
+        ("companies", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='LoginAttempt',
+            name="LoginAttempt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('success', models.BooleanField(default=False)),
-                ('attempted_at', models.DateTimeField(auto_now_add=True)),
-                ('user_agent', models.CharField(blank=True, max_length=255)),
-                ('method', models.CharField(default='password', help_text='password/magic/google/microsoft/2fa', max_length=20)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("email", models.EmailField(max_length=254)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("success", models.BooleanField(default=False)),
+                ("attempted_at", models.DateTimeField(auto_now_add=True)),
+                ("user_agent", models.CharField(blank=True, max_length=255)),
+                (
+                    "method",
+                    models.CharField(
+                        default="password", help_text="password/magic/google/microsoft/2fa", max_length=20
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pokušaj prijave',
-                'verbose_name_plural': 'Pokušaji prijave',
-                'ordering': ['-attempted_at'],
+                "verbose_name": "Pokušaj prijave",
+                "verbose_name_plural": "Pokušaji prijave",
+                "ordering": ["-attempted_at"],
             },
         ),
         migrations.CreateModel(
-            name='MagicToken',
+            name="MagicToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(default=secrets.token_urlsafe, max_length=64, unique=True)),
-                ('token_type', models.CharField(choices=[('investor', 'Investitor - projekti'), ('partner', 'Partner - fakture'), ('worker', 'Radnik - upload slika'), ('reset', 'Reset lozinke'), ('verify', 'Verifikacija emaila')], default='partner', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('used_at', models.DateTimeField(blank=True, null=True)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('context', models.JSONField(blank=True, default=dict)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='magic_tokens', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("token", models.CharField(default=secrets.token_urlsafe, max_length=64, unique=True)),
+                (
+                    "token_type",
+                    models.CharField(
+                        choices=[
+                            ("investor", "Investitor - projekti"),
+                            ("partner", "Partner - fakture"),
+                            ("worker", "Radnik - upload slika"),
+                            ("reset", "Reset lozinke"),
+                            ("verify", "Verifikacija emaila"),
+                        ],
+                        default="partner",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("used_at", models.DateTimeField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("context", models.JSONField(blank=True, default=dict)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="magic_tokens",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Magic token',
-                'verbose_name_plural': 'Magic tokeni',
-                'ordering': ['-created_at'],
+                "verbose_name": "Magic token",
+                "verbose_name_plural": "Magic tokeni",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('superadmin', 'Super Administrator'), ('company_admin', 'Admin tvrtke'), ('project_manager', 'Voditelj projekta'), ('worker', 'Radnik'), ('investor', 'Investitor'), ('partner', 'Partner / Klijent')], default='worker', max_length=30, verbose_name='Uloga')),
-                ('profile_image', models.ImageField(blank=True, upload_to='profiles/', verbose_name='Profilna slika')),
-                ('phone', models.CharField(blank=True, max_length=20, verbose_name='Telefon')),
-                ('department', models.CharField(blank=True, max_length=100, verbose_name='Odjel')),
-                ('totp_secret', models.CharField(blank=True, max_length=32, verbose_name='TOTP Secret')),
-                ('totp_enabled', models.BooleanField(default=False, verbose_name='2FA aktiviran')),
-                ('google_id', models.CharField(blank=True, max_length=100)),
-                ('microsoft_id', models.CharField(blank=True, max_length=100)),
-                ('preferred_language', models.CharField(choices=[('hr', 'Hrvatski'), ('de', 'Deutsch'), ('en', 'English')], default='hr', max_length=5, verbose_name='Jezik sučelja')),
-                ('can_upload_photos', models.BooleanField(default=True, verbose_name='Može uploadati slike')),
-                ('can_view_financials', models.BooleanField(default=False, verbose_name='Vidi financije')),
-                ('can_approve_timesheets', models.BooleanField(default=False, verbose_name='Odobrava radne sate')),
-                ('two_factor_enabled', models.BooleanField(default=False)),
-                ('two_factor_secret', models.CharField(blank=True, max_length=32)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('last_login_ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.company', verbose_name='Tvrtka')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("superadmin", "Super Administrator"),
+                            ("company_admin", "Admin tvrtke"),
+                            ("project_manager", "Voditelj projekta"),
+                            ("worker", "Radnik"),
+                            ("investor", "Investitor"),
+                            ("partner", "Partner / Klijent"),
+                        ],
+                        default="worker",
+                        max_length=30,
+                        verbose_name="Uloga",
+                    ),
+                ),
+                ("profile_image", models.ImageField(blank=True, upload_to="profiles/", verbose_name="Profilna slika")),
+                ("phone", models.CharField(blank=True, max_length=20, verbose_name="Telefon")),
+                ("department", models.CharField(blank=True, max_length=100, verbose_name="Odjel")),
+                ("totp_secret", models.CharField(blank=True, max_length=32, verbose_name="TOTP Secret")),
+                ("totp_enabled", models.BooleanField(default=False, verbose_name="2FA aktiviran")),
+                ("google_id", models.CharField(blank=True, max_length=100)),
+                ("microsoft_id", models.CharField(blank=True, max_length=100)),
+                (
+                    "preferred_language",
+                    models.CharField(
+                        choices=[("hr", "Hrvatski"), ("de", "Deutsch"), ("en", "English")],
+                        default="hr",
+                        max_length=5,
+                        verbose_name="Jezik sučelja",
+                    ),
+                ),
+                ("can_upload_photos", models.BooleanField(default=True, verbose_name="Može uploadati slike")),
+                ("can_view_financials", models.BooleanField(default=False, verbose_name="Vidi financije")),
+                ("can_approve_timesheets", models.BooleanField(default=False, verbose_name="Odobrava radne sate")),
+                ("two_factor_enabled", models.BooleanField(default=False)),
+                ("two_factor_secret", models.CharField(blank=True, max_length=32)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("last_login_ip", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="profile", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Korisnički profil',
-                'verbose_name_plural': 'Korisnički profili',
-                'db_table': 'core_userprofile',
+                "verbose_name": "Korisnički profil",
+                "verbose_name_plural": "Korisnički profili",
+                "db_table": "core_userprofile",
             },
         ),
     ]

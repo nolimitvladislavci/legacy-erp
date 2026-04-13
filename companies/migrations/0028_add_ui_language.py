@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0027_company_cash_register_limit'),
+        ("companies", "0027_company_cash_register_limit"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='ui_language',
-            field=models.CharField(choices=[('hr', 'Hrvatski'), ('de', 'Deutsch'), ('en', 'English'), ('tr', 'Turkce'), ('el', 'Ellinika')], default='hr', help_text='Zadani jezik za nove korisnike ove tvrtke', max_length=5, verbose_name='Jezik sucenja'),
+            model_name="company",
+            name="ui_language",
+            field=models.CharField(
+                choices=[
+                    ("hr", "Hrvatski"),
+                    ("de", "Deutsch"),
+                    ("en", "English"),
+                    ("tr", "Turkce"),
+                    ("el", "Ellinika"),
+                ],
+                default="hr",
+                help_text="Zadani jezik za nove korisnike ove tvrtke",
+                max_length=5,
+                verbose_name="Jezik sucenja",
+            ),
         ),
     ]

@@ -1,6 +1,7 @@
 """
 invoicing/tasks.py -- Dunning Engine
 """
+
 import logging
 
 from celery import shared_task
@@ -12,15 +13,17 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 DEFAULT_DUNNING_SEQUENCE = [
-    {"step": 1, "days_overdue": 3,  "channel": "email",  "tone": "gentle", "cc_admin": False},
-    {"step": 2, "days_overdue": 14, "channel": "both",   "tone": "firm",   "cc_admin": False},
-    {"step": 3, "days_overdue": 30, "channel": "email",  "tone": "legal",  "cc_admin": True},
+    {"step": 1, "days_overdue": 3, "channel": "email", "tone": "gentle", "cc_admin": False},
+    {"step": 2, "days_overdue": 14, "channel": "both", "tone": "firm", "cc_admin": False},
+    {"step": 3, "days_overdue": 30, "channel": "email", "tone": "legal", "cc_admin": True},
 ]
 
 NL = chr(10)
 
+
 def _get_dunning_rules(company):
     from .models import DunningRule
+
     rules = list(
         DunningRule.objects.filter(company=company, is_active=True)
         .order_by("step")
@@ -31,6 +34,7 @@ def _get_dunning_rules(company):
 
 def _already_sent_legacy(invoice, step):
     from .models import InvoiceEvent
+
     return InvoiceEvent.objects.filter(
         invoice=invoice,
         event_type__in=("sent_email", "sent_whatsapp"),
@@ -40,6 +44,7 @@ def _already_sent_legacy(invoice, step):
 
 def _already_sent(invoice, step):
     from .models import DunningHistory
+
     if DunningHistory.objects.filter(invoice=invoice, step=step, status="sent").exists():
         return True
     return _already_sent_legacy(invoice, step)
@@ -48,6 +53,7 @@ def _already_sent(invoice, step):
 def _build_message(invoice, tone, is_hr):
     if is_hr:
         from .dunning_templates import get_template
+
         return get_template(tone, invoice, invoice.company)
     n = invoice.number
     name = invoice.client_name
@@ -58,8 +64,8 @@ def _build_message(invoice, tone, is_hr):
     issuer = invoice.issuer_name
     subjects = {
         "gentle": f"Zahlungserinnerung: Rechnung {n}",
-        "firm":   f"Zweite Mahnung: Rechnung {n}",
-        "legal":  f"Letzte Mahnung: Rechnung {n} -- rechtliche Schritte",
+        "firm": f"Zweite Mahnung: Rechnung {n}",
+        "legal": f"Letzte Mahnung: Rechnung {n} -- rechtliche Schritte",
     }
     bodies = {
         "gentle": f"Sehr geehrte/r {name},{NL}{NL}wir mochten Sie daran erinnern, dass Rechnung Nr. {n} uber {total} {cur} am {due} fallig war.{NL}{NL}Bitte uberweisen Sie den Betrag auf IBAN: {iban}{NL}{NL}Mit freundlichen Grussen,{NL}{issuer}",
@@ -71,6 +77,7 @@ def _build_message(invoice, tone, is_hr):
 
 def _send_dunning_step(invoice, rule, company_admin_emails=None):
     from .models import DunningHistory, DunningRule, InvoiceEvent
+
     is_hr = getattr(invoice, "is_hr", True) or invoice.country == "HR"
     tone = rule["tone"]
     channel = rule["channel"]
@@ -78,9 +85,7 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
     company = invoice.company
     subject, body = _build_message(invoice, tone, is_hr)
     result = {"email_sent": False, "wa_sent": False, "error": None}
-    dunning_rule_obj = DunningRule.objects.filter(
-        company=company, step=step, is_active=True
-    ).first()
+    dunning_rule_obj = DunningRule.objects.filter(company=company, step=step, is_active=True).first()
 
     if channel in ("email", "both") and invoice.client_email:
         recipient_list = [invoice.client_email]
@@ -89,19 +94,27 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
             cc_list = company_admin_emails
         try:
             send_mail(
-                subject=subject, message=body,
+                subject=subject,
+                message=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=recipient_list, fail_silently=False,
+                recipient_list=recipient_list,
+                fail_silently=False,
             )
             result["email_sent"] = True
             DunningHistory.objects.create(
-                company=company, invoice=invoice, dunning_rule=dunning_rule_obj,
-                step=step, channel_used="email", status="sent",
-                email_subject=subject, email_body=body,
+                company=company,
+                invoice=invoice,
+                dunning_rule=dunning_rule_obj,
+                step=step,
+                channel_used="email",
+                status="sent",
+                email_subject=subject,
+                email_body=body,
                 recipient_email=", ".join(recipient_list),
             )
             InvoiceEvent.objects.create(
-                invoice=invoice, event_type="sent_email",
+                invoice=invoice,
+                event_type="sent_email",
                 title=f"Opomena korak {step}: {subject[:80]}",
                 detail=body[:500],
                 metadata={"dunning_step": step, "tone": tone, "recipients": recipient_list},
@@ -112,17 +125,24 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
                         subject=f"[CC] {subject}",
                         message=f"Opomena poslana klijentu {invoice.client_name}:{NL}{NL}{body}",
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=cc_list, fail_silently=True,
+                        recipient_list=cc_list,
+                        fail_silently=True,
                     )
                 except Exception:
                     pass
         except (IntegrityError, DatabaseError) as e:
             result["error"] = str(e)
             DunningHistory.objects.create(
-                company=company, invoice=invoice, dunning_rule=dunning_rule_obj,
-                step=step, channel_used="email", status="failed",
-                error_message=str(e)[:500], email_subject=subject,
-                email_body=body, recipient_email=invoice.client_email,
+                company=company,
+                invoice=invoice,
+                dunning_rule=dunning_rule_obj,
+                step=step,
+                channel_used="email",
+                status="failed",
+                error_message=str(e)[:500],
+                email_subject=subject,
+                email_body=body,
+                recipient_email=invoice.client_email,
             )
             logger.error("Dunning email error invoice %s: %s", invoice.number, e)
 
@@ -130,6 +150,7 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
         phone = ""
         try:
             from partners.models import Partner
+
             partner = Partner.objects.filter(company=invoice.company, oib=invoice.client_oib).first()
             if partner:
                 phone = getattr(partner, "contact_phone", "") or getattr(partner, "phone", "")
@@ -138,19 +159,26 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
         try:
             from core.whatsapp import is_gateway_healthy
             from core.whatsapp import send_text as wa_send
+
             if phone and is_gateway_healthy():
                 wa_text = f"{subject}{NL}{NL}{body[:300]}"
                 wa_result = wa_send(phone, wa_text)
                 if wa_result["success"]:
                     result["wa_sent"] = True
                     DunningHistory.objects.create(
-                        company=company, invoice=invoice, dunning_rule=dunning_rule_obj,
-                        step=step, channel_used="whatsapp", status="sent",
-                        email_subject=subject, email_body=wa_text[:500],
+                        company=company,
+                        invoice=invoice,
+                        dunning_rule=dunning_rule_obj,
+                        step=step,
+                        channel_used="whatsapp",
+                        status="sent",
+                        email_subject=subject,
+                        email_body=wa_text[:500],
                         recipient_email=phone,
                     )
                     InvoiceEvent.objects.create(
-                        invoice=invoice, event_type="sent_whatsapp",
+                        invoice=invoice,
+                        event_type="sent_whatsapp",
                         title=f"WhatsApp opomena korak {step}",
                         detail=wa_text[:300],
                         metadata={"dunning_step": step, "tone": tone, "phone": phone},
@@ -167,9 +195,12 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
 def check_overdue_invoices():
     from accounts.models import UserProfile
     from invoicing.models import Invoice
+
     today = timezone.now().date()
     Invoice.objects.filter(status__in=["SENT", "UNPAID"], date_due__lt=today).update(status="OVERDUE")
-    overdue_qs = Invoice.objects.filter(status="OVERDUE", date_due__isnull=False, company__isnull=False).select_related("company")
+    overdue_qs = Invoice.objects.filter(status="OVERDUE", date_due__isnull=False, company__isnull=False).select_related(
+        "company"
+    )
     sent_count = 0
     errors = 0
     companies_cache = {}
@@ -180,7 +211,8 @@ def check_overdue_invoices():
             rules = _get_dunning_rules(company)
             admin_emails = list(
                 UserProfile.objects.filter(
-                    company=company, user__is_active=True,
+                    company=company,
+                    user__is_active=True,
                     user__groups__name="company_admin",
                 ).values_list("user__email", flat=True)
             )
@@ -205,12 +237,15 @@ def run_dunning_cycle():
     from accounts.models import UserProfile
     from companies.models import Company
     from invoicing.models import Invoice
+
     today = timezone.now().date()
     summary = {"overdue_marked": 0, "reminders_sent": 0, "errors": 0, "invoices_processed": 0, "companies_processed": 0}
     marked = Invoice.objects.filter(status__in=["SENT", "UNPAID"], date_due__lt=today).update(status="OVERDUE")
     summary["overdue_marked"] = marked
     companies_with_overdue = set(
-        Invoice.objects.filter(status="OVERDUE", date_due__isnull=False, company__isnull=False).values_list("company_id", flat=True)
+        Invoice.objects.filter(status="OVERDUE", date_due__isnull=False, company__isnull=False).values_list(
+            "company_id", flat=True
+        )
     )
     for company_id in companies_with_overdue:
         try:
@@ -221,11 +256,15 @@ def run_dunning_cycle():
         rules = _get_dunning_rules(company)
         admin_emails = list(
             UserProfile.objects.filter(
-                company=company, user__is_active=True, user__groups__name="company_admin",
+                company=company,
+                user__is_active=True,
+                user__groups__name="company_admin",
             ).values_list("user__email", flat=True)
         )
         overdue_invoices = Invoice.objects.filter(
-            company=company, status="OVERDUE", date_due__isnull=False,
+            company=company,
+            status="OVERDUE",
+            date_due__isnull=False,
         ).select_related("company")
         for invoice in overdue_invoices:
             summary["invoices_processed"] += 1

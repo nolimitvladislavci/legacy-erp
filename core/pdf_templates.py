@@ -12,24 +12,36 @@ Usage u templateu:
 """
 
 TEMPLATES = {
-    'viskovic': 'pdf/base_viskovic.html',
-    'datev': 'pdf/base_datev.html',
-    'modern': 'pdf/base_modern.html',
+    "viskovic": "pdf/base_viskovic.html",
+    "datev": "pdf/base_datev.html",
+    "modern": "pdf/base_modern.html",
 }
 
 
 def get_pdf_base(company=None):
     """Vrati path do base PDF templatea za firmu."""
     if company:
-        choice = getattr(company, 'pdf_template', 'viskovic')
-        return TEMPLATES.get(choice, TEMPLATES['viskovic'])
-    return TEMPLATES['viskovic']
+        choice = getattr(company, "pdf_template", "viskovic")
+        return TEMPLATES.get(choice, TEMPLATES["viskovic"])
+    return TEMPLATES["viskovic"]
 
 
 def get_all_templates():
     """Lista svih dostupnih predložaka za settings UI."""
     return [
-        {'id': 'viskovic', 'name': 'Visković (Gold/Premium)', 'preview': 'Zlatno zaglavlje, tamni akcenti, premium osjećaj'},
-        {'id': 'datev', 'name': 'DATEV (Minimalistički)', 'preview': 'Crno-bijeli, strogi tabularni format, Steuerberater standard'},
-        {'id': 'modern', 'name': 'Modern (Plavo/Bijeli)', 'preview': 'Plavo zaglavlje, zaobljeni kutovi, svjež i profesionalan'},
+        {
+            "id": "viskovic",
+            "name": "Visković (Gold/Premium)",
+            "preview": "Zlatno zaglavlje, tamni akcenti, premium osjećaj",
+        },
+        {
+            "id": "datev",
+            "name": "DATEV (Minimalistički)",
+            "preview": "Crno-bijeli, strogi tabularni format, Steuerberater standard",
+        },
+        {
+            "id": "modern",
+            "name": "Modern (Plavo/Bijeli)",
+            "preview": "Plavo zaglavlje, zaobljeni kutovi, svjež i profesionalan",
+        },
     ]

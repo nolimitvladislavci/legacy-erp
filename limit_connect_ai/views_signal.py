@@ -3,6 +3,7 @@ FenixSignal views — AJAX endpoint za "Prijavi grešku" gumb.
 
 Rate-limited: max 10 signala po korisniku/IP u 5 minuta.
 """
+
 import json
 import logging
 
@@ -78,6 +79,7 @@ def submit_signal(request):
         user = request.user
         try:
             from core.company_utils import get_user_company
+
             company = get_user_company(request)
         except ImportError:
             pass
@@ -97,19 +99,24 @@ def submit_signal(request):
 
     logger.info(
         "FenixSignal %s: [%s] %s — %s",
-        signal.id, signal_type, message[:80],
+        signal.id,
+        signal_type,
+        message[:80],
         user or ip,
     )
 
     # FAZA 2: Haiku AI triage — async, ne blokira response
     try:
         from limit_connect_ai.tasks_signal import triage_new_signal
+
         triage_new_signal.delay(str(signal.id))
     except ImportError:
         pass  # Triage failure ne smije blokirati signal
 
-    return JsonResponse({
-        "ok": True,
-        "signal_id": str(signal.id),
-        "message": "Hvala! Signal primljen. BORG analizira...",
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "signal_id": str(signal.id),
+            "message": "Hvala! Signal primljen. BORG analizira...",
+        }
+    )

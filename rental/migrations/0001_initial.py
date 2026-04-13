@@ -6,128 +6,304 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0018_initial'),
+        ("companies", "0018_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Booking',
+            name="Booking",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('booking_number', models.CharField(blank=True, max_length=20, unique=True, verbose_name='Broj rezervacije')),
-                ('guest_name', models.CharField(max_length=100, verbose_name='Ime gosta')),
-                ('guest_email', models.EmailField(blank=True, max_length=254, verbose_name='Email')),
-                ('guest_phone', models.CharField(blank=True, max_length=30, verbose_name='Telefon')),
-                ('guest_country', models.CharField(blank=True, help_text='ISO 3166 kod (HR, DE, AT...)', max_length=3, verbose_name='Drzava')),
-                ('guest_id_number', models.CharField(blank=True, max_length=30, verbose_name='Broj dokumenta')),
-                ('guest_count', models.IntegerField(default=1, verbose_name='Broj gostiju')),
-                ('check_in', models.DateField(verbose_name='Check-in')),
-                ('check_out', models.DateField(verbose_name='Check-out')),
-                ('actual_check_in', models.DateTimeField(blank=True, null=True, verbose_name='Stvarni check-in')),
-                ('actual_check_out', models.DateTimeField(blank=True, null=True, verbose_name='Stvarni check-out')),
-                ('price_per_night', models.DecimalField(decimal_places=2, max_digits=8, verbose_name='Cijena/noc')),
-                ('total_nights', models.IntegerField(default=1, verbose_name='Broj noci')),
-                ('subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Podnos')),
-                ('tourist_tax_total', models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name='Boravisna pristojba')),
-                ('cleaning_fee', models.DecimalField(decimal_places=2, default=0, max_digits=6)),
-                ('total_price', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupno')),
-                ('access_code', models.CharField(blank=True, max_length=8, verbose_name='Pristupni kod')),
-                ('access_qr', models.CharField(blank=True, max_length=64, unique=True, verbose_name='QR pristup')),
-                ('access_valid_from', models.DateTimeField(blank=True, null=True)),
-                ('access_valid_until', models.DateTimeField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('pending', 'Na cekanju'), ('confirmed', 'Potvrdena'), ('checked_in', 'Prijavljen'), ('checked_out', 'Odjavljen'), ('cancelled', 'Otkazana'), ('no_show', 'No-show')], default='pending', max_length=15, verbose_name='Status')),
-                ('source', models.CharField(choices=[('direct', 'Direktno'), ('website', 'Web stranica'), ('qr', 'QR kod'), ('booking_com', 'Booking.com'), ('airbnb', 'Airbnb'), ('phone', 'Telefon'), ('walkin', 'Walk-in')], default='direct', max_length=15, verbose_name='Izvor')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomene')),
-                ('is_paid', models.BooleanField(default=False, verbose_name='Placeno')),
-                ('payment_id', models.UUIDField(blank=True, null=True, verbose_name='Payment ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rental_bookings', to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "booking_number",
+                    models.CharField(blank=True, max_length=20, unique=True, verbose_name="Broj rezervacije"),
+                ),
+                ("guest_name", models.CharField(max_length=100, verbose_name="Ime gosta")),
+                ("guest_email", models.EmailField(blank=True, max_length=254, verbose_name="Email")),
+                ("guest_phone", models.CharField(blank=True, max_length=30, verbose_name="Telefon")),
+                (
+                    "guest_country",
+                    models.CharField(
+                        blank=True, help_text="ISO 3166 kod (HR, DE, AT...)", max_length=3, verbose_name="Drzava"
+                    ),
+                ),
+                ("guest_id_number", models.CharField(blank=True, max_length=30, verbose_name="Broj dokumenta")),
+                ("guest_count", models.IntegerField(default=1, verbose_name="Broj gostiju")),
+                ("check_in", models.DateField(verbose_name="Check-in")),
+                ("check_out", models.DateField(verbose_name="Check-out")),
+                ("actual_check_in", models.DateTimeField(blank=True, null=True, verbose_name="Stvarni check-in")),
+                ("actual_check_out", models.DateTimeField(blank=True, null=True, verbose_name="Stvarni check-out")),
+                ("price_per_night", models.DecimalField(decimal_places=2, max_digits=8, verbose_name="Cijena/noc")),
+                ("total_nights", models.IntegerField(default=1, verbose_name="Broj noci")),
+                ("subtotal", models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Podnos")),
+                (
+                    "tourist_tax_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name="Boravisna pristojba"),
+                ),
+                ("cleaning_fee", models.DecimalField(decimal_places=2, default=0, max_digits=6)),
+                ("total_price", models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Ukupno")),
+                ("access_code", models.CharField(blank=True, max_length=8, verbose_name="Pristupni kod")),
+                ("access_qr", models.CharField(blank=True, max_length=64, unique=True, verbose_name="QR pristup")),
+                ("access_valid_from", models.DateTimeField(blank=True, null=True)),
+                ("access_valid_until", models.DateTimeField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Na cekanju"),
+                            ("confirmed", "Potvrdena"),
+                            ("checked_in", "Prijavljen"),
+                            ("checked_out", "Odjavljen"),
+                            ("cancelled", "Otkazana"),
+                            ("no_show", "No-show"),
+                        ],
+                        default="pending",
+                        max_length=15,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "source",
+                    models.CharField(
+                        choices=[
+                            ("direct", "Direktno"),
+                            ("website", "Web stranica"),
+                            ("qr", "QR kod"),
+                            ("booking_com", "Booking.com"),
+                            ("airbnb", "Airbnb"),
+                            ("phone", "Telefon"),
+                            ("walkin", "Walk-in"),
+                        ],
+                        default="direct",
+                        max_length=15,
+                        verbose_name="Izvor",
+                    ),
+                ),
+                ("notes", models.TextField(blank=True, verbose_name="Napomene")),
+                ("is_paid", models.BooleanField(default=False, verbose_name="Placeno")),
+                ("payment_id", models.UUIDField(blank=True, null=True, verbose_name="Payment ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="rental_bookings",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Rezervacija',
-                'verbose_name_plural': 'Rezervacije',
-                'ordering': ['-check_in'],
+                "verbose_name": "Rezervacija",
+                "verbose_name_plural": "Rezervacije",
+                "ordering": ["-check_in"],
             },
         ),
         migrations.CreateModel(
-            name='Property',
+            name="Property",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Naziv')),
-                ('type', models.CharField(choices=[('room', 'Soba'), ('apartment', 'Apartman'), ('house', 'Kuca'), ('suite', 'Suite'), ('dorm', 'Dorm / Spavaonica'), ('office', 'Ured'), ('parking', 'Parking')], default='room', max_length=20, verbose_name='Tip')),
-                ('floor', models.CharField(blank=True, max_length=30, verbose_name='Kat / Zona')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('capacity', models.IntegerField(default=2, verbose_name='Kapacitet (osoba)')),
-                ('beds', models.CharField(blank=True, help_text='npr. 1x bracni, 2x single', max_length=100, verbose_name='Kreveti')),
-                ('price_per_night', models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name='Cijena po noci (EUR)')),
-                ('price_weekend', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Cijena vikend')),
-                ('price_weekly', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Cijena tjedna')),
-                ('price_monthly', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Cijena mjesecna')),
-                ('tourist_tax', models.DecimalField(decimal_places=2, default=1, max_digits=5, verbose_name='Boravisna pristojba po osobi/noci')),
-                ('cleaning_fee', models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Naknada za ciscenje')),
-                ('min_nights', models.IntegerField(default=1, verbose_name='Min. noci')),
-                ('smart_lock_id', models.CharField(blank=True, max_length=100, verbose_name='Smart Lock ID')),
-                ('smart_lock_type', models.CharField(blank=True, help_text='nuki, ttlock, igloohome, yale', max_length=30, verbose_name='Tip brave')),
-                ('wifi_name', models.CharField(blank=True, max_length=50, verbose_name='WiFi naziv')),
-                ('wifi_password', models.CharField(blank=True, max_length=50, verbose_name='WiFi lozinka')),
-                ('qr_code', models.CharField(blank=True, max_length=32, unique=True, verbose_name='QR kod')),
-                ('status', models.CharField(choices=[('available', 'Slobodna'), ('occupied', 'Zauzeta'), ('cleaning', 'Ciscenje'), ('maintenance', 'Odrzavanje'), ('blocked', 'Blokirana')], default='available', max_length=15, verbose_name='Status')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivna')),
-                ('location', models.CharField(blank=True, max_length=200, verbose_name='Lokacija / Adresa')),
-                ('photo_url', models.URLField(blank=True, verbose_name='Foto URL')),
-                ('amenities', models.JSONField(blank=True, default=list, help_text='["wifi","parking","ac","tv","kitchen"]', verbose_name='Pogodnosti')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rental_properties', to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=100, verbose_name="Naziv")),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("room", "Soba"),
+                            ("apartment", "Apartman"),
+                            ("house", "Kuca"),
+                            ("suite", "Suite"),
+                            ("dorm", "Dorm / Spavaonica"),
+                            ("office", "Ured"),
+                            ("parking", "Parking"),
+                        ],
+                        default="room",
+                        max_length=20,
+                        verbose_name="Tip",
+                    ),
+                ),
+                ("floor", models.CharField(blank=True, max_length=30, verbose_name="Kat / Zona")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                ("capacity", models.IntegerField(default=2, verbose_name="Kapacitet (osoba)")),
+                (
+                    "beds",
+                    models.CharField(
+                        blank=True, help_text="npr. 1x bracni, 2x single", max_length=100, verbose_name="Kreveti"
+                    ),
+                ),
+                (
+                    "price_per_night",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name="Cijena po noci (EUR)"),
+                ),
+                (
+                    "price_weekend",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Cijena vikend"
+                    ),
+                ),
+                (
+                    "price_weekly",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Cijena tjedna"
+                    ),
+                ),
+                (
+                    "price_monthly",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Cijena mjesecna"
+                    ),
+                ),
+                (
+                    "tourist_tax",
+                    models.DecimalField(
+                        decimal_places=2, default=1, max_digits=5, verbose_name="Boravisna pristojba po osobi/noci"
+                    ),
+                ),
+                (
+                    "cleaning_fee",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name="Naknada za ciscenje"),
+                ),
+                ("min_nights", models.IntegerField(default=1, verbose_name="Min. noci")),
+                ("smart_lock_id", models.CharField(blank=True, max_length=100, verbose_name="Smart Lock ID")),
+                (
+                    "smart_lock_type",
+                    models.CharField(
+                        blank=True, help_text="nuki, ttlock, igloohome, yale", max_length=30, verbose_name="Tip brave"
+                    ),
+                ),
+                ("wifi_name", models.CharField(blank=True, max_length=50, verbose_name="WiFi naziv")),
+                ("wifi_password", models.CharField(blank=True, max_length=50, verbose_name="WiFi lozinka")),
+                ("qr_code", models.CharField(blank=True, max_length=32, unique=True, verbose_name="QR kod")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("available", "Slobodna"),
+                            ("occupied", "Zauzeta"),
+                            ("cleaning", "Ciscenje"),
+                            ("maintenance", "Odrzavanje"),
+                            ("blocked", "Blokirana"),
+                        ],
+                        default="available",
+                        max_length=15,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivna")),
+                ("location", models.CharField(blank=True, max_length=200, verbose_name="Lokacija / Adresa")),
+                ("photo_url", models.URLField(blank=True, verbose_name="Foto URL")),
+                (
+                    "amenities",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text='["wifi","parking","ac","tv","kitchen"]',
+                        verbose_name="Pogodnosti",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="rental_properties",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Nekretnina',
-                'verbose_name_plural': 'Nekretnine',
-                'ordering': ['floor', 'name'],
+                "verbose_name": "Nekretnina",
+                "verbose_name_plural": "Nekretnine",
+                "ordering": ["floor", "name"],
             },
         ),
         migrations.CreateModel(
-            name='HousekeepingLog',
+            name="HousekeepingLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'Za ciscenje'), ('in_progress', 'U tijeku'), ('done', 'Zavrseno'), ('inspected', 'Pregledano')], default='pending', max_length=15)),
-                ('notes', models.TextField(blank=True)),
-                ('started_at', models.DateTimeField(blank=True, null=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('assigned_to', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Zaduzena osoba')),
-                ('booking', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rental.booking')),
-                ('rental_property', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='housekeeping_logs', to='rental.property')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Za ciscenje"),
+                            ("in_progress", "U tijeku"),
+                            ("done", "Zavrseno"),
+                            ("inspected", "Pregledano"),
+                        ],
+                        default="pending",
+                        max_length=15,
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("started_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "assigned_to",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Zaduzena osoba",
+                    ),
+                ),
+                (
+                    "booking",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="rental.booking"
+                    ),
+                ),
+                (
+                    "rental_property",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="housekeeping_logs",
+                        to="rental.property",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Ciscenje',
-                'ordering': ['-created_at'],
+                "verbose_name": "Ciscenje",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddField(
-            model_name='booking',
-            name='rental_property',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to='rental.property', verbose_name='Nekretnina'),
+            model_name="booking",
+            name="rental_property",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bookings",
+                to="rental.property",
+                verbose_name="Nekretnina",
+            ),
         ),
         migrations.CreateModel(
-            name='SeasonalPrice',
+            name="SeasonalPrice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='Sezona')),
-                ('start_date', models.DateField(verbose_name='Od')),
-                ('end_date', models.DateField(verbose_name='Do')),
-                ('price_per_night', models.DecimalField(decimal_places=2, max_digits=8, verbose_name='Cijena po noci')),
-                ('rental_property', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='seasonal_prices', to='rental.property')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=50, verbose_name="Sezona")),
+                ("start_date", models.DateField(verbose_name="Od")),
+                ("end_date", models.DateField(verbose_name="Do")),
+                ("price_per_night", models.DecimalField(decimal_places=2, max_digits=8, verbose_name="Cijena po noci")),
+                (
+                    "rental_property",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="seasonal_prices",
+                        to="rental.property",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sezonska cijena',
-                'ordering': ['start_date'],
+                "verbose_name": "Sezonska cijena",
+                "ordering": ["start_date"],
             },
         ),
     ]

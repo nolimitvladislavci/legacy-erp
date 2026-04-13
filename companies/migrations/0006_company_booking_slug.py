@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0005_companybranch'),
+        ("companies", "0005_companybranch"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='booking_slug',
-            field=models.SlugField(blank=True, max_length=200, null=True, unique=True, verbose_name='Booking Slug'),
+            model_name="company",
+            name="booking_slug",
+            field=models.SlugField(blank=True, max_length=200, null=True, unique=True, verbose_name="Booking Slug"),
         ),
     ]

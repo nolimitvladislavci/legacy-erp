@@ -4,40 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0017_cashier_user_clockin'),
+        ("pos", "0017_cashier_user_clockin"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='possession',
-            name='is_field_session',
-            field=models.BooleanField(default=False, verbose_name='Terenska smjena'),
+            model_name="possession",
+            name="is_field_session",
+            field=models.BooleanField(default=False, verbose_name="Terenska smjena"),
         ),
         migrations.AddField(
-            model_name='possession',
-            name='loaded_items_json',
-            field=models.JSONField(blank=True, null=True, verbose_name='Utovareni artikli'),
+            model_name="possession",
+            name="loaded_items_json",
+            field=models.JSONField(blank=True, null=True, verbose_name="Utovareni artikli"),
         ),
         migrations.AddField(
-            model_name='possession',
-            name='returned_items_json',
-            field=models.JSONField(blank=True, null=True, verbose_name='Vraceni artikli'),
+            model_name="possession",
+            name="returned_items_json",
+            field=models.JSONField(blank=True, null=True, verbose_name="Vraceni artikli"),
         ),
         migrations.AddField(
-            model_name='possession',
-            name='route_name',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Ruta'),
+            model_name="possession",
+            name="route_name",
+            field=models.CharField(blank=True, max_length=200, verbose_name="Ruta"),
         ),
         migrations.AddField(
-            model_name='possession',
-            name='vehicle_plate',
-            field=models.CharField(blank=True, max_length=20, verbose_name='Reg. oznaka vozila'),
+            model_name="possession",
+            name="vehicle_plate",
+            field=models.CharField(blank=True, max_length=20, verbose_name="Reg. oznaka vozila"),
         ),
         migrations.AlterField(
-            model_name='posterminal',
-            name='pos_type',
-            field=models.CharField(choices=[('quick', 'Brza blagajna'), ('retail', 'Maloprodaja'), ('restaurant', 'Restoran'), ('field', 'Terenska prodaja')], default='retail', max_length=10, verbose_name='Tip POS sučelja'),
+            model_name="posterminal",
+            name="pos_type",
+            field=models.CharField(
+                choices=[
+                    ("quick", "Brza blagajna"),
+                    ("retail", "Maloprodaja"),
+                    ("restaurant", "Restoran"),
+                    ("field", "Terenska prodaja"),
+                ],
+                default="retail",
+                max_length=10,
+                verbose_name="Tip POS sučelja",
+            ),
         ),
     ]

@@ -5,14 +5,16 @@ Celery tasks for Stolarija module.
 - Risk profile recalculation (weekly)
 - AI message processing (every 5 min)
 """
+
 import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.conf import settings
 from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
 
-logger = logging.getLogger('stolarija')
+logger = logging.getLogger("stolarija")
 
 
 @shared_task(bind=True, max_retries=2, retry_backoff=True)
@@ -34,7 +36,7 @@ def check_service_reminders(self):
             scheduled=target_date,
             completed__isnull=True,
             ai_reminder_sent=False,
-        ).select_related('warranty__session__company')
+        ).select_related("warranty__session__company")
 
         for visit in visits:
             warranty = visit.warranty
@@ -43,30 +45,36 @@ def check_service_reminders(self):
                 continue
 
             if days_ahead == 0:
-                msg = (f"🔧 DANAS: Servisni pregled stolarije\n"
-                       f"Garancija: {warranty.warranty_number}\n"
-                       f"Adresa: {warranty.session.address if warranty.session else '—'}")
+                msg = (
+                    f"DANAS: Servisni pregled stolarije\n"
+                    f"Garancija: {warranty.warranty_number}\n"
+                    f"Adresa: {warranty.session.address if warranty.session else '—'}"
+                )
             elif days_ahead == 7:
-                msg = (f"📅 Za 7 dana: servisni pregled stolarije\n"
-                       f"Garancija: {warranty.warranty_number}\n"
-                       f"Datum: {target_date.strftime('%d.%m.%Y')}")
+                msg = (
+                    f"Za 7 dana: servisni pregled stolarije\n"
+                    f"Garancija: {warranty.warranty_number}\n"
+                    f"Datum: {target_date.strftime('%d.%m.%Y')}"
+                )
             else:
-                msg = (f"ℹ️ Za 30 dana: servisni pregled stolarije\n"
-                       f"Garancija: {warranty.warranty_number}\n"
-                       f"Datum: {target_date.strftime('%d.%m.%Y')}")
+                msg = (
+                    f"Za 30 dana: servisni pregled stolarije\n"
+                    f"Garancija: {warranty.warranty_number}\n"
+                    f"Datum: {target_date.strftime('%d.%m.%Y')}"
+                )
 
             try:
-                admin_phone = company.phone or ''
+                admin_phone = company.phone or ""
                 if admin_phone:
                     send_whatsapp_text_task.delay(admin_phone, msg)
                     visit.ai_reminder_sent = True
-                    visit.save(update_fields=['ai_reminder_sent'])
+                    visit.save(update_fields=["ai_reminder_sent"])
                     sent += 1
             except Exception as e:
-                logger.warning('Service reminder failed for visit %s: %s', visit.pk, e)
+                logger.warning("Service reminder failed for visit %s: %s", visit.pk, e)
 
-    logger.info('check_service_reminders: sent %d reminders', sent)
-    return {'sent': sent}
+    logger.info("check_service_reminders: sent %d reminders", sent)
+    return {"sent": sent}
 
 
 @shared_task(bind=True, max_retries=1)
@@ -81,7 +89,7 @@ def check_expired_warranties(self):
 
     warranties = WindowWarranty.objects.filter(
         handover_date__isnull=False,
-    ).select_related('session')
+    ).select_related("session")
 
     for w in warranties:
         expiry = w.handover_date.replace(year=w.handover_date.year + w.valid_years)
@@ -103,16 +111,17 @@ def check_expired_warranties(self):
             ServiceVisit.objects.create(warranty=w, scheduled=anniversary)
             created += 1
 
-    logger.info('check_expired_warranties: created %d service visits', created)
-    return {'created': created}
+    logger.info("check_expired_warranties: created %d service visits", created)
+    return {"created": created}
 
 
 @shared_task(bind=True, max_retries=1)
 def recalculate_risk_profiles(self):
     """Weekly: recalculate risk scores for all warranties."""
     from stolarija.risk_engine import recalculate_all_risks
+
     count = recalculate_all_risks()
-    return {'updated': count}
+    return {"updated": count}
 
 
 @shared_task(bind=True, max_retries=2, retry_backoff=True)
@@ -124,9 +133,9 @@ def process_pending_messages(self):
     from stolarija.models import ServiceMessage
 
     pending = ServiceMessage.objects.filter(
-        direction='inbound',
-        status='received',
-    ).order_by('created_at')[:10]  # Batch of 10
+        direction="inbound",
+        status="received",
+    ).order_by("created_at")[:10]
 
     processed = 0
     for msg in pending:
@@ -134,11 +143,11 @@ def process_pending_messages(self):
             process_inbound_message(msg)
             processed += 1
         except Exception as e:
-            logger.error('Failed to process message %s: %s', msg.pk, e)
+            logger.error("Failed to process message %s: %s", msg.pk, e)
 
     if processed:
-        logger.info('process_pending_messages: processed %d messages', processed)
-    return {'processed': processed}
+        logger.info("process_pending_messages: processed %d messages", processed)
+    return {"processed": processed}
 
 
 @shared_task(bind=True, max_retries=2, retry_backoff=True)
@@ -152,9 +161,9 @@ def send_approved_messages(self):
     from stolarija.models import ServiceMessage
 
     approved = ServiceMessage.objects.filter(
-        direction='outbound',
-        status='approved',
-    ).order_by('approved_at')[:10]
+        direction="outbound",
+        status="approved",
+    ).order_by("approved_at")[:10]
 
     sent = 0
     for msg in approved:
@@ -163,47 +172,43 @@ def send_approved_messages(self):
             continue
 
         try:
-            if msg.channel == 'whatsapp' and msg.sender_email:
-                # sender_email reused as phone for WhatsApp
+            if msg.channel == "whatsapp" and msg.sender_email:
                 send_whatsapp_text_task.delay(msg.sender_email, body)
-                msg.status = 'sent'
+                msg.status = "sent"
                 msg.sent_at = timezone.now()
-                msg.save(update_fields=['status', 'sent_at'])
+                msg.save(update_fields=["status", "sent_at"])
                 sent += 1
 
-            elif msg.channel == 'email' and msg.sender_email:
+            elif msg.channel == "email" and msg.sender_email:
                 send_mail(
-                    subject=msg.subject or 'Servis stolarije — LIMIT Connect',
+                    subject=msg.subject or "Servis stolarije — LIMIT Connect",
                     message=body,
-                    from_email=getattr(
-                        settings, 'DEFAULT_FROM_EMAIL',
-                        'service@limit-connect.com'
-                    ),
+                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "service@limit-connect.com"),
                     recipient_list=[msg.sender_email],
                     fail_silently=False,
                 )
-                msg.status = 'sent'
+                msg.status = "sent"
                 msg.sent_at = timezone.now()
-                msg.save(update_fields=['status', 'sent_at'])
+                msg.save(update_fields=["status", "sent_at"])
                 sent += 1
 
-            # Audit
             try:
                 from core.models import BookingSignature
+
                 BookingSignature.objects.create(
-                    action='send',
-                    target_type='ServiceMessage',
+                    action="send",
+                    target_type="ServiceMessage",
                     target_id=str(msg.pk),
-                    target_repr=f'AI message sent to {msg.sender_email}',
+                    target_repr=f"AI message sent to {msg.sender_email}",
                     user=msg.approved_by,
-                    changes={'channel': msg.channel, 'sentiment': msg.ai_sentiment},
+                    changes={"channel": msg.channel, "sentiment": msg.ai_sentiment},
                 )
             except (IntegrityError, DatabaseError):
                 pass
 
         except (IntegrityError, DatabaseError) as e:
-            logger.error('Failed to send message %s: %s', msg.pk, e)
+            logger.error("Failed to send message %s: %s", msg.pk, e)
 
     if sent:
-        logger.info('send_approved_messages: sent %d messages', sent)
-    return {'sent': sent}
+        logger.info("send_approved_messages: sent %d messages", sent)
+    return {"sent": sent}

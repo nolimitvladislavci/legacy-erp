@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0014_travel_expenses'),
+        ("worktime", "0014_travel_expenses"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='travelexpense',
-            name='ai_classified',
-            field=models.BooleanField(default=False, verbose_name='AI klasificirano'),
+            model_name="travelexpense",
+            name="ai_classified",
+            field=models.BooleanField(default=False, verbose_name="AI klasificirano"),
         ),
     ]

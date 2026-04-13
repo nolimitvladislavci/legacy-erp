@@ -5,28 +5,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0007_company_settings'),
+        ("companies", "0007_company_settings"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OnboardingProgress',
+            name="OnboardingProgress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('profile_completed', models.BooleanField(default=False)),
-                ('first_partner_added', models.BooleanField(default=False)),
-                ('first_invoice_created', models.BooleanField(default=False)),
-                ('bank_account_added', models.BooleanField(default=False)),
-                ('dismissed', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='onboarding', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("profile_completed", models.BooleanField(default=False)),
+                ("first_partner_added", models.BooleanField(default=False)),
+                ("first_invoice_created", models.BooleanField(default=False)),
+                ("bank_account_added", models.BooleanField(default=False)),
+                ("dismissed", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="onboarding", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Onboarding napredak',
-                'verbose_name_plural': 'Onboarding napredak',
+                "verbose_name": "Onboarding napredak",
+                "verbose_name_plural": "Onboarding napredak",
             },
         ),
     ]

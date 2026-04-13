@@ -21,14 +21,15 @@ Primjena u LIMIT Connect:
   - Claude Doktor: _call_haiku() — max_uses=1
   - batch skripte: BEZ advisora (predrago, overkill)
 """
+
 import logging
 from typing import Optional
 
-logger = logging.getLogger('anthropic_advisor')
+logger = logging.getLogger("anthropic_advisor")
 
-HAIKU_MODEL = 'claude-haiku-4-5-20251001'
-OPUS_MODEL  = 'claude-opus-4-6'
-ADVISOR_BETA = 'advisor-tool-2026-03-01'
+HAIKU_MODEL = "claude-haiku-4-5-20251001"
+OPUS_MODEL = "claude-opus-4-6"
+ADVISOR_BETA = "advisor-tool-2026-03-01"
 
 
 def haiku_with_advisor(
@@ -61,38 +62,34 @@ def haiku_with_advisor(
         model=HAIKU_MODEL,
         max_tokens=max_tokens,
         betas=[ADVISOR_BETA],
-        tools=[{
-            'type': 'advisor_20260301',
-            'name': 'advisor',
-            'model': OPUS_MODEL,
-            'max_uses': max_uses,
-        }],
+        tools=[
+            {
+                "type": "advisor_20260301",
+                "name": "advisor",
+                "model": OPUS_MODEL,
+                "max_uses": max_uses,
+            }
+        ],
         messages=messages,
     )
     if system:
-        kwargs['system'] = system
+        kwargs["system"] = system
 
     try:
         resp = client.beta.messages.create(**kwargs)
 
         # Prikupi sve text blokove
-        text_parts = [
-            block.text
-            for block in resp.content
-            if hasattr(block, 'text')
-        ]
-        result = '\n'.join(text_parts).strip()
+        text_parts = [block.text for block in resp.content if hasattr(block, "text")]
+        result = "\n".join(text_parts).strip()
 
         # Log advisor usage
         advisor_used = any(
-            getattr(block, 'type', '') == 'tool_use' and
-            getattr(block, 'name', '') == 'advisor'
+            getattr(block, "type", "") == "tool_use" and getattr(block, "name", "") == "advisor"
             for block in resp.content
         )
         if advisor_used:
             logger.info(
-                'Advisor Strategy: Haiku konzultirao Opus | '
-                'input=%s output=%s',
+                "Advisor Strategy: Haiku konzultirao Opus | input=%s output=%s",
                 resp.usage.input_tokens,
                 resp.usage.output_tokens,
             )
@@ -100,5 +97,5 @@ def haiku_with_advisor(
         return result
 
     except (IntegrityError, DatabaseError) as e:
-        logger.error('haiku_with_advisor greška: %s', e)
+        logger.error("haiku_with_advisor greška: %s", e)
         raise

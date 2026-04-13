@@ -6,59 +6,156 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0039_add_license_token'),
+        ("companies", "0039_add_license_token"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='InputMessage',
+            name="InputMessage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('channel', models.CharField(choices=[('voice', 'Glas (mikrofon)'), ('sms', 'SMS (IoT / vaga / senzor)'), ('email', 'Email'), ('bluetooth', 'Bluetooth (čip čitač)'), ('manual', 'Ručni unos'), ('webhook', 'Webhook (API)')], max_length=15)),
-                ('raw_text', models.TextField(help_text='Sirovi tekst — transkripcija, SMS body, email body')),
-                ('sender', models.CharField(blank=True, help_text='Broj telefona, email, BT MAC...', max_length=200)),
-                ('ai_parsed', models.JSONField(blank=True, default=dict, help_text='AI output: {intent, target_module, fields, confidence}')),
-                ('ai_confidence', models.FloatField(default=0, help_text='0.0 - 1.0')),
-                ('target_module', models.CharField(blank=True, help_text='Django app label: livestock, memio_pet, pos, inventory...', max_length=50)),
-                ('target_action', models.CharField(blank=True, help_text='Akcija: create_record, update_status, log_weight...', max_length=50)),
-                ('status', models.CharField(choices=[('raw', 'Primljeno — čeka AI'), ('parsed', 'AI parsirao — čeka potvrdu'), ('confirmed', 'Korisnik potvrdio'), ('applied', 'Primijenjeno u sustav'), ('rejected', 'Odbačeno'), ('error', 'Greška')], default='raw', max_length=12)),
-                ('applied_object_id', models.CharField(blank=True, help_text='PK kreiranog/ažuriranog objekta nakon primjene', max_length=100)),
-                ('error_message', models.TextField(blank=True)),
-                ('metadata', models.JSONField(blank=True, default=dict, help_text='Dodatni podaci po kanalu')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('processed_at', models.DateTimeField(blank=True, null=True)),
-                ('confirmed_at', models.DateTimeField(blank=True, null=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='input_messages', to='companies.company')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='input_messages', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "channel",
+                    models.CharField(
+                        choices=[
+                            ("voice", "Glas (mikrofon)"),
+                            ("sms", "SMS (IoT / vaga / senzor)"),
+                            ("email", "Email"),
+                            ("bluetooth", "Bluetooth (čip čitač)"),
+                            ("manual", "Ručni unos"),
+                            ("webhook", "Webhook (API)"),
+                        ],
+                        max_length=15,
+                    ),
+                ),
+                ("raw_text", models.TextField(help_text="Sirovi tekst — transkripcija, SMS body, email body")),
+                ("sender", models.CharField(blank=True, help_text="Broj telefona, email, BT MAC...", max_length=200)),
+                (
+                    "ai_parsed",
+                    models.JSONField(
+                        blank=True, default=dict, help_text="AI output: {intent, target_module, fields, confidence}"
+                    ),
+                ),
+                ("ai_confidence", models.FloatField(default=0, help_text="0.0 - 1.0")),
+                (
+                    "target_module",
+                    models.CharField(
+                        blank=True, help_text="Django app label: livestock, memio_pet, pos, inventory...", max_length=50
+                    ),
+                ),
+                (
+                    "target_action",
+                    models.CharField(
+                        blank=True, help_text="Akcija: create_record, update_status, log_weight...", max_length=50
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("raw", "Primljeno — čeka AI"),
+                            ("parsed", "AI parsirao — čeka potvrdu"),
+                            ("confirmed", "Korisnik potvrdio"),
+                            ("applied", "Primijenjeno u sustav"),
+                            ("rejected", "Odbačeno"),
+                            ("error", "Greška"),
+                        ],
+                        default="raw",
+                        max_length=12,
+                    ),
+                ),
+                (
+                    "applied_object_id",
+                    models.CharField(
+                        blank=True, help_text="PK kreiranog/ažuriranog objekta nakon primjene", max_length=100
+                    ),
+                ),
+                ("error_message", models.TextField(blank=True)),
+                ("metadata", models.JSONField(blank=True, default=dict, help_text="Dodatni podaci po kanalu")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("processed_at", models.DateTimeField(blank=True, null=True)),
+                ("confirmed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="input_messages",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="input_messages",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Ulazna poruka',
-                'verbose_name_plural': 'Ulazne poruke',
-                'ordering': ['-created_at'],
+                "verbose_name": "Ulazna poruka",
+                "verbose_name_plural": "Ulazne poruke",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='SMSDevice',
+            name="SMSDevice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('phone_number', models.CharField(db_index=True, help_text='Broj s kojeg uređaj šalje SMS (+385...)', max_length=20, unique=True)),
-                ('device_type', models.CharField(choices=[('bee_scale', 'Pčelarska vaga'), ('livestock_scale', 'Stočna vaga'), ('temperature', 'Temperaturni senzor'), ('gps_tracker', 'GPS tracker'), ('generic', 'Generički uređaj')], default='generic', max_length=20)),
-                ('name', models.CharField(help_text='Npr. "Vaga košnica 1-5"', max_length=100)),
-                ('parse_pattern', models.CharField(blank=True, help_text='Regex za parsiranje SMS-a. Grupe: weight, temp, hive_id...', max_length=500)),
-                ('target_module', models.CharField(default='livestock', help_text='Modul u koji idu podaci', max_length=50)),
-                ('is_active', models.BooleanField(default=True)),
-                ('last_message_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sms_devices', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "phone_number",
+                    models.CharField(
+                        db_index=True, help_text="Broj s kojeg uređaj šalje SMS (+385...)", max_length=20, unique=True
+                    ),
+                ),
+                (
+                    "device_type",
+                    models.CharField(
+                        choices=[
+                            ("bee_scale", "Pčelarska vaga"),
+                            ("livestock_scale", "Stočna vaga"),
+                            ("temperature", "Temperaturni senzor"),
+                            ("gps_tracker", "GPS tracker"),
+                            ("generic", "Generički uređaj"),
+                        ],
+                        default="generic",
+                        max_length=20,
+                    ),
+                ),
+                ("name", models.CharField(help_text='Npr. "Vaga košnica 1-5"', max_length=100)),
+                (
+                    "parse_pattern",
+                    models.CharField(
+                        blank=True,
+                        help_text="Regex za parsiranje SMS-a. Grupe: weight, temp, hive_id...",
+                        max_length=500,
+                    ),
+                ),
+                (
+                    "target_module",
+                    models.CharField(default="livestock", help_text="Modul u koji idu podaci", max_length=50),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("last_message_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="sms_devices", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'SMS uređaj',
-                'verbose_name_plural': 'SMS uređaji',
+                "verbose_name": "SMS uređaj",
+                "verbose_name_plural": "SMS uređaji",
             },
         ),
     ]

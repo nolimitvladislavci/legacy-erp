@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0015_fiscal_cert_log_batch'),
+        ("invoicing", "0015_fiscal_cert_log_batch"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='tax_status',
-            field=models.CharField(blank=True, default='standard', help_text='standard, reduced, zero, reverse_charge, exempt, pausalac, kleinunternehmer', max_length=20, verbose_name='PDV status racuna'),
+            model_name="invoice",
+            name="tax_status",
+            field=models.CharField(
+                blank=True,
+                default="standard",
+                help_text="standard, reduced, zero, reverse_charge, exempt, pausalac, kleinunternehmer",
+                max_length=20,
+                verbose_name="PDV status racuna",
+            ),
         ),
     ]

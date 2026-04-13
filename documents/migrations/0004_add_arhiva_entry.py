@@ -6,41 +6,77 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('documents', '0003_otpremnicaitem_lot'),
+        ("companies", "0021_extend_onboarding"),
+        ("documents", "0003_otpremnicaitem_lot"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ArhivaEntry',
+            name="ArhivaEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source_type', models.CharField(choices=[('invoice_out', 'Izlazni račun'), ('invoice_in', 'Ulazni račun (smart import)'), ('eracun', 'e-Račun (FINA/XML)'), ('document', 'Dokument (ručni upload)'), ('fiscal_cert', 'FINA certifikat'), ('otpremnica', 'Otpremnica'), ('primka', 'Primka'), ('otkupni_blok', 'Otkupni blok'), ('cmr', 'CMR')], max_length=30, verbose_name='Tip izvora')),
-                ('source_id', models.CharField(max_length=64, verbose_name='ID izvornog objekta')),
-                ('doc_number', models.CharField(db_index=True, max_length=50, verbose_name='Broj dokumenta')),
-                ('partner_name', models.CharField(blank=True, max_length=200, verbose_name='Partner')),
-                ('amount', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Iznos')),
-                ('currency', models.CharField(default='EUR', max_length=3, verbose_name='Valuta')),
-                ('doc_date', models.DateField(verbose_name='Datum dokumenta')),
-                ('zki', models.CharField(blank=True, max_length=64, verbose_name='ZKI')),
-                ('jir', models.CharField(blank=True, max_length=64, verbose_name='JIR')),
-                ('file_path', models.CharField(blank=True, max_length=500, verbose_name='Putanja datoteke')),
-                ('has_xml', models.BooleanField(default=False, verbose_name='Ima XML')),
-                ('has_pdf', models.BooleanField(default=False, verbose_name='Ima PDF')),
-                ('has_image', models.BooleanField(default=False, verbose_name='Ima sliku')),
-                ('archived_at', models.DateTimeField(auto_now_add=True, verbose_name='Datum arhiviranja')),
-                ('session_key', models.CharField(blank=True, db_index=True, max_length=64, verbose_name='Ključ sesije')),
-                ('archived_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Arhivirao')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "source_type",
+                    models.CharField(
+                        choices=[
+                            ("invoice_out", "Izlazni račun"),
+                            ("invoice_in", "Ulazni račun (smart import)"),
+                            ("eracun", "e-Račun (FINA/XML)"),
+                            ("document", "Dokument (ručni upload)"),
+                            ("fiscal_cert", "FINA certifikat"),
+                            ("otpremnica", "Otpremnica"),
+                            ("primka", "Primka"),
+                            ("otkupni_blok", "Otkupni blok"),
+                            ("cmr", "CMR"),
+                        ],
+                        max_length=30,
+                        verbose_name="Tip izvora",
+                    ),
+                ),
+                ("source_id", models.CharField(max_length=64, verbose_name="ID izvornog objekta")),
+                ("doc_number", models.CharField(db_index=True, max_length=50, verbose_name="Broj dokumenta")),
+                ("partner_name", models.CharField(blank=True, max_length=200, verbose_name="Partner")),
+                ("amount", models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Iznos")),
+                ("currency", models.CharField(default="EUR", max_length=3, verbose_name="Valuta")),
+                ("doc_date", models.DateField(verbose_name="Datum dokumenta")),
+                ("zki", models.CharField(blank=True, max_length=64, verbose_name="ZKI")),
+                ("jir", models.CharField(blank=True, max_length=64, verbose_name="JIR")),
+                ("file_path", models.CharField(blank=True, max_length=500, verbose_name="Putanja datoteke")),
+                ("has_xml", models.BooleanField(default=False, verbose_name="Ima XML")),
+                ("has_pdf", models.BooleanField(default=False, verbose_name="Ima PDF")),
+                ("has_image", models.BooleanField(default=False, verbose_name="Ima sliku")),
+                ("archived_at", models.DateTimeField(auto_now_add=True, verbose_name="Datum arhiviranja")),
+                (
+                    "session_key",
+                    models.CharField(blank=True, db_index=True, max_length=64, verbose_name="Ključ sesije"),
+                ),
+                (
+                    "archived_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Arhivirao",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Tvrtka"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Arhivski zapis',
-                'verbose_name_plural': 'Arhivski zapisi',
-                'ordering': ['-archived_at'],
-                'indexes': [models.Index(fields=['company', 'source_type'], name='arhiva_co_src_idx'), models.Index(fields=['company', 'doc_date'], name='arhiva_co_date_idx')],
+                "verbose_name": "Arhivski zapis",
+                "verbose_name_plural": "Arhivski zapisi",
+                "ordering": ["-archived_at"],
+                "indexes": [
+                    models.Index(fields=["company", "source_type"], name="arhiva_co_src_idx"),
+                    models.Index(fields=["company", "doc_date"], name="arhiva_co_date_idx"),
+                ],
             },
         ),
     ]

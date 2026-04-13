@@ -4,15 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0026_company_fiscal_exempt'),
+        ("companies", "0026_company_fiscal_exempt"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='cash_register_limit',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Zakonski limit gotovine u blagajni. Za udruge obavezno. Prazno = bez limita.', max_digits=10, null=True, verbose_name='Blagajnički maksimum (EUR)'),
+            model_name="company",
+            name="cash_register_limit",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                help_text="Zakonski limit gotovine u blagajni. Za udruge obavezno. Prazno = bez limita.",
+                max_digits=10,
+                null=True,
+                verbose_name="Blagajnički maksimum (EUR)",
+            ),
         ),
     ]

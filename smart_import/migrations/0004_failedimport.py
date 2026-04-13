@@ -5,29 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('smart_import', '0003_add_companymailbox'),
+        ("companies", "0021_extend_onboarding"),
+        ("smart_import", "0003_add_companymailbox"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FailedImport',
+            name="FailedImport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email_subject', models.CharField(blank=True, max_length=500)),
-                ('email_sender', models.CharField(blank=True, max_length=255)),
-                ('filename', models.CharField(max_length=255)),
-                ('error_message', models.TextField()),
-                ('mailbox_user', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("email_subject", models.CharField(blank=True, max_length=500)),
+                ("email_sender", models.CharField(blank=True, max_length=255)),
+                ("filename", models.CharField(max_length=255)),
+                ("error_message", models.TextField()),
+                ("mailbox_user", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Neuspjeli uvoz',
-                'verbose_name_plural': 'Neuspjeli uvozi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Neuspjeli uvoz",
+                "verbose_name_plural": "Neuspjeli uvozi",
+                "ordering": ["-created_at"],
             },
         ),
     ]

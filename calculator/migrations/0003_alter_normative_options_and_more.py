@@ -5,85 +5,86 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('calculator', '0002_normative_remove_estimate_created_by_and_more'),
+        ("calculator", "0002_normative_remove_estimate_created_by_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='normative',
-            options={'verbose_name': 'Normativ', 'verbose_name_plural': 'Normativi'},
+            name="normative",
+            options={"verbose_name": "Normativ", "verbose_name_plural": "Normativi"},
         ),
         migrations.RemoveField(
-            model_name='calculationitem',
-            name='labor_hours',
+            model_name="calculationitem",
+            name="labor_hours",
         ),
         migrations.RemoveField(
-            model_name='calculationitem',
-            name='labor_rate',
+            model_name="calculationitem",
+            name="labor_rate",
         ),
         migrations.RemoveField(
-            model_name='normative',
-            name='base_price',
+            model_name="normative",
+            name="base_price",
         ),
         migrations.RemoveField(
-            model_name='normative',
-            name='estimated_labor_hours',
+            model_name="normative",
+            name="estimated_labor_hours",
         ),
         migrations.AddField(
-            model_name='calculation',
-            name='updated_at',
+            model_name="calculation",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='calculation',
-            name='vat_percentage',
-            field=models.FloatField(default=25.0, verbose_name='PDV (%)'),
+            model_name="calculation",
+            name="vat_percentage",
+            field=models.FloatField(default=25.0, verbose_name="PDV (%)"),
         ),
         migrations.AddField(
-            model_name='calculationitem',
-            name='labor_hours_per_unit',
+            model_name="calculationitem",
+            name="labor_hours_per_unit",
             field=models.FloatField(default=0),
         ),
         migrations.AddField(
-            model_name='calculationitem',
-            name='labor_rate_applied',
+            model_name="calculationitem",
+            name="labor_rate_applied",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
         ),
         migrations.AddField(
-            model_name='calculationitem',
-            name='normative',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='calculator.normative'),
+            model_name="calculationitem",
+            name="normative",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="calculator.normative"
+            ),
         ),
         migrations.AddField(
-            model_name='normative',
-            name='base_material_cost',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Cijena materijala'),
+            model_name="normative",
+            name="base_material_cost",
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Cijena materijala"),
         ),
         migrations.AddField(
-            model_name='normative',
-            name='estimated_hours_per_unit',
-            field=models.FloatField(default=0, verbose_name='Sati rada po jedinici'),
+            model_name="normative",
+            name="estimated_hours_per_unit",
+            field=models.FloatField(default=0, verbose_name="Sati rada po jedinici"),
         ),
         migrations.AlterField(
-            model_name='calculation',
-            name='margin_percentage',
-            field=models.FloatField(default=20.0, verbose_name='Marža (%)'),
+            model_name="calculation",
+            name="margin_percentage",
+            field=models.FloatField(default=20.0, verbose_name="Marža (%)"),
         ),
         migrations.AlterField(
-            model_name='calculationitem',
-            name='description',
+            model_name="calculationitem",
+            name="description",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='calculationitem',
-            name='quantity',
+            model_name="calculationitem",
+            name="quantity",
             field=models.FloatField(default=1.0),
         ),
         migrations.AlterField(
-            model_name='calculationitem',
-            name='unit_price_material',
+            model_name="calculationitem",
+            name="unit_price_material",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
         ),
     ]

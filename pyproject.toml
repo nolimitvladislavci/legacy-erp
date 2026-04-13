@@ -1,6 +1,7 @@
 [tool.ruff]
 target-version = "py312"
 line-length = 120
+extend-exclude = ["backups", "venv", "tmp", "simulation", "scripts", "loadtest", "data_migration"]
 
 [tool.ruff.lint]
 select = ["F401", "F811", "F841", "E711", "E712", "E721", "W191", "I001", "F601", "F402"]
@@ -8,11 +9,6 @@ select = ["F401", "F811", "F841", "E711", "E712", "E721", "W191", "I001", "F601"
 [tool.ruff.lint.per-file-ignores]
 "*/migrations/*" = ["ALL"]
 "*/tests*" = ["F841", "F401"]
-"*/backups/*" = ["ALL"]
-"venv/*" = ["ALL"]
-"tmp/*" = ["ALL"]
-"scripts/*" = ["F841", "F401"]
-"simulation/*" = ["ALL"]
 "*/admin.py" = ["F403", "F405", "F821"]
 "*/serializers.py" = ["F403", "F405", "F821"]
 "pos_audit.py" = ["F403", "F405", "F821"]

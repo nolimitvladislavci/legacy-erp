@@ -5,33 +5,51 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('synesis', '0005_alter_synesisexportqueue_options_and_more'),
+        ("synesis", "0005_alter_synesisexportqueue_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='export_type',
-            field=models.CharField(choices=[('item', 'Artikl'), ('partner', 'Partner'), ('calculation', 'Kalkulacija'), ('pkv', 'PKV primka'), ('invoice', 'Faktura')], max_length=20),
+            model_name="synesisexportqueue",
+            name="export_type",
+            field=models.CharField(
+                choices=[
+                    ("item", "Artikl"),
+                    ("partner", "Partner"),
+                    ("calculation", "Kalkulacija"),
+                    ("pkv", "PKV primka"),
+                    ("invoice", "Faktura"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.CreateModel(
-            name='SynesisYearConfig',
+            name="SynesisYearConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.PositiveIntegerField(verbose_name='Godina')),
-                ('storage_db_path', models.CharField(max_length=500, verbose_name='Putanja do Storage.mdb')),
-                ('journal_db_path', models.CharField(blank=True, default='', max_length=500, verbose_name='Putanja do Journal.mdb')),
-                ('last_sync_invoices', models.DateTimeField(blank=True, null=True)),
-                ('invoices_total', models.IntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
-                ('config', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='year_configs', to='synesis.synesisconfig')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("year", models.PositiveIntegerField(verbose_name="Godina")),
+                ("storage_db_path", models.CharField(max_length=500, verbose_name="Putanja do Storage.mdb")),
+                (
+                    "journal_db_path",
+                    models.CharField(blank=True, default="", max_length=500, verbose_name="Putanja do Journal.mdb"),
+                ),
+                ("last_sync_invoices", models.DateTimeField(blank=True, null=True)),
+                ("invoices_total", models.IntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "config",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="year_configs",
+                        to="synesis.synesisconfig",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Synesis godišnja konfiguracija',
-                'ordering': ['-year'],
-                'unique_together': {('config', 'year')},
+                "verbose_name": "Synesis godišnja konfiguracija",
+                "ordering": ["-year"],
+                "unique_together": {("config", "year")},
             },
         ),
     ]

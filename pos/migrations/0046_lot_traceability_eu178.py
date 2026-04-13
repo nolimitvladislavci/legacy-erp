@@ -5,26 +5,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0017_livestock_animal_fk'),
-        ('pos', '0045_add_quick_actions_to_terminal'),
+        ("inventory", "0017_livestock_animal_fk"),
+        ("pos", "0045_add_quick_actions_to_terminal"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='expiry_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Rok trajanja'),
+            model_name="posreceiptitem",
+            name="expiry_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Rok trajanja"),
         ),
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='lot_number',
-            field=models.CharField(blank=True, default='', help_text='Denormalizirano — trajno na bonu cak i ako se sarza obrise', max_length=100, verbose_name='LOT broj'),
+            model_name="posreceiptitem",
+            name="lot_number",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Denormalizirano — trajno na bonu cak i ako se sarza obrise",
+                max_length=100,
+                verbose_name="LOT broj",
+            ),
         ),
         migrations.AddField(
-            model_name='posreceiptitem',
-            name='stock_batch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_items', to='inventory.stockbatch', verbose_name='Sarza (LOT)'),
+            model_name="posreceiptitem",
+            name="stock_batch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="pos_items",
+                to="inventory.stockbatch",
+                verbose_name="Sarza (LOT)",
+            ),
         ),
     ]

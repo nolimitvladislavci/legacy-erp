@@ -4,25 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0048_complaints_session2'),
+        ("pos", "0048_complaints_session2"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='moderation_note',
-            field=models.CharField(blank=True, help_text='AI/admin razlog odobrenja ili odbijanja javnog prikaza', max_length=500, verbose_name='Moderacijska napomena'),
+            model_name="knjigaprigovora",
+            name="moderation_note",
+            field=models.CharField(
+                blank=True,
+                help_text="AI/admin razlog odobrenja ili odbijanja javnog prikaza",
+                max_length=500,
+                verbose_name="Moderacijska napomena",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='moderation_passed',
-            field=models.BooleanField(default=False, help_text='Sadržaj prošao AI + ručnu moderaciju za javni prikaz', verbose_name='Moderacija prošla'),
+            model_name="knjigaprigovora",
+            name="moderation_passed",
+            field=models.BooleanField(
+                default=False,
+                help_text="Sadržaj prošao AI + ručnu moderaciju za javni prikaz",
+                verbose_name="Moderacija prošla",
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='whatsapp_consent',
-            field=models.BooleanField(default=False, help_text='Potrošač eksplicitno pristao na WhatsApp komunikaciju', verbose_name='WhatsApp pristanak'),
+            model_name="knjigaprigovora",
+            name="whatsapp_consent",
+            field=models.BooleanField(
+                default=False,
+                help_text="Potrošač eksplicitno pristao na WhatsApp komunikaciju",
+                verbose_name="WhatsApp pristanak",
+            ),
         ),
     ]

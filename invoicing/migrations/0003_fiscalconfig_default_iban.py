@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0002_remove_fiscalconfig_address_and_more'),
+        ("invoicing", "0002_remove_fiscalconfig_address_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='default_iban',
-            field=models.CharField(blank=True, default='', max_length=34, verbose_name='Zadani IBAN'),
+            model_name="fiscalconfig",
+            name="default_iban",
+            field=models.CharField(blank=True, default="", max_length=34, verbose_name="Zadani IBAN"),
         ),
     ]

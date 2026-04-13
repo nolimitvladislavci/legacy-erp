@@ -10,7 +10,11 @@ urlpatterns = [
     path("reports/", views.ai_reports, name="ai_reports"),
     path("funds/", views.ai_funds, name="ai_funds"),
     # BORG Signal
-    path("api/signal/", __import__("limit_connect_ai.views_signal", fromlist=["submit_signal"]).submit_signal, name="borg_signal"),
+    path(
+        "api/signal/",
+        __import__("limit_connect_ai.views_signal", fromlist=["submit_signal"]).submit_signal,
+        name="borg_signal",
+    ),
 ]
 
 

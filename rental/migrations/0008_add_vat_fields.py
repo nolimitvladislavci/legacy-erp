@@ -4,20 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('rental', '0007_property_owner_field'),
+        ("rental", "0007_property_owner_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='booking',
-            name='vat_amount',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name='PDV iznos'),
+            model_name="booking",
+            name="vat_amount",
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=8, verbose_name="PDV iznos"),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='vat_rate',
-            field=models.DecimalField(decimal_places=1, default=13, help_text='HR: 13% kratkoročni smještaj, 25% usluge, 0% dugoročni najam', max_digits=4, verbose_name='PDV stopa (%)'),
+            model_name="booking",
+            name="vat_rate",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=13,
+                help_text="HR: 13% kratkoročni smještaj, 25% usluge, 0% dugoročni najam",
+                max_digits=4,
+                verbose_name="PDV stopa (%)",
+            ),
         ),
     ]

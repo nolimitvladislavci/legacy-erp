@@ -5,6 +5,7 @@
   Stage 2: EN 16931 business rules (via eracun.services.validator)
   Stage 3: PROPTER custom rules (OIB checksum, future date, etc.)
 """
+
 import logging
 from dataclasses import dataclass, field
 from datetime import date
@@ -23,6 +24,7 @@ UBL_NS = {
 @dataclass
 class ValidationResult:
     """Result of UBL validation pipeline."""
+
     is_valid: bool = True
     errors: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
@@ -75,6 +77,7 @@ def validate_ubl(xml_content, strict=True):
     # ── Stage 1: XSD Schema ──
     try:
         from eracun.services.validator import validate_xsd
+
         xsd_valid, xsd_errors = validate_xsd(xml_bytes)
         result.stage_results["xsd"] = {"valid": xsd_valid, "errors": xsd_errors}
         if not xsd_valid:
@@ -88,10 +91,9 @@ def validate_ubl(xml_content, strict=True):
     # ── Stage 2: EN 16931 Business Rules ──
     try:
         from eracun.services.validator import validate_business_rules
+
         br_valid, br_errors, br_warnings = validate_business_rules(xml_bytes)
-        result.stage_results["business_rules"] = {
-            "valid": br_valid, "errors": br_errors, "warnings": br_warnings
-        }
+        result.stage_results["business_rules"] = {"valid": br_valid, "errors": br_errors, "warnings": br_warnings}
         if not br_valid:
             result.is_valid = False
             result.errors.extend([f"BR: {e}" for e in br_errors])
@@ -102,9 +104,7 @@ def validate_ubl(xml_content, strict=True):
 
     # ── Stage 3: PROPTER Custom Rules ──
     propter_errors, propter_warnings = _validate_propter_rules(xml_bytes)
-    result.stage_results["propter"] = {
-        "errors": propter_errors, "warnings": propter_warnings
-    }
+    result.stage_results["propter"] = {"errors": propter_errors, "warnings": propter_warnings}
     if propter_errors:
         result.is_valid = False
         result.errors.extend(propter_errors)

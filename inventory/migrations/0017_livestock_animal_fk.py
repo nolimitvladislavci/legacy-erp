@@ -5,16 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0016_donation_in_stock_type'),
-        ('livestock', '0001_initial'),
+        ("inventory", "0016_donation_in_stock_type"),
+        ("livestock", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inventoryitem',
-            name='livestock_animal',
-            field=models.ForeignKey(blank=True, help_text='Za pracenje karencije — blokira prodaju ako grlo u karenciji', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='products', to='livestock.livestock', verbose_name='Vezano grlo'),
+            model_name="inventoryitem",
+            name="livestock_animal",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Za pracenje karencije — blokira prodaju ako grlo u karenciji",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="products",
+                to="livestock.livestock",
+                verbose_name="Vezano grlo",
+            ),
         ),
     ]

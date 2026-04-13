@@ -7,6 +7,7 @@ Document Storage Backends — 3 opcije za spremanje datoteka.
 Svaka firma moze imati svoju konfiguraciju.
 Auto-kompresija slika prije spremanja.
 """
+
 import hashlib
 import io
 import logging
@@ -22,6 +23,7 @@ logger = logging.getLogger(__name__)
 # Register HEIC/HEIF opener for iPhone photos
 try:
     from pillow_heif import register_heif_opener
+
     register_heif_opener()
 except ImportError:
     pass
@@ -34,12 +36,14 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
     """Kompresira sliku na target velicinu. Vraca (bytes, content_type)."""
     try:
         from PIL import Image
+
         img = Image.open(io.BytesIO(file_bytes))
 
         try:
             from PIL import ExifTags
+
             for orientation in ExifTags.TAGS:
-                if ExifTags.TAGS[orientation] == 'Orientation':
+                if ExifTags.TAGS[orientation] == "Orientation":
                     break
             exif = img._getexif()
             if exif and orientation in exif:
@@ -52,8 +56,8 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
         except ImportError:
             pass
 
-        if img.mode in ('RGBA', 'P'):
-            img = img.convert('RGB')
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
 
         max_dim = 1920
         if max(img.size) > max_dim:
@@ -64,7 +68,7 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
         for _ in range(6):
             quality = (quality_lo + quality_hi) // 2
             buf = io.BytesIO()
-            img.save(buf, format='JPEG', quality=quality, optimize=True)
+            img.save(buf, format="JPEG", quality=quality, optimize=True)
             size = buf.tell()
             if size <= max_bytes:
                 best_buf = buf
@@ -74,22 +78,22 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
 
         if best_buf is None:
             best_buf = io.BytesIO()
-            img.save(best_buf, format='JPEG', quality=20, optimize=True)
+            img.save(best_buf, format="JPEG", quality=20, optimize=True)
 
         best_buf.seek(0)
-        return best_buf.read(), 'image/jpeg'
+        return best_buf.read(), "image/jpeg"
 
     except ImportError:
-        logger.warning('Pillow not installed, skipping image compression')
-        return file_bytes, 'application/octet-stream'
+        logger.warning("Pillow not installed, skipping image compression")
+        return file_bytes, "application/octet-stream"
     except (FileNotFoundError, PermissionError, IOError) as e:
-        logger.warning('Image compression failed: %s', e)
-        return file_bytes, 'application/octet-stream'
+        logger.warning("Image compression failed: %s", e)
+        return file_bytes, "application/octet-stream"
 
 
 def generate_storage_path(company_id, source_type, filename):
     now = datetime.now()
-    ext = os.path.splitext(filename)[1].lower() if filename else '.bin'
+    ext = os.path.splitext(filename)[1].lower() if filename else ".bin"
     unique = uuid.uuid4().hex[:12]
     return f"arhiva/{company_id}/{now.year}/{now.month:02d}/{unique}{ext}"
 
@@ -105,22 +109,22 @@ class LocalStorageBackend:
         rel_path = generate_storage_path(company_id, source_type, filename)
         full_path = os.path.join(settings.MEDIA_ROOT, rel_path)
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
-        with open(full_path, 'wb') as f:
+        with open(full_path, "wb") as f:
             f.write(file_bytes)
-        logger.info('LOCAL saved: %s (%d bytes)', rel_path, len(file_bytes))
+        logger.info("LOCAL saved: %s (%d bytes)", rel_path, len(file_bytes))
         return {
-            'backend': 'local',
-            'path': rel_path,
-            'url': f'{settings.MEDIA_URL}{rel_path}',
-            'size': len(file_bytes),
-            'hash': get_file_hash(file_bytes),
+            "backend": "local",
+            "path": rel_path,
+            "url": f"{settings.MEDIA_URL}{rel_path}",
+            "size": len(file_bytes),
+            "hash": get_file_hash(file_bytes),
         }
 
     def retrieve(self, path):
         full_path = os.path.join(settings.MEDIA_ROOT, path)
         if not os.path.exists(full_path):
             return None
-        with open(full_path, 'rb') as f:
+        with open(full_path, "rb") as f:
             return f.read()
 
     def delete(self, path):
@@ -138,25 +142,26 @@ class CloudStorageBackend:
     """S3-kompatibilan storage (Backblaze B2 ili AWS S3)."""
 
     def __init__(self):
-        self.bucket_name = os.environ.get('STORAGE_BUCKET', '')
-        self.key_id = os.environ.get('STORAGE_KEY_ID', '')
-        self.app_key = os.environ.get('STORAGE_APP_KEY', '')
-        self.endpoint = os.environ.get('STORAGE_ENDPOINT', '')
-        self.region = os.environ.get('STORAGE_REGION', 'us-west-004')
+        self.bucket_name = os.environ.get("STORAGE_BUCKET", "")
+        self.key_id = os.environ.get("STORAGE_KEY_ID", "")
+        self.app_key = os.environ.get("STORAGE_APP_KEY", "")
+        self.endpoint = os.environ.get("STORAGE_ENDPOINT", "")
+        self.region = os.environ.get("STORAGE_REGION", "us-west-004")
         self._client = None
 
     @property
     def client(self):
         if self._client is None:
             import boto3
+
             kwargs = {
-                'service_name': 's3',
-                'aws_access_key_id': self.key_id,
-                'aws_secret_access_key': self.app_key,
-                'region_name': self.region,
+                "service_name": "s3",
+                "aws_access_key_id": self.key_id,
+                "aws_secret_access_key": self.app_key,
+                "region_name": self.region,
             }
             if self.endpoint:
-                kwargs['endpoint_url'] = self.endpoint
+                kwargs["endpoint_url"] = self.endpoint
             self._client = boto3.client(**kwargs)
         return self._client
 
@@ -164,9 +169,11 @@ class CloudStorageBackend:
     def is_configured(self):
         return bool(self.bucket_name and self.key_id and self.app_key)
 
-    def save(self, file_bytes, filename, company_id, source_type, content_type='application/octet-stream', **kwargs):
+    def save(self, file_bytes, filename, company_id, source_type, content_type="application/octet-stream", **kwargs):
         if not self.is_configured:
-            raise RuntimeError('Cloud storage not configured. Set STORAGE_BUCKET, STORAGE_KEY_ID, STORAGE_APP_KEY in .env')
+            raise RuntimeError(
+                "Cloud storage not configured. Set STORAGE_BUCKET, STORAGE_KEY_ID, STORAGE_APP_KEY in .env"
+            )
 
         rel_path = generate_storage_path(company_id, source_type, filename)
         self.client.put_object(
@@ -180,13 +187,13 @@ class CloudStorageBackend:
         else:
             url = f"https://{self.bucket_name}.s3.amazonaws.com/{rel_path}"
 
-        logger.info('CLOUD saved: %s (%d bytes)', rel_path, len(file_bytes))
+        logger.info("CLOUD saved: %s (%d bytes)", rel_path, len(file_bytes))
         return {
-            'backend': 'cloud',
-            'path': rel_path,
-            'url': url,
-            'size': len(file_bytes),
-            'hash': get_file_hash(file_bytes),
+            "backend": "cloud",
+            "path": rel_path,
+            "url": url,
+            "size": len(file_bytes),
+            "hash": get_file_hash(file_bytes),
         }
 
     def retrieve(self, path):
@@ -194,9 +201,9 @@ class CloudStorageBackend:
             return None
         try:
             resp = self.client.get_object(Bucket=self.bucket_name, Key=path)
-            return resp['Body'].read()
+            return resp["Body"].read()
         except IOError as e:
-            logger.error('Cloud retrieve error: %s', e)
+            logger.error("Cloud retrieve error: %s", e)
             return None
 
     def delete(self, path):
@@ -221,51 +228,52 @@ class CloudStorageBackend:
 class DatabaseStorageBackend:
     """Sprema u DocumentBlob model (PostgreSQL bytea)."""
 
-    def save(self, file_bytes, filename, company_id, source_type, content_type='application/octet-stream', **kwargs):
+    def save(self, file_bytes, filename, company_id, source_type, content_type="application/octet-stream", **kwargs):
         from .models import DocumentBlob
 
         if len(file_bytes) > DB_MAX_SIZE:
             raise ValueError(
-                'Datoteka prevelika za DB storage (%dKB > %dKB). '
-                'Koristite Local ili Cloud backend.' % (len(file_bytes) // 1024, DB_MAX_SIZE // 1024)
+                "Datoteka prevelika za DB storage (%dKB > %dKB). "
+                "Koristite Local ili Cloud backend." % (len(file_bytes) // 1024, DB_MAX_SIZE // 1024)
             )
 
         file_hash = get_file_hash(file_bytes)
 
         existing = DocumentBlob.objects.filter(file_hash=file_hash, company_id=company_id).first()
         if existing:
-            logger.info('DB dedup hit: %s', file_hash[:16])
+            logger.info("DB dedup hit: %s", file_hash[:16])
             return {
-                'backend': 'database',
-                'path': 'db://%s' % existing.id,
-                'url': '/documents/blob/%s/' % existing.id,
-                'size': existing.file_size,
-                'hash': file_hash,
-                'blob_id': str(existing.id),
+                "backend": "database",
+                "path": "db://%s" % existing.id,
+                "url": "/documents/blob/%s/" % existing.id,
+                "size": existing.file_size,
+                "hash": file_hash,
+                "blob_id": str(existing.id),
             }
 
         blob = DocumentBlob.objects.create(
             company_id=company_id,
-            filename=filename or 'unknown',
+            filename=filename or "unknown",
             content_type=content_type,
             file_data=file_bytes,
             file_size=len(file_bytes),
             file_hash=file_hash,
             source_type=source_type,
         )
-        logger.info('DB saved: %s (%d bytes)', blob.id, len(file_bytes))
+        logger.info("DB saved: %s (%d bytes)", blob.id, len(file_bytes))
         return {
-            'backend': 'database',
-            'path': 'db://%s' % blob.id,
-            'url': '/documents/blob/%s/' % blob.id,
-            'size': len(file_bytes),
-            'hash': file_hash,
-            'blob_id': str(blob.id),
+            "backend": "database",
+            "path": "db://%s" % blob.id,
+            "url": "/documents/blob/%s/" % blob.id,
+            "size": len(file_bytes),
+            "hash": file_hash,
+            "blob_id": str(blob.id),
         }
 
     def retrieve(self, path):
         from .models import DocumentBlob
-        blob_id = path.replace('db://', '')
+
+        blob_id = path.replace("db://", "")
         try:
             blob = DocumentBlob.objects.get(id=blob_id)
             return bytes(blob.file_data)
@@ -274,7 +282,8 @@ class DatabaseStorageBackend:
 
     def delete(self, path):
         from .models import DocumentBlob
-        blob_id = path.replace('db://', '')
+
+        blob_id = path.replace("db://", "")
         try:
             DocumentBlob.objects.filter(id=blob_id).delete()
             return True
@@ -283,28 +292,30 @@ class DatabaseStorageBackend:
 
     def exists(self, path):
         from .models import DocumentBlob
-        blob_id = path.replace('db://', '')
+
+        blob_id = path.replace("db://", "")
         return DocumentBlob.objects.filter(id=blob_id).exists()
 
 
 BACKENDS = {
-    'local': LocalStorageBackend,
-    'cloud': CloudStorageBackend,
-    'database': DatabaseStorageBackend,
+    "local": LocalStorageBackend,
+    "cloud": CloudStorageBackend,
+    "database": DatabaseStorageBackend,
 }
 
 
 def get_backend(backend_name=None):
     if backend_name is None:
-        backend_name = os.environ.get('STORAGE_BACKEND', 'local')
+        backend_name = os.environ.get("STORAGE_BACKEND", "local")
     cls = BACKENDS.get(backend_name)
     if cls is None:
-        raise ValueError('Unknown storage backend: %s' % backend_name)
+        raise ValueError("Unknown storage backend: %s" % backend_name)
     return cls()
 
 
-def store_document(file_bytes, filename, company_id, source_type,
-                   backend_name=None, auto_compress=True, content_type=None):
+def store_document(
+    file_bytes, filename, company_id, source_type, backend_name=None, auto_compress=True, content_type=None
+):
     """
     Glavni entry point za spremanje dokumenata.
 
@@ -318,19 +329,25 @@ def store_document(file_bytes, filename, company_id, source_type,
     )
     """
     if not content_type:
-        ext = os.path.splitext(filename)[1].lower() if filename else ''
+        ext = os.path.splitext(filename)[1].lower() if filename else ""
         content_type = {
-            '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
-            '.gif': 'image/gif', '.webp': 'image/webp', '.pdf': 'application/pdf',
-            '.heic': 'image/heic', '.heif': 'image/heif',
-            '.xml': 'application/xml', '.json': 'application/json',
-        }.get(ext, 'application/octet-stream')
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+            ".pdf": "application/pdf",
+            ".heic": "image/heic",
+            ".heif": "image/heif",
+            ".xml": "application/xml",
+            ".json": "application/json",
+        }.get(ext, "application/octet-stream")
 
-    is_image = content_type.startswith('image/')
+    is_image = content_type.startswith("image/")
     if auto_compress and is_image and len(file_bytes) > IMAGE_TARGET_SIZE:
         original_size = len(file_bytes)
         file_bytes, content_type = compress_image(file_bytes, filename)
-        logger.info('Compressed %s: %dKB -> %dKB', filename, original_size // 1024, len(file_bytes) // 1024)
+        logger.info("Compressed %s: %dKB -> %dKB", filename, original_size // 1024, len(file_bytes) // 1024)
 
     backend = get_backend(backend_name)
     result = backend.save(
@@ -340,12 +357,12 @@ def store_document(file_bytes, filename, company_id, source_type,
         source_type=source_type,
         content_type=content_type,
     )
-    result['content_type'] = content_type
-    result['original_filename'] = filename
+    result["content_type"] = content_type
+    result["original_filename"] = filename
 
     # ── DUAL-WRITE: uvijek spremi i lokalno kao backup ──
-    actual_backend = backend_name or os.environ.get('STORAGE_BACKEND', 'local')
-    if actual_backend != 'local':
+    actual_backend = backend_name or os.environ.get("STORAGE_BACKEND", "local")
+    if actual_backend != "local":
         try:
             local = LocalStorageBackend()
             local_result = local.save(
@@ -354,27 +371,27 @@ def store_document(file_bytes, filename, company_id, source_type,
                 company_id=company_id,
                 source_type=source_type,
             )
-            result['local_backup_path'] = local_result['path']
-            logger.info('Dual-write: local backup at %s', local_result['path'])
+            result["local_backup_path"] = local_result["path"]
+            logger.info("Dual-write: local backup at %s", local_result["path"])
         except Exception as e:
-            logger.warning('Dual-write local backup failed: %s', e)
+            logger.warning("Dual-write local backup failed: %s", e)
 
     return result
 
 
 def retrieve_document(path, backend_name=None):
     """Dohvaca fajl — pokusava primarni backend, fallback na local."""
-    if path.startswith('db://'):
-        backend_name = 'database'
+    if path.startswith("db://"):
+        backend_name = "database"
     backend = get_backend(backend_name)
     data = backend.retrieve(path)
 
     # Fallback: ako cloud ne uspije, pokusaj lokalno
-    if data is None and backend_name not in (None, 'local'):
+    if data is None and backend_name not in (None, "local"):
         local = LocalStorageBackend()
         data = local.retrieve(path)
         if data:
-            logger.info('Cloud retrieve failed, served from local backup: %s', path)
+            logger.info("Cloud retrieve failed, served from local backup: %s", path)
 
     return data
 
@@ -398,28 +415,28 @@ def migrate_existing_files():
 
     # Mapiranje media direktorija na source_type
     DIR_MAP = {
-        'documents': 'document',
-        'smart_import': 'invoice_in',
-        'fiscal': 'fiscal_cert',
-        'leads': 'document',
-        'dossier': 'document',
-        'inventory': 'document',
+        "documents": "document",
+        "smart_import": "invoice_in",
+        "fiscal": "fiscal_cert",
+        "leads": "document",
+        "dossier": "document",
+        "inventory": "document",
     }
 
     # Skip ove direktorije (nisu dokumenti)
-    SKIP_DIRS = {'company_logos', 'website', 'site_photos', 'arhiva', 'certs'}
+    SKIP_DIRS = {"company_logos", "website", "site_photos", "arhiva", "certs"}
 
     companies = {str(c.id): c for c in Company.objects.all()}
     default_company = Company.objects.first()
 
     for root, dirs, files in os.walk(media_root):
         rel_root = os.path.relpath(root, media_root)
-        top_dir = rel_root.split(os.sep)[0] if rel_root != '.' else ''
+        top_dir = rel_root.split(os.sep)[0] if rel_root != "." else ""
 
         if top_dir in SKIP_DIRS:
             continue
 
-        source_type = DIR_MAP.get(top_dir, 'document')
+        source_type = DIR_MAP.get(top_dir, "document")
 
         for fname in files:
             full_path = os.path.join(root, fname)
@@ -444,19 +461,19 @@ def migrate_existing_files():
             ArhivaEntry.objects.create(
                 company=company,
                 source_type=source_type,
-                source_id='migrated:%s' % rel_path,
+                source_id="migrated:%s" % rel_path,
                 doc_number=fname,
-                partner_name='',
+                partner_name="",
                 amount=0,
-                currency='EUR',
+                currency="EUR",
                 doc_date=file_date,
                 file_path=rel_path,
-                has_pdf=(ext == '.pdf'),
-                has_xml=(ext == '.xml'),
-                has_image=(ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp')),
-                session_key='',
+                has_pdf=(ext == ".pdf"),
+                has_xml=(ext == ".xml"),
+                has_image=(ext in (".jpg", ".jpeg", ".png", ".gif", ".webp")),
+                session_key="",
             )
             migrated += 1
 
-    print('Migracija zavrsena: %d novih zapisa, %d preskocenih (vec postoje)' % (migrated, skipped))
+    print("Migracija zavrsena: %d novih zapisa, %d preskocenih (vec postoje)" % (migrated, skipped))
     return migrated

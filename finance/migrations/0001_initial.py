@@ -5,32 +5,61 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0001_initial'),
-        ('documents', '0001_initial'),
-        ('partners', '0001_initial'),
+        ("companies", "0001_initial"),
+        ("documents", "0001_initial"),
+        ("partners", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Iznos')),
-                ('direction', models.CharField(choices=[('income', 'Uplata / Prihod'), ('expense', 'Isplata / Rashod')], max_length=10, verbose_name='Smjer')),
-                ('date', models.DateField(verbose_name='Datum transakcije')),
-                ('description', models.CharField(max_length=255, verbose_name='Opis')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka')),
-                ('document', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='documents.document', verbose_name='Vezani dokument')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactions', to='partners.partner', verbose_name='Partner')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Iznos")),
+                (
+                    "direction",
+                    models.CharField(
+                        choices=[("income", "Uplata / Prihod"), ("expense", "Isplata / Rashod")],
+                        max_length=10,
+                        verbose_name="Smjer",
+                    ),
+                ),
+                ("date", models.DateField(verbose_name="Datum transakcije")),
+                ("description", models.CharField(max_length=255, verbose_name="Opis")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Tvrtka"
+                    ),
+                ),
+                (
+                    "document",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="transactions",
+                        to="documents.document",
+                        verbose_name="Vezani dokument",
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="transactions",
+                        to="partners.partner",
+                        verbose_name="Partner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Transakcija',
-                'verbose_name_plural': 'Transakcije',
+                "verbose_name": "Transakcija",
+                "verbose_name_plural": "Transakcije",
             },
         ),
     ]

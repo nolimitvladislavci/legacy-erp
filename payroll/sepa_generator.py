@@ -57,9 +57,7 @@ def generate_sepa_payroll(
     # --- Group Header (GrpHdr) ---
     grp_hdr = ET.SubElement(cstmr_cdt_trf_initn, "GrpHdr")
     ET.SubElement(grp_hdr, "MsgId").text = msg_id
-    ET.SubElement(grp_hdr, "CreDtTm").text = datetime.now().strftime(
-        "%Y-%m-%dT%H:%M:%S"
-    )
+    ET.SubElement(grp_hdr, "CreDtTm").text = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     ET.SubElement(grp_hdr, "NbOfTxs").text = nb_of_txs
     ET.SubElement(grp_hdr, "CtrlSum").text = f"{ctrl_sum:.2f}"
 
@@ -111,9 +109,7 @@ def generate_sepa_payroll(
         cdt_trf = ET.SubElement(pmt_inf, "CdtTrfTxInf")
 
         pmt_id = ET.SubElement(cdt_trf, "PmtId")
-        ET.SubElement(pmt_id, "EndToEndId").text = pmt.get(
-            "end_to_end_id", f"{msg_id[:25]}-{i}"
-        )
+        ET.SubElement(pmt_id, "EndToEndId").text = pmt.get("end_to_end_id", f"{msg_id[:25]}-{i}")
 
         amt = ET.SubElement(cdt_trf, "Amt")
         instd_amt = ET.SubElement(amt, "InstdAmt", Ccy="EUR")

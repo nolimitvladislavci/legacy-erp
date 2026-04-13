@@ -3,13 +3,25 @@ T&C Consent Middleware
 Ako firma nije potpisala uvjete korištenja → redirect na /legal/tc-accept/
 Exempt: superadmin, API, ajax, login, static, media, legal pages
 """
+
 from django.shortcuts import redirect
 
 EXEMPT_PREFIXES = (
-    '/admin/', '/api/', '/hr/login', '/hr/logout', '/legal/',
-    '/static/', '/media/', '/_dev/', '/mcp/', '/health',
-    '/invoicing/portal/', '/invoicing/client/', '/invoicing/public/',
-    '/eracun/', '/einvoice/',
+    "/admin/",
+    "/api/",
+    "/hr/login",
+    "/hr/logout",
+    "/legal/",
+    "/static/",
+    "/media/",
+    "/_dev/",
+    "/mcp/",
+    "/health",
+    "/invoicing/portal/",
+    "/invoicing/client/",
+    "/invoicing/public/",
+    "/eracun/",
+    "/einvoice/",
 )
 EXEMPT_AJAX = True
 
@@ -25,13 +37,13 @@ class TCConsentMiddleware:
             return self.get_response(request)
 
         # Preskoci AJAX i API pozive
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return self.get_response(request)
-        if 'application/json' in request.headers.get('Accept', ''):
+        if "application/json" in request.headers.get("Accept", ""):
             return self.get_response(request)
 
         # Preskoci ne-autenticirane
-        if not hasattr(request, 'user') or not request.user.is_authenticated:
+        if not hasattr(request, "user") or not request.user.is_authenticated:
             return self.get_response(request)
 
         # Preskoci superadmin
@@ -40,9 +52,9 @@ class TCConsentMiddleware:
 
         # Provjeri T&C za aktivnu kompaniju
         try:
-            company = getattr(request, 'company', None)
+            company = getattr(request, "company", None)
             if company and not company.has_signed_tc_consent:
-                tc_url = '/legal/tc-accept/'
+                tc_url = "/legal/tc-accept/"
                 if path != tc_url:
                     return redirect(tc_url)
         except (AttributeError, TypeError):

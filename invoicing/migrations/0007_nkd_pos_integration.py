@@ -5,16 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0003_nkd_pos_integration'),
-        ('invoicing', '0006_invoice_company_invoice_partner_and_more'),
+        ("companies", "0003_nkd_pos_integration"),
+        ("invoicing", "0006_invoice_company_invoice_partner_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='nkd_code',
-            field=models.ForeignKey(blank=True, help_text='Prikazuje se na računu i ponudi', null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.nkdcode', verbose_name='NKD djelatnost'),
+            model_name="invoice",
+            name="nkd_code",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Prikazuje se na računu i ponudi",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="companies.nkdcode",
+                verbose_name="NKD djelatnost",
+            ),
         ),
     ]

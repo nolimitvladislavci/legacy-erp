@@ -6,57 +6,154 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('burza', '0002_alter_leadactivity_id_alter_projectlead_id'),
-        ('companies', '0004_business_profiles'),
-        ('invoicing', '0009_workflow_fields'),
+        ("burza", "0002_alter_leadactivity_id_alter_projectlead_id"),
+        ("companies", "0004_business_profiles"),
+        ("invoicing", "0009_workflow_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FieldAssessment',
+            name="FieldAssessment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assessment_type', models.CharField(choices=[('bathroom', 'Kupaona'), ('optical', 'Optika'), ('mechanic', 'Auto mehaničar'), ('other', 'Ostalo')], default='bathroom', max_length=20, verbose_name='Tip procjene')),
-                ('client_name', models.CharField(max_length=200, verbose_name='Ime klijenta')),
-                ('client_phone', models.CharField(blank=True, max_length=50, verbose_name='Telefon')),
-                ('client_email', models.EmailField(blank=True, max_length=254, verbose_name='E-mail')),
-                ('client_address', models.CharField(blank=True, max_length=300, verbose_name='Adresa objekta')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('DRAFT', 'Skica'), ('COMPLETED', 'Završeno'), ('OFFER_SENT', 'Ponuda poslana'), ('ACCEPTED', 'Prihvaćeno'), ('REJECTED', 'Odbijeno')], default='DRAFT', max_length=20, verbose_name='Status')),
-                ('json_data', models.JSONField(blank=True, default=dict, verbose_name='Podaci formulara')),
-                ('notes', models.TextField(blank=True, verbose_name='Mišljenje stručnjaka')),
-                ('voice_note', models.FileField(blank=True, null=True, upload_to='assessments/voice/', verbose_name='Glasovna bilješka')),
-                ('calculated_price_from', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cijena od (€)')),
-                ('calculated_price_to', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cijena do (€)')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assessments', to='companies.company')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assessments_created', to=settings.AUTH_USER_MODEL, verbose_name='Majstor / inspektor')),
-                ('linked_offer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='source_assessments', to='invoicing.invoice', verbose_name='Ponuda')),
-                ('linked_project', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assessments', to='burza.projectlead', verbose_name='Projekt (Burza)')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "assessment_type",
+                    models.CharField(
+                        choices=[
+                            ("bathroom", "Kupaona"),
+                            ("optical", "Optika"),
+                            ("mechanic", "Auto mehaničar"),
+                            ("other", "Ostalo"),
+                        ],
+                        default="bathroom",
+                        max_length=20,
+                        verbose_name="Tip procjene",
+                    ),
+                ),
+                ("client_name", models.CharField(max_length=200, verbose_name="Ime klijenta")),
+                ("client_phone", models.CharField(blank=True, max_length=50, verbose_name="Telefon")),
+                ("client_email", models.EmailField(blank=True, max_length=254, verbose_name="E-mail")),
+                ("client_address", models.CharField(blank=True, max_length=300, verbose_name="Adresa objekta")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("DRAFT", "Skica"),
+                            ("COMPLETED", "Završeno"),
+                            ("OFFER_SENT", "Ponuda poslana"),
+                            ("ACCEPTED", "Prihvaćeno"),
+                            ("REJECTED", "Odbijeno"),
+                        ],
+                        default="DRAFT",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("json_data", models.JSONField(blank=True, default=dict, verbose_name="Podaci formulara")),
+                ("notes", models.TextField(blank=True, verbose_name="Mišljenje stručnjaka")),
+                (
+                    "voice_note",
+                    models.FileField(
+                        blank=True, null=True, upload_to="assessments/voice/", verbose_name="Glasovna bilješka"
+                    ),
+                ),
+                (
+                    "calculated_price_from",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True, verbose_name="Cijena od (€)"
+                    ),
+                ),
+                (
+                    "calculated_price_to",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True, verbose_name="Cijena do (€)"
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="assessments", to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="assessments_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Majstor / inspektor",
+                    ),
+                ),
+                (
+                    "linked_offer",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="source_assessments",
+                        to="invoicing.invoice",
+                        verbose_name="Ponuda",
+                    ),
+                ),
+                (
+                    "linked_project",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="assessments",
+                        to="burza.projectlead",
+                        verbose_name="Projekt (Burza)",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Terenska procjena',
-                'verbose_name_plural': 'Terenske procjene',
-                'ordering': ['-created_at'],
+                "verbose_name": "Terenska procjena",
+                "verbose_name_plural": "Terenske procjene",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='AssessmentPhoto',
+            name="AssessmentPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('photo', models.ImageField(upload_to='assessments/photos/%Y/%m/', verbose_name='Fotografija')),
-                ('caption', models.CharField(blank=True, max_length=200, verbose_name='Opis')),
-                ('step', models.IntegerField(choices=[(1, 'Lokacija'), (2, 'Instalacije'), (3, 'Stanje/Dimenzije'), (4, 'Elementi'), (5, 'Zaključak'), (6, 'Stil')], default=3, verbose_name='Korak')),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('assessment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='assessment.fieldassessment')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("photo", models.ImageField(upload_to="assessments/photos/%Y/%m/", verbose_name="Fotografija")),
+                ("caption", models.CharField(blank=True, max_length=200, verbose_name="Opis")),
+                (
+                    "step",
+                    models.IntegerField(
+                        choices=[
+                            (1, "Lokacija"),
+                            (2, "Instalacije"),
+                            (3, "Stanje/Dimenzije"),
+                            (4, "Elementi"),
+                            (5, "Zaključak"),
+                            (6, "Stil"),
+                        ],
+                        default=3,
+                        verbose_name="Korak",
+                    ),
+                ),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "assessment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="photos",
+                        to="assessment.fieldassessment",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['step', 'uploaded_at'],
+                "ordering": ["step", "uploaded_at"],
             },
         ),
     ]

@@ -9,6 +9,7 @@ website/tests.py — Integration tests for multi-tenant Website Builder.
 Run:
     python manage.py test website --verbosity=2
 """
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 
@@ -20,17 +21,19 @@ NO_HTTPS = override_settings(SECURE_SSL_REDIRECT=False)
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 def make_company(oib="88877766610"):
     from companies.models import Company
+
     return Company.objects.get_or_create(
         oib=oib,
-        defaults=dict(name="Web Test GmbH", country="DE",
-                      city="Munich", zip_code="80331"),
+        defaults=dict(name="Web Test GmbH", country="DE", city="Munich", zip_code="80331"),
     )[0]
 
 
 def make_user(company, username="web_admin", role="company_admin"):
     from accounts.models import UserProfile
+
     user = User.objects.create_user(
         username=username,
         email=f"{username}@web-test.de",
@@ -42,6 +45,7 @@ def make_user(company, username="web_admin", role="company_admin"):
 
 def make_site(company, slug="web-test-gmbh", published=True):
     from website.models import CompanyWebsite
+
     return CompanyWebsite.objects.create(
         company=company,
         slug=slug,
@@ -58,6 +62,7 @@ def make_site(company, slug="web-test-gmbh", published=True):
 # TEST 1 — CompanyWebsite model
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class CompanyWebsiteModelTest(TestCase):
     """Tests for CompanyWebsite and related models."""
 
@@ -67,6 +72,7 @@ class CompanyWebsiteModelTest(TestCase):
     def test_create_company_website(self):
         """CompanyWebsite can be created with required fields."""
         from website.models import CompanyWebsite
+
         site = CompanyWebsite.objects.create(
             company=self.company,
             slug="test-slug",
@@ -80,8 +86,11 @@ class CompanyWebsiteModelTest(TestCase):
     def test_public_url_property(self):
         """public_url returns /site/<slug>/"""
         from website.models import CompanyWebsite
+
         site = CompanyWebsite.objects.create(
-            company=self.company, slug="mein-betrieb", is_published=True,
+            company=self.company,
+            slug="mein-betrieb",
+            is_published=True,
         )
         self.assertEqual(site.public_url, "/site/mein-betrieb/")
 
@@ -90,13 +99,18 @@ class CompanyWebsiteModelTest(TestCase):
         from django.db import IntegrityError
 
         from website.models import CompanyWebsite
+
         CompanyWebsite.objects.create(
-            company=self.company, slug="unique-slug", is_published=True,
+            company=self.company,
+            slug="unique-slug",
+            is_published=True,
         )
         company2 = make_company(oib="88877766611")
         with self.assertRaises(IntegrityError):
             CompanyWebsite.objects.create(
-                company=company2, slug="unique-slug", is_published=True,
+                company=company2,
+                slug="unique-slug",
+                is_published=True,
             )
 
     def test_related_models_created(self):
@@ -106,11 +120,15 @@ class CompanyWebsiteModelTest(TestCase):
             WebsiteReview,
             WebsiteService,
         )
+
         site = make_site(self.company, slug="related-test")
         WebsiteService.objects.create(website=site, title="Servis 1")
         WebsiteReview.objects.create(website=site, author_name="Pero", text="Odlicno!", rating=5)
         WebsiteContactMessage.objects.create(
-            website=site, name="Ana", email="ana@test.de", message="Upit",
+            website=site,
+            name="Ana",
+            email="ana@test.de",
+            message="Upit",
         )
         self.assertEqual(site.services.count(), 1)
         self.assertEqual(site.reviews.count(), 1)
@@ -120,6 +138,7 @@ class CompanyWebsiteModelTest(TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # TEST 2 — Public site views
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @NO_HTTPS
 class CompanySiteViewTest(TestCase):
@@ -144,8 +163,11 @@ class CompanySiteViewTest(TestCase):
         """GET on unpublished site → 404."""
         company2 = make_company(oib="88877766613")
         from website.models import CompanyWebsite
+
         CompanyWebsite.objects.create(
-            company=company2, slug="hidden-site", is_published=False,
+            company=company2,
+            slug="hidden-site",
+            is_published=False,
         )
         r = self.c.get("/site/hidden-site/")
         self.assertEqual(r.status_code, 404)
@@ -158,13 +180,17 @@ class CompanySiteViewTest(TestCase):
     def test_contact_form_creates_message(self):
         """POST to /site/<slug>/contact/ → creates WebsiteContactMessage + redirect."""
         from website.models import WebsiteContactMessage
+
         before = WebsiteContactMessage.objects.count()
-        r = self.c.post(f"/site/{self.site.slug}/contact/", {
-            "name": "Test Korisnik",
-            "email": "test@example.com",
-            "phone": "0911234567",
-            "message": "Zainteresiran sam za vase usluge.",
-        })
+        r = self.c.post(
+            f"/site/{self.site.slug}/contact/",
+            {
+                "name": "Test Korisnik",
+                "email": "test@example.com",
+                "phone": "0911234567",
+                "message": "Zainteresiran sam za vase usluge.",
+            },
+        )
         self.assertEqual(r.status_code, 302)
         self.assertIn(f"/site/{self.site.slug}/", r["Location"])
         self.assertEqual(WebsiteContactMessage.objects.count(), before + 1)
@@ -176,6 +202,7 @@ class CompanySiteViewTest(TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # TEST 3 — CMS Editor views
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @NO_HTTPS
 class WebsiteEditorTest(TestCase):
@@ -197,6 +224,7 @@ class WebsiteEditorTest(TestCase):
     def test_editor_creates_site_on_first_access(self):
         """First GET to editor auto-creates CompanyWebsite for the company."""
         from website.models import CompanyWebsite
+
         before = CompanyWebsite.objects.filter(company=self.company).count()
         self.c.get(self.url)
         after = CompanyWebsite.objects.filter(company=self.company).count()
@@ -206,21 +234,25 @@ class WebsiteEditorTest(TestCase):
         """POST to editor saves site_title and tagline."""
         # Ensure site exists first
         self.c.get(self.url)
-        r = self.c.post(self.url, {
-            "site_title": "Moja Nova Firma",
-            "tagline": "Kvaliteta na prvom mjestu",
-            "theme": "generic",
-            "hero_text": "",
-            "about_text": "",
-            "contact_phone": "",
-            "contact_email": "",
-            "contact_address": "",
-            "facebook_url": "",
-            "instagram_url": "",
-            "primary_color": "#2563eb",
-        })
+        r = self.c.post(
+            self.url,
+            {
+                "site_title": "Moja Nova Firma",
+                "tagline": "Kvaliteta na prvom mjestu",
+                "theme": "generic",
+                "hero_text": "",
+                "about_text": "",
+                "contact_phone": "",
+                "contact_email": "",
+                "contact_address": "",
+                "facebook_url": "",
+                "instagram_url": "",
+                "primary_color": "#2563eb",
+            },
+        )
         self.assertEqual(r.status_code, 302)
         from website.models import CompanyWebsite
+
         site = CompanyWebsite.objects.get(company=self.company)
         self.assertEqual(site.site_title, "Moja Nova Firma")
         self.assertEqual(site.tagline, "Kvaliteta na prvom mjestu")
@@ -228,17 +260,21 @@ class WebsiteEditorTest(TestCase):
     def test_service_save_ajax(self):
         """POST to service_save creates a WebsiteService → JSON ok=True."""
         self.c.get(self.url)  # ensure site exists
-        r = self.c.post("/website/editor/service/save/", {
-            "title": "Instalacija vode",
-            "description": "Brza i pouzdana instalacija.",
-            "price_display": "od 80 EUR",
-            "order": "0",
-            "is_active": "1",
-        })
+        r = self.c.post(
+            "/website/editor/service/save/",
+            {
+                "title": "Instalacija vode",
+                "description": "Brza i pouzdana instalacija.",
+                "price_display": "od 80 EUR",
+                "order": "0",
+                "is_active": "1",
+            },
+        )
         self.assertEqual(r.status_code, 200)
         d = r.json()
         self.assertTrue(d["ok"])
         from website.models import WebsiteService
+
         self.assertTrue(WebsiteService.objects.filter(title="Instalacija vode").exists())
 
     def test_worker_cannot_access_editor(self):

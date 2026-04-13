@@ -6,78 +6,119 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
+        ("companies", "0021_extend_onboarding"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TaxFormType',
+            name="TaxFormType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=20, unique=True)),
-                ('name', models.CharField(max_length=200)),
-                ('frequency', models.CharField(choices=[('monthly', 'Mjesecno'), ('quarterly', 'Kvartalno'), ('yearly', 'Godisnje')], max_length=20)),
-                ('deadline_day', models.IntegerField(default=20, help_text='Dan u mjesecu do kad treba predati')),
-                ('description', models.TextField(blank=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("code", models.CharField(max_length=20, unique=True)),
+                ("name", models.CharField(max_length=200)),
+                (
+                    "frequency",
+                    models.CharField(
+                        choices=[("monthly", "Mjesecno"), ("quarterly", "Kvartalno"), ("yearly", "Godisnje")],
+                        max_length=20,
+                    ),
+                ),
+                ("deadline_day", models.IntegerField(default=20, help_text="Dan u mjesecu do kad treba predati")),
+                ("description", models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'Vrsta obrasca',
-                'verbose_name_plural': 'Vrste obrazaca',
-                'ordering': ['code'],
+                "verbose_name": "Vrsta obrasca",
+                "verbose_name_plural": "Vrste obrazaca",
+                "ordering": ["code"],
             },
         ),
         migrations.CreateModel(
-            name='TaxSubmission',
+            name="TaxSubmission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period_year', models.IntegerField()),
-                ('period_month', models.IntegerField(blank=True, null=True)),
-                ('period_quarter', models.IntegerField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('draft', 'Priprema'), ('ready', 'Spremno za predaju'), ('submitted', 'Predano'), ('accepted', 'Prihvaceno'), ('rejected', 'Odbijeno'), ('correction', 'Ispravak predan')], default='draft', max_length=20)),
-                ('prepared_date', models.DateTimeField(blank=True, null=True)),
-                ('submitted_date', models.DateTimeField(blank=True, null=True)),
-                ('response_date', models.DateTimeField(blank=True, null=True)),
-                ('deadline_date', models.DateField()),
-                ('xml_file', models.FileField(blank=True, upload_to='edik/submissions/')),
-                ('response_xml', models.FileField(blank=True, upload_to='edik/responses/')),
-                ('reference_number', models.CharField(blank=True, max_length=100)),
-                ('rejection_reason', models.TextField(blank=True)),
-                ('amount', models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tax_submissions', to='companies.company')),
-                ('form_type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='edik.taxformtype')),
-                ('submitted_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("period_year", models.IntegerField()),
+                ("period_month", models.IntegerField(blank=True, null=True)),
+                ("period_quarter", models.IntegerField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Priprema"),
+                            ("ready", "Spremno za predaju"),
+                            ("submitted", "Predano"),
+                            ("accepted", "Prihvaceno"),
+                            ("rejected", "Odbijeno"),
+                            ("correction", "Ispravak predan"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                    ),
+                ),
+                ("prepared_date", models.DateTimeField(blank=True, null=True)),
+                ("submitted_date", models.DateTimeField(blank=True, null=True)),
+                ("response_date", models.DateTimeField(blank=True, null=True)),
+                ("deadline_date", models.DateField()),
+                ("xml_file", models.FileField(blank=True, upload_to="edik/submissions/")),
+                ("response_xml", models.FileField(blank=True, upload_to="edik/responses/")),
+                ("reference_number", models.CharField(blank=True, max_length=100)),
+                ("rejection_reason", models.TextField(blank=True)),
+                ("amount", models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tax_submissions",
+                        to="companies.company",
+                    ),
+                ),
+                ("form_type", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="edik.taxformtype")),
+                (
+                    "submitted_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Predaja obrasca',
-                'verbose_name_plural': 'Predaje obrazaca',
-                'ordering': ['-period_year', '-period_month', 'form_type__code'],
-                'unique_together': {('company', 'form_type', 'period_year', 'period_month')},
+                "verbose_name": "Predaja obrasca",
+                "verbose_name_plural": "Predaje obrazaca",
+                "ordering": ["-period_year", "-period_month", "form_type__code"],
+                "unique_together": {("company", "form_type", "period_year", "period_month")},
             },
         ),
         migrations.CreateModel(
-            name='TaxCalendar',
+            name="TaxCalendar",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period_year', models.IntegerField()),
-                ('period_month', models.IntegerField(blank=True, null=True)),
-                ('deadline', models.DateField()),
-                ('is_completed', models.BooleanField(default=False)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tax_calendar', to='companies.company')),
-                ('form_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='edik.taxformtype')),
-                ('submission', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='edik.taxsubmission')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("period_year", models.IntegerField()),
+                ("period_month", models.IntegerField(blank=True, null=True)),
+                ("deadline", models.DateField()),
+                ("is_completed", models.BooleanField(default=False)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="tax_calendar", to="companies.company"
+                    ),
+                ),
+                ("form_type", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="edik.taxformtype")),
+                (
+                    "submission",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="edik.taxsubmission"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Porezni rok',
-                'verbose_name_plural': 'Porezni rokovi',
-                'ordering': ['deadline'],
+                "verbose_name": "Porezni rok",
+                "verbose_name_plural": "Porezni rokovi",
+                "ordering": ["deadline"],
             },
         ),
     ]

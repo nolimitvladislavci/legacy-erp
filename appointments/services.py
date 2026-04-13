@@ -3,6 +3,7 @@ Appointments business logic — pure functions, no request/response.
 
 Core functions: slot availability, booking creation, reminders.
 """
+
 import logging
 from datetime import date, datetime, timedelta
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # ── Slot Availability ───────────────────────────────────────
 
+
 def get_available_slots(service: "BookingService", target_date: date) -> dict[str, list[str]]:
     """
     Calculate available time slots for a service on a given date.
@@ -28,37 +30,34 @@ def get_available_slots(service: "BookingService", target_date: date) -> dict[st
         return {"available": [], "unavailable": []}
 
     weekday = target_date.weekday()
-    resources = BookingResource.objects.filter(
-        resource_type=service.resource_type, is_active=True
-    )
+    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True)
     service_duration = service.duration.total_seconds() / 60
 
     available_slots = set()
     unavailable_slots = set()
 
     for resource in resources:
-        wh = WorkingHours.objects.filter(
-            resource=resource, day_of_week=weekday, is_day_off=False
-        ).first()
+        wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).first()
         if not wh:
             continue
 
         start_dt = datetime.combine(target_date, wh.start_time)
         end_dt = datetime.combine(target_date, wh.end_time)
 
-        existing = list(Appointment.objects.filter(
-            resource=resource,
-            start_time__date=target_date,
-            status__in=["scheduled", "confirmed"],
-        ))
+        existing = list(
+            Appointment.objects.filter(
+                resource=resource,
+                start_time__date=target_date,
+                status__in=["scheduled", "confirmed"],
+            )
+        )
 
         current = start_dt
         while current + timedelta(minutes=service_duration) <= end_dt:
             slot_end = current + timedelta(minutes=service_duration)
 
             overlap = any(
-                current < a.end_time.replace(tzinfo=None)
-                and slot_end > a.start_time.replace(tzinfo=None)
+                current < a.end_time.replace(tzinfo=None) and slot_end > a.start_time.replace(tzinfo=None)
                 for a in existing
             )
 
@@ -85,22 +84,32 @@ def get_week_slots(service: "BookingService", start_date: date, days: int = 7) -
     for i in range(days):
         d = start_date + timedelta(days=i)
         slots = get_available_slots(service, d)
-        result.append({
-            "date": d.isoformat(),
-            "weekday": d.strftime("%A"),
-            "available": slots["available"],
-            "count": len(slots["available"]),
-        })
+        result.append(
+            {
+                "date": d.isoformat(),
+                "weekday": d.strftime("%A"),
+                "available": slots["available"],
+                "count": len(slots["available"]),
+            }
+        )
     return result
 
 
 # ── Booking Creation ────────────────────────────────────────
 
+
 @transaction.atomic
-def create_booking(service: "BookingService", target_date: date, time_str: str,
-                   client_name: str, client_email: str,
-                   client_phone: str = "", user: "User | None" = None,
-                   company: "Company | None" = None, notes: str = "") -> dict:
+def create_booking(
+    service: "BookingService",
+    target_date: date,
+    time_str: str,
+    client_name: str,
+    client_email: str,
+    client_phone: str = "",
+    user: "User | None" = None,
+    company: "Company | None" = None,
+    notes: str = "",
+) -> dict:
     """
     Create a new appointment booking.
     Validates slot availability, creates/finds partner, creates appointment.
@@ -125,9 +134,7 @@ def create_booking(service: "BookingService", target_date: date, time_str: str,
         raise BookingConflictError("Nema dostupnog resursa za ovaj termin.")
 
     # Get or create partner
-    partner = _get_or_create_partner(
-        client_name, client_email, client_phone, company
-    )
+    partner = _get_or_create_partner(client_name, client_email, client_phone, company)
 
     # Create appointment
     appointment = Appointment.objects.create(
@@ -144,7 +151,11 @@ def create_booking(service: "BookingService", target_date: date, time_str: str,
 
     logger.info(
         "Booking created: appt=%d service=%s date=%s time=%s client=%s",
-        appointment.pk, service.name, target_date, time_str, client_email,
+        appointment.pk,
+        service.name,
+        target_date,
+        time_str,
+        client_email,
     )
 
     return {
@@ -192,6 +203,7 @@ def change_appointment_status(appointment: "Appointment", new_status: str, notif
 
 # ── Cancellation ────────────────────────────────────────────
 
+
 def cancel_appointment(appointment: "Appointment", reason: str = "", notify: bool = True) -> bool:
     """Cancel an appointment with optional reason and notification."""
     if appointment.status in ("completed", "no_show"):
@@ -211,19 +223,18 @@ def cancel_appointment(appointment: "Appointment", reason: str = "", notify: boo
 
 # ── Internal Helpers ────────────────────────────────────────
 
-def _find_available_resource(service: "BookingService", target_date: date, start_time, end_time) -> "BookingResource | None":
+
+def _find_available_resource(
+    service: "BookingService", target_date: date, start_time, end_time
+) -> "BookingResource | None":
     """Find first available resource for service at given time."""
     from .models import Appointment, BookingResource, WorkingHours
 
-    resources = BookingResource.objects.filter(
-        resource_type=service.resource_type, is_active=True
-    )
+    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True)
     weekday = target_date.weekday()
 
     for resource in resources:
-        wh = WorkingHours.objects.filter(
-            resource=resource, day_of_week=weekday, is_day_off=False
-        ).first()
+        wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).first()
         if not wh:
             continue
 
@@ -268,6 +279,7 @@ def _send_status_notification(appointment: "Appointment", new_status: str) -> No
     """Send status change notification (email + WhatsApp) to client."""
     try:
         from .tasks import notify_appointment_status_change
+
         notify_appointment_status_change.delay(appointment.pk, new_status)
     except ImportError as e:
         logger.warning("Failed to send notification for appt %d: %s", appointment.pk, e)

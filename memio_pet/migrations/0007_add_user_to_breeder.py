@@ -6,16 +6,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0006_barf_njuskalo_no_fk'),
+        ("memio_pet", "0006_barf_njuskalo_no_fk"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='breederprofile',
-            name='user',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='breeder_profiles', to=settings.AUTH_USER_MODEL),
+            model_name="breederprofile",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="breeder_profiles",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

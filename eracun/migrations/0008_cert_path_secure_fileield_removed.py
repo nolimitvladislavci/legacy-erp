@@ -4,28 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('eracun', '0007_add_source_receipt'),
+        ("eracun", "0007_add_source_receipt"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='cert_p12',
+            model_name="eracunconfig",
+            name="cert_p12",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='cert_password',
+            model_name="eracunconfig",
+            name="cert_password",
         ),
         migrations.AddField(
-            model_name='eracunconfig',
-            name='cert_password_deprecated',
-            field=models.CharField(blank=True, help_text='Ne koristiti. Ostaje radi migracije podataka.', max_length=100, verbose_name='[DEPRECATED] Lozinka — koristiti .cert_password fajl'),
+            model_name="eracunconfig",
+            name="cert_password_deprecated",
+            field=models.CharField(
+                blank=True,
+                help_text="Ne koristiti. Ostaje radi migracije podataka.",
+                max_length=100,
+                verbose_name="[DEPRECATED] Lozinka — koristiti .cert_password fajl",
+            ),
         ),
         migrations.AddField(
-            model_name='eracunconfig',
-            name='cert_path',
-            field=models.CharField(blank=True, help_text='Apsolutna putanja: /etc/limit-connect/certs/firma.p12', max_length=500, verbose_name='Putanja certifikata'),
+            model_name="eracunconfig",
+            name="cert_path",
+            field=models.CharField(
+                blank=True,
+                help_text="Apsolutna putanja: /etc/limit-connect/certs/firma.p12",
+                max_length=500,
+                verbose_name="Putanja certifikata",
+            ),
         ),
     ]

@@ -1,4 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
 
-default_app_config = 'appointments.apps.AppointmentsConfig'
+default_app_config = "appointments.apps.AppointmentsConfig"

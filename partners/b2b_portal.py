@@ -18,21 +18,25 @@ import datetime
 
 # Statusi u kojima je terenski protokol ZATVOREN (vozač je predao robu,
 # potpisnica primljena) — Legal Vault smije biti dostupan
-VAULT_ALLOWED_STATUSES = frozenset([
-    'delivered',    # vozač potvrdio dostavu
-    'completed',    # dispatcher zatvorio narudžbu
-    'cancelled',    # otkazano — arhiva dostupna za evidenciju
-])
+VAULT_ALLOWED_STATUSES = frozenset(
+    [
+        "delivered",  # vozač potvrdio dostavu
+        "completed",  # dispatcher zatvorio narudžbu
+        "cancelled",  # otkazano — arhiva dostupna za evidenciju
+    ]
+)
 
 # Statusi u kojima je roba u pokretu ili u obradi — Vault blokiran
-VAULT_BLOCKED_STATUSES = frozenset([
-    'pending',      # narudžba čeka potvrdu
-    'confirmed',    # potvrđena, roba se priprema
-    'picking',      # skladištar bira robu
-    'packing',      # roba se pakira
-    'in_transit',   # vozač je na putu — terenski protokol otvoren
-    'loaded',       # utovareno na vozilo
-])
+VAULT_BLOCKED_STATUSES = frozenset(
+    [
+        "pending",  # narudžba čeka potvrdu
+        "confirmed",  # potvrđena, roba se priprema
+        "picking",  # skladištar bira robu
+        "packing",  # roba se pakira
+        "in_transit",  # vozač je na putu — terenski protokol otvoren
+        "loaded",  # utovareno na vozilo
+    ]
+)
 
 VAULT_BLOCKED_MSG = (
     "Pristup dokazima omogucen je tek nakon zatvaranja terenskog protokola. "
@@ -103,9 +107,7 @@ def validate_export_date_range(date_from, date_to):
     """
     # Provjera None
     if date_from is None or date_to is None:
-        return False, 400, (
-            "Datumi su obavezni. Navedite date_from i date_to u formatu YYYY-MM-DD."
-        )
+        return False, 400, ("Datumi su obavezni. Navedite date_from i date_to u formatu YYYY-MM-DD.")
 
     # Provjera tipova
     if not isinstance(date_from, datetime.date) or not isinstance(date_to, datetime.date):
@@ -113,18 +115,26 @@ def validate_export_date_range(date_from, date_to):
 
     # Obrnuti raspon
     if date_from > date_to:
-        return False, 400, (
-            "Neispravan raspon: date_from (%s) je kasniji od date_to (%s)."
-            % (date_from.isoformat(), date_to.isoformat())
+        return (
+            False,
+            400,
+            (
+                "Neispravan raspon: date_from (%s) je kasniji od date_to (%s)."
+                % (date_from.isoformat(), date_to.isoformat())
+            ),
         )
 
     # Provjera duljine raspona
     delta = (date_to - date_from).days  # razlika u danima; 31 = Jan1→Feb1 (granica)
     if delta > MAX_EXPORT_DAYS:
-        return False, 413, (
-            "Raspon od %d dana premasuje maksimalni dozvoljeni raspon od %d dana (razlika). "
-            "Smanjite raspon ili koristite vise odvojenih zahtjeva. "
-            "Anti-DDoS zastita aktivna." % (delta, MAX_EXPORT_DAYS)
+        return (
+            False,
+            413,
+            (
+                "Raspon od %d dana premasuje maksimalni dozvoljeni raspon od %d dana (razlika). "
+                "Smanjite raspon ili koristite vise odvojenih zahtjeva. "
+                "Anti-DDoS zastita aktivna." % (delta, MAX_EXPORT_DAYS)
+            ),
         )
 
     return True, 200, ""

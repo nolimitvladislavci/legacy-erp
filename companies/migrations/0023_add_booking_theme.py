@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0022_company_module_config'),
+        ("companies", "0022_company_module_config"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='booking_theme',
-            field=models.CharField(choices=[('dark', 'Tamna'), ('light', 'Svijetla'), ('standard', 'Standard (Navy)')], default='dark', help_text='Zadana tema za javnu booking stranicu ove kompanije', max_length=20, verbose_name='Booking tema'),
+            model_name="company",
+            name="booking_theme",
+            field=models.CharField(
+                choices=[("dark", "Tamna"), ("light", "Svijetla"), ("standard", "Standard (Navy)")],
+                default="dark",
+                help_text="Zadana tema za javnu booking stranicu ove kompanije",
+                max_length=20,
+                verbose_name="Booking tema",
+            ),
         ),
         migrations.AlterField(
-            model_name='companymoduleconfig',
-            name='enabled_modules',
-            field=models.JSONField(blank=True, default=list, verbose_name='Aktivni moduli'),
+            model_name="companymoduleconfig",
+            name="enabled_modules",
+            field=models.JSONField(blank=True, default=list, verbose_name="Aktivni moduli"),
         ),
         migrations.AlterField(
-            model_name='companymoduleconfig',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="companymoduleconfig",
+            name="id",
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID"),
         ),
     ]

@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_memio_pet_waitlist'),
+        ("core", "0004_memio_pet_waitlist"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='memiopetwaitlist',
-            name='is_cro_validated',
+            model_name="memiopetwaitlist",
+            name="is_cro_validated",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='memiopetwaitlist',
-            name='oib',
-            field=models.CharField(blank=True, default='', max_length=11),
+            model_name="memiopetwaitlist",
+            name="oib",
+            field=models.CharField(blank=True, default="", max_length=11),
         ),
         migrations.AddField(
-            model_name='memiopetwaitlist',
-            name='validated_at',
+            model_name="memiopetwaitlist",
+            name="validated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='memiopetwaitlist',
-            name='validated_city',
-            field=models.CharField(blank=True, default='', max_length=100),
+            model_name="memiopetwaitlist",
+            name="validated_city",
+            field=models.CharField(blank=True, default="", max_length=100),
         ),
         migrations.AddField(
-            model_name='memiopetwaitlist',
-            name='validated_name',
-            field=models.CharField(blank=True, default='', max_length=200),
+            model_name="memiopetwaitlist",
+            name="validated_name",
+            field=models.CharField(blank=True, default="", max_length=200),
         ),
     ]

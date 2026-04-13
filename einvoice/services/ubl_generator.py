@@ -5,6 +5,7 @@ rather than reimplementing UBL 2.1 from scratch.
 
 Pattern: Invoice model → InvoiceAdapter (ERacun-like) → generate_ubl_xml()
 """
+
 import logging
 from dataclasses import dataclass, field
 from datetime import date
@@ -17,6 +18,7 @@ logger = logging.getLogger("propter.einvoice.ubl_generator")
 @dataclass
 class LineItemAdapter:
     """Adapts InvoiceItem to ERacunItem interface."""
+
     line_number: int = 1
     description: str = ""
     quantity: Decimal = Decimal("1")
@@ -32,6 +34,7 @@ class LineItemAdapter:
 @dataclass
 class TaxSummaryAdapter:
     """Adapts tax breakdown to ERacunTaxSummary interface."""
+
     tax_category: str = "S"
     tax_rate: Decimal = Decimal("25")
     taxable_amount: Decimal = Decimal("0")
@@ -45,6 +48,7 @@ class InvoiceAdapter:
     The eracun UBL generator expects an object with specific attributes.
     This adapter maps Invoice fields to that interface.
     """
+
     # Document
     invoice_number: str = ""
     issue_date: date = None
@@ -94,21 +98,31 @@ class InvoiceAdapter:
 
     class items:
         """Fake manager to mimic ERacun.items.all()"""
+
         pass
 
     class tax_summaries:
         """Fake manager to mimic ERacun.tax_summaries.all()"""
+
         pass
 
     def __post_init__(self):
         # Wire up fake managers
-        self.items = type('ItemsManager', (), {
-            'all': lambda s: self._items,
-            'order_by': lambda s, *a: self._items,
-        })()
-        self.tax_summaries = type('TaxManager', (), {
-            'all': lambda s: self._tax_summaries,
-        })()
+        self.items = type(
+            "ItemsManager",
+            (),
+            {
+                "all": lambda s: self._items,
+                "order_by": lambda s, *a: self._items,
+            },
+        )()
+        self.tax_summaries = type(
+            "TaxManager",
+            (),
+            {
+                "all": lambda s: self._tax_summaries,
+            },
+        )()
 
     @classmethod
     def from_invoice(cls, invoice):
@@ -117,27 +131,28 @@ class InvoiceAdapter:
 
         # Map payment type
         payment_map = {
-            'TRANSAKCIJSKI': '30', 'GOTOVINA': '10', 'KARTICA': '48',
-            'VIRMAN': '30', 'KOMPENZACIJA': '97',
+            "TRANSAKCIJSKI": "30",
+            "GOTOVINA": "10",
+            "KARTICA": "48",
+            "VIRMAN": "30",
+            "KOMPENZACIJA": "97",
         }
-        payment_code = payment_map.get(
-            getattr(invoice, 'payment_type', 'TRANSAKCIJSKI'), '30'
-        )
+        payment_code = payment_map.get(getattr(invoice, "payment_type", "TRANSAKCIJSKI"), "30")
 
         # Get partner info for recipient address
-        partner = getattr(invoice, 'partner', None)
+        partner = getattr(invoice, "partner", None)
         recipient_address = ""
         recipient_city = ""
         recipient_postal = ""
         recipient_country = "HR"
         if partner:
-            recipient_address = getattr(partner, 'address', '') or ''
-            recipient_city = getattr(partner, 'city', '') or ''
-            recipient_postal = getattr(partner, 'postal_code', '') or ''
-            recipient_country = getattr(partner, 'country', 'HR') or 'HR'
+            recipient_address = getattr(partner, "address", "") or ""
+            recipient_city = getattr(partner, "city", "") or ""
+            recipient_postal = getattr(partner, "postal_code", "") or ""
+            recipient_country = getattr(partner, "country", "HR") or "HR"
 
         # Calculate tax
-        items_qs = invoice.items.all() if hasattr(invoice, 'items') else []
+        items_qs = invoice.items.all() if hasattr(invoice, "items") else []
         subtotal = invoice.subtotal or Decimal("0")
         total = invoice.total or Decimal("0")
         tax_amount = total - subtotal
@@ -145,30 +160,30 @@ class InvoiceAdapter:
         adapter = cls(
             invoice_number=invoice.number,
             issue_date=invoice.issue_date or date.today(),
-            due_date=getattr(invoice, 'due_date', None),
-            delivery_date=getattr(invoice, 'delivery_date', None),
+            due_date=getattr(invoice, "due_date", None),
+            delivery_date=getattr(invoice, "delivery_date", None),
             doc_type="380",
-            note=getattr(invoice, 'note', '') or '',
-            currency=getattr(invoice, 'currency', 'EUR') or 'EUR',
-            issuer_name=company.name if company else '',
-            issuer_oib=company.oib if company else '',
-            issuer_address=getattr(company, 'address', '') or '',
-            issuer_city=getattr(company, 'city', '') or '',
-            issuer_postal=getattr(company, 'postal_code', '') or '',
-            issuer_country=getattr(company, 'country', 'HR') or 'HR',
-            issuer_iban=getattr(company, 'iban', '') or '',
-            issuer_swift=getattr(company, 'swift', '') or '',
-            recipient_name=invoice.client_name or '',
-            recipient_oib=invoice.client_oib or '',
+            note=getattr(invoice, "note", "") or "",
+            currency=getattr(invoice, "currency", "EUR") or "EUR",
+            issuer_name=company.name if company else "",
+            issuer_oib=company.oib if company else "",
+            issuer_address=getattr(company, "address", "") or "",
+            issuer_city=getattr(company, "city", "") or "",
+            issuer_postal=getattr(company, "postal_code", "") or "",
+            issuer_country=getattr(company, "country", "HR") or "HR",
+            issuer_iban=getattr(company, "iban", "") or "",
+            issuer_swift=getattr(company, "swift", "") or "",
+            recipient_name=invoice.client_name or "",
+            recipient_oib=invoice.client_oib or "",
             recipient_address=recipient_address,
             recipient_city=recipient_city,
             recipient_postal=recipient_postal,
             recipient_country=recipient_country,
             payment_means_code=payment_code,
-            payment_reference=getattr(invoice, 'reference_number', '') or '',
-            payment_model=getattr(invoice, 'payment_model', 'HR00') or 'HR00',
-            zki=getattr(invoice, 'zki', '') or '',
-            jir=getattr(invoice, 'jir', '') or '',
+            payment_reference=getattr(invoice, "reference_number", "") or "",
+            payment_model=getattr(invoice, "payment_model", "HR00") or "HR00",
+            zki=getattr(invoice, "zki", "") or "",
+            jir=getattr(invoice, "jir", "") or "",
             subtotal=subtotal,
             tax_amount=tax_amount,
             total=total,
@@ -176,18 +191,21 @@ class InvoiceAdapter:
 
         # Build line items
         from eracun.services.ubl_generator import map_unit_code
+
         for idx, item in enumerate(items_qs, 1):
-            tax_rate = getattr(item, 'tax_rate', Decimal("25")) or Decimal("25")
-            adapter._items.append(LineItemAdapter(
-                line_number=idx,
-                description=item.description or '',
-                quantity=item.quantity or Decimal("1"),
-                unit_code=map_unit_code(getattr(item, 'unit', 'EA')),
-                unit_price=item.unit_price or Decimal("0"),
-                line_total=getattr(item, 'total_price', Decimal("0")) or Decimal("0"),
-                tax_rate=tax_rate,
-                tax_category="S" if tax_rate > 0 else "E",
-            ))
+            tax_rate = getattr(item, "tax_rate", Decimal("25")) or Decimal("25")
+            adapter._items.append(
+                LineItemAdapter(
+                    line_number=idx,
+                    description=item.description or "",
+                    quantity=item.quantity or Decimal("1"),
+                    unit_code=map_unit_code(getattr(item, "unit", "EA")),
+                    unit_price=item.unit_price or Decimal("0"),
+                    line_total=getattr(item, "total_price", Decimal("0")) or Decimal("0"),
+                    tax_rate=tax_rate,
+                    tax_category="S" if tax_rate > 0 else "E",
+                )
+            )
 
         # Build tax summary (aggregate by rate)
         tax_groups = {}
@@ -199,12 +217,14 @@ class InvoiceAdapter:
             tax_groups[rate]["tax"] += (item.line_total * rate / Decimal("100")).quantize(Decimal("0.01"))
 
         for rate, amounts in tax_groups.items():
-            adapter._tax_summaries.append(TaxSummaryAdapter(
-                tax_category="S" if rate > 0 else "E",
-                tax_rate=rate,
-                taxable_amount=amounts["base"],
-                tax_amount=amounts["tax"],
-            ))
+            adapter._tax_summaries.append(
+                TaxSummaryAdapter(
+                    tax_category="S" if rate > 0 else "E",
+                    tax_rate=rate,
+                    taxable_amount=amounts["base"],
+                    tax_amount=amounts["tax"],
+                )
+            )
 
         return adapter
 
@@ -230,9 +250,11 @@ def generate_ubl_for_invoice(invoice, profile="HR"):
 
     if profile == "DE":
         from eracun.services.xrechnung import generate_xrechnung
+
         return generate_xrechnung(adapter)
     else:
         from eracun.services.ubl_generator import generate_ubl_xml
+
         xml_bytes = generate_ubl_xml(adapter)
         if isinstance(xml_bytes, bytes):
             return xml_bytes.decode("utf-8")
@@ -243,9 +265,11 @@ def generate_ubl_for_eracun(eracun, profile="HR"):
     """Generate UBL from existing eracun.ERacun model (direct passthrough)."""
     if profile == "DE":
         from eracun.services.xrechnung import generate_xrechnung
+
         return generate_xrechnung(eracun)
     else:
         from eracun.services.ubl_generator import generate_ubl_xml
+
         xml_bytes = generate_ubl_xml(eracun)
         if isinstance(xml_bytes, bytes):
             return xml_bytes.decode("utf-8")

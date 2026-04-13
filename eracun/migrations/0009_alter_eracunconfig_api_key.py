@@ -5,15 +5,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('eracun', '0008_cert_path_secure_fileield_removed'),
+        ("eracun", "0008_cert_path_secure_fileield_removed"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eracunconfig',
-            name='api_key',
-            field=core.fields.FernetEncryptedCharField(blank=True, unique=True, verbose_name='API kljuc'),
+            model_name="eracunconfig",
+            name="api_key",
+            field=core.fields.FernetEncryptedCharField(blank=True, unique=True, verbose_name="API kljuc"),
         ),
     ]

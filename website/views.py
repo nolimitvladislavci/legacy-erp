@@ -13,25 +13,30 @@ from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
 def homepage(request):
     """Landing page 2026 — konverzijska stranica za limit-connect.com."""
     from companies.models import Company
-    return render(request, "website/landing_2026.html", {
-        'firm_count': Company.objects.count(),
-    })
+
+    return render(
+        request,
+        "website/landing_2026.html",
+        {
+            "firm_count": Company.objects.count(),
+        },
+    )
 
 
 def hitna_intervencija(request):
     """Javna forma za hitnu intervenciju"""
-    if request.method == 'POST':
+    if request.method == "POST":
         form = HitnaIntervencijaForm(request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
             # Spremi IP adresu
-            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
             if x_forwarded_for:
-                obj.ip_adresa = x_forwarded_for.split(',')[0].strip()
+                obj.ip_adresa = x_forwarded_for.split(",")[0].strip()
             else:
-                obj.ip_adresa = request.META.get('REMOTE_ADDR')
+                obj.ip_adresa = request.META.get("REMOTE_ADDR")
             # Jezik iz Accept-Language headera
-            lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'de')
+            lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "de")
             obj.jezik = lang[:2].lower()
             obj.save()
 
@@ -40,6 +45,7 @@ def hitna_intervencija(request):
                 from django.conf import settings
 
                 from core.email_tasks import send_email_task
+
                 subject = f"[HITNO] Nova intervencija: {obj.get_vrsta_display()} — {obj.ime}"
                 body = (
                     f"Novi zahtjev za hitnu intervenciju\n\n"
@@ -51,113 +57,128 @@ def hitna_intervencija(request):
                     f"Hitnost: {'HITNO' if obj.hitnost else 'Redovito'}\n\n"
                     f"Opis:\n{obj.opis}\n"
                 )
-                notify_email = getattr(settings, 'HITNA_NOTIFY_EMAIL', None)
+                notify_email = getattr(settings, "HITNA_NOTIFY_EMAIL", None)
                 if notify_email:
                     send_email_task.delay(subject, body, settings.DEFAULT_FROM_EMAIL, [notify_email])
             except ImportError:
                 pass
 
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'ok': True, 'id': obj.id})
-            messages.success(request, _('Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku.'))
-            return redirect('website:hitna_hvala')
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"ok": True, "id": obj.id})
+            messages.success(request, _("Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."))
+            return redirect("website:hitna_hvala")
         else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"ok": False, "errors": form.errors}, status=400)
     else:
         form = HitnaIntervencijaForm()
 
-    return render(request, 'website/hitna_intervencija.html', {'form': form})
+    return render(request, "website/hitna_intervencija.html", {"form": form})
 
 
 def hitna_hvala(request):
     """Stranica zahvale nakon slanja forme"""
-    return render(request, 'website/hitna_hvala.html')
+    return render(request, "website/hitna_hvala.html")
 
 
 def video_galerija(request):
     """Javna video galerija"""
-    kategorija = request.GET.get('k', '')
+    kategorija = request.GET.get("k", "")
     videos = VideoGallery.objects.select_related("website").filter(is_active=True)
     if kategorija:
         videos = videos.filter(kategorija=kategorija)
     kategorije = VideoGallery.KATEGORIJA_CHOICES
-    return render(request, 'website/video_galerija.html', {
-        'videos': videos,
-        'kategorije': kategorije,
-        'aktivna_kategorija': kategorija,
-    })
+    return render(
+        request,
+        "website/video_galerija.html",
+        {
+            "videos": videos,
+            "kategorije": kategorije,
+            "aktivna_kategorija": kategorija,
+        },
+    )
 
 
 @login_required
 def admin_panel(request):
     """Admin panel za upravljanje web stranicom"""
-    brands    = Brand.objects.filter(is_active=True)
-    gallery   = GalleryImage.objects.select_related("website").filter(is_active=True)
-    hitne     = HitnaIntervencija.objects.filter(status='novo')[:10]
-    videos    = VideoGallery.objects.select_related("website").filter(is_active=True)[:10]
-    return render(request, 'website/index.html', {
-        'brands': brands,
-        'gallery': gallery,
-        'hitne': hitne,
-        'videos': videos,
-    })
+    brands = Brand.objects.filter(is_active=True)
+    gallery = GalleryImage.objects.select_related("website").filter(is_active=True)
+    hitne = HitnaIntervencija.objects.filter(status="novo")[:10]
+    videos = VideoGallery.objects.select_related("website").filter(is_active=True)[:10]
+    return render(
+        request,
+        "website/index.html",
+        {
+            "brands": brands,
+            "gallery": gallery,
+            "hitne": hitne,
+            "videos": videos,
+        },
+    )
 
 
 def viskovic_hr(request):
     from django.shortcuts import render
-    return render(request, 'viskovic_group_index_hr.html')
+
+    return render(request, "viskovic_group_index_hr.html")
 
 
 def bau_page(request):
     from django.shortcuts import render
 
     from website.models import GalleryImage, VideoGallery
+
     media_items = []
     try:
         # Prikupi slike i filtriraj na razini Pythona
         for s in GalleryImage.objects.select_related("website").filter(is_active=True):
-            cat = str(getattr(s, 'category', getattr(s, 'kategorija', ''))).lower()
-            if 'bau' in cat or 'viskovi' in cat:
+            cat = str(getattr(s, "category", getattr(s, "kategorija", ""))).lower()
+            if "bau" in cat or "viskovi" in cat:
                 if s.image:
-                    title = getattr(s, 'caption_de', getattr(s, 'caption_hr', getattr(s, 'title', 'Referenz')))
-                    media_items.append({'type': 'image', 'url': s.image.url, 'title': title})
+                    title = getattr(s, "caption_de", getattr(s, "caption_hr", getattr(s, "title", "Referenz")))
+                    media_items.append({"type": "image", "url": s.image.url, "title": title})
 
         # Prikupi videe i filtriraj
         for v in VideoGallery.objects.select_related("website").filter(is_active=True):
-            cat = str(getattr(v, 'kategorija', getattr(v, 'category', ''))).lower()
-            if 'bau' in cat or 'viskovi' in cat:
-                if getattr(v, 'video_file', None):
-                    title = getattr(v, 'naslov_de', getattr(v, 'naslov_hr', getattr(v, 'title', 'Video')))
-                    media_items.append({'type': 'video_file', 'url': v.video_file.url, 'title': title})
-                elif getattr(v, 'embed_url', None):
-                    title = getattr(v, 'naslov_de', getattr(v, 'naslov_hr', getattr(v, 'title', 'Video')))
-                    media_items.append({'type': 'video_embed', 'url': v.embed_url, 'title': title})
+            cat = str(getattr(v, "kategorija", getattr(v, "category", ""))).lower()
+            if "bau" in cat or "viskovi" in cat:
+                if getattr(v, "video_file", None):
+                    title = getattr(v, "naslov_de", getattr(v, "naslov_hr", getattr(v, "title", "Video")))
+                    media_items.append({"type": "video_file", "url": v.video_file.url, "title": title})
+                elif getattr(v, "embed_url", None):
+                    title = getattr(v, "naslov_de", getattr(v, "naslov_hr", getattr(v, "title", "Video")))
+                    media_items.append({"type": "video_embed", "url": v.embed_url, "title": title})
     except DatabaseError as e:
         print("Galerija Error:", e)
-    return render(request, 'website/bau.html', {'media_items': media_items})
-
+    return render(request, "website/bau.html", {"media_items": media_items})
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # MULTI-TENANT WEBSITE BUILDER — PUBLIC VIEWS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 def company_site(request, slug):
     """Public company website page."""
     from django.shortcuts import get_object_or_404
 
     from .models import CompanyWebsite
+
     site = get_object_or_404(CompanyWebsite, slug=slug, is_published=True)
     services = site.services.filter(is_active=True)
-    gallery  = site.gallery.filter(is_active=True)
-    reviews  = site.reviews.filter(is_approved=True)
-    return render(request, f'website/themes/{site.theme}.html', {
-        'site':     site,
-        'services': services,
-        'gallery':  gallery,
-        'reviews':  reviews,
-    })
+    gallery = site.gallery.filter(is_active=True)
+    reviews = site.reviews.filter(is_approved=True)
+    return render(
+        request,
+        f"website/themes/{site.theme}.html",
+        {
+            "site": site,
+            "services": services,
+            "gallery": gallery,
+            "reviews": reviews,
+        },
+    )
 
 
 @require_POST
@@ -166,38 +187,44 @@ def company_site_contact(request, slug):
     from django.shortcuts import get_object_or_404
 
     from .models import CompanyWebsite, WebsiteContactMessage
+
     site = get_object_or_404(CompanyWebsite, slug=slug, is_published=True)
-    name    = request.POST.get('name', '').strip()
-    email   = request.POST.get('email', '').strip()
-    phone   = request.POST.get('phone', '').strip()
-    msg     = request.POST.get('message', '').strip()
+    name = request.POST.get("name", "").strip()
+    email = request.POST.get("email", "").strip()
+    phone = request.POST.get("phone", "").strip()
+    msg = request.POST.get("message", "").strip()
     if not name or not email or not msg:
-        messages.error(request, _('Molimo ispunite sva obavezna polja.'))
-        return redirect(f'/site/{slug}/#contact')
+        messages.error(request, _("Molimo ispunite sva obavezna polja."))
+        return redirect(f"/site/{slug}/#contact")
     WebsiteContactMessage.objects.create(
-        website=site, name=name, email=email, phone=phone, message=msg,
+        website=site,
+        name=name,
+        email=email,
+        phone=phone,
+        message=msg,
     )
-    messages.success(request, _('Vasa poruka je uspjesno poslana!'))
-    return redirect(f'/site/{slug}/#contact')
+    messages.success(request, _("Vasa poruka je uspjesno poslana!"))
+    return redirect(f"/site/{slug}/#contact")
+
 
 # --- Grosmarkt partner API -------------------------------------------
 
 GROSMARKT_TOTAL_SLOTS = 5
 
 ROLE_ICONS = {
-    'logistik':   {'icon': 'fas fa-warehouse',   'color': '#c9a84c'},
-    'gaertnerei': {'icon': 'fas fa-leaf',         'color': '#22c55e'},
-    'haendler':   {'icon': 'fas fa-store',        'color': '#3b82f6'},
-    'gastro':     {'icon': 'fas fa-utensils',     'color': '#f97316'},
-    'sonstiges':  {'icon': 'fas fa-building',     'color': '#94a3b8'},
+    "logistik": {"icon": "fas fa-warehouse", "color": "#c9a84c"},
+    "gaertnerei": {"icon": "fas fa-leaf", "color": "#22c55e"},
+    "haendler": {"icon": "fas fa-store", "color": "#3b82f6"},
+    "gastro": {"icon": "fas fa-utensils", "color": "#f97316"},
+    "sonstiges": {"icon": "fas fa-building", "color": "#94a3b8"},
 }
 
 ROLE_LABELS = {
-    'logistik':   'Logistik-Hub',
-    'gaertnerei': 'Gärtnerei & Frischware',
-    'haendler':   'Händler & Großhandel',
-    'gastro':     'Gastronomie',
-    'sonstiges':  'Partner',
+    "logistik": "Logistik-Hub",
+    "gaertnerei": "Gärtnerei & Frischware",
+    "haendler": "Händler & Großhandel",
+    "gastro": "Gastronomie",
+    "sonstiges": "Partner",
 }
 
 
@@ -206,36 +233,45 @@ def grosmarkt_partners_api(request):
     """Public JSON endpoint for grosmarkt-online.eu partner cards."""
     from companies.models import Company
 
-    partners = Company.objects.filter(
-        grosmarkt_partner=True
-    ).values(
-        'name', 'city', 'grosmarkt_role',
-        'grosmarkt_description', 'grosmarkt_show_name',
-        'website_url',
-    ).order_by('created_at')
+    partners = (
+        Company.objects.filter(grosmarkt_partner=True)
+        .values(
+            "name",
+            "city",
+            "grosmarkt_role",
+            "grosmarkt_description",
+            "grosmarkt_show_name",
+            "website_url",
+        )
+        .order_by("created_at")
+    )
 
     data = []
     for p in partners:
-        role = p['grosmarkt_role'] or 'sonstiges'
-        style = ROLE_ICONS.get(role, ROLE_ICONS['sonstiges'])
-        data.append({
-            'name':        p['name'] if p['grosmarkt_show_name'] else None,
-            'city':        p['city'] if p['grosmarkt_show_name'] else None,
-            'role':        role,
-            'role_label':  ROLE_LABELS.get(role, 'Partner'),
-            'description': p['grosmarkt_description'],
-            'icon':        style['icon'],
-            'color':       style['color'],
-            'website':     p['website_url'] if p['grosmarkt_show_name'] else None,
-        })
+        role = p["grosmarkt_role"] or "sonstiges"
+        style = ROLE_ICONS.get(role, ROLE_ICONS["sonstiges"])
+        data.append(
+            {
+                "name": p["name"] if p["grosmarkt_show_name"] else None,
+                "city": p["city"] if p["grosmarkt_show_name"] else None,
+                "role": role,
+                "role_label": ROLE_LABELS.get(role, "Partner"),
+                "description": p["grosmarkt_description"],
+                "icon": style["icon"],
+                "color": style["color"],
+                "website": p["website_url"] if p["grosmarkt_show_name"] else None,
+            }
+        )
 
-    return JsonResponse({
-        'partners':    data,
-        'total_slots': GROSMARKT_TOTAL_SLOTS,
-        'taken_slots': len(data),
-        'open_slots':  GROSMARKT_TOTAL_SLOTS - len(data),
-    }, json_dumps_params={'ensure_ascii': False})
-
+    return JsonResponse(
+        {
+            "partners": data,
+            "total_slots": GROSMARKT_TOTAL_SLOTS,
+            "taken_slots": len(data),
+            "open_slots": GROSMARKT_TOTAL_SLOTS - len(data),
+        },
+        json_dumps_params={"ensure_ascii": False},
+    )
 
 
 import json as _json
@@ -271,16 +307,18 @@ def grosmarkt_anfrage(request):
         else:
             body = request.POST
 
-        name    = str(body.get("name", "")).strip()[:200]
+        name = str(body.get("name", "")).strip()[:200]
         company = str(body.get("company", "")).strip()[:200]
-        email   = str(body.get("email", "")).strip()[:254]
-        phone   = str(body.get("phone", "")).strip()[:50]
+        email = str(body.get("email", "")).strip()[:254]
+        phone = str(body.get("phone", "")).strip()[:50]
         message = str(body.get("message", "")).strip()[:2000]
 
         # Validacija
         errors = {}
-        if not name:    errors["name"]    = "Name ist erforderlich."
-        if not company: errors["company"] = "Unternehmen ist erforderlich."
+        if not name:
+            errors["name"] = "Name ist erforderlich."
+        if not company:
+            errors["company"] = "Unternehmen ist erforderlich."
         if not email or "@" not in email:
             errors["email"] = "Gültige E-Mail ist erforderlich."
         if errors:
@@ -288,8 +326,11 @@ def grosmarkt_anfrage(request):
 
         # Spremi u bazu
         anfrage = GrosmarktAnfrage.objects.create(
-            name=name, company=company, email=email,
-            phone=phone, message=message,
+            name=name,
+            company=company,
+            email=email,
+            phone=phone,
+            message=message,
             ip_address=request.META.get("REMOTE_ADDR"),
             user_agent=request.META.get("HTTP_USER_AGENT", "")[:300],
         )
@@ -300,13 +341,13 @@ def grosmarkt_anfrage(request):
 
         text_body = (
             f"NEUE DEMO-ANFRAGE — grosmarkt-online.eu\n"
-            f"{'='*50}\n"
+            f"{'=' * 50}\n"
             f"Firma:    {company}\n"
             f"Name:     {name}\n"
             f"E-Mail:   {email}\n"
             f"Telefon:  {phone or '—'}\n"
             f"Nachricht:\n{message or '—'}\n"
-            f"{'='*50}\n"
+            f"{'=' * 50}\n"
             f"Eingegangen: {now().strftime('%d.%m.%Y %H:%M')}\n"
             f"Admin: https://limit-connect.com/admin/website/grosmarktanfrage/{anfrage.pk}/change/"
         )
@@ -348,6 +389,7 @@ def grosmarkt_anfrage(request):
         except Exception:
             # Celery možda ne radi — pokušaj sync
             from django.core.mail import send_mail
+
             send_mail(subject, text_body, None, [notify_email], fail_silently=True)
 
         # Auto-reply podnositelju
@@ -364,21 +406,24 @@ def grosmarkt_anfrage(request):
             send_html_email_task.delay(
                 subject=auto_reply_subject,
                 text_body=auto_reply_text,
-                html_body=f"<p style='font-family:sans-serif'>{auto_reply_text.replace(chr(10),'<br>')}</p>",
+                html_body=f"<p style='font-family:sans-serif'>{auto_reply_text.replace(chr(10), '<br>')}</p>",
                 from_email=None,
                 recipient_list=[email],
             )
         except AttributeError:
             pass
 
-        return JsonResponse({
-            "success": True,
-            "message": "Anfrage erfolgreich eingegangen.",
-            "id": anfrage.pk,
-        })
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Anfrage erfolgreich eingegangen.",
+                "id": anfrage.pk,
+            }
+        )
 
     except (json.JSONDecodeError, ValueError):
         import logging
+
         logging.getLogger(__name__).exception("grosmarkt_anfrage error")
         return JsonResponse({"success": False, "error": "Serverfehler. Bitte später erneut versuchen."}, status=500)
 
@@ -387,107 +432,107 @@ def pricing_page(request):
     """Public pricing page for limit-connect.com."""
     from registration.constants import PLAN_FEATURES
     from registration.models import PricingPlan
-    plans = PricingPlan.objects.filter(is_active=True).order_by('sort_order')
-    lang = request.GET.get('lang', 'hr')
-    profile = request.GET.get('profile', '')
-    PROFILE_PLAN_MAP = {
-        'obrtnik': ['pausalac', 'pos-besplatno', 'starter'],
-        'udruga': ['udruga-starter'],
-        'rental': ['rental-starter', 'pos-arhiva-combo'],
-        'firma': ['starter', 'professional', 'enterprise'],
-        'racunovodja': ['arhiva-ai', 'enterprise', 'distributor'],
-        'gastro': ['pos-besplatno', 'pos-arhiva-combo', 'professional'],
-    }
+
+    plans = PricingPlan.objects.filter(is_active=True).order_by("sort_order")
+    lang = request.GET.get("lang", "hr")
+    profile = request.GET.get("profile", "")
     # Always send ALL plans to template (JS PLANS_DB needs them all for profile switching)
-    return render(request, 'website/pricing.html', {
-        'plans': plans,
-        'plan_features': PLAN_FEATURES,
-        'lang': lang,
-        'active_profile': profile,
-    })
+    return render(
+        request,
+        "website/pricing.html",
+        {
+            "plans": plans,
+            "plan_features": PLAN_FEATURES,
+            "lang": lang,
+            "active_profile": profile,
+        },
+    )
 
 
 def about_page(request):
     """Public about page."""
-    return render(request, 'website/about.html')
+    return render(request, "website/about.html")
 
 
 def financijski_plan(request):
     """Financial viability plan — internal."""
-    return render(request, 'website/financijski_plan.html')
+    return render(request, "website/financijski_plan.html")
 
 
 def trzisna_analiza(request):
     """Market analysis — internal."""
-    return render(request, 'website/trzisna_analiza.html')
+    return render(request, "website/trzisna_analiza.html")
 
 
 def pricing_ai_advisor(request):
     """AI-powered plan recommendation based on business description."""
     from django.http import JsonResponse
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     import json
+
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         body = {}
 
-    industry = body.get('industry', '')
-    employees = int(body.get('employees', 1))
-    needs = body.get('needs', [])
+    industry = body.get("industry", "")
+    employees = int(body.get("employees", 1))
+    needs = body.get("needs", [])
 
-    score = {'starter': 0, 'professional': 0, 'enterprise': 0,
-             'pausalac': 0, 'udruga-starter': 0, 'rental-starter': 0}
+    score = {"starter": 0, "professional": 0, "enterprise": 0, "pausalac": 0, "udruga-starter": 0, "rental-starter": 0}
 
     # Industry-specific routing — BORG prepoznaje tko si
-    business_type = body.get('business_type', '')
-    if business_type in ('udruga', 'zadruga', 'ustanova'):
-        score['udruga-starter'] += 10  # Instant match
-    elif business_type == 'opg' or industry == 'rental':
-        score['rental-starter'] += 10
-    elif business_type == 'obrt' and employees <= 1:
-        score['pausalac'] += 10
+    business_type = body.get("business_type", "")
+    if business_type in ("udruga", "zadruga", "ustanova"):
+        score["udruga-starter"] += 10  # Instant match
+    elif business_type == "opg" or industry == "rental":
+        score["rental-starter"] += 10
+    elif business_type == "obrt" and employees <= 1:
+        score["pausalac"] += 10
 
     if employees <= 3:
-        score['starter'] += 3
+        score["starter"] += 3
     elif employees <= 15:
-        score['professional'] += 3
+        score["professional"] += 3
     else:
-        score['enterprise'] += 3
+        score["enterprise"] += 3
 
-    enterprise_needs = {'inventory', 'ai', 'eracun', 'rental', 'webshop', 'synesis', 'smart_import', 'helpdesk'}
-    pro_needs = {'tracking', 'reports', 'konto', 'payroll', 'delivery', 'marketplace', 'gastro'}
+    enterprise_needs = {"inventory", "ai", "eracun", "rental", "webshop", "synesis", "smart_import", "helpdesk"}
+    pro_needs = {"tracking", "reports", "konto", "payroll", "delivery", "marketplace", "gastro"}
 
     for n in needs:
         if n in enterprise_needs:
-            score['enterprise'] += 2
+            score["enterprise"] += 2
         elif n in pro_needs:
-            score['professional'] += 2
+            score["professional"] += 2
         else:
-            score['starter'] += 1
+            score["starter"] += 1
 
-    if industry in ('gastro', 'trade', 'construction'):
-        score['professional'] += 1
-    if industry in ('health', 'it'):
-        score['enterprise'] += 1
+    if industry in ("gastro", "trade", "construction"):
+        score["professional"] += 1
+    if industry in ("health", "it"):
+        score["enterprise"] += 1
 
     recommended = max(score, key=score.get)
     reasons = {
-        'starter': 'Za male tvrtke do 3 korisnika s osnovnim potrebama fakturiranja i POS-a.',
-        'professional': 'Idealan za rastuce tvrtke koje trebaju izvjestaje, tracking, payroll i CRM.',
-        'enterprise': 'Kompletno rjesenje sa svim modulima, AI asistentom i neogranicenim korisnicima.',
-        'pausalac': 'Besplatno za pausalne obrtnike — POS, fiskalizacija i PO-SD obrazac ukljuceni.',
-        'udruga-starter': 'Poseban paket za udruge — clanarine, donacije, izvjestaji, bez fiskalizacije.',
-        'rental-starter': 'Za iznajmljivace — eVisitor, turisticka pristojba, check-in, POS recepcija.',
+        "starter": "Za male tvrtke do 3 korisnika s osnovnim potrebama fakturiranja i POS-a.",
+        "professional": "Idealan za rastuce tvrtke koje trebaju izvjestaje, tracking, payroll i CRM.",
+        "enterprise": "Kompletno rjesenje sa svim modulima, AI asistentom i neogranicenim korisnicima.",
+        "pausalac": "Besplatno za pausalne obrtnike — POS, fiskalizacija i PO-SD obrazac ukljuceni.",
+        "udruga-starter": "Poseban paket za udruge — clanarine, donacije, izvjestaji, bez fiskalizacije.",
+        "rental-starter": "Za iznajmljivace — eVisitor, turisticka pristojba, check-in, POS recepcija.",
     }
 
-    return JsonResponse({
-        'recommended': recommended,
-        'reason': reasons[recommended],
-        'scores': score,
-    })
+    return JsonResponse(
+        {
+            "recommended": recommended,
+            "reason": reasons[recommended],
+            "scores": score,
+        }
+    )
 
 
 from django.contrib.auth.decorators import login_required
@@ -500,171 +545,193 @@ def gallery_manage(request):
     """Upload i upravljanje slikama za web stranicu firme."""
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('/')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("/")
 
     from website.models import GalleryImage
-    images = GalleryImage.objects.filter(company=company).order_by('category', 'sort_order')
-    return render(request, 'website/gallery_manage.html', {
-        'images': images,
-        'company': company,
-        'categories': GalleryImage.CATEGORY,
-    })
+
+    images = GalleryImage.objects.filter(company=company).order_by("category", "sort_order")
+    return render(
+        request,
+        "website/gallery_manage.html",
+        {
+            "images": images,
+            "company": company,
+            "categories": GalleryImage.CATEGORY,
+        },
+    )
+
 
 @login_required
 def gallery_upload(request):
     """AJAX upload slike."""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema firme'}, status=400)
+        return JsonResponse({"error": "Nema firme"}, status=400)
 
-    files = request.FILES.getlist('images')
-    category = request.POST.get('category', 'product')
+    files = request.FILES.getlist("images")
+    category = request.POST.get("category", "product")
     if not files:
-        return JsonResponse({'error': 'Nema slika'}, status=400)
+        return JsonResponse({"error": "Nema slika"}, status=400)
 
     from website.models import GalleryImage
+
     created = []
     for f in files:
-        if not f.content_type.startswith('image/'):
+        if not f.content_type.startswith("image/"):
             continue
         if f.size > 10 * 1024 * 1024:
             continue
         img = GalleryImage.objects.create(
             company=company,
             image=f,
-            title=f.name.rsplit('.', 1)[0][:100],
+            title=f.name.rsplit(".", 1)[0][:100],
             category=category,
             uploaded_by=request.user,
         )
-        created.append({'id': img.pk, 'url': img.image.url, 'title': img.title})
+        created.append({"id": img.pk, "url": img.image.url, "title": img.title})
 
-    return JsonResponse({'ok': True, 'count': len(created), 'images': created})
+    return JsonResponse({"ok": True, "count": len(created), "images": created})
+
 
 @login_required
 def gallery_delete(request, pk):
     """Obriši sliku."""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
     company = get_user_company(request)
     from website.models import GalleryImage
+
     try:
         img = GalleryImage.objects.get(pk=pk, company=company)
         img.delete()
-        return JsonResponse({'ok': True})
+        return JsonResponse({"ok": True})
     except GalleryImage.DoesNotExist:
-        return JsonResponse({'error': 'Ne postoji'}, status=404)
+        return JsonResponse({"error": "Ne postoji"}, status=404)
 
 
 def feedback_page(request):
     """Public feedback stranica — limit-connect.com/feedback/"""
-    return render(request, 'website/feedback.html')
+    return render(request, "website/feedback.html")
 
 
 def digitalni_posrednik(request):
     """Public page: Digitalni Posrednik chronicle and status."""
-    return render(request, 'website/digitalni_posrednik.html')
+    return render(request, "website/digitalni_posrednik.html")
 
 
 from django.views.decorators.csrf import csrf_exempt
 
 KRULJAC_WA = "+385913912621"
 
+
 def _wa_send(telefon, poruka):
     try:
         from core.whatsapp import send_text
+
         send_text(telefon, poruka)
     except ImportError:
         pass
 
+
 def korpas_termini(request):
     from .models import KorpasTermin
-    if request.method == 'POST':
+
+    if request.method == "POST":
         try:
             d = _json.loads(request.body)
             t = KorpasTermin.objects.create(
-                ime=d.get('ime',''),
-                telefon=d.get('telefon',''),
-                vrsta_vozila=d.get('vrsta_vozila','ostalo'),
-                usluga=d.get('usluga','ostalo'),
-                datum=d.get('datum'),
-                vrijeme=d.get('vrijeme','08:00'),
-                napomena=d.get('napomena',''),
+                ime=d.get("ime", ""),
+                telefon=d.get("telefon", ""),
+                vrsta_vozila=d.get("vrsta_vozila", "ostalo"),
+                usluga=d.get("usluga", "ostalo"),
+                datum=d.get("datum"),
+                vrijeme=d.get("vrijeme", "08:00"),
+                napomena=d.get("napomena", ""),
             )
-            _wa_send(KRULJAC_WA,
+            _wa_send(
+                KRULJAC_WA,
                 f"🔧 NOVI TERMIN KORPAŠ\n{t.ime} | {t.telefon}\n"
                 f"{t.get_usluga_display()} | {t.get_vrsta_vozila_display()}\n"
-                f"{t.datum} u {t.vrijeme}"
+                f"{t.datum} u {t.vrijeme}",
             )
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
         except (json.JSONDecodeError, ValueError) as e:
-            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
     from django.shortcuts import render
-    return render(request, 'website/korpas_termini.html', {})
+
+    return render(request, "website/korpas_termini.html", {})
 
 
 def sirokisor(request):
     from .models import KorpasRezervacija
-    if request.method == 'POST':
+
+    if request.method == "POST":
         try:
             d = _json.loads(request.body)
             r = KorpasRezervacija.objects.create(
-                ime=d.get('ime',''),
-                telefon=d.get('telefon',''),
-                vrsta=d.get('vrsta','stol'),
-                datum=d.get('datum'),
-                broj_gostiju=int(d.get('broj_gostiju', 1)),
-                napomena=d.get('napomena',''),
+                ime=d.get("ime", ""),
+                telefon=d.get("telefon", ""),
+                vrsta=d.get("vrsta", "stol"),
+                datum=d.get("datum"),
+                broj_gostiju=int(d.get("broj_gostiju", 1)),
+                napomena=d.get("napomena", ""),
             )
-            _wa_send(KRULJAC_WA,
+            _wa_send(
+                KRULJAC_WA,
                 f"🍷 REZERVACIJA ŠIROKI ŠOR\n{r.ime} | {r.telefon}\n"
                 f"{r.get_vrsta_display()} | {r.datum} | {r.broj_gostiju} osoba\n"
-                f"{r.napomena or ''}"
+                f"{r.napomena or ''}",
             )
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
         except (json.JSONDecodeError, ValueError) as e:
-            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
     from django.shortcuts import render
-    return render(request, 'website/sirokisor.html', {})
+
+    return render(request, "website/sirokisor.html", {})
 
 
 def opg_kruljac(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             d = _json.loads(request.body)
-            _wa_send(KRULJAC_WA,
-                f"🐄 NARUDŽBA OPG KRULJAC\n{d.get('ime','')} | {d.get('telefon','')}\n"
-                f"Proizvod: {d.get('usluga','')}\nKoličina: {d.get('napomena','')}\n"
-                f"Dostava: {d.get('datum','')}"
+            _wa_send(
+                KRULJAC_WA,
+                f"🐄 NARUDŽBA OPG KRULJAC\n{d.get('ime', '')} | {d.get('telefon', '')}\n"
+                f"Proizvod: {d.get('usluga', '')}\nKoličina: {d.get('napomena', '')}\n"
+                f"Dostava: {d.get('datum', '')}",
             )
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
         except (json.JSONDecodeError, ValueError) as e:
-            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
     from django.shortcuts import render
-    return render(request, 'website/opg_kruljac.html', {})
+
+    return render(request, "website/opg_kruljac.html", {})
 
 
 def nolimit_partner(request):
     from .models import NoLimitPartner
-    if request.method == 'POST':
+
+    if request.method == "POST":
         try:
             d = _json.loads(request.body)
             p = NoLimitPartner.objects.create(
-                naziv_firme=d.get('naziv_firme',''),
-                oib=d.get('oib',''),
-                kontakt_osoba=d.get('kontakt_osoba',''),
-                telefon=d.get('telefon',''),
-                adresa=d.get('adresa',''),
+                naziv_firme=d.get("naziv_firme", ""),
+                oib=d.get("oib", ""),
+                kontakt_osoba=d.get("kontakt_osoba", ""),
+                telefon=d.get("telefon", ""),
+                adresa=d.get("adresa", ""),
             )
-            _wa_send(KRULJAC_WA,
-                f"🏷️ NOVI NO LIMIT PARTNER\n{p.naziv_firme} | {p.oib}\n"
-                f"{p.kontakt_osoba} | {p.telefon}\n{p.adresa}"
+            _wa_send(
+                KRULJAC_WA,
+                f"🏷️ NOVI NO LIMIT PARTNER\n{p.naziv_firme} | {p.oib}\n{p.kontakt_osoba} | {p.telefon}\n{p.adresa}",
             )
-            return JsonResponse({'ok': True})
+            return JsonResponse({"ok": True})
         except (json.JSONDecodeError, ValueError) as e:
-            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
     from django.shortcuts import render
-    return render(request, 'website/no_limit.html', {})
+
+    return render(request, "website/no_limit.html", {})

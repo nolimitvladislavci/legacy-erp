@@ -4,30 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0033_add_notification_mode_to_module_config'),
+        ("companies", "0033_add_notification_mode_to_module_config"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='deactivation_reason',
-            field=models.CharField(blank=True, default='', max_length=500, verbose_name='Razlog odlaska'),
+            model_name="company",
+            name="deactivation_reason",
+            field=models.CharField(blank=True, default="", max_length=500, verbose_name="Razlog odlaska"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='deactivation_requested_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Zahtjev za deaktivacijom'),
+            model_name="company",
+            name="deactivation_requested_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Zahtjev za deaktivacijom"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='is_deactivated',
-            field=models.BooleanField(default=False, verbose_name='Deaktiviran'),
+            model_name="company",
+            name="is_deactivated",
+            field=models.BooleanField(default=False, verbose_name="Deaktiviran"),
         ),
         migrations.AddField(
-            model_name='company',
-            name='is_vaulted',
-            field=models.BooleanField(default=False, help_text='True = firma deaktivirana, podaci zapecaceni. Baza NETAKNUTA.', verbose_name='Zapecacena arhiva'),
+            model_name="company",
+            name="is_vaulted",
+            field=models.BooleanField(
+                default=False,
+                help_text="True = firma deaktivirana, podaci zapecaceni. Baza NETAKNUTA.",
+                verbose_name="Zapecacena arhiva",
+            ),
         ),
     ]

@@ -5,21 +5,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0016_scan_batch_models'),
-        ('pos', '0047_knjiga_prigovora_global'),
+        ("documents", "0016_scan_batch_models"),
+        ("pos", "0047_knjiga_prigovora_global"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='adr_offered',
-            field=models.BooleanField(default=False, help_text='Da li je potrosac obaviijesten o ADR/mirenju', verbose_name='ADR ponudjeno'),
+            model_name="knjigaprigovora",
+            name="adr_offered",
+            field=models.BooleanField(
+                default=False, help_text="Da li je potrosac obaviijesten o ADR/mirenju", verbose_name="ADR ponudjeno"
+            ),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='archive_blob',
-            field=models.ForeignKey(blank=True, help_text='Auto-generirani PDF za zakonsku arhivu', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='prigovori', to='documents.documentblob', verbose_name='Arhivski PDF'),
+            model_name="knjigaprigovora",
+            name="archive_blob",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Auto-generirani PDF za zakonsku arhivu",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="prigovori",
+                to="documents.documentblob",
+                verbose_name="Arhivski PDF",
+            ),
         ),
     ]

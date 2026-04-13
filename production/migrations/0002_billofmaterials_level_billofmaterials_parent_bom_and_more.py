@@ -6,64 +6,120 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0039_add_license_token'),
-        ('inventory', '0025_stockmovement_batch_number_and_more'),
-        ('production', '0001_initial'),
+        ("companies", "0039_add_license_token"),
+        ("inventory", "0025_stockmovement_batch_number_and_more"),
+        ("production", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='billofmaterials',
-            name='level',
-            field=models.PositiveIntegerField(default=0, help_text='0=vrhunski, 1=podsklop, 2=pod-podsklop', verbose_name='Razina BOM-a'),
+            model_name="billofmaterials",
+            name="level",
+            field=models.PositiveIntegerField(
+                default=0, help_text="0=vrhunski, 1=podsklop, 2=pod-podsklop", verbose_name="Razina BOM-a"
+            ),
         ),
         migrations.AddField(
-            model_name='billofmaterials',
-            name='parent_bom',
-            field=models.ForeignKey(blank=True, help_text='Za multi-level BOM: ova sastavnica je podsklop nadređene', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sub_boms', to='production.billofmaterials', verbose_name='Nadređena sastavnica'),
+            model_name="billofmaterials",
+            name="parent_bom",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Za multi-level BOM: ova sastavnica je podsklop nadređene",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="sub_boms",
+                to="production.billofmaterials",
+                verbose_name="Nadređena sastavnica",
+            ),
         ),
         migrations.AddField(
-            model_name='bomline',
-            name='is_subassembly',
-            field=models.BooleanField(default=False, help_text='Označava da je ova stavka sama po sebi BOM', verbose_name='Podsklop'),
+            model_name="bomline",
+            name="is_subassembly",
+            field=models.BooleanField(
+                default=False, help_text="Označava da je ova stavka sama po sebi BOM", verbose_name="Podsklop"
+            ),
         ),
         migrations.AddField(
-            model_name='productionorder',
-            name='planned_labor_cost',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Planirani trošak rada'),
+            model_name="productionorder",
+            name="planned_labor_cost",
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Planirani trošak rada"),
         ),
         migrations.AddField(
-            model_name='productionorder',
-            name='planned_material_cost',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Planirani trošak materijala'),
+            model_name="productionorder",
+            name="planned_material_cost",
+            field=models.DecimalField(
+                decimal_places=2, default=0, max_digits=12, verbose_name="Planirani trošak materijala"
+            ),
         ),
         migrations.AddField(
-            model_name='productionorder',
-            name='planned_total_cost',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Planirani ukupni trošak'),
+            model_name="productionorder",
+            name="planned_total_cost",
+            field=models.DecimalField(
+                decimal_places=2, default=0, max_digits=12, verbose_name="Planirani ukupni trošak"
+            ),
         ),
         migrations.CreateModel(
-            name='MRPPlannedOrder',
+            name="MRPPlannedOrder",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('order_type', models.CharField(choices=[('produce', 'Proizvesti'), ('purchase', 'Nabaviti')], max_length=10)),
-                ('quantity', models.DecimalField(decimal_places=4, max_digits=12)),
-                ('needed_by', models.DateField(verbose_name='Potrebno do')),
-                ('order_date', models.DateField(help_text='needed_by - lead_time', verbose_name='Datum narudžbe')),
-                ('status', models.CharField(choices=[('planned', 'Planirano'), ('confirmed', 'Potvrđeno'), ('cancelled', 'Otkazano')], default='planned', max_length=10)),
-                ('mrp_run_id', models.CharField(blank=True, help_text='ID MRP pokretanja', max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('bom', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='production.billofmaterials')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mrp_planned_orders', to='companies.company')),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='mrp_planned_orders', to='inventory.inventoryitem')),
-                ('source_order', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mrp_planned_orders', to='production.productionorder')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "order_type",
+                    models.CharField(choices=[("produce", "Proizvesti"), ("purchase", "Nabaviti")], max_length=10),
+                ),
+                ("quantity", models.DecimalField(decimal_places=4, max_digits=12)),
+                ("needed_by", models.DateField(verbose_name="Potrebno do")),
+                ("order_date", models.DateField(help_text="needed_by - lead_time", verbose_name="Datum narudžbe")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("planned", "Planirano"), ("confirmed", "Potvrđeno"), ("cancelled", "Otkazano")],
+                        default="planned",
+                        max_length=10,
+                    ),
+                ),
+                ("mrp_run_id", models.CharField(blank=True, help_text="ID MRP pokretanja", max_length=50)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "bom",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="production.billofmaterials",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mrp_planned_orders",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="mrp_planned_orders",
+                        to="inventory.inventoryitem",
+                    ),
+                ),
+                (
+                    "source_order",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="mrp_planned_orders",
+                        to="production.productionorder",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'MRP planirani nalog',
-                'verbose_name_plural': 'MRP planirani nalozi',
-                'ordering': ['order_date'],
+                "verbose_name": "MRP planirani nalog",
+                "verbose_name_plural": "MRP planirani nalozi",
+                "ordering": ["order_date"],
             },
         ),
     ]

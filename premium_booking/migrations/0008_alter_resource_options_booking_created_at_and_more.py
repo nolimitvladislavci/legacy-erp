@@ -5,44 +5,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0007_alter_resource_options_remove_booking_created_at_and_more'),
+        ("premium_booking", "0007_alter_resource_options_remove_booking_created_at_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name'], 'verbose_name': 'Premium Resurs'},
+            name="resource",
+            options={"ordering": ["group", "name"], "verbose_name": "Premium Resurs"},
         ),
         migrations.AddField(
-            model_name='booking',
-            name='created_at',
+            model_name="booking",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='resource',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to='premium_booking.resource'),
+            model_name="booking",
+            name="resource",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="bookings", to="premium_booking.resource"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='created_at',
+            model_name="payment",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='created_at',
+            model_name="resource",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='group',
-            field=models.CharField(choices=[('construction', 'Gradnja (Strojevi i Radnici)'), ('housing', 'Stanovanje (Sobe i Garsonjere)'), ('business', 'Poslovni prostori (Uredi i Restoran)')], max_length=20, verbose_name='Grupa'),
+            model_name="resource",
+            name="group",
+            field=models.CharField(
+                choices=[
+                    ("construction", "Gradnja (Strojevi i Radnici)"),
+                    ("housing", "Stanovanje (Sobe i Garsonjere)"),
+                    ("business", "Poslovni prostori (Uredi i Restoran)"),
+                ],
+                max_length=20,
+                verbose_name="Grupa",
+            ),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='name',
-            field=models.CharField(max_length=200, verbose_name='Naziv'),
+            model_name="resource",
+            name="name",
+            field=models.CharField(max_length=200, verbose_name="Naziv"),
         ),
     ]

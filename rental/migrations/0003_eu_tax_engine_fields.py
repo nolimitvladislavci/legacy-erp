@@ -4,25 +4,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('rental', '0002_f1_guest_document_invoice_traffic'),
+        ("rental", "0002_f1_guest_document_invoice_traffic"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='guest',
-            name='evisitor_status',
-            field=models.CharField(choices=[('pending', 'Na cekanju'), ('sent', 'Poslano'), ('error', 'Greska'), ('exempt', 'Oslobodeno')], default='pending', max_length=10, verbose_name='eVisitor status'),
+            model_name="guest",
+            name="evisitor_status",
+            field=models.CharField(
+                choices=[("pending", "Na cekanju"), ("sent", "Poslano"), ("error", "Greska"), ("exempt", "Oslobodeno")],
+                default="pending",
+                max_length=10,
+                verbose_name="eVisitor status",
+            ),
         ),
         migrations.AddField(
-            model_name='property',
-            name='razred_mjesta',
-            field=models.CharField(blank=True, choices=[('A', 'A - turisticko mjesto'), ('B', 'B - ostalo mjesto'), ('C', 'C - Zagreb'), ('D', 'D - potpomognuto podrucje')], default='A', max_length=2, verbose_name='Razred mjesta (HR boravisna pristojba)'),
+            model_name="property",
+            name="razred_mjesta",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("A", "A - turisticko mjesto"),
+                    ("B", "B - ostalo mjesto"),
+                    ("C", "C - Zagreb"),
+                    ("D", "D - potpomognuto podrucje"),
+                ],
+                default="A",
+                max_length=2,
+                verbose_name="Razred mjesta (HR boravisna pristojba)",
+            ),
         ),
         migrations.AddField(
-            model_name='property',
-            name='tax_calculation_rule',
-            field=models.CharField(blank=True, choices=[('HR_FIXED_BORAVISNA', 'HR fiksna boravisna pristojba'), ('CITY_TAX_5_PERCENT', 'DE City Tax 5%'), ('CITY_TAX_7_PERCENT', 'DE City Tax 7% (München)'), ('AT_ORTSTAXE_PERCENT', 'AT Ortstaxe (%)'), ('NONE', 'Bez turisticke pristojbe')], default='HR_FIXED_BORAVISNA', max_length=30, verbose_name='Pravilo obracuna pristojbe'),
+            model_name="property",
+            name="tax_calculation_rule",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("HR_FIXED_BORAVISNA", "HR fiksna boravisna pristojba"),
+                    ("CITY_TAX_5_PERCENT", "DE City Tax 5%"),
+                    ("CITY_TAX_7_PERCENT", "DE City Tax 7% (München)"),
+                    ("AT_ORTSTAXE_PERCENT", "AT Ortstaxe (%)"),
+                    ("NONE", "Bez turisticke pristojbe"),
+                ],
+                default="HR_FIXED_BORAVISNA",
+                max_length=30,
+                verbose_name="Pravilo obracuna pristojbe",
+            ),
         ),
     ]

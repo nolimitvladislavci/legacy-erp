@@ -2,6 +2,7 @@
 POS Chaos Test — Playwright E2E test za offline resilience.
 Pokreni: cd /var/www/fina-connect && source venv/bin/activate && python test_pos_kaos.py
 """
+
 import json
 import time
 
@@ -21,7 +22,7 @@ def run_chaos_test():
         print("=" * 60)
 
         print("\n[1] Podizem headless Chrome...")
-        browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
+        browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
 
@@ -75,7 +76,9 @@ def run_chaos_test():
                     pin_input.first.fill("1234")
                     time.sleep(0.3)
                     # Submit PIN
-                    pin_submit = page.locator("#pinModal button:has-text('OK'), #pinModal button[type='submit'], #pinSubmit")
+                    pin_submit = page.locator(
+                        "#pinModal button:has-text('OK'), #pinModal button[type='submit'], #pinSubmit"
+                    )
                     if pin_submit.exists():
                         pin_submit.first.click()
                     else:
@@ -141,7 +144,7 @@ def run_chaos_test():
         print("\n[9] VERIFIKACIJA:")
 
         # A) Success overlay
-        overlay = page.locator("#successOverlay")
+        page.locator("#successOverlay")
         overlay_has_show = page.evaluate("document.getElementById('successOverlay').classList.contains('show')")
         print(f"    a) Success overlay .show: {overlay_has_show}")
 

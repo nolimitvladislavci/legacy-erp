@@ -7,12 +7,13 @@ EU Audit Guard — 3 nagazne mine za EU fondove.
 
 Poziva se PRIJE generiranja EU timesheeta i pri save() TimeEntry.
 """
+
 import logging
 from decimal import Decimal
 
 from django.db.models import Sum
 
-logger = logging.getLogger('eu_audit')
+logger = logging.getLogger("eu_audit")
 
 
 class EUAuditError(Exception):
@@ -24,7 +25,6 @@ class EUAuditError(Exception):
 
 
 class EUAuditGuard:
-
     # ── MINA 1: Double-Dipping ─────────────────────────────────
 
     @classmethod
@@ -36,41 +36,48 @@ class EUAuditGuard:
             return []
 
         qs = TimeEntry.objects.filter(
-            user=user, date=date,
-            start_time__isnull=False, end_time__isnull=False,
-            start_time__lt=end_time, end_time__gt=start_time,
-            status__in=['APPROVED', 'PENDING'],
+            user=user,
+            date=date,
+            start_time__isnull=False,
+            end_time__isnull=False,
+            start_time__lt=end_time,
+            end_time__gt=start_time,
+            status__in=["APPROVED", "PENDING"],
         )
         if exclude_pk:
             qs = qs.exclude(pk=exclude_pk)
 
         conflicts = []
         for entry in qs:
-            conflicts.append({
-                'entry_id': entry.pk,
-                'project': entry.project.code if entry.project else '?',
-                'date': str(entry.date),
-                'time': '%s-%s' % (entry.start_time, entry.end_time),
-            })
+            conflicts.append(
+                {
+                    "entry_id": entry.pk,
+                    "project": entry.project.code if entry.project else "?",
+                    "date": str(entry.date),
+                    "time": "%s-%s" % (entry.start_time, entry.end_time),
+                }
+            )
 
         if conflicts:
-            logger.warning('[EU AUDIT] Double-dipping: user=%s date=%s conflicts=%d', user, date, len(conflicts))
+            logger.warning("[EU AUDIT] Double-dipping: user=%s date=%s conflicts=%d", user, date, len(conflicts))
         return conflicts
 
     @classmethod
     def validate_no_overlap(cls, time_entry):
         """Raises EUAuditError ako postoji preklapanje."""
         conflicts = cls.check_double_dipping(
-            user=time_entry.user, date=time_entry.date,
-            start_time=time_entry.start_time, end_time=time_entry.end_time,
+            user=time_entry.user,
+            date=time_entry.date,
+            start_time=time_entry.start_time,
+            end_time=time_entry.end_time,
             exclude_pk=time_entry.pk if time_entry.pk else None,
         )
         if conflicts:
             raise EUAuditError(
-                'DOUBLE_DIPPING',
-                'Preklapanje radnog vremena! %d konflikt(a) na %s. '
-                'EU revizija ne dopušta dvostruko financiranje istih sati.' % (len(conflicts), time_entry.date),
-                details={'conflicts': conflicts},
+                "DOUBLE_DIPPING",
+                "Preklapanje radnog vremena! %d konflikt(a) na %s. "
+                "EU revizija ne dopušta dvostruko financiranje istih sati." % (len(conflicts), time_entry.date),
+                details={"conflicts": conflicts},
             )
 
     # ── MINA 2: Mjesečni fond (Pravilo 100%) ──────────────────
@@ -89,23 +96,32 @@ class EUAuditGuard:
             max_hours = Decimal(str(workdays * 8))
 
         total = TimeEntry.objects.filter(
-            user=user, date__year=year, date__month=month, status='APPROVED',
-        ).aggregate(total=Sum('duration'))['total'] or Decimal('0')
+            user=user,
+            date__year=year,
+            date__month=month,
+            status="APPROVED",
+        ).aggregate(total=Sum("duration"))["total"] or Decimal("0")
 
         exceeded = total > max_hours
         if exceeded:
-            logger.warning('[EU AUDIT] Monthly cap: user=%s %02d/%d %sh/%sh', user, month, year, total, max_hours)
+            logger.warning("[EU AUDIT] Monthly cap: user=%s %02d/%d %sh/%sh", user, month, year, total, max_hours)
 
-        return {'total_hours': total, 'max_hours': max_hours, 'exceeded': exceeded, 'excess': max(Decimal('0'), total - max_hours)}
+        return {
+            "total_hours": total,
+            "max_hours": max_hours,
+            "exceeded": exceeded,
+            "excess": max(Decimal("0"), total - max_hours),
+        }
 
     @classmethod
     def validate_monthly_cap(cls, user, year, month, max_hours=None):
         """Raises EUAuditError ako prelazi fond."""
         result = cls.check_monthly_cap(user, year, month, max_hours)
-        if result['exceeded']:
+        if result["exceeded"]:
             raise EUAuditError(
-                'MONTHLY_CAP_EXCEEDED',
-                'Mjesečni fond prekoračen: %sh/%sh za %02d/%d.' % (result['total_hours'], result['max_hours'], month, year),
+                "MONTHLY_CAP_EXCEEDED",
+                "Mjesečni fond prekoračen: %sh/%sh za %02d/%d."
+                % (result["total_hours"], result["max_hours"], month, year),
                 details=result,
             )
 
@@ -117,13 +133,15 @@ class EUAuditGuard:
         unsigned = []
         for entry in entries:
             if not entry.approved_by or not entry.approved_at:
-                unsigned.append({
-                    'entry_id': entry.pk,
-                    'date': str(entry.date),
-                    'missing': 'approved_by' if not entry.approved_by else 'approved_at',
-                })
+                unsigned.append(
+                    {
+                        "entry_id": entry.pk,
+                        "date": str(entry.date),
+                        "missing": "approved_by" if not entry.approved_by else "approved_at",
+                    }
+                )
         if unsigned:
-            logger.warning('[EU AUDIT] %d unsigned entries', len(unsigned))
+            logger.warning("[EU AUDIT] %d unsigned entries", len(unsigned))
         return unsigned
 
     @classmethod
@@ -132,9 +150,9 @@ class EUAuditGuard:
         unsigned = cls.validate_signatures(entries)
         if unsigned:
             raise EUAuditError(
-                'UNSIGNED_ENTRIES',
-                '%d unos(a) nema potpis voditelja. EU timesheet zahtijeva potpis.' % len(unsigned),
-                details={'unsigned': unsigned},
+                "UNSIGNED_ENTRIES",
+                "%d unos(a) nema potpis voditelja. EU timesheet zahtijeva potpis." % len(unsigned),
+                details={"unsigned": unsigned},
             )
 
     # ── KOMBINIRANI CHECK ─────────────────────────────────────
@@ -146,4 +164,4 @@ class EUAuditGuard:
             cls.validate_no_overlap(entry)
         cls.validate_monthly_cap(user, year, month, max_hours)
         cls.validate_signatures_strict(entries)
-        logger.info('[EU AUDIT] Pre-export PASSED: user=%s %02d/%d', user, month, year)
+        logger.info("[EU AUDIT] Pre-export PASSED: user=%s %02d/%d", user, month, year)

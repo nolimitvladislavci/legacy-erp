@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('interventions', '0001_initial'),
+        ("interventions", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hitnaintervencija',
-            name='last_gps_update',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Zadnje GPS ažuriranje'),
+            model_name="hitnaintervencija",
+            name="last_gps_update",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Zadnje GPS ažuriranje"),
         ),
         migrations.AddField(
-            model_name='hitnaintervencija',
-            name='last_lat',
-            field=models.FloatField(blank=True, null=True, verbose_name='Zadnja GPS širina'),
+            model_name="hitnaintervencija",
+            name="last_lat",
+            field=models.FloatField(blank=True, null=True, verbose_name="Zadnja GPS širina"),
         ),
         migrations.AddField(
-            model_name='hitnaintervencija',
-            name='last_lng',
-            field=models.FloatField(blank=True, null=True, verbose_name='Zadnja GPS dužina'),
+            model_name="hitnaintervencija",
+            name="last_lng",
+            field=models.FloatField(blank=True, null=True, verbose_name="Zadnja GPS dužina"),
         ),
     ]

@@ -4,15 +4,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0030_alter_invoice_doctype'),
+        ("invoicing", "0030_alter_invoice_doctype"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='status',
-            field=models.CharField(choices=[('DRAFT', 'Nacrt'), ('CONFIRMED', 'Potvrdjeno'), ('FISCALIZED', 'Fiskalizirano'), ('SENT', 'Poslano'), ('ACCEPTED', 'Prihvaćeno'), ('REJECTED', 'Odbijeno'), ('EXPIRED', 'Isteklo'), ('PAID', 'Plaćeno'), ('UNPAID', 'Neplaćeno'), ('OVERDUE', 'Dospijelo'), ('CANCELLED', 'Otkazano'), ('STORNO', 'Stornirano')], default='DRAFT', max_length=20, verbose_name='Status'),
+            model_name="invoice",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("DRAFT", "Nacrt"),
+                    ("CONFIRMED", "Potvrdjeno"),
+                    ("FISCALIZED", "Fiskalizirano"),
+                    ("SENT", "Poslano"),
+                    ("ACCEPTED", "Prihvaćeno"),
+                    ("REJECTED", "Odbijeno"),
+                    ("EXPIRED", "Isteklo"),
+                    ("PAID", "Plaćeno"),
+                    ("UNPAID", "Neplaćeno"),
+                    ("OVERDUE", "Dospijelo"),
+                    ("CANCELLED", "Otkazano"),
+                    ("STORNO", "Stornirano"),
+                ],
+                default="DRAFT",
+                max_length=20,
+                verbose_name="Status",
+            ),
         ),
     ]

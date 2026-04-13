@@ -1,4 +1,5 @@
 """Seed KnowledgeArticle s inicijalnim compliance/help artiklima."""
+
 from django.core.management.base import BaseCommand
 
 ARTICLES = [
@@ -48,7 +49,7 @@ ARTICLES = [
 **BORG implementacija:**
 - inventory/services/split_allocation.py: allocate_to_inhouse()
 - Automatski StockMovement s tipom 'internal_use'
-- reserved_inhouse polje na InventoryItem"""
+- reserved_inhouse polje na InventoryItem""",
     },
     # ── EXPERIENCES ──
     {
@@ -64,7 +65,7 @@ ARTICLES = [
 - Kruh: 0.10 kg/os × 10 = 1.00 kg
 
 **Flow:** Booking → Check-in → allocate_to_inhouse() za svaki BOM item × pax_count
-**API:** GET /experiences/<pk>/normativ/?pax=10 — JSON preview s stock statusom"""
+**API:** GET /experiences/<pk>/normativ/?pax=10 — JSON preview s stock statusom""",
     },
     {
         "module": "experiences",
@@ -77,7 +78,7 @@ ARTICLES = [
 
 **Depozit:** Automatski = price_per_person × pax × deposit_pct / 100
 **Check-in:** Auto-alocira inventory (BOM × pax) kroz SplitAllocation
-**No-show:** Celery task u 22:00 — storno predujma + konačni račun"""
+**No-show:** Celery task u 22:00 — storno predujma + konačni račun""",
     },
     # ── POS ──
     {
@@ -89,7 +90,7 @@ ARTICLES = [
 1. Klik Z → modal za prebrojavanje gotovine
 2. Unos fizičke gotovine → sustav uspoređuje s evidentiranom
 3. Razlika = manjak ili višak → automatski se evidentira
-4. Z-izvještaj generiran (PDF) — arhivira se 11 godina (Zakon o fiskalizaciji)"""
+4. Z-izvještaj generiran (PDF) — arhivira se 11 godina (Zakon o fiskalizaciji)""",
     },
     # ── INVENTORY ──
     {
@@ -101,7 +102,7 @@ ARTICLES = [
 
 **FEFO:** First Expired First Out — šarže se sortiraju po roku trajanja.
 **Karenca link:** StockBatch.source_flock → Flock → has_active_karenca
-**POS check:** Ako LOT dolazi iz jata pod karencom → HARD BLOCK na prodaju"""
+**POS check:** Ako LOT dolazi iz jata pod karencom → HARD BLOCK na prodaju""",
     },
     # ── BORG ──
     {
@@ -118,7 +119,7 @@ ARTICLES = [
 - Inventory alerte (niska zaliha, karenca, istekle šarže)
 - Financijski pulse (današnji promet, neplaćeno)
 
-**Auto-refresh:** HTMX svake 60s. Redis cache 45s TTL."""
+**Auto-refresh:** HTMX svake 60s. Redis cache 45s TTL.""",
     },
     # ── GENERAL ──
     {
@@ -131,34 +132,33 @@ ARTICLES = [
 **Moduli:** POS (blagajna), Fakturiranje, Skladište, Experiences (agro-turizam), Radni nalozi, Rental (smještaj), Udruge (članstvo, donacije, perad), Marketplace (OPG tržnica), Konto (knjigovodstvo), Tax Wizard, eRačun, Payroll.
 
 **AI:** Chat asistent (Claude Haiku), Signal Triage, Patrol (anomaly detection), Smart Dispatch.
-**Sigurnost:** CSRF zaštita, karenca enforcement, Schema Drift sentinel."""
+**Sigurnost:** CSRF zaštita, karenca enforcement, Schema Drift sentinel.""",
     },
 ]
 
 
 class Command(BaseCommand):
-    help = 'Seed KnowledgeArticle bazu s inicijalnim člancima'
+    help = "Seed KnowledgeArticle bazu s inicijalnim člancima"
 
     def handle(self, *args, **options):
         from ai_assistant.models import KnowledgeArticle
+
         created = 0
         for art in ARTICLES:
             obj, was_created = KnowledgeArticle.objects.update_or_create(
-                module=art['module'],
-                title=art['title'],
+                module=art["module"],
+                title=art["title"],
                 defaults={
-                    'content': art['content'],
-                    'keywords': art.get('keywords', ''),
-                    'priority': art.get('priority', 5),
-                    'is_active': True,
+                    "content": art["content"],
+                    "keywords": art.get("keywords", ""),
+                    "priority": art.get("priority", 5),
+                    "is_active": True,
                 },
             )
             if was_created:
                 created += 1
-                self.stdout.write(f'  + {obj}')
+                self.stdout.write(f"  + {obj}")
             else:
-                self.stdout.write(f'  ~ {obj} (updated)')
+                self.stdout.write(f"  ~ {obj} (updated)")
 
-        self.stdout.write(self.style.SUCCESS(
-            f'\nDone: {created} created, {len(ARTICLES) - created} updated'
-        ))
+        self.stdout.write(self.style.SUCCESS(f"\nDone: {created} created, {len(ARTICLES) - created} updated"))

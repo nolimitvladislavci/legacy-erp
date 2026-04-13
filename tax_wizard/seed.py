@@ -2,14 +2,15 @@
 tax_wizard/seed.py — Inicijalni podaci za Porezni Savjetnik.
 Pokreni: python manage.py shell < tax_wizard/seed.py
 """
+
 import os
 import sys
 
 import django
 
 # Setup
-sys.path.insert(0, '/var/www/fina-connect')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+sys.path.insert(0, "/var/www/fina-connect")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
 from datetime import date
@@ -41,7 +42,7 @@ posd_schema = {
                     "help_text": "Osobni identifikacijski broj paušalnog obrtnika",
                     "help_text_en": "Personal identification number of the lump-sum sole proprietor",
                     "ai_hint": "Auto-fill iz company.oib ako je korisnik naš komitent",
-                    "source": "companies.Company.oib"
+                    "source": "companies.Company.oib",
                 },
                 {
                     "name": "ime_prezime",
@@ -49,7 +50,7 @@ posd_schema = {
                     "label": "Ime i prezime",
                     "label_en": "Full name",
                     "required": True,
-                    "source": "auth.User.get_full_name"
+                    "source": "auth.User.get_full_name",
                 },
                 {
                     "name": "adresa",
@@ -58,7 +59,7 @@ posd_schema = {
                     "label_en": "Residential address",
                     "required": True,
                     "ai_hint": "Provjeri potpomognuto područje za viši osobni odbitak",
-                    "source": "companies.Company.address"
+                    "source": "companies.Company.address",
                 },
                 {
                     "name": "naziv_obrta",
@@ -66,7 +67,7 @@ posd_schema = {
                     "label": "Naziv obrta",
                     "label_en": "Business name",
                     "required": True,
-                    "source": "companies.Company.name"
+                    "source": "companies.Company.name",
                 },
                 {
                     "name": "djelatnost_nkd",
@@ -74,7 +75,7 @@ posd_schema = {
                     "label": "Djelatnost (NKD šifra)",
                     "label_en": "Business activity (NKD code)",
                     "required": True,
-                    "help_text": "Glavna djelatnost prema Nacionalnoj klasifikaciji djelatnosti"
+                    "help_text": "Glavna djelatnost prema Nacionalnoj klasifikaciji djelatnosti",
                 },
                 {
                     "name": "porezna_godina",
@@ -84,11 +85,11 @@ posd_schema = {
                     "required": True,
                     "default": 2025,
                     "min": 2020,
-                    "max": 2026
-                }
+                    "max": 2026,
+                },
             ],
             "ai_message": "Povlačim vaše podatke iz sustava — provjerite i ispravite ako je potrebno.",
-            "ai_message_en": "Pulling your data from the system — please verify and correct if needed."
+            "ai_message_en": "Pulling your data from the system — please verify and correct if needed.",
         },
         {
             "id": "primitci",
@@ -107,7 +108,7 @@ posd_schema = {
                     "help_text": "Ukupni primitci za I. kvartal (EUR)",
                     "ai_hint": "Auto-fill iz invoicing.Invoice WHERE quarter=1",
                     "source": "invoicing.Invoice",
-                    "source_filter": {"quarter": 1}
+                    "source_filter": {"quarter": 1},
                 },
                 {
                     "name": "q2_primitak",
@@ -119,7 +120,7 @@ posd_schema = {
                     "min": 0,
                     "max": 60000,
                     "source": "invoicing.Invoice",
-                    "source_filter": {"quarter": 2}
+                    "source_filter": {"quarter": 2},
                 },
                 {
                     "name": "q3_primitak",
@@ -131,7 +132,7 @@ posd_schema = {
                     "min": 0,
                     "max": 60000,
                     "source": "invoicing.Invoice",
-                    "source_filter": {"quarter": 3}
+                    "source_filter": {"quarter": 3},
                 },
                 {
                     "name": "q4_primitak",
@@ -143,8 +144,8 @@ posd_schema = {
                     "min": 0,
                     "max": 60000,
                     "source": "invoicing.Invoice",
-                    "source_filter": {"quarter": 4}
-                }
+                    "source_filter": {"quarter": 4},
+                },
             ],
             "ai_message": "Zbrajam primitke i određujem vaš porezni razred...",
             "ai_message_en": "Calculating total income and determining your tax tier...",
@@ -154,15 +155,15 @@ posd_schema = {
                     "fields": ["q1_primitak", "q2_primitak", "q3_primitak", "q4_primitak"],
                     "message": "⚠️ Ukupni primitci prelaze 60.000 EUR — MORATE prijeći na redovni obrt i voditi poslovne knjige! Kontaktirajte svog računovođu.",
                     "message_en": "⚠️ Total income exceeds EUR 60,000 — you MUST switch to regular bookkeeping! Contact your accountant.",
-                    "severity": "error"
+                    "severity": "error",
                 },
                 {
                     "rule": "sum_gte_0",
                     "fields": ["q1_primitak", "q2_primitak", "q3_primitak", "q4_primitak"],
                     "message": "Primitci ne mogu biti negativni.",
-                    "severity": "error"
-                }
-            ]
+                    "severity": "error",
+                },
+            ],
         },
         {
             "id": "izracun",
@@ -176,7 +177,7 @@ posd_schema = {
                     "label_en": "Total annual income",
                     "computed": True,
                     "formula": "q1_primitak + q2_primitak + q3_primitak + q4_primitak",
-                    "readonly": True
+                    "readonly": True,
                 },
                 {
                     "name": "porezni_razred",
@@ -185,7 +186,7 @@ posd_schema = {
                     "label_en": "Tax tier",
                     "computed": True,
                     "formula": "tier_from_income(ukupni_primitak)",
-                    "readonly": True
+                    "readonly": True,
                 },
                 {
                     "name": "godisnji_porez",
@@ -194,7 +195,7 @@ posd_schema = {
                     "label_en": "Annual tax (EUR)",
                     "computed": True,
                     "formula": "tax_from_tier(porezni_razred)",
-                    "readonly": True
+                    "readonly": True,
                 },
                 {
                     "name": "vec_placeni_porez",
@@ -205,7 +206,7 @@ posd_schema = {
                     "default": 0,
                     "min": 0,
                     "help_text": "Koliko ste ukupno platili kvartalnih predujmova poreza u ovoj godini?",
-                    "help_text_en": "How much quarterly advance tax did you pay this year?"
+                    "help_text_en": "How much quarterly advance tax did you pay this year?",
                 },
                 {
                     "name": "razlika",
@@ -214,11 +215,11 @@ posd_schema = {
                     "label_en": "Difference to pay/refund (EUR)",
                     "computed": True,
                     "formula": "godisnji_porez - vec_placeni_porez",
-                    "readonly": True
-                }
+                    "readonly": True,
+                },
             ],
             "ai_message": "Izračun je gotov. Provjerite razliku — ako je negativna, imate pravo na povrat!",
-            "ai_message_en": "Calculation complete. Check the difference — if negative, you're entitled to a refund!"
+            "ai_message_en": "Calculation complete. Check the difference — if negative, you're entitled to a refund!",
         },
         {
             "id": "ai_savjeti",
@@ -231,7 +232,7 @@ posd_schema = {
                     "label": "Primitci su blizu granice razreda?",
                     "computed": True,
                     "readonly": True,
-                    "ai_hint": "Ako je korisnik unutar 500€ od granice razreda, predloži optimizaciju fakturiranja"
+                    "ai_hint": "Ako je korisnik unutar 500€ od granice razreda, predloži optimizaciju fakturiranja",
                 },
                 {
                     "name": "blizu_60k",
@@ -239,8 +240,8 @@ posd_schema = {
                     "label": "Primitci su blizu 60.000 EUR limita?",
                     "computed": True,
                     "readonly": True,
-                    "ai_hint": "Ako je korisnik iznad 50.000€, upozori na limit i predloži d.o.o. simulaciju"
-                }
+                    "ai_hint": "Ako je korisnik iznad 50.000€, upozori na limit i predloži d.o.o. simulaciju",
+                },
             ],
             "ai_message": "Analiziram vaše podatke za potencijalne uštede...",
             "ai_message_en": "Analyzing your data for potential savings...",
@@ -249,19 +250,19 @@ posd_schema = {
                     "check": "tier_boundary_proximity",
                     "message_template": "Vaši primitci ({total}€) su {diff}€ {direction} granice razreda {tier}. {tip}",
                     "tip_below": "Simulacija pokazuje da bi razred {lower_tier} rezultirao s {savings}€ manjim porezom godišnje.",
-                    "tip_above": "Primitci su u razredu {tier} — sljedeći razred počinje na {next_boundary}€."
+                    "tip_above": "Primitci su u razredu {tier} — sljedeći razred počinje na {next_boundary}€.",
                 },
                 {
                     "check": "vat_threshold_proximity",
                     "threshold": 60000,
                     "warning_at": 50000,
-                    "message": "Primitci su {total}€ — do PDV limita (60.000€) preostaje {remaining}€. Ako očekujete rast, razmislite o prijelazu na d.o.o."
+                    "message": "Primitci su {total}€ — do PDV limita (60.000€) preostaje {remaining}€. Ako očekujete rast, razmislite o prijelazu na d.o.o.",
                 },
                 {
                     "check": "potpomognuto_podrucje",
-                    "message": "Vaša adresa ({address}) je na potpomognutom području — imate pravo na povećani osobni odbitak ({amount}€/mj umjesto 600€)."
-                }
-            ]
+                    "message": "Vaša adresa ({address}) je na potpomognutom području — imate pravo na povećani osobni odbitak ({amount}€/mj umjesto 600€).",
+                },
+            ],
         },
         {
             "id": "preview",
@@ -271,47 +272,47 @@ posd_schema = {
             "is_preview": True,
             "ai_message": "Sve izgleda u redu! Možete preuzeti PO-SD obrazac u XML formatu za upload na ePorezna, ili PDF za vlastitu arhivu.",
             "ai_message_en": "Everything looks good! You can download the PO-SD form as XML for upload to ePorezna, or PDF for your records.",
-            "actions": ["download_xml", "download_pdf", "send_to_accountant"]
-        }
+            "actions": ["download_xml", "download_pdf", "send_to_accountant"],
+        },
     ],
     "output_xml_template": "posd_2026_v1",
     "legal_references": [
         "Zakon o porezu na dohodak (NN 115/16, 106/18, 121/19, 32/20, 138/20, 151/22, 114/23, 35/25) — čl. 82.",
         "Pravilnik o paušalnom oporezivanju samostalne djelatnosti (NN 1/20, 1/21, 156/22, 143/23) — čl. 2.–8.",
-        "Zakon o doprinosima (NN 84/08, ... , 35/25) — čl. 82.a"
-    ]
+        "Zakon o doprinosima (NN 84/08, ... , 35/25) — čl. 82.a",
+    ],
 }
 
 
 posd_template, created = TaxFormTemplate.objects.update_or_create(
-    form_type='PO-SD',
-    version='2026-v1',
+    form_type="PO-SD",
+    version="2026-v1",
     defaults={
-        'name': 'PO-SD — Izvješće o paušalnom dohotku od samostalne djelatnosti',
-        'name_en': 'PO-SD — Lump-sum self-employment income report',
-        'schema': posd_schema,
-        'applicable_business_types': ['obrt'],
-        'applicable_countries': ['HR'],
-        'filing_deadline_rule': 'jan-15',
-        'xml_template_name': 'posd_2026_v1',
-        'is_active': True,
-        'valid_from': date(2026, 1, 1),
-        'valid_until': date(2026, 12, 31),
-        'ai_system_prompt': (
-            'Ti si porezni kalkulator za paušalne obrtnike u Hrvatskoj. '
-            'Prikazuješ simulacije i izračune na temelju unesenih podataka '
-            'i trenutno važećih poreznih stopa za 2026. godinu. '
-            'NIKADA ne koristi riječi: preporučujem, savjetujem, trebali biste. '
-            'UVIJEK koristi: simulacija pokazuje, izračun rezultira, prema važećim stopama. '
-            'Paušalni obrtnici plaćaju fiksni porez prema razredima (tierovima) '
-            'te fiksne mjesečne doprinose (MIO + zdravstveno). '
-            'Limit za paušalni obrt je 60.000 EUR godišnje — iznad toga prelaze na redovne knjige. '
+        "name": "PO-SD — Izvješće o paušalnom dohotku od samostalne djelatnosti",
+        "name_en": "PO-SD — Lump-sum self-employment income report",
+        "schema": posd_schema,
+        "applicable_business_types": ["obrt"],
+        "applicable_countries": ["HR"],
+        "filing_deadline_rule": "jan-15",
+        "xml_template_name": "posd_2026_v1",
+        "is_active": True,
+        "valid_from": date(2026, 1, 1),
+        "valid_until": date(2026, 12, 31),
+        "ai_system_prompt": (
+            "Ti si porezni kalkulator za paušalne obrtnike u Hrvatskoj. "
+            "Prikazuješ simulacije i izračune na temelju unesenih podataka "
+            "i trenutno važećih poreznih stopa za 2026. godinu. "
+            "NIKADA ne koristi riječi: preporučujem, savjetujem, trebali biste. "
+            "UVIJEK koristi: simulacija pokazuje, izračun rezultira, prema važećim stopama. "
+            "Paušalni obrtnici plaćaju fiksni porez prema razredima (tierovima) "
+            "te fiksne mjesečne doprinose (MIO + zdravstveno). "
+            "Limit za paušalni obrt je 60.000 EUR godišnje — iznad toga prelaze na redovne knjige. "
             'Na kraju svake poruke dodaj: "Ovo je informativni izračun, ne pravni savjet."'
         ),
-    }
+    },
 )
-status = 'CREATED' if created else 'UPDATED'
-print(f'[{status}] TaxFormTemplate: {posd_template}')
+status = "CREATED" if created else "UPDATED"
+print(f"[{status}] TaxFormTemplate: {posd_template}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -331,16 +332,16 @@ for tier_num, min_inc, max_inc, annual, monthly, contrib in tiers_2026:
         valid_year=2026,
         tier_number=tier_num,
         defaults={
-            'min_income': Decimal(str(min_inc)),
-            'max_income': Decimal(str(max_inc)),
-            'annual_tax': Decimal(str(annual)),
-            'monthly_tax': Decimal(str(monthly)),
-            'monthly_contributions': Decimal(str(contrib)),
-            'is_active': True,
-        }
+            "min_income": Decimal(str(min_inc)),
+            "max_income": Decimal(str(max_inc)),
+            "annual_tax": Decimal(str(annual)),
+            "monthly_tax": Decimal(str(monthly)),
+            "monthly_contributions": Decimal(str(contrib)),
+            "is_active": True,
+        },
     )
-    status = 'CREATED' if created else 'UPDATED'
-    print(f'[{status}] PausalTier: {obj}')
+    status = "CREATED" if created else "UPDATED"
+    print(f"[{status}] PausalTier: {obj}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -348,34 +349,34 @@ for tier_num, min_inc, max_inc, annual, monthly, contrib in tiers_2026:
 # ═══════════════════════════════════════════════════════════════
 
 koeficijenti_2026 = [
-    ('dependent',     Decimal('0.5'),  'Provjeri bračni status i uzdržavane članove obitelji'),
-    ('child_1',       Decimal('0.5'),  'Provjeri ima li korisnik djecu u sustavu'),
-    ('child_2',       Decimal('0.7'),  'Drugo dijete — viši koeficijent'),
-    ('child_3',       Decimal('1.0'),  'Treće dijete'),
-    ('child_4',       Decimal('1.4'),  'Četvrto dijete'),
-    ('child_5_plus',  Decimal('1.9'),  'Peto i svako daljnje dijete — eksponencijalni rast koeficijenta'),
-    ('partial_dis',   Decimal('0.3'),  'Pitaj korisnika ima li potvrdu o djelomičnoj invalidnosti'),
-    ('full_dis',      Decimal('1.0'),  'Potvrda o 100% invalidnosti'),
-    ('hrvi_1',        Decimal('1.5'),  'HRVI I. skupina — potrebna potvrda MO'),
-    ('hrvi_2',        Decimal('1.0'),  'HRVI II. skupina'),
-    ('hrvi_other',    Decimal('0.5'),  'HRVI ostale skupine'),
+    ("dependent", Decimal("0.5"), "Provjeri bračni status i uzdržavane članove obitelji"),
+    ("child_1", Decimal("0.5"), "Provjeri ima li korisnik djecu u sustavu"),
+    ("child_2", Decimal("0.7"), "Drugo dijete — viši koeficijent"),
+    ("child_3", Decimal("1.0"), "Treće dijete"),
+    ("child_4", Decimal("1.4"), "Četvrto dijete"),
+    ("child_5_plus", Decimal("1.9"), "Peto i svako daljnje dijete — eksponencijalni rast koeficijenta"),
+    ("partial_dis", Decimal("0.3"), "Pitaj korisnika ima li potvrdu o djelomičnoj invalidnosti"),
+    ("full_dis", Decimal("1.0"), "Potvrda o 100% invalidnosti"),
+    ("hrvi_1", Decimal("1.5"), "HRVI I. skupina — potrebna potvrda MO"),
+    ("hrvi_2", Decimal("1.0"), "HRVI II. skupina"),
+    ("hrvi_other", Decimal("0.5"), "HRVI ostale skupine"),
 ]
 
-base = Decimal('600')
+base = Decimal("600")
 for category, coeff, hint in koeficijenti_2026:
     obj, created = OsobniOdbitakKoeficijent.objects.update_or_create(
         valid_year=2026,
         category=category,
         defaults={
-            'coefficient': coeff,
-            'base_amount': base,
-            'monthly_amount': (base * coeff).quantize(Decimal('0.01')),
-            'detection_hint': hint,
-            'is_active': True,
-        }
+            "coefficient": coeff,
+            "base_amount": base,
+            "monthly_amount": (base * coeff).quantize(Decimal("0.01")),
+            "detection_hint": hint,
+            "is_active": True,
+        },
     )
-    status = 'CREATED' if created else 'UPDATED'
-    print(f'[{status}] OsobniOdbitak: {obj}')
+    status = "CREATED" if created else "UPDATED"
+    print(f"[{status}] OsobniOdbitak: {obj}")
 
 
-print('\n✅ Seed complete! PO-SD template + 5 tierova + 11 koeficijenata')
+print("\n✅ Seed complete! PO-SD template + 5 tierova + 11 koeficijenata")

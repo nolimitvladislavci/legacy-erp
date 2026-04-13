@@ -8,37 +8,98 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0031_add_tc_consent_gdpr_fields'),
-        ('tax_wizard', '0001_initial'),
+        ("companies", "0031_add_tc_consent_gdpr_fields"),
+        ("tax_wizard", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PartnerTaxAccount',
+            name="PartnerTaxAccount",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('brand_name', models.CharField(help_text='Prikazuje se klijentu umjesto "LIMIT Connect"', max_length=200, verbose_name='Naziv branda')),
-                ('brand_logo', models.ImageField(blank=True, upload_to='tax_wizard/brands/', verbose_name='Logo partnera')),
-                ('brand_color', models.CharField(default='#C8A96E', help_text='HEX boja za wizard UI', max_length=7, verbose_name='Primarna boja')),
-                ('referral_code', models.CharField(db_index=True, help_text='Jedinstveni kod za tracking (npr. MARIJA2026)', max_length=20, unique=True, verbose_name='Referral kod')),
-                ('commission_rate', models.DecimalField(decimal_places=4, default=Decimal('0.3000'), help_text='0.30 = 30% od svake porezne prijave', max_digits=5, verbose_name='Stopa provizije')),
-                ('stripe_connect_id', models.CharField(blank=True, help_text='acct_XXXXX — za split payment', max_length=100, verbose_name='Stripe Connect Account ID')),
-                ('total_referrals', models.PositiveIntegerField(default=0, verbose_name='Ukupno klijenata')),
-                ('total_sessions', models.PositiveIntegerField(default=0, verbose_name='Ukupno sesija')),
-                ('total_earned', models.DecimalField(decimal_places=2, default=Decimal('0.00'), max_digits=12, verbose_name='Ukupno zarađeno (EUR)')),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='tax_partner_account', to='companies.company', verbose_name='Firma partnera')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tax_partner_accounts', to=settings.AUTH_USER_MODEL, verbose_name='Vlasnik računa')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "brand_name",
+                    models.CharField(
+                        help_text='Prikazuje se klijentu umjesto "LIMIT Connect"',
+                        max_length=200,
+                        verbose_name="Naziv branda",
+                    ),
+                ),
+                (
+                    "brand_logo",
+                    models.ImageField(blank=True, upload_to="tax_wizard/brands/", verbose_name="Logo partnera"),
+                ),
+                (
+                    "brand_color",
+                    models.CharField(
+                        default="#C8A96E", help_text="HEX boja za wizard UI", max_length=7, verbose_name="Primarna boja"
+                    ),
+                ),
+                (
+                    "referral_code",
+                    models.CharField(
+                        db_index=True,
+                        help_text="Jedinstveni kod za tracking (npr. MARIJA2026)",
+                        max_length=20,
+                        unique=True,
+                        verbose_name="Referral kod",
+                    ),
+                ),
+                (
+                    "commission_rate",
+                    models.DecimalField(
+                        decimal_places=4,
+                        default=Decimal("0.3000"),
+                        help_text="0.30 = 30% od svake porezne prijave",
+                        max_digits=5,
+                        verbose_name="Stopa provizije",
+                    ),
+                ),
+                (
+                    "stripe_connect_id",
+                    models.CharField(
+                        blank=True,
+                        help_text="acct_XXXXX — za split payment",
+                        max_length=100,
+                        verbose_name="Stripe Connect Account ID",
+                    ),
+                ),
+                ("total_referrals", models.PositiveIntegerField(default=0, verbose_name="Ukupno klijenata")),
+                ("total_sessions", models.PositiveIntegerField(default=0, verbose_name="Ukupno sesija")),
+                (
+                    "total_earned",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0.00"), max_digits=12, verbose_name="Ukupno zarađeno (EUR)"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tax_partner_account",
+                        to="companies.company",
+                        verbose_name="Firma partnera",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tax_partner_accounts",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Vlasnik računa",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Partner Tax Account',
-                'verbose_name_plural': 'Partner Tax Accounts',
-                'indexes': [models.Index(fields=['referral_code'], name='tax_wizard__referra_3d5fb9_idx')],
+                "verbose_name": "Partner Tax Account",
+                "verbose_name_plural": "Partner Tax Accounts",
+                "indexes": [models.Index(fields=["referral_code"], name="tax_wizard__referra_3d5fb9_idx")],
             },
         ),
     ]

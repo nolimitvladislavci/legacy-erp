@@ -5,53 +5,68 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('maintenance', '0002_alter_maintenancelog_options_and_more'),
+        ("companies", "0021_extend_onboarding"),
+        ("maintenance", "0002_alter_maintenancelog_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='asset',
-            name='accumulated_depreciation',
+            model_name="asset",
+            name="accumulated_depreciation",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='depreciation_method',
-            field=models.CharField(choices=[('linear', 'Linearna'), ('declining', 'Degresivna')], default='linear', max_length=20),
+            model_name="asset",
+            name="depreciation_method",
+            field=models.CharField(
+                choices=[("linear", "Linearna"), ("declining", "Degresivna")], default="linear", max_length=20
+            ),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='last_depreciation_date',
+            model_name="asset",
+            name="last_depreciation_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='salvage_value',
+            model_name="asset",
+            name="salvage_value",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='useful_life_months',
+            model_name="asset",
+            name="useful_life_months",
             field=models.PositiveIntegerField(default=60),
         ),
         migrations.CreateModel(
-            name='DepreciationLog',
+            name="DepreciationLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.PositiveSmallIntegerField()),
-                ('month', models.PositiveSmallIntegerField()),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('journal_entry_number', models.CharField(blank=True, max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='depreciation_logs', to='maintenance.asset')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='depreciation_logs', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("year", models.PositiveSmallIntegerField()),
+                ("month", models.PositiveSmallIntegerField()),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("journal_entry_number", models.CharField(blank=True, max_length=50)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "asset",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="depreciation_logs",
+                        to="maintenance.asset",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="depreciation_logs",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-year', '-month'],
-                'unique_together': {('asset', 'year', 'month')},
+                "ordering": ["-year", "-month"],
+                "unique_together": {("asset", "year", "month")},
             },
         ),
     ]

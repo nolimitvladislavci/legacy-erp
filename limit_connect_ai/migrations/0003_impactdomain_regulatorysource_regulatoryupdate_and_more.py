@@ -6,147 +6,352 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0030_komitent_manager'),
-        ('limit_connect_ai', '0002_campaignplan_compliancewatchitem'),
+        ("companies", "0030_komitent_manager"),
+        ("limit_connect_ai", "0002_campaignplan_compliancewatchitem"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ImpactDomain',
+            name="ImpactDomain",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('nkd_codes', models.JSONField(blank=True, default=list, help_text='["1071", "4711", "5610"] — prazno = svi', verbose_name='NKD kodovi')),
-                ('business_types', models.JSONField(blank=True, default=list, help_text='["doo", "obrt", "udruga"] — prazno = svi', verbose_name='Tipovi poslovanja')),
-                ('min_employees', models.IntegerField(default=0)),
-                ('max_employees', models.IntegerField(blank=True, null=True)),
-                ('requires_vat', models.BooleanField(default=False, verbose_name='Samo PDV obveznici')),
-                ('country', models.CharField(default='HR', help_text='HR, DE, ili * za sve', max_length=5)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "nkd_codes",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text='["1071", "4711", "5610"] — prazno = svi',
+                        verbose_name="NKD kodovi",
+                    ),
+                ),
+                (
+                    "business_types",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text='["doo", "obrt", "udruga"] — prazno = svi',
+                        verbose_name="Tipovi poslovanja",
+                    ),
+                ),
+                ("min_employees", models.IntegerField(default=0)),
+                ("max_employees", models.IntegerField(blank=True, null=True)),
+                ("requires_vat", models.BooleanField(default=False, verbose_name="Samo PDV obveznici")),
+                ("country", models.CharField(default="HR", help_text="HR, DE, ili * za sve", max_length=5)),
             ],
             options={
-                'verbose_name': 'Domena utjecaja',
-                'verbose_name_plural': 'Domene utjecaja',
+                "verbose_name": "Domena utjecaja",
+                "verbose_name_plural": "Domene utjecaja",
             },
         ),
         migrations.CreateModel(
-            name='RegulatorySource',
+            name="RegulatorySource",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255, verbose_name='Naziv izvora')),
-                ('source_type', models.CharField(choices=[('nn', 'Narodne novine'), ('fina', 'FINA'), ('porezna', 'Porezna uprava'), ('eurlex', 'EUR-Lex'), ('hzz', 'Hrvatski zavod za zapošljavanje'), ('mingor', 'Ministarstvo gospodarstva'), ('custom', 'Prilagođeni izvor')], default='nn', max_length=20)),
-                ('url_endpoint', models.URLField(blank=True, verbose_name='API ili RSS Endpoint')),
-                ('scrape_config', models.JSONField(blank=True, default=dict, help_text='CSS selektori, API ključevi, parametri scrapera')),
-                ('is_active', models.BooleanField(default=True)),
-                ('last_scraped', models.DateTimeField(blank=True, null=True)),
-                ('scrape_interval_hours', models.IntegerField(default=6, help_text='Svakih N sati')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=255, verbose_name="Naziv izvora")),
+                (
+                    "source_type",
+                    models.CharField(
+                        choices=[
+                            ("nn", "Narodne novine"),
+                            ("fina", "FINA"),
+                            ("porezna", "Porezna uprava"),
+                            ("eurlex", "EUR-Lex"),
+                            ("hzz", "Hrvatski zavod za zapošljavanje"),
+                            ("mingor", "Ministarstvo gospodarstva"),
+                            ("custom", "Prilagođeni izvor"),
+                        ],
+                        default="nn",
+                        max_length=20,
+                    ),
+                ),
+                ("url_endpoint", models.URLField(blank=True, verbose_name="API ili RSS Endpoint")),
+                (
+                    "scrape_config",
+                    models.JSONField(
+                        blank=True, default=dict, help_text="CSS selektori, API ključevi, parametri scrapera"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("last_scraped", models.DateTimeField(blank=True, null=True)),
+                ("scrape_interval_hours", models.IntegerField(default=6, help_text="Svakih N sati")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Regulatorni izvor',
-                'verbose_name_plural': 'Regulatorni izvori',
+                "verbose_name": "Regulatorni izvor",
+                "verbose_name_plural": "Regulatorni izvori",
             },
         ),
         migrations.CreateModel(
-            name='RegulatoryUpdate',
+            name="RegulatoryUpdate",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=500, verbose_name='Naslov dokumenta/zakona')),
-                ('category', models.CharField(choices=[('TAX', 'Porezi i davanja'), ('VAT', 'PDV'), ('LABOUR', 'Radno pravo i plaće'), ('FISCAL', 'Fiskalizacija'), ('ERACUN', 'e-Račun / PEPPOL'), ('CORP', 'Korporativno pravo'), ('TRADE', 'Trgovina i carine'), ('GDPR', 'Zaštita podataka'), ('AML', 'Sprječavanje pranja novca'), ('NONPROFIT', 'Udruge i neprofitni sektor'), ('EU_FUND', 'EU fondovi i poticaji'), ('OTHER', 'Ostalo')], max_length=20, verbose_name='Kategorija')),
-                ('nn_number', models.CharField(blank=True, help_text='Npr. NN 123/2026', max_length=50, verbose_name='NN broj')),
-                ('publication_date', models.DateField(verbose_name='Datum objave')),
-                ('effective_date', models.DateField(blank=True, null=True, verbose_name='Datum stupanja na snagu')),
-                ('raw_text', models.TextField(blank=True, verbose_name='Puni tekst ili sažetak')),
-                ('ai_summary', models.TextField(blank=True, help_text='Claude/Gemini generiran sažetak utjecaja', verbose_name='AI sažetak')),
-                ('impact_score', models.IntegerField(default=0, help_text='1-10: koliko je kritično za naše klijente')),
-                ('affected_modules', models.JSONField(blank=True, default=list, help_text='Lista modula: ["pos", "invoicing", "payroll"]')),
-                ('is_processed', models.BooleanField(default=False, help_text='AI je parsirao?')),
-                ('is_breaking', models.BooleanField(default=False, help_text='Zahtijeva hitnu prilagodbu sustava?')),
-                ('url', models.URLField(blank=True, verbose_name='Link na izvor')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('source', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='updates', to='limit_connect_ai.regulatorysource')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("title", models.CharField(max_length=500, verbose_name="Naslov dokumenta/zakona")),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("TAX", "Porezi i davanja"),
+                            ("VAT", "PDV"),
+                            ("LABOUR", "Radno pravo i plaće"),
+                            ("FISCAL", "Fiskalizacija"),
+                            ("ERACUN", "e-Račun / PEPPOL"),
+                            ("CORP", "Korporativno pravo"),
+                            ("TRADE", "Trgovina i carine"),
+                            ("GDPR", "Zaštita podataka"),
+                            ("AML", "Sprječavanje pranja novca"),
+                            ("NONPROFIT", "Udruge i neprofitni sektor"),
+                            ("EU_FUND", "EU fondovi i poticaji"),
+                            ("OTHER", "Ostalo"),
+                        ],
+                        max_length=20,
+                        verbose_name="Kategorija",
+                    ),
+                ),
+                (
+                    "nn_number",
+                    models.CharField(blank=True, help_text="Npr. NN 123/2026", max_length=50, verbose_name="NN broj"),
+                ),
+                ("publication_date", models.DateField(verbose_name="Datum objave")),
+                ("effective_date", models.DateField(blank=True, null=True, verbose_name="Datum stupanja na snagu")),
+                ("raw_text", models.TextField(blank=True, verbose_name="Puni tekst ili sažetak")),
+                (
+                    "ai_summary",
+                    models.TextField(
+                        blank=True, help_text="Claude/Gemini generiran sažetak utjecaja", verbose_name="AI sažetak"
+                    ),
+                ),
+                ("impact_score", models.IntegerField(default=0, help_text="1-10: koliko je kritično za naše klijente")),
+                (
+                    "affected_modules",
+                    models.JSONField(
+                        blank=True, default=list, help_text='Lista modula: ["pos", "invoicing", "payroll"]'
+                    ),
+                ),
+                ("is_processed", models.BooleanField(default=False, help_text="AI je parsirao?")),
+                ("is_breaking", models.BooleanField(default=False, help_text="Zahtijeva hitnu prilagodbu sustava?")),
+                ("url", models.URLField(blank=True, verbose_name="Link na izvor")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "source",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="updates",
+                        to="limit_connect_ai.regulatorysource",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Regulatorna promjena',
-                'verbose_name_plural': 'Regulatorne promjene',
-                'ordering': ['-publication_date'],
+                "verbose_name": "Regulatorna promjena",
+                "verbose_name_plural": "Regulatorne promjene",
+                "ordering": ["-publication_date"],
             },
         ),
         migrations.CreateModel(
-            name='LegalOpportunity',
+            name="LegalOpportunity",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('opportunity_type', models.CharField(choices=[('tax_relief', 'Porezna olakšica'), ('employment_subsidy', 'Poticaj za zapošljavanje'), ('eu_fund', 'EU fond'), ('depreciation', 'Ubrzana amortizacija'), ('vat_exemption', 'PDV izuzeće'), ('regional_aid', 'Regionalna pomoć'), ('green_incentive', 'Zeleni poticaj'), ('digital_voucher', 'Digitalni bon/vaučer'), ('other', 'Ostalo')], max_length=25)),
-                ('name', models.CharField(max_length=255, verbose_name='Naziv olakšice')),
-                ('description', models.TextField(verbose_name='Opis i uvjeti')),
-                ('eligibility_criteria', models.JSONField(blank=True, default=dict, help_text='{"max_employee_age": 30, "min_duration_months": 12}')),
-                ('savings_formula', models.CharField(blank=True, help_text='Python izraz: bruto_placa * 0.165 * 12', max_length=500)),
-                ('typical_savings_eur', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Tipična ušteda (EUR)')),
-                ('deadline', models.DateField(blank=True, null=True, verbose_name='Rok za prijavu')),
-                ('is_active', models.BooleanField(default=True)),
-                ('url', models.URLField(blank=True, verbose_name='Link na natječaj/zakon')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('impact_domain', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='limit_connect_ai.impactdomain')),
-                ('regulatory_update', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='opportunities', to='limit_connect_ai.regulatoryupdate')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "opportunity_type",
+                    models.CharField(
+                        choices=[
+                            ("tax_relief", "Porezna olakšica"),
+                            ("employment_subsidy", "Poticaj za zapošljavanje"),
+                            ("eu_fund", "EU fond"),
+                            ("depreciation", "Ubrzana amortizacija"),
+                            ("vat_exemption", "PDV izuzeće"),
+                            ("regional_aid", "Regionalna pomoć"),
+                            ("green_incentive", "Zeleni poticaj"),
+                            ("digital_voucher", "Digitalni bon/vaučer"),
+                            ("other", "Ostalo"),
+                        ],
+                        max_length=25,
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, verbose_name="Naziv olakšice")),
+                ("description", models.TextField(verbose_name="Opis i uvjeti")),
+                (
+                    "eligibility_criteria",
+                    models.JSONField(
+                        blank=True, default=dict, help_text='{"max_employee_age": 30, "min_duration_months": 12}'
+                    ),
+                ),
+                (
+                    "savings_formula",
+                    models.CharField(blank=True, help_text="Python izraz: bruto_placa * 0.165 * 12", max_length=500),
+                ),
+                (
+                    "typical_savings_eur",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=10, verbose_name="Tipična ušteda (EUR)"
+                    ),
+                ),
+                ("deadline", models.DateField(blank=True, null=True, verbose_name="Rok za prijavu")),
+                ("is_active", models.BooleanField(default=True)),
+                ("url", models.URLField(blank=True, verbose_name="Link na natječaj/zakon")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "impact_domain",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="limit_connect_ai.impactdomain",
+                    ),
+                ),
+                (
+                    "regulatory_update",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="opportunities",
+                        to="limit_connect_ai.regulatoryupdate",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pravna prilika (Olakšica)',
-                'verbose_name_plural': 'Pravne prilike (Olakšice)',
-                'ordering': ['-created_at'],
+                "verbose_name": "Pravna prilika (Olakšica)",
+                "verbose_name_plural": "Pravne prilike (Olakšice)",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddField(
-            model_name='impactdomain',
-            name='regulatory_update',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='impact_domains', to='limit_connect_ai.regulatoryupdate'),
+            model_name="impactdomain",
+            name="regulatory_update",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="impact_domains",
+                to="limit_connect_ai.regulatoryupdate",
+            ),
         ),
         migrations.CreateModel(
-            name='AdaptationRule',
+            name="AdaptationRule",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('rule_type', models.CharField(choices=[('tax_rate', 'Promjena porezne stope'), ('xml_schema', 'Promjena XML sheme (e-Račun, FINA)'), ('form_update', 'Ažuriranje obrasca (JOPPD, PDV-S)'), ('config_change', 'Promjena konfiguracije'), ('notification', 'Samo obavijest (ručna akcija)'), ('code_change', 'Zahtijeva code change (dev ticket)')], max_length=20)),
-                ('target_module', models.CharField(help_text='Django app: pos, invoicing, payroll, eracun...', max_length=100)),
-                ('action_description', models.TextField(help_text='Što točno treba napraviti', verbose_name='Opis akcije')),
-                ('action_payload', models.JSONField(blank=True, default=dict, help_text='Strukturirani podaci za auto-primjenu')),
-                ('can_auto_apply', models.BooleanField(default=False, help_text='Može li sustav sam primijeniti bez ljudske intervencije?')),
-                ('is_executed', models.BooleanField(default=False)),
-                ('executed_at', models.DateTimeField(blank=True, null=True)),
-                ('executed_by', models.CharField(blank=True, help_text='auto / username koji je primijenio', max_length=50)),
-                ('error_log', models.TextField(blank=True)),
-                ('regulatory_update', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='adaptation_rules', to='limit_connect_ai.regulatoryupdate')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "rule_type",
+                    models.CharField(
+                        choices=[
+                            ("tax_rate", "Promjena porezne stope"),
+                            ("xml_schema", "Promjena XML sheme (e-Račun, FINA)"),
+                            ("form_update", "Ažuriranje obrasca (JOPPD, PDV-S)"),
+                            ("config_change", "Promjena konfiguracije"),
+                            ("notification", "Samo obavijest (ručna akcija)"),
+                            ("code_change", "Zahtijeva code change (dev ticket)"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "target_module",
+                    models.CharField(help_text="Django app: pos, invoicing, payroll, eracun...", max_length=100),
+                ),
+                (
+                    "action_description",
+                    models.TextField(help_text="Što točno treba napraviti", verbose_name="Opis akcije"),
+                ),
+                (
+                    "action_payload",
+                    models.JSONField(blank=True, default=dict, help_text="Strukturirani podaci za auto-primjenu"),
+                ),
+                (
+                    "can_auto_apply",
+                    models.BooleanField(
+                        default=False, help_text="Može li sustav sam primijeniti bez ljudske intervencije?"
+                    ),
+                ),
+                ("is_executed", models.BooleanField(default=False)),
+                ("executed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "executed_by",
+                    models.CharField(blank=True, help_text="auto / username koji je primijenio", max_length=50),
+                ),
+                ("error_log", models.TextField(blank=True)),
+                (
+                    "regulatory_update",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="adaptation_rules",
+                        to="limit_connect_ai.regulatoryupdate",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pravilo adaptacije',
-                'verbose_name_plural': 'Pravila adaptacije',
+                "verbose_name": "Pravilo adaptacije",
+                "verbose_name_plural": "Pravila adaptacije",
             },
         ),
         migrations.CreateModel(
-            name='ClientOpportunityMatch',
+            name="ClientOpportunityMatch",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('calculated_savings', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Izračunata ušteda (EUR)')),
-                ('calculation_details', models.JSONField(blank=True, default=dict, help_text='Detaljni izračun: {"base": 5000, "rate": 0.165, "months": 12}')),
-                ('status', models.CharField(choices=[('identified', 'Identificirano'), ('notified', 'Klijent obaviješten'), ('interested', 'Klijent zainteresiran'), ('applied', 'Aplicirano'), ('utilized', 'Iskorišteno'), ('rejected', 'Klijent odbio'), ('expired', 'Istekao rok')], default='identified', max_length=20)),
-                ('notified_at', models.DateTimeField(blank=True, null=True)),
-                ('notified_via', models.CharField(blank=True, max_length=20)),
-                ('applied_at', models.DateTimeField(blank=True, null=True)),
-                ('matched_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='opportunity_matches', to='companies.company')),
-                ('opportunity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='client_matches', to='limit_connect_ai.legalopportunity')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "calculated_savings",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=10, verbose_name="Izračunata ušteda (EUR)"
+                    ),
+                ),
+                (
+                    "calculation_details",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='Detaljni izračun: {"base": 5000, "rate": 0.165, "months": 12}',
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("identified", "Identificirano"),
+                            ("notified", "Klijent obaviješten"),
+                            ("interested", "Klijent zainteresiran"),
+                            ("applied", "Aplicirano"),
+                            ("utilized", "Iskorišteno"),
+                            ("rejected", "Klijent odbio"),
+                            ("expired", "Istekao rok"),
+                        ],
+                        default="identified",
+                        max_length=20,
+                    ),
+                ),
+                ("notified_at", models.DateTimeField(blank=True, null=True)),
+                ("notified_via", models.CharField(blank=True, max_length=20)),
+                ("applied_at", models.DateTimeField(blank=True, null=True)),
+                ("matched_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="opportunity_matches",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "opportunity",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="client_matches",
+                        to="limit_connect_ai.legalopportunity",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pronađena prilika za klijenta',
-                'verbose_name_plural': 'Pronađene prilike za klijente',
-                'ordering': ['-calculated_savings'],
-                'unique_together': {('company', 'opportunity')},
+                "verbose_name": "Pronađena prilika za klijenta",
+                "verbose_name_plural": "Pronađene prilike za klijente",
+                "ordering": ["-calculated_savings"],
+                "unique_together": {("company", "opportunity")},
             },
         ),
         migrations.AddIndex(
-            model_name='regulatoryupdate',
-            index=models.Index(fields=['publication_date', 'category'], name='limit_conne_publica_074105_idx'),
+            model_name="regulatoryupdate",
+            index=models.Index(fields=["publication_date", "category"], name="limit_conne_publica_074105_idx"),
         ),
         migrations.AddIndex(
-            model_name='regulatoryupdate',
-            index=models.Index(fields=['is_processed', 'is_breaking'], name='limit_conne_is_proc_7e2145_idx'),
+            model_name="regulatoryupdate",
+            index=models.Index(fields=["is_processed", "is_breaking"], name="limit_conne_is_proc_7e2145_idx"),
         ),
     ]

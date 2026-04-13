@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0002_impersonationlog'),
+        ("accounts", "0002_impersonationlog"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='push_subscription',
-            field=models.TextField(blank=True, default='', verbose_name='Push subscription JSON'),
+            model_name="userprofile",
+            name="push_subscription",
+            field=models.TextField(blank=True, default="", verbose_name="Push subscription JSON"),
         ),
     ]

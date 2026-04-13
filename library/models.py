@@ -6,6 +6,7 @@ Fizicka posudba + digitalni katalog + ISBN auto-fill + QR clanarine
 
 "Jedan covjek na enteru — AI radi ostalo."
 """
+
 import uuid
 from decimal import Decimal
 
@@ -23,10 +24,13 @@ User = get_user_model()
 # KATALOG
 # ══════════════════════════════════════════════════════════
 
+
 class Author(models.Model):
     """Autor knjige."""
+
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_authors",
     )
     first_name = models.CharField(max_length=100, verbose_name=_("Ime"))
@@ -57,17 +61,25 @@ class Author(models.Model):
 
 class Category(models.Model):
     """Kategorija/zanr — hijerarhijska."""
+
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_categories",
     )
     name = models.CharField(max_length=100, verbose_name=_("Naziv"))
     parent = models.ForeignKey(
-        "self", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="children", verbose_name=_("Nadkategorija"),
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+        verbose_name=_("Nadkategorija"),
     )
     udk_code = models.CharField(
-        max_length=30, blank=True, verbose_name="UDK",
+        max_length=30,
+        blank=True,
+        verbose_name="UDK",
         help_text=_("Univerzalna decimalna klasifikacija"),
     )
     icon = models.CharField(max_length=30, blank=True, default="bi-book")
@@ -88,34 +100,47 @@ class Category(models.Model):
 
 class Book(models.Model):
     """Knjiga (bibliografski zapis) — NE fizicki primjerak."""
+
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_books",
     )
     title = models.CharField(max_length=500, verbose_name=_("Naslov"), db_index=True)
     subtitle = models.CharField(max_length=500, blank=True, verbose_name=_("Podnaslov"))
     authors = models.ManyToManyField(Author, blank=True, related_name="books")
     isbn_13 = models.CharField(
-        max_length=13, blank=True, verbose_name="ISBN-13", db_index=True,
+        max_length=13,
+        blank=True,
+        verbose_name="ISBN-13",
+        db_index=True,
     )
     isbn_10 = models.CharField(max_length=10, blank=True, verbose_name="ISBN-10")
     publisher = models.CharField(max_length=200, blank=True, verbose_name=_("Izdavac"))
     publish_year = models.PositiveSmallIntegerField(
-        null=True, blank=True, verbose_name=_("Godina izdanja"),
+        null=True,
+        blank=True,
+        verbose_name=_("Godina izdanja"),
     )
     language = models.CharField(max_length=5, default="hr", verbose_name=_("Jezik"))
     pages = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name=_("Stranica"))
     description = models.TextField(blank=True, verbose_name=_("Opis"))
 
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="books", verbose_name=_("Kategorija"),
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="books",
+        verbose_name=_("Kategorija"),
     )
 
     # Naslovnica
     cover_url = models.URLField(blank=True, verbose_name=_("URL naslovnice"))
     cover_image = models.ImageField(
-        upload_to="library/covers/", blank=True, verbose_name=_("Naslovnica"),
+        upload_to="library/covers/",
+        blank=True,
+        verbose_name=_("Naslovnica"),
     )
 
     # OpenLibrary metadata
@@ -125,7 +150,9 @@ class Book(models.Model):
     # Statistika
     times_borrowed = models.PositiveIntegerField(default=0, verbose_name=_("Puta posudjena"))
     rating_avg = models.DecimalField(
-        max_digits=3, decimal_places=2, default=Decimal("0"),
+        max_digits=3,
+        decimal_places=2,
+        default=Decimal("0"),
         verbose_name=_("Prosjecna ocjena"),
     )
 
@@ -172,14 +199,20 @@ class BookCopy(models.Model):
         REFERENCE = "reference", _("Referentna (ne posudjuje se)")
 
     book = models.ForeignKey(
-        Book, on_delete=models.CASCADE, related_name="copies",
+        Book,
+        on_delete=models.CASCADE,
+        related_name="copies",
     )
     barcode = models.CharField(
-        max_length=50, unique=True, verbose_name=_("Barcode/Signatura"),
+        max_length=50,
+        unique=True,
+        verbose_name=_("Barcode/Signatura"),
         help_text=_("Jedinstveni identifikator primjerka"),
     )
     status = models.CharField(
-        max_length=12, choices=Status.choices, default=Status.AVAILABLE,
+        max_length=12,
+        choices=Status.choices,
+        default=Status.AVAILABLE,
     )
     condition = models.CharField(
         max_length=20,
@@ -192,12 +225,17 @@ class BookCopy(models.Model):
         default="good",
     )
     location = models.CharField(
-        max_length=100, blank=True, verbose_name=_("Lokacija"),
+        max_length=100,
+        blank=True,
+        verbose_name=_("Lokacija"),
         help_text=_("Npr. Polica A3, Kat 2"),
     )
     acquisition_date = models.DateField(null=True, blank=True, verbose_name=_("Datum nabave"))
     acquisition_price = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True,
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
         verbose_name=_("Cijena nabave"),
     )
     notes = models.TextField(blank=True)
@@ -218,25 +256,34 @@ class BookCopy(models.Model):
 # CLANOVI
 # ══════════════════════════════════════════════════════════
 
+
 class MembershipType(models.Model):
     """Tip clanarine (djeca, odrasli, umirovljenici, studenti)."""
+
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_membership_types",
     )
     name = models.CharField(max_length=100, verbose_name=_("Naziv"))
     max_books = models.PositiveSmallIntegerField(
-        default=5, verbose_name=_("Max knjiga istovremeno"),
+        default=5,
+        verbose_name=_("Max knjiga istovremeno"),
     )
     loan_days = models.PositiveSmallIntegerField(
-        default=21, verbose_name=_("Rok posudbe (dana)"),
+        default=21,
+        verbose_name=_("Rok posudbe (dana)"),
     )
     annual_fee = models.DecimalField(
-        max_digits=6, decimal_places=2, default=Decimal("0"),
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("0"),
         verbose_name=_("Godisnja clanarina (EUR)"),
     )
     daily_late_fee = models.DecimalField(
-        max_digits=4, decimal_places=2, default=Decimal("0.10"),
+        max_digits=4,
+        decimal_places=2,
+        default=Decimal("0.10"),
         verbose_name=_("Kazna po danu kasnjenja (EUR)"),
     )
     can_reserve = models.BooleanField(default=True, verbose_name=_("Moze rezervirati"))
@@ -262,15 +309,22 @@ class LibraryMember(models.Model):
         BLOCKED = "blocked", _("Blokiran (dugovanje)")
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_members",
     )
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="lib_memberships",
     )
     membership_type = models.ForeignKey(
-        MembershipType, on_delete=models.SET_NULL, null=True, blank=True,
+        MembershipType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="members",
     )
 
@@ -284,15 +338,20 @@ class LibraryMember(models.Model):
 
     # Clanski broj + QR
     member_number = models.CharField(
-        max_length=20, unique=True, verbose_name=_("Clanski broj"),
+        max_length=20,
+        unique=True,
+        verbose_name=_("Clanski broj"),
     )
     qr_token = models.UUIDField(
-        default=uuid.uuid4, unique=True,
+        default=uuid.uuid4,
+        unique=True,
         help_text=_("UUID za QR iskaznicu — skenira se na posudbi"),
     )
 
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.ACTIVE,
+        max_length=10,
+        choices=Status.choices,
+        default=Status.ACTIVE,
     )
     membership_start = models.DateField(verbose_name=_("Pocetak clanarine"))
     membership_end = models.DateField(null=True, blank=True, verbose_name=_("Kraj clanarine"))
@@ -339,6 +398,7 @@ class LibraryMember(models.Model):
 # POSUDBA
 # ══════════════════════════════════════════════════════════
 
+
 class Loan(models.Model):
     """Posudba knjige."""
 
@@ -349,33 +409,49 @@ class Loan(models.Model):
         LOST = "lost", _("Izgubljena")
 
     member = models.ForeignKey(
-        LibraryMember, on_delete=models.CASCADE, related_name="loans",
+        LibraryMember,
+        on_delete=models.CASCADE,
+        related_name="loans",
     )
     copy = models.ForeignKey(
-        BookCopy, on_delete=models.CASCADE, related_name="loans",
+        BookCopy,
+        on_delete=models.CASCADE,
+        related_name="loans",
     )
     borrowed_date = models.DateTimeField(default=timezone.now, verbose_name=_("Datum posudbe"))
     due_date = models.DateField(verbose_name=_("Rok vracanja"))
     returned_date = models.DateTimeField(null=True, blank=True, verbose_name=_("Datum vracanja"))
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.ACTIVE,
+        max_length=10,
+        choices=Status.choices,
+        default=Status.ACTIVE,
     )
 
     renewed_count = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Broj produljenja"),
+        default=0,
+        verbose_name=_("Broj produljenja"),
     )
     fine_amount = models.DecimalField(
-        max_digits=6, decimal_places=2, default=Decimal("0"),
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("0"),
         verbose_name=_("Iznos kazne"),
     )
 
     reader_profile = models.ForeignKey(
-        "ReaderProfile", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="loans", verbose_name=_("Djecji profil"),
+        "ReaderProfile",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="loans",
+        verbose_name=_("Djecji profil"),
         help_text=_("Ako posudba za dijete. NULL = za roditelja samog."),
     )
     issued_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issued_loans",
     )
 
@@ -402,9 +478,7 @@ class Loan(models.Model):
 
     def calculate_fine(self):
         if self.is_overdue and self.member.membership_type:
-            self.fine_amount = (
-                self.member.membership_type.daily_late_fee * self.days_overdue
-            )
+            self.fine_amount = self.member.membership_type.daily_late_fee * self.days_overdue
         return self.fine_amount
 
 
@@ -419,14 +493,20 @@ class Reservation(models.Model):
         EXPIRED = "expired", _("Istekla")
 
     member = models.ForeignKey(
-        LibraryMember, on_delete=models.CASCADE, related_name="reservations",
+        LibraryMember,
+        on_delete=models.CASCADE,
+        related_name="reservations",
     )
     book = models.ForeignKey(
-        Book, on_delete=models.CASCADE, related_name="reservations",
+        Book,
+        on_delete=models.CASCADE,
+        related_name="reservations",
     )
     reserved_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.PENDING,
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
     )
     notified_date = models.DateTimeField(null=True, blank=True)
     pickup_deadline = models.DateField(null=True, blank=True)
@@ -445,6 +525,7 @@ class Reservation(models.Model):
 # IMPORT
 # ══════════════════════════════════════════════════════════
 
+
 class ImportBatch(models.Model):
     """Batch import fonda iz Excel/CSV — 3-step wizard."""
 
@@ -456,21 +537,27 @@ class ImportBatch(models.Model):
         FAILED = "failed", _("Neuspjelo")
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="lib_imports",
     )
     file_name = models.CharField(max_length=200)
     uploaded_file = models.FileField(upload_to="library/imports/")
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="lib_import_batches")
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="lib_import_batches"
+    )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(
-        max_length=12, choices=Status.choices, default=Status.UPLOADED,
+        max_length=12,
+        choices=Status.choices,
+        default=Status.UPLOADED,
     )
 
     # Mapping
     column_mapping = models.JSONField(
-        default=dict, blank=True,
+        default=dict,
+        blank=True,
         help_text=_("Excel kolona -> polje u sustavu"),
     )
 
@@ -503,6 +590,7 @@ class ImportBatch(models.Model):
 # DIGITALNA POSUDBA (CDL framework — Faza 3)
 # ══════════════════════════════════════════════════════════
 
+
 class DigitalAsset(models.Model):
     """Digitalni sadrzaj vezan za knjigu (EPUB, PDF) — SAMO od nakladnika."""
 
@@ -520,15 +608,18 @@ class DigitalAsset(models.Model):
     file = models.FileField(upload_to="library/digital/", blank=True)
 
     publisher_license = models.CharField(
-        max_length=200, blank=True,
+        max_length=200,
+        blank=True,
         verbose_name=_("Licenca nakladnika"),
     )
     max_concurrent_loans = models.PositiveSmallIntegerField(
-        default=1, verbose_name=_("Max istovremenih posudbi"),
+        default=1,
+        verbose_name=_("Max istovremenih posudbi"),
     )
     license_expires = models.DateField(null=True, blank=True)
     total_loans_allowed = models.PositiveIntegerField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         help_text=_("Ukupan broj posudbi prije isteka licence"),
     )
     loans_used = models.PositiveIntegerField(default=0)
@@ -553,18 +644,24 @@ class DigitalAsset(models.Model):
         if self.total_loans_allowed and self.loans_used >= self.total_loans_allowed:
             return False
         active = DigitalLoan.objects.filter(
-            asset=self, returned_date__isnull=True,
+            asset=self,
+            returned_date__isnull=True,
         ).count()
         return active < self.max_concurrent_loans
 
 
 class DigitalLoan(models.Model):
     """Digitalna posudba — CDL model."""
+
     member = models.ForeignKey(
-        LibraryMember, on_delete=models.CASCADE, related_name="digital_loans",
+        LibraryMember,
+        on_delete=models.CASCADE,
+        related_name="digital_loans",
     )
     asset = models.ForeignKey(
-        DigitalAsset, on_delete=models.CASCADE, related_name="loans",
+        DigitalAsset,
+        on_delete=models.CASCADE,
+        related_name="loans",
     )
     borrowed_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
@@ -598,7 +695,8 @@ class ReaderProfile(models.Model):
         TEEN = "14-18", _("Tinejdzeri (14-18)")
 
     parent = models.ForeignKey(
-        LibraryMember, on_delete=models.CASCADE,
+        LibraryMember,
+        on_delete=models.CASCADE,
         related_name="reader_profiles",
         verbose_name=_("Roditelj/Skrbnik"),
     )
@@ -657,11 +755,16 @@ class ReaderProfile(models.Model):
 
     def auto_age_group(self):
         a = self.age
-        if a <= 3: return "0-3"
-        elif a <= 6: return "3-6"
-        elif a <= 10: return "6-10"
-        elif a <= 14: return "10-14"
-        else: return "14-18"
+        if a <= 3:
+            return "0-3"
+        elif a <= 6:
+            return "3-6"
+        elif a <= 10:
+            return "6-10"
+        elif a <= 14:
+            return "10-14"
+        else:
+            return "14-18"
 
     def check_badges(self):
         badges = list(self.badges)

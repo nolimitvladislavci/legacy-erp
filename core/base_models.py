@@ -18,6 +18,7 @@ Hierarchy:
     AuditableModel            → all of the above
     MoneyModel                → + currency, amount helpers
 """
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -25,20 +26,22 @@ from django.utils import timezone
 
 class TimestampedModel(models.Model):
     """Base: auto timestamps on create/update."""
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
 
 class CompanyOwnedModel(TimestampedModel):
     """Timestamps + company FK with scoped manager."""
+
     company = models.ForeignKey(
-        'companies.Company',
+        "companies.Company",
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_set',
+        related_name="%(app_label)s_%(class)s_set",
     )
 
     class Meta(TimestampedModel.Meta):
@@ -47,11 +50,13 @@ class CompanyOwnedModel(TimestampedModel):
 
 class UserTrackedModel(CompanyOwnedModel):
     """Company-owned + who created it."""
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='%(app_label)s_%(class)s_created',
+        null=True,
+        blank=True,
+        related_name="%(app_label)s_%(class)s_created",
     )
 
     class Meta(CompanyOwnedModel.Meta):
@@ -60,6 +65,7 @@ class UserTrackedModel(CompanyOwnedModel):
 
 class SoftDeleteModel(models.Model):
     """Mixin: soft delete instead of hard delete."""
+
     is_active = models.BooleanField(default=True, db_index=True)
     deactivated_at = models.DateTimeField(null=True, blank=True)
 
@@ -69,12 +75,12 @@ class SoftDeleteModel(models.Model):
     def soft_delete(self):
         self.is_active = False
         self.deactivated_at = timezone.now()
-        self.save(update_fields=['is_active', 'deactivated_at'])
+        self.save(update_fields=["is_active", "deactivated_at"])
 
     def reactivate(self):
         self.is_active = True
         self.deactivated_at = None
-        self.save(update_fields=['is_active', 'deactivated_at'])
+        self.save(update_fields=["is_active", "deactivated_at"])
 
 
 class AuditableModel(UserTrackedModel, SoftDeleteModel):
@@ -93,7 +99,8 @@ class AuditableModel(UserTrackedModel, SoftDeleteModel):
 
 class NotesModel(models.Model):
     """Mixin: notes/description text field."""
-    notes = models.TextField(blank=True, default='')
+
+    notes = models.TextField(blank=True, default="")
 
     class Meta:
         abstract = True
@@ -106,6 +113,7 @@ class StatusModel(models.Model):
         class MyModel(StatusModel):
             STATUS_CHOICES = [('draft', 'Draft'), ('active', 'Active')]
     """
+
     status = models.CharField(max_length=30, db_index=True)
 
     class Meta:

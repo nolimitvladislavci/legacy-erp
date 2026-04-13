@@ -28,12 +28,10 @@ urlpatterns = [
     path("labels/", views.label_manage, name="label_manage"),
     path("arhiva/autocomplete/", views.arhiva_autocomplete, name="arhiva_autocomplete"),
     path("revizija/export/", views.revizija_export, name="revizija_export"),
-
     path("ai-inbox/<int:entry_id>/accept/", views.ai_inbox_accept, name="ai_inbox_accept"),
     path("ai-inbox/bulk-accept/", views.ai_inbox_bulk_accept, name="ai_inbox_bulk_accept"),
     path("ai-inbox/send-email/", views.ai_inbox_send_email, name="ai_inbox_send_email"),
     path("arhiva/api/list/", views.arhiva_list_json, name="arhiva_list_json"),
-
     path("arhiva/upload/", views.arhiva_upload, name="arhiva_upload"),
     path("upload/", views.arhiva_upload, name="upload_shortcut"),  # alias
     path("moji-komitenti/", views.moji_komitenti, name="moji_komitenti"),
@@ -66,32 +64,27 @@ urlpatterns = [
     path("blob/<uuid:blob_id>/", views.blob_serve, name="blob_serve"),
     path("<int:pk>/", views.document_detail, name="detail"),
     path("<int:pk>/paid/", views.document_toggle_paid, name="toggle_paid"),
-
     # Process documents
     path("otpremnica/", views.otpremnica_list, name="otpremnica_list"),
     path("otpremnica/nova/", views.otpremnica_create, name="otpremnica_create"),
     path("otpremnica/<uuid:pk>/", views.otpremnica_detail, name="otpremnica_detail"),
     path("otpremnica/<uuid:pk>/pdf/", views.otpremnica_pdf, name="otpremnica_pdf"),
     path("otpremnica/<uuid:pk>/confirm/", views.doc_confirm, name="otpremnica_confirm"),
-
     # LEGACY redirecti — ne brisati, stari bookmarkovi i emailovi ih koriste
     path("primka/", views.primka_list, name="primka_list"),
     path("primka/nova/", views.primka_create, name="primka_create"),
     path("primka/<uuid:pk>/", views.primka_detail, name="primka_detail"),
     path("primka/<uuid:pk>/pdf/", views.primka_pdf, name="primka_pdf"),
     path("primka/<uuid:pk>/confirm/", views.doc_confirm, name="primka_confirm"),
-
     path("otkupni/", views.otkupni_list, name="otkupni_list"),
     path("otkupni/novi/", views.otkupni_create, name="otkupni_create"),
     path("otkupni/<uuid:pk>/", views.otkupni_detail, name="otkupni_detail"),
     path("otkupni/<uuid:pk>/pdf/", views.otkupni_pdf, name="otkupni_pdf"),
     path("otkupni/<uuid:pk>/confirm/", views.doc_confirm, name="otkupni_confirm"),
-
     path("cmr/", views.cmr_list, name="cmr_list"),
     path("cmr/novi/", views.cmr_create, name="cmr_create"),
     path("cmr/<uuid:pk>/", views.cmr_detail, name="cmr_detail"),
     path("cmr/<uuid:pk>/pdf/", views.cmr_pdf, name="cmr_pdf"),
     path("cmr/<uuid:pk>/confirm/", views.doc_confirm, name="cmr_confirm"),
-
     path("", include(router.urls)),
 ]

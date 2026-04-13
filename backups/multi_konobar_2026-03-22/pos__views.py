@@ -228,7 +228,7 @@ def add_item(request, receipt_id):
     if not kwargs.get('description'):
         messages.error(request, 'Item description is required.')
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
-    item = POSReceiptItem.objects.create(**kwargs)
+    POSReceiptItem.objects.create(**kwargs)
     _recalculate(receipt)
 
     # ── Korisnicke poruke ──
@@ -393,7 +393,7 @@ def ai_barcode_lookup(request):
     except:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-    code = data.get('code', '').strip()
+    data.get('code', '').strip()
     image = data.get('image', '')
 
     if not image:
@@ -666,7 +666,7 @@ def session_zreport(request, session_id):
     }
     template = get_template('pos/zreport_pdf.html')
     html = template.render(ctx)
-    result = BytesIO()
+    BytesIO()
     try:
         import weasyprint
         pdf_bytes = weasyprint.HTML(string=html, base_url=settings.BASE_DIR).write_pdf()
@@ -3445,7 +3445,7 @@ def yesterday_manage(request):
 def cashier_report(request, session_id, cashier_id):
     """AJAX: Izvjestaj prometa za jednog blagajnika u smjeni."""
     from django.db import connection
-    session = get_object_or_404(POSSession, pk=session_id)
+    get_object_or_404(POSSession, pk=session_id)
     cashier = get_object_or_404(POSCashier, pk=cashier_id)
 
     with connection.cursor() as cur:

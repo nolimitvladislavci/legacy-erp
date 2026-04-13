@@ -4,25 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0020_payment_methods_expansion'),
+        ("pos", "0020_payment_methods_expansion"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='possettings',
-            name='auto_print_zreport',
-            field=models.BooleanField(default=False, help_text='Automatski printaj Z-report pri zatvaranju smjene', verbose_name='Auto-print Z-reporta'),
+            model_name="possettings",
+            name="auto_print_zreport",
+            field=models.BooleanField(
+                default=False,
+                help_text="Automatski printaj Z-report pri zatvaranju smjene",
+                verbose_name="Auto-print Z-reporta",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='cashier_report_ai_check',
-            field=models.BooleanField(default=True, help_text='AI provjerava anomalije, razlike, sumnjive transakcije', verbose_name='AI kontrola izvještaja'),
+            model_name="possettings",
+            name="cashier_report_ai_check",
+            field=models.BooleanField(
+                default=True,
+                help_text="AI provjerava anomalije, razlike, sumnjive transakcije",
+                verbose_name="AI kontrola izvještaja",
+            ),
         ),
         migrations.AddField(
-            model_name='possettings',
-            name='use_cashier_report',
-            field=models.BooleanField(default=True, help_text='Generiraj detaljan blagajnički izvještaj na kraju smjene', verbose_name='Koristi blagajnički izvještaj'),
+            model_name="possettings",
+            name="use_cashier_report",
+            field=models.BooleanField(
+                default=True,
+                help_text="Generiraj detaljan blagajnički izvještaj na kraju smjene",
+                verbose_name="Koristi blagajnički izvještaj",
+            ),
         ),
     ]

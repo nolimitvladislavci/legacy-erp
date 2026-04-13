@@ -5,104 +5,109 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('eracun', '0004_posrednik_config'),
-        ('invoicing', '0031_add_confirmed_fiscalized_status'),
+        ("eracun", "0004_posrednik_config"),
+        ("invoicing", "0031_add_confirmed_fiscalized_status"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='eracun',
-            name='booked_invoice',
+            model_name="eracun",
+            name="booked_invoice",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='direction',
+            model_name="eracun",
+            name="direction",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='is_booked',
+            model_name="eracun",
+            name="is_booked",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='original_xml',
+            model_name="eracun",
+            name="original_xml",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='posrednik',
+            model_name="eracun",
+            name="posrednik",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='posrednik_id',
+            model_name="eracun",
+            name="posrednik_id",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='posrednik_response',
+            model_name="eracun",
+            name="posrednik_response",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='posrednik_status',
+            model_name="eracun",
+            name="posrednik_status",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='received_at',
+            model_name="eracun",
+            name="received_at",
         ),
         migrations.RemoveField(
-            model_name='eracun',
-            name='received_via',
+            model_name="eracun",
+            name="received_via",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_api_key',
+            model_name="eracunconfig",
+            name="posrednik_api_key",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_api_secret',
+            model_name="eracunconfig",
+            name="posrednik_api_secret",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_api_url',
+            model_name="eracunconfig",
+            name="posrednik_api_url",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_company_id',
+            model_name="eracunconfig",
+            name="posrednik_company_id",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_connected_at',
+            model_name="eracunconfig",
+            name="posrednik_connected_at",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_password',
+            model_name="eracunconfig",
+            name="posrednik_password",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_raw_config',
+            model_name="eracunconfig",
+            name="posrednik_raw_config",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_status',
+            model_name="eracunconfig",
+            name="posrednik_status",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_test_mode',
+            model_name="eracunconfig",
+            name="posrednik_test_mode",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_type',
+            model_name="eracunconfig",
+            name="posrednik_type",
         ),
         migrations.RemoveField(
-            model_name='eracunconfig',
-            name='posrednik_username',
+            model_name="eracunconfig",
+            name="posrednik_username",
         ),
         migrations.RemoveField(
-            model_name='eracunitem',
-            name='kpd_code',
+            model_name="eracunitem",
+            name="kpd_code",
         ),
         migrations.AlterField(
-            model_name='eracun',
-            name='invoice',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='eracun', to='invoicing.invoice'),
+            model_name="eracun",
+            name="invoice",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="eracun",
+                to="invoicing.invoice",
+            ),
         ),
     ]

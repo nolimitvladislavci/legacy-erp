@@ -6,6 +6,7 @@ Radi sam dok je Ivan na baušteli:
 2. signal_patrol — svakih 30 min provjerava netriažirane
 3. daily_signal_digest — jutarnji sažetak za tim
 """
+
 import logging
 
 from celery import shared_task
@@ -91,16 +92,12 @@ def daily_signal_digest():
         "by_priority": by_priority,
         "critical_count": critical,
         "top_pages": list(
-            signals.exclude(page_url="")
-            .values_list("page_url")
-            .annotate(c=Count("id"))
-            .order_by("-c")[:5]
+            signals.exclude(page_url="").values_list("page_url").annotate(c=Count("id")).order_by("-c")[:5]
         ),
     }
 
     logger.info("Signal digest: %d signals (P1-P2: %d)", total, critical)
     return digest
-
 
 
 @shared_task

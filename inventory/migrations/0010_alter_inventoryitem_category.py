@@ -4,15 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0009_stockbatch_inventorycountlog'),
+        ("inventory", "0009_stockbatch_inventorycountlog"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='category',
-            field=models.CharField(choices=[('material', 'Materijal'), ('tool', 'Alat'), ('equipment', 'Oprema'), ('consumable', 'Potrošni materijal'), ('product', 'Gotov proizvod'), ('service', 'Usluga'), ('food', 'Hrana'), ('drink', 'Piće'), ('dessert', 'Desert'), ('special', 'Posebna ponuda'), ('other', 'Ostalo')], default='other', max_length=20, verbose_name='Kategorija'),
+            model_name="inventoryitem",
+            name="category",
+            field=models.CharField(
+                choices=[
+                    ("material", "Materijal"),
+                    ("tool", "Alat"),
+                    ("equipment", "Oprema"),
+                    ("consumable", "Potrošni materijal"),
+                    ("product", "Gotov proizvod"),
+                    ("service", "Usluga"),
+                    ("food", "Hrana"),
+                    ("drink", "Piće"),
+                    ("dessert", "Desert"),
+                    ("special", "Posebna ponuda"),
+                    ("other", "Ostalo"),
+                ],
+                default="other",
+                max_length=20,
+                verbose_name="Kategorija",
+            ),
         ),
     ]

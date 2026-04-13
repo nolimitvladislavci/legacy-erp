@@ -6,78 +6,155 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0008_onboarding_progress'),
-        ('invoicing', '0014_alter_invoice_source'),
+        ("companies", "0008_onboarding_progress"),
+        ("invoicing", "0014_alter_invoice_source"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FiscalBatch',
+            name="FiscalBatch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'Na cekanju'), ('processing', 'U tijeku'), ('completed', 'Zavrseno'), ('partial', 'Djelomicno uspjesno'), ('failed', 'Neuspjesno')], default='pending', max_length=20)),
-                ('total_count', models.PositiveIntegerField(default=0)),
-                ('success_count', models.PositiveIntegerField(default=0)),
-                ('error_count', models.PositiveIntegerField(default=0)),
-                ('results_json', models.JSONField(blank=True, default=dict)),
-                ('started_at', models.DateTimeField(blank=True, null=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_batches', to='companies.company')),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_batches', to=settings.AUTH_USER_MODEL)),
-                ('invoices', models.ManyToManyField(blank=True, related_name='fiscal_batches', to='invoicing.invoice')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Na cekanju"),
+                            ("processing", "U tijeku"),
+                            ("completed", "Zavrseno"),
+                            ("partial", "Djelomicno uspjesno"),
+                            ("failed", "Neuspjesno"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("total_count", models.PositiveIntegerField(default=0)),
+                ("success_count", models.PositiveIntegerField(default=0)),
+                ("error_count", models.PositiveIntegerField(default=0)),
+                ("results_json", models.JSONField(blank=True, default=dict)),
+                ("started_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_batches",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_batches",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("invoices", models.ManyToManyField(blank=True, related_name="fiscal_batches", to="invoicing.invoice")),
             ],
             options={
-                'verbose_name': 'Batch fiskalizacija',
-                'verbose_name_plural': 'Batch fiskalizacije',
-                'ordering': ['-created_at'],
+                "verbose_name": "Batch fiskalizacija",
+                "verbose_name_plural": "Batch fiskalizacije",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='FiscalCertificate',
+            name="FiscalCertificate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('oib', models.CharField(blank=True, max_length=11)),
-                ('cert_name', models.CharField(blank=True, max_length=200)),
-                ('cert_file', models.FileField(upload_to='fiscal/certs/')),
-                ('cert_password', models.CharField(blank=True, max_length=200)),
-                ('is_valid', models.BooleanField(default=False)),
-                ('valid_from', models.DateTimeField(blank=True, null=True)),
-                ('valid_until', models.DateTimeField(blank=True, null=True)),
-                ('cert_subject', models.TextField(blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('last_test', models.DateTimeField(blank=True, null=True)),
-                ('last_test_result', models.BooleanField(blank=True, null=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_certificates', to='companies.company')),
-                ('location', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_certificates', to='invoicing.businesslocation')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("oib", models.CharField(blank=True, max_length=11)),
+                ("cert_name", models.CharField(blank=True, max_length=200)),
+                ("cert_file", models.FileField(upload_to="fiscal/certs/")),
+                ("cert_password", models.CharField(blank=True, max_length=200)),
+                ("is_valid", models.BooleanField(default=False)),
+                ("valid_from", models.DateTimeField(blank=True, null=True)),
+                ("valid_until", models.DateTimeField(blank=True, null=True)),
+                ("cert_subject", models.TextField(blank=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                ("last_test", models.DateTimeField(blank=True, null=True)),
+                ("last_test_result", models.BooleanField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_certificates",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "location",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_certificates",
+                        to="invoicing.businesslocation",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fiskalni certifikat',
-                'verbose_name_plural': 'Fiskalni certifikati',
-                'ordering': ['-uploaded_at'],
+                "verbose_name": "Fiskalni certifikat",
+                "verbose_name_plural": "Fiskalni certifikati",
+                "ordering": ["-uploaded_at"],
             },
         ),
         migrations.CreateModel(
-            name='FiscalLog',
+            name="FiscalLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('sign', 'ZKI potpis'), ('send', 'Slanje na CIS'), ('response', 'Odgovor CIS-a'), ('retry', 'Ponovni pokusaj'), ('error', 'Greska'), ('manual', 'Rucna provjera')], max_length=20)),
-                ('status', models.CharField(choices=[('success', 'Uspjeh'), ('error', 'Greska'), ('warning', 'Upozorenje'), ('info', 'Info')], default='info', max_length=20)),
-                ('message', models.TextField(blank=True)),
-                ('request_xml', models.TextField(blank=True)),
-                ('response_xml', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('invoice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_logs', to='invoicing.invoice')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("sign", "ZKI potpis"),
+                            ("send", "Slanje na CIS"),
+                            ("response", "Odgovor CIS-a"),
+                            ("retry", "Ponovni pokusaj"),
+                            ("error", "Greska"),
+                            ("manual", "Rucna provjera"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("success", "Uspjeh"),
+                            ("error", "Greska"),
+                            ("warning", "Upozorenje"),
+                            ("info", "Info"),
+                        ],
+                        default="info",
+                        max_length=20,
+                    ),
+                ),
+                ("message", models.TextField(blank=True)),
+                ("request_xml", models.TextField(blank=True)),
+                ("response_xml", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="fiscal_logs", to="invoicing.invoice"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fiskalni log',
-                'verbose_name_plural': 'Fiskalni logovi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Fiskalni log",
+                "verbose_name_plural": "Fiskalni logovi",
+                "ordering": ["-created_at"],
             },
         ),
     ]

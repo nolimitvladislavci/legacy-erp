@@ -11,6 +11,7 @@ Svaki novi FenixSignal prolazi kroz Haiku koji:
 Radi autonomno preko Celery taska — 0 ljudskog inputa.
 Kad se Ivan vrati s bauštele, ima kategoriziran backlog.
 """
+
 import json
 import logging
 
@@ -52,6 +53,7 @@ def triage_signal(signal):
 
     try:
         from anthropic import Anthropic
+
         client = Anthropic(api_key=api_key)
 
         prompt = TRIAGE_PROMPT.format(
@@ -77,7 +79,10 @@ def triage_signal(signal):
 
         logger.info(
             "Triage signal %s: %s (P%s) → %s",
-            signal.id, result.get("classification"), result.get("priority"), result.get("assign_to"),
+            signal.id,
+            result.get("classification"),
+            result.get("priority"),
+            result.get("assign_to"),
         )
         return result
 
@@ -110,20 +115,28 @@ def apply_triage(signal, triage_result):
     signal.status = "triaged"
 
     # Spremi triage u triage_note
-    signal.triage_note = json.dumps({
-        "classification": triage_result.get("classification"),
-        "dev_summary": triage_result.get("dev_summary", ""),
-        "user_response": triage_result.get("user_response", ""),
-        "duplicate_hint": triage_result.get("is_duplicate_hint"),
-        "model": "claude-haiku-4-5-20251001",
-    }, ensure_ascii=False)
+    signal.triage_note = json.dumps(
+        {
+            "classification": triage_result.get("classification"),
+            "dev_summary": triage_result.get("dev_summary", ""),
+            "user_response": triage_result.get("user_response", ""),
+            "duplicate_hint": triage_result.get("is_duplicate_hint"),
+            "model": "claude-haiku-4-5-20251001",
+        },
+        ensure_ascii=False,
+    )
 
-    signal.save(update_fields=[
-        "signal_type", "priority", "assigned_to", "status", "triage_note",
-    ])
+    signal.save(
+        update_fields=[
+            "signal_type",
+            "priority",
+            "assigned_to",
+            "status",
+            "triage_note",
+        ]
+    )
 
     logger.info("Applied triage to signal %s: P%s → %s", signal.id, signal.priority, signal.assigned_to)
-
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -153,12 +166,15 @@ def auto_resolve_known(signal):
         if pattern.lower() in msg or pattern.lower() in url:
             signal.status = "resolved"
             signal.priority = 4
-            signal.triage_note = json.dumps({
-                "classification": "auto_resolved",
-                "dev_summary": f"Known 404 pattern: {pattern}",
-                "user_response": "",
-                "auto": True,
-            }, ensure_ascii=False)
+            signal.triage_note = json.dumps(
+                {
+                    "classification": "auto_resolved",
+                    "dev_summary": f"Known 404 pattern: {pattern}",
+                    "user_response": "",
+                    "auto": True,
+                },
+                ensure_ascii=False,
+            )
             signal.save(update_fields=["status", "priority", "triage_note"])
             logger.info("Auto-resolved signal %s: known 404 %s", signal.id, pattern)
             return True
@@ -179,28 +195,27 @@ def dedup_signals(hours=24):
     signals = FenixSignal.objects.filter(created_at__gte=since)
 
     dupes = (
-        signals
-        .values('message', 'page_url')
-        .annotate(cnt=Count('id'), latest_time=Max('created_at'))
+        signals.values("message", "page_url")
+        .annotate(cnt=Count("id"), latest_time=Max("created_at"))
         .filter(cnt__gt=1)
-        .order_by('-cnt')
+        .order_by("-cnt")
     )
 
     total_deduped = 0
     for group in dupes:
         matching = signals.filter(
-            message=group['message'],
-            page_url=group['page_url'],
-        ).order_by('-created_at')
+            message=group["message"],
+            page_url=group["page_url"],
+        ).order_by("-created_at")
 
         # Keep the first (newest), mark the rest
         keep_ids = [matching.first().id] if matching.exists() else []
         older = matching.exclude(id__in=keep_ids)
 
-        count = older.filter(status='new').update(status='resolved')
+        count = older.filter(status="new").update(status="resolved")
         total_deduped += count
 
-    logger.info('Dedup: %d signals resolved as duplicates', total_deduped)
+    logger.info("Dedup: %d signals resolved as duplicates", total_deduped)
     return total_deduped
 
 

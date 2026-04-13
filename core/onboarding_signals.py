@@ -4,6 +4,7 @@ Onboarding auto-completion signals.
 Connected in core/apps.py ready() to automatically mark onboarding steps
 when users create their first partner, item, invoice, or POS terminal.
 """
+
 import logging
 
 from django.db.models.signals import post_save
@@ -22,6 +23,7 @@ def on_item_saved(sender, instance, created, **kwargs):
         return
     try:
         from companies.models import OnboardingProgress
+
         ob, _ = OnboardingProgress.objects.get_or_create(company=company)
         if not ob.first_item_added:
             ob.first_item_added = True
@@ -40,6 +42,7 @@ def on_pos_terminal_saved(sender, instance, created, **kwargs):
         return
     try:
         from companies.models import OnboardingProgress
+
         ob, _ = OnboardingProgress.objects.get_or_create(company=company)
         if not ob.pos_configured:
             ob.pos_configured = True

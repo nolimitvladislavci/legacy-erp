@@ -13,6 +13,7 @@ Kategorije:
   Recenzije/aktivnost:  +15  (redovitost, azuriranost)
   UKUPNO:              =100
 """
+
 import logging
 from datetime import timedelta
 
@@ -52,13 +53,14 @@ def calculate_trust_score(breeder):
 
     if total_animals > 0:
         from memio_pet.models import PetHealthRecord
+
         animals_with_vet = 0
         for animal in animals:
-            has_verified_vet = PetHealthRecord.objects.using(db).filter(
-                animal=animal,
-                vet_profile__isnull=False,
-                vet_profile__is_verified=True
-            ).exists()
+            has_verified_vet = (
+                PetHealthRecord.objects.using(db)
+                .filter(animal=animal, vet_profile__isnull=False, vet_profile__is_verified=True)
+                .exists()
+            )
             if has_verified_vet:
                 animals_with_vet += 1
 
@@ -76,9 +78,8 @@ def calculate_trust_score(breeder):
     health_notes = []
     if total_animals > 0:
         from memio_pet.models import PetHealthRecord
-        total_records = PetHealthRecord.objects.using(db).filter(
-            animal__breeder=breeder
-        ).count()
+
+        total_records = PetHealthRecord.objects.using(db).filter(animal__breeder=breeder).count()
 
         avg_records = total_records / total_animals
         if avg_records >= 3:
@@ -99,6 +100,7 @@ def calculate_trust_score(breeder):
     own_notes = []
     if total_animals > 0:
         from memio_pet.models import PetOwnership
+
         animals_with_ownership = 0
         for animal in animals:
             if PetOwnership.objects.using(db).filter(animal=animal).exists():
@@ -133,9 +135,7 @@ def calculate_trust_score(breeder):
     now = timezone.now()
 
     if total_animals > 0:
-        recently_updated = animals.filter(
-            updated_at__gte=now - timedelta(days=90)
-        ).count()
+        recently_updated = animals.filter(updated_at__gte=now - timedelta(days=90)).count()
         ratio = recently_updated / total_animals
         pts = int(ratio * 8)
         act_score += pts
@@ -163,10 +163,12 @@ def calculate_trust_score(breeder):
     rev_score = 0
     rev_notes = []
     from memio_pet.models import BreederReview
+
     reviews = BreederReview.objects.using(db).filter(breeder=breeder, is_published=True)
     rev_count = reviews.count()
     if rev_count > 0:
         from django.db.models import Avg
+
         avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"] or 0
         verified_count = reviews.filter(is_verified_purchase=True).count()
         # Score: do 5 za kolicinu, do 5 za kvalitetu, do 5 za verificirane
@@ -208,6 +210,7 @@ def update_trust_score(breeder):
 def bulk_update_trust_scores():
     """Azurira Trust Score za sve breedere. Celery task ili manual."""
     from memio_pet.models import BreederProfile
+
     breeders = BreederProfile.objects.using("memio_pets").all()
     results = []
     for b in breeders:

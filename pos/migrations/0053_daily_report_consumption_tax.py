@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0052_consumption_tax'),
+        ("pos", "0052_consumption_tax"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posdailyreport',
-            name='consumption_tax_total',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Porez na potrošnju ukupno'),
+            model_name="posdailyreport",
+            name="consumption_tax_total",
+            field=models.DecimalField(
+                decimal_places=2, default=0, max_digits=10, verbose_name="Porez na potrošnju ukupno"
+            ),
         ),
     ]

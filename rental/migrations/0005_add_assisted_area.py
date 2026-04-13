@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('rental', '0004_p0_landlord_units'),
+        ("rental", "0004_p0_landlord_units"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='property',
-            name='is_assisted_area',
-            field=models.BooleanField(default=False, help_text='I.-IV. razvojna skupina — 20% popust na TZ članarinu (čl.7 st.2 NN 52/19)', verbose_name='Potpomognuto područje'),
+            model_name="property",
+            name="is_assisted_area",
+            field=models.BooleanField(
+                default=False,
+                help_text="I.-IV. razvojna skupina — 20% popust na TZ članarinu (čl.7 st.2 NN 52/19)",
+                verbose_name="Potpomognuto područje",
+            ),
         ),
     ]

@@ -6,21 +6,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0016_multi_cashier'),
+        ("pos", "0016_multi_cashier"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='poscashier',
-            name='clock_in_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Prijava u'),
+            model_name="poscashier",
+            name="clock_in_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Prijava u"),
         ),
         migrations.AddField(
-            model_name='poscashier',
-            name='user',
-            field=models.ForeignKey(blank=True, help_text='Povezani korisnik za evidenciju radnog vremena', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_cashier_profiles', to=settings.AUTH_USER_MODEL, verbose_name='Django korisnik'),
+            model_name="poscashier",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Povezani korisnik za evidenciju radnog vremena",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="pos_cashier_profiles",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Django korisnik",
+            ),
         ),
     ]

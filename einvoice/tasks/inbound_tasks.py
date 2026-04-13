@@ -1,4 +1,5 @@
 """Celery tasks for inbound invoice processing."""
+
 import logging
 
 from celery import shared_task
@@ -23,7 +24,8 @@ def poll_inbox():
     mailbox = SmartMailboxService()
 
     configs = TransportConfiguration.objects.filter(
-        primary_transport="FINA", smart_mailbox_enabled=True,
+        primary_transport="FINA",
+        smart_mailbox_enabled=True,
     ).select_related("company")
 
     total_received = 0
@@ -60,6 +62,7 @@ def poll_inbox():
                     # Push notification for new invoice
                     try:
                         from push_notifications.push import send_company_push
+
                         send_company_push(
                             config.company.id,
                             title="Nova ulazna faktura",

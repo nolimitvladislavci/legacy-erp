@@ -1,7 +1,7 @@
 import os
 
-path = '/var/www/fina-connect/invoicing/urls.py'
-with open(path, 'r', encoding='utf-8') as f:
+path = "/var/www/fina-connect/invoicing/urls.py"
+with open(path, "r", encoding="utf-8") as f:
     lines = f.readlines()
 
 new_lines = []
@@ -13,7 +13,7 @@ for line in lines:
     else:
         new_lines.append(line)
 
-with open(path, 'w', encoding='utf-8') as f:
+with open(path, "w", encoding="utf-8") as f:
     f.writelines(new_lines)
 
 # Osiguravamo backup i dozvole [cite: 2026-02-17]

@@ -6,90 +6,240 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0024_partnership_model'),
-        ('inventory', '0013_warehouse_warehousetransfer_warehousetransferitem'),
+        ("companies", "0024_partnership_model"),
+        ("inventory", "0013_warehouse_warehousetransfer_warehousetransferitem"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Inventura',
+            name="Inventura",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('inventura_number', models.CharField(blank=True, help_text='Auto: INV-YYYY/NNNNN', max_length=50, verbose_name='Broj popisa')),
-                ('inventura_type', models.CharField(choices=[('annual', 'Godišnji popis'), ('periodic', 'Periodički popis'), ('spot', 'Izvanredni popis'), ('sample', 'Stichprobeninventur')], default='annual', max_length=20, verbose_name='Vrsta popisa')),
-                ('status', models.CharField(choices=[('draft', 'Priprema'), ('in_progress', 'U tijeku'), ('counting', 'Brojanje'), ('completed', 'Završeno'), ('approved', 'Odobreno'), ('cancelled', 'Poništeno')], default='draft', max_length=20, verbose_name='Status')),
-                ('date_started', models.DateField(verbose_name='Datum početka')),
-                ('date_completed', models.DateField(blank=True, null=True, verbose_name='Datum završetka')),
-                ('reference_date', models.DateField(help_text='Datum na koji se utvrđuje stanje (obično 31.12.)', verbose_name='Datum stanja')),
-                ('category_filter', models.CharField(blank=True, help_text='Prazno = sve kategorije', max_length=20, verbose_name='Filtar kategorije')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomene')),
-                ('approved_at', models.DateTimeField(blank=True, null=True, verbose_name='Datum odobrenja')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('approved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='inventuras_approved', to=settings.AUTH_USER_MODEL, verbose_name='Odobrio')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='inventuras', to='companies.company', verbose_name='Tvrtka')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='inventuras_created', to=settings.AUTH_USER_MODEL, verbose_name='Kreirao')),
-                ('warehouse', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.warehouse', verbose_name='Skladište')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "inventura_number",
+                    models.CharField(
+                        blank=True, help_text="Auto: INV-YYYY/NNNNN", max_length=50, verbose_name="Broj popisa"
+                    ),
+                ),
+                (
+                    "inventura_type",
+                    models.CharField(
+                        choices=[
+                            ("annual", "Godišnji popis"),
+                            ("periodic", "Periodički popis"),
+                            ("spot", "Izvanredni popis"),
+                            ("sample", "Stichprobeninventur"),
+                        ],
+                        default="annual",
+                        max_length=20,
+                        verbose_name="Vrsta popisa",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Priprema"),
+                            ("in_progress", "U tijeku"),
+                            ("counting", "Brojanje"),
+                            ("completed", "Završeno"),
+                            ("approved", "Odobreno"),
+                            ("cancelled", "Poništeno"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("date_started", models.DateField(verbose_name="Datum početka")),
+                ("date_completed", models.DateField(blank=True, null=True, verbose_name="Datum završetka")),
+                (
+                    "reference_date",
+                    models.DateField(
+                        help_text="Datum na koji se utvrđuje stanje (obično 31.12.)", verbose_name="Datum stanja"
+                    ),
+                ),
+                (
+                    "category_filter",
+                    models.CharField(
+                        blank=True, help_text="Prazno = sve kategorije", max_length=20, verbose_name="Filtar kategorije"
+                    ),
+                ),
+                ("notes", models.TextField(blank=True, verbose_name="Napomene")),
+                ("approved_at", models.DateTimeField(blank=True, null=True, verbose_name="Datum odobrenja")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "approved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="inventuras_approved",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Odobrio",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="inventuras",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="inventuras_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Kreirao",
+                    ),
+                ),
+                (
+                    "warehouse",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="inventory.warehouse",
+                        verbose_name="Skladište",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Inventura',
-                'verbose_name_plural': 'Inventure',
-                'ordering': ['-date_started', '-created_at'],
+                "verbose_name": "Inventura",
+                "verbose_name_plural": "Inventure",
+                "ordering": ["-date_started", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='InventuraCommission',
+            name="InventuraCommission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('predsjednik', 'Predsjednik komisije'), ('clan', 'Član komisije'), ('zapisnicar', 'Zapisničar')], default='clan', max_length=20, verbose_name='Uloga')),
-                ('inventura', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commission', to='inventory.inventura', verbose_name='Inventura')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Osoba')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("predsjednik", "Predsjednik komisije"),
+                            ("clan", "Član komisije"),
+                            ("zapisnicar", "Zapisničar"),
+                        ],
+                        default="clan",
+                        max_length=20,
+                        verbose_name="Uloga",
+                    ),
+                ),
+                (
+                    "inventura",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="commission",
+                        to="inventory.inventura",
+                        verbose_name="Inventura",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name="Osoba"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Član komisije',
-                'verbose_name_plural': 'Popisna komisija',
+                "verbose_name": "Član komisije",
+                "verbose_name_plural": "Popisna komisija",
             },
         ),
         migrations.CreateModel(
-            name='InventuraItem',
+            name="InventuraItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('expected_qty', models.DecimalField(decimal_places=3, default=0, max_digits=10, verbose_name='Knjižno stanje')),
-                ('counted_qty', models.DecimalField(blank=True, decimal_places=3, max_digits=10, null=True, verbose_name='Stvarno stanje')),
-                ('difference_qty', models.DecimalField(decimal_places=3, default=0, max_digits=10, verbose_name='Razlika (kol.)')),
-                ('unit_price', models.DecimalField(decimal_places=4, default=0, max_digits=12, verbose_name='Jedinična cijena')),
-                ('difference_value', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Razlika (iznos)')),
-                ('unit', models.CharField(default='kom', max_length=20, verbose_name='JMJ')),
-                ('counted_at', models.DateTimeField(blank=True, null=True, verbose_name='Vrijeme brojanja')),
-                ('barcode_scanned', models.BooleanField(default=False, help_text='Je li artikl identificiran barcode skenerom', verbose_name='Skenirano')),
-                ('note', models.CharField(blank=True, max_length=255, verbose_name='Napomena')),
-                ('counted_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Prebrojao')),
-                ('inventory_item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='inventura_items', to='inventory.inventoryitem', verbose_name='Artikl')),
-                ('inventura', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='inventory.inventura', verbose_name='Inventura')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "expected_qty",
+                    models.DecimalField(decimal_places=3, default=0, max_digits=10, verbose_name="Knjižno stanje"),
+                ),
+                (
+                    "counted_qty",
+                    models.DecimalField(
+                        blank=True, decimal_places=3, max_digits=10, null=True, verbose_name="Stvarno stanje"
+                    ),
+                ),
+                (
+                    "difference_qty",
+                    models.DecimalField(decimal_places=3, default=0, max_digits=10, verbose_name="Razlika (kol.)"),
+                ),
+                (
+                    "unit_price",
+                    models.DecimalField(decimal_places=4, default=0, max_digits=12, verbose_name="Jedinična cijena"),
+                ),
+                (
+                    "difference_value",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Razlika (iznos)"),
+                ),
+                ("unit", models.CharField(default="kom", max_length=20, verbose_name="JMJ")),
+                ("counted_at", models.DateTimeField(blank=True, null=True, verbose_name="Vrijeme brojanja")),
+                (
+                    "barcode_scanned",
+                    models.BooleanField(
+                        default=False, help_text="Je li artikl identificiran barcode skenerom", verbose_name="Skenirano"
+                    ),
+                ),
+                ("note", models.CharField(blank=True, max_length=255, verbose_name="Napomena")),
+                (
+                    "counted_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Prebrojao",
+                    ),
+                ),
+                (
+                    "inventory_item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="inventura_items",
+                        to="inventory.inventoryitem",
+                        verbose_name="Artikl",
+                    ),
+                ),
+                (
+                    "inventura",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="inventory.inventura",
+                        verbose_name="Inventura",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka inventure',
-                'verbose_name_plural': 'Stavke inventure',
-                'ordering': ['inventory_item__name'],
+                "verbose_name": "Stavka inventure",
+                "verbose_name_plural": "Stavke inventure",
+                "ordering": ["inventory_item__name"],
             },
         ),
         migrations.AddIndex(
-            model_name='inventura',
-            index=models.Index(fields=['company', 'status'], name='inventory_i_company_b2dc8b_idx'),
+            model_name="inventura",
+            index=models.Index(fields=["company", "status"], name="inventory_i_company_b2dc8b_idx"),
         ),
         migrations.AddIndex(
-            model_name='inventura',
-            index=models.Index(fields=['company', 'reference_date'], name='inventory_i_company_e9b83d_idx'),
+            model_name="inventura",
+            index=models.Index(fields=["company", "reference_date"], name="inventory_i_company_e9b83d_idx"),
         ),
         migrations.AlterUniqueTogether(
-            name='inventuracommission',
-            unique_together={('inventura', 'user')},
+            name="inventuracommission",
+            unique_together={("inventura", "user")},
         ),
         migrations.AlterUniqueTogether(
-            name='inventuraitem',
-            unique_together={('inventura', 'inventory_item')},
+            name="inventuraitem",
+            unique_together={("inventura", "inventory_item")},
         ),
     ]

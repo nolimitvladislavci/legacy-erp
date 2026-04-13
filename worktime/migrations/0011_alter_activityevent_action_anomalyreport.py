@@ -6,39 +6,113 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0024_partnership_model'),
-        ('worktime', '0010_travelorder'),
+        ("companies", "0024_partnership_model"),
+        ("worktime", "0010_travelorder"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='activityevent',
-            name='action',
-            field=models.CharField(choices=[('GENESIS_SCAN', 'Genesis QR sken'), ('PALLET_SCAN', 'Sken palete'), ('WEIGHT_EVENT', 'Vaganje'), ('DELIVERY_SCAN', 'Sken isporuke'), ('PHOTO', 'Fotografija'), ('APP_ACTION', 'Akcija u aplikaciji'), ('VEHICLE_START', 'Pokretanje vozila'), ('MANUAL_CHECK', 'Rucna provjera'), ('POS_CHECKOUT', 'POS Naplata'), ('POS_VOID', 'POS Storno'), ('POS_OPEN_SHIFT', 'POS Otvaranje smjene'), ('POS_CLOSE_SHIFT', 'POS Zatvaranje smjene')], max_length=30),
+            model_name="activityevent",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("GENESIS_SCAN", "Genesis QR sken"),
+                    ("PALLET_SCAN", "Sken palete"),
+                    ("WEIGHT_EVENT", "Vaganje"),
+                    ("DELIVERY_SCAN", "Sken isporuke"),
+                    ("PHOTO", "Fotografija"),
+                    ("APP_ACTION", "Akcija u aplikaciji"),
+                    ("VEHICLE_START", "Pokretanje vozila"),
+                    ("MANUAL_CHECK", "Rucna provjera"),
+                    ("POS_CHECKOUT", "POS Naplata"),
+                    ("POS_VOID", "POS Storno"),
+                    ("POS_OPEN_SHIFT", "POS Otvaranje smjene"),
+                    ("POS_CLOSE_SHIFT", "POS Zatvaranje smjene"),
+                ],
+                max_length=30,
+            ),
         ),
         migrations.CreateModel(
-            name='AnomalyReport',
+            name="AnomalyReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('detected_at', models.DateTimeField(auto_now_add=True)),
-                ('anomaly_type', models.CharField(choices=[('GHOST_SHIFT', 'Smjena bez aktivnosti'), ('NO_ACTIVITY', 'Duga pauza bez evidencije'), ('GPS_MISMATCH', 'GPS ne odgovara lokaciji firme'), ('OVERTIME', 'Prekoracenje zakonskog max'), ('MISSING_BREAK', 'Nedostajuca zakonska pauza'), ('DOUBLE_SHIFT', 'Dvije paralelne smjene')], max_length=30)),
-                ('severity', models.CharField(choices=[('low', 'Nisko (Upozorenje)'), ('medium', 'Srednje (Istraga)'), ('high', 'Visoko (Prekrsaj)')], max_length=10)),
-                ('description', models.TextField(help_text='AI objasnjenje nalaza')),
-                ('ai_confidence', models.DecimalField(decimal_places=2, default=0, help_text='Sigurnost AI-ja 0-100%', max_digits=5)),
-                ('is_resolved', models.BooleanField(default=False)),
-                ('resolution_note', models.TextField(blank=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('resolved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='resolved_anomalies', to=settings.AUTH_USER_MODEL)),
-                ('time_log', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='anomalies', to='worktime.timelog')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='anomaly_reports', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("detected_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "anomaly_type",
+                    models.CharField(
+                        choices=[
+                            ("GHOST_SHIFT", "Smjena bez aktivnosti"),
+                            ("NO_ACTIVITY", "Duga pauza bez evidencije"),
+                            ("GPS_MISMATCH", "GPS ne odgovara lokaciji firme"),
+                            ("OVERTIME", "Prekoracenje zakonskog max"),
+                            ("MISSING_BREAK", "Nedostajuca zakonska pauza"),
+                            ("DOUBLE_SHIFT", "Dvije paralelne smjene"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                (
+                    "severity",
+                    models.CharField(
+                        choices=[
+                            ("low", "Nisko (Upozorenje)"),
+                            ("medium", "Srednje (Istraga)"),
+                            ("high", "Visoko (Prekrsaj)"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("description", models.TextField(help_text="AI objasnjenje nalaza")),
+                (
+                    "ai_confidence",
+                    models.DecimalField(decimal_places=2, default=0, help_text="Sigurnost AI-ja 0-100%", max_digits=5),
+                ),
+                ("is_resolved", models.BooleanField(default=False)),
+                ("resolution_note", models.TextField(blank=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
+                (
+                    "resolved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="resolved_anomalies",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "time_log",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="anomalies",
+                        to="worktime.timelog",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="anomaly_reports",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'worktime_anomaly_report',
-                'ordering': ['-detected_at'],
-                'indexes': [models.Index(fields=['user', 'detected_at'], name='worktime_an_user_id_f3a3bb_idx'), models.Index(fields=['company', 'severity', 'is_resolved'], name='worktime_an_company_036429_idx')],
+                "db_table": "worktime_anomaly_report",
+                "ordering": ["-detected_at"],
+                "indexes": [
+                    models.Index(fields=["user", "detected_at"], name="worktime_an_user_id_f3a3bb_idx"),
+                    models.Index(fields=["company", "severity", "is_resolved"], name="worktime_an_company_036429_idx"),
+                ],
             },
         ),
     ]

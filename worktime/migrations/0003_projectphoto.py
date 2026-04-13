@@ -6,23 +6,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('burza', '0003_add_rijeseno_status'),
-        ('worktime', '0002_add_project_lead_to_timeentry'),
+        ("burza", "0003_add_rijeseno_status"),
+        ("worktime", "0002_add_project_lead_to_timeentry"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProjectPhoto',
+            name="ProjectPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='site_photos/%Y/%m/')),
-                ('note', models.TextField(blank=True, help_text='Bilješka radnika (opcionalno)')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('project_lead', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='site_photos', to='burza.projectlead')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='uploaded_photos', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("image", models.ImageField(upload_to="site_photos/%Y/%m/")),
+                ("note", models.TextField(blank=True, help_text="Bilješka radnika (opcionalno)")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "project_lead",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="site_photos",
+                        to="burza.projectlead",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="uploaded_photos",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

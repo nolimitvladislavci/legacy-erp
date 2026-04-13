@@ -12,7 +12,7 @@ from .models import ProductionLog, ProductionOrder
 logger = logging.getLogger(__name__)
 
 
-@receiver(pre_save, sender=ProductionOrder, dispatch_uid='production_order_status_log')
+@receiver(pre_save, sender=ProductionOrder, dispatch_uid="production_order_status_log")
 def log_status_change(sender, instance, **kwargs):
     """Logira promjenu statusa radnog naloga."""
     if not instance.pk:
@@ -25,18 +25,18 @@ def log_status_change(sender, instance, **kwargs):
 
     if old.status != instance.status:
         action_map = {
-            'confirmed': 'confirmed',
-            'in_progress': 'started',
-            'done': 'completed',
-            'cancelled': 'cancelled',
+            "confirmed": "confirmed",
+            "in_progress": "started",
+            "done": "completed",
+            "cancelled": "cancelled",
         }
         action = action_map.get(instance.status)
         if action:
             ProductionLog.objects.create(
                 order=instance,
                 action=action,
-                description=f'Status: {old.status} → {instance.status}',
-                metadata={'old_status': old.status, 'new_status': instance.status},
+                description=f"Status: {old.status} → {instance.status}",
+                metadata={"old_status": old.status, "new_status": instance.status},
             )
 
     if old.produced_quantity != instance.produced_quantity:
@@ -44,9 +44,9 @@ def log_status_change(sender, instance, **kwargs):
         if diff > 0:
             ProductionLog.objects.create(
                 order=instance,
-                action='produced',
+                action="produced",
                 quantity=diff,
-                description=f'Proizvedeno +{diff} (ukupno: {instance.produced_quantity})',
+                description=f"Proizvedeno +{diff} (ukupno: {instance.produced_quantity})",
             )
 
     if old.scrap_quantity != instance.scrap_quantity:
@@ -54,7 +54,7 @@ def log_status_change(sender, instance, **kwargs):
         if diff > 0:
             ProductionLog.objects.create(
                 order=instance,
-                action='scrap',
+                action="scrap",
                 quantity=diff,
-                description=f'Škart +{diff} (ukupno: {instance.scrap_quantity})',
+                description=f"Škart +{diff} (ukupno: {instance.scrap_quantity})",
             )

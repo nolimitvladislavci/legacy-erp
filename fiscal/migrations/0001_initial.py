@@ -5,63 +5,105 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0005_companybranch'),
+        ("companies", "0005_companybranch"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FiscalConfiguration',
+            name="FiscalConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('provider', models.CharField(choices=[('hr_fina', 'Hrvatska - FINA CIS'), ('de_tse', 'Deutschland - KassenSichV/TSE'), ('none', 'Bez fiskalizacije')], default='none', max_length=20)),
-                ('is_active', models.BooleanField(default=False)),
-                ('is_test_mode', models.BooleanField(default=True, help_text='Koristi test okolinu')),
-                ('certificate_file', models.FileField(blank=True, help_text='.p12 certifikat od FINA', upload_to='fiscal/certs/')),
-                ('certificate_password', models.CharField(blank=True, max_length=255)),
-                ('oib', models.CharField(blank=True, help_text='OIB obveznika', max_length=11)),
-                ('business_premise_id', models.CharField(blank=True, max_length=20, verbose_name='Oznaka poslovnog prostora')),
-                ('device_id', models.CharField(blank=True, max_length=20, verbose_name='Oznaka naplatnog uredaja')),
-                ('tse_api_key', models.CharField(blank=True, help_text='fiskaly API Key', max_length=255)),
-                ('tse_api_secret', models.CharField(blank=True, help_text='fiskaly API Secret', max_length=255)),
-                ('tse_tss_id', models.CharField(blank=True, help_text='TSS ID iz fiskaly dashboarda', max_length=255)),
-                ('tse_client_id', models.CharField(blank=True, max_length=255)),
-                ('branch', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.companybranch')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_configs', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "provider",
+                    models.CharField(
+                        choices=[
+                            ("hr_fina", "Hrvatska - FINA CIS"),
+                            ("de_tse", "Deutschland - KassenSichV/TSE"),
+                            ("none", "Bez fiskalizacije"),
+                        ],
+                        default="none",
+                        max_length=20,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=False)),
+                ("is_test_mode", models.BooleanField(default=True, help_text="Koristi test okolinu")),
+                (
+                    "certificate_file",
+                    models.FileField(blank=True, help_text=".p12 certifikat od FINA", upload_to="fiscal/certs/"),
+                ),
+                ("certificate_password", models.CharField(blank=True, max_length=255)),
+                ("oib", models.CharField(blank=True, help_text="OIB obveznika", max_length=11)),
+                (
+                    "business_premise_id",
+                    models.CharField(blank=True, max_length=20, verbose_name="Oznaka poslovnog prostora"),
+                ),
+                ("device_id", models.CharField(blank=True, max_length=20, verbose_name="Oznaka naplatnog uredaja")),
+                ("tse_api_key", models.CharField(blank=True, help_text="fiskaly API Key", max_length=255)),
+                ("tse_api_secret", models.CharField(blank=True, help_text="fiskaly API Secret", max_length=255)),
+                ("tse_tss_id", models.CharField(blank=True, help_text="TSS ID iz fiskaly dashboarda", max_length=255)),
+                ("tse_client_id", models.CharField(blank=True, max_length=255)),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.companybranch"
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_configs",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fiskalna konfiguracija',
-                'verbose_name_plural': 'Fiskalne konfiguracije',
-                'unique_together': {('company', 'branch')},
+                "verbose_name": "Fiskalna konfiguracija",
+                "verbose_name_plural": "Fiskalne konfiguracije",
+                "unique_together": {("company", "branch")},
             },
         ),
         migrations.CreateModel(
-            name='FiscalLog',
+            name="FiscalLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('receipt_type', models.CharField(max_length=50)),
-                ('receipt_id', models.PositiveIntegerField()),
-                ('status', models.CharField(choices=[('success', 'Uspjesno'), ('error', 'Greska'), ('pending', 'Na cekanju'), ('retry', 'Ponovni pokusaj')], max_length=20)),
-                ('zki', models.CharField(blank=True, max_length=64, verbose_name='ZKI')),
-                ('jir', models.CharField(blank=True, max_length=40, verbose_name='JIR')),
-                ('tse_signature', models.TextField(blank=True)),
-                ('tse_transaction_number', models.CharField(blank=True, max_length=100)),
-                ('tse_start_time', models.DateTimeField(blank=True, null=True)),
-                ('tse_end_time', models.DateTimeField(blank=True, null=True)),
-                ('request_xml', models.TextField(blank=True, help_text='Poslani zahtjev')),
-                ('response_xml', models.TextField(blank=True, help_text='Primljeni odgovor')),
-                ('error_message', models.TextField(blank=True)),
-                ('qr_code_data', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('config', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='fiscal.fiscalconfiguration')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("receipt_type", models.CharField(max_length=50)),
+                ("receipt_id", models.PositiveIntegerField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("success", "Uspjesno"),
+                            ("error", "Greska"),
+                            ("pending", "Na cekanju"),
+                            ("retry", "Ponovni pokusaj"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("zki", models.CharField(blank=True, max_length=64, verbose_name="ZKI")),
+                ("jir", models.CharField(blank=True, max_length=40, verbose_name="JIR")),
+                ("tse_signature", models.TextField(blank=True)),
+                ("tse_transaction_number", models.CharField(blank=True, max_length=100)),
+                ("tse_start_time", models.DateTimeField(blank=True, null=True)),
+                ("tse_end_time", models.DateTimeField(blank=True, null=True)),
+                ("request_xml", models.TextField(blank=True, help_text="Poslani zahtjev")),
+                ("response_xml", models.TextField(blank=True, help_text="Primljeni odgovor")),
+                ("error_message", models.TextField(blank=True)),
+                ("qr_code_data", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "config",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="fiscal.fiscalconfiguration"),
+                ),
             ],
             options={
-                'verbose_name': 'Fiskalni log',
-                'verbose_name_plural': 'Fiskalni logovi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Fiskalni log",
+                "verbose_name_plural": "Fiskalni logovi",
+                "ordering": ["-created_at"],
             },
         ),
     ]

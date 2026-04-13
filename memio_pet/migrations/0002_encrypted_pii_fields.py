@@ -6,80 +6,85 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0001_initial'),
+        ("memio_pet", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='waitlistentry',
-            name='email_hash',
+            model_name="waitlistentry",
+            name="email_hash",
             field=models.CharField(blank=True, db_index=True, max_length=64, unique=True),
         ),
         migrations.AlterField(
-            model_name='animalprofile',
-            name='chip_number',
-            field=models.CharField(blank=True, db_index=True, max_length=20, validators=[memio_pet.validators.validate_chip_number]),
+            model_name="animalprofile",
+            name="chip_number",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=20, validators=[memio_pet.validators.validate_chip_number]
+            ),
         ),
         migrations.AlterField(
-            model_name='animalprofile',
-            name='color_description',
+            model_name="animalprofile",
+            name="color_description",
             field=models.CharField(blank=True, max_length=200, validators=[memio_pet.validators.validate_free_text]),
         ),
         migrations.AlterField(
-            model_name='animalprofile',
-            name='name',
+            model_name="animalprofile",
+            name="name",
             field=models.CharField(blank=True, max_length=100, validators=[memio_pet.validators.validate_name_field]),
         ),
         migrations.AlterField(
-            model_name='animalprofile',
-            name='notes',
+            model_name="animalprofile",
+            name="notes",
             field=models.TextField(blank=True, validators=[memio_pet.validators.validate_free_text]),
         ),
         migrations.AlterField(
-            model_name='breederprofile',
-            name='email',
+            model_name="breederprofile",
+            name="email",
             field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True),
         ),
         migrations.AlterField(
-            model_name='breederprofile',
-            name='name',
+            model_name="breederprofile",
+            name="name",
             field=models.CharField(max_length=200, validators=[memio_pet.validators.validate_name_field]),
         ),
         migrations.AlterField(
-            model_name='breederprofile',
-            name='oib',
-            field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True, validators=[memio_pet.validators.validate_oib_format]),
+            model_name="breederprofile",
+            name="oib",
+            field=memio_pet.encrypted_fields.MemioEncryptedField(
+                blank=True, validators=[memio_pet.validators.validate_oib_format]
+            ),
         ),
         migrations.AlterField(
-            model_name='petownership',
-            name='owner_address',
+            model_name="petownership",
+            name="owner_address",
             field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True),
         ),
         migrations.AlterField(
-            model_name='petownership',
-            name='owner_email',
+            model_name="petownership",
+            name="owner_email",
             field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True),
         ),
         migrations.AlterField(
-            model_name='petownership',
-            name='owner_oib',
+            model_name="petownership",
+            name="owner_oib",
             field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True),
         ),
         migrations.AlterField(
-            model_name='waitlistentry',
-            name='email',
+            model_name="waitlistentry",
+            name="email",
             field=memio_pet.encrypted_fields.MemioEncryptedField(),
         ),
         migrations.AlterField(
-            model_name='waitlistentry',
-            name='name',
+            model_name="waitlistentry",
+            name="name",
             field=models.CharField(max_length=120, validators=[memio_pet.validators.validate_name_field]),
         ),
         migrations.AlterField(
-            model_name='waitlistentry',
-            name='oib',
-            field=memio_pet.encrypted_fields.MemioEncryptedField(blank=True, validators=[memio_pet.validators.validate_oib_format]),
+            model_name="waitlistentry",
+            name="oib",
+            field=memio_pet.encrypted_fields.MemioEncryptedField(
+                blank=True, validators=[memio_pet.validators.validate_oib_format]
+            ),
         ),
     ]

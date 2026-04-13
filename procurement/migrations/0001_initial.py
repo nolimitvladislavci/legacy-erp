@@ -7,85 +7,187 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0018_initial'),
-        ('inventory', '0010_alter_inventoryitem_category'),
-        ('invoicing', '0024_invoice_issuer_oib_longer'),
-        ('partners', '0004_add_nkd_code'),
+        ("companies", "0018_initial"),
+        ("inventory", "0010_alter_inventoryitem_category"),
+        ("invoicing", "0024_invoice_issuer_oib_longer"),
+        ("partners", "0004_add_nkd_code"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PurchaseOrder',
+            name="PurchaseOrder",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('po_number', models.CharField(max_length=50, unique=True)),
-                ('status', models.CharField(choices=[('draft', 'Nacrt'), ('sent', 'Poslano'), ('confirmed', 'Potvrdjeno'), ('partial', 'Djelomicno isporuceno'), ('received', 'Isporuceno'), ('invoiced', 'Fakturirano'), ('cancelled', 'Otkazano')], default='draft', max_length=20)),
-                ('priority', models.CharField(choices=[('low', 'Nizak'), ('normal', 'Normalan'), ('high', 'Visok'), ('urgent', 'Hitno')], default='normal', max_length=10)),
-                ('order_date', models.DateField(default=django.utils.timezone.now)),
-                ('expected_delivery', models.DateField(blank=True, null=True)),
-                ('actual_delivery', models.DateField(blank=True, null=True)),
-                ('subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('tax_amount', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('total', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('notes', models.TextField(blank=True, default='')),
-                ('internal_note', models.TextField(blank=True, default='')),
-                ('match_status', models.CharField(choices=[('unmatched', 'Neupareno'), ('matched', 'Upareno'), ('mismatch', 'Nepodudaranje'), ('approved', 'Odobreno')], default='unmatched', max_length=20)),
-                ('match_diff_amount', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('approved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='po_approved', to=settings.AUTH_USER_MODEL)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='po_created', to=settings.AUTH_USER_MODEL)),
-                ('matched_invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='matched_po', to='invoicing.invoice')),
-                ('supplier', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='purchase_orders', to='partners.partner')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("po_number", models.CharField(max_length=50, unique=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Nacrt"),
+                            ("sent", "Poslano"),
+                            ("confirmed", "Potvrdjeno"),
+                            ("partial", "Djelomicno isporuceno"),
+                            ("received", "Isporuceno"),
+                            ("invoiced", "Fakturirano"),
+                            ("cancelled", "Otkazano"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[("low", "Nizak"), ("normal", "Normalan"), ("high", "Visok"), ("urgent", "Hitno")],
+                        default="normal",
+                        max_length=10,
+                    ),
+                ),
+                ("order_date", models.DateField(default=django.utils.timezone.now)),
+                ("expected_delivery", models.DateField(blank=True, null=True)),
+                ("actual_delivery", models.DateField(blank=True, null=True)),
+                ("subtotal", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("tax_amount", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("total", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("notes", models.TextField(blank=True, default="")),
+                ("internal_note", models.TextField(blank=True, default="")),
+                (
+                    "match_status",
+                    models.CharField(
+                        choices=[
+                            ("unmatched", "Neupareno"),
+                            ("matched", "Upareno"),
+                            ("mismatch", "Nepodudaranje"),
+                            ("approved", "Odobreno"),
+                        ],
+                        default="unmatched",
+                        max_length=20,
+                    ),
+                ),
+                ("match_diff_amount", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "approved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="po_approved",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="po_created",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "matched_invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="matched_po",
+                        to="invoicing.invoice",
+                    ),
+                ),
+                (
+                    "supplier",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="purchase_orders",
+                        to="partners.partner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Narudzbenica',
-                'verbose_name_plural': 'Narudzbenice',
-                'ordering': ['-created_at'],
+                "verbose_name": "Narudzbenica",
+                "verbose_name_plural": "Narudzbenice",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='PurchaseOrderItem',
+            name="PurchaseOrderItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(max_length=500)),
-                ('sku', models.CharField(blank=True, default='', max_length=50)),
-                ('quantity', models.DecimalField(decimal_places=3, max_digits=12)),
-                ('unit', models.CharField(default='kom', max_length=20)),
-                ('unit_price', models.DecimalField(decimal_places=4, max_digits=12)),
-                ('tax_rate', models.DecimalField(decimal_places=2, default=25, max_digits=5)),
-                ('line_total', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('line_tax', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('quantity_received', models.DecimalField(decimal_places=3, default=0, max_digits=12)),
-                ('inventory_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.inventoryitem')),
-                ('purchase_order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='procurement.purchaseorder')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("description", models.CharField(max_length=500)),
+                ("sku", models.CharField(blank=True, default="", max_length=50)),
+                ("quantity", models.DecimalField(decimal_places=3, max_digits=12)),
+                ("unit", models.CharField(default="kom", max_length=20)),
+                ("unit_price", models.DecimalField(decimal_places=4, max_digits=12)),
+                ("tax_rate", models.DecimalField(decimal_places=2, default=25, max_digits=5)),
+                ("line_total", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("line_tax", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("quantity_received", models.DecimalField(decimal_places=3, default=0, max_digits=12)),
+                (
+                    "inventory_item",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="inventory.inventoryitem",
+                    ),
+                ),
+                (
+                    "purchase_order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="procurement.purchaseorder",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka narudzbenice',
+                "verbose_name": "Stavka narudzbenice",
             },
         ),
         migrations.CreateModel(
-            name='SupplierPriceList',
+            name="SupplierPriceList",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('agreed_price', models.DecimalField(decimal_places=4, max_digits=12)),
-                ('valid_from', models.DateField(default=django.utils.timezone.now)),
-                ('valid_until', models.DateField(blank=True, null=True)),
-                ('min_quantity', models.DecimalField(decimal_places=3, default=1, max_digits=12)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company')),
-                ('inventory_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.inventoryitem')),
-                ('supplier', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='price_lists', to='partners.partner')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("agreed_price", models.DecimalField(decimal_places=4, max_digits=12)),
+                ("valid_from", models.DateField(default=django.utils.timezone.now)),
+                ("valid_until", models.DateField(blank=True, null=True)),
+                ("min_quantity", models.DecimalField(decimal_places=3, default=1, max_digits=12)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="companies.company"
+                    ),
+                ),
+                (
+                    "inventory_item",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="inventory.inventoryitem"),
+                ),
+                (
+                    "supplier",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="price_lists", to="partners.partner"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Cjenik dobavljaca',
-                'unique_together': {('supplier', 'inventory_item', 'valid_from')},
+                "verbose_name": "Cjenik dobavljaca",
+                "unique_together": {("supplier", "inventory_item", "valid_from")},
             },
         ),
     ]

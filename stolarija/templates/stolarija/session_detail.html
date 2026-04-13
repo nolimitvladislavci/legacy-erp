@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block title %}{{ session.address|default:"Sesija" }} — Stolarija{% endblock %}
-{% block page_title %}📋 Pregled sesije{% endblock %}
+{% block page_title %}Pregled sesije{% endblock %}
 
 {% block content %}
 <div class="fx-container fx-py-3">
@@ -26,6 +26,11 @@
             &nbsp;|&nbsp;
             <i class="fas fa-user me-1"></i> {{ session.created_by|default:"—" }}
           </div>
+          {% if session.latitude and session.longitude %}
+          <div class="fx-text-muted mt-1" style="font-size:.75rem">
+            <i class="fas fa-map-marker-alt me-1"></i> {{ session.latitude|floatformat:5 }}, {{ session.longitude|floatformat:5 }}
+          </div>
+          {% endif %}
           {% if session.notes %}
           <div class="fx-text-muted mt-1" style="font-size:.82rem">{{ session.notes }}</div>
           {% endif %}
@@ -62,8 +67,6 @@
           <tbody>
             {% for m in measurements %}
             <tr>
-              <td>
-                </td>
               <td style="font-weight:800;color:var(--gold)">{{ m.position_number }}</td>
               <td>{{ m.location_note|default:"—" }}
                 {% if m.floor > 0 %}<br><small class="fx-text-muted">Kat {{ m.floor }}</small>{% endif %}
@@ -71,10 +74,19 @@
               <td>
                 <strong class="fx-text-gold">{{ m.width_mm }} × {{ m.height_mm }}</strong>
                 <small class="fx-text-muted">mm</small>
+                {% if m.depth_mm %}<br><small class="fx-text-muted">Dubina: {{ m.depth_mm }}mm</small>{% endif %}
               </td>
               <td>
                 {{ m.get_element_type_display }}
                 <br><small class="fx-text-muted">{{ m.get_wing_config_display }}</small>
+                {% if m.element_type == 'interior_door' %}
+                  {% if m.swing_direction %}<br><small class="fx-text-muted">{{ m.get_swing_direction_display }}</small>{% endif %}
+                  {% if m.door_position %}<br><small class="fx-text-muted">{{ m.get_door_position_display }}</small>{% endif %}
+                {% endif %}
+                {% if m.element_type == 'mosquito' %}
+                  {% if m.mesh_type %}<br><small class="fx-text-muted">{{ m.mesh_type }}</small>{% endif %}
+                  {% if m.mounting_type %}<br><small class="fx-text-muted">{{ m.mounting_type }}</small>{% endif %}
+                {% endif %}
               </td>
               <td>{{ m.quantity }}</td>
               <td>{{ m.total_area_m2 }} m²</td>
@@ -90,7 +102,7 @@
           </tbody>
           <tfoot>
             <tr class="fw-bold">
-              <td colspan="4" class="text-end fx-text-muted">Ukupno:</td>
+              <td colspan="5" class="text-end fx-text-muted">Ukupno:</td>
               <td class="fx-text-gold">{{ total_area }} m²</td>
               <td></td>
             </tr>
@@ -138,7 +150,7 @@
   <!-- Postojeće ponude -->
   {% with offers=session.offers.all %}
   {% if offers %}
-  <div class="fx-card">
+  <div class="fx-card fx-mb-3">
     <div class="fx-card-header">
       <i class="fas fa-file-alt me-2"></i> Ponude
     </div>
@@ -163,6 +175,29 @@
   </div>
   {% endif %}
   {% endwith %}
+
+  <!-- Garancija / primopredaja -->
+  {% if session.warranty %}
+  <div class="fx-card fx-mb-3" style="border-color:rgba(34,197,94,.3)">
+    <div class="fx-card-header">
+      <i class="fas fa-shield-alt me-2 text-success"></i> Garancija
+    </div>
+    <div class="fx-card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ session.warranty.warranty_number }}</strong>
+          <div class="fx-text-muted" style="font-size:.82rem">
+            Trajanje: {{ session.warranty.valid_years }} god.
+            {% if session.warranty.handover_date %}| Primopredaja: {{ session.warranty.handover_date|date:"d.m.Y" }}{% endif %}
+          </div>
+        </div>
+        <a href="{% url 'stolarija:warranty_public' session.warranty.qr_token %}" class="btn btn-sm btn-outline-success" target="_blank">
+          <i class="fas fa-qrcode me-1"></i> Portal
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}

@@ -4,35 +4,50 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0019_rename_documents_a_company_audit_ts_idx_documents_a_company_163a9c_idx_and_more'),
+        ("documents", "0019_rename_documents_a_company_audit_ts_idx_documents_a_company_163a9c_idx_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='arhivaentry',
-            name='email_open_count',
-            field=models.PositiveSmallIntegerField(default=0, verbose_name='Broj otvaranja'),
+            model_name="arhivaentry",
+            name="email_open_count",
+            field=models.PositiveSmallIntegerField(default=0, verbose_name="Broj otvaranja"),
         ),
         migrations.AddField(
-            model_name='arhivaentry',
-            name='email_opened_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Email otvoren'),
+            model_name="arhivaentry",
+            name="email_opened_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Email otvoren"),
         ),
         migrations.AddField(
-            model_name='arhivaentry',
-            name='email_sent_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Email poslan'),
+            model_name="arhivaentry",
+            name="email_sent_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Email poslan"),
         ),
         migrations.AddField(
-            model_name='arhivaentry',
-            name='email_sent_to',
-            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Email primatelj'),
+            model_name="arhivaentry",
+            name="email_sent_to",
+            field=models.CharField(blank=True, default="", max_length=255, verbose_name="Email primatelj"),
         ),
         migrations.AlterField(
-            model_name='arhivaentry',
-            name='source_type',
-            field=models.CharField(choices=[('invoice_out', 'Izlazni račun'), ('invoice_in', 'Ulazni račun (smart import)'), ('eracun', 'e-Račun (FINA/XML)'), ('document', 'Dokument (ručni upload)'), ('fiscal_cert', 'FINA certifikat'), ('otpremnica', 'Otpremnica'), ('primka', 'Primka'), ('otkupni_blok', 'Otkupni blok'), ('cmr', 'CMR'), ('pos_receipt', 'POS račun'), ('email_in', 'Ulazni email (URA auto-import)')], max_length=30, verbose_name='Tip izvora'),
+            model_name="arhivaentry",
+            name="source_type",
+            field=models.CharField(
+                choices=[
+                    ("invoice_out", "Izlazni račun"),
+                    ("invoice_in", "Ulazni račun (smart import)"),
+                    ("eracun", "e-Račun (FINA/XML)"),
+                    ("document", "Dokument (ručni upload)"),
+                    ("fiscal_cert", "FINA certifikat"),
+                    ("otpremnica", "Otpremnica"),
+                    ("primka", "Primka"),
+                    ("otkupni_blok", "Otkupni blok"),
+                    ("cmr", "CMR"),
+                    ("pos_receipt", "POS račun"),
+                    ("email_in", "Ulazni email (URA auto-import)"),
+                ],
+                max_length=30,
+                verbose_name="Tip izvora",
+            ),
         ),
     ]

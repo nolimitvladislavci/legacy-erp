@@ -2,6 +2,7 @@
 Celery tasks for LIMIT Connect AI.
 Morning report: generates per-company AI summary and sends via WhatsApp/email.
 """
+
 import logging
 import os
 from datetime import timedelta
@@ -118,6 +119,7 @@ def _gather_company_context(company):
     # POS today
     try:
         from pos.models import POSReceipt
+
         receipts_today = POSReceipt.objects.filter(
             company=company,
             created_at__date=today,
@@ -135,6 +137,7 @@ def _gather_company_context(company):
     # Open invoices
     try:
         from invoicing.models import Invoice
+
         open_inv = Invoice.objects.filter(
             company=company,
             status__in=["sent", "overdue"],
@@ -151,6 +154,7 @@ def _gather_company_context(company):
     # Low stock items
     try:
         from inventory.models import InventoryItem
+
         low = InventoryItem.objects.filter(
             company=company,
             quantity__lte=F("reorder_level"),
@@ -162,6 +166,7 @@ def _gather_company_context(company):
     # Active funds
     try:
         from intelligence.models import FundOpportunity
+
         ctx["active_funds"] = FundOpportunity.objects.filter(status="aktivan").count()
     except DatabaseError:
         ctx["active_funds"] = 0
@@ -169,19 +174,24 @@ def _gather_company_context(company):
     # Overdue invoices (dospjele fakture)
     try:
         from invoicing.models import Invoice
+
         overdue = Invoice.objects.filter(
             company=company,
-            status__in=['SENT', 'UNPAID', 'OVERDUE'],
+            status__in=["SENT", "UNPAID", "OVERDUE"],
             date_due__lt=today,
-        ).order_by('date_due')[:5]
+        ).order_by("date_due")[:5]
         ctx["overdue_invoices"] = [
-            {"number": inv.number, "client": inv.client_name,
-             "total": float(inv.total or 0),
-             "days": (today - inv.date_due).days}
+            {
+                "number": inv.number,
+                "client": inv.client_name,
+                "total": float(inv.total or 0),
+                "days": (today - inv.date_due).days,
+            }
             for inv in overdue
         ]
         ctx["overdue_count"] = Invoice.objects.filter(
-            company=company, status__in=['SENT', 'UNPAID', 'OVERDUE'],
+            company=company,
+            status__in=["SENT", "UNPAID", "OVERDUE"],
             date_due__lt=today,
         ).count()
     except (ValueError, TypeError):
@@ -191,9 +201,10 @@ def _gather_company_context(company):
     # Open helpdesk tickets
     try:
         from helpdesk.models import Ticket
+
         open_tickets = Ticket.objects.filter(
             company=company,
-            status__in=['open', 'in_progress'],
+            status__in=["open", "in_progress"],
         ).count()
         ctx["open_tickets"] = open_tickets
     except DatabaseError:
@@ -202,15 +213,15 @@ def _gather_company_context(company):
     # Bank unmatched transactions
     try:
         from konto.models import BankTransaction
-        ctx["unmatched_transactions"] = BankTransaction.objects.filter(
-            company=company, status='unmatched'
-        ).count()
+
+        ctx["unmatched_transactions"] = BankTransaction.objects.filter(company=company, status="unmatched").count()
     except DatabaseError:
         ctx["unmatched_transactions"] = 0
 
     # Worktime anomalies (today)
     try:
         from worktime.models import AnomalyReport
+
         ctx["worktime_anomalies"] = AnomalyReport.objects.filter(
             company=company,
             created_at__date=today,
@@ -230,6 +241,7 @@ def _generate_report_with_ai(company, context):
 
     try:
         import anthropic
+
         client = anthropic.Anthropic(api_key=api_key)
 
         parts = [
@@ -261,7 +273,6 @@ def _generate_report_with_ai(company, context):
     except Exception as exc:
         logger.warning("AI generation failed, using fallback: %s", exc)
         return _fallback_report(context), 0
-
 
 
 def _fallback_report(ctx):
@@ -296,8 +307,8 @@ def fund_check_all(self):
 
     missions = AIAgentMission.objects.filter(
         is_active=True,
-        mission_type='fund_watch',
-    ).select_related('company')
+        mission_type="fund_watch",
+    ).select_related("company")
 
     count = 0
     for mission in missions:
@@ -319,13 +330,14 @@ def _check_funds_for_company(mission):
 
     company = mission.company
     active_funds = FundOpportunity.objects.filter(
-        status='aktivan',
+        status="aktivan",
         rok_prijave__gte=timezone.now().date(),
     )
 
     for fund in active_funds:
         existing = FundApplicationDraft.objects.filter(
-            company=company, fund_opportunity=fund,
+            company=company,
+            fund_opportunity=fund,
         ).exists()
         if existing:
             continue
@@ -333,15 +345,15 @@ def _check_funds_for_company(mission):
         # Basic eligibility check based on company type
         bt = company.business_type
         cs = fund.ciljna_skupina
-        if cs != 'svi' and bt != cs:
+        if cs != "svi" and bt != cs:
             continue
 
         FundApplicationDraft.objects.create(
             company=company,
             fund_opportunity=fund,
-            status='draft',
+            status="draft",
             eligibility_score=50,
-            eligibility_notes='Automatski detektirano — potreban review.',
+            eligibility_notes="Automatski detektirano — potreban review.",
         )
         logger.info("Created fund draft: %s for %s", fund.naziv, company.name)
 
@@ -353,8 +365,8 @@ def compliance_check_all(self):
 
     missions = AIAgentMission.objects.filter(
         is_active=True,
-        mission_type='compliance_watch',
-    ).select_related('company')
+        mission_type="compliance_watch",
+    ).select_related("company")
 
     count = 0
     for mission in missions:
@@ -362,14 +374,16 @@ def compliance_check_all(self):
             company = mission.company
             overdue = ComplianceWatchItem.objects.filter(
                 company=company,
-                status__in=['action_needed', 'in_progress'],
+                status__in=["action_needed", "in_progress"],
                 deadline__lt=timezone.now().date(),
             )
             if overdue.exists():
                 from core.whatsapp import send_text
+
                 items = ", ".join(o.law_reference for o in overdue[:5])
                 msg = "Compliance upozorenje za {}:\nIstekli rokovi: {}".format(
-                    company.name, items,
+                    company.name,
+                    items,
                 )
                 if mission.notify_target:
                     send_text(mission.notify_target, msg, company_id=str(company.id))
@@ -388,8 +402,8 @@ def campaign_suggestions_all(self):
 
     missions = AIAgentMission.objects.filter(
         is_active=True,
-        mission_type='campaign_planner',
-    ).select_related('company')
+        mission_type="campaign_planner",
+    ).select_related("company")
 
     count = 0
     for mission in missions:
@@ -401,9 +415,9 @@ def campaign_suggestions_all(self):
                 title="AI prijedlog kampanje — {}".format(
                     timezone.now().strftime("%d.%m.%Y"),
                 ),
-                campaign_type='promo',
-                channel=mission.notify_channel if mission.notify_channel != 'chat' else 'whatsapp',
-                status='draft',
+                campaign_type="promo",
+                channel=mission.notify_channel if mission.notify_channel != "chat" else "whatsapp",
+                status="draft",
                 ai_suggestion=True,
                 message_template="AI ce generirati sadrzaj kampanje nakon odobrenja.",
                 created_by=mission.created_by,
@@ -420,22 +434,23 @@ def campaign_suggestions_all(self):
 # BORG FENIX: Narodne Novine RSS Feed — automatska asimilacija zakona
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fetch_nn_feed',
-             time_limit=3600, soft_time_limit=3500)
+
+@shared_task(bind=True, max_retries=3, name="limit_connect_ai.fetch_nn_feed", time_limit=3600, soft_time_limit=3500)
 def fetch_and_process_nn_feed(self):
     """
     Svakih 6h: dohvati NN RSS, parsiraj zakone, LLM ekstrakcija.
     Retry: 3 pokušaja, 15 min između.
     """
-    logger.info('[BORG] Započinjem asimilaciju NN feeda...')
+    logger.info("[BORG] Započinjem asimilaciju NN feeda...")
     try:
         from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
+
         service = NNFeedScraperService()
         result = service.process_feed()
-        logger.info('[BORG] NN feed završen: %s', result)
+        logger.info("[BORG] NN feed završen: %s", result)
         return result
     except ImportError as exc:
-        logger.error('[BORG] Kritična greška u NN feed tasku: %s', exc)
+        logger.error("[BORG] Kritična greška u NN feed tasku: %s", exc)
         raise self.retry(exc=exc, countdown=60 * 15)
 
 
@@ -445,7 +460,8 @@ def fetch_and_process_nn_feed(self):
 # Troslojni napad: WhatsApp klijent + In-app + WhatsApp superadmin
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(bind=True, max_retries=2, name='limit_connect_ai.fenix_post_import_scan')
+
+@shared_task(bind=True, max_retries=2, name="limit_connect_ai.fenix_post_import_scan")
 def fenix_post_import_scan(self, company_id, project_id=None):
     """
     FENIX orkestrator — pokreće se automatski nakon data_migration COMPLETED.
@@ -467,38 +483,44 @@ def fenix_post_import_scan(self, company_id, project_id=None):
     try:
         company = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
-        logger.error('[FENIX] Company %s ne postoji', company_id)
-        return {'error': 'Company not found'}
+        logger.error("[FENIX] Company %s ne postoji", company_id)
+        return {"error": "Company not found"}
 
-    logger.info('[FENIX] Post-import scan za %s (project=%s)', company.name, project_id)
+    logger.info("[FENIX] Post-import scan za %s (project=%s)", company.name, project_id)
 
     # ── 1. Opportunity Scan ──────────────────────────────────────────
     scan_result = match_opportunities_for_company(company)
-    opp_count = scan_result['count']
-    total_savings = scan_result['total_savings']
+    opp_count = scan_result["count"]
+    total_savings = scan_result["total_savings"]
 
     # ── 2. Bonitet Check — novouvezeni partneri s OIB-om ─────────────
     risk_count = 0
     high_risk_partners = []
 
-    partners_with_oib = Partner.objects.filter(
-        company=company,
-        oib__isnull=False,
-    ).exclude(oib='').order_by('-created_at')[:50]  # Max 50 za performanse
+    partners_with_oib = (
+        Partner.objects.filter(
+            company=company,
+            oib__isnull=False,
+        )
+        .exclude(oib="")
+        .order_by("-created_at")[:50]
+    )  # Max 50 za performanse
 
     for partner in partners_with_oib:
         try:
             risk = get_supplier_risk(partner.oib, company_id=str(company.pk))
-            if risk.get('risk_level') in ('HIGH', 'CRITICAL'):
+            if risk.get("risk_level") in ("HIGH", "CRITICAL"):
                 risk_count += 1
-                high_risk_partners.append({
-                    'name': partner.name,
-                    'oib': partner.oib,
-                    'risk': risk['risk_level'],
-                    'note': risk.get('note', ''),
-                })
+                high_risk_partners.append(
+                    {
+                        "name": partner.name,
+                        "oib": partner.oib,
+                        "risk": risk["risk_level"],
+                        "note": risk.get("note", ""),
+                    }
+                )
         except (ValueError, TypeError) as e:
-            logger.debug('[FENIX] Bonitet check skip za %s: %s', partner.oib, e)
+            logger.debug("[FENIX] Bonitet check skip za %s: %s", partner.oib, e)
 
     # ── 3. Master Report ─────────────────────────────────────────────
     report = generate_onboarding_report(company)
@@ -506,24 +528,25 @@ def fenix_post_import_scan(self, company_id, project_id=None):
     # Dodaj rizik sekciju ako ima
     if risk_count > 0:
         risk_lines = [
-            '',
-            f'*Upozorenje:* {risk_count} dobavljač(a) s povišenim rizikom:',
+            "",
+            f"*Upozorenje:* {risk_count} dobavljač(a) s povišenim rizikom:",
         ]
         for rp in high_risk_partners[:5]:
-            risk_lines.append(f'  - {rp["name"]} (OIB: {rp["oib"]}) — {rp["risk"]}')
+            risk_lines.append(f"  - {rp['name']} (OIB: {rp['oib']}) — {rp['risk']}")
         if risk_count > 5:
-            risk_lines.append(f'  ... i još {risk_count - 5}')
-        report += '\n'.join(risk_lines)
+            risk_lines.append(f"  ... i još {risk_count - 5}")
+        report += "\n".join(risk_lines)
 
     # Dodaj migration info
     if project_id:
         try:
             from data_migration.models import MigrationProject
+
             project = MigrationProject.objects.get(pk=project_id)
             report += (
                 f'\n\n_Import "{project.name}": '
-                f'{project.records_created} kreirano, '
-                f'{project.records_updated} ažurirano._'
+                f"{project.records_created} kreirano, "
+                f"{project.records_updated} ažurirano._"
             )
         except ObjectDoesNotExist:
             pass
@@ -534,71 +557,88 @@ def fenix_post_import_scan(self, company_id, project_id=None):
     admin_user = None
     try:
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         # User ↔ Company veza ide preko accounts.CompanyMembership
         from accounts.models import CompanyMembership
-        membership = CompanyMembership.objects.filter(
-            company=company,
-        ).select_related('user__profile').first()
+
+        membership = (
+            CompanyMembership.objects.filter(
+                company=company,
+            )
+            .select_related("user__profile")
+            .first()
+        )
         admin_user = membership.user if membership else None
 
         if not admin_user:
             # Fallback: creator projekta
-            admin_user = User.objects.filter(
-                is_active=True, is_staff=True,
-            ).select_related('profile').first()
+            admin_user = (
+                User.objects.filter(
+                    is_active=True,
+                    is_staff=True,
+                )
+                .select_related("profile")
+                .first()
+            )
 
         if admin_user:
-            phone = getattr(getattr(admin_user, 'profile', None), 'phone', None)
+            phone = getattr(getattr(admin_user, "profile", None), "phone", None)
             if phone:
                 from core.whatsapp import send_text
+
                 send_text(phone, report, company_id=str(company.pk))
-                logger.info('[FENIX] WhatsApp poslan klijentu %s', phone)
+                logger.info("[FENIX] WhatsApp poslan klijentu %s", phone)
     except DatabaseError as e:
-        logger.warning('[FENIX] Klijent WhatsApp failed: %s', e)
+        logger.warning("[FENIX] Klijent WhatsApp failed: %s", e)
 
     # 4b. Klijent — In-App notifikacija
     try:
         from notifications.services import notify as notify_inapp
+
         if admin_user:
             notify_inapp(
                 recipient=admin_user,
-                notification_type='system',
-                title='Analiza završena!',
+                notification_type="system",
+                title="Analiza završena!",
                 message=(
-                    f'Pronađeno {opp_count} prilika za uštedu od {total_savings:,.2f} EUR. '
-                    f'{f"{risk_count} rizičnih dobavljača detektirano." if risk_count else "Svi dobavljači OK."}'
+                    f"Pronađeno {opp_count} prilika za uštedu od {total_savings:,.2f} EUR. "
+                    f"{f'{risk_count} rizičnih dobavljača detektirano.' if risk_count else 'Svi dobavljači OK.'}"
                 ),
-                url='/data-migration/',
+                url="/data-migration/",
                 company=company,
             )
     except ImportError as e:
-        logger.warning('[FENIX] In-app notifikacija failed: %s', e)
+        logger.warning("[FENIX] In-app notifikacija failed: %s", e)
 
     # 4c. Superadmin — WhatsApp
     try:
         from core.notify import notify as notify_admin
+
         notify_admin(
-            'INFO',
-            f'Klijent *{company.name}* uspješno migriran.\n'
-            f'Pronađeno *{opp_count} prilika* ({total_savings:,.2f} EUR) '
-            f'i *{risk_count} rizik(a)*.',
+            "INFO",
+            f"Klijent *{company.name}* uspješno migriran.\n"
+            f"Pronađeno *{opp_count} prilika* ({total_savings:,.2f} EUR) "
+            f"i *{risk_count} rizik(a)*.",
         )
     except ImportError as e:
-        logger.warning('[FENIX] Superadmin notify failed: %s', e)
+        logger.warning("[FENIX] Superadmin notify failed: %s", e)
 
     result = {
-        'company': company.name,
-        'opportunities': opp_count,
-        'total_savings': str(total_savings),
-        'risks': risk_count,
-        'high_risk_partners': high_risk_partners[:5],
-        'report_sent': True,
+        "company": company.name,
+        "opportunities": opp_count,
+        "total_savings": str(total_savings),
+        "risks": risk_count,
+        "high_risk_partners": high_risk_partners[:5],
+        "report_sent": True,
     }
 
     logger.info(
-        '[FENIX] Scan komplet: %s → %d prilika, %.2f EUR, %d rizika',
-        company.name, opp_count, total_savings, risk_count,
+        "[FENIX] Scan komplet: %s → %d prilika, %.2f EUR, %d rizika",
+        company.name,
+        opp_count,
+        total_savings,
+        risk_count,
     )
 
     return result
@@ -608,7 +648,8 @@ def fenix_post_import_scan(self, company_id, project_id=None):
 # BORG FENIX: AdaptationEngine — Safety Gateway + Scheduled Execution
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(name='limit_connect_ai.request_adaptation_approval')
+
+@shared_task(name="limit_connect_ai.request_adaptation_approval")
 def request_adaptation_approval(rule_id):
     """
     Safety Gateway: FENIX traži odobrenje prije mijenjanja poreznih stopa.
@@ -619,49 +660,50 @@ def request_adaptation_approval(rule_id):
     from limit_connect_ai.models_knowledge_graph import AdaptationRule
 
     try:
-        rule = AdaptationRule.objects.select_related('regulatory_update').get(pk=rule_id)
+        rule = AdaptationRule.objects.select_related("regulatory_update").get(pk=rule_id)
     except AdaptationRule.DoesNotExist:
-        logger.error('[ADAPT] Rule %s ne postoji', rule_id)
+        logger.error("[ADAPT] Rule %s ne postoji", rule_id)
         return
 
     payload = rule.action_payload
-    effective = payload.get('effective_date', 'N/A')
+    effective = payload.get("effective_date", "N/A")
 
     msg = (
-        f'*FENIX REGULATORNA AKCIJA*\n\n'
-        f'Zakon: {rule.regulatory_update.title[:100]}\n'
-        f'Promjena: {payload.get("country", "HR")} PDV '
-        f'{payload.get("old_rate")}% → {payload.get("new_rate")}%\n'
-        f'Stupa na snagu: {effective}\n\n'
-        f'Sustav će kreirati novu stopu i prebaciti artikle. '
-        f'Povijesni POS bonovi i fakture ostaju netaknuti.\n\n'
-        f'Odobrite na: limit-connect.com/admin/\n'
-        f'Ili odgovorite DA za autorizaciju.'
+        f"*FENIX REGULATORNA AKCIJA*\n\n"
+        f"Zakon: {rule.regulatory_update.title[:100]}\n"
+        f"Promjena: {payload.get('country', 'HR')} PDV "
+        f"{payload.get('old_rate')}% → {payload.get('new_rate')}%\n"
+        f"Stupa na snagu: {effective}\n\n"
+        f"Sustav će kreirati novu stopu i prebaciti artikle. "
+        f"Povijesni POS bonovi i fakture ostaju netaknuti.\n\n"
+        f"Odobrite na: limit-connect.com/admin/\n"
+        f"Ili odgovorite DA za autorizaciju."
     )
 
-    notify('ACTION', msg)
+    notify("ACTION", msg)
 
     # In-app notifikacija
     try:
         from django.contrib.auth import get_user_model
 
         from notifications.services import notify as notify_inapp
+
         User = get_user_model()
         for admin in User.objects.filter(is_staff=True, is_superuser=True, is_active=True)[:3]:
             notify_inapp(
                 recipient=admin,
-                notification_type='system',
-                title='Odobrenje potrebno — promjena PDV stope',
-                message=f'{payload.get("country")} {payload.get("old_rate")}% → {payload.get("new_rate")}%. Stupa na snagu: {effective}',
-                url='/admin/limit_connect_ai/adaptationrule/',
+                notification_type="system",
+                title="Odobrenje potrebno — promjena PDV stope",
+                message=f"{payload.get('country')} {payload.get('old_rate')}% → {payload.get('new_rate')}%. Stupa na snagu: {effective}",
+                url="/admin/limit_connect_ai/adaptationrule/",
             )
     except DatabaseError as e:
-        logger.warning('[ADAPT] In-app notify failed: %s', e)
+        logger.warning("[ADAPT] In-app notify failed: %s", e)
 
-    logger.info('[ADAPT] Approval request sent for rule %s', rule_id)
+    logger.info("[ADAPT] Approval request sent for rule %s", rule_id)
 
 
-@shared_task(bind=True, max_retries=2, name='limit_connect_ai.execute_approved_adaptation')
+@shared_task(bind=True, max_retries=2, name="limit_connect_ai.execute_approved_adaptation")
 def execute_approved_adaptation(self, rule_id):
     """
     Izvršava odobrenu AdaptationRule.
@@ -676,31 +718,31 @@ def execute_approved_adaptation(self, rule_id):
     try:
         rule = AdaptationRule.objects.get(pk=rule_id)
     except AdaptationRule.DoesNotExist:
-        logger.error('[ADAPT] Rule %s ne postoji', rule_id)
-        return {'error': 'Rule not found'}
+        logger.error("[ADAPT] Rule %s ne postoji", rule_id)
+        return {"error": "Rule not found"}
 
     if rule.is_executed:
-        logger.info('[ADAPT] Rule %s već izvršen, preskačem', rule_id)
-        return {'status': 'already_executed'}
+        logger.info("[ADAPT] Rule %s već izvršen, preskačem", rule_id)
+        return {"status": "already_executed"}
 
     try:
         success, count = AdaptationEngine.execute_tax_rate_change(rule)
 
         if not success:
-            raise Exception('AdaptationEngine vratio False — provjerite logove')
+            raise Exception("AdaptationEngine vratio False — provjerite logove")
 
-        logger.info('[ADAPT] Rule %s izvršen: %d artikala ažurirano', rule_id, count)
+        logger.info("[ADAPT] Rule %s izvršen: %d artikala ažurirano", rule_id, count)
         return {
-            'status': 'completed',
-            'updated_items': count,
-            'rule_id': str(rule_id),
+            "status": "completed",
+            "updated_items": count,
+            "rule_id": str(rule_id),
         }
 
     except (ValueError, TypeError) as exc:
-        logger.error('[ADAPT] Execution failed za rule %s: %s', rule_id, exc)
+        logger.error("[ADAPT] Execution failed za rule %s: %s", rule_id, exc)
         try:
             rule.error_log = str(exc)[:500]
-            rule.save(update_fields=['error_log'])
+            rule.save(update_fields=["error_log"])
         except (ValueError, TypeError):
             pass
         raise self.retry(exc=exc, countdown=300)
@@ -710,7 +752,8 @@ def execute_approved_adaptation(self, rule_id):
 # BORG FENIX: B2B Interceptor — skenira ulazne e-Račune za rizike i olakšice
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fenix_intercept_incoming')
+
+@shared_task(bind=True, max_retries=3, name="limit_connect_ai.fenix_intercept_incoming")
 def fenix_intercept_incoming(self, eracun_id):
     """
     FENIX B2B Interceptor — okida se automatski kad stigne ulazni e-Račun.
@@ -723,13 +766,13 @@ def fenix_intercept_incoming(self, eracun_id):
     from fiskalizacija.fina_bonitet_service import get_supplier_risk
 
     try:
-        racun = ERacun.objects.select_related('company').get(pk=eracun_id)
+        racun = ERacun.objects.select_related("company").get(pk=eracun_id)
     except ERacun.DoesNotExist:
-        logger.warning('[FENIX B2B] ERacun %s ne postoji', eracun_id)
+        logger.warning("[FENIX B2B] ERacun %s ne postoji", eracun_id)
         return
 
     company = racun.company
-    issuer_oib = racun.issuer_oib or ''
+    issuer_oib = racun.issuer_oib or ""
     alerts = []
 
     # ── 1. Risk Shield — bonitet dobavljača ──────────────────────────
@@ -737,41 +780,45 @@ def fenix_intercept_incoming(self, eracun_id):
     if issuer_oib and len(issuer_oib) >= 8:
         try:
             risk_data = get_supplier_risk(issuer_oib, company_id=str(company.pk))
-            if risk_data.get('risk_level') in ('HIGH', 'CRITICAL'):
-                alerts.append({
-                    'type': 'risk',
-                    'level': risk_data['risk_level'],
-                    'message': (
-                        f'Dobavljač {racun.issuer_name} (OIB: {issuer_oib}) '
-                        f'ima {risk_data["risk_label"]}. '
-                        f'{risk_data.get("note", "Preporučujemo oprez pri plaćanju.")}'
-                    ),
-                })
+            if risk_data.get("risk_level") in ("HIGH", "CRITICAL"):
+                alerts.append(
+                    {
+                        "type": "risk",
+                        "level": risk_data["risk_level"],
+                        "message": (
+                            f"Dobavljač {racun.issuer_name} (OIB: {issuer_oib}) "
+                            f"ima {risk_data['risk_label']}. "
+                            f"{risk_data.get('note', 'Preporučujemo oprez pri plaćanju.')}"
+                        ),
+                    }
+                )
                 logger.warning(
-                    '[FENIX B2B] RIZIK: %s od %s — %s',
-                    racun.invoice_number, racun.issuer_name, risk_data['risk_level'],
+                    "[FENIX B2B] RIZIK: %s od %s — %s",
+                    racun.invoice_number,
+                    racun.issuer_name,
+                    risk_data["risk_level"],
                 )
         except (ValueError, TypeError) as e:
-            logger.debug('[FENIX B2B] Bonitet check skip: %s', e)
+            logger.debug("[FENIX B2B] Bonitet check skip: %s", e)
 
     # ── 2. Opportunity Trigger — ključne riječi u stavkama ───────────
     opportunity_keywords = {
-        'solar': 'green_incentive',
-        'fotovoltai': 'green_incentive',
-        'elektricno vozilo': 'green_incentive',
-        'ev charg': 'green_incentive',
-        'edukacija': 'digital_voucher',
-        'softver': 'digital_voucher',
-        'erp': 'digital_voucher',
-        'digitalizacija': 'digital_voucher',
-        'webshop': 'digital_voucher',
-        'cyber': 'digital_voucher',
+        "solar": "green_incentive",
+        "fotovoltai": "green_incentive",
+        "elektricno vozilo": "green_incentive",
+        "ev charg": "green_incentive",
+        "edukacija": "digital_voucher",
+        "softver": "digital_voucher",
+        "erp": "digital_voucher",
+        "digitalizacija": "digital_voucher",
+        "webshop": "digital_voucher",
+        "cyber": "digital_voucher",
     }
 
     matched_opportunities = set()
     try:
         for item in racun.items.all():
-            desc_lower = (item.description or '').lower()
+            desc_lower = (item.description or "").lower()
             for keyword, opp_type in opportunity_keywords.items():
                 if keyword in desc_lower:
                     matched_opportunities.add((keyword, opp_type))
@@ -779,73 +826,82 @@ def fenix_intercept_incoming(self, eracun_id):
         pass
 
     if matched_opportunities:
-        kw_list = ', '.join(kw for kw, _ in matched_opportunities)
-        alerts.append({
-            'type': 'opportunity',
-            'message': (
-                f'Račun od {racun.issuer_name} sadrži stavke vezane za poticaje: {kw_list}. '
-                f'Provjerite dostupne olakšice na Dashboard-u.'
-            ),
-        })
-        logger.info('[FENIX B2B] Opportunity match: %s → %s', racun.invoice_number, kw_list)
+        kw_list = ", ".join(kw for kw, _ in matched_opportunities)
+        alerts.append(
+            {
+                "type": "opportunity",
+                "message": (
+                    f"Račun od {racun.issuer_name} sadrži stavke vezane za poticaje: {kw_list}. "
+                    f"Provjerite dostupne olakšice na Dashboard-u."
+                ),
+            }
+        )
+        logger.info("[FENIX B2B] Opportunity match: %s → %s", racun.invoice_number, kw_list)
 
     # ── 3. Notifikacije (samo ako ima alertova) ──────────────────────
     if not alerts:
-        logger.debug('[FENIX B2B] %s od %s — čisto, nema alertova', racun.invoice_number, racun.issuer_name)
-        return {'status': 'clean', 'alerts': 0}
+        logger.debug("[FENIX B2B] %s od %s — čisto, nema alertova", racun.invoice_number, racun.issuer_name)
+        return {"status": "clean", "alerts": 0}
 
     # WhatsApp klijentu
     try:
         from accounts.models import CompanyMembership
-        membership = CompanyMembership.objects.filter(
-            company=company,
-        ).select_related('user__profile').first()
+
+        membership = (
+            CompanyMembership.objects.filter(
+                company=company,
+            )
+            .select_related("user__profile")
+            .first()
+        )
 
         if membership and membership.user:
-            phone = getattr(getattr(membership.user, 'profile', None), 'phone', None)
+            phone = getattr(getattr(membership.user, "profile", None), "phone", None)
             if phone:
                 from core.whatsapp import send_text
-                msg_parts = [f'*FENIX — Ulazni račun {racun.invoice_number}*\n']
+
+                msg_parts = [f"*FENIX — Ulazni račun {racun.invoice_number}*\n"]
                 for alert in alerts:
-                    if alert['type'] == 'risk':
-                        msg_parts.append(f'⚠️ RIZIK: {alert["message"]}')
-                    elif alert['type'] == 'opportunity':
-                        msg_parts.append(f'💡 PRILIKA: {alert["message"]}')
-                send_text(phone, '\n'.join(msg_parts), company_id=str(company.pk))
+                    if alert["type"] == "risk":
+                        msg_parts.append(f"⚠️ RIZIK: {alert['message']}")
+                    elif alert["type"] == "opportunity":
+                        msg_parts.append(f"💡 PRILIKA: {alert['message']}")
+                send_text(phone, "\n".join(msg_parts), company_id=str(company.pk))
     except DatabaseError as e:
-        logger.warning('[FENIX B2B] WhatsApp failed: %s', e)
+        logger.warning("[FENIX B2B] WhatsApp failed: %s", e)
 
     # In-App notifikacija
     try:
         from notifications.services import notify as notify_inapp
+
         if membership and membership.user:
-            title = f'Ulazni račun {racun.invoice_number}'
-            message = '; '.join(a['message'][:100] for a in alerts)
+            title = f"Ulazni račun {racun.invoice_number}"
+            message = "; ".join(a["message"][:100] for a in alerts)
             notify_inapp(
                 recipient=membership.user,
-                notification_type='system',
+                notification_type="system",
                 title=title,
                 message=message[:300],
-                url='/eracun/inbox/',
+                url="/eracun/inbox/",
                 company=company,
             )
     except ImportError as e:
-        logger.warning('[FENIX B2B] In-app notify failed: %s', e)
+        logger.warning("[FENIX B2B] In-app notify failed: %s", e)
 
     # Superadmin WhatsApp
     try:
         from core.notify import notify
+
         notify(
-            'INFO',
-            f'Ulazni račun za *{company.name}*: {racun.invoice_number} od {racun.issuer_name}\n'
-            f'Alertova: {len(alerts)} ({", ".join(a["type"] for a in alerts)})',
+            "INFO",
+            f"Ulazni račun za *{company.name}*: {racun.invoice_number} od {racun.issuer_name}\n"
+            f"Alertova: {len(alerts)} ({', '.join(a['type'] for a in alerts)})",
         )
     except ImportError:
         pass
 
-    logger.info('[FENIX B2B] %s: %d alertova obrađeno', racun.invoice_number, len(alerts))
-    return {'status': 'intercepted', 'alerts': len(alerts), 'details': alerts}
-
+    logger.info("[FENIX B2B] %s: %d alertova obrađeno", racun.invoice_number, len(alerts))
+    return {"status": "intercepted", "alerts": len(alerts), "details": alerts}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -855,7 +911,7 @@ def fenix_intercept_incoming(self, eracun_id):
 from celery import shared_task
 
 
-@shared_task(name='limit_connect_ai.classify_nn_updates')
+@shared_task(name="limit_connect_ai.classify_nn_updates")
 def classify_nn_updates():
     """
     Celery beat: svakih 6h, 30min nakon scrapera.
@@ -868,13 +924,13 @@ def classify_nn_updates():
     from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate, TenantRegulatoryImpact
     from limit_connect_ai.services.nn_classifier import classify_and_store
 
-    logger = logging.getLogger('borg.nn_classifier')
+    logger = logging.getLogger("borg.nn_classifier")
 
     # Find unclassified updates (processed by scraper but not yet per-tenant)
     updates = RegulatoryUpdate.objects.filter(
         is_processed=True,
         impact_score__gte=3,  # Skip trivial updates
-    ).order_by('-publication_date')[:20]
+    ).order_by("-publication_date")[:20]
 
     companies = Company.objects.filter(is_active=True)[:100]
     classified = 0
@@ -883,9 +939,7 @@ def classify_nn_updates():
     for update in updates:
         for company in companies:
             # Skip if already classified
-            if TenantRegulatoryImpact.objects.filter(
-                company=company, regulatory_update=update
-            ).exists():
+            if TenantRegulatoryImpact.objects.filter(company=company, regulatory_update=update).exists():
                 continue
 
             try:
@@ -894,9 +948,9 @@ def classify_nn_updates():
                 if impact and impact.is_relevant:
                     relevant += 1
             except Exception as e:
-                logger.debug('Classify error %s x %s: %s', update.pk, company.pk, e)
+                logger.debug("Classify error %s x %s: %s", update.pk, company.pk, e)
 
-    logger.info('NN Classification: %d classified, %d relevant', classified, relevant)
+    logger.info("NN Classification: %d classified, %d relevant", classified, relevant)
     return {"classified": classified, "relevant": relevant}
 
 
@@ -904,19 +958,20 @@ def classify_nn_updates():
 # CONTINUOUS GROWTH ENGINE — Trojstvo autonomno prati trendove
 # ═══════════════════════════════════════════════════════════════════════════
 
-@shared_task(bind=True, soft_time_limit=300, name='limit_connect_ai.tasks.growth_patrol')
+
+@shared_task(bind=True, soft_time_limit=300, name="limit_connect_ai.tasks.growth_patrol")
 def growth_patrol(self):
     """
     Dnevni patrol — Haiku skenira sustav i predlaže poboljšanja.
     Pokreće se svaku noć u 03:30 (Celery Beat).
-    
+
     Skenira:
     1. Korisničke greške (500 errori u zadnja 24h)
     2. Neiskorišteni moduli (enabled ali 0 zapisa)
     3. Performance problemi (spore stranice)
     4. Compliance gaps (radnici bez OIB, istekli certifikati)
     5. UX problemi (stranice s visokim bounce rate-om)
-    
+
     Rezultat: ImprovementSuggestion(source='system') → Trojstvo analizira
     """
     import os
@@ -933,69 +988,83 @@ def growth_patrol(self):
 
     # 1. Error scan — zadnja 24h
     try:
-        log_path = '/var/www/fina-connect/logs/django.log'
+        log_path = "/var/www/fina-connect/logs/django.log"
         if os.path.exists(log_path):
-            with open(log_path, 'r') as f:
+            with open(log_path, "r") as f:
                 lines = f.readlines()
-            recent_errors = [l for l in lines if 'ERROR' in l and now.strftime('%Y-%m-%d') in l]
+            recent_errors = [l for l in lines if "ERROR" in l and now.strftime("%Y-%m-%d") in l]
             if len(recent_errors) > 5:
-                findings.append({
-                    'title': f'{len(recent_errors)} errora u zadnja 24h',
-                    'desc': '\n'.join(recent_errors[-5:]),
-                    'category': 'workflow',
-                    'priority': 2,
-                })
+                findings.append(
+                    {
+                        "title": f"{len(recent_errors)} errora u zadnja 24h",
+                        "desc": "\n".join(recent_errors[-5:]),
+                        "category": "workflow",
+                        "priority": 2,
+                    }
+                )
     except (FileNotFoundError, PermissionError, IOError):
         pass
 
     # 2. Compliance gaps
     try:
         from worktime.models import EmployeeProfile
-        no_oib = EmployeeProfile.objects.filter(
-            tax_id='', is_terminated=False
-        ).exclude(user__is_active=False).count()
+
+        no_oib = EmployeeProfile.objects.filter(tax_id="", is_terminated=False).exclude(user__is_active=False).count()
         if no_oib > 0:
-            findings.append({
-                'title': f'{no_oib} radnika bez OIB-a',
-                'desc': 'Zakon o fiskalizaciji cl. 9 — kazna do 66.000 EUR po radniku.',
-                'category': 'workflow',
-                'priority': 1,
-            })
+            findings.append(
+                {
+                    "title": f"{no_oib} radnika bez OIB-a",
+                    "desc": "Zakon o fiskalizaciji cl. 9 — kazna do 66.000 EUR po radniku.",
+                    "category": "workflow",
+                    "priority": 1,
+                }
+            )
     except DatabaseError:
         pass
 
     # 3. Nefiskalizirani računi
     try:
         from pos.models import POSReceipt
-        unfiscalized = POSReceipt.objects.filter(
-            status='paid', jir__isnull=True,
-            created_at__gte=yesterday,
-        ).exclude(jir='').count()
+
+        unfiscalized = (
+            POSReceipt.objects.filter(
+                status="paid",
+                jir__isnull=True,
+                created_at__gte=yesterday,
+            )
+            .exclude(jir="")
+            .count()
+        )
         if unfiscalized > 0:
-            findings.append({
-                'title': f'{unfiscalized} racuna bez JIR-a (24h)',
-                'desc': 'Zakon o fiskalizaciji — rok 48h za fiskalizaciju.',
-                'category': 'fiscal',
-                'priority': 1,
-            })
+            findings.append(
+                {
+                    "title": f"{unfiscalized} racuna bez JIR-a (24h)",
+                    "desc": "Zakon o fiskalizaciji — rok 48h za fiskalizaciju.",
+                    "category": "fiscal",
+                    "priority": 1,
+                }
+            )
     except DatabaseError:
         pass
 
     # 4. Certifikati koji istječu
     try:
         from registration.models import CompanySubscription
+
         expiring = CompanySubscription.objects.filter(
             is_active=True,
             valid_until__lte=(now + timedelta(days=14)).date(),
             valid_until__gt=now.date(),
         ).count()
         if expiring > 0:
-            findings.append({
-                'title': f'{expiring} pretplata istjece u 14 dana',
-                'desc': 'Kontaktiraj korisnike za obnovu.',
-                'category': 'other',
-                'priority': 3,
-            })
+            findings.append(
+                {
+                    "title": f"{expiring} pretplata istjece u 14 dana",
+                    "desc": "Kontaktiraj korisnike za obnovu.",
+                    "category": "other",
+                    "priority": 3,
+                }
+            )
     except DatabaseError:
         pass
 
@@ -1008,7 +1077,7 @@ def growth_patrol(self):
     for f in findings:
         # Provjeri duplikat (isti naslov u zadnja 24h)
         exists = ImprovementSuggestion.objects.filter(
-            title=f['title'],
+            title=f["title"],
             created_at__gte=yesterday,
         ).exists()
         if exists:
@@ -1016,22 +1085,23 @@ def growth_patrol(self):
 
         s = ImprovementSuggestion.objects.create(
             company=platform,
-            source='system',
-            title=f['title'],
-            description=f['desc'],
-            category=f['category'],
-            priority=f['priority'],
-            trojstvo_status='pending',
+            source="system",
+            title=f["title"],
+            description=f["desc"],
+            category=f["category"],
+            priority=f["priority"],
+            trojstvo_status="pending",
         )
 
         # Pokreni Trojstvo analizu
         try:
             from pos.trojstvo_task import trojstvo_rijesi
+
             trojstvo_rijesi.delay(s.pk)
         except ImportError:
             pass
 
         created += 1
 
-    logger.info('Growth patrol: %d findings, %d new suggestions', len(findings), created)
-    return {'findings': len(findings), 'created': created}
+    logger.info("Growth patrol: %d findings, %d new suggestions", len(findings), created)
+    return {"findings": len(findings), "created": created}

@@ -5,33 +5,60 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0002_upgrade_company_add_taxrate'),
-        ('inventory', '0002_inventoryitem_barcode_inventoryitem_company_and_more'),
-        ('invoicing', '0005_fiscalconfig_email_from_and_more'),
-        ('partners', '0002_partner_contact_email_partner_contact_person_and_more'),
+        ("companies", "0002_upgrade_company_add_taxrate"),
+        ("inventory", "0002_inventoryitem_barcode_inventoryitem_company_and_more"),
+        ("invoicing", "0005_fiscalconfig_email_from_and_more"),
+        ("partners", "0002_partner_contact_email_partner_contact_person_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='companies.company', verbose_name='Tvrtka izdavatelj'),
+            model_name="invoice",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="companies.company",
+                verbose_name="Tvrtka izdavatelj",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='partner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='partners.partner', verbose_name='Partner (klijent)'),
+            model_name="invoice",
+            name="partner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="partners.partner",
+                verbose_name="Partner (klijent)",
+            ),
         ),
         migrations.AddField(
-            model_name='invoiceitem',
-            name='inventory_item',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_items', to='inventory.inventoryitem', verbose_name='Artikl iz zalihe'),
+            model_name="invoiceitem",
+            name="inventory_item",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoice_items",
+                to="inventory.inventoryitem",
+                verbose_name="Artikl iz zalihe",
+            ),
         ),
         migrations.AddField(
-            model_name='invoiceitem',
-            name='tax_rate_obj',
-            field=models.ForeignKey(blank=True, help_text='Veza na poreznu stopu iz registra', null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.taxrate', verbose_name='PDV stopa'),
+            model_name="invoiceitem",
+            name="tax_rate_obj",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Veza na poreznu stopu iz registra",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="companies.taxrate",
+                verbose_name="PDV stopa",
+            ),
         ),
     ]

@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('rental', '0005_add_assisted_area'),
+        ("rental", "0005_add_assisted_area"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='guest',
-            name='encrypted_document_number',
-            field=models.TextField(blank=True, default='', verbose_name='Enkriptirani br. dokumenta'),
+            model_name="guest",
+            name="encrypted_document_number",
+            field=models.TextField(blank=True, default="", verbose_name="Enkriptirani br. dokumenta"),
         ),
         migrations.AddField(
-            model_name='guest',
-            name='encrypted_first_name',
-            field=models.TextField(blank=True, default='', verbose_name='Enkriptirano ime'),
+            model_name="guest",
+            name="encrypted_first_name",
+            field=models.TextField(blank=True, default="", verbose_name="Enkriptirano ime"),
         ),
         migrations.AddField(
-            model_name='guest',
-            name='encrypted_last_name',
-            field=models.TextField(blank=True, default='', verbose_name='Enkriptirano prezime'),
+            model_name="guest",
+            name="encrypted_last_name",
+            field=models.TextField(blank=True, default="", verbose_name="Enkriptirano prezime"),
         ),
         migrations.AddField(
-            model_name='guest',
-            name='pii_encrypted',
-            field=models.BooleanField(default=False, verbose_name='PII enkriptirano'),
+            model_name="guest",
+            name="pii_encrypted",
+            field=models.BooleanField(default=False, verbose_name="PII enkriptirano"),
         ),
     ]

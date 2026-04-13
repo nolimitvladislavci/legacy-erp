@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0004_fiscalconfig_address_fiscalconfig_city_and_more'),
+        ("invoicing", "0004_fiscalconfig_address_fiscalconfig_city_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='email_from',
-            field=models.EmailField(blank=True, default='', max_length=255, verbose_name='Službeni Email'),
+            model_name="fiscalconfig",
+            name="email_from",
+            field=models.EmailField(blank=True, default="", max_length=255, verbose_name="Službeni Email"),
         ),
         migrations.AlterField(
-            model_name='businesslocation',
-            name='location_code',
-            field=models.CharField(max_length=20, verbose_name='Oznaka prostora (PP)'),
+            model_name="businesslocation",
+            name="location_code",
+            field=models.CharField(max_length=20, verbose_name="Oznaka prostora (PP)"),
         ),
         migrations.AlterField(
-            model_name='fiscalconfig',
-            name='cert_file',
-            field=models.FileField(blank=True, null=True, upload_to='certs/'),
+            model_name="fiscalconfig",
+            name="cert_file",
+            field=models.FileField(blank=True, null=True, upload_to="certs/"),
         ),
     ]

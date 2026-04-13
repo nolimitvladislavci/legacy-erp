@@ -5,29 +5,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0038_add_whitelabel_config'),
+        ("companies", "0038_add_whitelabel_config"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='LicenseToken',
+            name="LicenseToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('active', 'Aktivna'), ('grace', 'Grace period'), ('suspended', 'Suspendirano'), ('cancelled', 'Otkazano')], default='active', max_length=20)),
-                ('valid_until', models.DateTimeField()),
-                ('grace_until', models.DateTimeField(blank=True, null=True)),
-                ('last_heartbeat', models.DateTimeField(auto_now=True)),
-                ('monthly_amount_eur', models.DecimalField(decimal_places=2, default=0, max_digits=8)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('white_label', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='license_token', to='companies.whitelabelconfig')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Aktivna"),
+                            ("grace", "Grace period"),
+                            ("suspended", "Suspendirano"),
+                            ("cancelled", "Otkazano"),
+                        ],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
+                ("valid_until", models.DateTimeField()),
+                ("grace_until", models.DateTimeField(blank=True, null=True)),
+                ("last_heartbeat", models.DateTimeField(auto_now=True)),
+                ("monthly_amount_eur", models.DecimalField(decimal_places=2, default=0, max_digits=8)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "white_label",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="license_token",
+                        to="companies.whitelabelconfig",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Licencni token',
-                'verbose_name_plural': 'Licencni tokeni',
+                "verbose_name": "Licencni token",
+                "verbose_name_plural": "Licencni tokeni",
             },
         ),
     ]

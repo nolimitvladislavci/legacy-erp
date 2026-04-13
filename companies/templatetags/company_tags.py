@@ -6,6 +6,7 @@ Usage u templateima:
     {% company_language as lang %}
     {% if lang == "de" %}Deutsch{% else %}Hrvatski{% endif %}
 """
+
 from django import template
 from django.utils.translation import get_language
 
@@ -19,6 +20,7 @@ def company_language(context):
     if request:
         try:
             from core.company_utils import get_user_company
+
             company = get_user_company(request)
             if company and company.ui_language:
                 return company.ui_language
@@ -34,6 +36,7 @@ def is_german(context):
     if request:
         try:
             from core.company_utils import get_user_company
+
             company = get_user_company(request)
             if company:
                 return company.ui_language == "de" or company.country == "DE"

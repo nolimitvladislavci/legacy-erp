@@ -5,34 +5,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0004_business_profiles'),
+        ("companies", "0004_business_profiles"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CompanyBranch',
+            name="CompanyBranch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv podružnice')),
-                ('branch_code', models.CharField(blank=True, max_length=20, verbose_name='Šifra')),
-                ('branch_type', models.CharField(choices=[('optika', 'Optika'), ('fitness', 'Fitness centar'), ('retail', 'Trgovina'), ('accounting', 'Knjigovodstvo'), ('restaurant', 'Restoran'), ('salon', 'Salon ljepote'), ('other', 'Ostalo')], default='other', max_length=20, verbose_name='Tip poslovnice')),
-                ('address', models.CharField(blank=True, max_length=300, verbose_name='Adresa')),
-                ('city', models.CharField(blank=True, max_length=100, verbose_name='Grad')),
-                ('phone', models.CharField(blank=True, max_length=50, verbose_name='Telefon')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='E-mail')),
-                ('active_modules', models.JSONField(blank=True, default=list, help_text='Prazno = nasljeđuje plan matične tvrtke', verbose_name='Aktivni moduli (override)')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivna')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('parent_company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='branches', to='companies.company', verbose_name='Matična tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv podružnice")),
+                ("branch_code", models.CharField(blank=True, max_length=20, verbose_name="Šifra")),
+                (
+                    "branch_type",
+                    models.CharField(
+                        choices=[
+                            ("optika", "Optika"),
+                            ("fitness", "Fitness centar"),
+                            ("retail", "Trgovina"),
+                            ("accounting", "Knjigovodstvo"),
+                            ("restaurant", "Restoran"),
+                            ("salon", "Salon ljepote"),
+                            ("other", "Ostalo"),
+                        ],
+                        default="other",
+                        max_length=20,
+                        verbose_name="Tip poslovnice",
+                    ),
+                ),
+                ("address", models.CharField(blank=True, max_length=300, verbose_name="Adresa")),
+                ("city", models.CharField(blank=True, max_length=100, verbose_name="Grad")),
+                ("phone", models.CharField(blank=True, max_length=50, verbose_name="Telefon")),
+                ("email", models.EmailField(blank=True, max_length=254, verbose_name="E-mail")),
+                (
+                    "active_modules",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text="Prazno = nasljeđuje plan matične tvrtke",
+                        verbose_name="Aktivni moduli (override)",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivna")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "parent_company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="branches",
+                        to="companies.company",
+                        verbose_name="Matična tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Podružnica',
-                'verbose_name_plural': 'Podružnice',
-                'ordering': ['name'],
-                'unique_together': {('parent_company', 'branch_code')},
+                "verbose_name": "Podružnica",
+                "verbose_name_plural": "Podružnice",
+                "ordering": ["name"],
+                "unique_together": {("parent_company", "branch_code")},
             },
         ),
     ]

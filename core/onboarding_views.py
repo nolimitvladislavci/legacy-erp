@@ -18,6 +18,7 @@ def onboarding_wizard(request):
         return redirect("dashboard")
 
     from companies.models import OnboardingProgress
+
     onboarding, _ = OnboardingProgress.objects.get_or_create(company=company)
 
     # If dismissed or 100%, go to dashboard
@@ -46,12 +47,16 @@ def onboarding_wizard(request):
         except (ValueError, TypeError):
             pass
 
-    return render(request, "core/onboarding_wizard.html", {
-        "company": company,
-        "onboarding": onboarding,
-        "step": step,
-        "total_steps": 6,
-    })
+    return render(
+        request,
+        "core/onboarding_wizard.html",
+        {
+            "company": company,
+            "onboarding": onboarding,
+            "step": step,
+            "total_steps": 6,
+        },
+    )
 
 
 @login_required
@@ -89,6 +94,7 @@ def onboarding_update_profile(request):
 
     # Mark profile completed
     from companies.models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
     if not ob.profile_completed:
         ob.profile_completed = True
@@ -165,6 +171,7 @@ def onboarding_add_item(request):
 
     # Mark step
     from companies.models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
     if not ob.first_item_added:
         ob.first_item_added = True
@@ -188,12 +195,14 @@ def onboarding_activate_pos(request):
         POSTerminal.objects.create(
             company=company,
             name="Blagajna 1",
-            pos_type="quick", terminal_code="KASA01",
+            pos_type="quick",
+            terminal_code="KASA01",
             is_active=True,
         )
 
     # Mark step
     from companies.models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
     if not ob.pos_configured:
         ob.pos_configured = True
@@ -212,6 +221,7 @@ def onboarding_skip_step(request):
 
     step = request.POST.get("step", "")
     from companies.models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
 
     field_map = {
@@ -244,6 +254,7 @@ def onboarding_complete(request):
         return JsonResponse({"ok": False}, status=400)
 
     from companies.models import OnboardingProgress
+
     ob, _ = OnboardingProgress.objects.get_or_create(company=company)
     ob.dismissed = True
     ob.save(update_fields=["dismissed", "updated_at"])

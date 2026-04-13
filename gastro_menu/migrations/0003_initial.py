@@ -5,49 +5,69 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0011_add_phone_email_web_to_company'),
-        ('gastro_menu', '0002_initial'),
-        ('pos', '0007_cashdeposit'),
-        ('traceability', '0001_initial'),
+        ("companies", "0011_add_phone_email_web_to_company"),
+        ("gastro_menu", "0002_initial"),
+        ("pos", "0007_cashdeposit"),
+        ("traceability", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='menuitemingredient',
-            name='trace',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='traceability.producttrace', verbose_name='Trag proizvoda'),
+            model_name="menuitemingredient",
+            name="trace",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="traceability.producttrace",
+                verbose_name="Trag proizvoda",
+            ),
         ),
         migrations.AddField(
-            model_name='tableorder',
-            name='company',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
+            model_name="tableorder",
+            name="company",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="companies.company"),
         ),
         migrations.AddField(
-            model_name='tableorder',
-            name='pos_receipt',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='pos.posreceipt', verbose_name='POS račun'),
+            model_name="tableorder",
+            name="pos_receipt",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="pos.posreceipt",
+                verbose_name="POS račun",
+            ),
         ),
         migrations.AddField(
-            model_name='tableqr',
-            name='company',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='table_qrs', to='companies.company', verbose_name='Restoran'),
+            model_name="tableqr",
+            name="company",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="table_qrs",
+                to="companies.company",
+                verbose_name="Restoran",
+            ),
         ),
         migrations.AddField(
-            model_name='tableqr',
-            name='menu',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tables', to='gastro_menu.digitalmenu'),
+            model_name="tableqr",
+            name="menu",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="tables", to="gastro_menu.digitalmenu"
+            ),
         ),
         migrations.AddField(
-            model_name='tableorder',
-            name='table_qr',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='gastro_menu.tableqr'),
+            model_name="tableorder",
+            name="table_qr",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="orders", to="gastro_menu.tableqr"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='tableqr',
-            unique_together={('company', 'table_number')},
+            name="tableqr",
+            unique_together={("company", "table_number")},
         ),
     ]

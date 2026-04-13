@@ -6,73 +6,126 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_world', '0001_initial'),
+        ("memio_world", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ChildProfile',
+            name="ChildProfile",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100)),
-                ('date_of_birth', models.DateField()),
-                ('birth_city', models.CharField(blank=True, max_length=100)),
-                ('birth_country', models.CharField(default='HR', max_length=2)),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='children/')),
-                ('guardian_emails', models.JSONField(blank=True, default=list, help_text='Email adrese roditelja/skrbnika (cross-db, bez FK)')),
-                ('visibility', models.CharField(choices=[('private', 'Samo obitelj'), ('family', 'Šira obitelj'), ('public', 'Javno')], default='private', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=100)),
+                ("date_of_birth", models.DateField()),
+                ("birth_city", models.CharField(blank=True, max_length=100)),
+                ("birth_country", models.CharField(default="HR", max_length=2)),
+                ("photo", models.ImageField(blank=True, null=True, upload_to="children/")),
+                (
+                    "guardian_emails",
+                    models.JSONField(
+                        blank=True, default=list, help_text="Email adrese roditelja/skrbnika (cross-db, bez FK)"
+                    ),
+                ),
+                (
+                    "visibility",
+                    models.CharField(
+                        choices=[("private", "Samo obitelj"), ("family", "Šira obitelj"), ("public", "Javno")],
+                        default="private",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Profil djeteta',
-                'verbose_name_plural': 'Profili djece',
-                'db_table': 'mw_child_profile',
-                'ordering': ['name'],
+                "verbose_name": "Profil djeteta",
+                "verbose_name_plural": "Profili djece",
+                "db_table": "mw_child_profile",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='MemoryEntry',
+            name="MemoryEntry",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('entry_type', models.CharField(choices=[('photo', 'Fotografija'), ('video', 'Video'), ('text', 'Priča/tekst'), ('milestone', 'Postignuće'), ('document', 'Dokument'), ('drawing', 'Crtež')], max_length=20)),
-                ('title', models.CharField(max_length=200)),
-                ('content', models.TextField(blank=True)),
-                ('media_file', models.FileField(blank=True, null=True, upload_to='memories/')),
-                ('entry_date', models.DateField(help_text='Datum sjećanja')),
-                ('age_at_entry', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('created_by_email', models.EmailField(blank=True, max_length=254)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('is_featured', models.BooleanField(default=False)),
-                ('tags', models.CharField(blank=True, max_length=500)),
-                ('child', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memories', to='memio_world.childprofile')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "entry_type",
+                    models.CharField(
+                        choices=[
+                            ("photo", "Fotografija"),
+                            ("video", "Video"),
+                            ("text", "Priča/tekst"),
+                            ("milestone", "Postignuće"),
+                            ("document", "Dokument"),
+                            ("drawing", "Crtež"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("content", models.TextField(blank=True)),
+                ("media_file", models.FileField(blank=True, null=True, upload_to="memories/")),
+                ("entry_date", models.DateField(help_text="Datum sjećanja")),
+                ("age_at_entry", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("created_by_email", models.EmailField(blank=True, max_length=254)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("is_featured", models.BooleanField(default=False)),
+                ("tags", models.CharField(blank=True, max_length=500)),
+                (
+                    "child",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="memories",
+                        to="memio_world.childprofile",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sjećanje',
-                'verbose_name_plural': 'Sjećanja',
-                'db_table': 'mw_memory_entry',
-                'ordering': ['entry_date'],
+                "verbose_name": "Sjećanje",
+                "verbose_name_plural": "Sjećanja",
+                "db_table": "mw_memory_entry",
+                "ordering": ["entry_date"],
             },
         ),
         migrations.CreateModel(
-            name='Milestone',
+            name="Milestone",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('milestone_type', models.CharField(choices=[('first_word', 'Prva riječ'), ('first_step', 'Prvi korak'), ('first_tooth', 'Prvi zubić'), ('school_start', 'Polazak u školu'), ('graduation', 'Završetak obrazovanja'), ('sport', 'Sportski uspjeh'), ('art', 'Umjetnički uspjeh'), ('other', 'Ostalo')], max_length=30)),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('achieved_date', models.DateField()),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='milestones/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('child', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='milestones', to='memio_world.childprofile')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "milestone_type",
+                    models.CharField(
+                        choices=[
+                            ("first_word", "Prva riječ"),
+                            ("first_step", "Prvi korak"),
+                            ("first_tooth", "Prvi zubić"),
+                            ("school_start", "Polazak u školu"),
+                            ("graduation", "Završetak obrazovanja"),
+                            ("sport", "Sportski uspjeh"),
+                            ("art", "Umjetnički uspjeh"),
+                            ("other", "Ostalo"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                ("achieved_date", models.DateField()),
+                ("photo", models.ImageField(blank=True, null=True, upload_to="milestones/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "child",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="milestones",
+                        to="memio_world.childprofile",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Prekretnica',
-                'verbose_name_plural': 'Prekretnice',
-                'db_table': 'mw_milestone',
-                'ordering': ['achieved_date'],
+                "verbose_name": "Prekretnica",
+                "verbose_name_plural": "Prekretnice",
+                "db_table": "mw_milestone",
+                "ordering": ["achieved_date"],
             },
         ),
     ]

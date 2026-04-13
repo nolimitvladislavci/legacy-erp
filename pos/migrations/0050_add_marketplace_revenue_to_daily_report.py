@@ -4,25 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0049_complaints_security_drones'),
+        ("pos", "0049_complaints_security_drones"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posdailyreport',
-            name='gastro_bridge_revenue',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Promet od Last Call prebacivanja', max_digits=12, verbose_name='Gastro Bridge promet'),
+            model_name="posdailyreport",
+            name="gastro_bridge_revenue",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="Promet od Last Call prebacivanja",
+                max_digits=12,
+                verbose_name="Gastro Bridge promet",
+            ),
         ),
         migrations.AddField(
-            model_name='posdailyreport',
-            name='marketplace_order_count',
-            field=models.PositiveIntegerField(default=0, verbose_name='Marketplace narudžbe'),
+            model_name="posdailyreport",
+            name="marketplace_order_count",
+            field=models.PositiveIntegerField(default=0, verbose_name="Marketplace narudžbe"),
         ),
         migrations.AddField(
-            model_name='posdailyreport',
-            name='marketplace_revenue',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Ukupan promet od online tržnice za ovaj dan', max_digits=12, verbose_name='Marketplace promet'),
+            model_name="posdailyreport",
+            name="marketplace_revenue",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="Ukupan promet od online tržnice za ovaj dan",
+                max_digits=12,
+                verbose_name="Marketplace promet",
+            ),
         ),
     ]

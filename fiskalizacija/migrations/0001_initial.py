@@ -5,33 +5,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0004_business_profiles'),
+        ("companies", "0004_business_profiles"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FiscalConfig',
+            name="FiscalConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cert_filename', models.CharField(blank=True, max_length=255, verbose_name='Naziv .p12 datoteke')),
-                ('_cert_password', models.BinaryField(blank=True, db_column='cert_password', null=True, verbose_name='Lozinka (enkriptirana)')),
-                ('ozn_pos_pr', models.CharField(default='1', max_length=20, verbose_name='Oznaka poslovnog prostora')),
-                ('ozn_nap_ur', models.CharField(default='1', max_length=20, verbose_name='Oznaka naplatnog uređaja')),
-                ('is_demo', models.BooleanField(default=True, verbose_name='Demo način (CIS test)')),
-                ('is_active', models.BooleanField(default=False, verbose_name='Fiskalizacija aktivna')),
-                ('last_test_at', models.DateTimeField(blank=True, null=True, verbose_name='Zadnji test')),
-                ('last_test_ok', models.BooleanField(blank=True, null=True, verbose_name='Zadnji test OK')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='fiscal_config', to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("cert_filename", models.CharField(blank=True, max_length=255, verbose_name="Naziv .p12 datoteke")),
+                (
+                    "_cert_password",
+                    models.BinaryField(
+                        blank=True, db_column="cert_password", null=True, verbose_name="Lozinka (enkriptirana)"
+                    ),
+                ),
+                ("ozn_pos_pr", models.CharField(default="1", max_length=20, verbose_name="Oznaka poslovnog prostora")),
+                ("ozn_nap_ur", models.CharField(default="1", max_length=20, verbose_name="Oznaka naplatnog uređaja")),
+                ("is_demo", models.BooleanField(default=True, verbose_name="Demo način (CIS test)")),
+                ("is_active", models.BooleanField(default=False, verbose_name="Fiskalizacija aktivna")),
+                ("last_test_at", models.DateTimeField(blank=True, null=True, verbose_name="Zadnji test")),
+                ("last_test_ok", models.BooleanField(blank=True, null=True, verbose_name="Zadnji test OK")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fiscal_config",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Konfiguracija fiskalizacije',
-                'verbose_name_plural': 'Konfiguracije fiskalizacije',
+                "verbose_name": "Konfiguracija fiskalizacije",
+                "verbose_name_plural": "Konfiguracije fiskalizacije",
             },
         ),
     ]

@@ -9,6 +9,7 @@ Design principles:
 - Multi-tenant: always scoped to company
 - Archive-ready: SHA-256 hash for legal compliance
 """
+
 import hashlib
 import uuid
 
@@ -58,20 +59,26 @@ class AS4Message(models.Model):
     Every e-invoice that flows through PROPTER — in or out —
     gets an AS4Message record. Transport-agnostic.
     """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="as4_messages",
     )
     invoice = models.ForeignKey(
-        "invoicing.Invoice", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="as4_messages",
+        "invoicing.Invoice",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="as4_messages",
     )
 
     direction = models.CharField(max_length=3, choices=MessageDirection.choices, db_index=True)
     transport = models.CharField(
-        max_length=10, choices=TransportType.choices,
+        max_length=10,
+        choices=TransportType.choices,
         default=TransportType.FINA_POSREDNIK,
     )
 
@@ -83,7 +90,8 @@ class AS4Message(models.Model):
 
     # Document Info
     document_type = models.CharField(
-        max_length=20, default="INVOICE",
+        max_length=20,
+        default="INVOICE",
         choices=[
             ("INVOICE", "Racun"),
             ("CREDIT_NOTE", "Odobrenje"),
@@ -96,8 +104,10 @@ class AS4Message(models.Model):
 
     # Status
     status = models.CharField(
-        max_length=10, choices=MessageStatus.choices,
-        default=MessageStatus.DRAFT, db_index=True,
+        max_length=10,
+        choices=MessageStatus.choices,
+        default=MessageStatus.DRAFT,
+        db_index=True,
     )
 
     # External References
@@ -136,8 +146,11 @@ class AS4Message(models.Model):
     archived_at = models.DateTimeField(null=True, blank=True)
 
     created_by = models.ForeignKey(
-        "auth.User", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="as4_messages_created",
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="as4_messages_created",
     )
     metadata = models.JSONField(default=dict, blank=True)
 
@@ -173,10 +186,7 @@ class AS4Message(models.Model):
         self.archive_sha256 = self.compute_sha256()
 
     def can_retry(self):
-        return (
-            self.status in (MessageStatus.SEND_FAILED, MessageStatus.RETRY)
-            and self.retry_count < self.max_retries
-        )
+        return self.status in (MessageStatus.SEND_FAILED, MessageStatus.RETRY) and self.retry_count < self.max_retries
 
     def calculate_next_retry(self):
         intervals = [60, 300, 900, 3600, 14400]
@@ -235,14 +245,18 @@ class AS4Message(models.Model):
     @property
     def is_terminal(self):
         return self.status in (
-            MessageStatus.DELIVERED, MessageStatus.ACKNOWLEDGED,
-            MessageStatus.BOOKED, MessageStatus.CANCELLED,
-            MessageStatus.ARCHIVED, MessageStatus.REJECTED,
+            MessageStatus.DELIVERED,
+            MessageStatus.ACKNOWLEDGED,
+            MessageStatus.BOOKED,
+            MessageStatus.CANCELLED,
+            MessageStatus.ARCHIVED,
+            MessageStatus.REJECTED,
         )
 
 
 class AS4MessageEvent(models.Model):
     """Immutable audit trail for AS4 message lifecycle. NEVER UPDATE OR DELETE."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     message = models.ForeignKey(AS4Message, on_delete=models.CASCADE, related_name="events")
     from_status = models.CharField(max_length=10, choices=MessageStatus.choices)
@@ -251,7 +265,10 @@ class AS4MessageEvent(models.Model):
     external_response = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
-        "auth.User", on_delete=models.SET_NULL, null=True, blank=True,
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     class Meta:

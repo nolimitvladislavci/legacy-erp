@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ai_assistant', '0002_patrolreport'),
+        ("ai_assistant", "0002_patrolreport"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='patrolreport',
-            name='has_issues',
+            model_name="patrolreport",
+            name="has_issues",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='patrolreport',
-            name='raw_data',
+            model_name="patrolreport",
+            name="raw_data",
             field=models.JSONField(blank=True, default=dict),
         ),
     ]

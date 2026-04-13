@@ -4,12 +4,13 @@ Connects NN feed results + external sources into unified IntelligenceResult/Fund
 
 Runs as Celery task: intelligence_unified_scan
 """
+
 import logging
 
 from celery import shared_task
 from django.utils import timezone
 
-logger = logging.getLogger('borg.intelligence')
+logger = logging.getLogger("borg.intelligence")
 
 
 @shared_task
@@ -21,25 +22,26 @@ def intelligence_unified_scan():
     3. Match FundOpportunities with company IntelligenceJobs
     4. Generate IntelligenceResults
     """
-    stats = {'nn_processed': 0, 'funds_created': 0, 'results_created': 0}
+    stats = {"nn_processed": 0, "funds_created": 0, "results_created": 0}
 
     # Step 1: Run NN scraper
     try:
         from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
+
         nn = NNFeedScraperService()
         nn_result = nn.process_feed()
-        stats['nn_processed'] = nn_result.get('processed', 0)
-        logger.info('NN scraper: %s', nn_result)
+        stats["nn_processed"] = nn_result.get("processed", 0)
+        logger.info("NN scraper: %s", nn_result)
     except ImportError as e:
-        logger.error('NN scraper failed: %s', e)
+        logger.error("NN scraper failed: %s", e)
 
     # Step 2: Convert EU_FUND regulatory updates to FundOpportunities
-    stats['funds_created'] = _convert_regulatory_to_funds()
+    stats["funds_created"] = _convert_regulatory_to_funds()
 
     # Step 3: Match funds with company jobs and create results
-    stats['results_created'] = _match_funds_to_companies()
+    stats["results_created"] = _match_funds_to_companies()
 
-    logger.info('Unified scan complete: %s', stats)
+    logger.info("Unified scan complete: %s", stats)
     return stats
 
 
@@ -49,39 +51,39 @@ def _convert_regulatory_to_funds():
     from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate
 
     updates = RegulatoryUpdate.objects.filter(
-        category__in=['EU_FUND', 'TAX', 'LABOUR'],
+        category__in=["EU_FUND", "TAX", "LABOUR"],
         is_processed=True,
     ).exclude(
         # Skip if already linked to a fund
-        title__in=FundOpportunity.objects.values_list('naziv', flat=True),
+        title__in=FundOpportunity.objects.values_list("naziv", flat=True),
     )
 
     created = 0
     for update in updates[:20]:  # Max 20 per run
         tip_map = {
-            'EU_FUND': 'eu_esf',
-            'TAX': 'hr_ostalo',
-            'LABOUR': 'hr_ostalo',
+            "EU_FUND": "eu_esf",
+            "TAX": "hr_ostalo",
+            "LABOUR": "hr_ostalo",
         }
 
         fund, is_new = FundOpportunity.objects.get_or_create(
             naziv=update.title[:300],
             defaults={
-                'tip': tip_map.get(update.category, 'hr_ostalo'),
-                'tijelo': 'Auto-detected',
-                'opis': update.ai_summary or update.raw_text[:1000],
-                'url': update.url,
-                'ai_summary': update.ai_summary[:500] if update.ai_summary else '',
-                'kljucne_rijeci': update.affected_modules or [],
-                'otkrio_intelligence': True,
-                'status': 'aktivan',
-                'ciljna_skupina': 'svi',
+                "tip": tip_map.get(update.category, "hr_ostalo"),
+                "tijelo": "Auto-detected",
+                "opis": update.ai_summary or update.raw_text[:1000],
+                "url": update.url,
+                "ai_summary": update.ai_summary[:500] if update.ai_summary else "",
+                "kljucne_rijeci": update.affected_modules or [],
+                "otkrio_intelligence": True,
+                "status": "aktivan",
+                "ciljna_skupina": "svi",
             },
         )
         if is_new:
             created += 1
 
-    logger.info('Converted %d regulatory updates to FundOpportunities', created)
+    logger.info("Converted %d regulatory updates to FundOpportunities", created)
     return created
 
 
@@ -90,12 +92,12 @@ def _match_funds_to_companies():
     from intelligence.models import FundOpportunity, IntelligenceJob, IntelligenceResult
 
     active_funds = FundOpportunity.objects.filter(
-        status='aktivan',
+        status="aktivan",
     ).exclude(
         rok_prijave__lt=timezone.now().date(),
     )
 
-    jobs = IntelligenceJob.objects.filter(aktivan=True).select_related('company')
+    jobs = IntelligenceJob.objects.filter(aktivan=True).select_related("company")
     created = 0
 
     for job in jobs:
@@ -128,11 +130,11 @@ def _match_funds_to_companies():
                 url=fund.url,
                 ai_relevantnost=min(relevance, 100),
                 fund_opportunity=fund,
-                status='novo',
+                status="novo",
             )
             created += 1
 
-    logger.info('Created %d new IntelligenceResults', created)
+    logger.info("Created %d new IntelligenceResults", created)
     return created
 
 
@@ -150,14 +152,14 @@ def seed_intelligence_jobs():
         job, is_new = IntelligenceJob.objects.get_or_create(
             company=company,
             defaults={
-                'aktivan': True,
-                'opis_poslovanja': f'{company.name} - {company.business_type}',
-                'kljucne_rijeci': [],
+                "aktivan": True,
+                "opis_poslovanja": f"{company.name} - {company.business_type}",
+                "kljucne_rijeci": [],
             },
         )
         if is_new:
             job.sources.set(sources)
             created += 1
 
-    logger.info('Created %d new IntelligenceJobs', created)
+    logger.info("Created %d new IntelligenceJobs", created)
     return created

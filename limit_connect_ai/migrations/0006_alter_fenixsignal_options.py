@@ -4,14 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('limit_connect_ai', '0005_fenix_signal_model'),
+        ("limit_connect_ai", "0005_fenix_signal_model"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='fenixsignal',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Prijava problema', 'verbose_name_plural': 'Prijave problema'},
+            name="fenixsignal",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Prijava problema",
+                "verbose_name_plural": "Prijave problema",
+            },
         ),
     ]

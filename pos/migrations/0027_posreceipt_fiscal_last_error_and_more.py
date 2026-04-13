@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0026_bezpapira_delivery'),
+        ("pos", "0026_bezpapira_delivery"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='fiscal_last_error',
-            field=models.CharField(blank=True, default='', max_length=200, verbose_name='Zadnja greška fiskalizacije'),
+            model_name="posreceipt",
+            name="fiscal_last_error",
+            field=models.CharField(blank=True, default="", max_length=200, verbose_name="Zadnja greška fiskalizacije"),
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='fiscal_retry_count',
-            field=models.PositiveSmallIntegerField(default=0, verbose_name='Broj pokušaja fiskalizacije'),
+            model_name="posreceipt",
+            name="fiscal_retry_count",
+            field=models.PositiveSmallIntegerField(default=0, verbose_name="Broj pokušaja fiskalizacije"),
         ),
     ]

@@ -1,10 +1,9 @@
-
-path = '/var/www/fina-connect/core/views.py'
-with open(path, 'r') as f:
+path = "/var/www/fina-connect/core/views.py"
+with open(path, "r") as f:
     content = f.read()
 
 # Zamjena pogrešnog ključa duration_hours sa duration
-content = content.replace('duration_hours', 'duration')
+content = content.replace("duration_hours", "duration")
 
-with open(path, 'w') as f:
+with open(path, "w") as f:
     f.write(content)

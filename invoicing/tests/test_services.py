@@ -1,6 +1,7 @@
 """
 Tests for invoicing.services — business logic unit tests.
 """
+
 from decimal import Decimal
 
 from django.test import TestCase
@@ -77,6 +78,7 @@ class TestCopyInvoice(TestCase):
     def setUp(self):
         from companies.models import Company
         from invoicing.models import Invoice
+
         self.company = Company.objects.first()
         if not self.company:
             self.company = Company.objects.create(name="Test Co", oib="12345678901")
@@ -111,12 +113,14 @@ class TestCopyInvoice(TestCase):
 class TestGenerateInvoiceNumber(TestCase):
     def setUp(self):
         from companies.models import Company
+
         self.company = Company.objects.first()
         if not self.company:
             self.company = Company.objects.create(name="Test Co", oib="99999999999")
 
     def test_generates_number(self):
         from invoicing.models import Invoice
+
         invoice = Invoice(company=self.company, doctype="R")
         number = generate_invoice_number(invoice, None, "R")
         self.assertIsInstance(number, str)

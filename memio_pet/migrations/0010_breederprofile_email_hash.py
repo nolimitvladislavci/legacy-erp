@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0009_lifemilestone_memorialprofile'),
+        ("memio_pet", "0009_lifemilestone_memorialprofile"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='breederprofile',
-            name='email_hash',
+            model_name="breederprofile",
+            name="email_hash",
             field=models.CharField(blank=True, db_index=True, max_length=64, null=True, unique=True),
         ),
     ]

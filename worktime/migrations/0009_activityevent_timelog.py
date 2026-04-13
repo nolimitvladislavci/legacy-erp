@@ -6,62 +6,132 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0015_company_geofence_radius_company_latitude_and_more'),
-        ('worktime', '0008_payroll_fields'),
+        ("companies", "0015_company_geofence_radius_company_latitude_and_more"),
+        ("worktime", "0008_payroll_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ActivityEvent',
+            name="ActivityEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(db_index=True)),
-                ('action', models.CharField(choices=[('GENESIS_SCAN', 'Genesis QR sken'), ('PALLET_SCAN', 'Sken palete'), ('WEIGHT_EVENT', 'Vaganje'), ('DELIVERY_SCAN', 'Sken isporuke'), ('PHOTO', 'Fotografija'), ('APP_ACTION', 'Akcija u aplikaciji'), ('VEHICLE_START', 'Pokretanje vozila'), ('MANUAL_CHECK', 'Rucna provjera')], max_length=30)),
-                ('detail', models.TextField(blank=True)),
-                ('metadata', models.JSONField(blank=True, default=dict)),
-                ('lat', models.FloatField(blank=True, null=True)),
-                ('lon', models.FloatField(blank=True, null=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='activity_events', to='companies.company')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity_events', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("timestamp", models.DateTimeField(db_index=True)),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("GENESIS_SCAN", "Genesis QR sken"),
+                            ("PALLET_SCAN", "Sken palete"),
+                            ("WEIGHT_EVENT", "Vaganje"),
+                            ("DELIVERY_SCAN", "Sken isporuke"),
+                            ("PHOTO", "Fotografija"),
+                            ("APP_ACTION", "Akcija u aplikaciji"),
+                            ("VEHICLE_START", "Pokretanje vozila"),
+                            ("MANUAL_CHECK", "Rucna provjera"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("detail", models.TextField(blank=True)),
+                ("metadata", models.JSONField(blank=True, default=dict)),
+                ("lat", models.FloatField(blank=True, null=True)),
+                ("lon", models.FloatField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="activity_events",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="activity_events",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'worktime_activity_event',
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['user', 'timestamp'], name='worktime_ac_user_id_f97743_idx')],
+                "db_table": "worktime_activity_event",
+                "ordering": ["-timestamp"],
+                "indexes": [models.Index(fields=["user", "timestamp"], name="worktime_ac_user_id_f97743_idx")],
             },
         ),
         migrations.CreateModel(
-            name='TimeLog',
+            name="TimeLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_time', models.DateTimeField()),
-                ('end_time', models.DateTimeField(blank=True, null=True)),
-                ('date', models.DateField(db_index=True)),
-                ('clock_in_lat', models.FloatField(blank=True, null=True)),
-                ('clock_in_lon', models.FloatField(blank=True, null=True)),
-                ('clock_out_lat', models.FloatField(blank=True, null=True)),
-                ('clock_out_lon', models.FloatField(blank=True, null=True)),
-                ('clock_in_distance', models.FloatField(blank=True, help_text='Udaljenost od firme pri prijavi (m)', null=True)),
-                ('clock_out_distance', models.FloatField(blank=True, help_text='Udaljenost od firme pri odjavi (m)', null=True)),
-                ('gross_hours', models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Bruto sati (bez odbitka)')),
-                ('break_minutes', models.PositiveSmallIntegerField(default=0, verbose_name='ArbZG pauza (min)')),
-                ('payable_hours', models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Neto sati za placu')),
-                ('status', models.CharField(choices=[('OPEN', 'Aktivna smjena'), ('CLOSED', 'Zatvorena'), ('FLAGGED', 'Zastavica')], default='OPEN', max_length=10)),
-                ('is_audited', models.BooleanField(default=False)),
-                ('audit_flag', models.CharField(blank=True, help_text='Revizorska zastavica', max_length=255)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='time_logs', to='companies.company')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_logs', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("start_time", models.DateTimeField()),
+                ("end_time", models.DateTimeField(blank=True, null=True)),
+                ("date", models.DateField(db_index=True)),
+                ("clock_in_lat", models.FloatField(blank=True, null=True)),
+                ("clock_in_lon", models.FloatField(blank=True, null=True)),
+                ("clock_out_lat", models.FloatField(blank=True, null=True)),
+                ("clock_out_lon", models.FloatField(blank=True, null=True)),
+                (
+                    "clock_in_distance",
+                    models.FloatField(blank=True, help_text="Udaljenost od firme pri prijavi (m)", null=True),
+                ),
+                (
+                    "clock_out_distance",
+                    models.FloatField(blank=True, help_text="Udaljenost od firme pri odjavi (m)", null=True),
+                ),
+                (
+                    "gross_hours",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=6, verbose_name="Bruto sati (bez odbitka)"
+                    ),
+                ),
+                ("break_minutes", models.PositiveSmallIntegerField(default=0, verbose_name="ArbZG pauza (min)")),
+                (
+                    "payable_hours",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name="Neto sati za placu"),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("OPEN", "Aktivna smjena"), ("CLOSED", "Zatvorena"), ("FLAGGED", "Zastavica")],
+                        default="OPEN",
+                        max_length=10,
+                    ),
+                ),
+                ("is_audited", models.BooleanField(default=False)),
+                ("audit_flag", models.CharField(blank=True, help_text="Revizorska zastavica", max_length=255)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="time_logs",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="time_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'worktime_timelog',
-                'ordering': ['-date', '-start_time'],
-                'indexes': [models.Index(fields=['user', 'date'], name='worktime_ti_user_id_a79188_idx'), models.Index(fields=['status'], name='worktime_ti_status_12758f_idx')],
+                "db_table": "worktime_timelog",
+                "ordering": ["-date", "-start_time"],
+                "indexes": [
+                    models.Index(fields=["user", "date"], name="worktime_ti_user_id_a79188_idx"),
+                    models.Index(fields=["status"], name="worktime_ti_status_12758f_idx"),
+                ],
             },
         ),
     ]

@@ -21,12 +21,12 @@ class HACCPAnalysisTests(TestCase):
     def setUp(self):
         self.box = SmartBox.objects.create(
             owner_company=self.company,
-            box_id='BOX-TEST-001',
-            box_type='active_cool',
-            qr_code='QR-TEST-001',
+            box_id="BOX-TEST-001",
+            box_type="active_cool",
+            qr_code="QR-TEST-001",
             has_sensor=True,
-            target_min_temp=Decimal('2.0'),
-            target_max_temp=Decimal('8.0'),
+            target_min_temp=Decimal("2.0"),
+            target_max_temp=Decimal("8.0"),
         )
 
     def _reading(self, minutes_ago, temp):
@@ -34,7 +34,7 @@ class HACCPAnalysisTests(TestCase):
         ts = timezone.now() - timedelta(minutes=minutes_ago)
         return SensorReading.objects.create(
             smart_box=self.box,
-            source='delivery',
+            source="delivery",
             timestamp=ts,
             temperature=Decimal(str(temp)),
         )
@@ -49,10 +49,10 @@ class HACCPAnalysisTests(TestCase):
         print("=" * 60)
 
         self._reading(10, 4.0)  # -10min: 4C
-        self._reading(9, 6.0)   # -9min: 6C
+        self._reading(9, 6.0)  # -9min: 6C
         self._reading(8, 10.0)  # -8min: 10C (iznad 8C, ali kratko)
-        self._reading(7, 7.0)   # -7min: 7C
-        self._reading(6, 4.0)   # -6min: nazad na 4C
+        self._reading(7, 7.0)  # -7min: 7C
+        self._reading(6, 4.0)  # -6min: nazad na 4C
 
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
@@ -62,7 +62,7 @@ class HACCPAnalysisTests(TestCase):
         print(f" -> Box status: {self.box.haccp_status}")
 
         self.assertEqual(len(incidents), 0)
-        self.assertEqual(self.box.haccp_status, 'ok')
+        self.assertEqual(self.box.haccp_status, "ok")
         print(" PASS: Nema alarma — trajanje prekrsaja < 10 min")
 
     # ════════════════════════════════════════════════════════════
@@ -74,13 +74,13 @@ class HACCPAnalysisTests(TestCase):
         print(" [SCENARIJ 2] CRKNUT KOMPRESOR — SUSTAINED BREACH")
         print("=" * 60)
 
-        self._reading(20, 4.0)   # -20min: OK
-        self._reading(18, 7.0)   # -18min: OK
-        self._reading(16, 9.0)   # -16min: iznad 8C — breach pocinje
+        self._reading(20, 4.0)  # -20min: OK
+        self._reading(18, 7.0)  # -18min: OK
+        self._reading(16, 9.0)  # -16min: iznad 8C — breach pocinje
         self._reading(14, 10.0)  # -14min: raste
         self._reading(12, 11.0)  # -12min: raste
-        self._reading(4, 11.5)   # -4min: jos traje (breach = 12 min)
-        self._reading(2, 5.0)    # -2min: nazad na normalu
+        self._reading(4, 11.5)  # -4min: jos traje (breach = 12 min)
+        self._reading(2, 5.0)  # -2min: nazad na normalu
 
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
@@ -96,10 +96,10 @@ class HACCPAnalysisTests(TestCase):
         print(f" -> Box status: {self.box.haccp_status}")
 
         self.assertEqual(len(incidents), 1)
-        self.assertEqual(incidents[0].incident_type, 'sustained_breach')
+        self.assertEqual(incidents[0].incident_type, "sustained_breach")
         self.assertGreaterEqual(incidents[0].duration_minutes, 10)
-        self.assertEqual(incidents[0].max_temperature, Decimal('11.5'))
-        self.assertIn(self.box.haccp_status, ['critical', 'blocked'])
+        self.assertEqual(incidents[0].max_temperature, Decimal("11.5"))
+        self.assertIn(self.box.haccp_status, ["critical", "blocked"])
         print(" PASS: Sustained breach detektiran, box u CRITICAL statusu")
 
     # ════════════════════════════════════════════════════════════
@@ -142,7 +142,7 @@ class HACCPAnalysisTests(TestCase):
 
         self.assertGreater(len(incidents), 0)
         # Should be offline_retroactive because >10 readings in batch
-        breach_inc = [i for i in incidents if i.incident_type == 'offline_retroactive']
+        breach_inc = [i for i in incidents if i.incident_type == "offline_retroactive"]
         self.assertGreater(len(breach_inc), 0)
         self.assertGreaterEqual(breach_inc[0].duration_minutes, 20)
         print(" PASS: Retroaktivni scan otkrio 30-minutni prekrsaj iz proslosti")
@@ -156,8 +156,8 @@ class HACCPAnalysisTests(TestCase):
         print(" [SCENARIJ 4] CRITICAL FAILURE — INSTANT BLOKADA")
         print("=" * 60)
 
-        self._reading(5, 4.0)   # OK
-        self._reading(3, 8.0)   # OK
+        self._reading(5, 4.0)  # OK
+        self._reading(3, 8.0)  # OK
         self._reading(1, 16.5)  # CRITICAL!
 
         incidents = analyze_readings(self.box)
@@ -170,10 +170,10 @@ class HACCPAnalysisTests(TestCase):
             print(f" -> Severity: {incidents[0].severity}")
         print(f" -> Box status: {self.box.haccp_status}")
 
-        critical = [i for i in incidents if i.incident_type == 'critical_failure']
+        critical = [i for i in incidents if i.incident_type == "critical_failure"]
         self.assertGreater(len(critical), 0)
-        self.assertEqual(critical[0].severity, 'blocked')
-        self.assertEqual(self.box.haccp_status, 'blocked')
+        self.assertEqual(critical[0].severity, "blocked")
+        self.assertEqual(self.box.haccp_status, "blocked")
         print(" PASS: Instant blokada — box BLOCKED, severity BLOCKED")
 
     # ════════════════════════════════════════════════════════════
@@ -189,13 +189,13 @@ class HACCPAnalysisTests(TestCase):
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
 
-        self.assertEqual(self.box.haccp_status, 'blocked')
+        self.assertEqual(self.box.haccp_status, "blocked")
         print(f" -> Box blokiran: {self.box.haccp_status}")
 
         # Dispatcher resolves
-        user = User.objects.create_user(username='dispatcher_test', password='pwd')
+        user = User.objects.create_user(username="dispatcher_test", password="pwd")
         inc = incidents[0]
-        inc.resolve(user, 'Vozac prebacio meso u rezervni hladnjak, roba spasena')
+        inc.resolve(user, "Vozac prebacio meso u rezervni hladnjak, roba spasena")
 
         inc.refresh_from_db()
         self.box.refresh_from_db()
@@ -206,8 +206,8 @@ class HACCPAnalysisTests(TestCase):
         print(f" -> Box status: {self.box.haccp_status}")
 
         self.assertTrue(inc.is_resolved)
-        self.assertEqual(inc.resolution_note, 'Vozac prebacio meso u rezervni hladnjak, roba spasena')
-        self.assertEqual(self.box.haccp_status, 'ok')
+        self.assertEqual(inc.resolution_note, "Vozac prebacio meso u rezervni hladnjak, roba spasena")
+        self.assertEqual(self.box.haccp_status, "ok")
         print(" PASS: Incident zatvoren, box odblokiran, audit trail sacrvan")
 
     # ════════════════════════════════════════════════════════════

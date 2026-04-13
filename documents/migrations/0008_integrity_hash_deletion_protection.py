@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0007_conversionrecord'),
+        ("documents", "0007_conversionrecord"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='arhivaentry',
-            name='deletion_protected_until',
-            field=models.DateField(blank=True, null=True, verbose_name='Zaštićeno do'),
+            model_name="arhivaentry",
+            name="deletion_protected_until",
+            field=models.DateField(blank=True, null=True, verbose_name="Zaštićeno do"),
         ),
         migrations.AddField(
-            model_name='arhivaentry',
-            name='integrity_hash',
-            field=models.CharField(blank=True, db_index=True, max_length=64, verbose_name='Integritet hash'),
+            model_name="arhivaentry",
+            name="integrity_hash",
+            field=models.CharField(blank=True, db_index=True, max_length=64, verbose_name="Integritet hash"),
         ),
     ]

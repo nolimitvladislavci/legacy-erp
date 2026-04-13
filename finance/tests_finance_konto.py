@@ -5,6 +5,7 @@ Tests for Finance→Konto features:
 - Cashflow API
 - Appointment reminder views
 """
+
 import datetime
 import io
 import uuid
@@ -22,19 +23,15 @@ from partners.models import Partner
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
+
 def _make_company(name="Test Firma GmbH"):
     return Company.objects.get_or_create(
-        name=name,
-        defaults={"country": "DE", "currency": "EUR", "oib": str(abs(hash(name)))[:11]}
+        name=name, defaults={"country": "DE", "currency": "EUR", "oib": str(abs(hash(name)))[:11]}
     )[0]
 
 
 def _make_partner(company):
-    return Partner.objects.get_or_create(
-        name="Test Partner",
-        company=company,
-        defaults={"email": "partner@test.de"}
-    )[0]
+    return Partner.objects.get_or_create(name="Test Partner", company=company, defaults={"email": "partner@test.de"})[0]
 
 
 def _make_bank(company):
@@ -48,14 +45,13 @@ def _make_bank(company):
             "is_primary": True,
             "opening_balance": Decimal("0"),
             "current_balance": Decimal("0"),
-        }
+        },
     )[0]
 
 
 def _make_user_with_company(username="test_fin_user"):
     u, _ = User.objects.get_or_create(
-        username=username,
-        defaults={"is_staff": True, "is_superuser": True, "email": f"{username}@test.de"}
+        username=username, defaults={"is_staff": True, "is_superuser": True, "email": f"{username}@test.de"}
     )
     u.set_password("pass")
     u.save()
@@ -69,9 +65,9 @@ def _make_user_with_company(username="test_fin_user"):
 
 # ─── Signal Tests ────────────────────────────────────────────────────────────
 
+
 @override_settings(SECURE_SSL_REDIRECT=False)
 class FinanceKontoSignalTest(TestCase):
-
     def setUp(self):
         self.user, self.company = _make_user_with_company("sig_test_user")
         self.partner = _make_partner(self.company)
@@ -79,9 +75,12 @@ class FinanceKontoSignalTest(TestCase):
 
     def test_create_income_syncs_inflow(self):
         t = Transaction.objects.create(
-            company=self.company, partner=self.partner,
-            amount=Decimal("150.00"), direction="income",
-            date=datetime.date.today(), description="Signal test",
+            company=self.company,
+            partner=self.partner,
+            amount=Decimal("150.00"),
+            direction="income",
+            date=datetime.date.today(),
+            description="Signal test",
         )
         bt = BankTransaction.objects.filter(external_id=f"finance-{t.pk}").first()
         self.assertIsNotNone(bt)
@@ -92,9 +91,12 @@ class FinanceKontoSignalTest(TestCase):
 
     def test_create_expense_syncs_outflow(self):
         t = Transaction.objects.create(
-            company=self.company, partner=self.partner,
-            amount=Decimal("75.00"), direction="expense",
-            date=datetime.date.today(), description="Expense",
+            company=self.company,
+            partner=self.partner,
+            amount=Decimal("75.00"),
+            direction="expense",
+            date=datetime.date.today(),
+            description="Expense",
         )
         bt = BankTransaction.objects.filter(external_id=f"finance-{t.pk}").first()
         self.assertIsNotNone(bt)
@@ -103,9 +105,12 @@ class FinanceKontoSignalTest(TestCase):
 
     def test_update_syncs_new_amount(self):
         t = Transaction.objects.create(
-            company=self.company, partner=self.partner,
-            amount=Decimal("100.00"), direction="income",
-            date=datetime.date.today(), description="Update test",
+            company=self.company,
+            partner=self.partner,
+            amount=Decimal("100.00"),
+            direction="income",
+            date=datetime.date.today(),
+            description="Update test",
         )
         t.amount = Decimal("200.00")
         t.save()
@@ -115,22 +120,26 @@ class FinanceKontoSignalTest(TestCase):
 
     def test_delete_removes_from_konto(self):
         t = Transaction.objects.create(
-            company=self.company, partner=self.partner,
-            amount=Decimal("50.00"), direction="income",
-            date=datetime.date.today(), description="Delete test",
+            company=self.company,
+            partner=self.partner,
+            amount=Decimal("50.00"),
+            direction="income",
+            date=datetime.date.today(),
+            description="Delete test",
         )
         pk = t.pk
         t.delete()
-        self.assertFalse(
-            BankTransaction.objects.filter(external_id=f"finance-{pk}").exists()
-        )
+        self.assertFalse(BankTransaction.objects.filter(external_id=f"finance-{pk}").exists())
 
     def test_string_amount_does_not_crash(self):
         """Signal must handle string amounts without crashing (Decimal cast)."""
         t = Transaction(
-            company=self.company, partner=self.partner,
-            amount="99.99", direction="income",
-            date=datetime.date.today(), description="String amount",
+            company=self.company,
+            partner=self.partner,
+            amount="99.99",
+            direction="income",
+            date=datetime.date.today(),
+            description="String amount",
         )
         t.save()
         bt = BankTransaction.objects.filter(external_id=f"finance-{t.pk}").first()
@@ -141,24 +150,26 @@ class FinanceKontoSignalTest(TestCase):
     def test_no_bank_account_skips_silently(self):
         """Company with no bank account must not raise."""
         company2 = Company.objects.create(
-            name="No Bank Co", country="DE", currency="EUR",
-            oib=str(abs(hash("NoBankCo" + str(uuid.uuid4()))))[: 11]
+            name="No Bank Co", country="DE", currency="EUR", oib=str(abs(hash("NoBankCo" + str(uuid.uuid4()))))[:11]
         )
         partner2 = Partner.objects.create(name="P2", company=company2)
         # Should not raise
         t = Transaction.objects.create(
-            company=company2, partner=partner2,
-            amount=Decimal("10.00"), direction="income",
-            date=datetime.date.today(), description="No bank",
+            company=company2,
+            partner=partner2,
+            amount=Decimal("10.00"),
+            direction="income",
+            date=datetime.date.today(),
+            description="No bank",
         )
         t.delete()
 
 
 # ─── CSV Import Tests ────────────────────────────────────────────────────────
 
+
 @override_settings(SECURE_SSL_REDIRECT=False)
 class CsvBankImportTest(TestCase):
-
     def setUp(self):
         self.user, self.company = _make_user_with_company("csv_test_user")
         self.bank = _make_bank(self.company)
@@ -224,9 +235,9 @@ class CsvBankImportTest(TestCase):
 
 # ─── Cashflow API ─────────────────────────────────────────────────────────────
 
+
 @override_settings(SECURE_SSL_REDIRECT=False)
 class CashflowApiTest(TestCase):
-
     def setUp(self):
         self.user, self.company = _make_user_with_company("cashflow_test_user")
         self.bank = _make_bank(self.company)
@@ -248,10 +259,12 @@ class CashflowApiTest(TestCase):
 
     def test_values_are_numeric(self):
         BankTransaction.objects.create(
-            bank_account=self.bank, company=self.company,
+            bank_account=self.bank,
+            company=self.company,
             transaction_date=datetime.date.today(),
             value_date=datetime.date.today(),
-            amount=Decimal("100.00"), transaction_type="inflow",
+            amount=Decimal("100.00"),
+            transaction_type="inflow",
         )
         resp = self.client.get("/finance/cashflow-api/")
         if resp.status_code == 200:
@@ -265,9 +278,9 @@ class CashflowApiTest(TestCase):
 
 # ─── Appointment Reminders ────────────────────────────────────────────────────
 
+
 @override_settings(SECURE_SSL_REDIRECT=False)
 class AppointmentReminderViewTest(TestCase):
-
     def setUp(self):
         self.user, self.company = _make_user_with_company("appt_rem_user")
         self.client = Client()
@@ -287,9 +300,9 @@ class AppointmentReminderViewTest(TestCase):
 
 # ─── Bank Import Template ─────────────────────────────────────────────────────
 
+
 @override_settings(SECURE_SSL_REDIRECT=False)
 class BankImportPageTest(TestCase):
-
     def setUp(self):
         self.user, self.company = _make_user_with_company("page_test_user")
         self.client = Client()

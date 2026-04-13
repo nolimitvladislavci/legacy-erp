@@ -6,9 +6,10 @@ from .models import *
 class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = '__all__'
+        fields = "__all__"
+
 
 class MemberCheckInSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberCheckIn
-        fields = '__all__'
+        fields = "__all__"

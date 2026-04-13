@@ -1,4 +1,5 @@
 """POS forms — validation for terminal, session, receipt operations."""
+
 from decimal import Decimal
 
 from django import forms
@@ -10,6 +11,7 @@ from .models import POSPaymentLine, POSTerminal
 
 class TerminalForm(forms.ModelForm):
     """Terminal creation/edit form."""
+
     class Meta:
         model = POSTerminal
         fields = ["name", "location", "is_active"]
@@ -17,22 +19,27 @@ class TerminalForm(forms.ModelForm):
 
 class OpenSessionForm(forms.Form):
     """Form for opening a POS session."""
+
     opening_cash = forms.DecimalField(
-        min_value=Decimal("0"), initial=Decimal("0"),
+        min_value=Decimal("0"),
+        initial=Decimal("0"),
         label=_("Početni iznos u blagajni"),
     )
 
 
 class CloseSessionForm(forms.Form):
     """Form for closing a POS session."""
+
     closing_cash = forms.DecimalField(
-        min_value=Decimal("0"), initial=Decimal("0"),
+        min_value=Decimal("0"),
+        initial=Decimal("0"),
         label=_("Završni iznos u blagajni"),
     )
 
 
 class AddItemForm(forms.Form):
     """Form for adding item to receipt."""
+
     inventory_item_id = forms.IntegerField(required=False)
     description = forms.CharField(max_length=200)
     quantity = forms.DecimalField(min_value=Decimal("0.01"), initial=Decimal("1"))
@@ -47,6 +54,7 @@ class AddItemForm(forms.Form):
 
 class PaymentForm(forms.Form):
     """Form for processing payment."""
+
     payment_method = forms.ChoiceField(choices=POSPaymentLine.Method.choices)
     amount_paid = forms.DecimalField(min_value=Decimal("0"))
 
@@ -59,6 +67,7 @@ class PaymentForm(forms.Form):
 
 class InventoryCSVImportForm(forms.Form):
     """Form for CSV inventory import."""
+
     csv_file = forms.FileField(
         label=_("CSV datoteka"),
         help_text=_("Format: naziv, cijena, PDV, barkod, kategorija"),

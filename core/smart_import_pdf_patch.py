@@ -2,6 +2,7 @@
 core/smart_import_pdf_patch.py
 Vision fallback za skenirane PDF-ove u smart_import.
 """
+
 import base64
 import logging
 
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 def _pdf_to_images_b64(file_path, max_pages=4, dpi=150):
     try:
         import fitz
+
         doc = fitz.open(file_path)
         mat = fitz.Matrix(dpi / 72, dpi / 72)
         result = []
@@ -28,11 +30,12 @@ def apply_vision_patch():
     """Monkey-patch smart_import.services.parse_pdf s Vision fallbackom."""
     try:
         import smart_import.services as svc
+
         if getattr(svc, "_vision_patched", False):
             return
 
         _orig_extract = svc._extract_pdf_text
-        _parse_json   = svc._parse_json_rows
+        _parse_json = svc._parse_json_rows
         _claude_lines = svc._claude_extract_lines
 
         def _vision_parse(file_path):
@@ -46,16 +49,17 @@ def apply_vision_patch():
                 "Include every product/service row. Use 0 for missing prices."
             )
             blocks = [
-                {"type": "image", "source": {"type": "base64", "media_type": mt, "data": b64}}
-                for b64, mt in images
+                {"type": "image", "source": {"type": "base64", "media_type": mt, "data": b64}} for b64, mt in images
             ]
             blocks.append({"type": "text", "text": prompt})
             try:
                 import anthropic
                 from django.conf import settings
+
                 client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
                 msg = client.messages.create(
-                    model="claude-haiku-4-5-20251001", max_tokens=2048,
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=2048,
                     messages=[{"role": "user", "content": blocks}],
                 )
                 return _parse_json(msg.content[0].text.strip())

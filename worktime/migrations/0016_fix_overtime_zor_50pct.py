@@ -5,15 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0015_add_ai_classified_travel_expense'),
+        ("worktime", "0015_add_ai_classified_travel_expense"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='employeeprofile',
-            name='overtime_rate',
-            field=models.DecimalField(decimal_places=2, default=Decimal('50.00'), help_text='ZOR čl.94 st.2: minimum 50%% za prekovremeni rad', max_digits=10),
+            model_name="employeeprofile",
+            name="overtime_rate",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("50.00"),
+                help_text="ZOR čl.94 st.2: minimum 50%% za prekovremeni rad",
+                max_digits=10,
+            ),
         ),
     ]

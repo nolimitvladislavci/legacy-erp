@@ -6,38 +6,114 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('limit_connect_ai', '0007_tenantregulatoryimpact'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("limit_connect_ai", "0007_tenantregulatoryimpact"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AIAction',
+            name="AIAction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action_type', models.CharField(choices=[('booking', 'Automatsko knjiženje'), ('classification', 'Klasifikacija dokumenta'), ('ocr', 'OCR ekstrakcija'), ('signal_triage', 'BORG signal trijage'), ('recommendation', 'AI preporuka'), ('import', 'Smart import'), ('compliance', 'Compliance provjera'), ('anomaly', 'Anomaly detekcija'), ('forecast', 'Prognoza / forecast')], db_index=True, max_length=30, verbose_name='Tip akcije')),
-                ('description', models.CharField(help_text="Npr. 'Proknjižena faktura #R-2025-142'", max_length=255, verbose_name='Opis')),
-                ('ai_model', models.CharField(choices=[('borg', 'BORG AI'), ('sonnet', 'Claude Sonnet'), ('haiku', 'Claude Haiku'), ('gemini', 'Gemini'), ('system', 'Sustav (auto)')], default='borg', max_length=20, verbose_name='AI model')),
-                ('confidence', models.PositiveSmallIntegerField(blank=True, help_text='0–100, None ako nije mjerljivo', null=True, verbose_name='Sigurnost (%)')),
-                ('source_object', models.CharField(blank=True, help_text="Npr. 'Invoice #R-2025-142', 'FenixSignal #abc'", max_length=200, verbose_name='Izvor')),
-                ('source_url', models.CharField(blank=True, max_length=500, verbose_name='URL izvora')),
-                ('result_object', models.CharField(blank=True, help_text="Npr. 'JournalEntry #456'", max_length=200, verbose_name='Rezultat')),
-                ('result_data', models.JSONField(blank=True, default=dict, verbose_name='Detalji rezultata')),
-                ('is_reviewed', models.BooleanField(default=False, verbose_name='Pregledano')),
-                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
-                ('review_note', models.TextField(blank=True, verbose_name='Napomena pri pregledu')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ai_actions', to='companies.company', verbose_name='Tvrtka')),
-                ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='lc_reviewed_ai_actions', to=settings.AUTH_USER_MODEL, verbose_name='Pregledao')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "action_type",
+                    models.CharField(
+                        choices=[
+                            ("booking", "Automatsko knjiženje"),
+                            ("classification", "Klasifikacija dokumenta"),
+                            ("ocr", "OCR ekstrakcija"),
+                            ("signal_triage", "BORG signal trijage"),
+                            ("recommendation", "AI preporuka"),
+                            ("import", "Smart import"),
+                            ("compliance", "Compliance provjera"),
+                            ("anomaly", "Anomaly detekcija"),
+                            ("forecast", "Prognoza / forecast"),
+                        ],
+                        db_index=True,
+                        max_length=30,
+                        verbose_name="Tip akcije",
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        help_text="Npr. 'Proknjižena faktura #R-2025-142'", max_length=255, verbose_name="Opis"
+                    ),
+                ),
+                (
+                    "ai_model",
+                    models.CharField(
+                        choices=[
+                            ("borg", "BORG AI"),
+                            ("sonnet", "Claude Sonnet"),
+                            ("haiku", "Claude Haiku"),
+                            ("gemini", "Gemini"),
+                            ("system", "Sustav (auto)"),
+                        ],
+                        default="borg",
+                        max_length=20,
+                        verbose_name="AI model",
+                    ),
+                ),
+                (
+                    "confidence",
+                    models.PositiveSmallIntegerField(
+                        blank=True, help_text="0–100, None ako nije mjerljivo", null=True, verbose_name="Sigurnost (%)"
+                    ),
+                ),
+                (
+                    "source_object",
+                    models.CharField(
+                        blank=True,
+                        help_text="Npr. 'Invoice #R-2025-142', 'FenixSignal #abc'",
+                        max_length=200,
+                        verbose_name="Izvor",
+                    ),
+                ),
+                ("source_url", models.CharField(blank=True, max_length=500, verbose_name="URL izvora")),
+                (
+                    "result_object",
+                    models.CharField(
+                        blank=True, help_text="Npr. 'JournalEntry #456'", max_length=200, verbose_name="Rezultat"
+                    ),
+                ),
+                ("result_data", models.JSONField(blank=True, default=dict, verbose_name="Detalji rezultata")),
+                ("is_reviewed", models.BooleanField(default=False, verbose_name="Pregledano")),
+                ("reviewed_at", models.DateTimeField(blank=True, null=True)),
+                ("review_note", models.TextField(blank=True, verbose_name="Napomena pri pregledu")),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ai_actions",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "reviewed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="lc_reviewed_ai_actions",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Pregledao",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'AI akcija',
-                'verbose_name_plural': 'AI akcije',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['company', '-created_at'], name='idx_aiaction_company'), models.Index(fields=['action_type', '-created_at'], name='idx_aiaction_type'), models.Index(fields=['is_reviewed'], name='idx_aiaction_reviewed')],
+                "verbose_name": "AI akcija",
+                "verbose_name_plural": "AI akcije",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(fields=["company", "-created_at"], name="idx_aiaction_company"),
+                    models.Index(fields=["action_type", "-created_at"], name="idx_aiaction_type"),
+                    models.Index(fields=["is_reviewed"], name="idx_aiaction_reviewed"),
+                ],
             },
         ),
     ]

@@ -4,25 +4,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0033_invoiceitem_section_sort_order'),
+        ("invoicing", "0033_invoiceitem_section_sort_order"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='doctype',
-            field=models.CharField(choices=[('PO', 'Ponuda'), ('P', 'Predračun'), ('R', 'Račun'), ('A', 'Avansni račun'), ('S', 'Storno račun'), ('GS', 'Gutschrift (DE)'), ('FA', 'Faktura (B2B)'), ('URA', 'Ulazni racun'), ('RN', 'Racun - gotovina'), ('OTP', 'Otpremnica (Lieferschein)'), ('ZR', 'Zbirni račun (Sammelrechnung)'), ('NAR', 'Narudžbenica')], default='R', max_length=10, verbose_name='Vrsta'),
+            model_name="invoice",
+            name="doctype",
+            field=models.CharField(
+                choices=[
+                    ("PO", "Ponuda"),
+                    ("P", "Predračun"),
+                    ("R", "Račun"),
+                    ("A", "Avansni račun"),
+                    ("S", "Storno račun"),
+                    ("GS", "Gutschrift (DE)"),
+                    ("FA", "Faktura (B2B)"),
+                    ("URA", "Ulazni racun"),
+                    ("RN", "Racun - gotovina"),
+                    ("OTP", "Otpremnica (Lieferschein)"),
+                    ("ZR", "Zbirni račun (Sammelrechnung)"),
+                    ("NAR", "Narudžbenica"),
+                ],
+                default="R",
+                max_length=10,
+                verbose_name="Vrsta",
+            ),
         ),
         migrations.AlterField(
-            model_name='invoiceitem',
-            name='section',
-            field=models.CharField(blank=True, default='', help_text='Opcionalano grupiranje stavki na računu', max_length=100, verbose_name='Sekcija'),
+            model_name="invoiceitem",
+            name="section",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Opcionalano grupiranje stavki na računu",
+                max_length=100,
+                verbose_name="Sekcija",
+            ),
         ),
         migrations.AlterField(
-            model_name='invoiceitem',
-            name='sort_order',
-            field=models.PositiveIntegerField(default=0, verbose_name='Redoslijed'),
+            model_name="invoiceitem",
+            name="sort_order",
+            field=models.PositiveIntegerField(default=0, verbose_name="Redoslijed"),
         ),
     ]

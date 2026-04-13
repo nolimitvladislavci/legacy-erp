@@ -5,30 +5,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('limit_connect_ai', '0006_alter_fenixsignal_options'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("limit_connect_ai", "0006_alter_fenixsignal_options"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TenantRegulatoryImpact',
+            name="TenantRegulatoryImpact",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_relevant', models.BooleanField(default=False)),
-                ('severity', models.CharField(default='info', help_text='info, warning, action_required', max_length=20)),
-                ('impact_summary', models.TextField(blank=True)),
-                ('affected_modules', models.JSONField(blank=True, default=list)),
-                ('reviewed_by_user', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='regulatory_impacts', to='companies.company')),
-                ('regulatory_update', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tenant_impacts', to='limit_connect_ai.regulatoryupdate')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("is_relevant", models.BooleanField(default=False)),
+                (
+                    "severity",
+                    models.CharField(default="info", help_text="info, warning, action_required", max_length=20),
+                ),
+                ("impact_summary", models.TextField(blank=True)),
+                ("affected_modules", models.JSONField(blank=True, default=list)),
+                ("reviewed_by_user", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="regulatory_impacts",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "regulatory_update",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tenant_impacts",
+                        to="limit_connect_ai.regulatoryupdate",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Tenant Regulatory Impact',
-                'verbose_name_plural': 'Tenant Regulatory Impacts',
-                'unique_together': {('company', 'regulatory_update')},
+                "verbose_name": "Tenant Regulatory Impact",
+                "verbose_name_plural": "Tenant Regulatory Impacts",
+                "unique_together": {("company", "regulatory_update")},
             },
         ),
     ]

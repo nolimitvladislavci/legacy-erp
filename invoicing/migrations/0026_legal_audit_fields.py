@@ -6,21 +6,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0025_invoice_archive_hash_and_more'),
+        ("invoicing", "0025_invoice_archive_hash_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoiceevent',
-            name='client_ip',
-            field=models.GenericIPAddressField(blank=True, help_text='IP adresa korisnika koji je izvršio akciju', null=True, verbose_name='IP adresa'),
+            model_name="invoiceevent",
+            name="client_ip",
+            field=models.GenericIPAddressField(
+                blank=True, help_text="IP adresa korisnika koji je izvršio akciju", null=True, verbose_name="IP adresa"
+            ),
         ),
         migrations.AddField(
-            model_name='invoiceevent',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_events_updated', to=settings.AUTH_USER_MODEL, verbose_name='Izvršio izmjenu'),
+            model_name="invoiceevent",
+            name="updated_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoice_events_updated",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Izvršio izmjenu",
+            ),
         ),
     ]

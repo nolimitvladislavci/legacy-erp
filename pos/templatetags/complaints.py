@@ -7,20 +7,22 @@ Korištenje u BILO KOJEM templateu:
     {% complaints_button style="fab" %}  → floating action button
     {% complaints_qr %}                  → QR kod za potrošačev mobitel
 """
+
 from django import template
 from django.db import DatabaseError
 
 register = template.Library()
 
 
-@register.inclusion_tag('pos/complaints_button.html', takes_context=True)
-def complaints_button(context, style='inline', source_module='general'):
+@register.inclusion_tag("pos/complaints_button.html", takes_context=True)
+def complaints_button(context, style="inline", source_module="general"):
     """Renders complaint/impression button."""
-    request = context.get('request')
+    request = context.get("request")
     company = None
     if request:
         try:
             from core.company_utils import get_user_company
+
             company = get_user_company(request)
         except ImportError:
             pass
@@ -30,44 +32,46 @@ def complaints_button(context, style='inline', source_module='general'):
     if company:
         try:
             from pos.models import KnjigaPrigovora
+
             pending = KnjigaPrigovora.objects.filter(
                 company=company,
-                record_type__in=['prigovor', 'reklamacija'],
+                record_type__in=["prigovor", "reklamacija"],
                 datum_odgovora__isnull=True,
             ).count()
         except DatabaseError:
             pass
 
     return {
-        'company': company,
-        'company_id': company.pk if company else '',
-        'pending_count': pending,
-        'style': style,
-        'source_module': source_module,
-        'is_authenticated': getattr(request, 'user', None) and request.user.is_authenticated,
+        "company": company,
+        "company_id": company.pk if company else "",
+        "pending_count": pending,
+        "style": style,
+        "source_module": source_module,
+        "is_authenticated": getattr(request, "user", None) and request.user.is_authenticated,
     }
 
 
 @register.simple_tag(takes_context=True)
 def complaints_qr_url(context):
     """Returns the public QR complaint URL for current company."""
-    request = context.get('request')
+    request = context.get("request")
     if not request:
-        return ''
+        return ""
     try:
         from core.company_utils import get_user_company
+
         company = get_user_company(request)
         if company:
-            return f'/pos/prigovori/new/?company={company.pk}&source=qr'
+            return f"/pos/prigovori/new/?company={company.pk}&source=qr"
     except ImportError:
         pass
-    return ''
+    return ""
 
 
 @register.simple_tag(takes_context=True)
 def complaints_stats(context):
     """Returns dict with complaint/impression stats for dashboard widgets."""
-    request = context.get('request')
+    request = context.get("request")
     if not request:
         return {}
     try:
@@ -75,27 +79,27 @@ def complaints_stats(context):
 
         from core.company_utils import get_user_company
         from pos.models import KnjigaPrigovora
+
         company = get_user_company(request)
         if not company:
             return {}
 
         qs = KnjigaPrigovora.objects.filter(company=company)
         return {
-            'total': qs.count(),
-            'prigovori': qs.filter(record_type='prigovor').count(),
-            'pohvale': qs.filter(record_type='pohvala').count(),
-            'utisci': qs.filter(record_type='utisak').count(),
-            'reklamacije': qs.filter(record_type='reklamacija').count(),
-            'pending': qs.filter(
-                record_type__in=['prigovor', 'reklamacija'],
+            "total": qs.count(),
+            "prigovori": qs.filter(record_type="prigovor").count(),
+            "pohvale": qs.filter(record_type="pohvala").count(),
+            "utisci": qs.filter(record_type="utisak").count(),
+            "reklamacije": qs.filter(record_type="reklamacija").count(),
+            "pending": qs.filter(
+                record_type__in=["prigovor", "reklamacija"],
                 datum_odgovora__isnull=True,
             ).count(),
-            'overdue': qs.filter(
-                record_type__in=['prigovor', 'reklamacija'],
+            "overdue": qs.filter(
+                record_type__in=["prigovor", "reklamacija"],
                 datum_odgovora__isnull=True,
             ).count(),  # will be filtered by date in template
-            'avg_rating': qs.filter(star_rating__isnull=False).aggregate(
-                avg=Avg('star_rating'))['avg'],
+            "avg_rating": qs.filter(star_rating__isnull=False).aggregate(avg=Avg("star_rating"))["avg"],
         }
     except DatabaseError:
         return {}

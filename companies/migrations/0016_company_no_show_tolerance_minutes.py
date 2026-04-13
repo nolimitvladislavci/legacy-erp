@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0015_company_geofence_radius_company_latitude_and_more'),
+        ("companies", "0015_company_geofence_radius_company_latitude_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='no_show_tolerance_minutes',
-            field=models.PositiveIntegerField(default=15, verbose_name='Tolerancija kasnjenja (min)'),
+            model_name="company",
+            name="no_show_tolerance_minutes",
+            field=models.PositiveIntegerField(default=15, verbose_name="Tolerancija kasnjenja (min)"),
         ),
     ]

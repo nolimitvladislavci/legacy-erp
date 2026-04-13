@@ -1,6 +1,7 @@
 """smart_import/services.py -- Parse XML/PDF/Image invoices, match items.
-   v2 - 2026-03-17: Enhanced image fallback, better error handling, Gemini usage logging.
+v2 - 2026-03-17: Enhanced image fallback, better error handling, Gemini usage logging.
 """
+
 import base64
 import json
 import logging
@@ -15,12 +16,14 @@ logger = logging.getLogger(__name__)
 # Register HEIC/HEIF opener for iPhone photos
 try:
     from pillow_heif import register_heif_opener
+
     register_heif_opener()
 except ImportError:
     pass
 
 
 # -- XML (UBL e-Racun) ---------------------------------------------------------
+
 
 def parse_xml(file_path):
     try:
@@ -40,20 +43,34 @@ def parse_xml(file_path):
     rows = []
     lines = root.findall(".//cac:InvoiceLine", ns) or root.findall(".//InvoiceLine")
     for line in lines:
-        name = _xml_text(line, [
-            "cac:Item/cbc:Name", "Item/Name", "cbc:Description",
-        ], ns)
-        qty_str   = _xml_text(line, ["cbc:InvoicedQuantity", "InvoicedQuantity"], ns)
-        price_str = _xml_text(line, [
-            "cac:Price/cbc:PriceAmount", "Price/PriceAmount", "cbc:LineExtensionAmount",
-        ], ns)
+        name = _xml_text(
+            line,
+            [
+                "cac:Item/cbc:Name",
+                "Item/Name",
+                "cbc:Description",
+            ],
+            ns,
+        )
+        qty_str = _xml_text(line, ["cbc:InvoicedQuantity", "InvoicedQuantity"], ns)
+        price_str = _xml_text(
+            line,
+            [
+                "cac:Price/cbc:PriceAmount",
+                "Price/PriceAmount",
+                "cbc:LineExtensionAmount",
+            ],
+            ns,
+        )
         if not name:
             continue
-        rows.append({
-            "vendor_name":    name.strip(),
-            "quantity":       _to_decimal(qty_str, 1),
-            "purchase_price": _to_decimal(price_str, 0),
-        })
+        rows.append(
+            {
+                "vendor_name": name.strip(),
+                "quantity": _to_decimal(qty_str, 1),
+                "purchase_price": _to_decimal(price_str, 0),
+            }
+        )
 
     if not rows:
         rows = _generic_xml_scan(root)
@@ -86,15 +103,18 @@ def _generic_xml_scan(root):
                 elif ctag in ("price", "priceamount", "unitprice", "cijena") and child.text:
                     price = child.text
             if name:
-                rows.append({
-                    "vendor_name":    name.strip(),
-                    "quantity":       _to_decimal(qty, 1),
-                    "purchase_price": _to_decimal(price, 0),
-                })
+                rows.append(
+                    {
+                        "vendor_name": name.strip(),
+                        "quantity": _to_decimal(qty, 1),
+                        "purchase_price": _to_decimal(price, 0),
+                    }
+                )
     return rows
 
 
 # -- PDF -----------------------------------------------------------------------
+
 
 def parse_pdf(file_path):
     text = _extract_pdf_text(file_path)
@@ -140,12 +160,14 @@ def _pdf_image_fallback(file_path):
 def _extract_pdf_text(file_path):
     try:
         import pdfplumber
+
         with pdfplumber.open(file_path) as pdf:
             return "\n".join(p.extract_text() or "" for p in pdf.pages)
     except ImportError:
         pass
     try:
         from pypdf import PdfReader
+
         reader = PdfReader(file_path)
         return "\n".join(p.extract_text() or "" for p in reader.pages)
     except ImportError as e:
@@ -154,6 +176,7 @@ def _extract_pdf_text(file_path):
 
 
 # -- Image (Gemini Vision) -----------------------------------------------------
+
 
 def parse_image(file_path):
     """Primary image parser: Gemini Vision with Claude fallback."""
@@ -183,8 +206,6 @@ def parse_image_enhanced(file_path):
     return _gemini_vision_extract_enhanced(image_b64, media_type)
 
 
-
-
 def _claude_vision_extract(file_path):
     """Fallback: use Claude Haiku Vision for invoice extraction when Gemini fails."""
     try:
@@ -204,30 +225,32 @@ def _claude_vision_extract(file_path):
         message = client.messages.create(
             model="claude-3-5-haiku-20241022",
             max_tokens=4096,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": media_type,
-                            "data": image_b64,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": media_type,
+                                "data": image_b64,
+                            },
                         },
-                    },
-                    {
-                        "type": "text",
-                        "text": (
-                            "Ovo je slika racuna/fakture. Izvuci SVE stavke. "
-                            "Tekst moze biti na hrvatskom, njemackom ili engleskom. "
-                            "Vrati ISKLJUCIVO JSON array bez ikakvog drugog teksta. "
-                            "Svaki element: "
-                            '{"vendor_name": "<naziv stavke>", "quantity": <broj>, "purchase_price": <jedinicna cijena>}. '
-                            "Ako cijena nije vidljiva, koristi 0. Ukljuci SVAKU stavku."
-                        ),
-                    },
-                ],
-            }],
+                        {
+                            "type": "text",
+                            "text": (
+                                "Ovo je slika racuna/fakture. Izvuci SVE stavke. "
+                                "Tekst moze biti na hrvatskom, njemackom ili engleskom. "
+                                "Vrati ISKLJUCIVO JSON array bez ikakvog drugog teksta. "
+                                "Svaki element: "
+                                '{"vendor_name": "<naziv stavke>", "quantity": <broj>, "purchase_price": <jedinicna cijena>}. '
+                                "Ako cijena nije vidljiva, koristi 0. Ukljuci SVAKU stavku."
+                            ),
+                        },
+                    ],
+                }
+            ],
         )
 
         text = message.content[0].text.replace("```json", "").replace("```", "").strip()
@@ -241,6 +264,7 @@ def _claude_vision_extract(file_path):
     except Exception as e:
         logger.error("Claude Vision fallback failed: %s", e)
         return []
+
 
 def _gemini_vision_extract(image_b64, media_type):
     """Send a base64 image to Gemini Vision and extract invoice lines."""
@@ -334,6 +358,7 @@ def _log_gemini_usage(response, caller):
     """Log Gemini API usage for cost tracking."""
     try:
         from smart_import.models import GeminiUsageLog
+
         usage = getattr(response, "usage_metadata", None)
         if usage:
             input_tokens = getattr(usage, "prompt_token_count", 0) or 0
@@ -356,11 +381,13 @@ def _encode_image(file_path):
     try:
         from PIL import Image as PILImage
         from PIL import ImageEnhance
+
         img = PILImage.open(file_path)
 
         # Auto-rotate based on EXIF (mobile camera photos)
         try:
             from PIL import ExifTags
+
             exif = img._getexif()
             if exif:
                 for tag, val in exif.items():
@@ -402,11 +429,13 @@ def _encode_image_enhanced(file_path):
     try:
         from PIL import Image as PILImage
         from PIL import ImageEnhance, ImageFilter, ImageOps
+
         img = PILImage.open(file_path)
 
         # Auto-rotate
         try:
             from PIL import ExifTags
+
             exif = img._getexif()
             if exif:
                 for tag, val in exif.items():
@@ -445,6 +474,7 @@ def _encode_image_enhanced(file_path):
 
 
 # -- Gemini text extraction ----------------------------------------------------
+
 
 def _claude_extract_lines(text, source_type="text"):
     prompt = (
@@ -496,15 +526,18 @@ def _parse_json_rows(raw):
         name = str(item.get("vendor_name") or item.get("name") or "").strip()
         if not name:
             continue
-        rows.append({
-            "vendor_name":    name,
-            "quantity":       _to_decimal(item.get("quantity"), 1),
-            "purchase_price": _to_decimal(item.get("purchase_price") or item.get("price"), 0),
-        })
+        rows.append(
+            {
+                "vendor_name": name,
+                "quantity": _to_decimal(item.get("quantity"), 1),
+                "purchase_price": _to_decimal(item.get("purchase_price") or item.get("price"), 0),
+            }
+        )
     return rows
 
 
 # -- Item matching -------------------------------------------------------------
+
 
 def match_items(batch):
     """Fuzzy-match ImportBatchItems to InventoryItems.
@@ -512,7 +545,7 @@ def match_items(batch):
     from inventory.models import InventoryItem
     from smart_import.models import VendorItemMapping
 
-    company  = batch.company
+    company = batch.company
     supplier = batch.supplier
 
     inv_items = list(InventoryItem.objects.filter(company=company, is_active=True))
@@ -522,33 +555,32 @@ def match_items(batch):
         vname = batch_item.vendor_name.lower().strip()
 
         # 1. Learned mapping
-        mapping_qs = VendorItemMapping.objects.filter(
-            company=company, vendor_item_name__iexact=vname
-        )
+        mapping_qs = VendorItemMapping.objects.filter(company=company, vendor_item_name__iexact=vname)
         if supplier:
             mapping_qs = mapping_qs.filter(partner=supplier)
         mapping = mapping_qs.first()
         if mapping:
             batch_item.matched_item = mapping.inventory_item
-            batch_item.match_score  = 1.0
+            batch_item.match_score = 1.0
             batch_item.save(update_fields=["matched_item", "match_score"])
             continue
 
         # 2. Fuzzy match
         best_score = 0.0
-        best_item  = None
+        best_item = None
         for idx, inv_name in enumerate(inv_names):
             score = SequenceMatcher(None, vname, inv_name).ratio()
             if score > best_score:
                 best_score = score
-                best_item  = inv_items[idx]
+                best_item = inv_items[idx]
 
         batch_item.matched_item = best_item if best_score >= 0.4 else None
-        batch_item.match_score  = round(best_score, 4)
+        batch_item.match_score = round(best_score, 4)
         batch_item.save(update_fields=["matched_item", "match_score"])
 
 
 # -- Helpers -------------------------------------------------------------------
+
 
 def _to_decimal(value, default=0):
     if value is None:
@@ -577,6 +609,7 @@ def _to_decimal(value, default=0):
 
 
 # ── Zaglavlje računa (header OCR) ────────────────────────────────────────────
+
 
 def extract_invoice_header(file_path):
     """
@@ -625,7 +658,9 @@ def extract_invoice_header(file_path):
         header = json.loads(text)
         logger.info(
             "Header extracted: supplier=%s OIB=%s total=%s",
-            header.get("supplier_name", "?"), header.get("supplier_oib", "?"), header.get("total_amount")
+            header.get("supplier_name", "?"),
+            header.get("supplier_oib", "?"),
+            header.get("total_amount"),
         )
         return header
     except (json.JSONDecodeError, ValueError) as e:
@@ -635,6 +670,7 @@ def extract_invoice_header(file_path):
 
 # ── UNIFIED OCR — stavke + header u jednom pozivu (cost-efficient) ──────────
 
+
 def extract_unified(file_path):
     """
     Jedan Gemini poziv koji vraća i header i stavke.
@@ -643,7 +679,7 @@ def extract_unified(file_path):
     """
     image_b64, media_type = _encode_image(file_path)
     if not image_b64:
-        return {'header': {}, 'items': []}
+        return {"header": {}, "items": []}
 
     prompt = (
         "You are an expert invoice OCR system. Extract BOTH the document header AND all line items. "
@@ -671,7 +707,7 @@ def extract_unified(file_path):
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:
-            return {'header': {}, 'items': []}
+            return {"header": {}, "items": []}
 
         _client = _genai.Client(api_key=api_key)
         image_data = base64.standard_b64decode(image_b64)
@@ -682,25 +718,27 @@ def extract_unified(file_path):
         _log_gemini_usage(response, "smart_import_unified")
 
         data = json.loads(text)
-        header = data.get('header', {})
-        items = data.get('items', [])
+        header = data.get("header", {})
+        items = data.get("items", [])
 
         # Normalize items
         rows = []
         for item in items:
             if not isinstance(item, dict):
                 continue
-            name = str(item.get('vendor_name') or item.get('name') or '').strip()
+            name = str(item.get("vendor_name") or item.get("name") or "").strip()
             if not name:
                 continue
-            rows.append({
-                'vendor_name': name,
-                'quantity': _to_decimal(item.get('quantity'), 1),
-                'purchase_price': _to_decimal(item.get('purchase_price') or item.get('price'), 0),
-            })
+            rows.append(
+                {
+                    "vendor_name": name,
+                    "quantity": _to_decimal(item.get("quantity"), 1),
+                    "purchase_price": _to_decimal(item.get("purchase_price") or item.get("price"), 0),
+                }
+            )
 
-        logger.info("Unified OCR: header=%s items=%d", header.get('supplier_name', '?'), len(rows))
-        return {'header': header, 'items': rows}
+        logger.info("Unified OCR: header=%s items=%d", header.get("supplier_name", "?"), len(rows))
+        return {"header": header, "items": rows}
     except (json.JSONDecodeError, ValueError) as e:
         logger.error("Unified OCR failed: %s", e)
-        return {'header': {}, 'items': []}
+        return {"header": {}, "items": []}

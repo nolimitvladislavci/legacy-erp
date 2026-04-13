@@ -1,4 +1,5 @@
 """Tests for pos.services — POS business logic unit tests."""
+
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -26,13 +27,10 @@ class POSTestBase(TestCase):
 
         self.company = Company.objects.create(name="Test POS Co", oib="55555555555")
         self.user = User.objects.create_user("postest", password="test123")
-        self.terminal = POSTerminal.objects.create(
-            name="Terminal 1", company=self.company
-        )
+        self.terminal = POSTerminal.objects.create(name="Terminal 1", company=self.company)
 
 
 class TestSessionManagement(POSTestBase):
-
     def test_open_session(self):
         session = open_session(self.terminal, self.user, Decimal("500"))
         self.assertEqual(session.session_number, 1)
@@ -66,7 +64,6 @@ class TestSessionManagement(POSTestBase):
 
 
 class TestReceiptOperations(POSTestBase):
-
     def setUp(self):
         super().setUp()
         self.session = open_session(self.terminal, self.user)
@@ -98,7 +95,6 @@ class TestReceiptOperations(POSTestBase):
 
 
 class TestPayment(POSTestBase):
-
     def setUp(self):
         super().setUp()
         self.session = open_session(self.terminal, self.user)
@@ -143,7 +139,6 @@ class TestPayment(POSTestBase):
 
 
 class TestZReport(POSTestBase):
-
     def test_zreport_empty_session(self):
         session = open_session(self.terminal, self.user)
         report = generate_zreport(session)

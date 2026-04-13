@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0009_mobile_login_daily_report'),
+        ("accounts", "0009_mobile_login_daily_report"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='devicetoken',
-            name='expires_at',
-            field=models.DateTimeField(blank=True, help_text='Automatski se deaktivira nakon ovog datuma. Prazno = trajno.', null=True, verbose_name='Istječe'),
+            model_name="devicetoken",
+            name="expires_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Automatski se deaktivira nakon ovog datuma. Prazno = trajno.",
+                null=True,
+                verbose_name="Istječe",
+            ),
         ),
         migrations.AddField(
-            model_name='devicetoken',
-            name='label',
-            field=models.CharField(blank=True, help_text='Ime + firma + datum — za printane QR kartice volontera', max_length=100, verbose_name='Natpis na QR-u'),
+            model_name="devicetoken",
+            name="label",
+            field=models.CharField(
+                blank=True,
+                help_text="Ime + firma + datum — za printane QR kartice volontera",
+                max_length=100,
+                verbose_name="Natpis na QR-u",
+            ),
         ),
     ]

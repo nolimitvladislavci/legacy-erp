@@ -5,55 +5,96 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0007_company_settings'),
-        ('konto', '0001_initial'),
+        ("companies", "0007_company_settings"),
+        ("konto", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TaxPeriod',
+            name="TaxPeriod",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period_type', models.CharField(choices=[('monthly', 'Miesięczny / Monatlich'), ('quarterly', 'Kvartalni / Quartal'), ('yearly', 'Godišnji / Jährlich')], default='monthly', max_length=20)),
-                ('year', models.PositiveSmallIntegerField()),
-                ('month', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('quarter', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('total_output_vat', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Izlazni PDV')),
-                ('total_input_vat', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Pretporez')),
-                ('vat_payable', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='PDV za uplatu')),
-                ('total_revenue', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Prihodi')),
-                ('total_expenses', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Rashodi')),
-                ('filing_deadline', models.DateField(blank=True, null=True, verbose_name='Rok prijave')),
-                ('is_filed', models.BooleanField(default=False, verbose_name='Prijavljeno')),
-                ('filed_at', models.DateTimeField(blank=True, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tax_periods', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "period_type",
+                    models.CharField(
+                        choices=[
+                            ("monthly", "Miesięczny / Monatlich"),
+                            ("quarterly", "Kvartalni / Quartal"),
+                            ("yearly", "Godišnji / Jährlich"),
+                        ],
+                        default="monthly",
+                        max_length=20,
+                    ),
+                ),
+                ("year", models.PositiveSmallIntegerField()),
+                ("month", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("quarter", models.PositiveSmallIntegerField(blank=True, null=True)),
+                (
+                    "total_output_vat",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Izlazni PDV"),
+                ),
+                (
+                    "total_input_vat",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Pretporez"),
+                ),
+                (
+                    "vat_payable",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="PDV za uplatu"),
+                ),
+                (
+                    "total_revenue",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Prihodi"),
+                ),
+                (
+                    "total_expenses",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Rashodi"),
+                ),
+                ("filing_deadline", models.DateField(blank=True, null=True, verbose_name="Rok prijave")),
+                ("is_filed", models.BooleanField(default=False, verbose_name="Prijavljeno")),
+                ("filed_at", models.DateTimeField(blank=True, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="tax_periods", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Porezno razdoblje',
-                'verbose_name_plural': 'Porezna razdoblja',
-                'ordering': ['-year', '-month', '-quarter'],
-                'unique_together': {('company', 'period_type', 'year', 'month', 'quarter')},
+                "verbose_name": "Porezno razdoblje",
+                "verbose_name_plural": "Porezna razdoblja",
+                "ordering": ["-year", "-month", "-quarter"],
+                "unique_together": {("company", "period_type", "year", "month", "quarter")},
             },
         ),
         migrations.CreateModel(
-            name='TaxLineDetail',
+            name="TaxLineDetail",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tax_rate', models.DecimalField(decimal_places=2, max_digits=5, verbose_name='Stopa PDV-a (%)')),
-                ('revenue_base', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Porezna osnovica')),
-                ('output_vat', models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name='Izlazni PDV')),
-                ('period', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='line_details', to='konto.taxperiod')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("tax_rate", models.DecimalField(decimal_places=2, max_digits=5, verbose_name="Stopa PDV-a (%)")),
+                (
+                    "revenue_base",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Porezna osnovica"),
+                ),
+                (
+                    "output_vat",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=14, verbose_name="Izlazni PDV"),
+                ),
+                (
+                    "period",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="line_details", to="konto.taxperiod"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka PDV-a',
-                'verbose_name_plural': 'Stavke PDV-a',
-                'ordering': ['-tax_rate'],
-                'unique_together': {('period', 'tax_rate')},
+                "verbose_name": "Stavka PDV-a",
+                "verbose_name_plural": "Stavke PDV-a",
+                "ordering": ["-tax_rate"],
+                "unique_together": {("period", "tax_rate")},
             },
         ),
     ]

@@ -4,30 +4,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0015_nonprofit_activity_flag'),
+        ("inventory", "0015_nonprofit_activity_flag"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='stockmovement',
-            name='donor_name',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Donator'),
+            model_name="stockmovement",
+            name="donor_name",
+            field=models.CharField(blank=True, max_length=200, verbose_name="Donator"),
         ),
         migrations.AddField(
-            model_name='stockmovement',
-            name='donor_oib',
-            field=models.CharField(blank=True, max_length=13, verbose_name='OIB donatora'),
+            model_name="stockmovement",
+            name="donor_oib",
+            field=models.CharField(blank=True, max_length=13, verbose_name="OIB donatora"),
         ),
         migrations.AddField(
-            model_name='stockmovement',
-            name='fair_market_value',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Obavezno za donation_in — procjena vrijednosti za knjizenje', max_digits=10, null=True, verbose_name='Fer trzisna vrijednost'),
+            model_name="stockmovement",
+            name="fair_market_value",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                help_text="Obavezno za donation_in — procjena vrijednosti za knjizenje",
+                max_digits=10,
+                null=True,
+                verbose_name="Fer trzisna vrijednost",
+            ),
         ),
         migrations.AlterField(
-            model_name='stockmovement',
-            name='movement_type',
-            field=models.CharField(choices=[('in', 'Ulaz (nabava)'), ('out', 'Izlaz (prodaja/upotreba)'), ('adjustment', 'Korekcija zalihe'), ('transfer', 'Prijenos na drugu lokaciju'), ('return', 'Povrat dobavljaču'), ('donation_in', 'Ulaz (materijalna donacija)'), ('writeoff', 'Otpis / Kalo')], max_length=20, verbose_name='Vrsta kretanja'),
+            model_name="stockmovement",
+            name="movement_type",
+            field=models.CharField(
+                choices=[
+                    ("in", "Ulaz (nabava)"),
+                    ("out", "Izlaz (prodaja/upotreba)"),
+                    ("adjustment", "Korekcija zalihe"),
+                    ("transfer", "Prijenos na drugu lokaciju"),
+                    ("return", "Povrat dobavljaču"),
+                    ("donation_in", "Ulaz (materijalna donacija)"),
+                    ("writeoff", "Otpis / Kalo"),
+                ],
+                max_length=20,
+                verbose_name="Vrsta kretanja",
+            ),
         ),
     ]

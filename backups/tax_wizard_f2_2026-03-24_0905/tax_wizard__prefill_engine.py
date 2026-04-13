@@ -239,7 +239,6 @@ class PrefillEngine:
         # to je storno bon — ignoriramo ga jer ima negativan total.
 
         tips_total = ZERO
-        training_total = ZERO
 
         for receipt in receipts:
             # paid_at je naš datum (caka #2 — načelo blagajne)
@@ -251,7 +250,6 @@ class PrefillEngine:
             # Izračunaj iznos BEZ napojnica (caka #1)
             # Dohvati sve stavke ovog bona
             items = receipt.items.all()
-            tip_amount = ZERO
             non_tip_total = ZERO
 
             for item in items:

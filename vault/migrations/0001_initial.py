@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,61 +14,158 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='VaultEntry',
+            name="VaultEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=300)),
-                ('category', models.CharField(choices=[('credentials', 'Pristupni podaci (lozinke, API ključevi)'), ('certificates', 'Certifikati (.p12, SSL, FINA)'), ('legal', 'Pravni dokumenti (ugovori, punomoći)'), ('financial', 'Financijski podaci (kartice, bankovni)'), ('infra', 'Infrastruktura (SSH, server pristup)'), ('emergency', 'Hitni protokoli i upute'), ('other', 'Ostalo')], default='other', max_length=20)),
-                ('_content_enc', models.BinaryField(help_text='Šifrirani sadržaj (Fernet AES)')),
-                ('url', models.CharField(blank=True, help_text='Link (npr. https://hetzner.com)', max_length=500)),
-                ('username_hint', models.CharField(blank=True, help_text='Korisničko ime (nešifrirano — hint)', max_length=200)),
-                ('visible_to', models.CharField(choices=[('T2', 'Trojstvo 2 — Core (Ivan, Antonio, Marija)'), ('T3', 'Trojstvo 3 — Operativno (Marija, Kruljac, Neutral)'), ('ALL', 'Sva trojstva — puni pristup')], default='ALL', help_text='Koje trojstvo može pristupiti', max_length=3)),
-                ('priority', models.CharField(choices=[('critical', '🔴 Kritično'), ('high', '🟡 Visoko'), ('normal', '🟢 Normalno')], default='normal', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vault_entries_created', to=settings.AUTH_USER_MODEL)),
-                ('updated_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vault_entries_updated', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("title", models.CharField(max_length=300)),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("credentials", "Pristupni podaci (lozinke, API ključevi)"),
+                            ("certificates", "Certifikati (.p12, SSL, FINA)"),
+                            ("legal", "Pravni dokumenti (ugovori, punomoći)"),
+                            ("financial", "Financijski podaci (kartice, bankovni)"),
+                            ("infra", "Infrastruktura (SSH, server pristup)"),
+                            ("emergency", "Hitni protokoli i upute"),
+                            ("other", "Ostalo"),
+                        ],
+                        default="other",
+                        max_length=20,
+                    ),
+                ),
+                ("_content_enc", models.BinaryField(help_text="Šifrirani sadržaj (Fernet AES)")),
+                ("url", models.CharField(blank=True, help_text="Link (npr. https://hetzner.com)", max_length=500)),
+                (
+                    "username_hint",
+                    models.CharField(blank=True, help_text="Korisničko ime (nešifrirano — hint)", max_length=200),
+                ),
+                (
+                    "visible_to",
+                    models.CharField(
+                        choices=[
+                            ("T2", "Trojstvo 2 — Core (Ivan, Antonio, Marija)"),
+                            ("T3", "Trojstvo 3 — Operativno (Marija, Kruljac, Neutral)"),
+                            ("ALL", "Sva trojstva — puni pristup"),
+                        ],
+                        default="ALL",
+                        help_text="Koje trojstvo može pristupiti",
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[("critical", "🔴 Kritično"), ("high", "🟡 Visoko"), ("normal", "🟢 Normalno")],
+                        default="normal",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="vault_entries_created",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "updated_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="vault_entries_updated",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Unos trezora',
-                'verbose_name_plural': 'Unosi trezora',
-                'ordering': ['category', 'title'],
+                "verbose_name": "Unos trezora",
+                "verbose_name_plural": "Unosi trezora",
+                "ordering": ["category", "title"],
             },
         ),
         migrations.CreateModel(
-            name='VaultAccessLog',
+            name="VaultAccessLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('read', 'Čitanje'), ('write', 'Pisanje'), ('delete', 'Brisanje')], max_length=10)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vault_accesses', to=settings.AUTH_USER_MODEL)),
-                ('entry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='access_logs', to='vault.vaultentry')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[("read", "Čitanje"), ("write", "Pisanje"), ("delete", "Brisanje")], max_length=10
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="vault_accesses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "entry",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="access_logs", to="vault.vaultentry"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Log pristupa trezoru',
-                'ordering': ['-timestamp'],
+                "verbose_name": "Log pristupa trezoru",
+                "ordering": ["-timestamp"],
             },
         ),
         migrations.CreateModel(
-            name='VaultMember',
+            name="VaultMember",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('display_name', models.CharField(help_text='Ime kako se prikazuje u trezoru', max_length=200)),
-                ('trojstvo', models.CharField(choices=[('T2', 'Trojstvo 2 — Core (Ivan, Antonio, Marija)'), ('T3', 'Trojstvo 3 — Operativno (Marija, Kruljac, Neutral)'), ('ALL', 'Sva trojstva — puni pristup')], default='ALL', max_length=3)),
-                ('is_active', models.BooleanField(default=True)),
-                ('can_write', models.BooleanField(default=True, help_text='Može dodavati i mijenjati unose')),
-                ('can_delete', models.BooleanField(default=False, help_text='Može brisati unose (samo vlasnik)')),
-                ('added_at', models.DateTimeField(auto_now_add=True)),
-                ('notes', models.TextField(blank=True, help_text='Napomena (uloga, kontakt, nasljedstvo)')),
-                ('added_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vault_members_added', to=settings.AUTH_USER_MODEL)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='vault_member', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("display_name", models.CharField(help_text="Ime kako se prikazuje u trezoru", max_length=200)),
+                (
+                    "trojstvo",
+                    models.CharField(
+                        choices=[
+                            ("T2", "Trojstvo 2 — Core (Ivan, Antonio, Marija)"),
+                            ("T3", "Trojstvo 3 — Operativno (Marija, Kruljac, Neutral)"),
+                            ("ALL", "Sva trojstva — puni pristup"),
+                        ],
+                        default="ALL",
+                        max_length=3,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("can_write", models.BooleanField(default=True, help_text="Može dodavati i mijenjati unose")),
+                ("can_delete", models.BooleanField(default=False, help_text="Može brisati unose (samo vlasnik)")),
+                ("added_at", models.DateTimeField(auto_now_add=True)),
+                ("notes", models.TextField(blank=True, help_text="Napomena (uloga, kontakt, nasljedstvo)")),
+                (
+                    "added_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="vault_members_added",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="vault_member",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Član trezora',
-                'verbose_name_plural': 'Članovi trezora',
-                'ordering': ['display_name'],
+                "verbose_name": "Član trezora",
+                "verbose_name_plural": "Članovi trezora",
+                "ordering": ["display_name"],
             },
         ),
     ]

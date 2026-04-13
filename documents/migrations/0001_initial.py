@@ -5,33 +5,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0001_initial'),
-        ('partners', '0001_initial'),
+        ("companies", "0001_initial"),
+        ("partners", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Document',
+            name="Document",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doc_type', models.CharField(choices=[('invoice', 'Izlazni Račun'), ('offer', 'Ponuda'), ('bill', 'Ulazni Račun'), ('contract', 'Ugovor'), ('receipt', 'Potvrda')], max_length=20, verbose_name='Tip dokumenta')),
-                ('doc_number', models.CharField(max_length=50, verbose_name='Broj dokumenta')),
-                ('date_issued', models.DateField(verbose_name='Datum izdavanja')),
-                ('date_due', models.DateField(blank=True, null=True, verbose_name='Datum dospijeća')),
-                ('total_amount', models.DecimalField(decimal_places=2, default=0.0, max_digits=12, verbose_name='Iznos')),
-                ('file', models.FileField(upload_to='documents/%Y/%m/', verbose_name='Datoteka')),
-                ('is_paid', models.BooleanField(default=False, verbose_name='Plaćeno')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Tvrtka')),
-                ('partner', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='documents', to='partners.partner', verbose_name='Partner')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "doc_type",
+                    models.CharField(
+                        choices=[
+                            ("invoice", "Izlazni Račun"),
+                            ("offer", "Ponuda"),
+                            ("bill", "Ulazni Račun"),
+                            ("contract", "Ugovor"),
+                            ("receipt", "Potvrda"),
+                        ],
+                        max_length=20,
+                        verbose_name="Tip dokumenta",
+                    ),
+                ),
+                ("doc_number", models.CharField(max_length=50, verbose_name="Broj dokumenta")),
+                ("date_issued", models.DateField(verbose_name="Datum izdavanja")),
+                ("date_due", models.DateField(blank=True, null=True, verbose_name="Datum dospijeća")),
+                (
+                    "total_amount",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=12, verbose_name="Iznos"),
+                ),
+                ("file", models.FileField(upload_to="documents/%Y/%m/", verbose_name="Datoteka")),
+                ("is_paid", models.BooleanField(default=False, verbose_name="Plaćeno")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Tvrtka"
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="documents",
+                        to="partners.partner",
+                        verbose_name="Partner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dokument',
-                'verbose_name_plural': 'Dokumenti',
+                "verbose_name": "Dokument",
+                "verbose_name_plural": "Dokumenti",
             },
         ),
     ]

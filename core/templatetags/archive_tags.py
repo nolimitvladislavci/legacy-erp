@@ -11,9 +11,7 @@ def is_archive_readonly(user):
         company = user.profile.company
         if not company:
             return False
-        sub = company.subscriptions.filter(
-            is_active=True
-        ).order_by('-valid_from').first()
-        return sub and sub.plan == 'archive_readonly'
+        sub = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
+        return sub and sub.plan == "archive_readonly"
     except DatabaseError:
         return False

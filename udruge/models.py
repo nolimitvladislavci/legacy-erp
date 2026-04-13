@@ -2,6 +2,7 @@
 Udruge modul - evidencija clanova braniteljskih, sportskih i OPG udruga.
 Cross-sell: clan udruge -> potencijalni OPG/obrt korisnik LC-a.
 """
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -13,38 +14,35 @@ class Clan(models.Model):
     """Clan udruge - osnovna evidencija + cross-sell polja."""
 
     MEMBERSHIP_CHOICES = [
-        ('redovni', 'Redovni clan'),
-        ('pocasni', 'Pocasni clan'),
-        ('pridruzeni', 'Pridruzeni clan'),
-        ('osnivac', 'Osnivacki clan'),
-        ('branitelj', 'Branitelj'),
-        ('senior', 'Senior'),
-        ('junior', 'Junior / Omladinac'),
-        ('kadeti', 'Kadet'),
-        ('sportski', 'Sportski clan'),
-        ('rekreativac', 'Rekreativac'),
-        ('zena', 'Clan - zena'),
-        ('umirovljenik', 'Umirovljenik'),
+        ("redovni", "Redovni clan"),
+        ("pocasni", "Pocasni clan"),
+        ("pridruzeni", "Pridruzeni clan"),
+        ("osnivac", "Osnivacki clan"),
+        ("branitelj", "Branitelj"),
+        ("senior", "Senior"),
+        ("junior", "Junior / Omladinac"),
+        ("kadeti", "Kadet"),
+        ("sportski", "Sportski clan"),
+        ("rekreativac", "Rekreativac"),
+        ("zena", "Clan - zena"),
+        ("umirovljenik", "Umirovljenik"),
     ]
     STATUS_CHOICES = [
-        ('aktivan', 'Aktivan'),
-        ('neaktivan', 'Neaktivan'),
-        ('istupio', 'Istupio'),
-        ('iskljucen', 'Iskljucen'),
+        ("aktivan", "Aktivan"),
+        ("neaktivan", "Neaktivan"),
+        ("istupio", "Istupio"),
+        ("iskljucen", "Iskljucen"),
     ]
     INTEREST_CHOICES = [
-        ('opg', 'OPG / Poljoprivreda'),
-        ('obrt', 'Obrt'),
-        ('ugostiteljstvo', 'Ugostiteljstvo'),
-        ('trgovina', 'Trgovina'),
-        ('usluge', 'Usluge'),
-        ('', 'Nije navedeno'),
+        ("opg", "OPG / Poljoprivreda"),
+        ("obrt", "Obrt"),
+        ("ugostiteljstvo", "Ugostiteljstvo"),
+        ("trgovina", "Trgovina"),
+        ("usluge", "Usluge"),
+        ("", "Nije navedeno"),
     ]
 
-    company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='udruga_clanovi'
-    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="udruga_clanovi")
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     oib = models.CharField(max_length=11, blank=True, db_index=True)
@@ -55,8 +53,8 @@ class Clan(models.Model):
     address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
 
-    membership_type = models.CharField(max_length=20, choices=MEMBERSHIP_CHOICES, default='redovni')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aktivan')
+    membership_type = models.CharField(max_length=20, choices=MEMBERSHIP_CHOICES, default="redovni")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="aktivan")
     date_joined = models.DateField(default=timezone.now)
     membership_number = models.CharField(max_length=50, blank=True)
     membership_expires = models.DateField(null=True, blank=True)
@@ -76,17 +74,21 @@ class Clan(models.Model):
 
     # Kisobran naplata: tko placa clanarinu za ovog clana?
     paying_sponsor = models.ForeignKey(
-        'partners.Partner', on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='sponsored_members',
-        verbose_name='Sponzor/Platitelj',
-        help_text='Npr. otac placa za 3 djece, firma za zaposlenike',
+        "partners.Partner",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsored_members",
+        verbose_name="Sponzor/Platitelj",
+        help_text="Npr. otac placa za 3 djece, firma za zaposlenike",
     )
     # IoT/pristup: UID kartice za kontrolu pristupa
     access_card_uid = models.CharField(
-        max_length=100, blank=True, db_index=True,
-        verbose_name='UID pristupne kartice',
-        help_text='NFC/RFID UID za kontrolu pristupa dvorani',
+        max_length=100,
+        blank=True,
+        db_index=True,
+        verbose_name="UID pristupne kartice",
+        help_text="NFC/RFID UID za kontrolu pristupa dvorani",
     )
 
     notes = models.TextField(blank=True)
@@ -95,19 +97,19 @@ class Clan(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_clan'
-        ordering = ['last_name', 'first_name']
+        db_table = "udruge_clan"
+        ordering = ["last_name", "first_name"]
         indexes = [
-            models.Index(fields=['company', 'status']),
-            models.Index(fields=['company', 'membership_expires']),
+            models.Index(fields=["company", "status"]),
+            models.Index(fields=["company", "membership_expires"]),
         ]
 
     def __str__(self):
-        return '%s %s' % (self.last_name, self.first_name)
+        return "%s %s" % (self.last_name, self.first_name)
 
     @property
     def full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
     @property
     def billing_target(self):
@@ -135,53 +137,61 @@ class Clan(models.Model):
 
 class ClanBiljeska(models.Model):
     """Biljeske o clanu."""
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='biljeske')
+
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="biljeske")
     text = models.TextField()
-    tip = models.CharField(max_length=10, choices=[
-        ('rucno', 'Rucno'), ('ai', 'AI'), ('sistem', 'Sistem'),
-    ], default='rucno')
+    tip = models.CharField(
+        max_length=10,
+        choices=[
+            ("rucno", "Rucno"),
+            ("ai", "AI"),
+            ("sistem", "Sistem"),
+        ],
+        default="rucno",
+    )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_clan_biljeska'
-        ordering = ['-created_at']
-
+        db_table = "udruge_clan_biljeska"
+        ordering = ["-created_at"]
 
 
 class Clanarina(models.Model):
     """Evidencija placanja clanarine — NE fiskalizira se, ide na konto 32."""
 
     PAYMENT_METHOD_CHOICES = [
-        ('gotovina', 'Gotovina'),
-        ('virman', 'Virman / IBAN uplata'),
-        ('pos', 'POS (neprofitni bon)'),
-        ('online', 'Online'),
+        ("gotovina", "Gotovina"),
+        ("virman", "Virman / IBAN uplata"),
+        ("pos", "POS (neprofitni bon)"),
+        ("online", "Online"),
     ]
     STATUS_CHOICES = [
-        ('placena', 'Placena'),
-        ('ceka', 'Ceka uplatu'),
-        ('kasni', 'Kasni'),
-        ('otpisana', 'Otpisana'),
+        ("placena", "Placena"),
+        ("ceka", "Ceka uplatu"),
+        ("kasni", "Kasni"),
+        ("otpisana", "Otpisana"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='clanarine',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="clanarine",
     )
     clan = models.ForeignKey(
-        Clan, on_delete=models.CASCADE,
-        related_name='clanarine',
+        Clan,
+        on_delete=models.CASCADE,
+        related_name="clanarine",
     )
 
-    period_start = models.DateField(verbose_name='Pocetak perioda')
-    period_end = models.DateField(verbose_name='Kraj perioda')
-    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Iznos (EUR)')
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='gotovina')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ceka')
+    period_start = models.DateField(verbose_name="Pocetak perioda")
+    period_end = models.DateField(verbose_name="Kraj perioda")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Iznos (EUR)")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default="gotovina")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ceka")
 
-    paid_at = models.DateTimeField(null=True, blank=True, verbose_name='Datum uplate')
-    receipt_number = models.CharField(max_length=50, blank=True, verbose_name='Broj priznanice')
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Datum uplate")
+    receipt_number = models.CharField(max_length=50, blank=True, verbose_name="Broj priznanice")
     note = models.CharField(max_length=255, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -189,90 +199,94 @@ class Clanarina(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_clanarina'
-        ordering = ['-period_start']
+        db_table = "udruge_clanarina"
+        ordering = ["-period_start"]
         indexes = [
-            models.Index(fields=['company', 'status']),
+            models.Index(fields=["company", "status"]),
         ]
 
     def __str__(self):
-        return '%s — %s (%s EUR)' % (self.clan, self.period_start, self.amount)
+        return "%s — %s (%s EUR)" % (self.clan, self.period_start, self.amount)
 
-    def mark_paid(self, method='gotovina'):
-        self.status = 'placena'
+    def mark_paid(self, method="gotovina"):
+        self.status = "placena"
         self.paid_at = timezone.now()
         self.payment_method = method
-        self.save(update_fields=['status', 'paid_at', 'payment_method', 'updated_at'])
+        self.save(update_fields=["status", "paid_at", "payment_method", "updated_at"])
         # Auto dvojno knjiženje
         try:
             from konto.booking_engine import auto_knjizi_clanarina
+
             auto_knjizi_clanarina(self)
         except ImportError as _e:
             import logging
-            logging.getLogger('udruge').warning('mark_paid auto_knjizi: %s', _e)
+
+            logging.getLogger("udruge").warning("mark_paid auto_knjizi: %s", _e)
 
 
 class Donacija(models.Model):
     """Evidencija donacija — porezna potvrda za donatora, konto 35."""
 
     DONOR_TYPE_CHOICES = [
-        ('fizicka', 'Fizicka osoba'),
-        ('pravna', 'Pravna osoba'),
-        ('anonimno', 'Anonimno'),
+        ("fizicka", "Fizicka osoba"),
+        ("pravna", "Pravna osoba"),
+        ("anonimno", "Anonimno"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='donacije',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="donacije",
     )
-    donor_name = models.CharField(max_length=200, verbose_name='Ime donatora')
-    donor_oib = models.CharField(max_length=11, blank=True, verbose_name='OIB donatora')
-    donor_type = models.CharField(max_length=20, choices=DONOR_TYPE_CHOICES, default='fizicka')
+    donor_name = models.CharField(max_length=200, verbose_name="Ime donatora")
+    donor_oib = models.CharField(max_length=11, blank=True, verbose_name="OIB donatora")
+    donor_type = models.CharField(max_length=20, choices=DONOR_TYPE_CHOICES, default="fizicka")
     donor_address = models.CharField(max_length=255, blank=True)
 
-    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Iznos (EUR)')
-    purpose = models.CharField(max_length=255, blank=True, verbose_name='Namjena donacije')
-    date = models.DateField(default=timezone.now, verbose_name='Datum donacije')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Iznos (EUR)")
+    purpose = models.CharField(max_length=255, blank=True, verbose_name="Namjena donacije")
+    date = models.DateField(default=timezone.now, verbose_name="Datum donacije")
 
     # Za poreznu potvrdu
-    potvrda_number = models.CharField(max_length=50, blank=True, verbose_name='Broj potvrde')
-    potvrda_issued = models.BooleanField(default=False, verbose_name='Potvrda izdana')
+    potvrda_number = models.CharField(max_length=50, blank=True, verbose_name="Broj potvrde")
+    potvrda_issued = models.BooleanField(default=False, verbose_name="Potvrda izdana")
     potvrda_issued_at = models.DateTimeField(null=True, blank=True)
 
     note = models.CharField(max_length=255, blank=True)
 
     # AML Guard (ZSPNFT — Zakon o sprjecavanju pranja novca)
     AML_STATUS_CHOICES = [
-        ('clear', 'Cisto'),
-        ('review', 'Na pregledu'),
-        ('kyc_pending', 'Ceka KYC provjeru'),
-        ('blocked', 'Blokirano'),
-        ('reported', 'Prijavljeno USKOK-u'),
+        ("clear", "Cisto"),
+        ("review", "Na pregledu"),
+        ("kyc_pending", "Ceka KYC provjeru"),
+        ("blocked", "Blokirano"),
+        ("reported", "Prijavljeno USKOK-u"),
     ]
-    aml_status = models.CharField(max_length=20, choices=AML_STATUS_CHOICES, default='clear',
-                                   verbose_name='AML status')
-    aml_flag_reason = models.CharField(max_length=255, blank=True, verbose_name='AML razlog')
+    aml_status = models.CharField(max_length=20, choices=AML_STATUS_CHOICES, default="clear", verbose_name="AML status")
+    aml_flag_reason = models.CharField(max_length=255, blank=True, verbose_name="AML razlog")
     aml_flagged_at = models.DateTimeField(null=True, blank=True)
 
     # Materijalna donacija
-    is_material = models.BooleanField(default=False, verbose_name='Materijalna donacija',
-                                       help_text='Roba/oprema umjesto novca')
-    material_description = models.CharField(max_length=255, blank=True, verbose_name='Opis robe')
-    material_fair_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True,
-                                               verbose_name='Fer trzisna vrijednost (EUR)')
+    is_material = models.BooleanField(
+        default=False, verbose_name="Materijalna donacija", help_text="Roba/oprema umjesto novca"
+    )
+    material_description = models.CharField(max_length=255, blank=True, verbose_name="Opis robe")
+    material_fair_value = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="Fer trzisna vrijednost (EUR)"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_donacija'
-        ordering = ['-date']
+        db_table = "udruge_donacija"
+        ordering = ["-date"]
         indexes = [
-            models.Index(fields=['company', 'date']),
+            models.Index(fields=["company", "date"]),
         ]
 
     def __str__(self):
-        return '%s — %s EUR (%s)' % (self.donor_name, self.amount, self.date)
+        return "%s — %s EUR (%s)" % (self.donor_name, self.amount, self.date)
 
 
 class KnjigaPrimitaka(models.Model):
@@ -282,48 +296,48 @@ class KnjigaPrimitaka(models.Model):
     """
 
     VRSTA_CHOICES = [
-        ('primitak', 'Primitak'),
-        ('izdatak', 'Izdatak'),
+        ("primitak", "Primitak"),
+        ("izdatak", "Izdatak"),
     ]
     IZVOR_CHOICES = [
-        ('clanarina', 'Clanarina'),
-        ('donacija', 'Donacija'),
-        ('dotacija', 'Dotacija / Grant'),
-        ('prodaja', 'Prodaja (gospodarska)'),
-        ('placa', 'Placa'),
-        ('materijal', 'Materijalni troskovi'),
-        ('rezije', 'Rezije'),
-        ('ostalo', 'Ostalo'),
+        ("clanarina", "Clanarina"),
+        ("donacija", "Donacija"),
+        ("dotacija", "Dotacija / Grant"),
+        ("prodaja", "Prodaja (gospodarska)"),
+        ("placa", "Placa"),
+        ("materijal", "Materijalni troskovi"),
+        ("rezije", "Rezije"),
+        ("ostalo", "Ostalo"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='knjiga_primitaka',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="knjiga_primitaka",
     )
-    redni_broj = models.PositiveIntegerField(verbose_name='R.br.')
-    datum = models.DateField(verbose_name='Datum')
-    opis = models.CharField(max_length=255, verbose_name='Opis primitka/izdatka')
+    redni_broj = models.PositiveIntegerField(verbose_name="R.br.")
+    datum = models.DateField(verbose_name="Datum")
+    opis = models.CharField(max_length=255, verbose_name="Opis primitka/izdatka")
     vrsta = models.CharField(max_length=10, choices=VRSTA_CHOICES)
-    izvor = models.CharField(max_length=20, choices=IZVOR_CHOICES, default='ostalo')
-    iznos = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Iznos (EUR)')
+    izvor = models.CharField(max_length=20, choices=IZVOR_CHOICES, default="ostalo")
+    iznos = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Iznos (EUR)")
 
     # Veze (opcionalno)
     clanarina = models.ForeignKey(Clanarina, on_delete=models.SET_NULL, null=True, blank=True)
     donacija = models.ForeignKey(Donacija, on_delete=models.SET_NULL, null=True, blank=True)
 
-    dokument = models.CharField(max_length=100, blank=True, verbose_name='Broj dokumenta')
+    dokument = models.CharField(max_length=100, blank=True, verbose_name="Broj dokumenta")
     napomena = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_knjiga_primitaka'
-        ordering = ['datum', 'redni_broj']
-        unique_together = [('company', 'redni_broj', 'datum')]
+        db_table = "udruge_knjiga_primitaka"
+        ordering = ["datum", "redni_broj"]
+        unique_together = [("company", "redni_broj", "datum")]
 
     def __str__(self):
-        return '#%d %s %s EUR' % (self.redni_broj, self.opis[:30], self.iznos)
-
+        return "#%d %s %s EUR" % (self.redni_broj, self.opis[:30], self.iznos)
 
 
 class MembershipPlan(models.Model):
@@ -331,49 +345,55 @@ class MembershipPlan(models.Model):
     Plan clanarine s automatikom: trajanje, cijena, grace period, popust.
     Vezan na InventoryItem za POS integraciju.
     """
+
     BILLING_PERIOD_CHOICES = [
-        ('monthly', 'Mjesecno'),
-        ('quarterly', 'Kvartalno'),
-        ('yearly', 'Godisnje'),
-        ('lifetime', 'Dozivotno'),
+        ("monthly", "Mjesecno"),
+        ("quarterly", "Kvartalno"),
+        ("yearly", "Godisnje"),
+        ("lifetime", "Dozivotno"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='membership_plans',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="membership_plans",
     )
-    name = models.CharField(max_length=100, verbose_name='Naziv plana')
+    name = models.CharField(max_length=100, verbose_name="Naziv plana")
     description = models.TextField(blank=True)
 
     # Veza na inventar — clanarina kao artikl za POS/fakturiranje
     linked_item = models.ForeignKey(
-        'inventory.InventoryItem', on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name='Povezani artikl',
-        help_text='Artikl za POS naplatu (is_nonprofit_activity=True)',
+        "inventory.InventoryItem",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Povezani artikl",
+        help_text="Artikl za POS naplatu (is_nonprofit_activity=True)",
     )
 
-    billing_period = models.CharField(max_length=20, choices=BILLING_PERIOD_CHOICES, default='yearly')
-    duration_days = models.PositiveIntegerField(default=365, verbose_name='Trajanje (dana)')
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cijena (EUR)')
+    billing_period = models.CharField(max_length=20, choices=BILLING_PERIOD_CHOICES, default="yearly")
+    duration_days = models.PositiveIntegerField(default=365, verbose_name="Trajanje (dana)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cijena (EUR)")
 
     # Automatika
     auto_renew = models.BooleanField(
         default=True,
-        verbose_name='Automatska obnova',
-        help_text='Sustav kreira novu clanarinu prije isteka',
+        verbose_name="Automatska obnova",
+        help_text="Sustav kreira novu clanarinu prije isteka",
     )
     grace_period_days = models.PositiveIntegerField(
         default=7,
-        verbose_name='Grace period (dana)',
-        help_text='Tolerancija prije suspenzije',
+        verbose_name="Grace period (dana)",
+        help_text="Tolerancija prije suspenzije",
     )
 
     # Povlastice — postotak popusta na POS-u za aktivne clanove
     discount_percent = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0,
-        verbose_name='Popust za clanove (%)',
-        help_text='Automatski popust na POS-u dok je clanarina aktivna',
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        verbose_name="Popust za clanove (%)",
+        help_text="Automatski popust na POS-u dok je clanarina aktivna",
     )
 
     is_active = models.BooleanField(default=True)
@@ -381,12 +401,12 @@ class MembershipPlan(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_membership_plan'
-        unique_together = [('company', 'name')]
-        ordering = ['name']
+        db_table = "udruge_membership_plan"
+        unique_together = [("company", "name")]
+        ordering = ["name"]
 
     def __str__(self):
-        return '%s — %s EUR/%s' % (self.name, self.price, self.billing_period)
+        return "%s — %s EUR/%s" % (self.name, self.price, self.billing_period)
 
 
 class MemberSubscription(models.Model):
@@ -395,43 +415,50 @@ class MemberSubscription(models.Model):
     draft -> active -> grace -> suspended -> cancelled
     Celery evaluate_status() svake noci u 02:00.
     """
+
     STATUS_CHOICES = [
-        ('draft', 'U pripremi'),
-        ('active', 'Aktivno'),
-        ('grace', 'Pocek (isteklo ali tolerirano)'),
-        ('suspended', 'Suspendirano'),
-        ('cancelled', 'Otkazano'),
+        ("draft", "U pripremi"),
+        ("active", "Aktivno"),
+        ("grace", "Pocek (isteklo ali tolerirano)"),
+        ("suspended", "Suspendirano"),
+        ("cancelled", "Otkazano"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='member_subscriptions',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="member_subscriptions",
     )
     clan = models.ForeignKey(
-        Clan, on_delete=models.CASCADE,
-        related_name='subscriptions',
+        Clan,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
     )
     plan = models.ForeignKey(
-        MembershipPlan, on_delete=models.RESTRICT,
-        related_name='subscriptions',
+        MembershipPlan,
+        on_delete=models.RESTRICT,
+        related_name="subscriptions",
     )
 
     valid_from = models.DateField(default=timezone.now)
     valid_until = models.DateField()
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     status_changed_at = models.DateTimeField(auto_now=True)
 
     # Veza na naplatu
     clanarina = models.ForeignKey(
-        Clanarina, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='subscription',
+        Clanarina,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subscription",
     )
     payment_reference = models.CharField(
-        max_length=100, blank=True,
-        verbose_name='Referenca placanja',
-        help_text='Broj POS bona, uplatnice ili fakture',
+        max_length=100,
+        blank=True,
+        verbose_name="Referenca placanja",
+        help_text="Broj POS bona, uplatnice ili fakture",
     )
 
     # Dunning tracking
@@ -442,15 +469,15 @@ class MemberSubscription(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_member_subscription'
+        db_table = "udruge_member_subscription"
         indexes = [
-            models.Index(fields=['status', 'valid_until']),
-            models.Index(fields=['company', 'status']),
+            models.Index(fields=["status", "valid_until"]),
+            models.Index(fields=["company", "status"]),
         ]
-        ordering = ['-valid_from']
+        ordering = ["-valid_from"]
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.clan, self.plan.name, self.status)
+        return "%s — %s (%s)" % (self.clan, self.plan.name, self.status)
 
     def evaluate_status(self):
         """
@@ -461,36 +488,36 @@ class MemberSubscription(models.Model):
         """
         today = timezone.now().date()
 
-        if self.status in ('cancelled', 'draft'):
+        if self.status in ("cancelled", "draft"):
             return self.status
 
         old_status = self.status
         grace_end = self.valid_until + timezone.timedelta(days=self.plan.grace_period_days)
 
         if self.valid_until >= today:
-            self.status = 'active'
+            self.status = "active"
         elif grace_end >= today:
-            self.status = 'grace'
+            self.status = "grace"
         else:
-            self.status = 'suspended'
+            self.status = "suspended"
 
         if self.status != old_status:
-            self.save(update_fields=['status', 'status_changed_at'])
+            self.save(update_fields=["status", "status_changed_at"])
 
         return self.status
 
-    def activate(self, payment_ref=''):
-        self.status = 'active'
+    def activate(self, payment_ref=""):
+        self.status = "active"
         self.payment_reference = payment_ref
-        self.save(update_fields=['status', 'payment_reference', 'status_changed_at'])
+        self.save(update_fields=["status", "payment_reference", "status_changed_at"])
 
     def cancel(self):
-        self.status = 'cancelled'
-        self.save(update_fields=['status', 'status_changed_at'])
+        self.status = "cancelled"
+        self.save(update_fields=["status", "status_changed_at"])
 
     @property
     def is_active_or_grace(self):
-        return self.status in ('active', 'grace')
+        return self.status in ("active", "grace")
 
     @property
     def days_remaining(self):
@@ -499,68 +526,76 @@ class MemberSubscription(models.Model):
         return (self.valid_until - timezone.now().date()).days
 
 
-
 # ═══════════════════════════════════════════════════════════════════════════
 # DOGADJAJI / EVENTI
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 class Dogadjaj(models.Model):
     """Dogadjaj udruge — koncert, skupstina, humanitarna akcija, radionica."""
 
     STATUS_CHOICES = [
-        ('draft', 'Nacrt'),
-        ('planned', 'Planiran'),
-        ('active', 'U tijeku'),
-        ('completed', 'Zavrsen'),
-        ('cancelled', 'Otkazan'),
+        ("draft", "Nacrt"),
+        ("planned", "Planiran"),
+        ("active", "U tijeku"),
+        ("completed", "Zavrsen"),
+        ("cancelled", "Otkazan"),
     ]
     TYPE_CHOICES = [
-        ('skupstina', 'Skupstina'),
-        ('koncert', 'Koncert / Nastup'),
-        ('radionica', 'Radionica / Seminar'),
-        ('humanitarna', 'Humanitarna akcija'),
-        ('sportski', 'Sportski dogadjaj'),
-        ('druzenje', 'Druzenje / Teambuilding'),
-        ('fundraising', 'Fundraising event'),
-        ('festival', 'Festival'),
-        ('ostalo', 'Ostalo'),
+        ("skupstina", "Skupstina"),
+        ("koncert", "Koncert / Nastup"),
+        ("radionica", "Radionica / Seminar"),
+        ("humanitarna", "Humanitarna akcija"),
+        ("sportski", "Sportski dogadjaj"),
+        ("druzenje", "Druzenje / Teambuilding"),
+        ("fundraising", "Fundraising event"),
+        ("festival", "Festival"),
+        ("ostalo", "Ostalo"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='dogadjaji',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="dogadjaji",
     )
-    name = models.CharField(max_length=200, verbose_name='Naziv dogadjaja')
-    event_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='ostalo')
-    description = models.TextField(blank=True, verbose_name='Opis')
+    name = models.CharField(max_length=200, verbose_name="Naziv dogadjaja")
+    event_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="ostalo")
+    description = models.TextField(blank=True, verbose_name="Opis")
 
     # Kad i gdje
-    start_date = models.DateTimeField(verbose_name='Pocetak')
-    end_date = models.DateTimeField(null=True, blank=True, verbose_name='Kraj')
-    location = models.CharField(max_length=255, blank=True, verbose_name='Lokacija')
-    online_url = models.URLField(blank=True, verbose_name='Online link (Zoom/Teams)')
+    start_date = models.DateTimeField(verbose_name="Pocetak")
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name="Kraj")
+    location = models.CharField(max_length=255, blank=True, verbose_name="Lokacija")
+    online_url = models.URLField(blank=True, verbose_name="Online link (Zoom/Teams)")
 
     # Kapacitet i prijave
-    max_attendees = models.PositiveIntegerField(default=0, verbose_name='Max polaznika (0=neograniceno)')
-    registration_required = models.BooleanField(default=False, verbose_name='Prijava obavezna')
+    max_attendees = models.PositiveIntegerField(default=0, verbose_name="Max polaznika (0=neograniceno)")
+    registration_required = models.BooleanField(default=False, verbose_name="Prijava obavezna")
     registration_deadline = models.DateTimeField(null=True, blank=True)
-    ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cijena ulaznice (EUR)')
-    is_free = models.BooleanField(default=True, verbose_name='Besplatan')
+    ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cijena ulaznice (EUR)")
+    is_free = models.BooleanField(default=True, verbose_name="Besplatan")
 
     # Status i organizacija
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     organizer = models.ForeignKey(
-        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
-        verbose_name='Organizator',
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Organizator",
     )
-    budget = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Budzet (EUR)')
-    actual_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Stvarni trosak (EUR)')
-    revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Prihod (EUR)')
+    budget = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Budzet (EUR)")
+    actual_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Stvarni trosak (EUR)")
+    revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Prihod (EUR)")
 
     # Veza s kampanjom
     kampanja = models.ForeignKey(
-        'Kampanja', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='dogadjaji', verbose_name='Povezana kampanja',
+        "Kampanja",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dogadjaji",
+        verbose_name="Povezana kampanja",
     )
 
     notes = models.TextField(blank=True)
@@ -568,15 +603,15 @@ class Dogadjaj(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_dogadjaj'
-        ordering = ['-start_date']
+        db_table = "udruge_dogadjaj"
+        ordering = ["-start_date"]
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.start_date.strftime('%d.%m.%Y'))
+        return "%s (%s)" % (self.name, self.start_date.strftime("%d.%m.%Y"))
 
     @property
     def attendee_count(self):
-        return self.prijave.filter(status='confirmed').count()
+        return self.prijave.filter(status="confirmed").count()
 
     @property
     def spots_left(self):
@@ -595,91 +630,102 @@ class Dogadjaj(models.Model):
 
 class EventPrijava(models.Model):
     """Prijava clana na dogadjaj."""
+
     STATUS_CHOICES = [
-        ('pending', 'Na cekanju'),
-        ('confirmed', 'Potvrdjen'),
-        ('cancelled', 'Otkazan'),
-        ('attended', 'Prisustvovao'),
-        ('no_show', 'Nije dosao'),
+        ("pending", "Na cekanju"),
+        ("confirmed", "Potvrdjen"),
+        ("cancelled", "Otkazan"),
+        ("attended", "Prisustvovao"),
+        ("no_show", "Nije dosao"),
     ]
 
-    dogadjaj = models.ForeignKey(Dogadjaj, on_delete=models.CASCADE, related_name='prijave')
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='event_prijave')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    dogadjaj = models.ForeignKey(Dogadjaj, on_delete=models.CASCADE, related_name="prijave")
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="event_prijave")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     registered_at = models.DateTimeField(auto_now_add=True)
     notes = models.CharField(max_length=255, blank=True)
     paid = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'udruge_event_prijava'
-        unique_together = [('dogadjaj', 'clan')]
+        db_table = "udruge_event_prijava"
+        unique_together = [("dogadjaj", "clan")]
 
     def __str__(self):
-        return '%s -> %s (%s)' % (self.clan, self.dogadjaj.name, self.status)
+        return "%s -> %s (%s)" % (self.clan, self.dogadjaj.name, self.status)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # KAMPANJE (Fundraising, EU fondovi, eventi)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class Kampanja(models.Model):
     """Kampanja — fundraising, EU fond prijava, donacijska akcija."""
 
     TYPE_CHOICES = [
-        ('fundraising', 'Fundraising'),
-        ('eu_fond', 'EU Fond prijava'),
-        ('donacijska', 'Donacijska akcija'),
-        ('clanarinska', 'Clanarinska kampanja'),
-        ('awareness', 'Awareness / PR'),
-        ('event', 'Event kampanja'),
+        ("fundraising", "Fundraising"),
+        ("eu_fond", "EU Fond prijava"),
+        ("donacijska", "Donacijska akcija"),
+        ("clanarinska", "Clanarinska kampanja"),
+        ("awareness", "Awareness / PR"),
+        ("event", "Event kampanja"),
     ]
     STATUS_CHOICES = [
-        ('draft', 'Nacrt'),
-        ('active', 'Aktivna'),
-        ('paused', 'Pauzirana'),
-        ('completed', 'Zavrsena'),
-        ('cancelled', 'Otkazana'),
+        ("draft", "Nacrt"),
+        ("active", "Aktivna"),
+        ("paused", "Pauzirana"),
+        ("completed", "Zavrsena"),
+        ("cancelled", "Otkazana"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='kampanje',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="kampanje",
     )
-    name = models.CharField(max_length=200, verbose_name='Naziv kampanje')
-    campaign_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='fundraising')
+    name = models.CharField(max_length=200, verbose_name="Naziv kampanje")
+    campaign_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="fundraising")
     description = models.TextField(blank=True)
 
     # Vremenski okvir
-    start_date = models.DateField(verbose_name='Pocetak')
-    end_date = models.DateField(null=True, blank=True, verbose_name='Kraj')
+    start_date = models.DateField(verbose_name="Pocetak")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Kraj")
 
     # Ciljevi
-    goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Cilj (EUR)')
-    raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Prikupljeno (EUR)')
-    goal_members = models.PositiveIntegerField(default=0, verbose_name='Cilj clanova')
-    acquired_members = models.PositiveIntegerField(default=0, verbose_name='Dobiveno clanova')
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Cilj (EUR)")
+    raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Prikupljeno (EUR)")
+    goal_members = models.PositiveIntegerField(default=0, verbose_name="Cilj clanova")
+    acquired_members = models.PositiveIntegerField(default=0, verbose_name="Dobiveno clanova")
 
     # EU fond specifika
-    eu_project_code = models.CharField(max_length=100, blank=True, verbose_name='Sifra EU projekta')
-    eu_program = models.CharField(max_length=200, blank=True, verbose_name='EU program (ESF+, ERDF...)')
-    eu_submitted_at = models.DateField(null=True, blank=True, verbose_name='Datum prijave')
-    eu_decision_at = models.DateField(null=True, blank=True, verbose_name='Datum odluke')
-    eu_status = models.CharField(max_length=20, blank=True, choices=[
-        ('preparing', 'U pripremi'),
-        ('submitted', 'Prijavljeno'),
-        ('evaluation', 'Evaluacija'),
-        ('approved', 'Odobreno'),
-        ('rejected', 'Odbijeno'),
-        ('implementation', 'Provedba'),
-        ('reporting', 'Izvjestavanje'),
-        ('closed', 'Zatvoreno'),
-    ], verbose_name='EU status')
+    eu_project_code = models.CharField(max_length=100, blank=True, verbose_name="Sifra EU projekta")
+    eu_program = models.CharField(max_length=200, blank=True, verbose_name="EU program (ESF+, ERDF...)")
+    eu_submitted_at = models.DateField(null=True, blank=True, verbose_name="Datum prijave")
+    eu_decision_at = models.DateField(null=True, blank=True, verbose_name="Datum odluke")
+    eu_status = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ("preparing", "U pripremi"),
+            ("submitted", "Prijavljeno"),
+            ("evaluation", "Evaluacija"),
+            ("approved", "Odobreno"),
+            ("rejected", "Odbijeno"),
+            ("implementation", "Provedba"),
+            ("reporting", "Izvjestavanje"),
+            ("closed", "Zatvoreno"),
+        ],
+        verbose_name="EU status",
+    )
 
     # Status
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     responsible = models.ForeignKey(
-        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
-        verbose_name='Odgovorna osoba',
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Odgovorna osoba",
     )
 
     notes = models.TextField(blank=True)
@@ -687,11 +733,11 @@ class Kampanja(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_kampanja'
-        ordering = ['-start_date']
+        db_table = "udruge_kampanja"
+        ordering = ["-start_date"]
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.get_campaign_type_display())
+        return "%s (%s)" % (self.name, self.get_campaign_type_display())
 
     @property
     def progress_percent(self):
@@ -704,6 +750,7 @@ class Kampanja(models.Model):
         if not self.end_date:
             return None
         from django.utils import timezone
+
         return (self.end_date - timezone.now().date()).days
 
 
@@ -711,57 +758,65 @@ class Kampanja(models.Model):
 # EMAIL KAMPANJE (AI automatizacija)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class EmailKampanja(models.Model):
     """Email kampanja — masovno slanje clanovima s AI personalizacijom."""
 
     STATUS_CHOICES = [
-        ('draft', 'Nacrt'),
-        ('scheduled', 'Zakazana'),
-        ('sending', 'Salje se'),
-        ('sent', 'Poslana'),
-        ('cancelled', 'Otkazana'),
+        ("draft", "Nacrt"),
+        ("scheduled", "Zakazana"),
+        ("sending", "Salje se"),
+        ("sent", "Poslana"),
+        ("cancelled", "Otkazana"),
     ]
     TYPE_CHOICES = [
-        ('newsletter', 'Newsletter'),
-        ('clanarina_reminder', 'Podsjetnik za clanarinu'),
-        ('event_invite', 'Pozivnica na dogadjaj'),
-        ('fundraising', 'Fundraising apel'),
-        ('thank_you', 'Zahvalnica donatorima'),
-        ('report', 'Godisnji izvjestaj'),
-        ('custom', 'Prilagodjeno'),
+        ("newsletter", "Newsletter"),
+        ("clanarina_reminder", "Podsjetnik za clanarinu"),
+        ("event_invite", "Pozivnica na dogadjaj"),
+        ("fundraising", "Fundraising apel"),
+        ("thank_you", "Zahvalnica donatorima"),
+        ("report", "Godisnji izvjestaj"),
+        ("custom", "Prilagodjeno"),
     ]
 
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='email_kampanje',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="email_kampanje",
     )
-    name = models.CharField(max_length=200, verbose_name='Naziv')
-    email_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='newsletter')
-    subject = models.CharField(max_length=200, verbose_name='Predmet emaila')
-    body_html = models.TextField(blank=True, verbose_name='Sadrzaj (HTML)')
-    body_text = models.TextField(blank=True, verbose_name='Sadrzaj (tekst)')
+    name = models.CharField(max_length=200, verbose_name="Naziv")
+    email_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="newsletter")
+    subject = models.CharField(max_length=200, verbose_name="Predmet emaila")
+    body_html = models.TextField(blank=True, verbose_name="Sadrzaj (HTML)")
+    body_text = models.TextField(blank=True, verbose_name="Sadrzaj (tekst)")
 
     # AI personalizacija
-    ai_generated = models.BooleanField(default=False, verbose_name='AI generirao sadrzaj')
-    ai_prompt = models.TextField(blank=True, verbose_name='AI prompt za generiranje')
+    ai_generated = models.BooleanField(default=False, verbose_name="AI generirao sadrzaj")
+    ai_prompt = models.TextField(blank=True, verbose_name="AI prompt za generiranje")
 
     # Targeting
-    target_all_members = models.BooleanField(default=True, verbose_name='Svi clanovi')
-    target_membership_types = models.JSONField(default=list, blank=True, verbose_name='Tipovi clanstva')
-    target_statuses = models.JSONField(default=list, blank=True, verbose_name='Statusi')
+    target_all_members = models.BooleanField(default=True, verbose_name="Svi clanovi")
+    target_membership_types = models.JSONField(default=list, blank=True, verbose_name="Tipovi clanstva")
+    target_statuses = models.JSONField(default=list, blank=True, verbose_name="Statusi")
     target_kampanja = models.ForeignKey(
-        Kampanja, on_delete=models.SET_NULL, null=True, blank=True,
-        verbose_name='Vezana kampanja',
+        Kampanja,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Vezana kampanja",
     )
     target_dogadjaj = models.ForeignKey(
-        Dogadjaj, on_delete=models.SET_NULL, null=True, blank=True,
-        verbose_name='Vezani dogadjaj',
+        Dogadjaj,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Vezani dogadjaj",
     )
 
     # Slanje
-    scheduled_at = models.DateTimeField(null=True, blank=True, verbose_name='Zakazano slanje')
+    scheduled_at = models.DateTimeField(null=True, blank=True, verbose_name="Zakazano slanje")
     sent_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
 
     # Statistike
     total_recipients = models.PositiveIntegerField(default=0)
@@ -770,16 +825,16 @@ class EmailKampanja(models.Model):
     total_clicked = models.PositiveIntegerField(default=0)
     total_bounced = models.PositiveIntegerField(default=0)
 
-    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_email_kampanja'
-        ordering = ['-created_at']
+        db_table = "udruge_email_kampanja"
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.get_status_display())
+        return "%s (%s)" % (self.name, self.get_status_display())
 
     @property
     def open_rate(self):
@@ -795,88 +850,113 @@ class EmailKampanja(models.Model):
 
     def get_recipients(self):
         """Dohvati listu clanova prema targeting pravilima."""
-        qs = Clan.objects.filter(company=self.company, status='aktivan')
+        qs = Clan.objects.filter(company=self.company, status="aktivan")
         if not self.target_all_members:
             if self.target_membership_types:
                 qs = qs.filter(membership_type__in=self.target_membership_types)
             if self.target_statuses:
                 qs = qs.filter(status__in=self.target_statuses)
-        return qs.exclude(email='').exclude(email__isnull=True)
+        return qs.exclude(email="").exclude(email__isnull=True)
 
 
 class EmailLog(models.Model):
     """Log pojedinacnog emaila iz kampanje."""
-    kampanja = models.ForeignKey(EmailKampanja, on_delete=models.CASCADE, related_name='logs')
+
+    kampanja = models.ForeignKey(EmailKampanja, on_delete=models.CASCADE, related_name="logs")
     clan = models.ForeignKey(Clan, on_delete=models.CASCADE)
     email = models.EmailField()
-    status = models.CharField(max_length=20, choices=[
-        ('queued', 'U redu'),
-        ('sent', 'Poslan'),
-        ('opened', 'Otvoren'),
-        ('clicked', 'Kliknuo'),
-        ('bounced', 'Odbijen'),
-        ('error', 'Greska'),
-    ], default='queued')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("queued", "U redu"),
+            ("sent", "Poslan"),
+            ("opened", "Otvoren"),
+            ("clicked", "Kliknuo"),
+            ("bounced", "Odbijen"),
+            ("error", "Greska"),
+        ],
+        default="queued",
+    )
     sent_at = models.DateTimeField(null=True, blank=True)
     opened_at = models.DateTimeField(null=True, blank=True)
     error_message = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        db_table = 'udruge_email_log'
-        ordering = ['-sent_at']
+        db_table = "udruge_email_log"
+        ordering = ["-sent_at"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # VOLONTERSKE AKTIVNOSTI
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class VolunteerActivity(models.Model):
     """Evidencija volonterskih aktivnosti — Zakon o volonterstvu (NN 58/07, 22/13)."""
+
     STATUS_CHOICES = [
-        ('planned', 'Planirana'), ('in_progress', 'U tijeku'),
-        ('completed', 'Zavrsena'), ('cancelled', 'Otkazana'),
+        ("planned", "Planirana"),
+        ("in_progress", "U tijeku"),
+        ("completed", "Zavrsena"),
+        ("cancelled", "Otkazana"),
     ]
     CATEGORY_CHOICES = [
-        ('admin', 'Administrativno'), ('field', 'Terenski rad'),
-        ('event', 'Organizacija eventi'), ('education', 'Edukacija / Mentoring'),
-        ('fundraising', 'Fundraising'), ('it', 'IT / Digitalizacija'),
-        ('legal', 'Pravna pomoc'), ('social', 'Socijalni rad'),
-        ('sports', 'Sport / Rekreacija'), ('culture', 'Kultura / Umjetnost'),
-        ('environment', 'Zastita okolisa'), ('other', 'Ostalo'),
+        ("admin", "Administrativno"),
+        ("field", "Terenski rad"),
+        ("event", "Organizacija eventi"),
+        ("education", "Edukacija / Mentoring"),
+        ("fundraising", "Fundraising"),
+        ("it", "IT / Digitalizacija"),
+        ("legal", "Pravna pomoc"),
+        ("social", "Socijalni rad"),
+        ("sports", "Sport / Rekreacija"),
+        ("culture", "Kultura / Umjetnost"),
+        ("environment", "Zastita okolisa"),
+        ("other", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='volunteer_activities')
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='volunteer_activities', verbose_name='Volonter')
-    dogadjaj = models.ForeignKey(Dogadjaj, on_delete=models.SET_NULL, null=True, blank=True, related_name='volunteer_activities')
-    kampanja = models.ForeignKey(Kampanja, on_delete=models.SET_NULL, null=True, blank=True, related_name='volunteer_activities')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="volunteer_activities")
+    clan = models.ForeignKey(
+        Clan, on_delete=models.CASCADE, related_name="volunteer_activities", verbose_name="Volonter"
+    )
+    dogadjaj = models.ForeignKey(
+        Dogadjaj, on_delete=models.SET_NULL, null=True, blank=True, related_name="volunteer_activities"
+    )
+    kampanja = models.ForeignKey(
+        Kampanja, on_delete=models.SET_NULL, null=True, blank=True, related_name="volunteer_activities"
+    )
 
-    title = models.CharField(max_length=200, verbose_name='Naziv aktivnosti')
+    title = models.CharField(max_length=200, verbose_name="Naziv aktivnosti")
     description = models.TextField(blank=True)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
-    date = models.DateField(verbose_name='Datum')
-    hours = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Broj sati')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="other")
+    date = models.DateField(verbose_name="Datum")
+    hours = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Broj sati")
     location = models.CharField(max_length=255, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planned')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="planned")
     eu_project_code = models.CharField(max_length=100, blank=True)
-    inkind_rate_eur = models.DecimalField(max_digits=8, decimal_places=2, default=0,
-        verbose_name='In-kind satnica (EUR)',
-        help_text='Fer trzisna vrijednost sata volonterskog rada za EU izvjestaj')
-    verified_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    inkind_rate_eur = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        verbose_name="In-kind satnica (EUR)",
+        help_text="Fer trzisna vrijednost sata volonterskog rada za EU izvjestaj",
+    )
+    verified_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_volunteer_activity'
-        ordering = ['-date']
+        db_table = "udruge_volunteer_activity"
+        ordering = ["-date"]
         indexes = [
-            models.Index(fields=['company', 'date'], name='udruge_vol_comp_date_idx'),
-            models.Index(fields=['company', 'clan', 'date'], name='udruge_vol_comp_clan_idx'),
+            models.Index(fields=["company", "date"], name="udruge_vol_comp_date_idx"),
+            models.Index(fields=["company", "clan", "date"], name="udruge_vol_comp_clan_idx"),
         ]
 
     def __str__(self):
-        return '%s — %s (%s sati)' % (self.clan.full_name, self.title[:30], self.hours)
+        return "%s — %s (%s sati)" % (self.clan.full_name, self.title[:30], self.hours)
 
     @property
     def inkind_value(self):
@@ -887,83 +967,91 @@ class VolunteerActivity(models.Model):
 #  Sekcije + Dozvole — KUD, Ribolov, Lov, Sport
 # ═══════════════════════════════════════════════════════════════
 
+
 class Sekcija(models.Model):
     """Sekcija/skupina unutar udruge (KUD: tamburaši, pjevači; Ribolov: seniori, juniori)."""
+
     company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='sekcije',
+        "companies.Company",
+        on_delete=models.CASCADE,
+        related_name="sekcije",
     )
-    name = models.CharField(max_length=100, verbose_name='Naziv sekcije')
+    name = models.CharField(max_length=100, verbose_name="Naziv sekcije")
     description = models.TextField(blank=True)
     leader = models.ForeignKey(
-        'Clan', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='led_sections',
-        verbose_name='Voditelj sekcije',
+        "Clan",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="led_sections",
+        verbose_name="Voditelj sekcije",
     )
-    max_members = models.PositiveIntegerField(default=0, help_text='0=neograničeno')
+    max_members = models.PositiveIntegerField(default=0, help_text="0=neograničeno")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = 'Sekcija'
-        verbose_name_plural = 'Sekcije'
-        unique_together = [('company', 'name')]
+        verbose_name = "Sekcija"
+        verbose_name_plural = "Sekcije"
+        unique_together = [("company", "name")]
 
     def __str__(self):
         return self.name
 
     @property
     def member_count(self):
-        return self.members.filter(clan__status='aktivan').count()
+        return self.members.filter(clan__status="aktivan").count()
 
 
 class ClanSekcija(models.Model):
     """Članstvo u sekciji (M2M through)."""
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='section_memberships')
-    sekcija = models.ForeignKey(Sekcija, on_delete=models.CASCADE, related_name='members')
-    role = models.CharField(max_length=30, blank=True, help_text='Npr. solist, bubnjač, kapetan')
+
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="section_memberships")
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.CASCADE, related_name="members")
+    role = models.CharField(max_length=30, blank=True, help_text="Npr. solist, bubnjač, kapetan")
     joined_at = models.DateField(auto_now_add=True)
 
     class Meta:
-        unique_together = [('clan', 'sekcija')]
-        verbose_name = 'Član sekcije'
-        verbose_name_plural = 'Članovi sekcija'
+        unique_together = [("clan", "sekcija")]
+        verbose_name = "Član sekcije"
+        verbose_name_plural = "Članovi sekcija"
 
     def __str__(self):
-        return f'{self.clan} → {self.sekcija} ({self.role})'
+        return f"{self.clan} → {self.sekcija} ({self.role})"
 
 
 class ClanskiDokument(models.Model):
     """Dozvola/licenca člana — ribolovna, lovačka, oružni list, zdravstvena potvrda."""
+
     DOC_TYPES = [
-        ('ribolovna', 'Ribolovna dozvola'),
-        ('lovacka', 'Lovačka dozvola'),
-        ('oruzni_list', 'Oružni list'),
-        ('zdravstvena', 'Zdravstvena potvrda'),
-        ('osiguranje', 'Polica osiguranja'),
-        ('iskaznica', 'Članska iskaznica'),
-        ('certifikat', 'Certifikat / licenca'),
-        ('other', 'Ostalo'),
+        ("ribolovna", "Ribolovna dozvola"),
+        ("lovacka", "Lovačka dozvola"),
+        ("oruzni_list", "Oružni list"),
+        ("zdravstvena", "Zdravstvena potvrda"),
+        ("osiguranje", "Polica osiguranja"),
+        ("iskaznica", "Članska iskaznica"),
+        ("certifikat", "Certifikat / licenca"),
+        ("other", "Ostalo"),
     ]
 
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='dokumenti')
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="dokumenti")
     doc_type = models.CharField(max_length=20, choices=DOC_TYPES)
-    doc_number = models.CharField(max_length=50, blank=True, verbose_name='Broj dokumenta')
-    issued_by = models.CharField(max_length=100, blank=True, verbose_name='Izdao')
+    doc_number = models.CharField(max_length=50, blank=True, verbose_name="Broj dokumenta")
+    issued_by = models.CharField(max_length=100, blank=True, verbose_name="Izdao")
     issue_date = models.DateField(null=True, blank=True)
     valid_until = models.DateField(null=True, blank=True)
-    file = models.FileField(upload_to='clan_docs/%Y/', blank=True)
+    file = models.FileField(upload_to="clan_docs/%Y/", blank=True)
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-valid_until']
-        verbose_name = 'Članski dokument'
-        verbose_name_plural = 'Članski dokumenti'
+        ordering = ["-valid_until"]
+        verbose_name = "Članski dokument"
+        verbose_name_plural = "Članski dokumenti"
 
     def __str__(self):
-        return f'{self.get_doc_type_display()} — {self.clan} (do {self.valid_until})'
+        return f"{self.get_doc_type_display()} — {self.clan} (do {self.valid_until})"
 
     @property
     def is_expired(self):
@@ -977,29 +1065,36 @@ class ClanskiDokument(models.Model):
         if not self.valid_until:
             return False
         from datetime import timedelta
+
         return self.valid_until <= (timezone.now().date() + timedelta(days=30))
 
 
 class NatjecanjeRezultat(models.Model):
     """Rezultat natjecanja/nastupa — vezano na Dogadjaj."""
-    dogadjaj = models.ForeignKey('Dogadjaj', on_delete=models.CASCADE, related_name='rezultati')
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='rezultati',
-                             null=True, blank=True, help_text='Individualni rezultat')
-    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL,
-                                null=True, blank=True, help_text='Ekipni rezultat')
-    placement = models.PositiveIntegerField(null=True, blank=True, verbose_name='Plasman')
-    score = models.CharField(max_length=50, blank=True, verbose_name='Rezultat/bodovi')
-    category = models.CharField(max_length=100, blank=True, verbose_name='Kategorija')
+
+    dogadjaj = models.ForeignKey("Dogadjaj", on_delete=models.CASCADE, related_name="rezultati")
+    clan = models.ForeignKey(
+        "Clan",
+        on_delete=models.CASCADE,
+        related_name="rezultati",
+        null=True,
+        blank=True,
+        help_text="Individualni rezultat",
+    )
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL, null=True, blank=True, help_text="Ekipni rezultat")
+    placement = models.PositiveIntegerField(null=True, blank=True, verbose_name="Plasman")
+    score = models.CharField(max_length=50, blank=True, verbose_name="Rezultat/bodovi")
+    category = models.CharField(max_length=100, blank=True, verbose_name="Kategorija")
     notes = models.TextField(blank=True)
 
     class Meta:
-        ordering = ['placement']
-        verbose_name = 'Rezultat natjecanja'
-        verbose_name_plural = 'Rezultati natjecanja'
+        ordering = ["placement"]
+        verbose_name = "Rezultat natjecanja"
+        verbose_name_plural = "Rezultati natjecanja"
 
     def __str__(self):
-        who = self.clan or self.sekcija or '?'
-        return f'{who} — #{self.placement} ({self.dogadjaj})'
+        who = self.clan or self.sekcija or "?"
+        return f"{who} — #{self.placement} ({self.dogadjaj})"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1008,56 +1103,60 @@ class NatjecanjeRezultat(models.Model):
 # Pravilnik o evidencijama vatrogasnih postrojbi (NN 47/20)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class VatrogasnaOprema(models.Model):
     """Vatrogasna oprema — aparati, cijevi, pumpe, dišni aparati, ljestve."""
+
     KATEGORIJA_CHOICES = [
-        ('aparat', 'Aparat za gašenje'),
-        ('cijev', 'Vatrogasna cijev'),
-        ('pumpa', 'Pumpa'),
-        ('disni', 'Dišni aparat'),
-        ('ljestve', 'Ljestve'),
-        ('alat', 'Ručni alat'),
-        ('zasticna', 'Zaštitna oprema'),
-        ('komunikacija', 'Komunikacijska oprema'),
-        ('prva_pomoc', 'Prva pomoć'),
-        ('ostalo', 'Ostalo'),
+        ("aparat", "Aparat za gašenje"),
+        ("cijev", "Vatrogasna cijev"),
+        ("pumpa", "Pumpa"),
+        ("disni", "Dišni aparat"),
+        ("ljestve", "Ljestve"),
+        ("alat", "Ručni alat"),
+        ("zasticna", "Zaštitna oprema"),
+        ("komunikacija", "Komunikacijska oprema"),
+        ("prva_pomoc", "Prva pomoć"),
+        ("ostalo", "Ostalo"),
     ]
     STATUS_CHOICES = [
-        ('ispravno', 'Ispravno'),
-        ('servis', 'Na servisu'),
-        ('neispravno', 'Neispravno'),
-        ('otpisano', 'Otpisano'),
+        ("ispravno", "Ispravno"),
+        ("servis", "Na servisu"),
+        ("neispravno", "Neispravno"),
+        ("otpisano", "Otpisano"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='vatrogasna_oprema')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv opreme')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="vatrogasna_oprema")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv opreme")
     kategorija = models.CharField(max_length=20, choices=KATEGORIJA_CHOICES)
-    serijski_broj = models.CharField(max_length=100, blank=True, verbose_name='Serijski broj')
-    proizvodac = models.CharField(max_length=100, blank=True, verbose_name='Proizvođač')
+    serijski_broj = models.CharField(max_length=100, blank=True, verbose_name="Serijski broj")
+    proizvodac = models.CharField(max_length=100, blank=True, verbose_name="Proizvođač")
     godina_nabave = models.PositiveSmallIntegerField(null=True, blank=True)
-    nabavna_vrijednost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Nabavna vrijednost (EUR)')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ispravno')
+    nabavna_vrijednost = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Nabavna vrijednost (EUR)"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ispravno")
     # Atesti — KRITIČNO za sigurnost
-    atest_datum = models.DateField(null=True, blank=True, verbose_name='Datum zadnjeg atesta')
-    atest_vrijedi_do = models.DateField(null=True, blank=True, verbose_name='Atest vrijedi do')
-    atest_izdavac = models.CharField(max_length=100, blank=True, verbose_name='Atest izdao')
-    sljedeci_servis = models.DateField(null=True, blank=True, verbose_name='Sljedeći servis')
-    lokacija = models.CharField(max_length=100, blank=True, verbose_name='Lokacija (spremište/vozilo)')
-    qr_code = models.CharField(max_length=100, blank=True, db_index=True, verbose_name='QR kod opreme')
-    photo = models.ImageField(upload_to='vatrogasci/oprema/%Y/', blank=True)
+    atest_datum = models.DateField(null=True, blank=True, verbose_name="Datum zadnjeg atesta")
+    atest_vrijedi_do = models.DateField(null=True, blank=True, verbose_name="Atest vrijedi do")
+    atest_izdavac = models.CharField(max_length=100, blank=True, verbose_name="Atest izdao")
+    sljedeci_servis = models.DateField(null=True, blank=True, verbose_name="Sljedeći servis")
+    lokacija = models.CharField(max_length=100, blank=True, verbose_name="Lokacija (spremište/vozilo)")
+    qr_code = models.CharField(max_length=100, blank=True, db_index=True, verbose_name="QR kod opreme")
+    photo = models.ImageField(upload_to="vatrogasci/oprema/%Y/", blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_vatrogasna_oprema'
-        ordering = ['kategorija', 'naziv']
-        verbose_name = 'Vatrogasna oprema'
-        verbose_name_plural = 'Vatrogasna oprema'
+        db_table = "udruge_vatrogasna_oprema"
+        ordering = ["kategorija", "naziv"]
+        verbose_name = "Vatrogasna oprema"
+        verbose_name_plural = "Vatrogasna oprema"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.naziv, self.get_kategorija_display(), self.get_status_display())
+        return "%s — %s (%s)" % (self.naziv, self.get_kategorija_display(), self.get_status_display())
 
     @property
     def atest_istekao(self):
@@ -1070,92 +1169,103 @@ class VatrogasnaOprema(models.Model):
         if not self.atest_vrijedi_do:
             return False
         from datetime import timedelta
+
         return self.atest_vrijedi_do <= (timezone.now().date() + timedelta(days=30))
 
 
 class VatrogasnoVozilo(models.Model):
     """Vatrogasno vozilo — navalno, autocisterna, ljestvača, kombi."""
+
     TIP_CHOICES = [
-        ('navalno', 'Navalno vozilo'),
-        ('autocisterna', 'Autocisterna'),
-        ('ljestve', 'Auto-ljestve'),
-        ('kombi', 'Kombi / Pick-up'),
-        ('zapovjedno', 'Zapovjedno vozilo'),
-        ('tehnicko', 'Tehničko vozilo'),
-        ('ostalo', 'Ostalo'),
+        ("navalno", "Navalno vozilo"),
+        ("autocisterna", "Autocisterna"),
+        ("ljestve", "Auto-ljestve"),
+        ("kombi", "Kombi / Pick-up"),
+        ("zapovjedno", "Zapovjedno vozilo"),
+        ("tehnicko", "Tehničko vozilo"),
+        ("ostalo", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='vatrogasna_vozila')
-    naziv = models.CharField(max_length=100, verbose_name='Naziv vozila')
-    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default='navalno')
-    reg_oznaka = models.CharField(max_length=20, verbose_name='Registarska oznaka')
-    marka = models.CharField(max_length=50, blank=True, verbose_name='Marka / Model')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="vatrogasna_vozila")
+    naziv = models.CharField(max_length=100, verbose_name="Naziv vozila")
+    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default="navalno")
+    reg_oznaka = models.CharField(max_length=20, verbose_name="Registarska oznaka")
+    marka = models.CharField(max_length=50, blank=True, verbose_name="Marka / Model")
     godina_proizvodnje = models.PositiveSmallIntegerField(null=True, blank=True)
     sasija_broj = models.CharField(max_length=50, blank=True)
-    kapacitet_vode_l = models.PositiveIntegerField(default=0, verbose_name='Kapacitet vode (L)')
+    kapacitet_vode_l = models.PositiveIntegerField(default=0, verbose_name="Kapacitet vode (L)")
     # Registracija i tehnički
-    reg_vrijedi_do = models.DateField(null=True, blank=True, verbose_name='Registracija do')
-    tehnicki_do = models.DateField(null=True, blank=True, verbose_name='Tehnički pregled do')
-    osiguranje_do = models.DateField(null=True, blank=True, verbose_name='Osiguranje do')
+    reg_vrijedi_do = models.DateField(null=True, blank=True, verbose_name="Registracija do")
+    tehnicki_do = models.DateField(null=True, blank=True, verbose_name="Tehnički pregled do")
+    osiguranje_do = models.DateField(null=True, blank=True, verbose_name="Osiguranje do")
     # Gorivo
-    zadnje_tocenje_km = models.PositiveIntegerField(default=0, verbose_name='Km zadnjeg točenja')
-    ukupni_km = models.PositiveIntegerField(default=0, verbose_name='Ukupni km')
-    status = models.CharField(max_length=20, choices=[
-        ('aktivno', 'Aktivno'), ('servis', 'Na servisu'), ('rashodovano', 'Rashodovano'),
-    ], default='aktivno')
-    photo = models.ImageField(upload_to='vatrogasci/vozila/%Y/', blank=True)
+    zadnje_tocenje_km = models.PositiveIntegerField(default=0, verbose_name="Km zadnjeg točenja")
+    ukupni_km = models.PositiveIntegerField(default=0, verbose_name="Ukupni km")
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("aktivno", "Aktivno"),
+            ("servis", "Na servisu"),
+            ("rashodovano", "Rashodovano"),
+        ],
+        default="aktivno",
+    )
+    photo = models.ImageField(upload_to="vatrogasci/vozila/%Y/", blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_vatrogasno_vozilo'
-        ordering = ['naziv']
-        verbose_name = 'Vatrogasno vozilo'
+        db_table = "udruge_vatrogasno_vozilo"
+        ordering = ["naziv"]
+        verbose_name = "Vatrogasno vozilo"
 
     def __str__(self):
-        return '%s (%s) — %s' % (self.naziv, self.reg_oznaka, self.get_tip_display())
+        return "%s (%s) — %s" % (self.naziv, self.reg_oznaka, self.get_tip_display())
 
 
 class Intervencija(models.Model):
     """Vatrogasna intervencija — Obrazac INT-1 (NN 47/20)."""
+
     TIP_CHOICES = [
-        ('pozar', 'Požar'),
-        ('tehnicka', 'Tehnička intervencija'),
-        ('prometna', 'Prometna nesreća'),
-        ('poplava', 'Poplava / Izlijevanje'),
-        ('potraga', 'Potraga i spašavanje'),
-        ('opasne_tvari', 'Opasne tvari (HAZMAT)'),
-        ('vjezba', 'Vježba (terenska)'),
-        ('dezurstvo', 'Dežurstvo'),
-        ('ostalo', 'Ostalo'),
+        ("pozar", "Požar"),
+        ("tehnicka", "Tehnička intervencija"),
+        ("prometna", "Prometna nesreća"),
+        ("poplava", "Poplava / Izlijevanje"),
+        ("potraga", "Potraga i spašavanje"),
+        ("opasne_tvari", "Opasne tvari (HAZMAT)"),
+        ("vjezba", "Vježba (terenska)"),
+        ("dezurstvo", "Dežurstvo"),
+        ("ostalo", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='intervencije')
-    evidencijski_broj = models.CharField(max_length=50, verbose_name='Evidencijski broj (INT-1)')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="intervencije")
+    evidencijski_broj = models.CharField(max_length=50, verbose_name="Evidencijski broj (INT-1)")
     tip = models.CharField(max_length=20, choices=TIP_CHOICES)
-    opis = models.TextField(verbose_name='Opis intervencije')
+    opis = models.TextField(verbose_name="Opis intervencije")
     # Vrijeme
-    alarm_primljen = models.DateTimeField(verbose_name='Alarm primljen')
-    izlazak = models.DateTimeField(null=True, blank=True, verbose_name='Izlazak')
-    dolazak = models.DateTimeField(null=True, blank=True, verbose_name='Dolazak na mjesto')
-    zavrsetak = models.DateTimeField(null=True, blank=True, verbose_name='Završetak')
-    povratak = models.DateTimeField(null=True, blank=True, verbose_name='Povratak u postaju')
+    alarm_primljen = models.DateTimeField(verbose_name="Alarm primljen")
+    izlazak = models.DateTimeField(null=True, blank=True, verbose_name="Izlazak")
+    dolazak = models.DateTimeField(null=True, blank=True, verbose_name="Dolazak na mjesto")
+    zavrsetak = models.DateTimeField(null=True, blank=True, verbose_name="Završetak")
+    povratak = models.DateTimeField(null=True, blank=True, verbose_name="Povratak u postaju")
     # Lokacija
-    lokacija = models.CharField(max_length=255, verbose_name='Lokacija')
+    lokacija = models.CharField(max_length=255, verbose_name="Lokacija")
     geo_lat = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     geo_lon = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     # Osoblje
-    voditelj = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='vodio_intervencije')
-    sudionici = models.ManyToManyField(Clan, blank=True, related_name='intervencije')
+    voditelj = models.ForeignKey(
+        Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="vodio_intervencije"
+    )
+    sudionici = models.ManyToManyField(Clan, blank=True, related_name="intervencije")
     broj_sudionika = models.PositiveSmallIntegerField(default=0)
     # Vozila i oprema
-    vozila = models.ManyToManyField(VatrogasnoVozilo, blank=True, related_name='intervencije')
-    oprema_koristena = models.ManyToManyField(VatrogasnaOprema, blank=True, related_name='intervencije')
-    voda_utrosena_l = models.PositiveIntegerField(default=0, verbose_name='Voda utrošena (L)')
-    pjena_utrosena_l = models.PositiveIntegerField(default=0, verbose_name='Pjena utrošena (L)')
+    vozila = models.ManyToManyField(VatrogasnoVozilo, blank=True, related_name="intervencije")
+    oprema_koristena = models.ManyToManyField(VatrogasnaOprema, blank=True, related_name="intervencije")
+    voda_utrosena_l = models.PositiveIntegerField(default=0, verbose_name="Voda utrošena (L)")
+    pjena_utrosena_l = models.PositiveIntegerField(default=0, verbose_name="Pjena utrošena (L)")
     # Rezultat
-    steta_eur = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Procijenjena šteta (EUR)')
+    steta_eur = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Procijenjena šteta (EUR)")
     spaseno_osoba = models.PositiveSmallIntegerField(default=0)
     spaseno_zivotinja = models.PositiveSmallIntegerField(default=0)
     notes = models.TextField(blank=True)
@@ -1164,12 +1274,16 @@ class Intervencija(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_intervencija'
-        ordering = ['-alarm_primljen']
-        verbose_name = 'Intervencija'
+        db_table = "udruge_intervencija"
+        ordering = ["-alarm_primljen"]
+        verbose_name = "Intervencija"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.evidencijski_broj, self.get_tip_display(), self.alarm_primljen.strftime('%d.%m.%Y'))
+        return "%s — %s (%s)" % (
+            self.evidencijski_broj,
+            self.get_tip_display(),
+            self.alarm_primljen.strftime("%d.%m.%Y"),
+        )
 
     @property
     def trajanje_minuta(self):
@@ -1186,65 +1300,67 @@ class Intervencija(models.Model):
 
 class Vjezba(models.Model):
     """Vatrogasna vježba — evidencija obuke i osposobljavanja."""
+
     TIP_CHOICES = [
-        ('teorijska', 'Teorijska nastava'),
-        ('prakticna', 'Praktična vježba'),
-        ('natjecanje', 'Natjecanje / Olimpijada'),
-        ('tecaj', 'Tečaj osposobljavanja'),
-        ('ispit', 'Ispit'),
-        ('terenska', 'Terenska vježba'),
+        ("teorijska", "Teorijska nastava"),
+        ("prakticna", "Praktična vježba"),
+        ("natjecanje", "Natjecanje / Olimpijada"),
+        ("tecaj", "Tečaj osposobljavanja"),
+        ("ispit", "Ispit"),
+        ("terenska", "Terenska vježba"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='vjezbe')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv vježbe')
-    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default='prakticna')
-    datum = models.DateField(verbose_name='Datum')
-    trajanje_sati = models.DecimalField(max_digits=4, decimal_places=1, default=2, verbose_name='Trajanje (sati)')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="vjezbe")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv vježbe")
+    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default="prakticna")
+    datum = models.DateField(verbose_name="Datum")
+    trajanje_sati = models.DecimalField(max_digits=4, decimal_places=1, default=2, verbose_name="Trajanje (sati)")
     lokacija = models.CharField(max_length=200, blank=True)
-    voditelj = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='vodio_vjezbe')
-    sudionici = models.ManyToManyField(Clan, blank=True, related_name='vjezbe')
+    voditelj = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="vodio_vjezbe")
+    sudionici = models.ManyToManyField(Clan, blank=True, related_name="vjezbe")
     opis = models.TextField(blank=True)
-    ocjena = models.CharField(max_length=50, blank=True, verbose_name='Ocjena/Rezultat')
+    ocjena = models.CharField(max_length=50, blank=True, verbose_name="Ocjena/Rezultat")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_vjezba'
-        ordering = ['-datum']
-        verbose_name = 'Vježba'
+        db_table = "udruge_vjezba"
+        ordering = ["-datum"]
+        verbose_name = "Vježba"
 
     def __str__(self):
-        return '%s (%s)' % (self.naziv, self.datum.strftime('%d.%m.%Y'))
+        return "%s (%s)" % (self.naziv, self.datum.strftime("%d.%m.%Y"))
 
 
 class VatrogasnoZvanje(models.Model):
     """Vatrogasno zvanje člana — razine prema Zakonu o vatrogastvu."""
+
     RAZINA_CHOICES = [
-        ('podmladak', 'Vatrogasni podmladak'),
-        ('A', 'Razina A — Vatrogasac'),
-        ('B', 'Razina B — Dočasnik'),
-        ('C', 'Razina C — Časnik'),
-        ('D', 'Razina D — Viši časnik'),
-        ('E', 'Razina E — Zapovjednik'),
-        ('veteran', 'Vatrogasni veteran'),
+        ("podmladak", "Vatrogasni podmladak"),
+        ("A", "Razina A — Vatrogasac"),
+        ("B", "Razina B — Dočasnik"),
+        ("C", "Razina C — Časnik"),
+        ("D", "Razina D — Viši časnik"),
+        ("E", "Razina E — Zapovjednik"),
+        ("veteran", "Vatrogasni veteran"),
     ]
 
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='vatrogasna_zvanja')
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="vatrogasna_zvanja")
     razina = models.CharField(max_length=20, choices=RAZINA_CHOICES)
-    naziv_zvanja = models.CharField(max_length=100, verbose_name='Naziv zvanja')
-    datum_stjecanja = models.DateField(verbose_name='Datum stjecanja')
+    naziv_zvanja = models.CharField(max_length=100, verbose_name="Naziv zvanja")
+    datum_stjecanja = models.DateField(verbose_name="Datum stjecanja")
     certifikat_broj = models.CharField(max_length=50, blank=True)
-    izdavac = models.CharField(max_length=100, blank=True, verbose_name='Izdao (VZG/VZŽ/HVZ)')
+    izdavac = models.CharField(max_length=100, blank=True, verbose_name="Izdao (VZG/VZŽ/HVZ)")
     notes = models.CharField(max_length=200, blank=True)
 
     class Meta:
-        db_table = 'udruge_vatrogasno_zvanje'
-        ordering = ['-datum_stjecanja']
-        verbose_name = 'Vatrogasno zvanje'
+        db_table = "udruge_vatrogasno_zvanje"
+        ordering = ["-datum_stjecanja"]
+        verbose_name = "Vatrogasno zvanje"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.clan, self.naziv_zvanja, self.get_razina_display())
+        return "%s — %s (%s)" % (self.clan, self.naziv_zvanja, self.get_razina_display())
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1252,65 +1368,70 @@ class VatrogasnoZvanje(models.Model):
 # Zakon o kulturnim vijećima (NN 83/22)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class Repertoar(models.Model):
     """Repertoar KUD-a — pjesme, plesovi, drame, koreografije."""
+
     TIP_CHOICES = [
-        ('pjesma', 'Pjesma'),
-        ('ples', 'Ples / Koreografija'),
-        ('drama', 'Drama / Igrokaz'),
-        ('instrumentalna', 'Instrumentalna kompozicija'),
-        ('recital', 'Recital / Recitacija'),
-        ('ostalo', 'Ostalo'),
+        ("pjesma", "Pjesma"),
+        ("ples", "Ples / Koreografija"),
+        ("drama", "Drama / Igrokaz"),
+        ("instrumentalna", "Instrumentalna kompozicija"),
+        ("recital", "Recital / Recitacija"),
+        ("ostalo", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='repertoar')
-    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL, null=True, blank=True, related_name='repertoar')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="repertoar")
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL, null=True, blank=True, related_name="repertoar")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv")
     tip = models.CharField(max_length=20, choices=TIP_CHOICES)
-    autor = models.CharField(max_length=200, blank=True, verbose_name='Autor / Koreograf')
-    trajanje_min = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Trajanje (min)')
-    region = models.CharField(max_length=100, blank=True, verbose_name='Regija / Kraj podrijetla')
+    autor = models.CharField(max_length=200, blank=True, verbose_name="Autor / Koreograf")
+    trajanje_min = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="Trajanje (min)")
+    region = models.CharField(max_length=100, blank=True, verbose_name="Regija / Kraj podrijetla")
     opis = models.TextField(blank=True)
     # Digitalni materijali
-    note_file = models.FileField(upload_to='kud/note/%Y/', blank=True, verbose_name='Notni zapis')
-    audio_file = models.FileField(upload_to='kud/audio/%Y/', blank=True, verbose_name='Audio snimka')
-    video_url = models.URLField(blank=True, verbose_name='Video link')
-    koreografija_file = models.FileField(upload_to='kud/koreo/%Y/', blank=True, verbose_name='Koreografija (PDF)')
+    note_file = models.FileField(upload_to="kud/note/%Y/", blank=True, verbose_name="Notni zapis")
+    audio_file = models.FileField(upload_to="kud/audio/%Y/", blank=True, verbose_name="Audio snimka")
+    video_url = models.URLField(blank=True, verbose_name="Video link")
+    koreografija_file = models.FileField(upload_to="kud/koreo/%Y/", blank=True, verbose_name="Koreografija (PDF)")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_repertoar'
-        ordering = ['naziv']
-        verbose_name = 'Repertoar'
+        db_table = "udruge_repertoar"
+        ordering = ["naziv"]
+        verbose_name = "Repertoar"
 
     def __str__(self):
-        return '%s (%s)' % (self.naziv, self.get_tip_display())
+        return "%s (%s)" % (self.naziv, self.get_tip_display())
 
 
 class ProbaLog(models.Model):
     """Evidencija probe — datum, sekcija, prisutnost, bilješka."""
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='probe')
-    sekcija = models.ForeignKey(Sekcija, on_delete=models.CASCADE, related_name='probe')
-    datum = models.DateField(verbose_name='Datum probe')
-    pocetak = models.TimeField(null=True, blank=True, verbose_name='Početak')
-    kraj = models.TimeField(null=True, blank=True, verbose_name='Kraj')
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="probe")
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.CASCADE, related_name="probe")
+    datum = models.DateField(verbose_name="Datum probe")
+    pocetak = models.TimeField(null=True, blank=True, verbose_name="Početak")
+    kraj = models.TimeField(null=True, blank=True, verbose_name="Kraj")
     lokacija = models.CharField(max_length=200, blank=True)
-    prisutni = models.ManyToManyField(Clan, blank=True, related_name='probe_prisutan')
-    voditelj = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='vodio_probe')
-    repertoar_radjen = models.ManyToManyField(Repertoar, blank=True, related_name='probe', verbose_name='Repertoar rađen')
-    biljeska = models.TextField(blank=True, verbose_name='Bilješka')
+    prisutni = models.ManyToManyField(Clan, blank=True, related_name="probe_prisutan")
+    voditelj = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="vodio_probe")
+    repertoar_radjen = models.ManyToManyField(
+        Repertoar, blank=True, related_name="probe", verbose_name="Repertoar rađen"
+    )
+    biljeska = models.TextField(blank=True, verbose_name="Bilješka")
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_proba_log'
-        ordering = ['-datum']
-        verbose_name = 'Proba'
+        db_table = "udruge_proba_log"
+        ordering = ["-datum"]
+        verbose_name = "Proba"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.sekcija.name, self.datum.strftime('%d.%m.%Y'), self.prisutni_count)
+        return "%s — %s (%s)" % (self.sekcija.name, self.datum.strftime("%d.%m.%Y"), self.prisutni_count)
 
     @property
     def prisutni_count(self):
@@ -1321,6 +1442,7 @@ class ProbaLog(models.Model):
         if not self.pocetak or not self.kraj:
             return None
         from datetime import datetime, timedelta
+
         start = datetime.combine(self.datum, self.pocetak)
         end = datetime.combine(self.datum, self.kraj)
         if end < start:
@@ -1330,63 +1452,75 @@ class ProbaLog(models.Model):
 
 class Kostim(models.Model):
     """Inventar nošnji/kostima — KILLER FEATURE za KUD-ove."""
+
     STANJE_CHOICES = [
-        ('novo', 'Novo'),
-        ('dobro', 'Dobro'),
-        ('trosno', 'Trošno'),
-        ('popravak', 'Na popravku'),
-        ('otpisano', 'Otpisano'),
+        ("novo", "Novo"),
+        ("dobro", "Dobro"),
+        ("trosno", "Trošno"),
+        ("popravak", "Na popravku"),
+        ("otpisano", "Otpisano"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='kostimi')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv nošnje/kostima')
-    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL, null=True, blank=True, related_name='kostimi')
-    region = models.CharField(max_length=100, blank=True, verbose_name='Regija / Kraj')
-    spol = models.CharField(max_length=10, choices=[('M', 'Muški'), ('Z', 'Ženski'), ('U', 'Unisex')], default='U')
-    velicina = models.CharField(max_length=20, blank=True, verbose_name='Veličina')
-    inventarni_broj = models.CharField(max_length=50, blank=True, verbose_name='Inventarni broj')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="kostimi")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv nošnje/kostima")
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL, null=True, blank=True, related_name="kostimi")
+    region = models.CharField(max_length=100, blank=True, verbose_name="Regija / Kraj")
+    spol = models.CharField(max_length=10, choices=[("M", "Muški"), ("Z", "Ženski"), ("U", "Unisex")], default="U")
+    velicina = models.CharField(max_length=20, blank=True, verbose_name="Veličina")
+    inventarni_broj = models.CharField(max_length=50, blank=True, verbose_name="Inventarni broj")
     # Dodjela
-    dodijeljen_clanu = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='kostimi', verbose_name='Dodijeljeno članu')
+    dodijeljen_clanu = models.ForeignKey(
+        Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="kostimi", verbose_name="Dodijeljeno članu"
+    )
     dodijeljen_od = models.DateField(null=True, blank=True)
-    stanje = models.CharField(max_length=20, choices=STANJE_CHOICES, default='dobro')
-    nabavna_cijena = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Nabavna cijena (EUR)')
-    photo = models.ImageField(upload_to='kud/kostimi/%Y/', blank=True)
-    opis_dijelova = models.TextField(blank=True, verbose_name='Opis dijelova (košulja, prsluk, suknja...)')
+    stanje = models.CharField(max_length=20, choices=STANJE_CHOICES, default="dobro")
+    nabavna_cijena = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Nabavna cijena (EUR)"
+    )
+    photo = models.ImageField(upload_to="kud/kostimi/%Y/", blank=True)
+    opis_dijelova = models.TextField(blank=True, verbose_name="Opis dijelova (košulja, prsluk, suknja...)")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_kostim'
-        ordering = ['naziv', 'velicina']
-        verbose_name = 'Kostim / Nošnja'
+        db_table = "udruge_kostim"
+        ordering = ["naziv", "velicina"]
+        verbose_name = "Kostim / Nošnja"
 
     def __str__(self):
-        assigned = ' → %s' % self.dodijeljen_clanu if self.dodijeljen_clanu else ''
-        return '%s (%s, %s)%s' % (self.naziv, self.velicina, self.get_stanje_display(), assigned)
+        assigned = " → %s" % self.dodijeljen_clanu if self.dodijeljen_clanu else ""
+        return "%s (%s, %s)%s" % (self.naziv, self.velicina, self.get_stanje_display(), assigned)
 
 
 class NastupPlan(models.Model):
     """Plan nastupa — set lista, raspored, logistika."""
-    dogadjaj = models.OneToOneField(Dogadjaj, on_delete=models.CASCADE, related_name='nastup_plan')
-    set_lista = models.JSONField(default=list, blank=True, verbose_name='Set lista',
-        help_text='[{"redni_broj":1, "repertoar_id":5, "napomena":""}]')
-    raspored_dolaska = models.DateTimeField(null=True, blank=True, verbose_name='Dolazak na lokaciju')
-    proba_prije_nastupa = models.BooleanField(default=False, verbose_name='Proba prije nastupa')
-    garderoba = models.CharField(max_length=200, blank=True, verbose_name='Garderoba / Prostor')
-    prijevoz = models.CharField(max_length=200, blank=True, verbose_name='Prijevoz')
-    smjestaj = models.CharField(max_length=200, blank=True, verbose_name='Smještaj')
-    troskovi = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Procijenjeni troškovi (EUR)')
+
+    dogadjaj = models.OneToOneField(Dogadjaj, on_delete=models.CASCADE, related_name="nastup_plan")
+    set_lista = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Set lista",
+        help_text='[{"redni_broj":1, "repertoar_id":5, "napomena":""}]',
+    )
+    raspored_dolaska = models.DateTimeField(null=True, blank=True, verbose_name="Dolazak na lokaciju")
+    proba_prije_nastupa = models.BooleanField(default=False, verbose_name="Proba prije nastupa")
+    garderoba = models.CharField(max_length=200, blank=True, verbose_name="Garderoba / Prostor")
+    prijevoz = models.CharField(max_length=200, blank=True, verbose_name="Prijevoz")
+    smjestaj = models.CharField(max_length=200, blank=True, verbose_name="Smještaj")
+    troskovi = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Procijenjeni troškovi (EUR)"
+    )
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_nastup_plan'
-        verbose_name = 'Plan nastupa'
+        db_table = "udruge_nastup_plan"
+        verbose_name = "Plan nastupa"
 
     def __str__(self):
-        return 'Nastup plan: %s' % self.dogadjaj.name
+        return "Nastup plan: %s" % self.dogadjaj.name
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1395,30 +1529,37 @@ class NastupPlan(models.Model):
 # Pravilnik o športskom ribolovu (NN 122/19, 15/21)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class Revir(models.Model):
     """Ribolovni revir / voda — rijeka, jezero, akumulacija."""
+
     TIP_CHOICES = [
-        ('rijeka', 'Rijeka'),
-        ('jezero', 'Jezero'),
-        ('akumulacija', 'Akumulacija'),
-        ('kanal', 'Kanal'),
-        ('potok', 'Potok'),
-        ('bare', 'Bare / Mrtvice'),
+        ("rijeka", "Rijeka"),
+        ("jezero", "Jezero"),
+        ("akumulacija", "Akumulacija"),
+        ("kanal", "Kanal"),
+        ("potok", "Potok"),
+        ("bare", "Bare / Mrtvice"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='reviri')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv vode')
-    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default='rijeka')
-    lokacija = models.CharField(max_length=255, blank=True, verbose_name='Lokacija / Dionica')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="reviri")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv vode")
+    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default="rijeka")
+    lokacija = models.CharField(max_length=255, blank=True, verbose_name="Lokacija / Dionica")
     geo_lat = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     geo_lon = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    povrsina_ha = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name='Površina (ha)')
-    duljina_km = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Duljina (km)')
+    povrsina_ha = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Površina (ha)"
+    )
+    duljina_km = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Duljina (km)")
     # Riblje vrste
-    glavne_vrste = models.JSONField(default=list, blank=True, verbose_name='Glavne riblje vrste',
-        help_text='["šaran", "som", "štuka", "smuđ"]')
-    max_dnevni_ulov_kg = models.DecimalField(max_digits=5, decimal_places=2, default=5, verbose_name='Max dnevni ulov (kg)')
-    zabrana_ribolova = models.BooleanField(default=False, verbose_name='Zabrana ribolova (aktivna)')
+    glavne_vrste = models.JSONField(
+        default=list, blank=True, verbose_name="Glavne riblje vrste", help_text='["šaran", "som", "štuka", "smuđ"]'
+    )
+    max_dnevni_ulov_kg = models.DecimalField(
+        max_digits=5, decimal_places=2, default=5, verbose_name="Max dnevni ulov (kg)"
+    )
+    zabrana_ribolova = models.BooleanField(default=False, verbose_name="Zabrana ribolova (aktivna)")
     zabrana_razlog = models.CharField(max_length=200, blank=True)
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True)
@@ -1426,46 +1567,54 @@ class Revir(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_revir'
-        ordering = ['naziv']
-        verbose_name = 'Ribolovni revir'
+        db_table = "udruge_revir"
+        ordering = ["naziv"]
+        verbose_name = "Ribolovni revir"
 
     def __str__(self):
-        return '%s (%s)' % (self.naziv, self.get_tip_display())
+        return "%s (%s)" % (self.naziv, self.get_tip_display())
 
 
 class RibolovnaDozvola(models.Model):
     """Ribolovna dozvola — izdaje društvo, kategorije A-D."""
+
     KATEGORIJA_CHOICES = [
-        ('A', 'Kategorija A — godišnja'),
-        ('B', 'Kategorija B — višednevna'),
-        ('C', 'Kategorija C — dnevna'),
-        ('D', 'Kategorija D — podmladak'),
-        ('turisticka', 'Turistička dozvola'),
+        ("A", "Kategorija A — godišnja"),
+        ("B", "Kategorija B — višednevna"),
+        ("C", "Kategorija C — dnevna"),
+        ("D", "Kategorija D — podmladak"),
+        ("turisticka", "Turistička dozvola"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='ribolovne_dozvole')
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='ribolovne_dozvole')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="ribolovne_dozvole")
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="ribolovne_dozvole")
     kategorija = models.CharField(max_length=20, choices=KATEGORIJA_CHOICES)
-    broj_dozvole = models.CharField(max_length=50, verbose_name='Broj dozvole')
-    valid_from = models.DateField(verbose_name='Vrijedi od')
-    valid_until = models.DateField(verbose_name='Vrijedi do')
-    reviri = models.ManyToManyField(Revir, blank=True, related_name='dozvole', verbose_name='Dozvoljeni reviri')
-    cijena = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Cijena (EUR)')
+    broj_dozvole = models.CharField(max_length=50, verbose_name="Broj dozvole")
+    valid_from = models.DateField(verbose_name="Vrijedi od")
+    valid_until = models.DateField(verbose_name="Vrijedi do")
+    reviri = models.ManyToManyField(Revir, blank=True, related_name="dozvole", verbose_name="Dozvoljeni reviri")
+    cijena = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name="Cijena (EUR)")
     placena = models.BooleanField(default=False)
-    placeno_putem = models.CharField(max_length=20, blank=True, choices=[
-        ('gotovina', 'Gotovina'), ('pos', 'POS'), ('virman', 'Virman'), ('online', 'Online'),
-    ])
+    placeno_putem = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ("gotovina", "Gotovina"),
+            ("pos", "POS"),
+            ("virman", "Virman"),
+            ("online", "Online"),
+        ],
+    )
     issued_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_ribolovna_dozvola'
-        ordering = ['-valid_from']
-        verbose_name = 'Ribolovna dozvola'
+        db_table = "udruge_ribolovna_dozvola"
+        ordering = ["-valid_from"]
+        verbose_name = "Ribolovna dozvola"
 
     def __str__(self):
-        return '%s — %s %s' % (self.clan, self.get_kategorija_display(), self.broj_dozvole)
+        return "%s — %s %s" % (self.clan, self.get_kategorija_display(), self.broj_dozvole)
 
     @property
     def is_valid(self):
@@ -1475,87 +1624,91 @@ class RibolovnaDozvola(models.Model):
 
 class UlovEvidencija(models.Model):
     """Evidencija ulova — zakonska obveza (Obrazac UL)."""
+
     METODA_CHOICES = [
-        ('stap', 'Štap'),
-        ('fly', 'Mušičarenje (fly)'),
-        ('feeder', 'Feeder'),
-        ('spinning', 'Spinning'),
-        ('ostalo', 'Ostalo'),
+        ("stap", "Štap"),
+        ("fly", "Mušičarenje (fly)"),
+        ("feeder", "Feeder"),
+        ("spinning", "Spinning"),
+        ("ostalo", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='ulovi')
-    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='ulovi')
-    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name='ulovi')
-    datum = models.DateField(verbose_name='Datum')
-    vrsta_ribe = models.CharField(max_length=100, verbose_name='Vrsta ribe')
-    tezina_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Težina (kg)')
-    duzina_cm = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Dužina (cm)')
-    komada = models.PositiveSmallIntegerField(default=1, verbose_name='Komada')
-    catch_and_release = models.BooleanField(default=False, verbose_name='Catch & Release')
-    metoda = models.CharField(max_length=20, choices=METODA_CHOICES, default='stap')
-    photo = models.ImageField(upload_to='ribolov/ulovi/%Y/', blank=True)
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="ulovi")
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="ulovi")
+    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name="ulovi")
+    datum = models.DateField(verbose_name="Datum")
+    vrsta_ribe = models.CharField(max_length=100, verbose_name="Vrsta ribe")
+    tezina_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Težina (kg)")
+    duzina_cm = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="Dužina (cm)")
+    komada = models.PositiveSmallIntegerField(default=1, verbose_name="Komada")
+    catch_and_release = models.BooleanField(default=False, verbose_name="Catch & Release")
+    metoda = models.CharField(max_length=20, choices=METODA_CHOICES, default="stap")
+    photo = models.ImageField(upload_to="ribolov/ulovi/%Y/", blank=True)
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_ulov'
-        ordering = ['-datum']
-        verbose_name = 'Evidencija ulova'
+        db_table = "udruge_ulov"
+        ordering = ["-datum"]
+        verbose_name = "Evidencija ulova"
         indexes = [
-            models.Index(fields=['company', 'datum']),
-            models.Index(fields=['clan', 'datum']),
+            models.Index(fields=["company", "datum"]),
+            models.Index(fields=["clan", "datum"]),
         ]
 
     def __str__(self):
-        return '%s — %s %s kg (%s)' % (self.clan, self.vrsta_ribe, self.tezina_kg or '?', self.datum)
+        return "%s — %s %s kg (%s)" % (self.clan, self.vrsta_ribe, self.tezina_kg or "?", self.datum)
 
 
 class Poribljavanje(models.Model):
     """Evidencija poribljanja — plan i izvršenje."""
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='poribljavanja')
-    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name='poribljavanja')
-    datum = models.DateField(verbose_name='Datum')
-    vrsta_ribe = models.CharField(max_length=100, verbose_name='Vrsta ribe')
-    kolicina_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Količina (kg)')
-    komada = models.PositiveIntegerField(default=0, verbose_name='Komada')
-    dobavljac = models.CharField(max_length=200, blank=True, verbose_name='Dobavljač / Ribnjak')
-    cijena_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cijena (EUR)')
-    financirano_iz = models.CharField(max_length=100, blank=True, verbose_name='Financirano iz',
-        help_text='članarine, proračun, HSR, EU fond...')
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="poribljavanja")
+    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name="poribljavanja")
+    datum = models.DateField(verbose_name="Datum")
+    vrsta_ribe = models.CharField(max_length=100, verbose_name="Vrsta ribe")
+    kolicina_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Količina (kg)")
+    komada = models.PositiveIntegerField(default=0, verbose_name="Komada")
+    dobavljac = models.CharField(max_length=200, blank=True, verbose_name="Dobavljač / Ribnjak")
+    cijena_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Cijena (EUR)")
+    financirano_iz = models.CharField(
+        max_length=100, blank=True, verbose_name="Financirano iz", help_text="članarine, proračun, HSR, EU fond..."
+    )
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_poribljavanje'
-        ordering = ['-datum']
-        verbose_name = 'Poribljavanje'
+        db_table = "udruge_poribljavanje"
+        ordering = ["-datum"]
+        verbose_name = "Poribljavanje"
 
     def __str__(self):
-        return '%s — %s %s kg (%s)' % (self.revir, self.vrsta_ribe, self.kolicina_kg, self.datum)
+        return "%s — %s %s kg (%s)" % (self.revir, self.vrsta_ribe, self.kolicina_kg, self.datum)
 
 
 class CuvarskaStraza(models.Model):
     """Čuvarska služba — raspored, zapisnici."""
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='cuvarske_straze')
-    cuvar = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='straze')
-    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name='straze')
-    datum_od = models.DateTimeField(verbose_name='Od')
-    datum_do = models.DateTimeField(verbose_name='Do')
-    prekrsaji = models.PositiveSmallIntegerField(default=0, verbose_name='Broj prekršaja')
-    zapisnik = models.TextField(blank=True, verbose_name='Zapisnik')
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="cuvarske_straze")
+    cuvar = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name="straze")
+    revir = models.ForeignKey(Revir, on_delete=models.CASCADE, related_name="straze")
+    datum_od = models.DateTimeField(verbose_name="Od")
+    datum_do = models.DateTimeField(verbose_name="Do")
+    prekrsaji = models.PositiveSmallIntegerField(default=0, verbose_name="Broj prekršaja")
+    zapisnik = models.TextField(blank=True, verbose_name="Zapisnik")
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_cuvarska_straza'
-        ordering = ['-datum_od']
-        verbose_name = 'Čuvarska straža'
+        db_table = "udruge_cuvarska_straza"
+        ordering = ["-datum_od"]
+        verbose_name = "Čuvarska straža"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.cuvar, self.revir, self.datum_od.strftime('%d.%m.%Y'))
+        return "%s — %s (%s)" % (self.cuvar, self.revir, self.datum_od.strftime("%d.%m.%Y"))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1564,163 +1717,174 @@ class CuvarskaStraza(models.Model):
 # Pravilnik o držanju pčela (NN 11/23)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class Pcelinjak(models.Model):
     """Pčelinjak — lokacija s košnicama, vezan za člana-pčelara."""
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='pcelinjaci')
-    vlasnik = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='pcelinjaci', verbose_name='Vlasnik (pčelar)')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv pčelinjaka')
-    lokacija = models.CharField(max_length=255, verbose_name='Adresa / Lokacija')
-    katastarska_cestica = models.CharField(max_length=50, blank=True, verbose_name='Katastarska čestica')
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="pcelinjaci")
+    vlasnik = models.ForeignKey(
+        Clan, on_delete=models.CASCADE, related_name="pcelinjaci", verbose_name="Vlasnik (pčelar)"
+    )
+    naziv = models.CharField(max_length=200, verbose_name="Naziv pčelinjaka")
+    lokacija = models.CharField(max_length=255, verbose_name="Adresa / Lokacija")
+    katastarska_cestica = models.CharField(max_length=50, blank=True, verbose_name="Katastarska čestica")
     geo_lat = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     geo_lon = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    jrdz_broj = models.CharField(max_length=50, blank=True, verbose_name='JRDŽ broj', db_index=True)
-    stacionarni = models.BooleanField(default=True, verbose_name='Stacionarni (ne seli)')
+    jrdz_broj = models.CharField(max_length=50, blank=True, verbose_name="JRDŽ broj", db_index=True)
+    stacionarni = models.BooleanField(default=True, verbose_name="Stacionarni (ne seli)")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_pcelinjak'
-        ordering = ['naziv']
-        verbose_name = 'Pčelinjak'
+        db_table = "udruge_pcelinjak"
+        ordering = ["naziv"]
+        verbose_name = "Pčelinjak"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.naziv, self.vlasnik, self.lokacija[:30])
+        return "%s — %s (%s)" % (self.naziv, self.vlasnik, self.lokacija[:30])
 
     @property
     def broj_kosnica(self):
-        return self.kosnice.filter(status='aktivna').count()
+        return self.kosnice.filter(status="aktivna").count()
 
 
 class Kosnica(models.Model):
     """Pojedinačna košnica u pčelinjaku."""
+
     TIP_CHOICES = [
-        ('lr', 'Langstroth-Root (LR)'),
-        ('db', 'Dadant-Blatt (DB)'),
-        ('az', 'AŽ (Albert-Žnideršič)'),
-        ('polunastavak', 'Polunastavak'),
-        ('ostalo', 'Ostalo'),
+        ("lr", "Langstroth-Root (LR)"),
+        ("db", "Dadant-Blatt (DB)"),
+        ("az", "AŽ (Albert-Žnideršič)"),
+        ("polunastavak", "Polunastavak"),
+        ("ostalo", "Ostalo"),
     ]
     STATUS_CHOICES = [
-        ('aktivna', 'Aktivna'),
-        ('prazna', 'Prazna'),
-        ('bolesna', 'Bolesna'),
-        ('rojila', 'Rojila se'),
-        ('uginula', 'Zajednica uginula'),
-        ('spojena', 'Spojena'),
+        ("aktivna", "Aktivna"),
+        ("prazna", "Prazna"),
+        ("bolesna", "Bolesna"),
+        ("rojila", "Rojila se"),
+        ("uginula", "Zajednica uginula"),
+        ("spojena", "Spojena"),
     ]
 
-    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name='kosnice')
-    oznaka = models.CharField(max_length=50, verbose_name='Oznaka košnice')
-    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default='lr')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aktivna')
-    godina_matice = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Godina matice')
-    boja_matice = models.CharField(max_length=20, blank=True, verbose_name='Boja matice')
-    snaga_zajednice = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Snaga zajednice (1-5)',
-        help_text='1=slaba, 5=jaka')
+    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name="kosnice")
+    oznaka = models.CharField(max_length=50, verbose_name="Oznaka košnice")
+    tip = models.CharField(max_length=20, choices=TIP_CHOICES, default="lr")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="aktivna")
+    godina_matice = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="Godina matice")
+    boja_matice = models.CharField(max_length=20, blank=True, verbose_name="Boja matice")
+    snaga_zajednice = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name="Snaga zajednice (1-5)", help_text="1=slaba, 5=jaka"
+    )
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'udruge_kosnica'
-        ordering = ['oznaka']
-        unique_together = [('pcelinjak', 'oznaka')]
-        verbose_name = 'Košnica'
+        db_table = "udruge_kosnica"
+        ordering = ["oznaka"]
+        unique_together = [("pcelinjak", "oznaka")]
+        verbose_name = "Košnica"
 
     def __str__(self):
-        return '%s/%s (%s)' % (self.pcelinjak.naziv[:20], self.oznaka, self.get_status_display())
+        return "%s/%s (%s)" % (self.pcelinjak.naziv[:20], self.oznaka, self.get_status_display())
 
 
 class TretmanKosnice(models.Model):
     """Veterinarski tretman košnice — varroa, AFB, EFB, nosema."""
+
     TIP_CHOICES = [
-        ('varroa', 'Varroa tretman'),
-        ('afb', 'AFB (Američka gnjiloća)'),
-        ('efb', 'EFB (Europska gnjiloća)'),
-        ('nosema', 'Nosema'),
-        ('pregled', 'Veterinarski pregled'),
-        ('hranjenje', 'Prihranjivanje'),
-        ('ostalo', 'Ostalo'),
+        ("varroa", "Varroa tretman"),
+        ("afb", "AFB (Američka gnjiloća)"),
+        ("efb", "EFB (Europska gnjiloća)"),
+        ("nosema", "Nosema"),
+        ("pregled", "Veterinarski pregled"),
+        ("hranjenje", "Prihranjivanje"),
+        ("ostalo", "Ostalo"),
     ]
 
-    kosnica = models.ForeignKey(Kosnica, on_delete=models.CASCADE, related_name='tretmani')
-    datum = models.DateField(verbose_name='Datum')
+    kosnica = models.ForeignKey(Kosnica, on_delete=models.CASCADE, related_name="tretmani")
+    datum = models.DateField(verbose_name="Datum")
     tip = models.CharField(max_length=20, choices=TIP_CHOICES)
-    lijek = models.CharField(max_length=100, blank=True, verbose_name='Lijek / Sredstvo')
-    doza = models.CharField(max_length=50, blank=True, verbose_name='Doza / Količina')
+    lijek = models.CharField(max_length=100, blank=True, verbose_name="Lijek / Sredstvo")
+    doza = models.CharField(max_length=50, blank=True, verbose_name="Doza / Količina")
     veterinar = models.CharField(max_length=100, blank=True)
-    karencija_do = models.DateField(null=True, blank=True, verbose_name='Karencija do (zabrana vrcanja)')
+    karencija_do = models.DateField(null=True, blank=True, verbose_name="Karencija do (zabrana vrcanja)")
     rezultat = models.CharField(max_length=200, blank=True)
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_tretman_kosnice'
-        ordering = ['-datum']
-        verbose_name = 'Tretman košnice'
+        db_table = "udruge_tretman_kosnice"
+        ordering = ["-datum"]
+        verbose_name = "Tretman košnice"
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.kosnica, self.get_tip_display(), self.datum)
+        return "%s — %s (%s)" % (self.kosnica, self.get_tip_display(), self.datum)
 
 
 class MedProizvodnja(models.Model):
     """Evidencija proizvodnje meda — vrcanje, količina, vrsta."""
+
     VRSTA_CHOICES = [
-        ('bagrem', 'Bagremov med'),
-        ('lipa', 'Lipov med'),
-        ('livada', 'Livadni med'),
-        ('suncokret', 'Suncokretov med'),
-        ('kesten', 'Kestenov med'),
-        ('kadulja', 'Med od kadulje'),
-        ('vresina', 'Vrištinov med'),
-        ('medljikovac', 'Medljikovac'),
-        ('mijesani', 'Miješani cvjetni'),
-        ('ostalo', 'Ostalo'),
+        ("bagrem", "Bagremov med"),
+        ("lipa", "Lipov med"),
+        ("livada", "Livadni med"),
+        ("suncokret", "Suncokretov med"),
+        ("kesten", "Kestenov med"),
+        ("kadulja", "Med od kadulje"),
+        ("vresina", "Vrištinov med"),
+        ("medljikovac", "Medljikovac"),
+        ("mijesani", "Miješani cvjetni"),
+        ("ostalo", "Ostalo"),
     ]
 
-    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name='proizvodnja_meda')
-    datum_vrcanja = models.DateField(verbose_name='Datum vrcanja')
+    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name="proizvodnja_meda")
+    datum_vrcanja = models.DateField(verbose_name="Datum vrcanja")
     vrsta = models.CharField(max_length=20, choices=VRSTA_CHOICES)
-    kolicina_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Količina (kg)')
-    vlaga_posto = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, verbose_name='Vlaga (%)')
-    broj_kosnica_vrcano = models.PositiveSmallIntegerField(default=0, verbose_name='Košnica vrcano')
+    kolicina_kg = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Količina (kg)")
+    vlaga_posto = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, verbose_name="Vlaga (%)")
+    broj_kosnica_vrcano = models.PositiveSmallIntegerField(default=0, verbose_name="Košnica vrcano")
     za_prodaju = models.BooleanField(default=False)
-    cijena_eur_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Cijena (EUR/kg)')
-    serija = models.CharField(max_length=50, blank=True, verbose_name='Serija / Lot')
+    cijena_eur_kg = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Cijena (EUR/kg)"
+    )
+    serija = models.CharField(max_length=50, blank=True, verbose_name="Serija / Lot")
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_med_proizvodnja'
-        ordering = ['-datum_vrcanja']
-        verbose_name = 'Proizvodnja meda'
+        db_table = "udruge_med_proizvodnja"
+        ordering = ["-datum_vrcanja"]
+        verbose_name = "Proizvodnja meda"
 
     def __str__(self):
-        return '%s — %s %s kg (%s)' % (self.pcelinjak, self.get_vrsta_display(), self.kolicina_kg, self.datum_vrcanja)
+        return "%s — %s %s kg (%s)" % (self.pcelinjak, self.get_vrsta_display(), self.kolicina_kg, self.datum_vrcanja)
 
 
 class SelidbaLog(models.Model):
     """Selidba pčelinjaka — zakonska prijava, lokacija."""
-    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name='selidbe')
-    datum = models.DateField(verbose_name='Datum selidbe')
-    odrediste = models.CharField(max_length=255, verbose_name='Odredište')
+
+    pcelinjak = models.ForeignKey(Pcelinjak, on_delete=models.CASCADE, related_name="selidbe")
+    datum = models.DateField(verbose_name="Datum selidbe")
+    odrediste = models.CharField(max_length=255, verbose_name="Odredište")
     odrediste_lat = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     odrediste_lon = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    broj_kosnica = models.PositiveSmallIntegerField(verbose_name='Broj košnica')
-    razlog = models.CharField(max_length=200, blank=True, verbose_name='Razlog (paša, tretman...)')
-    prijavljeno_veterinaru = models.BooleanField(default=False, verbose_name='Prijavljeno veterinaru')
-    vracanje_datum = models.DateField(null=True, blank=True, verbose_name='Datum povratka')
+    broj_kosnica = models.PositiveSmallIntegerField(verbose_name="Broj košnica")
+    razlog = models.CharField(max_length=200, blank=True, verbose_name="Razlog (paša, tretman...)")
+    prijavljeno_veterinaru = models.BooleanField(default=False, verbose_name="Prijavljeno veterinaru")
+    vracanje_datum = models.DateField(null=True, blank=True, verbose_name="Datum povratka")
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_selidba_log'
-        ordering = ['-datum']
-        verbose_name = 'Selidba pčelinjaka'
+        db_table = "udruge_selidba_log"
+        ordering = ["-datum"]
+        verbose_name = "Selidba pčelinjaka"
 
     def __str__(self):
-        return '%s → %s (%s)' % (self.pcelinjak, self.odrediste[:30], self.datum)
+        return "%s → %s (%s)" % (self.pcelinjak, self.odrediste[:30], self.datum)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1729,136 +1893,173 @@ class SelidbaLog(models.Model):
 # EU Uredba 2019/787 — jaka alkoholna pića
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class DestilacijaKotao(models.Model):
     """Registar destilacijskog kotla — zakonska prijava carinskom uredu."""
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='kotlovi')
-    vlasnik = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='kotlovi',
-        verbose_name='Vlasnik (pčelar/OPG)')
-    registarski_broj = models.CharField(max_length=50, verbose_name='Registarski broj (Carina)')
-    volumen_litara = models.PositiveIntegerField(verbose_name='Volumen kotla (L)')
-    tip = models.CharField(max_length=50, blank=True, verbose_name='Tip kotla', help_text='Bakreni, inox...')
-    lokacija = models.CharField(max_length=255, verbose_name='Lokacija kotla')
-    carinski_ured = models.CharField(max_length=100, blank=True, verbose_name='Nadležni carinski ured')
-    registriran_od = models.DateField(null=True, blank=True, verbose_name='Registriran od')
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="kotlovi")
+    vlasnik = models.ForeignKey(
+        Clan,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="kotlovi",
+        verbose_name="Vlasnik (pčelar/OPG)",
+    )
+    registarski_broj = models.CharField(max_length=50, verbose_name="Registarski broj (Carina)")
+    volumen_litara = models.PositiveIntegerField(verbose_name="Volumen kotla (L)")
+    tip = models.CharField(max_length=50, blank=True, verbose_name="Tip kotla", help_text="Bakreni, inox...")
+    lokacija = models.CharField(max_length=255, verbose_name="Lokacija kotla")
+    carinski_ured = models.CharField(max_length=100, blank=True, verbose_name="Nadležni carinski ured")
+    registriran_od = models.DateField(null=True, blank=True, verbose_name="Registriran od")
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_destilacija_kotao'
-        ordering = ['registarski_broj']
-        verbose_name = 'Destilacijski kotao'
+        db_table = "udruge_destilacija_kotao"
+        ordering = ["registarski_broj"]
+        verbose_name = "Destilacijski kotao"
 
     def __str__(self):
-        return 'Kotao %s (%s L) — %s' % (self.registarski_broj, self.volumen_litara, self.lokacija[:30])
+        return "Kotao %s (%s L) — %s" % (self.registarski_broj, self.volumen_litara, self.lokacija[:30])
 
 
 class DestilacijaLog(models.Model):
     """Dnevnik destilacije — svako pečenje rakije."""
+
     SIROVINA_CHOICES = [
-        ('sljiva', 'Šljiva'),
-        ('grozdje', 'Grožđe (lozovača)'),
-        ('kruska', 'Kruška (viljamovka)'),
-        ('jabuka', 'Jabuka'),
-        ('tresnja', 'Trešnja'),
-        ('visnja', 'Višnja'),
-        ('marelica', 'Marelica'),
-        ('dunja', 'Dunja'),
-        ('med', 'Med (medica/medovina)'),
-        ('smokva', 'Smokva'),
-        ('orah', 'Orah (orahovac)'),
-        ('ostalo', 'Ostalo'),
+        ("sljiva", "Šljiva"),
+        ("grozdje", "Grožđe (lozovača)"),
+        ("kruska", "Kruška (viljamovka)"),
+        ("jabuka", "Jabuka"),
+        ("tresnja", "Trešnja"),
+        ("visnja", "Višnja"),
+        ("marelica", "Marelica"),
+        ("dunja", "Dunja"),
+        ("med", "Med (medica/medovina)"),
+        ("smokva", "Smokva"),
+        ("orah", "Orah (orahovac)"),
+        ("ostalo", "Ostalo"),
     ]
 
-    kotao = models.ForeignKey(DestilacijaKotao, on_delete=models.CASCADE, related_name='destilacije')
-    datum = models.DateField(verbose_name='Datum pečenja')
+    kotao = models.ForeignKey(DestilacijaKotao, on_delete=models.CASCADE, related_name="destilacije")
+    datum = models.DateField(verbose_name="Datum pečenja")
     sirovina = models.CharField(max_length=20, choices=SIROVINA_CHOICES)
-    kg_sirovina = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Količina sirovina (kg)')
-    litara_komine = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name='Litara komine')
+    kg_sirovina = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Količina sirovina (kg)")
+    litara_komine = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Litara komine"
+    )
     # Rezultat
-    litara_destilata = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Litara destilata (ukupno)')
-    alkohol_posto = models.DecimalField(max_digits=4, decimal_places=1, verbose_name='Alkohol (%)')
-    litara_cistog_alkohola = models.DecimalField(max_digits=8, decimal_places=2, default=0,
-        verbose_name='Litara čistog alkohola', help_text='Auto: litara × %alc / 100')
+    litara_destilata = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Litara destilata (ukupno)")
+    alkohol_posto = models.DecimalField(max_digits=4, decimal_places=1, verbose_name="Alkohol (%)")
+    litara_cistog_alkohola = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        verbose_name="Litara čistog alkohola",
+        help_text="Auto: litara × %alc / 100",
+    )
     # Frakcije
-    prvijenac_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Prvijenac (L)')
-    srce_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Srce (L)')
-    patoka_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name='Patoka (L)')
-    temperatura_c = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, verbose_name='Max temp (°C)')
+    prvijenac_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Prvijenac (L)")
+    srce_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Srce (L)")
+    patoka_l = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Patoka (L)")
+    temperatura_c = models.DecimalField(
+        max_digits=4, decimal_places=1, null=True, blank=True, verbose_name="Max temp (°C)"
+    )
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_destilacija_log'
-        ordering = ['-datum']
-        verbose_name = 'Destilacija (pečenje)'
+        db_table = "udruge_destilacija_log"
+        ordering = ["-datum"]
+        verbose_name = "Destilacija (pečenje)"
 
     def save(self, *args, **kwargs):
         self.litara_cistog_alkohola = self.litara_destilata * self.alkohol_posto / 100
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return '%s — %s %s L (%s%%)' % (self.datum, self.get_sirovina_display(), self.litara_destilata, self.alkohol_posto)
+        return "%s — %s %s L (%s%%)" % (
+            self.datum,
+            self.get_sirovina_display(),
+            self.litara_destilata,
+            self.alkohol_posto,
+        )
 
 
 class RakijaProizvodnja(models.Model):
     """Gotov proizvod — rakija spremna za konzumaciju/prodaju."""
-    destilacija = models.ForeignKey(DestilacijaLog, on_delete=models.SET_NULL, null=True, blank=True, related_name='proizvodi')
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='rakije')
-    naziv = models.CharField(max_length=100, verbose_name='Naziv proizvoda')
-    tip_rakije = models.CharField(max_length=50, verbose_name='Tip rakije',
-        help_text='Šljivovica, Lozovača, Viljamovka, Travarica, Medica...')
-    litara = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Litara')
-    alkohol_posto = models.DecimalField(max_digits=4, decimal_places=1, verbose_name='Alkohol (%)')
-    serija = models.CharField(max_length=50, blank=True, verbose_name='Serija / Lot')
-    godina = models.PositiveSmallIntegerField(verbose_name='Godina proizvodnje')
+
+    destilacija = models.ForeignKey(
+        DestilacijaLog, on_delete=models.SET_NULL, null=True, blank=True, related_name="proizvodi"
+    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="rakije")
+    naziv = models.CharField(max_length=100, verbose_name="Naziv proizvoda")
+    tip_rakije = models.CharField(
+        max_length=50, verbose_name="Tip rakije", help_text="Šljivovica, Lozovača, Viljamovka, Travarica, Medica..."
+    )
+    litara = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Litara")
+    alkohol_posto = models.DecimalField(max_digits=4, decimal_places=1, verbose_name="Alkohol (%)")
+    serija = models.CharField(max_length=50, blank=True, verbose_name="Serija / Lot")
+    godina = models.PositiveSmallIntegerField(verbose_name="Godina proizvodnje")
     za_prodaju = models.BooleanField(default=False)
-    cijena_eur_l = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name='Cijena (EUR/L)')
+    cijena_eur_l = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Cijena (EUR/L)"
+    )
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_rakija_proizvodnja'
-        ordering = ['-godina', 'naziv']
-        verbose_name = 'Rakija (proizvod)'
+        db_table = "udruge_rakija_proizvodnja"
+        ordering = ["-godina", "naziv"]
+        verbose_name = "Rakija (proizvod)"
 
     def __str__(self):
-        return '%s %d — %s L (%s%%)' % (self.naziv, self.godina, self.litara, self.alkohol_posto)
+        return "%s %d — %s L (%s%%)" % (self.naziv, self.godina, self.litara, self.alkohol_posto)
 
 
 class TrosarinaPrijava(models.Model):
     """Godišnja trošarinska prijava — mali proizvođač do 50L čistog alkohola."""
+
     STATUS_CHOICES = [
-        ('draft', 'Nacrt'),
-        ('submitted', 'Prijavljeno'),
-        ('paid', 'Plaćeno'),
+        ("draft", "Nacrt"),
+        ("submitted", "Prijavljeno"),
+        ("paid", "Plaćeno"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='trosarine')
-    godina = models.PositiveSmallIntegerField(verbose_name='Godina')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="trosarine")
+    godina = models.PositiveSmallIntegerField(verbose_name="Godina")
     ukupno_litara_destilata = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     prosjecni_alkohol_posto = models.DecimalField(max_digits=4, decimal_places=1, default=40)
-    ukupno_litara_cistog = models.DecimalField(max_digits=10, decimal_places=2, default=0,
-        verbose_name='Ukupno litara čistog alkohola')
+    ukupno_litara_cistog = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Ukupno litara čistog alkohola"
+    )
     # Trošarina
-    mali_proizvodac = models.BooleanField(default=True, verbose_name='Mali proizvođač (≤50L č.a.)')
-    stopa_eur_hl = models.DecimalField(max_digits=10, decimal_places=2, default=0,
-        verbose_name='Stopa (EUR/hL čistog alkohola)',
-        help_text='Puna stopa 2024: 1.047,27 EUR/hL. Mali proiz.: 0 ili snižena.')
-    iznos_trosarine = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Iznos trošarine (EUR)')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    mali_proizvodac = models.BooleanField(default=True, verbose_name="Mali proizvođač (≤50L č.a.)")
+    stopa_eur_hl = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Stopa (EUR/hL čistog alkohola)",
+        help_text="Puna stopa 2024: 1.047,27 EUR/hL. Mali proiz.: 0 ili snižena.",
+    )
+    iznos_trosarine = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Iznos trošarine (EUR)"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     datum_prijave = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_trosarina_prijava'
-        unique_together = [('company', 'godina')]
-        ordering = ['-godina']
-        verbose_name = 'Trošarinska prijava'
+        db_table = "udruge_trosarina_prijava"
+        unique_together = [("company", "godina")]
+        ordering = ["-godina"]
+        verbose_name = "Trošarinska prijava"
 
     def save(self, *args, **kwargs):
         self.mali_proizvodac = self.ukupno_litara_cistog <= 50
@@ -1866,7 +2067,7 @@ class TrosarinaPrijava(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return 'Trošarina %d — %s L č.a. (%s EUR)' % (self.godina, self.ukupno_litara_cistog, self.iznos_trosarine)
+        return "Trošarina %d — %s L č.a. (%s EUR)" % (self.godina, self.ukupno_litara_cistog, self.iznos_trosarine)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1874,61 +2075,75 @@ class TrosarinaPrijava(models.Model):
 # Zakon o poljoprivredi (NN 118/18), Pravilnik o integriranoj (NN 137/12)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class Vocnjak(models.Model):
     """Voćnjak — ARKOD čestica sa sadnim materijalom."""
+
     VRSTA_CHOICES = [
-        ('jabuka', 'Jabuka'),
-        ('kruska', 'Kruška'),
-        ('sljiva', 'Šljiva'),
-        ('tresnja', 'Trešnja'),
-        ('visnja', 'Višnja'),
-        ('breskva', 'Breskva'),
-        ('marelica', 'Marelica'),
-        ('orah', 'Orah'),
-        ('lijeska', 'Lijeska'),
-        ('smokva', 'Smokva'),
-        ('maslina', 'Maslina'),
-        ('vinova_loza', 'Vinova loza'),
-        ('borovnica', 'Borovnica'),
-        ('malina', 'Malina'),
-        ('jagoda', 'Jagoda'),
-        ('ostalo', 'Ostalo'),
+        ("jabuka", "Jabuka"),
+        ("kruska", "Kruška"),
+        ("sljiva", "Šljiva"),
+        ("tresnja", "Trešnja"),
+        ("visnja", "Višnja"),
+        ("breskva", "Breskva"),
+        ("marelica", "Marelica"),
+        ("orah", "Orah"),
+        ("lijeska", "Lijeska"),
+        ("smokva", "Smokva"),
+        ("maslina", "Maslina"),
+        ("vinova_loza", "Vinova loza"),
+        ("borovnica", "Borovnica"),
+        ("malina", "Malina"),
+        ("jagoda", "Jagoda"),
+        ("ostalo", "Ostalo"),
     ]
     SUSTAV_CHOICES = [
-        ('spalir', 'Špalir'),
-        ('piramida', 'Piramida'),
-        ('vretenast', 'Vretenast'),
-        ('slobodan', 'Slobodan uzgoj'),
-        ('pergola', 'Pergola'),
-        ('ostalo', 'Ostalo'),
+        ("spalir", "Špalir"),
+        ("piramida", "Piramida"),
+        ("vretenast", "Vretenast"),
+        ("slobodan", "Slobodan uzgoj"),
+        ("pergola", "Pergola"),
+        ("ostalo", "Ostalo"),
     ]
 
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='vocnjaci')
-    vlasnik = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name='vocnjaci')
-    field = models.ForeignKey('livestock.Field', on_delete=models.SET_NULL, null=True, blank=True, related_name='vocnjaci',
-        verbose_name='ARKOD parcela')
-    naziv = models.CharField(max_length=200, verbose_name='Naziv voćnjaka')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="vocnjaci")
+    vlasnik = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="vocnjaci")
+    field = models.ForeignKey(
+        "livestock.Field",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="vocnjaci",
+        verbose_name="ARKOD parcela",
+    )
+    naziv = models.CharField(max_length=200, verbose_name="Naziv voćnjaka")
     vrsta = models.CharField(max_length=20, choices=VRSTA_CHOICES)
-    sorta = models.CharField(max_length=100, blank=True, verbose_name='Sorta')
-    podloga = models.CharField(max_length=100, blank=True, verbose_name='Podloga (rootstock)')
-    sustav_uzgoja = models.CharField(max_length=20, choices=SUSTAV_CHOICES, default='spalir')
-    broj_stabala = models.PositiveIntegerField(default=0, verbose_name='Broj stabala/sadnica')
-    razmak_red_m = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, verbose_name='Razmak red (m)')
-    razmak_stablo_m = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, verbose_name='Razmak stablo (m)')
+    sorta = models.CharField(max_length=100, blank=True, verbose_name="Sorta")
+    podloga = models.CharField(max_length=100, blank=True, verbose_name="Podloga (rootstock)")
+    sustav_uzgoja = models.CharField(max_length=20, choices=SUSTAV_CHOICES, default="spalir")
+    broj_stabala = models.PositiveIntegerField(default=0, verbose_name="Broj stabala/sadnica")
+    razmak_red_m = models.DecimalField(
+        max_digits=4, decimal_places=1, null=True, blank=True, verbose_name="Razmak red (m)"
+    )
+    razmak_stablo_m = models.DecimalField(
+        max_digits=4, decimal_places=1, null=True, blank=True, verbose_name="Razmak stablo (m)"
+    )
     godina_sadnje = models.PositiveSmallIntegerField(null=True, blank=True)
-    povrsina_ha = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Površina (ha)')
-    is_organic = models.BooleanField(default=False, verbose_name='Ekološki uzgoj')
+    povrsina_ha = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Površina (ha)"
+    )
+    is_organic = models.BooleanField(default=False, verbose_name="Ekološki uzgoj")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_vocnjak'
-        ordering = ['naziv']
-        verbose_name = 'Voćnjak'
+        db_table = "udruge_vocnjak"
+        ordering = ["naziv"]
+        verbose_name = "Voćnjak"
 
     def __str__(self):
-        return '%s — %s %s (%s st.)' % (self.naziv, self.get_vrsta_display(), self.sorta, self.broj_stabala)
+        return "%s — %s %s (%s st.)" % (self.naziv, self.get_vrsta_display(), self.sorta, self.broj_stabala)
 
     @property
     def starost_godina(self):
@@ -1939,66 +2154,75 @@ class Vocnjak(models.Model):
 
 class BerbaLog(models.Model):
     """Evidencija berbe voća."""
-    vocnjak = models.ForeignKey(Vocnjak, on_delete=models.CASCADE, related_name='berbe')
-    datum = models.DateField(verbose_name='Datum berbe')
-    kolicina_kg = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Količina (kg)')
-    kvaliteta = models.CharField(max_length=20, choices=[
-        ('I', 'I. klasa'), ('II', 'II. klasa'), ('III', 'III. klasa / prerađevina'),
-        ('ekstra', 'Ekstra klasa'),
-    ], default='I')
+
+    vocnjak = models.ForeignKey(Vocnjak, on_delete=models.CASCADE, related_name="berbe")
+    datum = models.DateField(verbose_name="Datum berbe")
+    kolicina_kg = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Količina (kg)")
+    kvaliteta = models.CharField(
+        max_length=20,
+        choices=[
+            ("I", "I. klasa"),
+            ("II", "II. klasa"),
+            ("III", "III. klasa / prerađevina"),
+            ("ekstra", "Ekstra klasa"),
+        ],
+        default="I",
+    )
     broj_radnika = models.PositiveSmallIntegerField(default=1)
-    sati_berbe = models.DecimalField(max_digits=4, decimal_places=1, default=0, verbose_name='Sati berbe')
+    sati_berbe = models.DecimalField(max_digits=4, decimal_places=1, default=0, verbose_name="Sati berbe")
     za_prodaju = models.BooleanField(default=True)
-    za_preradu = models.BooleanField(default=False, verbose_name='Za preradu (rakija, sok, džem)')
+    za_preradu = models.BooleanField(default=False, verbose_name="Za preradu (rakija, sok, džem)")
     cijena_eur_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_berba_log'
-        ordering = ['-datum']
-        verbose_name = 'Berba'
+        db_table = "udruge_berba_log"
+        ordering = ["-datum"]
+        verbose_name = "Berba"
 
     def __str__(self):
-        return '%s — %s kg (%s)' % (self.vocnjak, self.kolicina_kg, self.datum)
+        return "%s — %s kg (%s)" % (self.vocnjak, self.kolicina_kg, self.datum)
 
 
 class TretmanVocnjaka(models.Model):
     """Tretman voćnjaka — prskanje, đubrenje (zakonska evidencija za integrirane)."""
+
     TIP_CHOICES = [
-        ('fungicid', 'Fungicid'),
-        ('insekticid', 'Insekticid'),
-        ('herbicid', 'Herbicid'),
-        ('gnojidba', 'Gnojidba'),
-        ('rezidba', 'Rezidba'),
-        ('navodnjavanje', 'Navodnjavanje'),
-        ('ostalo', 'Ostalo'),
+        ("fungicid", "Fungicid"),
+        ("insekticid", "Insekticid"),
+        ("herbicid", "Herbicid"),
+        ("gnojidba", "Gnojidba"),
+        ("rezidba", "Rezidba"),
+        ("navodnjavanje", "Navodnjavanje"),
+        ("ostalo", "Ostalo"),
     ]
 
-    vocnjak = models.ForeignKey(Vocnjak, on_delete=models.CASCADE, related_name='tretmani')
-    datum = models.DateField(verbose_name='Datum')
+    vocnjak = models.ForeignKey(Vocnjak, on_delete=models.CASCADE, related_name="tretmani")
+    datum = models.DateField(verbose_name="Datum")
     tip = models.CharField(max_length=20, choices=TIP_CHOICES)
-    sredstvo = models.CharField(max_length=200, verbose_name='Sredstvo / Preparat')
-    doza = models.CharField(max_length=100, blank=True, verbose_name='Doza (L/ha ili kg/ha)')
-    kolicina_ukupno = models.CharField(max_length=100, blank=True, verbose_name='Ukupna količina')
-    karencija_dana = models.PositiveSmallIntegerField(default=0, verbose_name='Karencija (dana)')
-    karencija_do = models.DateField(null=True, blank=True, verbose_name='Karencija do')
-    tretirao = models.CharField(max_length=100, blank=True, verbose_name='Tretirao (osoba)')
-    vremenske_prilike = models.CharField(max_length=100, blank=True, verbose_name='Vremenske prilike')
+    sredstvo = models.CharField(max_length=200, verbose_name="Sredstvo / Preparat")
+    doza = models.CharField(max_length=100, blank=True, verbose_name="Doza (L/ha ili kg/ha)")
+    kolicina_ukupno = models.CharField(max_length=100, blank=True, verbose_name="Ukupna količina")
+    karencija_dana = models.PositiveSmallIntegerField(default=0, verbose_name="Karencija (dana)")
+    karencija_do = models.DateField(null=True, blank=True, verbose_name="Karencija do")
+    tretirao = models.CharField(max_length=100, blank=True, verbose_name="Tretirao (osoba)")
+    vremenske_prilike = models.CharField(max_length=100, blank=True, verbose_name="Vremenske prilike")
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'udruge_tretman_vocnjaka'
-        ordering = ['-datum']
-        verbose_name = 'Tretman voćnjaka'
+        db_table = "udruge_tretman_vocnjaka"
+        ordering = ["-datum"]
+        verbose_name = "Tretman voćnjaka"
 
     def __str__(self):
-        return '%s — %s: %s (%s)' % (self.vocnjak, self.get_tip_display(), self.sredstvo, self.datum)
+        return "%s — %s: %s (%s)" % (self.vocnjak, self.get_tip_display(), self.sredstvo, self.datum)
 
     def save(self, *args, **kwargs):
         if self.karencija_dana and self.datum and not self.karencija_do:
             from datetime import timedelta
+
             self.karencija_do = self.datum + timedelta(days=self.karencija_dana)
         super().save(*args, **kwargs)
 
@@ -2007,33 +2231,34 @@ class TretmanVocnjaka(models.Model):
 # BRANITELJI — Zakon NN 121/17, 98/19, 84/21, 156/23
 # ═══════════════════════════════════════════════════════════════════
 
+
 class StatusBranitelja(models.Model):
     VRSTA_STATUSA = [
-        ('branitelj',      'Hrvatski branitelj iz DR'),
-        ('dragovoljac',    'Dragovoljac iz DR'),
-        ('hrvi_1',         'HRVI — I. skupina (80-100%)'),
-        ('hrvi_2',         'HRVI — II. skupina (60-79%)'),
-        ('hrvi_3',         'HRVI — III. skupina (40-59%)'),
-        ('hrvi_4',         'HRVI — IV. skupina (20-39%)'),
-        ('civilni_invalid','Civilni invalid rata'),
-        ('smrtno_stradali','Smrtno stradali (nasljednici)'),
-        ('nestali',        'Nestali (obitelj)'),
+        ("branitelj", "Hrvatski branitelj iz DR"),
+        ("dragovoljac", "Dragovoljac iz DR"),
+        ("hrvi_1", "HRVI — I. skupina (80-100%)"),
+        ("hrvi_2", "HRVI — II. skupina (60-79%)"),
+        ("hrvi_3", "HRVI — III. skupina (40-59%)"),
+        ("hrvi_4", "HRVI — IV. skupina (20-39%)"),
+        ("civilni_invalid", "Civilni invalid rata"),
+        ("smrtno_stradali", "Smrtno stradali (nasljednici)"),
+        ("nestali", "Nestali (obitelj)"),
     ]
     POSTROJBA_CHOICES = [
-        ('HV',   'Hrvatska vojska'),
-        ('MUP',  'MUP'),
-        ('ZNG',  'Zbor narodne garde'),
-        ('HOS',  'Hrvatske obrambene snage'),
-        ('NZ',   'Narodna zaštita'),
-        ('HVO',  'HVO (BiH)'),
-        ('ostalo','Ostalo'),
+        ("HV", "Hrvatska vojska"),
+        ("MUP", "MUP"),
+        ("ZNG", "Zbor narodne garde"),
+        ("HOS", "Hrvatske obrambene snage"),
+        ("NZ", "Narodna zaštita"),
+        ("HVO", "HVO (BiH)"),
+        ("ostalo", "Ostalo"),
     ]
-    clan = models.OneToOneField('Clan', on_delete=models.CASCADE, related_name='status_branitelja')
-    vrsta_statusa = models.CharField(max_length=20, choices=VRSTA_STATUSA, default='branitelj')
+    clan = models.OneToOneField("Clan", on_delete=models.CASCADE, related_name="status_branitelja")
+    vrsta_statusa = models.CharField(max_length=20, choices=VRSTA_STATUSA, default="branitelj")
     postrojba = models.CharField(max_length=10, choices=POSTROJBA_CHOICES, blank=True)
     naziv_postrojbe = models.CharField(max_length=200, blank=True)
-    od_datuma = models.DateField(null=True, blank=True, verbose_name='Sudjelovanje od')
-    do_datuma = models.DateField(null=True, blank=True, verbose_name='Sudjelovanje do')
+    od_datuma = models.DateField(null=True, blank=True, verbose_name="Sudjelovanje od")
+    do_datuma = models.DateField(null=True, blank=True, verbose_name="Sudjelovanje do")
     dana_sudjelovanja = models.PositiveIntegerField(default=0)
     borbeni_sektor = models.BooleanField(default=False)
     broj_potvrde_ministarstva = models.CharField(max_length=50, blank=True)
@@ -2049,27 +2274,27 @@ class StatusBranitelja(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'udruge_status_branitelja'
-        verbose_name = 'Status branitelja'
-        verbose_name_plural = 'Statusi branitelja'
+        db_table = "udruge_status_branitelja"
+        verbose_name = "Status branitelja"
+        verbose_name_plural = "Statusi branitelja"
 
     def __str__(self):
-        return '%s — %s' % (self.clan, self.get_vrsta_statusa_display())
+        return "%s — %s" % (self.clan, self.get_vrsta_statusa_display())
 
     @property
     def je_hrvi(self):
-        return self.vrsta_statusa.startswith('hrvi_')
+        return self.vrsta_statusa.startswith("hrvi_")
 
 
 class OdlikovanjeBranitelja(models.Model):
     ODLIKOVANJE_VRSTA = [
-        ('red_danice_hr', 'Red Danice Hrvatske'),
-        ('domovinska_rat', 'Domovinska medalja — ratna'),
-        ('domovinska_mir', 'Domovinska medalja — mirovna'),
-        ('medalja_slobode', 'Medalja slobode'),
-        ('ostalo', 'Ostalo odlikovanje'),
+        ("red_danice_hr", "Red Danice Hrvatske"),
+        ("domovinska_rat", "Domovinska medalja — ratna"),
+        ("domovinska_mir", "Domovinska medalja — mirovna"),
+        ("medalja_slobode", "Medalja slobode"),
+        ("ostalo", "Ostalo odlikovanje"),
     ]
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='odlikovanja_bran')
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="odlikovanja_bran")
     vrsta = models.CharField(max_length=30, choices=ODLIKOVANJE_VRSTA)
     naziv = models.CharField(max_length=200)
     datum_dodjeljivanja = models.DateField(null=True, blank=True)
@@ -2077,25 +2302,30 @@ class OdlikovanjeBranitelja(models.Model):
     napomena = models.CharField(max_length=300, blank=True)
 
     class Meta:
-        db_table = 'udruge_odlikovanje_branitelja'
-        verbose_name = 'Odlikovanje'
-        ordering = ['-datum_dodjeljivanja']
+        db_table = "udruge_odlikovanje_branitelja"
+        verbose_name = "Odlikovanje"
+        ordering = ["-datum_dodjeljivanja"]
 
 
 # ═══════════════════════════════════════════════════════════════════
 # LOV — Zakon o lovstvu (NN), Pravilnik NN 48/22, SLE od 06/2025
 # ═══════════════════════════════════════════════════════════════════
 
+
 class Loviste(models.Model):
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='lovista')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="lovista")
     naziv = models.CharField(max_length=200)
     broj_lovista = models.CharField(max_length=30, blank=True)
     povrsina_ha = models.DecimalField(max_digits=10, decimal_places=2)
-    vrsta = models.CharField(max_length=20, choices=[
-        ('zajednicko', 'Zajedničko lovište'),
-        ('privatno', 'Privatno lovište'),
-        ('uzgajaliste', 'Uzgajalište divljači'),
-    ], default='zajednicko')
+    vrsta = models.CharField(
+        max_length=20,
+        choices=[
+            ("zajednicko", "Zajedničko lovište"),
+            ("privatno", "Privatno lovište"),
+            ("uzgajaliste", "Uzgajalište divljači"),
+        ],
+        default="zajednicko",
+    )
     lovoovlastenik = models.CharField(max_length=200, blank=True)
     zakup_od = models.DateField(null=True, blank=True)
     zakup_do = models.DateField(null=True, blank=True)
@@ -2105,24 +2335,24 @@ class Loviste(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_loviste'
-        verbose_name = 'Lovište'
-        ordering = ['naziv']
+        db_table = "udruge_loviste"
+        verbose_name = "Lovište"
+        ordering = ["naziv"]
 
     def __str__(self):
-        return '%s (%s ha)' % (self.naziv, self.povrsina_ha)
+        return "%s (%s ha)" % (self.naziv, self.povrsina_ha)
 
 
 class LovackaIskaznica(models.Model):
     KATEGORIJA_CHOICES = [
-        ('hr_5god', 'HR državljanin (5 godina)'),
-        ('inozemac', 'Strani državljanin (sezonska)'),
-        ('pocasna', 'Počasna iskaznica'),
+        ("hr_5god", "HR državljanin (5 godina)"),
+        ("inozemac", "Strani državljanin (sezonska)"),
+        ("pocasna", "Počasna iskaznica"),
     ]
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='lovacke_iskaznice')
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='lovacke_iskaznice')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="lovacke_iskaznice")
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="lovacke_iskaznice")
     broj_iskaznice = models.CharField(max_length=30)
-    kategorija = models.CharField(max_length=15, choices=KATEGORIJA_CHOICES, default='hr_5god')
+    kategorija = models.CharField(max_length=15, choices=KATEGORIJA_CHOICES, default="hr_5god")
     datum_izdavanja = models.DateField()
     vrijedi_do = models.DateField()
     markica_godina = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -2134,30 +2364,32 @@ class LovackaIskaznica(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_lovacka_iskaznica'
-        verbose_name = 'Lovačka iskaznica'
-        ordering = ['-datum_izdavanja']
+        db_table = "udruge_lovacka_iskaznica"
+        verbose_name = "Lovačka iskaznica"
+        ordering = ["-datum_izdavanja"]
 
     def __str__(self):
-        return 'Iskaznica %s — %s' % (self.broj_iskaznice, self.clan)
+        return "Iskaznica %s — %s" % (self.broj_iskaznice, self.clan)
 
     @property
     def je_aktivna(self):
         from django.utils import timezone
+
         return self.vrijedi_do >= timezone.now().date()
 
     @property
     def treba_markicu(self):
         from django.utils import timezone
+
         today = timezone.now().date()
         lovna_god = today.year if today.month >= 4 else today.year - 1
         return self.markica_godina != lovna_god
 
 
 class DopustenjeLova(models.Model):
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='dopustenja_lova')
-    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name='dopustenja')
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='dopustenja_lova')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="dopustenja_lova")
+    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name="dopustenja")
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="dopustenja_lova")
     broj_dopustenja = models.CharField(max_length=20)
     datum_lova = models.DateField()
     vrsta_divljaci = models.CharField(max_length=100)
@@ -2168,103 +2400,112 @@ class DopustenjeLova(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_dopustenje_lova'
-        verbose_name = 'Dopuštenje za lov'
-        ordering = ['-datum_lova']
+        db_table = "udruge_dopustenje_lova"
+        verbose_name = "Dopuštenje za lov"
+        ordering = ["-datum_lova"]
 
     def __str__(self):
-        return 'Dopuštenje %s — %s' % (self.broj_dopustenja, self.vrsta_divljaci)
+        return "Dopuštenje %s — %s" % (self.broj_dopustenja, self.vrsta_divljaci)
 
 
 class ZapisnikLova(models.Model):
     NACIN_LOVA = [
-        ('pojedinacni', 'Pojedinačni lov'),
-        ('skupni', 'Skupni lov (hajka)'),
-        ('tihacenje', 'Tihačenje'),
-        ('iz_zasjede', 'Iz zasjede'),
+        ("pojedinacni", "Pojedinačni lov"),
+        ("skupni", "Skupni lov (hajka)"),
+        ("tihacenje", "Tihačenje"),
+        ("iz_zasjede", "Iz zasjede"),
     ]
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zapisnici_lova')
-    dopustenje = models.ForeignKey(DopustenjeLova, on_delete=models.SET_NULL, null=True, blank=True, related_name='zapisnici')
-    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name='zapisnici')
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='zapisnici_lova')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="zapisnici_lova")
+    dopustenje = models.ForeignKey(
+        DopustenjeLova, on_delete=models.SET_NULL, null=True, blank=True, related_name="zapisnici"
+    )
+    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name="zapisnici")
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="zapisnici_lova")
     datum = models.DateField()
-    nacin_lova = models.CharField(max_length=15, choices=NACIN_LOVA, default='pojedinacni')
+    nacin_lova = models.CharField(max_length=15, choices=NACIN_LOVA, default="pojedinacni")
     vrsta_divljaci = models.CharField(max_length=100)
-    spol = models.CharField(max_length=10, choices=[('muz', 'Mužjak'), ('zen', 'Ženka'), ('mlado', 'Mlado')], blank=True)
+    spol = models.CharField(
+        max_length=10, choices=[("muz", "Mužjak"), ("zen", "Ženka"), ("mlado", "Mlado")], blank=True
+    )
     masa_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     lokalitet = models.CharField(max_length=200, blank=True)
     sle_broj = models.CharField(max_length=50, blank=True)
-    photo = models.ImageField(upload_to='lov/zapisnici/%Y/', blank=True)
+    photo = models.ImageField(upload_to="lov/zapisnici/%Y/", blank=True)
     napomena = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_zapisnik_lova'
-        verbose_name = 'Zapisnik o lovu'
-        ordering = ['-datum']
+        db_table = "udruge_zapisnik_lova"
+        verbose_name = "Zapisnik o lovu"
+        ordering = ["-datum"]
 
     def __str__(self):
-        return '%s — %s (%s)' % (self.vrsta_divljaci, self.clan, self.datum)
+        return "%s — %s (%s)" % (self.vrsta_divljaci, self.clan, self.datum)
 
 
 class Trofej(models.Model):
     VRSTA_TROFEJA = [
-        ('jelen_paroske', 'Jelenje paroške'),
-        ('srna_rogi', 'Srneće rogovlje'),
-        ('vepar_kljove', 'Veprove kljove'),
-        ('medvjed_lubanja', 'Medvjeđa lubanja'),
-        ('muflon_rogi', 'Muflonovo rogovlje'),
-        ('ostalo', 'Ostali trofej'),
+        ("jelen_paroske", "Jelenje paroške"),
+        ("srna_rogi", "Srneće rogovlje"),
+        ("vepar_kljove", "Veprove kljove"),
+        ("medvjed_lubanja", "Medvjeđa lubanja"),
+        ("muflon_rogi", "Muflonovo rogovlje"),
+        ("ostalo", "Ostali trofej"),
     ]
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='trofeji')
-    zapisnik = models.OneToOneField(ZapisnikLova, on_delete=models.CASCADE, related_name='trofej', null=True, blank=True)
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='trofeji')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="trofeji")
+    zapisnik = models.OneToOneField(
+        ZapisnikLova, on_delete=models.CASCADE, related_name="trofej", null=True, blank=True
+    )
+    clan = models.ForeignKey("Clan", on_delete=models.CASCADE, related_name="trofeji")
     vrsta = models.CharField(max_length=20, choices=VRSTA_TROFEJA)
     rok_lista = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
     teza_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    cis_tockova = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='CIC točaka')
-    medalja = models.CharField(max_length=10, blank=True, choices=[('zlato','Zlato'), ('srebro','Srebro'), ('bronca','Bronca')])
+    cis_tockova = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="CIC točaka")
+    medalja = models.CharField(
+        max_length=10, blank=True, choices=[("zlato", "Zlato"), ("srebro", "Srebro"), ("bronca", "Bronca")]
+    )
     datum_vrjednovanja = models.DateField(null=True, blank=True)
-    photo = models.ImageField(upload_to='lov/trofeji/%Y/', blank=True)
+    photo = models.ImageField(upload_to="lov/trofeji/%Y/", blank=True)
     napomena = models.CharField(max_length=200, blank=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_trofej'
-        verbose_name = 'Trofej'
-        ordering = ['-cis_tockova']
+        db_table = "udruge_trofej"
+        verbose_name = "Trofej"
+        ordering = ["-cis_tockova"]
 
     def __str__(self):
-        return '%s — %s' % (self.get_vrsta_display(), self.clan)
+        return "%s — %s" % (self.get_vrsta_display(), self.clan)
 
 
 # ═══════════════════════════════════════════════════════════════════
 # ZADRUGE — Zakon o zadrugama NN 76/14, Pravilnik NN 56/12
 # ═══════════════════════════════════════════════════════════════════
 
+
 class Zadrugar(models.Model):
     ULOGA_CHOICES = [
-        ('osnivac', 'Osnivač'),
-        ('redovni', 'Redovni zadrugar'),
-        ('pridruzeni', 'Pridruženi zadrugar'),
-        ('pocasni', 'Počasni zadrugar'),
+        ("osnivac", "Osnivač"),
+        ("redovni", "Redovni zadrugar"),
+        ("pridruzeni", "Pridruženi zadrugar"),
+        ("pocasni", "Počasni zadrugar"),
     ]
     STATUS_CHOICES = [
-        ('aktivan', 'Aktivan'),
-        ('mirovanje', 'Mirovanje'),
-        ('istupio', 'Istupio'),
-        ('iskljucen', 'Isključen'),
+        ("aktivan", "Aktivan"),
+        ("mirovanje", "Mirovanje"),
+        ("istupio", "Istupio"),
+        ("iskljucen", "Isključen"),
     ]
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zadrugari')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="zadrugari")
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     oib = models.CharField(max_length=11, blank=True)
     adresa = models.TextField(blank=True)
     datum_pristupanja = models.DateField()
     datum_istupanja = models.DateField(null=True, blank=True)
-    uloga = models.CharField(max_length=20, choices=ULOGA_CHOICES, default='redovni')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aktivan')
+    uloga = models.CharField(max_length=20, choices=ULOGA_CHOICES, default="redovni")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="aktivan")
     clanski_ulog_eur = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     udjeli_postotak = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ukupni_prinos_eur = models.DecimalField(max_digits=14, decimal_places=2, default=0)
@@ -2276,36 +2517,40 @@ class Zadrugar(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_zadrugar'
-        verbose_name = 'Zadrugar'
-        ordering = ['last_name', 'first_name']
+        db_table = "udruge_zadrugar"
+        verbose_name = "Zadrugar"
+        ordering = ["last_name", "first_name"]
 
     def __str__(self):
-        return '%s %s' % (self.last_name, self.first_name)
+        return "%s %s" % (self.last_name, self.first_name)
 
 
 class ZadruznRevizija(models.Model):
-    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zadruznrevizije')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="zadruznrevizije")
     godina = models.PositiveSmallIntegerField()
     revizor_ime = models.CharField(max_length=200)
     revizor_firma = models.CharField(max_length=200, blank=True)
     datum_pocetak = models.DateField()
     datum_zavrsetak = models.DateField(null=True, blank=True)
     nalaz = models.TextField(blank=True)
-    ocjena = models.CharField(max_length=20, choices=[
-        ('uredna', 'Poslovanje uredno'),
-        ('napomene', 'S napomenama'),
-        ('neuredna', 'Neuredna'),
-    ], blank=True)
-    izvjestaj_pdf = models.FileField(upload_to='zadruge/revizija/%Y/', blank=True)
+    ocjena = models.CharField(
+        max_length=20,
+        choices=[
+            ("uredna", "Poslovanje uredno"),
+            ("napomene", "S napomenama"),
+            ("neuredna", "Neuredna"),
+        ],
+        blank=True,
+    )
+    izvjestaj_pdf = models.FileField(upload_to="zadruge/revizija/%Y/", blank=True)
     sljedeca_revizija = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_zadruzna_revizija'
-        verbose_name = 'Zadružna revizija'
-        ordering = ['-godina']
+        db_table = "udruge_zadruzna_revizija"
+        verbose_name = "Zadružna revizija"
+        ordering = ["-godina"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2313,269 +2558,288 @@ class ZadruznRevizija(models.Model):
 # Sprint G1: Temeljni modeli s Genetskim pečatom
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class Golubinjak(models.Model):
     """Registrirani golubinjak — EU obveza (Uredba 2016/429)."""
-    company     = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='golubinjaci')
-    naziv       = models.CharField(max_length=200)
-    adresa      = models.CharField(max_length=300, blank=True)
-    gps_lat     = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    gps_lng     = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    eu_reg_broj = models.CharField(max_length=50, blank=True, help_text='HR-XX-YYYY-ZZZZ (EU 2016/429)')
-    kapacitet   = models.PositiveIntegerField(default=0)
-    aktivan     = models.BooleanField(default=True)
-    napomena    = models.TextField(blank=True)
-    fotografija = models.ImageField(upload_to='golubinjaci/', null=True, blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="golubinjaci")
+    naziv = models.CharField(max_length=200)
+    adresa = models.CharField(max_length=300, blank=True)
+    gps_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    gps_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    eu_reg_broj = models.CharField(max_length=50, blank=True, help_text="HR-XX-YYYY-ZZZZ (EU 2016/429)")
+    kapacitet = models.PositiveIntegerField(default=0)
+    aktivan = models.BooleanField(default=True)
+    napomena = models.TextField(blank=True)
+    fotografija = models.ImageField(upload_to="golubinjaci/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Golubinjak'
-        verbose_name_plural = 'Golubinjaci'
+        verbose_name = "Golubinjak"
+        verbose_name_plural = "Golubinjaci"
 
     def __str__(self):
-        return f'{self.naziv} ({self.eu_reg_broj or "bez EU broja"})'
+        return f"{self.naziv} ({self.eu_reg_broj or 'bez EU broja'})"
 
 
 class Golub(models.Model):
     """Individualni golub s rodovnikom i genetskim pečatom (Dron #3)."""
-    SPOL = [('M', 'Mužjak'), ('F', 'Ženka'), ('?', 'Nepoznato')]
-    BOJA = [('plav','Plav'),('bijel','Bijel'),('crn','Crn'),
-            ('crvena_siva','Crvena/siva'),('karirani','Karirani'),('ostalo','Ostalo')]
 
-    company     = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='golubovi')
-    golubinjak  = models.ForeignKey(Golubinjak, on_delete=models.SET_NULL, null=True, blank=True, related_name='golubovi')
-    prsten_broj = models.CharField(max_length=30, unique=True, help_text='LOK/HOG prsten, npr. HR-2024-12345')
-    naziv       = models.CharField(max_length=100, blank=True)
-    spol        = models.CharField(max_length=1, choices=SPOL, default='?')
-    boja        = models.CharField(max_length=20, choices=BOJA, default='ostalo')
+    SPOL = [("M", "Mužjak"), ("F", "Ženka"), ("?", "Nepoznato")]
+    BOJA = [
+        ("plav", "Plav"),
+        ("bijel", "Bijel"),
+        ("crn", "Crn"),
+        ("crvena_siva", "Crvena/siva"),
+        ("karirani", "Karirani"),
+        ("ostalo", "Ostalo"),
+    ]
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="golubovi")
+    golubinjak = models.ForeignKey(
+        Golubinjak, on_delete=models.SET_NULL, null=True, blank=True, related_name="golubovi"
+    )
+    prsten_broj = models.CharField(max_length=30, unique=True, help_text="LOK/HOG prsten, npr. HR-2024-12345")
+    naziv = models.CharField(max_length=100, blank=True)
+    spol = models.CharField(max_length=1, choices=SPOL, default="?")
+    boja = models.CharField(max_length=20, choices=BOJA, default="ostalo")
     datum_izlijeganja = models.DateField(null=True, blank=True)
-    fotografija = models.ImageField(upload_to='golubovi/', null=True, blank=True)
-    aktivan     = models.BooleanField(default=True)
-    napomena    = models.TextField(blank=True)
+    fotografija = models.ImageField(upload_to="golubovi/", null=True, blank=True)
+    aktivan = models.BooleanField(default=True)
+    napomena = models.TextField(blank=True)
 
     # Rodovnik — direktni roditelji (2 razine = 6 predaka vidljivo)
-    otac  = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='djeca_otac')
-    majka = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='djeca_majka')
+    otac = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="djeca_otac")
+    majka = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="djeca_majka")
 
     # Genetski pečat — Data Vaulting (Dron #3)
-    is_sealed     = models.BooleanField(default=False)
-    sealed_at     = models.DateTimeField(null=True, blank=True)
+    is_sealed = models.BooleanField(default=False)
+    sealed_at = models.DateTimeField(null=True, blank=True)
     sealed_reason = models.CharField(max_length=200, blank=True)
-    genetics_hash = models.CharField(max_length=64, blank=True, help_text='SHA-256 za offline verifikaciju')
+    genetics_hash = models.CharField(max_length=64, blank=True, help_text="SHA-256 za offline verifikaciju")
 
     # Cache statistika
-    broj_utrka   = models.PositiveIntegerField(default=0)
+    broj_utrka = models.PositiveIntegerField(default=0)
     broj_pobjeda = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Golub'
-        verbose_name_plural = 'Golubovi'
-        ordering = ['-created_at']
+        verbose_name = "Golub"
+        verbose_name_plural = "Golubovi"
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'{self.prsten_broj} — {self.naziv or "bez naziva"}'
+        return f"{self.prsten_broj} — {self.naziv or 'bez naziva'}"
 
     def izracunaj_genetics_hash(self):
         import hashlib
         import json
+
         data = {
-            'prsten':       self.prsten_broj,
-            'datum':        str(self.datum_izlijeganja),
-            'otac':         self.otac.prsten_broj if self.otac else None,
-            'majka':        self.majka.prsten_broj if self.majka else None,
-            'djed_oc':      self.otac.otac.prsten_broj if self.otac and self.otac.otac else None,
-            'baka_oc':      self.otac.majka.prsten_broj if self.otac and self.otac.majka else None,
-            'djed_maj':     self.majka.otac.prsten_broj if self.majka and self.majka.otac else None,
-            'baka_maj':     self.majka.majka.prsten_broj if self.majka and self.majka.majka else None,
+            "prsten": self.prsten_broj,
+            "datum": str(self.datum_izlijeganja),
+            "otac": self.otac.prsten_broj if self.otac else None,
+            "majka": self.majka.prsten_broj if self.majka else None,
+            "djed_oc": self.otac.otac.prsten_broj if self.otac and self.otac.otac else None,
+            "baka_oc": self.otac.majka.prsten_broj if self.otac and self.otac.majka else None,
+            "djed_maj": self.majka.otac.prsten_broj if self.majka and self.majka.otac else None,
+            "baka_maj": self.majka.majka.prsten_broj if self.majka and self.majka.majka else None,
         }
         return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
 
-    def zapecati(self, razlog='aukcija'):
+    def zapecati(self, razlog="aukcija"):
         from django.utils import timezone
+
         if not self.is_sealed:
             self.genetics_hash = self.izracunaj_genetics_hash()
-            self.is_sealed    = True
-            self.sealed_at    = timezone.now()
+            self.is_sealed = True
+            self.sealed_at = timezone.now()
             self.sealed_reason = razlog
             self.save()
 
 
 class ParGolubova(models.Model):
-    company    = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='parovi_golubova')
-    golubinjak = models.ForeignKey(Golubinjak, on_delete=models.CASCADE, related_name='parovi')
-    muzjak     = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='par_muzjak')
-    zenka      = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='par_zenka')
-    sezona     = models.PositiveIntegerField(help_text='Godina')
-    datum_spajanja   = models.DateField(null=True, blank=True)
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="parovi_golubova")
+    golubinjak = models.ForeignKey(Golubinjak, on_delete=models.CASCADE, related_name="parovi")
+    muzjak = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name="par_muzjak")
+    zenka = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name="par_zenka")
+    sezona = models.PositiveIntegerField(help_text="Godina")
+    datum_spajanja = models.DateField(null=True, blank=True)
     datum_razdvajanja = models.DateField(null=True, blank=True)
-    aktivan    = models.BooleanField(default=True)
-    napomena   = models.TextField(blank=True)
+    aktivan = models.BooleanField(default=True)
+    napomena = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Par golubova'
-        verbose_name_plural = 'Parovi golubova'
+        verbose_name = "Par golubova"
+        verbose_name_plural = "Parovi golubova"
 
     def __str__(self):
-        return f'{self.muzjak} × {self.zenka} ({self.sezona})'
+        return f"{self.muzjak} × {self.zenka} ({self.sezona})"
 
 
 class Leglo(models.Model):
-    par                  = models.ForeignKey(ParGolubova, on_delete=models.CASCADE, related_name='legla')
-    datum_jaja           = models.DateField(null=True, blank=True)
-    datum_izlijeganja_1  = models.DateField(null=True, blank=True)
-    datum_izlijeganja_2  = models.DateField(null=True, blank=True)
-    ptic_1 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name='leglo_ptic1')
-    ptic_2 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name='leglo_ptic2')
-    napomena   = models.TextField(blank=True)
+    par = models.ForeignKey(ParGolubova, on_delete=models.CASCADE, related_name="legla")
+    datum_jaja = models.DateField(null=True, blank=True)
+    datum_izlijeganja_1 = models.DateField(null=True, blank=True)
+    datum_izlijeganja_2 = models.DateField(null=True, blank=True)
+    ptic_1 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name="leglo_ptic1")
+    ptic_2 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name="leglo_ptic2")
+    napomena = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Leglo'
-        verbose_name_plural = 'Legla'
+        verbose_name = "Leglo"
+        verbose_name_plural = "Legla"
 
 
 class ZdravstveniZapisGolub(models.Model):
     """EU PMV/Newcastle obaveza (Uredba 2016/429) — zdravstveni dnevnik."""
+
     VRSTA = [
-        ('pmv',       'Cijepljenje PMV (Paramyxovirus)'),
-        ('newcastle', 'Cijepljenje Newcastle'),
-        ('paratifus', 'Cijepljenje Paratifus'),
-        ('antipar',   'Antiparazitik'),
-        ('antibiot',  'Antibiotik'),
-        ('vet',       'Veterinarski pregled'),
-        ('ostalo',    'Ostalo'),
+        ("pmv", "Cijepljenje PMV (Paramyxovirus)"),
+        ("newcastle", "Cijepljenje Newcastle"),
+        ("paratifus", "Cijepljenje Paratifus"),
+        ("antipar", "Antiparazitik"),
+        ("antibiot", "Antibiotik"),
+        ("vet", "Veterinarski pregled"),
+        ("ostalo", "Ostalo"),
     ]
-    golub            = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='zdravstveni_zapisi')
-    vrsta            = models.CharField(max_length=15, choices=VRSTA)
-    datum            = models.DateField()
-    lijek_preparat   = models.CharField(max_length=200, blank=True)
-    doza             = models.CharField(max_length=100, blank=True)
-    veterinar        = models.CharField(max_length=200, blank=True)
-    sljedeci_tretman = models.DateField(null=True, blank=True, help_text='Okida Celery podsjetnik')
-    napomena         = models.TextField(blank=True)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    golub = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name="zdravstveni_zapisi")
+    vrsta = models.CharField(max_length=15, choices=VRSTA)
+    datum = models.DateField()
+    lijek_preparat = models.CharField(max_length=200, blank=True)
+    doza = models.CharField(max_length=100, blank=True)
+    veterinar = models.CharField(max_length=200, blank=True)
+    sljedeci_tretman = models.DateField(null=True, blank=True, help_text="Okida Celery podsjetnik")
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Zdravstveni zapis goluba'
-        verbose_name_plural = 'Zdravstveni zapisi golubova'
-        ordering = ['-datum']
+        verbose_name = "Zdravstveni zapis goluba"
+        verbose_name_plural = "Zdravstveni zapisi golubova"
+        ordering = ["-datum"]
 
     def __str__(self):
-        return f'{self.golub.prsten_broj} — {self.get_vrsta_display()} ({self.datum})'
+        return f"{self.golub.prsten_broj} — {self.get_vrsta_display()} ({self.datum})"
 
 
 class Utrka(models.Model):
     """Utrka — ERP razina, BEZ timing sustava (Dron #2)."""
-    company        = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='utrke_golub')
-    naziv          = models.CharField(max_length=200)
-    datum          = models.DateField()
-    startna_tocka  = models.CharField(max_length=200)
-    startna_lat    = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    startna_lng    = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    udaljenost_km  = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
-    organizator    = models.CharField(max_length=200, blank=True)
+
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="utrke_golub")
+    naziv = models.CharField(max_length=200)
+    datum = models.DateField()
+    startna_tocka = models.CharField(max_length=200)
+    startna_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    startna_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    udaljenost_km = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    organizator = models.CharField(max_length=200, blank=True)
     broj_natjecatelja = models.PositiveIntegerField(null=True, blank=True)
-    uvjeti         = models.CharField(max_length=200, blank=True, help_text='Vjetar, oblaci...')
-    napomena       = models.TextField(blank=True)
-    created_at     = models.DateTimeField(auto_now_add=True)
+    uvjeti = models.CharField(max_length=200, blank=True, help_text="Vjetar, oblaci...")
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Utrka'
-        verbose_name_plural = 'Utrke'
-        ordering = ['-datum']
+        verbose_name = "Utrka"
+        verbose_name_plural = "Utrke"
+        ordering = ["-datum"]
 
     def __str__(self):
-        return f'{self.naziv} ({self.datum})'
+        return f"{self.naziv} ({self.datum})"
 
 
 class RezultatUtrke(models.Model):
     """Rezultat jednog goluba — uvoz iz ETS/Bricon CSV."""
-    utrka              = models.ForeignKey(Utrka, on_delete=models.CASCADE, related_name='rezultati')
-    golub              = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='rezultati_utrka')
-    placiranje         = models.PositiveIntegerField(null=True, blank=True)
-    placiranje_ukupno  = models.PositiveIntegerField(null=True, blank=True)
-    brzina_mpm         = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                              help_text='Metri po minuti — standard')
-    vrijeme_dolaska    = models.DateTimeField(null=True, blank=True)
-    bodovi             = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    ets_data           = models.JSONField(null=True, blank=True, help_text='Raw CSV/JSON iz ETS clock-a')
-    created_at         = models.DateTimeField(auto_now_add=True)
+
+    utrka = models.ForeignKey(Utrka, on_delete=models.CASCADE, related_name="rezultati")
+    golub = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name="rezultati_utrka")
+    placiranje = models.PositiveIntegerField(null=True, blank=True)
+    placiranje_ukupno = models.PositiveIntegerField(null=True, blank=True)
+    brzina_mpm = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, help_text="Metri po minuti — standard"
+    )
+    vrijeme_dolaska = models.DateTimeField(null=True, blank=True)
+    bodovi = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    ets_data = models.JSONField(null=True, blank=True, help_text="Raw CSV/JSON iz ETS clock-a")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Rezultat utrke'
-        verbose_name_plural = 'Rezultati utrka'
-        unique_together = [('utrka', 'golub')]
+        verbose_name = "Rezultat utrke"
+        verbose_name_plural = "Rezultati utrka"
+        unique_together = [("utrka", "golub")]
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         g = self.golub
-        g.broj_utrka   = RezultatUtrke.objects.filter(golub=g).count()
+        g.broj_utrka = RezultatUtrke.objects.filter(golub=g).count()
         g.broj_pobjeda = RezultatUtrke.objects.filter(golub=g, placiranje=1).count()
-        g.save(update_fields=['broj_utrka', 'broj_pobjeda'])
+        g.save(update_fields=["broj_utrka", "broj_pobjeda"])
 
     def __str__(self):
-        return f'{self.golub} — {self.utrka} (#{self.placiranje})'
+        return f"{self.golub} — {self.utrka} (#{self.placiranje})"
 
 
 # ═══════════════════════════════════════════════════════════════════
 # PERAD — JATA (Flock) — kokoši, prepelice, patke, guske
 # ═══════════════════════════════════════════════════════════════════
 
+
 class Flock(models.Model):
     """Jato peradi — registar za OPG-ove i udruge."""
+
     VRSTA_CHOICES = [
-        ('kokos',     'Kokoš'),
-        ('prepelica', 'Prepelica'),
-        ('patka',     'Patka'),
-        ('guska',     'Guska'),
+        ("kokos", "Kokoš"),
+        ("prepelica", "Prepelica"),
+        ("patka", "Patka"),
+        ("guska", "Guska"),
     ]
     TIP_UZGOJA_CHOICES = [
-        ('slobodni', 'Slobodni uzgoj'),
-        ('kavezni',  'Kavezni uzgoj'),
-        ('organski', 'Organski uzgoj'),
+        ("slobodni", "Slobodni uzgoj"),
+        ("kavezni", "Kavezni uzgoj"),
+        ("organski", "Organski uzgoj"),
     ]
 
-    company       = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='flockovi')
-    naziv         = models.CharField(max_length=200, verbose_name='Naziv jata')
-    vrsta         = models.CharField(max_length=15, choices=VRSTA_CHOICES)
-    pasmina       = models.CharField(max_length=100, blank=True, verbose_name='Pasmina')
-    broj_komada   = models.PositiveIntegerField(verbose_name='Broj komada')
-    datum_nabave  = models.DateField(verbose_name='Datum nabave')
-    tip_uzgoja    = models.CharField(max_length=15, choices=TIP_UZGOJA_CHOICES, default='slobodni')
-    objekt        = models.CharField(max_length=200, blank=True, verbose_name='Objekt / kokošinjac')
-    napomena      = models.TextField(blank=True)
-    aktivan       = models.BooleanField(default=True)
-    created_at    = models.DateTimeField(auto_now_add=True)
-    updated_at    = models.DateTimeField(auto_now=True)
-    objects       = CompanyManager()
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="flockovi")
+    naziv = models.CharField(max_length=200, verbose_name="Naziv jata")
+    vrsta = models.CharField(max_length=15, choices=VRSTA_CHOICES)
+    pasmina = models.CharField(max_length=100, blank=True, verbose_name="Pasmina")
+    broj_komada = models.PositiveIntegerField(verbose_name="Broj komada")
+    datum_nabave = models.DateField(verbose_name="Datum nabave")
+    tip_uzgoja = models.CharField(max_length=15, choices=TIP_UZGOJA_CHOICES, default="slobodni")
+    objekt = models.CharField(max_length=200, blank=True, verbose_name="Objekt / kokošinjac")
+    napomena = models.TextField(blank=True)
+    aktivan = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
-        verbose_name = 'Jato peradi'
-        verbose_name_plural = 'Jata peradi'
-        ordering = ['-datum_nabave']
-        db_table = 'udruge_flock'
+        verbose_name = "Jato peradi"
+        verbose_name_plural = "Jata peradi"
+        ordering = ["-datum_nabave"]
+        db_table = "udruge_flock"
 
     def __str__(self):
-        return f'{self.naziv} ({self.get_vrsta_display()}, {self.broj_komada} kom)'
+        return f"{self.naziv} ({self.get_vrsta_display()}, {self.broj_komada} kom)"
 
     @property
     def aktivnih_komada(self):
-        uginuli = self.mortaliteti.aggregate(s=models.Sum('broj_uginulih'))['s'] or 0
+        uginuli = self.mortaliteti.aggregate(s=models.Sum("broj_uginulih"))["s"] or 0
         return max(0, self.broj_komada - uginuli)
 
     @property
     def has_active_karenca(self):
         """True ako bilo koji zdravstveni zapis ima aktivnu karencu."""
-        return any(z.karenca_aktivna for z in self.zdravstveni_zapisi.all()
-                   if z.karenca_dana)
+        return any(z.karenca_aktivna for z in self.zdravstveni_zapisi.all() if z.karenca_dana)
 
     @property
     def karenca_end_date(self):
         """Najkasniji datum isteka karence, ili None."""
         from datetime import timedelta
+
         latest = None
         for z in self.zdravstveni_zapisi.all():
             if z.karenca_dana and z.karenca_aktivna:
@@ -2587,63 +2851,67 @@ class Flock(models.Model):
 
 class EggRecord(models.Model):
     """Dnevni zapis nesenja jaja."""
-    flock       = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='egg_records')
-    datum       = models.DateField(verbose_name='Datum')
-    broj_jaja   = models.PositiveIntegerField(verbose_name='Broj jaja')
-    broken      = models.PositiveIntegerField(default=0, verbose_name='Polomljena')
-    sold        = models.PositiveIntegerField(default=0, verbose_name='Prodano')
-    za_prodaju  = models.BooleanField(default=False, verbose_name='Za tržnicu')
-    cijena_eur  = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                       verbose_name='Cijena (EUR/kom)')
-    notes       = models.TextField(blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
+
+    flock = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name="egg_records")
+    datum = models.DateField(verbose_name="Datum")
+    broj_jaja = models.PositiveIntegerField(verbose_name="Broj jaja")
+    broken = models.PositiveIntegerField(default=0, verbose_name="Polomljena")
+    sold = models.PositiveIntegerField(default=0, verbose_name="Prodano")
+    za_prodaju = models.BooleanField(default=False, verbose_name="Za tržnicu")
+    cijena_eur = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Cijena (EUR/kom)"
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Zapis nesenja'
-        verbose_name_plural = 'Zapisi nesenja'
-        ordering = ['-datum']
-        unique_together = [('flock', 'datum')]
-        db_table = 'udruge_egg_record'
+        verbose_name = "Zapis nesenja"
+        verbose_name_plural = "Zapisi nesenja"
+        ordering = ["-datum"]
+        unique_together = [("flock", "datum")]
+        db_table = "udruge_egg_record"
 
     def __str__(self):
-        return f'{self.flock.naziv} — {self.datum}: {self.broj_jaja} jaja'
+        return f"{self.flock.naziv} — {self.datum}: {self.broj_jaja} jaja"
 
 
 class FlockHealthRecord(models.Model):
     """Zdravstveni tretman jata."""
+
     VRSTA_TRETMANA = [
-        ('cijepljenje',  'Cijepljenje'),
-        ('antiparazit',  'Antiparazitik'),
-        ('antibiotik',   'Antibiotik'),
-        ('vitamin',      'Vitamini / dodaci'),
-        ('vet_pregled',  'Veterinarski pregled'),
-        ('ostalo',       'Ostalo'),
+        ("cijepljenje", "Cijepljenje"),
+        ("antiparazit", "Antiparazitik"),
+        ("antibiotik", "Antibiotik"),
+        ("vitamin", "Vitamini / dodaci"),
+        ("vet_pregled", "Veterinarski pregled"),
+        ("ostalo", "Ostalo"),
     ]
 
-    flock            = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='zdravstveni_zapisi')
-    vrsta_tretmana   = models.CharField(max_length=15, choices=VRSTA_TRETMANA)
-    datum            = models.DateField()
-    lijek            = models.CharField(max_length=200, blank=True, verbose_name='Lijek / preparat')
-    doza             = models.CharField(max_length=100, blank=True)
-    veterinar        = models.CharField(max_length=200, blank=True)
-    karenca_dana     = models.PositiveIntegerField(null=True, blank=True,
-                                                    verbose_name='Karenca (dana)',
-                                                    help_text='Koliko dana jaja nisu za prodaju')
-    napomena         = models.TextField(blank=True)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    flock = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name="zdravstveni_zapisi")
+    vrsta_tretmana = models.CharField(max_length=15, choices=VRSTA_TRETMANA)
+    datum = models.DateField()
+    lijek = models.CharField(max_length=200, blank=True, verbose_name="Lijek / preparat")
+    doza = models.CharField(max_length=100, blank=True)
+    veterinar = models.CharField(max_length=200, blank=True)
+    karenca_dana = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Karenca (dana)", help_text="Koliko dana jaja nisu za prodaju"
+    )
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Zdravstveni zapis jata'
-        verbose_name_plural = 'Zdravstveni zapisi jata'
-        ordering = ['-datum']
-        db_table = 'udruge_flock_health'
+        verbose_name = "Zdravstveni zapis jata"
+        verbose_name_plural = "Zdravstveni zapisi jata"
+        ordering = ["-datum"]
+        db_table = "udruge_flock_health"
 
     def __str__(self):
-        return f'{self.flock.naziv} — {self.get_vrsta_tretmana_display()} ({self.datum})'
+        return f"{self.flock.naziv} — {self.get_vrsta_tretmana_display()} ({self.datum})"
 
     @property
     def karenca_aktivna(self):
         from django.utils import timezone
+
         if not self.karenca_dana:
             return False
         return (timezone.now().date() - self.datum).days < self.karenca_dana
@@ -2651,56 +2919,54 @@ class FlockHealthRecord(models.Model):
 
 class FlockMortality(models.Model):
     """Zapis uginuća u jatu."""
-    flock          = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='mortaliteti')
-    datum          = models.DateField()
-    broj_uginulih  = models.PositiveIntegerField(verbose_name='Broj uginulih')
-    razlog         = models.CharField(max_length=200, blank=True, verbose_name='Razlog / uzrok')
-    napomena       = models.TextField(blank=True)
-    created_at     = models.DateTimeField(auto_now_add=True)
+
+    flock = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name="mortaliteti")
+    datum = models.DateField()
+    broj_uginulih = models.PositiveIntegerField(verbose_name="Broj uginulih")
+    razlog = models.CharField(max_length=200, blank=True, verbose_name="Razlog / uzrok")
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Uginuće u jatu'
-        verbose_name_plural = 'Uginuća u jatu'
-        ordering = ['-datum']
-        db_table = 'udruge_flock_mortality'
+        verbose_name = "Uginuće u jatu"
+        verbose_name_plural = "Uginuća u jatu"
+        ordering = ["-datum"]
+        db_table = "udruge_flock_mortality"
 
     def __str__(self):
-        return f'{self.flock.naziv} — {self.datum}: {self.broj_uginulih} uginulih'
+        return f"{self.flock.naziv} — {self.datum}: {self.broj_uginulih} uginulih"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # GLAZBENA ŠKOLA
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class GlazbenaSkola(models.Model):
     """Konfiguracija glazbene škole unutar udruge/kompanije."""
+
     VRSTA_CHOICES = [
-        ('privatna',  'Privatna glazbena škola'),
-        ('udruga',    'Glazbena škola pri udruzi (KUD)'),
-        ('opcinska',  'Općinska / gradska škola'),
-        ('studij',    'Privatni studio / instruktor'),
+        ("privatna", "Privatna glazbena škola"),
+        ("udruga", "Glazbena škola pri udruzi (KUD)"),
+        ("opcinska", "Općinska / gradska škola"),
+        ("studij", "Privatni studio / instruktor"),
     ]
-    company = models.OneToOneField(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='glazbena_skola'
-    )
-    vrsta = models.CharField(max_length=20, choices=VRSTA_CHOICES, default='udruga')
+    company = models.OneToOneField("companies.Company", on_delete=models.CASCADE, related_name="glazbena_skola")
+    vrsta = models.CharField(max_length=20, choices=VRSTA_CHOICES, default="udruga")
     naziv_skole = models.CharField(max_length=200, blank=True)
     instrumenti = models.JSONField(
-        default=list, blank=True,
-        help_text='["Klavir", "Gitara", "Violina", "Pjevanje", "Solfeggio"]'
+        default=list, blank=True, help_text='["Klavir", "Gitara", "Violina", "Pjevanje", "Solfeggio"]'
     )
     skolska_godina_start = models.DateField(null=True, blank=True)
     skolska_godina_end = models.DateField(null=True, blank=True)
     fakturira_roditelje = models.BooleanField(default=True)
     pdv_na_nastavu = models.BooleanField(
-        default=False,
-        help_text='Glazbeno obrazovanje je PDV oslobođeno (čl.40 ZPDV) ako je u registru'
+        default=False, help_text="Glazbeno obrazovanje je PDV oslobođeno (čl.40 ZPDV) ako je u registru"
     )
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = 'Glazbena škola'
+        verbose_name = "Glazbena škola"
 
     def __str__(self):
         return f"{self.company.name} — glazbena škola"
@@ -2708,23 +2974,17 @@ class GlazbenaSkola(models.Model):
 
 class GlazbeniUcenik(models.Model):
     """Učenik glazbene škole — može biti i Clan udruge."""
+
     RAZINA_CHOICES = [
-        ('pripremni',    'Pripremni tečaj'),
-        ('osnovna_1_3',  'Osnovna razina (1-3 god.)'),
-        ('srednja_4_6',  'Srednja razina (4-6 god.)'),
-        ('napredna',     'Napredna razina'),
-        ('odrasli',      'Odrasli polaznik'),
+        ("pripremni", "Pripremni tečaj"),
+        ("osnovna_1_3", "Osnovna razina (1-3 god.)"),
+        ("srednja_4_6", "Srednja razina (4-6 god.)"),
+        ("napredna", "Napredna razina"),
+        ("odrasli", "Odrasli polaznik"),
     ]
 
-    company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='glazbeni_ucenici'
-    )
-    clan = models.OneToOneField(
-        Clan, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='glazbeni_ucenik'
-    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="glazbeni_ucenici")
+    clan = models.OneToOneField(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="glazbeni_ucenik")
     ime = models.CharField(max_length=100)
     prezime = models.CharField(max_length=100)
     datum_rodenja = models.DateField(null=True, blank=True)
@@ -2735,20 +2995,17 @@ class GlazbeniUcenik(models.Model):
 
     # Veza na dijete iz vrtića (vrtić→KUD pipeline)
     child = models.OneToOneField(
-        'kindergarten.Child', on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='glazbeni_ucenik',
-        help_text='Ako je ucenik dosao iz vrtica'
+        "kindergarten.Child",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="glazbeni_ucenik",
+        help_text="Ako je ucenik dosao iz vrtica",
     )
 
-    instrument = models.CharField(max_length=100, blank=True,
-        help_text='Primarni instrument / predmet')
-    razina = models.CharField(max_length=20, choices=RAZINA_CHOICES, default='osnovna_1_3')
-    instruktor = models.ForeignKey(
-        Clan, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='ucenici'
-    )
+    instrument = models.CharField(max_length=100, blank=True, help_text="Primarni instrument / predmet")
+    razina = models.CharField(max_length=20, choices=RAZINA_CHOICES, default="osnovna_1_3")
+    instruktor = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="ucenici")
     datum_upisa = models.DateField(auto_now_add=True)
     je_aktivan = models.BooleanField(default=True)
     napomene = models.TextField(blank=True)
@@ -2756,10 +3013,10 @@ class GlazbeniUcenik(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_glazbeni_ucenik'
-        ordering = ['prezime', 'ime']
-        verbose_name = 'Glazbeni učenik'
-        verbose_name_plural = 'Glazbeni učenici'
+        db_table = "udruge_glazbeni_ucenik"
+        ordering = ["prezime", "ime"]
+        verbose_name = "Glazbeni učenik"
+        verbose_name_plural = "Glazbeni učenici"
 
     def __str__(self):
         return f"{self.prezime} {self.ime} ({self.instrument or '—'})"
@@ -2771,59 +3028,44 @@ class GlazbeniUcenik(models.Model):
 
 class SatGlazbene(models.Model):
     """Evidencija održanih sati — napredak + prisutnost."""
+
     VRSTA_SATA = [
-        ('individualni', 'Individualni sat'),
-        ('grupni',       'Grupna nastava'),
-        ('nastup',       'Nastup / Ispit'),
-        ('proba',        'Proba ansambla'),
+        ("individualni", "Individualni sat"),
+        ("grupni", "Grupna nastava"),
+        ("nastup", "Nastup / Ispit"),
+        ("proba", "Proba ansambla"),
     ]
 
-    company = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE,
-        related_name='sati_glazbene'
-    )
-    ucenik = models.ForeignKey(
-        GlazbeniUcenik, on_delete=models.CASCADE,
-        related_name='sati'
-    )
-    instruktor = models.ForeignKey(
-        Clan, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='odrzani_sati'
-    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="sati_glazbene")
+    ucenik = models.ForeignKey(GlazbeniUcenik, on_delete=models.CASCADE, related_name="sati")
+    instruktor = models.ForeignKey(Clan, on_delete=models.SET_NULL, null=True, blank=True, related_name="odrzani_sati")
     datum = models.DateField()
     pocetak = models.TimeField()
     trajanje_min = models.PositiveSmallIntegerField(default=45)
-    vrsta = models.CharField(max_length=20, choices=VRSTA_SATA, default='individualni')
+    vrsta = models.CharField(max_length=20, choices=VRSTA_SATA, default="individualni")
     je_odrzan = models.BooleanField(default=True)
     razlog_izostanka = models.CharField(max_length=200, blank=True)
 
-    gradivo = models.CharField(max_length=500, blank=True,
-        help_text='Što je rađeno: ljestvice, komad, tehnika...')
+    gradivo = models.CharField(max_length=500, blank=True, help_text="Što je rađeno: ljestvice, komad, tehnika...")
     biljeska_instruktora = models.TextField(blank=True)
-    ocjena = models.PositiveSmallIntegerField(null=True, blank=True,
-        help_text='1-5, opcijalno')
+    ocjena = models.PositiveSmallIntegerField(null=True, blank=True, help_text="1-5, opcijalno")
 
     fakturiran = models.BooleanField(default=False)
     invoice_item = models.ForeignKey(
-        'invoicing.InvoiceItem', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='glazbeni_sati'
+        "invoicing.InvoiceItem", on_delete=models.SET_NULL, null=True, blank=True, related_name="glazbeni_sati"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = CompanyManager()
 
     class Meta:
-        db_table = 'udruge_sat_glazbene'
-        ordering = ['-datum', '-pocetak']
-        verbose_name = 'Sat glazbene škole'
-        verbose_name_plural = 'Sati glazbene škole'
+        db_table = "udruge_sat_glazbene"
+        ordering = ["-datum", "-pocetak"]
+        verbose_name = "Sat glazbene škole"
+        verbose_name_plural = "Sati glazbene škole"
 
     def __str__(self):
-        return (
-            f"{self.ucenik.puno_ime} — {self.datum} "
-            f"({self.trajanje_min}min, {self.get_vrsta_display()})"
-        )
+        return f"{self.ucenik.puno_ime} — {self.datum} ({self.trajanje_min}min, {self.get_vrsta_display()})"
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2831,69 +3073,70 @@ class SatGlazbene(models.Model):
 # Zakon: ZoZZ (NN 102/17), Pravilnik o sklonistima (NN 99/2019)
 # ══════════════════════════════════════════════════════════════════
 
+
 class Zivotinja(models.Model):
     class Vrsta(models.TextChoices):
-        PAS    = 'pas',    'Pas'
-        MACKA  = 'macka',  'Macka'
-        KUNIC  = 'kunic',  'Kunic'
-        PTICA  = 'ptica',  'Ptica'
-        OSTALO = 'ostalo', 'Ostalo'
+        PAS = "pas", "Pas"
+        MACKA = "macka", "Macka"
+        KUNIC = "kunic", "Kunic"
+        PTICA = "ptica", "Ptica"
+        OSTALO = "ostalo", "Ostalo"
 
     class Status(models.TextChoices):
-        KARANTENA  = 'karantena',  'Karantena (0-15 dana)'
-        SLOBODAN   = 'slobodan',   'Slobodan za udomljenje'
-        REZERVIRAN = 'rezerviran', 'Rezerviran'
-        UDOMLJEN   = 'udomljen',   'Udomljen'
-        VRÁCEN     = 'vrácen',     'Vrácen vlasniku'
-        UGINUO     = 'uginuo',     'Uginuo (prirodno)'
-        EUTANAZIJA = 'eutanazija', 'Eutanazija (veterinarska odluka)'
+        KARANTENA = "karantena", "Karantena (0-15 dana)"
+        SLOBODAN = "slobodan", "Slobodan za udomljenje"
+        REZERVIRAN = "rezerviran", "Rezerviran"
+        UDOMLJEN = "udomljen", "Udomljen"
+        VRÁCEN = "vrácen", "Vrácen vlasniku"
+        UGINUO = "uginuo", "Uginuo (prirodno)"
+        EUTANAZIJA = "eutanazija", "Eutanazija (veterinarska odluka)"
 
-    company          = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE, related_name='azil_zivotinje')
-    evidencijski_br  = models.CharField(max_length=20, unique=True, db_index=True)
-    mikrocip         = models.CharField(max_length=20, blank=True, db_index=True,
-                                        help_text='15-znamenkasti ISO 11784 broj')
-    vrsta            = models.CharField(max_length=10, choices=Vrsta.choices, default='pas')
-    naziv_pasmina    = models.CharField(max_length=100, blank=True)
-    ime              = models.CharField(max_length=100, blank=True)
-    spol             = models.CharField(max_length=1,
-                                        choices=[('M', 'Muski'), ('Z', 'Zenski'), ('N', 'Nepoznat')],
-                                        default='N')
-    dob_procjena     = models.CharField(max_length=50, blank=True)
-    boja_opis        = models.CharField(max_length=200, blank=True)
-    fotografija      = models.ImageField(upload_to='azil/zivotinje/', null=True, blank=True)
-    datum_ulaska     = models.DateField()
-    nacin_primitka   = models.CharField(max_length=20,
-                                        choices=[('pronadjen', 'Pronadjen'),
-                                                 ('priveden', 'Priveden policijom/komunalcem'),
-                                                 ('ostavljen', 'Ostavljeno od vlasnika'),
-                                                 ('premjesten', 'Premjesten iz drugog sklonista')],
-                                        default='pronadjen')
-    lokacija_nalaza  = models.CharField(max_length=300, blank=True)
-    lokacija_gps     = models.CharField(max_length=50, blank=True, help_text='lat,lng')
-    napomena_ulaz    = models.TextField(blank=True)
-    status           = models.CharField(max_length=15, choices=Status.choices, default='karantena')
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="azil_zivotinje")
+    evidencijski_br = models.CharField(max_length=20, unique=True, db_index=True)
+    mikrocip = models.CharField(max_length=20, blank=True, db_index=True, help_text="15-znamenkasti ISO 11784 broj")
+    vrsta = models.CharField(max_length=10, choices=Vrsta.choices, default="pas")
+    naziv_pasmina = models.CharField(max_length=100, blank=True)
+    ime = models.CharField(max_length=100, blank=True)
+    spol = models.CharField(max_length=1, choices=[("M", "Muski"), ("Z", "Zenski"), ("N", "Nepoznat")], default="N")
+    dob_procjena = models.CharField(max_length=50, blank=True)
+    boja_opis = models.CharField(max_length=200, blank=True)
+    fotografija = models.ImageField(upload_to="azil/zivotinje/", null=True, blank=True)
+    datum_ulaska = models.DateField()
+    nacin_primitka = models.CharField(
+        max_length=20,
+        choices=[
+            ("pronadjen", "Pronadjen"),
+            ("priveden", "Priveden policijom/komunalcem"),
+            ("ostavljen", "Ostavljeno od vlasnika"),
+            ("premjesten", "Premjesten iz drugog sklonista"),
+        ],
+        default="pronadjen",
+    )
+    lokacija_nalaza = models.CharField(max_length=300, blank=True)
+    lokacija_gps = models.CharField(max_length=50, blank=True, help_text="lat,lng")
+    napomena_ulaz = models.TextField(blank=True)
+    status = models.CharField(max_length=15, choices=Status.choices, default="karantena")
     datum_karantena_kraj = models.DateField(null=True, blank=True)
-    javno_oglaseno   = models.BooleanField(default=False,
-                                           help_text='Prikazuje se na burzi za udomljenje')
-    objects          = CompanyManager()
-    created_at       = models.DateTimeField(auto_now_add=True)
-    updated_at       = models.DateTimeField(auto_now=True)
+    javno_oglaseno = models.BooleanField(default=False, help_text="Prikazuje se na burzi za udomljenje")
+    objects = CompanyManager()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.evidencijski_br:
-            last = Zivotinja.objects.filter(company=self.company).order_by('-id').first()
-            br = (int(last.evidencijski_br.split('-')[-1]) + 1) if last else 1
+            last = Zivotinja.objects.filter(company=self.company).order_by("-id").first()
+            br = (int(last.evidencijski_br.split("-")[-1]) + 1) if last else 1
             self.evidencijski_br = f"AZ-{timezone.now().year}-{br:04d}"
         if not self.datum_karantena_kraj and self.datum_ulaska:
             from datetime import timedelta
+
             self.datum_karantena_kraj = self.datum_ulaska + timedelta(days=15)
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['-datum_ulaska']
-        verbose_name = 'Zivotinja'
-        verbose_name_plural = 'Zivotinje'
+        ordering = ["-datum_ulaska"]
+        verbose_name = "Zivotinja"
+        verbose_name_plural = "Zivotinje"
 
     def __str__(self):
         naziv = self.ime or self.naziv_pasmina or self.get_vrsta_display()
@@ -2902,31 +3145,30 @@ class Zivotinja(models.Model):
 
 class KartonZdravlja(models.Model):
     class VrstaTretmana(models.TextChoices):
-        CIJEPLJENJE = 'cijepljenje', 'Cijepljenje'
-        KASTRACIJA  = 'kastracija',  'Kastracija/Sterilizacija'
-        CIPIRANJE   = 'cipiranje',   'Cipiranje'
-        ANTIPARAZIT = 'antiparazit', 'Antiparazitna terapija'
-        PREGLED     = 'pregled',     'Veterinarski pregled'
-        LIJEK       = 'lijek',       'Lijek/Terapija'
-        OZLJEDA     = 'ozljeda',     'Lijecenje ozljede'
-        OSTALO      = 'ostalo',      'Ostalo'
+        CIJEPLJENJE = "cijepljenje", "Cijepljenje"
+        KASTRACIJA = "kastracija", "Kastracija/Sterilizacija"
+        CIPIRANJE = "cipiranje", "Cipiranje"
+        ANTIPARAZIT = "antiparazit", "Antiparazitna terapija"
+        PREGLED = "pregled", "Veterinarski pregled"
+        LIJEK = "lijek", "Lijek/Terapija"
+        OZLJEDA = "ozljeda", "Lijecenje ozljede"
+        OSTALO = "ostalo", "Ostalo"
 
-    zivotinja        = models.ForeignKey(
-        Zivotinja, on_delete=models.CASCADE, related_name='zdravlje')
-    datum            = models.DateField()
-    vrsta_tretmana   = models.CharField(max_length=15, choices=VrstaTretmana.choices)
-    opis             = models.TextField()
-    veterinar        = models.CharField(max_length=200, blank=True)
-    klinika          = models.CharField(max_length=200, blank=True)
+    zivotinja = models.ForeignKey(Zivotinja, on_delete=models.CASCADE, related_name="zdravlje")
+    datum = models.DateField()
+    vrsta_tretmana = models.CharField(max_length=15, choices=VrstaTretmana.choices)
+    opis = models.TextField()
+    veterinar = models.CharField(max_length=200, blank=True)
+    klinika = models.CharField(max_length=200, blank=True)
     sljedeci_pregled = models.DateField(null=True, blank=True)
-    trosak_eur       = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    dokument         = models.FileField(upload_to='azil/zdravlje/', null=True, blank=True)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    trosak_eur = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    dokument = models.FileField(upload_to="azil/zdravlje/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-datum']
-        verbose_name = 'Karton zdravlja'
-        verbose_name_plural = 'Kartoni zdravlja'
+        ordering = ["-datum"]
+        verbose_name = "Karton zdravlja"
+        verbose_name_plural = "Kartoni zdravlja"
 
     def __str__(self):
         return f"{self.zivotinja} — {self.get_vrsta_tretmana_display()} ({self.datum})"
@@ -2936,31 +3178,27 @@ class VeterinarskaEutanazija(models.Model):
     # POSEBNO OSJETLJIV MODEL — samo za neizljecivo bolesne/tesko ozlijedene zivotinje.
     # Zakon HR (NN 102/17, cl. 55): usmrcivanje zdravih zivotinja u sklonistu je ZABRANJENO.
     # Ovaj model smije kreirati SAMO korisnik s rolom veterinar (role_check u view-u).
-    zivotinja        = models.OneToOneField(
-        Zivotinja, on_delete=models.CASCADE, related_name='eutanazija')
-    datum            = models.DateField()
-    veterinar_ime    = models.CharField(max_length=200,
-                                        help_text='Puno ime i prezime veterinara')
-    veterinar_oib    = models.CharField(max_length=11,
-                                        help_text='OIB veterinara — zakonski obvezan')
-    klinika          = models.CharField(max_length=200)
-    dijagnoza        = models.TextField(
-        help_text='Obvezna klinicka dijagnoza: neizljeciva bolest ili teska ozljeda')
-    metoda           = models.CharField(max_length=200,
-                                        default='IV barbiturni koktel (standard WSAVA)')
-    potvrda_pdf      = models.FileField(upload_to='azil/eutanazija/', null=True, blank=True,
-                                        help_text='Skenirana veterinarska potvrda (obavezno)')
-    napomena         = models.TextField(blank=True)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    zivotinja = models.OneToOneField(Zivotinja, on_delete=models.CASCADE, related_name="eutanazija")
+    datum = models.DateField()
+    veterinar_ime = models.CharField(max_length=200, help_text="Puno ime i prezime veterinara")
+    veterinar_oib = models.CharField(max_length=11, help_text="OIB veterinara — zakonski obvezan")
+    klinika = models.CharField(max_length=200)
+    dijagnoza = models.TextField(help_text="Obvezna klinicka dijagnoza: neizljeciva bolest ili teska ozljeda")
+    metoda = models.CharField(max_length=200, default="IV barbiturni koktel (standard WSAVA)")
+    potvrda_pdf = models.FileField(
+        upload_to="azil/eutanazija/", null=True, blank=True, help_text="Skenirana veterinarska potvrda (obavezno)"
+    )
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.zivotinja.status = 'eutanazija'
-        self.zivotinja.save(update_fields=['status', 'updated_at'])
+        self.zivotinja.status = "eutanazija"
+        self.zivotinja.save(update_fields=["status", "updated_at"])
 
     class Meta:
-        verbose_name = 'Veterinarska eutanazija'
-        verbose_name_plural = 'Veterinarska eutanazija (povjerljivo)'
+        verbose_name = "Veterinarska eutanazija"
+        verbose_name_plural = "Veterinarska eutanazija (povjerljivo)"
 
     def __str__(self):
         return f"Eutanazija — {self.zivotinja} ({self.datum})"
@@ -2968,34 +3206,32 @@ class VeterinarskaEutanazija(models.Model):
 
 class Udomljavanje(models.Model):
     class Tip(models.TextChoices):
-        TRAJNO     = 'trajno',     'Trajno udomljavanje'
-        PRIVREMENO = 'privremeno', 'Privremeni smjestaj (foster)'
-        POVRAT     = 'povrat',     'Povrat vlasniku'
+        TRAJNO = "trajno", "Trajno udomljavanje"
+        PRIVREMENO = "privremeno", "Privremeni smjestaj (foster)"
+        POVRAT = "povrat", "Povrat vlasniku"
 
-    zivotinja        = models.ForeignKey(
-        Zivotinja, on_delete=models.CASCADE, related_name='udomljavanja')
-    datum            = models.DateField()
-    ime_prezime      = models.CharField(max_length=200)
-    oib              = models.CharField(max_length=11,
-                                        help_text='OIB udomitelja — zakonski obvezno (ZoZZ)')
-    adresa           = models.CharField(max_length=300)
-    telefon          = models.CharField(max_length=30)
-    email            = models.EmailField(blank=True)
-    tip              = models.CharField(max_length=15, choices=Tip.choices, default='trajno')
-    napomena         = models.TextField(blank=True)
-    ugovor_potpisan  = models.BooleanField(default=False)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    zivotinja = models.ForeignKey(Zivotinja, on_delete=models.CASCADE, related_name="udomljavanja")
+    datum = models.DateField()
+    ime_prezime = models.CharField(max_length=200)
+    oib = models.CharField(max_length=11, help_text="OIB udomitelja — zakonski obvezno (ZoZZ)")
+    adresa = models.CharField(max_length=300)
+    telefon = models.CharField(max_length=30)
+    email = models.EmailField(blank=True)
+    tip = models.CharField(max_length=15, choices=Tip.choices, default="trajno")
+    napomena = models.TextField(blank=True)
+    ugovor_potpisan = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        novi_status = 'vrácen' if self.tip == 'povrat' else 'udomljen'
+        novi_status = "vrácen" if self.tip == "povrat" else "udomljen"
         self.zivotinja.status = novi_status
-        self.zivotinja.save(update_fields=['status', 'updated_at'])
+        self.zivotinja.save(update_fields=["status", "updated_at"])
 
     class Meta:
-        ordering = ['-datum']
-        verbose_name = 'Udomljavanje'
-        verbose_name_plural = 'Udomljavanja'
+        ordering = ["-datum"]
+        verbose_name = "Udomljavanje"
+        verbose_name_plural = "Udomljavanja"
 
     def __str__(self):
         return f"{self.zivotinja} -> {self.ime_prezime} ({self.datum})"
@@ -3003,32 +3239,28 @@ class Udomljavanje(models.Model):
 
 class AzilIntervencija(models.Model):
     class Rezultat(models.TextChoices):
-        PREUZETO      = 'preuzeto',      'Preuzeto u skloniste'
-        NIJE_UHVACENO = 'nije_uhvaceno', 'Nije uhvaceno'
-        VRÁCENO       = 'vráceno',       'Vráceno vlasniku na licu mjesta'
-        VETERINAR     = 'veterinar',     'Upuceno veterinaru (hitno)'
+        PREUZETO = "preuzeto", "Preuzeto u skloniste"
+        NIJE_UHVACENO = "nije_uhvaceno", "Nije uhvaceno"
+        VRÁCENO = "vráceno", "Vráceno vlasniku na licu mjesta"
+        VETERINAR = "veterinar", "Upuceno veterinaru (hitno)"
 
-    company          = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE, related_name='azil_intervencije')
-    datum_vrijeme    = models.DateTimeField()
-    adresa           = models.CharField(max_length=300)
-    gps              = models.CharField(max_length=50, blank=True, help_text='lat,lng')
-    opis             = models.TextField()
-    djelatnik        = models.ForeignKey(
-        'auth.User', on_delete=models.SET_NULL, null=True, blank=True)
-    km_prijedeno     = models.DecimalField(max_digits=6, decimal_places=1, default=0)
-    broj_zivotinja   = models.PositiveSmallIntegerField(default=1)
-    rezultat         = models.CharField(
-        max_length=20, choices=Rezultat.choices, default='preuzeto')
-    zivotinje        = models.ManyToManyField(
-        Zivotinja, blank=True, related_name='intervencije')
-    objects          = CompanyManager()
-    created_at       = models.DateTimeField(auto_now_add=True)
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="azil_intervencije")
+    datum_vrijeme = models.DateTimeField()
+    adresa = models.CharField(max_length=300)
+    gps = models.CharField(max_length=50, blank=True, help_text="lat,lng")
+    opis = models.TextField()
+    djelatnik = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
+    km_prijedeno = models.DecimalField(max_digits=6, decimal_places=1, default=0)
+    broj_zivotinja = models.PositiveSmallIntegerField(default=1)
+    rezultat = models.CharField(max_length=20, choices=Rezultat.choices, default="preuzeto")
+    zivotinje = models.ManyToManyField(Zivotinja, blank=True, related_name="intervencije")
+    objects = CompanyManager()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-datum_vrijeme']
-        verbose_name = 'Intervencija'
-        verbose_name_plural = 'Intervencije (hvatanje napustenih zivotinja)'
+        ordering = ["-datum_vrijeme"]
+        verbose_name = "Intervencija"
+        verbose_name_plural = "Intervencije (hvatanje napustenih zivotinja)"
 
     def __str__(self):
         return f"{self.datum_vrijeme:%d.%m.%Y %H:%M} — {self.adresa[:50]}"
@@ -3037,28 +3269,27 @@ class AzilIntervencija(models.Model):
 class MjesecniIzvjestajAzil(models.Model):
     # Sluzbeni mjesecni izvjestaj za JLS (Jedinicu lokalne samouprave).
     # Generira se automatski 1. u mjesecu, PDF salje Celery task.
-    company           = models.ForeignKey(
-        'companies.Company', on_delete=models.CASCADE, related_name='azil_izvjestaji')
-    godina            = models.PositiveSmallIntegerField()
-    mjesec            = models.PositiveSmallIntegerField()
-    primljeno         = models.PositiveSmallIntegerField(default=0)
-    udomljeno         = models.PositiveSmallIntegerField(default=0)
-    vráceno_vlasniku  = models.PositiveSmallIntegerField(default=0)
-    uginulo           = models.PositiveSmallIntegerField(default=0)
-    eutanazirano      = models.PositiveSmallIntegerField(default=0)
-    trenutno_stanje   = models.PositiveSmallIntegerField(default=0)
-    trosak_hrana_eur  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    trosak_vet_eur    = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="azil_izvjestaji")
+    godina = models.PositiveSmallIntegerField()
+    mjesec = models.PositiveSmallIntegerField()
+    primljeno = models.PositiveSmallIntegerField(default=0)
+    udomljeno = models.PositiveSmallIntegerField(default=0)
+    vráceno_vlasniku = models.PositiveSmallIntegerField(default=0)
+    uginulo = models.PositiveSmallIntegerField(default=0)
+    eutanazirano = models.PositiveSmallIntegerField(default=0)
+    trenutno_stanje = models.PositiveSmallIntegerField(default=0)
+    trosak_hrana_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    trosak_vet_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     trosak_ostalo_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    pdf_generiran     = models.BooleanField(default=False)
-    pdf_file          = models.FileField(upload_to='azil/izvjestaji/', null=True, blank=True)
-    objects           = CompanyManager()
+    pdf_generiran = models.BooleanField(default=False)
+    pdf_file = models.FileField(upload_to="azil/izvjestaji/", null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
-        unique_together = [('company', 'godina', 'mjesec')]
-        ordering = ['-godina', '-mjesec']
-        verbose_name = 'Mjesecni izvjestaj azila'
-        verbose_name_plural = 'Mjesecni izvjestaji azila'
+        unique_together = [("company", "godina", "mjesec")]
+        ordering = ["-godina", "-mjesec"]
+        verbose_name = "Mjesecni izvjestaj azila"
+        verbose_name_plural = "Mjesecni izvjestaji azila"
 
     def __str__(self):
         return f"Izvjestaj {self.godina}/{self.mjesec:02d} — {self.company.name}"

@@ -13,13 +13,14 @@ Dizajniran za tisuće pingova bez opterećenja baze:
 
 EU 852/2004, HR NN 81/13
 """
+
 import logging
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone as tz
 
-logger = logging.getLogger('cold_chain')
+logger = logging.getLogger("cold_chain")
 
 
 class ColdChainError(Exception):
@@ -36,9 +37,9 @@ class ColdChainService:
 
     @classmethod
     @transaction.atomic
-    def ingest_reading(cls, box_id, temperature, humidity=None,
-                       latitude=None, longitude=None, timestamp=None,
-                       raw_payload=None):
+    def ingest_reading(
+        cls, box_id, temperature, humidity=None, latitude=None, longitude=None, timestamp=None, raw_payload=None
+    ):
         """
         Prima jedno očitanje s IoT senzora.
         Koristi SmartBox.update_from_sensor() + analyze_readings().
@@ -61,12 +62,12 @@ class ColdChainService:
         if not box:
             box = SmartBox.objects.filter(sensor_device_id=box_id).first()
         if not box:
-            raise ColdChainError('BOX_NOT_FOUND', 'SmartBox "%s" nije pronađen.' % box_id)
+            raise ColdChainError("BOX_NOT_FOUND", 'SmartBox "%s" nije pronađen.' % box_id)
 
         try:
             temp = Decimal(str(temperature))
         except (InvalidOperation, ValueError):
-            raise ColdChainError('INVALID_TEMP', 'Neispravna temperatura: %s' % temperature)
+            raise ColdChainError("INVALID_TEMP", "Neispravna temperatura: %s" % temperature)
 
         ts = timestamp or tz.now()
 
@@ -77,13 +78,13 @@ class ColdChainService:
             temperature=temp,
         ).exists()
         if recent:
-            return {'reading_id': None, 'is_alert': False, 'incidents': [], 'deduplicated': True}
+            return {"reading_id": None, "is_alert": False, "incidents": [], "deduplicated": True}
 
         # Kreiraj SensorReading
         reading = SensorReading.objects.create(
             smart_box=box,
             consolidated_delivery=box.current_delivery,
-            source='delivery' if box.current_delivery else 'zone',
+            source="delivery" if box.current_delivery else "zone",
             timestamp=ts,
             temperature=temp,
             humidity=Decimal(str(humidity)) if humidity is not None else None,
@@ -95,13 +96,13 @@ class ColdChainService:
         # Update SmartBox cache
         box.last_temp = temp
         box.last_reading_at = ts
-        update_fields = ['last_temp', 'last_reading_at']
+        update_fields = ["last_temp", "last_reading_at"]
         if latitude is not None:
             box.last_lat = Decimal(str(latitude))
-            update_fields.append('last_lat')
+            update_fields.append("last_lat")
         if longitude is not None:
             box.last_lng = Decimal(str(longitude))
-            update_fields.append('last_lng')
+            update_fields.append("last_lng")
         box.save(update_fields=update_fields)
 
         # HACCP analiza samo ako je alert
@@ -110,12 +111,9 @@ class ColdChainService:
             incidents = analyze_readings(box)
 
         return {
-            'reading_id': reading.pk,
-            'is_alert': reading.is_alert,
-            'incidents': [
-                {'id': inc.pk, 'type': inc.incident_type, 'severity': inc.severity}
-                for inc in incidents
-            ],
+            "reading_id": reading.pk,
+            "is_alert": reading.is_alert,
+            "incidents": [{"id": inc.pk, "type": inc.incident_type, "severity": inc.severity} for inc in incidents],
         }
 
     # ── Bulk Ingest (offline sync / batch) ─────────────────────
@@ -138,7 +136,7 @@ class ColdChainService:
         if not box:
             box = SmartBox.objects.filter(sensor_device_id=box_id).first()
         if not box:
-            raise ColdChainError('BOX_NOT_FOUND', 'SmartBox "%s" nije pronađen.' % box_id)
+            raise ColdChainError("BOX_NOT_FOUND", 'SmartBox "%s" nije pronađen.' % box_id)
 
         # Bulk create readings
         readings_to_create = []
@@ -146,30 +144,32 @@ class ColdChainService:
 
         for r in readings_data:
             try:
-                temp = Decimal(str(r.get('temperature', 0)))
+                temp = Decimal(str(r.get("temperature", 0)))
             except (InvalidOperation, ValueError):
                 continue
 
-            ts = r.get('timestamp', tz.now())
+            ts = r.get("timestamp", tz.now())
             is_alert = temp > box.target_max_temp or temp < box.target_min_temp
             if is_alert:
                 alert_count += 1
 
-            readings_to_create.append(SensorReading(
-                smart_box=box,
-                consolidated_delivery=box.current_delivery,
-                source='delivery' if box.current_delivery else 'zone',
-                timestamp=ts,
-                temperature=temp,
-                humidity=Decimal(str(r['humidity'])) if r.get('humidity') is not None else None,
-                latitude=Decimal(str(r['lat'])) if r.get('lat') is not None else None,
-                longitude=Decimal(str(r['lng'])) if r.get('lng') is not None else None,
-                is_alert=is_alert,
-                alert_message='Temp %sC izvan opsega (%s-%sC)' % (
-                    temp, box.target_min_temp, box.target_max_temp
-                ) if is_alert else '',
-                raw_payload=r.get('raw'),
-            ))
+            readings_to_create.append(
+                SensorReading(
+                    smart_box=box,
+                    consolidated_delivery=box.current_delivery,
+                    source="delivery" if box.current_delivery else "zone",
+                    timestamp=ts,
+                    temperature=temp,
+                    humidity=Decimal(str(r["humidity"])) if r.get("humidity") is not None else None,
+                    latitude=Decimal(str(r["lat"])) if r.get("lat") is not None else None,
+                    longitude=Decimal(str(r["lng"])) if r.get("lng") is not None else None,
+                    is_alert=is_alert,
+                    alert_message="Temp %sC izvan opsega (%s-%sC)" % (temp, box.target_min_temp, box.target_max_temp)
+                    if is_alert
+                    else "",
+                    raw_payload=r.get("raw"),
+                )
+            )
 
         created = SensorReading.objects.bulk_create(readings_to_create, batch_size=500)
 
@@ -182,7 +182,7 @@ class ColdChainService:
                 box.last_lat = last.latitude
             if last.longitude:
                 box.last_lng = last.longitude
-            box.save(update_fields=['last_temp', 'last_reading_at', 'last_lat', 'last_lng'])
+            box.save(update_fields=["last_temp", "last_reading_at", "last_lat", "last_lng"])
 
         # HACCP analiza retroaktivno
         incidents = []
@@ -190,14 +190,17 @@ class ColdChainService:
             incidents = analyze_readings(box)
 
         logger.info(
-            '[COLD CHAIN] Bulk ingest box %s: %d readings, %d alerts, %d incidents',
-            box_id, len(created), alert_count, len(incidents)
+            "[COLD CHAIN] Bulk ingest box %s: %d readings, %d alerts, %d incidents",
+            box_id,
+            len(created),
+            alert_count,
+            len(incidents),
         )
 
         return {
-            'ingested': len(created),
-            'alerts': alert_count,
-            'incidents': len(incidents),
+            "ingested": len(created),
+            "alerts": alert_count,
+            "incidents": len(incidents),
         }
 
     # ── HACCP Enforcement ──────────────────────────────────────
@@ -214,25 +217,25 @@ class ColdChainService:
         incidents = HACCPIncident.objects.filter(
             consolidated_delivery=delivery,
             is_resolved=False,
-        ).order_by('-severity', '-created_at')
+        ).order_by("-severity", "-created_at")
 
-        blocked = incidents.filter(severity='blocked').exists()
-        critical = incidents.filter(severity='critical').exists()
+        blocked = incidents.filter(severity="blocked").exists()
+        critical = incidents.filter(severity="critical").exists()
 
-        status = 'blocked' if blocked else ('critical' if critical else 'ok')
+        status = "blocked" if blocked else ("critical" if critical else "ok")
 
         return {
-            'delivery_id': delivery_id,
-            'status': status,
-            'can_accept_goods': status == 'ok',
-            'incidents': [
+            "delivery_id": delivery_id,
+            "status": status,
+            "can_accept_goods": status == "ok",
+            "incidents": [
                 {
-                    'id': inc.pk,
-                    'type': inc.incident_type,
-                    'severity': inc.severity,
-                    'max_temp': str(inc.max_temperature),
-                    'duration_min': inc.duration_minutes,
-                    'description': inc.description,
+                    "id": inc.pk,
+                    "type": inc.incident_type,
+                    "severity": inc.severity,
+                    "max_temp": str(inc.max_temperature),
+                    "duration_min": inc.duration_minutes,
+                    "description": inc.description,
                 }
                 for inc in incidents
             ],
@@ -250,14 +253,14 @@ class ColdChainService:
         from delivery.models import SmartBox
         from inventory.models import GoodsReceipt
 
-        box = SmartBox.objects.select_related('current_delivery').get(pk=smart_box_id)
+        box = SmartBox.objects.select_related("current_delivery").get(pk=smart_box_id)
         if not box.current_delivery:
             return []
 
         # Nađi sve rollwagene u ovoj isporuci vezane na ovaj box
-        order_ids = box.current_delivery.rollwagens.filter(
-            bound_order__isnull=False
-        ).values_list('bound_order_id', flat=True)
+        order_ids = box.current_delivery.rollwagens.filter(bound_order__isnull=False).values_list(
+            "bound_order_id", flat=True
+        )
 
         if not order_ids:
             return []
@@ -265,16 +268,16 @@ class ColdChainService:
         # Blokiraj GoodsReceipt koji su 'draft' za ove narudžbe
         blocked = []
         receipts = GoodsReceipt.objects.filter(
-            status='draft',
-            notes__regex=r'(?:^|[,\s])(' + '|'.join(str(i) for i in order_ids) + r')(?:[,\s]|$)',
+            status="draft",
+            notes__regex=r"(?:^|[,\s])(" + "|".join(str(i) for i in order_ids) + r")(?:[,\s]|$)",
         )
 
         for gr in receipts:
-            gr.status = 'haccp_blocked'
-            gr.notes = (gr.notes or '') + '\n[HACCP BLOKADA] SmartBox %s — prekid hladnog lanca' % box.box_id
-            gr.save(update_fields=['status', 'notes'])
+            gr.status = "haccp_blocked"
+            gr.notes = (gr.notes or "") + "\n[HACCP BLOKADA] SmartBox %s — prekid hladnog lanca" % box.box_id
+            gr.save(update_fields=["status", "notes"])
             blocked.append(gr.pk)
-            logger.warning('[HACCP] GoodsReceipt %s blocked due to SmartBox %s', gr.pk, box.box_id)
+            logger.warning("[HACCP] GoodsReceipt %s blocked due to SmartBox %s", gr.pk, box.box_id)
 
         return blocked
 
@@ -292,26 +295,28 @@ class ColdChainService:
 
         boxes = SmartBox.objects.filter(owner_company_id=company_id)
 
-        summary = boxes.values('haccp_status').annotate(count=Count('id'))
-        status_map = {s['haccp_status']: s['count'] for s in summary}
+        summary = boxes.values("haccp_status").annotate(count=Count("id"))
+        status_map = {s["haccp_status"]: s["count"] for s in summary}
 
-        alerts = boxes.filter(
-            haccp_status__in=['warning', 'critical', 'blocked']
-        ).select_related('current_delivery').order_by('-last_reading_at')[:20]
+        alerts = (
+            boxes.filter(haccp_status__in=["warning", "critical", "blocked"])
+            .select_related("current_delivery")
+            .order_by("-last_reading_at")[:20]
+        )
 
         return {
-            'total': boxes.count(),
-            'ok': status_map.get('ok', 0),
-            'warning': status_map.get('warning', 0),
-            'critical': status_map.get('critical', 0),
-            'blocked': status_map.get('blocked', 0),
-            'alerts': [
+            "total": boxes.count(),
+            "ok": status_map.get("ok", 0),
+            "warning": status_map.get("warning", 0),
+            "critical": status_map.get("critical", 0),
+            "blocked": status_map.get("blocked", 0),
+            "alerts": [
                 {
-                    'box_id': b.box_id,
-                    'status': b.haccp_status,
-                    'last_temp': str(b.last_temp) if b.last_temp else None,
-                    'last_reading': b.last_reading_at.isoformat() if b.last_reading_at else None,
-                    'delivery': str(b.current_delivery) if b.current_delivery else None,
+                    "box_id": b.box_id,
+                    "status": b.haccp_status,
+                    "last_temp": str(b.last_temp) if b.last_temp else None,
+                    "last_reading": b.last_reading_at.isoformat() if b.last_reading_at else None,
+                    "delivery": str(b.current_delivery) if b.current_delivery else None,
                 }
                 for b in alerts
             ],

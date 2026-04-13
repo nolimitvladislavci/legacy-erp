@@ -6,30 +6,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0037_is_draft'),
+        ("companies", "0037_is_draft"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WhiteLabelConfig',
+            name="WhiteLabelConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('brand_name', models.CharField(help_text='Npr. Konjik d.o.o.', max_length=80)),
-                ('subdomain', models.SlugField(help_text='Npr. konjik → konjik.limit-connect.com', unique=True)),
-                ('logo_url', models.URLField(blank=True, help_text='URL logotipa')),
-                ('primary_color', models.CharField(default='#c9a84c', help_text='Hex boja npr. #3b82f6', max_length=7)),
-                ('tagline', models.CharField(blank=True, max_length=120)),
-                ('fiscal_system', models.CharField(choices=[('HR', 'Hrvatska (FINA)'), ('DE', 'Njemačka (KassenSichV)'), ('AT', 'Austrija (RKSV)'), ('SI', 'Slovenija (FURS)')], default='HR', max_length=2)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='white_label_config', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("brand_name", models.CharField(help_text="Npr. Konjik d.o.o.", max_length=80)),
+                ("subdomain", models.SlugField(help_text="Npr. konjik → konjik.limit-connect.com", unique=True)),
+                ("logo_url", models.URLField(blank=True, help_text="URL logotipa")),
+                ("primary_color", models.CharField(default="#c9a84c", help_text="Hex boja npr. #3b82f6", max_length=7)),
+                ("tagline", models.CharField(blank=True, max_length=120)),
+                (
+                    "fiscal_system",
+                    models.CharField(
+                        choices=[
+                            ("HR", "Hrvatska (FINA)"),
+                            ("DE", "Njemačka (KassenSichV)"),
+                            ("AT", "Austrija (RKSV)"),
+                            ("SI", "Slovenija (FURS)"),
+                        ],
+                        default="HR",
+                        max_length=2,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "owner",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="white_label_config",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'WhiteLabel konfiguracija',
-                'verbose_name_plural': 'WhiteLabel konfiguracije',
+                "verbose_name": "WhiteLabel konfiguracija",
+                "verbose_name_plural": "WhiteLabel konfiguracije",
             },
         ),
     ]

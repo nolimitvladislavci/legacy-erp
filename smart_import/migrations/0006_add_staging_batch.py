@@ -6,54 +6,116 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0029_transport_module'),
-        ('smart_import', '0005_add_processing_status_and_problem_report'),
+        ("companies", "0029_transport_module"),
+        ("smart_import", "0005_add_processing_status_and_problem_report"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StagingBatch',
+            name="StagingBatch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(blank=True, default='', help_text='Npr. "Računi veljača 2026"', max_length=200)),
-                ('status', models.CharField(choices=[('pending', 'Čeka pokretanje'), ('queued', 'U redu za obradu'), ('processing', 'AI obrađuje'), ('paused', 'Pauzirano'), ('done', 'Završeno'), ('done_with_errors', 'Završeno s greškama')], default='pending', max_length=20)),
-                ('total_files', models.IntegerField(default=0)),
-                ('processed_files', models.IntegerField(default=0)),
-                ('failed_files', models.IntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('started_at', models.DateTimeField(blank=True, null=True)),
-                ('finished_at', models.DateTimeField(blank=True, null=True)),
-                ('last_message', models.CharField(blank=True, default='', help_text='Zadnja AI poruka — razmišljanje na glas', max_length=500)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staging_batches', to='companies.company')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "title",
+                    models.CharField(blank=True, default="", help_text='Npr. "Računi veljača 2026"', max_length=200),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Čeka pokretanje"),
+                            ("queued", "U redu za obradu"),
+                            ("processing", "AI obrađuje"),
+                            ("paused", "Pauzirano"),
+                            ("done", "Završeno"),
+                            ("done_with_errors", "Završeno s greškama"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("total_files", models.IntegerField(default=0)),
+                ("processed_files", models.IntegerField(default=0)),
+                ("failed_files", models.IntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("started_at", models.DateTimeField(blank=True, null=True)),
+                ("finished_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "last_message",
+                    models.CharField(
+                        blank=True, default="", help_text="Zadnja AI poruka — razmišljanje na glas", max_length=500
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="staging_batches",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Staging batch',
-                'verbose_name_plural': 'Staging batchevi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Staging batch",
+                "verbose_name_plural": "Staging batchevi",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='StagingFile',
+            name="StagingFile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to='staging/%Y/%m/')),
-                ('original_filename', models.CharField(blank=True, max_length=255)),
-                ('status', models.CharField(choices=[('pending', 'Čeka'), ('processing', 'AI čita'), ('done', 'Obrađeno'), ('error', 'Greška'), ('skipped', 'Preskočeno')], default='pending', max_length=20)),
-                ('ai_message', models.CharField(blank=True, help_text='Što je AI rekao za ovaj fajl', max_length=500)),
-                ('error_msg', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('processed_at', models.DateTimeField(blank=True, null=True)),
-                ('result_batch', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='staging_source', to='smart_import.importbatch')),
-                ('staging_batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to='smart_import.stagingbatch')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("file", models.FileField(upload_to="staging/%Y/%m/")),
+                ("original_filename", models.CharField(blank=True, max_length=255)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Čeka"),
+                            ("processing", "AI čita"),
+                            ("done", "Obrađeno"),
+                            ("error", "Greška"),
+                            ("skipped", "Preskočeno"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("ai_message", models.CharField(blank=True, help_text="Što je AI rekao za ovaj fajl", max_length=500)),
+                ("error_msg", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("processed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "result_batch",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="staging_source",
+                        to="smart_import.importbatch",
+                    ),
+                ),
+                (
+                    "staging_batch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="files",
+                        to="smart_import.stagingbatch",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Staging fajl',
-                'verbose_name_plural': 'Staging fajlovi',
-                'ordering': ['created_at'],
+                "verbose_name": "Staging fajl",
+                "verbose_name_plural": "Staging fajlovi",
+                "ordering": ["created_at"],
             },
         ),
     ]

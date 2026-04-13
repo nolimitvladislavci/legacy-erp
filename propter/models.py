@@ -4,6 +4,7 @@ Propter models -- Faza A + B
 Faza A: BillingPeriod, Otpremnica, OtpremnicaItem
 Faza B: PropterTenant, PropterOperator
 """
+
 import uuid
 
 from django.db import models
@@ -15,6 +16,7 @@ from core.managers import CompanyManager
 # FAZA A -- BillingPeriod + Otpremnica
 # =============================================================================
 
+
 class BillingPeriod(models.Model):
     """Obracunski period (mjesec) per firma.
     Skuplja otpremnice kroz cijeli mjesec.
@@ -22,31 +24,28 @@ class BillingPeriod(models.Model):
     """
 
     class Status(models.TextChoices):
-        OPEN      = "open",     "Otvoren"
-        CLOSING   = "closing",  "Zatvara se"
-        CLOSED    = "closed",   "Zatvoren"
-        INVOICED  = "invoiced", "Fakturiran"
+        OPEN = "open", "Otvoren"
+        CLOSING = "closing", "Zatvara se"
+        CLOSED = "closed", "Zatvoren"
+        INVOICED = "invoiced", "Fakturiran"
 
-    company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        related_name="billing_periods"
-    )
-    year  = models.PositiveSmallIntegerField()
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="billing_periods")
+    year = models.PositiveSmallIntegerField()
     month = models.PositiveSmallIntegerField()  # 1-12
 
-    status      = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
-    opened_at   = models.DateTimeField(auto_now_add=True)
-    closed_at   = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    opened_at = models.DateTimeField(auto_now_add=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
     invoiced_at = models.DateTimeField(null=True, blank=True)
 
     # Zbirni e-Racun kreiran na kraju perioda (FK na eracun.ERacun)
-    zbirni_eracun_id     = models.CharField(max_length=64, blank=True, db_index=True)
+    zbirni_eracun_id = models.CharField(max_length=64, blank=True, db_index=True)
     zbirni_invoice_number = models.CharField(max_length=100, blank=True)
 
     # Snapshot iznosa pri zatvaranju
-    total_net        = models.DecimalField(max_digits=14, decimal_places=2, default=0)
-    total_tax        = models.DecimalField(max_digits=14, decimal_places=2, default=0)
-    total_with_tax   = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    total_net = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    total_tax = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    total_with_tax = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     otpremnica_count = models.PositiveIntegerField(default=0)
     objects = CompanyManager()
 
@@ -57,16 +56,13 @@ class BillingPeriod(models.Model):
         verbose_name_plural = "Obracunski periodi"
 
     def __str__(self):
-        return "{} {}/{:02d} ({})".format(
-            self.company.name, self.year, self.month, self.get_status_display()
-        )
+        return "{} {}/{:02d} ({})".format(self.company.name, self.year, self.month, self.get_status_display())
 
     @classmethod
     def get_or_create_current(cls, company):
         now = timezone.now()
         period, _ = cls.objects.get_or_create(
-            company=company, year=now.year, month=now.month,
-            defaults={"status": cls.Status.OPEN}
+            company=company, year=now.year, month=now.month, defaults={"status": cls.Status.OPEN}
         )
         return period
 
@@ -78,54 +74,48 @@ class Otpremnica(models.Model):
     """
 
     class Status(models.TextChoices):
-        DRAFT      = "draft",      "Nacrt"
-        ISSUED     = "issued",     "Izdana"
+        DRAFT = "draft", "Nacrt"
+        ISSUED = "issued", "Izdana"
         AGGREGATED = "aggregated", "Ukljucena u zbirni racun"
-        CANCELLED  = "cancelled",  "Stornirana"
+        CANCELLED = "cancelled", "Stornirana"
 
     class Source(models.TextChoices):
-        POS     = "pos",     "POS blagajna"
-        MANUAL  = "manual",  "Rucni unos"
+        POS = "pos", "POS blagajna"
+        MANUAL = "manual", "Rucni unos"
         SYNESIS = "synesis", "Synesis"
-        API     = "api",     "API"
+        API = "api", "API"
         INVOICE = "invoice", "Faktura"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        related_name="otpremnice"
-    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="otpremnice")
     billing_period = models.ForeignKey(
-        BillingPeriod, on_delete=models.PROTECT,
-        related_name="otpremnice", null=True, blank=True
+        BillingPeriod, on_delete=models.PROTECT, related_name="otpremnice", null=True, blank=True
     )
 
     # Veze na izvorne dokumente (opcionalno -- loose coupling)
     pos_receipt_id = models.CharField(max_length=64, blank=True, db_index=True)
-    invoice_id     = models.CharField(max_length=64, blank=True, db_index=True)
+    invoice_id = models.CharField(max_length=64, blank=True, db_index=True)
 
-    number        = models.CharField(max_length=50, verbose_name="Broj otpremnice")
-    issue_date    = models.DateField()
+    number = models.CharField(max_length=50, verbose_name="Broj otpremnice")
+    issue_date = models.DateField()
     delivery_date = models.DateField(null=True, blank=True)
 
-    recipient_name    = models.CharField(max_length=200)
-    recipient_oib     = models.CharField(max_length=20, blank=True)
+    recipient_name = models.CharField(max_length=200)
+    recipient_oib = models.CharField(max_length=20, blank=True)
     recipient_address = models.CharField(max_length=300, blank=True)
 
-    subtotal   = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     source = models.CharField(max_length=10, choices=Source.choices, default=Source.MANUAL)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.DRAFT)
-    note   = models.TextField(blank=True)
+    note = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        "auth.User", on_delete=models.SET_NULL, null=True, blank=True
-    )
+    created_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
     objects = CompanyManager()
 
     class Meta:
@@ -146,10 +136,7 @@ class Otpremnica(models.Model):
             self.billing_period = BillingPeriod.get_or_create_current(self.company)
         if not self.number:
             now = timezone.now()
-            count = Otpremnica.objects.filter(
-                company=self.company,
-                issue_date__year=now.year
-            ).count() + 1
+            count = Otpremnica.objects.filter(company=self.company, issue_date__year=now.year).count() + 1
             self.number = "{}-{:04d}".format(now.year, count)
         super().save(**kwargs)
 
@@ -158,33 +145,38 @@ class OtpremnicaItem(models.Model):
     """Stavka otpremnice (EN 16931 kompatibilna)."""
 
     UNIT_CHOICES = [
-        ("EA", "Komad"), ("HUR", "Sat"), ("KGM", "Kilogram"),
-        ("MTR", "Metar"), ("LTR", "Litra"), ("MTK", "m2"),
-        ("DAY", "Dan"), ("MON", "Mjesec"), ("SET", "Set"),
+        ("EA", "Komad"),
+        ("HUR", "Sat"),
+        ("KGM", "Kilogram"),
+        ("MTR", "Metar"),
+        ("LTR", "Litra"),
+        ("MTK", "m2"),
+        ("DAY", "Dan"),
+        ("MON", "Mjesec"),
+        ("SET", "Set"),
     ]
 
-    otpremnica  = models.ForeignKey(Otpremnica, on_delete=models.CASCADE, related_name="items")
+    otpremnica = models.ForeignKey(Otpremnica, on_delete=models.CASCADE, related_name="items")
     line_number = models.PositiveIntegerField(default=1)
     description = models.CharField(max_length=300)
-    quantity    = models.DecimalField(max_digits=10, decimal_places=3, default=1)
-    unit        = models.CharField(max_length=5, choices=UNIT_CHOICES, default="EA")
-    unit_price  = models.DecimalField(max_digits=12, decimal_places=4)
-    tax_rate    = models.DecimalField(max_digits=5, decimal_places=2, default=25)
-    line_total  = models.DecimalField(max_digits=12, decimal_places=2)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, default=1)
+    unit = models.CharField(max_length=5, choices=UNIT_CHOICES, default="EA")
+    unit_price = models.DecimalField(max_digits=12, decimal_places=4)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25)
+    line_total = models.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
         ordering = ["line_number"]
         verbose_name = "Stavka otpremnice"
 
     def __str__(self):
-        return "#{}: {} x{} = {}".format(
-            self.line_number, self.description, self.quantity, self.line_total
-        )
+        return "#{}: {} x{} = {}".format(self.line_number, self.description, self.quantity, self.line_total)
 
 
 # =============================================================================
 # FAZA B -- PropterTenant (SaaS multi-tenant)
 # =============================================================================
+
 
 class PropterConfig(models.Model):
     """SaaS tenant za Propter modul.
@@ -199,46 +191,38 @@ class PropterConfig(models.Model):
     """
 
     class Tier(models.TextChoices):
-        CLIENT      = "client",      "Komitent (direktni)"
-        BOOKKEEPER  = "bookkeeper",  "Knjigovodstveni servis"
-        OPERATOR    = "operator",    "Operator/Hub (buducnost)"
+        CLIENT = "client", "Komitent (direktni)"
+        BOOKKEEPER = "bookkeeper", "Knjigovodstveni servis"
+        OPERATOR = "operator", "Operator/Hub (buducnost)"
 
     class CertStatus(models.TextChoices):
-        NONE    = "none",    "Nema certifikata"
+        NONE = "none", "Nema certifikata"
         PENDING = "pending", "Ceka certifikat"
-        ACTIVE  = "active",  "Aktivan"
+        ACTIVE = "active", "Aktivan"
         EXPIRED = "expired", "Istekao"
 
-    company = models.OneToOneField(
-        "companies.Company", on_delete=models.CASCADE,
-        related_name="propter_config"
-    )
+    company = models.OneToOneField("companies.Company", on_delete=models.CASCADE, related_name="propter_config")
 
-    tier            = models.CharField(max_length=15, choices=Tier.choices, default=Tier.CLIENT)
-    operator_name   = models.CharField(max_length=200, blank=True,
-                                       help_text="Npr. KS Limit d.o.o.")
-    max_clients     = models.PositiveIntegerField(default=1,
-                                                  help_text="Za bookkeepere: max klijenata")
+    tier = models.CharField(max_length=15, choices=Tier.choices, default=Tier.CLIENT)
+    operator_name = models.CharField(max_length=200, blank=True, help_text="Npr. KS Limit d.o.o.")
+    max_clients = models.PositiveIntegerField(default=1, help_text="Za bookkeepere: max klijenata")
 
     # FINA certifikat status
-    cert_status      = models.CharField(max_length=10, choices=CertStatus.choices,
-                                        default=CertStatus.NONE)
+    cert_status = models.CharField(max_length=10, choices=CertStatus.choices, default=CertStatus.NONE)
     cert_valid_until = models.DateField(null=True, blank=True)
 
     # Moduli ukljuceni u pretplatu
-    modules_enabled = models.JSONField(default=list,
-                                       help_text="Slugovi modula: eracun, payroll, pos, ...")
+    modules_enabled = models.JSONField(default=list, help_text="Slugovi modula: eracun, payroll, pos, ...")
 
     # Pretplata
-    monthly_fee  = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    billing_day  = models.PositiveSmallIntegerField(default=1)  # dan u mj. naplate
-    is_active    = models.BooleanField(default=True)
-    trial_until  = models.DateField(null=True, blank=True)
+    monthly_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    billing_day = models.PositiveSmallIntegerField(default=1)  # dan u mj. naplate
+    is_active = models.BooleanField(default=True)
+    trial_until = models.DateField(null=True, blank=True)
 
     # Eco/marketing
     eco_badge_enabled = models.BooleanField(default=False)
-    public_eco_page   = models.BooleanField(default=False,
-                                            help_text="Javna eko stranica za klijenta")
+    public_eco_page = models.BooleanField(default=False, help_text="Javna eko stranica za klijenta")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -248,9 +232,7 @@ class PropterConfig(models.Model):
         verbose_name_plural = "Propter tenanti"
 
     def __str__(self):
-        return "{} [{}] {}/mj".format(
-            self.company.name, self.get_tier_display(), self.monthly_fee
-        )
+        return "{} [{}] {}/mj".format(self.company.name, self.get_tier_display(), self.monthly_fee)
 
     @property
     def is_trial(self):
@@ -269,6 +251,7 @@ class PropterConfig(models.Model):
 # FAZA C -- EkoStats (marketing differentiator)
 # =============================================================================
 
+
 class EkoStats(models.Model):
     """Eko statistika po firmi i mjesecu.
     Automatski se izracunava pri zatvaranju BillingPeriod-a.
@@ -278,35 +261,31 @@ class EkoStats(models.Model):
     """
 
     class Badge(models.TextChoices):
-        NONE     = "",          "Bez bedza"
-        BRONZE   = "bronze",   "Bronze (50+)"
-        SILVER   = "silver",   "Silver (200+)"
-        GOLD     = "gold",     "Gold (500+)"
+        NONE = "", "Bez bedza"
+        BRONZE = "bronze", "Bronze (50+)"
+        SILVER = "silver", "Silver (200+)"
+        GOLD = "gold", "Gold (500+)"
         PLATINUM = "platinum", "Platinum (1000+)"
 
-    company        = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
-        related_name="eko_stats"
-    )
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE, related_name="eko_stats")
     billing_period = models.OneToOneField(
-        BillingPeriod, on_delete=models.CASCADE,
-        related_name="eko_stats", null=True, blank=True
+        BillingPeriod, on_delete=models.CASCADE, related_name="eko_stats", null=True, blank=True
     )
-    year  = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
     month = models.PositiveSmallIntegerField()
 
     # Brojaci
-    eracuni_sent     = models.PositiveIntegerField(default=0)
+    eracuni_sent = models.PositiveIntegerField(default=0)
     otpremnice_count = models.PositiveIntegerField(default=0)
 
     # Eko izracun (IPCC standard: 5g CO2 po listu A4)
-    paper_saved_sheets  = models.PositiveIntegerField(default=0)
-    co2_saved_grams     = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    trees_equivalent    = models.DecimalField(max_digits=8, decimal_places=4, default=0)
+    paper_saved_sheets = models.PositiveIntegerField(default=0)
+    co2_saved_grams = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    trees_equivalent = models.DecimalField(max_digits=8, decimal_places=4, default=0)
 
     # Kumulativ za godinu
-    paper_saved_ytd  = models.PositiveIntegerField(default=0)
-    co2_saved_ytd    = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    paper_saved_ytd = models.PositiveIntegerField(default=0)
+    co2_saved_ytd = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     badge_level = models.CharField(max_length=10, choices=Badge.choices, blank=True, default="")
 
@@ -320,8 +299,7 @@ class EkoStats(models.Model):
 
     def __str__(self):
         return "{} {}/{:02d} -- {}g CO2 usteda [{}]".format(
-            self.company.name, self.year, self.month,
-            self.co2_saved_grams, self.badge_level or "bez bedza"
+            self.company.name, self.year, self.month, self.co2_saved_grams, self.badge_level or "bez bedza"
         )
 
     @classmethod
@@ -351,9 +329,7 @@ class EkoStats(models.Model):
 
         # YTD -- zbroj prethodnih mjeseci iste godine
         ytd_qs = cls.objects.filter(
-            company=billing_period.company,
-            year=billing_period.year,
-            month__lt=billing_period.month
+            company=billing_period.company, year=billing_period.year, month__lt=billing_period.month
         )
         ytd_sheets = sum(e.paper_saved_sheets for e in ytd_qs) + sheets
         ytd_co2 = sum(e.co2_saved_grams for e in ytd_qs) + co2
@@ -372,6 +348,6 @@ class EkoStats(models.Model):
                 "paper_saved_ytd": ytd_sheets,
                 "co2_saved_ytd": ytd_co2,
                 "badge_level": badge,
-            }
+            },
         )
         return eko

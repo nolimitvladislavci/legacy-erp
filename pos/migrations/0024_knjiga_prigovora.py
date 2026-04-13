@@ -6,34 +6,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0024_partnership_model'),
-        ('pos', '0023_terminal_category_filter'),
+        ("companies", "0024_partnership_model"),
+        ("pos", "0023_terminal_category_filter"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KnjigaPrigovora',
+            name="KnjigaPrigovora",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('redni_broj', models.PositiveIntegerField(help_text='Auto-inkrement po tvrtki', verbose_name='Redni broj')),
-                ('datum_primitka', models.DateField(auto_now_add=True, verbose_name='Datum primitka')),
-                ('ime_potrosaca', models.CharField(max_length=200, verbose_name='Ime i prezime potrošača')),
-                ('kontakt', models.CharField(blank=True, max_length=200, verbose_name='Adresa ili e-mail')),
-                ('opis_prigovora', models.TextField(verbose_name='Opis prigovora')),
-                ('odgovor', models.TextField(blank=True, verbose_name='Odgovor na prigovor')),
-                ('datum_odgovora', models.DateField(blank=True, null=True, verbose_name='Datum odgovora')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='prigovori', to='companies.company', verbose_name='Tvrtka')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Evidentirao')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "redni_broj",
+                    models.PositiveIntegerField(help_text="Auto-inkrement po tvrtki", verbose_name="Redni broj"),
+                ),
+                ("datum_primitka", models.DateField(auto_now_add=True, verbose_name="Datum primitka")),
+                ("ime_potrosaca", models.CharField(max_length=200, verbose_name="Ime i prezime potrošača")),
+                ("kontakt", models.CharField(blank=True, max_length=200, verbose_name="Adresa ili e-mail")),
+                ("opis_prigovora", models.TextField(verbose_name="Opis prigovora")),
+                ("odgovor", models.TextField(blank=True, verbose_name="Odgovor na prigovor")),
+                ("datum_odgovora", models.DateField(blank=True, null=True, verbose_name="Datum odgovora")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="prigovori",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Evidentirao",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Prigovor',
-                'verbose_name_plural': 'Knjiga prigovora',
-                'ordering': ['-redni_broj'],
-                'unique_together': {('company', 'redni_broj')},
+                "verbose_name": "Prigovor",
+                "verbose_name_plural": "Knjiga prigovora",
+                "ordering": ["-redni_broj"],
+                "unique_together": {("company", "redni_broj")},
             },
         ),
     ]

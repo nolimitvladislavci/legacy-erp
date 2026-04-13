@@ -6,27 +6,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('superadmin_ai', '0002_add_boolean_permissions'),
+        ("companies", "0021_extend_onboarding"),
+        ("superadmin_ai", "0002_add_boolean_permissions"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='aimodulepermission',
-            name='module',
-            field=models.CharField(max_length=50, verbose_name='Modul'),
+            model_name="aimodulepermission",
+            name="module",
+            field=models.CharField(max_length=50, verbose_name="Modul"),
         ),
         migrations.AlterField(
-            model_name='aimodulepermission',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Ažurirao'),
+            model_name="aimodulepermission",
+            name="updated_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Ažurirao",
+            ),
         ),
         migrations.AlterField(
-            model_name='pendingaiaction',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='pending_ai_actions', to='companies.company', verbose_name='Tvrtka'),
+            model_name="pendingaiaction",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="pending_ai_actions",
+                to="companies.company",
+                verbose_name="Tvrtka",
+            ),
         ),
     ]

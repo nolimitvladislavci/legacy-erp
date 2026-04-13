@@ -5,50 +5,93 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('partners', '0001_initial'),
+        ("partners", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Member',
+            name="Member",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100, verbose_name='Ime')),
-                ('last_name', models.CharField(max_length=100, verbose_name='Prezime')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='Email')),
-                ('phone', models.CharField(blank=True, max_length=50, verbose_name='Telefon')),
-                ('membership_type', models.CharField(choices=[('basic', 'Osnovno'), ('standard', 'Standard'), ('premium', 'Premium'), ('vip', 'VIP')], default='basic', max_length=20, verbose_name='Tip clanstva')),
-                ('status', models.CharField(choices=[('active', 'Aktivan'), ('inactive', 'Neaktivan'), ('frozen', 'Zamrznut'), ('expired', 'Isteklo')], default='active', max_length=20, verbose_name='Status')),
-                ('date_joined', models.DateField(auto_now_add=True, verbose_name='Datum uclanjenja')),
-                ('membership_expires', models.DateField(blank=True, null=True, verbose_name='Istjece clanstvo')),
-                ('rfid_card', models.CharField(blank=True, max_length=50, verbose_name='RFID kartica')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomene')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('partner', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='fitness_member', to='partners.partner', verbose_name='Partner')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("first_name", models.CharField(max_length=100, verbose_name="Ime")),
+                ("last_name", models.CharField(max_length=100, verbose_name="Prezime")),
+                ("email", models.EmailField(blank=True, max_length=254, verbose_name="Email")),
+                ("phone", models.CharField(blank=True, max_length=50, verbose_name="Telefon")),
+                (
+                    "membership_type",
+                    models.CharField(
+                        choices=[
+                            ("basic", "Osnovno"),
+                            ("standard", "Standard"),
+                            ("premium", "Premium"),
+                            ("vip", "VIP"),
+                        ],
+                        default="basic",
+                        max_length=20,
+                        verbose_name="Tip clanstva",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Aktivan"),
+                            ("inactive", "Neaktivan"),
+                            ("frozen", "Zamrznut"),
+                            ("expired", "Isteklo"),
+                        ],
+                        default="active",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("date_joined", models.DateField(auto_now_add=True, verbose_name="Datum uclanjenja")),
+                ("membership_expires", models.DateField(blank=True, null=True, verbose_name="Istjece clanstvo")),
+                ("rfid_card", models.CharField(blank=True, max_length=50, verbose_name="RFID kartica")),
+                ("notes", models.TextField(blank=True, verbose_name="Napomene")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "partner",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fitness_member",
+                        to="partners.partner",
+                        verbose_name="Partner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Clan fitnessa',
-                'verbose_name_plural': 'Clanovi fitnessa',
-                'db_table': 'fitness_member',
-                'ordering': ['last_name', 'first_name'],
+                "verbose_name": "Clan fitnessa",
+                "verbose_name_plural": "Clanovi fitnessa",
+                "db_table": "fitness_member",
+                "ordering": ["last_name", "first_name"],
             },
         ),
         migrations.CreateModel(
-            name='MemberCheckIn',
+            name="MemberCheckIn",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('check_in', models.DateTimeField(auto_now_add=True, verbose_name='Dolazak')),
-                ('check_out', models.DateTimeField(blank=True, null=True, verbose_name='Odlazak')),
-                ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='checkins', to='fitness.member', verbose_name='Clan')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("check_in", models.DateTimeField(auto_now_add=True, verbose_name="Dolazak")),
+                ("check_out", models.DateTimeField(blank=True, null=True, verbose_name="Odlazak")),
+                (
+                    "member",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="checkins",
+                        to="fitness.member",
+                        verbose_name="Clan",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Evidencija dolaska',
-                'verbose_name_plural': 'Evidencija dolazaka',
-                'ordering': ['-check_in'],
+                "verbose_name": "Evidencija dolaska",
+                "verbose_name_plural": "Evidencija dolazaka",
+                "ordering": ["-check_in"],
             },
         ),
     ]

@@ -1,4 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
 
-default_app_config = 'accounts.apps.AccountsConfig'
+default_app_config = "accounts.apps.AccountsConfig"

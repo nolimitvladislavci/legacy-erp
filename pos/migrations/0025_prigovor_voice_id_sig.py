@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0024_knjiga_prigovora'),
+        ("pos", "0024_knjiga_prigovora"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='id_photo',
-            field=models.TextField(blank=True, verbose_name='Slika osobne (base64)'),
+            model_name="knjigaprigovora",
+            name="id_photo",
+            field=models.TextField(blank=True, verbose_name="Slika osobne (base64)"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='signature',
-            field=models.TextField(blank=True, verbose_name='Potpis potrošača (base64)'),
+            model_name="knjigaprigovora",
+            name="signature",
+            field=models.TextField(blank=True, verbose_name="Potpis potrošača (base64)"),
         ),
         migrations.AddField(
-            model_name='knjigaprigovora',
-            name='voice_input',
-            field=models.BooleanField(default=False, verbose_name='Glasovni unos'),
+            model_name="knjigaprigovora",
+            name="voice_input",
+            field=models.BooleanField(default=False, verbose_name="Glasovni unos"),
         ),
     ]

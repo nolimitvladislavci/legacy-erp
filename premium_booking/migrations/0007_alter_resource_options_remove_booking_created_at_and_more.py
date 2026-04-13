@@ -4,47 +4,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0006_alter_resource_options'),
+        ("premium_booking", "0006_alter_resource_options"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resource',
-            options={'ordering': ['group', 'name']},
+            name="resource",
+            options={"ordering": ["group", "name"]},
         ),
         migrations.RemoveField(
-            model_name='booking',
-            name='created_at',
+            model_name="booking",
+            name="created_at",
         ),
         migrations.RemoveField(
-            model_name='booking',
-            name='payment_method',
+            model_name="booking",
+            name="payment_method",
         ),
         migrations.AlterField(
-            model_name='addon',
-            name='icon',
+            model_name="addon",
+            name="icon",
             field=models.CharField(blank=True, max_length=50),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='status',
-            field=models.CharField(default='pending', max_length=20),
+            model_name="booking",
+            name="status",
+            field=models.CharField(default="pending", max_length=20),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='method',
-            field=models.CharField(default='invoice', max_length=20),
+            model_name="payment",
+            name="method",
+            field=models.CharField(default="invoice", max_length=20),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='group',
-            field=models.CharField(choices=[('construction', 'Gradnja (Strojevi i Radnici)'), ('housing', 'Stanovanje (Sobe i Garsonjere)'), ('business', 'Poslovni prostori (Uredi i Restoran)')], max_length=20),
+            model_name="resource",
+            name="group",
+            field=models.CharField(
+                choices=[
+                    ("construction", "Gradnja (Strojevi i Radnici)"),
+                    ("housing", "Stanovanje (Sobe i Garsonjere)"),
+                    ("business", "Poslovni prostori (Uredi i Restoran)"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='resource',
-            name='name',
+            model_name="resource",
+            name="name",
             field=models.CharField(max_length=200),
         ),
     ]

@@ -9,6 +9,7 @@ Pokretanje:
   venv/bin/python manage.py bulk_invite --company "Konjik"
   venv/bin/python manage.py bulk_invite
 """
+
 import secrets
 import string
 
@@ -22,17 +23,10 @@ class Command(BaseCommand):
     help = "Pošalji welcome invite svim korisnicima koji se nikad nisu prijavili"
 
     def add_arguments(self, parser):
+        parser.add_argument("--dry-run", action="store_true", help="Samo prikaži što bi se desilo, ne šalji emailove")
+        parser.add_argument("--company", type=str, default=None, help="Filter po nazivu kompanije (parcijalni match)")
         parser.add_argument(
-            "--dry-run", action="store_true",
-            help="Samo prikaži što bi se desilo, ne šalji emailove"
-        )
-        parser.add_argument(
-            "--company", type=str, default=None,
-            help="Filter po nazivu kompanije (parcijalni match)"
-        )
-        parser.add_argument(
-            "--force", action="store_true",
-            help="Pošalji i korisnicima koji već imaju must_change_password=True"
+            "--force", action="store_true", help="Pošalji i korisnicima koji već imaju must_change_password=True"
         )
 
     def handle(self, *args, **options):
@@ -47,9 +41,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("═══ DRY RUN — ništa se ne šalje ═══\n"))
 
         # Dohvati aktivne pretplate
-        subs = CompanySubscription.objects.filter(
-            is_active=True
-        ).select_related("company").order_by("company__name")
+        subs = CompanySubscription.objects.filter(is_active=True).select_related("company").order_by("company__name")
 
         if company_filter:
             subs = subs.filter(company__name__icontains=company_filter)
@@ -135,21 +127,15 @@ class Command(BaseCommand):
                             from_email=settings.DEFAULT_FROM_EMAIL,
                             recipient_list=[user.email],
                         )
-                        self.stdout.write(
-                            self.style.SUCCESS(f"  ✅ {user.username} ({user.email})")
-                        )
+                        self.stdout.write(self.style.SUCCESS(f"  ✅ {user.username} ({user.email})"))
                         total_invited += 1
                     except Exception as e:
-                        self.stdout.write(
-                            self.style.ERROR(f"  ❌ {user.username} — email greška: {e}")
-                        )
+                        self.stdout.write(self.style.ERROR(f"  ❌ {user.username} — email greška: {e}"))
                         total_skipped += 1
                 else:
                     # Nema emaila — lozinka postavljena, ručna predaja
                     self.stdout.write(
-                        self.style.WARNING(
-                            f"  ⚠️  {user.username} — lozinka: {temp_pass} (ručna predaja, nema emaila)"
-                        )
+                        self.style.WARNING(f"  ⚠️  {user.username} — lozinka: {temp_pass} (ručna predaja, nema emaila)")
                     )
                     no_email_list.append((company.name, user.username, temp_pass))
                     total_no_email += 1
@@ -159,17 +145,11 @@ class Command(BaseCommand):
         self.stdout.write("\n" + "═" * 50)
         prefix = "[DRY RUN] " if dry_run else ""
 
-        self.stdout.write(
-            self.style.SUCCESS(f"{prefix}✅ Invited: {total_invited}")
-        )
+        self.stdout.write(self.style.SUCCESS(f"{prefix}✅ Invited: {total_invited}"))
         if total_no_email:
-            self.stdout.write(
-                self.style.WARNING(f"{prefix}⚠️  Bez emaila (ručna predaja): {total_no_email}")
-            )
+            self.stdout.write(self.style.WARNING(f"{prefix}⚠️  Bez emaila (ručna predaja): {total_no_email}"))
         if total_skipped:
-            self.stdout.write(
-                self.style.ERROR(f"{prefix}❌ Greške: {total_skipped}")
-            )
+            self.stdout.write(self.style.ERROR(f"{prefix}❌ Greške: {total_skipped}"))
 
         if no_email_list and not dry_run:
             self.stdout.write("\n" + self.style.WARNING("KORISNICI BEZ EMAILA — ručno predaj lozinke:"))

@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0025_add_opg_udruga_business_types'),
-        ('eracun', '0005_remove_eracun_booked_invoice_remove_eracun_direction_and_more'),
+        ("companies", "0025_add_opg_udruga_business_types"),
+        ("eracun", "0005_remove_eracun_booked_invoice_remove_eracun_direction_and_more"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='eracun',
-            unique_together={('company', 'invoice_number')},
+            name="eracun",
+            unique_together={("company", "invoice_number")},
         ),
     ]

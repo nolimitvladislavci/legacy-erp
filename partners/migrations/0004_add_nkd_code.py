@@ -5,16 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0012_add_swift_bic'),
-        ('partners', '0003_partner_portal_token'),
+        ("companies", "0012_add_swift_bic"),
+        ("partners", "0003_partner_portal_token"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='partner',
-            name='nkd_code',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.nkdcode', verbose_name='NKD djelatnost'),
+            model_name="partner",
+            name="nkd_code",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="companies.nkdcode",
+                verbose_name="NKD djelatnost",
+            ),
         ),
     ]

@@ -14,15 +14,17 @@ Sigurnosni slojevi:
 Import u warehouse_views.py:
   from .warehouse_safety import _check_fefo, _check_weight_tolerance, _check_anti_crush
 """
+
 from decimal import Decimal
 
 # ── Konstante ─────────────────────────────────────────────────────────────────
-WEIGHT_TOLERANCE = Decimal('0.20')  # ±20% dozvoljena devijacija
+WEIGHT_TOLERANCE = Decimal("0.20")  # ±20% dozvoljena devijacija
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 6.1 FEFO — First Expired First Out
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def _check_fefo(product, scanned_expiry, oldest_available):
     """
@@ -42,26 +44,27 @@ def _check_fefo(product, scanned_expiry, oldest_available):
     """
     if oldest_available is None:
         # Nema starije šarže u sustavu — sken je ok
-        return True, ''
+        return True, ""
 
     if scanned_expiry > oldest_available:
         return False, (
             'FEFO BLOKADA: Proizvod "%s" ima stariju sarzu '
-            '(rok: %s). '
-            'Skenirani rok (%s) nije najstariji. '
-            'Potrebno je uzeti sarzu s ranijim rokom trajanja.'
+            "(rok: %s). "
+            "Skenirani rok (%s) nije najstariji. "
+            "Potrebno je uzeti sarzu s ranijim rokom trajanja."
             % (
                 product.name,
-                oldest_available.strftime('%d.%m.%Y'),
-                scanned_expiry.strftime('%d.%m.%Y'),
+                oldest_available.strftime("%d.%m.%Y"),
+                scanned_expiry.strftime("%d.%m.%Y"),
             )
         )
-    return True, ''
+    return True, ""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 6.2 IoT Vaga — Weight Tolerance
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def _check_weight_tolerance(actual_qty, ordered_qty):
     """
@@ -75,22 +78,22 @@ def _check_weight_tolerance(actual_qty, ordered_qty):
         (ok: bool, error_message: str)
     """
     if ordered_qty <= 0:
-        return True, ''
+        return True, ""
     deviation = abs(actual_qty - ordered_qty) / ordered_qty
     if deviation > WEIGHT_TOLERANCE:
         pct = int(deviation * 100)
         return False, (
-            'Tolerancija premasena: %s vs naruceno %s '
-            '(%d%% odstupanje, max %d%%). '
-            'Koristite "force=1" za override.'
-            % (actual_qty, ordered_qty, pct, int(WEIGHT_TOLERANCE * 100))
+            "Tolerancija premasena: %s vs naruceno %s "
+            "(%d%% odstupanje, max %d%%). "
+            'Koristite "force=1" za override.' % (actual_qty, ordered_qty, pct, int(WEIGHT_TOLERANCE * 100))
         )
-    return True, ''
+    return True, ""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 6.3 Anti-Crush — Heavy over Fragile
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def _check_anti_crush(rollwagen, new_product):
     """
@@ -104,10 +107,10 @@ def _check_anti_crush(rollwagen, new_product):
         (ok: bool, error_message: str)
     """
     if not new_product.is_heavy:
-        return True, ''
+        return True, ""
 
     if not rollwagen.bound_order:
-        return True, ''
+        return True, ""
 
     fragile_in_rw = rollwagen.bound_order.items.filter(
         product__is_fragile=True,
@@ -116,16 +119,16 @@ def _check_anti_crush(rollwagen, new_product):
 
     if fragile_in_rw:
         return False, (
-            'ANTI-CRUSH BLOKADA: Rollwagen %s vec sadrzi krhke proizvode. '
-            'Teske stavke (%s) ne mogu ici u isti rollwagen.'
-            % (rollwagen.qr_code, new_product.name)
+            "ANTI-CRUSH BLOKADA: Rollwagen %s vec sadrzi krhke proizvode. "
+            "Teske stavke (%s) ne mogu ici u isti rollwagen." % (rollwagen.qr_code, new_product.name)
         )
-    return True, ''
+    return True, ""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 6.4 Genesis Scan — IFCO Packaging Lock
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 def _check_genesis_packaging(rollwagen, required_ifco_count=1):
     """
@@ -140,13 +143,12 @@ def _check_genesis_packaging(rollwagen, required_ifco_count=1):
         (ok: bool, error_message: str)
     """
     packaging = rollwagen.packaging_count or {}
-    ifco_scanned = packaging.get('ifco', 0)
+    ifco_scanned = packaging.get("ifco", 0)
 
     if ifco_scanned < required_ifco_count:
         return False, (
-            'GENESIS SCAN BLOKADA: Rollwagen %s — skenirano %d IFCO '
-            '(potrebno minimum %d). '
-            'Skenirajte ambalazu prije zaključavanja narudzbe.'
-            % (rollwagen.qr_code, ifco_scanned, required_ifco_count)
+            "GENESIS SCAN BLOKADA: Rollwagen %s — skenirano %d IFCO "
+            "(potrebno minimum %d). "
+            "Skenirajte ambalazu prije zaključavanja narudzbe." % (rollwagen.qr_code, ifco_scanned, required_ifco_count)
         )
-    return True, ''
+    return True, ""

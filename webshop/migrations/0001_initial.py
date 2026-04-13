@@ -5,72 +5,137 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('partners', '0001_initial'),
+        ("partners", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Product',
+            name="Product",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sku', models.CharField(max_length=50, unique=True, verbose_name='SKU')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('category', models.CharField(choices=[('equipment', 'Oprema'), ('supplement', 'Suplementi'), ('clothing', 'Odjeca'), ('accessory', 'Dodaci'), ('other', 'Ostalo')], default='other', max_length=20, verbose_name='Kategorija')),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Cijena')),
-                ('stock', models.IntegerField(default=0, verbose_name='Zaliha')),
-                ('is_rental', models.BooleanField(default=False, verbose_name='Za iznajmljivanje')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivno')),
-                ('image', models.ImageField(blank=True, upload_to='products/', verbose_name='Slika')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("sku", models.CharField(max_length=50, unique=True, verbose_name="SKU")),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("equipment", "Oprema"),
+                            ("supplement", "Suplementi"),
+                            ("clothing", "Odjeca"),
+                            ("accessory", "Dodaci"),
+                            ("other", "Ostalo"),
+                        ],
+                        default="other",
+                        max_length=20,
+                        verbose_name="Kategorija",
+                    ),
+                ),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Cijena")),
+                ("stock", models.IntegerField(default=0, verbose_name="Zaliha")),
+                ("is_rental", models.BooleanField(default=False, verbose_name="Za iznajmljivanje")),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivno")),
+                ("image", models.ImageField(blank=True, upload_to="products/", verbose_name="Slika")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Proizvod',
-                'verbose_name_plural': 'Proizvodi',
-                'db_table': 'webshop_product',
-                'ordering': ['name'],
+                "verbose_name": "Proizvod",
+                "verbose_name_plural": "Proizvodi",
+                "db_table": "webshop_product",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_number', models.CharField(max_length=50, unique=True, verbose_name='Broj narudzbe')),
-                ('status', models.CharField(choices=[('pending', 'Na cekanju'), ('confirmed', 'Potvrdjeno'), ('processing', 'U obradi'), ('shipped', 'Poslano'), ('delivered', 'Dostavljeno'), ('cancelled', 'Otkazano')], default='pending', max_length=20, verbose_name='Status')),
-                ('total_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupni iznos')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomene')),
-                ('shipping_address', models.TextField(blank=True, verbose_name='Adresa dostave')),
-                ('shipping_method', models.CharField(choices=[('osobni_preuzimanje', 'Osobno preuzimanje'), ('dostava', 'Dostava'), ('dpd', 'DPD'), ('hp', 'Hrvatska Posta')], default='osobni_preuzimanje', max_length=50, verbose_name='Nacin dostave')),
-                ('tracking_number', models.CharField(blank=True, max_length=100, verbose_name='Broj pracenja')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('customer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='partners.partner', verbose_name='Kupac')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("order_number", models.CharField(max_length=50, unique=True, verbose_name="Broj narudzbe")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Na cekanju"),
+                            ("confirmed", "Potvrdjeno"),
+                            ("processing", "U obradi"),
+                            ("shipped", "Poslano"),
+                            ("delivered", "Dostavljeno"),
+                            ("cancelled", "Otkazano"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "total_amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Ukupni iznos"),
+                ),
+                ("notes", models.TextField(blank=True, verbose_name="Napomene")),
+                ("shipping_address", models.TextField(blank=True, verbose_name="Adresa dostave")),
+                (
+                    "shipping_method",
+                    models.CharField(
+                        choices=[
+                            ("osobni_preuzimanje", "Osobno preuzimanje"),
+                            ("dostava", "Dostava"),
+                            ("dpd", "DPD"),
+                            ("hp", "Hrvatska Posta"),
+                        ],
+                        default="osobni_preuzimanje",
+                        max_length=50,
+                        verbose_name="Nacin dostave",
+                    ),
+                ),
+                ("tracking_number", models.CharField(blank=True, max_length=100, verbose_name="Broj pracenja")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "customer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="orders",
+                        to="partners.partner",
+                        verbose_name="Kupac",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Narudzba',
-                'verbose_name_plural': 'Narudzbe',
-                'db_table': 'webshop_order',
-                'ordering': ['-created_at'],
+                "verbose_name": "Narudzba",
+                "verbose_name_plural": "Narudzbe",
+                "db_table": "webshop_order",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='OrderItem',
+            name="OrderItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField(default=1, verbose_name='Kolicina')),
-                ('unit_price', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Jedinicna cijena')),
-                ('total_price', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Ukupno')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='webshop.order', verbose_name='Narudzba')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='webshop.product', verbose_name='Proizvod')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("quantity", models.IntegerField(default=1, verbose_name="Kolicina")),
+                ("unit_price", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Jedinicna cijena")),
+                ("total_price", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Ukupno")),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="webshop.order",
+                        verbose_name="Narudzba",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="webshop.product", verbose_name="Proizvod"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka narudzbe',
-                'verbose_name_plural': 'Stavke narudzbe',
-                'db_table': 'webshop_orderitem',
+                "verbose_name": "Stavka narudzbe",
+                "verbose_name_plural": "Stavke narudzbe",
+                "db_table": "webshop_orderitem",
             },
         ),
     ]

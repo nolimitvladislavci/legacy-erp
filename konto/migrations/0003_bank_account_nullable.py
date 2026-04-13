@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('konto', '0002_taxperiod_taxlinedetail'),
+        ("konto", "0002_taxperiod_taxlinedetail"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='banktransaction',
-            name='bank_account',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='konto.bankaccount'),
+            model_name="banktransaction",
+            name="bank_account",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="transactions",
+                to="konto.bankaccount",
+            ),
         ),
     ]

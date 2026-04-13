@@ -12,6 +12,7 @@ FINA zahtijeva XAdES-BES profil (Basic Electronic Signature):
 
 Zamjenjuje stari sign_xml() koji je radio goli XML-DSIG.
 """
+
 import logging
 
 from lxml import etree

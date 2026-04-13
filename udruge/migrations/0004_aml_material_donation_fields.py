@@ -4,40 +4,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udruge', '0003_membership_plan_subscription'),
+        ("udruge", "0003_membership_plan_subscription"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='donacija',
-            name='aml_flag_reason',
-            field=models.CharField(blank=True, max_length=255, verbose_name='AML razlog'),
+            model_name="donacija",
+            name="aml_flag_reason",
+            field=models.CharField(blank=True, max_length=255, verbose_name="AML razlog"),
         ),
         migrations.AddField(
-            model_name='donacija',
-            name='aml_flagged_at',
+            model_name="donacija",
+            name="aml_flagged_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='donacija',
-            name='aml_status',
-            field=models.CharField(choices=[('clear', 'Cisto'), ('review', 'Na pregledu'), ('kyc_pending', 'Ceka KYC provjeru'), ('blocked', 'Blokirano'), ('reported', 'Prijavljeno USKOK-u')], default='clear', max_length=20, verbose_name='AML status'),
+            model_name="donacija",
+            name="aml_status",
+            field=models.CharField(
+                choices=[
+                    ("clear", "Cisto"),
+                    ("review", "Na pregledu"),
+                    ("kyc_pending", "Ceka KYC provjeru"),
+                    ("blocked", "Blokirano"),
+                    ("reported", "Prijavljeno USKOK-u"),
+                ],
+                default="clear",
+                max_length=20,
+                verbose_name="AML status",
+            ),
         ),
         migrations.AddField(
-            model_name='donacija',
-            name='is_material',
-            field=models.BooleanField(default=False, help_text='Roba/oprema umjesto novca', verbose_name='Materijalna donacija'),
+            model_name="donacija",
+            name="is_material",
+            field=models.BooleanField(
+                default=False, help_text="Roba/oprema umjesto novca", verbose_name="Materijalna donacija"
+            ),
         ),
         migrations.AddField(
-            model_name='donacija',
-            name='material_description',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Opis robe'),
+            model_name="donacija",
+            name="material_description",
+            field=models.CharField(blank=True, max_length=255, verbose_name="Opis robe"),
         ),
         migrations.AddField(
-            model_name='donacija',
-            name='material_fair_value',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Fer trzisna vrijednost (EUR)'),
+            model_name="donacija",
+            name="material_fair_value",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="Fer trzisna vrijednost (EUR)"
+            ),
         ),
     ]

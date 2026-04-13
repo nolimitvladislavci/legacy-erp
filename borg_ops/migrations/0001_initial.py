@@ -6,55 +6,88 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CardActivity',
+            name="CardActivity",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.CharField(db_index=True, max_length=50)),
-                ('action', models.CharField(max_length=200)),
-                ('old_value', models.CharField(blank=True, max_length=100)),
-                ('new_value', models.CharField(blank=True, max_length=100)),
-                ('note', models.TextField(blank=True)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='card_activities', to='contenttypes.contenttype')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("object_id", models.CharField(db_index=True, max_length=50)),
+                ("action", models.CharField(max_length=200)),
+                ("old_value", models.CharField(blank=True, max_length=100)),
+                ("new_value", models.CharField(blank=True, max_length=100)),
+                ("note", models.TextField(blank=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="card_activities",
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Card Activity',
-                'verbose_name_plural': 'Card Activities',
-                'db_table': 'card_activity',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['content_type', 'object_id', '-created_at'], name='idx_cardact_ct_obj_date')],
+                "verbose_name": "Card Activity",
+                "verbose_name_plural": "Card Activities",
+                "db_table": "card_activity",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(fields=["content_type", "object_id", "-created_at"], name="idx_cardact_ct_obj_date")
+                ],
             },
         ),
         migrations.CreateModel(
-            name='StatusTimestamp',
+            name="StatusTimestamp",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.CharField(db_index=True, max_length=50)),
-                ('status', models.CharField(max_length=30)),
-                ('entered_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('exited_at', models.DateTimeField(blank=True, null=True)),
-                ('duration_seconds', models.PositiveIntegerField(blank=True, null=True)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("object_id", models.CharField(db_index=True, max_length=50)),
+                ("status", models.CharField(max_length=30)),
+                ("entered_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("exited_at", models.DateTimeField(blank=True, null=True)),
+                ("duration_seconds", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'SLA Status Timestamp',
-                'verbose_name_plural': 'SLA Status Timestamps',
-                'db_table': 'sla_status_timestamp',
-                'ordering': ['-entered_at'],
-                'indexes': [models.Index(fields=['content_type', 'object_id', 'status', 'exited_at'], name='idx_sla_ct_obj_status_exit')],
+                "verbose_name": "SLA Status Timestamp",
+                "verbose_name_plural": "SLA Status Timestamps",
+                "db_table": "sla_status_timestamp",
+                "ordering": ["-entered_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["content_type", "object_id", "status", "exited_at"], name="idx_sla_ct_obj_status_exit"
+                    )
+                ],
             },
         ),
     ]

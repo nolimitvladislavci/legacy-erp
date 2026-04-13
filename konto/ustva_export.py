@@ -16,13 +16,14 @@ Kennzahlen (KZ) Mapping:
   KZ 67: Vorsteuerbeträge nach §13b
   KZ 83: Verbleibende USt-Vorauszahlung (+) / Überschuss (-)
 """
+
 import xml.etree.ElementTree as ET
 from decimal import ROUND_HALF_UP, Decimal
 from xml.dom import minidom
 
 
 def _q(val):
-    return Decimal(str(val or 0)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    return Decimal(str(val or 0)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def _cents(val):
@@ -46,72 +47,73 @@ def generate_ustva(company, year, month, tax_period=None):
     if not tax_period:
         try:
             tax_period = TaxPeriod.objects.get(
-                company=company, period_type='monthly',
-                year=year, month=month,
+                company=company,
+                period_type="monthly",
+                year=year,
+                month=month,
             )
         except TaxPeriod.DoesNotExist:
             from konto.services_file import calculate_vat_period
-            tax_period = calculate_vat_period(company, 'monthly', year, month)
+
+            tax_period = calculate_vat_period(company, "monthly", year, month)
 
     # Get rate breakdown
     details = TaxLineDetail.objects.filter(period=tax_period)
 
     kz = {
         # Abschnitt I: Steuerpflichtige Lieferungen (Bemessungsgrundlage)
-        'kz81_base': Decimal('0'),   # 19% Bemessungsgrundlage
-        'kz81_tax': Decimal('0'),    # 19% Steuer
-        'kz86_base': Decimal('0'),   # 7% Bemessungsgrundlage
-        'kz86_tax': Decimal('0'),    # 7% Steuer
-        'kz35_base': Decimal('0'),   # andere Steuersätze
-        'kz35_tax': Decimal('0'),
-        'kz77_base': Decimal('0'),   # steuerfreie EU-Lieferungen
-        'kz76_base': Decimal('0'),   # steuerfreie sonstige
-
+        "kz81_base": Decimal("0"),  # 19% Bemessungsgrundlage
+        "kz81_tax": Decimal("0"),  # 19% Steuer
+        "kz86_base": Decimal("0"),  # 7% Bemessungsgrundlage
+        "kz86_tax": Decimal("0"),  # 7% Steuer
+        "kz35_base": Decimal("0"),  # andere Steuersätze
+        "kz35_tax": Decimal("0"),
+        "kz77_base": Decimal("0"),  # steuerfreie EU-Lieferungen
+        "kz76_base": Decimal("0"),  # steuerfreie sonstige
         # Abschnitt II: Vorsteuer
-        'kz66': Decimal('0'),        # Vorsteuer 19%
-        'kz61': Decimal('0'),        # Vorsteuer 7%
-        'kz62': Decimal('0'),        # Vorsteuer innergemeinschaftlicher Erwerb
-        'kz67': Decimal('0'),        # Vorsteuer §13b
-
+        "kz66": Decimal("0"),  # Vorsteuer 19%
+        "kz61": Decimal("0"),  # Vorsteuer 7%
+        "kz62": Decimal("0"),  # Vorsteuer innergemeinschaftlicher Erwerb
+        "kz67": Decimal("0"),  # Vorsteuer §13b
         # Abschnitt III: Ergebnis
-        'kz83': Decimal('0'),        # Vorauszahlung (+) / Überschuss (-)
+        "kz83": Decimal("0"),  # Vorauszahlung (+) / Überschuss (-)
     }
 
     for d in details:
         rate = d.tax_rate
-        if rate == Decimal('19') or rate == Decimal('19.00'):
-            kz['kz81_base'] += d.revenue_base
-            kz['kz81_tax'] += d.output_vat
-        elif rate == Decimal('7') or rate == Decimal('7.00'):
-            kz['kz86_base'] += d.revenue_base
-            kz['kz86_tax'] += d.output_vat
-        elif rate == Decimal('0') or rate == Decimal('0.00'):
-            kz['kz76_base'] += d.revenue_base
+        if rate == Decimal("19") or rate == Decimal("19.00"):
+            kz["kz81_base"] += d.revenue_base
+            kz["kz81_tax"] += d.output_vat
+        elif rate == Decimal("7") or rate == Decimal("7.00"):
+            kz["kz86_base"] += d.revenue_base
+            kz["kz86_tax"] += d.output_vat
+        elif rate == Decimal("0") or rate == Decimal("0.00"):
+            kz["kz76_base"] += d.revenue_base
         else:
-            kz['kz35_base'] += d.revenue_base
-            kz['kz35_tax'] += d.output_vat
+            kz["kz35_base"] += d.revenue_base
+            kz["kz35_tax"] += d.output_vat
 
     # Total output (Umsatzsteuer)
-    total_ust = kz['kz81_tax'] + kz['kz86_tax'] + kz['kz35_tax']
+    total_ust = kz["kz81_tax"] + kz["kz86_tax"] + kz["kz35_tax"]
 
     # Input VAT (Vorsteuer) — split by rate from ledger
     # For now: total input from TaxPeriod, split proportionally
     total_vorsteuer = tax_period.total_input_vat
-    kz['kz66'] = total_vorsteuer  # Simplified: all as 19% Vorsteuer
+    kz["kz66"] = total_vorsteuer  # Simplified: all as 19% Vorsteuer
 
     # Vorauszahlung
-    kz['kz83'] = total_ust - total_vorsteuer
+    kz["kz83"] = total_ust - total_vorsteuer
 
     # Quantize all
     for k in kz:
         kz[k] = _q(kz[k])
 
-    kz['company'] = company
-    kz['year'] = year
-    kz['month'] = month
-    kz['total_ust'] = _q(total_ust)
-    kz['total_vorsteuer'] = _q(total_vorsteuer)
-    kz['filing_deadline'] = f"10.{month + 1 if month < 12 else 1:02d}.{year if month < 12 else year + 1}"
+    kz["company"] = company
+    kz["year"] = year
+    kz["month"] = month
+    kz["total_ust"] = _q(total_ust)
+    kz["total_vorsteuer"] = _q(total_vorsteuer)
+    kz["filing_deadline"] = f"10.{month + 1 if month < 12 else 1:02d}.{year if month < 12 else year + 1}"
 
     return kz
 
@@ -124,67 +126,67 @@ def generate_ustva_xml(company, year, month, kz_data):
     tax software (DATEV, Lexware, etc). Direct ELSTER submission requires
     ERiC library integration (separate module).
     """
-    root = ET.Element('Anmeldungssteuern')
-    root.set('art', 'UStVA')
-    root.set('version', '202401')
+    root = ET.Element("Anmeldungssteuern")
+    root.set("art", "UStVA")
+    root.set("version", "202401")
 
     # Erstellungsdaten
-    erstellung = ET.SubElement(root, 'DatenLieferant')
-    ET.SubElement(erstellung, 'Name').text = company.name
-    ET.SubElement(erstellung, 'Strasse').text = getattr(company, 'address', '') or ''
-    ET.SubElement(erstellung, 'PLZ').text = getattr(company, 'zip_code', '') or ''
-    ET.SubElement(erstellung, 'Ort').text = getattr(company, 'city', '') or ''
+    erstellung = ET.SubElement(root, "DatenLieferant")
+    ET.SubElement(erstellung, "Name").text = company.name
+    ET.SubElement(erstellung, "Strasse").text = getattr(company, "address", "") or ""
+    ET.SubElement(erstellung, "PLZ").text = getattr(company, "zip_code", "") or ""
+    ET.SubElement(erstellung, "Ort").text = getattr(company, "city", "") or ""
 
     # Steuerfall
-    steuerfall = ET.SubElement(root, 'Steuerfall')
-    ET.SubElement(steuerfall, 'Steuernummer').text = company.oib or ''
-    ET.SubElement(steuerfall, 'Zeitraum').text = f"{year}{month:02d}"
-    ET.SubElement(steuerfall, 'Jahr').text = str(year)
-    ET.SubElement(steuerfall, 'Monat').text = str(month)
+    steuerfall = ET.SubElement(root, "Steuerfall")
+    ET.SubElement(steuerfall, "Steuernummer").text = company.oib or ""
+    ET.SubElement(steuerfall, "Zeitraum").text = f"{year}{month:02d}"
+    ET.SubElement(steuerfall, "Jahr").text = str(year)
+    ET.SubElement(steuerfall, "Monat").text = str(month)
 
     # Kennzahlen
-    kennzahlen = ET.SubElement(root, 'Kennzahlen')
+    kennzahlen = ET.SubElement(root, "Kennzahlen")
 
     def _add_kz(parent, kz_nr, base=None, steuer=None):
-        el = ET.SubElement(parent, 'Kz')
-        el.set('nr', str(kz_nr))
+        el = ET.SubElement(parent, "Kz")
+        el.set("nr", str(kz_nr))
         if base is not None:
-            ET.SubElement(el, 'Bemessungsgrundlage').text = f"{base:.2f}"
+            ET.SubElement(el, "Bemessungsgrundlage").text = f"{base:.2f}"
         if steuer is not None:
-            ET.SubElement(el, 'Steuer').text = f"{steuer:.2f}"
+            ET.SubElement(el, "Steuer").text = f"{steuer:.2f}"
 
     # I. Steuerpflichtige Lieferungen
-    if kz_data['kz81_base']:
-        _add_kz(kennzahlen, 81, base=kz_data['kz81_base'], steuer=kz_data['kz81_tax'])
-    if kz_data['kz86_base']:
-        _add_kz(kennzahlen, 86, base=kz_data['kz86_base'], steuer=kz_data['kz86_tax'])
-    if kz_data['kz35_base']:
-        _add_kz(kennzahlen, 35, base=kz_data['kz35_base'], steuer=kz_data['kz35_tax'])
-    if kz_data['kz77_base']:
-        _add_kz(kennzahlen, 77, base=kz_data['kz77_base'])
-    if kz_data['kz76_base']:
-        _add_kz(kennzahlen, 76, base=kz_data['kz76_base'])
+    if kz_data["kz81_base"]:
+        _add_kz(kennzahlen, 81, base=kz_data["kz81_base"], steuer=kz_data["kz81_tax"])
+    if kz_data["kz86_base"]:
+        _add_kz(kennzahlen, 86, base=kz_data["kz86_base"], steuer=kz_data["kz86_tax"])
+    if kz_data["kz35_base"]:
+        _add_kz(kennzahlen, 35, base=kz_data["kz35_base"], steuer=kz_data["kz35_tax"])
+    if kz_data["kz77_base"]:
+        _add_kz(kennzahlen, 77, base=kz_data["kz77_base"])
+    if kz_data["kz76_base"]:
+        _add_kz(kennzahlen, 76, base=kz_data["kz76_base"])
 
     # II. Vorsteuer
-    if kz_data['kz66']:
-        _add_kz(kennzahlen, 66, steuer=kz_data['kz66'])
-    if kz_data['kz61']:
-        _add_kz(kennzahlen, 61, steuer=kz_data['kz61'])
-    if kz_data['kz62']:
-        _add_kz(kennzahlen, 62, steuer=kz_data['kz62'])
-    if kz_data['kz67']:
-        _add_kz(kennzahlen, 67, steuer=kz_data['kz67'])
+    if kz_data["kz66"]:
+        _add_kz(kennzahlen, 66, steuer=kz_data["kz66"])
+    if kz_data["kz61"]:
+        _add_kz(kennzahlen, 61, steuer=kz_data["kz61"])
+    if kz_data["kz62"]:
+        _add_kz(kennzahlen, 62, steuer=kz_data["kz62"])
+    if kz_data["kz67"]:
+        _add_kz(kennzahlen, 67, steuer=kz_data["kz67"])
 
     # III. Vorauszahlung
-    ergebnis = ET.SubElement(root, 'Ergebnis')
-    ET.SubElement(ergebnis, 'Kz83').text = f"{kz_data['kz83']:.2f}"
+    ergebnis = ET.SubElement(root, "Ergebnis")
+    ET.SubElement(ergebnis, "Kz83").text = f"{kz_data['kz83']:.2f}"
 
     # Pretty print
-    raw = ET.tostring(root, encoding='unicode')
+    raw = ET.tostring(root, encoding="unicode")
     xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + raw
     try:
         dom = minidom.parseString(xml_str)
-        xml_str = dom.toprettyxml(indent='  ')
+        xml_str = dom.toprettyxml(indent="  ")
     except Exception:
         pass
 
@@ -219,7 +221,7 @@ def format_ustva_text(kz_data):
         "III. ERGEBNIS",
     ]
 
-    kz83 = kz_data['kz83']
+    kz83 = kz_data["kz83"]
     if kz83 > 0:
         lines.append(f"  KZ 83  VORAUSZAHLUNG:          {kz83:>12.2f} EUR")
     elif kz83 < 0:
@@ -248,10 +250,11 @@ def is_kleinunternehmer(company):
     revenue_last_year = (
         Invoice.objects.filter(
             company=company,
-            doctype__in=['R', 'A', 'GS', 'IRA'],
-            status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+            doctype__in=["R", "A", "GS", "IRA"],
+            status__in=["PAID", "SENT", "OVERDUE", "UNPAID"],
             date_issued__year=last_year,
-        ).aggregate(t=Sum('subtotal'))['t'] or 0
+        ).aggregate(t=Sum("subtotal"))["t"]
+        or 0
     )
 
     return float(revenue_last_year) <= 22000
@@ -280,17 +283,40 @@ def generate_zm(company, year, quarter):
     # Find EU invoices via partner data
     eu_invoices = Invoice.objects.filter(
         company=company,
-        doctype__in=['R', 'A', 'GS', 'IRA'],
-        status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+        doctype__in=["R", "A", "GS", "IRA"],
+        status__in=["PAID", "SENT", "OVERDUE", "UNPAID"],
         date_issued__date__gte=date_from,
         date_issued__date__lte=date_to,
         partner__isnull=False,
-    ).select_related('partner')
+    ).select_related("partner")
 
     EU_COUNTRIES = {
-        'AT', 'BE', 'BG', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI',
-        'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
-        'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK',
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK",
     }
 
     # Aggregate by partner VAT ID
@@ -299,8 +325,8 @@ def generate_zm(company, year, quarter):
         p = inv.partner
         if not p:
             continue
-        country = getattr(p, 'country', '') or ''
-        vat_id = getattr(p, 'vat_id', '') or ''
+        country = getattr(p, "country", "") or ""
+        vat_id = getattr(p, "vat_id", "") or ""
 
         if country.upper() not in EU_COUNTRIES:
             continue
@@ -310,18 +336,18 @@ def generate_zm(company, year, quarter):
         key = vat_id or f"{country}-{p.oib or p.name}"
         if key not in entries:
             entries[key] = {
-                'vat_id': vat_id,
-                'country': country.upper(),
-                'partner_name': p.name,
-                'amount': 0,
+                "vat_id": vat_id,
+                "country": country.upper(),
+                "partner_name": p.name,
+                "amount": 0,
             }
-        entries[key]['amount'] += float(inv.subtotal or 0)
+        entries[key]["amount"] += float(inv.subtotal or 0)
 
     return {
-        'year': year,
-        'quarter': quarter,
-        'period': f"Q{quarter}/{year}",
-        'entries': sorted(entries.values(), key=lambda x: -x['amount']),
-        'total': sum(e['amount'] for e in entries.values()),
-        'count': len(entries),
+        "year": year,
+        "quarter": quarter,
+        "period": f"Q{quarter}/{year}",
+        "entries": sorted(entries.values(), key=lambda x: -x["amount"]),
+        "total": sum(e["amount"] for e in entries.values()),
+        "count": len(entries),
     }

@@ -6,4 +6,4 @@ from .models import *
 class InsurancePolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = InsurancePolicy
-        fields = '__all__'
+        fields = "__all__"

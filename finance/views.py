@@ -24,25 +24,34 @@ def transaction_list(request):
 
     qs = Transaction.objects.select_related("partner", "company", "document").order_by("-date")
     if q:
-        qs = qs.filter(Q(description__icontains=q)|Q(partner__name__icontains=q))
+        qs = qs.filter(Q(description__icontains=q) | Q(partner__name__icontains=q))
     if direction:
         qs = qs.filter(direction=direction)
     if company_id:
         qs = qs.filter(company_id=company_id)
 
-    total_in  = qs.filter(direction="income").aggregate(s=Sum("amount"))["s"] or 0
+    total_in = qs.filter(direction="income").aggregate(s=Sum("amount"))["s"] or 0
     total_out = qs.filter(direction="expense").aggregate(s=Sum("amount"))["s"] or 0
-    balance   = total_in - total_out
+    balance = total_in - total_out
 
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "finance/transaction_list.html", {
-        "page_obj": page, "q": q, "direction": direction, "company_id": company_id,
-        "total_in": total_in, "total_out": total_out, "balance": balance,
-        "companies": [get_user_company(request)] if get_user_company(request) else [],
-        "total": qs.count(),
-    })
+    return render(
+        request,
+        "finance/transaction_list.html",
+        {
+            "page_obj": page,
+            "q": q,
+            "direction": direction,
+            "company_id": company_id,
+            "total_in": total_in,
+            "total_out": total_out,
+            "balance": balance,
+            "companies": [get_user_company(request)] if get_user_company(request) else [],
+            "total": qs.count(),
+        },
+    )
 
 
 @require_permission("finance.create")
@@ -52,8 +61,8 @@ def transaction_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-                return redirect('finance:list')
+                messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+                return redirect("finance:list")
             partner = Partner.objects.get(pk=request.POST["partner"])
             t = Transaction(
                 company=company,
@@ -69,11 +78,15 @@ def transaction_create(request):
             return redirect("finance:list")
         except ObjectDoesNotExist as e:
             messages.error(request, str(e))
-    return render(request, "finance/transaction_form.html", {
-        "companies": [get_user_company(request)] if get_user_company(request) else [],
-        "partners": Partner.objects.filter(is_active=True).order_by("name"),
-        "action": "Nova transakcija",
-    })
+    return render(
+        request,
+        "finance/transaction_form.html",
+        {
+            "companies": [get_user_company(request)] if get_user_company(request) else [],
+            "partners": Partner.objects.filter(is_active=True).order_by("name"),
+            "action": "Nova transakcija",
+        },
+    )
 
 
 @require_permission("finance.delete")
@@ -110,95 +123,120 @@ def bank_import_csv(request):
 
     from core.company_utils import get_user_company
     from konto.models import BankAccount, BankTransaction
+
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('finance:list')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("finance:list")
     banks = BankAccount.objects.filter(company=company, is_active=True)
-    if request.method != 'POST':
-        return render(request, 'konto/bank_import.html', {'banks': banks})
-    bank_id = request.POST.get('bank_account')
-    csvfile = request.FILES.get('csvfile')
+    if request.method != "POST":
+        return render(request, "konto/bank_import.html", {"banks": banks})
+    bank_id = request.POST.get("bank_account")
+    csvfile = request.FILES.get("csvfile")
     if not bank_id or not csvfile:
-        messages.error(request, _('Odaberi ziro racun i CSV datoteku.'))
-        return render(request, 'konto/bank_import.html', {'banks': banks})
+        messages.error(request, _("Odaberi ziro racun i CSV datoteku."))
+        return render(request, "konto/bank_import.html", {"banks": banks})
     ba = get_object_or_404(BankAccount, pk=bank_id, company=company)
-    content = csvfile.read().decode('utf-8-sig', errors='replace')
-    delim = ';' if content.count(';') > content.count(',') else ','
+    content = csvfile.read().decode("utf-8-sig", errors="replace")
+    delim = ";" if content.count(";") > content.count(",") else ","
     reader = csv.DictReader(io.StringIO(content), delimiter=delim)
     hdrs = [h.strip().lower() for h in (reader.fieldnames or [])]
-    if any('buchungstag' in h for h in hdrs) and any('beguenstigter' in h or 'auftraggeber' in h for h in hdrs):
-        fmt = 'commerzbank'
-    elif any('buchungsdatum' in h for h in hdrs):
-        fmt = 'dkb'
+    if any("buchungstag" in h for h in hdrs) and any("beguenstigter" in h or "auftraggeber" in h for h in hdrs):
+        fmt = "commerzbank"
+    elif any("buchungsdatum" in h for h in hdrs):
+        fmt = "dkb"
     else:
-        fmt = 'generic'
+        fmt = "generic"
+
     def col(row, *keys):
         for k in keys:
             for rk in row:
-                if rk.strip().lower() == k.lower(): return (row[rk] or '').strip()
-        return ''
+                if rk.strip().lower() == k.lower():
+                    return (row[rk] or "").strip()
+        return ""
+
     def parse_amt(s):
-        s = s.strip().replace(' ','').replace('\u20ac','').replace('EUR','')
-        if ',' in s and '.' in s:
-            s = s.replace('.','').replace(',','.') if s.rfind(',') > s.rfind('.') else s.replace(',','')
-        elif ',' in s: s = s.replace(',','.')
-        try: return Decimal(s)
-        except Exception: return None
-    DATE_FMTS = ['%d.%m.%Y','%Y-%m-%d','%d/%m/%Y','%d.%m.%y']
+        s = s.strip().replace(" ", "").replace("\u20ac", "").replace("EUR", "")
+        if "," in s and "." in s:
+            s = s.replace(".", "").replace(",", ".") if s.rfind(",") > s.rfind(".") else s.replace(",", "")
+        elif "," in s:
+            s = s.replace(",", ".")
+        try:
+            return Decimal(s)
+        except Exception:
+            return None
+
+    DATE_FMTS = ["%d.%m.%Y", "%Y-%m-%d", "%d/%m/%Y", "%d.%m.%y"]
+
     def parse_date(s):
         for f in DATE_FMTS:
-            try: return _dt.datetime.strptime(s.strip(), f).date()
-            except Exception: pass
+            try:
+                return _dt.datetime.strptime(s.strip(), f).date()
+            except Exception:
+                pass
         return None
+
     batch_id = str(uuid.uuid4())[:8]
     created = skipped = errors = 0
     for row in reader:
         try:
-            if fmt == 'commerzbank':
-                d = col(row,'Buchungstag','buchungstag','Valutadatum')
-                cp = col(row,'Auftraggeber / Beguenstigter','Beguenstigter/Auftraggeber')
-                desc = col(row,'Verwendungszweck','verwendungszweck')
-                amt_s = col(row,'Betrag','betrag')
-                ref = col(row,'Referenz','Glaeubiger-ID')
-            elif fmt == 'dkb':
-                d = col(row,'Buchungsdatum','Buchungstag')
-                cp = col(row,'Beguenstigter / Auftraggeber','Glaeubiger')
-                desc = col(row,'Verwendungszweck')
-                amt_s = col(row,'Betrag (EUR)','Betrag')
-                ref = col(row,'Mandatsreferenz','Glaeubiger-ID')
+            if fmt == "commerzbank":
+                d = col(row, "Buchungstag", "buchungstag", "Valutadatum")
+                cp = col(row, "Auftraggeber / Beguenstigter", "Beguenstigter/Auftraggeber")
+                desc = col(row, "Verwendungszweck", "verwendungszweck")
+                amt_s = col(row, "Betrag", "betrag")
+                ref = col(row, "Referenz", "Glaeubiger-ID")
+            elif fmt == "dkb":
+                d = col(row, "Buchungsdatum", "Buchungstag")
+                cp = col(row, "Beguenstigter / Auftraggeber", "Glaeubiger")
+                desc = col(row, "Verwendungszweck")
+                amt_s = col(row, "Betrag (EUR)", "Betrag")
+                ref = col(row, "Mandatsreferenz", "Glaeubiger-ID")
             else:
-                d = col(row,'Datum','Date','Buchungstag','Valutadatum','buchungsdatum')
-                cp = col(row,'Name','Auftraggeber','Empfaenger','counterparty','Beguenstigter')
-                desc = col(row,'Verwendungszweck','Betreff','description','memo','Buchungstext')
-                amt_s = col(row,'Betrag','Amount','amount','Umsatz')
-                ref = col(row,'Referenz','Reference')
-            if not d or not amt_s: errors += 1; continue
+                d = col(row, "Datum", "Date", "Buchungstag", "Valutadatum", "buchungsdatum")
+                cp = col(row, "Name", "Auftraggeber", "Empfaenger", "counterparty", "Beguenstigter")
+                desc = col(row, "Verwendungszweck", "Betreff", "description", "memo", "Buchungstext")
+                amt_s = col(row, "Betrag", "Amount", "amount", "Umsatz")
+                ref = col(row, "Referenz", "Reference")
+            if not d or not amt_s:
+                errors += 1
+                continue
             txn_date = parse_date(d)
-            if not txn_date: errors += 1; continue
+            if not txn_date:
+                errors += 1
+                continue
             amount = parse_amt(amt_s)
-            if amount is None: errors += 1; continue
-            txn_type = 'inflow' if amount >= 0 else 'outflow'
+            if amount is None:
+                errors += 1
+                continue
+            txn_type = "inflow" if amount >= 0 else "outflow"
             amount = abs(amount)
-            ext_id = '{}_{}_{}'.format(d, amt_s, cp[:20])
+            ext_id = "{}_{}_{}".format(d, amt_s, cp[:20])
             if BankTransaction.objects.filter(bank_account=ba, external_id=ext_id).exists():
-                skipped += 1; continue
+                skipped += 1
+                continue
             BankTransaction.objects.create(
-                bank_account=ba, company=company,
-                transaction_date=txn_date, value_date=txn_date,
-                amount=amount, transaction_type=txn_type,
-                counterparty_name=cp[:300], description=desc[:500] if desc else '',
-                reference_number=ref[:100] if ref else '',
-                import_batch=batch_id, external_id=ext_id,
+                bank_account=ba,
+                company=company,
+                transaction_date=txn_date,
+                value_date=txn_date,
+                amount=amount,
+                transaction_type=txn_type,
+                counterparty_name=cp[:300],
+                description=desc[:500] if desc else "",
+                reference_number=ref[:100] if ref else "",
+                import_batch=batch_id,
+                external_id=ext_id,
             )
             created += 1
-        except Exception: errors += 1
+        except Exception:
+            errors += 1
     ba.recalculate_balance()
     if created:
-        messages.success(request, _('Importirano {} | Duplikati: {} | Greske: {}').format(created, skipped, errors))
+        messages.success(request, _("Importirano {} | Duplikati: {} | Greske: {}").format(created, skipped, errors))
     else:
-        messages.warning(request, _('Nema novih transakcija. Duplikati: {}, Greske: {}').format(skipped, errors))
-    return redirect('konto:transactions')
+        messages.warning(request, _("Nema novih transakcija. Duplikati: {}, Greske: {}").format(skipped, errors))
+    return redirect("konto:transactions")
 
 
 @login_required
@@ -209,20 +247,22 @@ def cashflow_api(request):
 
     from core.company_utils import get_user_company
     from konto.models import BankTransaction
+
     company = get_user_company(request)
     today = _dt.date.today()
     labels, inflows, outflows = [], [], []
     for i in range(5, -1, -1):
-        m_start = (today.replace(day=1) - _dt.timedelta(days=i*28)).replace(day=1)
+        m_start = (today.replace(day=1) - _dt.timedelta(days=i * 28)).replace(day=1)
         m_end = (m_start.replace(day=28) + _dt.timedelta(days=4)).replace(day=1)
         qs = BankTransaction.objects.filter(company=company, transaction_date__gte=m_start, transaction_date__lt=m_end)
-        inf = float(qs.filter(transaction_type='inflow').aggregate(s=Sum('amount'))['s'] or 0)
-        out = float(qs.filter(transaction_type='outflow').aggregate(s=Sum('amount'))['s'] or 0)
+        inf = float(qs.filter(transaction_type="inflow").aggregate(s=Sum("amount"))["s"] or 0)
+        out = float(qs.filter(transaction_type="outflow").aggregate(s=Sum("amount"))["s"] or 0)
         labels.append(m_start.strftime("%b '%y"))
         inflows.append(inf)
         outflows.append(out)
     from django.http import JsonResponse
-    return JsonResponse({'labels': labels, 'inflows': inflows, 'outflows': outflows})
+
+    return JsonResponse({"labels": labels, "inflows": inflows, "outflows": outflows})
 
 
 @login_required
@@ -234,14 +274,16 @@ def report_pnl_pdf(request):
 
     from core.company_utils import get_user_company
     from konto import services
+
     company = get_user_company(request)
     if not company:
         from django.contrib import messages
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('konto:report_pnl')
+
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("konto:report_pnl")
     today = timezone.now().date()
-    date_from = request.GET.get('from', str(_dt.date(today.year, 1, 1)))
-    date_to = request.GET.get('to', str(today))
+    date_from = request.GET.get("from", str(_dt.date(today.year, 1, 1)))
+    date_to = request.GET.get("to", str(today))
     try:
         df = _dt.date.fromisoformat(date_from)
         dt = _dt.date.fromisoformat(date_to)
@@ -249,20 +291,29 @@ def report_pnl_pdf(request):
         df = _dt.date(today.year, 1, 1)
         dt = today
     pnl = services.get_profit_loss(company, df, dt)
-    html = render(request, 'konto/report_pnl_pdf.html', {
-        'report': pnl, 'date_from': str(df), 'date_to': str(dt),
-        'company': company, 'today': today,
-    }).content.decode('utf-8')
+    html = render(
+        request,
+        "konto/report_pnl_pdf.html",
+        {
+            "report": pnl,
+            "date_from": str(df),
+            "date_to": str(dt),
+            "company": company,
+            "today": today,
+        },
+    ).content.decode("utf-8")
     try:
         import weasyprint
-        pdf = weasyprint.HTML(string=html, base_url=request.build_absolute_uri('/')).write_pdf()
-        resp = HttpResponse(pdf, content_type='application/pdf')
-        resp['Content-Disposition'] = 'attachment; filename="RDG_{}-{}.pdf"'.format(df, dt)
+
+        pdf = weasyprint.HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
+        resp = HttpResponse(pdf, content_type="application/pdf")
+        resp["Content-Disposition"] = 'attachment; filename="RDG_{}-{}.pdf"'.format(df, dt)
         return resp
     except (ValueError, KeyError) as e:
         from django.contrib import messages
-        messages.error(request, _('PDF greska: {}').format(e))
-        return redirect('konto:report_pnl')
+
+        messages.error(request, _("PDF greska: {}").format(e))
+        return redirect("konto:report_pnl")
 
 
 @login_required
@@ -272,29 +323,37 @@ def report_vat_pdf(request, pk):
 
     from core.company_utils import get_user_company
     from konto.models import TaxPeriod
+
     company = get_user_company(request)
     period = get_object_or_404(TaxPeriod, pk=pk, company=company)
-    html = render(request, 'konto/report_vat_pdf.html', {
-        'period': period,
-        'lines': period.line_details.all().order_by('-tax_rate'),
-        'company': company,
-        'today': timezone.now().date(),
-    }).content.decode('utf-8')
+    html = render(
+        request,
+        "konto/report_vat_pdf.html",
+        {
+            "period": period,
+            "lines": period.line_details.all().order_by("-tax_rate"),
+            "company": company,
+            "today": timezone.now().date(),
+        },
+    ).content.decode("utf-8")
     try:
         import weasyprint
-        pdf = weasyprint.HTML(string=html, base_url=request.build_absolute_uri('/')).write_pdf()
-        resp = HttpResponse(pdf, content_type='application/pdf')
-        resp['Content-Disposition'] = 'attachment; filename="PDV_{}.pdf"'.format(period)
+
+        pdf = weasyprint.HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
+        resp = HttpResponse(pdf, content_type="application/pdf")
+        resp["Content-Disposition"] = 'attachment; filename="PDV_{}.pdf"'.format(period)
         return resp
     except (ValueError, KeyError) as e:
         from django.contrib import messages
-        messages.error(request, _('PDF greska: {}').format(e))
-        return redirect('konto:report_vat')
+
+        messages.error(request, _("PDF greska: {}").format(e))
+        return redirect("konto:report_vat")
 
 
 # Dodati u finance/views.py — novi view za XML import (camt.053)
 # + novi view za pain.001 download
 # + novi view za discrepancies lista
+
 
 @login_required
 def bank_import_xml(request):
@@ -313,23 +372,23 @@ def bank_import_xml(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('finance:list')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("finance:list")
 
     banks = BankAccount.objects.filter(company=company, is_active=True)
 
-    if request.method != 'POST':
-        return render(request, 'konto/bank_import_xml.html', {'banks': banks})
+    if request.method != "POST":
+        return render(request, "konto/bank_import_xml.html", {"banks": banks})
 
-    xmlfile = request.FILES.get('xmlfile')
+    xmlfile = request.FILES.get("xmlfile")
     if not xmlfile:
-        messages.error(request, _('Odaberi XML datoteku.'))
-        return render(request, 'konto/bank_import_xml.html', {'banks': banks})
+        messages.error(request, _("Odaberi XML datoteku."))
+        return render(request, "konto/bank_import_xml.html", {"banks": banks})
 
     # Validacija: max 10 MB
     if xmlfile.size > 10 * 1024 * 1024:
-        messages.error(request, _('Datoteka je prevelika (max 10 MB).'))
-        return render(request, 'konto/bank_import_xml.html', {'banks': banks})
+        messages.error(request, _("Datoteka je prevelika (max 10 MB)."))
+        return render(request, "konto/bank_import_xml.html", {"banks": banks})
 
     try:
         xml_content = xmlfile.read()
@@ -337,36 +396,32 @@ def bank_import_xml(request):
         import_batch = str(uuid.uuid4())[:8]
         stats = parser.parse(company=company, import_batch=import_batch)
     except (ValueError, TypeError):
-        messages.error(request, _('XML datoteka nije ispravnog formata. Provjerite datoteku.'))
-        return render(request, 'konto/bank_import_xml.html', {'banks': banks})
+        messages.error(request, _("XML datoteka nije ispravnog formata. Provjerite datoteku."))
+        return render(request, "konto/bank_import_xml.html", {"banks": banks})
 
     # Auto-match nakon importa
     matched_pairs = []
-    if stats['created'] > 0:
+    if stats["created"] > 0:
         try:
             matched_pairs = konto_services.auto_match_transactions(company)
         except (IntegrityError, DatabaseError):
             pass
 
     # Izvještaj
-    if stats['created'] > 0:
+    if stats["created"] > 0:
         msg = (
             f"Importirano {stats['created']} transakcija | "
             f"Duplikati: {stats['skipped']} | "
             f"Greške: {stats['errors']} | "
             f"Auto-pariranih: {len(matched_pairs)}"
         )
-        if stats['unresolved_ibans']:
+        if stats["unresolved_ibans"]:
             msg += f" | ⚠ Nepoznati IBAN-ovi: {', '.join(stats['unresolved_ibans'])}"
         messages.success(request, msg)
     else:
-        messages.warning(
-            request,
-            f'Nema novih transakcija. '
-            f'Duplikati: {stats["skipped"]}, Greške: {stats["errors"]}'
-        )
+        messages.warning(request, f"Nema novih transakcija. Duplikati: {stats['skipped']}, Greške: {stats['errors']}")
 
-    return redirect('konto:transactions')
+    return redirect("konto:transactions")
 
 
 @login_required
@@ -387,35 +442,48 @@ def bank_pain001_suppliers(request):
 
     company = get_user_company(request)
     if not company:
-        messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-        return redirect('finance:list')
+        messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+        return redirect("finance:list")
 
     banks = BankAccount.objects.filter(company=company, is_active=True)
 
     # Dohvati neplaćene dobavljačke fakture s IBAN-om
-    supplier_ids = Partner.objects.filter(
-        company=company, partner_type='supplier',
-    ).exclude(iban='').values_list('pk', flat=True)
+    supplier_ids = (
+        Partner.objects.filter(
+            company=company,
+            partner_type="supplier",
+        )
+        .exclude(iban="")
+        .values_list("pk", flat=True)
+    )
 
-    pending_invoices = Invoice.objects.filter(
-        company=company,
-        status__in=['UNPAID', 'OVERDUE'],
-        doctype='R',
-        partner__in=supplier_ids,
-    ).select_related('partner').order_by('-date_due')
+    pending_invoices = (
+        Invoice.objects.filter(
+            company=company,
+            status__in=["UNPAID", "OVERDUE"],
+            doctype="R",
+            partner__in=supplier_ids,
+        )
+        .select_related("partner")
+        .order_by("-date_due")
+    )
 
-    if request.method == 'GET':
-        return render(request, 'konto/pain001_suppliers.html', {
-            'banks': banks,
-            'pending_invoices': pending_invoices,
-        })
+    if request.method == "GET":
+        return render(
+            request,
+            "konto/pain001_suppliers.html",
+            {
+                "banks": banks,
+                "pending_invoices": pending_invoices,
+            },
+        )
 
     # POST — generiraj XML
-    bank_id = request.POST.get('bank_account')
-    invoice_ids = request.POST.getlist('invoice_ids')
+    bank_id = request.POST.get("bank_account")
+    invoice_ids = request.POST.getlist("invoice_ids")
 
     if not bank_id:
-        messages.error(request, _('Odaberi žiro račun.'))
+        messages.error(request, _("Odaberi žiro račun."))
         return redirect(request.path)
 
     try:
@@ -425,20 +493,19 @@ def bank_pain001_suppliers(request):
             bank_account=bank_account,
             initiating_user=request.user,
         )
-        xml_bytes = gen.generate_supplier_payments(
-            invoice_ids=[int(i) for i in invoice_ids] if invoice_ids else None
-        )
+        xml_bytes = gen.generate_supplier_payments(invoice_ids=[int(i) for i in invoice_ids] if invoice_ids else None)
     except ValueError as e:
         messages.error(request, str(e))
         return redirect(request.path)
     except ObjectDoesNotExist:
-        messages.error(request, _('Generiranje XML datoteke nije uspjelo. Pokušajte ponovo.'))
+        messages.error(request, _("Generiranje XML datoteke nije uspjelo. Pokušajte ponovo."))
         return redirect(request.path)
 
     from django.utils import timezone
+
     filename = f"pain001_dobavljaci_{timezone.now().strftime('%Y%m%d_%H%M')}.xml"
-    resp = HttpResponse(xml_bytes, content_type='application/xml')
-    resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+    resp = HttpResponse(xml_bytes, content_type="application/xml")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
     return resp
 
 
@@ -458,27 +525,31 @@ def bank_pain001_salaries(request):
 
     company = get_user_company(request)
     if not company:
-        return redirect('finance:list')
+        return redirect("finance:list")
 
     banks = BankAccount.objects.filter(company=company, is_active=True)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         today = datetime.date.today()
         first = today.replace(day=1)
-        return render(request, 'konto/pain001_salaries.html', {
-            'banks': banks,
-            'default_from': first.isoformat(),
-            'default_to': today.isoformat(),
-        })
+        return render(
+            request,
+            "konto/pain001_salaries.html",
+            {
+                "banks": banks,
+                "default_from": first.isoformat(),
+                "default_to": today.isoformat(),
+            },
+        )
 
-    bank_id = request.POST.get('bank_account')
-    period_from = request.POST.get('period_from')
-    period_to   = request.POST.get('period_to')
+    bank_id = request.POST.get("bank_account")
+    period_from = request.POST.get("period_from")
+    period_to = request.POST.get("period_to")
 
     try:
         bank_account = BankAccount.objects.get(pk=bank_id, company=company)
         d_from = datetime.date.fromisoformat(period_from)
-        d_to   = datetime.date.fromisoformat(period_to)
+        d_to = datetime.date.fromisoformat(period_to)
         gen = Pain001Generator(
             company=company,
             bank_account=bank_account,
@@ -489,12 +560,12 @@ def bank_pain001_salaries(request):
         messages.error(request, str(e))
         return redirect(request.path)
     except ObjectDoesNotExist:
-        messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
+        messages.error(request, _("Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku."))
         return redirect(request.path)
 
     filename = f"pain001_place_{period_from}_{period_to}.xml"
-    resp = HttpResponse(xml_bytes, content_type='application/xml')
-    resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+    resp = HttpResponse(xml_bytes, content_type="application/xml")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
     return resp
 
 
@@ -510,21 +581,26 @@ def bank_discrepancies(request):
 
     company = get_user_company(request)
     if not company:
-        return redirect('finance:list')
+        return redirect("finance:list")
 
     discrepancies = get_partial_payment_discrepancies(company)
-    total_gap = sum(d['gap'] for d in discrepancies)
+    total_gap = sum(d["gap"] for d in discrepancies)
 
-    return render(request, 'konto/bank_discrepancies.html', {
-        'discrepancies': discrepancies,
-        'total_gap': total_gap,
-        'count': len(discrepancies),
-    })
+    return render(
+        request,
+        "konto/bank_discrepancies.html",
+        {
+            "discrepancies": discrepancies,
+            "total_gap": total_gap,
+            "count": len(discrepancies),
+        },
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Discrepancies — Clean read-only view (works on any browser)
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @login_required
 def bank_discrepancies_legacy(request):
@@ -538,10 +614,14 @@ def bank_discrepancies_legacy(request):
 
     company = get_user_company(request)
     discrepancies = get_partial_payment_discrepancies(company) if company else []
-    total_gap = sum(d['gap'] for d in discrepancies)
+    total_gap = sum(d["gap"] for d in discrepancies)
 
-    return render(request, 'finance/discrepancies_legacy.html', {
-        'discrepancies': discrepancies,
-        'total_gap': total_gap,
-        'count': len(discrepancies),
-    })
+    return render(
+        request,
+        "finance/discrepancies_legacy.html",
+        {
+            "discrepancies": discrepancies,
+            "total_gap": total_gap,
+            "count": len(discrepancies),
+        },
+    )

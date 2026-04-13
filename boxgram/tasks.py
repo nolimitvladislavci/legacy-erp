@@ -15,17 +15,17 @@ logger = logging.getLogger(__name__)
 def close_competition(competition_id):
     try:
         competition = Competition.objects.get(id=competition_id)
-        competition.status = 'closed'
+        competition.status = "closed"
 
         if competition.entries.exists():
-            top_entry = competition.entries.order_by('-votes').first()
+            top_entry = competition.entries.order_by("-votes").first()
             if top_entry:
                 competition.winner = top_entry.pet
                 top_entry.rank = 1
                 top_entry.save()
 
                 rank = 2
-                for entry in competition.entries.exclude(id=top_entry.id).order_by('-votes'):
+                for entry in competition.entries.exclude(id=top_entry.id).order_by("-votes"):
                     entry.rank = rank
                     entry.save()
                     rank += 1
@@ -42,11 +42,11 @@ def close_competition(competition_id):
 def fetch_social_import(import_id):
     try:
         social_import = SocialImport.objects.get(id=import_id)
-        if social_import.platform == 'facebook':
+        if social_import.platform == "facebook":
             pass
-        elif social_import.platform == 'instagram':
+        elif social_import.platform == "instagram":
             pass
-        elif social_import.platform == 'tiktok':
+        elif social_import.platform == "tiktok":
             pass
         logger.info(f"Social import {import_id} processed")
     except SocialImport.DoesNotExist:
@@ -65,10 +65,10 @@ def generate_pet_qr(pet_id):
 
         img = qr.make_image(fill_color="black", back_color="white")
         img_io = io.BytesIO()
-        img.save(img_io, 'PNG')
+        img.save(img_io, "PNG")
         img_io.seek(0)
 
-        pet.qr_code.save(f'qr_{pet.id}.png', ContentFile(img_io.getvalue()))
+        pet.qr_code.save(f"qr_{pet.id}.png", ContentFile(img_io.getvalue()))
         pet.save()
         logger.info(f"QR code generated for pet {pet_id}")
     except PetProfile.DoesNotExist:

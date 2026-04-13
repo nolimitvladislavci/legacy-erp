@@ -4,29 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0050_add_marketplace_revenue_to_daily_report'),
+        ("pos", "0050_add_marketplace_revenue_to_daily_report"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='knjigaprigovora',
-            options={'ordering': ['-redni_broj'], 'verbose_name': 'Zapis (boljitci)', 'verbose_name_plural': 'Knjiga boljitaka'},
+            name="knjigaprigovora",
+            options={
+                "ordering": ["-redni_broj"],
+                "verbose_name": "Zapis (boljitci)",
+                "verbose_name_plural": "Knjiga boljitaka",
+            },
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='odgovor',
-            field=models.TextField(blank=True, verbose_name='Odgovor'),
+            model_name="knjigaprigovora",
+            name="odgovor",
+            field=models.TextField(blank=True, verbose_name="Odgovor"),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='opis_prigovora',
-            field=models.TextField(verbose_name='Vaš prijedlog'),
+            model_name="knjigaprigovora",
+            name="opis_prigovora",
+            field=models.TextField(verbose_name="Vaš prijedlog"),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='record_type',
-            field=models.CharField(choices=[('prigovor', 'Prijedlog za poboljšanje / Verbesserungsvorschlag'), ('pohvala', 'Pohvala / Lob'), ('utisak', 'Utisak / Eindruck'), ('reklamacija', 'Reklamacija / Reklamation'), ('prijedlog', 'Prijedlog poboljšanja / Verbesserungsvorschlag')], default='prigovor', max_length=20, verbose_name='Vrsta zapisa'),
+            model_name="knjigaprigovora",
+            name="record_type",
+            field=models.CharField(
+                choices=[
+                    ("prigovor", "Prijedlog za poboljšanje / Verbesserungsvorschlag"),
+                    ("pohvala", "Pohvala / Lob"),
+                    ("utisak", "Utisak / Eindruck"),
+                    ("reklamacija", "Reklamacija / Reklamation"),
+                    ("prijedlog", "Prijedlog poboljšanja / Verbesserungsvorschlag"),
+                ],
+                default="prigovor",
+                max_length=20,
+                verbose_name="Vrsta zapisa",
+            ),
         ),
     ]

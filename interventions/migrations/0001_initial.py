@@ -7,44 +7,110 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('burza', '0002_alter_leadactivity_id_alter_projectlead_id'),
-        ('companies', '0004_business_profiles'),
-        ('pos', '0001_nkd_pos_integration'),
+        ("burza", "0002_alter_leadactivity_id_alter_projectlead_id"),
+        ("companies", "0004_business_profiles"),
+        ("pos", "0001_nkd_pos_integration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='HitnaIntervencija',
+            name="HitnaIntervencija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Naslov')),
-                ('category', models.CharField(choices=[('voda', 'Vodoinstalacije'), ('struja', 'Elektrika'), ('plin', 'Plin'), ('kljucar', 'Kljucar'), ('ostalo', 'Ostalo')], default='ostalo', max_length=20, verbose_name='Kategorija')),
-                ('address', models.CharField(max_length=300, verbose_name='Adresa intervencije')),
-                ('description', models.TextField(blank=True, verbose_name='Opis')),
-                ('client_name', models.CharField(max_length=100, verbose_name='Ime klijenta')),
-                ('client_phone', models.CharField(max_length=30, verbose_name='Telefon klijenta')),
-                ('assigned_at', models.DateTimeField(blank=True, null=True)),
-                ('ttl_expires_at', models.DateTimeField(blank=True, null=True, verbose_name='TTL istjece')),
-                ('tracking_token', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('status', models.CharField(choices=[('NOVO', 'Novi poziv'), ('DODIJELJENO', 'Dodijeljeno ekipi'), ('NA_PUTU', 'Ekipa na putu'), ('NA_LOKACIJI', 'Ekipa na lokaciji'), ('RIJESENO', 'Rijeseno'), ('ESKALIRANO', 'Eskalirano u projekt'), ('FAKTURIRANO', 'Fakturirano')], db_index=True, default='NOVO', max_length=20, verbose_name='Status')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('started_at', models.DateTimeField(blank=True, null=True)),
-                ('arrived_at', models.DateTimeField(blank=True, null=True)),
-                ('resolved_at', models.DateTimeField(blank=True, null=True)),
-                ('assigned_to', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_interventions', to=settings.AUTH_USER_MODEL, verbose_name='Dodijeljen')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='interventions', to='companies.company', verbose_name='Tvrtka')),
-                ('pos_receipt', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='interventions', to='pos.posreceipt')),
-                ('project_lead', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='interventions', to='burza.projectlead')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("title", models.CharField(max_length=200, verbose_name="Naslov")),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("voda", "Vodoinstalacije"),
+                            ("struja", "Elektrika"),
+                            ("plin", "Plin"),
+                            ("kljucar", "Kljucar"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        default="ostalo",
+                        max_length=20,
+                        verbose_name="Kategorija",
+                    ),
+                ),
+                ("address", models.CharField(max_length=300, verbose_name="Adresa intervencije")),
+                ("description", models.TextField(blank=True, verbose_name="Opis")),
+                ("client_name", models.CharField(max_length=100, verbose_name="Ime klijenta")),
+                ("client_phone", models.CharField(max_length=30, verbose_name="Telefon klijenta")),
+                ("assigned_at", models.DateTimeField(blank=True, null=True)),
+                ("ttl_expires_at", models.DateTimeField(blank=True, null=True, verbose_name="TTL istjece")),
+                ("tracking_token", models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("NOVO", "Novi poziv"),
+                            ("DODIJELJENO", "Dodijeljeno ekipi"),
+                            ("NA_PUTU", "Ekipa na putu"),
+                            ("NA_LOKACIJI", "Ekipa na lokaciji"),
+                            ("RIJESENO", "Rijeseno"),
+                            ("ESKALIRANO", "Eskalirano u projekt"),
+                            ("FAKTURIRANO", "Fakturirano"),
+                        ],
+                        db_index=True,
+                        default="NOVO",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("started_at", models.DateTimeField(blank=True, null=True)),
+                ("arrived_at", models.DateTimeField(blank=True, null=True)),
+                ("resolved_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "assigned_to",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="assigned_interventions",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Dodijeljen",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="interventions",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "pos_receipt",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="interventions",
+                        to="pos.posreceipt",
+                    ),
+                ),
+                (
+                    "project_lead",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="interventions",
+                        to="burza.projectlead",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Hitna intervencija',
-                'verbose_name_plural': 'Hitne intervencije',
-                'ordering': ['-created_at'],
+                "verbose_name": "Hitna intervencija",
+                "verbose_name_plural": "Hitne intervencije",
+                "ordering": ["-created_at"],
             },
         ),
     ]

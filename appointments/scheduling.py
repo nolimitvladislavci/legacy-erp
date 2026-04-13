@@ -3,6 +3,7 @@ appointments/scheduling.py
 Polymorphic Resource Scheduling Engine - Double-Lock + Race Protection.
 v2 - Koristi Appointment.actor_resource FK (mig 0009) za precizno pracenje aktora.
 """
+
 from datetime import timedelta
 
 from django.db import transaction
@@ -22,12 +23,16 @@ class SchedulingError(Exception):
 def get_on_shift_actors(company, target_date, start_dt, end_dt):
     weekday = target_date.weekday()
     actors = BookingResource.objects.filter(
-        company=company, resource_type="ljudstvo", is_active=True,
+        company=company,
+        resource_type="ljudstvo",
+        is_active=True,
     )
     available = []
     for actor in actors:
         wh = WorkingHours.objects.filter(
-            resource=actor, day_of_week=weekday, is_day_off=False,
+            resource=actor,
+            day_of_week=weekday,
+            is_day_off=False,
         ).first()
         if not wh:
             continue
@@ -73,9 +78,11 @@ def _advisory_lock_slot(company_id, resource_id, slot_epoch):
     SQLite fallback: uvijek vraca True (nema advisory lock podrsku).
     """
     from django.db import connection
-    if connection.vendor != 'postgresql':
+
+    if connection.vendor != "postgresql":
         return True
     import ctypes
+
     raw = hash((company_id, resource_id, slot_epoch)) & 0x7FFFFFFFFFFFFFFF
     lock_key = ctypes.c_int64(raw).value
     with connection.cursor() as cur:
@@ -84,8 +91,7 @@ def _advisory_lock_slot(company_id, resource_id, slot_epoch):
 
 
 @transaction.atomic
-def book_slot(company, service, start_dt, end_dt, client=None,
-              client_name="", client_data=None, user_actor_id=None):
+def book_slot(company, service, start_dt, end_dt, client=None, client_name="", client_data=None, user_actor_id=None):
     """
     Atomicki zakazan termin s Double-Lock + Advisory Lock zastitom.
 
@@ -144,9 +150,13 @@ def book_slot(company, service, start_dt, end_dt, client=None,
         if res_type == "ljudstvo":
             assigned_resource = assigned_actor
         else:
-            all_resources = list(BookingResource.objects.filter(
-                company=company, resource_type=res_type, is_active=True,
-            ))
+            all_resources = list(
+                BookingResource.objects.filter(
+                    company=company,
+                    resource_type=res_type,
+                    is_active=True,
+                )
+            )
             if not all_resources:
                 raise SchedulingError(
                     "Nema konfiguriranih resursa tipa '%s'." % res_type,
@@ -198,9 +208,13 @@ def check_availability(company, service, start_dt, end_dt):
             return False, "NO_ACTOR"
 
     if service.requires_resource and service.resource_type != "ljudstvo":
-        all_res = list(BookingResource.objects.filter(
-            company=company, resource_type=service.resource_type, is_active=True,
-        ))
+        all_res = list(
+            BookingResource.objects.filter(
+                company=company,
+                resource_type=service.resource_type,
+                is_active=True,
+            )
+        )
         if not all_res:
             return False, "NO_RESOURCE"
         free = [r for r in all_res if r.pk not in busy_resource_ids]
@@ -214,7 +228,9 @@ def process_no_show(company):
     tolerance = getattr(company, "no_show_tolerance_minutes", 15) or 15
     cutoff = timezone.now() - timedelta(minutes=tolerance)
     stale = Appointment.objects.filter(
-        company=company, status="scheduled", start_time__lt=cutoff,
+        company=company,
+        status="scheduled",
+        start_time__lt=cutoff,
     )
     count = 0
     for appt in stale:

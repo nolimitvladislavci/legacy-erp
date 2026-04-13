@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('premium_booking', '0001_initial'),
+        ("premium_booking", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='addon',
-            name='applicable_groups',
-            field=models.CharField(blank=True, help_text='housing,business', max_length=50),
+            model_name="addon",
+            name="applicable_groups",
+            field=models.CharField(blank=True, help_text="housing,business", max_length=50),
         ),
     ]

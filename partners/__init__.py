@@ -1,4 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
 
-default_app_config = 'partners.apps.PartnersConfig'
+default_app_config = "partners.apps.PartnersConfig"

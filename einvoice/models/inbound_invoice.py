@@ -1,4 +1,5 @@
 """Smart Mailbox — inbound invoice processing."""
+
 import uuid
 
 from django.db import models
@@ -6,19 +7,25 @@ from django.db import models
 
 class InboundInvoice(models.Model):
     """Received e-invoice waiting for processing in Smart Mailbox."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="inbound_invoices",
     )
     as4_message = models.OneToOneField(
-        "einvoice.AS4Message", on_delete=models.CASCADE,
+        "einvoice.AS4Message",
+        on_delete=models.CASCADE,
         related_name="inbound_invoice",
     )
     journal_entry = models.ForeignKey(
-        "konto.JournalEntry", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="source_inbound_invoices",
+        "konto.JournalEntry",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="source_inbound_invoices",
     )
 
     class ProcessingStatus(models.TextChoices):
@@ -30,8 +37,10 @@ class InboundInvoice(models.Model):
         DUPLICATE = "DUPLICATE", "Duplikat"
 
     status = models.CharField(
-        max_length=10, choices=ProcessingStatus.choices,
-        default=ProcessingStatus.PENDING, db_index=True,
+        max_length=10,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.PENDING,
+        db_index=True,
     )
 
     # Parsed Invoice Data
@@ -56,7 +65,8 @@ class InboundInvoice(models.Model):
     suggested_konto_name = models.CharField(max_length=255, blank=True)
     suggested_cost_center = models.CharField(max_length=50, blank=True)
     suggested_vat_treatment = models.CharField(
-        max_length=20, blank=True,
+        max_length=20,
+        blank=True,
         choices=[
             ("FULL_DEDUCTION", "Puni odbitak pretporeza"),
             ("PARTIAL_DEDUCTION", "Djelomicni odbitak"),
@@ -72,16 +82,22 @@ class InboundInvoice(models.Model):
     final_konto = models.CharField(max_length=20, blank=True)
     final_cost_center = models.CharField(max_length=50, blank=True)
     approved_by = models.ForeignKey(
-        "auth.User", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="approved_inbound_invoices",
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_inbound_invoices",
     )
     approved_at = models.DateTimeField(null=True, blank=True)
 
     # Duplicate Detection
     is_duplicate = models.BooleanField(default=False)
     duplicate_of = models.ForeignKey(
-        "self", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="duplicates",
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="duplicates",
     )
 
     notes = models.TextField(blank=True)
@@ -104,13 +120,18 @@ class InboundInvoice(models.Model):
         return f"URA {self.invoice_number} - {self.supplier_name} ({self.gross_amount} {self.currency})"
 
     def check_duplicate(self):
-        existing = InboundInvoice.objects.filter(
-            company=self.company,
-            supplier_tax_id=self.supplier_tax_id,
-            invoice_number=self.invoice_number,
-        ).exclude(pk=self.pk).exclude(
-            status=self.ProcessingStatus.REJECTED,
-        ).first()
+        existing = (
+            InboundInvoice.objects.filter(
+                company=self.company,
+                supplier_tax_id=self.supplier_tax_id,
+                invoice_number=self.invoice_number,
+            )
+            .exclude(pk=self.pk)
+            .exclude(
+                status=self.ProcessingStatus.REJECTED,
+            )
+            .first()
+        )
 
         if existing:
             self.is_duplicate = True

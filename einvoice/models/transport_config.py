@@ -1,4 +1,5 @@
 """Per-company transport configuration."""
+
 import uuid
 
 from django.db import models
@@ -6,9 +7,11 @@ from django.db import models
 
 class TransportConfiguration(models.Model):
     """Per-company transport settings for e-invoice delivery."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.OneToOneField(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="transport_config",
     )
 
@@ -18,7 +21,8 @@ class TransportConfiguration(models.Model):
         DISABLED = "OFF", "e-Racun onemogucen"
 
     primary_transport = models.CharField(
-        max_length=10, choices=PrimaryTransport.choices,
+        max_length=10,
+        choices=PrimaryTransport.choices,
         default=PrimaryTransport.FINA_POSREDNIK,
     )
     b2c_enabled = models.BooleanField(default=True)
@@ -36,7 +40,8 @@ class TransportConfiguration(models.Model):
 
     # CIUS Profile
     default_cius_profile = models.CharField(
-        max_length=10, default="HR",
+        max_length=10,
+        default="HR",
         choices=[("HR", "CIUS-HR"), ("DE", "CIUS-DE / XRechnung"), ("EU", "EN 16931")],
     )
 

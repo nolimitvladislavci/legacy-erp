@@ -6,6 +6,7 @@ Extracted from views.py to enable:
 - Reuse across views, API, Celery tasks
 - Clear separation of concerns
 """
+
 import logging
 from decimal import Decimal
 from typing import Optional
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 # ── Receipt Calculation ─────────────────────────────────────
 
+
 def recalculate_receipt(receipt: "POSReceipt") -> None:
     """Recalculate receipt totals from items. Saves to DB."""
     items = list(receipt.items.all())
@@ -42,6 +44,7 @@ def recalculate_receipt(receipt: "POSReceipt") -> None:
 
 
 # ── Session Management ──────────────────────────────────────
+
 
 def open_session(terminal: "POSTerminal", user: "User", opening_cash: Decimal = Decimal("0")) -> "POSSession":
     """Open a new POS session on terminal. Returns session or raises."""
@@ -88,6 +91,7 @@ def close_session(session: "POSSession", closing_cash: Decimal = Decimal("0")) -
 
 # ── Receipt Creation ────────────────────────────────────────
 
+
 def create_receipt(session: "POSSession", table_number: str = "", note: str = "") -> "POSReceipt":
     """Create a new receipt in session. Returns receipt."""
     from .models import POSReceipt
@@ -105,10 +109,16 @@ def create_receipt(session: "POSSession", table_number: str = "", note: str = ""
     return receipt
 
 
-def add_receipt_item(receipt: "POSReceipt", inventory_item_id: Optional[int], description: str,
-                     quantity: Decimal, unit_price: Decimal,
-                     unit: str = "kom", tax_rate: Decimal = Decimal("25"),
-                     discount_percent: Decimal = Decimal("0")) -> "POSReceiptItem":
+def add_receipt_item(
+    receipt: "POSReceipt",
+    inventory_item_id: Optional[int],
+    description: str,
+    quantity: Decimal,
+    unit_price: Decimal,
+    unit: str = "kom",
+    tax_rate: Decimal = Decimal("25"),
+    discount_percent: Decimal = Decimal("0"),
+) -> "POSReceiptItem":
     """Add item to receipt. Returns created item."""
     from .models import POSReceiptItem
 
@@ -138,9 +148,9 @@ def remove_receipt_item(receipt: "POSReceipt", item_id: int) -> bool:
 
 # ── Payment Processing ──────────────────────────────────────
 
+
 @transaction.atomic
-def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
-                    user: "User | None" = None) -> dict:
+def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal, user: "User | None" = None) -> dict:
     """
     Process payment for receipt.
     Creates payment line, updates inventory, attempts fiscalization.
@@ -179,7 +189,10 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
 
     logger.info(
         "Payment processed: receipt=%d method=%s total=%.2f jir=%s",
-        receipt.receipt_number, method, receipt.total, jir or "none"
+        receipt.receipt_number,
+        method,
+        receipt.total,
+        jir or "none",
     )
 
     return {
@@ -192,9 +205,14 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
 
 
 @transaction.atomic
-def quick_pay(session: "POSSession", items_data: list[dict], method: str = "CASH",
-              amount_paid: Decimal = Decimal("0"),
-              cashier_name: str = "", user: "User | None" = None) -> dict:
+def quick_pay(
+    session: "POSSession",
+    items_data: list[dict],
+    method: str = "CASH",
+    amount_paid: Decimal = Decimal("0"),
+    cashier_name: str = "",
+    user: "User | None" = None,
+) -> dict:
     """
     One-shot: create receipt + add items + pay.
     Used by quick POS and restaurant POS.
@@ -230,19 +248,18 @@ def quick_pay(session: "POSSession", items_data: list[dict], method: str = "CASH
 
 # ── Internal Helpers ────────────────────────────────────────
 
+
 def _deduct_inventory(receipt: "POSReceipt", user: "User | None" = None) -> int:
     """Deduct inventory for all items in receipt. Returns count of movements."""
     from inventory.models import StockMovement
+
     count = 0
 
     # LOCK — zaključaj sve inventory artikle odjednom prije dedukcije
-    item_ids = [
-        item.inventory_item_id
-        for item in receipt.items.all()
-        if item.inventory_item_id
-    ]
+    item_ids = [item.inventory_item_id for item in receipt.items.all() if item.inventory_item_id]
     if item_ids:
         from inventory.models import InventoryItem
+
         list(InventoryItem.objects.select_for_update().filter(pk__in=item_ids))
 
     for item in receipt.items.select_related("inventory_item").all():
@@ -300,6 +317,7 @@ def _attempt_fiscalization(receipt: "POSReceipt") -> str | None:
     """Attempt fiscal registration. Returns JIR or None."""
     try:
         from fiscal.service import fiscalize_pos_receipt
+
         jir = fiscalize_pos_receipt(receipt)
         return jir
     except ImportError as e:
@@ -308,6 +326,7 @@ def _attempt_fiscalization(receipt: "POSReceipt") -> str | None:
 
 
 # ── Z-Report ────────────────────────────────────────────────
+
 
 def generate_zreport(session: "POSSession") -> dict:
     """Generate Z-report data for a session."""

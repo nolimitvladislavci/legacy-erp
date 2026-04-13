@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('website', '0005_grosmarkt_anfrage'),
+        ("website", "0005_grosmarkt_anfrage"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='grosmarktanfrage',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="grosmarktanfrage",
+            name="id",
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID"),
         ),
         migrations.AlterField(
-            model_name='grosmarktanfrage',
-            name='status',
-            field=models.CharField(choices=[('new', 'Nova / Neu'), ('contacted', 'Kontaktiran / Kontaktiert'), ('demo_done', 'Demo odrađen / Demo durchgeführt'), ('converted', 'Pretvoren u klijenta / Konvertiert'), ('declined', 'Odbio / Abgelehnt')], default='new', max_length=20),
+            model_name="grosmarktanfrage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("new", "Nova / Neu"),
+                    ("contacted", "Kontaktiran / Kontaktiert"),
+                    ("demo_done", "Demo odrađen / Demo durchgeführt"),
+                    ("converted", "Pretvoren u klijenta / Konvertiert"),
+                    ("declined", "Odbio / Abgelehnt"),
+                ],
+                default="new",
+                max_length=20,
+            ),
         ),
     ]

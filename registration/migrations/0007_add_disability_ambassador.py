@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0006_company_claim_request'),
+        ("registration", "0006_company_claim_request"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='saleslead',
-            name='is_disability_ambassador',
-            field=models.BooleanField(default=False, verbose_name='NO LIMIT Ambasador'),
+            model_name="saleslead",
+            name="is_disability_ambassador",
+            field=models.BooleanField(default=False, verbose_name="NO LIMIT Ambasador"),
         ),
     ]

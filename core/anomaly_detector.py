@@ -7,13 +7,14 @@ Anomalies:
 2. Same OIB, total unpaid > threshold
 3. Same OIB, different names (data quality)
 """
+
 import logging
 
 from celery import shared_task
 from django.db import connection
 from django.utils import timezone
 
-logger = logging.getLogger('borg.anomaly')
+logger = logging.getLogger("borg.anomaly")
 
 
 @shared_task
@@ -22,14 +23,14 @@ def detect_cross_company_anomalies(debt_threshold_eur=10000):
     Run all anomaly detections and return structured results.
     """
     results = {
-        'type_mismatches': detect_buyer_type_mismatches(),
-        'high_debtors': detect_high_cross_company_debt(debt_threshold_eur),
-        'name_mismatches': detect_name_mismatches(),
-        'run_at': str(timezone.now()),
+        "type_mismatches": detect_buyer_type_mismatches(),
+        "high_debtors": detect_high_cross_company_debt(debt_threshold_eur),
+        "name_mismatches": detect_name_mismatches(),
+        "run_at": str(timezone.now()),
     }
 
     total = sum(len(v) for v in results.values() if isinstance(v, list))
-    logger.info('Anomaly scan: %d total anomalies found', total)
+    logger.info("Anomaly scan: %d total anomalies found", total)
     return results
 
 
@@ -52,14 +53,15 @@ def detect_buyer_type_mismatches():
         cols = [d[0] for d in cur.description]
         rows = [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    logger.info('Buyer type mismatches: %d OIBs', len(rows))
+    logger.info("Buyer type mismatches: %d OIBs", len(rows))
     return rows
 
 
 def detect_high_cross_company_debt(threshold_eur=10000):
     """Find OIBs with total unpaid invoices > threshold across all companies."""
     with connection.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             SELECT p.oib, p.name,
                    COUNT(DISTINCT p.company_id) as in_companies,
                    COUNT(i.id) as invoice_count,
@@ -72,11 +74,13 @@ def detect_high_cross_company_debt(threshold_eur=10000):
             HAVING COALESCE(SUM(CASE WHEN i.status IN ('UNPAID', 'OVERDUE') THEN i.total ELSE 0 END), 0) > %s
             ORDER BY total_unpaid DESC
             LIMIT 50
-        """, [threshold_eur])
+        """,
+            [threshold_eur],
+        )
         cols = [d[0] for d in cur.description]
         rows = [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    logger.info('High debtors (>%d EUR): %d OIBs', threshold_eur, len(rows))
+    logger.info("High debtors (>%d EUR): %d OIBs", threshold_eur, len(rows))
     return rows
 
 
@@ -99,5 +103,5 @@ def detect_name_mismatches():
         cols = [d[0] for d in cur.description]
         rows = [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    logger.info('Name mismatches: %d OIBs', len(rows))
+    logger.info("Name mismatches: %d OIBs", len(rows))
     return rows

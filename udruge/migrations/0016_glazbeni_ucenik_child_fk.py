@@ -5,16 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('kindergarten', '0001_initial'),
-        ('udruge', '0015_glazbena_skola_modeli'),
+        ("kindergarten", "0001_initial"),
+        ("udruge", "0015_glazbena_skola_modeli"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='glazbeniucenik',
-            name='child',
-            field=models.OneToOneField(blank=True, help_text='Ako je ucenik dosao iz vrtica', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='glazbeni_ucenik', to='kindergarten.child'),
+            model_name="glazbeniucenik",
+            name="child",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="Ako je ucenik dosao iz vrtica",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="glazbeni_ucenik",
+                to="kindergarten.child",
+            ),
         ),
     ]

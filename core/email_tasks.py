@@ -2,6 +2,7 @@
 Centralized Celery email tasks for LIMIT Connect ERP.
 All email sending goes through these tasks for async processing.
 """
+
 import base64
 import logging
 
@@ -26,8 +27,9 @@ def send_email_task(self, subject, message, from_email, recipient_list, html_mes
 
 
 @shared_task(bind=True, max_retries=3, retry_backoff=True, autoretry_for=(Exception,))
-def send_email_with_attachment_task(self, subject, body, from_email, to_list,
-                                     attachment_name, attachment_content_b64, content_type):
+def send_email_with_attachment_task(
+    self, subject, body, from_email, to_list, attachment_name, attachment_content_b64, content_type
+):
     """Send email with a single file attachment (base64-encoded content)."""
     email = EmailMessage(
         subject=subject,

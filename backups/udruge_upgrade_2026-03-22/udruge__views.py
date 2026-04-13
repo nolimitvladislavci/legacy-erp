@@ -203,7 +203,7 @@ def send_whatsapp(request, pk):
 
     try:
         from core.whatsapp import send_text
-        result = send_text(phone=phone, message=msg, company_id=str(company.pk))
+        send_text(phone=phone, message=msg, company_id=str(company.pk))
         from .models import ClanBiljeska
         ClanBiljeska.objects.create(clan=clan, text='WhatsApp (%s): %s' % (msg_type, msg[:100]), tip='sistem', created_by=request.user)
         return JsonResponse({'ok': True, 'sent_to': phone})

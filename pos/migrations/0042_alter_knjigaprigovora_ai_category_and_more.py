@@ -4,60 +4,113 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0041_prigovor_ai_audio_hash'),
+        ("pos", "0041_prigovor_ai_audio_hash"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='ai_category',
-            field=models.CharField(blank=True, choices=[('product_quality', 'Kvaliteta proizvoda'), ('service', 'Usluga / Osoblje'), ('pricing', 'Cijena / Naplata'), ('hygiene', 'Higijena / Čistoća'), ('wait_time', 'Vrijeme čekanja'), ('delivery', 'Dostava / Isporuka'), ('warranty', 'Garancija / Reklamacija'), ('safety', 'Sigurnost / Ozljeda'), ('other', 'Ostalo')], max_length=30, verbose_name='AI kategorija'),
+            model_name="knjigaprigovora",
+            name="ai_category",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("product_quality", "Kvaliteta proizvoda"),
+                    ("service", "Usluga / Osoblje"),
+                    ("pricing", "Cijena / Naplata"),
+                    ("hygiene", "Higijena / Čistoća"),
+                    ("wait_time", "Vrijeme čekanja"),
+                    ("delivery", "Dostava / Isporuka"),
+                    ("warranty", "Garancija / Reklamacija"),
+                    ("safety", "Sigurnost / Ozljeda"),
+                    ("other", "Ostalo"),
+                ],
+                max_length=30,
+                verbose_name="AI kategorija",
+            ),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='ai_priority',
-            field=models.PositiveSmallIntegerField(default=0, help_text='0=nije analizirano, 5=najhitnije', verbose_name='AI prioritet (1-5)'),
+            model_name="knjigaprigovora",
+            name="ai_priority",
+            field=models.PositiveSmallIntegerField(
+                default=0, help_text="0=nije analizirano, 5=najhitnije", verbose_name="AI prioritet (1-5)"
+            ),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='ai_sentiment',
-            field=models.CharField(blank=True, choices=[('critical', 'Kritično — hitno'), ('negative', 'Negativno'), ('neutral', 'Neutralno'), ('constructive', 'Konstruktivno')], max_length=15, verbose_name='AI sentiment'),
+            model_name="knjigaprigovora",
+            name="ai_sentiment",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("critical", "Kritično — hitno"),
+                    ("negative", "Negativno"),
+                    ("neutral", "Neutralno"),
+                    ("constructive", "Konstruktivno"),
+                ],
+                max_length=15,
+                verbose_name="AI sentiment",
+            ),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='ai_suggested_response',
-            field=models.TextField(blank=True, help_text='Claude generira prijedlog odgovora na hrvatskom', verbose_name='AI prijedlog odgovora'),
+            model_name="knjigaprigovora",
+            name="ai_suggested_response",
+            field=models.TextField(
+                blank=True,
+                help_text="Claude generira prijedlog odgovora na hrvatskom",
+                verbose_name="AI prijedlog odgovora",
+            ),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='audio_recording',
-            field=models.FileField(blank=True, help_text='WebM/MP3 snimka glasovnog prigovora', null=True, upload_to='prigovori/audio/%Y/%m/', verbose_name='Zvučni zapis'),
+            model_name="knjigaprigovora",
+            name="audio_recording",
+            field=models.FileField(
+                blank=True,
+                help_text="WebM/MP3 snimka glasovnog prigovora",
+                null=True,
+                upload_to="prigovori/audio/%Y/%m/",
+                verbose_name="Zvučni zapis",
+            ),
         ),
         migrations.AlterField(
-            model_name='knjigaprigovora',
-            name='integrity_hash',
-            field=models.CharField(blank=True, help_text='SHA256 certifikat — dokaz nepromijenjenosti zapisa', max_length=64, verbose_name='Integritetski hash'),
+            model_name="knjigaprigovora",
+            name="integrity_hash",
+            field=models.CharField(
+                blank=True,
+                help_text="SHA256 certifikat — dokaz nepromijenjenosti zapisa",
+                max_length=64,
+                verbose_name="Integritetski hash",
+            ),
         ),
         migrations.AlterField(
-            model_name='posreceipt',
-            name='global_number',
-            field=models.PositiveIntegerField(blank=True, db_index=True, help_text='Jedinstven po firmi, bez duplikata. Za fiskalizaciju i analizu.', null=True, verbose_name='Globalni redni broj'),
+            model_name="posreceipt",
+            name="global_number",
+            field=models.PositiveIntegerField(
+                blank=True,
+                db_index=True,
+                help_text="Jedinstven po firmi, bez duplikata. Za fiskalizaciju i analizu.",
+                null=True,
+                verbose_name="Globalni redni broj",
+            ),
         ),
         migrations.AlterField(
-            model_name='posreceipt',
-            name='member_clan_id',
-            field=models.PositiveIntegerField(blank=True, help_text='FK na udruge.Clan — za audit trail popusta', null=True, verbose_name='Clan ID'),
+            model_name="posreceipt",
+            name="member_clan_id",
+            field=models.PositiveIntegerField(
+                blank=True, help_text="FK na udruge.Clan — za audit trail popusta", null=True, verbose_name="Clan ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='posreceipt',
-            name='member_discount_applied',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name='Primijenjeni clanski popust (%)'),
+            model_name="posreceipt",
+            name="member_discount_applied",
+            field=models.DecimalField(
+                decimal_places=2, default=0, max_digits=5, verbose_name="Primijenjeni clanski popust (%)"
+            ),
         ),
         migrations.AlterField(
-            model_name='posreceipt',
-            name='member_name',
-            field=models.CharField(blank=True, help_text='Clan udruge koji je ostvario popust', max_length=200, verbose_name='Ime clana'),
+            model_name="posreceipt",
+            name="member_name",
+            field=models.CharField(
+                blank=True, help_text="Clan udruge koji je ostvario popust", max_length=200, verbose_name="Ime clana"
+            ),
         ),
     ]

@@ -4,6 +4,7 @@ FenixSignal — BORG senzorni sustav.
 Svaki signal = korisnik prijavljen problem, bug, zbunjenost ili prijedlog.
 Minimalni MVP: model + view + floating gumb. AI triage u v2.
 """
+
 import uuid
 
 from django.conf import settings
@@ -36,12 +37,18 @@ class FenixSignal(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="fenix_signals",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="fenix_signals",
     )
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="fenix_signals",
+        "companies.Company",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="fenix_signals",
     )
 
     signal_type = models.CharField(max_length=12, choices=SignalType.choices, default=SignalType.BUG)

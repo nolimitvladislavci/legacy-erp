@@ -6,38 +6,129 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0040_add_konjik_stolovi'),
+        ("companies", "0040_add_konjik_stolovi"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Workspace',
+            name="Workspace",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Npr. "Stol 1", "Home Office Ljiljana", "Poslovnica Centar"', max_length=100, verbose_name='Naziv')),
-                ('type', models.CharField(choices=[('desk', 'Stol u uredu'), ('home', 'Rad od kuće'), ('remote', 'Mobilni / Remote'), ('premise', 'Poslovni prostor (POS)')], default='desk', max_length=10, verbose_name='Tip')),
-                ('color', models.CharField(choices=[('#c9a84c', 'Zlatna'), ('#22c55e', 'Zelena'), ('#3b82f6', 'Plava'), ('#f97316', 'Narančasta'), ('#ec4899', 'Ružičasta'), ('#8b5cf6', 'Ljubičasta'), ('#06b6d4', 'Tirkizna'), ('#ef4444', 'Crvena'), ('#84cc16', 'Vapno'), ('#64748b', 'Siva')], default='#c9a84c', max_length=20, verbose_name='Boja')),
-                ('position', models.PositiveSmallIntegerField(default=0, help_text='Za sortiranje u admin prikazu', verbose_name='Redoslijed')),
-                ('address', models.CharField(blank=True, help_text='Fizička adresa (za HOME = kućna adresa, za PREMISE = adresa poslovnice)', max_length=200, verbose_name='Adresa')),
-                ('city', models.CharField(blank=True, max_length=100, verbose_name='Grad')),
-                ('zip_code', models.CharField(blank=True, max_length=10, verbose_name='Poštanski broj')),
-                ('valid_from', models.DateField(blank=True, help_text='Prazno = odmah aktivan', null=True, verbose_name='Aktivan od')),
-                ('valid_until', models.DateField(blank=True, help_text='Prazno = trajno. Za studente/volontere postaviti datum isteka.', null=True, verbose_name='Aktivan do')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivan')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomena')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('clients', models.ManyToManyField(blank=True, help_text='Firme/komitenti dodijeljeni ovom prostoru', related_name='workspace_assignments', to='companies.company', verbose_name='Klijenti')),
-                ('company', models.ForeignKey(help_text='Firma kojoj workspace pripada (npr. Konjik d.o.o.)', on_delete=django.db.models.deletion.CASCADE, related_name='workspaces', to='companies.company', verbose_name='Matica')),
-                ('workers', models.ManyToManyField(blank=True, help_text='Osobe koje rade u ovom prostoru', related_name='workspaces', to=settings.AUTH_USER_MODEL, verbose_name='Radnici')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "name",
+                    models.CharField(
+                        help_text='Npr. "Stol 1", "Home Office Ljiljana", "Poslovnica Centar"',
+                        max_length=100,
+                        verbose_name="Naziv",
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("desk", "Stol u uredu"),
+                            ("home", "Rad od kuće"),
+                            ("remote", "Mobilni / Remote"),
+                            ("premise", "Poslovni prostor (POS)"),
+                        ],
+                        default="desk",
+                        max_length=10,
+                        verbose_name="Tip",
+                    ),
+                ),
+                (
+                    "color",
+                    models.CharField(
+                        choices=[
+                            ("#c9a84c", "Zlatna"),
+                            ("#22c55e", "Zelena"),
+                            ("#3b82f6", "Plava"),
+                            ("#f97316", "Narančasta"),
+                            ("#ec4899", "Ružičasta"),
+                            ("#8b5cf6", "Ljubičasta"),
+                            ("#06b6d4", "Tirkizna"),
+                            ("#ef4444", "Crvena"),
+                            ("#84cc16", "Vapno"),
+                            ("#64748b", "Siva"),
+                        ],
+                        default="#c9a84c",
+                        max_length=20,
+                        verbose_name="Boja",
+                    ),
+                ),
+                (
+                    "position",
+                    models.PositiveSmallIntegerField(
+                        default=0, help_text="Za sortiranje u admin prikazu", verbose_name="Redoslijed"
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        blank=True,
+                        help_text="Fizička adresa (za HOME = kućna adresa, za PREMISE = adresa poslovnice)",
+                        max_length=200,
+                        verbose_name="Adresa",
+                    ),
+                ),
+                ("city", models.CharField(blank=True, max_length=100, verbose_name="Grad")),
+                ("zip_code", models.CharField(blank=True, max_length=10, verbose_name="Poštanski broj")),
+                (
+                    "valid_from",
+                    models.DateField(
+                        blank=True, help_text="Prazno = odmah aktivan", null=True, verbose_name="Aktivan od"
+                    ),
+                ),
+                (
+                    "valid_until",
+                    models.DateField(
+                        blank=True,
+                        help_text="Prazno = trajno. Za studente/volontere postaviti datum isteka.",
+                        null=True,
+                        verbose_name="Aktivan do",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivan")),
+                ("notes", models.TextField(blank=True, verbose_name="Napomena")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "clients",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Firme/komitenti dodijeljeni ovom prostoru",
+                        related_name="workspace_assignments",
+                        to="companies.company",
+                        verbose_name="Klijenti",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        help_text="Firma kojoj workspace pripada (npr. Konjik d.o.o.)",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="workspaces",
+                        to="companies.company",
+                        verbose_name="Matica",
+                    ),
+                ),
+                (
+                    "workers",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Osobe koje rade u ovom prostoru",
+                        related_name="workspaces",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Radnici",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Radni prostor',
-                'verbose_name_plural': 'Radni prostori',
-                'ordering': ['position', 'name'],
+                "verbose_name": "Radni prostor",
+                "verbose_name_plural": "Radni prostori",
+                "ordering": ["position", "name"],
             },
         ),
     ]

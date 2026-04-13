@@ -1,9 +1,10 @@
 """OIB validacija i lookup."""
+
 import logging
 
 from django.core.cache import cache
 
-logger = logging.getLogger('udruge')
+logger = logging.getLogger("udruge")
 
 
 def validate_oib(oib):
@@ -24,20 +25,20 @@ def validate_oib(oib):
 
 def lookup_oib(oib):
     """Lookup OIB — validacija + cache."""
-    result = {'oib': oib, 'valid': validate_oib(oib)}
+    result = {"oib": oib, "valid": validate_oib(oib)}
 
-    if not result['valid']:
-        result['error'] = 'Neispravan OIB (checksum)'
+    if not result["valid"]:
+        result["error"] = "Neispravan OIB (checksum)"
         return result
 
-    cache_key = 'oib_lookup_%s' % oib
+    cache_key = "oib_lookup_%s" % oib
     cached = cache.get(cache_key)
     if cached:
         return cached
 
     # Za sada samo validacija — Sudreg API zahtijeva registraciju
-    result['note'] = 'OIB validan. Sudski registar lookup zahtijeva API pristup.'
-    result['found'] = False
+    result["note"] = "OIB validan. Sudski registar lookup zahtijeva API pristup."
+    result["found"] = False
 
     cache.set(cache_key, result, 86400)
     return result

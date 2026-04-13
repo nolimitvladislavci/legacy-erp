@@ -13,9 +13,18 @@ from smart_import.models import (
 
 @admin.register(ImportBatch)
 class ImportBatchAdmin(admin.ModelAdmin):
-    list_display  = ("pk", "company", "supplier", "file_type", "status", "status_message",
-                     "original_filename", "retry_count", "created_at")
-    list_filter   = ("status", "file_type")
+    list_display = (
+        "pk",
+        "company",
+        "supplier",
+        "file_type",
+        "status",
+        "status_message",
+        "original_filename",
+        "retry_count",
+        "created_at",
+    )
+    list_filter = ("status", "file_type")
     raw_id_fields = ("supplier", "goods_receipt")
     readonly_fields = ("processing_started_at",)
 
@@ -32,10 +41,19 @@ class VendorItemMappingAdmin(admin.ModelAdmin):
 
 @admin.register(GeminiUsageLog)
 class GeminiUsageLogAdmin(admin.ModelAdmin):
-    list_display    = ("called_at", "caller", "model", "input_tokens", "output_tokens", "cost_eur", "success")
-    list_filter     = ("caller", "success", "model")
-    date_hierarchy  = "called_at"
-    readonly_fields = ("called_at", "caller", "model", "input_tokens", "output_tokens", "cost_eur", "success", "input_hash")
+    list_display = ("called_at", "caller", "model", "input_tokens", "output_tokens", "cost_eur", "success")
+    list_filter = ("caller", "success", "model")
+    date_hierarchy = "called_at"
+    readonly_fields = (
+        "called_at",
+        "caller",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "cost_eur",
+        "success",
+        "input_hash",
+    )
 
 
 @admin.register(CompanyMailbox)
@@ -62,6 +80,7 @@ class ProblemReportAdmin(admin.ModelAdmin):
 
     def mark_resolved(self, request, queryset):
         queryset.update(resolved=True)
+
     mark_resolved.short_description = "Oznaci kao rijeseno"
 
 
@@ -70,9 +89,9 @@ from smart_import.models import FenixInboxItem
 
 @admin.register(FenixInboxItem)
 class FenixInboxItemAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'izvor', 'tip', 'partner_naziv', 'iznos', 'valuta', 'status', 'usmjereno_na')
-    list_filter = ('izvor', 'tip', 'status')
-    search_fields = ('partner_naziv', 'doc_broj', 'ai_summary')
-    readonly_fields = ('created_at', 'updated_at', 'ai_summary', 'ai_prijedlog', 'ai_tip_confidence')
-    date_hierarchy = 'created_at'
+    list_display = ("created_at", "izvor", "tip", "partner_naziv", "iznos", "valuta", "status", "usmjereno_na")
+    list_filter = ("izvor", "tip", "status")
+    search_fields = ("partner_naziv", "doc_broj", "ai_summary")
+    readonly_fields = ("created_at", "updated_at", "ai_summary", "ai_prijedlog", "ai_tip_confidence")
+    date_hierarchy = "created_at"
     list_per_page = 50

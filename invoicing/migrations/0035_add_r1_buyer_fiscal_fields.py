@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0034_alter_invoice_doctype_alter_invoiceitem_section_and_more'),
+        ("invoicing", "0034_alter_invoice_doctype_alter_invoiceitem_section_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='buyer_address',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Adresa kupca (R1)'),
+            model_name="invoice",
+            name="buyer_address",
+            field=models.CharField(blank=True, max_length=255, verbose_name="Adresa kupca (R1)"),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='buyer_name',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Naziv kupca (R1)'),
+            model_name="invoice",
+            name="buyer_name",
+            field=models.CharField(blank=True, max_length=200, verbose_name="Naziv kupca (R1)"),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='buyer_oib',
-            field=models.CharField(blank=True, max_length=20, verbose_name='OIB kupca (R1)'),
+            model_name="invoice",
+            name="buyer_oib",
+            field=models.CharField(blank=True, max_length=20, verbose_name="OIB kupca (R1)"),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='fiscal_jir',
-            field=models.CharField(blank=True, max_length=40, verbose_name='JIR (fiskalizacija)'),
+            model_name="invoice",
+            name="fiscal_jir",
+            field=models.CharField(blank=True, max_length=40, verbose_name="JIR (fiskalizacija)"),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='fiscal_zki',
-            field=models.CharField(blank=True, max_length=80, verbose_name='ZKI (fiskalizacija)'),
+            model_name="invoice",
+            name="fiscal_zki",
+            field=models.CharField(blank=True, max_length=80, verbose_name="ZKI (fiskalizacija)"),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='is_r1',
-            field=models.BooleanField(default=False, verbose_name='R1 račun'),
+            model_name="invoice",
+            name="is_r1",
+            field=models.BooleanField(default=False, verbose_name="R1 račun"),
         ),
     ]

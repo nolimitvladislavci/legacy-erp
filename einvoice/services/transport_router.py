@@ -1,4 +1,5 @@
 """TransportRouter — decides HOW to deliver each invoice."""
+
 import logging
 from dataclasses import dataclass
 
@@ -58,7 +59,9 @@ class TransportRouter:
             )
 
         participant = PeppolParticipant.objects.filter(
-            participant_id=receiver_oib, scheme="9934", is_active=True,
+            participant_id=receiver_oib,
+            scheme="9934",
+            is_active=True,
         ).first()
 
         if participant and participant.is_on_peppol:
@@ -105,14 +108,18 @@ class TransportRouter:
 
     def _create_backend(self, transport):
         from einvoice.models import TransportType
+
         if transport == TransportType.FINA_POSREDNIK:
             from einvoice.services.posrednik_client import PosrednikClient
+
             return PosrednikClient()
         elif transport == TransportType.PHASE4_AP:
             from einvoice.services.phase4_client import Phase4Client
+
             return Phase4Client()
         elif transport == TransportType.B2C_PORTAL:
             from einvoice.services.b2c_portal_service import B2CPortalService
+
             return B2CPortalService()
         else:
             raise ValueError(f"Unknown transport: {transport}")

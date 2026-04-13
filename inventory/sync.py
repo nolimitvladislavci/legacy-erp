@@ -12,7 +12,7 @@ def sync_to_webshop(item):
     try:
         int(item.quantity)
     except (TypeError, ValueError):
-        item.refresh_from_db(fields=['quantity'])
+        item.refresh_from_db(fields=["quantity"])
 
     product = None
     try:
@@ -23,7 +23,7 @@ def sync_to_webshop(item):
     if not item.webshop_visible:
         if product and product.inventory_item_id == item.pk:
             product.is_active = False
-            product.save(update_fields=['is_active'])
+            product.save(update_fields=["is_active"])
         return
 
     if product:
@@ -35,8 +35,7 @@ def sync_to_webshop(item):
         product.inventory_item = item
         if item.image and not product.image:
             product.image = item.image
-        product.save(update_fields=['name', 'price', 'stock', 'is_active',
-                                     'description', 'inventory_item', 'image'])
+        product.save(update_fields=["name", "price", "stock", "is_active", "description", "inventory_item", "image"])
     else:
         Product.objects.create(
             inventory_item=item,
@@ -45,6 +44,6 @@ def sync_to_webshop(item):
             price=item.unit_price,
             stock=max(0, int(item.quantity)),
             is_active=item.is_active,
-            description=item.description or '',
-            image=item.image or '',
+            description=item.description or "",
+            image=item.image or "",
         )

@@ -4,25 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0023_stockbatch_source_flock'),
+        ("inventory", "0023_stockbatch_source_flock"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='purchase_date',
-            field=models.DateField(blank=True, help_text='Za amortizaciju (assets)', null=True, verbose_name='Datum nabave'),
+            model_name="inventoryitem",
+            name="purchase_date",
+            field=models.DateField(
+                blank=True, help_text="Za amortizaciju (assets)", null=True, verbose_name="Datum nabave"
+            ),
         ),
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='wholesale_min_qty',
-            field=models.DecimalField(decimal_places=2, default=1, help_text='Ispod ove kolicine — maloprodajna cijena', max_digits=10, verbose_name='Min. kol. veleprodaja'),
+            model_name="inventoryitem",
+            name="wholesale_min_qty",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=1,
+                help_text="Ispod ove kolicine — maloprodajna cijena",
+                max_digits=10,
+                verbose_name="Min. kol. veleprodaja",
+            ),
         ),
         migrations.AlterField(
-            model_name='stockmovement',
-            name='movement_type',
-            field=models.CharField(choices=[('in', 'Ulaz (nabava)'), ('out', 'Izlaz (prodaja/upotreba)'), ('internal_use', 'Interna upotreba (repromaterijal)'), ('adjustment', 'Korekcija zalihe'), ('transfer', 'Prijenos na drugu lokaciju'), ('return', 'Povrat dobavljaču'), ('donation_in', 'Ulaz (materijalna donacija)'), ('writeoff', 'Otpis / Kalo')], max_length=20, verbose_name='Vrsta kretanja'),
+            model_name="stockmovement",
+            name="movement_type",
+            field=models.CharField(
+                choices=[
+                    ("in", "Ulaz (nabava)"),
+                    ("out", "Izlaz (prodaja/upotreba)"),
+                    ("internal_use", "Interna upotreba (repromaterijal)"),
+                    ("adjustment", "Korekcija zalihe"),
+                    ("transfer", "Prijenos na drugu lokaciju"),
+                    ("return", "Povrat dobavljaču"),
+                    ("donation_in", "Ulaz (materijalna donacija)"),
+                    ("writeoff", "Otpis / Kalo"),
+                ],
+                max_length=20,
+                verbose_name="Vrsta kretanja",
+            ),
         ),
     ]

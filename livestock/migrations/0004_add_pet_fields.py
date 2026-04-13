@@ -4,50 +4,68 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('livestock', '0003_add_fruit_crop_choices'),
+        ("livestock", "0003_add_fruit_crop_choices"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='livestock',
-            name='chip_number',
-            field=models.CharField(blank=True, help_text='15-znamenkasti ISO 11784/85 chip', max_length=20, verbose_name='Broj mikročipa'),
+            model_name="livestock",
+            name="chip_number",
+            field=models.CharField(
+                blank=True, help_text="15-znamenkasti ISO 11784/85 chip", max_length=20, verbose_name="Broj mikročipa"
+            ),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='color_description',
-            field=models.CharField(blank=True, max_length=120, verbose_name='Opis boje/šare'),
+            model_name="livestock",
+            name="color_description",
+            field=models.CharField(blank=True, max_length=120, verbose_name="Opis boje/šare"),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='father_name',
-            field=models.CharField(blank=True, max_length=80, verbose_name='Otac (ime)'),
+            model_name="livestock",
+            name="father_name",
+            field=models.CharField(blank=True, max_length=80, verbose_name="Otac (ime)"),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='mother_name',
-            field=models.CharField(blank=True, max_length=80, verbose_name='Majka (ime)'),
+            model_name="livestock",
+            name="mother_name",
+            field=models.CharField(blank=True, max_length=80, verbose_name="Majka (ime)"),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='pedigree_number',
-            field=models.CharField(blank=True, max_length=50, verbose_name='Broj rodovnice'),
+            model_name="livestock",
+            name="pedigree_number",
+            field=models.CharField(blank=True, max_length=50, verbose_name="Broj rodovnice"),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='photo',
-            field=models.ImageField(blank=True, upload_to='livestock/pets/%Y/', verbose_name='Fotografija'),
+            model_name="livestock",
+            name="photo",
+            field=models.ImageField(blank=True, upload_to="livestock/pets/%Y/", verbose_name="Fotografija"),
         ),
         migrations.AddField(
-            model_name='livestock',
-            name='spol',
-            field=models.CharField(blank=True, choices=[('M', 'Mužjak'), ('F', 'Ženka'), ('N', 'Nepoznato')], default='N', max_length=1),
+            model_name="livestock",
+            name="spol",
+            field=models.CharField(
+                blank=True, choices=[("M", "Mužjak"), ("F", "Ženka"), ("N", "Nepoznato")], default="N", max_length=1
+            ),
         ),
         migrations.AlterField(
-            model_name='livestock',
-            name='vrsta',
-            field=models.CharField(choices=[('krava', 'Krava (muzara)'), ('junica', 'Junica'), ('tele', 'Tele'), ('bik', 'Bik'), ('vo', 'Vo (tov)'), ('pas', 'Pas'), ('macka', 'Mačka'), ('konj', 'Konj'), ('zec', 'Zec'), ('ostalo_ljubimac', 'Ostalo (ljubimac)')], default='krava', max_length=15),
+            model_name="livestock",
+            name="vrsta",
+            field=models.CharField(
+                choices=[
+                    ("krava", "Krava (muzara)"),
+                    ("junica", "Junica"),
+                    ("tele", "Tele"),
+                    ("bik", "Bik"),
+                    ("vo", "Vo (tov)"),
+                    ("pas", "Pas"),
+                    ("macka", "Mačka"),
+                    ("konj", "Konj"),
+                    ("zec", "Zec"),
+                    ("ostalo_ljubimac", "Ostalo (ljubimac)"),
+                ],
+                default="krava",
+                max_length=15,
+            ),
         ),
     ]

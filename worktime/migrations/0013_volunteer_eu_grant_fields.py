@@ -5,50 +5,88 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('worktime', '0012_alter_activityevent_action'),
+        ("worktime", "0012_alter_activityevent_action"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='employeeprofile',
-            name='is_volunteer',
-            field=models.BooleanField(default=False, help_text='Iskljucuje iz obracuna placa. Sati se monetiziraju za EU fondove.', verbose_name='Volonter'),
+            model_name="employeeprofile",
+            name="is_volunteer",
+            field=models.BooleanField(
+                default=False,
+                help_text="Iskljucuje iz obracuna placa. Sati se monetiziraju za EU fondove.",
+                verbose_name="Volonter",
+            ),
         ),
         migrations.AddField(
-            model_name='employeeprofile',
-            name='volunteer_annual_limit',
-            field=models.DecimalField(decimal_places=2, default=Decimal('238.90'), help_text='Maks iznos naknada volonteru godisnje (cca 1800 HRK)', max_digits=10, verbose_name='Neoporezivi godisnji limit (EUR)'),
+            model_name="employeeprofile",
+            name="volunteer_annual_limit",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("238.90"),
+                help_text="Maks iznos naknada volonteru godisnje (cca 1800 HRK)",
+                max_digits=10,
+                verbose_name="Neoporezivi godisnji limit (EUR)",
+            ),
         ),
         migrations.AddField(
-            model_name='employeeprofile',
-            name='volunteer_contract_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Datum ugovora o volontiranju'),
+            model_name="employeeprofile",
+            name="volunteer_contract_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Datum ugovora o volontiranju"),
         ),
         migrations.AddField(
-            model_name='employeeprofile',
-            name='volunteer_hourly_value',
-            field=models.DecimalField(decimal_places=2, default=Decimal('5.00'), help_text='Za monetizaciju u EU projektima', max_digits=10, verbose_name='Vrijednost volonterskog sata (EUR)'),
+            model_name="employeeprofile",
+            name="volunteer_hourly_value",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("5.00"),
+                help_text="Za monetizaciju u EU projektima",
+                max_digits=10,
+                verbose_name="Vrijednost volonterskog sata (EUR)",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentry',
-            name='grant_monetary_value',
-            field=models.DecimalField(decimal_places=2, default=Decimal('0.00'), help_text='Automatski: sati x volunteer_hourly_value', max_digits=10, verbose_name='Monetizirana vrijednost (EUR)'),
+            model_name="timeentry",
+            name="grant_monetary_value",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="Automatski: sati x volunteer_hourly_value",
+                max_digits=10,
+                verbose_name="Monetizirana vrijednost (EUR)",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentry',
-            name='grant_project_code',
-            field=models.CharField(blank=True, help_text='Npr. HR.3.1.20-0001, ESF-2026-xxx', max_length=100, verbose_name='Sifra EU projekta'),
+            model_name="timeentry",
+            name="grant_project_code",
+            field=models.CharField(
+                blank=True,
+                help_text="Npr. HR.3.1.20-0001, ESF-2026-xxx",
+                max_length=100,
+                verbose_name="Sifra EU projekta",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentry',
-            name='is_volunteer_work',
-            field=models.BooleanField(default=False, verbose_name='Volonterski rad'),
+            model_name="timeentry",
+            name="is_volunteer_work",
+            field=models.BooleanField(default=False, verbose_name="Volonterski rad"),
         ),
         migrations.AlterField(
-            model_name='anomalyreport',
-            name='anomaly_type',
-            field=models.CharField(choices=[('GHOST_SHIFT', 'Smjena bez aktivnosti'), ('NO_ACTIVITY', 'Duga pauza bez evidencije'), ('GPS_MISMATCH', 'GPS ne odgovara lokaciji firme'), ('OVERTIME', 'Prekoracenje zakonskog max'), ('MISSING_BREAK', 'Nedostajuca zakonska pauza'), ('DOUBLE_SHIFT', 'Dvije paralelne smjene'), ('VOLUNTEER_LIMIT', 'Probijen neoporezivi limit volontera'), ('VOLUNTEER_NO_CONTRACT', 'Volontiranje bez ugovora')], max_length=30),
+            model_name="anomalyreport",
+            name="anomaly_type",
+            field=models.CharField(
+                choices=[
+                    ("GHOST_SHIFT", "Smjena bez aktivnosti"),
+                    ("NO_ACTIVITY", "Duga pauza bez evidencije"),
+                    ("GPS_MISMATCH", "GPS ne odgovara lokaciji firme"),
+                    ("OVERTIME", "Prekoracenje zakonskog max"),
+                    ("MISSING_BREAK", "Nedostajuca zakonska pauza"),
+                    ("DOUBLE_SHIFT", "Dvije paralelne smjene"),
+                    ("VOLUNTEER_LIMIT", "Probijen neoporezivi limit volontera"),
+                    ("VOLUNTEER_NO_CONTRACT", "Volontiranje bez ugovora"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

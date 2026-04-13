@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
             model_name="sensorreading",
             name="smart_box",
             field=models.ForeignKey(
-                blank=True, null=True,
+                blank=True,
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="sensor_readings",
                 to="delivery.smartbox",
@@ -46,40 +47,65 @@ class Migration(migrations.Migration):
             name="HACCPIncident",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("incident_type", models.CharField(max_length=30, choices=[
-                    ("sustained_breach", "Sustained Breach (>10min)"),
-                    ("critical_failure", "Critical Failure (>15C)"),
-                    ("offline_retroactive", "Offline Retroactive Detection"),
-                ])),
-                ("severity", models.CharField(max_length=10, choices=[
-                    ("warning", "Warning"),
-                    ("critical", "Critical"),
-                    ("blocked", "Blocked"),
-                ], default="critical")),
-                ("smart_box", models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE,
-                    related_name="haccp_incidents",
-                    to="delivery.smartbox",
-                    null=True, blank=True,
-                )),
-                ("consolidated_delivery", models.ForeignKey(
-                    on_delete=django.db.models.deletion.CASCADE,
-                    related_name="haccp_incidents",
-                    to="delivery.consolidateddelivery",
-                    null=True, blank=True,
-                )),
+                (
+                    "incident_type",
+                    models.CharField(
+                        max_length=30,
+                        choices=[
+                            ("sustained_breach", "Sustained Breach (>10min)"),
+                            ("critical_failure", "Critical Failure (>15C)"),
+                            ("offline_retroactive", "Offline Retroactive Detection"),
+                        ],
+                    ),
+                ),
+                (
+                    "severity",
+                    models.CharField(
+                        max_length=10,
+                        choices=[
+                            ("warning", "Warning"),
+                            ("critical", "Critical"),
+                            ("blocked", "Blocked"),
+                        ],
+                        default="critical",
+                    ),
+                ),
+                (
+                    "smart_box",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="haccp_incidents",
+                        to="delivery.smartbox",
+                        null=True,
+                        blank=True,
+                    ),
+                ),
+                (
+                    "consolidated_delivery",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="haccp_incidents",
+                        to="delivery.consolidateddelivery",
+                        null=True,
+                        blank=True,
+                    ),
+                ),
                 ("breach_start", models.DateTimeField(verbose_name="Pocetak prekrsaja")),
                 ("breach_end", models.DateTimeField(null=True, blank=True, verbose_name="Kraj prekrsaja")),
                 ("max_temperature", models.DecimalField(max_digits=5, decimal_places=1, verbose_name="Max temp (C)")),
                 ("duration_minutes", models.IntegerField(default=0, verbose_name="Trajanje prekrsaja (min)")),
                 ("description", models.TextField(blank=True)),
                 ("is_resolved", models.BooleanField(default=False)),
-                ("resolved_by", models.ForeignKey(
-                    null=True, blank=True,
-                    on_delete=django.db.models.deletion.SET_NULL,
-                    to="auth.user",
-                    related_name="resolved_haccp_incidents",
-                )),
+                (
+                    "resolved_by",
+                    models.ForeignKey(
+                        null=True,
+                        blank=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="auth.user",
+                        related_name="resolved_haccp_incidents",
+                    ),
+                ),
                 ("resolution_note", models.TextField(blank=True, verbose_name="Sto je poduzeto")),
                 ("resolved_at", models.DateTimeField(null=True, blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),

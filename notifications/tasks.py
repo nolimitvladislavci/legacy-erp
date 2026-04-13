@@ -1,11 +1,12 @@
 """Notification Celery Tasks — automatsko čišćenje."""
+
 import logging
 from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone as tz
 
-logger = logging.getLogger('notifications')
+logger = logging.getLogger("notifications")
 
 
 @shared_task
@@ -15,6 +16,7 @@ def cleanup_old_notifications():
     Sprječava nakupljanje stotina notifikacija po korisniku.
     """
     from notifications.models import Notification
+
     now = tz.now()
 
     # 1. Briši pročitane starije od 30 dana
@@ -31,29 +33,32 @@ def cleanup_old_notifications():
 
     # 3. Per-user cap: ako netko ima > 50 nepročitanih, zadrži samo 20 najnovijih
     from django.db.models import Count
+
     heavy_users = (
-        Notification.objects
-        .filter(is_read=False)
-        .values('recipient_id')
-        .annotate(c=Count('id'))
-        .filter(c__gt=50)
+        Notification.objects.filter(is_read=False).values("recipient_id").annotate(c=Count("id")).filter(c__gt=50)
     )
     capped = 0
     for row in heavy_users:
         keep_ids = list(
-            Notification.objects
-            .filter(recipient_id=row['recipient_id'], is_read=False)
-            .order_by('-created_at')[:20]
-            .values_list('id', flat=True)
+            Notification.objects.filter(recipient_id=row["recipient_id"], is_read=False)
+            .order_by("-created_at")[:20]
+            .values_list("id", flat=True)
         )
-        capped += Notification.objects.filter(
-            recipient_id=row['recipient_id'], is_read=False,
-        ).exclude(id__in=keep_ids).update(is_read=True)
+        capped += (
+            Notification.objects.filter(
+                recipient_id=row["recipient_id"],
+                is_read=False,
+            )
+            .exclude(id__in=keep_ids)
+            .update(is_read=True)
+        )
 
     if deleted or marked or capped:
         logger.info(
-            '[NOTIFICATIONS] Cleanup: %d deleted, %d auto-read, %d capped',
-            deleted, marked, capped,
+            "[NOTIFICATIONS] Cleanup: %d deleted, %d auto-read, %d capped",
+            deleted,
+            marked,
+            capped,
         )
 
-    return {'deleted': deleted, 'marked_read': marked, 'capped': capped}
+    return {"deleted": deleted, "marked_read": marked, "capped": capped}

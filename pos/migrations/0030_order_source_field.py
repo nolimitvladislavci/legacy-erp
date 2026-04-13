@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0029_audit_trail_fields'),
+        ("pos", "0029_audit_trail_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='order_source',
-            field=models.CharField(blank=True, choices=[('pos', 'POS blagajna'), ('qr', 'QR narudzba'), ('web', 'Webshop'), ('api', 'API')], default='pos', max_length=10, verbose_name='Kanal narudzbe'),
+            model_name="posreceipt",
+            name="order_source",
+            field=models.CharField(
+                blank=True,
+                choices=[("pos", "POS blagajna"), ("qr", "QR narudzba"), ("web", "Webshop"), ("api", "API")],
+                default="pos",
+                max_length=10,
+                verbose_name="Kanal narudzbe",
+            ),
         ),
     ]

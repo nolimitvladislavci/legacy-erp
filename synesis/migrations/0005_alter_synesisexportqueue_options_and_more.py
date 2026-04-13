@@ -4,39 +4,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('synesis', '0004_synesis_export_queue'),
+        ("synesis", "0004_synesis_export_queue"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='synesisexportqueue',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Synesis export'},
+            name="synesisexportqueue",
+            options={"ordering": ["-created_at"], "verbose_name": "Synesis export"},
         ),
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='erp_object_id',
-            field=models.CharField(blank=True, default='', max_length=50),
+            model_name="synesisexportqueue",
+            name="erp_object_id",
+            field=models.CharField(blank=True, default="", max_length=50),
         ),
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='export_type',
-            field=models.CharField(choices=[('item', 'Artikl'), ('partner', 'Partner'), ('calculation', 'Kalkulacija'), ('pkv', 'PKV primka')], max_length=20),
+            model_name="synesisexportqueue",
+            name="export_type",
+            field=models.CharField(
+                choices=[
+                    ("item", "Artikl"),
+                    ("partner", "Partner"),
+                    ("calculation", "Kalkulacija"),
+                    ("pkv", "PKV primka"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="synesisexportqueue",
+            name="id",
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID"),
         ),
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='payload',
-            field=models.JSONField(default=dict, help_text='MDB fields to write'),
+            model_name="synesisexportqueue",
+            name="payload",
+            field=models.JSONField(default=dict, help_text="MDB fields to write"),
         ),
         migrations.AlterField(
-            model_name='synesisexportqueue',
-            name='synesis_id',
-            field=models.CharField(blank=True, default='', help_text='Synesis ITEM_ID or PARTNER_ID', max_length=50),
+            model_name="synesisexportqueue",
+            name="synesis_id",
+            field=models.CharField(blank=True, default="", help_text="Synesis ITEM_ID or PARTNER_ID", max_length=50),
         ),
     ]

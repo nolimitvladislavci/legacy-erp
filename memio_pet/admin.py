@@ -2,6 +2,7 @@
 memio_pet/admin.py -- Admin za memio.pet modul
 Ljubeta unosi podatke ovdje. Inline pomoc na svakom koraku.
 """
+
 from django.contrib import admin, messages
 from django.db import IntegrityError
 from django.utils.html import format_html, mark_safe
@@ -104,7 +105,16 @@ class ReviewInline(admin.TabularInline):
 
 @admin.register(BreederProfile)
 class BreederProfileAdmin(admin.ModelAdmin):
-    list_display = ("name", "account_type", "city", "country", "trust_badge", "is_cro_validated", "animal_count", "created_at")
+    list_display = (
+        "name",
+        "account_type",
+        "city",
+        "country",
+        "trust_badge",
+        "is_cro_validated",
+        "animal_count",
+        "created_at",
+    )
     list_filter = ("account_type", "is_cro_validated", "country", "is_no_limit_partner")
     search_fields = ("name", "city")
     readonly_fields = ("id", "api_key", "created_at", "updated_at", "trust_updated", "trust_score_display", "help_text")
@@ -112,29 +122,39 @@ class BreederProfileAdmin(admin.ModelAdmin):
     list_per_page = 25
 
     fieldsets = (
-        (None, {
-            "fields": ("help_text",)
-        }),
-        ("Identitet", {
-            "fields": ("name", "account_type", "oib", "city", "country")
-        }),
-        ("Kontakt", {
-            "fields": ("email", "phone", "website")
-        }),
-        ("Verifikacija", {
-            "fields": ("is_cro_validated", "validated_name", "validated_at", "is_no_limit_partner", "shelter_sponsor")
-        }),
-        ("Trust Score", {
-            "fields": ("trust_score_display", "trust_score", "trust_breakdown", "trust_updated"),
-        }),
-        ("Sistem", {
-            "fields": ("id", "api_key", "limit_company_id", "created_at", "updated_at"),
-            "classes": ("collapse",),
-        }),
+        (None, {"fields": ("help_text",)}),
+        ("Identitet", {"fields": ("name", "account_type", "oib", "city", "country")}),
+        ("Kontakt", {"fields": ("email", "phone", "website")}),
+        (
+            "Verifikacija",
+            {
+                "fields": (
+                    "is_cro_validated",
+                    "validated_name",
+                    "validated_at",
+                    "is_no_limit_partner",
+                    "shelter_sponsor",
+                )
+            },
+        ),
+        (
+            "Trust Score",
+            {
+                "fields": ("trust_score_display", "trust_score", "trust_breakdown", "trust_updated"),
+            },
+        ),
+        (
+            "Sistem",
+            {
+                "fields": ("id", "api_key", "limit_company_id", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
     def help_text(self, obj):
         return mark_safe(HELP_BREEDER)
+
     help_text.short_description = ""
 
     def trust_badge(self, obj):
@@ -145,10 +165,8 @@ class BreederProfileAdmin(admin.ModelAdmin):
             color, icon = "#ffc107", "◆"
         else:
             color, icon = "#dc3545", "○"
-        return format_html(
-            '<span style="color:{}; font-weight:bold;">{} {}/100</span>',
-            color, icon, s
-        )
+        return format_html('<span style="color:{}; font-weight:bold;">{} {}/100</span>', color, icon, s)
+
     trust_badge.short_description = "Trust"
     trust_badge.admin_order_field = "trust_score"
 
@@ -165,26 +183,29 @@ class BreederProfileAdmin(admin.ModelAdmin):
                 f'<tr><td style="padding:3px 8px;"><b>{key.upper()}</b></td>'
                 f'<td><div style="background:#eee;width:120px;height:16px;border-radius:3px;">'
                 f'<div style="background:{color};width:{bar_width}%;height:16px;border-radius:3px;"></div>'
-                f'</div></td>'
+                f"</div></td>"
                 f'<td style="padding:0 8px;">{data["score"]}/{data["max"]}</td>'
                 f'<td style="color:#666;font-size:11px;">{notes}</td></tr>'
             )
         return mark_safe(
             f'<table style="border-collapse:collapse;">{rows}'
             f'<tr><td colspan="4" style="border-top:2px solid #333;padding-top:4px;">'
-            f'<b>UKUPNO: {obj.trust_score}/100</b></td></tr></table>'
+            f"<b>UKUPNO: {obj.trust_score}/100</b></td></tr></table>"
         )
+
     trust_score_display.short_description = "Trust Score Breakdown"
 
     def animal_count(self, obj):
         c = obj.animals.count()
         return f"{c} zivotinja" if c else "—"
+
     animal_count.short_description = "Zivotinje"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         try:
             from memio_pet.trust_score import update_trust_score
+
             score, _ = update_trust_score(obj)
             messages.info(request, f"Trust Score azuriran: {score}/100")
         except ImportError as e:
@@ -193,7 +214,17 @@ class BreederProfileAdmin(admin.ModelAdmin):
 
 @admin.register(AnimalProfile)
 class AnimalProfileAdmin(admin.ModelAdmin):
-    list_display = ("display_name", "vrsta", "breed", "spol", "status", "breeder_link", "chip_number", "date_of_birth", "has_photo")
+    list_display = (
+        "display_name",
+        "vrsta",
+        "breed",
+        "spol",
+        "status",
+        "breeder_link",
+        "chip_number",
+        "date_of_birth",
+        "has_photo",
+    )
     list_filter = ("vrsta", "status", "spol")
     search_fields = ("name", "ear_tag", "chip_number", "breed", "pedigree_number")
     readonly_fields = ("id", "public_id", "created_at", "updated_at", "public_url_link", "help_text")
@@ -201,37 +232,38 @@ class AnimalProfileAdmin(admin.ModelAdmin):
     list_per_page = 50
 
     fieldsets = (
-        (None, {
-            "fields": ("help_text",)
-        }),
-        ("Osnovni podaci", {
-            "fields": ("name", "vrsta", "breed", "spol", "color_description", "date_of_birth", "weight_kg", "status")
-        }),
-        ("Identifikacija", {
-            "fields": ("ear_tag", "chip_number", "pedigree_number", "photo")
-        }),
-        ("Roditelji (rodovnica)", {
-            "fields": ("father_name", "mother_name"),
-        }),
-        ("Uzgajivac", {
-            "fields": ("breeder", "breeder_name_snapshot", "breeder_oib_snapshot")
-        }),
-        ("Napomene", {
-            "fields": ("notes",)
-        }),
-        ("Sistem", {
-            "fields": ("id", "public_id", "public_url_link", "limit_livestock_id", "created_at", "updated_at"),
-            "classes": ("collapse",),
-        }),
+        (None, {"fields": ("help_text",)}),
+        (
+            "Osnovni podaci",
+            {"fields": ("name", "vrsta", "breed", "spol", "color_description", "date_of_birth", "weight_kg", "status")},
+        ),
+        ("Identifikacija", {"fields": ("ear_tag", "chip_number", "pedigree_number", "photo")}),
+        (
+            "Roditelji (rodovnica)",
+            {
+                "fields": ("father_name", "mother_name"),
+            },
+        ),
+        ("Uzgajivac", {"fields": ("breeder", "breeder_name_snapshot", "breeder_oib_snapshot")}),
+        ("Napomene", {"fields": ("notes",)}),
+        (
+            "Sistem",
+            {
+                "fields": ("id", "public_id", "public_url_link", "limit_livestock_id", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
     def help_text(self, obj):
         return mark_safe(HELP_ANIMAL)
+
     help_text.short_description = ""
 
     def display_name(self, obj):
         icon = "" if obj.photo else " [bez foto]"
         return f"{obj.name or obj.ear_tag}{icon}"
+
     display_name.short_description = "Ime/Tag"
 
     def breeder_link(self, obj):
@@ -239,16 +271,19 @@ class AnimalProfileAdmin(admin.ModelAdmin):
             v = " ✓" if obj.breeder.verified_badge else ""
             return f"{obj.breeder.name}{v}"
         return obj.breeder_name_snapshot or "—"
+
     breeder_link.short_description = "Uzgajivac"
 
     def has_photo(self, obj):
         return bool(obj.photo)
+
     has_photo.boolean = True
     has_photo.short_description = "Foto"
 
     def public_url_link(self, obj):
         url = obj.public_url
         return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
+
     public_url_link.short_description = "Javni profil (QR)"
 
     def save_model(self, request, obj, form, change):
@@ -256,6 +291,7 @@ class AnimalProfileAdmin(admin.ModelAdmin):
         if obj.breeder:
             try:
                 from memio_pet.trust_score import update_trust_score
+
                 update_trust_score(obj.breeder)
             except ImportError:
                 pass
@@ -273,6 +309,7 @@ class PetHealthRecordAdmin(admin.ModelAdmin):
         if obj.vet_profile and obj.vet_profile.is_verified:
             return f"{obj.vet_profile.name} ✓"
         return obj.veterinar or "—"
+
     vet_display.short_description = "Veterinar"
 
     def save_model(self, request, obj, form, change):
@@ -280,6 +317,7 @@ class PetHealthRecordAdmin(admin.ModelAdmin):
         if obj.animal and obj.animal.breeder:
             try:
                 from memio_pet.trust_score import update_trust_score
+
                 update_trust_score(obj.animal.breeder)
             except ImportError:
                 pass
@@ -297,6 +335,7 @@ class PetOwnershipAdmin(admin.ModelAdmin):
         if obj.animal and obj.animal.breeder:
             try:
                 from memio_pet.trust_score import update_trust_score
+
                 update_trust_score(obj.animal.breeder)
             except ImportError:
                 pass
@@ -319,39 +358,48 @@ class VeterinarProfileAdmin(admin.ModelAdmin):
     readonly_fields = ("id", "created_at", "updated_at", "verified_at", "help_text")
 
     fieldsets = (
-        (None, {
-            "fields": ("help_text",)
-        }),
-        ("Osnovni podaci", {
-            "fields": ("name", "clinic_name", "city", "country")
-        }),
-        ("Identifikacija", {
-            "fields": ("oib", "license_number")
-        }),
-        ("Kontakt", {
-            "fields": ("email", "phone")
-        }),
-        ("Verifikacija", {
-            "fields": ("is_verified", "verified_at"),
-        }),
-        ("Sistem", {
-            "fields": ("id", "created_at", "updated_at"),
-            "classes": ("collapse",),
-        }),
+        (None, {"fields": ("help_text",)}),
+        ("Osnovni podaci", {"fields": ("name", "clinic_name", "city", "country")}),
+        ("Identifikacija", {"fields": ("oib", "license_number")}),
+        ("Kontakt", {"fields": ("email", "phone")}),
+        (
+            "Verifikacija",
+            {
+                "fields": ("is_verified", "verified_at"),
+            },
+        ),
+        (
+            "Sistem",
+            {
+                "fields": ("id", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
     def help_text(self, obj):
         return mark_safe(HELP_VET)
+
     help_text.short_description = ""
 
     def record_count(self, obj):
         return obj.health_records.count()
+
     record_count.short_description = "Zapisa"
 
 
 @admin.register(VerificationLog)
 class VerificationLogAdmin(admin.ModelAdmin):
-    list_display = ("verification_type", "animal", "breeder", "veterinar", "verified_by", "is_valid", "hash_short", "timestamp")
+    list_display = (
+        "verification_type",
+        "animal",
+        "breeder",
+        "veterinar",
+        "verified_by",
+        "is_valid",
+        "hash_short",
+        "timestamp",
+    )
     list_filter = ("verification_type", "is_valid")
     search_fields = ("verified_by", "notes")
     readonly_fields = ("id", "timestamp", "sha256_hash")
@@ -361,8 +409,8 @@ class VerificationLogAdmin(admin.ModelAdmin):
         if obj.sha256_hash:
             return f"{obj.sha256_hash[:12]}..."
         return "—"
-    hash_short.short_description = "SHA-256"
 
+    hash_short.short_description = "SHA-256"
 
 
 @admin.register(BreederReview)
@@ -377,16 +425,19 @@ class BreederReviewAdmin(admin.ModelAdmin):
 
     def stars(self, obj):
         return "★" * obj.rating + "☆" * (5 - obj.rating)
+
     stars.short_description = "Ocjena"
 
     def publish_reviews(self, request, queryset):
         count = queryset.update(is_published=True)
         messages.success(request, f"{count} recenzija objavljeno.")
+
     publish_reviews.short_description = "Objavi odabrane recenzije"
 
     def verify_purchases(self, request, queryset):
         count = queryset.update(is_verified_purchase=True)
         messages.success(request, f"{count} kupnji verificirano.")
+
     verify_purchases.short_description = "Verificiraj kupnje"
 
     def save_model(self, request, obj, form, change):
@@ -398,6 +449,7 @@ class BreederReviewAdmin(admin.ModelAdmin):
         if obj.breeder:
             try:
                 from memio_pet.trust_score import update_trust_score
+
                 update_trust_score(obj.breeder)
             except ImportError:
                 pass
@@ -408,15 +460,16 @@ from memio_pet.models import RawFoodListing, RawFoodOrder
 
 @admin.register(RawFoodListing)
 class RawFoodListingAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'product_type', 'quantity_kg', 'price_eur_kg', 'status', 'is_free_range')
-    list_filter = ('product_type', 'status', 'is_antibiotic_free', 'is_free_range')
-    search_fields = ('company_name', 'k3_cert_number')
+    list_display = ("company_name", "product_type", "quantity_kg", "price_eur_kg", "status", "is_free_range")
+    list_filter = ("product_type", "status", "is_antibiotic_free", "is_free_range")
+    search_fields = ("company_name", "k3_cert_number")
+
 
 @admin.register(RawFoodOrder)
 class RawFoodOrderAdmin(admin.ModelAdmin):
-    list_display = ('batch_id', 'listing', 'quantity_kg', 'status', 'created_at')
-    list_filter = ('status',)
-    search_fields = ('batch_id',)
+    list_display = ("batch_id", "listing", "quantity_kg", "status", "created_at")
+    list_filter = ("status",)
+    search_fields = ("batch_id",)
 
 
 from memio_pet.models import DogTrainingSession, PetBoardingReservation
@@ -424,12 +477,13 @@ from memio_pet.models import DogTrainingSession, PetBoardingReservation
 
 @admin.register(DogTrainingSession)
 class DogTrainingSessionAdmin(admin.ModelAdmin):
-    list_display = ('animal', 'training_type', 'datum', 'trainer', 'status', 'cijena_eur')
-    list_filter = ('training_type', 'status')
-    search_fields = ('animal__name', 'trainer__name')
+    list_display = ("animal", "training_type", "datum", "trainer", "status", "cijena_eur")
+    list_filter = ("training_type", "status")
+    search_fields = ("animal__name", "trainer__name")
+
 
 @admin.register(PetBoardingReservation)
 class PetBoardingReservationAdmin(admin.ModelAdmin):
-    list_display = ('animal', 'hotel', 'check_in', 'check_out', 'room_type', 'status', 'total_price')
-    list_filter = ('status', 'room_type')
-    search_fields = ('animal__name', 'owner_name', 'hotel__name')
+    list_display = ("animal", "hotel", "check_in", "check_out", "room_type", "status", "total_price")
+    list_filter = ("status", "room_type")
+    search_fields = ("animal__name", "owner_name", "hotel__name")

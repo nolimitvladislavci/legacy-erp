@@ -4,6 +4,7 @@ BORG SLA Engine — Celery tasks za detekciju SLA kršenja.
 check_sla: svakih 10 min provjerava kartice koje predugo stoje u statusu.
 archive_old_activity: mjesečno broji stare zapise (arhiva u v2).
 """
+
 import logging
 
 from celery import shared_task
@@ -12,26 +13,26 @@ from django.utils import timezone
 
 from borg_ops.business_hours import is_business_hour, sla_breached
 
-logger = logging.getLogger('borg.sla')
+logger = logging.getLogger("borg.sla")
 
 SLA_RULES = {
-    'work_orders.WorkOrder': {
-        'in_progress': 480,     # 8h
+    "work_orders.WorkOrder": {
+        "in_progress": 480,  # 8h
     },
-    'burza.ProjectLead': {
-        'NOVI_UPIT':        1440,   # 24h
-        'INTERNA_PROCJENA': 4320,   # 72h
-        'NA_BURZI':         10080,  # 7 dana
+    "burza.ProjectLead": {
+        "NOVI_UPIT": 1440,  # 24h
+        "INTERNA_PROCJENA": 4320,  # 72h
+        "NA_BURZI": 10080,  # 7 dana
     },
-    'interventions.HitnaIntervencija': {
-        'NOVO':        15,    # 15 min
-        'DODIJELJENO': 30,    # 30 min
-        'NA_PUTU':     60,    # 1h
+    "interventions.HitnaIntervencija": {
+        "NOVO": 15,  # 15 min
+        "DODIJELJENO": 30,  # 30 min
+        "NA_PUTU": 60,  # 1h
     },
 }
 
 
-@shared_task(name='borg_ops.check_sla')
+@shared_task(name="borg_ops.check_sla")
 def check_sla():
     """Celery beat: svakih 10 min — SLA breach detekcija."""
     from django.apps import apps
@@ -43,7 +44,7 @@ def check_sla():
     breaches = []
 
     for model_path, rules in SLA_RULES.items():
-        app_label, model_name = model_path.split('.')
+        app_label, model_name = model_path.split(".")
         try:
             Model = apps.get_model(app_label, model_name)
         except LookupError:
@@ -61,44 +62,51 @@ def check_sla():
                 status=status,
                 exited_at__isnull=True,
                 entered_at__lt=cutoff,
-            ).select_related('user')
+            ).select_related("user")
 
             for ts in candidates:
                 # Računaj RADNE minute — ne ukupno proteklo vrijeme
                 breached, elapsed = sla_breached(ts.entered_at, max_minutes)
                 if not breached:
-                    continue   # Ukupno radno vrijeme još nije premašeno
+                    continue  # Ukupno radno vrijeme još nije premašeno
 
                 logger.warning(
-                    'SLA BREACH: %s #%s u statusu %s — %d radnih min (max %d)',
-                    model_name, ts.object_id, status, elapsed, max_minutes
+                    "SLA BREACH: %s #%s u statusu %s — %d radnih min (max %d)",
+                    model_name,
+                    ts.object_id,
+                    status,
+                    elapsed,
+                    max_minutes,
                 )
-                breaches.append({
-                    'model': model_name,
-                    'pk': ts.object_id,
-                    'status': status,
-                    'minutes': elapsed,
-                    'max': max_minutes,
-                })
+                breaches.append(
+                    {
+                        "model": model_name,
+                        "pk": ts.object_id,
+                        "status": status,
+                        "minutes": elapsed,
+                        "max": max_minutes,
+                    }
+                )
 
     if breaches:
-        logger.warning('SLA check: %d breach(es) detected', len(breaches))
+        logger.warning("SLA check: %d breach(es) detected", len(breaches))
 
     return {
-        'checked_at': now.isoformat(),
-        'breaches': len(breaches),
-        'details': breaches[:20],
+        "checked_at": now.isoformat(),
+        "breaches": len(breaches),
+        "details": breaches[:20],
     }
 
 
-@shared_task(name='borg_ops.archive_old_activity')
+@shared_task(name="borg_ops.archive_old_activity")
 def archive_old_activity():
     """Mjesecno: broji aktivnosti starije od 90 dana (arhiva u v2)."""
     from borg_ops.models import CardActivity
+
     cutoff = timezone.now() - timezone.timedelta(days=90)
     count = CardActivity.objects.filter(created_at__lt=cutoff).count()
-    logger.info('CardActivity: %d zapisa starijih od 90 dana', count)
-    return {'old_records': count}
+    logger.info("CardActivity: %d zapisa starijih od 90 dana", count)
+    return {"old_records": count}
 
 
 """
@@ -115,7 +123,7 @@ from celery import shared_task
 from django.apps import apps
 from django.db import connection
 
-logger = logging.getLogger('borg.sentinel')
+logger = logging.getLogger("borg.sentinel")
 
 
 def _get_db_columns(table_name):
@@ -125,9 +133,9 @@ def _get_db_columns(table_name):
             "SELECT column_name, data_type, is_nullable "
             "FROM information_schema.columns "
             "WHERE table_name = %s ORDER BY ordinal_position",
-            [table_name]
+            [table_name],
         )
-        return {row[0]: {'type': row[1], 'nullable': row[2]} for row in cursor.fetchall()}
+        return {row[0]: {"type": row[1], "nullable": row[2]} for row in cursor.fetchall()}
 
 
 def _get_model_columns(model):
@@ -137,10 +145,10 @@ def _get_model_columns(model):
         # Skip M2M i reverse relacije — nemaju stupac u tablici
         if field.many_to_many or field.one_to_many:
             continue
-        if hasattr(field, 'column') and field.column:
+        if hasattr(field, "column") and field.column:
             columns[field.column] = {
-                'field_name': field.name,
-                'field_type': type(field).__name__,
+                "field_name": field.name,
+                "field_type": type(field).__name__,
             }
     return columns
 
@@ -170,50 +178,56 @@ def schema_drift_check(self):
 
         # Stupci u DB ali ne u modelu (orphan)
         for col_name in db_cols:
-            if col_name not in model_cols and col_name != 'id':
-                drifts.append({
-                    'table': table,
-                    'column': col_name,
-                    'type': 'ORPHAN_IN_DB',
-                    'detail': f'Stupac "{col_name}" ({db_cols[col_name]["type"]}) postoji u DB ali ne u Django modelu',
-                })
+            if col_name not in model_cols and col_name != "id":
+                drifts.append(
+                    {
+                        "table": table,
+                        "column": col_name,
+                        "type": "ORPHAN_IN_DB",
+                        "detail": f'Stupac "{col_name}" ({db_cols[col_name]["type"]}) postoji u DB ali ne u Django modelu',
+                    }
+                )
 
         # Polja u modelu ali ne u DB (missing)
         for col_name in model_cols:
             if col_name not in db_cols:
-                drifts.append({
-                    'table': table,
-                    'column': col_name,
-                    'type': 'MISSING_IN_DB',
-                    'detail': f'Polje "{model_cols[col_name]["field_name"]}" ({model_cols[col_name]["field_type"]}) postoji u modelu ali ne u DB tablici',
-                })
+                drifts.append(
+                    {
+                        "table": table,
+                        "column": col_name,
+                        "type": "MISSING_IN_DB",
+                        "detail": f'Polje "{model_cols[col_name]["field_name"]}" ({model_cols[col_name]["field_type"]}) postoji u modelu ali ne u DB tablici',
+                    }
+                )
 
     # Alarmiranje
     if drifts:
         logger.warning(
-            'SCHEMA DRIFT DETECTED: %d problema u %d tablica:\n%s',
-            len(drifts), len(set(d['table'] for d in drifts)),
-            '\n'.join(f'  [{d["type"]}] {d["table"]}.{d["column"]}: {d["detail"]}' for d in drifts),
+            "SCHEMA DRIFT DETECTED: %d problema u %d tablica:\n%s",
+            len(drifts),
+            len(set(d["table"] for d in drifts)),
+            "\n".join(f"  [{d['type']}] {d['table']}.{d['column']}: {d['detail']}" for d in drifts),
         )
 
         # WhatsApp alarm
         try:
             from core.whatsapp import send_text
+
             msg = (
-                f'BORG SENTINEL: Schema Drift detected!\n'
-                f'{len(drifts)} problema u {len(set(d["table"] for d in drifts))} tablica.\n'
-                + '\n'.join(f'[{d["type"]}] {d["table"]}.{d["column"]}' for d in drifts[:10])
+                f"BORG SENTINEL: Schema Drift detected!\n"
+                f"{len(drifts)} problema u {len(set(d['table'] for d in drifts))} tablica.\n"
+                + "\n".join(f"[{d['type']}] {d['table']}.{d['column']}" for d in drifts[:10])
             )
-            send_text(phone='385976091655', message=msg, company_id='system')
+            send_text(phone="385976091655", message=msg, company_id="system")
         except ImportError:
             pass
     else:
-        logger.info('Schema Drift Sentinel: %d tablica provjereno — ČISTO', checked)
+        logger.info("Schema Drift Sentinel: %d tablica provjereno — ČISTO", checked)
 
     return {
-        'checked_tables': checked,
-        'drifts': len(drifts),
-        'details': drifts[:50],  # Max 50 za Celery result
+        "checked_tables": checked,
+        "drifts": len(drifts),
+        "details": drifts[:50],  # Max 50 za Celery result
     }
 
 
@@ -228,33 +242,32 @@ def orphan_data_check(self):
 
     # Kritične FK relacije za provjeru
     checks = [
-        ('invoicing.Invoice', 'company_id', 'companies.Company'),
-        ('invoicing.Invoice', 'partner_id', 'partners.Partner'),
-        ('work_orders.WorkOrder', 'company_id', 'companies.Company'),
-        ('inventory.InventoryItem', 'company_id', 'companies.Company'),
-        ('experiences.ExperienceBooking', 'schedule_id', 'experiences.ExperienceSchedule'),
-        ('pos.POSReceipt', 'session_id', 'pos.POSSession'),
+        ("invoicing.Invoice", "company_id", "companies.Company"),
+        ("invoicing.Invoice", "partner_id", "partners.Partner"),
+        ("work_orders.WorkOrder", "company_id", "companies.Company"),
+        ("inventory.InventoryItem", "company_id", "companies.Company"),
+        ("experiences.ExperienceBooking", "schedule_id", "experiences.ExperienceSchedule"),
+        ("pos.POSReceipt", "session_id", "pos.POSSession"),
     ]
 
     for model_path, fk_field, target_path in checks:
         try:
-            app_label, model_name = model_path.split('.')
+            app_label, model_name = model_path.split(".")
             Model = apps.get_model(app_label, model_name)
 
-            target_app, target_model = target_path.split('.')
+            target_app, target_model = target_path.split(".")
             TargetModel = apps.get_model(target_app, target_model)
 
             # Nađi zapise s FK koji ne postoji u target tablici
-            valid_ids = set(TargetModel.objects.values_list('pk', flat=True))
+            valid_ids = set(TargetModel.objects.values_list("pk", flat=True))
 
-            orphan_qs = Model.objects.exclude(
-                **{f'{fk_field}__isnull': True}
-            ).exclude(
-                **{f'{fk_field}__in': valid_ids}
+            Model.objects.exclude(**{f"{fk_field}__isnull": True}).exclude(
+                **{f"{fk_field}__in": valid_ids}
             ) if valid_ids else Model.objects.none()
 
             # Efikasniji pristup: raw SQL
             from django.db import connection
+
             table = Model._meta.db_table
             target_table = TargetModel._meta.db_table
             with connection.cursor() as cur:
@@ -266,41 +279,44 @@ def orphan_data_check(self):
                 count = cur.fetchone()[0]
 
             if count > 0:
-                orphans.append({
-                    'model': model_path,
-                    'fk_field': fk_field,
-                    'target': target_path,
-                    'count': count,
-                })
+                orphans.append(
+                    {
+                        "model": model_path,
+                        "fk_field": fk_field,
+                        "target": target_path,
+                        "count": count,
+                    }
+                )
         except DatabaseError as e:
-            logger.debug('Orphan check skip %s.%s: %s', model_path, fk_field, e)
+            logger.debug("Orphan check skip %s.%s: %s", model_path, fk_field, e)
 
     if orphans:
         logger.warning(
-            'ORPHANED DATA DETECTED: %d relacija s siročadima:\n%s',
+            "ORPHANED DATA DETECTED: %d relacija s siročadima:\n%s",
             len(orphans),
-            '\n'.join(f'  {o["model"]}.{o["fk_field"]} → {o["target"]}: {o["count"]} orphan(a)' for o in orphans),
+            "\n".join(f"  {o['model']}.{o['fk_field']} → {o['target']}: {o['count']} orphan(a)" for o in orphans),
         )
         try:
             from core.whatsapp import send_text
-            msg = (
-                'BORG SENTINEL: Orphaned Data!\n'
-                + '\n'.join(f'{o["model"]}.{o["fk_field"]}: {o["count"]} siročadi' for o in orphans)
+
+            msg = "BORG SENTINEL: Orphaned Data!\n" + "\n".join(
+                f"{o['model']}.{o['fk_field']}: {o['count']} siročadi" for o in orphans
             )
-            send_text(phone='385976091655', message=msg, company_id='system')
+            send_text(phone="385976091655", message=msg, company_id="system")
         except ImportError:
             pass
     else:
-        logger.info('Orphan Data Radar: sve FK relacije čiste')
+        logger.info("Orphan Data Radar: sve FK relacije čiste")
 
-    return {'orphans': orphans}
+    return {"orphans": orphans}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BORG Morning Briefing — proaktivni dnevni WhatsApp briefing
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(name='borg_ops.morning_briefing')
+
+@shared_task(name="borg_ops.morning_briefing")
 def morning_briefing():
     """
     Celery beat: svaki dan 07:45.
@@ -310,7 +326,7 @@ def morning_briefing():
     from borg_ops.briefing import collect_briefing_items, format_briefing_message
     from borg_ops.models import BorgBriefingConfig
 
-    configs = BorgBriefingConfig.objects.filter(enabled=True).select_related('company')
+    configs = BorgBriefingConfig.objects.filter(enabled=True).select_related("company")
     sent = 0
     errors = 0
 
@@ -321,6 +337,7 @@ def morning_briefing():
 
             # Send via WhatsApp
             from core.whatsapp import send_text
+
             send_text(
                 phone=config.phone_number,
                 message=message,
@@ -329,39 +346,39 @@ def morning_briefing():
 
             # Update last_sent
             config.last_sent = timezone.now()
-            config.save(update_fields=['last_sent'])
+            config.save(update_fields=["last_sent"])
 
             # Audit trail
             log_borg_audit(
                 company=config.company,
-                entry_type='BRIEFING',
-                summary=f'Jutarnji briefing poslan: {len(items)} stavki',
-                metadata={'items_count': len(items), 'phone': config.phone_number},
+                entry_type="BRIEFING",
+                summary=f"Jutarnji briefing poslan: {len(items)} stavki",
+                metadata={"items_count": len(items), "phone": config.phone_number},
             )
 
             sent += 1
-            logger.info('Morning briefing sent to %s (%d items)', config.company.name, len(items))
+            logger.info("Morning briefing sent to %s (%d items)", config.company.name, len(items))
 
         except ImportError as e:
             errors += 1
-            logger.warning('Morning briefing failed for %s: %s', config.company.name, e)
+            logger.warning("Morning briefing failed for %s: %s", config.company.name, e)
 
-    return {'sent': sent, 'errors': errors, 'total_configs': configs.count()}
-
+    return {"sent": sent, "errors": errors, "total_configs": configs.count()}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BORG Trust Decay — nightly check
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(name='borg_ops.check_trust_decay_all')
+
+@shared_task(name="borg_ops.check_trust_decay_all")
 def check_trust_decay_all():
     """Celery beat: svaki dan 23:00 — provjeri trust decay za sve tenante."""
     from borg_ops.trust import check_trust_decay_all as _check
-    checkpoints = _check()
-    logger.info('Trust decay check: %d checkpoints triggered', checkpoints)
-    return {'checkpoints': checkpoints}
 
+    checkpoints = _check()
+    logger.info("Trust decay check: %d checkpoints triggered", checkpoints)
+    return {"checkpoints": checkpoints}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -370,7 +387,8 @@ def check_trust_decay_all():
 
 SIGNAL_THRESHOLD = 5  # Min signals to trigger alert
 
-@shared_task(name='borg_ops.aggregate_signals')
+
+@shared_task(name="borg_ops.aggregate_signals")
 def aggregate_signals():
     """
     Celery beat: svaki dan 04:00.
@@ -381,15 +399,15 @@ def aggregate_signals():
 
     from borg_ops.models import BorgCollabConfig, BorgInsightAlert, BorgSignal
 
-    configs = BorgCollabConfig.objects.filter(enabled=True).select_related('company')
+    configs = BorgCollabConfig.objects.filter(enabled=True).select_related("company")
     signals_emitted = 0
     alerts_created = 0
 
-    current_quarter = f'{timezone.now().year}-Q{(timezone.now().month - 1) // 3 + 1}'
+    current_quarter = f"{timezone.now().year}-Q{(timezone.now().month - 1) // 3 + 1}"
 
     for config in configs:
         company = config.company
-        region = getattr(company, 'region_code', 'HR-00') or 'HR-00'
+        region = getattr(company, "region_code", "HR-00") or "HR-00"
 
         # Analyze recent procurement/invoices for price trends
         try:
@@ -402,38 +420,37 @@ def aggregate_signals():
 
             # Compare last 30 days vs previous 60 days
             recent_total = Invoice.objects.filter(
-                company=company, date_issued__gte=recent, status__in=['SENT', 'PAID']
+                company=company, date_issued__gte=recent, status__in=["SENT", "PAID"]
             ).count()
 
             old_total = Invoice.objects.filter(
-                company=company, date_issued__gte=old, date_issued__lt=recent,
-                status__in=['SENT', 'PAID']
+                company=company, date_issued__gte=old, date_issued__lt=recent, status__in=["SENT", "PAID"]
             ).count()
 
             if old_total > 0 and recent_total > 0:
                 # Simple trend detection
                 ratio = recent_total / max(old_total / 2, 1)  # normalize to 30-day period
                 if ratio > 1.1:
-                    direction = 'UP'
+                    direction = "UP"
                     magnitude = min((ratio - 1) * 100, 50)
                 elif ratio < 0.9:
-                    direction = 'DOWN'
+                    direction = "DOWN"
                     magnitude = min((1 - ratio) * 100, 50)
                 else:
                     continue  # Stable, no signal
 
                 # Emit anonymous signal
                 signal, created = BorgSignal.objects.get_or_create(
-                    category='SERVICE',
+                    category="SERVICE",
                     direction=direction,
                     region=region,
                     period=current_quarter,
-                    defaults={'magnitude_pct': magnitude},
+                    defaults={"magnitude_pct": magnitude},
                 )
                 if not created:
-                    signal.signal_count = F('signal_count') + 1
+                    signal.signal_count = F("signal_count") + 1
                     signal.magnitude_pct = (signal.magnitude_pct + magnitude) / 2
-                    signal.save(update_fields=['signal_count', 'magnitude_pct', 'last_seen'])
+                    signal.save(update_fields=["signal_count", "magnitude_pct", "last_seen"])
                     signal.refresh_from_db()
 
                 signals_emitted += 1
@@ -448,23 +465,23 @@ def aggregate_signals():
                             signal=signal,
                             threshold_reached=SIGNAL_THRESHOLD,
                             insight_text=(
-                                f'Uocen trend {signal.get_direction_display().lower()} '
-                                f'{signal.get_category_display().lower()} '
-                                f'({signal.magnitude_pct:.0f}%) u regiji {signal.region}. '
-                                f'{signal.signal_count} neovisnih izvora potvrduje trend.'
+                                f"Uocen trend {signal.get_direction_display().lower()} "
+                                f"{signal.get_category_display().lower()} "
+                                f"({signal.magnitude_pct:.0f}%) u regiji {signal.region}. "
+                                f"{signal.signal_count} neovisnih izvora potvrduje trend."
                             ),
                         )
                         # Notify opted-in companies in same region
                         notified = _notify_collab_insight(alert, region)
                         alert.companies_notified = notified
-                        alert.save(update_fields=['companies_notified'])
+                        alert.save(update_fields=["companies_notified"])
                         alerts_created += 1
 
         except (IntegrityError, DatabaseError) as e:
-            logger.debug('Signal aggregation error for %s: %s', company.name, e)
+            logger.debug("Signal aggregation error for %s: %s", company.name, e)
 
-    logger.info('Signal aggregation: %d signals, %d alerts', signals_emitted, alerts_created)
-    return {'signals': signals_emitted, 'alerts': alerts_created}
+    logger.info("Signal aggregation: %d signals, %d alerts", signals_emitted, alerts_created)
+    return {"signals": signals_emitted, "alerts": alerts_created}
 
 
 def _notify_collab_insight(alert, region):
@@ -472,19 +489,17 @@ def _notify_collab_insight(alert, region):
     from borg_ops.audit_helpers import log_borg_audit
     from borg_ops.models import BorgCollabConfig
 
-    configs = BorgCollabConfig.objects.filter(
-        enabled=True, company__region_code=region
-    ).select_related('company')
+    configs = BorgCollabConfig.objects.filter(enabled=True, company__region_code=region).select_related("company")
 
     notified = 0
     for config in configs:
         try:
             log_borg_audit(
                 company=config.company,
-                entry_type='REGULATORY',
+                entry_type="REGULATORY",
                 summary=alert.insight_text,
-                severity='INFO',
-                metadata={'signal_id': alert.signal.pk, 'alert_id': alert.pk},
+                severity="INFO",
+                metadata={"signal_id": alert.signal.pk, "alert_id": alert.pk},
             )
             notified += 1
         except AttributeError:
@@ -506,28 +521,28 @@ def check_domain_expiry():
 
     from borg_ops.models import DomainRegistry
 
-    logger = logging.getLogger('borg_ops.domain_check')
-    today = date.today()
+    logger = logging.getLogger("borg_ops.domain_check")
+    date.today()
     warnings = []
 
     for d in DomainRegistry.objects.all():
         days = d.days_until_expiry
         if days in (30, 14, 7, 3, 1):
-            warnings.append(f'⚠️ {d.domain} istječe za {days} dana ({d.expires_at}) — registrar: {d.registrar}')
-            logger.warning(f'Domain expiry alert: {d.domain} in {days} days')
+            warnings.append(f"⚠️ {d.domain} istječe za {days} dana ({d.expires_at}) — registrar: {d.registrar}")
+            logger.warning(f"Domain expiry alert: {d.domain} in {days} days")
 
     if warnings:
-        body = 'LIMIT Connect — Domain Expiry Alert\n\n' + '\n'.join(warnings)
-        body += '\n\nProvjeri Namecheap dashboard i obnovi domene.'
+        body = "LIMIT Connect — Domain Expiry Alert\n\n" + "\n".join(warnings)
+        body += "\n\nProvjeri Namecheap dashboard i obnovi domene."
         try:
             send_mail(
-                subject=f'[LIMIT] {len(warnings)} domena istječe uskoro!',
+                subject=f"[LIMIT] {len(warnings)} domena istječe uskoro!",
                 message=body,
                 from_email=None,
-                recipient_list=['niksa.viskovic@limit-connect.com'],
+                recipient_list=["niksa.viskovic@limit-connect.com"],
                 fail_silently=True,
             )
         except TypeError:
             pass
 
-    return f'Checked {DomainRegistry.objects.count()} domains, {len(warnings)} alerts'
+    return f"Checked {DomainRegistry.objects.count()} domains, {len(warnings)} alerts"

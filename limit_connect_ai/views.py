@@ -1,6 +1,7 @@
 """
 Views for LIMIT Connect AI cockpit and missions management.
 """
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
@@ -32,8 +33,11 @@ def ai_cockpit(request):
     # POS today
     try:
         from pos.models import POSReceipt
+
         agg = POSReceipt.objects.filter(
-            session__terminal__company=company, status='paid', paid_at__date=today,
+            session__terminal__company=company,
+            status="paid",
+            paid_at__date=today,
         ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["pos_revenue"] = agg["total"] or 0
         ctx["pos_count"] = agg["count"] or 0
@@ -44,8 +48,10 @@ def ai_cockpit(request):
     # Open invoices
     try:
         from invoicing.models import Invoice
+
         agg = Invoice.objects.filter(
-            company=company, status__in=["SENT", "OVERDUE", "UNPAID"],
+            company=company,
+            status__in=["SENT", "OVERDUE", "UNPAID"],
         ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["inv_count"] = agg["count"] or 0
         ctx["inv_total"] = agg["total"] or 0
@@ -56,15 +62,23 @@ def ai_cockpit(request):
     # Low stock
     try:
         from inventory.models import InventoryItem
-        ctx["low_stock"] = InventoryItem.objects.filter(
-            company=company, is_active=True, quantity__lte=F("min_quantity"),
-        ).exclude(min_quantity=0).count()
+
+        ctx["low_stock"] = (
+            InventoryItem.objects.filter(
+                company=company,
+                is_active=True,
+                quantity__lte=F("min_quantity"),
+            )
+            .exclude(min_quantity=0)
+            .count()
+        )
     except DatabaseError:
         ctx["low_stock"] = 0
 
     # Active funds
     try:
         from intelligence.models import FundOpportunity
+
         ctx["active_funds"] = FundOpportunity.objects.filter(status="aktivan").count()
     except DatabaseError:
         ctx["active_funds"] = 0
@@ -79,7 +93,7 @@ def ai_cockpit(request):
     ctx["missions_count"] = AIAgentMission.objects.filter(company=company, is_active=True).count()
 
     # Compliance
-    ctx["compliance_items"] = ComplianceWatchItem.objects.filter(company=company).exclude(status='compliant')[:5]
+    ctx["compliance_items"] = ComplianceWatchItem.objects.filter(company=company).exclude(status="compliant")[:5]
     ctx["compliance_ok"] = not ctx["compliance_items"].exists()
 
     return render(request, "limit_connect_ai/ai_cockpit.html", ctx)
@@ -129,13 +143,17 @@ def ai_missions(request):
         return redirect("limit_connect_ai:ai_missions")
 
     missions = AIAgentMission.objects.filter(company=company).order_by("-created_at")
-    return render(request, "limit_connect_ai/ai_missions.html", {
-        "company": company,
-        "missions": missions,
-        "mission_types": AIAgentMission.MISSION_TYPES,
-        "frequency_choices": AIAgentMission.FREQUENCY_CHOICES,
-        "channel_choices": AIAgentMission.NOTIFY_CHANNEL_CHOICES,
-    })
+    return render(
+        request,
+        "limit_connect_ai/ai_missions.html",
+        {
+            "company": company,
+            "missions": missions,
+            "mission_types": AIAgentMission.MISSION_TYPES,
+            "frequency_choices": AIAgentMission.FREQUENCY_CHOICES,
+            "channel_choices": AIAgentMission.NOTIFY_CHANNEL_CHOICES,
+        },
+    )
 
 
 @login_required
@@ -146,10 +164,14 @@ def ai_reports(request):
         return render(request, "limit_connect_ai/ai_reports.html", {"no_company": True})
 
     reports = AIReportLog.objects.filter(company=company).select_related("mission")
-    return render(request, "limit_connect_ai/ai_reports.html", {
-        "company": company,
-        "reports": reports,
-    })
+    return render(
+        request,
+        "limit_connect_ai/ai_reports.html",
+        {
+            "company": company,
+            "reports": reports,
+        },
+    )
 
 
 @login_required
@@ -163,7 +185,11 @@ def ai_funds(request):
         company=company,
     ).select_related("fund_opportunity")
 
-    return render(request, "limit_connect_ai/ai_funds.html", {
-        "company": company,
-        "drafts": drafts,
-    })
+    return render(
+        request,
+        "limit_connect_ai/ai_funds.html",
+        {
+            "company": company,
+            "drafts": drafts,
+        },
+    )

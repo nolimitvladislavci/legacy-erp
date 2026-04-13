@@ -10,6 +10,7 @@ Povezuje vanjske besplatne izvore knjiga u jedinstven katalog:
 - Wikizvor / hr.wikisource.org (5.000+ HR tekstova)
 - Internet Archive (CDL posudba)
 """
+
 import json
 import re
 import urllib.error
@@ -106,9 +107,13 @@ def _fetch_json(url, timeout=10):
 @login_required
 def source_hub(request):
     """Hub stranica — pregled svih izvora s live pretragom."""
-    return render(request, "library/source_hub.html", {
-        "sources": SOURCES,
-    })
+    return render(
+        request,
+        "library/source_hub.html",
+        {
+            "sources": SOURCES,
+        },
+    )
 
 
 @login_required
@@ -136,23 +141,27 @@ def search_gutenberg(request):
             elif fmt == "text/html":
                 formats.append({"type": "HTML", "url": url})
 
-        results.append({
-            "id": b.get("id"),
-            "title": b.get("title", ""),
-            "authors": authors,
-            "cover": cover,
-            "languages": b.get("languages", []),
-            "download_count": b.get("download_count", 0),
-            "formats": formats,
-            "source": "gutenberg",
-            "source_url": f"https://www.gutenberg.org/ebooks/{b.get('id')}",
-        })
+        results.append(
+            {
+                "id": b.get("id"),
+                "title": b.get("title", ""),
+                "authors": authors,
+                "cover": cover,
+                "languages": b.get("languages", []),
+                "download_count": b.get("download_count", 0),
+                "formats": formats,
+                "source": "gutenberg",
+                "source_url": f"https://www.gutenberg.org/ebooks/{b.get('id')}",
+            }
+        )
 
-    return JsonResponse({
-        "results": results,
-        "total": data.get("count", 0),
-        "source": "gutenberg",
-    })
+    return JsonResponse(
+        {
+            "results": results,
+            "total": data.get("count", 0),
+            "source": "gutenberg",
+        }
+    )
 
 
 @login_required
@@ -174,23 +183,27 @@ def search_openlibrary(request):
         isbn_list = doc.get("isbn", [])
         isbn = isbn_list[0] if isbn_list else ""
 
-        results.append({
-            "title": doc.get("title", ""),
-            "authors": ", ".join(doc.get("author_name", [])),
-            "cover": cover,
-            "year": doc.get("first_publish_year"),
-            "isbn": isbn,
-            "publisher": ", ".join(doc.get("publisher", [])[:2]),
-            "source": "openlibrary",
-            "source_url": f"https://openlibrary.org{doc.get('key', '')}",
-            "editions": doc.get("edition_count", 0),
-        })
+        results.append(
+            {
+                "title": doc.get("title", ""),
+                "authors": ", ".join(doc.get("author_name", [])),
+                "cover": cover,
+                "year": doc.get("first_publish_year"),
+                "isbn": isbn,
+                "publisher": ", ".join(doc.get("publisher", [])[:2]),
+                "source": "openlibrary",
+                "source_url": f"https://openlibrary.org{doc.get('key', '')}",
+                "editions": doc.get("edition_count", 0),
+            }
+        )
 
-    return JsonResponse({
-        "results": results,
-        "total": data.get("numFound", 0),
-        "source": "openlibrary",
-    })
+    return JsonResponse(
+        {
+            "results": results,
+            "total": data.get("numFound", 0),
+            "source": "openlibrary",
+        }
+    )
 
 
 @login_required
@@ -209,10 +222,13 @@ def import_from_source(request):
     # Check duplicate
     existing = Book.objects.filter(company=company, title__iexact=title).first()
     if existing:
-        return JsonResponse({
-            "error": f"Knjiga '{title}' vec postoji u katalogu (ID: {existing.pk})",
-            "existing_id": existing.pk,
-        }, status=409)
+        return JsonResponse(
+            {
+                "error": f"Knjiga '{title}' vec postoji u katalogu (ID: {existing.pk})",
+                "existing_id": existing.pk,
+            },
+            status=409,
+        )
 
     # Create book
     isbn = re.sub(r"[^0-9X]", "", data.get("isbn", "").upper())
@@ -241,7 +257,9 @@ def import_from_source(request):
             first = parts[0]
             last = parts[1] if len(parts) > 1 else ""
             author, _ = Author.objects.get_or_create(
-                company=company, first_name=first, last_name=last,
+                company=company,
+                first_name=first,
+                last_name=last,
             )
             book.authors.add(author)
 
@@ -257,9 +275,11 @@ def import_from_source(request):
             notes=f"Izvor: {source_url}",
         )
 
-    return JsonResponse({
-        "success": True,
-        "book_id": book.pk,
-        "title": book.title,
-        "message": f"'{book.title}' uvezena u katalog!",
-    })
+    return JsonResponse(
+        {
+            "success": True,
+            "book_id": book.pk,
+            "title": book.title,
+            "message": f"'{book.title}' uvezena u katalog!",
+        }
+    )

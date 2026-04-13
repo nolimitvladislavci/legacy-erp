@@ -2,6 +2,7 @@
 intelligence/services.py
 Glavna logika Intelligence agenta.
 """
+
 import datetime
 import json
 import logging
@@ -10,7 +11,7 @@ import re
 from django.db import DatabaseError
 from django.utils import timezone
 
-logger = logging.getLogger('intelligence')
+logger = logging.getLogger("intelligence")
 
 
 def run_intelligence_job(job):
@@ -47,7 +48,7 @@ def run_intelligence_job(job):
                 '"promo_tekst": "OPG, ovo je idealna prilika...", '
                 '"checklist": ["Mora biti OPG", "Potreban ARKOD broj"]}]}\n'
                 'Ako nema nista relevantno, vrati: {"pronasci": []}\n'
-                'Vrati SAMO JSON, bez komentara.'
+                "Vrati SAMO JSON, bez komentara."
             )
             result = agent.run_task(task)
 
@@ -56,35 +57,35 @@ def run_intelligence_job(job):
             json_match = re.search(r'\{.*"pronasci".*\}', output, re.DOTALL)
             if not json_match:
                 source.zadnja_provjera = timezone.now()
-                source.save(update_fields=['zadnja_provjera'])
+                source.save(update_fields=["zadnja_provjera"])
                 continue
 
             data = json.loads(json_match.group())
-            pronasci = data.get('pronasci', [])
+            pronasci = data.get("pronasci", [])
 
             for p in pronasci:
-                relevantnost = int(p.get('relevantnost', 0))
+                relevantnost = int(p.get("relevantnost", 0))
                 if relevantnost < 40:
                     continue
 
                 # Kreira FundOpportunity za fond natjecaje
                 fund_opp = None
-                if p.get('tip') in ('eu_fond', 'hr_poticaj') and p.get('rok_prijave'):
+                if p.get("tip") in ("eu_fond", "hr_poticaj") and p.get("rok_prijave"):
                     try:
-                        rok = datetime.date.fromisoformat(p['rok_prijave'])
+                        rok = datetime.date.fromisoformat(p["rok_prijave"])
                         fund_opp, _ = FundOpportunity.objects.get_or_create(
-                            naziv=p['naslov'][:300],
+                            naziv=p["naslov"][:300],
                             defaults={
-                                'tip': 'eu_eafrd' if 'EU' in p.get('tip', '') else 'hr_apprrr',
-                                'tijelo': 'AI Intelligence',
-                                'opis': p['summary'],
-                                'url': p.get('url', ''),
-                                'rok_prijave': rok,
-                                'iznos_max_eur': p.get('iznos_max_eur'),
-                                'ai_checklist': p.get('checklist', []),
-                                'ai_summary': p['summary'][:500],
-                                'otkrio_intelligence': True,
-                            }
+                                "tip": "eu_eafrd" if "EU" in p.get("tip", "") else "hr_apprrr",
+                                "tijelo": "AI Intelligence",
+                                "opis": p["summary"],
+                                "url": p.get("url", ""),
+                                "rok_prijave": rok,
+                                "iznos_max_eur": p.get("iznos_max_eur"),
+                                "ai_checklist": p.get("checklist", []),
+                                "ai_summary": p["summary"][:500],
+                                "otkrio_intelligence": True,
+                            },
                         )
                     except DatabaseError:
                         pass
@@ -93,11 +94,11 @@ def run_intelligence_job(job):
                 ir = IntelligenceResult.objects.create(
                     job=job,
                     source=source,
-                    naslov=p['naslov'][:300],
-                    summary=p['summary'],
-                    url=p.get('url', ''),
+                    naslov=p["naslov"][:300],
+                    summary=p["summary"],
+                    url=p.get("url", ""),
                     ai_relevantnost=relevantnost,
-                    promo_tekst=p.get('promo_tekst', ''),
+                    promo_tekst=p.get("promo_tekst", ""),
                     fund_opportunity=fund_opp,
                 )
                 results_count += 1
@@ -106,19 +107,19 @@ def run_intelligence_job(job):
                 if relevantnost >= 60 and job.obavijesti_whatsapp:
                     sent = _posalji_obavijest(job, ir)
                     if sent:
-                        ir.status = 'obavljeno'
+                        ir.status = "obavljeno"
                         ir.obavljeno_at = timezone.now()
-                        ir.save(update_fields=['status', 'obavljeno_at'])
+                        ir.save(update_fields=["status", "obavljeno_at"])
                         sent_count += 1
 
             source.zadnja_provjera = timezone.now()
-            source.save(update_fields=['zadnja_provjera'])
+            source.save(update_fields=["zadnja_provjera"])
 
         except (json.JSONDecodeError, ValueError) as e:
-            logger.error('Source %s failed: %s', source.naziv, e)
+            logger.error("Source %s failed: %s", source.naziv, e)
 
     job.zadnji_run = timezone.now()
-    job.save(update_fields=['zadnji_run'])
+    job.save(update_fields=["zadnji_run"])
 
     return results_count, sent_count
 
@@ -126,34 +127,34 @@ def run_intelligence_job(job):
 def _posalji_obavijest(job, result):
     """Posalji WhatsApp obavijest korisniku."""
     from core.whatsapp import send_text
+
     try:
         phone = job.whatsapp_broj
         if not phone:
             from accounts.models import UserProfile
-            profile = UserProfile.objects.filter(
-                company=job.company, role='company_admin'
-            ).first()
+
+            profile = UserProfile.objects.filter(company=job.company, role="company_admin").first()
             if profile:
-                phone = getattr(profile.user, 'phone', '') or ''
+                phone = getattr(profile.user, "phone", "") or ""
 
         if not phone:
             return False
 
         msg = (
-            f'Poslovna inteligencija -- nova prilika\n\n'
-            f'*{result.naslov}*\n\n'
-            f'{result.summary[:300]}\n\n'
-            f'Relevantnost: {result.ai_relevantnost}%\n'
+            f"Poslovna inteligencija -- nova prilika\n\n"
+            f"*{result.naslov}*\n\n"
+            f"{result.summary[:300]}\n\n"
+            f"Relevantnost: {result.ai_relevantnost}%\n"
         )
         if result.promo_tekst:
-            msg += f'\n{result.promo_tekst[:200]}'
+            msg += f"\n{result.promo_tekst[:200]}"
         if result.url:
-            msg += f'\n\nLink: {result.url}'
+            msg += f"\n\nLink: {result.url}"
 
         r = send_text(phone, msg)
-        return r.get('success', False)
+        return r.get("success", False)
     except DatabaseError as e:
-        logger.error('Obavijest failed: %s', e)
+        logger.error("Obavijest failed: %s", e)
         return False
 
 
@@ -176,34 +177,34 @@ def create_futures_listing_from_crop(crop_plan):
         return False
 
     cat_map = {
-        'kukuruz': 'Zitarice',
-        'kukuruz_silaza': 'Zitarice',
-        'psenica': 'Zitarice',
-        'jecam': 'Zitarice',
-        'djetelina': 'Krmno bilje',
-        'livada': 'Krmno bilje',
-        'soja': 'Uljarice',
-        'suncokret': 'Uljarice',
+        "kukuruz": "Zitarice",
+        "kukuruz_silaza": "Zitarice",
+        "psenica": "Zitarice",
+        "jecam": "Zitarice",
+        "djetelina": "Krmno bilje",
+        "livada": "Krmno bilje",
+        "soja": "Uljarice",
+        "suncokret": "Uljarice",
     }
-    cat_naziv = cat_map.get(crop_plan.kultura, 'Ostalo')
+    cat_naziv = cat_map.get(crop_plan.kultura, "Ostalo")
     category, _ = MarketplaceCategory.objects.get_or_create(name=cat_naziv)
 
     FuturesListing.objects.create(
         seller_company=crop_plan.company,
         category=category,
-        name=f'{crop_plan.get_kultura_display()} -- {crop_plan.sorta or "domace"} {crop_plan.godina}',
+        name=f"{crop_plan.get_kultura_display()} -- {crop_plan.sorta or 'domace'} {crop_plan.godina}",
         description=(
-            f'OPG {crop_plan.company.name} nudi visak usjeva {crop_plan.get_kultura_display()}.\n'
-            f'Godina: {crop_plan.godina} | Prinos: {crop_plan.stvarni_prinos_t or "U berbi"} t\n'
-            f'{"Ekoloska proizvodnja" if crop_plan.is_organic else "Konvencionalna proizvodnja"}'
+            f"OPG {crop_plan.company.name} nudi visak usjeva {crop_plan.get_kultura_display()}.\n"
+            f"Godina: {crop_plan.godina} | Prinos: {crop_plan.stvarni_prinos_t or 'U berbi'} t\n"
+            f"{'Ekoloska proizvodnja' if crop_plan.is_organic else 'Konvencionalna proizvodnja'}"
         ),
-        unit='t',
+        unit="t",
         unit_price=0,
         total_capacity=crop_plan.procijenjeni_visak_t,
         available_from=datetime.date(crop_plan.godina, 9, 1),
         available_until=datetime.date(crop_plan.godina, 12, 31),
         booking_deadline=datetime.date(crop_plan.godina, 8, 1),
         is_organic=crop_plan.is_organic,
-        status='open',
+        status="open",
     )
     return True

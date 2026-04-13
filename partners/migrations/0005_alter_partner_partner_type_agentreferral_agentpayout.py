@@ -6,63 +6,141 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0028_add_ui_language'),
-        ('partners', '0004_add_nkd_code'),
+        ("companies", "0028_add_ui_language"),
+        ("partners", "0004_add_nkd_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='partner',
-            name='partner_type',
-            field=models.CharField(choices=[('client', 'Klijent (Kupac)'), ('supplier', 'Dobavljač'), ('both', 'Partner (Oboje)'), ('employee', 'Zaposlenik'), ('agent', 'Prodajni agent / Tippgeber')], default='client', max_length=10, verbose_name='Tip partnera'),
+            model_name="partner",
+            name="partner_type",
+            field=models.CharField(
+                choices=[
+                    ("client", "Klijent (Kupac)"),
+                    ("supplier", "Dobavljač"),
+                    ("both", "Partner (Oboje)"),
+                    ("employee", "Zaposlenik"),
+                    ("agent", "Prodajni agent / Tippgeber"),
+                ],
+                default="client",
+                max_length=10,
+                verbose_name="Tip partnera",
+            ),
         ),
         migrations.CreateModel(
-            name='AgentReferral',
+            name="AgentReferral",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('referral_code', models.CharField(help_text='Jedinstveni kod za praćenje (npr. REF-ANTONIO-001)', max_length=30, unique=True, verbose_name='Referral kod')),
-                ('status', models.CharField(choices=[('pending', 'Čeka aktivaciju'), ('active', 'Aktivan — provizija teče'), ('expired', 'Istekao (12 mj)'), ('cancelled', 'Otkazan')], default='pending', max_length=15)),
-                ('commission_percent', models.DecimalField(decimal_places=2, default=20, max_digits=5, verbose_name='Provizija (%)')),
-                ('commission_months', models.PositiveSmallIntegerField(default=12, verbose_name='Trajanje provizije (mjeseci)')),
-                ('total_earned', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupno zarađeno (EUR)')),
-                ('total_paid', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupno isplaćeno (EUR)')),
-                ('contract_signed_at', models.DateTimeField(blank=True, null=True, verbose_name='Ugovor potpisan')),
-                ('contract_ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('contract_user_agent', models.CharField(blank=True, max_length=200)),
-                ('agent_iban', models.CharField(blank=True, max_length=34, verbose_name='IBAN agenta')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True, verbose_name='Istječe')),
-                ('agent', models.ForeignKey(limit_choices_to={'partner_type': 'agent'}, on_delete=django.db.models.deletion.CASCADE, related_name='referrals', to='partners.partner', verbose_name='Agent')),
-                ('referred_company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='referred_by', to='companies.company', verbose_name='Preporučena tvrtka')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "referral_code",
+                    models.CharField(
+                        help_text="Jedinstveni kod za praćenje (npr. REF-ANTONIO-001)",
+                        max_length=30,
+                        unique=True,
+                        verbose_name="Referral kod",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Čeka aktivaciju"),
+                            ("active", "Aktivan — provizija teče"),
+                            ("expired", "Istekao (12 mj)"),
+                            ("cancelled", "Otkazan"),
+                        ],
+                        default="pending",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "commission_percent",
+                    models.DecimalField(decimal_places=2, default=20, max_digits=5, verbose_name="Provizija (%)"),
+                ),
+                (
+                    "commission_months",
+                    models.PositiveSmallIntegerField(default=12, verbose_name="Trajanje provizije (mjeseci)"),
+                ),
+                (
+                    "total_earned",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=10, verbose_name="Ukupno zarađeno (EUR)"
+                    ),
+                ),
+                (
+                    "total_paid",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=10, verbose_name="Ukupno isplaćeno (EUR)"
+                    ),
+                ),
+                ("contract_signed_at", models.DateTimeField(blank=True, null=True, verbose_name="Ugovor potpisan")),
+                ("contract_ip", models.GenericIPAddressField(blank=True, null=True)),
+                ("contract_user_agent", models.CharField(blank=True, max_length=200)),
+                ("agent_iban", models.CharField(blank=True, max_length=34, verbose_name="IBAN agenta")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True, verbose_name="Istječe")),
+                (
+                    "agent",
+                    models.ForeignKey(
+                        limit_choices_to={"partner_type": "agent"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="referrals",
+                        to="partners.partner",
+                        verbose_name="Agent",
+                    ),
+                ),
+                (
+                    "referred_company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="referred_by",
+                        to="companies.company",
+                        verbose_name="Preporučena tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Agent Referral',
-                'verbose_name_plural': 'Agent Referrals',
-                'ordering': ['-created_at'],
+                "verbose_name": "Agent Referral",
+                "verbose_name_plural": "Agent Referrals",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='AgentPayout',
+            name="AgentPayout",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('period_month', models.PositiveSmallIntegerField(verbose_name='Mjesec')),
-                ('period_year', models.PositiveSmallIntegerField(verbose_name='Godina')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Iznos (EUR)')),
-                ('referrals_count', models.PositiveSmallIntegerField(default=0, verbose_name='Broj referrala')),
-                ('breakdown', models.JSONField(default=list, verbose_name='Razrada po klijentima')),
-                ('iban', models.CharField(max_length=34, verbose_name='IBAN za isplatu')),
-                ('status', models.CharField(choices=[('calculated', 'Izračunato'), ('approved', 'Odobreno'), ('paid', 'Isplaćeno')], default='calculated', max_length=15)),
-                ('paid_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('agent', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payouts', to='partners.partner', verbose_name='Agent')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("period_month", models.PositiveSmallIntegerField(verbose_name="Mjesec")),
+                ("period_year", models.PositiveSmallIntegerField(verbose_name="Godina")),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Iznos (EUR)")),
+                ("referrals_count", models.PositiveSmallIntegerField(default=0, verbose_name="Broj referrala")),
+                ("breakdown", models.JSONField(default=list, verbose_name="Razrada po klijentima")),
+                ("iban", models.CharField(max_length=34, verbose_name="IBAN za isplatu")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("calculated", "Izračunato"), ("approved", "Odobreno"), ("paid", "Isplaćeno")],
+                        default="calculated",
+                        max_length=15,
+                    ),
+                ),
+                ("paid_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "agent",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payouts",
+                        to="partners.partner",
+                        verbose_name="Agent",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Agent isplata',
-                'verbose_name_plural': 'Agent isplate',
-                'ordering': ['-period_year', '-period_month'],
-                'unique_together': {('agent', 'period_month', 'period_year')},
+                "verbose_name": "Agent isplata",
+                "verbose_name_plural": "Agent isplate",
+                "ordering": ["-period_year", "-period_month"],
+                "unique_together": {("agent", "period_month", "period_year")},
             },
         ),
     ]

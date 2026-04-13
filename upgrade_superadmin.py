@@ -8,7 +8,8 @@ import textwrap
 def print_status(msg):
     print(f"[+] {msg}")
 
-app_dir = 'superadmin_ai'
+
+app_dir = "superadmin_ai"
 
 if not os.path.exists(app_dir):
     print("[-] GREŠKA: Modul 'superadmin_ai' ne postoji u root direktoriju. Provjeri točan naziv modula.")
@@ -16,13 +17,13 @@ if not os.path.exists(app_dir):
 
 # 1. Kreiranje backupa postojećih datoteka
 print_status("Kreiram sigurnosne .bak kopije za views.py i dashboard.html...")
-views_path = os.path.join(app_dir, 'views.py')
+views_path = os.path.join(app_dir, "views.py")
 if os.path.exists(views_path):
     shutil.copy2(views_path, f"{views_path}.bak_upgrade")
 
-templates_dir = os.path.join(app_dir, 'templates', 'superadmin_ai')
+templates_dir = os.path.join(app_dir, "templates", "superadmin_ai")
 os.makedirs(templates_dir, exist_ok=True)
-dashboard_path = os.path.join(templates_dir, 'dashboard.html')
+dashboard_path = os.path.join(templates_dir, "dashboard.html")
 if os.path.exists(dashboard_path):
     shutil.copy2(dashboard_path, f"{dashboard_path}.bak_upgrade")
 
@@ -443,7 +444,7 @@ html_content = r"""<!DOCTYPE html>
 </html>
 """
 
-with open(dashboard_path, 'w', encoding='utf-8') as f:
+with open(dashboard_path, "w", encoding="utf-8") as f:
     f.write(html_content)
 
 # 3. Restrukturiranje views.py sa zahtijevanim arhitektonskim izmjenama
@@ -525,11 +526,11 @@ from django.core.exceptions import ObjectDoesNotExist
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 """)
 
-with open(views_path, 'w', encoding='utf-8') as f:
+with open(views_path, "w", encoding="utf-8") as f:
     f.write(views_content)
 
 # 4. Zaključavanje dozvola
 print_status("Postavljam Linux dozvole (chown www-data) za modificirane datoteke...")
-subprocess.run(['chown', '-R', 'www-data:www-data', app_dir])
+subprocess.run(["chown", "-R", "www-data:www-data", app_dir])
 
 print_status("UPGRADE ZAVRŠEN! Sustav sada koristi C Code arhitekturu uz Premium UI i potpunu automatizaciju.")

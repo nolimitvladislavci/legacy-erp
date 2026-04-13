@@ -5,21 +5,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('burza', '0003_add_rijeseno_status'),
-        ('worktime', '0001_initial'),
+        ("burza", "0003_add_rijeseno_status"),
+        ("worktime", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='activetimer',
-            name='project_lead',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='active_timers', to='burza.projectlead', verbose_name='Burza projekt'),
+            model_name="activetimer",
+            name="project_lead",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="active_timers",
+                to="burza.projectlead",
+                verbose_name="Burza projekt",
+            ),
         ),
         migrations.AddField(
-            model_name='timeentry',
-            name='project_lead',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='time_entries', to='burza.projectlead', verbose_name='Burza projekt'),
+            model_name="timeentry",
+            name="project_lead",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="time_entries",
+                to="burza.projectlead",
+                verbose_name="Burza projekt",
+            ),
         ),
     ]

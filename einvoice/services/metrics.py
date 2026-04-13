@@ -6,13 +6,15 @@ Counters and histograms for:
 - Delivery latency
 - Transport backend usage
 """
+
 import logging
 
 logger = logging.getLogger("propter.einvoice.metrics")
 
 # Try to import prometheus_client, but don't fail if not installed
 try:
-    from prometheus_client import Counter, Gauge, Histogram, Info
+    from prometheus_client import Counter, Gauge, Histogram, Info  # noqa: F401
+
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False
@@ -74,11 +76,20 @@ if PROMETHEUS_AVAILABLE:
 else:
     # Dummy metrics that do nothing
     class _DummyMetric:
-        def labels(self, *a, **kw): return self
-        def inc(self, *a, **kw): pass
-        def dec(self, *a, **kw): pass
-        def set(self, *a, **kw): pass
-        def observe(self, *a, **kw): pass
+        def labels(self, *a, **kw):
+            return self
+
+        def inc(self, *a, **kw):
+            pass
+
+        def dec(self, *a, **kw):
+            pass
+
+        def set(self, *a, **kw):
+            pass
+
+        def observe(self, *a, **kw):
+            pass
 
     INVOICES_SENT = _DummyMetric()
     INVOICES_RECEIVED = _DummyMetric()
@@ -94,20 +105,26 @@ else:
 def record_sent(transport, status):
     INVOICES_SENT.labels(transport=transport, status=status).inc()
 
+
 def record_received(company_name):
     INVOICES_RECEIVED.labels(company=company_name).inc()
+
 
 def record_validation_error(rule):
     VALIDATION_ERRORS.labels(rule=rule).inc()
 
+
 def record_dlq(reason):
     DLQ_MESSAGES.labels(reason=reason).inc()
+
 
 def record_retry(transport):
     RETRY_ATTEMPTS.labels(transport=transport).inc()
 
+
 def record_delivery_latency(seconds):
     DELIVERY_LATENCY.observe(seconds)
+
 
 def record_pipeline_stage(stage, duration):
     PIPELINE_DURATION.labels(stage=stage).observe(duration)
@@ -116,9 +133,8 @@ def record_pipeline_stage(stage, duration):
 def update_queue_gauges():
     """Update queue size gauges from database."""
     from einvoice.models import AS4Message, InboundInvoice
+
     for status_val in ["QUEUED", "SUBMITTED", "SENT", "RETRY", "SEND_FAIL"]:
         count = AS4Message.objects.filter(status=status_val, direction="OUT").count()
         QUEUE_SIZE.labels(status=status_val).set(count)
-    INBOX_PENDING.set(
-        InboundInvoice.objects.filter(status="PENDING").count()
-    )
+    INBOX_PENDING.set(InboundInvoice.objects.filter(status="PENDING").count())

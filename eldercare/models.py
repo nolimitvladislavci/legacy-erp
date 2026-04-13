@@ -15,6 +15,7 @@ Light moduli:
   StaffShift -- Raspored smjena osoblja
   Activity -- Dnevne aktivnosti (NE medicinske)
 """
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -29,8 +30,10 @@ User = get_user_model()
 
 class Room(models.Model):
     """Soba u domu."""
+
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="eldercare_rooms",
     )
     number = models.CharField(max_length=20, verbose_name=_("Broj sobe"))
@@ -47,7 +50,9 @@ class Room(models.Model):
         default="double",
     )
     monthly_price = models.DecimalField(
-        max_digits=10, decimal_places=2, default=Decimal("800.00"),
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("800.00"),
         verbose_name=_("Mjesecna cijena (EUR)"),
     )
     is_available = models.BooleanField(default=True)
@@ -82,7 +87,8 @@ class Resident(models.Model):
         WAITLIST = "waitlist", _("Lista cekanja")
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="eldercare_residents",
     )
     first_name = models.CharField(max_length=100, verbose_name=_("Ime"))
@@ -90,32 +96,47 @@ class Resident(models.Model):
     date_of_birth = models.DateField(verbose_name=_("Datum rodjenja"))
     oib = models.CharField(max_length=13, blank=True, verbose_name="OIB")
     gender = models.CharField(
-        max_length=1, choices=[("M", _("Musko")), ("F", _("Zensko"))], blank=True,
+        max_length=1,
+        choices=[("M", _("Musko")), ("F", _("Zensko"))],
+        blank=True,
     )
 
     room = models.ForeignKey(
-        Room, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="residents", verbose_name=_("Soba"),
+        Room,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="residents",
+        verbose_name=_("Soba"),
     )
     status = models.CharField(
-        max_length=12, choices=Status.choices, default=Status.ACTIVE,
+        max_length=12,
+        choices=Status.choices,
+        default=Status.ACTIVE,
     )
     admission_date = models.DateField(null=True, blank=True, verbose_name=_("Datum prijema"))
     discharge_date = models.DateField(null=True, blank=True, verbose_name=_("Datum otpusta"))
 
     emergency_contact_name = models.CharField(
-        max_length=200, blank=True, verbose_name=_("Hitni kontakt - ime"),
+        max_length=200,
+        blank=True,
+        verbose_name=_("Hitni kontakt - ime"),
     )
     emergency_contact_phone = models.CharField(
-        max_length=30, blank=True, verbose_name=_("Hitni kontakt - telefon"),
+        max_length=30,
+        blank=True,
+        verbose_name=_("Hitni kontakt - telefon"),
     )
 
     dietary_requirements = models.TextField(
-        blank=True, verbose_name=_("Prehrambeni zahtjevi"),
+        blank=True,
+        verbose_name=_("Prehrambeni zahtjevi"),
         help_text=_("Za kuhinju - NE medicinski karton"),
     )
     mobility_notes = models.CharField(
-        max_length=200, blank=True, verbose_name=_("Pokretnost"),
+        max_length=200,
+        blank=True,
+        verbose_name=_("Pokretnost"),
         help_text=_("Npr. kolica, hodalica, samostalan"),
     )
 
@@ -156,12 +177,16 @@ class Relative(models.Model):
         OTHER = "other", _("Ostalo")
 
     resident = models.ForeignKey(
-        Resident, on_delete=models.CASCADE, related_name="relatives",
+        Resident,
+        on_delete=models.CASCADE,
+        related_name="relatives",
     )
     first_name = models.CharField(max_length=100, verbose_name=_("Ime"))
     last_name = models.CharField(max_length=100, verbose_name=_("Prezime"))
     relation = models.CharField(
-        max_length=15, choices=Relation.choices, default=Relation.CHILD,
+        max_length=15,
+        choices=Relation.choices,
+        default=Relation.CHILD,
     )
     phone = models.CharField(max_length=30, verbose_name=_("Telefon"))
     phone_secondary = models.CharField(max_length=30, blank=True)
@@ -192,35 +217,50 @@ class MonthlyCharge(models.Model):
         OVERDUE = "overdue", _("Dospjelo")
 
     resident = models.ForeignKey(
-        Resident, on_delete=models.CASCADE, related_name="charges",
+        Resident,
+        on_delete=models.CASCADE,
+        related_name="charges",
     )
     year = models.PositiveSmallIntegerField()
     month = models.PositiveSmallIntegerField()
 
     base_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name=_("Osnovni iznos"),
+        max_digits=10,
+        decimal_places=2,
+        verbose_name=_("Osnovni iznos"),
     )
     extras = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0,
+        max_digits=10,
+        decimal_places=2,
+        default=0,
         verbose_name=_("Dodaci (pranje, frizerka...)"),
     )
     deductions = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0,
+        max_digits=10,
+        decimal_places=2,
+        default=0,
         verbose_name=_("Odbitci (odsutnost)"),
     )
     total_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name=_("Ukupno"),
+        max_digits=10,
+        decimal_places=2,
+        verbose_name=_("Ukupno"),
     )
 
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.DRAFT,
+        max_length=10,
+        choices=Status.choices,
+        default=Status.DRAFT,
     )
     due_date = models.DateField(null=True, blank=True, verbose_name=_("Rok placanja"))
     paid_date = models.DateField(null=True, blank=True)
     payment_reference = models.CharField(max_length=30, blank=True)
 
     invoice = models.ForeignKey(
-        "invoicing.Invoice", on_delete=models.SET_NULL, null=True, blank=True,
+        "invoicing.Invoice",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="eldercare_charges",
     )
 
@@ -252,15 +292,20 @@ class StaffShift(models.Model):
         DAY = "day", _("Dnevna (07-19)")
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="eldercare_shifts",
     )
     staff_member = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="eldercare_shifts",
+        User,
+        on_delete=models.CASCADE,
+        related_name="eldercare_shifts",
     )
     date = models.DateField(verbose_name=_("Datum"))
     shift_type = models.CharField(
-        max_length=10, choices=ShiftType.choices, default=ShiftType.MORNING,
+        max_length=10,
+        choices=ShiftType.choices,
+        default=ShiftType.MORNING,
     )
     notes = models.CharField(max_length=200, blank=True)
 
@@ -289,24 +334,32 @@ class Activity(models.Model):
         OTHER = "other", _("Ostalo")
 
     company = models.ForeignKey(
-        "companies.Company", on_delete=models.CASCADE,
+        "companies.Company",
+        on_delete=models.CASCADE,
         related_name="eldercare_activities",
     )
     title = models.CharField(max_length=200, verbose_name=_("Naziv"))
     description = models.TextField(blank=True)
     category = models.CharField(
-        max_length=12, choices=Category.choices, default=Category.SOCIAL,
+        max_length=12,
+        choices=Category.choices,
+        default=Category.SOCIAL,
     )
     date = models.DateField(verbose_name=_("Datum"))
     time_from = models.TimeField(null=True, blank=True, verbose_name=_("Od"))
     time_to = models.TimeField(null=True, blank=True, verbose_name=_("Do"))
 
     participants = models.ManyToManyField(
-        Resident, blank=True, related_name="activities",
+        Resident,
+        blank=True,
+        related_name="activities",
         verbose_name=_("Sudionici"),
     )
     organizer = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         verbose_name=_("Organizator"),
     )
 

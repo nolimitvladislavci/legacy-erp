@@ -7,41 +7,115 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0033_add_notification_mode_to_module_config'),
-        ('einvoice', '0001_initial'),
+        ("companies", "0033_add_notification_mode_to_module_config"),
+        ("einvoice", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Mandate',
+            name="Mandate",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('principal_oib', models.CharField(max_length=11, verbose_name='OIB opunomoćitelja')),
-                ('agent_oib', models.CharField(max_length=11, verbose_name='OIB opunomoćenika')),
-                ('mandate_type', models.CharField(choices=[('full', 'Potpuna punomoć (slanje + primanje)'), ('send', 'Samo slanje'), ('receive', 'Samo primanje')], default='full', max_length=10, verbose_name='Tip punomoći')),
-                ('status', models.CharField(choices=[('draft', 'Nacrt — čeka potpis'), ('signed', 'Potpisan — čeka registraciju kod FINA'), ('active', 'Aktivan — registriran kod FINA'), ('revoked', 'Opozvan'), ('expired', 'Istekao')], default='draft', max_length=10, verbose_name='Status')),
-                ('fina_mandate_id', models.CharField(blank=True, default='', help_text='ID dobiven od FINA nakon registracije', max_length=100, verbose_name='FINA referenca mandata')),
-                ('registered_with_fina', models.BooleanField(default=False, verbose_name='Registrirano kod FINA')),
-                ('fina_registered_at', models.DateTimeField(blank=True, null=True, verbose_name='Datum registracije kod FINA')),
-                ('mandate_document', models.FileField(blank=True, null=True, upload_to='einvoice/mandates/', verbose_name='PDF punomoći (potpisana)')),
-                ('valid_from', models.DateField(verbose_name='Vrijedi od')),
-                ('valid_until', models.DateField(blank=True, help_text='Prazno = neograničeno', null=True, verbose_name='Vrijedi do')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivan')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('notes', models.TextField(blank=True, verbose_name='Bilješke')),
-                ('agent_company', models.ForeignKey(help_text='Firma koja šalje e-Račune u ime opunomoćitelja', on_delete=django.db.models.deletion.CASCADE, related_name='mandates_held', to='companies.company', verbose_name='Opunomoćenik (posrednik)')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Kreirao')),
-                ('principal_company', models.ForeignKey(help_text='Firma čiji se e-Računi šalju', on_delete=django.db.models.deletion.CASCADE, related_name='mandates_given', to='companies.company', verbose_name='Opunomoćitelj (vlasnik OIB-a)')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("principal_oib", models.CharField(max_length=11, verbose_name="OIB opunomoćitelja")),
+                ("agent_oib", models.CharField(max_length=11, verbose_name="OIB opunomoćenika")),
+                (
+                    "mandate_type",
+                    models.CharField(
+                        choices=[
+                            ("full", "Potpuna punomoć (slanje + primanje)"),
+                            ("send", "Samo slanje"),
+                            ("receive", "Samo primanje"),
+                        ],
+                        default="full",
+                        max_length=10,
+                        verbose_name="Tip punomoći",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Nacrt — čeka potpis"),
+                            ("signed", "Potpisan — čeka registraciju kod FINA"),
+                            ("active", "Aktivan — registriran kod FINA"),
+                            ("revoked", "Opozvan"),
+                            ("expired", "Istekao"),
+                        ],
+                        default="draft",
+                        max_length=10,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "fina_mandate_id",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        help_text="ID dobiven od FINA nakon registracije",
+                        max_length=100,
+                        verbose_name="FINA referenca mandata",
+                    ),
+                ),
+                ("registered_with_fina", models.BooleanField(default=False, verbose_name="Registrirano kod FINA")),
+                (
+                    "fina_registered_at",
+                    models.DateTimeField(blank=True, null=True, verbose_name="Datum registracije kod FINA"),
+                ),
+                (
+                    "mandate_document",
+                    models.FileField(
+                        blank=True, null=True, upload_to="einvoice/mandates/", verbose_name="PDF punomoći (potpisana)"
+                    ),
+                ),
+                ("valid_from", models.DateField(verbose_name="Vrijedi od")),
+                (
+                    "valid_until",
+                    models.DateField(
+                        blank=True, help_text="Prazno = neograničeno", null=True, verbose_name="Vrijedi do"
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivan")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("notes", models.TextField(blank=True, verbose_name="Bilješke")),
+                (
+                    "agent_company",
+                    models.ForeignKey(
+                        help_text="Firma koja šalje e-Račune u ime opunomoćitelja",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mandates_held",
+                        to="companies.company",
+                        verbose_name="Opunomoćenik (posrednik)",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Kreirao",
+                    ),
+                ),
+                (
+                    "principal_company",
+                    models.ForeignKey(
+                        help_text="Firma čiji se e-Računi šalju",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mandates_given",
+                        to="companies.company",
+                        verbose_name="Opunomoćitelj (vlasnik OIB-a)",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Punomoć (e-Račun mandat)',
-                'verbose_name_plural': 'Punomoći (e-Račun mandati)',
-                'ordering': ['-created_at'],
-                'unique_together': {('principal_company', 'agent_company')},
+                "verbose_name": "Punomoć (e-Račun mandat)",
+                "verbose_name_plural": "Punomoći (e-Račun mandati)",
+                "ordering": ["-created_at"],
+                "unique_together": {("principal_company", "agent_company")},
             },
         ),
     ]

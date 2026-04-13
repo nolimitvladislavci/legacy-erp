@@ -20,6 +20,7 @@ Ne treba ništa mijenjati u postojećim modelima.
 Za forme i API: koristi Django validatore iz core/validators.py koji
 pozivaju iste funkcije.
 """
+
 import logging
 import re
 
@@ -29,19 +30,19 @@ from django.db.models.signals import pre_save
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger('validation_engine')
+logger = logging.getLogger("validation_engine")
 
 # Field name patterns that trigger validation
 OIB_FIELD_PATTERNS = re.compile(
-    r'^(oib|tax_id|buyer_oib|client_oib|seller_oib|partner_oib)$',
+    r"^(oib|tax_id|buyer_oib|client_oib|seller_oib|partner_oib)$",
     re.IGNORECASE,
 )
 IBAN_FIELD_PATTERNS = re.compile(
-    r'^(iban|bank_account|employee_iban|seller_iban|buyer_iban|partner_iban)$',
+    r"^(iban|bank_account|employee_iban|seller_iban|buyer_iban|partner_iban)$",
     re.IGNORECASE,
 )
 MBS_FIELD_PATTERNS = re.compile(
-    r'^(mbs|registration_number)$',
+    r"^(mbs|registration_number)$",
     re.IGNORECASE,
 )
 
@@ -49,17 +50,33 @@ MBS_FIELD_PATTERNS = re.compile(
 VALIDATABLE_FIELD_TYPES = (models.CharField, models.TextField)
 
 # Apps to skip (framework internals)
-SKIP_APPS = frozenset({
-    'django', 'admin', 'auth', 'contenttypes', 'sessions',
-    'allauth', 'socialaccount', 'sites', 'django_celery_beat',
-    'django_celery_results',
-})
+SKIP_APPS = frozenset(
+    {
+        "django",
+        "admin",
+        "auth",
+        "contenttypes",
+        "sessions",
+        "allauth",
+        "socialaccount",
+        "sites",
+        "django_celery_beat",
+        "django_celery_results",
+    }
+)
 
 # Models to skip (audit trails — may contain historical data we must not block)
-SKIP_MODELS = frozenset({
-    'SystemAuditLog', 'BookingSignature', 'FiscalLog', 'ImpersonationLog',
-    'SynesisImportLog', 'MigrationRecord', 'MemioPetWaitlist',
-})
+SKIP_MODELS = frozenset(
+    {
+        "SystemAuditLog",
+        "BookingSignature",
+        "FiscalLog",
+        "ImpersonationLog",
+        "SynesisImportLog",
+        "MigrationRecord",
+        "MemioPetWaitlist",
+    }
+)
 
 _engine_active = False
 
@@ -81,24 +98,24 @@ def _get_country_safe(instance):
     on unsaved FK references.
     """
     try:
-        company = getattr(instance, 'company', None)
-        if company and hasattr(company, 'country'):
-            return getattr(company, 'country', None) or 'HR'
+        company = getattr(instance, "company", None)
+        if company and hasattr(company, "country"):
+            return getattr(company, "country", None) or "HR"
     except (AttributeError, TypeError):
         logger.exception("Company operation failed")
 
     try:
-        session = getattr(instance, 'session', None)
+        session = getattr(instance, "session", None)
         if session:
-            terminal = getattr(session, 'terminal', None)
+            terminal = getattr(session, "terminal", None)
             if terminal:
-                company = getattr(terminal, 'company', None)
+                company = getattr(terminal, "company", None)
                 if company:
-                    return getattr(company, 'country', None) or 'HR'
+                    return getattr(company, "country", None) or "HR"
     except (AttributeError, TypeError):
         logger.exception("Unexpected error in: session = getattr(instance, 'session', None)")
 
-    return 'HR'
+    return "HR"
 
 
 def _global_validation_guard(sender, instance, **kwargs):
@@ -140,7 +157,7 @@ def _global_validation_guard(sender, instance, **kwargs):
             continue
 
         value = value.strip()
-        if not value or value.startswith('DRAFT'):
+        if not value or value.startswith("DRAFT"):
             continue
 
         # ── OIB / tax_id ──────────────────────────────────────────────
@@ -148,16 +165,10 @@ def _global_validation_guard(sender, instance, **kwargs):
             if country is None:
                 country = _get_country_safe(instance)
 
-            valid = (
-                validate_oib_hr(value) if country == 'HR'
-                else validate_vat_id(value, country)
-            )
+            valid = validate_oib_hr(value) if country == "HR" else validate_vat_id(value, country)
             if not valid:
-                label = 'OIB' if country == 'HR' else f'VAT ID ({country})'
-                msg = (
-                    f"{model_name}.{field_name}: {label} '{value}' "
-                    f"ne prolazi provjeru"
-                )
+                label = "OIB" if country == "HR" else f"VAT ID ({country})"
+                msg = f"{model_name}.{field_name}: {label} '{value}' ne prolazi provjeru"
                 if is_new:
                     errors.append(msg)
                 else:
@@ -166,10 +177,7 @@ def _global_validation_guard(sender, instance, **kwargs):
         # ── IBAN ──────────────────────────────────────────────────────
         elif IBAN_FIELD_PATTERNS.match(field_name):
             if not validate_iban(value):
-                msg = (
-                    f"{model_name}.{field_name}: IBAN '{value[:8]}...' "
-                    f"ne prolazi MOD97 provjeru"
-                )
+                msg = f"{model_name}.{field_name}: IBAN '{value[:8]}...' ne prolazi MOD97 provjeru"
                 if is_new:
                     errors.append(msg)
                 else:
@@ -178,10 +186,7 @@ def _global_validation_guard(sender, instance, **kwargs):
         # ── MBS ───────────────────────────────────────────────────────
         elif MBS_FIELD_PATTERNS.match(field_name):
             if not validate_mbs(value):
-                msg = (
-                    f"{model_name}.{field_name}: MBS '{value}' "
-                    f"nije 8 znamenki"
-                )
+                msg = f"{model_name}.{field_name}: MBS '{value}' nije 8 znamenki"
                 if is_new:
                     errors.append(msg)
                 else:

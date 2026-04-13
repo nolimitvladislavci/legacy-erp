@@ -1,5 +1,6 @@
 """Peppol Participant Directory — local cache.
 Maps tax IDs (OIB) to Peppol routing information."""
+
 import uuid
 
 from django.db import models
@@ -8,6 +9,7 @@ from django.utils import timezone
 
 class PeppolParticipant(models.Model):
     """Known Peppol participants — our local routing table."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     scheme = models.CharField(max_length=20, default="9934")

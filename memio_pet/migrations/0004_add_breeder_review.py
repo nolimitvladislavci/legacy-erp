@@ -8,31 +8,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('memio_pet', '0003_add_veterinar_verification_trustscore'),
+        ("memio_pet", "0003_add_veterinar_verification_trustscore"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BreederReview',
+            name="BreederReview",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('reviewer_name', models.CharField(max_length=120, verbose_name='Ime kupca')),
-                ('reviewer_email', memio_pet.encrypted_fields.MemioEncryptedField(blank=True, verbose_name='Email kupca')),
-                ('rating', models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')], verbose_name='Ocjena (1-5)')),
-                ('comment', models.TextField(blank=True, validators=[memio_pet.validators.validate_free_text], verbose_name='Komentar')),
-                ('is_verified_purchase', models.BooleanField(default=False, help_text='Potvrdjeno da je kupac zaista kupio/udomio zivotinju', verbose_name='Verificirana kupnja')),
-                ('is_published', models.BooleanField(default=False, verbose_name='Objavljeno')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('animal', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviews', to='memio_pet.animalprofile')),
-                ('breeder', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='memio_pet.breederprofile')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("reviewer_name", models.CharField(max_length=120, verbose_name="Ime kupca")),
+                (
+                    "reviewer_email",
+                    memio_pet.encrypted_fields.MemioEncryptedField(blank=True, verbose_name="Email kupca"),
+                ),
+                (
+                    "rating",
+                    models.IntegerField(
+                        choices=[(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")], verbose_name="Ocjena (1-5)"
+                    ),
+                ),
+                (
+                    "comment",
+                    models.TextField(
+                        blank=True, validators=[memio_pet.validators.validate_free_text], verbose_name="Komentar"
+                    ),
+                ),
+                (
+                    "is_verified_purchase",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Potvrdjeno da je kupac zaista kupio/udomio zivotinju",
+                        verbose_name="Verificirana kupnja",
+                    ),
+                ),
+                ("is_published", models.BooleanField(default=False, verbose_name="Objavljeno")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "animal",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="reviews",
+                        to="memio_pet.animalprofile",
+                    ),
+                ),
+                (
+                    "breeder",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reviews",
+                        to="memio_pet.breederprofile",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Recenzija kupca',
-                'verbose_name_plural': 'Recenzije kupaca',
-                'ordering': ['-created_at'],
-                'unique_together': {('breeder', 'reviewer_email')},
+                "verbose_name": "Recenzija kupca",
+                "verbose_name_plural": "Recenzije kupaca",
+                "ordering": ["-created_at"],
+                "unique_together": {("breeder", "reviewer_email")},
             },
         ),
     ]

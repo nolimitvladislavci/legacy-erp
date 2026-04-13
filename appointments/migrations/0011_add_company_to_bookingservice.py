@@ -4,20 +4,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('appointments', '0010_alter_appointment_actor_resource'),
+        ("appointments", "0010_alter_appointment_actor_resource"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bookingservice',
-            name='branch_type',
-            field=models.CharField(choices=[('general', 'Općenito'), ('optic', 'Optičar'), ('hairdresser', 'Frizer / Kozmetičar'), ('tax', 'Porezni savjetnik / Računovođa'), ('medical', 'Medicinska ordinacija'), ('dental', 'Stomatolog'), ('gym', 'Fitness / Teretana'), ('beauty', 'Kozmetički salon'), ('mechanic', 'Auto servis / Mehaničar'), ('bakery', 'Pekara / Uslužno pečenje'), ('legal', 'Odvjetnik / Notar')], default='general', max_length=20, verbose_name='Tip djelatnosti'),
+            model_name="bookingservice",
+            name="branch_type",
+            field=models.CharField(
+                choices=[
+                    ("general", "Općenito"),
+                    ("optic", "Optičar"),
+                    ("hairdresser", "Frizer / Kozmetičar"),
+                    ("tax", "Porezni savjetnik / Računovođa"),
+                    ("medical", "Medicinska ordinacija"),
+                    ("dental", "Stomatolog"),
+                    ("gym", "Fitness / Teretana"),
+                    ("beauty", "Kozmetički salon"),
+                    ("mechanic", "Auto servis / Mehaničar"),
+                    ("bakery", "Pekara / Uslužno pečenje"),
+                    ("legal", "Odvjetnik / Notar"),
+                ],
+                default="general",
+                max_length=20,
+                verbose_name="Tip djelatnosti",
+            ),
         ),
         migrations.AlterField(
-            model_name='clientdossier',
-            name='branch_type',
-            field=models.CharField(choices=[('general', 'Općenito'), ('optic', 'Optičar'), ('hairdresser', 'Frizer / Kozmetičar'), ('tax', 'Porezni savjetnik / Računovođa'), ('medical', 'Medicinska ordinacija'), ('dental', 'Stomatolog'), ('gym', 'Fitness / Teretana'), ('beauty', 'Kozmetički salon'), ('mechanic', 'Auto servis / Mehaničar'), ('bakery', 'Pekara / Uslužno pečenje'), ('legal', 'Odvjetnik / Notar')], default='general', max_length=20, verbose_name='Tip kartona'),
+            model_name="clientdossier",
+            name="branch_type",
+            field=models.CharField(
+                choices=[
+                    ("general", "Općenito"),
+                    ("optic", "Optičar"),
+                    ("hairdresser", "Frizer / Kozmetičar"),
+                    ("tax", "Porezni savjetnik / Računovođa"),
+                    ("medical", "Medicinska ordinacija"),
+                    ("dental", "Stomatolog"),
+                    ("gym", "Fitness / Teretana"),
+                    ("beauty", "Kozmetički salon"),
+                    ("mechanic", "Auto servis / Mehaničar"),
+                    ("bakery", "Pekara / Uslužno pečenje"),
+                    ("legal", "Odvjetnik / Notar"),
+                ],
+                default="general",
+                max_length=20,
+                verbose_name="Tip kartona",
+            ),
         ),
     ]

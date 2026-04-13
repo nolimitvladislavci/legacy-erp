@@ -4,15 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('livestock', '0002_institutional_access'),
+        ("livestock", "0002_institutional_access"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cropplan',
-            name='kultura',
-            field=models.CharField(choices=[('kukuruz', 'Kukuruz (zrno)'), ('kukuruz_silaza', 'Kukuruz (silaza)'), ('djetelina', 'Djetelina'), ('livada', 'Livada / Trava'), ('psenica', 'Psenica'), ('jecam', 'Jecam'), ('soja', 'Soja'), ('secerna_repa', 'Secerna repa'), ('suncokret', 'Suncokret'), ('jabuka', 'Jabuka'), ('kruska', 'Kruška'), ('sljiva', 'Šljiva'), ('tresnja', 'Trešnja'), ('visnja', 'Višnja'), ('breskva', 'Breskva'), ('marelica', 'Marelica'), ('orah', 'Orah'), ('malina', 'Malina'), ('jagoda', 'Jagoda'), ('vinova_loza', 'Vinova loza'), ('ostalo', 'Ostalo')], max_length=30),
+            model_name="cropplan",
+            name="kultura",
+            field=models.CharField(
+                choices=[
+                    ("kukuruz", "Kukuruz (zrno)"),
+                    ("kukuruz_silaza", "Kukuruz (silaza)"),
+                    ("djetelina", "Djetelina"),
+                    ("livada", "Livada / Trava"),
+                    ("psenica", "Psenica"),
+                    ("jecam", "Jecam"),
+                    ("soja", "Soja"),
+                    ("secerna_repa", "Secerna repa"),
+                    ("suncokret", "Suncokret"),
+                    ("jabuka", "Jabuka"),
+                    ("kruska", "Kruška"),
+                    ("sljiva", "Šljiva"),
+                    ("tresnja", "Trešnja"),
+                    ("visnja", "Višnja"),
+                    ("breskva", "Breskva"),
+                    ("marelica", "Marelica"),
+                    ("orah", "Orah"),
+                    ("malina", "Malina"),
+                    ("jagoda", "Jagoda"),
+                    ("vinova_loza", "Vinova loza"),
+                    ("ostalo", "Ostalo"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0009_company_pdv_fields'),
+        ("companies", "0009_company_pdv_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_platform_owner',
-            field=models.BooleanField(default=False, help_text='Firma vlasnika platforme – svi moduli otključani bez pretplate', verbose_name='Platform Owner'),
+            model_name="company",
+            name="is_platform_owner",
+            field=models.BooleanField(
+                default=False,
+                help_text="Firma vlasnika platforme – svi moduli otključani bez pretplate",
+                verbose_name="Platform Owner",
+            ),
         ),
     ]

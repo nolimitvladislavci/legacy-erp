@@ -2,13 +2,14 @@
 Deploy Synesis Invoice Integration — Faze 1-6
 Pokreni na serveru: venv/bin/python3 synesis_invoices_deploy.py
 """
+
 import os
 
 # ══════════════════════════════════════════════════════════════════════
 # FAZA 1: Model proširenje — Invoice + SynesisYearConfig
 # ══════════════════════════════════════════════════════════════════════
 
-INVOICE_FIELDS = '''
+INVOICE_FIELDS = """
     # ── Synesis arhiva ────────────────────────────────────────────────
     synesis_id = models.CharField(
         max_length=50, blank=True, default='',
@@ -35,7 +36,7 @@ INVOICE_FIELDS = '''
         verbose_name='Zaštita od brisanja do',
         help_text='Zakonska obveza čuvanja (11 godina od izdavanja)',
     )
-'''
+"""
 
 # ══════════════════════════════════════════════════════════════════════
 # FAZA 2: SynesisYearConfig model
@@ -76,21 +77,20 @@ print("FAZA 1+2: Dodajem polja na Invoice + SynesisYearConfig model")
 print("=" * 60)
 
 # --- Patch Invoice model ---
-invoice_model = '/var/www/fina-connect/invoicing/models.py'
-with open(invoice_model, 'r') as f:
+invoice_model = "/var/www/fina-connect/invoicing/models.py"
+with open(invoice_model, "r") as f:
     content = f.read()
 
-if 'synesis_id' not in content:
+if "synesis_id" not in content:
     # Insert before "# Meta" in Invoice class
     marker = "    # Workflow chain (Ponuda"
     if marker in content:
-        content = content.replace(marker, INVOICE_FIELDS + '\n' + marker)
+        content = content.replace(marker, INVOICE_FIELDS + "\n" + marker)
         # Also add 'synesis' to SOURCE_CHOICES
         content = content.replace(
-            "        ('import', 'Import'),",
-            "        ('import', 'Import'),\n        ('synesis', 'Synesis arhiva'),"
+            "        ('import', 'Import'),", "        ('import', 'Import'),\n        ('synesis', 'Synesis arhiva'),"
         )
-        with open(invoice_model, 'w') as f:
+        with open(invoice_model, "w") as f:
             f.write(content)
         print("  Invoice model: 5 polja dodano + synesis source")
     else:
@@ -99,41 +99,38 @@ else:
     print("  Invoice model: vec ima synesis polja")
 
 # --- Patch Synesis models ---
-synesis_model = '/var/www/fina-connect/synesis/models.py'
-with open(synesis_model, 'r') as f:
+synesis_model = "/var/www/fina-connect/synesis/models.py"
+with open(synesis_model, "r") as f:
     content = f.read()
 
-if 'SynesisYearConfig' not in content:
+if "SynesisYearConfig" not in content:
     content += SYNESIS_YEAR_CONFIG
-    with open(synesis_model, 'w') as f:
+    with open(synesis_model, "w") as f:
         f.write(content)
     print("  SynesisYearConfig model dodan")
 
     # Also add 'invoice' to SynesisExportQueue TYPE_CHOICES
-    with open(synesis_model, 'r') as f:
+    with open(synesis_model, "r") as f:
         content = f.read()
     if "'invoice'" not in content:
-        content = content.replace(
-            "('pkv', 'PKV primka')]",
-            "('pkv', 'PKV primka'), ('invoice', 'Faktura')]"
-        )
-        with open(synesis_model, 'w') as f:
+        content = content.replace("('pkv', 'PKV primka')]", "('pkv', 'PKV primka'), ('invoice', 'Faktura')]")
+        with open(synesis_model, "w") as f:
             f.write(content)
         print("  SynesisExportQueue: invoice tip dodan")
 else:
     print("  SynesisYearConfig: vec postoji")
 
 # --- Add last_sync_invoices + invoices_total to SynesisConfig ---
-with open(synesis_model, 'r') as f:
+with open(synesis_model, "r") as f:
     content = f.read()
-if 'last_sync_invoices' not in content:
+if "last_sync_invoices" not in content:
     content = content.replace(
         "    items_total = models.IntegerField(default=0)",
         "    items_total = models.IntegerField(default=0)\n"
         "    last_sync_invoices = models.DateTimeField(null=True, blank=True)\n"
-        "    invoices_total = models.IntegerField(default=0)"
+        "    invoices_total = models.IntegerField(default=0)",
     )
-    with open(synesis_model, 'w') as f:
+    with open(synesis_model, "w") as f:
         f.write(content)
     print("  SynesisConfig: last_sync_invoices + invoices_total dodano")
 
@@ -141,9 +138,9 @@ if 'last_sync_invoices' not in content:
 # Run migrations
 # ══════════════════════════════════════════════════════════════════════
 print("\nRunning makemigrations + migrate...")
-os.chdir('/var/www/fina-connect')
-os.system('venv/bin/python3 manage.py makemigrations invoicing synesis 2>&1')
-os.system('venv/bin/python3 manage.py migrate 2>&1')
+os.chdir("/var/www/fina-connect")
+os.system("venv/bin/python3 manage.py makemigrations invoicing synesis 2>&1")
+os.system("venv/bin/python3 manage.py migrate 2>&1")
 
 # ══════════════════════════════════════════════════════════════════════
 # FAZA 3: Import logika — _import_invoices() u synesis/views.py
@@ -320,11 +317,11 @@ from django.core.exceptions import ObjectDoesNotExist
     return created, updated, errors
 '''
 
-synesis_views = '/var/www/fina-connect/synesis/views.py'
-with open(synesis_views, 'r') as f:
+synesis_views = "/var/www/fina-connect/synesis/views.py"
+with open(synesis_views, "r") as f:
     content = f.read()
 
-if '_import_invoices' not in content:
+if "_import_invoices" not in content:
     # Add the function before the last function or at end
     content += IMPORT_INVOICES_FUNC
 
@@ -334,9 +331,9 @@ if '_import_invoices' not in content:
         "elif sync_type == 'invoices':\n"
         "            created, updated, errors = _import_invoices(request, company, data_list)\n"
         "            log_type = 'invoices'\n"
-        "        elif sync_type == 'pos':"
+        "        elif sync_type == 'pos':",
     )
-    with open(synesis_views, 'w') as f:
+    with open(synesis_views, "w") as f:
         f.write(content)
     print("  _import_invoices() dodan u synesis/views.py")
     print("  'invoices' route dodan u synesis_import_api")
@@ -415,26 +412,20 @@ def sync_invoices():
 
 '''
 
-with open(synesis_views, 'r') as f:
+with open(synesis_views, "r") as f:
     content = f.read()
 
-if 'sync_invoices' not in content:
+if "sync_invoices" not in content:
     # Add sync_invoices to the generated script
     # Find where sync_partners/sync_items are called in main()
     marker = "sync_items()"
     if marker in content:
         # Add sync_invoices call after sync_items
-        content = content.replace(
-            'sync_items()\\n',
-            'sync_items()\\n    sync_invoices()\\n'
-        )
+        content = content.replace("sync_items()\\n", "sync_items()\\n    sync_invoices()\\n")
         # Add YEAR variable to script config
-        if 'YEAR =' not in content.split('_build_script')[1][:500] if '_build_script' in content else True:
-            content = content.replace(
-                "STORAGE_PATH = r'{storage}'",
-                "STORAGE_PATH = r'{storage}'\\nYEAR = {year}"
-            )
-        with open(synesis_views, 'w') as f:
+        if "YEAR =" not in content.split("_build_script")[1][:500] if "_build_script" in content else True:
+            content = content.replace("STORAGE_PATH = r'{storage}'", "STORAGE_PATH = r'{storage}'\\nYEAR = {year}")
+        with open(synesis_views, "w") as f:
             f.write(content)
         print("  sync_invoices() poziv dodan u generiranu skriptu")
     else:
@@ -462,25 +453,20 @@ print("FAZA 6: UI filter po godini + Synesis lock")
 print("=" * 60)
 
 # Patch invoice list view
-inv_views = '/var/www/fina-connect/invoicing/views.py'
-with open(inv_views, 'r') as f:
+inv_views = "/var/www/fina-connect/invoicing/views.py"
+with open(inv_views, "r") as f:
     content = f.read()
 
-if 'synesis_year' not in content:
+if "synesis_year" not in content:
     # Add year filter to index view
     # Find where status filter is applied
     filter_marker = "status_filter = request.GET.get('status')"
     if filter_marker in content:
-        content = content.replace(
-            filter_marker,
-            filter_marker + "\n    year_filter = request.GET.get('year', '')\n"
-        )
+        content = content.replace(filter_marker, filter_marker + "\n    year_filter = request.GET.get('year', '')\n")
         # Add year filter to queryset
         content = content.replace(
             "if search_q:",
-            "if year_filter:\n"
-            "        invoices = invoices.filter(synesis_year=int(year_filter))\n"
-            "    if search_q:"
+            "if year_filter:\n        invoices = invoices.filter(synesis_year=int(year_filter))\n    if search_q:",
         )
         # Add year choices to context
         content = content.replace(
@@ -489,14 +475,14 @@ if 'synesis_year' not in content:
             "    synesis_years = Invoice.objects.filter(\n"
             "        company=company, synesis_year__isnull=False\n"
             "    ).values_list('synesis_year', flat=True).distinct().order_by('-synesis_year')\n\n"
-            "    return render(request, 'invoicing/invoice_list.html', {"
+            "    return render(request, 'invoicing/invoice_list.html', {",
         )
         # Add to context dict
         content = content.replace(
             "'invoices': invoices,",
-            "'invoices': invoices,\n        'synesis_years': synesis_years,\n        'year_filter': year_filter,"
+            "'invoices': invoices,\n        'synesis_years': synesis_years,\n        'year_filter': year_filter,",
         )
-        with open(inv_views, 'w') as f:
+        with open(inv_views, "w") as f:
             f.write(content)
         print("  Invoice list view: year filter dodan")
     else:
@@ -505,10 +491,10 @@ else:
     print("  Invoice list view: year filter vec postoji")
 
 # Patch invoice edit view to block locked invoices
-with open(inv_views, 'r') as f:
+with open(inv_views, "r") as f:
     content = f.read()
 
-if 'is_locked' not in content:
+if "is_locked" not in content:
     # Find edit/update view
     edit_marker = "def edit(request, pk):"
     if edit_marker in content:
@@ -524,9 +510,9 @@ if 'is_locked' not in content:
             "    if inv.is_locked:\n"
             "        messages.warning(request, _('Ova faktura je zaključana (Synesis arhiva) i ne može se editirati.'))\n"
             "        return redirect('invoicing:detail', pk=pk)\n",
-            1  # replace only first occurrence
+            1,  # replace only first occurrence
         )
-        with open(inv_views, 'w') as f:
+        with open(inv_views, "w") as f:
             f.write(content)
         print("  Invoice edit view: lock check dodan")
     else:
@@ -535,10 +521,10 @@ else:
     print("  Invoice edit: lock check vec postoji")
 
 # Add delete protection
-with open(inv_views, 'r') as f:
+with open(inv_views, "r") as f:
     content = f.read()
 
-if 'deletion_protected_until' not in content:
+if "deletion_protected_until" not in content:
     delete_marker = "def delete(request, pk):"
     if delete_marker in content:
         content = content.replace(
@@ -549,9 +535,9 @@ if 'deletion_protected_until' not in content:
             "    if inv.deletion_protected_until and inv.deletion_protected_until > timezone.now().date():\n"
             "        messages.error(request, f'Faktura je zaštićena od brisanja do {inv.deletion_protected_until}.')\n"
             "        return redirect('invoicing:detail', pk=pk)\n",
-            1
+            1,
         )
-        with open(inv_views, 'w') as f:
+        with open(inv_views, "w") as f:
             f.write(content)
         print("  Invoice delete view: protection check dodan")
     else:

@@ -93,6 +93,6 @@ from .models import ReaderProfile
 
 @admin.register(ReaderProfile)
 class ReaderProfileAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'parent', 'age_group', 'books_read', 'xp_points', 'parental_consent']
-    list_filter = ['age_group', 'reading_level', 'parental_consent']
-    search_fields = ['first_name', 'last_name']
+    list_display = ["first_name", "last_name", "parent", "age_group", "books_read", "xp_points", "parental_consent"]
+    list_filter = ["age_group", "reading_level", "parental_consent"]
+    search_fields = ["first_name", "last_name"]

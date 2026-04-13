@@ -6,29 +6,50 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0002_alter_ticketmessage_options_and_more'),
+        ("helpdesk", "0002_alter_ticketmessage_options_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='VIPContact',
+            name="VIPContact",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('phone', models.CharField(help_text='Bez + i razmaka, npr. 385976091655', max_length=50, unique=True)),
-                ('name', models.CharField(max_length=200)),
-                ('note', models.CharField(blank=True, default='', max_length=500)),
-                ('priority', models.CharField(choices=[('low', 'Nizak'), ('normal', 'Normalan'), ('high', 'Visok'), ('urgent', 'Hitno'), ('critical', 'Kriticno')], default='critical', max_length=10)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('auto_assign_to', models.ForeignKey(blank=True, help_text='Automatski dodijeli tiket ovom korisniku', null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("phone", models.CharField(help_text="Bez + i razmaka, npr. 385976091655", max_length=50, unique=True)),
+                ("name", models.CharField(max_length=200)),
+                ("note", models.CharField(blank=True, default="", max_length=500)),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[
+                            ("low", "Nizak"),
+                            ("normal", "Normalan"),
+                            ("high", "Visok"),
+                            ("urgent", "Hitno"),
+                            ("critical", "Kriticno"),
+                        ],
+                        default="critical",
+                        max_length=10,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "auto_assign_to",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Automatski dodijeli tiket ovom korisniku",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'VIP kontakt',
-                'verbose_name_plural': 'VIP kontakti',
-                'ordering': ['name'],
+                "verbose_name": "VIP kontakt",
+                "verbose_name_plural": "VIP kontakti",
+                "ordering": ["name"],
             },
         ),
     ]

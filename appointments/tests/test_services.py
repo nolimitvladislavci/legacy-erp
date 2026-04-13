@@ -1,4 +1,5 @@
 """Tests for appointments.services — booking logic unit tests."""
+
 from datetime import date, time, timedelta
 from decimal import Decimal
 
@@ -53,7 +54,6 @@ class AppointmentTestBase(TestCase):
 
 
 class TestSlotAvailability(AppointmentTestBase):
-
     def _next_weekday(self):
         """Find next Monday-Friday date."""
         d = date.today() + timedelta(days=1)
@@ -87,7 +87,6 @@ class TestSlotAvailability(AppointmentTestBase):
 
 
 class TestBooking(AppointmentTestBase):
-
     def _next_weekday(self):
         d = date.today() + timedelta(days=1)
         while d.weekday() >= 5:
@@ -120,9 +119,9 @@ class TestBooking(AppointmentTestBase):
 
 
 class TestStatusTransitions(AppointmentTestBase):
-
     def _create_appointment(self):
         from appointments.models import Appointment
+
         target = date.today() + timedelta(days=1)
         while target.weekday() >= 5:
             target += timedelta(days=1)

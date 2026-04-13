@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0003_subscription_cancel'),
+        ("registration", "0003_subscription_cancel"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='companysubscription',
-            name='cancel_at_period_end',
-            field=models.BooleanField(default=False, help_text='Pretplata ostaje aktivna do valid_until, zatim auto-downgrade na archive_readonly', verbose_name='Otkaži na kraju perioda'),
+            model_name="companysubscription",
+            name="cancel_at_period_end",
+            field=models.BooleanField(
+                default=False,
+                help_text="Pretplata ostaje aktivna do valid_until, zatim auto-downgrade na archive_readonly",
+                verbose_name="Otkaži na kraju perioda",
+            ),
         ),
     ]

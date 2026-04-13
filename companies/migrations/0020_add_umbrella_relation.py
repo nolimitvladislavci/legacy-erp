@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0019_add_umbrella_fields'),
+        ("companies", "0019_add_umbrella_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='umbrella_relation',
-            field=models.CharField(blank=True, choices=[('subsidiary', 'Podružnica / Sestrinska firma'), ('client', 'Klijent (knjigovodstvo)'), ('franchise', 'Franšiza')], default='client', max_length=20, verbose_name='Tip veze s umbrella'),
+            model_name="company",
+            name="umbrella_relation",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("subsidiary", "Podružnica / Sestrinska firma"),
+                    ("client", "Klijent (knjigovodstvo)"),
+                    ("franchise", "Franšiza"),
+                ],
+                default="client",
+                max_length=20,
+                verbose_name="Tip veze s umbrella",
+            ),
         ),
     ]

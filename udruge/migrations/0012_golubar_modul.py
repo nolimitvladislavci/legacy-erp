@@ -5,163 +5,310 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('udruge', '0011_zadruge_zadrugar_revizija'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("udruge", "0011_zadruge_zadrugar_revizija"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Golubinjak',
+            name="Golubinjak",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv', models.CharField(max_length=200)),
-                ('adresa', models.CharField(blank=True, max_length=300)),
-                ('gps_lat', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('gps_lng', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('eu_reg_broj', models.CharField(blank=True, help_text='HR-XX-YYYY-ZZZZ (EU 2016/429)', max_length=50)),
-                ('kapacitet', models.PositiveIntegerField(default=0)),
-                ('aktivan', models.BooleanField(default=True)),
-                ('napomena', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='golubinjaci', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv", models.CharField(max_length=200)),
+                ("adresa", models.CharField(blank=True, max_length=300)),
+                ("gps_lat", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("gps_lng", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("eu_reg_broj", models.CharField(blank=True, help_text="HR-XX-YYYY-ZZZZ (EU 2016/429)", max_length=50)),
+                ("kapacitet", models.PositiveIntegerField(default=0)),
+                ("aktivan", models.BooleanField(default=True)),
+                ("napomena", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="golubinjaci", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Golubinjak',
-                'verbose_name_plural': 'Golubinjaci',
+                "verbose_name": "Golubinjak",
+                "verbose_name_plural": "Golubinjaci",
             },
         ),
         migrations.CreateModel(
-            name='Golub',
+            name="Golub",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('prsten_broj', models.CharField(help_text='LOK/HOG prsten, npr. HR-2024-12345', max_length=30, unique=True)),
-                ('naziv', models.CharField(blank=True, max_length=100)),
-                ('spol', models.CharField(choices=[('M', 'Mužjak'), ('F', 'Ženka'), ('?', 'Nepoznato')], default='?', max_length=1)),
-                ('boja', models.CharField(choices=[('plav', 'Plav'), ('bijel', 'Bijel'), ('crn', 'Crn'), ('crvena_siva', 'Crvena/siva'), ('karirani', 'Karirani'), ('ostalo', 'Ostalo')], default='ostalo', max_length=20)),
-                ('datum_izlijeganja', models.DateField(blank=True, null=True)),
-                ('fotografija', models.ImageField(blank=True, null=True, upload_to='golubovi/')),
-                ('aktivan', models.BooleanField(default=True)),
-                ('napomena', models.TextField(blank=True)),
-                ('is_sealed', models.BooleanField(default=False)),
-                ('sealed_at', models.DateTimeField(blank=True, null=True)),
-                ('sealed_reason', models.CharField(blank=True, max_length=200)),
-                ('genetics_hash', models.CharField(blank=True, help_text='SHA-256 za offline verifikaciju', max_length=64)),
-                ('broj_utrka', models.PositiveIntegerField(default=0)),
-                ('broj_pobjeda', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='golubovi', to='companies.company')),
-                ('majka', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='djeca_majka', to='udruge.golub')),
-                ('otac', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='djeca_otac', to='udruge.golub')),
-                ('golubinjak', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='golubovi', to='udruge.golubinjak')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "prsten_broj",
+                    models.CharField(help_text="LOK/HOG prsten, npr. HR-2024-12345", max_length=30, unique=True),
+                ),
+                ("naziv", models.CharField(blank=True, max_length=100)),
+                (
+                    "spol",
+                    models.CharField(
+                        choices=[("M", "Mužjak"), ("F", "Ženka"), ("?", "Nepoznato")], default="?", max_length=1
+                    ),
+                ),
+                (
+                    "boja",
+                    models.CharField(
+                        choices=[
+                            ("plav", "Plav"),
+                            ("bijel", "Bijel"),
+                            ("crn", "Crn"),
+                            ("crvena_siva", "Crvena/siva"),
+                            ("karirani", "Karirani"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        default="ostalo",
+                        max_length=20,
+                    ),
+                ),
+                ("datum_izlijeganja", models.DateField(blank=True, null=True)),
+                ("fotografija", models.ImageField(blank=True, null=True, upload_to="golubovi/")),
+                ("aktivan", models.BooleanField(default=True)),
+                ("napomena", models.TextField(blank=True)),
+                ("is_sealed", models.BooleanField(default=False)),
+                ("sealed_at", models.DateTimeField(blank=True, null=True)),
+                ("sealed_reason", models.CharField(blank=True, max_length=200)),
+                (
+                    "genetics_hash",
+                    models.CharField(blank=True, help_text="SHA-256 za offline verifikaciju", max_length=64),
+                ),
+                ("broj_utrka", models.PositiveIntegerField(default=0)),
+                ("broj_pobjeda", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="golubovi", to="companies.company"
+                    ),
+                ),
+                (
+                    "majka",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="djeca_majka",
+                        to="udruge.golub",
+                    ),
+                ),
+                (
+                    "otac",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="djeca_otac",
+                        to="udruge.golub",
+                    ),
+                ),
+                (
+                    "golubinjak",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="golubovi",
+                        to="udruge.golubinjak",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Golub',
-                'verbose_name_plural': 'Golubovi',
-                'ordering': ['-created_at'],
+                "verbose_name": "Golub",
+                "verbose_name_plural": "Golubovi",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='ParGolubova',
+            name="ParGolubova",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sezona', models.PositiveIntegerField(help_text='Godina')),
-                ('datum_spajanja', models.DateField(blank=True, null=True)),
-                ('datum_razdvajanja', models.DateField(blank=True, null=True)),
-                ('aktivan', models.BooleanField(default=True)),
-                ('napomena', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='parovi_golubova', to='companies.company')),
-                ('golubinjak', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='parovi', to='udruge.golubinjak')),
-                ('muzjak', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='par_muzjak', to='udruge.golub')),
-                ('zenka', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='par_zenka', to='udruge.golub')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("sezona", models.PositiveIntegerField(help_text="Godina")),
+                ("datum_spajanja", models.DateField(blank=True, null=True)),
+                ("datum_razdvajanja", models.DateField(blank=True, null=True)),
+                ("aktivan", models.BooleanField(default=True)),
+                ("napomena", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="parovi_golubova",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "golubinjak",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="parovi", to="udruge.golubinjak"
+                    ),
+                ),
+                (
+                    "muzjak",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="par_muzjak", to="udruge.golub"
+                    ),
+                ),
+                (
+                    "zenka",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="par_zenka", to="udruge.golub"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Par golubova',
-                'verbose_name_plural': 'Parovi golubova',
+                "verbose_name": "Par golubova",
+                "verbose_name_plural": "Parovi golubova",
             },
         ),
         migrations.CreateModel(
-            name='Leglo',
+            name="Leglo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('datum_jaja', models.DateField(blank=True, null=True)),
-                ('datum_izlijeganja_1', models.DateField(blank=True, null=True)),
-                ('datum_izlijeganja_2', models.DateField(blank=True, null=True)),
-                ('napomena', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('ptic_1', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='leglo_ptic1', to='udruge.golub')),
-                ('ptic_2', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='leglo_ptic2', to='udruge.golub')),
-                ('par', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='legla', to='udruge.pargolubova')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("datum_jaja", models.DateField(blank=True, null=True)),
+                ("datum_izlijeganja_1", models.DateField(blank=True, null=True)),
+                ("datum_izlijeganja_2", models.DateField(blank=True, null=True)),
+                ("napomena", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "ptic_1",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="leglo_ptic1",
+                        to="udruge.golub",
+                    ),
+                ),
+                (
+                    "ptic_2",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="leglo_ptic2",
+                        to="udruge.golub",
+                    ),
+                ),
+                (
+                    "par",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="legla", to="udruge.pargolubova"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Leglo',
-                'verbose_name_plural': 'Legla',
+                "verbose_name": "Leglo",
+                "verbose_name_plural": "Legla",
             },
         ),
         migrations.CreateModel(
-            name='Utrka',
+            name="Utrka",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv', models.CharField(max_length=200)),
-                ('datum', models.DateField()),
-                ('startna_tocka', models.CharField(max_length=200)),
-                ('startna_lat', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('startna_lng', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('udaljenost_km', models.DecimalField(blank=True, decimal_places=2, max_digits=7, null=True)),
-                ('organizator', models.CharField(blank=True, max_length=200)),
-                ('broj_natjecatelja', models.PositiveIntegerField(blank=True, null=True)),
-                ('uvjeti', models.CharField(blank=True, help_text='Vjetar, oblaci...', max_length=200)),
-                ('napomena', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='utrke_golub', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv", models.CharField(max_length=200)),
+                ("datum", models.DateField()),
+                ("startna_tocka", models.CharField(max_length=200)),
+                ("startna_lat", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("startna_lng", models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
+                ("udaljenost_km", models.DecimalField(blank=True, decimal_places=2, max_digits=7, null=True)),
+                ("organizator", models.CharField(blank=True, max_length=200)),
+                ("broj_natjecatelja", models.PositiveIntegerField(blank=True, null=True)),
+                ("uvjeti", models.CharField(blank=True, help_text="Vjetar, oblaci...", max_length=200)),
+                ("napomena", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="utrke_golub", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Utrka',
-                'verbose_name_plural': 'Utrke',
-                'ordering': ['-datum'],
+                "verbose_name": "Utrka",
+                "verbose_name_plural": "Utrke",
+                "ordering": ["-datum"],
             },
         ),
         migrations.CreateModel(
-            name='ZdravstveniZapisGolub',
+            name="ZdravstveniZapisGolub",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vrsta', models.CharField(choices=[('pmv', 'Cijepljenje PMV (Paramyxovirus)'), ('newcastle', 'Cijepljenje Newcastle'), ('paratifus', 'Cijepljenje Paratifus'), ('antipar', 'Antiparazitik'), ('antibiot', 'Antibiotik'), ('vet', 'Veterinarski pregled'), ('ostalo', 'Ostalo')], max_length=15)),
-                ('datum', models.DateField()),
-                ('lijek_preparat', models.CharField(blank=True, max_length=200)),
-                ('doza', models.CharField(blank=True, max_length=100)),
-                ('veterinar', models.CharField(blank=True, max_length=200)),
-                ('sljedeci_tretman', models.DateField(blank=True, help_text='Okida Celery podsjetnik', null=True)),
-                ('napomena', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('golub', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='zdravstveni_zapisi', to='udruge.golub')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("pmv", "Cijepljenje PMV (Paramyxovirus)"),
+                            ("newcastle", "Cijepljenje Newcastle"),
+                            ("paratifus", "Cijepljenje Paratifus"),
+                            ("antipar", "Antiparazitik"),
+                            ("antibiot", "Antibiotik"),
+                            ("vet", "Veterinarski pregled"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        max_length=15,
+                    ),
+                ),
+                ("datum", models.DateField()),
+                ("lijek_preparat", models.CharField(blank=True, max_length=200)),
+                ("doza", models.CharField(blank=True, max_length=100)),
+                ("veterinar", models.CharField(blank=True, max_length=200)),
+                ("sljedeci_tretman", models.DateField(blank=True, help_text="Okida Celery podsjetnik", null=True)),
+                ("napomena", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "golub",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="zdravstveni_zapisi",
+                        to="udruge.golub",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zdravstveni zapis goluba',
-                'verbose_name_plural': 'Zdravstveni zapisi golubova',
-                'ordering': ['-datum'],
+                "verbose_name": "Zdravstveni zapis goluba",
+                "verbose_name_plural": "Zdravstveni zapisi golubova",
+                "ordering": ["-datum"],
             },
         ),
         migrations.CreateModel(
-            name='RezultatUtrke',
+            name="RezultatUtrke",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('placiranje', models.PositiveIntegerField(blank=True, null=True)),
-                ('placiranje_ukupno', models.PositiveIntegerField(blank=True, null=True)),
-                ('brzina_mpm', models.DecimalField(blank=True, decimal_places=2, help_text='Metri po minuti — standard', max_digits=8, null=True)),
-                ('vrijeme_dolaska', models.DateTimeField(blank=True, null=True)),
-                ('bodovi', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
-                ('ets_data', models.JSONField(blank=True, help_text='Raw CSV/JSON iz ETS clock-a', null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('golub', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rezultati_utrka', to='udruge.golub')),
-                ('utrka', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rezultati', to='udruge.utrka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("placiranje", models.PositiveIntegerField(blank=True, null=True)),
+                ("placiranje_ukupno", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "brzina_mpm",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, help_text="Metri po minuti — standard", max_digits=8, null=True
+                    ),
+                ),
+                ("vrijeme_dolaska", models.DateTimeField(blank=True, null=True)),
+                ("bodovi", models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
+                ("ets_data", models.JSONField(blank=True, help_text="Raw CSV/JSON iz ETS clock-a", null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "golub",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="rezultati_utrka", to="udruge.golub"
+                    ),
+                ),
+                (
+                    "utrka",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="rezultati", to="udruge.utrka"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Rezultat utrke',
-                'verbose_name_plural': 'Rezultati utrka',
-                'unique_together': {('utrka', 'golub')},
+                "verbose_name": "Rezultat utrke",
+                "verbose_name_plural": "Rezultati utrka",
+                "unique_together": {("utrka", "golub")},
             },
         ),
     ]

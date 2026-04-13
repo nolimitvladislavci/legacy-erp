@@ -6,105 +6,244 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='FarmAnimal',
+            name="FarmAnimal",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('ear_tag', models.CharField(db_index=True, help_text='HR format npr. HR123456789', max_length=20, verbose_name='Broj ušne markice')),
-                ('chip_number', models.CharField(blank=True, db_index=True, max_length=20, verbose_name='Broj mikročipa')),
-                ('passport_number', models.CharField(blank=True, max_length=50, verbose_name='Broj pasoša (za konje)')),
-                ('name', models.CharField(blank=True, max_length=100, verbose_name='Ime (opcionalno)')),
-                ('vrsta', models.CharField(choices=[('krava', '🐄 Krava / Govedo'), ('konj', '🐎 Konj'), ('ovca', '🐑 Ovca'), ('koza', '🐐 Koza'), ('svinja', '🐷 Svinja'), ('kokoska', '🐔 Kokoška / Perad'), ('zec', '🐇 Kunić / Zec'), ('ostalo', '🐾 Ostalo')], default='krava', max_length=20)),
-                ('breed', models.CharField(blank=True, max_length=100, verbose_name='Pasmina')),
-                ('spol', models.CharField(choices=[('M', 'Mužjak'), ('F', 'Ženka'), ('N', 'Nepoznato')], default='N', max_length=1)),
-                ('date_of_birth', models.DateField(blank=True, null=True)),
-                ('weight_kg', models.DecimalField(blank=True, decimal_places=1, max_digits=7, null=True)),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='memio_farm/photos/')),
-                ('status', models.CharField(choices=[('aktivno', 'Aktivno'), ('gravidno', 'Gravidno'), ('tov', 'U tovu'), ('prodano', 'Prodano'), ('uginulo', 'Uginulo'), ('izluceno', 'Izlučeno iz stada'), ('u_miru', 'U mirovini')], default='aktivno', max_length=15)),
-                ('notes', models.TextField(blank=True)),
-                ('memio_pet_profile_id', models.UUIDField(blank=True, null=True, verbose_name='memio.pet profil ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "ear_tag",
+                    models.CharField(
+                        db_index=True,
+                        help_text="HR format npr. HR123456789",
+                        max_length=20,
+                        verbose_name="Broj ušne markice",
+                    ),
+                ),
+                (
+                    "chip_number",
+                    models.CharField(blank=True, db_index=True, max_length=20, verbose_name="Broj mikročipa"),
+                ),
+                ("passport_number", models.CharField(blank=True, max_length=50, verbose_name="Broj pasoša (za konje)")),
+                ("name", models.CharField(blank=True, max_length=100, verbose_name="Ime (opcionalno)")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("krava", "🐄 Krava / Govedo"),
+                            ("konj", "🐎 Konj"),
+                            ("ovca", "🐑 Ovca"),
+                            ("koza", "🐐 Koza"),
+                            ("svinja", "🐷 Svinja"),
+                            ("kokoska", "🐔 Kokoška / Perad"),
+                            ("zec", "🐇 Kunić / Zec"),
+                            ("ostalo", "🐾 Ostalo"),
+                        ],
+                        default="krava",
+                        max_length=20,
+                    ),
+                ),
+                ("breed", models.CharField(blank=True, max_length=100, verbose_name="Pasmina")),
+                (
+                    "spol",
+                    models.CharField(
+                        choices=[("M", "Mužjak"), ("F", "Ženka"), ("N", "Nepoznato")], default="N", max_length=1
+                    ),
+                ),
+                ("date_of_birth", models.DateField(blank=True, null=True)),
+                ("weight_kg", models.DecimalField(blank=True, decimal_places=1, max_digits=7, null=True)),
+                ("photo", models.ImageField(blank=True, null=True, upload_to="memio_farm/photos/")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("aktivno", "Aktivno"),
+                            ("gravidno", "Gravidno"),
+                            ("tov", "U tovu"),
+                            ("prodano", "Prodano"),
+                            ("uginulo", "Uginulo"),
+                            ("izluceno", "Izlučeno iz stada"),
+                            ("u_miru", "U mirovini"),
+                        ],
+                        default="aktivno",
+                        max_length=15,
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("memio_pet_profile_id", models.UUIDField(blank=True, null=True, verbose_name="memio.pet profil ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'db_table': 'mf_farm_animal',
-                'ordering': ['ear_tag'],
+                "db_table": "mf_farm_animal",
+                "ordering": ["ear_tag"],
             },
         ),
         migrations.CreateModel(
-            name='FarmProfile',
+            name="FarmProfile",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv farme / OPG-a')),
-                ('farm_type', models.CharField(choices=[('opg', '🌿 OPG'), ('govedarstvo', '🐄 Govedarstvo'), ('ovcarstvo', '🐑 Ovčarstvo / Kozarstvo'), ('svinjogojstvo', '🐷 Svinjogojstvo'), ('peradarstvo', '🐔 Peradarstvo'), ('konjogojstvo', '🐎 Konjogojstvo'), ('pcelarstvo', '🍯 Pčelarstvo'), ('misovito', '🌾 Mješovita farma'), ('rescue', '🏠 Rescue / Azil za farmske životinje')], default='opg', max_length=20)),
-                ('oib', models.CharField(blank=True, max_length=11, verbose_name='OIB')),
-                ('mibpg', models.CharField(blank=True, max_length=20, verbose_name='MIBPG (Matični identifikacijski broj poljoprivrednog gospodarstva)')),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('website', models.URLField(blank=True)),
-                ('city', models.CharField(blank=True, max_length=100)),
-                ('county', models.CharField(blank=True, max_length=100, verbose_name='Županija')),
-                ('country', models.CharField(default='HR', max_length=2)),
-                ('limit_company_id', models.UUIDField(blank=True, null=True, verbose_name='LIMIT Connect company ID')),
-                ('is_agronet_verified', models.BooleanField(default=False, verbose_name='Verificiran u AGRONET-u')),
-                ('trust_score', models.PositiveSmallIntegerField(default=40)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv farme / OPG-a")),
+                (
+                    "farm_type",
+                    models.CharField(
+                        choices=[
+                            ("opg", "🌿 OPG"),
+                            ("govedarstvo", "🐄 Govedarstvo"),
+                            ("ovcarstvo", "🐑 Ovčarstvo / Kozarstvo"),
+                            ("svinjogojstvo", "🐷 Svinjogojstvo"),
+                            ("peradarstvo", "🐔 Peradarstvo"),
+                            ("konjogojstvo", "🐎 Konjogojstvo"),
+                            ("pcelarstvo", "🍯 Pčelarstvo"),
+                            ("misovito", "🌾 Mješovita farma"),
+                            ("rescue", "🏠 Rescue / Azil za farmske životinje"),
+                        ],
+                        default="opg",
+                        max_length=20,
+                    ),
+                ),
+                ("oib", models.CharField(blank=True, max_length=11, verbose_name="OIB")),
+                (
+                    "mibpg",
+                    models.CharField(
+                        blank=True,
+                        max_length=20,
+                        verbose_name="MIBPG (Matični identifikacijski broj poljoprivrednog gospodarstva)",
+                    ),
+                ),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("website", models.URLField(blank=True)),
+                ("city", models.CharField(blank=True, max_length=100)),
+                ("county", models.CharField(blank=True, max_length=100, verbose_name="Županija")),
+                ("country", models.CharField(default="HR", max_length=2)),
+                ("limit_company_id", models.UUIDField(blank=True, null=True, verbose_name="LIMIT Connect company ID")),
+                ("is_agronet_verified", models.BooleanField(default=False, verbose_name="Verificiran u AGRONET-u")),
+                ("trust_score", models.PositiveSmallIntegerField(default=40)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Farma / OPG',
-                'db_table': 'mf_farm_profile',
+                "verbose_name": "Farma / OPG",
+                "db_table": "mf_farm_profile",
             },
         ),
         migrations.CreateModel(
-            name='AnimalCustody',
+            name="AnimalCustody",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('memio_pet_chip', models.CharField(blank=True, max_length=20, verbose_name='memio.pet čip (za ljubimce)')),
-                ('custodian_name', models.CharField(max_length=200)),
-                ('custodian_email', models.EmailField(blank=True, max_length=254)),
-                ('custodian_phone', models.CharField(blank=True, max_length=20)),
-                ('custody_type', models.CharField(choices=[('permanent', '🏠 Stalni vlasnik'), ('foster', '💛 Udomiteljska obitelj'), ('shared', '🔄 Dijeljeno skrbništvo (vikend)'), ('riding', '🐎 Jahač / korisnik'), ('therapy', '💙 Terapijski program'), ('training', '🎓 Dresura / trening'), ('breeding', '🌿 Razplodna posudba'), ('temporary', '⏰ Privremeni čuvar'), ('researcher', '🔬 Istraživač / student')], max_length=15)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField(blank=True, null=True)),
-                ('schedule_note', models.CharField(blank=True, help_text='npr. "Svaki vikend Pet-Ned" ili "Utorkom 10-12h"', max_length=300, verbose_name='Raspored')),
-                ('is_public', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('farm_animal', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='custodies', to='memio_farm.farmanimal')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "memio_pet_chip",
+                    models.CharField(blank=True, max_length=20, verbose_name="memio.pet čip (za ljubimce)"),
+                ),
+                ("custodian_name", models.CharField(max_length=200)),
+                ("custodian_email", models.EmailField(blank=True, max_length=254)),
+                ("custodian_phone", models.CharField(blank=True, max_length=20)),
+                (
+                    "custody_type",
+                    models.CharField(
+                        choices=[
+                            ("permanent", "🏠 Stalni vlasnik"),
+                            ("foster", "💛 Udomiteljska obitelj"),
+                            ("shared", "🔄 Dijeljeno skrbništvo (vikend)"),
+                            ("riding", "🐎 Jahač / korisnik"),
+                            ("therapy", "💙 Terapijski program"),
+                            ("training", "🎓 Dresura / trening"),
+                            ("breeding", "🌿 Razplodna posudba"),
+                            ("temporary", "⏰ Privremeni čuvar"),
+                            ("researcher", "🔬 Istraživač / student"),
+                        ],
+                        max_length=15,
+                    ),
+                ),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField(blank=True, null=True)),
+                (
+                    "schedule_note",
+                    models.CharField(
+                        blank=True,
+                        help_text='npr. "Svaki vikend Pet-Ned" ili "Utorkom 10-12h"',
+                        max_length=300,
+                        verbose_name="Raspored",
+                    ),
+                ),
+                ("is_public", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "farm_animal",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="custodies",
+                        to="memio_farm.farmanimal",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'mf_animal_custody',
+                "db_table": "mf_animal_custody",
             },
         ),
         migrations.AddField(
-            model_name='farmanimal',
-            name='farm',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='animals', to='memio_farm.farmprofile'),
+            model_name="farmanimal",
+            name="farm",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="animals", to="memio_farm.farmprofile"
+            ),
         ),
         migrations.CreateModel(
-            name='Beehive',
+            name="Beehive",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('hive_number', models.CharField(db_index=True, max_length=20, verbose_name='Broj košnice')),
-                ('location_name', models.CharField(blank=True, max_length=200, verbose_name='Lokacija pčelinjaka')),
-                ('queen_year', models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='Godina matice')),
-                ('bee_race', models.CharField(blank=True, help_text='npr. Carnica, Buckfast, Krajinska', max_length=100, verbose_name='Soj pčela')),
-                ('status', models.CharField(choices=[('aktivna', 'Aktivna'), ('zimovanje', 'Zimovanje'), ('roj_izgubljen', 'Roj izgubljen'), ('neaktivna', 'Neaktivna')], default='aktivna', max_length=20)),
-                ('agronet_id', models.CharField(blank=True, max_length=50, verbose_name='AGRONET ID pčelinjaka')),
-                ('last_inspection', models.DateField(blank=True, null=True, verbose_name='Zadnji pregled')),
-                ('honey_yield_kg', models.DecimalField(blank=True, decimal_places=1, max_digits=7, null=True, verbose_name='Prinos meda (kg/god)')),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('farm', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='beehives', to='memio_farm.farmprofile')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("hive_number", models.CharField(db_index=True, max_length=20, verbose_name="Broj košnice")),
+                ("location_name", models.CharField(blank=True, max_length=200, verbose_name="Lokacija pčelinjaka")),
+                ("queen_year", models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Godina matice")),
+                (
+                    "bee_race",
+                    models.CharField(
+                        blank=True,
+                        help_text="npr. Carnica, Buckfast, Krajinska",
+                        max_length=100,
+                        verbose_name="Soj pčela",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("aktivna", "Aktivna"),
+                            ("zimovanje", "Zimovanje"),
+                            ("roj_izgubljen", "Roj izgubljen"),
+                            ("neaktivna", "Neaktivna"),
+                        ],
+                        default="aktivna",
+                        max_length=20,
+                    ),
+                ),
+                ("agronet_id", models.CharField(blank=True, max_length=50, verbose_name="AGRONET ID pčelinjaka")),
+                ("last_inspection", models.DateField(blank=True, null=True, verbose_name="Zadnji pregled")),
+                (
+                    "honey_yield_kg",
+                    models.DecimalField(
+                        blank=True, decimal_places=1, max_digits=7, null=True, verbose_name="Prinos meda (kg/god)"
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "farm",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="beehives",
+                        to="memio_farm.farmprofile",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'mf_beehive',
-                'ordering': ['hive_number'],
+                "db_table": "mf_beehive",
+                "ordering": ["hive_number"],
             },
         ),
     ]

@@ -6,56 +6,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('documents', '0005_add_blob_and_storage_config'),
+        ("documents", "0005_add_blob_and_storage_config"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='arhivaentry',
-            name='doc_number',
-            field=models.CharField(db_index=True, max_length=255, verbose_name='Broj dokumenta'),
+            model_name="arhivaentry",
+            name="doc_number",
+            field=models.CharField(db_index=True, max_length=255, verbose_name="Broj dokumenta"),
         ),
         migrations.AlterField(
-            model_name='arhivaentry',
-            name='source_id',
-            field=models.CharField(max_length=255, verbose_name='ID izvornog objekta'),
+            model_name="arhivaentry",
+            name="source_id",
+            field=models.CharField(max_length=255, verbose_name="ID izvornog objekta"),
         ),
         migrations.AlterField(
-            model_name='cmr',
-            name='doc_number',
-            field=models.CharField(db_index=True, max_length=255, verbose_name='Broj dokumenta'),
+            model_name="cmr",
+            name="doc_number",
+            field=models.CharField(db_index=True, max_length=255, verbose_name="Broj dokumenta"),
         ),
         migrations.AlterField(
-            model_name='otkupniblok',
-            name='doc_number',
-            field=models.CharField(db_index=True, max_length=255, verbose_name='Broj dokumenta'),
+            model_name="otkupniblok",
+            name="doc_number",
+            field=models.CharField(db_index=True, max_length=255, verbose_name="Broj dokumenta"),
         ),
         migrations.AlterField(
-            model_name='otpremnica',
-            name='doc_number',
-            field=models.CharField(db_index=True, max_length=255, verbose_name='Broj dokumenta'),
+            model_name="otpremnica",
+            name="doc_number",
+            field=models.CharField(db_index=True, max_length=255, verbose_name="Broj dokumenta"),
         ),
         migrations.AlterField(
-            model_name='primka',
-            name='doc_number',
-            field=models.CharField(db_index=True, max_length=255, verbose_name='Broj dokumenta'),
+            model_name="primka",
+            name="doc_number",
+            field=models.CharField(db_index=True, max_length=255, verbose_name="Broj dokumenta"),
         ),
         migrations.CreateModel(
-            name='ArhivaBookmark',
+            name="ArhivaBookmark",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('note', models.CharField(blank=True, max_length=200)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('entry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to='documents.arhivaentry')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("note", models.CharField(blank=True, max_length=200)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "entry",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bookmarks",
+                        to="documents.arhivaentry",
+                    ),
+                ),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'verbose_name': 'Arhivska oznaka',
-                'verbose_name_plural': 'Arhivske oznake',
-                'unique_together': {('user', 'entry')},
+                "verbose_name": "Arhivska oznaka",
+                "verbose_name_plural": "Arhivske oznake",
+                "unique_together": {("user", "entry")},
             },
         ),
     ]

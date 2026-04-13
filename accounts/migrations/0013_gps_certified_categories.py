@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0012_alter_userprofile_totp_secret_and_more'),
+        ("accounts", "0012_alter_userprofile_totp_secret_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='certified_categories',
-            field=models.JSONField(blank=True, default=list, help_text='Lista: voda, struja, plin, kljucar'),
+            model_name="userprofile",
+            name="certified_categories",
+            field=models.JSONField(blank=True, default=list, help_text="Lista: voda, struja, plin, kljucar"),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='last_gps_update',
+            model_name="userprofile",
+            name="last_gps_update",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='last_lat',
+            model_name="userprofile",
+            name="last_lat",
             field=models.FloatField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='last_lng',
+            model_name="userprofile",
+            name="last_lng",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

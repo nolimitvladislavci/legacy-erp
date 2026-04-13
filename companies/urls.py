@@ -10,14 +10,13 @@ router.register(r"api", views.CompanyViewSet)
 app_name = "companies"
 
 urlpatterns = [
-
     # ── Workspace ──
-    path('workspace/', views.workspace_home, name='workspace_home'),
+    path("workspace/", views.workspace_home, name="workspace_home"),
     # Legacy redirects
-    path('stolovi/', RedirectView.as_view(pattern_name='companies:workspace_admin', permanent=True)),
-    path('workspace/admin/', views.workspace_admin, name='workspace_admin'),
-    path('workspace/switch/<int:ws_id>/', views.workspace_switch, name='workspace_switch'),
-    path('workspace/enter/<uuid:client_id>/', views.workspace_enter_client, name='workspace_enter_client'),
+    path("stolovi/", RedirectView.as_view(pattern_name="companies:workspace_admin", permanent=True)),
+    path("workspace/admin/", views.workspace_admin, name="workspace_admin"),
+    path("workspace/switch/<int:ws_id>/", views.workspace_switch, name="workspace_switch"),
+    path("workspace/enter/<uuid:client_id>/", views.workspace_enter_client, name="workspace_enter_client"),
     path("", views.company_list, name="list"),
     path("new/", views.company_create, name="create"),
     path("<str:pk>/edit/", views.company_edit, name="edit"),
@@ -32,9 +31,8 @@ urlpatterns = [
     path("settings/employee/<int:pk>/edit/", views.employee_edit, name="employee_edit"),
     path("settings/employee/<int:pk>/password/", views.employee_change_password, name="employee_change_password"),
     path("settings/employee/<int:pk>/toggle/", views.employee_toggle_redirect, name="employee_toggle_active"),
-    path('compliance/', views.compliance_monitor, name='compliance_monitor'),
-    path('settings/employee/<int:pk>/offboard/', views.employee_offboard, name='employee_offboard'),
-
+    path("compliance/", views.compliance_monitor, name="compliance_monitor"),
+    path("settings/employee/<int:pk>/offboard/", views.employee_offboard, name="employee_offboard"),
     path("settings/branch/save/", views.branch_save_redirect, name="branch_create"),
     path("settings/branch/<int:pk>/save/", views.branch_save_redirect, name="branch_edit"),
     path("settings/branch/<int:pk>/toggle/", views.branch_toggle_redirect, name="branch_toggle_active"),
@@ -42,38 +40,35 @@ urlpatterns = [
     path("tax-rates/", views.tax_rate_list, name="tax_rates"),
     path("api/nkd-search/", views.nkd_search, name="nkd_search"),
     path("", include(router.urls)),
-
     # Module Picker (general ERP modules)
-    path('modules/', views_modules.module_picker, name='module_picker'),
-    path('modules/api/toggle/', views_modules.module_toggle_api, name='module_toggle'),
-
+    path("modules/", views_modules.module_picker, name="module_picker"),
+    path("modules/api/toggle/", views_modules.module_toggle_api, name="module_toggle"),
     # Specialized Module Config (udruge, DVD, KUD, etc.)
-    path('onboard/employee/', views.employee_onboard, name='employee_onboard'),
-    path('onboard/employee/<int:pk>/', views.employee_onboard, name='employee_onboard_edit'),
-    path('modules/config/', views_modules.company_modules, name='company_modules'),
-    path('modules/config/api/toggle/', views_modules.spec_module_toggle_api, name='spec_module_toggle'),
+    path("onboard/employee/", views.employee_onboard, name="employee_onboard"),
+    path("onboard/employee/<int:pk>/", views.employee_onboard, name="employee_onboard_edit"),
+    path("modules/config/", views_modules.company_modules, name="company_modules"),
+    path("modules/config/api/toggle/", views_modules.spec_module_toggle_api, name="spec_module_toggle"),
 ]
 
 # KS LIMIT Komitent Manager
 from companies import views_komitent
 
 urlpatterns += [
-    path('komitenti/', views_komitent.komitent_dashboard, name='komitent_dashboard'),
-    path('komitenti/novi/', views_komitent.komitent_create, name='komitent_create'),
-    path('komitenti/<int:pk>/', views_komitent.komitent_detail, name='komitent_detail'),
-    path('komitenti/<int:pk>/status/', views_komitent.komitent_quick_status, name='komitent_status'),
-
+    path("komitenti/", views_komitent.komitent_dashboard, name="komitent_dashboard"),
+    path("komitenti/novi/", views_komitent.komitent_create, name="komitent_create"),
+    path("komitenti/<int:pk>/", views_komitent.komitent_detail, name="komitent_detail"),
+    path("komitenti/<int:pk>/status/", views_komitent.komitent_quick_status, name="komitent_status"),
     # Pretplata
-    path('subscription/', views.subscription_view, name='subscription'),
-    path('subscription/cancel/', views.subscription_cancel, name='subscription_cancel'),
-
+    path("subscription/", views.subscription_view, name="subscription"),
+    path("subscription/cancel/", views.subscription_cancel, name="subscription_cancel"),
     # T&C Consent
-    path('tc-consent/', views.tc_consent_view, name='tc_consent'),
+    path("tc-consent/", views.tc_consent_view, name="tc_consent"),
 ]
 
 # ── Command Center HTMX Tab Endpoints ────────────────────────────────────
 from . import views_settings
+
 urlpatterns += [
-    path('settings/tab/<str:tab_name>/', views_settings.settings_tab, name='settings_tab'),
-    path('settings/toggle-module/', views_settings.toggle_module, name='toggle_module'),
+    path("settings/tab/<str:tab_name>/", views_settings.settings_tab, name="settings_tab"),
+    path("settings/toggle-module/", views_settings.toggle_module, name="toggle_module"),
 ]

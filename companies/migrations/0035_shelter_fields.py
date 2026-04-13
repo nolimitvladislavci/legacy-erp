@@ -4,25 +4,56 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
+        ("companies", "0034_vault_deactivation_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_shelter',
-            field=models.BooleanField(default=False, help_text='Označava azil koji prima besplatnu Memio.pet licencu sponzoriranu od strane Udruge No Limit.', verbose_name='Azil / Sklonište za životinje'),
+            model_name="company",
+            name="is_shelter",
+            field=models.BooleanField(
+                default=False,
+                help_text="Označava azil koji prima besplatnu Memio.pet licencu sponzoriranu od strane Udruge No Limit.",
+                verbose_name="Azil / Sklonište za životinje",
+            ),
         ),
         migrations.AddField(
-            model_name='company',
-            name='shelter_sponsor',
-            field=models.CharField(blank=True, default='', help_text='Npr. "Udruga No Limit" — prikazuje se na javnom profilu ljubimca.', max_length=100, verbose_name='Sponzor azila'),
+            model_name="company",
+            name="shelter_sponsor",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text='Npr. "Udruga No Limit" — prikazuje se na javnom profilu ljubimca.',
+                max_length=100,
+                verbose_name="Sponzor azila",
+            ),
         ),
         migrations.AlterField(
-            model_name='company',
-            name='business_type',
-            field=models.CharField(choices=[('doo', 'd.o.o. (Društvo s ograničenom odgovornošću)'), ('jdoo', 'j.d.o.o. (Jednostavno d.o.o.)'), ('dd', 'd.d. (Dioničko društvo)'), ('obrt', 'Obrt'), ('gmbh', 'GmbH'), ('ag', 'AG (Aktiengesellschaft)'), ('einzelunternehmen', 'Einzelunternehmen'), ('opg', 'OPG (Obiteljsko poljoprivredno gospodarstvo)'), ('udruga', 'Udruga'), ('zadruga', 'Zadruga'), ('ustanova', 'Ustanova'), ('iznajmljivac', 'Iznajmljivač (fizička osoba)'), ('other', 'Ostalo'), ('odvjetnik', 'Odvjetnički ured'), ('biljeznik', 'Javni bilježnik'), ('dimnjacari', 'Dimnjačarska služba')], default='doo', max_length=30, verbose_name='Tip poslovnog subjekta'),
+            model_name="company",
+            name="business_type",
+            field=models.CharField(
+                choices=[
+                    ("doo", "d.o.o. (Društvo s ograničenom odgovornošću)"),
+                    ("jdoo", "j.d.o.o. (Jednostavno d.o.o.)"),
+                    ("dd", "d.d. (Dioničko društvo)"),
+                    ("obrt", "Obrt"),
+                    ("gmbh", "GmbH"),
+                    ("ag", "AG (Aktiengesellschaft)"),
+                    ("einzelunternehmen", "Einzelunternehmen"),
+                    ("opg", "OPG (Obiteljsko poljoprivredno gospodarstvo)"),
+                    ("udruga", "Udruga"),
+                    ("zadruga", "Zadruga"),
+                    ("ustanova", "Ustanova"),
+                    ("iznajmljivac", "Iznajmljivač (fizička osoba)"),
+                    ("other", "Ostalo"),
+                    ("odvjetnik", "Odvjetnički ured"),
+                    ("biljeznik", "Javni bilježnik"),
+                    ("dimnjacari", "Dimnjačarska služba"),
+                ],
+                default="doo",
+                max_length=30,
+                verbose_name="Tip poslovnog subjekta",
+            ),
         ),
     ]

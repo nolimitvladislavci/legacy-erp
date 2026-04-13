@@ -4,20 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration', '0006_umbrella_invite_code'),
+        ("registration", "0006_umbrella_invite_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='companyregistration',
-            name='selected_plan',
-            field=models.CharField(choices=[('micro', 'Micro – €4/mj'), ('starter', 'Starter – €9/mj'), ('professional', 'Professional – €29/mj'), ('enterprise', 'Enterprise – €79/mj'), ('distributor', 'Distributor – €149/mj')], default='starter', max_length=20),
+            model_name="companyregistration",
+            name="selected_plan",
+            field=models.CharField(
+                choices=[
+                    ("micro", "Micro – €4/mj"),
+                    ("starter", "Starter – €9/mj"),
+                    ("professional", "Professional – €29/mj"),
+                    ("enterprise", "Enterprise – €79/mj"),
+                    ("distributor", "Distributor – €149/mj"),
+                ],
+                default="starter",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='companysubscription',
-            name='plan',
-            field=models.CharField(choices=[('starter', 'Starter'), ('professional', 'Professional'), ('business', 'Business'), ('enterprise', 'Enterprise'), ('micro', 'Micro'), ('distributor', 'Distributor')], max_length=20),
+            model_name="companysubscription",
+            name="plan",
+            field=models.CharField(
+                choices=[
+                    ("starter", "Starter"),
+                    ("professional", "Professional"),
+                    ("business", "Business"),
+                    ("enterprise", "Enterprise"),
+                    ("micro", "Micro"),
+                    ("distributor", "Distributor"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

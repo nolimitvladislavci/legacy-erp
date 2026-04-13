@@ -23,6 +23,7 @@ Response: {
     "warning":    null | "..."
 }
 """
+
 import json
 import logging
 import os
@@ -35,12 +36,11 @@ logger = logging.getLogger("borg.scan")
 
 # ─── Anthropic size limit: 5MB decoded → ~3.7MB b64 ──────────────────────────
 MAX_B64_BYTES = 3_700_000
-MAX_IMAGES    = 5
+MAX_IMAGES = 5
 
 # ─── Prompts po tipu dokumenta ────────────────────────────────────────────────
 PROMPTS = {
-
-"ring": """\
+    "ring": """\
 Prikazano je {n} fotografij{suffix} prstena goluba trkača.
 Pogledi SVE slike i pokuši pročitati broj prstena.
 Tipični formati: HR-YYYY-NNNNN | CRO YYYY NNNNN | HOG YYYY NNNNN | LOK oznaka.
@@ -48,16 +48,14 @@ Ako su slike različitih kutova istog prstena — koristi sve za veću točnost.
 Odgovori ISKLJUČIVO JSON, nula komentara:
 {{"prsten_broj":"HR-2026-12345","godina":"2026","confidence":0.92}}
 Ako nisi siguran, smanji confidence. Ispod 0.35 = prsten_broj vrati prazan string.""",
-
-"golub": """\
+    "golub": """\
 Prikazano je {n} fotografij{suffix} goluba trkača (racing pigeon).
 Predloži ime i opiši boju.
 Ime: snažno, hrvatsko (Vihor, Munja, Oluja, Srebrni, Planinar, Stijela, Zorko, Grom, Sjever, Zora, Ponoć, Talac).
 boja_kod MORA biti jedan od: siv | bijel | crn | smed | plav | crven | zut | sareno | ostalo
 Odgovori ISKLJUČIVO JSON:
 {{"ime":"Vihor","opis_boje":"siv s bijelim krilnim perima","boja_kod":"siv","confidence":0.88}}""",
-
-"id_card": """\
+    "id_card": """\
 Prikazano je {n} fotografij{suffix} dokumenta (osobna iskaznica, putovnica, vozačka dozvola).
 Ako imaš prednju I stražnju stranu — koristi obje.
 Pročitaj MRZ (Machine Readable Zone) I vidljive podatke.
@@ -75,8 +73,7 @@ Odgovori ISKLJUČIVO JSON:
   "confidence": 0.95
 }}
 Polja koja ne možeš pročitati postavi na null.""",
-
-"invoice": """\
+    "invoice": """\
 Prikazano je {n} fotografij{suffix} računa / dokumenta.
 Ako je više strana istog računa — objedini podatke.
 Odgovori ISKLJUČIVO JSON:
@@ -94,8 +91,7 @@ Odgovori ISKLJUČIVO JSON:
   "confidence": 0.90
 }}
 Brojeve uvijek kao decimale. Polja koja ne vidiš: null.""",
-
-"complaint": """\
+    "complaint": """\
 Prikazano je {n} fotografij{suffix} stranice iz knjige prigovora ili knjige utisaka.
 Pročitaj tekst rukopisa ili tiskanog teksta.
 Odgovori ISKLJUČIVO JSON:
@@ -108,8 +104,7 @@ Odgovori ISKLJUČIVO JSON:
   "sentiment": "pozitivan|neutralan|negativan",
   "confidence": 0.85
 }}""",
-
-"azil_zivotinja": """Prikazano je {n} fotografij{suffix} napustene zivotinje pronasene u terenu ili dovedene u skloniste.
+    "azil_zivotinja": """Prikazano je {n} fotografij{suffix} napustene zivotinje pronasene u terenu ili dovedene u skloniste.
 Procijeni sto vidis i popuni polja. Budi konkretan ali oprezan - reci PROCJENA ako nisi siguran.
 Chip broj CITAJ ISKLJUCIVO s naljepnice/dokumenta (ne skeniras implantirani chip).
 Odgovori ISKLJUCIVO JSON:
@@ -125,9 +120,7 @@ Odgovori ISKLJUCIVO JSON:
   "confidence": 0.80
 }}
 Polja koja ne mozes procijeniti postavi na null.""",
-
-
-"pas": """\
+    "pas": """\
 Prikazano je {n} fotografij{suffix} psa.
 Procijeni pasminu, boju, spol i dob. Budi konkretan.
 spol: "M" za muzjaka, "F" za zenku, "N" ako nije vidljivo.
@@ -135,18 +128,21 @@ boja_kod: jedan od: crn|bijel|siv|smed|zlatni|sareno|crvenkast|krem|ostalo
 Odgovori ISKLJUCIVO JSON:
 {"pasmina":"Njemacki ovcar","boja_opis":"crno-smedi sa standardnim sarama","boja_kod":"sareno","spol":"M","dob_procjena":"2-3 godine","ime_prijedlog":"Rex","confidence":0.88}
 Polja koja ne mozes procijeniti postavi na null.""",
-
-"general": """\
+    "general": """\
 Prikazano je {n} fotografij{suffix} dokumenta ili predmeta.
 Izvuci sve relevantne tekstualne i vizualne informacije.
 Odgovori ISKLJUČIVO JSON s poljem "podaci" (objekt s ekstrahiranim ključ-vrijednost parovima) i "opis" (1-2 rečenice):
 {{"podaci":{{}},"opis":"...","confidence":0.8}}""",
 }
 
+
 def _suffix(n):
-    if n == 1: return "a"
-    if n in (2, 3, 4): return "e"
+    if n == 1:
+        return "a"
+    if n in (2, 3, 4):
+        return "e"
     return "a"
+
 
 def _validate_images(raw_list):
     """Validira i filtrira slike. Vraća (valid_list, warning|None)."""
@@ -167,26 +163,31 @@ def _validate_images(raw_list):
         warning = f"{skipped} slika preskočeno (prevelike). Koristi resize na frontendu."
     return valid, warning
 
+
 def _build_content(images, doc_type):
     """Gradi Anthropic content array: slike + prompt."""
     content = []
     for b64 in images:
-        content.append({
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/jpeg",
-                "data": b64,
-            },
-        })
+        content.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": b64,
+                },
+            }
+        )
     n = len(images)
     prompt_tpl = PROMPTS.get(doc_type, PROMPTS["general"])
     prompt = prompt_tpl.format(n=n, suffix=_suffix(n))
     content.append({"type": "text", "text": prompt})
     return content
 
+
 def _call_anthropic(content, max_tokens=300):
     import anthropic as ant
+
     client = ant.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
     response = client.messages.create(
         model=os.environ.get("HAIKU_MODEL", "claude-haiku-4-5-20251001"),
@@ -195,11 +196,13 @@ def _call_anthropic(content, max_tokens=300):
     )
     return response.content[0].text.strip()
 
+
 def _parse_json(raw):
-    m = re.search(r'\{[\s\S]*\}', raw)
+    m = re.search(r"\{[\s\S]*\}", raw)
     if m:
         return json.loads(m.group(0))
     raise ValueError(f"Nema JSON u odgovoru: {raw[:100]}")
+
 
 def _post_process(fields, doc_type):
     """Normalizacije per doc_type."""
@@ -246,10 +249,13 @@ def fenix_scan(request):
     images, warning = _validate_images(raw_images)
 
     if not images:
-        return JsonResponse({
-            "error": "Nema valjanih slika. Slike su ili prevelike ili nisu proslijeđene.",
-            "hint": "Koristi FenixScan.resize() — max 1200px, JPEG 0.82"
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": "Nema valjanih slika. Slike su ili prevelike ili nisu proslijeđene.",
+                "hint": "Koristi FenixScan.resize() — max 1200px, JPEG 0.82",
+            },
+            status=400,
+        )
 
     try:
         # Broj tokena ovisno o tipu
@@ -261,17 +267,18 @@ def fenix_scan(request):
 
         confidence = float(fields.get("confidence", 0.5))
 
-        logger.info("fenix_scan [%s] %d slika → conf=%.2f user=%s",
-                    doc_type, len(images), confidence, request.user)
+        logger.info("fenix_scan [%s] %d slika → conf=%.2f user=%s", doc_type, len(images), confidence, request.user)
 
-        return JsonResponse({
-            "ok": True,
-            "doc_type": doc_type,
-            "fields": fields,
-            "confidence": confidence,
-            "images_used": len(images),
-            "warning": warning,
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "doc_type": doc_type,
+                "fields": fields,
+                "confidence": confidence,
+                "images_used": len(images),
+                "warning": warning,
+            }
+        )
 
     except json.JSONDecodeError as e:
         logger.error("scan JSON parse error: %s", e)

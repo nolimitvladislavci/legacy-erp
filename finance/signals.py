@@ -15,6 +15,7 @@ def transaction_post_save(sender, instance, created, **kwargs):
     if instance.document:
         check_document_status(instance.document)
 
+
 @receiver(post_delete, sender=Transaction)
 def transaction_post_delete(sender, instance, **kwargs):
     if instance.partner:
@@ -23,18 +24,19 @@ def transaction_post_delete(sender, instance, **kwargs):
     if instance.document:
         check_document_status(instance.document)
 
+
 def check_document_status(document):
     """Provjerava je li suma transakcija pokrila iznos dokumenta"""
-    paid_amount = document.transactions.aggregate(Sum('amount'))['amount__sum'] or 0
+    paid_amount = document.transactions.aggregate(Sum("amount"))["amount__sum"] or 0
     # Ako je plaćeno >= iznos računa (tolerancija 0.01 zbog decimala)
     if paid_amount >= (document.total_amount - 0.01):
         if not document.is_paid:
             document.is_paid = True
-            document.save(update_fields=['is_paid'])
+            document.save(update_fields=["is_paid"])
     else:
         if document.is_paid:
             document.is_paid = False
-            document.save(update_fields=['is_paid'])
+            document.save(update_fields=["is_paid"])
 
 
 # ── Finance → Konto bridge ───────────────────────────────────────────────────
@@ -43,7 +45,8 @@ def _sync_to_konto(instance, delete=False):
     # Runs inside try/except so it never breaks finance saves
     try:
         from konto.models import BankAccount, BankTransaction
-        ext_id = 'finance-{}'.format(instance.pk)
+
+        ext_id = "finance-{}".format(instance.pk)
         if delete:
             BankTransaction.objects.filter(external_id=ext_id).delete()
             return
@@ -52,32 +55,29 @@ def _sync_to_konto(instance, delete=False):
         if instance.payment_account:
             # Try matching by IBAN
             ba = BankAccount.objects.filter(
-                company=instance.company,
-                iban__icontains=instance.payment_account[:10]
+                company=instance.company, iban__icontains=instance.payment_account[:10]
             ).first()
         if not ba:
-            ba = BankAccount.objects.filter(
-                company=instance.company, is_primary=True
-            ).first()
+            ba = BankAccount.objects.filter(company=instance.company, is_primary=True).first()
         if not ba:
             ba = BankAccount.objects.filter(company=instance.company).first()
         if not ba:
             return  # No bank account configured — skip silently
-        txn_type = 'inflow' if instance.direction == 'income' else 'outflow'
-        counterparty = ''
+        txn_type = "inflow" if instance.direction == "income" else "outflow"
+        counterparty = ""
         if instance.partner_id:
             try:
                 counterparty = instance.partner.name
             except Exception:
                 pass
-        ref = ''
+        ref = ""
         if instance.invoice_id:
             try:
                 ref = instance.invoice.number
             except Exception:
                 pass
         if not ref:
-            ref = instance.reference or ''
+            ref = instance.reference or ""
         # Upsert: update if exists, create if not
         BankTransaction.objects.update_or_create(
             external_id=ext_id,
@@ -86,23 +86,25 @@ def _sync_to_konto(instance, delete=False):
                 company=instance.company,
                 transaction_date=instance.date,
                 value_date=instance.value_date or instance.date,
-                amount=abs(__import__('decimal').Decimal(str(instance.amount))),
+                amount=abs(__import__("decimal").Decimal(str(instance.amount))),
                 transaction_type=txn_type,
                 counterparty_name=counterparty[:300],
-                description=instance.description[:500] if instance.description else '',
+                description=instance.description[:500] if instance.description else "",
                 reference_number=ref[:100],
-                import_batch='finance-sync',
-                status='matched' if instance.is_reconciled else 'unmatched',
+                import_batch="finance-sync",
+                status="matched" if instance.is_reconciled else "unmatched",
                 matched_invoice=instance.invoice if instance.invoice_id else None,
-            )
+            ),
         )
         ba.recalculate_balance()
     except (ValueError, TypeError):
         pass  # Never break finance saves due to konto sync
 
+
 @receiver(post_save, sender=Transaction)
 def sync_finance_to_konto(sender, instance, **kwargs):
     _sync_to_konto(instance)
+
 
 @receiver(post_delete, sender=Transaction)
 def unsync_finance_from_konto(sender, instance, **kwargs):

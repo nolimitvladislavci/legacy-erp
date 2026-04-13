@@ -6,35 +6,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('eracun', '0009_alter_eracunconfig_api_key'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("eracun", "0009_alter_eracunconfig_api_key"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SukladnostTestRun',
+            name="SukladnostTestRun",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('ts01_cert', models.BooleanField(null=True, verbose_name='TS-01: Certifikat')),
-                ('ts02_ubl', models.BooleanField(null=True, verbose_name='TS-02: UBL generacija')),
-                ('ts03_validate', models.BooleanField(null=True, verbose_name='TS-03: XSD validacija')),
-                ('ts04_fiscal', models.BooleanField(null=True, verbose_name='TS-04: Fiskalizacija')),
-                ('ts05_inbox', models.BooleanField(null=True, verbose_name='TS-05: Inbox primanje')),
-                ('total_pass', models.PositiveIntegerField(default=0)),
-                ('total_fail', models.PositiveIntegerField(default=0)),
-                ('details', models.JSONField(blank=True, default=dict)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sukladnost_runs', to='companies.company')),
-                ('run_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("ts01_cert", models.BooleanField(null=True, verbose_name="TS-01: Certifikat")),
+                ("ts02_ubl", models.BooleanField(null=True, verbose_name="TS-02: UBL generacija")),
+                ("ts03_validate", models.BooleanField(null=True, verbose_name="TS-03: XSD validacija")),
+                ("ts04_fiscal", models.BooleanField(null=True, verbose_name="TS-04: Fiskalizacija")),
+                ("ts05_inbox", models.BooleanField(null=True, verbose_name="TS-05: Inbox primanje")),
+                ("total_pass", models.PositiveIntegerField(default=0)),
+                ("total_fail", models.PositiveIntegerField(default=0)),
+                ("details", models.JSONField(blank=True, default=dict)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sukladnost_runs",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "run_by",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Test sukladnosti',
-                'verbose_name_plural': 'Testovi sukladnosti',
-                'ordering': ['-started_at'],
+                "verbose_name": "Test sukladnosti",
+                "verbose_name_plural": "Testovi sukladnosti",
+                "ordering": ["-started_at"],
             },
         ),
     ]

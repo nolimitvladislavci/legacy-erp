@@ -5,71 +5,161 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
-        ('partners', '0009_vies_validation'),
+        ("companies", "0034_vault_deactivation_fields"),
+        ("partners", "0009_vies_validation"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DimnjacarskaInspekcija',
+            name="DimnjacarskaInspekcija",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('adresa', models.CharField(max_length=300, verbose_name='Adresa objekta')),
-                ('kat_cestica', models.CharField(blank=True, max_length=50, verbose_name='Katastarska čestica')),
-                ('broj_dimnjaka', models.CharField(max_length=30, verbose_name='Broj / oznaka dimnjaka')),
-                ('vrsta_goriva', models.CharField(blank=True, max_length=100, verbose_name='Vrsta goriva')),
-                ('datum_pregleda', models.DateField(verbose_name='Datum pregleda')),
-                ('status_dimnjaka', models.CharField(choices=[('ispravan', 'Ispravan — dimnjak u redu'), ('uvjetno', 'Uvjetno ispravan — potrebni popravci'), ('neispravan', 'Neispravan — zabrana korištenja')], max_length=20, verbose_name='Status dimnjaka')),
-                ('opis_nalaza', models.TextField(blank=True, verbose_name='Opis nalaza')),
-                ('preporuke', models.TextField(blank=True, verbose_name='Preporuke')),
-                ('sljedeci_pregled', models.DateField(blank=True, null=True, verbose_name='Sljedeći pregled')),
-                ('pdf_sha256', models.CharField(blank=True, max_length=64, verbose_name='SHA-256 potvrde')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Firma')),
-                ('klijent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='partners.partner', verbose_name='Klijent / Vlasnik')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("adresa", models.CharField(max_length=300, verbose_name="Adresa objekta")),
+                ("kat_cestica", models.CharField(blank=True, max_length=50, verbose_name="Katastarska čestica")),
+                ("broj_dimnjaka", models.CharField(max_length=30, verbose_name="Broj / oznaka dimnjaka")),
+                ("vrsta_goriva", models.CharField(blank=True, max_length=100, verbose_name="Vrsta goriva")),
+                ("datum_pregleda", models.DateField(verbose_name="Datum pregleda")),
+                (
+                    "status_dimnjaka",
+                    models.CharField(
+                        choices=[
+                            ("ispravan", "Ispravan — dimnjak u redu"),
+                            ("uvjetno", "Uvjetno ispravan — potrebni popravci"),
+                            ("neispravan", "Neispravan — zabrana korištenja"),
+                        ],
+                        max_length=20,
+                        verbose_name="Status dimnjaka",
+                    ),
+                ),
+                ("opis_nalaza", models.TextField(blank=True, verbose_name="Opis nalaza")),
+                ("preporuke", models.TextField(blank=True, verbose_name="Preporuke")),
+                ("sljedeci_pregled", models.DateField(blank=True, null=True, verbose_name="Sljedeći pregled")),
+                ("pdf_sha256", models.CharField(blank=True, max_length=64, verbose_name="SHA-256 potvrde")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Firma"
+                    ),
+                ),
+                (
+                    "klijent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="partners.partner",
+                        verbose_name="Klijent / Vlasnik",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Dimnjačarska inspekcija',
-                'verbose_name_plural': 'Dimnjačarske inspekcije',
-                'ordering': ['-datum_pregleda'],
+                "verbose_name": "Dimnjačarska inspekcija",
+                "verbose_name_plural": "Dimnjačarske inspekcije",
+                "ordering": ["-datum_pregleda"],
             },
         ),
         migrations.CreateModel(
-            name='PravniPredmet',
+            name="PravniPredmet",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv', models.CharField(max_length=300, verbose_name='Naziv predmeta')),
-                ('vrsta', models.CharField(choices=[('parnica', 'Parnični postupak'), ('ovrha', 'Ovršni postupak'), ('ugovor', 'Izrada ugovora'), ('savjet', 'Pravni savjet'), ('nekretnina', 'Promet nekretnina'), ('osnivanje', 'Osnivanje d.o.o./obrta'), ('ostalo', 'Ostalo')], max_length=20, verbose_name='Vrsta')),
-                ('status', models.CharField(choices=[('aktivan', 'Aktivan'), ('zatvoren', 'Zatvoren'), ('arhiva', 'Arhiva')], default='aktivan', max_length=20, verbose_name='Status')),
-                ('satnica_eur', models.DecimalField(decimal_places=2, default=100.0, max_digits=8, verbose_name='Satnica (EUR)')),
-                ('datum_otvaranja', models.DateField(auto_now_add=True, verbose_name='Datum otvaranja')),
-                ('rok', models.DateField(blank=True, null=True, verbose_name='Rok')),
-                ('napomena', models.TextField(blank=True, verbose_name='Napomena')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Firma')),
-                ('klijent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='partners.partner', verbose_name='Klijent')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv", models.CharField(max_length=300, verbose_name="Naziv predmeta")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("parnica", "Parnični postupak"),
+                            ("ovrha", "Ovršni postupak"),
+                            ("ugovor", "Izrada ugovora"),
+                            ("savjet", "Pravni savjet"),
+                            ("nekretnina", "Promet nekretnina"),
+                            ("osnivanje", "Osnivanje d.o.o./obrta"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        max_length=20,
+                        verbose_name="Vrsta",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("aktivan", "Aktivan"), ("zatvoren", "Zatvoren"), ("arhiva", "Arhiva")],
+                        default="aktivan",
+                        max_length=20,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "satnica_eur",
+                    models.DecimalField(decimal_places=2, default=100.0, max_digits=8, verbose_name="Satnica (EUR)"),
+                ),
+                ("datum_otvaranja", models.DateField(auto_now_add=True, verbose_name="Datum otvaranja")),
+                ("rok", models.DateField(blank=True, null=True, verbose_name="Rok")),
+                ("napomena", models.TextField(blank=True, verbose_name="Napomena")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Firma"
+                    ),
+                ),
+                (
+                    "klijent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="partners.partner",
+                        verbose_name="Klijent",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pravni predmet',
-                'verbose_name_plural': 'Pravni predmeti',
-                'ordering': ['-datum_otvaranja'],
+                "verbose_name": "Pravni predmet",
+                "verbose_name_plural": "Pravni predmeti",
+                "ordering": ["-datum_otvaranja"],
             },
         ),
         migrations.CreateModel(
-            name='NotariatPredlozak',
+            name="NotariatPredlozak",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vrsta', models.CharField(choices=[('punomoc', 'Opunomoćenje (punomoć)'), ('osnivanje_jdoo', 'Osnivački akt j.d.o.o.'), ('osnivanje_doo', 'Osnivački akt d.o.o.'), ('kupoprodaja_nekr', 'Kupoprodaja nekretnine'), ('zaduznica', 'Zadužnica'), ('bjanko_zaduznica', 'Bjanko zadužnica'), ('darovanje', 'Ugovor o darovanju'), ('maloljetnik_put', 'Suglasnost za putovanje maloljetnika'), ('nasljedstvo', 'Izjava o prihvatu nasljedstva'), ('dozivotno_uzdrz', 'Ugovor o doživotnom uzdržavanju'), ('potvrda_dimnjak', 'Potvrda o ispravnosti dimnjaka'), ('nalaz_dimnjak', 'Nalaz i mišljenje dimnjačara'), ('plan_obilasku', 'Godišnji plan obilazaka')], max_length=30, verbose_name='Vrsta')),
-                ('naslov', models.CharField(max_length=200, verbose_name='Naslov')),
-                ('aktivan', models.BooleanField(default=True, verbose_name='Aktivan')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company', verbose_name='Firma')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("punomoc", "Opunomoćenje (punomoć)"),
+                            ("osnivanje_jdoo", "Osnivački akt j.d.o.o."),
+                            ("osnivanje_doo", "Osnivački akt d.o.o."),
+                            ("kupoprodaja_nekr", "Kupoprodaja nekretnine"),
+                            ("zaduznica", "Zadužnica"),
+                            ("bjanko_zaduznica", "Bjanko zadužnica"),
+                            ("darovanje", "Ugovor o darovanju"),
+                            ("maloljetnik_put", "Suglasnost za putovanje maloljetnika"),
+                            ("nasljedstvo", "Izjava o prihvatu nasljedstva"),
+                            ("dozivotno_uzdrz", "Ugovor o doživotnom uzdržavanju"),
+                            ("potvrda_dimnjak", "Potvrda o ispravnosti dimnjaka"),
+                            ("nalaz_dimnjak", "Nalaz i mišljenje dimnjačara"),
+                            ("plan_obilasku", "Godišnji plan obilazaka"),
+                        ],
+                        max_length=30,
+                        verbose_name="Vrsta",
+                    ),
+                ),
+                ("naslov", models.CharField(max_length=200, verbose_name="Naslov")),
+                ("aktivan", models.BooleanField(default=True, verbose_name="Aktivan")),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="companies.company", verbose_name="Firma"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Notariat predložak',
-                'verbose_name_plural': 'Notariat predlošci',
-                'unique_together': {('company', 'vrsta')},
+                "verbose_name": "Notariat predložak",
+                "verbose_name_plural": "Notariat predlošci",
+                "unique_together": {("company", "vrsta")},
             },
         ),
     ]

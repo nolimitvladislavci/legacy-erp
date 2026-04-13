@@ -5,30 +5,67 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoicing', '0008_cert_password_field'),
+        ("invoicing", "0008_cert_password_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='source_document',
-            field=models.ForeignKey(blank=True, help_text='Ponuda ili predračun iz kojeg je kreiran ovaj dokument', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='derived_documents', to='invoicing.invoice', verbose_name='Izvorni dokument'),
+            model_name="invoice",
+            name="source_document",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Ponuda ili predračun iz kojeg je kreiran ovaj dokument",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="derived_documents",
+                to="invoicing.invoice",
+                verbose_name="Izvorni dokument",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='validity_date',
-            field=models.DateField(blank=True, help_text='Rok do kojeg ponuda / predračun vrijedi', null=True, verbose_name='Rok važnosti'),
+            model_name="invoice",
+            name="validity_date",
+            field=models.DateField(
+                blank=True, help_text="Rok do kojeg ponuda / predračun vrijedi", null=True, verbose_name="Rok važnosti"
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='doctype',
-            field=models.CharField(choices=[('PO', 'Ponuda'), ('P', 'Predračun'), ('R', 'Račun'), ('A', 'Avansni račun'), ('S', 'Storno račun'), ('GS', 'Gutschrift (DE)')], default='R', max_length=10, verbose_name='Vrsta'),
+            model_name="invoice",
+            name="doctype",
+            field=models.CharField(
+                choices=[
+                    ("PO", "Ponuda"),
+                    ("P", "Predračun"),
+                    ("R", "Račun"),
+                    ("A", "Avansni račun"),
+                    ("S", "Storno račun"),
+                    ("GS", "Gutschrift (DE)"),
+                ],
+                default="R",
+                max_length=10,
+                verbose_name="Vrsta",
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='status',
-            field=models.CharField(choices=[('DRAFT', 'Nacrt'), ('SENT', 'Poslano'), ('ACCEPTED', 'Prihvaćeno'), ('REJECTED', 'Odbijeno'), ('EXPIRED', 'Isteklo'), ('PAID', 'Plaćeno'), ('UNPAID', 'Neplaćeno'), ('OVERDUE', 'Dospijelo'), ('CANCELLED', 'Otkazano'), ('STORNO', 'Stornirano')], default='DRAFT', max_length=20, verbose_name='Status'),
+            model_name="invoice",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("DRAFT", "Nacrt"),
+                    ("SENT", "Poslano"),
+                    ("ACCEPTED", "Prihvaćeno"),
+                    ("REJECTED", "Odbijeno"),
+                    ("EXPIRED", "Isteklo"),
+                    ("PAID", "Plaćeno"),
+                    ("UNPAID", "Neplaćeno"),
+                    ("OVERDUE", "Dospijelo"),
+                    ("CANCELLED", "Otkazano"),
+                    ("STORNO", "Stornirano"),
+                ],
+                default="DRAFT",
+                max_length=20,
+                verbose_name="Status",
+            ),
         ),
     ]

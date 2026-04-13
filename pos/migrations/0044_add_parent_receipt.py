@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0043_pocket_mode'),
+        ("pos", "0043_pocket_mode"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posreceipt',
-            name='parent_receipt',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='refund_receipts', to='pos.posreceipt', verbose_name='Originalni bon (za storno/povrat)'),
+            model_name="posreceipt",
+            name="parent_receipt",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="refund_receipts",
+                to="pos.posreceipt",
+                verbose_name="Originalni bon (za storno/povrat)",
+            ),
         ),
     ]

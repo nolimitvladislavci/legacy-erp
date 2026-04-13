@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
-        ('konto', '0004_add_ledgerline_integrity_hash'),
+        ("companies", "0021_extend_onboarding"),
+        ("konto", "0004_add_ledgerline_integrity_hash"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='journalentry',
-            unique_together={('company', 'entry_number')},
+            name="journalentry",
+            unique_together={("company", "entry_number")},
         ),
     ]

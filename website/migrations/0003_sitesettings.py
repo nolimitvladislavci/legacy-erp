@@ -4,27 +4,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('website', '0002_videogallery_hitnaintervencija'),
+        ("website", "0002_videogallery_hitnaintervencija"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SiteSettings',
+            name="SiteSettings",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company_name', models.CharField(default='Visković Group', max_length=100, verbose_name='Naziv tvrtke')),
-                ('founded_year', models.IntegerField(default=2018, verbose_name='Godina osnivanja (DE)')),
-                ('phone_1_name', models.CharField(default='Dragan', max_length=50, verbose_name='Kontakt 1 Ime')),
-                ('phone_1_number', models.CharField(default='+4917684397173', max_length=30, verbose_name='Kontakt 1 Broj')),
-                ('phone_2_name', models.CharField(default='Nikša', max_length=50, verbose_name='Kontakt 2 Ime')),
-                ('phone_2_number', models.CharField(default='+4915234209056', max_length=30, verbose_name='Kontakt 2 Broj')),
-                ('email', models.EmailField(default='viskovic.bau@gmail.com', max_length=254, verbose_name='Glavni E-mail')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "company_name",
+                    models.CharField(default="Visković Group", max_length=100, verbose_name="Naziv tvrtke"),
+                ),
+                ("founded_year", models.IntegerField(default=2018, verbose_name="Godina osnivanja (DE)")),
+                ("phone_1_name", models.CharField(default="Dragan", max_length=50, verbose_name="Kontakt 1 Ime")),
+                (
+                    "phone_1_number",
+                    models.CharField(default="+4917684397173", max_length=30, verbose_name="Kontakt 1 Broj"),
+                ),
+                ("phone_2_name", models.CharField(default="Nikša", max_length=50, verbose_name="Kontakt 2 Ime")),
+                (
+                    "phone_2_number",
+                    models.CharField(default="+4915234209056", max_length=30, verbose_name="Kontakt 2 Broj"),
+                ),
+                (
+                    "email",
+                    models.EmailField(default="viskovic.bau@gmail.com", max_length=254, verbose_name="Glavni E-mail"),
+                ),
             ],
             options={
-                'verbose_name': 'Postavke Weba',
-                'verbose_name_plural': 'Postavke Weba',
+                "verbose_name": "Postavke Weba",
+                "verbose_name_plural": "Postavke Weba",
             },
         ),
     ]

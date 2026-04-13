@@ -8,188 +8,463 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0039_add_license_token'),
-        ('inventory', '0025_stockmovement_batch_number_and_more'),
-        ('invoicing', '0035_add_r1_buyer_fiscal_fields'),
-        ('konto', '0011_alter_journalentry_source_type'),
-        ('partners', '0009_vies_validation'),
-        ('propter', '0001_initial'),
+        ("companies", "0039_add_license_token"),
+        ("inventory", "0025_stockmovement_batch_number_and_more"),
+        ("invoicing", "0035_add_r1_buyer_fiscal_fields"),
+        ("konto", "0011_alter_journalentry_source_type"),
+        ("partners", "0009_vies_validation"),
+        ("propter", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CustomerPriceList',
+            name="CustomerPriceList",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv cjenika')),
-                ('partner_group', models.CharField(blank=True, help_text='Alternativa: primijeni na sve partnere u grupi', max_length=50, verbose_name='Grupa partnera')),
-                ('is_active', models.BooleanField(default=True)),
-                ('valid_from', models.DateField(blank=True, null=True, verbose_name='Vrijedi od')),
-                ('valid_until', models.DateField(blank=True, null=True, verbose_name='Vrijedi do')),
-                ('priority', models.PositiveIntegerField(default=10, help_text='Manji broj = viši prioritet', verbose_name='Prioritet')),
-                ('notes', models.TextField(blank=True)),
-                ('ai_suggested', models.BooleanField(default=False, verbose_name='AI preporučeno')),
-                ('ai_confidence', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='customer_price_lists', to='companies.company')),
-                ('partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='customer_price_lists', to='partners.partner', verbose_name='Partner (kupac)')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv cjenika")),
+                (
+                    "partner_group",
+                    models.CharField(
+                        blank=True,
+                        help_text="Alternativa: primijeni na sve partnere u grupi",
+                        max_length=50,
+                        verbose_name="Grupa partnera",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("valid_from", models.DateField(blank=True, null=True, verbose_name="Vrijedi od")),
+                ("valid_until", models.DateField(blank=True, null=True, verbose_name="Vrijedi do")),
+                (
+                    "priority",
+                    models.PositiveIntegerField(
+                        default=10, help_text="Manji broj = viši prioritet", verbose_name="Prioritet"
+                    ),
+                ),
+                ("notes", models.TextField(blank=True)),
+                ("ai_suggested", models.BooleanField(default=False, verbose_name="AI preporučeno")),
+                ("ai_confidence", models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="customer_price_lists",
+                        to="companies.company",
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="customer_price_lists",
+                        to="partners.partner",
+                        verbose_name="Partner (kupac)",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Posebni cjenik',
-                'verbose_name_plural': 'Posebni cjenici',
-                'ordering': ['priority', 'name'],
+                "verbose_name": "Posebni cjenik",
+                "verbose_name_plural": "Posebni cjenici",
+                "ordering": ["priority", "name"],
             },
         ),
         migrations.CreateModel(
-            name='IOSReport',
+            name="IOSReport",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('report_date', models.DateField(verbose_name='Datum izvoda')),
-                ('total_receivable', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Ukupna potraživanja')),
-                ('total_payable', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Ukupne obveze')),
-                ('net_balance', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Neto saldo')),
-                ('items_count', models.PositiveIntegerField(default=0)),
-                ('sent_at', models.DateTimeField(blank=True, null=True, verbose_name='Poslano')),
-                ('confirmed_at', models.DateTimeField(blank=True, null=True, verbose_name='Potvrđeno')),
-                ('confirmed_by', models.CharField(blank=True, max_length=200, verbose_name='Potvrdio')),
-                ('pdf_url', models.URLField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ios_reports', to='companies.company')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ios_reports', to='partners.partner')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("report_date", models.DateField(verbose_name="Datum izvoda")),
+                (
+                    "total_receivable",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Ukupna potraživanja"),
+                ),
+                (
+                    "total_payable",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Ukupne obveze"),
+                ),
+                (
+                    "net_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Neto saldo"),
+                ),
+                ("items_count", models.PositiveIntegerField(default=0)),
+                ("sent_at", models.DateTimeField(blank=True, null=True, verbose_name="Poslano")),
+                ("confirmed_at", models.DateTimeField(blank=True, null=True, verbose_name="Potvrđeno")),
+                ("confirmed_by", models.CharField(blank=True, max_length=200, verbose_name="Potvrdio")),
+                ("pdf_url", models.URLField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="ios_reports", to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="ios_reports", to="partners.partner"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'IOS izvod',
-                'verbose_name_plural': 'IOS izvodi',
-                'ordering': ['-report_date'],
+                "verbose_name": "IOS izvod",
+                "verbose_name_plural": "IOS izvodi",
+                "ordering": ["-report_date"],
             },
         ),
         migrations.CreateModel(
-            name='RabatGroup',
+            name="RabatGroup",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100, verbose_name='Naziv grupe')),
-                ('code', models.CharField(blank=True, max_length=20, verbose_name='Šifra')),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rabat_groups', to='companies.company')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=100, verbose_name="Naziv grupe")),
+                ("code", models.CharField(blank=True, max_length=20, verbose_name="Šifra")),
+                ("description", models.CharField(blank=True, max_length=255)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="rabat_groups", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Rabatna grupa',
-                'verbose_name_plural': 'Rabatne grupe',
-                'ordering': ['name'],
-                'unique_together': {('company', 'code')},
+                "verbose_name": "Rabatna grupa",
+                "verbose_name_plural": "Rabatne grupe",
+                "ordering": ["name"],
+                "unique_together": {("company", "code")},
             },
         ),
         migrations.CreateModel(
-            name='PriceListLine',
+            name="PriceListLine",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('discount_type', models.CharField(choices=[('percent', 'Postotak (%)'), ('fixed_price', 'Fiksna cijena'), ('fixed_amount', 'Fiksni iznos popusta'), ('cassa_sconto', 'Cassa sconto (prijevremeno plaćanje)')], default='percent', max_length=15, verbose_name='Tip popusta')),
-                ('discount_value', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Vrijednost')),
-                ('min_quantity', models.DecimalField(decimal_places=2, default=0, help_text='Količinski prag za aktivaciju', max_digits=10, verbose_name='Min. količina')),
-                ('cassa_days', models.PositiveIntegerField(default=0, help_text='Rok za prijevremeno plaćanje', verbose_name='Cassa dani')),
-                ('item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='price_list_lines', to='inventory.inventoryitem', verbose_name='Artikl')),
-                ('price_list', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lines', to='sales.customerpricelist')),
-                ('rabat_group', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sales.rabatgroup', verbose_name='Rabatna grupa')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "discount_type",
+                    models.CharField(
+                        choices=[
+                            ("percent", "Postotak (%)"),
+                            ("fixed_price", "Fiksna cijena"),
+                            ("fixed_amount", "Fiksni iznos popusta"),
+                            ("cassa_sconto", "Cassa sconto (prijevremeno plaćanje)"),
+                        ],
+                        default="percent",
+                        max_length=15,
+                        verbose_name="Tip popusta",
+                    ),
+                ),
+                (
+                    "discount_value",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Vrijednost"),
+                ),
+                (
+                    "min_quantity",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0,
+                        help_text="Količinski prag za aktivaciju",
+                        max_digits=10,
+                        verbose_name="Min. količina",
+                    ),
+                ),
+                (
+                    "cassa_days",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Rok za prijevremeno plaćanje", verbose_name="Cassa dani"
+                    ),
+                ),
+                (
+                    "item",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="price_list_lines",
+                        to="inventory.inventoryitem",
+                        verbose_name="Artikl",
+                    ),
+                ),
+                (
+                    "price_list",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lines", to="sales.customerpricelist"
+                    ),
+                ),
+                (
+                    "rabat_group",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="sales.rabatgroup",
+                        verbose_name="Rabatna grupa",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka cjenika',
-                'verbose_name_plural': 'Stavke cjenika',
-                'ordering': ['rabat_group', 'item'],
+                "verbose_name": "Stavka cjenika",
+                "verbose_name_plural": "Stavke cjenika",
+                "ordering": ["rabat_group", "item"],
             },
         ),
         migrations.CreateModel(
-            name='SalesOrder',
+            name="SalesOrder",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('order_number', models.CharField(max_length=50, verbose_name='Broj narudžbe')),
-                ('order_date', models.DateField(default=django.utils.timezone.now, verbose_name='Datum narudžbe')),
-                ('delivery_date', models.DateField(blank=True, null=True, verbose_name='Željeni datum isporuke')),
-                ('subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('discount_total', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Ukupni popust')),
-                ('tax_total', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('total', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('currency', models.CharField(default='EUR', max_length=3)),
-                ('status', models.CharField(choices=[('draft', 'Nacrt'), ('confirmed', 'Potvrđena'), ('processing', 'U obradi'), ('shipped', 'Isporučeno'), ('invoiced', 'Fakturirano'), ('closed', 'Zatvorena'), ('cancelled', 'Otkazana')], default='draft', max_length=15)),
-                ('priority', models.PositiveSmallIntegerField(choices=[(1, 'Niska'), (2, 'Normalna'), (3, 'Visoka'), (4, 'Hitna')], default=2)),
-                ('delivery_address', models.TextField(blank=True, verbose_name='Adresa isporuke')),
-                ('notes', models.TextField(blank=True)),
-                ('internal_notes', models.TextField(blank=True, verbose_name='Interne napomene')),
-                ('ai_predicted', models.BooleanField(default=False, verbose_name='AI predviđena')),
-                ('ai_suggested_items', models.JSONField(blank=True, default=list, help_text='AI sugestije artikala za cross-sell')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sales_orders', to='companies.company')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sales_orders', to='invoicing.invoice', verbose_name='Faktura')),
-                ('otpremnica', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sales_orders', to='propter.otpremnica', verbose_name='Otpremnica')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='sales_orders', to='partners.partner', verbose_name='Kupac')),
-                ('price_list', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sales.customerpricelist', verbose_name='Posebni cjenik')),
-                ('warehouse', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.warehouse', verbose_name='Skladište')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("order_number", models.CharField(max_length=50, verbose_name="Broj narudžbe")),
+                ("order_date", models.DateField(default=django.utils.timezone.now, verbose_name="Datum narudžbe")),
+                ("delivery_date", models.DateField(blank=True, null=True, verbose_name="Željeni datum isporuke")),
+                ("subtotal", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                (
+                    "discount_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Ukupni popust"),
+                ),
+                ("tax_total", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("total", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("currency", models.CharField(default="EUR", max_length=3)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Nacrt"),
+                            ("confirmed", "Potvrđena"),
+                            ("processing", "U obradi"),
+                            ("shipped", "Isporučeno"),
+                            ("invoiced", "Fakturirano"),
+                            ("closed", "Zatvorena"),
+                            ("cancelled", "Otkazana"),
+                        ],
+                        default="draft",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "priority",
+                    models.PositiveSmallIntegerField(
+                        choices=[(1, "Niska"), (2, "Normalna"), (3, "Visoka"), (4, "Hitna")], default=2
+                    ),
+                ),
+                ("delivery_address", models.TextField(blank=True, verbose_name="Adresa isporuke")),
+                ("notes", models.TextField(blank=True)),
+                ("internal_notes", models.TextField(blank=True, verbose_name="Interne napomene")),
+                ("ai_predicted", models.BooleanField(default=False, verbose_name="AI predviđena")),
+                (
+                    "ai_suggested_items",
+                    models.JSONField(blank=True, default=list, help_text="AI sugestije artikala za cross-sell"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="sales_orders", to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="sales_orders",
+                        to="invoicing.invoice",
+                        verbose_name="Faktura",
+                    ),
+                ),
+                (
+                    "otpremnica",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="sales_orders",
+                        to="propter.otpremnica",
+                        verbose_name="Otpremnica",
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="sales_orders",
+                        to="partners.partner",
+                        verbose_name="Kupac",
+                    ),
+                ),
+                (
+                    "price_list",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="sales.customerpricelist",
+                        verbose_name="Posebni cjenik",
+                    ),
+                ),
+                (
+                    "warehouse",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="inventory.warehouse",
+                        verbose_name="Skladište",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Narudžbenica kupca',
-                'verbose_name_plural': 'Narudžbenice kupaca',
-                'ordering': ['-order_date', '-created_at'],
-                'unique_together': {('company', 'order_number')},
+                "verbose_name": "Narudžbenica kupca",
+                "verbose_name_plural": "Narudžbenice kupaca",
+                "ordering": ["-order_date", "-created_at"],
+                "unique_together": {("company", "order_number")},
             },
         ),
         migrations.CreateModel(
-            name='SalesOrderLine',
+            name="SalesOrderLine",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('quantity', models.DecimalField(decimal_places=4, max_digits=12, verbose_name='Količina')),
-                ('unit', models.CharField(default='kom', max_length=20)),
-                ('unit_price', models.DecimalField(decimal_places=4, max_digits=12, verbose_name='Jed. cijena')),
-                ('discount_percent', models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name='Popust %')),
-                ('tax_rate', models.DecimalField(decimal_places=2, default=25, max_digits=5, verbose_name='PDV stopa')),
-                ('delivered_quantity', models.DecimalField(decimal_places=4, default=0, max_digits=12, verbose_name='Isporučeno')),
-                ('is_ai_suggested', models.BooleanField(default=False)),
-                ('sort_order', models.PositiveIntegerField(default=0)),
-                ('notes', models.CharField(blank=True, max_length=255)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='inventory.inventoryitem', verbose_name='Artikl')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lines', to='sales.salesorder')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("quantity", models.DecimalField(decimal_places=4, max_digits=12, verbose_name="Količina")),
+                ("unit", models.CharField(default="kom", max_length=20)),
+                ("unit_price", models.DecimalField(decimal_places=4, max_digits=12, verbose_name="Jed. cijena")),
+                (
+                    "discount_percent",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name="Popust %"),
+                ),
+                ("tax_rate", models.DecimalField(decimal_places=2, default=25, max_digits=5, verbose_name="PDV stopa")),
+                (
+                    "delivered_quantity",
+                    models.DecimalField(decimal_places=4, default=0, max_digits=12, verbose_name="Isporučeno"),
+                ),
+                ("is_ai_suggested", models.BooleanField(default=False)),
+                ("sort_order", models.PositiveIntegerField(default=0)),
+                ("notes", models.CharField(blank=True, max_length=255)),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="inventory.inventoryitem", verbose_name="Artikl"
+                    ),
+                ),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="lines", to="sales.salesorder"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka narudžbe',
-                'verbose_name_plural': 'Stavke narudžbe',
-                'ordering': ['sort_order'],
+                "verbose_name": "Stavka narudžbe",
+                "verbose_name_plural": "Stavke narudžbe",
+                "ordering": ["sort_order"],
             },
         ),
         migrations.CreateModel(
-            name='OpenItem',
+            name="OpenItem",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('direction', models.CharField(choices=[('receivable', 'Potraživanje (kupac nam duguje)'), ('payable', 'Obveza (mi dugujemo dobavljaču)')], max_length=12)),
-                ('document_type', models.CharField(help_text='racun, avansni, odobrenje...', max_length=30, verbose_name='Vrsta dokumenta')),
-                ('document_number', models.CharField(max_length=50, verbose_name='Broj dokumenta')),
-                ('document_date', models.DateField(verbose_name='Datum dokumenta')),
-                ('due_date', models.DateField(verbose_name='Datum dospijeća')),
-                ('original_amount', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='Izvorni iznos')),
-                ('paid_amount', models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Plaćeni iznos')),
-                ('currency', models.CharField(default='EUR', max_length=3)),
-                ('is_closed', models.BooleanField(default=False, verbose_name='Zatvoreno')),
-                ('closed_at', models.DateTimeField(blank=True, null=True)),
-                ('ai_payment_prediction_days', models.PositiveIntegerField(blank=True, help_text='Predviđeni broj dana do plaćanja', null=True, verbose_name='AI predviđanje (dana)')),
-                ('ai_risk_score', models.DecimalField(blank=True, decimal_places=2, help_text='0=siguran, 100=visok rizik neplaćanja', max_digits=5, null=True, verbose_name='AI rizik score')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='open_items', to='companies.company')),
-                ('invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='open_items', to='invoicing.invoice')),
-                ('journal_entry', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='konto.journalentry')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='open_items', to='partners.partner', verbose_name='Partner')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "direction",
+                    models.CharField(
+                        choices=[
+                            ("receivable", "Potraživanje (kupac nam duguje)"),
+                            ("payable", "Obveza (mi dugujemo dobavljaču)"),
+                        ],
+                        max_length=12,
+                    ),
+                ),
+                (
+                    "document_type",
+                    models.CharField(
+                        help_text="racun, avansni, odobrenje...", max_length=30, verbose_name="Vrsta dokumenta"
+                    ),
+                ),
+                ("document_number", models.CharField(max_length=50, verbose_name="Broj dokumenta")),
+                ("document_date", models.DateField(verbose_name="Datum dokumenta")),
+                ("due_date", models.DateField(verbose_name="Datum dospijeća")),
+                ("original_amount", models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Izvorni iznos")),
+                (
+                    "paid_amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name="Plaćeni iznos"),
+                ),
+                ("currency", models.CharField(default="EUR", max_length=3)),
+                ("is_closed", models.BooleanField(default=False, verbose_name="Zatvoreno")),
+                ("closed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "ai_payment_prediction_days",
+                    models.PositiveIntegerField(
+                        blank=True,
+                        help_text="Predviđeni broj dana do plaćanja",
+                        null=True,
+                        verbose_name="AI predviđanje (dana)",
+                    ),
+                ),
+                (
+                    "ai_risk_score",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="0=siguran, 100=visok rizik neplaćanja",
+                        max_digits=5,
+                        null=True,
+                        verbose_name="AI rizik score",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="open_items", to="companies.company"
+                    ),
+                ),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="open_items",
+                        to="invoicing.invoice",
+                    ),
+                ),
+                (
+                    "journal_entry",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="konto.journalentry"
+                    ),
+                ),
+                (
+                    "partner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="open_items",
+                        to="partners.partner",
+                        verbose_name="Partner",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Otvorena stavka',
-                'verbose_name_plural': 'Otvorene stavke',
-                'ordering': ['due_date'],
-                'indexes': [models.Index(fields=['company', 'partner', 'is_closed'], name='sales_openi_company_159824_idx'), models.Index(fields=['company', 'due_date'], name='sales_openi_company_f27a04_idx')],
+                "verbose_name": "Otvorena stavka",
+                "verbose_name_plural": "Otvorene stavke",
+                "ordering": ["due_date"],
+                "indexes": [
+                    models.Index(fields=["company", "partner", "is_closed"], name="sales_openi_company_159824_idx"),
+                    models.Index(fields=["company", "due_date"], name="sales_openi_company_f27a04_idx"),
+                ],
             },
         ),
     ]

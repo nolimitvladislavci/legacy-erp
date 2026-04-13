@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pos', '0002_add_fiscal_fields'),
+        ("pos", "0002_add_fiscal_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterminal',
-            name='pos_type',
-            field=models.CharField(choices=[('quick', 'Brza blagajna'), ('retail', 'Maloprodaja'), ('restaurant', 'Restoran')], default='retail', max_length=10, verbose_name='Tip POS sučelja'),
+            model_name="posterminal",
+            name="pos_type",
+            field=models.CharField(
+                choices=[("quick", "Brza blagajna"), ("retail", "Maloprodaja"), ("restaurant", "Restoran")],
+                default="retail",
+                max_length=10,
+                verbose_name="Tip POS sučelja",
+            ),
         ),
     ]

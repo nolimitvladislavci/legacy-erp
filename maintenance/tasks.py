@@ -7,6 +7,7 @@ def monthly_depreciation_task():
     from companies.models import Company
 
     from .services import run_monthly_depreciation
+
     today = timezone.now().date()
     results = []
     for company in Company.objects.filter(is_active=True):

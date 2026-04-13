@@ -11,6 +11,7 @@ Kljucni tokovi:
     aggregate_to_eracun()      -- kreiraj zbirni e-Racun iz perioda
     auto_close_previous()      -- Celery: 1. u mj. zatvori prethodni
 """
+
 import logging
 from decimal import Decimal
 
@@ -76,7 +77,8 @@ def create_from_invoice(invoice):
             company=invoice.company,
             invoice_id=str(invoice.pk),
             issue_date=getattr(invoice, "date_issued", timezone.now()).date()
-                       if hasattr(invoice, "date_issued") else timezone.now().date(),
+            if hasattr(invoice, "date_issued")
+            else timezone.now().date(),
             delivery_date=getattr(invoice, "date_delivery", None),
             recipient_name=invoice.client_name or "",
             recipient_oib=invoice.client_oib or "",
@@ -114,23 +116,20 @@ def close_period(period, user=None):
         raise ValueError("Period {} nije OPEN/CLOSING (je: {})".format(period, period.status))
 
     with transaction.atomic():
-        qs = period.otpremnice.filter(
-            status__in=(Otpremnica.Status.ISSUED, Otpremnica.Status.DRAFT)
-        )
-        total_net   = sum(o.subtotal for o in qs) or Decimal("0")
-        total_tax   = sum(o.tax_amount for o in qs) or Decimal("0")
+        qs = period.otpremnice.filter(status__in=(Otpremnica.Status.ISSUED, Otpremnica.Status.DRAFT))
+        total_net = sum(o.subtotal for o in qs) or Decimal("0")
+        total_tax = sum(o.tax_amount for o in qs) or Decimal("0")
         total_gross = sum(o.total for o in qs) or Decimal("0")
 
-        period.total_net        = total_net
-        period.total_tax        = total_tax
-        period.total_with_tax   = total_gross
+        period.total_net = total_net
+        period.total_tax = total_tax
+        period.total_with_tax = total_gross
         period.otpremnica_count = qs.count()
-        period.status           = period.Status.CLOSED
-        period.closed_at        = timezone.now()
+        period.status = period.Status.CLOSED
+        period.closed_at = timezone.now()
         period.save()
 
-    logger.info("Period %s zatvoren: %d otp, %.2f EUR bruto",
-                period, period.otpremnica_count, period.total_with_tax)
+    logger.info("Period %s zatvoren: %d otp, %.2f EUR bruto", period, period.otpremnica_count, period.total_with_tax)
     return period
 
 
@@ -159,15 +158,14 @@ def aggregate_to_eracun(period, user=None):
         raise ValueError("Nema otpremnica u periodu za agregaciju")
 
     import calendar
+
     period_name = "{} {}".format(calendar.month_name[period.month], period.year)
 
     with transaction.atomic():
         eracun = ERacun.objects.create(
             company=company,
             doc_type="380",
-            invoice_number="ZBIRNI-{}-{:02d}-{}".format(
-                period.year, period.month, company.oib
-            ),
+            invoice_number="ZBIRNI-{}-{:02d}-{}".format(period.year, period.month, company.oib),
             issue_date=timezone.now().date(),
             currency="EUR",
             issuer_name=company.name,
@@ -179,9 +177,7 @@ def aggregate_to_eracun(period, user=None):
             tax_amount=period.total_tax,
             total=period.total_with_tax,
             payment_means_code="30",
-            note="Zbirni e-Racun za period: {}. Otpremnica: {}.".format(
-                period_name, period.otpremnica_count
-            ),
+            note="Zbirni e-Racun za period: {}. Otpremnica: {}.".format(period_name, period.otpremnica_count),
             created_by=user,
         )
 
@@ -191,13 +187,11 @@ def aggregate_to_eracun(period, user=None):
         for otp in otpremnice:
             for item in otp.items.all():
                 # Dron #3: Date of Supply u svakoj stavci (zakonski obavezno za ZR)
-                delivery_dt = (otp.delivery_date or otp.issue_date).strftime('%d.%m.%Y')
+                delivery_dt = (otp.delivery_date or otp.issue_date).strftime("%d.%m.%Y")
                 ERacunItem.objects.create(
                     eracun=eracun,
                     line_number=line_num,
-                    description="{} (OTP {} — isporuka {})".format(
-                        item.description, otp.number, delivery_dt
-                    ),
+                    description="{} (OTP {} — isporuka {})".format(item.description, otp.number, delivery_dt),
                     quantity=item.quantity,
                     unit_code=item.unit or "EA",
                     unit_price=item.unit_price,
@@ -222,14 +216,11 @@ def aggregate_to_eracun(period, user=None):
             )
 
         # Povezi period
-        period.zbirni_eracun_id      = str(eracun.pk)
+        period.zbirni_eracun_id = str(eracun.pk)
         period.zbirni_invoice_number = eracun.invoice_number
-        period.status                = period.Status.INVOICED
-        period.invoiced_at           = timezone.now()
-        period.save(update_fields=[
-            "zbirni_eracun_id", "zbirni_invoice_number",
-            "status", "invoiced_at"
-        ])
+        period.status = period.Status.INVOICED
+        period.invoiced_at = timezone.now()
+        period.save(update_fields=["zbirni_eracun_id", "zbirni_invoice_number", "status", "invoiced_at"])
 
         # Oznaci otpremnice
         otpremnice.update(status=Otpremnica.Status.AGGREGATED)
@@ -240,12 +231,18 @@ def aggregate_to_eracun(period, user=None):
         except Exception as e:
             logger.warning("EkoStats greska za %s: %s", period, e)
 
-    logger.info("Zbirni e-Racun %s kreiran za %s (%d stavki, %.2f EUR)",
-                eracun.invoice_number, period, line_num - 1, float(eracun.total))
+    logger.info(
+        "Zbirni e-Racun %s kreiran za %s (%d stavki, %.2f EUR)",
+        eracun.invoice_number,
+        period,
+        line_num - 1,
+        float(eracun.total),
+    )
 
     # Async posalji na FINA CIS
     try:
         from propter.tasks import send_zbirni_eracun
+
         send_zbirni_eracun.delay(period.pk)
         logger.info("send_zbirni_eracun task pokrenut za period %s", period.pk)
     except ImportError as e:
@@ -262,12 +259,11 @@ def auto_close_previous():
     from propter.models import BillingPeriod
 
     now = timezone.now()
-    prev_year  = now.year if now.month > 1 else now.year - 1
+    prev_year = now.year if now.month > 1 else now.year - 1
     prev_month = now.month - 1 if now.month > 1 else 12
 
     open_periods = BillingPeriod.objects.filter(
-        year=prev_year, month=prev_month,
-        status__in=(BillingPeriod.Status.OPEN, BillingPeriod.Status.CLOSING)
+        year=prev_year, month=prev_month, status__in=(BillingPeriod.Status.OPEN, BillingPeriod.Status.CLOSING)
     ).select_related("company")
 
     results = []
@@ -275,21 +271,25 @@ def auto_close_previous():
         try:
             close_period(period)
             eracun = aggregate_to_eracun(period)
-            results.append({
-                "company": period.company.name,
-                "period": str(period),
-                "eracun": eracun.invoice_number,
-                "total": float(eracun.total),
-                "status": "OK",
-            })
+            results.append(
+                {
+                    "company": period.company.name,
+                    "period": str(period),
+                    "eracun": eracun.invoice_number,
+                    "total": float(eracun.total),
+                    "status": "OK",
+                }
+            )
         except (ValueError, TypeError) as e:
             logger.error("Greska pri zatvaranju perioda %s: %s", period, e)
-            results.append({
-                "company": period.company.name,
-                "period": str(period),
-                "status": "ERROR",
-                "error": str(e),
-            })
+            results.append(
+                {
+                    "company": period.company.name,
+                    "period": str(period),
+                    "status": "ERROR",
+                    "error": str(e),
+                }
+            )
 
     logger.info("auto_close_previous: %d perioda obradjeno", len(results))
     return results

@@ -7,132 +7,295 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0003_nkd_pos_integration'),
-        ('inventory', '0002_inventoryitem_barcode_inventoryitem_company_and_more'),
-        ('invoicing', '0007_nkd_pos_integration'),
+        ("companies", "0003_nkd_pos_integration"),
+        ("inventory", "0002_inventoryitem_barcode_inventoryitem_company_and_more"),
+        ("invoicing", "0007_nkd_pos_integration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='POSReceipt',
+            name="POSReceipt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('receipt_number', models.PositiveIntegerField(verbose_name='Broj bona')),
-                ('subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Iznos bez PDV')),
-                ('tax_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='PDV')),
-                ('total', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupno')),
-                ('discount', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Popust')),
-                ('status', models.CharField(choices=[('open', 'Otvoreni bon'), ('paid', 'Plaćen'), ('cancelled', 'Storniran / Otkazan'), ('refunded', 'Povrat')], default='open', max_length=10, verbose_name='Status')),
-                ('table_number', models.CharField(blank=True, help_text='Za ugostiteljstvo: broj stola', max_length=20, verbose_name='Stol / Zona')),
-                ('note', models.CharField(blank=True, max_length=255, verbose_name='Napomena na bonu')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('paid_at', models.DateTimeField(blank=True, null=True, verbose_name='Plaćen u')),
-                ('invoice', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_receipt', to='invoicing.invoice', verbose_name='Fiskalni račun')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("uuid", models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                ("receipt_number", models.PositiveIntegerField(verbose_name="Broj bona")),
+                (
+                    "subtotal",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Iznos bez PDV"),
+                ),
+                ("tax_amount", models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="PDV")),
+                ("total", models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Ukupno")),
+                ("discount", models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Popust")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Otvoreni bon"),
+                            ("paid", "Plaćen"),
+                            ("cancelled", "Storniran / Otkazan"),
+                            ("refunded", "Povrat"),
+                        ],
+                        default="open",
+                        max_length=10,
+                        verbose_name="Status",
+                    ),
+                ),
+                (
+                    "table_number",
+                    models.CharField(
+                        blank=True, help_text="Za ugostiteljstvo: broj stola", max_length=20, verbose_name="Stol / Zona"
+                    ),
+                ),
+                ("note", models.CharField(blank=True, max_length=255, verbose_name="Napomena na bonu")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("paid_at", models.DateTimeField(blank=True, null=True, verbose_name="Plaćen u")),
+                (
+                    "invoice",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="pos_receipt",
+                        to="invoicing.invoice",
+                        verbose_name="Fiskalni račun",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'POS bon / račun',
-                'verbose_name_plural': 'POS bonovi / računi',
-                'ordering': ['-created_at'],
+                "verbose_name": "POS bon / račun",
+                "verbose_name_plural": "POS bonovi / računi",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='POSPaymentLine',
+            name="POSPaymentLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('method', models.CharField(choices=[('CASH', 'Gotovina'), ('CARD', 'Kartica'), ('MOBILE', 'Mobilno plaćanje (mPOS)'), ('VOUCHER', 'Bon / Voucher'), ('ACCOUNT', 'Na račun (klijent)')], max_length=10, verbose_name='Način plaćanja')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Iznos')),
-                ('change_given', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Vraćeno kusur')),
-                ('card_reference', models.CharField(blank=True, max_length=100, verbose_name='Referenca kartice / autorizacijski kod')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('receipt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_lines', to='pos.posreceipt', verbose_name='Bon')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "method",
+                    models.CharField(
+                        choices=[
+                            ("CASH", "Gotovina"),
+                            ("CARD", "Kartica"),
+                            ("MOBILE", "Mobilno plaćanje (mPOS)"),
+                            ("VOUCHER", "Bon / Voucher"),
+                            ("ACCOUNT", "Na račun (klijent)"),
+                        ],
+                        max_length=10,
+                        verbose_name="Način plaćanja",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Iznos")),
+                (
+                    "change_given",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Vraćeno kusur"),
+                ),
+                (
+                    "card_reference",
+                    models.CharField(blank=True, max_length=100, verbose_name="Referenca kartice / autorizacijski kod"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "receipt",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment_lines",
+                        to="pos.posreceipt",
+                        verbose_name="Bon",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Linija plaćanja',
-                'verbose_name_plural': 'Linije plaćanja',
+                "verbose_name": "Linija plaćanja",
+                "verbose_name_plural": "Linije plaćanja",
             },
         ),
         migrations.CreateModel(
-            name='POSReceiptItem',
+            name="POSReceiptItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('barcode', models.CharField(blank=True, help_text='Uneseno skeniranjem', max_length=100, verbose_name='Barkod')),
-                ('description', models.CharField(max_length=255, verbose_name='Naziv artikla')),
-                ('quantity', models.DecimalField(decimal_places=3, default=1, max_digits=10, verbose_name='Količina')),
-                ('unit', models.CharField(default='kom', max_length=20, verbose_name='Jed.mjera')),
-                ('unit_price', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Cijena bez PDV')),
-                ('discount_percent', models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name='Popust %')),
-                ('tax_rate', models.DecimalField(decimal_places=2, default=25, max_digits=5, verbose_name='PDV %')),
-                ('total_price', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ukupno s PDV')),
-                ('inventory_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_items', to='inventory.inventoryitem', verbose_name='Artikl (zaliha)')),
-                ('receipt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='pos.posreceipt', verbose_name='Bon')),
-                ('tax_rate_obj', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.taxrate', verbose_name='PDV stopa')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "barcode",
+                    models.CharField(
+                        blank=True, help_text="Uneseno skeniranjem", max_length=100, verbose_name="Barkod"
+                    ),
+                ),
+                ("description", models.CharField(max_length=255, verbose_name="Naziv artikla")),
+                ("quantity", models.DecimalField(decimal_places=3, default=1, max_digits=10, verbose_name="Količina")),
+                ("unit", models.CharField(default="kom", max_length=20, verbose_name="Jed.mjera")),
+                ("unit_price", models.DecimalField(decimal_places=2, max_digits=10, verbose_name="Cijena bez PDV")),
+                (
+                    "discount_percent",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name="Popust %"),
+                ),
+                ("tax_rate", models.DecimalField(decimal_places=2, default=25, max_digits=5, verbose_name="PDV %")),
+                (
+                    "total_price",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name="Ukupno s PDV"),
+                ),
+                (
+                    "inventory_item",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="pos_items",
+                        to="inventory.inventoryitem",
+                        verbose_name="Artikl (zaliha)",
+                    ),
+                ),
+                (
+                    "receipt",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="pos.posreceipt",
+                        verbose_name="Bon",
+                    ),
+                ),
+                (
+                    "tax_rate_obj",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="companies.taxrate",
+                        verbose_name="PDV stopa",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Stavka bona',
-                'verbose_name_plural': 'Stavke bona',
+                "verbose_name": "Stavka bona",
+                "verbose_name_plural": "Stavke bona",
             },
         ),
         migrations.CreateModel(
-            name='POSSession',
+            name="POSSession",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_number', models.PositiveIntegerField(verbose_name='Broj smjene')),
-                ('opened_at', models.DateTimeField(auto_now_add=True, verbose_name='Otvorena u')),
-                ('closed_at', models.DateTimeField(blank=True, null=True, verbose_name='Zatvorena u')),
-                ('opening_cash', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Gotovina pri otvaranju (€)')),
-                ('closing_cash', models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Prebrojana gotovina pri zatvaranju (€)')),
-                ('status', models.CharField(choices=[('open', 'Otvorena'), ('closed', 'Zatvorena'), ('z_done', 'Z-izvješće generirano')], default='open', max_length=10, verbose_name='Status')),
-                ('z_report_number', models.PositiveIntegerField(blank=True, null=True, verbose_name='Broj Z-izvješća')),
-                ('notes', models.TextField(blank=True, verbose_name='Napomene')),
-                ('operator', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_sessions', to=settings.AUTH_USER_MODEL, verbose_name='Operater')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("session_number", models.PositiveIntegerField(verbose_name="Broj smjene")),
+                ("opened_at", models.DateTimeField(auto_now_add=True, verbose_name="Otvorena u")),
+                ("closed_at", models.DateTimeField(blank=True, null=True, verbose_name="Zatvorena u")),
+                (
+                    "opening_cash",
+                    models.DecimalField(
+                        decimal_places=2, default=0, max_digits=10, verbose_name="Gotovina pri otvaranju (€)"
+                    ),
+                ),
+                (
+                    "closing_cash",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0,
+                        max_digits=10,
+                        verbose_name="Prebrojana gotovina pri zatvaranju (€)",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("open", "Otvorena"), ("closed", "Zatvorena"), ("z_done", "Z-izvješće generirano")],
+                        default="open",
+                        max_length=10,
+                        verbose_name="Status",
+                    ),
+                ),
+                ("z_report_number", models.PositiveIntegerField(blank=True, null=True, verbose_name="Broj Z-izvješća")),
+                ("notes", models.TextField(blank=True, verbose_name="Napomene")),
+                (
+                    "operator",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="pos_sessions",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Operater",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'POS smjena',
-                'verbose_name_plural': 'POS smjene',
-                'ordering': ['-opened_at'],
+                "verbose_name": "POS smjena",
+                "verbose_name_plural": "POS smjene",
+                "ordering": ["-opened_at"],
             },
         ),
         migrations.AddField(
-            model_name='posreceipt',
-            name='session',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='receipts', to='pos.possession', verbose_name='Smjena'),
+            model_name="posreceipt",
+            name="session",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="receipts",
+                to="pos.possession",
+                verbose_name="Smjena",
+            ),
         ),
         migrations.CreateModel(
-            name='POSTerminal',
+            name="POSTerminal",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Npr. Kasa 1, Šank, Blagajna', max_length=100, verbose_name='Naziv kase')),
-                ('terminal_code', models.CharField(help_text='Jedinstveni kod npr. KS001', max_length=20, verbose_name='Kod terminala')),
-                ('description', models.CharField(blank=True, max_length=255, verbose_name='Opis / Lokacija')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivna')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('business_location', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pos_terminals', to='invoicing.businesslocation', verbose_name='Poslovni prostor (za fiskalizaciju)')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pos_terminals', to='companies.company', verbose_name='Tvrtka')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Npr. Kasa 1, Šank, Blagajna", max_length=100, verbose_name="Naziv kase"
+                    ),
+                ),
+                (
+                    "terminal_code",
+                    models.CharField(
+                        help_text="Jedinstveni kod npr. KS001", max_length=20, verbose_name="Kod terminala"
+                    ),
+                ),
+                ("description", models.CharField(blank=True, max_length=255, verbose_name="Opis / Lokacija")),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivna")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "business_location",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="pos_terminals",
+                        to="invoicing.businesslocation",
+                        verbose_name="Poslovni prostor (za fiskalizaciju)",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="pos_terminals",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'POS terminal (kasa)',
-                'verbose_name_plural': 'POS terminali (kase)',
-                'ordering': ['company', 'name'],
-                'unique_together': {('company', 'terminal_code')},
+                "verbose_name": "POS terminal (kasa)",
+                "verbose_name_plural": "POS terminali (kase)",
+                "ordering": ["company", "name"],
+                "unique_together": {("company", "terminal_code")},
             },
         ),
         migrations.AddField(
-            model_name='possession',
-            name='terminal',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='pos.posterminal', verbose_name='Terminal'),
+            model_name="possession",
+            name="terminal",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sessions",
+                to="pos.posterminal",
+                verbose_name="Terminal",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='posreceipt',
-            unique_together={('session', 'receipt_number')},
+            name="posreceipt",
+            unique_together={("session", "receipt_number")},
         ),
         migrations.AlterUniqueTogether(
-            name='possession',
-            unique_together={('terminal', 'session_number')},
+            name="possession",
+            unique_together={("terminal", "session_number")},
         ),
     ]

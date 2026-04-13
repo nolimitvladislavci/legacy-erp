@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tracking', '0001_initial'),
+        ("tracking", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='trackeditem',
-            name='object_id',
+            model_name="trackeditem",
+            name="object_id",
             field=models.CharField(max_length=64),
         ),
     ]

@@ -1,4 +1,5 @@
 """Smart Mailbox views — AI-powered inbound invoice processing UI."""
+
 import logging
 
 from django.contrib import messages as django_messages
@@ -18,7 +19,7 @@ def smart_mailbox(request):
     """Smart Mailbox inbox — list all inbound invoices with AI classification."""
     company = get_user_company(request)
     if not company:
-        django_messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
+        django_messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
         return redirect("dashboard")
 
     from einvoice.models import AS4Message, InboundInvoice, MessageDirection
@@ -39,12 +40,8 @@ def smart_mailbox(request):
         "booked": all_qs.filter(status="BOOKED").count(),
         "rejected": all_qs.filter(status="REJECTED").count(),
         "duplicates": all_qs.filter(status="DUPLICATE").count(),
-        "pending_amount": sum(
-            i.gross_amount for i in all_qs.filter(status__in=["PENDING", "AUTO"])
-        ),
-        "booked_amount": sum(
-            i.gross_amount for i in all_qs.filter(status="BOOKED")
-        ),
+        "pending_amount": sum(i.gross_amount for i in all_qs.filter(status__in=["PENDING", "AUTO"])),
+        "booked_amount": sum(i.gross_amount for i in all_qs.filter(status="BOOKED")),
     }
 
     # AS4 message stats
@@ -60,12 +57,16 @@ def smart_mailbox(request):
         ).count(),
     }
 
-    return render(request, "einvoice/smart_mailbox.html", {
-        "invoices": invoices,
-        "stats": stats,
-        "as4_stats": as4_stats,
-        "status_filter": status_filter,
-    })
+    return render(
+        request,
+        "einvoice/smart_mailbox.html",
+        {
+            "invoices": invoices,
+            "stats": stats,
+            "as4_stats": as4_stats,
+            "status_filter": status_filter,
+        },
+    )
 
 
 @login_required
@@ -74,7 +75,8 @@ def mailbox_detail(request, pk):
     company = get_user_company(request)
     inbound = get_object_or_404(
         InboundInvoice.objects.select_related("as4_message", "approved_by", "duplicate_of"),
-        pk=pk, company=company,
+        pk=pk,
+        company=company,
     )
 
     # Get AS4 audit trail
@@ -82,10 +84,14 @@ def mailbox_detail(request, pk):
     if inbound.as4_message:
         events = inbound.as4_message.events.all().order_by("created_at")
 
-    return render(request, "einvoice/mailbox_detail.html", {
-        "inbound": inbound,
-        "events": events,
-    })
+    return render(
+        request,
+        "einvoice/mailbox_detail.html",
+        {
+            "inbound": inbound,
+            "events": events,
+        },
+    )
 
 
 @login_required
@@ -166,10 +172,14 @@ def outbound_messages(request):
 
     messages_list = qs.order_by("-created_at")[:100]
 
-    return render(request, "einvoice/outbound_messages.html", {
-        "messages": messages_list,
-        "status_filter": status_filter,
-    })
+    return render(
+        request,
+        "einvoice/outbound_messages.html",
+        {
+            "messages": messages_list,
+            "status_filter": status_filter,
+        },
+    )
 
 
 @login_required
@@ -181,7 +191,11 @@ def message_detail(request, pk):
     message = get_object_or_404(AS4Message, pk=pk, company=company)
     events = message.events.all().order_by("created_at")
 
-    return render(request, "einvoice/message_detail.html", {
-        "message": message,
-        "events": events,
-    })
+    return render(
+        request,
+        "einvoice/message_detail.html",
+        {
+            "message": message,
+            "events": events,
+        },
+    )

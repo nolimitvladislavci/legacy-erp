@@ -7,33 +7,76 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0023_add_booking_theme'),
+        ("companies", "0023_add_booking_theme"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CompanyPartnership',
+            name="CompanyPartnership",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('billing_type', models.CharField(choices=[('included', 'Uključeno u paket'), ('discounted', 'Povlaštena cijena'), ('full', 'Puna cijena'), ('free', 'Besplatno')], default='included', max_length=20)),
-                ('monthly_fee', models.DecimalField(decimal_places=2, default=0, max_digits=8)),
-                ('access_level', models.CharField(choices=[('read', 'Samo čitanje'), ('full', 'Puni pristup'), ('admin', 'Admin pristup')], default='full', max_length=10)),
-                ('valid_from', models.DateField(auto_now_add=True)),
-                ('valid_until', models.DateField(blank=True, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_partnerships', to=settings.AUTH_USER_MODEL)),
-                ('managed_company', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='managing_partners', to='companies.company', verbose_name='Upravljana firma')),
-                ('partner_company', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='managed_companies', to='companies.company', verbose_name='Partner (reseller)')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "billing_type",
+                    models.CharField(
+                        choices=[
+                            ("included", "Uključeno u paket"),
+                            ("discounted", "Povlaštena cijena"),
+                            ("full", "Puna cijena"),
+                            ("free", "Besplatno"),
+                        ],
+                        default="included",
+                        max_length=20,
+                    ),
+                ),
+                ("monthly_fee", models.DecimalField(decimal_places=2, default=0, max_digits=8)),
+                (
+                    "access_level",
+                    models.CharField(
+                        choices=[("read", "Samo čitanje"), ("full", "Puni pristup"), ("admin", "Admin pristup")],
+                        default="full",
+                        max_length=10,
+                    ),
+                ),
+                ("valid_from", models.DateField(auto_now_add=True)),
+                ("valid_until", models.DateField(blank=True, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="created_partnerships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "managed_company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="managing_partners",
+                        to="companies.company",
+                        verbose_name="Upravljana firma",
+                    ),
+                ),
+                (
+                    "partner_company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="managed_companies",
+                        to="companies.company",
+                        verbose_name="Partner (reseller)",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Partnerstvo',
-                'verbose_name_plural': 'Partnerstva',
-                'ordering': ['managed_company__name'],
-                'unique_together': {('partner_company', 'managed_company')},
+                "verbose_name": "Partnerstvo",
+                "verbose_name_plural": "Partnerstva",
+                "ordering": ["managed_company__name"],
+                "unique_together": {("partner_company", "managed_company")},
             },
         ),
     ]

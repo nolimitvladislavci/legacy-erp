@@ -5,30 +5,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0016_company_no_show_tolerance_minutes'),
-        ('invoicing', '0021_invoiceevent'),
+        ("companies", "0016_company_no_show_tolerance_minutes"),
+        ("invoicing", "0021_invoiceevent"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DunningRule',
+            name="DunningRule",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('step', models.PositiveIntegerField(verbose_name='Korak')),
-                ('days_overdue', models.PositiveIntegerField(verbose_name='Dana kasnjenja')),
-                ('channel', models.CharField(choices=[('email', 'Email'), ('whatsapp', 'WhatsApp'), ('both', 'Email + WhatsApp')], default='email', max_length=20)),
-                ('tone', models.CharField(choices=[('gentle', 'Blagi podsjetnik'), ('firm', 'Asertivan zahtjev'), ('legal', 'Formalna opomena')], default='gentle', max_length=20)),
-                ('cc_admin', models.BooleanField(default=False, verbose_name='CC company_admin')),
-                ('is_active', models.BooleanField(default=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='dunning_rules', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("step", models.PositiveIntegerField(verbose_name="Korak")),
+                ("days_overdue", models.PositiveIntegerField(verbose_name="Dana kasnjenja")),
+                (
+                    "channel",
+                    models.CharField(
+                        choices=[("email", "Email"), ("whatsapp", "WhatsApp"), ("both", "Email + WhatsApp")],
+                        default="email",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "tone",
+                    models.CharField(
+                        choices=[
+                            ("gentle", "Blagi podsjetnik"),
+                            ("firm", "Asertivan zahtjev"),
+                            ("legal", "Formalna opomena"),
+                        ],
+                        default="gentle",
+                        max_length=20,
+                    ),
+                ),
+                ("cc_admin", models.BooleanField(default=False, verbose_name="CC company_admin")),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="dunning_rules",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Pravilo opomene',
-                'verbose_name_plural': 'Pravila opomena',
-                'ordering': ['company', 'step'],
-                'unique_together': {('company', 'step')},
+                "verbose_name": "Pravilo opomene",
+                "verbose_name_plural": "Pravila opomena",
+                "ordering": ["company", "step"],
+                "unique_together": {("company", "step")},
             },
         ),
     ]

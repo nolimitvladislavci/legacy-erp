@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('burza', '0002_alter_leadactivity_id_alter_projectlead_id'),
+        ("burza", "0002_alter_leadactivity_id_alter_projectlead_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='projectlead',
-            name='status',
-            field=models.CharField(choices=[('NOVI_UPIT', 'Novi upit'), ('INTERNA_PROCJENA', 'Interna procjena'), ('NA_BURZI', 'Na burzi'), ('PREUZETO', 'Preuzeto'), ('RIJESENO', 'Riješeno')], db_index=True, default='NOVI_UPIT', max_length=20),
+            model_name="projectlead",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("NOVI_UPIT", "Novi upit"),
+                    ("INTERNA_PROCJENA", "Interna procjena"),
+                    ("NA_BURZI", "Na burzi"),
+                    ("PREUZETO", "Preuzeto"),
+                    ("RIJESENO", "Riješeno"),
+                ],
+                db_index=True,
+                default="NOVI_UPIT",
+                max_length=20,
+            ),
         ),
     ]

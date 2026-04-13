@@ -5,31 +5,58 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0024_partnership_model'),
-        ('invoicing', '0031_add_confirmed_fiscalized_status'),
+        ("companies", "0024_partnership_model"),
+        ("invoicing", "0031_add_confirmed_fiscalized_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='businesslocation',
-            name='branch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='business_locations', to='companies.companybranch', verbose_name='Poslovnica'),
+            model_name="businesslocation",
+            name="branch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="business_locations",
+                to="companies.companybranch",
+                verbose_name="Poslovnica",
+            ),
         ),
         migrations.AddField(
-            model_name='businesslocation',
-            name='company',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='business_locations', to='companies.company', verbose_name='Tvrtka'),
+            model_name="businesslocation",
+            name="company",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="business_locations",
+                to="companies.company",
+                verbose_name="Tvrtka",
+            ),
         ),
         migrations.AddField(
-            model_name='invoiceprofile',
-            name='branch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_profiles', to='companies.companybranch', verbose_name='Poslovnica'),
+            model_name="invoiceprofile",
+            name="branch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoice_profiles",
+                to="companies.companybranch",
+                verbose_name="Poslovnica",
+            ),
         ),
         migrations.AddField(
-            model_name='invoiceprofile',
-            name='business_location',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoice_profiles', to='invoicing.businesslocation', verbose_name='Poslovni prostor (PP)'),
+            model_name="invoiceprofile",
+            name="business_location",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoice_profiles",
+                to="invoicing.businesslocation",
+                verbose_name="Poslovni prostor (PP)",
+            ),
         ),
     ]

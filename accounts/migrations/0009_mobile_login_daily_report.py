@@ -7,35 +7,78 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0008_alter_companymembership_role_alter_userprofile_role'),
-        ('companies', '0024_partnership_model'),
-        ('pos', '0018_field_sales'),
+        ("accounts", "0008_alter_companymembership_role_alter_userprofile_role"),
+        ("companies", "0024_partnership_model"),
+        ("pos", "0018_field_sales"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DeviceToken',
+            name="DeviceToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('barcode_data', models.CharField(editable=False, max_length=30, unique=True, verbose_name='Barcode podatak')),
-                ('device_name', models.CharField(blank=True, help_text='npr. "Moj iPhone", "Samsung tablet blagajna"', max_length=100, verbose_name='Naziv uređaja')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Aktivan')),
-                ('auto_pos_login', models.BooleanField(default=True, help_text='Automatski prijavi na POS bez skeniranja barkoda', verbose_name='Auto POS login')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('last_used_at', models.DateTimeField(blank=True, null=True)),
-                ('last_ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('cashier', models.ForeignKey(blank=True, help_text='Ako je postavljeno, odmah aktivira ovog blagajnika', null=True, on_delete=django.db.models.deletion.SET_NULL, to='pos.poscashier', verbose_name='POS blagajnik')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='device_tokens', to='companies.company', verbose_name='Tvrtka')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='device_tokens', to=settings.AUTH_USER_MODEL, verbose_name='Korisnik')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("token", models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                (
+                    "barcode_data",
+                    models.CharField(editable=False, max_length=30, unique=True, verbose_name="Barcode podatak"),
+                ),
+                (
+                    "device_name",
+                    models.CharField(
+                        blank=True,
+                        help_text='npr. "Moj iPhone", "Samsung tablet blagajna"',
+                        max_length=100,
+                        verbose_name="Naziv uređaja",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True, verbose_name="Aktivan")),
+                (
+                    "auto_pos_login",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Automatski prijavi na POS bez skeniranja barkoda",
+                        verbose_name="Auto POS login",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("last_used_at", models.DateTimeField(blank=True, null=True)),
+                ("last_ip", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "cashier",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Ako je postavljeno, odmah aktivira ovog blagajnika",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="pos.poscashier",
+                        verbose_name="POS blagajnik",
+                    ),
+                ),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="device_tokens",
+                        to="companies.company",
+                        verbose_name="Tvrtka",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="device_tokens",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Korisnik",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Device token',
-                'verbose_name_plural': 'Device tokeni',
-                'ordering': ['-created_at'],
+                "verbose_name": "Device token",
+                "verbose_name_plural": "Device tokeni",
+                "ordering": ["-created_at"],
             },
         ),
     ]

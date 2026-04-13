@@ -7,73 +7,133 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0025_add_opg_udruga_business_types'),
+        ("companies", "0025_add_opg_udruga_business_types"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Clan',
+            name="Clan",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('oib', models.CharField(blank=True, db_index=True, max_length=11)),
-                ('date_of_birth', models.DateField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=50)),
-                ('address', models.CharField(blank=True, max_length=255)),
-                ('city', models.CharField(blank=True, max_length=100)),
-                ('membership_type', models.CharField(choices=[('redovni', 'Redovni clan'), ('pocasni', 'Pocasni clan'), ('pridruzeni', 'Pridruzeni clan'), ('osnivac', 'Osnivacki clan'), ('branitelj', 'Branitelj')], default='redovni', max_length=20)),
-                ('status', models.CharField(choices=[('aktivan', 'Aktivan'), ('neaktivan', 'Neaktivan'), ('istupio', 'Istupio'), ('iskljucen', 'Iskljucen')], default='aktivan', max_length=20)),
-                ('date_joined', models.DateField(default=django.utils.timezone.now)),
-                ('membership_number', models.CharField(blank=True, max_length=50)),
-                ('membership_expires', models.DateField(blank=True, null=True)),
-                ('business_interest', models.CharField(blank=True, choices=[('opg', 'OPG / Poljoprivreda'), ('obrt', 'Obrt'), ('ugostiteljstvo', 'Ugostiteljstvo'), ('trgovina', 'Trgovina'), ('usluge', 'Usluge'), ('', 'Nije navedeno')], max_length=20)),
-                ('has_opg', models.BooleanField(default=False)),
-                ('opg_oib', models.CharField(blank=True, max_length=11)),
-                ('has_obrt', models.BooleanField(default=False)),
-                ('ai_profile', models.JSONField(blank=True, default=dict)),
-                ('ai_last_analyzed', models.DateTimeField(blank=True, null=True)),
-                ('oib_lookup_result', models.JSONField(blank=True, default=dict)),
-                ('oib_last_checked', models.DateTimeField(blank=True, null=True)),
-                ('whatsapp_phone', models.CharField(blank=True, max_length=50)),
-                ('whatsapp_opt_in', models.BooleanField(default=False)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='udruga_clanovi', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                ("oib", models.CharField(blank=True, db_index=True, max_length=11)),
+                ("date_of_birth", models.DateField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=50)),
+                ("address", models.CharField(blank=True, max_length=255)),
+                ("city", models.CharField(blank=True, max_length=100)),
+                (
+                    "membership_type",
+                    models.CharField(
+                        choices=[
+                            ("redovni", "Redovni clan"),
+                            ("pocasni", "Pocasni clan"),
+                            ("pridruzeni", "Pridruzeni clan"),
+                            ("osnivac", "Osnivacki clan"),
+                            ("branitelj", "Branitelj"),
+                        ],
+                        default="redovni",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("aktivan", "Aktivan"),
+                            ("neaktivan", "Neaktivan"),
+                            ("istupio", "Istupio"),
+                            ("iskljucen", "Iskljucen"),
+                        ],
+                        default="aktivan",
+                        max_length=20,
+                    ),
+                ),
+                ("date_joined", models.DateField(default=django.utils.timezone.now)),
+                ("membership_number", models.CharField(blank=True, max_length=50)),
+                ("membership_expires", models.DateField(blank=True, null=True)),
+                (
+                    "business_interest",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("opg", "OPG / Poljoprivreda"),
+                            ("obrt", "Obrt"),
+                            ("ugostiteljstvo", "Ugostiteljstvo"),
+                            ("trgovina", "Trgovina"),
+                            ("usluge", "Usluge"),
+                            ("", "Nije navedeno"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("has_opg", models.BooleanField(default=False)),
+                ("opg_oib", models.CharField(blank=True, max_length=11)),
+                ("has_obrt", models.BooleanField(default=False)),
+                ("ai_profile", models.JSONField(blank=True, default=dict)),
+                ("ai_last_analyzed", models.DateTimeField(blank=True, null=True)),
+                ("oib_lookup_result", models.JSONField(blank=True, default=dict)),
+                ("oib_last_checked", models.DateTimeField(blank=True, null=True)),
+                ("whatsapp_phone", models.CharField(blank=True, max_length=50)),
+                ("whatsapp_opt_in", models.BooleanField(default=False)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="udruga_clanovi",
+                        to="companies.company",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'udruge_clan',
-                'ordering': ['last_name', 'first_name'],
+                "db_table": "udruge_clan",
+                "ordering": ["last_name", "first_name"],
             },
         ),
         migrations.CreateModel(
-            name='ClanBiljeska',
+            name="ClanBiljeska",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.TextField()),
-                ('tip', models.CharField(choices=[('rucno', 'Rucno'), ('ai', 'AI'), ('sistem', 'Sistem')], default='rucno', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('clan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='biljeske', to='udruge.clan')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("text", models.TextField()),
+                (
+                    "tip",
+                    models.CharField(
+                        choices=[("rucno", "Rucno"), ("ai", "AI"), ("sistem", "Sistem")], default="rucno", max_length=10
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "clan",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="biljeske", to="udruge.clan"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'db_table': 'udruge_clan_biljeska',
-                'ordering': ['-created_at'],
+                "db_table": "udruge_clan_biljeska",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddIndex(
-            model_name='clan',
-            index=models.Index(fields=['company', 'status'], name='udruge_clan_company_031613_idx'),
+            model_name="clan",
+            index=models.Index(fields=["company", "status"], name="udruge_clan_company_031613_idx"),
         ),
         migrations.AddIndex(
-            model_name='clan',
-            index=models.Index(fields=['company', 'membership_expires'], name='udruge_clan_company_d525c5_idx'),
+            model_name="clan",
+            index=models.Index(fields=["company", "membership_expires"], name="udruge_clan_company_d525c5_idx"),
         ),
     ]

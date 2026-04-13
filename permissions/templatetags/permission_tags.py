@@ -11,7 +11,7 @@ def has_permission(context, permission_codename, company=None):
     Provjera ovlasti u templateu.
     Koristi: {% has_permission 'invoices.create' as can_create %}
     """
-    request = context.get('request')
+    request = context.get("request")
     if not request or not request.user.is_authenticated:
         return False
     return get_engine().has_permission(request.user, permission_codename, company)

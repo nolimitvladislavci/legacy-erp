@@ -1,6 +1,7 @@
 """
 .ics (iCalendar) file generation for appointments.
 """
+
 from datetime import datetime
 
 
@@ -9,11 +10,12 @@ def generate_ics(appointment):
     Generate an .ics file content string for the given Appointment instance.
     Returns a string that can be written as a .ics file.
     """
+
     def fmt_dt(dt):
         """Format datetime as iCalendar UTC timestamp."""
         if dt is None:
             return ""
-        if hasattr(dt, 'utctimetuple'):
+        if hasattr(dt, "utctimetuple"):
             return dt.strftime("%Y%m%dT%H%M%SZ")
         return ""
 

@@ -6,31 +6,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0029_transport_module'),
-        ('pos', '0037_cashier_oib'),
+        ("companies", "0029_transport_module"),
+        ("pos", "0037_cashier_oib"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ChainLink',
+            name="ChainLink",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sequence', models.PositiveBigIntegerField(db_index=True)),
-                ('payload_hash', models.CharField(max_length=64, verbose_name='SHA256 payload')),
-                ('prev_hash', models.CharField(max_length=64, verbose_name='Hash prethodne karike')),
-                ('chain_hash', models.CharField(max_length=64, unique=True, verbose_name='Hash ove karike')),
-                ('payload_summary', models.CharField(blank=True, max_length=200)),
-                ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='chain_links', to='companies.company')),
-                ('receipt', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='chain_link', to='pos.posreceipt')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("sequence", models.PositiveBigIntegerField(db_index=True)),
+                ("payload_hash", models.CharField(max_length=64, verbose_name="SHA256 payload")),
+                ("prev_hash", models.CharField(max_length=64, verbose_name="Hash prethodne karike")),
+                ("chain_hash", models.CharField(max_length=64, unique=True, verbose_name="Hash ove karike")),
+                ("payload_summary", models.CharField(blank=True, max_length=200)),
+                ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="chain_links", to="companies.company"
+                    ),
+                ),
+                (
+                    "receipt",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="chain_link",
+                        to="pos.posreceipt",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Hash Chain Link',
-                'verbose_name_plural': 'Hash Chain Links',
-                'ordering': ['company', 'sequence'],
-                'unique_together': {('company', 'sequence')},
+                "verbose_name": "Hash Chain Link",
+                "verbose_name_plural": "Hash Chain Links",
+                "ordering": ["company", "sequence"],
+                "unique_together": {("company", "sequence")},
             },
         ),
     ]

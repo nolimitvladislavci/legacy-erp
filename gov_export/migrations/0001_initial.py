@@ -7,112 +7,214 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0034_vault_deactivation_fields'),
+        ("companies", "0034_vault_deactivation_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GovDocumentType',
+            name="GovDocumentType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=30, verbose_name='Šifra dokumenta')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv')),
-                ('xml_namespace', models.CharField(blank=True, max_length=300, verbose_name='XML Namespace')),
-                ('xsd_url', models.URLField(blank=True, verbose_name='XSD Schema URL')),
-                ('period_type', models.CharField(choices=[('monthly', 'Mjesečno'), ('quarterly', 'Kvartalno'), ('yearly', 'Godišnje'), ('on_demand', 'Na zahtjev'), ('realtime', 'Real-time')], default='monthly', max_length=20)),
-                ('deadline_rule', models.CharField(blank=True, help_text='npr. "20. u mjesecu za prethodni" ili "30 dana od kraja kvartala"', max_length=100)),
-                ('generator_class', models.CharField(blank=True, help_text='Python path: gov_export.generators.joppd.JOPPDGenerator', max_length=100)),
-                ('is_active', models.BooleanField(default=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("code", models.CharField(max_length=30, verbose_name="Šifra dokumenta")),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv")),
+                ("xml_namespace", models.CharField(blank=True, max_length=300, verbose_name="XML Namespace")),
+                ("xsd_url", models.URLField(blank=True, verbose_name="XSD Schema URL")),
+                (
+                    "period_type",
+                    models.CharField(
+                        choices=[
+                            ("monthly", "Mjesečno"),
+                            ("quarterly", "Kvartalno"),
+                            ("yearly", "Godišnje"),
+                            ("on_demand", "Na zahtjev"),
+                            ("realtime", "Real-time"),
+                        ],
+                        default="monthly",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "deadline_rule",
+                    models.CharField(
+                        blank=True,
+                        help_text='npr. "20. u mjesecu za prethodni" ili "30 dana od kraja kvartala"',
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "generator_class",
+                    models.CharField(
+                        blank=True, help_text="Python path: gov_export.generators.joppd.JOPPDGenerator", max_length=100
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name': 'Tip dokumenta',
-                'verbose_name_plural': 'Tipovi dokumenata',
+                "verbose_name": "Tip dokumenta",
+                "verbose_name_plural": "Tipovi dokumenata",
             },
         ),
         migrations.CreateModel(
-            name='GovInstitution',
+            name="GovInstitution",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=20, unique=True, verbose_name='Šifra')),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv')),
-                ('country', models.CharField(default='HR', max_length=2)),
-                ('endpoint_url', models.URLField(blank=True, verbose_name='API Endpoint')),
-                ('test_endpoint_url', models.URLField(blank=True, verbose_name='Test Endpoint')),
-                ('transport', models.CharField(choices=[('soap', 'SOAP Web Service'), ('rest', 'REST API'), ('as4', 'AS4 (eDelivery)'), ('upload', 'Portal Upload (manual)'), ('email', 'Email s potpisom')], default='upload', max_length=20, verbose_name='Transport')),
-                ('auth_type', models.CharField(choices=[('cert', 'mTLS Certifikat'), ('bearer', 'Bearer Token'), ('basic', 'Basic Auth'), ('none', 'Bez autentifikacije')], default='cert', max_length=20)),
-                ('requires_signature', models.BooleanField(default=True, verbose_name='Zahtijeva XML potpis')),
-                ('is_active', models.BooleanField(default=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("code", models.CharField(max_length=20, unique=True, verbose_name="Šifra")),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv")),
+                ("country", models.CharField(default="HR", max_length=2)),
+                ("endpoint_url", models.URLField(blank=True, verbose_name="API Endpoint")),
+                ("test_endpoint_url", models.URLField(blank=True, verbose_name="Test Endpoint")),
+                (
+                    "transport",
+                    models.CharField(
+                        choices=[
+                            ("soap", "SOAP Web Service"),
+                            ("rest", "REST API"),
+                            ("as4", "AS4 (eDelivery)"),
+                            ("upload", "Portal Upload (manual)"),
+                            ("email", "Email s potpisom"),
+                        ],
+                        default="upload",
+                        max_length=20,
+                        verbose_name="Transport",
+                    ),
+                ),
+                (
+                    "auth_type",
+                    models.CharField(
+                        choices=[
+                            ("cert", "mTLS Certifikat"),
+                            ("bearer", "Bearer Token"),
+                            ("basic", "Basic Auth"),
+                            ("none", "Bez autentifikacije"),
+                        ],
+                        default="cert",
+                        max_length=20,
+                    ),
+                ),
+                ("requires_signature", models.BooleanField(default=True, verbose_name="Zahtijeva XML potpis")),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name': 'Državna institucija',
-                'verbose_name_plural': 'Državne institucije',
-                'ordering': ['name'],
+                "verbose_name": "Državna institucija",
+                "verbose_name_plural": "Državne institucije",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='GovExport',
+            name="GovExport",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('reference_number', models.CharField(max_length=50, unique=True, verbose_name='Referentni broj')),
-                ('period_start', models.DateField(verbose_name='Početak perioda')),
-                ('period_end', models.DateField(verbose_name='Kraj perioda')),
-                ('status', models.CharField(choices=[('draft', 'Nacrt — generirano'), ('validated', 'Validirano (XSD OK)'), ('signed', 'Potpisano (XAdES)'), ('sent', 'Poslano'), ('accepted', 'Prihvaćeno'), ('rejected', 'Odbijeno'), ('error', 'Greška')], default='draft', max_length=15)),
-                ('xml_content', models.TextField(blank=True, verbose_name='XML sadržaj')),
-                ('xml_hash', models.CharField(blank=True, max_length=64, verbose_name='SHA-256')),
-                ('xml_size', models.PositiveIntegerField(default=0)),
-                ('is_valid', models.BooleanField(null=True)),
-                ('validation_errors', models.JSONField(blank=True, default=list)),
-                ('validated_at', models.DateTimeField(blank=True, null=True)),
-                ('is_signed', models.BooleanField(default=False)),
-                ('signature_method', models.CharField(blank=True, max_length=30)),
-                ('signed_at', models.DateTimeField(blank=True, null=True)),
-                ('sent_at', models.DateTimeField(blank=True, null=True)),
-                ('transport_method', models.CharField(blank=True, max_length=30)),
-                ('transport_response', models.TextField(blank=True)),
-                ('confirmation_id', models.CharField(blank=True, max_length=100, verbose_name='ID potvrde (JIR ekvivalent)')),
-                ('accepted_at', models.DateTimeField(blank=True, null=True)),
-                ('rejected_at', models.DateTimeField(blank=True, null=True)),
-                ('rejection_reason', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gov_exports', to='companies.company')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('document_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='exports', to='gov_export.govdocumenttype')),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("reference_number", models.CharField(max_length=50, unique=True, verbose_name="Referentni broj")),
+                ("period_start", models.DateField(verbose_name="Početak perioda")),
+                ("period_end", models.DateField(verbose_name="Kraj perioda")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Nacrt — generirano"),
+                            ("validated", "Validirano (XSD OK)"),
+                            ("signed", "Potpisano (XAdES)"),
+                            ("sent", "Poslano"),
+                            ("accepted", "Prihvaćeno"),
+                            ("rejected", "Odbijeno"),
+                            ("error", "Greška"),
+                        ],
+                        default="draft",
+                        max_length=15,
+                    ),
+                ),
+                ("xml_content", models.TextField(blank=True, verbose_name="XML sadržaj")),
+                ("xml_hash", models.CharField(blank=True, max_length=64, verbose_name="SHA-256")),
+                ("xml_size", models.PositiveIntegerField(default=0)),
+                ("is_valid", models.BooleanField(null=True)),
+                ("validation_errors", models.JSONField(blank=True, default=list)),
+                ("validated_at", models.DateTimeField(blank=True, null=True)),
+                ("is_signed", models.BooleanField(default=False)),
+                ("signature_method", models.CharField(blank=True, max_length=30)),
+                ("signed_at", models.DateTimeField(blank=True, null=True)),
+                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("transport_method", models.CharField(blank=True, max_length=30)),
+                ("transport_response", models.TextField(blank=True)),
+                (
+                    "confirmation_id",
+                    models.CharField(blank=True, max_length=100, verbose_name="ID potvrde (JIR ekvivalent)"),
+                ),
+                ("accepted_at", models.DateTimeField(blank=True, null=True)),
+                ("rejected_at", models.DateTimeField(blank=True, null=True)),
+                ("rejection_reason", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="gov_exports", to="companies.company"
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "document_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="exports",
+                        to="gov_export.govdocumenttype",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Državni export',
-                'verbose_name_plural': 'Državni exporti',
-                'ordering': ['-created_at'],
+                "verbose_name": "Državni export",
+                "verbose_name_plural": "Državni exporti",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='GovExportLog',
+            name="GovExportLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('step', models.CharField(max_length=20)),
-                ('status', models.CharField(choices=[('ok', 'OK'), ('error', 'Error'), ('skip', 'Skip')], max_length=10)),
-                ('message', models.TextField(blank=True)),
-                ('duration_ms', models.PositiveIntegerField(default=0)),
-                ('actor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('export', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='logs', to='gov_export.govexport')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("step", models.CharField(max_length=20)),
+                (
+                    "status",
+                    models.CharField(choices=[("ok", "OK"), ("error", "Error"), ("skip", "Skip")], max_length=10),
+                ),
+                ("message", models.TextField(blank=True)),
+                ("duration_ms", models.PositiveIntegerField(default=0)),
+                (
+                    "actor",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "export",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="logs", to="gov_export.govexport"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['timestamp'],
+                "ordering": ["timestamp"],
             },
         ),
         migrations.AddField(
-            model_name='govdocumenttype',
-            name='institution',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='document_types', to='gov_export.govinstitution'),
+            model_name="govdocumenttype",
+            name="institution",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="document_types",
+                to="gov_export.govinstitution",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='govdocumenttype',
-            unique_together={('institution', 'code')},
+            name="govdocumenttype",
+            unique_together={("institution", "code")},
         ),
     ]

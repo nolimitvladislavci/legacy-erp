@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('fiskalizacija', '0001_initial'),
+        ("fiskalizacija", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='cert_expires_at',
-            field=models.DateTimeField(blank=True, help_text='Automatski iz P12 pri uploadu', null=True, verbose_name='Certifikat istječe'),
+            model_name="fiscalconfig",
+            name="cert_expires_at",
+            field=models.DateTimeField(
+                blank=True, help_text="Automatski iz P12 pri uploadu", null=True, verbose_name="Certifikat istječe"
+            ),
         ),
         migrations.AddField(
-            model_name='fiscalconfig',
-            name='cert_subject',
-            field=models.CharField(blank=True, default='', max_length=200, verbose_name='Certifikat Subject'),
+            model_name="fiscalconfig",
+            name="cert_subject",
+            field=models.CharField(blank=True, default="", max_length=200, verbose_name="Certifikat Subject"),
         ),
     ]

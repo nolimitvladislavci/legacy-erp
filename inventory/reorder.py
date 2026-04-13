@@ -14,6 +14,7 @@ Formula:
 Requires minimum 90 days of StockMovement data to produce
 meaningful predictions. Returns 'insufficient_data' flag otherwise.
 """
+
 from datetime import timedelta
 from decimal import Decimal
 
@@ -21,14 +22,13 @@ from django.db.models import Sum
 from django.utils import timezone
 
 # Configurable defaults
-MIN_DATA_DAYS = 90       # Minimum days of movement history required
-LOOKBACK_DAYS = 90       # Days to look back for avg consumption
-LEAD_TIME_DAYS = 7       # Default supplier lead time
-SAFETY_FACTOR = Decimal('1.5')  # Safety stock multiplier
+MIN_DATA_DAYS = 90  # Minimum days of movement history required
+LOOKBACK_DAYS = 90  # Days to look back for avg consumption
+LEAD_TIME_DAYS = 7  # Default supplier lead time
+SAFETY_FACTOR = Decimal("1.5")  # Safety stock multiplier
 
 
-def predict_reorder(item, lookback_days=LOOKBACK_DAYS, lead_time_days=LEAD_TIME_DAYS,
-                    safety_factor=SAFETY_FACTOR):
+def predict_reorder(item, lookback_days=LOOKBACK_DAYS, lead_time_days=LEAD_TIME_DAYS, safety_factor=SAFETY_FACTOR):
     """
     Predict reorder needs for a single InventoryItem.
 
@@ -48,76 +48,80 @@ def predict_reorder(item, lookback_days=LOOKBACK_DAYS, lead_time_days=LEAD_TIME_
     # Check data span
     movements = StockMovement.objects.filter(
         item=item,
-        movement_type='out',
+        movement_type="out",
         created_at__gte=cutoff,
     )
 
-    first_movement = StockMovement.objects.filter(
-        item=item,
-        movement_type='out',
-    ).order_by('created_at').first()
+    first_movement = (
+        StockMovement.objects.filter(
+            item=item,
+            movement_type="out",
+        )
+        .order_by("created_at")
+        .first()
+    )
 
     if not first_movement:
         return {
-            'insufficient_data': True,
-            'reason': 'Nema izlaznih kretanja za ovaj artikl.',
-            'avg_daily': Decimal('0'),
-            'days_left': None,
-            'reorder_point': Decimal('0'),
-            'suggested_qty': Decimal('0'),
-            'urgency': 'ok',
+            "insufficient_data": True,
+            "reason": "Nema izlaznih kretanja za ovaj artikl.",
+            "avg_daily": Decimal("0"),
+            "days_left": None,
+            "reorder_point": Decimal("0"),
+            "suggested_qty": Decimal("0"),
+            "urgency": "ok",
         }
 
     data_span = (now - first_movement.created_at).days
     if data_span < MIN_DATA_DAYS:
         return {
-            'insufficient_data': True,
-            'reason': f'Nedovoljno podataka ({data_span} dana, potrebno min. {MIN_DATA_DAYS}).',
-            'avg_daily': Decimal('0'),
-            'days_left': None,
-            'reorder_point': Decimal('0'),
-            'suggested_qty': Decimal('0'),
-            'urgency': 'ok',
+            "insufficient_data": True,
+            "reason": f"Nedovoljno podataka ({data_span} dana, potrebno min. {MIN_DATA_DAYS}).",
+            "avg_daily": Decimal("0"),
+            "days_left": None,
+            "reorder_point": Decimal("0"),
+            "suggested_qty": Decimal("0"),
+            "urgency": "ok",
         }
 
     # Compute average daily consumption
-    total_out = movements.aggregate(total=Sum('quantity'))['total'] or Decimal('0')
+    total_out = movements.aggregate(total=Sum("quantity"))["total"] or Decimal("0")
     actual_days = max((now - cutoff).days, 1)
     avg_daily = total_out / actual_days
 
     if avg_daily <= 0:
         return {
-            'insufficient_data': False,
-            'avg_daily': Decimal('0'),
-            'days_left': None,
-            'reorder_point': Decimal('0'),
-            'suggested_qty': Decimal('0'),
-            'urgency': 'ok',
+            "insufficient_data": False,
+            "avg_daily": Decimal("0"),
+            "days_left": None,
+            "reorder_point": Decimal("0"),
+            "suggested_qty": Decimal("0"),
+            "urgency": "ok",
         }
 
     # Predictions
     current_qty = item.quantity
     days_left = int(current_qty / avg_daily) if avg_daily > 0 else None
     reorder_point = avg_daily * lead_time_days * safety_factor
-    suggested_qty = max(reorder_point - current_qty, Decimal('0'))
+    suggested_qty = max(reorder_point - current_qty, Decimal("0"))
 
     # Urgency
     if current_qty <= 0:
-        urgency = 'critical'
+        urgency = "critical"
     elif days_left is not None and days_left <= lead_time_days:
-        urgency = 'critical'
+        urgency = "critical"
     elif days_left is not None and days_left <= lead_time_days * 2:
-        urgency = 'warning'
+        urgency = "warning"
     else:
-        urgency = 'ok'
+        urgency = "ok"
 
     return {
-        'insufficient_data': False,
-        'avg_daily': avg_daily.quantize(Decimal('0.01')),
-        'days_left': days_left,
-        'reorder_point': reorder_point.quantize(Decimal('0.01')),
-        'suggested_qty': suggested_qty.quantize(Decimal('0.01')),
-        'urgency': urgency,
+        "insufficient_data": False,
+        "avg_daily": avg_daily.quantize(Decimal("0.01")),
+        "days_left": days_left,
+        "reorder_point": reorder_point.quantize(Decimal("0.01")),
+        "suggested_qty": suggested_qty.quantize(Decimal("0.01")),
+        "urgency": urgency,
     }
 
 
@@ -135,24 +139,26 @@ def reorder_report(company, top_n=20):
 
     for item in items:
         prediction = predict_reorder(item)
-        if prediction['insufficient_data']:
+        if prediction["insufficient_data"]:
             insufficient_count += 1
             continue
-        if prediction['urgency'] in ('critical', 'warning'):
-            results.append({
-                'item': item,
-                **prediction,
-            })
+        if prediction["urgency"] in ("critical", "warning"):
+            results.append(
+                {
+                    "item": item,
+                    **prediction,
+                }
+            )
 
     # Sort: critical first, then warning, then by days_left ascending
-    urgency_order = {'critical': 0, 'warning': 1, 'ok': 2}
-    results.sort(key=lambda r: (urgency_order[r['urgency']], r['days_left'] or 999))
+    urgency_order = {"critical": 0, "warning": 1, "ok": 2}
+    results.sort(key=lambda r: (urgency_order[r["urgency"]], r["days_left"] or 999))
 
     return {
-        'items': results[:top_n],
-        'total_items': items.count(),
-        'insufficient_count': insufficient_count,
-        'has_enough_data': insufficient_count < items.count(),
+        "items": results[:top_n],
+        "total_items": items.count(),
+        "insufficient_count": insufficient_count,
+        "has_enough_data": insufficient_count < items.count(),
     }
 
 
@@ -160,6 +166,7 @@ def reorder_report(company, top_n=20):
 # PREDICTIVE ANALYTICS ENGINE — Phase 2
 # Weighted moving average demand prediction + Auto PO generation
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 def predict_weekly_demand(item, weeks_ahead=2):
     """
@@ -178,13 +185,13 @@ def predict_weekly_demand(item, weeks_ahead=2):
     daily_out = (
         StockMovement.objects.filter(
             item=item,
-            movement_type='out',
+            movement_type="out",
             created_at__gte=lookback,
         )
-        .extra(select={'day': 'DATE(created_at)'})
-        .values('day')
-        .annotate(total=Sum('quantity'))
-        .order_by('day')
+        .extra(select={"day": "DATE(created_at)"})
+        .values("day")
+        .annotate(total=Sum("quantity"))
+        .order_by("day")
     )
 
     if not daily_out:
@@ -192,25 +199,32 @@ def predict_weekly_demand(item, weeks_ahead=2):
 
     # Calculate weighted average (recent days get 2x weight)
     mid_point = now - timedelta(days=45)
-    total_weighted = Decimal('0')
-    total_weight = Decimal('0')
+    total_weighted = Decimal("0")
+    total_weight = Decimal("0")
 
     for entry in daily_out:
         from datetime import datetime as _dt
-        day = entry['day']
+
+        day = entry["day"]
         if isinstance(day, str):
-            day = _dt.strptime(day, '%Y-%m-%d').date()
-        weight = Decimal('2') if day >= mid_point.date() else Decimal('1')
-        total_weighted += abs(entry['total']) * weight
+            day = _dt.strptime(day, "%Y-%m-%d").date()
+        weight = Decimal("2") if day >= mid_point.date() else Decimal("1")
+        total_weighted += abs(entry["total"]) * weight
         total_weight += weight
 
     if total_weight == 0:
         return None
 
     # Count actual days in period
-    first_movement = StockMovement.objects.filter(
-        item=item, movement_type='out', created_at__gte=lookback,
-    ).order_by('created_at').first()
+    first_movement = (
+        StockMovement.objects.filter(
+            item=item,
+            movement_type="out",
+            created_at__gte=lookback,
+        )
+        .order_by("created_at")
+        .first()
+    )
 
     if not first_movement:
         return None
@@ -221,14 +235,14 @@ def predict_weekly_demand(item, weeks_ahead=2):
     weekly_demand = avg_daily * 7
 
     return {
-        'avg_daily': round(avg_daily, 2),
-        'weekly_demand': round(weekly_demand, 2),
-        'predicted_demand': round(weekly_demand * weeks_ahead, 2),
-        'weeks_ahead': weeks_ahead,
-        'current_stock': item.quantity,
-        'days_of_stock': int(item.quantity / avg_daily) if avg_daily > 0 else 999,
-        'will_stockout': item.quantity < (weekly_demand * weeks_ahead),
-        'stockout_date': (now + timedelta(days=int(item.quantity / avg_daily))).date() if avg_daily > 0 else None,
+        "avg_daily": round(avg_daily, 2),
+        "weekly_demand": round(weekly_demand, 2),
+        "predicted_demand": round(weekly_demand * weeks_ahead, 2),
+        "weeks_ahead": weeks_ahead,
+        "current_stock": item.quantity,
+        "days_of_stock": int(item.quantity / avg_daily) if avg_daily > 0 else 999,
+        "will_stockout": item.quantity < (weekly_demand * weeks_ahead),
+        "stockout_date": (now + timedelta(days=int(item.quantity / avg_daily))).date() if avg_daily > 0 else None,
     }
 
 
@@ -256,8 +270,9 @@ def generate_draft_po(company, supplier=None, items=None):
     if items is None:
         report = reorder_report(company, top_n=50)
         items_to_order = [
-            r for r in report['items']
-            if r['urgency'] in ('critical', 'warning') and r.get('suggested_qty', Decimal('0')) > 0
+            r
+            for r in report["items"]
+            if r["urgency"] in ("critical", "warning") and r.get("suggested_qty", Decimal("0")) > 0
         ]
     else:
         items_to_order = items
@@ -270,7 +285,7 @@ def generate_draft_po(company, supplier=None, items=None):
     for r in items_to_order:
         # Support both dict (from reorder_report) and raw item objects
         if isinstance(r, dict):
-            item_id = r.get('item_id') or (r['item'].pk if 'item' in r and hasattr(r['item'], 'pk') else None)
+            item_id = r.get("item_id") or (r["item"].pk if "item" in r and hasattr(r["item"], "pk") else None)
             if not item_id:
                 continue
             try:
@@ -280,10 +295,10 @@ def generate_draft_po(company, supplier=None, items=None):
                     item = InventoryItem.objects.get(pk=item_id)
                 except InventoryItem.DoesNotExist:
                     continue
-            suggested = Decimal(str(r.get('suggested_qty', r.get('reorder_point', 10))))
+            suggested = Decimal(str(r.get("suggested_qty", r.get("reorder_point", 10))))
         else:
             item = r
-            suggested = Decimal('10')
+            suggested = Decimal("10")
 
         sup = item.supplier
         if supplier and sup != supplier:
@@ -292,52 +307,57 @@ def generate_draft_po(company, supplier=None, items=None):
             continue
 
         if sup.pk not in by_supplier:
-            by_supplier[sup.pk] = {'supplier': sup, 'items': []}
-        by_supplier[sup.pk]['items'].append({
-            'item': item,
-            'qty': suggested,
-        })
+            by_supplier[sup.pk] = {"supplier": sup, "items": []}
+        by_supplier[sup.pk]["items"].append(
+            {
+                "item": item,
+                "qty": suggested,
+            }
+        )
 
     # Create PO per supplier
     for sup_id, data in by_supplier.items():
-        sup = data['supplier']
+        sup = data["supplier"]
         po = PurchaseOrder(
             company=company,
             supplier=sup,
-            status='draft',
-            priority='normal',
+            status="draft",
+            priority="normal",
             order_date=today,
             expected_delivery=today + timedelta(days=7),
-            notes=f'Automatski generirano \u2014 Prediktivna analiza {today:%d.%m.%Y}',
+            notes=f"Automatski generirano \u2014 Prediktivna analiza {today:%d.%m.%Y}",
         )
         po.po_number = po.generate_po_number()
         po.save()
 
-        for entry in data['items']:
-            item = entry['item']
-            qty = entry['qty']
+        for entry in data["items"]:
+            item = entry["item"]
+            qty = entry["qty"]
 
             # Try to get price from SupplierPriceList
-            price_entry = SupplierPriceList.objects.filter(
-                company=company,
-                supplier=sup,
-                inventory_item=item,
-                valid_from__lte=today,
-            ).filter(
-                Q(valid_until__isnull=True) | Q(valid_until__gte=today)
-            ).order_by('-valid_from').first()
+            price_entry = (
+                SupplierPriceList.objects.filter(
+                    company=company,
+                    supplier=sup,
+                    inventory_item=item,
+                    valid_from__lte=today,
+                )
+                .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+                .order_by("-valid_from")
+                .first()
+            )
 
-            unit_price = price_entry.agreed_price if price_entry else (item.purchase_price or Decimal('0'))
+            unit_price = price_entry.agreed_price if price_entry else (item.purchase_price or Decimal("0"))
 
             PurchaseOrderItem.objects.create(
                 purchase_order=po,
                 inventory_item=item,
                 description=item.name,
-                sku=item.sku or '',
+                sku=item.sku or "",
                 quantity=qty,
-                unit=item.unit or 'kom',
+                unit=item.unit or "kom",
                 unit_price=unit_price,
-                tax_rate=Decimal('25.00'),
+                tax_rate=Decimal("25.00"),
             )
 
         po.recalculate()

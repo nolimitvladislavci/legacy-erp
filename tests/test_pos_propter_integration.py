@@ -5,6 +5,7 @@ Pokretanje:
     cd /var/www/fina-connect
     python manage.py test tests.test_pos_propter_integration -v2
 """
+
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -84,15 +85,21 @@ class POSMathAndPaymentTest(TestCase):
         receipt = create_receipt(session=session)
 
         add_receipt_item(
-            receipt=receipt, inventory_item_id=None,
-            description="Pivo", quantity=Decimal("2"),
-            unit_price=Decimal("3.00"), tax_rate=Decimal("25"),
+            receipt=receipt,
+            inventory_item_id=None,
+            description="Pivo",
+            quantity=Decimal("2"),
+            unit_price=Decimal("3.00"),
+            tax_rate=Decimal("25"),
             discount_percent=Decimal("10"),
         )
         add_receipt_item(
-            receipt=receipt, inventory_item_id=None,
-            description="Pizza", quantity=Decimal("1"),
-            unit_price=Decimal("10.00"), tax_rate=Decimal("5"),
+            receipt=receipt,
+            inventory_item_id=None,
+            description="Pizza",
+            quantity=Decimal("1"),
+            unit_price=Decimal("10.00"),
+            tax_rate=Decimal("5"),
         )
 
         receipt.refresh_from_db()
@@ -109,9 +116,12 @@ class POSMathAndPaymentTest(TestCase):
         receipt = create_receipt(session=session)
 
         add_receipt_item(
-            receipt=receipt, inventory_item_id=None,
-            description="Artikl A", quantity=Decimal("3"),
-            unit_price=Decimal("5.00"), tax_rate=Decimal("25"),
+            receipt=receipt,
+            inventory_item_id=None,
+            description="Artikl A",
+            quantity=Decimal("3"),
+            unit_price=Decimal("5.00"),
+            tax_rate=Decimal("25"),
         )
 
         receipt.refresh_from_db()
@@ -126,9 +136,12 @@ class POSMathAndPaymentTest(TestCase):
         receipt = create_receipt(session=session)
 
         add_receipt_item(
-            receipt=receipt, inventory_item_id=None,
-            description="Kava", quantity=Decimal("1"),
-            unit_price=Decimal("2.00"), tax_rate=Decimal("25"),
+            receipt=receipt,
+            inventory_item_id=None,
+            description="Kava",
+            quantity=Decimal("1"),
+            unit_price=Decimal("2.00"),
+            tax_rate=Decimal("25"),
         )
 
         receipt.refresh_from_db()
@@ -171,17 +184,25 @@ class PropterAggregationTest(TestCase):
         period = BillingPeriod.get_or_create_current(self.company)
 
         Otpremnica.objects.create(
-            company=self.company, billing_period=period,
+            company=self.company,
+            billing_period=period,
             issue_date="2026-03-01",
-            recipient_name="Kupac A", recipient_oib="44444444444",
-            subtotal=Decimal("100.00"), tax_amount=Decimal("25.00"), total=Decimal("125.00"),
+            recipient_name="Kupac A",
+            recipient_oib="44444444444",
+            subtotal=Decimal("100.00"),
+            tax_amount=Decimal("25.00"),
+            total=Decimal("125.00"),
             status=Otpremnica.Status.ISSUED,
         )
         Otpremnica.objects.create(
-            company=self.company, billing_period=period,
+            company=self.company,
+            billing_period=period,
             issue_date="2026-03-15",
-            recipient_name="Kupac A", recipient_oib="44444444444",
-            subtotal=Decimal("50.00"), tax_amount=Decimal("2.50"), total=Decimal("52.50"),
+            recipient_name="Kupac A",
+            recipient_oib="44444444444",
+            subtotal=Decimal("50.00"),
+            tax_amount=Decimal("2.50"),
+            total=Decimal("52.50"),
             status=Otpremnica.Status.ISSUED,
         )
 
@@ -199,29 +220,43 @@ class PropterAggregationTest(TestCase):
         period = BillingPeriod.get_or_create_current(self.company)
 
         otp1 = Otpremnica.objects.create(
-            company=self.company, billing_period=period,
+            company=self.company,
+            billing_period=period,
             issue_date="2026-03-01",
-            recipient_name="Restoran X", recipient_oib="55555555555",
-            subtotal=Decimal("100.00"), tax_amount=Decimal("25.00"), total=Decimal("125.00"),
+            recipient_name="Restoran X",
+            recipient_oib="55555555555",
+            subtotal=Decimal("100.00"),
+            tax_amount=Decimal("25.00"),
+            total=Decimal("125.00"),
             status=Otpremnica.Status.ISSUED,
         )
         OtpremnicaItem.objects.create(
-            otpremnica=otp1, description="Odojak 10kg",
-            quantity=Decimal("10"), unit_price=Decimal("10.00"),
-            tax_rate=Decimal("25"), line_total=Decimal("100.00"),
+            otpremnica=otp1,
+            description="Odojak 10kg",
+            quantity=Decimal("10"),
+            unit_price=Decimal("10.00"),
+            tax_rate=Decimal("25"),
+            line_total=Decimal("100.00"),
         )
 
         otp2 = Otpremnica.objects.create(
-            company=self.company, billing_period=period,
+            company=self.company,
+            billing_period=period,
             issue_date="2026-03-15",
-            recipient_name="Restoran X", recipient_oib="55555555555",
-            subtotal=Decimal("50.00"), tax_amount=Decimal("2.50"), total=Decimal("52.50"),
+            recipient_name="Restoran X",
+            recipient_oib="55555555555",
+            subtotal=Decimal("50.00"),
+            tax_amount=Decimal("2.50"),
+            total=Decimal("52.50"),
             status=Otpremnica.Status.ISSUED,
         )
         OtpremnicaItem.objects.create(
-            otpremnica=otp2, description="Kruh 50 kom",
-            quantity=Decimal("50"), unit_price=Decimal("1.00"),
-            tax_rate=Decimal("5"), line_total=Decimal("50.00"),
+            otpremnica=otp2,
+            description="Kruh 50 kom",
+            quantity=Decimal("50"),
+            unit_price=Decimal("1.00"),
+            tax_rate=Decimal("5"),
+            line_total=Decimal("50.00"),
         )
 
         # Zatvori period
@@ -262,16 +297,23 @@ class PropterAggregationTest(TestCase):
         period = BillingPeriod.get_or_create_current(self.company)
 
         otp = Otpremnica.objects.create(
-            company=self.company, billing_period=period,
+            company=self.company,
+            billing_period=period,
             issue_date="2026-03-05",
-            recipient_name="Kupac Z", recipient_oib="66666666666",
-            subtotal=Decimal("200.00"), tax_amount=Decimal("50.00"), total=Decimal("250.00"),
+            recipient_name="Kupac Z",
+            recipient_oib="66666666666",
+            subtotal=Decimal("200.00"),
+            tax_amount=Decimal("50.00"),
+            total=Decimal("250.00"),
             status=Otpremnica.Status.ISSUED,
         )
         OtpremnicaItem.objects.create(
-            otpremnica=otp, description="Vino 20L",
-            quantity=Decimal("20"), unit_price=Decimal("10.00"),
-            tax_rate=Decimal("25"), line_total=Decimal("200.00"),
+            otpremnica=otp,
+            description="Vino 20L",
+            quantity=Decimal("20"),
+            unit_price=Decimal("10.00"),
+            tax_rate=Decimal("25"),
+            line_total=Decimal("200.00"),
         )
 
         close_period(period, self.user)

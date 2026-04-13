@@ -5,13 +5,14 @@ Doktrina: "Blockchain razina" — svaki unos prolazi kroz validaciju
 prije nego dođe do baze. Ni jedan script, ni jedan SQL payload,
 ni jedna nelegalna vrijednost ne smije ući.
 """
+
 import html
 import logging
 import re
 
 from django.core.exceptions import ValidationError
 
-logger = logging.getLogger('memio_pet.security')
+logger = logging.getLogger("memio_pet.security")
 
 # ─── Dozvoljena slova po tipu polja ────────────────────────────────────────
 
@@ -32,23 +33,20 @@ _EAR_RE = re.compile(r"^[A-Z0-9\-_]{1,30}$", re.IGNORECASE)
 
 # Slobodan tekst (opis, napomene): bez HTML taga i JS
 _SCRIPT_RE = re.compile(
-    r"(<script|</script|javascript:|on\w+\s*=|<iframe|<object|<embed|data:text/html)",
-    re.IGNORECASE
+    r"(<script|</script|javascript:|on\w+\s*=|<iframe|<object|<embed|data:text/html)", re.IGNORECASE
 )
 
 # SQL injection patterns
 _SQL_RE = re.compile(
-    r"(\bUNION\b|\bSELECT\b|\bDROP\b|\bINSERT\b|\bDELETE\b|\bEXEC\b|--|;--|\bOR\b\s+\d+=\d+)",
-    re.IGNORECASE
+    r"(\bUNION\b|\bSELECT\b|\bDROP\b|\bINSERT\b|\bDELETE\b|\bEXEC\b|--|;--|\bOR\b\s+\d+=\d+)", re.IGNORECASE
 )
 
 # IP adresa
-_IP_RE = re.compile(
-    r"^(\d{1,3}\.){3}\d{1,3}$|^[0-9a-fA-F:]{3,39}$"
-)
+_IP_RE = re.compile(r"^(\d{1,3}\.){3}\d{1,3}$|^[0-9a-fA-F:]{3,39}$")
 
 
 # ─── Sanitizacija ────────────────────────────────────────────────────────────
+
 
 def sanitize_text(value: str, max_len: int = 500) -> str:
     """
@@ -58,7 +56,7 @@ def sanitize_text(value: str, max_len: int = 500) -> str:
     - Skrati na max_len
     """
     if not value:
-        return ''
+        return ""
     v = html.escape(value.strip())
     return v[:max_len]
 
@@ -66,11 +64,12 @@ def sanitize_text(value: str, max_len: int = 500) -> str:
 def sanitize_name(value: str, max_len: int = 200) -> str:
     """Sanitizira ime — strip i skraćivanje."""
     if not value:
-        return ''
+        return ""
     return value.strip()[:max_len]
 
 
 # ─── Validatori (Django ValidationError) ────────────────────────────────────
+
 
 def validate_no_scripts(value: str):
     """Zabrani HTML/JS injection u bilo koje tekstualno polje."""
@@ -78,9 +77,7 @@ def validate_no_scripts(value: str):
         return
     if _SCRIPT_RE.search(value):
         logger.warning("SECURITY: Script injection pokušaj: %r", value[:100])
-        raise ValidationError(
-            "Nedozvoljeni sadržaj u polju. HTML i skriptni kod nisu dozvoljeni."
-        )
+        raise ValidationError("Nedozvoljeni sadržaj u polju. HTML i skriptni kod nisu dozvoljeni.")
 
 
 def validate_no_sql(value: str):
@@ -89,9 +86,7 @@ def validate_no_sql(value: str):
         return
     if _SQL_RE.search(value):
         logger.warning("SECURITY: SQL injection pokušaj: %r", value[:100])
-        raise ValidationError(
-            "Nedozvoljeni sadržaj u polju."
-        )
+        raise ValidationError("Nedozvoljeni sadržaj u polju.")
 
 
 def validate_oib_format(value: str):
@@ -142,6 +137,7 @@ def validate_free_text(value: str):
 
 # ─── API ulazna sanitizacija (za views) ─────────────────────────────────────
 
+
 def clean_api_input(data: dict) -> dict:
     """
     Sanitizira cijeli API payload prije obrade.
@@ -153,12 +149,17 @@ def clean_api_input(data: dict) -> dict:
             # Strip whitespace
             v = value.strip()
             # Ukloni null bytes
-            v = v.replace('\x00', '')
+            v = v.replace("\x00", "")
             # Skraćivanje na razumne limite
             limits = {
-                'name': 120, 'email': 254, 'oib': 11,
-                'chip_number': 20, 'breed': 100, 'notes': 2000,
-                'color_description': 200, 'source': 50,
+                "name": 120,
+                "email": 254,
+                "oib": 11,
+                "chip_number": 20,
+                "breed": 100,
+                "notes": 2000,
+                "color_description": 200,
+                "source": 50,
             }
             max_len = limits.get(key, 500)
             v = v[:max_len]

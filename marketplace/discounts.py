@@ -9,23 +9,24 @@ Logika:
 Primjena: uzima se NAJVECI od (partner_tier, category_discount), pa se DODAJE volume_discount.
 Maksimalni ukupni rabat: 50% (safety cap).
 """
+
 from decimal import Decimal
 
 from django.utils import timezone
 
 TIER_DISCOUNTS = {
-    'standard': Decimal('0'),
-    'bronze': Decimal('10'),
-    'silver': Decimal('15'),
-    'gold': Decimal('20'),
-    'platinum': Decimal('25'),
-    'custom': None,  # uses PartnerDiscount.discount_percent
+    "standard": Decimal("0"),
+    "bronze": Decimal("10"),
+    "silver": Decimal("15"),
+    "gold": Decimal("20"),
+    "platinum": Decimal("25"),
+    "custom": None,  # uses PartnerDiscount.discount_percent
 }
 
-MAX_DISCOUNT = Decimal('50')
+MAX_DISCOUNT = Decimal("50")
 
 
-def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
+def get_discount_for_item(product, buyer_company, quantity=Decimal("1")):
     """
     Calculate total discount % for a product given buyer and quantity.
 
@@ -47,8 +48,8 @@ def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
     seller = product.seller_company
 
     # 1. Partner tier discount
-    partner_pct = Decimal('0')
-    tier = 'standard'
+    partner_pct = Decimal("0")
+    tier = "standard"
     try:
         pd = PartnerDiscount.objects.get(
             seller_company=seller,
@@ -61,23 +62,21 @@ def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
             pd = None
         else:
             tier = pd.tier
-            if pd.tier == 'custom':
+            if pd.tier == "custom":
                 partner_pct = pd.discount_percent
             else:
-                partner_pct = TIER_DISCOUNTS.get(pd.tier, Decimal('0'))
+                partner_pct = TIER_DISCOUNTS.get(pd.tier, Decimal("0"))
     except PartnerDiscount.DoesNotExist:
         pass
 
     # 2. Category discount (specific > general)
-    cat_pct = Decimal('0')
+    cat_pct = Decimal("0")
     if product.category:
         cat_discounts = CategoryDiscount.objects.filter(
             seller_company=seller,
             category=product.category,
             is_active=True,
-        ).filter(
-            models_q_valid(today)
-        )
+        ).filter(models_q_valid(today))
         # Specific buyer first, then general (buyer=None)
         for cd in cat_discounts:
             if cd.buyer_company == buyer_company:
@@ -90,12 +89,12 @@ def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
     base_pct = max(partner_pct, cat_pct)
 
     # 3. Volume discount (additional, stacks on top)
-    vol_pct = Decimal('0')
+    vol_pct = Decimal("0")
     vol_qs = VolumeDiscount.objects.filter(
         seller_company=seller,
         is_active=True,
         min_quantity__lte=quantity,
-    ).order_by('-min_quantity')
+    ).order_by("-min_quantity")
 
     # Product-specific volume discount first
     product_vol = vol_qs.filter(product=product).first()
@@ -115,27 +114,27 @@ def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
 
     # Price calculation
     original = product.unit_price
-    savings = original * total_pct / Decimal('100')
+    savings = original * total_pct / Decimal("100")
     discounted = original - savings
 
     return {
-        'partner_percent': partner_pct,
-        'category_percent': cat_pct,
-        'volume_percent': vol_pct,
-        'total_percent': total_pct,
-        'tier': tier,
-        'original_price': original,
-        'discounted_price': discounted.quantize(Decimal('0.01')),
-        'savings_per_unit': savings.quantize(Decimal('0.01')),
+        "partner_percent": partner_pct,
+        "category_percent": cat_pct,
+        "volume_percent": vol_pct,
+        "total_percent": total_pct,
+        "tier": tier,
+        "original_price": original,
+        "discounted_price": discounted.quantize(Decimal("0.01")),
+        "savings_per_unit": savings.quantize(Decimal("0.01")),
     }
 
 
 def models_q_valid(today):
     """Return Q filter for date validity."""
     from django.db.models import Q
-    return (
-        (Q(valid_from__isnull=True) | Q(valid_from__lte=today)) &
-        (Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+
+    return (Q(valid_from__isnull=True) | Q(valid_from__lte=today)) & (
+        Q(valid_until__isnull=True) | Q(valid_until__gte=today)
     )
 
 
@@ -149,30 +148,30 @@ def get_cart_with_discounts(cart_items, buyer_company):
 
     enriched = []
     for item in cart_items:
-        product = MarketplaceProduct.objects.select_related(
-            'seller_company', 'category'
-        ).get(pk=item['product_id'])
+        product = MarketplaceProduct.objects.select_related("seller_company", "category").get(pk=item["product_id"])
 
-        qty = Decimal(str(item['qty']))
+        qty = Decimal(str(item["qty"]))
         disc = get_discount_for_item(product, buyer_company, qty)
 
         line_original = product.unit_price * qty
-        line_discounted = disc['discounted_price'] * qty
+        line_discounted = disc["discounted_price"] * qty
         line_savings = line_original - line_discounted
 
-        enriched.append({
-            **item,
-            'product': product,
-            'original_price': float(product.unit_price),
-            'discounted_price': float(disc['discounted_price']),
-            'discount_percent': float(disc['total_percent']),
-            'tier': disc['tier'],
-            'line_original': float(line_original),
-            'line_total': float(line_discounted),
-            'line_savings': float(line_savings),
-            'has_discount': disc['total_percent'] > 0,
-            'partner_pct': float(disc['partner_percent']),
-            'volume_pct': float(disc['volume_percent']),
-        })
+        enriched.append(
+            {
+                **item,
+                "product": product,
+                "original_price": float(product.unit_price),
+                "discounted_price": float(disc["discounted_price"]),
+                "discount_percent": float(disc["total_percent"]),
+                "tier": disc["tier"],
+                "line_original": float(line_original),
+                "line_total": float(line_discounted),
+                "line_savings": float(line_savings),
+                "has_discount": disc["total_percent"] > 0,
+                "partner_pct": float(disc["partner_percent"]),
+                "volume_pct": float(disc["volume_percent"]),
+            }
+        )
 
     return enriched

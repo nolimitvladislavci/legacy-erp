@@ -15,6 +15,7 @@ Audit: Ivan Brtan + Sonnet — 02.04.2026.
 Pravna provjera: 2 korekcije (PDV kava 25%, JOPPD min 2.000 EUR)
 e-Račun datum: potvrđen iz porezna.gov.hr (NN 89/25)
 """
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -197,7 +198,6 @@ Iznos iznad limita mora se platiti bezgotovinskim putem (virman, kartica, transa
 
 **Nije dozvoljeno:** Brisanje računa umjesto storniranja. Svaki izdan fiskalni račun mora imati vidljiv zapis — zakonska obveza čuvanja 11 godina.""",
     },
-
     # ── POS (5) ──────────────────────────────────────────────────────
     {
         "module": "pos",
@@ -298,7 +298,6 @@ Iznos iznad limita mora se platiti bezgotovinskim putem (virman, kartica, transa
 
 **PDV na napojnicu:** Napojnica je prihod zaposlenika — ne podliježe PDV-u. Na računu se iskazuje zasebno, bez PDV-a.""",
     },
-
     # ── INVOICING (4) ────────────────────────────────────────────────
     {
         "module": "invoicing",
@@ -388,7 +387,6 @@ Dokument koji prati robu pri isporuci. Nema PDV-a — to dolazi na R1 pri naplat
 
 **Praktično:** Ugostitelj koji iznajmljuje sobe — gostima koji plaćaju karticom ili gotovinom → fiskalni R. Agenciji koja plaća virmanom → eRačun (FA/R1 u UBL XML formatu).""",
     },
-
     # ── GENERAL (3) ──────────────────────────────────────────────────
     {
         "module": "general",
@@ -506,8 +504,8 @@ class Command(BaseCommand):
                     self.stdout.write(f"  UPDATED [{art['module']}] {title}")
 
         if options["run"]:
-            self.stdout.write(self.style.SUCCESS(
-                f"\nGotovo: {created} kreirano, {updated} ažurirano, {skipped} preskočeno."
-            ))
+            self.stdout.write(
+                self.style.SUCCESS(f"\nGotovo: {created} kreirano, {updated} ažurirano, {skipped} preskočeno.")
+            )
             total = KnowledgeArticle.objects.filter(is_active=True).count()
             self.stdout.write(f"Ukupno aktivnih KnowledgeArticle: {total}")

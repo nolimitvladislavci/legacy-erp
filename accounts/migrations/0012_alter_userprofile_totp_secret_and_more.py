@@ -5,20 +5,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0011_institutional_access'),
+        ("accounts", "0011_institutional_access"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='totp_secret',
-            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name='TOTP Secret'),
+            model_name="userprofile",
+            name="totp_secret",
+            field=core.fields.FernetEncryptedCharField(blank=True, verbose_name="TOTP Secret"),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='two_factor_secret',
+            model_name="userprofile",
+            name="two_factor_secret",
             field=core.fields.FernetEncryptedCharField(blank=True),
         ),
     ]

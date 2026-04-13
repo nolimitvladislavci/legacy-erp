@@ -6,15 +6,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('konto', '0005_alter_journalentry_unique_together'),
+        ("konto", "0005_alter_journalentry_unique_together"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ledgerline',
-            name='amount',
-            field=models.DecimalField(decimal_places=2, max_digits=14, validators=[django.core.validators.MinValueValidator(Decimal('0.01'))]),
+            model_name="ledgerline",
+            name="amount",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=14, validators=[django.core.validators.MinValueValidator(Decimal("0.01"))]
+            ),
         ),
     ]

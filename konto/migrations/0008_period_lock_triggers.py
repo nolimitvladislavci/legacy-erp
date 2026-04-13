@@ -58,9 +58,8 @@ DROP FUNCTION IF EXISTS check_period_lock_invoice();
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('konto', '0007_accountingperiod'),
+        ("konto", "0007_accountingperiod"),
     ]
 
     operations = [

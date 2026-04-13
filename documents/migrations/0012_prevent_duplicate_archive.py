@@ -5,16 +5,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0023_add_booking_theme'),
-        ('documents', '0011_remove_primkaitem_document_delete_primka_and_more'),
+        ("companies", "0023_add_booking_theme"),
+        ("documents", "0011_remove_primkaitem_document_delete_primka_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='arhivaentry',
-            constraint=models.UniqueConstraint(fields=('company', 'doc_number', 'source_type'), name='arhiva_unique_doc_per_company'),
+            model_name="arhivaentry",
+            constraint=models.UniqueConstraint(
+                fields=("company", "doc_number", "source_type"), name="arhiva_unique_doc_per_company"
+            ),
         ),
     ]

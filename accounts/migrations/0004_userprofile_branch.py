@@ -5,16 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0003_add_push_subscription'),
-        ('companies', '0005_companybranch'),
+        ("accounts", "0003_add_push_subscription"),
+        ("companies", "0005_companybranch"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='branch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='companies.companybranch', verbose_name='Podružnica'),
+            model_name="userprofile",
+            name="branch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="users",
+                to="companies.companybranch",
+                verbose_name="Podružnica",
+            ),
         ),
     ]

@@ -4,12 +4,13 @@ BORG Compliance Simulator — simulira financijski utjecaj regulatornih promjena
 Phase 1: PDV promjene — izracunaj delta na recurring invoices.
 Phase 2: LLM-driven simulacija za slozenije promjene.
 """
+
 import logging
 from decimal import Decimal
 
 from django.utils import timezone
 
-logger = logging.getLogger('borg.simulation')
+logger = logging.getLogger("borg.simulation")
 
 
 class ComplianceSimulator:
@@ -41,40 +42,38 @@ class ComplianceSimulator:
             company=company,
             date_issued__gte=three_months_ago,
             tax_percent=old_rate,
-            status__in=['SENT', 'PAID', 'OVERDUE', 'CONFIRMED', 'FISCALIZED'],
+            status__in=["SENT", "PAID", "OVERDUE", "CONFIRMED", "FISCALIZED"],
         )
 
-        total_subtotal = recent_invoices.aggregate(
-            total=models_Sum('subtotal')
-        )['total'] or Decimal('0')
+        total_subtotal = recent_invoices.aggregate(total=models_Sum("subtotal"))["total"] or Decimal("0")
 
         invoice_count = recent_invoices.count()
 
         # Calculate monthly average
-        monthly_subtotal = total_subtotal / Decimal('3')
+        monthly_subtotal = total_subtotal / Decimal("3")
 
         # Impact calculation
-        monthly_impact = monthly_subtotal * rate_diff / Decimal('100')
-        quarterly_impact = monthly_impact * Decimal('3')
+        monthly_impact = monthly_subtotal * rate_diff / Decimal("100")
+        quarterly_impact = monthly_impact * Decimal("3")
 
-        direction = 'increase' if rate_diff > 0 else 'decrease'
+        direction = "increase" if rate_diff > 0 else "decrease"
 
         details = (
-            f'Na temelju {invoice_count} faktura iz zadnja 3 mjeseca '
-            f'(prosjek {monthly_subtotal:.2f} EUR/mj neto), '
-            f'promjena PDV stope s {old_rate}% na {new_rate}% '
-            f'znaci {direction} od {abs(monthly_impact):.2f} EUR mjesecno.'
+            f"Na temelju {invoice_count} faktura iz zadnja 3 mjeseca "
+            f"(prosjek {monthly_subtotal:.2f} EUR/mj neto), "
+            f"promjena PDV stope s {old_rate}% na {new_rate}% "
+            f"znaci {direction} od {abs(monthly_impact):.2f} EUR mjesecno."
         )
 
         return {
-            'monthly_impact_eur': monthly_impact,
-            'quarterly_impact_eur': quarterly_impact,
-            'affected_invoices': invoice_count,
-            'direction': direction,
-            'details': details,
-            'old_rate': float(old_rate),
-            'new_rate': float(new_rate),
-            'effective_date': effective_date.isoformat() if effective_date else None,
+            "monthly_impact_eur": monthly_impact,
+            "quarterly_impact_eur": quarterly_impact,
+            "affected_invoices": invoice_count,
+            "direction": direction,
+            "details": details,
+            "old_rate": float(old_rate),
+            "new_rate": float(new_rate),
+            "effective_date": effective_date.isoformat() if effective_date else None,
         }
 
     def simulate_regulation_impact(self, company, regulatory_update):
@@ -87,11 +86,11 @@ class ComplianceSimulator:
         classifier = NNTenantClassifier()
         result = classifier.classify(regulatory_update, company)
 
-        if not result['relevant']:
+        if not result["relevant"]:
             return None
 
         # Check if it's a VAT change
-        if regulatory_update.category == 'VAT':
+        if regulatory_update.category == "VAT":
             # Try to extract rates from AI summary
             vat_result = self._try_vat_simulation(company, regulatory_update)
             if vat_result:
@@ -99,16 +98,18 @@ class ComplianceSimulator:
 
         # Generic impact assessment
         return {
-            'insight_type': 'regulation_impact',
-            'title': f'Utjecaj: {regulatory_update.title[:150]}',
-            'summary': result['impact_summary'],
-            'data': {
-                'severity': result['severity'],
-                'affected_modules': result['affected_modules'],
-                'nn_number': regulatory_update.nn_number,
-                'effective_date': regulatory_update.effective_date.isoformat() if regulatory_update.effective_date else None,
+            "insight_type": "regulation_impact",
+            "title": f"Utjecaj: {regulatory_update.title[:150]}",
+            "summary": result["impact_summary"],
+            "data": {
+                "severity": result["severity"],
+                "affected_modules": result["affected_modules"],
+                "nn_number": regulatory_update.nn_number,
+                "effective_date": regulatory_update.effective_date.isoformat()
+                if regulatory_update.effective_date
+                else None,
             },
-            'confidence_score': 0.6 if result['severity'] == 'action_required' else 0.4,
+            "confidence_score": 0.6 if result["severity"] == "action_required" else 0.4,
         }
 
     def _try_vat_simulation(self, company, regulatory_update):
@@ -128,23 +129,24 @@ def create_insight_from_simulation(company, sim_result, regulatory_update=None):
 
     insight = BorgInsight.objects.create(
         company=company,
-        insight_type=sim_result.get('insight_type', 'regulation_impact'),
-        title=sim_result['title'],
-        summary=sim_result['summary'],
-        data=sim_result.get('data', {}),
+        insight_type=sim_result.get("insight_type", "regulation_impact"),
+        title=sim_result["title"],
+        summary=sim_result["summary"],
+        data=sim_result.get("data", {}),
         regulatory_update=regulatory_update,
-        confidence_score=sim_result.get('confidence_score', 0.5),
+        confidence_score=sim_result.get("confidence_score", 0.5),
     )
 
     # Audit trail
     from borg_ops.audit_helpers import log_borg_audit
+
     log_borg_audit(
         company=company,
-        entry_type='REGULATORY',
-        summary=f'Insight generiran: {sim_result["title"][:100]}',
-        severity='INFO',
+        entry_type="REGULATORY",
+        summary=f"Insight generiran: {sim_result['title'][:100]}",
+        severity="INFO",
         regulatory_update=regulatory_update,
-        metadata={'insight_id': insight.pk, 'confidence': sim_result.get('confidence_score', 0.5)},
+        metadata={"insight_id": insight.pk, "confidence": sim_result.get("confidence_score", 0.5)},
     )
 
     return insight

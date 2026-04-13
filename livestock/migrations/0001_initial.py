@@ -6,143 +6,352 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0029_transport_module'),
+        ("companies", "0029_transport_module"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Field',
+            name="Field",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('naziv', models.CharField(max_length=100, verbose_name='Naziv parcele')),
-                ('katastarska_cestica', models.CharField(blank=True, max_length=50, verbose_name='Katastarska cestica')),
-                ('povrsina_ha', models.DecimalField(decimal_places=4, max_digits=8, verbose_name='Povrsina (ha)')),
-                ('tip_tla', models.CharField(blank=True, help_text='npr. ilovaca, pjeskovita ilovaca, cernozem', max_length=50, verbose_name='Tip tla')),
-                ('ph_tla', models.DecimalField(blank=True, decimal_places=1, max_digits=4, null=True, verbose_name='pH tla')),
-                ('geo_lat', models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
-                ('geo_lon', models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
-                ('is_organic', models.BooleanField(default=False, verbose_name='Ekoloska parcela')),
-                ('arkod_id', models.CharField(blank=True, help_text='Potreban za APPRRR poticaje', max_length=50, verbose_name='ARKOD ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fields', to='companies.company')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("naziv", models.CharField(max_length=100, verbose_name="Naziv parcele")),
+                (
+                    "katastarska_cestica",
+                    models.CharField(blank=True, max_length=50, verbose_name="Katastarska cestica"),
+                ),
+                ("povrsina_ha", models.DecimalField(decimal_places=4, max_digits=8, verbose_name="Povrsina (ha)")),
+                (
+                    "tip_tla",
+                    models.CharField(
+                        blank=True,
+                        help_text="npr. ilovaca, pjeskovita ilovaca, cernozem",
+                        max_length=50,
+                        verbose_name="Tip tla",
+                    ),
+                ),
+                (
+                    "ph_tla",
+                    models.DecimalField(blank=True, decimal_places=1, max_digits=4, null=True, verbose_name="pH tla"),
+                ),
+                ("geo_lat", models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
+                ("geo_lon", models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
+                ("is_organic", models.BooleanField(default=False, verbose_name="Ekoloska parcela")),
+                (
+                    "arkod_id",
+                    models.CharField(
+                        blank=True, help_text="Potreban za APPRRR poticaje", max_length=50, verbose_name="ARKOD ID"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="fields", to="companies.company"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Parcela',
-                'verbose_name_plural': 'Parcele',
-                'db_table': 'livestock_field',
-                'ordering': ['naziv'],
+                "verbose_name": "Parcela",
+                "verbose_name_plural": "Parcele",
+                "db_table": "livestock_field",
+                "ordering": ["naziv"],
             },
         ),
         migrations.CreateModel(
-            name='CropPlan',
+            name="CropPlan",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('godina', models.PositiveSmallIntegerField(verbose_name='Godina')),
-                ('kultura', models.CharField(choices=[('kukuruz', 'Kukuruz (zrno)'), ('kukuruz_silaza', 'Kukuruz (silaza)'), ('djetelina', 'Djetelina'), ('livada', 'Livada / Trava'), ('psenica', 'Psenica'), ('jecam', 'Jecam'), ('soja', 'Soja'), ('secerna_repa', 'Secerna repa'), ('suncokret', 'Suncokret'), ('ostalo', 'Ostalo')], max_length=30)),
-                ('sorta', models.CharField(blank=True, max_length=100, verbose_name='Sorta / Hibrid')),
-                ('status', models.CharField(choices=[('plan', 'U planu'), ('posijano', 'Posijano'), ('raste', 'Raste'), ('berba', 'U berbi'), ('zavrseno', 'Zavrseno'), ('propalo', 'Propalo')], default='plan', max_length=15)),
-                ('datum_sjetve', models.DateField(blank=True, null=True, verbose_name='Planirani datum sjetve')),
-                ('datum_berbe', models.DateField(blank=True, null=True, verbose_name='Planirani datum berbe')),
-                ('stvarni_datum_berbe', models.DateField(blank=True, null=True)),
-                ('planrani_prinos_t_ha', models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='Planirani prinos (t/ha)')),
-                ('stvarni_prinos_t', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Stvarni prinos (t)')),
-                ('za_vlastite_potrebe', models.BooleanField(default=True, verbose_name='Za vlastite potrebe (stoka)')),
-                ('za_prodaju', models.BooleanField(default=False, verbose_name='Za prodaju')),
-                ('procijenjeni_visak_t', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Procijenjeni visak za prodaju (t)')),
-                ('is_organic', models.BooleanField(default=False)),
-                ('gnojidba_opis', models.CharField(blank=True, max_length=255, verbose_name='Gnojidba (sredstvo, kolicina)')),
-                ('zastita_opis', models.CharField(blank=True, max_length=255, verbose_name='Zastita bilja (sredstvo)')),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='crop_plans', to='companies.company')),
-                ('parcela', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='crop_plans', to='livestock.field')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("godina", models.PositiveSmallIntegerField(verbose_name="Godina")),
+                (
+                    "kultura",
+                    models.CharField(
+                        choices=[
+                            ("kukuruz", "Kukuruz (zrno)"),
+                            ("kukuruz_silaza", "Kukuruz (silaza)"),
+                            ("djetelina", "Djetelina"),
+                            ("livada", "Livada / Trava"),
+                            ("psenica", "Psenica"),
+                            ("jecam", "Jecam"),
+                            ("soja", "Soja"),
+                            ("secerna_repa", "Secerna repa"),
+                            ("suncokret", "Suncokret"),
+                            ("ostalo", "Ostalo"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("sorta", models.CharField(blank=True, max_length=100, verbose_name="Sorta / Hibrid")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("plan", "U planu"),
+                            ("posijano", "Posijano"),
+                            ("raste", "Raste"),
+                            ("berba", "U berbi"),
+                            ("zavrseno", "Zavrseno"),
+                            ("propalo", "Propalo"),
+                        ],
+                        default="plan",
+                        max_length=15,
+                    ),
+                ),
+                ("datum_sjetve", models.DateField(blank=True, null=True, verbose_name="Planirani datum sjetve")),
+                ("datum_berbe", models.DateField(blank=True, null=True, verbose_name="Planirani datum berbe")),
+                ("stvarni_datum_berbe", models.DateField(blank=True, null=True)),
+                (
+                    "planrani_prinos_t_ha",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=6, null=True, verbose_name="Planirani prinos (t/ha)"
+                    ),
+                ),
+                (
+                    "stvarni_prinos_t",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Stvarni prinos (t)"
+                    ),
+                ),
+                ("za_vlastite_potrebe", models.BooleanField(default=True, verbose_name="Za vlastite potrebe (stoka)")),
+                ("za_prodaju", models.BooleanField(default=False, verbose_name="Za prodaju")),
+                (
+                    "procijenjeni_visak_t",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        max_digits=8,
+                        null=True,
+                        verbose_name="Procijenjeni visak za prodaju (t)",
+                    ),
+                ),
+                ("is_organic", models.BooleanField(default=False)),
+                (
+                    "gnojidba_opis",
+                    models.CharField(blank=True, max_length=255, verbose_name="Gnojidba (sredstvo, kolicina)"),
+                ),
+                ("zastita_opis", models.CharField(blank=True, max_length=255, verbose_name="Zastita bilja (sredstvo)")),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="crop_plans", to="companies.company"
+                    ),
+                ),
+                (
+                    "parcela",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="crop_plans",
+                        to="livestock.field",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Plan sjetve',
-                'verbose_name_plural': 'Planovi sjetve',
-                'db_table': 'livestock_crop_plan',
-                'ordering': ['-godina', 'kultura'],
+                "verbose_name": "Plan sjetve",
+                "verbose_name_plural": "Planovi sjetve",
+                "db_table": "livestock_crop_plan",
+                "ordering": ["-godina", "kultura"],
             },
         ),
         migrations.CreateModel(
-            name='Livestock',
+            name="Livestock",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ear_tag', models.CharField(db_index=True, help_text='HR format: HR + OIB + redni br', max_length=20, verbose_name='Broj usne markice')),
-                ('name', models.CharField(blank=True, max_length=50, verbose_name='Ime (opcionalno)')),
-                ('vrsta', models.CharField(choices=[('krava', 'Krava (muzara)'), ('junica', 'Junica'), ('tele', 'Tele'), ('bik', 'Bik'), ('vo', 'Vo (tov)')], default='krava', max_length=15)),
-                ('status', models.CharField(choices=[('aktivno', 'Aktivno'), ('gravidno', 'Gravidno'), ('zasuseno', 'Zasuseno'), ('tov', 'U tovu'), ('prodano', 'Prodano'), ('uginulo', 'Uginulo'), ('izluceno', 'Izluceno')], default='aktivno', max_length=15)),
-                ('date_of_birth', models.DateField(blank=True, null=True, verbose_name='Datum rodjenja')),
-                ('breed', models.CharField(blank=True, help_text='npr. Simentalac, Holstein, Siva', max_length=50, verbose_name='Pasmina')),
-                ('weight_kg', models.DecimalField(blank=True, decimal_places=1, max_digits=7, null=True, verbose_name='Tezina (kg)')),
-                ('avg_daily_milk_l', models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='Prosj. dnevna mlijecnost (L)')),
-                ('last_calving', models.DateField(blank=True, null=True, verbose_name='Zadnje teljenje')),
-                ('expected_calving', models.DateField(blank=True, null=True, verbose_name='Ocekivano teljenje')),
-                ('is_organic', models.BooleanField(default=False, verbose_name='Ekoloski uzgoj')),
-                ('organic_since', models.DateField(blank=True, null=True)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='livestock', to='companies.company', verbose_name='OPG')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "ear_tag",
+                    models.CharField(
+                        db_index=True,
+                        help_text="HR format: HR + OIB + redni br",
+                        max_length=20,
+                        verbose_name="Broj usne markice",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=50, verbose_name="Ime (opcionalno)")),
+                (
+                    "vrsta",
+                    models.CharField(
+                        choices=[
+                            ("krava", "Krava (muzara)"),
+                            ("junica", "Junica"),
+                            ("tele", "Tele"),
+                            ("bik", "Bik"),
+                            ("vo", "Vo (tov)"),
+                        ],
+                        default="krava",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("aktivno", "Aktivno"),
+                            ("gravidno", "Gravidno"),
+                            ("zasuseno", "Zasuseno"),
+                            ("tov", "U tovu"),
+                            ("prodano", "Prodano"),
+                            ("uginulo", "Uginulo"),
+                            ("izluceno", "Izluceno"),
+                        ],
+                        default="aktivno",
+                        max_length=15,
+                    ),
+                ),
+                ("date_of_birth", models.DateField(blank=True, null=True, verbose_name="Datum rodjenja")),
+                (
+                    "breed",
+                    models.CharField(
+                        blank=True, help_text="npr. Simentalac, Holstein, Siva", max_length=50, verbose_name="Pasmina"
+                    ),
+                ),
+                (
+                    "weight_kg",
+                    models.DecimalField(
+                        blank=True, decimal_places=1, max_digits=7, null=True, verbose_name="Tezina (kg)"
+                    ),
+                ),
+                (
+                    "avg_daily_milk_l",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        max_digits=6,
+                        null=True,
+                        verbose_name="Prosj. dnevna mlijecnost (L)",
+                    ),
+                ),
+                ("last_calving", models.DateField(blank=True, null=True, verbose_name="Zadnje teljenje")),
+                ("expected_calving", models.DateField(blank=True, null=True, verbose_name="Ocekivano teljenje")),
+                ("is_organic", models.BooleanField(default=False, verbose_name="Ekoloski uzgoj")),
+                ("organic_since", models.DateField(blank=True, null=True)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="livestock",
+                        to="companies.company",
+                        verbose_name="OPG",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Grlo',
-                'verbose_name_plural': 'Grla',
-                'db_table': 'livestock_animal',
-                'ordering': ['ear_tag'],
-                'unique_together': {('company', 'ear_tag')},
+                "verbose_name": "Grlo",
+                "verbose_name_plural": "Grla",
+                "db_table": "livestock_animal",
+                "ordering": ["ear_tag"],
+                "unique_together": {("company", "ear_tag")},
             },
         ),
         migrations.CreateModel(
-            name='HealthRecord',
+            name="HealthRecord",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('datum', models.DateField(verbose_name='Datum')),
-                ('tip', models.CharField(choices=[('cijepljenje', 'Cijepljenje'), ('pregled', 'Veterinarski pregled'), ('tretman', 'Tretman / Lijek'), ('bolest', 'Bolest'), ('operacija', 'Operacija'), ('karantena', 'Karantena')], max_length=20)),
-                ('opis', models.CharField(max_length=255, verbose_name='Opis')),
-                ('veterinar', models.CharField(blank=True, max_length=100, verbose_name='Veterinar')),
-                ('lijek', models.CharField(blank=True, max_length=100, verbose_name='Lijek / Preparat')),
-                ('kolicina', models.CharField(blank=True, max_length=50, verbose_name='Kolicina doze')),
-                ('karencija_do', models.DateField(blank=True, null=True, verbose_name='Karencija do (zabrana mlijeka/mesa)')),
-                ('trosak_eur', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Trosak (EUR)')),
-                ('photo', models.ImageField(blank=True, upload_to='livestock/health/%Y/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('animal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='health_records', to='livestock.livestock')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("datum", models.DateField(verbose_name="Datum")),
+                (
+                    "tip",
+                    models.CharField(
+                        choices=[
+                            ("cijepljenje", "Cijepljenje"),
+                            ("pregled", "Veterinarski pregled"),
+                            ("tretman", "Tretman / Lijek"),
+                            ("bolest", "Bolest"),
+                            ("operacija", "Operacija"),
+                            ("karantena", "Karantena"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("opis", models.CharField(max_length=255, verbose_name="Opis")),
+                ("veterinar", models.CharField(blank=True, max_length=100, verbose_name="Veterinar")),
+                ("lijek", models.CharField(blank=True, max_length=100, verbose_name="Lijek / Preparat")),
+                ("kolicina", models.CharField(blank=True, max_length=50, verbose_name="Kolicina doze")),
+                (
+                    "karencija_do",
+                    models.DateField(blank=True, null=True, verbose_name="Karencija do (zabrana mlijeka/mesa)"),
+                ),
+                (
+                    "trosak_eur",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True, verbose_name="Trosak (EUR)"
+                    ),
+                ),
+                ("photo", models.ImageField(blank=True, upload_to="livestock/health/%Y/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "animal",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="health_records",
+                        to="livestock.livestock",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Zdravstveni zapis',
-                'verbose_name_plural': 'Zdravstveni zapisi',
-                'db_table': 'livestock_health_record',
-                'ordering': ['-datum'],
+                "verbose_name": "Zdravstveni zapis",
+                "verbose_name_plural": "Zdravstveni zapisi",
+                "db_table": "livestock_health_record",
+                "ordering": ["-datum"],
             },
         ),
         migrations.CreateModel(
-            name='MilkRecord',
+            name="MilkRecord",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('datum', models.DateField()),
-                ('jutarnja_l', models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Jutarnja muza (L)')),
-                ('vecernja_l', models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name='Vecernja muza (L)')),
-                ('ukupno_l', models.DecimalField(decimal_places=2, default=0, editable=False, max_digits=6)),
-                ('masnoca_posto', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True, verbose_name='Masnoca (%)')),
-                ('proteini_posto', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True, verbose_name='Proteini (%)')),
-                ('notes', models.CharField(blank=True, max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('animal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='milk_records', to='livestock.livestock')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("datum", models.DateField()),
+                (
+                    "jutarnja_l",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name="Jutarnja muza (L)"),
+                ),
+                (
+                    "vecernja_l",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=6, verbose_name="Vecernja muza (L)"),
+                ),
+                ("ukupno_l", models.DecimalField(decimal_places=2, default=0, editable=False, max_digits=6)),
+                (
+                    "masnoca_posto",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True, verbose_name="Masnoca (%)"
+                    ),
+                ),
+                (
+                    "proteini_posto",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True, verbose_name="Proteini (%)"
+                    ),
+                ),
+                ("notes", models.CharField(blank=True, max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "animal",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="milk_records",
+                        to="livestock.livestock",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Muzni zapis',
-                'verbose_name_plural': 'Muzni zapisi',
-                'db_table': 'livestock_milk_record',
-                'ordering': ['-datum'],
-                'unique_together': {('animal', 'datum')},
+                "verbose_name": "Muzni zapis",
+                "verbose_name_plural": "Muzni zapisi",
+                "db_table": "livestock_milk_record",
+                "ordering": ["-datum"],
+                "unique_together": {("animal", "datum")},
             },
         ),
     ]

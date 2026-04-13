@@ -5,29 +5,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('smart_import', '0001_initial'),
+        ("smart_import", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GeminiUsageLog',
+            name="GeminiUsageLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('caller', models.CharField(db_index=True, help_text='Modul koji je pozvao AI (invoice_text, smart_import...)', max_length=100)),
-                ('model', models.CharField(default='gemini-2.0-flash', max_length=60)),
-                ('input_tokens', models.IntegerField(default=0)),
-                ('output_tokens', models.IntegerField(default=0)),
-                ('cost_eur', models.DecimalField(decimal_places=8, default=0, max_digits=10)),
-                ('success', models.BooleanField(default=True)),
-                ('input_hash', models.CharField(blank=True, max_length=16)),
-                ('called_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "caller",
+                    models.CharField(
+                        db_index=True,
+                        help_text="Modul koji je pozvao AI (invoice_text, smart_import...)",
+                        max_length=100,
+                    ),
+                ),
+                ("model", models.CharField(default="gemini-2.0-flash", max_length=60)),
+                ("input_tokens", models.IntegerField(default=0)),
+                ("output_tokens", models.IntegerField(default=0)),
+                ("cost_eur", models.DecimalField(decimal_places=8, default=0, max_digits=10)),
+                ("success", models.BooleanField(default=True)),
+                ("input_hash", models.CharField(blank=True, max_length=16)),
+                ("called_at", models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
             ],
             options={
-                'verbose_name': 'Gemini poziv',
-                'verbose_name_plural': 'Gemini pozivi',
-                'ordering': ['-called_at'],
+                "verbose_name": "Gemini poziv",
+                "verbose_name_plural": "Gemini pozivi",
+                "ordering": ["-called_at"],
             },
         ),
     ]

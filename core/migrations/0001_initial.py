@@ -6,34 +6,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('companies', '0021_extend_onboarding'),
+        ("companies", "0021_extend_onboarding"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SystemAuditLog',
+            name="SystemAuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('action', models.CharField(choices=[('create', 'Kreiranje'), ('update', 'Ažuriranje'), ('delete', 'Brisanje')], max_length=10)),
-                ('model_name', models.CharField(db_index=True, max_length=100)),
-                ('object_id', models.CharField(max_length=50)),
-                ('object_repr', models.CharField(blank=True, max_length=300)),
-                ('changes', models.JSONField(blank=True, default=dict)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='companies.company')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[("create", "Kreiranje"), ("update", "Ažuriranje"), ("delete", "Brisanje")],
+                        max_length=10,
+                    ),
+                ),
+                ("model_name", models.CharField(db_index=True, max_length=100)),
+                ("object_id", models.CharField(max_length=50)),
+                ("object_repr", models.CharField(blank=True, max_length=300)),
+                ("changes", models.JSONField(blank=True, default=dict)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="companies.company"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Revizijski zapis',
-                'verbose_name_plural': 'Revizijski zapisi',
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['model_name', 'object_id'], name='core_system_model_n_282d76_idx'), models.Index(fields=['company', 'timestamp'], name='core_system_company_3f80de_idx'), models.Index(fields=['user', 'timestamp'], name='core_system_user_id_a62dd1_idx')],
+                "verbose_name": "Revizijski zapis",
+                "verbose_name_plural": "Revizijski zapisi",
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(fields=["model_name", "object_id"], name="core_system_model_n_282d76_idx"),
+                    models.Index(fields=["company", "timestamp"], name="core_system_company_3f80de_idx"),
+                    models.Index(fields=["user", "timestamp"], name="core_system_user_id_a62dd1_idx"),
+                ],
             },
         ),
     ]

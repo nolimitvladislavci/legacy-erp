@@ -5,31 +5,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Company',
+            name="Company",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=200, verbose_name='Naziv tvrtke')),
-                ('oib', models.CharField(max_length=11, unique=True, verbose_name='OIB')),
-                ('address', models.CharField(blank=True, max_length=255, verbose_name='Adresa')),
-                ('city', models.CharField(blank=True, max_length=100, verbose_name='Grad')),
-                ('zip_code', models.CharField(blank=True, max_length=20, verbose_name='Poštanski broj')),
-                ('iban', models.CharField(blank=True, max_length=34, verbose_name='IBAN')),
-                ('is_vat_registered', models.BooleanField(default=True, verbose_name='U sustavu PDV-a')),
-                ('logo', models.ImageField(blank=True, null=True, upload_to='company_logos/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=200, verbose_name="Naziv tvrtke")),
+                ("oib", models.CharField(max_length=11, unique=True, verbose_name="OIB")),
+                ("address", models.CharField(blank=True, max_length=255, verbose_name="Adresa")),
+                ("city", models.CharField(blank=True, max_length=100, verbose_name="Grad")),
+                ("zip_code", models.CharField(blank=True, max_length=20, verbose_name="Poštanski broj")),
+                ("iban", models.CharField(blank=True, max_length=34, verbose_name="IBAN")),
+                ("is_vat_registered", models.BooleanField(default=True, verbose_name="U sustavu PDV-a")),
+                ("logo", models.ImageField(blank=True, null=True, upload_to="company_logos/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Tvrtka',
-                'verbose_name_plural': 'Tvrtke',
+                "verbose_name": "Tvrtka",
+                "verbose_name_plural": "Tvrtke",
             },
         ),
     ]

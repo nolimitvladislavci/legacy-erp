@@ -1,4 +1,5 @@
 """Django signals — auto-send on invoice finalize."""
+
 import logging
 
 from django.db.models.signals import post_save
@@ -25,9 +26,14 @@ def on_invoice_status_change(sender, instance, **kwargs):
         pass
 
     # Don't duplicate
-    if AS4Message.objects.filter(
-        invoice=instance, direction=MessageDirection.OUTBOUND,
-    ).exclude(status__in=[MessageStatus.CANCELLED, MessageStatus.REJECTED]).exists():
+    if (
+        AS4Message.objects.filter(
+            invoice=instance,
+            direction=MessageDirection.OUTBOUND,
+        )
+        .exclude(status__in=[MessageStatus.CANCELLED, MessageStatus.REJECTED])
+        .exists()
+    ):
         return
 
     # Get OIBs
@@ -60,7 +66,13 @@ def on_invoice_status_change(sender, instance, **kwargs):
         invoice_amount=instance.total,
         invoice_currency=getattr(instance, "currency", "EUR"),
         status=MessageStatus.DRAFT,
-        metadata={"routing_decision": {"transport": decision.transport, "reason": decision.reason, "backend": decision.backend_name}},
+        metadata={
+            "routing_decision": {
+                "transport": decision.transport,
+                "reason": decision.reason,
+                "backend": decision.backend_name,
+            }
+        },
     )
     # Note: UBL XML generation will be added in Day 3-4
     # For now, just create the message record without XML

@@ -13,17 +13,19 @@ Sigurnost:
   - Soft-lock zaliha kod dobavljača
   - Audit log preko SystemAuditLog
 """
+
 import logging
 from decimal import Decimal
 
 from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
 
-logger = logging.getLogger('b2b_bridge')
+logger = logging.getLogger("b2b_bridge")
 
 
 class B2BBridgeError(Exception):
     """Greška koja prekida transakciju i vraća jasnu poruku kupcu."""
+
     def __init__(self, code, message):
         self.code = code
         self.message = message
@@ -41,18 +43,14 @@ class B2BBridgeService:
         """
         from companies.models import Company
 
-        oib = getattr(supplier, 'oib', None)
+        oib = getattr(supplier, "oib", None)
         if not oib or not oib.strip():
-            raise B2BBridgeError(
-                'NO_OIB',
-                'Dobavljač "%s" nema unesen OIB. B2B prijenos nije moguć.' % supplier.name
-            )
+            raise B2BBridgeError("NO_OIB", 'Dobavljač "%s" nema unesen OIB. B2B prijenos nije moguć.' % supplier.name)
 
         seller = Company.objects.filter(oib=oib.strip()).first()
         if not seller:
             raise B2BBridgeError(
-                'NOT_ON_PLATFORM',
-                'Dobavljač "%s" (OIB: %s) nije registriran na LIMIT Connect.' % (supplier.name, oib)
+                "NOT_ON_PLATFORM", 'Dobavljač "%s" (OIB: %s) nije registriran na LIMIT Connect.' % (supplier.name, oib)
             )
 
         return seller
@@ -65,11 +63,15 @@ class B2BBridgeService:
         """
         from marketplace.models import MarketplaceProduct
 
-        product = MarketplaceProduct.objects.filter(
-            seller_company=seller_company,
-            inventory_item__sku=sku,
-            is_active=True,
-        ).select_related('inventory_item').first()
+        product = (
+            MarketplaceProduct.objects.filter(
+                seller_company=seller_company,
+                inventory_item__sku=sku,
+                is_active=True,
+            )
+            .select_related("inventory_item")
+            .first()
+        )
 
         return product
 
@@ -93,13 +95,16 @@ class B2BBridgeService:
             return product.price * (1 - discount.discount_percent / 100)
 
         # 2. Cjenik dobavljača (najnoviji s min_quantity <= tražene količine)
-        price_entry = SupplierPriceList.objects.filter(
-            inventory_item=product.inventory_item,
-            valid_from__lte=timezone.now().date(),
-            min_quantity__lte=quantity,
-        ).filter(
-            Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.now().date())
-        ).order_by('-min_quantity').first()
+        price_entry = (
+            SupplierPriceList.objects.filter(
+                inventory_item=product.inventory_item,
+                valid_from__lte=timezone.now().date(),
+                min_quantity__lte=quantity,
+            )
+            .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.now().date()))
+            .order_by("-min_quantity")
+            .first()
+        )
 
         if price_entry:
             return price_entry.agreed_price
@@ -132,20 +137,19 @@ class B2BBridgeService:
 
         # 1. Učitaj PO s relacijama
         po = (
-            PurchaseOrder.objects
-            .select_related('company', 'supplier')
-            .prefetch_related('items__inventory_item')
+            PurchaseOrder.objects.select_related("company", "supplier")
+            .prefetch_related("items__inventory_item")
             .get(pk=po_id)
         )
 
-        if po.status != 'draft':
-            raise B2BBridgeError('NOT_DRAFT', 'Samo draft narudžbe mogu biti poslane na Marketplace.')
+        if po.status != "draft":
+            raise B2BBridgeError("NOT_DRAFT", "Samo draft narudžbe mogu biti poslane na Marketplace.")
 
         if not po.supplier:
-            raise B2BBridgeError('NO_SUPPLIER', 'Narudžbenica nema odabranog dobavljača.')
+            raise B2BBridgeError("NO_SUPPLIER", "Narudžbenica nema odabranog dobavljača.")
 
         if not po.items.exists():
-            raise B2BBridgeError('EMPTY_PO', 'Narudžbenica nema stavki.')
+            raise B2BBridgeError("EMPTY_PO", "Narudžbenica nema stavki.")
 
         # 2. Mapiraj Partner → Company (OIB most)
         seller_company = cls._resolve_seller(po.supplier)
@@ -154,19 +158,19 @@ class B2BBridgeService:
         market_order = MarketplaceOrder.objects.create(
             buyer_company=po.company,
             buyer_user=buyer_user,
-            status='pending',
+            status="pending",
         )
 
         # 4. Kreiraj SellerSubOrder (dobavljačev pogled)
         sub_order = SellerSubOrder.objects.create(
             marketplace_order=market_order,
             seller_company=seller_company,
-            status='pending',
-            pickup_address=getattr(seller_company, 'address', '') or '',
+            status="pending",
+            pickup_address=getattr(seller_company, "address", "") or "",
         )
 
         # 5. Prenesi stavke s validacijom zaliha
-        total = Decimal('0')
+        total = Decimal("0")
         items_count = 0
 
         for po_item in po.items.all():
@@ -174,18 +178,15 @@ class B2BBridgeService:
 
             if not product:
                 raise B2BBridgeError(
-                    'PRODUCT_NOT_FOUND',
-                    'Artikl SKU: %s nije dostupan u katalogu dobavljača "%s".' % (
-                        po_item.sku, seller_company.name
-                    )
+                    "PRODUCT_NOT_FOUND",
+                    'Artikl SKU: %s nije dostupan u katalogu dobavljača "%s".' % (po_item.sku, seller_company.name),
                 )
 
             if product.stock < po_item.quantity:
                 raise B2BBridgeError(
-                    'INSUFFICIENT_STOCK',
-                    'Nedovoljne zalihe za "%s". Traženo: %s, dostupno: %s.' % (
-                        product.name, po_item.quantity, product.stock
-                    )
+                    "INSUFFICIENT_STOCK",
+                    'Nedovoljne zalihe za "%s". Traženo: %s, dostupno: %s.'
+                    % (product.name, po_item.quantity, product.stock),
                 )
 
             # Cijena iz marketplace kataloga (kupac ne diktira cijenu)
@@ -203,7 +204,7 @@ class B2BBridgeService:
 
             # Soft-lock zaliha
             product.stock -= po_item.quantity
-            product.save(update_fields=['stock'])
+            product.save(update_fields=["stock"])
 
             total += line_total
             items_count += 1
@@ -213,46 +214,52 @@ class B2BBridgeService:
         sub_order.subtotal = total
         sub_order.commission_amount = commission
         sub_order.seller_payout = total - commission
-        sub_order.save(update_fields=[
-            'subtotal', 'commission_amount', 'seller_payout',
-        ])
+        sub_order.save(
+            update_fields=[
+                "subtotal",
+                "commission_amount",
+                "seller_payout",
+            ]
+        )
 
         # 7. Zaključaj PO
-        po.status = 'sent'
-        po.save(update_fields=['status', 'updated_at'])
+        po.status = "sent"
+        po.save(update_fields=["status", "updated_at"])
 
         # 8. Audit log
         try:
             from core.models import SystemAuditLog
+
             SystemAuditLog.objects.create(
                 user=buyer_user,
                 company=po.company,
-                action='b2b_transmit',
-                model_name='procurement.PurchaseOrder',
+                action="b2b_transmit",
+                model_name="procurement.PurchaseOrder",
                 object_id=str(po.pk),
-                object_repr='PO %s → %s (%s stavki, %s EUR)' % (
-                    po.po_number, seller_company.name, items_count, total
-                ),
+                object_repr="PO %s → %s (%s stavki, %s EUR)" % (po.po_number, seller_company.name, items_count, total),
                 changes={
-                    'po_id': po.pk,
-                    'market_order_id': market_order.pk,
-                    'sub_order_id': sub_order.pk,
-                    'seller_oib': seller_company.oib,
-                    'total': str(total),
+                    "po_id": po.pk,
+                    "market_order_id": market_order.pk,
+                    "sub_order_id": sub_order.pk,
+                    "seller_oib": seller_company.oib,
+                    "total": str(total),
                 },
             )
         except (IntegrityError, DatabaseError):
-            logger.warning('B2B audit log failed for PO %s', po.pk, exc_info=True)
+            logger.warning("B2B audit log failed for PO %s", po.pk, exc_info=True)
 
         logger.info(
-            '[B2B BRIDGE] PO %s → SubOrder %s (seller: %s, total: %s EUR)',
-            po.po_number, sub_order.pk, seller_company.name, total
+            "[B2B BRIDGE] PO %s → SubOrder %s (seller: %s, total: %s EUR)",
+            po.po_number,
+            sub_order.pk,
+            seller_company.name,
+            total,
         )
 
         return {
-            'sub_order_id': sub_order.pk,
-            'market_order_id': market_order.pk,
-            'seller': seller_company.name,
-            'items_count': items_count,
-            'total': str(total),
+            "sub_order_id": sub_order.pk,
+            "market_order_id": market_order.pk,
+            "seller": seller_company.name,
+            "items_count": items_count,
+            "total": str(total),
         }

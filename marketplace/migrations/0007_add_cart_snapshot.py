@@ -6,39 +6,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0014_add_cart_snapshot'),
-        ('marketplace', '0006_add_order_complaint'),
+        ("companies", "0014_add_cart_snapshot"),
+        ("marketplace", "0006_add_order_complaint"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CartSnapshot',
+            name="CartSnapshot",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(db_index=True, max_length=64, unique=True)),
-                ('cart_data', models.JSONField(verbose_name='Snapshot kosrice')),
-                ('cart_hash', models.CharField(max_length=64, verbose_name='SHA-256 hash stanja')),
-                ('total', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('expires_at', models.DateTimeField(verbose_name='Istice')),
-                ('is_used', models.BooleanField(default=False, verbose_name='Iskoristen')),
-                ('delivery_address', models.CharField(blank=True, max_length=300)),
-                ('delivery_method', models.CharField(default='standard', max_length=20)),
-                ('notes', models.TextField(blank=True)),
-                ('wa_message_id', models.CharField(blank=True, max_length=100)),
-                ('wa_sent', models.BooleanField(default=False)),
-                ('wa_fallback_used', models.CharField(blank=True, max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cart_snapshots', to='companies.company', verbose_name='Tvrtka kupca')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Kreirao (dispeeer)')),
-                ('order', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='from_snapshot', to='marketplace.marketplaceorder', verbose_name='Kreirana narudzba')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("token", models.CharField(db_index=True, max_length=64, unique=True)),
+                ("cart_data", models.JSONField(verbose_name="Snapshot kosrice")),
+                ("cart_hash", models.CharField(max_length=64, verbose_name="SHA-256 hash stanja")),
+                ("total", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("expires_at", models.DateTimeField(verbose_name="Istice")),
+                ("is_used", models.BooleanField(default=False, verbose_name="Iskoristen")),
+                ("delivery_address", models.CharField(blank=True, max_length=300)),
+                ("delivery_method", models.CharField(default="standard", max_length=20)),
+                ("notes", models.TextField(blank=True)),
+                ("wa_message_id", models.CharField(blank=True, max_length=100)),
+                ("wa_sent", models.BooleanField(default=False)),
+                ("wa_fallback_used", models.CharField(blank=True, max_length=20)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "company",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cart_snapshots",
+                        to="companies.company",
+                        verbose_name="Tvrtka kupca",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Kreirao (dispeeer)",
+                    ),
+                ),
+                (
+                    "order",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="from_snapshot",
+                        to="marketplace.marketplaceorder",
+                        verbose_name="Kreirana narudzba",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Cart Snapshot',
-                'verbose_name_plural': 'Cart Snapshots',
-                'ordering': ['-created_at'],
+                "verbose_name": "Cart Snapshot",
+                "verbose_name_plural": "Cart Snapshots",
+                "ordering": ["-created_at"],
             },
         ),
     ]
