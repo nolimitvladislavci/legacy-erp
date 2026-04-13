@@ -1,6 +1,6 @@
 # CC TASK — SHELL MIGRATION: 4 Hamburger panela + Joker fullscreen
 # Autor: Sonnet | Datum: 09.04.2026
-# Prioritet: 🟡 SREDNJI — prije 15.04.
+# Prioritet: 🟢 NIZAK — Faza 1 DONE, Faze 2-3 post-launch
 
 ---
 
