@@ -82,3 +82,46 @@ class StrongPasswordValidator:
 
     def get_help_text(self):
         return 'Lozinka mora imati barem 10 znakova, jedno veliko slovo, jedan broj i jedan poseban znak.'
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EU-wide form validators — use as field validators=[...]
+# Single source: delegates to core.oib_validator
+# ═══════════════════════════════════════════════════════════════════════════
+
+def validate_iban(value):
+    """ISO 13616 IBAN validator for Django forms."""
+    if not value:
+        return
+    from core.oib_validator import validate_iban as _check
+    value = str(value).strip().replace(' ', '').upper()
+    if not _check(value):
+        raise ValidationError(
+            'IBAN nije valjan (MOD97 provjera neuspješna).',
+            code='invalid_iban',
+        )
+
+
+def validate_tax_id(value, country='HR'):
+    """Multi-country tax ID validator for Django forms."""
+    if not value:
+        return
+    from core.oib_validator import validate_vat_id
+    value = str(value).strip()
+    if not validate_vat_id(value, country):
+        raise ValidationError(
+            f'Porezni ID nije valjan za državu {country}.',
+            code='invalid_tax_id',
+        )
+
+
+def validate_mbs(value):
+    """MBS (matični broj subjekta) validator — 8 digits."""
+    if not value:
+        return
+    value = str(value).strip()
+    if not (len(value) == 8 and value.isdigit()):
+        raise ValidationError(
+            'MBS mora imati točno 8 znamenki.',
+            code='invalid_mbs',
+        )

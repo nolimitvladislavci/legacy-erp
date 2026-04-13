@@ -15,3 +15,7 @@ class CoreConfig(AppConfig):
         register_pdf_fonts()
         # Onboarding auto-completion signals
         import core.onboarding_signals  # noqa: F401
+
+        # Global Validation Engine — OIB/IBAN/MBS validation on ALL models
+        from core.validation_engine import activate
+        activate()
