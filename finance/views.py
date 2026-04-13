@@ -6,6 +6,7 @@ from django.db import DatabaseError, IntegrityError
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
 from core.company_utils import get_user_company
@@ -105,6 +106,7 @@ def transaction_delete(request, pk):
     return redirect("finance:list")
 
 
+@extend_schema_view(list=extend_schema(tags=["Finance"]))
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer

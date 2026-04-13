@@ -3,7 +3,6 @@
 # Generic document views are kept here.
 # All other views are imported from submodules via wildcard re-export,
 # so urls.py (which imports from documents.views) continues to work unchanged.
-
 import logging
 
 from django.contrib import messages
@@ -13,6 +12,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
 from core.company_utils import get_user_company
@@ -132,6 +132,7 @@ def document_toggle_paid(request, pk):
     return redirect("documents:list")
 
 
+@extend_schema_view(list=extend_schema(tags=["Documents"]))
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
 

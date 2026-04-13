@@ -344,7 +344,7 @@ def offer_detail(request, offer_id):
     measurements = list(offer.session.measurements.filter(confirmed=True))
 
     # Generate SVG visualization for each measurement
-    from .svg_window import generate_window_svg, generate_door_svg, generate_mosquito_svg
+    from .svg_window import generate_door_svg, generate_mosquito_svg, generate_window_svg
 
     for m in measurements:
         if m.element_type == "interior_door" or m.element_type == "door":
