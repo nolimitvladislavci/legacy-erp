@@ -62,17 +62,13 @@ AUDITED_MODELS = [
     'pos.POSReceipt',
     'pos.POSReceiptItem',
     # Fiskalizacija
-    'fiskalizacija.FiscalInvoice',
     # Dokumenti
     'documents.Document',
     # Korisnici & firme
     'accounts.UserProfile',
     'companies.Company',
-    'companies.Branch',
     # e-Račun
-    'eracun.EInvoice',
     # AML
-    'aml.AMLCheck',
     # Arhiva
     'documents.ArhivaEntry',
     # Pristup

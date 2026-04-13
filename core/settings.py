@@ -90,8 +90,8 @@ INSTALLED_APPS = [
     "companies",
     "documents",
     "finance",
-    "fitness",  # GHOST: 0 data but referenced by tests
-    "insurance",  # GHOST: 0 data but model loaded
+    # "fitness",  # DEACTIVATED: 0 data, 0 FK refs from live models
+    # "insurance",  # DEACTIVATED: 0 data, 0 FK refs from live models
     "inventory",
     "invoicing",
     "partners",
