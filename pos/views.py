@@ -79,9 +79,11 @@ def dashboard(request):
         t = POSTerminal.objects.filter(company=company, is_active=True).order_by('id').first()
         if t:
             return redirect('pos:pos_joker', terminal_id=t.pk)
-    terminals = POSTerminal.objects.filter(company=company, is_active=True) if company else POSTerminal.objects.none()
+    terminals = POSTerminal.objects.filter(company=company, is_active=True).prefetch_related(
+        models.Prefetch('sessions', queryset=POSSession.objects.filter(status=POSSession.Status.OPEN), to_attr='_open_sessions')
+    ) if company else POSTerminal.objects.none()
     for t in terminals:
-        t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()
+        t.active_session = t._open_sessions[0] if t._open_sessions else None
     return render(request, 'pos/dashboard.html', {'terminals': terminals})
 
 

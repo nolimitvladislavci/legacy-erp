@@ -498,69 +498,88 @@ def umbrella_dashboard(request):
     now = timezone.now()
     month_start = now.date().replace(day=1)
 
-    # Per-child enriched data
+    # ── Batch queries (avoid N+1 for 75+ children) ────────────────
+    child_ids = list(children.values_list('pk', flat=True))
+
+    # Users per company — 1 query
+    from django.db.models import Count as _Count
+    user_counts = dict(
+        User.objects.filter(profile__company__in=child_ids)
+        .values_list('profile__company')
+        .annotate(c=_Count('id'))
+        .values_list('profile__company', 'c')
+    )
+
+    # Invoice revenue per company — 1 query
+    inv_revs = {}
+    try:
+        from invoicing.models import Invoice
+        inv_revs = dict(
+            Invoice.objects.filter(
+                company__in=child_ids, status='PAID',
+                date_issued__date__gte=month_start
+            ).values('company').annotate(s=Sum('total'))
+            .values_list('company', 's')
+        )
+    except Exception:
+        pass
+
+    # POS revenue per company — 1 query
+    pos_revs = {}
+    try:
+        from pos.models import POSReceipt
+        pos_revs = dict(
+            POSReceipt.objects.filter(
+                session__terminal__company__in=child_ids, status='paid',
+                created_at__date__gte=month_start
+            ).values('session__terminal__company')
+            .annotate(s=Sum('total'))
+            .values_list('session__terminal__company', 's')
+        )
+    except Exception:
+        pass
+
+    # Synesis configs — 1 query
+    synesis_map = {}
+    try:
+        from synesis.models import SynesisConfig
+        for cfg in SynesisConfig.objects.filter(company__in=child_ids):
+            synesis_map[cfg.company_id] = {
+                'active': cfg.is_active if hasattr(cfg, 'is_active') else True,
+                'last_sync': getattr(cfg, 'last_sync', None) or getattr(cfg, 'updated_at', None),
+            }
+    except Exception:
+        pass
+
+    # Subscriptions — 1 query
+    sub_map = {}
+    try:
+        from registration.models import CompanySubscription
+        for sub in CompanySubscription.objects.filter(
+            company__in=child_ids, is_active=True
+        ).order_by('company', '-valid_from').distinct('company'):
+            sub_map[sub.company_id] = sub.plan.upper()
+    except Exception:
+        pass
+
+    # Build enriched list — 0 extra queries
     children_data = []
     total_users = 0
     total_revenue = 0
     for child in children:
-        user_count = User.objects.filter(profile__company=child).count()
-        total_users += user_count
-
-        # Invoice revenue this month
-        inv_rev = 0
-        try:
-            from invoicing.models import Invoice
-            inv_rev = Invoice.objects.filter(
-                company=child, status='PAID', date_issued__date__gte=month_start
-            ).aggregate(s=Sum('total'))['s'] or 0
-            inv_rev = float(inv_rev)
-        except Exception:
-            pass
-
-        # POS revenue this month
-        pos_rev = 0
-        try:
-            from pos.models import POSReceipt
-            pos_rev = POSReceipt.objects.filter(
-                session__terminal__company=child, status='paid',
-                created_at__date__gte=month_start
-            ).aggregate(s=Sum('total'))['s'] or 0
-            pos_rev = float(pos_rev)
-        except Exception:
-            pass
-
-        total_revenue += inv_rev + pos_rev
-
-        # Synesis status
-        synesis_status = None
-        try:
-            from synesis.models import SynesisConfig
-            cfg = SynesisConfig.objects.filter(company=child).first()
-            if cfg:
-                synesis_status = {
-                    'active': cfg.is_active if hasattr(cfg, 'is_active') else True,
-                    'last_sync': getattr(cfg, 'last_sync', None) or getattr(cfg, 'updated_at', None),
-                }
-        except Exception:
-            pass
-
-        # Subscription
-        sub_plan = '-'
-        try:
-            sub = child.subscriptions.filter(is_active=True).order_by('-valid_from').first()
-            if sub:
-                sub_plan = sub.plan.upper()
-        except Exception:
-            pass
-
+        uc = user_counts.get(child.pk, 0)
+        ir = float(inv_revs.get(child.pk, 0) or 0)
+        pr = float(pos_revs.get(child.pk, 0) or 0)
+        total_users += uc
+        total_revenue += ir + pr
         children_data.append({
             'company': child,
-            'user_count': user_count,
-            'inv_revenue': inv_rev,
-            'pos_revenue': pos_rev,
-            'total_revenue': inv_rev + pos_rev,
-            'synesis': synesis_status,
-            'plan': sub_plan,
+            'user_count': uc,
+            'inv_revenue': ir,
+            'pos_revenue': pr,
+            'total_revenue': ir + pr,
+            'synesis': synesis_map.get(child.pk),
+            'plan': sub_map.get(child.pk, '-'),
         })
 
     # Handle POST actions
