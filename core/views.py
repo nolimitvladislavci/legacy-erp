@@ -1062,6 +1062,9 @@ def company_dashboard(request):
 
     today = timezone.now().date()
     month_start = today.replace(day=1)
+    from datetime import timedelta as _td
+
+    week_start = today - _td(days=today.weekday())
 
     # ── Fakture ──────────────────────────────────────────────────────────────
     try:
