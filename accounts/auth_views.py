@@ -156,8 +156,9 @@ def smart_login(request):
         password = request.POST.get("password", "").strip()
         ip = get_client_ip(request)
 
-        # Rate limiting
-        if LoginAttempt.is_blocked(ip, email_or_user):
+        # Rate limiting (20 pokušaja / 15 min — dovoljno za superadmine s više firmi)
+        if LoginAttempt.is_blocked(ip, email_or_user, max_attempts=20, minutes=15):
+            logger.warning("Login blocked: ip=%s email=%s", ip, email_or_user)
             messages.error(request, _("Previše neuspješnih pokušaja. Pričekajte 15 minuta."))
             return render(request, "accounts/login.html", {"blocked": True})
 
@@ -234,7 +235,7 @@ def send_magic_link(request):
             return redirect("login")
 
         # Rate limiting za magic linkove
-        if LoginAttempt.is_blocked(ip, email, max_attempts=3, minutes=10):
+        if LoginAttempt.is_blocked(ip, email, max_attempts=10, minutes=10):
             messages.error(request, _("Previše zahtjeva. Pričekajte 10 minuta."))
             return redirect("login")
 
