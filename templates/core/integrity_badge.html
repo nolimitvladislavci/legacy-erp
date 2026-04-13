@@ -1,21 +1,5 @@
-{% load i18n %}
-<div class="fx-text-dim fx-b" style="margin-top:15pt;padding:8pt 12pt;border-radius:4pt;font-size:7pt;background:#fafafa;page-break-inside:avoid">
-  <div class="d-flex justify-content-between align-items-center" style="margin-bottom:4pt">
-    <span class="fx-fw-bold fx-text-dark">&#9989; {{ verified_text }}</span>
-    <span class="fx-text-muted">{{ system }}</span>
-  </div>
-  {% if hash %}
-  <div class="fx-text-muted fx-font-mono text-break" style="font-size:6pt">
-    SHA-256: {{ hash }}
-    {% if doc_id %} | Ref: {{ doc_id }}{% endif %}
-    {% if generated_by %} | {{ generated_by }}{% endif %}
-    | {{ timestamp }}
-  </div>
-  {% else %}
-  <div class="fx-text-muted" style="font-size:6pt">
-    Generirano: {{ timestamp }}
-    {% if generated_by %} | {{ generated_by }}{% endif %}
-    {% if doc_id %} | Ref: {{ doc_id }}{% endif %}
-  </div>
-  {% endif %}
-</div>
+{% comment %}
+integrity_badge.html — Koristi se kroz {% doc_integrity_badge %} template tag.
+Za nove dokumente preferirati _pdf_footer.html koji je kompletniji.
+{% endcomment %}
+{% include "includes/_pdf_footer.html" with show_hash=True lang=lang doc_id=doc_id %}

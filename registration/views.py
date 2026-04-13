@@ -1808,7 +1808,17 @@ def register_trikey(request):
                 trikey = TriKeyProfile.objects.create(user=user)
                 if not pin:
                     pin = generate_pin()
-                trikey.set_pin(pin)
+                try:
+                    trikey.set_pin(pin)
+                except ValueError:
+                    # PIN too simple — show error, don't crash
+                    errors = {"pin": "PIN je previše jednostavan (ne koristite 123456, 111111 i sl.). Odaberite sigurniji."}
+                    return render(request, "registration/trikey_register.html", {
+                        "step": 2, "errors": errors,
+                        "oib": oib, "company_name": company_name, "address": address,
+                        "city": city, "zip_code": zip_code, "country": country,
+                        "email": email, "first_name": first_name, "last_name": last_name,
+                    })
 
                 # Subscription
                 trial_end = now().date() + timedelta(days=14)

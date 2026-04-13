@@ -48,13 +48,21 @@
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
+:root, [data-theme="light"] {
   --ink: #0a0f1e; --paper: #f8f7f4; --gold: #c9a84c;
   --blue: #1d4ed8; --red: #dc2626; --green: #15803d;
   --border: #e2e0da; --muted: #6b7280; --surface: #ffffff;
+  --surface2: #f1f5f9; --surface-hover: #eff6ff; --surface-green: #f0fdf4;
   --accent-r: #1d4ed8; --accent-p: #7c3aed; --accent-a: #b45309; --accent-s: #dc2626; --accent-g: #0f766e;
 }
-body { background: var(--paper); }
+[data-theme="dark"] {
+  --ink: #e2e8f0; --paper: #0a1020; --gold: #c9a84c;
+  --blue: #60a5fa; --red: #f87171; --green: #4ade80;
+  --border: #334155; --muted: #94a3b8; --surface: #1e293b;
+  --surface2: #1e293b; --surface-hover: rgba(59,130,246,.1); --surface-green: rgba(34,197,94,.08);
+  --accent-r: #3b82f6; --accent-p: #a78bfa; --accent-a: #f59e0b; --accent-s: #f87171; --accent-g: #2dd4bf;
+}
+body { background: var(--paper); color: var(--ink); }
 .inv-wrap { max-width: 1200px; margin: 0 auto; }
 
 /* DOC TYPE TABS */
@@ -66,7 +74,7 @@ body { background: var(--paper); }
 .doc-tab.active[data-type="A"] { background: var(--accent-a); color: white; }
 .doc-tab.active[data-type="S"] { background: var(--accent-s); color: white; }
 .doc-tab.active[data-type="GS"] { background: var(--accent-g); color: white; }
-.doc-tab:hover:not(.active) { background: #f1f5f9; }
+.doc-tab:hover:not(.active) { background: var(--surface2); }
 
 /* LAYOUT */
 .inv-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
@@ -90,15 +98,15 @@ body { background: var(--paper); }
   font-size: 0.875rem; color: var(--ink); background: var(--paper);
   transition: border-color 0.15s; outline: none; font-family: inherit;
 }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); background: white; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); background: var(--surface); }
 .field textarea { resize: vertical; min-height: 60px; }
 .field .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
 
 /* PARTNER SEARCH */
 .partner-search-wrap { position: relative; }
-.partner-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid var(--blue); border-top: none; border-radius: 0 0 8px 8px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
-.partner-option { padding: 10px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; }
-.partner-option:hover { background: #eff6ff; }
+.partner-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1.5px solid var(--blue); border-top: none; border-radius: 0 0 8px 8px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
+.partner-option { padding: 10px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
+.partner-option:hover { background: var(--surface-hover); }
 .partner-option .p-name { font-weight: 600; color: var(--ink); }
 .partner-option .p-detail { font-size: 0.75rem; color: var(--muted); }
 
@@ -134,19 +142,19 @@ body { background: var(--paper); }
 .article-search-wrap { position: relative; margin-bottom: 8px; }
 .article-dropdown {
   position: absolute; top: 100%; left: 0; right: 0;
-  background: white; border: 1.5px solid var(--green); border-top: none;
+  background: var(--surface); border: 1.5px solid var(--green); border-top: none;
   border-radius: 0 0 8px 8px; z-index: 100; max-height: 250px;
   overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,.12);
 }
-.article-option { padding: 10px 12px; cursor: pointer; font-size: 0.82rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-.article-option:hover { background: #f0fdf4; }
+.article-option { padding: 10px 12px; cursor: pointer; font-size: 0.82rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.article-option:hover { background: var(--surface-green); }
 .article-option .a-name { font-weight: 600; color: var(--ink); }
 .article-option .a-detail { font-size: 0.72rem; color: var(--muted); }
 .article-option .a-price { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--green); }
 
 /* Company indicator */
 .company-indicator {
-  background: var(--gold); color: #0f172a; padding: 3px 10px;
+  background: var(--gold); color: var(--ink); padding: 3px 10px;
   border-radius: 5px; font-size: 0.7rem; font-weight: 700;
   letter-spacing: 0.5px; margin-right: 8px;
 }
@@ -164,7 +172,7 @@ body { background: var(--paper); }
   border-radius: 5px; font-size: 0.82rem; background: var(--paper);
   transition: all 0.15s; font-family: inherit;
 }
-.items-table input:focus, .items-table select:focus { border-color: var(--blue); background: white; outline: none; }
+.items-table input:focus, .items-table select:focus { border-color: var(--blue); background: var(--surface); outline: none; }
 .items-table .col-opis { width: 35%; }
 .items-table .col-qty { width: 8%; }
 .items-table .col-unit { width: 7%; }
@@ -177,13 +185,13 @@ body { background: var(--paper); }
 .btn-del-item { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 1.1rem; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; }
 .btn-del-item:hover { background: #fef2f2; color: var(--red); }
 .btn-add-item { border: 1.5px dashed var(--border); background: none; color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: 'Syne', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-top: 8px; transition: all 0.2s; }
-.btn-add-item:hover { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+.btn-add-item:hover { border-color: var(--blue); color: var(--blue); background: var(--surface-hover); }
 /* QUICK-BAR */
 .quick-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}
-.qbtn{background:#f0fdf4;border:1.5px solid var(--green);color:#166534;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
+.qbtn{background: var(--surface-green);border:1.5px solid var(--green);color:#166534;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
 .qbtn:hover{background:var(--green);color:white;transform:translateY(-1px);box-shadow:0 3px 10px rgba(22,163,74,.25)}
 .qbtn-manage{background:none;border:1.5px dashed var(--border);color:var(--muted)}
-.qbtn-manage:hover{border-color:var(--blue);color:var(--blue);background:#eff6ff}
+.qbtn-manage:hover{border-color:var(--blue);color:var(--blue);background: var(--surface-hover)}
 .ai-input-wrap{margin:8px 0}
 .ai-input-row{display:flex;gap:6px;align-items:center}
 .ai-textarea{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;resize:none;background:var(--paper);transition:border-color .15s;min-height:38px;max-height:80px}
@@ -254,7 +262,7 @@ body { background: var(--paper); }
 .import-tab:hover, .import-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
 .import-list { margin-top: 10px; max-height: 200px; overflow-y: auto; }
 .import-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
-.import-item:hover { border-color: var(--blue); background: #eff6ff; }
+.import-item:hover { border-color: var(--blue); background: var(--surface-hover); }
 .import-item .i-info { }
 .import-item .i-title { font-weight: 600; color: var(--ink); }
 .import-item .i-sub { font-size: 0.72rem; color: var(--muted); }
@@ -387,10 +395,10 @@ body { background: var(--paper); }
         <div class="alert-msg alert-{{ message.tags }}" style="
           padding:12px 16px; border-radius:8px; margin-bottom:8px;
           font-size:0.85rem; font-weight:500; display:flex; align-items:center; gap:8px;
-          {% if message.tags == 'success' %}background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;
+          {% if message.tags == 'success' %}background: var(--surface-green); color:#166534; border:1px solid #bbf7d0;
           {% elif message.tags == 'error' %}background:#fef2f2; color:#991b1b; border:1px solid #fecaca;
           {% elif message.tags == 'warning' %}background:#fffbeb; color:#92400e; border:1px solid #fed7aa;
-          {% else %}background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;{% endif %}
+          {% else %}background: var(--surface-hover); color:#1e40af; border:1px solid #bfdbfe;{% endif %}
         ">
           {{ message }}
           <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:.5">×</button>
@@ -403,7 +411,7 @@ body { background: var(--paper); }
       <!-- AKTIVNA FIRMA -->
       {% if active_company %}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1.5px solid var(--gold);border-radius:8px">
-        <div style="background:var(--gold);color:#0f172a;padding:4px 10px;border-radius:5px;font-size:0.7rem;font-weight:700;letter-spacing:0.5px">FIRMA</div>
+        <div style="background:var(--gold);color: var(--ink);padding:4px 10px;border-radius:5px;font-size:0.7rem;font-weight:700;letter-spacing:0.5px">FIRMA</div>
         <div style="font-weight:700;font-size:0.9rem;color:var(--ink)">{{ active_company.name }}</div>
         {% if profile %}
         <div style="font-size:0.75rem;color:var(--muted);margin-left:auto">{{ profile.address }}, {{ profile.zip_code }} {{ profile.city }}</div>
@@ -861,7 +869,7 @@ Sustav automatski provjerava ispravnost.">{% trans "OIB / USt-IdNr" %}</label>
               </select>
             </div>
             {% if invoice.is_fiscalized %}
-            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:10px;font-size:0.78rem">
+            <div style="background: var(--surface-green);border:1px solid #86efac;border-radius:6px;padding:10px;font-size:0.78rem">
               <div style="color:#16a34a;font-weight:700;margin-bottom:4px">{% trans "✓ Fiskalizirano" %}</div>
               <div style="font-family:'IBM Plex Mono',monospace;color:#374151;font-size:0.72rem">
                 ZKI: {{ invoice.zki|truncatechars:16 }}...<br>

@@ -57,5 +57,8 @@ table tr.total td { font-weight: bold; background: #f0f0f0; border-top: 2px soli
     {{ company.name }} | OIB: {{ company.oib|default:"—" }} |
     Generirano: {% now "d.m.Y H:i" %} | LIMIT Connect
 </div>
+
+{% include "includes/_pdf_footer.html" %}
+
 </body>
 </html>

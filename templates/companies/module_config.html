@@ -121,12 +121,21 @@
                 <i class="fas fa-info-circle"></i>
                 Aktivni specijalizirani moduli: <strong id="activeCount">{{ active_keys|length }}</strong>
             </div>
-            <button type="submit" class="btn px-4 py-2 fx-text-dark fx-fw-bold fx-rounded fx-bg-gold" id="moduleSaveBtn"
-                    onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Spremam...';this.disabled=true;this.closest('form').submit();">
+            <button type="submit" class="btn px-4 py-2 fx-text-dark fx-fw-bold fx-rounded fx-bg-gold" id="moduleSaveBtn">
                 <i class="fas fa-save"></i> Spremi konfiguraciju
             </button>
         </div>
     </form>
+<script>
+document.getElementById('moduleForm').addEventListener('submit', function(){
+  var btn = document.getElementById('moduleSaveBtn');
+  if(btn){
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spremam...';
+    setTimeout(function(){ btn.disabled = true; }, 50);
+  }
+});
+</script>
+
 </div>
 
 <style>

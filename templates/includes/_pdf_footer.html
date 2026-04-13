@@ -1,0 +1,170 @@
+{% comment %}
+_pdf_footer.html — Univerzalni PDF footer za SVE dokumente na LIMIT Connect platformi.
+
+Koristi:
+  {% include "includes/_pdf_footer.html" with doc_id=invoice.number company=invoice.company lang="hr" %}
+
+Parametri:
+  doc_id    — broj/referenca dokumenta (npr. R-2026-0042)
+  company   — Company objekt (za OIB i logo)
+  lang      — "hr" ili "de"
+  show_hash — True/False (default True)
+  custom_text — opcionalni custom tekst umjesto defaultnog
+{% endcomment %}
+{% load i18n %}
+
+<div style="
+  margin-top: 16pt;
+  border-top: 0.5pt solid #e2e8f0;
+  padding-top: 10pt;
+  page-break-inside: avoid;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+">
+
+  <!-- RED 1: Logo + Brand + CroValidator pečat -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:6pt">
+    <tr>
+
+      <!-- LOGO BLOK -->
+      <td style="width:38pt;vertical-align:middle;padding-right:8pt">
+        {% if WL_ACTIVE and WL_LOGO %}
+          <img src="{{ WL_LOGO }}" alt="{{ WL_NAME }}"
+               style="width:34pt;height:34pt;object-fit:contain;display:block">
+        {% elif company and company.logo %}
+          <img src="{{ company.logo.url }}" alt="{{ company.name }}"
+               style="width:34pt;height:34pt;object-fit:contain;display:block">
+        {% else %}
+          <!-- LIMIT Connect Shield SVG inline — ne ovisi o URL-u, radi i offline -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 90"
+               style="width:30pt;height:34pt;display:block">
+            <path d="M40 4 L74 17 C75 17,76 50,66 67 C56 82,40 90,40 90
+                     C40 90,24 82,14 67 C4 50,5 17,6 17 Z"
+                  fill="none" stroke="#c9a84c" stroke-width="4" stroke-linejoin="round"/>
+            <circle cx="40" cy="40" r="5" fill="#c9a84c"/>
+            <line x1="40" y1="45" x2="40" y2="58" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="40" y1="35" x2="40" y2="24" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="35" y1="40" x2="24" y2="40" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="45" y1="40" x2="56" y2="40" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="24" cy="40" r="3" fill="#c9a84c" opacity="0.8"/>
+            <circle cx="56" cy="40" r="3" fill="#c9a84c" opacity="0.8"/>
+            <circle cx="40" cy="24" r="3" fill="#c9a84c" opacity="0.8"/>
+            <circle cx="40" cy="58" r="3" fill="#c9a84c" opacity="0.8"/>
+          </svg>
+        {% endif %}
+      </td>
+
+      <!-- BRAND TEKST -->
+      <td style="vertical-align:middle;padding-right:12pt">
+        {% if WL_ACTIVE %}
+          <div style="font-size:8pt;font-weight:700;color:#0f172a;letter-spacing:0.5pt">
+            {{ WL_NAME }}
+          </div>
+          <div style="font-size:6.5pt;color:#64748b;margin-top:1pt">
+            Powered by <span style="color:#c9a84c;font-weight:700">LIMIT Connect</span>
+            &nbsp;·&nbsp; limit-connect.com
+          </div>
+        {% else %}
+          <div style="font-size:8pt;font-weight:700;color:#0f172a;letter-spacing:0.5pt">
+            LIMIT <span style="color:#c9a84c">CONNECT</span>
+          </div>
+          <div style="font-size:6.5pt;color:#64748b;margin-top:1pt;line-height:1.5">
+            {% if lang == "de" %}
+              Digitale ERP-Plattform für KMU · Fiskalisierung · AI-Buchhaltung
+            {% else %}
+              Digitalna ERP platforma za KMU · Fiskalizacija · AI računovodstvo
+            {% endif %}
+          </div>
+          <div style="font-size:5.5pt;color:#94a3b8;margin-top:1pt">
+            limit-connect.com
+          </div>
+        {% endif %}
+      </td>
+
+      <!-- CROVALIDATOR PEČAT -->
+      <td style="vertical-align:middle;text-align:right;min-width:160pt">
+        <div style="
+          display:inline-block;
+          border:0.8pt solid #c9a84c;
+          border-radius:3pt;
+          padding:4pt 8pt;
+          background:#fffbeb;
+        ">
+          <div style="font-size:6pt;font-weight:700;color:#92650a;letter-spacing:1pt;margin-bottom:2pt">
+            &#10003; CROVALIDATOR
+          </div>
+          {% if company and company.oib %}
+          <div style="font-size:5.5pt;color:#475569;font-family:monospace">
+            OIB: {{ company.oib }}
+            {% if company.oib|length == 11 %}
+            <span style="color:#16a34a;font-weight:700"> &#10003;</span>
+            {% endif %}
+          </div>
+          {% endif %}
+          {% if doc_id %}
+          <div style="font-size:5pt;color:#94a3b8;margin-top:1pt;font-family:monospace">
+            REF: {{ doc_id }}
+          </div>
+          {% endif %}
+          <div style="font-size:5pt;color:#94a3b8;margin-top:1pt">
+            {% now "d.m.Y H:i" %} UTC+1
+          </div>
+        </div>
+      </td>
+
+    </tr>
+  </table>
+
+  <!-- RED 2: SHA-256 integritetni hash + pravni tekst -->
+  {% if integrity_hash or show_hash != False %}
+  <div style="
+    background:#f8fafc;
+    border:0.5pt solid #e2e8f0;
+    border-radius:3pt;
+    padding:5pt 8pt;
+    font-size:5.5pt;
+    color:#64748b;
+    line-height:1.6;
+  ">
+    <span style="font-weight:700;color:#0f172a">
+      {% if lang == "de" %}
+        &#9989; Elektronisches Dokument
+      {% else %}
+        &#9989; Elektronički dokument
+      {% endif %}
+    </span>
+    &nbsp;&mdash;&nbsp;
+    {% if lang == "de" %}
+      Gültig ohne Stempel und Unterschrift gemäß § 14 UStG.
+      Aufbewahrungspflicht gem. § 147 AO (10 Jahre). GoBD-konform.
+    {% else %}
+      Važeći bez pečata i potpisa (čl. 9. st. 2. ZOR-a).
+      Čuvati 11 godina (Zakon o računovodstvu, NN 78/15).
+    {% endif %}
+    {% if integrity_hash %}
+    &nbsp;·&nbsp;
+    <span style="font-family:monospace;font-size:5pt;color:#94a3b8">
+      SHA-256: {{ integrity_hash }}
+    </span>
+    {% endif %}
+    {% if integrity_generated_by %}
+    &nbsp;·&nbsp; {{ integrity_generated_by }}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- RED 3: Custom tekst ili viral call-to-action -->
+  {% if custom_text %}
+  <div style="font-size:6pt;color:#94a3b8;margin-top:4pt;text-align:center">
+    {{ custom_text }}
+  </div>
+  {% else %}
+  <div style="font-size:5.5pt;color:#cbd5e1;margin-top:4pt;text-align:center;letter-spacing:0.5pt">
+    {% if lang == "de" %}
+      Erstellt mit LIMIT Connect — Ihrer intelligenten ERP-Lösung · limit-connect.com
+    {% else %}
+      Dokument kreiran platformom LIMIT Connect — vaš pametni ERP sustav · limit-connect.com
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>

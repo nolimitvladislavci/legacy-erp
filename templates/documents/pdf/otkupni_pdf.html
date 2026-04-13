@@ -49,4 +49,5 @@ td.r { text-align:right; }
   <div class="sig-box">Preuzeo: _____________________</div>
 </div>
 <div class="footer">{{ doc.company.name }} · OIB: {{ doc.company.oib|default:"" }} · {{ doc.company.address|default:"" }} · Generirano: {% now "d.m.Y H:i" %}</div>
+{% include "includes/_pdf_footer.html" %}
 </body></html>

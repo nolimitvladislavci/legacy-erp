@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8c96a"/>
+      <stop offset="100%" style="stop-color:#c9a84c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Infinity/Connection symbol — two interlocking loops -->
+  <g transform="translate(12, 22)">
+    <!-- Left loop -->
+    <path d="M38 38 C38 18, 12 18, 12 38 C12 58, 38 58, 38 38" 
+          fill="none" stroke="url(#g3)" stroke-width="5" stroke-linecap="round"/>
+    <!-- Right loop -->
+    <path d="M38 38 C38 58, 64 58, 64 38 C64 18, 38 18, 38 38" 
+          fill="none" stroke="url(#g3)" stroke-width="5" stroke-linecap="round"/>
+    <!-- Center pulse dot -->
+    <circle cx="38" cy="38" r="5" fill="#c9a84c"/>
+    <circle cx="38" cy="38" r="9" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.3"/>
+  </g>
+
+  <!-- LIMIT — bold, tight -->
+  <text x="100" y="55" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="42" font-weight="900" letter-spacing="2" fill="#e2e8f0">
+    LIMIT
+  </text>
+  
+  <!-- Gold dot separator -->
+  <circle cx="296" cy="45" r="4" fill="#c9a84c"/>
+  
+  <!-- CONNECT — light weight -->
+  <text x="100" y="92" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="28" font-weight="300" letter-spacing="8" fill="#c9a84c">
+    CONNECT
+  </text>
+
+  <!-- Bottom accent line -->
+  <rect x="100" y="102" width="60" height="3" rx="1.5" fill="#c9a84c"/>
+  <rect x="168" y="102" width="20" height="3" rx="1.5" fill="#c9a84c" opacity="0.4"/>
+  <rect x="196" y="102" width="8" height="3" rx="1.5" fill="#c9a84c" opacity="0.2"/>
+</svg>

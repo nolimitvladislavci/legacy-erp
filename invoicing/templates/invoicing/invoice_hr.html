@@ -364,56 +364,7 @@
 </div>
 
 <!-- ══ BRAND FOOTER ════════════════════════════════════════════════ -->
-<div class="brand-footer">
-
-  <!-- LC brand + partner stranice -->
-  <div class="bf-brand">
-    {% if lc_qr_b64 %}
-    <div class="bf-brand-qr">
-      <img src="data:image/png;base64,{{ lc_qr_b64 }}"
-           style="width:38pt;height:38pt;display:block">
-      <p>limit-connect.com</p>
-    </div>
-    {% endif %}
-    <div class="bf-brand-text">
-      <strong>Kreirano s LIMIT Connect</strong><br>
-      Digitale Plattform für Handwerk &amp; KMU · EU ViDA 2028 konform<br>
-      eRačun · Fiskalizacija · AI računovodstvo<br>
-      <span class="partners">
-        viskovic-group.de &nbsp;·&nbsp; grosmarkt-online.eu &nbsp;·&nbsp; limit-connect.com
-      </span>
-    </div>
-  </div>
-
-  <!-- Kontakti (svi telefoni s imenima) -->
-  <div class="bf-contacts">
-    <div class="ct-title">Kontakti</div>
-    {% if invoice_contacts %}
-      {% for ct in invoice_contacts %}
-      <div class="bf-contact-row">
-        <span class="bf-contact-name">{{ ct.name }}</span>
-        <span class="bf-contact-role">{{ ct.role }}</span>
-        <span class="bf-contact-phone">{{ ct.phone }}</span>
-      </div>
-      {% endfor %}
-    {% else %}
-      {% if invoice.issuer_phone %}
-      <div class="bf-contact-row">
-        <span class="bf-contact-name">{{ invoice.issuer_name }}</span>
-        <span class="bf-contact-phone">{{ invoice.issuer_phone }}</span>
-      </div>
-      {% endif %}
-    {% endif %}
-  </div>
-
-  <!-- Meta -->
-  <div class="bf-meta">
-    {{ now|date:"d.m.Y H:i" }}<br>
-    Dok.-Nr.: {{ invoice.number }}<br>
-    <span class="uuid">{{ invoice.uuid }}</span>
-  </div>
-
-</div>
+{% include "includes/_pdf_footer.html" with doc_id=invoice.number company=invoice.company lang=lang %}
 <!-- ══ / BRAND FOOTER ══════════════════════════════════════════════ -->
 
 </body>
