@@ -234,6 +234,8 @@ class ShortShiftAndBreakComplianceTests(TestCase):
 
 
 from django.test import override_settings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class PayrollViewTests(TestCase):

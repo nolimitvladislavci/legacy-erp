@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

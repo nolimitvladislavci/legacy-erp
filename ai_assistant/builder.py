@@ -15,6 +15,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.conf import settings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Conversation, Message, AIUsageLog
 from .claude_client import get_claude_client, estimate_cost
@@ -343,7 +345,7 @@ Za generiranje koda, uputi ih da koriste Katana Engine (lijevi panel → odaberi
         )
         final_content = response.content[0].text
         tokens = response.usage.input_tokens + response.usage.output_tokens
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         final_content = f"Greška: {e}"
         tokens = 0
 

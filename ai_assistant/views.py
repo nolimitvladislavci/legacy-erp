@@ -4,6 +4,8 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Conversation, Message, AIUsageLog
 from .claude_client import chat_with_claude, SYSTEM_PROMPT, estimate_cost, _build_contextual_system_prompt
@@ -54,7 +56,7 @@ def _get_company(request):
         try:
             from companies.models import Company
             company = request.user.profile.company if hasattr(request.user, "profile") else None
-        except Exception:
+        except ImportError:
             pass
     return company
 
@@ -298,7 +300,7 @@ def ai_intro(request):
             if sub:
                 context['plan'] = sub.plan
                 context['modules'] = list(sub.allowed_modules)
-        except Exception:
+        except DatabaseError:
             pass
 
     return render(request, 'ai_assistant/ai_intro.html', context)
@@ -465,6 +467,6 @@ def analyze_image(request):
         )
         _ai_rate_increment(request.user)
         return JsonResponse({'response': response.content[0].text})
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f'analyze_image error: {e}', exc_info=True)
         return JsonResponse({'error': str(e)}, status=500)

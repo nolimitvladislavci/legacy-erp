@@ -213,7 +213,7 @@ class RegistrationAdminActionsTest(TestCase):
             if reg:
                 resp = self.client.get(f'/register/superadmin/registrations/{reg.pk}/', follow=True)
                 self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_admin_approve(self):

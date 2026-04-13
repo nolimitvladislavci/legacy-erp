@@ -144,7 +144,7 @@ class WorktimeEntryTest(TestCase):
             entry = self._create_entry()
             resp = self.client.get(f'/worktime/edit/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass  # TimeEntry model fields may differ
 
     def test_entry_delete(self):
@@ -181,5 +181,5 @@ class WorktimeEntryTest(TestCase):
         try:
             resp = self.client.get('/worktime/analytics/?from=2026-01-01&to=2026-01-31', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass  # Template may crash in test env

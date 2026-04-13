@@ -7,6 +7,8 @@ Usage:
 """
 import logging
 from django.conf import settings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('accounts')
 
@@ -41,7 +43,7 @@ def notify_password_change(user, new_password, changed_by=None):
             from core.whatsapp_tasks import send_whatsapp_text_task
             send_whatsapp_text_task.delay(phone, message)
             sent_via.append('whatsapp:%s' % phone)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('WhatsApp password notify failed for %s: %s', user.username, e)
 
     # 2. Email fallback
@@ -72,7 +74,7 @@ def notify_password_change(user, new_password, changed_by=None):
             url='/worktime/profile/',
         )
         sent_via.append('in_app')
-    except Exception:
+    except ImportError:
         pass
 
     if sent_via:

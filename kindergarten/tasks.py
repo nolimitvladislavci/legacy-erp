@@ -53,7 +53,7 @@ def send_daily_report_notification():
                             company_id=str(report.group.company.pk),
                         )
                         sent += 1
-                    except Exception as e:
+                    except ImportError as e:
                         logger.debug('Report notification error: %s', e)
 
     logger.info('Daily report notifications: %d sent', sent)
@@ -100,7 +100,7 @@ def send_absence_alert():
                         company_id=str(att.child.company_id),
                     )
                     sent += 1
-                except Exception as e:
+                except ImportError as e:
                     logger.debug('Absence alert error: %s', e)
 
     logger.info('Absence alerts: %d sent', sent)
@@ -149,7 +149,7 @@ def send_billing_reminder():
                         company_id=str(billing.child.company_id),
                     )
                     sent += 1
-                except Exception as e:
+                except ImportError as e:
                     logger.debug('Billing reminder error: %s', e)
 
     logger.info('Billing reminders: %d sent', sent)

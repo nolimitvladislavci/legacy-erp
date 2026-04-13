@@ -42,14 +42,14 @@ class BurzaViewsTest(TestCase):
         try:
             resp = self.client.get('/burza/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_lead_new_get(self):
         try:
             resp = self.client.get('/burza/lead/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_lead_new_post(self):
@@ -69,7 +69,7 @@ class BurzaViewsTest(TestCase):
         try:
             resp = self.client.get('/burza/lead/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_lead_move_invalid(self):
@@ -85,14 +85,14 @@ class BurzaViewsTest(TestCase):
         try:
             resp = self.client.get('/burza/upit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_upit_hvala(self):
         try:
             resp = self.client.get('/burza/upit/hvala/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -108,14 +108,14 @@ class WebsiteCMSViewsTest(TestCase):
         try:
             resp = self.client.get('/website/editor/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_website_messages(self):
         try:
             resp = self.client.get('/website/editor/messages/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_service_save(self):
@@ -146,7 +146,7 @@ class WebsiteCMSViewsTest(TestCase):
         try:
             resp = self.client.get('/cms/gallery/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -160,14 +160,14 @@ class CoreViewsTest(TestCase):
         try:
             resp = self.client.get('/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_notifications_list(self):
         try:
             resp = self.client.get('/notifications/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_notifications_mark_read(self):
@@ -181,7 +181,7 @@ class CoreViewsTest(TestCase):
         try:
             resp = self.client.get('/superadmin/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -198,35 +198,35 @@ class SuperadminViewsTest(TestCase):
         try:
             resp = self.client.get('/superadmin/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_superadmin_companies(self):
         try:
             resp = self.client.get('/companies/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_superadmin_users(self):
         try:
             resp = self.client.get('/accounts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_superadmin_analytics(self):
         try:
             resp = self.client.get('/superadmin/analytics/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_superadmin_logs(self):
         try:
             resp = self.client.get('/superadmin/logs/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -240,7 +240,7 @@ class WebshopDetailViewsTest(TestCase):
         try:
             resp = self.client.get('/webshop/products/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_product_create_post(self):
@@ -259,14 +259,14 @@ class WebshopDetailViewsTest(TestCase):
         try:
             resp = self.client.get('/webshop/orders/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_webshop_settings(self):
         try:
             resp = self.client.get('/webshop/settings/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -280,21 +280,21 @@ class FinanceViewsTest(TestCase):
         try:
             resp = self.client.get('/finance/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_finance_transactions(self):
         try:
             resp = self.client.get('/finance/transactions/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_finance_reports(self):
         try:
             resp = self.client.get('/finance/reports/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -308,19 +308,19 @@ class RentalViewsTest(TestCase):
         try:
             resp = self.client.get('/rental/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_rental_items(self):
         try:
             resp = self.client.get('/rental/items/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_rental_new_booking(self):
         try:
             resp = self.client.get('/rental/bookings/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

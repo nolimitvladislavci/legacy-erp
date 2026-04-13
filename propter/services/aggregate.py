@@ -247,7 +247,7 @@ def aggregate_to_eracun(period, user=None):
         from propter.tasks import send_zbirni_eracun
         send_zbirni_eracun.delay(period.pk)
         logger.info("send_zbirni_eracun task pokrenut za period %s", period.pk)
-    except Exception as e:
+    except ImportError as e:
         logger.warning("Nije moguce pokrenuti send_zbirni_eracun: %s", e)
 
     return eracun

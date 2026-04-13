@@ -78,7 +78,7 @@ class OutreachDashboardTest(TestCase):
         try:
             resp = self.client.get('/outreach/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dashboard_with_data(self):
@@ -112,7 +112,7 @@ class OutreachContactsTest(TestCase):
         try:
             resp = self.client.get('/outreach/contacts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contacts_list_with_data(self):
@@ -121,7 +121,7 @@ class OutreachContactsTest(TestCase):
             _make_contact('cl2@test.hr', 'Firma B')
             resp = self.client.get('/outreach/contacts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contacts_list_filter_status(self):
@@ -129,14 +129,14 @@ class OutreachContactsTest(TestCase):
             _make_contact('cl3@test.hr', status='interessiert')
             resp = self.client.get('/outreach/contacts/?status=interessiert', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contacts_list_filter_type(self):
         try:
             resp = self.client.get('/outreach/contacts/?type=makler', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contacts_list_search(self):
@@ -144,14 +144,14 @@ class OutreachContactsTest(TestCase):
             _make_contact('cl4@search.hr', 'Searchable Firma')
             resp = self.client.get('/outreach/contacts/?q=Searchable', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contact_new_get(self):
         try:
             resp = self.client.get('/outreach/contacts/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contact_new_post(self):
@@ -176,7 +176,7 @@ class OutreachContactsTest(TestCase):
             c = _make_contact('edit1@test.hr', 'Edit Firm')
             resp = self.client.get(f'/outreach/contacts/{c.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contact_edit_post(self):
@@ -202,7 +202,7 @@ class OutreachContactsTest(TestCase):
         try:
             resp = self.client.get('/outreach/contacts/9999/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -225,7 +225,7 @@ class OutreachCSVImportTest(TestCase):
         try:
             resp = self.client.get('/outreach/contacts/import/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_csv_import_valid_file(self):
@@ -237,7 +237,7 @@ class OutreachCSVImportTest(TestCase):
                 'csvfile': csv_file,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (UnicodeDecodeError, ValueError):
             pass
 
     def test_csv_import_with_duplicates(self):
@@ -251,7 +251,7 @@ class OutreachCSVImportTest(TestCase):
                 'csvfile': csv_file,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (UnicodeDecodeError, ValueError):
             pass
 
     def test_csv_import_semicolon_delimiter(self):
@@ -263,7 +263,7 @@ class OutreachCSVImportTest(TestCase):
                 'csvfile': csv_file,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (UnicodeDecodeError, ValueError):
             pass
 
 
@@ -281,7 +281,7 @@ class OutreachCampaignTest(TestCase):
         try:
             resp = self.client.get('/outreach/campaign/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_new_post(self):
@@ -309,7 +309,7 @@ class OutreachCampaignTest(TestCase):
                 'contacts': [str(self.contact1.pk), str(self.contact2.pk)],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_campaign_detail_with_data(self):
@@ -319,14 +319,14 @@ class OutreachCampaignTest(TestCase):
             _make_campaign_contact(campaign, self.contact2)
             resp = self.client.get(f'/outreach/campaign/{campaign.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_detail_invalid(self):
         try:
             resp = self.client.get('/outreach/campaign/9999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_preview_no_contact(self):
@@ -334,7 +334,7 @@ class OutreachCampaignTest(TestCase):
             campaign = _make_campaign('Preview Campaign')
             resp = self.client.get(f'/outreach/campaign/{campaign.pk}/preview/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_preview_with_contact(self):
@@ -345,7 +345,7 @@ class OutreachCampaignTest(TestCase):
                 follow=True
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_send(self):
@@ -366,7 +366,7 @@ class OutreachCampaignTest(TestCase):
                 'contacts': [str(self.contact1.pk), str(self.contact2.pk)],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_campaign_add_contacts_invalid_id(self):
@@ -392,7 +392,7 @@ class OutreachInboxTest(TestCase):
         try:
             resp = self.client.get('/outreach/inbox/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_inbox_with_replied(self):

@@ -14,8 +14,9 @@ Samo InventoryItem.tax_rate FK se ažurira na novu stopu.
 import logging
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ def _apply_notification(rule):
             f'Akcija: {rule.action_description}\n\n'
             f'Potrebna ručna intervencija: limit-connect.com',
         )
-    except Exception as e:
+    except ImportError as e:
         logger.warning('[BORG] Notification failed: %s', e)
 
     rule.is_executed = True
@@ -212,7 +213,7 @@ class AdaptationEngine:
                 f'Ažurirano {updated_count} artikala.\n'
                 f'Povijesni POS bonovi i fakture ostaju na {old_rate}%.',
             )
-        except Exception:
+        except ImportError:
             pass
 
         logger.info(

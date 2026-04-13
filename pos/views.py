@@ -169,7 +169,7 @@ def open_session(request, terminal_id):
                 'workspace': str(terminal.workspace) if terminal.workspace else None,
             },
         )
-    except Exception:
+    except (ValueError, TypeError):
         pass
     messages.success(request, _('Smjena #{n} otvorena! Skenirajte artikle za kreiranje bona.').format(n=session.session_number))
     return redirect('pos:session_detail', session_id=session.pk)
@@ -228,7 +228,7 @@ def close_session(request, session_id):
     try:
         from pos.worktime_bridge import session_close_all_cashiers
         session_close_all_cashiers(session)
-    except Exception:
+    except ImportError:
         pass
     messages.success(request, _('Smjena #{n} zatvorena. Z-izvještaj je generiran.').format(n=session.session_number))
 
@@ -271,7 +271,7 @@ def close_session(request, session_id):
     try:
         from pos.pulse import analyze_session_close
         analyze_session_close(session)
-    except Exception:
+    except ImportError:
         pass
     # Audit: session close with financial snapshot
     try:
@@ -574,7 +574,7 @@ def process_payment(request, receipt_id):
                 f'JIR: {jir[:8]}… | Kusur: €{change:.2f}')
         else:
             messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
-    except Exception as _fisk_err:
+    except ImportError as _fisk_err:
         logger.warning(f'Fiskalizacija bon #{receipt.receipt_number}: {_fisk_err}')
         messages.success(request, _('Bon #{n} plaćen! Kusur: €{c:.2f}').format(n=receipt.receipt_number, c=change))
         messages.warning(request, f'Fiskalizacija nije uspjela: {str(_fisk_err)[:120]}')
@@ -582,7 +582,7 @@ def process_payment(request, receipt_id):
     # Audit: payment/fiscal
     try:
         BookingSignature.log(request, 'fiscal', target_model='POSReceipt', target_id=str(receipt_id), target_repr=f'Receipt #{receipt_id}')
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     return redirect('pos:session_detail', session_id=receipt.session_id)
@@ -626,7 +626,7 @@ def cancel_receipt(request, receipt_id):
                 'workspace': str(receipt.session.terminal.workspace) if receipt.session.terminal.workspace else None,
             },
         )
-    except Exception:
+    except (ValueError, TypeError):
         pass
     messages.warning(request, f'Bon #{receipt.receipt_number} storniran.' + (f' Razlog: {reason}' if reason else ''))
     return redirect('pos:session_detail', session_id=receipt.session_id)
@@ -750,7 +750,7 @@ def ai_barcode_lookup(request):
                 'price': ai_price, 'category': ai_category,
             })
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('Gemini barcode failed: %s', e)
 
     # Fallback Claude Haiku
@@ -1214,7 +1214,7 @@ def _quick_pos_legacy(request, terminal_id):
         from django.urls import reverse
         # reverse() uz i18n_patterns vec vraca /hr/pos/... ne treba dodavati lang prefix
         report_url = reverse('pos:cashier_report_html', args=[session.id]) if session else '#'
-    except Exception:
+    except ImportError:
         report_url = '#'
 
     # Top 12 najprodavanijih = brze tipke
@@ -1353,7 +1353,7 @@ def pos_joker(request, terminal_id):
     try:
         from django.urls import reverse
         report_url = reverse('pos:cashier_report_html', args=[session.id]) if session else '#'
-    except Exception:
+    except ImportError:
         report_url = '#'
 
     # Top 12 najprodavanijih = brze tipke
@@ -1477,7 +1477,7 @@ def quick_pay(request, session_id):
         })
     except CheckoutValidationError as e:
         return JsonResponse({'ok': False, 'error': e.message, 'code': e.code}, status=400)
-    except Exception as e:
+    except KeyError as e:
         logger.error('quick_pay greska: %s', e, exc_info=True)
         return JsonResponse({'ok': False, 'error': 'Sistemska greska pri naplati'}, status=500)
 
@@ -1672,7 +1672,7 @@ def receipt_pay(request, receipt_id):
     try:
         from fiscal.service import fiscalize_pos_receipt
         fiscalize_pos_receipt(receipt)
-    except Exception:
+    except ImportError:
         logger.warning("Suppressed error", exc_info=True)
 
     return JsonResponse({
@@ -1905,7 +1905,7 @@ def settings_test_fiscal(request):
         except ImportError:
             msg = f'Certifikat učitan ({name}, {size} B). Fiskalizacija modul nije konfiguriran.'
         return JsonResponse({'ok': True, 'message': msg})
-    except Exception as e:
+    except ImportError as e:
         logger.exception("Unexpected error", exc_info=True)
         return JsonResponse({'ok': False, 'error': str(e)})
 
@@ -2800,7 +2800,7 @@ def article_search(request):
         # Superusers don't have thread-local company — fall back to profile
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             logger.warning("Suppressed error", exc_info=True)
     if not company:
         return JsonResponse({'articles': []})
@@ -3162,7 +3162,7 @@ def refund_receipt(request, receipt_id):
     try:
         from pos.hashchain import append_receipt
         append_receipt(refund_receipt)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('Hash chain append failed for refund #%d: %s', refund_receipt.pk, e)
 
     return JsonResponse({
@@ -4389,7 +4389,7 @@ def _zlatno_dugme_notify_ivan(suggestion):
             f"Odgovori na: https://limit-connect.com/hr/login/?next=/hr/superadmin/ivan/"
         )
         send_text(IVAN_PHONE, msg)
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger('whatsapp').warning('Zlatno dugme Ivan notify failed: %s', e)
 
@@ -4404,7 +4404,7 @@ def _zlatno_dugme_notify_user(suggestion):
         phone = ''
         try:
             phone = normalize_phone(author.profile.phone or '')
-        except Exception:
+        except AttributeError:
             pass
         if not phone:
             return
@@ -4426,7 +4426,7 @@ def _zlatno_dugme_notify_user(suggestion):
             msg += f"Komentar: {suggestion.admin_note}\n"
         msg += f"\nHvala što pomažete poboljšati sustav!"
         send_text(phone, msg)
-    except Exception as e:
+    except AttributeError as e:
         import logging
         logging.getLogger('whatsapp').warning('Zlatno dugme user notify failed: %s', e)
 
@@ -4470,7 +4470,7 @@ def improvement_list(request):
             try:
                 from pos.trojstvo_task import trojstvo_rijesi
                 trojstvo_rijesi.delay(s.pk)
-            except Exception as e:
+            except ImportError as e:
                 import logging
                 logging.getLogger('trojstvo').error('Task dispatch greska: %s', e)
 
@@ -4487,7 +4487,7 @@ def improvement_list(request):
                     from core.whatsapp import send_text
                     send_text(IVAN_PHONE,
                         f'Zlatno dugme: {title}\n{desc[:200]}\nPrioritet: P{s.priority}\nFirma: {company.name}')
-                except Exception:
+                except ImportError:
                     pass
             elif send_method == 'email':
                 try:
@@ -4728,14 +4728,14 @@ def prigovori_api(request):
                         'prigovor_%d.webm' % p.redni_broj,
                         ContentFile(audio_data), save=True,
                     )
-                except Exception:
+                except ValueError:
                     pass
 
             # Trigger AI analysis (async Celery)
             try:
                 from pos.tasks import ai_analyze_prigovor
                 ai_analyze_prigovor.delay(p.pk)
-            except Exception:
+            except ImportError:
                 pass
 
             return JsonResponse({
@@ -5484,7 +5484,7 @@ def qr_session(request, session_id):
     try:
         from django.urls import reverse
         report_url = reverse("pos:cashier_report_html", args=[session.id])
-    except Exception:
+    except ImportError:
         report_url = "#"
 
     # Top 12 quick items
@@ -5563,7 +5563,7 @@ def qr_quick_pay(request, session_id):
         })
     except CheckoutValidationError as e:
         return JsonResponse({"ok": False, "error": e.message, "code": e.code}, status=400)
-    except Exception as e:
+    except KeyError as e:
         logger.error("qr_quick_pay error: %s", e, exc_info=True)
         return JsonResponse({"ok": False, "error": "Sistemska greska pri naplati"}, status=500)
 

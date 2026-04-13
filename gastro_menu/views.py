@@ -109,7 +109,7 @@ def public_order(request, slug):
             f'Ukupno: {total} EUR'
         )
         send_text(phone='385913912621', message=msg, company_id=str(menu.company.pk))
-    except Exception as e:
+    except ImportError as e:
         logger.debug('Order WhatsApp failed: %s', e)
 
     return JsonResponse({

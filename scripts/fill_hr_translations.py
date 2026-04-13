@@ -3,6 +3,8 @@ Fill HR .po file: since msgid is already Croatian, set msgstr = msgid for empty 
 Skip the header entry and any fuzzy entries.
 """
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 PO_PATH = "/var/www/fina-connect/locale/hr/LC_MESSAGES/django.po"
 

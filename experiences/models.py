@@ -19,10 +19,11 @@ Modeli:
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -325,7 +326,7 @@ class ExperienceBooking(models.Model):
                         'Storno predujma FAILED za booking #%d: %s',
                         self.pk, storno_result.get('message', ''),
                     )
-            except Exception as e:
+            except ImportError as e:
                 logger.error('Storno predujma ERROR za booking #%d: %s', self.pk, e)
         else:
             logger.warning(

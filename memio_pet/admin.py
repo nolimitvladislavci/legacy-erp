@@ -4,7 +4,7 @@ Ljubeta unosi podatke ovdje. Inline pomoc na svakom koraku.
 """
 from django.contrib import admin
 from django.utils.html import format_html, mark_safe
-from django.db import IntegrityError
+from django.db import IntegrityError, DatabaseError
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from memio_pet.models import (
@@ -183,7 +183,7 @@ class BreederProfileAdmin(admin.ModelAdmin):
             from memio_pet.trust_score import update_trust_score
             score, _ = update_trust_score(obj)
             messages.info(request, f"Trust Score azuriran: {score}/100")
-        except Exception as e:
+        except ImportError as e:
             messages.warning(request, f"Trust Score greska: {e}")
 
 
@@ -253,7 +253,7 @@ class AnimalProfileAdmin(admin.ModelAdmin):
             try:
                 from memio_pet.trust_score import update_trust_score
                 update_trust_score(obj.breeder)
-            except Exception:
+            except ImportError:
                 pass
 
 
@@ -277,7 +277,7 @@ class PetHealthRecordAdmin(admin.ModelAdmin):
             try:
                 from memio_pet.trust_score import update_trust_score
                 update_trust_score(obj.animal.breeder)
-            except Exception:
+            except ImportError:
                 pass
 
 
@@ -294,7 +294,7 @@ class PetOwnershipAdmin(admin.ModelAdmin):
             try:
                 from memio_pet.trust_score import update_trust_score
                 update_trust_score(obj.animal.breeder)
-            except Exception:
+            except ImportError:
                 pass
 
 
@@ -395,7 +395,7 @@ class BreederReviewAdmin(admin.ModelAdmin):
             try:
                 from memio_pet.trust_score import update_trust_score
                 update_trust_score(obj.breeder)
-            except Exception:
+            except ImportError:
                 pass
 
 
@@ -415,6 +415,7 @@ class RawFoodOrderAdmin(admin.ModelAdmin):
 
 
 from memio_pet.models import DogTrainingSession, PetBoardingReservation
+from django.core.exceptions import ObjectDoesNotExist
 
 @admin.register(DogTrainingSession)
 class DogTrainingSessionAdmin(admin.ModelAdmin):

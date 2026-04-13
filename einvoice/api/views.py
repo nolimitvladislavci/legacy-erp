@@ -93,7 +93,7 @@ class SmartMailboxViewSet(viewsets.ModelViewSet):
             from einvoice.services.archive_service import ArchiveService
             archive_svc = ArchiveService()
             archive_svc.archive_message(inbound.as4_message)
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Archive failed: {e}")
 
         return Response({"status": "booked", "konto": konto, "message": f"Racun {inbound.invoice_number} proknjizen"})

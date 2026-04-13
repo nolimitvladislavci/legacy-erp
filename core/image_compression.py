@@ -300,7 +300,7 @@ class ImageQuotaMiddleware:
             if not company:
                 try:
                     company = request.user.userprofile.company
-                except Exception:
+                except AttributeError:
                     company = None
 
             if company:

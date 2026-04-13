@@ -67,7 +67,7 @@ class DocumentBasicCRUDTest(TestCase):
             self._make_document()
             resp = self.client.get(f'/documents/?q=DOC', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_list_filter_doc_type(self):
@@ -75,7 +75,7 @@ class DocumentBasicCRUDTest(TestCase):
             self._make_document('PONUDA')
             resp = self.client.get('/documents/?doc_type=PONUDA', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_list_filter_paid(self):
@@ -83,7 +83,7 @@ class DocumentBasicCRUDTest(TestCase):
             self._make_document(paid=True)
             resp = self.client.get('/documents/?is_paid=1', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_list_filter_unpaid(self):
@@ -91,7 +91,7 @@ class DocumentBasicCRUDTest(TestCase):
             self._make_document(paid=False)
             resp = self.client.get('/documents/?is_paid=0', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_create_post_with_partner(self):
@@ -139,7 +139,7 @@ class DocumentBasicCRUDTest(TestCase):
             doc = self._make_document()
             resp = self.client.get(f'/documents/{doc.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_toggle_paid_to_true(self):

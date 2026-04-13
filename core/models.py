@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -407,7 +408,7 @@ def audit_action(action_name, target_param='pk', target_model_name=None):
                         target_model=target_model_name or view_func.__module__.split('.')[0],
                         target_id=str(target_id),
                     )
-                except Exception:
+                except (ValueError, TypeError):
                     pass  # Never let audit failure break the action
 
             return response

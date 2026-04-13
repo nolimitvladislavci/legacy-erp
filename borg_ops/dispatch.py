@@ -138,7 +138,7 @@ def score_worker(user, intervention, company_lat=None, company_lng=None):
     certified = []
     try:
         certified = list(user.profile.certified_categories or [])
-    except Exception:
+    except AttributeError:
         pass
 
     # Ako ima certifikate i kategorija intervencije nije u njima — diskvaliﬁciraj
@@ -273,7 +273,7 @@ def _get_worker_location(user):
             else:
                 logger.debug('GPS radnika %s star %.0f min — koristim fallback',
                              user.username, age_minutes)
-    except Exception:
+    except ImportError:
         pass
 
     # 2. Fallback: zadnja intervencija s GPS-om

@@ -5,6 +5,8 @@ All tasks are idempotent with graceful retry on gateway errors.
 import logging
 from celery import shared_task
 from django.conf import settings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('whatsapp')
 

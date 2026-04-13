@@ -8,6 +8,8 @@ Usage u templateima:
 """
 from django import template
 from django.utils.translation import get_language
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -22,7 +24,7 @@ def company_language(context):
             company = get_user_company(request)
             if company and company.ui_language:
                 return company.ui_language
-        except Exception:
+        except ImportError:
             pass
     return get_language() or "hr"
 
@@ -37,6 +39,6 @@ def is_german(context):
             company = get_user_company(request)
             if company:
                 return company.ui_language == "de" or company.country == "DE"
-        except Exception:
+        except ImportError:
             pass
     return False

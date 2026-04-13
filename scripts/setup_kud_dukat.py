@@ -19,6 +19,8 @@ from datetime import date, time, timedelta
 from django.utils import timezone
 from companies.models import Company
 from udruge.models import Clan, GlazbenaSkola, GlazbeniUcenik, SatGlazbene
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 print('=' * 60)
 print('  SETUP KUD DUKAT VLADISLAVCI — Glazbena škola')

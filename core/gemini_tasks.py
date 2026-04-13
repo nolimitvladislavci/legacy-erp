@@ -1,6 +1,8 @@
 """Gemini Agent Celery Tasks — autonomno izvršavanje zadataka."""
 import logging
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('gemini_agent')
@@ -53,7 +55,7 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
             ),
             notification_type='system',
         )
-    except Exception:
+    except ImportError:
         logger.exception("Failed to import _notify_superadmins")
 
     return result

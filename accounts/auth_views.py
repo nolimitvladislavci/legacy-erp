@@ -70,14 +70,14 @@ def _check_concurrent_login(user, current_ip, current_ua):
         if phone and getattr(settings, 'WAHA_ENABLED', False):
             from core.whatsapp_tasks import send_whatsapp_text_task
             send_whatsapp_text_task.delay(phone, alert_msg)
-    except Exception:
+    except ImportError:
         pass
 
     # Push notification
     try:
         from push_notifications.push import send_push_to_user
         send_push_to_user(user, 'Prijava s nove lokacije!', alert_msg[:100])
-    except Exception:
+    except ImportError:
         pass
 
     # In-app notification
@@ -89,7 +89,7 @@ def _check_concurrent_login(user, current_ip, current_ua):
             message='IP: %s | Ako to niste vi, odmah promijenite lozinku.' % current_ip,
             url='/accounts/change-password/',
         )
-    except Exception:
+    except ImportError:
         pass
 
     # Audit log
@@ -127,7 +127,7 @@ def get_dashboard_url(user):
             'partner':        '/dashboard/partner/',
         }
         return urls.get(role, '/dashboard/')
-    except Exception:
+    except KeyError:
         if user.is_superuser:
             return '/superadmin/'
         return '/dashboard/'
@@ -223,7 +223,7 @@ def send_magic_link(request):
                 'partner':  'partner',
                 'worker':   'worker',
             }.get(profile.role, 'partner')
-        except Exception:
+        except KeyError:
             pass
 
         # Kreiraj token (24h valjanost)
@@ -1073,7 +1073,7 @@ def gdpr_delete_view(request):
         _msgs.success(request, 'Vas racun je trajno anonimiziran sukladno GDPR Clanku 17.')
         return redirect('login')
 
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger(__name__).error('GDPR delete error: %s', e)
         return JsonResponse({
@@ -1102,7 +1102,7 @@ def verify_email(request, token):
             BookingSignature.log(request, 'approve',
                 target_model='User', target_id=str(user.pk),
                 target_repr=f'Email verified: {user.email}')
-        except Exception:
+        except ImportError:
             pass
         if request.user.is_authenticated:
             return redirect('/')

@@ -1,8 +1,9 @@
 """Peppol Participant Directory — local cache.
 Maps tax IDs (OIB) to Peppol routing information."""
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class PeppolParticipant(models.Model):

@@ -8,3 +8,5 @@ class LimitConnectAiConfig(AppConfig):
 
     def ready(self):
         import limit_connect_ai.kg_signals  # noqa: F401
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist

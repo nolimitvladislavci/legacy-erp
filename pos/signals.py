@@ -79,7 +79,7 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
     try:
         terminal = instance.session.terminal
         company = terminal.company
-    except Exception:
+    except AttributeError:
         return
 
     pos_type = terminal.pos_type
@@ -91,7 +91,7 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
             from rental.tasks import check_evisitor_pending
             check_evisitor_pending.delay()
             logger.info('Rental hook: eVisitor check triggered after receipt %s', instance.pk)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Rental hook failed: %s', e)
 
     # ── Udruga Hook: auto-produlji članstvo ──
@@ -105,7 +105,7 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
                 from udruge.tasks import evaluate_subscriptions
                 evaluate_subscriptions.delay()
                 logger.info('Udruga hook: membership extension triggered for receipt %s', instance.pk)
-        except Exception as e:
+        except DatabaseError as e:
             logger.warning('Udruga hook failed: %s', e)
 
     # ── Field Hook: WhatsApp PDF ──
@@ -121,11 +121,11 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
             if customer_phone:
                 try:
                     from udruge.tasks import check_access_card as _noop
-                except Exception:
+                except ImportError:
                     pass
                 import logging as _lg
                 _lg.getLogger('pos.signals').info(
                     'Field hook: WhatsApp receipt za %s → %s', instance.pk, customer_phone)
                 logger.info('Field hook: WhatsApp receipt triggered for %s', instance.pk)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Field hook failed: %s', e)

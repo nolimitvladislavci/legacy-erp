@@ -13,6 +13,8 @@ new = '''def login_view(request):
     if request.user.is_authenticated:
         if request.GET.get('switch') or request.GET.get('force'):
             from django.contrib.auth import logout as _logout
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
             _logout(request)
         else:
             return redirect('dashboard')'''

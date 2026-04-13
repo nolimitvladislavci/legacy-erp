@@ -297,5 +297,5 @@ def _whatsapp_ivan(s, postotak, haiku, gemini):
             f"Ivan, tvoja odluka: limit-connect.com/hr/pos/improvements/"
         )
         send_text(IVAN_PHONE, msg)
-    except Exception as e:
+    except ImportError as e:
         logger.error('WhatsApp greška: %s', e)

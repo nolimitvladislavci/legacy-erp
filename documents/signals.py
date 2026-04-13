@@ -21,7 +21,7 @@ def _trigger_ai_proposal(entry):
         if entry and (entry.has_pdf or entry.has_image) and not entry.ai_proposal:
             from documents.tasks import generate_ai_proposal
             generate_ai_proposal.apply_async(args=[entry.pk], countdown=5)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('_trigger_ai_proposal failed: %s', e)
 
 
@@ -162,7 +162,7 @@ def _archive_pos_receipt_inner(instance):
     source_id = str(instance.pk)
     try:
         company = instance.session.terminal.company
-    except Exception:
+    except AttributeError:
         logger.error('archive_pos_receipt: ne mogu dohvatiti company za bon %s', instance.pk)
         return
     doc_date = instance.created_at
@@ -231,5 +231,5 @@ def track_archive_activity(sender, instance, created, **kwargs):
                   instance.doc_number,
                   instance.amount),
               company=instance.company)
-    except Exception:
+    except ImportError:
         pass

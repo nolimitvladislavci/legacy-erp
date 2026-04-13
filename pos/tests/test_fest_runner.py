@@ -314,7 +314,7 @@ class FestScenarioTest(TestCase):
             try:
                 resp = c.get('/hr/pos/gastro/qr/%s/' % tbl.qr_code, follow=True)
                 results.append(resp.status_code)
-            except Exception:
+            except KeyError:
                 results.append(500)
         ok_count = sum(1 for s in results if s in [200, 301, 302, 404])
         self.assertGreaterEqual(ok_count, 8, 'Only %d/10 QR requests OK' % ok_count)

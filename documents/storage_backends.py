@@ -48,7 +48,7 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
                     img = img.rotate(270, expand=True)
                 elif exif[orientation] == 8:
                     img = img.rotate(90, expand=True)
-        except Exception:
+        except ImportError:
             pass
 
         if img.mode in ('RGBA', 'P'):

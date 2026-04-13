@@ -7,6 +7,8 @@ from django.db.models import Q, Sum, Count
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Asset, MaintenanceSchedule, MaintenanceLog
 

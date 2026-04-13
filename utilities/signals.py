@@ -101,5 +101,5 @@ def _send_anomaly_alert(company, contract, bill):
             f"Provjerite račun u režijama."
         )
         notify('WARN', msg)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('Anomaly alert failed: %s', e)

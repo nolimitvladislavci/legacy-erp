@@ -131,7 +131,7 @@ class GeminiAgent:
             prompt += "SLJEDEĆA AKCIJA (samo JSON):"
             response = model.generate_content(prompt)
             return response.text
-        except Exception as e:
+        except ImportError as e:
             logger.error('[GEMINI v2] API greška: %s', e)
             return '{"action":"DONE","summary":"API greška: ' + str(e)[:100] + '"}'
 

@@ -62,7 +62,7 @@ class MarketplaceCatalogTest(TestCase):
         try:
             resp = self.client.get('/marketplace/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_catalog_with_products(self):
@@ -71,7 +71,7 @@ class MarketplaceCatalogTest(TestCase):
             _make_product(self.company, 'Kruške')
             resp = self.client.get('/marketplace/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_catalog_search(self):
@@ -79,7 +79,7 @@ class MarketplaceCatalogTest(TestCase):
             _make_product(self.company, 'Pšenica Ozima')
             resp = self.client.get('/marketplace/?q=Pšenica', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_catalog_organic_filter(self):
@@ -97,14 +97,14 @@ class MarketplaceCatalogTest(TestCase):
             _make_product(self.company, 'Skupo')
             resp = self.client.get('/marketplace/?sort=price_asc', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_catalog_sort_newest(self):
         try:
             resp = self.client.get('/marketplace/?sort=newest', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_product_detail(self):
@@ -112,14 +112,14 @@ class MarketplaceCatalogTest(TestCase):
             prod = _make_product(self.company, 'Detail Test')
             resp = self.client.get(f'/marketplace/product/{prod.slug}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_product_detail_invalid_slug(self):
         try:
             resp = self.client.get('/marketplace/product/ne-postoji/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -136,7 +136,7 @@ class MarketplaceCartTest(TestCase):
         try:
             resp = self.client.get('/marketplace/cart/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cart_add_product(self):
@@ -157,7 +157,7 @@ class MarketplaceCartTest(TestCase):
             })
             resp = self.client.get('/marketplace/cart/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cart_add_same_product_twice(self):
@@ -180,7 +180,7 @@ class MarketplaceCartTest(TestCase):
         try:
             resp = self.client.get('/marketplace/cart/add/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cart_remove_item(self):
@@ -192,14 +192,14 @@ class MarketplaceCartTest(TestCase):
             })
             resp = self.client.get(f'/marketplace/cart/remove/{self.product.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cart_remove_nonexistent_key(self):
         try:
             resp = self.client.get('/marketplace/cart/remove/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cart_clear(self):
@@ -210,7 +210,7 @@ class MarketplaceCartTest(TestCase):
             })
             resp = self.client.get('/marketplace/cart/clear/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -228,7 +228,7 @@ class MarketplaceCheckoutTest(TestCase):
         try:
             resp = self.client.get('/marketplace/checkout/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_checkout_with_cart_get(self):
@@ -292,14 +292,14 @@ class MarketplaceOrdersTest(TestCase):
         try:
             resp = self.client.get('/marketplace/orders/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_order_detail_invalid(self):
         try:
             resp = self.client.get('/marketplace/orders/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -315,14 +315,14 @@ class MarketplaceSellerTest(TestCase):
         try:
             resp = self.client.get('/marketplace/seller/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_seller_product_new_get(self):
         try:
             resp = self.client.get('/marketplace/seller/product/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_seller_product_new_post(self):
@@ -346,7 +346,7 @@ class MarketplaceSellerTest(TestCase):
             prod = _make_product(self.company, 'Edit Produkt')
             resp = self.client.get(f'/marketplace/seller/product/{prod.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_seller_product_edit_post(self):
@@ -362,5 +362,5 @@ class MarketplaceSellerTest(TestCase):
                 'is_available': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass

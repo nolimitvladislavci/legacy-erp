@@ -91,7 +91,7 @@ class POSDashboardTest(TestCase):
         try:
             _make_terminal(self.company, self.user, 'Test Kasa')
             self.assertIn(self._get('/pos/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_new_terminal_get(self):
@@ -256,7 +256,7 @@ class POSReceiptTest(TestCase):
         try:
             resp = self.client.get('/pos/api/barcode/?code=1234567890', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_quick_pos_get(self):

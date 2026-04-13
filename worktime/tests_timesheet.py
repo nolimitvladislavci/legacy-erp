@@ -154,7 +154,7 @@ class WorktimeTimerWithProjectTest(TestCase):
                 'description': 'Inactive project',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_timer_start_no_project(self):
@@ -175,7 +175,7 @@ class WorktimeTimerWithProjectTest(TestCase):
             })
             resp = self.client.get('/worktime/timer/status/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_timer_ajax_start(self):
@@ -206,7 +206,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 _make_time_entry(self.user, self.company, self.project, delta_days=days)
             resp = self.client.get('/worktime/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_worker_dashboard_date_navigation(self):
@@ -216,7 +216,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 d = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
                 resp = self.client.get(f'/worktime/?date={d}', follow=True)
                 self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_add_entry_with_project(self):
@@ -246,7 +246,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 'description': 'Updated description',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_billable_hours_with_project_entries(self):
@@ -256,7 +256,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 _make_time_entry(self.user, self.company, self.project, delta_days=days)
             resp = self.client.get('/worktime/billable/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_weekly_entry_with_data(self):
@@ -266,7 +266,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 _make_time_entry(self.user, self.company, self.project, delta_days=days)
             resp = self.client.get('/worktime/weekly/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -297,7 +297,7 @@ class WorktimeManagerTimesheetTest(TestCase):
             _make_time_entry(self.worker2, self.company, self.project, 2)
             resp = self.client.get('/worktime/manager/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_manager_timesheet_filter_by_user(self):
@@ -305,7 +305,7 @@ class WorktimeManagerTimesheetTest(TestCase):
             _make_time_entry(self.worker1, self.company, self.project, 1)
             resp = self.client.get(f'/worktime/manager/?user={self.worker1.pk}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_manager_timesheet_filter_by_project(self):
@@ -313,7 +313,7 @@ class WorktimeManagerTimesheetTest(TestCase):
             _make_time_entry(self.worker1, self.company, self.project, 1)
             resp = self.client.get(f'/worktime/manager/?project={self.project.pk}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_manager_analytics(self):
@@ -322,7 +322,7 @@ class WorktimeManagerTimesheetTest(TestCase):
             _make_time_entry(self.worker2, self.company, self.project, 3)
             resp = self.client.get('/worktime/analytics/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_approve_entries_with_data(self):

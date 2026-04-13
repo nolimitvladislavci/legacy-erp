@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Calculation, CalculationItem, Normative
 
@@ -63,7 +65,7 @@ def export_calculation_pdf(request, pk):
             response = HttpResponse(result.getvalue(), content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="Ponuda_{pk}.pdf"'
             return response
-    except Exception:
+    except ImportError:
         logger.exception('PDF generation failed')
     return HttpResponse("Greska prilikom generiranja PDF-a", status=400)
 
@@ -124,7 +126,7 @@ def bathroom_anfrage(request):
     # ── Viskovic Bau company ───────────────────────────────────────────────
     try:
         company = Company.objects.get(name__icontains='Viskovic bau')
-    except Exception:
+    except ObjectDoesNotExist:
         company = None
 
     # ── Reference number ───────────────────────────────────────────────────
@@ -222,7 +224,7 @@ def bom_list(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
 
     qs = BOM.objects.filter(company=company).select_related('article') if company else BOM.objects.none()
@@ -242,7 +244,7 @@ def bom_create(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
 
     if request.method == 'POST':
@@ -283,7 +285,7 @@ def bom_detail(request, pk):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     bom = get_object_or_404(BOM, pk=pk, company=company)
     return render(request, 'calculator/bom_detail.html', {
@@ -302,7 +304,7 @@ def bom_edit(request, pk):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     bom = get_object_or_404(BOM, pk=pk, company=company)
 
@@ -673,7 +675,7 @@ def aufnahme_save(request):
 
     try:
         company = Company.objects.filter(name__icontains='Viskovic bau').first()
-    except Exception:
+    except DatabaseError:
         company = None
 
     CAT_MAP = {'bad':'kupaonica','wohnung':'renovacija','kueche':'ostalo',
@@ -708,7 +710,7 @@ def aufnahme_save(request):
                 photo = ProjectPhoto(project_lead=lead, user=request.user)
                 photo.photo.save(f"{ref}_photo_{pi}.jpg", ContentFile(img_bytes), save=True)
                 photo_urls.append(photo.photo.url)
-            except Exception:
+            except ImportError:
                 pass
 
     # Generate PDF
@@ -734,7 +736,7 @@ def aufnahme_save(request):
             )
             doc.file.save(f"Aufnahme_{ref}.pdf", ContentFile(pdf_bytes), save=True)
             pdf_url = doc.file.url
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger(__name__).warning(f"Aufnahme PDF failed: {e}")
 

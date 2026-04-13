@@ -1,6 +1,7 @@
+from django.core.exceptions import ObjectDoesNotExist
 from core.fields import FernetEncryptedCharField
 """e-Račun models — multi-tenant e-invoice gateway."""
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
 from core.managers import CompanyManager
 import uuid

@@ -216,7 +216,7 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
     # Company in VAT system?
     try:
         u_pdv = 'true' if receipt.session.terminal.company.is_vat_registered else 'false'
-    except Exception:
+    except AttributeError:
         u_pdv = 'true'
 
     sub(racun, 'Oib', oib)
@@ -379,7 +379,7 @@ def fiscalize_receipt(receipt) -> str | None:
     try:
         company = receipt.session.terminal.company
         config  = company.fiscal_config
-    except Exception:
+    except AttributeError:
         return None
 
     if not config.is_active or not config.cert_filename:

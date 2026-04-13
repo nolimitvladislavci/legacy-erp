@@ -57,7 +57,7 @@ class PartnerPortalTest(TestCase):
             token = self.partner.portal_token
             resp = self.client.get(f'/portal/{token}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_portal_invalid_token(self):
@@ -65,7 +65,7 @@ class PartnerPortalTest(TestCase):
             fake_token = uuid.uuid4()
             resp = self.client.get(f'/portal/{fake_token}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_portal_invoices(self):
@@ -73,7 +73,7 @@ class PartnerPortalTest(TestCase):
             token = self.partner.portal_token
             resp = self.client.get(f'/portal/{token}/invoices/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_portal_invoices_with_data(self):
@@ -137,7 +137,7 @@ class PartnerPortalTest(TestCase):
             token = self.partner.portal_token
             resp = self.client.get(f'/portal/{token}/projects/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_portal_documents(self):
@@ -145,5 +145,5 @@ class PartnerPortalTest(TestCase):
             token = self.partner.portal_token
             resp = self.client.get(f'/portal/{token}/documents/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

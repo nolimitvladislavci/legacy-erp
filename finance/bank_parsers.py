@@ -51,7 +51,7 @@ def _ns(tree_or_element):
                 if 'camt.053' in v:
                     nsmap = {'n': v}
                     break
-    except Exception:
+    except DatabaseError:
         pass
     return nsmap
 
@@ -62,7 +62,7 @@ def _xpath_text(element, path, ns, default=''):
         text_path = path if path.endswith('/text()') else path + '/text()'
         result = element.xpath(text_path, namespaces=ns)
         return result[0].strip() if result else default
-    except Exception:
+    except (ValueError, AttributeError):
         return default
 
 

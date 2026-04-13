@@ -25,6 +25,8 @@ from companies.models import Company, CompanyBranch
 from gastro_menu.models import DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR
 from inventory.models import InventoryItem
 from pos.models import Table
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ═══════════════════════════════════════════════════════════════════
 # CONFIG

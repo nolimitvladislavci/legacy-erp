@@ -8,12 +8,13 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models import Sum, F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     PickWave, PickTask, Rollwagen, ConsolidatedDelivery,

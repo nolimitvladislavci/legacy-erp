@@ -12,6 +12,7 @@ from typing import Optional
 
 from django.db import transaction
 from django.utils.timezone import now
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import PaymentError, SessionError
 from django.db import IntegrityError, DatabaseError
@@ -196,7 +197,7 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
     try:
         from pos.services._otpremnica_bridge import pos_receipt_to_otpremnica
         pos_receipt_to_otpremnica(receipt)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('pos_receipt_to_otpremnica failed: %s', e)
 
     logger.info(
@@ -316,7 +317,7 @@ def _attempt_fiscalization(receipt: "POSReceipt") -> str | None:
         from fiscal.service import fiscalize_pos_receipt
         jir = fiscalize_pos_receipt(receipt)
         return jir
-    except Exception as e:
+    except ImportError as e:
         logger.warning("Fiscalization failed for receipt %d: %s", receipt.pk, e)
         return None
 

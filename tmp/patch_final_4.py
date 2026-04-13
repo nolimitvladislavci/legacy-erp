@@ -308,6 +308,8 @@ class NoShowStornoTest(TestCase):
         # Simulate: schedule is tomorrow, cancellation_hours=12
         from datetime import datetime
         import experiences.models as em
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
         # Force can_cancel_free to True
         self.booking.schedule.date = (timezone.now() + timedelta(days=2)).date()
         self.booking.schedule.save()

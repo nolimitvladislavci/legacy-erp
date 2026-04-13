@@ -13,6 +13,8 @@ from django.contrib.auth.models import User
 from companies.models import Company, CompanyBranch
 from pos.models import *
 from inventory.models import InventoryItem, StockMovement
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 konjik = Company.objects.get(name__icontains="Konjik")
 su = User.objects.get(username="superadmin")

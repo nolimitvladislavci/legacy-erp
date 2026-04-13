@@ -3,6 +3,7 @@ partners/tests.py - OIB validator + VIES + partner lookup tests.
 """
 from django.test import TestCase
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class OIBFormatTests(TestCase):

@@ -62,7 +62,7 @@ if 'def extract_cert_metadata' not in c:
             self.cert_expires_at = cert.not_valid_after_utc
             self.cert_subject = cert.subject.rfc4514_string()[:200]
             self.save(update_fields=['cert_expires_at', 'cert_subject'])
-        except Exception:
+        except (FileNotFoundError, IOError):
             pass
 
     class Meta:"""
@@ -85,6 +85,8 @@ Fiscal Health template tag v2 — 3 drona neutralizirana:
 from django import template
 from django.core.cache import cache
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -165,7 +167,7 @@ def fiscal_health_status(context):
                 hours_old = (now - oldest.fiscal_datetime).total_seconds() / 3600
             else:
                 hours_old = 0
-        except Exception:
+        except DatabaseError:
             pending_count = 0
             hours_old = 0
 
@@ -179,7 +181,7 @@ def fiscal_health_status(context):
                 company=company, zki__isnull=False,
             ).exclude(zki='').filter(jir='').count()
             pending_count += pending_inv
-        except Exception:
+        except DatabaseError:
             pass
 
         result['pending_count'] = pending_count
@@ -194,7 +196,7 @@ def fiscal_health_status(context):
             if last:
                 result['last_jir'] = last.jir[:12]
                 result['last_jir_date'] = last.fiscal_datetime.strftime('%d.%m. %H:%M') if last.fiscal_datetime else ''
-        except Exception:
+        except DatabaseError:
             pass
 
         # ── DRON #1: Status logika (ne garantiramo FINA CIS!) ──

@@ -58,7 +58,7 @@ def apply_vision_patch():
                     messages=[{"role": "user", "content": blocks}],
                 )
                 return _parse_json(msg.content[0].text.strip())
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.error("Vision PDF failed: %s", e)
                 return []
 
@@ -76,5 +76,5 @@ def apply_vision_patch():
         svc.parse_pdf = patched_parse_pdf
         svc._vision_patched = True
         logger.info("[smart_import] parse_pdf Vision patch applied OK")
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error("[smart_import] Vision patch failed: %s", e)

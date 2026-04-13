@@ -1107,7 +1107,7 @@ class BatchStatusApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_status_api_returns_json(self):
@@ -1134,7 +1134,7 @@ class RetryBatchApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     @patch("smart_import.views.process_import_batch")
@@ -1172,7 +1172,7 @@ class ReportProblemApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_report_problem(self):
@@ -1196,7 +1196,7 @@ class SaveMappingApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_save_mapping(self):
@@ -1229,7 +1229,7 @@ class UpdateItemApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_update_item_fields(self):
@@ -1261,7 +1261,7 @@ class DeleteItemApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_delete_item(self):
@@ -1284,7 +1284,7 @@ class AddItemApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_add_item(self):
@@ -1331,7 +1331,7 @@ class ConfirmViewTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_confirm_creates_goods_receipt(self):
@@ -1418,7 +1418,7 @@ class UpdateSupplierApiTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_update_supplier(self):
@@ -1493,7 +1493,7 @@ class ManualEntryViewTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_manual_entry_get(self):
@@ -1588,7 +1588,7 @@ class EndToEndXmlFlowTest(TestCase):
         try:
             from companies.models import UserRole
             UserRole.objects.get_or_create(user=self.user, defaults={"company": self.company, "role": "admin"})
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_xml_end_to_end(self):

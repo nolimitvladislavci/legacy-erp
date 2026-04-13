@@ -18,6 +18,7 @@ from django.contrib.auth import get_user_model
 from companies.models import Company
 from accounts.models import UserProfile
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 
 User = get_user_model()
 

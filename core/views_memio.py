@@ -217,7 +217,7 @@ def memio_stats(request):
     try:
         from memio_world.models import WaitlistEntry as MW_WL
         total_waitlist += MW_WL.objects.using('memio_world').count()
-    except Exception:
+    except DatabaseError:
         logger.exception("Failed to import WaitlistEntry")
 
     data = {

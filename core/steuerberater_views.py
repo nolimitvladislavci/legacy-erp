@@ -6,6 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ def steuerberater_upload(request):
         from core.whatsapp import send_text
         send_text('+385976091655',
             f'\U0001f4c4 Steuerberater Upload: {f.name}\nTyp: {doc_type}\nFirma: {company.name}\nVon: {request.user.get_full_name()}')
-    except Exception:
+    except ImportError:
         logger.exception("Failed to import send_text")
 
     logger.info('Steuerberater upload: %s by %s for %s', f.name, request.user, company)

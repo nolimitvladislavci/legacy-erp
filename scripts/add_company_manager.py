@@ -4,6 +4,8 @@ Skips: models that already have objects = CompanyManager(), child models without
 """
 import os
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 ROOT = '/var/www/fina-connect'
 SKIP_DIRS = {'venv', 'migrations', 'backups', '__pycache__', '.git'}

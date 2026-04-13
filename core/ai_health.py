@@ -67,7 +67,7 @@ def check_gunicorn():
         resp = req.get('http://127.0.0.1:8000/health/', timeout=5)
         http_code = resp.status_code
         http_ok = (http_code == 200)
-    except Exception:
+    except KeyError:
         http_ok = False
 
     # ─── DIJAGNOZA ─────────────────────────────────────────────────────────────
@@ -181,7 +181,7 @@ def check_gemini():
         model = genai.GenerativeModel('gemini-2.5-flash')
         r = model.generate_content('OK', generation_config={'max_output_tokens': 5})
         return True, f'OK ({r.text.strip()[:20]})'
-    except Exception as e:
+    except (AttributeError, TypeError) as e:
         return False, str(e)[:150]
 
 
@@ -197,7 +197,7 @@ def check_anthropic(model_key='claude-haiku-4-5-20251001'):
             messages=[{'role': 'user', 'content': 'OK'}]
         )
         return True, f'OK ({r.content[0].text.strip()[:20]})'
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return False, str(e)[:150]
 
 
@@ -260,7 +260,7 @@ def check_redis():
         r = redis_lib.from_url(redis_url)
         r.ping()
         return True, 'ping OK'
-    except Exception as e:
+    except (AttributeError, TypeError) as e:
         return False, str(e)[:100]
 
 
@@ -367,7 +367,7 @@ def run_ai_health_check():
                 f'limit-connect.com/superadmin/ai/'
             )
             send_text(phone='+4915771998747', message=poruka)
-        except Exception as e:
+        except ImportError as e:
             logger.error(f'WhatsApp AI health alert greška: {e}')
 
     return {

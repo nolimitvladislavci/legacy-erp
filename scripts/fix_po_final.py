@@ -6,6 +6,8 @@ Final comprehensive PO fix:
 """
 import re
 import subprocess
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 HEADERS = {

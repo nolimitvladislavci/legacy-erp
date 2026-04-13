@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from django.db import models as db_models
+from django.core.exceptions import ObjectDoesNotExist
 from .models import BillingPeriod, Otpremnica, OtpremnicaItem, PropterConfig, EkoStats
 from .services.aggregate import close_period, aggregate_to_eracun
 from django.db import IntegrityError, DatabaseError
@@ -20,7 +21,7 @@ def _company(request):
     try:
         from core.company_utils import get_user_company
         return get_user_company(request)
-    except Exception:
+    except ImportError:
         return request.user.profile.company
 
 

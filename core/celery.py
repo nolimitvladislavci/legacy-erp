@@ -32,7 +32,7 @@ def setup_extra_tasks(sender, **kwargs):
 try:
     from core.smart_import_pdf_patch import apply_vision_patch
     apply_vision_patch()
-except Exception:
+except ImportError:
     pass
 app.autodiscover_tasks(['marketplace'])
 app.autodiscover_tasks(['experiences'])

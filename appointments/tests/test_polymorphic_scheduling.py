@@ -11,13 +11,14 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, TransactionTestCase, override_settings
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
 from django.utils import timezone
 from rest_framework.test import APIClient
 
 from appointments.models import Appointment, BookingResource, BookingService, WorkingHours
 from appointments.scheduling import SchedulingError, book_slot
 from companies.models import Company
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 MONDAY = datetime.date(2026, 3, 9)

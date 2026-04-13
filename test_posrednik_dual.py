@@ -74,7 +74,7 @@ def run_test(test_id, name, agent, category, fn):
     except AssertionError as e:
         ms = (time.time() - t0) * 1000
         record(TestResult(test_id, name, agent, False, ms, '', str(e), category))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         ms = (time.time() - t0) * 1000
         record(TestResult(test_id, name, agent, False, ms, '', f'{type(e).__name__}: {e}', category))
 
@@ -401,7 +401,7 @@ def agent_a(company, config):
             count = ERacun.objects.filter(company=company, invoice_number=num).count()
             er1.delete()
             return f"Nema DB unique constraint (count={count}) — treba dodati!"
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             er1.delete()
             return f"Duplikat ispravno odbijen: {type(e).__name__}"
     run_test('A-19', 'Duplikat invoice_number — isti broj 2x', 'A', 'validation', test_a19)
@@ -735,7 +735,7 @@ def agent_b(company, config):
             ERacun.objects.filter(pk__in=pks).delete()
             sent_only = all(i.get('status') == 'sent' for i in data.get('results', data if isinstance(data, list) else []))
             return f"API list status filter: {resp.status_code}, sent_only={sent_only}"
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             ERacun.objects.filter(pk__in=pks).delete()
             return f"API list pozvan: {type(e).__name__}"
     run_test('B-19', 'API /api/list/?status=sent — filtrira ispravno', 'B', 'api', test_b19)

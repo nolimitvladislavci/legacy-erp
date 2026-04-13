@@ -3,6 +3,8 @@ import logging
 import httpx
 from django.conf import settings
 from einvoice.models import AS4Message, MessageStatus
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("propter.einvoice.posrednik")
 

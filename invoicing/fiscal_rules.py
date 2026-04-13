@@ -157,7 +157,7 @@ def should_fiscalize(invoice) -> Tuple[bool, str]:
                 )
                 if all_nonprofit:
                     return False, 'Svi artikli su nonprofit aktivnost udruge'
-        except Exception:
+        except DatabaseError:
             pass
     
     total = getattr(invoice, 'total', 0) or 0

@@ -327,7 +327,7 @@ def client_upload(request, token):
     try:
         from smart_import.services import extract_invoice_data
         ocr_result = extract_invoice_data(saved_path)
-    except Exception:
+    except ImportError:
         pass
 
     return JsonResponse({

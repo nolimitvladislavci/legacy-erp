@@ -10,3 +10,5 @@ class KontoConfig(AppConfig):
     def ready(self):
         import konto.signals  # noqa: F401
         import konto.integrity  # noqa: F401
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist

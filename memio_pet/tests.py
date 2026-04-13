@@ -76,21 +76,21 @@ class MemioDBRoutingTest(TestCase):
         # Ovo ne smije baciti exception
         try:
             list(RawFoodListing.objects.using('memio_pets').all()[:1])
-        except Exception as e:
+        except DatabaseError as e:
             self.fail(f"RawFoodListing.using('memio_pets') bacilo grešku: {e}")
 
     def test_breeder_uses_memio_pets_db(self):
         from memio_pet.models import BreederProfile
         try:
             list(BreederProfile.objects.using('memio_pets').all()[:1])
-        except Exception as e:
+        except DatabaseError as e:
             self.fail(f"BreederProfile.using('memio_pets') bacilo grešku: {e}")
 
     def test_animal_uses_memio_pets_db(self):
         from memio_pet.models import AnimalProfile
         try:
             list(AnimalProfile.objects.using('memio_pets').all()[:1])
-        except Exception as e:
+        except DatabaseError as e:
             self.fail(f"AnimalProfile.using('memio_pets') bacilo grešku: {e}")
 
 

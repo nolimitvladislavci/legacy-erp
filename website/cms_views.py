@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.db import DatabaseError, IntegrityError
 
 from .models import GalleryImage
 from django.core.exceptions import ObjectDoesNotExist
@@ -48,7 +49,7 @@ def _get_site_for_user(user):
     from .models import CompanyWebsite
     try:
         company = user.profile.company
-    except Exception:
+    except AttributeError:
         return None
     slug_base = getattr(company, 'booking_slug', None) or company.oib or str(company.pk)
     site, _ = CompanyWebsite.objects.get_or_create(

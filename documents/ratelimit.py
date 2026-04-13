@@ -2,6 +2,8 @@ from functools import wraps
 from django.core.cache import cache
 from django.http import JsonResponse
 import time
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def rate_limit(max_requests, window_seconds, key_func=None):

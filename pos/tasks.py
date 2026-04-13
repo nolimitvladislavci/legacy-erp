@@ -131,7 +131,7 @@ def retry_fiscalization():
                     ) % warning_24h,
                     notification_type='system',
                 )
-        except Exception:
+        except ImportError:
             pass
 
     result = {
@@ -294,7 +294,7 @@ def nightly_owner_zreport(self):
                 if result.get('success'):
                     sent += 1
                     logger.info('Z-report sent to %s (%s)', company.name, phone)
-            except Exception as e:
+            except KeyError as e:
                 logger.warning('Z-report failed for %s: %s', company.name, e)
 
     return {'sent': sent, 'date': str(today)}
@@ -407,13 +407,13 @@ VRATI JSON:
                 try:
                     from pos.complaint_views import _send_response_email
                     _send_response_email(p)
-                except Exception:
+                except ImportError:
                     pass
             if p.consumer_phone:
                 try:
                     from pos.complaint_views import _send_response_wa
                     _send_response_wa(p)
-                except Exception:
+                except ImportError:
                     pass
             logger.info('Auto-response sent for %s #%d', p.record_type, p.redni_broj)
 
@@ -590,7 +590,7 @@ def check_fiscal_deadline():
                 phones_sent.add(admin_phone)
                 alerts_sent += 1
 
-        except Exception as e:
+        except ImportError as e:
             logger.warning('check_fiscal_deadline WhatsApp failed (%s): %s', company.name, e)
 
         # 3. Za SOS tier: superadmin notifikacija + ImprovementSuggestion log
@@ -608,7 +608,7 @@ def check_fiscal_deadline():
                          'DA (%d)' % len(phones_sent) if phones_sent else 'NE — nema broja!'),
                     notification_type='system',
                 )
-            except Exception:
+            except ImportError:
                 pass
 
             # Log u ImprovementSuggestion (system)
@@ -661,7 +661,7 @@ def archive_prigovor_pdf(self, prigovor_id):
         blob = archive_prigovor_to_blob(p)
         logger.info('Prigovor #%d archived as DocumentBlob %s', p.redni_broj, blob.pk)
         return {'status': 'archived', 'blob_id': str(blob.pk)}
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning('Archive prigovor #%d failed: %s', prigovor_id, e)
         return {'error': str(e)}
 

@@ -7,7 +7,7 @@ import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 import django; django.setup()
 
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
 
 # 1. Kreiraj tablicu ako ne postoji
 with connection.cursor() as c:
@@ -119,6 +119,7 @@ group_kpd_map = {
 
 from inventory.models import InventoryItem
 from collections import Counter
+from django.core.exceptions import ObjectDoesNotExist
 
 # Get group counts
 descriptions = InventoryItem.objects.values_list('description', flat=True)

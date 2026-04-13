@@ -6,7 +6,7 @@ from django.apps import apps
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
 
 from .models import AIModulePermission, PendingAIAction, AIActionLog
@@ -417,7 +417,7 @@ def agent_gateway(request):
                     }]
                 )
                 result['ai_report'] = report.content[0].text
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     return JsonResponse(result)

@@ -19,7 +19,7 @@ def ai_bookkeeper_process(self, archive_entry_id, auto_commit=False):
     try:
         from konto.ai_bookkeeper import process_archive_entry
         return process_archive_entry(archive_entry_id, auto_commit=auto_commit)
-    except Exception as exc:
+    except ImportError as exc:
         logger.error(
             "ai_bookkeeper_process failed for ArhivaEntry {}: {}".format(
                 archive_entry_id, exc
@@ -84,7 +84,7 @@ def generate_saft_export(self, company_id, period_from_str, period_to_str):
                 summary=f'SAF-T HR export: {period_from} do {period_to} ({file_size:.0f} KB)',
                 metadata={'file': filename, 'size_kb': file_size},
             )
-        except Exception:
+        except ImportError:
             pass
 
         logger.info('SAF-T export completed: %s (%.0f KB)', filename, file_size)
@@ -127,6 +127,6 @@ def tax_deadline_notifier():
     try:
         from core.whatsapp import send_whatsapp
         send_whatsapp(marija, chr(10).join(lines))
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger('konto').warning('tax_deadline_notifier WA: %s', e)

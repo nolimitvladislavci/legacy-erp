@@ -1,4 +1,6 @@
 from django.shortcuts import redirect
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .constants import MODULE_URL_MAP
 
@@ -55,7 +57,7 @@ class SubscriptionMiddleware:
         if not company:
             try:
                 company = request.user.profile.company
-            except Exception:
+            except AttributeError:
                 return None
         if not company:
             return None
@@ -67,7 +69,7 @@ class SubscriptionMiddleware:
             return None
         try:
             subscription = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
-        except Exception:
+        except DatabaseError:
             return None
 
         # ── SOFT GATE: nikad ne blokiraj, samo označi za banner ──

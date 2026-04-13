@@ -1,4 +1,5 @@
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 """
 companies/context_processors.py
 Injects sidebar_modules into every template context.

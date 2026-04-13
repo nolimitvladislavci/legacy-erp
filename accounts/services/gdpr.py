@@ -69,7 +69,7 @@ class GDPRExportService:
                 "hourly_rate": str(ep.hourly_rate),
                 "overtime_rate": str(ep.overtime_rate),
             }
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
         # CompanyMembership

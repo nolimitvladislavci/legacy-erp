@@ -293,7 +293,7 @@ class Command(BaseCommand):
 
             return {"ok": True, "valid": result.is_valid, "errors": result.errors, "warnings": result.warnings}
 
-        except Exception as e:
+        except ImportError as e:
             self._error(f"Validation error: {e}")
             return {"ok": False}
 

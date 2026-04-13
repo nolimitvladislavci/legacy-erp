@@ -113,7 +113,7 @@ def verify_email_token(token_str, request=None):
         profile.email_verified_at = timezone.now()
         profile.save(update_fields=['email_verified', 'email_verified_at'])
         logger.info('Email verified for %s', token.user.email)
-    except Exception as e:
+    except AttributeError as e:
         logger.error('Profile update failed for %s: %s', token.user.email, e)
         return False, token.user, 'Greška pri ažuriranju profila.'
 

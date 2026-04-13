@@ -28,7 +28,7 @@ def _user(username, company=None):
         try:
             from accounts.models import UserProfile
             UserProfile.objects.get_or_create(user=u, defaults={'company': company})
-        except Exception:
+        except DatabaseError:
             pass
     return u
 

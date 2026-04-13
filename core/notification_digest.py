@@ -39,7 +39,7 @@ def _get_notification_mode(company):
     try:
         config = company.module_config
         return getattr(config, 'notification_mode', 'digest')
-    except Exception:
+    except (AttributeError, TypeError):
         return 'digest'
 
 
@@ -476,10 +476,10 @@ def send_weekly_digest(self):
                     wa_msg = render_whatsapp_digest(company, alerts)
                     send_whatsapp_text_task.delay(wa_phone, wa_msg)
                     logger.info('digest: WhatsApp za %s -> %s', company.name, wa_phone)
-                except Exception as e:
+                except ImportError as e:
                     logger.warning('digest: WhatsApp fail za %s: %s', company.name, e)
 
-        except Exception as e:
+        except ImportError as e:
             error_count += 1
             logger.error('digest: greška za %s: %s', company.name, e, exc_info=True)
 

@@ -8,6 +8,7 @@ from django import template
 from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 

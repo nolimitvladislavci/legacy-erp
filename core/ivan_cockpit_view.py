@@ -67,7 +67,7 @@ def ivan_cockpit(request):
     try:
         from documents.models import ArhivaEntry
         ctx['arhiva'] = ArhivaEntry.objects.count()
-    except Exception:
+    except DatabaseError:
         ctx['arhiva'] = 0
     # Server
     try:

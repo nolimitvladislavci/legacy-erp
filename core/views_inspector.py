@@ -19,6 +19,7 @@ from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import InspectionToken
 from django.db import IntegrityError, DatabaseError
@@ -130,7 +131,7 @@ def _gather_porezna(company, date_from, date_to):
         from konto.services_file import get_profit_loss, get_balance_sheet
         data['pnl'] = get_profit_loss(company, date_from, date_to)
         data['balance_sheet'] = get_balance_sheet(company, date_to)
-    except Exception as e:
+    except ImportError as e:
         data['error_konto'] = str(e)
 
     # PDV
@@ -154,7 +155,7 @@ def _gather_porezna(company, date_from, date_to):
         from konto.services_file import get_open_receivables, get_open_payables
         data['receivables'] = get_open_receivables(company)[:15]
         data['payables'] = get_open_payables(company)[:15]
-    except Exception:
+    except ImportError:
         data['receivables'] = []
         data['payables'] = []
 
@@ -539,7 +540,7 @@ def panic_button(request):
                         'institution': protocol.inspector_institution,
                         'signed_ip': ip,
                     })
-            except Exception:
+            except ImportError:
                 logger.exception("Failed to import BookingSignature")
 
             # WhatsApp notifikacija vlasniku
@@ -556,7 +557,7 @@ def panic_button(request):
                         f"Potpisan zapisnik: DA\n"
                         f"Istjece: {tok.expires_at.strftime('%d.%m.%Y %H:%M')}",
                         company_id=str(company.pk))
-            except Exception:
+            except ImportError:
                 logger.exception("Failed to import send_text")
 
             # Email zapisnika inspektoru (ako ima email)
@@ -712,7 +713,7 @@ def inspector_register(request, token):
                     'institution': institution,
                     'ip': ip,
                 })
-        except Exception:
+        except ImportError:
             logger.exception("Failed to import BookingSignature")
 
         # Notifikacija vlasniku firme — inspektor se prijavio
@@ -732,7 +733,7 @@ def inspector_register(request, token):
                     f"Pristup istjece: {tok.expires_at.strftime('%d.%m.%Y %H:%M')}"
                 )
                 send_text(owner_phone, msg, company_id=str(tok.company.pk))
-        except Exception:
+        except ImportError:
             logger.exception("Failed to import send_text")
 
         # Email notifikacija

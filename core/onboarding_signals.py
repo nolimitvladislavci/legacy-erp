@@ -26,7 +26,7 @@ def on_item_saved(sender, instance, created, **kwargs):
         if not ob.first_item_added:
             ob.first_item_added = True
             ob.save(update_fields=["first_item_added", "updated_at"])
-    except Exception:
+    except DatabaseError:
         logger.warning("onboarding signal item error", exc_info=True)
 
 
@@ -44,5 +44,5 @@ def on_pos_terminal_saved(sender, instance, created, **kwargs):
         if not ob.pos_configured:
             ob.pos_configured = True
             ob.save(update_fields=["pos_configured", "updated_at"])
-    except Exception:
+    except DatabaseError:
         logger.warning("onboarding signal pos error", exc_info=True)

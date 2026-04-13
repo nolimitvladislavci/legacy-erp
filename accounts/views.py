@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 from django.contrib import messages
 from django.utils.translation import gettext as _
@@ -60,7 +61,7 @@ def user_edit(request, pk):
             try:
                 from accounts.password_notify import notify_password_change
                 notify_password_change(target_user, password, changed_by=request.user)
-            except Exception:
+            except ImportError:
                 pass
 
         # 3. Ažuriranje Uloge i automatsko mapiranje privilegija
@@ -217,7 +218,7 @@ def change_password(request):
                 if prof.must_change_password:
                     prof.must_change_password = False
                     prof.save(update_fields=['must_change_password'])
-            except Exception:
+            except AttributeError:
                 pass
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
@@ -348,7 +349,7 @@ def quick_register(request):
         try:
             from accounts.email_verification import send_verification_email
             send_verification_email(user)
-        except Exception:
+        except ImportError:
             pass
 
         # Audit
@@ -442,11 +443,11 @@ def switch_company(request):
                   ref=str(company.pk),
                   detail='Switch na %s (%s)' % (company.name, role_display),
                   company=company)
-        except Exception:
+        except ImportError:
             pass
         try:
             BookingSignature.log(request, "switch", target_model="Company", target_id=str(company.pk), target_repr=f"Switch na {company.name}")
-        except Exception:
+        except (ValueError, TypeError):
             pass
     except (CompanyMembership.DoesNotExist, Company.DoesNotExist):
         messages.error(request, _('Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom.'))

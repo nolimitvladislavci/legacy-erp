@@ -113,7 +113,7 @@ def _encode_image_for_gemini(file_bytes, filename):
                     img = img.rotate(270, expand=True)
                 elif exif[orientation] == 8:
                     img = img.rotate(90, expand=True)
-        except Exception:
+        except ImportError:
             pass
 
         # Resize if too large
@@ -400,7 +400,7 @@ def _parse_date(date_str):
             if len(parts[0]) == 4:  # Already YYYY-MM-DD
                 return date_str
             return '%s-%s-%s' % (parts[2], parts[1].zfill(2), parts[0].zfill(2))
-    except Exception:
+    except (ValueError, AttributeError):
         pass
     return datetime.now().strftime('%Y-%m-%d')
 

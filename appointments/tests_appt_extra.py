@@ -80,7 +80,7 @@ class AppointmentCalendarTest(TestCase):
         try:
             resp = self.client.get('/appointments/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_events(self):
@@ -90,7 +90,7 @@ class AppointmentCalendarTest(TestCase):
                 f'/appointments/api/events/?start={now.date().isoformat()}&end={(now + datetime.timedelta(days=30)).date().isoformat()}'
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_events_with_data(self):
@@ -98,7 +98,7 @@ class AppointmentCalendarTest(TestCase):
             _make_appointment(self.company, self.user, self.partner)
             resp = self.client.get('/appointments/api/events/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -114,7 +114,7 @@ class AppointmentListCRUDTest(TestCase):
         try:
             resp = self.client.get('/appointments/lista/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_data(self):
@@ -122,21 +122,21 @@ class AppointmentListCRUDTest(TestCase):
             _make_appointment(self.company, self.user, self.partner)
             resp = self.client.get('/appointments/lista/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status(self):
         try:
             resp = self.client.get('/appointments/lista/?status=scheduled', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_create_get(self):
         try:
             resp = self.client.get('/appointments/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_create_post(self):
@@ -177,7 +177,7 @@ class AppointmentListCRUDTest(TestCase):
             appt = _make_appointment(self.company, self.user, self.partner)
             resp = self.client.get(f'/appointments/{appt.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_post(self):
@@ -193,7 +193,7 @@ class AppointmentListCRUDTest(TestCase):
                 'appointment_type': 'meeting',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_delete_appointment(self):
@@ -201,7 +201,7 @@ class AppointmentListCRUDTest(TestCase):
             appt = _make_appointment(self.company, self.user, self.partner)
             resp = self.client.post(f'/appointments/{appt.pk}/delete/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_status_update(self):
@@ -211,7 +211,7 @@ class AppointmentListCRUDTest(TestCase):
                 'status': 'completed',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -225,14 +225,14 @@ class AppointmentServiceTest(TestCase):
         try:
             resp = self.client.get('/appointments/usluge/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_service_create_get(self):
         try:
             resp = self.client.get('/appointments/usluge/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_service_create_post(self):
@@ -253,7 +253,7 @@ class AppointmentServiceTest(TestCase):
             svc = _make_service(self.company, 'Edit usluga')
             resp = self.client.get(f'/appointments/usluge/{svc.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_service_edit_post(self):
@@ -266,7 +266,7 @@ class AppointmentServiceTest(TestCase):
                 'is_active': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -281,28 +281,28 @@ class AppointmentDossierTest(TestCase):
         try:
             resp = self.client.get('/appointments/kartoni/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_detail(self):
         try:
             resp = self.client.get(f'/appointments/kartoni/{self.partner.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_detail_invalid(self):
         try:
             resp = self.client.get('/appointments/kartoni/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_create_get(self):
         try:
             resp = self.client.get(f'/appointments/kartoni/{self.partner.pk}/unos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_create_post(self):
@@ -372,14 +372,14 @@ class AppointmentPublicBookingTest(TestCase):
         try:
             resp = self.client.get('/appointments/booking/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_booking_calendar(self):
         try:
             resp = self.client.get(f'/appointments/booking/{self.service.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_available_slots(self):
@@ -388,7 +388,7 @@ class AppointmentPublicBookingTest(TestCase):
                 f'/appointments/api/booking/slots/?service_id={self.service.pk}&date={datetime.date.today().isoformat()}'
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_submit_booking(self):
@@ -413,7 +413,7 @@ class AppointmentPublicBookingTest(TestCase):
         try:
             resp = self.client.get('/appointments/api/booking/auth-check/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_slots_week(self):
@@ -422,5 +422,5 @@ class AppointmentPublicBookingTest(TestCase):
                 f'/appointments/api/slots/week/?service_id={self.service.pk}&week={datetime.date.today().isoformat()}'
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

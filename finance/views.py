@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import viewsets
+from django.db import DatabaseError, IntegrityError
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -324,7 +325,7 @@ def bank_import_xml(request):
         parser = SEPACamtParser(xml_content)
         import_batch = str(uuid.uuid4())[:8]
         stats = parser.parse(company=company, import_batch=import_batch)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         messages.error(request, _('XML datoteka nije ispravnog formata. Provjerite datoteku.'))
         return render(request, 'konto/bank_import_xml.html', {'banks': banks})
 
@@ -333,7 +334,7 @@ def bank_import_xml(request):
     if stats['created'] > 0:
         try:
             matched_pairs = konto_services.auto_match_transactions(company)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     # Izvještaj

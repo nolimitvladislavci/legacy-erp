@@ -34,7 +34,7 @@ def auto_fill_company_data(sender, instance, created, **kwargs):
     try:
         from companies.tasks import async_fill_company_address
         async_fill_company_address.delay(str(instance.pk))
-    except Exception as e:
+    except ImportError as e:
         logger.warning('auto_fill_company_data dispatch failed: %s', e)
 
 

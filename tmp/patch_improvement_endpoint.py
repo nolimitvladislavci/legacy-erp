@@ -39,7 +39,7 @@ def system_improvement_api(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
     title = (data.get('title') or '')[:200].strip()
@@ -54,6 +54,8 @@ def system_improvement_api(request):
     company_id = data.get('company_id', '')
     if company_id:
         from companies.models import Company
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
         company = Company.objects.filter(pk=company_id).first()
     elif is_authenticated:
         from core.company_utils import get_user_company

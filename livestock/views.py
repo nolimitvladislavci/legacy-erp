@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Livestock, Field, CropPlan
 from django.db import IntegrityError, DatabaseError
@@ -591,7 +592,7 @@ def generate_inspection_pdf(request):
         response['Content-Disposition'] = 'attachment; filename="Knjiga_lijecenja_%s_%s.pdf"' % (
             company.oib, today.strftime('%Y%m%d'))
         return response
-    except Exception:
+    except ImportError:
         # Fallback: return HTML
         return HttpResponse(html)
 
@@ -667,7 +668,7 @@ def farm_register(request):
             BookingSignature.log(request, 'create', target_obj=farm,
                 target_repr=f'IKG: {farm.jibg_display} — {farm.owner_name}',
                 changes={'animal_types': farm.animal_types})
-        except Exception:
+        except ImportError:
             pass
 
         messages.success(request,

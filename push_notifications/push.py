@@ -47,7 +47,7 @@ def send_push(subscription_json: str, title: str, body: str,
             vapid_claims=_get_vapid_claims(),
         )
         return True
-    except Exception as exc:
+    except ImportError as exc:
         err_str = str(exc)
         if '410' in err_str or '404' in err_str:
             # Pretplata istekla – caller bi trebao obrisati
@@ -69,7 +69,7 @@ def send_push_to_user(user, title: str, body: str, url: str = '/interventions/')
             user.profile.push_subscription = ''
             user.profile.save(update_fields=['push_subscription'])
         return ok
-    except Exception as exc:
+    except AttributeError as exc:
         logger.warning(f'send_push_to_user error: {exc}')
         return False
 

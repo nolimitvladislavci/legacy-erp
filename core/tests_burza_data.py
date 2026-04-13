@@ -85,7 +85,7 @@ class BurzaKanbanTest(TestCase):
             c = self._client('brz_v1')
             resp = c.get('/burza/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_kanban_as_superadmin(self):
@@ -97,7 +97,7 @@ class BurzaKanbanTest(TestCase):
             c = self._client('brz_super1')
             resp = c.get('/burza/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_kanban_without_profile(self):
@@ -109,7 +109,7 @@ class BurzaKanbanTest(TestCase):
             c.login(username='brz_bare1', password='pass123')
             resp = c.get('/burza/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except DatabaseError:
             pass
 
 
@@ -132,7 +132,7 @@ class BurzaLeadDetailTest(TestCase):
             c = self._client('brz_v3')
             resp = c.get(f'/burza/lead/{lead.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_lead_detail_public_burza_lead(self):
@@ -142,7 +142,7 @@ class BurzaLeadDetailTest(TestCase):
             c = self._client('brz_v4')
             resp = c.get(f'/burza/lead/{lead.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_lead_detail_foreign_non_public(self):
@@ -152,7 +152,7 @@ class BurzaLeadDetailTest(TestCase):
             c = self._client('brz_v4')
             resp = c.get(f'/burza/lead/{lead.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_lead_detail_superadmin(self):
@@ -161,7 +161,7 @@ class BurzaLeadDetailTest(TestCase):
             c = self._client('brz_super2')
             resp = c.get(f'/burza/lead/{lead.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_lead_detail_invalid_pk(self):
@@ -224,7 +224,7 @@ class BurzaLeadMoveTest(TestCase):
                           data='not json',
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_lead_move_foreign_lead_denied(self):
@@ -269,7 +269,7 @@ class BurzaLeadPreuzmiTest(TestCase):
             c = self._client('brz_v7')
             resp = c.post(f'/burza/lead/{lead.pk}/preuzmi/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_preuzmi_other_company_lead(self):
@@ -281,7 +281,7 @@ class BurzaLeadPreuzmiTest(TestCase):
             c = self._client('brz_v8')
             resp = c.post(f'/burza/lead/{lead.pk}/preuzmi/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_preuzmi_not_on_burza(self):
@@ -291,7 +291,7 @@ class BurzaLeadPreuzmiTest(TestCase):
             c = self._client('brz_v8')
             resp = c.post(f'/burza/lead/{lead.pk}/preuzmi/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_preuzmi_already_taken(self):
@@ -301,7 +301,7 @@ class BurzaLeadPreuzmiTest(TestCase):
             c = self._client('brz_v8')
             resp = c.post(f'/burza/lead/{lead.pk}/preuzmi/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_preuzmi_invalid_pk(self):
@@ -329,7 +329,7 @@ class BurzaLeadNewTest(TestCase):
             c = self._client()
             resp = c.get('/burza/lead/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_lead_new_post_valid(self):
@@ -387,7 +387,7 @@ class BurzaPublicUqitTest(TestCase):
         try:
             resp = self.client.get('/burza/upit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_upit_get_with_prefill(self):
@@ -397,7 +397,7 @@ class BurzaPublicUqitTest(TestCase):
                 follow=True
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_upit_post_valid(self):
@@ -435,7 +435,7 @@ class BurzaPublicUqitTest(TestCase):
         try:
             resp = self.client.get('/burza/upit/hvala/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -458,7 +458,7 @@ class BurzaInvoiceFromLeadTest(TestCase):
             c = self._client('brz_super10')
             resp = c.get(f'/burza/lead/{lead.pk}/invoice/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_from_lead_taken_by_company(self):
@@ -467,7 +467,7 @@ class BurzaInvoiceFromLeadTest(TestCase):
             c = self._client('brz_v11')
             resp = c.get(f'/burza/lead/{lead.pk}/invoice/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_from_lead_forbidden(self):
@@ -476,7 +476,7 @@ class BurzaInvoiceFromLeadTest(TestCase):
             c = self._client('brz_v10')
             resp = c.get(f'/burza/lead/{lead.pk}/invoice/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_from_lead_invalid(self):

@@ -66,7 +66,7 @@ def membership_expiry_check():
                     f'Molimo obnovite clanarinu u knjiznici.'
                 ))
                 count += 1
-        except Exception:
+        except ImportError:
             pass
 
     return f'{count} expiry warnings sent'
@@ -113,7 +113,7 @@ def weekly_reading_digest():
             if phone:
                 send_text(phone=phone, message='\n'.join(lines))
                 count += 1
-        except Exception:
+        except ImportError:
             pass
 
     return f'{count} weekly digests sent'

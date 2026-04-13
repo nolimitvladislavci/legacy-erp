@@ -122,7 +122,7 @@ def _wa_rate_ok(daily_limit=500):
             logger.warning('WhatsApp daily limit reached: %d/%d', count, daily_limit)
             return False
         return True
-    except Exception:
+    except ImportError:
         return True
 
 
@@ -150,7 +150,7 @@ def _whatsapp_rate_check(company_id=None, phone=None):
                 logger.warning('WhatsApp hourly limit for phone %s***', phone[:6])
                 return False, f'Satni limit ({WHATSAPP_HOURLY_LIMIT_PER_PHONE}) za broj dosegnut'
         return True, ''
-    except Exception as e:
+    except ImportError as e:
         logger.warning('WhatsApp rate check error (allowing): %s', e)
         return True, ''
 

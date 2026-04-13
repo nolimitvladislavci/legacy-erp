@@ -179,12 +179,12 @@ def ivan_cockpit(request):
                 context['api_status']    = 'no_credit' if 'credit balance' in str(e) else 'error'
                 context['api_error']     = str(e)[:100]
                 context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 context['api_status'] = 'error'
                 context['api_error']  = str(e)[:100]
         else:
             context['api_status'] = 'missing'
-    except Exception:
+    except (IntegrityError, DatabaseError):
         context['api_status'] = 'unknown'
 
     # FINA certifikati
@@ -196,7 +196,7 @@ def ivan_cockpit(request):
             c for c in certs
             if c.get('status') in ('CRITICAL', 'WARNING', 'ATTENTION', 'EXPIRED')
         ]
-    except Exception:
+    except ImportError:
         context['certs']          = []
         context['certs_expiring'] = []
 
@@ -551,7 +551,7 @@ def partner_signup_api(request):
                     '— LIMIT Connect tim'
                 ) % str(partner.pk)[:8]
             send_whatsapp_text_task.delay(norm_phone, wa_msg)
-    except Exception:
+    except ImportError:
         logger.exception("Failed to import normalize_phone")
 
     # Notifikacija superadminu
@@ -563,7 +563,7 @@ def partner_signup_api(request):
                 email, phone, region, iban[:8] + '...'),
             notification_type='system',
         )
-    except Exception:
+    except ImportError:
         logger.exception("Failed to import _notify_superadmins")
 
     return JsonResponse({'ok': True, 'partner_id': str(partner.pk)[:8]})

@@ -79,7 +79,7 @@ def _get_owner_phone(company):
         if not phone:
             try:
                 phone = m.user.profile.phone or ''
-            except Exception:
+            except AttributeError:
                 logger.exception("Profile access failed")
         if phone and len(phone) >= 8:
             return (phone, m.user.get_full_name() or m.user.username)

@@ -47,7 +47,7 @@ class AICallBudget:
                 logger.warning("AIBudget BLOCK daily_tokens=%d caller=%s", dt, caller)
                 return {"allowed": False, "reason": f"Dnevni token limit ({dt:,}/{DAILY_TOKEN_LIMIT:,})."}
             return {"allowed": True, "daily_calls": dc, "hourly_calls": hourly}
-        except Exception as e:
+        except DatabaseError as e:
             logger.error("AICallBudget.check error: %s", e)
             return {"allowed": True}
 

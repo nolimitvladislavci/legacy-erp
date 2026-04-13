@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from accounts.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import HitnaIntervencija
 
@@ -42,7 +43,7 @@ def _get_company_workers(company):
                 role='worker'
             ).values_list('user_id', flat=True)
         return User.objects.filter(id__in=user_ids, is_active=True).order_by('first_name', 'username')
-    except Exception:
+    except DatabaseError:
         return User.objects.none()
 
 
@@ -120,7 +121,7 @@ def new_intervention(request):
                     try:
                         from core.whatsapp_tasks import send_intervention_assignment_whatsapp
                         send_intervention_assignment_whatsapp.delay(interv.pk, worker.pk)
-                    except Exception:
+                    except ImportError:
                         pass
                 except User.DoesNotExist:
                     pass
@@ -148,7 +149,7 @@ def update_status(request, pk):
     try:
         data = json.loads(request.body)
         new_status = data.get('status', '').upper()
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     if new_status not in HitnaIntervencija.Status.values:
@@ -186,7 +187,7 @@ def update_status(request, pk):
         })
     except HitnaIntervencija.DoesNotExist:
         return JsonResponse({'error': 'Intervencija nije pronadena'}, status=404)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -197,7 +198,7 @@ def assign_worker(request, pk):
     try:
         data = json.loads(request.body)
         worker_id = data.get('worker_id')
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     interv = get_object_or_404(HitnaIntervencija, pk=pk)
@@ -217,7 +218,7 @@ def assign_worker(request, pk):
             body=f'{interv.title} – {interv.address or interv.client_name}',
             url=push_url,
         )
-    except Exception as _push_err:
+    except ImportError as _push_err:
         import logging
         logging.getLogger(__name__).warning(f'Push assign_worker: {_push_err}')
     # In-app notification
@@ -231,13 +232,13 @@ def assign_worker(request, pk):
             url=f'/interventions/{interv.pk}/field/',
             sender=request.user,
         )
-    except Exception:
+    except ImportError:
         pass
     # WhatsApp notification
     try:
         from core.whatsapp_tasks import send_intervention_assignment_whatsapp
         send_intervention_assignment_whatsapp.delay(interv.pk, worker.pk)
-    except Exception:
+    except ImportError:
         pass
     return JsonResponse({
         'ok': True,
@@ -253,7 +254,7 @@ def escalate(request, pk):
     interv = get_object_or_404(HitnaIntervencija, pk=pk)
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
 
     try:
@@ -282,7 +283,7 @@ def escalate(request, pk):
             'lead_id': lead.pk,
             'message': f'Eskalirano u Zlatni Kanban. Upit #{lead.pk} kreiran.',
         })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -301,7 +302,7 @@ def gps_update(request, pk):
         data = json.loads(request.body)
         lat  = float(data['lat'])
         lng  = float(data['lng'])
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Neispravan format.'}, status=400)
     iv.last_lat        = lat
     iv.last_lng        = lng

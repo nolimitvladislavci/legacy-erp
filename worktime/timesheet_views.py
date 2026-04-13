@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
 
 from core.tenant import get_current_company
 
@@ -23,7 +24,7 @@ def _user_company(user):
     """Get company from user profile, or thread-local, or None."""
     try:
         return user.profile.company
-    except Exception:
+    except AttributeError:
         return get_current_company()
 
 
@@ -1176,7 +1177,7 @@ def timesheet_pdf(request):
         resp = HttpResponse(pdf, content_type='application/pdf')
         resp['Content-Disposition'] = f'inline; filename="sati_{date_from}_{date_to}.pdf"'
         return resp
-    except Exception:
+    except ImportError:
         return HttpResponse(html)
 
 
@@ -1219,7 +1220,7 @@ def bill_entries(request):
         issuer_name = cfg.company_name; issuer_oib = cfg.oib
         issuer_addr = cfg.address; issuer_iban = cfg.default_iban
         prefix = cfg.invoice_prefix_hr; next_num = cfg.next_invoice_number
-    except Exception:
+    except ImportError:
         issuer_name='LIMIT Connect'; issuer_oib=''
         issuer_addr='Kralja Tomislava 1a, Čepin'; issuer_iban=''
         prefix='KNJ'; next_num=Invoice.objects.count()+1
@@ -1784,7 +1785,7 @@ def dispute_revision(request, revision_id):
                 f'Prigovor na izmjenu sata: {request.user.get_full_name()} ne slaže se s izmjenom {rev.field_name}',
                 url=f'/hr/worktime/ts/manager/',
             )
-    except Exception:
+    except ImportError:
         pass
 
     # Audit
@@ -1796,7 +1797,7 @@ def dispute_revision(request, revision_id):
             target_id=str(rev.pk),
             target_repr=f'Dispute: {request.user.get_full_name()} — {rev.field_name}',
         )
-    except Exception:
+    except ImportError:
         pass
 
     return JsonResponse({

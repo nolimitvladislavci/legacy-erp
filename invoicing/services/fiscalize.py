@@ -22,7 +22,7 @@ def generate_qr(invoice):
         buf = BytesIO()
         qr.save(buf, format='PNG')
         return base64.b64encode(buf.getvalue()).decode()
-    except Exception:
+    except ImportError:
         return ''
 
 

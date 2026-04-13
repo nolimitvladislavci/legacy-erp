@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import TrackedItem, TrackingStatus
 from delivery.models import ConsolidatedDelivery, SensorReading
 
@@ -107,7 +109,7 @@ def tracking_public(request, token):
     try:
         doc = item.content_object
         doc_label = str(doc) if doc else None
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # Cold chain data

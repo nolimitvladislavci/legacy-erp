@@ -67,7 +67,7 @@ def async_fill_company_address(self, company_pk):
                 updated.append('updated_at')
                 company.save(update_fields=updated)
                 logger.info('Auto-fill %s from VIES: %s', company.name, ', '.join(updated))
-    except Exception as e:
+    except ImportError as e:
         logger.warning('VIES auto-fill failed for %s: %s', company.name, e)
 
 

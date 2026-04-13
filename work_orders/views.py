@@ -5,8 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponseForbidden
 from django.utils.translation import gettext_lazy as _
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.tenant import get_current_company
 from .models import WorkOrder, WorkOrderItem, VehicleCard, ClientCard
@@ -19,7 +20,7 @@ def _get_company(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     return company
 
@@ -485,7 +486,7 @@ def client_card_create(request):
             cc.save()
             messages.success(request, f"Karton klijenta {cc} kreiran.")
             return redirect('work_orders:client_card_list')
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     from partners.models import Partner

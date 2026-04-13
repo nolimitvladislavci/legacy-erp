@@ -68,7 +68,7 @@ class WorktimeDashboardTest(TestCase):
         try:
             resp = self.client.get('/worktime/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dashboard_with_entries(self):
@@ -76,35 +76,35 @@ class WorktimeDashboardTest(TestCase):
             _make_time_entry(self.company, self.user, self.project)
             resp = self.client.get('/worktime/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_worker_profile(self):
         try:
             resp = self.client.get('/worktime/profile/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_weekly_entry(self):
         try:
             resp = self.client.get('/worktime/weekly/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_analytics(self):
         try:
             resp = self.client.get('/worktime/analytics/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_billable_hours(self):
         try:
             resp = self.client.get('/worktime/billable/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -129,7 +129,7 @@ class WorktimeTimerTest(TestCase):
         try:
             resp = self.client.get('/worktime/timer/status/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_timer_pause_no_timer(self):
@@ -201,7 +201,7 @@ class WorktimeEntryTest(TestCase):
         try:
             resp = self.client.get('/worktime/add/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_add_entry_post(self):
@@ -237,7 +237,7 @@ class WorktimeEntryTest(TestCase):
             entry = _make_time_entry(self.company, self.user, self.project)
             resp = self.client.get(f'/worktime/edit/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_entry_post(self):
@@ -251,7 +251,7 @@ class WorktimeEntryTest(TestCase):
                 'task_type': 'TESTING',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_delete_entry(self):
@@ -259,7 +259,7 @@ class WorktimeEntryTest(TestCase):
             entry = _make_time_entry(self.company, self.user, self.project)
             resp = self.client.post(f'/worktime/delete/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_duplicate_entry(self):
@@ -267,7 +267,7 @@ class WorktimeEntryTest(TestCase):
             entry = _make_time_entry(self.company, self.user, self.project)
             resp = self.client.post(f'/worktime/duplicate/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_copy_previous_day(self):
@@ -278,7 +278,7 @@ class WorktimeEntryTest(TestCase):
                 'target_date': datetime.date.today().isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_daily_note_save(self):
@@ -305,7 +305,7 @@ class WorktimeManagerTest(TestCase):
         try:
             resp = self.client.get('/worktime/manager/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_approve_entries(self):
@@ -316,14 +316,14 @@ class WorktimeManagerTest(TestCase):
                 'action': 'approve',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_bill_entries(self):
         try:
             resp = self.client.get('/worktime/bill/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_timesheet_pdf(self):

@@ -75,6 +75,8 @@ new_verify = """def verify_2fa(request):
 
     if request.method == 'POST':
         import pyotp
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
         code = request.POST.get('code', '').replace(' ', '')
 
         # Rate limit: max 5 pokušaja u 10 min (sprečava brute-force 6-digit koda)

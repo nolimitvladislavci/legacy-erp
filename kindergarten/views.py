@@ -12,6 +12,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -134,7 +136,7 @@ def child_create(request):
             )
             messages.success(request, f'Dijete {child} upisano.')
             return redirect('kindergarten:child_detail', pk=child.pk)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
 
     return render(request, 'kindergarten/child_form.html', {
@@ -515,7 +517,7 @@ def bulk_import_children(request):
                                         )
                                         send_text(phone=g_phone, message=msg,
                                                   company_id=str(company.pk))
-                                    except Exception:
+                                    except ImportError:
                                         pass
 
                         # Link child to guardian
@@ -528,7 +530,7 @@ def bulk_import_children(request):
                             },
                         )
 
-                except Exception as e:
+                except DatabaseError as e:
                     errors.append(f'Red {row_num}: {str(e)[:100]}')
 
             messages.success(
@@ -613,7 +615,7 @@ def preporuci_u_kud(request):
                 ),
                 company_id=str(company.pk),
             )
-        except Exception:
+        except ImportError:
             pass
 
     messages.success(request, f'{child} preporučen/a za KUD {kud.name} — {instrument}')

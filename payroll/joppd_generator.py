@@ -8,6 +8,8 @@ from xml.dom import minidom
 from datetime import datetime, date
 from decimal import Decimal
 import calendar
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 JOPPD_NS = 'http://e-porezna.porezna-uprava.hr/sheme/zahtjevi/ObscePorezanDohodak/v4-0'
@@ -120,7 +122,7 @@ def generate_joppd_xml(company, payroll_run, payslips, oznaka=None):
             profile = UserProfile.objects.get(user=emp)
             if hasattr(profile, 'tax_id'):
                 emp_oib = profile.tax_id or ''
-        except Exception:
+        except ObjectDoesNotExist:
             pass
 
         ET.SubElement(primatelj, 'OIB').text = emp_oib

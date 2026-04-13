@@ -11,6 +11,8 @@ import uuid
 from base64 import b64encode, b64decode
 from datetime import datetime
 from decimal import Decimal
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from ..base import BaseFiscalProvider, FiscalResult
 

@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework import permissions, viewsets
 
 from partners.models import Partner
+from django.db import DatabaseError, IntegrityError
 
 from .models import InsurancePolicy
 from .serializers import InsurancePolicySerializer

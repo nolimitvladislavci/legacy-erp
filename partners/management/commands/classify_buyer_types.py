@@ -23,10 +23,11 @@ Pokretanje:
 import re
 from contextlib import nullcontext
 from django.core.management.base import BaseCommand
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
 
 from partners.models import Partner
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # ═══════════════════════════════════════════════════════

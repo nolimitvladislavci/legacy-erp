@@ -8,6 +8,8 @@ from einvoice.models import AS4Message, MessageStatus, MessageDirection, Transpo
 from einvoice.services.ubl_generator import generate_ubl_for_invoice, generate_ubl_for_eracun
 from einvoice.services.ubl_validator import validate_ubl
 from einvoice.services.transport_router import TransportRouter
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("propter.einvoice.pipeline")
 

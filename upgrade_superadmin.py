@@ -455,6 +455,8 @@ views_content = textwrap.dedent("""\
     from django.apps import apps
     from django.contrib.auth.decorators import user_passes_test
     from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
     from .models import AIModuleAccess, AIActionQueue
     # from . import services  # Otkomentiraj ako C Code koristi specifične servise
 
@@ -498,7 +500,7 @@ views_content = textwrap.dedent("""\
             return JsonResponse({'status': 'success', 'message': f'Dozvole za {module.module_name} ažurirane.'})
         except AIModuleAccess.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Modul nije pronađen u bazi.'}, status=404)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     @require_POST
@@ -518,7 +520,7 @@ views_content = textwrap.dedent("""\
             return JsonResponse({'status': 'success', 'message': f'AI Akcija {msg}.'})
         except AIActionQueue.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Akcija nije pronađena.'}, status=404)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 """)
 

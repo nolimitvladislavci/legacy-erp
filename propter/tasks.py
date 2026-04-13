@@ -20,7 +20,7 @@ def auto_close_billing_periods(self):
         err = [r for r in results if r.get("status") == "ERROR"]
         logger.info("auto_close: %d OK, %d ERROR", len(ok), len(err))
         return {"ok": len(ok), "errors": len(err), "results": results}
-    except Exception as exc:
+    except ImportError as exc:
         logger.error("auto_close_billing_periods: %s", exc)
         raise self.retry(exc=exc)
 

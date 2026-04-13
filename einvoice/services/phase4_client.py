@@ -1,6 +1,8 @@
 """phase4 AS4 Gateway Client — Phase 3 stub.
 Will be implemented when we deploy our own Peppol AP."""
 import logging
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("propter.einvoice.phase4")
 

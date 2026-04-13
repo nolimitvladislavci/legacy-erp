@@ -1,6 +1,7 @@
 """Smart Mailbox — inbound invoice processing."""
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class InboundInvoice(models.Model):

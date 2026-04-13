@@ -6,6 +6,7 @@ Usage: from payments.integrations import pay_webshop_order, pay_rental_booking, 
 import logging
 from decimal import Decimal
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 

@@ -4,6 +4,8 @@ This makes them i18n-ready so {% trans %} tags will work.
 """
 import os
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 TEMPLATES_DIR = "/var/www/fina-connect/templates"
 SKIP_DIRS = {"worktime_ARCHIVED", "__pycache__"}

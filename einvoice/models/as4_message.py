@@ -11,8 +11,9 @@ Design principles:
 """
 import uuid
 import hashlib
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class MessageDirection(models.TextChoices):

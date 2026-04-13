@@ -199,5 +199,5 @@ def _get_farm_stats():
             'beehives': Beehive.objects.using(db).count(),
             'farm_list': list(FarmProfile.objects.using(db).all().order_by('-created_at')[:10]),
         }
-    except Exception:
+    except DatabaseError:
         return {'farms': 0, 'animals': 0, 'beehives': 0, 'farm_list': [], 'error': 'Baza nije dostupna'}

@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 """
 FENIX SessionGuard — "Zaključaj kancelariju prije izlaska"
 

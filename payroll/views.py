@@ -13,6 +13,8 @@ Rute:
 """
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.audit_access import audit_sensitive_access, audit_bulk_access
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -59,7 +61,7 @@ def payroll_new(request):
             else:
                 messages.success(request, f'Kreiran obračun za {month:02d}/{year}.')
             return redirect('payroll:detail', pk=run.pk)
-        except Exception as e:
+        except DatabaseError as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     import datetime
@@ -144,7 +146,7 @@ def payroll_pain001(request, pk):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect('payroll:detail', pk=pk)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('payroll:detail', pk=pk)
 

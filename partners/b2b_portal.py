@@ -11,6 +11,8 @@ Sve su pure functions — bez side effecta, lako testabilne.
 """
 
 import datetime
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 8.2 — Legal Vault Access Control

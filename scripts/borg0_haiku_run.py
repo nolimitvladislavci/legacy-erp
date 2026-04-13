@@ -10,6 +10,8 @@ load_dotenv('/var/www/fina-connect/.env')
 import anthropic
 from inventory.models import InventoryItem
 from collections import Counter
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 

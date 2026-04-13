@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 cache.set('nkd_codes_top500', nkd, 86400)
                 warmed += 1
                 self.stdout.write(f'  NKD codes: {len(nkd)}')
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(f'  NKD codes: skip ({e})')
 
         # 5. Module registry (koristi se za sidebar/nav)
@@ -71,7 +71,7 @@ class Command(BaseCommand):
             cache.set('module_registry', MODULE_REGISTRY, 86400)
             warmed += 1
             self.stdout.write(f'  Module registry: {len(MODULE_REGISTRY)} modules')
-        except Exception:
+        except ImportError:
             pass
 
         # 6. Regulatory sources (za BORG)

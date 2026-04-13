@@ -104,7 +104,7 @@ class AppointmentWithDataTest(TestCase):
             svc = self._make_service()
             resp = self.client.get(f'/appointments/usluge/{svc.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_booking_calendar(self):
@@ -112,7 +112,7 @@ class AppointmentWithDataTest(TestCase):
             svc = self._make_service()
             resp = self.client.get(f'/appointments/booking/{svc.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def _make_partner(self):
@@ -128,7 +128,7 @@ class AppointmentWithDataTest(TestCase):
             partner = self._make_partner()
             resp = self.client.get(f'/appointments/kartoni/{partner.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_create_get(self):
@@ -136,7 +136,7 @@ class AppointmentWithDataTest(TestCase):
             partner = self._make_partner()
             resp = self.client.get(f'/appointments/kartoni/{partner.pk}/unos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_appointments_get(self):

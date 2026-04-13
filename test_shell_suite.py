@@ -363,11 +363,11 @@ try:
                   "Nema template grešaka u outputu",
                   "TEMPLATE GREŠKA u rendered outputu!")
 
-        except Exception as e:
+        except (UnicodeDecodeError, ValueError) as e:
             fail(f"Iznimka za {url}: {e}")
             RESULTS['fail'] += 1
 
-except Exception as e:
+except (UnicodeDecodeError, ValueError) as e:
     warn(f"HTTP provjere preskočene — greška pri login: {e}")
     RESULTS['warn'] += 1
 
@@ -478,6 +478,8 @@ except FileNotFoundError:
 head("9. GIT STANJE")
 
 import subprocess
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
 uncommited = [l for l in result.stdout.strip().split('\n') if l.strip()]
 uncommited_shell = [l for l in uncommited if any(x in l for x in ['base.html','shell','panel','konto','doktor','pos'])]

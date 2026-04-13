@@ -310,7 +310,7 @@ def receive_eracun(company, xml_string, received_via='upload', user=None):
     try:
         from limit_connect_ai.tasks import fenix_intercept_incoming
         fenix_intercept_incoming.delay(str(eracun.pk))
-    except Exception as e:
+    except ImportError as e:
         logger.debug('FENIX intercept trigger skipped: %s', e)
 
     return {

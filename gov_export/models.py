@@ -5,9 +5,10 @@ Filozofija: svaki export je "dokument" koji prolazi kroz iste faze
 kao fiskalizirani račun — generate → validate → sign → send → confirm.
 """
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 

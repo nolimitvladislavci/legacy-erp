@@ -58,7 +58,7 @@ class AccountsUserEditTest(TestCase):
         try:
             resp = self.client.get(f'/accounts/{self.target.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_user_edit_post_worker(self):
@@ -135,7 +135,7 @@ class AccountsUserEditTest(TestCase):
         try:
             resp = self.client.get('/accounts/99999/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_toggle_user_status(self):
@@ -158,7 +158,7 @@ class AccountsUserEditTest(TestCase):
         try:
             resp = self.client.get('/accounts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -174,7 +174,7 @@ class AccountsChangePasswordTest(TestCase):
         try:
             resp = self.client.get('/accounts/password/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_change_password_success(self):
@@ -218,14 +218,14 @@ class AccountsQuickRegisterTest(TestCase):
         try:
             resp = self.client.get('/accounts/quick-register/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_quick_register_get_with_params(self):
         try:
             resp = self.client.get('/accounts/quick-register/?next=/dashboard/&company=test', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_quick_register_post_success(self):
@@ -250,7 +250,7 @@ class AccountsQuickRegisterTest(TestCase):
                 'password': 'password123',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_quick_register_post_short_password(self):
@@ -293,7 +293,7 @@ class AccountsQuickRegisterTest(TestCase):
             self.client.login(username='acc_auth_qr', password='pass123')
             resp = self.client.get('/accounts/quick-register/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_quick_register_with_first_last_name(self):

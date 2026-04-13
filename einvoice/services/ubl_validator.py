@@ -80,7 +80,7 @@ def validate_ubl(xml_content, strict=True):
             result.is_valid = False
             result.errors.extend([f"XSD: {e}" for e in xsd_errors])
             return result  # Stop early — no point checking rules if XML is malformed
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f"XSD validation skipped: {e}")
         result.stage_results["xsd"] = {"valid": True, "errors": [str(e)]}
 
@@ -95,7 +95,7 @@ def validate_ubl(xml_content, strict=True):
             result.is_valid = False
             result.errors.extend([f"BR: {e}" for e in br_errors])
         result.warnings.extend([f"BR: {w}" for w in br_warnings])
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f"Business rules validation skipped: {e}")
         result.stage_results["business_rules"] = {"valid": True, "errors": [str(e)]}
 

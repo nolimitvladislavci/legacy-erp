@@ -27,7 +27,7 @@ def _today_pos_revenue(branch):
         if branch:
             qs = qs.filter(session__terminal__branch=branch)
         return qs.aggregate(t=Sum('total'))['t'] or Decimal('0')
-    except Exception:
+    except (ValueError, TypeError):
         return Decimal('0')
 
 
@@ -37,7 +37,7 @@ def _today_appointments(branch):
         from appointments.models import Appointment
         qs = Appointment.objects.filter(start_time__date=date.today())
         return qs.count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -48,7 +48,7 @@ def _open_receipts_count(branch):
         if branch:
             qs = qs.filter(session__terminal__branch=branch)
         return qs.count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -59,7 +59,7 @@ def _inventory_low_stock(branch):
             is_active=True,
             quantity__lte=models_F('min_quantity'),
         ).count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -71,7 +71,7 @@ def _month_invoice_count():
             issue_date__year=now.year,
             issue_date__month=now.month,
         ).count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -79,7 +79,7 @@ def _pending_invoices():
     try:
         from invoicing.models import Invoice
         return Invoice.objects.filter(status__in=['sent', 'overdue']).count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -191,7 +191,7 @@ def _appts_week():
             start_time__date__gte=today,
             start_time__date__lte=today + timedelta(days=7),
         ).count()
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -203,5 +203,5 @@ def _recent_appts(n=5):
                 start_time__date__gte=date.today(),
             ).order_by('start_time')[:n]
         )
-    except Exception:
+    except DatabaseError:
         return []

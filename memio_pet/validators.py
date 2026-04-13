@@ -8,7 +8,8 @@ ni jedna nelegalna vrijednost ne smije ući.
 import re
 import html
 import logging
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('memio_pet.security')
 

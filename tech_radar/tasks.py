@@ -93,7 +93,7 @@ def tech_radar_scan(self):
         inspect = current_app.control.inspect(timeout=2)
         workers = inspect.active_queues() or {}
         signal.celery_workers = len(workers)
-    except Exception:
+    except ImportError:
         signal.celery_queue_size = -1
         signal.celery_workers = -1
 

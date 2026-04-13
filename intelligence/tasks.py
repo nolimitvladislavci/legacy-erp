@@ -26,7 +26,7 @@ def intelligence_nightly_patrol(self):
             total_results += results
             total_sent += sent
             logger.info('Intelligence job %s: %d rezultata, %d poslano', job.company.name, results, sent)
-        except Exception as e:
+        except AttributeError as e:
             logger.error('Intelligence job failed %s: %s', job.company.name, e)
 
     notify('INFO', f'Inteligencija patrol zavrsen -- {total_results} pronalazaka, {total_sent} obavijesti poslano')
@@ -60,7 +60,7 @@ def check_auto_listings(self):
             created = create_futures_listing_from_crop(plan)
             if created:
                 listed += 1
-        except Exception as e:
+        except ImportError as e:
             logger.error('Auto-listing failed %s: %s', plan, e)
 
     # Upozorenje za krave koje tele uskoro

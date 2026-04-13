@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 invoicing/services/pdf.py
 PDF generation for invoices — placeholder, delegates to existing logic.

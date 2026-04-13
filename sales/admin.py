@@ -3,6 +3,8 @@ sales/admin.py — Admin za cjenike, narudžbe, saldakonti.
 """
 
 from django.contrib import admin
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     RabatGroup, CustomerPriceList, PriceListLine,
     SalesOrder, SalesOrderLine, OpenItem, IOSReport,

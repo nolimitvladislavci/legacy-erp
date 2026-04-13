@@ -9,8 +9,9 @@ Anomalies:
 """
 import logging
 from celery import shared_task
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('borg.anomaly')
 

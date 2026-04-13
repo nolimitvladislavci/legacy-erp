@@ -116,7 +116,7 @@ def pickup_order(request, company_slug):
                 metadata={'order_id': order.pk},
             )
             pay_url = payment.get('checkout_url', '')
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Payment init failed: %s', e)
 
     # WhatsApp potvrda narudzbe
@@ -126,7 +126,7 @@ def pickup_order(request, company_slug):
             track_url = 'https://limit-connect.com/pos/pickup/track/' + order.tracking_token + '/'
             msg = 'Narudzba primljena! Vasa vrecica ce biti spremna. Ukupno: ' + str(total) + ' EUR. Placanje: ' + payment_method + '. Pratite: ' + track_url
             send_whatsapp_text_task.delay(guest_phone, msg)
-        except Exception:
+        except ImportError:
             pass
 
     return JsonResponse({
@@ -221,7 +221,7 @@ def pickup_status_update(request, order_id):
                     order.guest_phone,
                     order.company.name + ' - ' + msg + ' #' + order.tracking_token[:8]
                 )
-            except Exception:
+            except ImportError:
                 pass
 
     return JsonResponse({'ok': True, 'status': order.status})

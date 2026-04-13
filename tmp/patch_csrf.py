@@ -8,6 +8,8 @@ promjena statusa naloga, financijske transakcije).
 """
 import os
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 BASE = '/var/www/fina-connect'
 TEMPLATES_DIR = os.path.join(BASE, 'templates')

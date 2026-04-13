@@ -94,7 +94,7 @@ def _create_pdvs_report(company, tax_period, year, month):
     try:
         from pdv_s.service import generate_pdv_s_from_tax_period
         return generate_pdv_s_from_tax_period(company, year, month)
-    except Exception as exc:
+    except ImportError as exc:
         logger.error("PDV-S report creation failed for %s: %s", company.name, exc)
         return None
 

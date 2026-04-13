@@ -1,5 +1,7 @@
 """Fix missing imports in flock views — udruge/views.py"""
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 filepath = '/var/www/fina-connect/udruge/views.py'
 

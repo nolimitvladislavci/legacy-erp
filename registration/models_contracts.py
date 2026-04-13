@@ -15,9 +15,10 @@ Dva pravna entiteta:
                ILI Konjik d.o.o. ako Viskovic nema Softwarevertrieb
 """
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ServiceProvider(models.Model):

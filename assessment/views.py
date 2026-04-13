@@ -8,6 +8,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
 
 from .models import AssessmentPhoto, FieldAssessment
 from django.core.exceptions import ObjectDoesNotExist
@@ -215,7 +216,7 @@ def assessment_pdf(request, pk):
         buf = io.BytesIO()
         img.save(buf, 'PNG')
         qr_b64 = base64.b64encode(buf.getvalue()).decode()
-    except Exception:
+    except ValueError:
         pass
 
     # Company logo
@@ -261,7 +262,7 @@ def assessment_pdf(request, pk):
             resp['Content-Disposition'] = f'inline; filename="nalaz-{assessment.pk}.pdf"'
             return resp
         messages.error(request, f'PDF greška: {pdf.err}')
-    except Exception as e:
+    except ImportError as e:
         messages.error(request, f'PDF greška: {e}')
     return redirect('assessment:detail', pk=pk)
 

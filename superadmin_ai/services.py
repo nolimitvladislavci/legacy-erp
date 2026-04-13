@@ -14,6 +14,8 @@ Uporaba iz bilo kojeg modula:
         # blokirano
 """
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import AIModulePermission, PendingAIAction, AIActionLog
 
 

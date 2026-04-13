@@ -1,6 +1,8 @@
 from django.views.generic import RedirectView
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from . import views
 from . import views_modules

@@ -87,7 +87,7 @@ class POSDashboardTest(TestCase):
         try:
             resp = self.client.get('/pos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dashboard_with_terminal(self):
@@ -95,14 +95,14 @@ class POSDashboardTest(TestCase):
             _make_terminal(self.company)
             resp = self.client.get('/pos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_new_terminal_get(self):
         try:
             resp = self.client.get('/pos/terminal/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_new_terminal_post(self):
@@ -129,14 +129,14 @@ class POSTerminalSessionTest(TestCase):
         try:
             resp = self.client.get(f'/pos/terminal/{self.terminal.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_terminal_invalid(self):
         try:
             resp = self.client.get('/pos/terminal/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_open_session(self):
@@ -171,7 +171,7 @@ class POSSessionActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/session/{self.session.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_close_session_empty(self):
@@ -204,7 +204,7 @@ class POSSessionActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/session/{self.session.pk}/zreport/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_cash_deposit(self):
@@ -221,21 +221,21 @@ class POSSessionActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/quick/{self.terminal.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_restaurant_pos(self):
         try:
             resp = self.client.get(f'/pos/restaurant/{self.terminal.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_quick_pay_get(self):
         try:
             resp = self.client.get(f'/pos/session/{self.session.pk}/quick-pay/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_new_receipt_ajax(self):
@@ -264,7 +264,7 @@ class POSReceiptActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/receipt/{self.receipt.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_receipt_cancel(self):
@@ -292,7 +292,7 @@ class POSReceiptActionsTest(TestCase):
                 'qty': '2',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_process_payment_cash(self):
@@ -309,7 +309,7 @@ class POSReceiptActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/receipt/{self.receipt.pk}/json/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_receipt_pdf(self):
@@ -323,7 +323,7 @@ class POSReceiptActionsTest(TestCase):
         try:
             resp = self.client.get('/pos/api/barcode/?barcode=1234567890', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -337,7 +337,7 @@ class POSSettingsTest(TestCase):
         try:
             resp = self.client.get('/pos/settings/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_save_printer(self):
@@ -414,7 +414,7 @@ class POSSettingsTest(TestCase):
         try:
             resp = self.client.get('/pos/settings/reports/export/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -428,35 +428,35 @@ class POSGastroTest(TestCase):
         try:
             resp = self.client.get('/pos/gastro/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_gastro_kitchen(self):
         try:
             resp = self.client.get('/pos/gastro/kitchen/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_gastro_kitchen_api(self):
         try:
             resp = self.client.get('/pos/gastro/kitchen/api/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_gastro_table_order_invalid(self):
         try:
             resp = self.client.get('/pos/gastro/table/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_expiry_dashboard(self):
         try:
             resp = self.client.get('/pos/expiry/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_expiry_add(self):
@@ -474,14 +474,14 @@ class POSGastroTest(TestCase):
         try:
             resp = self.client.get('/pos/expiry/api/alerts/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_article_search(self):
         try:
             resp = self.client.get('/pos/api/articles/search/?q=test')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_article_quick_create(self):

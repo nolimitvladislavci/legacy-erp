@@ -1,8 +1,9 @@
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class TrackingStatus(models.Model):

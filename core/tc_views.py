@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 import logging
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 
@@ -13,7 +15,7 @@ def tc_accept_view(request):
         company = None
         try:
             company = request.user.userprofile.company
-        except Exception:
+        except AttributeError:
             logger.exception("Profile access failed")
         if company:
             company.has_signed_tc_consent = True

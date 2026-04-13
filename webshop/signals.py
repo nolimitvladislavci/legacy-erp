@@ -58,7 +58,7 @@ def _reserve_inventory(order):
                     reason=f'Webshop narudžba {order.order_number}',
                 )
         logger.info('Inventory reserved for order %s', order.order_number)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning('Inventory reservation failed for %s', order.order_number, exc_info=True)
 
 
@@ -77,7 +77,7 @@ def _release_inventory(order):
                     reason=f'Otkazana narudžba {order.order_number}',
                 )
         logger.info('Inventory released for cancelled order %s', order.order_number)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning('Inventory release failed for %s', order.order_number, exc_info=True)
 
 
@@ -98,5 +98,5 @@ def _create_delivery(order):
             notes=f'Webshop narudžba {order.order_number}',
         )
         logger.info('Delivery created for order %s', order.order_number)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning('Delivery creation failed for %s', order.order_number, exc_info=True)

@@ -5,6 +5,8 @@ wrap the content properly.
 """
 import re
 import sys
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 

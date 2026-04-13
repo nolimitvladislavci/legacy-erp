@@ -165,7 +165,7 @@ def generate_tz2_data(company, year=None):
     try:
         from rental.hub3a import build_tz_membership_hub3a
         hub3a = build_tz_membership_hub3a(locals_data)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('HUB-3A generation failed: %s', e)
 
     return {

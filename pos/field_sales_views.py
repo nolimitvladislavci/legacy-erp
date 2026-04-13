@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from inventory.models import InventoryItem, StockMovement
@@ -282,7 +283,7 @@ def field_return(request, session_id):
     try:
         from pos.worktime_bridge import session_close_all_cashiers
         session_close_all_cashiers(session)
-    except Exception:
+    except ImportError:
         pass
 
     messages.success(request, _('Terenska smjena zatvorena. Povrat: ') + str(len(returned)) + ' artikala.')

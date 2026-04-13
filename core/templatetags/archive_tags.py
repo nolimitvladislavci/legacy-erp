@@ -1,4 +1,6 @@
 from django import template
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -14,5 +16,5 @@ def is_archive_readonly(user):
             is_active=True
         ).order_by('-valid_from').first()
         return sub and sub.plan == 'archive_readonly'
-    except Exception:
+    except DatabaseError:
         return False

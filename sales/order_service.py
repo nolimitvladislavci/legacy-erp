@@ -14,8 +14,9 @@ next_order_number()      — generiraj sljedeći broj narudžbe
 import logging
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import SalesOrder, SalesOrderLine
 from .ai_services import resolve_price
@@ -157,7 +158,7 @@ def create_invoice(order, user=None):
     from invoicing.services.invoice_service import generate_invoice_number
     try:
         inv.number = generate_invoice_number(order.company)
-    except Exception:
+    except AttributeError:
         inv.number = f'RAC-{timezone.now().strftime("%Y%m%d")}-{inv.pk}'
     inv.save(update_fields=['number'])
 

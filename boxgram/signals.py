@@ -12,6 +12,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 import logging
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -327,7 +328,7 @@ def auto_enrich_life_event(sender, instance, created, **kwargs):
             countdown=2  # Delayed start za 2 sekunde
         )
         logger.info(f'auto_enrich_life_event: Zakazan task za event {instance.id}')
-    except Exception as e:
+    except ImportError as e:
         logger.error(f'auto_enrich_life_event: {str(e)}')
 
 
@@ -421,7 +422,7 @@ def on_animal_profile_saved(sender, instance, created, **kwargs):
     try:
         from boxgram.services.memio_bridge import sync_animal_to_boxgram
         sync_animal_to_boxgram(instance)
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f'Boxgram bridge skip (AnimalProfile {getattr(instance, "pk", "?")}): {e}')
 
 
@@ -432,5 +433,5 @@ def on_health_record_saved(sender, instance, created, **kwargs):
     try:
         from boxgram.services.memio_bridge import sync_health_record_to_boxgram
         sync_health_record_to_boxgram(instance)
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f'Boxgram bridge skip (PetHealthRecord {getattr(instance, "pk", "?")}): {e}')

@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Livestock, HealthRecord
 from django.db import IntegrityError, DatabaseError

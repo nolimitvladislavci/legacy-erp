@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import ActiveTimer, DailyNote, EmployeeProfile, Project, TimeEntry, TimeEntryTemplate, WorkGroup
 
@@ -61,6 +63,6 @@ try:
         list_filter = ['status', 'transport_type']
         search_fields = ['order_number', 'destination', 'employee__username']
         inlines = [TravelExpenseInline]
-except Exception as _e:
+except ImportError as _e:
     import logging
     logging.getLogger(__name__).warning("TravelOrder admin skip: %s", _e)

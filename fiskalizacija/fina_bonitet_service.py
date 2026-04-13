@@ -11,6 +11,7 @@ from decimal import Decimal
 from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('fiskalizacija.bonitet')
 
@@ -90,7 +91,7 @@ def get_supplier_risk(oib, company_id=None):
             details['vies_name'] = vies_result.get('name', '')
             details['vies_address'] = vies_result.get('address', '')
             details['company_active'] = vies_result.get('valid', None)
-    except Exception as e:
+    except ImportError as e:
         logger.debug('VIES lookup failed for %s: %s', oib, e)
         details['vies_valid'] = None
 

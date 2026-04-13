@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -307,7 +308,7 @@ class InventoryItem(models.Model):
             try:
                 from inventory.sync import sync_to_webshop
                 sync_to_webshop(self)
-            except Exception:
+            except ImportError:
                 pass
     @property
     def is_low_stock(self):
@@ -584,7 +585,7 @@ class GoodsReceipt(models.Model):
                     track(self._confirmed_by, 'INV', 'GOODS_RECEIPT', ref=self.grn_number,
                           detail='Primka %s, %d stavki' % (self.grn_number, self.items.count()),
                           company=self.company)
-            except Exception:
+            except DatabaseError:
                 pass
 
             # Fix 3: automatic journal entry
@@ -1108,7 +1109,7 @@ class WarehouseTransfer(models.Model):
                 track(user, 'INV', 'TRANSFER_OUT', ref=self.transfer_number,
                       detail='Izdatnica %s -> %s' % (self.source_warehouse.name, self.destination_warehouse.name),
                       company=self.company)
-        except Exception:
+        except ImportError:
             pass
 
     def receive(self, user=None):
@@ -1329,7 +1330,7 @@ class Inventura(models.Model):
                 track(user, 'INV', 'INVENTURA_COMPLETE', ref='INV-%d' % self.pk,
                       detail='Inventura zavrsena, %d stavki' % self.items.count(),
                       company=self.company)
-        except Exception:
+        except DatabaseError:
             pass
 
     def approve_and_adjust(self, user):

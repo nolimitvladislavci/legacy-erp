@@ -450,7 +450,7 @@ def arhiva_upload(request):
                             pass  # Will use below
                         logger.info('arhiva_upload: FenixScan OCR ok, partner=%s, conf=%.2f',
                                     fields.get('dobavljac', '?'), fields.get('confidence', 0))
-                except Exception as ocr_err:
+                except ImportError as ocr_err:
                     logger.warning('arhiva_upload: FenixScan OCR failed (non-blocking): %s', ocr_err)
 
             # Fuzzy match partner
@@ -502,7 +502,7 @@ def arhiva_upload(request):
                         args=[entry.pk],
                         countdown=3,
                     )
-            except Exception as ai_err:
+            except ImportError as ai_err:
                 logger.warning('arhiva_upload: AI trigger failed: %s', ai_err)
 
         except (ValueError, TypeError) as e:
@@ -815,7 +815,7 @@ def arhiva_barcode_png(request, pk):
         code = barcode.get('code128', code_value, writer=ImageWriter())
         code.write(buf, options={'write_text': True, 'module_height': 10, 'font_size': 8, 'text_distance': 3})
         return HttpResponse(buf.getvalue(), content_type='image/png')
-    except Exception:
+    except ImportError:
         try:
             import qrcode
             qr = qrcode.make(code_value)
@@ -1650,7 +1650,7 @@ def arhiva_send_komitent(request, pk):
             entry.email_sent_to = recipient
             entry.save(update_fields=['email_sent_at', 'email_sent_to'])
             return JsonResponse({'ok': True, 'message': f'Email poslan na: {recipient}'})
-        except Exception as e:
+        except ImportError as e:
             return JsonResponse({'error': str(e)[:200]}, status=500)
 
     return JsonResponse({'error': 'Nepoznat kanal. Koristite "email" ili "whatsapp".'}, status=400)

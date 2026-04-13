@@ -3,8 +3,9 @@ Udruge modul - evidencija clanova braniteljskih, sportskih i OPG udruga.
 Cross-sell: clan udruge -> potencijalni OPG/obrt korisnik LC-a.
 """
 from django.conf import settings
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -206,7 +207,7 @@ class Clanarina(models.Model):
         try:
             from konto.booking_engine import auto_knjizi_clanarina
             auto_knjizi_clanarina(self)
-        except Exception as _e:
+        except ImportError as _e:
             import logging
             logging.getLogger('udruge').warning('mark_paid auto_knjizi: %s', _e)
 

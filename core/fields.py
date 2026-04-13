@@ -8,7 +8,8 @@ Graceful Degradation:
 """
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class FernetEncryptedCharField(models.CharField):

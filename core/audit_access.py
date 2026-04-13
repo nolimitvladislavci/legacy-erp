@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 """
 core/audit_access.py — Sensitive data access audit decorator.
 
@@ -52,7 +53,7 @@ def audit_sensitive_access(model_name, description='', get_object_id=None):
             try:
                 from core.tenant import get_current_company
                 company = get_current_company()
-            except Exception:
+            except ImportError:
                 company = None
 
             # Get IP

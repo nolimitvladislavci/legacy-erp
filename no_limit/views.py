@@ -51,7 +51,7 @@ def prijava_azila(request):
                 wa_number = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
                 if wa_number:
                     send_whatsapp(wa_number, f"Nov azil: {naziv}, {grad} ({email})")
-            except Exception:
+            except ImportError:
                 pass
             return redirect("/no-limit/?prijava=ok")
     return redirect("/no-limit/")

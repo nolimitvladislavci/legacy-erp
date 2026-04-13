@@ -108,7 +108,7 @@ def capture_error_for_borg(request, exc_info=None):
             if company:
                 company_id = str(company.pk)
                 company_name = company.name
-        except Exception:
+        except (ValueError, TypeError):
             logger.exception("HTTP request failed")
         
         # Sanitize POST data (remove passwords, tokens)

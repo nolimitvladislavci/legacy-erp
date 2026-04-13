@@ -25,6 +25,8 @@ import json
 from decimal import Decimal
 
 import requests
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('pos.revolut')
 

@@ -71,7 +71,7 @@ class InvoicingListFilterTest(TestCase):
         try:
             resp = self.client.get('/invoicing/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_invoices(self):
@@ -79,28 +79,28 @@ class InvoicingListFilterTest(TestCase):
             _make_invoice(self.company, self.user, self.partner)
             resp = self.client.get('/invoicing/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_doctype(self):
         try:
             resp = self.client.get('/invoicing/?doctype=INVOICE', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_filter_status(self):
         try:
             resp = self.client.get('/invoicing/?status=DRAFT', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_search(self):
         try:
             resp = self.client.get('/invoicing/?q=KNJ', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -115,42 +115,42 @@ class InvoicingWizardTest(TestCase):
         try:
             resp = self.client.get('/invoicing/wizard/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_invoice_create_get(self):
         try:
             resp = self.client.get('/invoicing/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_office_wizard(self):
         try:
             resp = self.client.get('/invoicing/office/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_field_wizard(self):
         try:
             resp = self.client.get('/invoicing/field/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_invoice_form_view(self):
         try:
             resp = self.client.get('/invoicing/form/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_invoice_form_standalone(self):
         try:
             resp = self.client.get('/invoicing/form-standalone/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -166,7 +166,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.get(f'/invoicing/{inv.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_pdf(self):
@@ -182,7 +182,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.get(f'/invoicing/{inv.pk}/download/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_send_email(self):
@@ -194,7 +194,7 @@ class InvoicingActionsTest(TestCase):
                 'message': 'Šaljemo vam račun.',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_storno(self):
@@ -202,7 +202,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.post(f'/invoicing/{inv.pk}/storno/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_clone(self):
@@ -210,7 +210,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.post(f'/invoicing/{inv.pk}/clone/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_convert_to_predracun(self):
@@ -218,7 +218,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.post(f'/invoicing/{inv.pk}/to-predracun/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_mark_sent(self):
@@ -226,7 +226,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner, 'PREDRACUN')
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-sent/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_mark_accepted(self):
@@ -234,7 +234,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner, 'PREDRACUN')
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-accepted/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_mark_rejected(self):
@@ -242,7 +242,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner, 'PREDRACUN')
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-rejected/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -257,42 +257,42 @@ class InvoicingAPITest(TestCase):
         try:
             resp = self.client.get('/invoicing/api/profiles/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_partners(self):
         try:
             resp = self.client.get('/invoicing/api/partners/?q=test')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_articles(self):
         try:
             resp = self.client.get('/invoicing/api/articles/?q=art')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_tax_rates(self):
         try:
             resp = self.client.get('/invoicing/api/tax-rates/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_worktime_entries(self):
         try:
             resp = self.client.get('/invoicing/api/worktime-entries/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_tax_calculate(self):
         try:
             resp = self.client.get('/invoicing/api/tax-calculate/?amount=100&rate=25')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_update_status(self):
@@ -323,21 +323,21 @@ class InvoicingAPITest(TestCase):
         try:
             resp = self.client.get('/invoicing/api/import/partners/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_fiscal_certificates(self):
         try:
             resp = self.client.get('/invoicing/fiscal/certificates/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_fiscal_batch(self):
         try:
             resp = self.client.get('/invoicing/fiscal/batch/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_fiscal_batch_create(self):
@@ -376,7 +376,7 @@ class InvoicingSaveTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.get(f'/invoicing/{inv.pk}/add-hours/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_api_field_create(self):

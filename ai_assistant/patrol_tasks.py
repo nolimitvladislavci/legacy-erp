@@ -76,7 +76,7 @@ def ai_midnight_patrol(self):
                             profile.phone,
                             report[:1000]
                         )
-                    except Exception:
+                    except ImportError:
                         pass
 
             logger.info(f'Patrol for {company.name}: {len(findings)} findings')

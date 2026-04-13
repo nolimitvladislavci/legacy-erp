@@ -14,6 +14,8 @@ import sys
 import argparse
 from pathlib import Path
 from collections import defaultdict
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ═══════════════════════════════════════════════════════════════
 # COLOR MAPPINGS: hardcoded hex → CSS variable class

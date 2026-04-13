@@ -13,6 +13,8 @@ import logging
 
 from django.conf import settings
 from django.http import HttpResponseForbidden
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

@@ -13,9 +13,10 @@ from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models import Sum, Q
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import OpenItem, IOSReport
 

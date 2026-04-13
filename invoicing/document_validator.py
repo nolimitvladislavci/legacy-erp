@@ -183,7 +183,7 @@ class DocumentValidator:
                             field=f'items[{item.pk}].tax_rate',
                             action='Promijenite PDV stopu'
                         ))
-        except Exception:
+        except DatabaseError:
             pass
         return issues
 

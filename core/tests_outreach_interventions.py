@@ -41,21 +41,21 @@ class OutreachViewsTest(TestCase):
         try:
             resp = self.client.get('/outreach/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contacts_list(self):
         try:
             resp = self.client.get('/outreach/contacts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contact_new_get(self):
         try:
             resp = self.client.get('/outreach/contacts/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_contact_new_post(self):
@@ -74,14 +74,14 @@ class OutreachViewsTest(TestCase):
         try:
             resp = self.client.get('/outreach/contacts/99999/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_new_get(self):
         try:
             resp = self.client.get('/outreach/campaign/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_campaign_new_post(self):
@@ -100,14 +100,14 @@ class OutreachViewsTest(TestCase):
         try:
             resp = self.client.get('/outreach/inbox/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_csv_import_get(self):
         try:
             resp = self.client.get('/outreach/contacts/import/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -121,14 +121,14 @@ class InterventionsViewsTest(TestCase):
         try:
             resp = self.client.get('/interventions/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_new_intervention_get(self):
         try:
             resp = self.client.get('/interventions/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_new_intervention_post(self):
@@ -153,7 +153,7 @@ class InterventionsViewsTest(TestCase):
         try:
             resp = self.client.get('/interventions/99999/field/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_update_status_invalid(self):
@@ -169,7 +169,7 @@ class InterventionsViewsTest(TestCase):
         try:
             resp = self.client.get('/interventions/public/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -183,21 +183,21 @@ class WebshopViewsTest(TestCase):
         try:
             resp = self.client.get('/webshop/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_webshop_products(self):
         try:
             resp = self.client.get('/webshop/products/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_webshop_orders(self):
         try:
             resp = self.client.get('/webshop/orders/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -211,21 +211,21 @@ class CalculatorViewsTest(TestCase):
         try:
             resp = self.client.get('/calculator/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_bom_list(self):
         try:
             resp = self.client.get('/calculator/bom/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_bom_create_get(self):
         try:
             resp = self.client.get('/calculator/bom/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -239,14 +239,14 @@ class ProjectsViewsTest(TestCase):
         try:
             resp = self.client.get('/projects/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_project_create_get(self):
         try:
             resp = self.client.get('/projects/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_project_create_post(self):
@@ -272,26 +272,26 @@ class DocumentsViewsTest(TestCase):
         try:
             resp = self.client.get('/documents/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_document_list_filter_type(self):
         try:
             resp = self.client.get('/documents/?type=otpremnica', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_otpremnica_create_get(self):
         try:
             resp = self.client.get('/documents/otpremnica/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_primka_create_get(self):
         try:
             resp = self.client.get('/documents/primka/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

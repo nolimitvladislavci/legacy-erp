@@ -93,7 +93,7 @@ try:
     r = make_receipt(sess, items_data, note='S1 quick pekara')
     log('S1', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR | is_training=True')
     log('S1', 'OK', f'pos_type=quick → signal hookovi NE aktiviraju rental/udrugu (ocekivano)')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S1', 'ERROR', str(e))
 
 # ── S2: retail × Konjik (R1, OIB kupca) ────────────────────
@@ -114,7 +114,7 @@ try:
     r = make_receipt(sess, items_data, buyer_oib='37590751921', is_r1=True, note='S2 retail R1')
     log('S2', 'OK', f'R1 receipt {r.receipt_number} | is_r1={r.is_r1} | oib={r.buyer_oib}')
     log('S2', 'OK', f'Total: {r.total:.2f} EUR')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S2', 'ERROR', str(e))
 
 # ── S3: retail × udruga (membership) ───────────────────────
@@ -141,7 +141,7 @@ try:
     r.save(update_fields=['member_name'])
     log('S3', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} | member={r.member_name}')
     log('S3', 'OK', f'post-receipt hook: evaluate_subscriptions.delay() (udruga pattern)')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S3', 'ERROR', str(e))
 
 # ── S4: field × teren (GPS, WhatsApp) ──────────────────────
@@ -165,7 +165,7 @@ try:
     r = make_receipt(sess, items_data, note='S4 field dostava')
     log('S4', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR')
     log('S4', 'OK', f'WhatsApp hook: INFO log aktivan (Twilio/Meta API treba za produkciju)')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S4', 'ERROR', str(e))
 
 # ── S5: quick × prazno (brzi iznos) ────────────────────────
@@ -185,7 +185,7 @@ try:
     r = make_receipt(sess, items_data, note='S5 brzi iznos')
     log('S5', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR')
     log('S5', 'OK', f'add_amount radi bez inventure (by design)')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S5', 'ERROR', str(e))
 
 # ── S6: reception × rental (check-in) ──────────────────────
@@ -217,7 +217,7 @@ try:
     from rental.tasks import check_evisitor_pending
     log('S6', 'OK', f'post-receipt hook: check_evisitor_pending DOSTUPAN')
     log('S6', 'OK', f'pos_type=reception → eVisitor XML trigger aktivan')
-except Exception as e:
+except (ValueError, TypeError) as e:
     log('S6', 'ERROR', str(e))
 
 # ── SAŽETAK ─────────────────────────────────────────────────

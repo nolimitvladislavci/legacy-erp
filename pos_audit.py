@@ -8,6 +8,8 @@ django.setup()
 from pos.models import *
 from django.db.models import Sum, Count, Avg
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 SEP = "=" * 55
 
@@ -95,7 +97,7 @@ try:
     for s in shifts:
         end = s.ended_at.strftime('%d.%m %H:%M') if s.ended_at else 'AKTIVNA'
         print(f"  {s.user} | start:{s.started_at.strftime('%d.%m %H:%M')} | kraj:{end} | orders:{s.total_orders_claimed}")
-except Exception as e:
+except DatabaseError as e:
     print(f"  Greška: {e}")
 
 # Daily reports
@@ -103,7 +105,7 @@ print("\n[ DNEVNI IZVJESTAJI ]")
 try:
     reports = POSDailyReport.objects.count()
     print(f"  Ukupno: {reports}")
-except Exception as e:
+except DatabaseError as e:
     print(f"  Greška: {e}")
 
 # Loyalty
@@ -113,7 +115,7 @@ try:
     gl = GuestLoyalty.objects.count()
     print(f"  Loyalty programi: {lp}")
     print(f"  Gosti u programu: {gl}")
-except Exception as e:
+except DatabaseError as e:
     print(f"  Greška: {e}")
 
 # Vouchers
@@ -121,7 +123,7 @@ print("\n[ VAUCERI ]")
 try:
     v = Voucher.objects.count()
     print(f"  Ukupno vaučera: {v}")
-except Exception as e:
+except DatabaseError as e:
     print(f"  Greška: {e}")
 
 # Cash deposits
@@ -131,7 +133,7 @@ try:
     print(f"  Zadnjih 5 pologa:")
     for d in cd:
         print(f"  {d.created_at.strftime('%d.%m')} | {d.amount} EUR | {d.deposit_type}")
-except Exception as e:
+except DatabaseError as e:
     print(f"  Greška: {e}")
 
 # POS Settings
@@ -142,7 +144,7 @@ try:
         print(f"  Fiskalizacija: {getattr(s, 'fiscalization_enabled', 'N/A')}")
         print(f"  Štampač: {getattr(s, 'printer_type', 'N/A')}")
         print(f"  Quick items: {getattr(s, 'quick_item_ids', 'N/A')}")
-except Exception as e:
+except (ValueError, TypeError) as e:
     print(f"  Greška: {e}")
 
 print("\n" + SEP)

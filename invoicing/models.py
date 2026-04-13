@@ -2,8 +2,9 @@ import uuid
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -323,7 +324,7 @@ class Invoice(models.Model):
             self._validation_warnings = [i for i in issues if i.severity.value in ('warn', 'info')]
         except ValidationError:
             raise
-        except Exception:
+        except ImportError:
             pass
 
     def save(self, *args, **kwargs):
@@ -394,7 +395,7 @@ class Invoice(models.Model):
                 if not should and self.doctype in ('R', 'RN', 'A', 'FA'):
                     if not self.internal_note or 'fiscal_skip' not in self.internal_note:
                         self.internal_note = (self.internal_note or '') + chr(10) + '[fiscal_skip: %s]' % reason
-            except Exception:
+            except ImportError:
                 pass
 
         super().save(*args, **kwargs)

@@ -7,7 +7,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 print("="*70)
 print(" FINA-CONNECT CHAOS MONKEY - META TEST (POSTGRESQL INTROSPEKCIJA)")

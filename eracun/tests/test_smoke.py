@@ -231,7 +231,7 @@ class DataFactory:
             from payments.models import PaymentConfig
             cfg, _ = PaymentConfig.objects.get_or_create(company=company)
             return {'payment_config': cfg}
-        except Exception:
+        except DatabaseError:
             return {}
 
     @classmethod

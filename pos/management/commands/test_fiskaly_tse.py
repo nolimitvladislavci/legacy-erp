@@ -172,7 +172,7 @@ class Command(BaseCommand):
                     'Registriraj se na: https://dashboard.fiskaly.com/'
                 ))
 
-            except Exception as e:
+            except ImportError as e:
                 self.stdout.write(self.style.ERROR('   GRESKA: %s' % e))
             return
 

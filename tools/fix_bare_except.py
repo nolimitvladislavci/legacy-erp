@@ -28,7 +28,7 @@ def scan_file(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             source = f.read()
-    except Exception:
+    except (FileNotFoundError, IOError):
         return []
 
     try:
@@ -49,7 +49,7 @@ def fix_file(filepath, dry_run=False):
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
-    except Exception:
+    except (FileNotFoundError, IOError):
         return 0
 
     hits = scan_file(filepath)

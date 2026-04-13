@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 class DiagnosisReport(models.Model):
     company = models.ForeignKey("companies.Company", on_delete=models.CASCADE,

@@ -146,6 +146,8 @@ class RAGRetrievalTest(TestCase):
 
     def test_empty_query_returns_something(self):
         from ai_assistant.claude_client import retrieve_knowledge
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
         result = retrieve_knowledge(module_context='compliance')
         self.assertTrue(len(result) > 0)
 '''

@@ -160,6 +160,8 @@ def embed_timestamp_in_xades(xml_content, timestamp_token):
         return xml_content
     
     import base64
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
     ts_b64 = base64.b64encode(timestamp_token).decode('ascii')
     
     # Inject SignatureTimeStamp u XAdES UnsignedProperties
@@ -228,7 +230,7 @@ if 'tsa' not in pc:
                     message='TSA server nedostupan — ostaje XAdES-BES',
                     duration_ms=int((time.time() - t0) * 1000), actor=user,
                 )
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             results['timestamp'] = f'error: {e}'
             GovExportLog.objects.create(
                 export=export, step='timestamp', status='error',

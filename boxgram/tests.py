@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import date, timedelta
 from companies.models import Company
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     PetProfile, LifeEvent, Competition, CompetitionEntry, 
     CompetitionVote, EventHeart

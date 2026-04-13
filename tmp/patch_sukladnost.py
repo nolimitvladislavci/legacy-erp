@@ -3,6 +3,8 @@ Sukladnost Dashboard — 5 testnih scenarija Porezne uprave
 zabetoniranih u Fenix kao live dashboard s run/status/history.
 """
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect'
 
 # ══════════════════════════════════════════════════════════════════════
@@ -135,7 +137,7 @@ def sukladnost_run(request):
         else:
             run.ts01_cert = False
             details['ts01'] = {'status': 'FAIL', 'error': 'Nema ERacunConfig ili cert_path'}
-    except Exception as e:
+    except (FileNotFoundError, IOError) as e:
         run.ts01_cert = False
         details['ts01'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -191,7 +193,7 @@ def sukladnost_run(request):
         if is_valid:
             passes += 1
         details['ts03'] = {'status': 'PASS' if is_valid else 'FAIL', 'result': str(result)[:300]}
-    except Exception as e:
+    except ImportError as e:
         run.ts03_validate = False
         details['ts03'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -202,7 +204,7 @@ def sukladnost_run(request):
         try:
             from fiskalizacija.models import FiscalConfig
             fisk_config = FiscalConfig.objects.filter(company=company, is_active=True).first()
-        except Exception:
+        except DatabaseError:
             pass
 
         if fisk_config and fisk_config.cert_path:
@@ -217,7 +219,7 @@ def sukladnost_run(request):
             run.ts04_fiscal = True
             passes += 1
             details['ts04'] = {'status': 'PASS', 'note': 'Modul spreman, fisk config pending'}
-    except Exception as e:
+    except DatabaseError as e:
         run.ts04_fiscal = False
         details['ts04'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -231,7 +233,7 @@ def sukladnost_run(request):
     except ImportError:
         run.ts05_inbox = False
         details['ts05'] = {'status': 'FAIL', 'error': 'InboxService import failed'}
-    except Exception as e:
+    except ImportError as e:
         run.ts05_inbox = False
         details['ts05'] = {'status': 'FAIL', 'error': str(e)[:200]}
 

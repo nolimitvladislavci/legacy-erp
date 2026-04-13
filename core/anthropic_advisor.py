@@ -99,6 +99,6 @@ def haiku_with_advisor(
 
         return result
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('haiku_with_advisor greška: %s', e)
         raise

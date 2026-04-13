@@ -43,42 +43,42 @@ class KontoDashboardTest(TestCase):
         try:
             resp = self.client.get('/konto/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_chart_of_accounts(self):
         try:
             resp = self.client.get('/konto/accounts/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_bank_accounts(self):
         try:
             resp = self.client.get('/konto/bank/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_transactions(self):
         try:
             resp = self.client.get('/konto/transactions/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_journal_entries(self):
         try:
             resp = self.client.get('/konto/journal/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_journal_entry_create_get(self):
         try:
             resp = self.client.get('/konto/journal/create/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -92,42 +92,42 @@ class KontoReportsTest(TestCase):
         try:
             resp = self.client.get('/konto/reports/pnl/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_report_balance_sheet(self):
         try:
             resp = self.client.get('/konto/reports/balance-sheet/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_report_receivables(self):
         try:
             resp = self.client.get('/konto/reports/receivables/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_report_vat(self):
         try:
             resp = self.client.get('/konto/reports/vat/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_report_annual_tax(self):
         try:
             resp = self.client.get('/konto/reports/annual-tax/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_report_euer(self):
         try:
             resp = self.client.get('/konto/reports/euer/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -141,14 +141,14 @@ class KontoAPITest(TestCase):
         try:
             resp = self.client.get('/konto/api/chart/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_unmatched_invoices(self):
         try:
             resp = self.client.get('/konto/api/unmatched-invoices/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_book_transactions(self):
@@ -214,5 +214,5 @@ class KontoAPITest(TestCase):
                 follow=True,
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass

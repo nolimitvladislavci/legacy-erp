@@ -217,7 +217,7 @@ def arhiva_morning_brief(self):
                 }]
             )
             brief_text = response.content[0].text
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('AI brief generation failed: %s', e)
 
     # Notifikacija
@@ -474,7 +474,7 @@ def generate_ai_proposal(self, entry_id):
             entry.ai_status = 'error'
             entry.ai_status_message = f'AI greška: {str(e)[:150]}'
             entry.save(update_fields=['ai_status', 'ai_status_message'])
-        except Exception:
+        except (ValueError, TypeError):
             pass
         return {'error': str(e)}
 

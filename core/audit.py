@@ -8,6 +8,7 @@ import json
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.db import IntegrityError, DatabaseError
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 _thread_locals = threading.local()
@@ -194,5 +195,5 @@ def connect_audit_signals():
             pre_save.connect(audit_pre_save, sender=model, dispatch_uid=f'audit_pre_{model_path}')
             post_save.connect(audit_post_save, sender=model, dispatch_uid=f'audit_post_{model_path}')
             post_delete.connect(audit_post_delete, sender=model, dispatch_uid=f'audit_del_{model_path}')
-        except Exception:
+        except (ValueError, AttributeError):
             logger.exception("File operation failed")

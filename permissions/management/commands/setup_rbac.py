@@ -127,7 +127,7 @@ class Command(BaseCommand):
         for user in User.objects.all():
             try:
                 role = user.profile.role
-            except Exception:
+            except AttributeError:
                 role = None
 
             if not role:

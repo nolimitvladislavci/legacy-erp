@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .forms import HitnaIntervencijaForm
 from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
@@ -54,7 +56,7 @@ def hitna_intervencija(request):
                 notify_email = getattr(settings, 'HITNA_NOTIFY_EMAIL', None)
                 if notify_email:
                     send_email_task.delay(subject, body, settings.DEFAULT_FROM_EMAIL, [notify_email])
-            except Exception:
+            except ImportError:
                 pass
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -133,7 +135,7 @@ def bau_page(request):
                 elif getattr(v, 'embed_url', None):
                     title = getattr(v, 'naslov_de', getattr(v, 'naslov_hr', getattr(v, 'title', 'Video')))
                     media_items.append({'type': 'video_embed', 'url': v.embed_url, 'title': title})
-    except Exception as e:
+    except DatabaseError as e:
         print("Galerija Error:", e)
     return render(request, 'website/bau.html', {'media_items': media_items})
 
@@ -576,7 +578,7 @@ def _wa_send(telefon, poruka):
     try:
         from core.whatsapp import send_text
         send_text(telefon, poruka)
-    except Exception:
+    except ImportError:
         pass
 
 def korpas_termini(request):

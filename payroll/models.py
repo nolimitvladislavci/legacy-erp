@@ -15,9 +15,10 @@ Integracija:
 """
 
 from decimal import Decimal
-from django.db import models, transaction
+from django.db import models, transaction, DatabaseError, IntegrityError
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

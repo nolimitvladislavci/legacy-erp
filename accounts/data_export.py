@@ -13,6 +13,7 @@ from django.http import StreamingHttpResponse, JsonResponse
 from django.utils import timezone as tz
 
 from accounts.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 
@@ -95,7 +96,7 @@ def export_company_data(request):
             detail=f'GDPR čl. 20 export zatražen za {company.name}',
             company=company,
         )
-    except Exception:
+    except ImportError:
         logger.exception('Audit trail failed for data export')
 
     def data_sections():

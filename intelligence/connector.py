@@ -30,7 +30,7 @@ def intelligence_unified_scan():
         nn_result = nn.process_feed()
         stats['nn_processed'] = nn_result.get('processed', 0)
         logger.info('NN scraper: %s', nn_result)
-    except Exception as e:
+    except ImportError as e:
         logger.error('NN scraper failed: %s', e)
 
     # Step 2: Convert EU_FUND regulatory updates to FundOpportunities

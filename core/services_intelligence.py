@@ -5,7 +5,8 @@ All queries use raw SQL with GROUP BY oib for performance.
 No FK rewiring, no cross-tenant data mutation — read-only aggregation.
 """
 import logging
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

@@ -389,6 +389,8 @@ print("[OK] inventory/migrations/0022_source_flock.py")
 # Experiences migracija: forfeited_invoice FK
 mig_exp = '''from django.db import migrations, models
 import django.db.models.deletion
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Migration(migrations.Migration):

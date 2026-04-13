@@ -76,7 +76,7 @@ class ProjectsWithDataTest(TestCase):
             _make_project(self.company, self.user)
             _make_project(self.company, self.user, status='planning')
             self.assertIn(self._get('/projects/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_list_search(self):
@@ -84,7 +84,7 @@ class ProjectsWithDataTest(TestCase):
             _make_project(self.company, code='SEARCH-01', status='active')
             resp = self.client.get('/projects/?q=SEARCH', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_list_filter_status(self):
@@ -92,7 +92,7 @@ class ProjectsWithDataTest(TestCase):
             _make_project(self.company, status='completed')
             resp = self.client.get('/projects/?status=completed', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_create_get(self):
@@ -130,7 +130,7 @@ class ProjectsWithDataTest(TestCase):
         try:
             proj = _make_project(self.company, self.user)
             self.assertIn(self._get(f'/projects/{proj.pk}/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_detail_invalid(self):
@@ -140,7 +140,7 @@ class ProjectsWithDataTest(TestCase):
         try:
             proj = _make_project(self.company, self.user)
             self.assertIn(self._get(f'/projects/{proj.pk}/edit/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_edit_post(self):
@@ -155,7 +155,7 @@ class ProjectsWithDataTest(TestCase):
                 'location': 'Split',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_update_add(self):
@@ -167,7 +167,7 @@ class ProjectsWithDataTest(TestCase):
                 'is_public': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_team_add(self):
@@ -178,7 +178,7 @@ class ProjectsWithDataTest(TestCase):
                 'user_id': worker.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_project_team_remove(self):
@@ -189,19 +189,19 @@ class ProjectsWithDataTest(TestCase):
                 'user_id': self.user.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_api_list(self):
         try:
             _make_project(self.company)
             self.assertIn(self._get('/projects/api/projects/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_project_api_detail(self):
         try:
             proj = _make_project(self.company)
             self.assertIn(self._get(f'/projects/api/projects/{proj.pk}/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass

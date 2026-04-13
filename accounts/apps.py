@@ -8,3 +8,5 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         import accounts.signals  # noqa: F401
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist

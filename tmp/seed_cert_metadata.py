@@ -1,6 +1,8 @@
 
 # One-time: extract cert metadata za sve postojeće FiscalConfig-e
 from fiskalizacija.models import FiscalConfig
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 for fc in FiscalConfig.objects.filter(cert_expires_at__isnull=True):
     fc.extract_cert_metadata()
     if fc.cert_expires_at:

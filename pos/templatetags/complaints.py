@@ -11,6 +11,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -24,7 +25,7 @@ def complaints_button(context, style='inline', source_module='general'):
         try:
             from core.company_utils import get_user_company
             company = get_user_company(request)
-        except Exception:
+        except ImportError:
             pass
 
     # Count pending (unanswered prigovori)
@@ -61,7 +62,7 @@ def complaints_qr_url(context):
         company = get_user_company(request)
         if company:
             return f'/pos/prigovori/new/?company={company.pk}&source=qr'
-    except Exception:
+    except ImportError:
         pass
     return ''
 

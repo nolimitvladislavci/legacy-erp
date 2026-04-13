@@ -6,6 +6,8 @@ import datetime
 from unittest.mock import patch
 from companies.models import Company
 from worktime.models import TimeEntry, EmployeeProfile, Project, ActiveTimer
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

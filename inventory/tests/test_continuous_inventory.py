@@ -15,6 +15,8 @@ from django.utils import timezone
 
 from companies.models import Company
 from inventory.models import InventoryItem, StockBatch, InventoryCountLog
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

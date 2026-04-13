@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 Tool definitions for Claude API tool use.
 Each tool maps to a handler in tool_handlers.py.

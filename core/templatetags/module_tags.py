@@ -115,7 +115,7 @@ def module_sidebar(context):
                 try:
                     from django.urls import reverse
                     resolved_url = reverse(url_name)
-                except Exception:
+                except ImportError:
                     resolved_url = '#'
 
                 html_parts.append(

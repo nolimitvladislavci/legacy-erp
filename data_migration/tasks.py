@@ -11,6 +11,7 @@ import traceback
 from celery import shared_task
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -208,7 +209,7 @@ def post_migration_fenix_hook(project_pk):
             send_whatsapp_message.delay(admin_phone, msg)
     except ImportError:
         pass
-    except Exception as e:
+    except ImportError as e:
         logger.warning("FENIX hook: WhatsApp greska: %s", e)
 
     try:
@@ -244,7 +245,7 @@ def post_migration_fenix_hook(project_pk):
         from limit_connect_ai.tasks import fenix_post_import_scan
         fenix_post_import_scan.delay(str(company.pk), project.pk)
         logger.info("FENIX scan pokrenut za %s (project=%s)", company.name, project.pk)
-    except Exception as e:
+    except ImportError as e:
         logger.warning("FENIX hook: scan pokretanje greska: %s", e)
 
 
@@ -260,7 +261,7 @@ def _get_company_admin_phone(company):
                     phone = getattr(profile, "phone", None) or getattr(profile, "whatsapp_number", None)
                     if phone:
                         return phone
-            except Exception:
+            except (AttributeError, TypeError):
                 continue
     except DatabaseError:
         pass

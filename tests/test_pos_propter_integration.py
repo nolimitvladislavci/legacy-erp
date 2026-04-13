@@ -16,6 +16,8 @@ from pos.services import open_session, create_receipt, add_receipt_item, process
 from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
 from propter.services.aggregate import close_period, aggregate_to_eracun
 from eracun.models import ERacun, ERacunItem
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class POSMathAndPaymentTest(TestCase):

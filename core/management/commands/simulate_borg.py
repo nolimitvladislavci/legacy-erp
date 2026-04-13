@@ -250,7 +250,7 @@ class Command(BaseCommand):
             from companies.models import Company
             count = Company.objects.count()
             r.success(f"Ukupno kompanija u bazi: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Company utils greška", e)
 
         try:
@@ -322,7 +322,7 @@ class Command(BaseCommand):
             info("Provjera POS modela")
             count = POSReceipt.objects.count()  # Cross-company count za simulaciju
             r.success(f"POSReceipt queryset OK: {count} računa")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("POSReceipt model greška", e)
 
         try:
@@ -343,7 +343,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('pos:dashboard')
             r.success(f"POS Joker URL resolves: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("POS URL greška", e)
 
         return r
@@ -452,7 +452,7 @@ class Command(BaseCommand):
             for name, args in urls_to_check:
                 url = reverse(name, args=args)
                 r.success(f"URL resolves: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("URL resolve greška", e)
 
         try:
@@ -536,7 +536,7 @@ class Command(BaseCommand):
             for name in ['work_orders:list', 'work_orders:create']:
                 url = reverse(name)
                 r.success(f"URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("work_orders URL greška", e)
 
         return r
@@ -565,7 +565,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('inventory:list')
             r.success(f"Inventory URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("Inventory URL greška", e)
 
         return r
@@ -584,14 +584,14 @@ class Command(BaseCommand):
         try:
             from worktime.services import WorktimeService
             r.success("WorktimeService import OK")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"WorktimeService nije dostupan: {e}")
 
         try:
             from django.urls import reverse
             url = reverse('worktime:ts_worker')
             r.success(f"Worktime URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("Worktime URL greška", e)
 
         return r
@@ -620,7 +620,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('burza:kanban')
             r.success(f"Burza URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("Burza URL greška", e)
 
         return r
@@ -655,7 +655,7 @@ class Command(BaseCommand):
             from borg_ops.models import CardActivity
             count = CardActivity.objects.count()
             r.success(f"CardActivity records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("CardActivity greška", e)
 
         try:
@@ -674,21 +674,21 @@ class Command(BaseCommand):
             from borg_ops.models import StatusTimestamp
             count = StatusTimestamp.objects.count()
             r.success(f"StatusTimestamp records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("StatusTimestamp greška", e)
 
         try:
             from django.urls import reverse
             url = reverse('borg_ops:operations_dashboard')
             r.success(f"Operations Dashboard URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("borg_ops URL greška", e)
 
         try:
             from django.urls import reverse
             url = reverse('borg_ops:borg_hub')
             r.success(f"BORG Hub URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"BORG Hub URL ne postoji još — CC_TASK_BORG_HUB.md potreban")
 
         return r
@@ -713,7 +713,7 @@ class Command(BaseCommand):
             zdravstveni = ZdravstveniZapisGolub.objects.count()
             rezultati = RezultatUtrke.objects.count()
             r.success(f"Legla: {legla}, Zdravstveni: {zdravstveni}, Rezultati: {rezultati}")
-        except Exception as e:
+        except DatabaseError as e:
             r.warning(f"Golubar extended modeli: {e}")
 
         try:
@@ -727,14 +727,14 @@ class Command(BaseCommand):
             }
             for name, url in urls.items():
                 r.success(f"Golubar {name}: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Golubar URL greška: {e}")
 
         try:
             from django.urls import reverse
             url = reverse('brochure_golubar')
             r.success(f"Brošura URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Brošura URL: {e}")
 
         return r
@@ -755,7 +755,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('rental:property_list')
             r.success(f"Rental URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.error("Rental URL greška", e)
 
         return r
@@ -779,7 +779,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('compliance:dashboard')
             r.success(f"Compliance URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Compliance URL ne postoji: {e}")
 
         return r
@@ -794,7 +794,7 @@ class Command(BaseCommand):
             r.success(f"AI Health check pokrenuto: {result}")
         except ImportError:
             r.warning("ai_health modul ne postoji na ovoj putanji")
-        except Exception as e:
+        except ImportError as e:
             r.error("AI Health greška", e)
 
         try:
@@ -827,7 +827,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('interventions:list')
             r.success(f"Interventions URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Interventions URL: {e}")
         return r
 
@@ -845,7 +845,7 @@ class Command(BaseCommand):
         try:
             from eracun.services.validator import validate_full
             r.success("Validator modul dostupan")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Validator import: {e}")
         return r
 
@@ -856,7 +856,7 @@ class Command(BaseCommand):
             from einvoice.models import AS4Message
             count = AS4Message.objects.count()
             r.success(f"AS4Message records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("AS4Message greška", e)
         return r
 
@@ -870,7 +870,7 @@ class Command(BaseCommand):
                 r.success(f"FiscalConfiguration: {latest}")
             else:
                 r.success("FiscalConfiguration: nema zapisa (OK za dev)")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Fiscal greška", e)
         return r
 
@@ -882,13 +882,13 @@ class Command(BaseCommand):
             templates = TaxFormTemplate.objects.count()
             deadlines = TaxDeadline.objects.count()
             r.success(f"TaxFormTemplate: {templates}, TaxDeadline: {deadlines}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("TaxWizard greška", e)
         try:
             from django.urls import reverse
             url = reverse('tax_wizard:dashboard')
             r.success(f"Tax Wizard URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Tax Wizard URL: {e}")
         return r
 
@@ -899,7 +899,7 @@ class Command(BaseCommand):
             from udruge.models import UdrugaSegment
             segments = UdrugaSegment.objects.count()
             r.success(f"UdrugaSegment: {segments}")
-        except Exception as e:
+        except DatabaseError as e:
             r.warning(f"UdrugaSegment: {e}")
         segments_to_check = [
             ('vatrogasci', 'DVD modul'),
@@ -917,7 +917,7 @@ class Command(BaseCommand):
                 from django.urls import reverse
                 url = reverse(f'udruge:{seg_key}_dashboard')
                 r.success(f"{seg_name} URL: {url}")
-            except Exception:
+            except ImportError:
                 r.warning(f"{seg_name} URL ne postoji")
         return r
 
@@ -935,7 +935,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('konto:dashboard')
             r.success(f"Konto URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Konto URL: {e}")
         return r
 
@@ -963,7 +963,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('documents:archive')
             r.success(f"Arhiva URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"Arhiva URL: {e}")
         return r
 
@@ -986,7 +986,7 @@ class Command(BaseCommand):
             from helpdesk.models import Ticket
             count = Ticket.objects.count()
             r.success(f"Ticket records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Helpdesk greška", e)
         return r
 
@@ -1003,7 +1003,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('gov_export:validator')
             r.success(f"CroXML Verify URL: {url}")
-        except Exception as e:
+        except ImportError as e:
             r.warning(f"CroXML Verify URL: {e}")
         return r
 
@@ -1025,7 +1025,7 @@ class Command(BaseCommand):
             from delivery.models import DeliveryRoute
             count = DeliveryRoute.objects.count()
             r.success(f"DeliveryRoute records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Delivery greška", e)
         return r
 
@@ -1036,7 +1036,7 @@ class Command(BaseCommand):
             from gastro_menu.models import MenuItem
             count = MenuItem.objects.count()
             r.success(f"MenuItem records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("GastroMenu greška", e)
         return r
 
@@ -1047,7 +1047,7 @@ class Command(BaseCommand):
             from marketplace.models import FuturesListing
             count = FuturesListing.objects.count()
             r.success(f"FuturesListing records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Marketplace greška", e)
         return r
 
@@ -1080,7 +1080,7 @@ class Command(BaseCommand):
             from fitness.models import Member
             count = Member.objects.count()
             r.success(f"Fitness Member records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Fitness greška", e)
         return r
 
@@ -1146,7 +1146,7 @@ class Command(BaseCommand):
             from intelligence.models import IntelligenceResult
             count = IntelligenceResult.objects.count()
             r.success(f"IntelligenceResult records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Intelligence greška", e)
         return r
 
@@ -1157,7 +1157,7 @@ class Command(BaseCommand):
             from tracking.models import TrackingEvent
             count = TrackingEvent.objects.count()
             r.success(f"TrackingEvent records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Tracking greška", e)
         return r
 
@@ -1168,7 +1168,7 @@ class Command(BaseCommand):
             from traceability.models import TraceEvent
             count = TraceEvent.objects.count()
             r.success(f"TraceEvent records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Traceability greška", e)
         return r
 
@@ -1186,7 +1186,7 @@ class Command(BaseCommand):
             from limit_connect_ai.models import AIConversation
             count = AIConversation.objects.count()
             r.success(f"AIConversation records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.warning(f"AIConversation: {e}")
         return r
 
@@ -1197,7 +1197,7 @@ class Command(BaseCommand):
             from registration.models import CompanyRegistration
             count = CompanyRegistration.objects.count()
             r.success(f"CompanyRegistration records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Registration greška", e)
         return r
 
@@ -1208,7 +1208,7 @@ class Command(BaseCommand):
             from premium_booking.models import Booking
             count = Booking.objects.count()
             r.success(f"PremiumBooking records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("PremiumBooking greška", e)
         return r
 

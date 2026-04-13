@@ -111,7 +111,7 @@ class AMLGuard:
                 ),
                 fail_silently=True,
             )
-        except Exception as e:
+        except ImportError as e:
             logger.error('AML alert email failed: %s', e)
 
     @classmethod

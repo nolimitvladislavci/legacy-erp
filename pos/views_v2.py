@@ -24,6 +24,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone as tz
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -194,7 +195,7 @@ def storno_receipt(request, receipt_id):
         jir = fiscalize_receipt(storno)
         if jir:
             fiscal_result = {'jir': jir, 'zki': storno.zki}
-    except Exception as e:
+    except ImportError as e:
         fiscal_result = {'fiscal_error': str(e)[:100]}
         logger.warning('Storno fiskalizacija failed: %s', e)
 
@@ -421,7 +422,7 @@ def partial_payment(request, receipt_id):
         jir = fiscalize_pos_receipt(receipt)
         if jir:
             fiscal_result['jir'] = jir
-    except Exception as e:
+    except ImportError as e:
         fiscal_result['fiscal_warning'] = str(e)[:100]
 
     # Pulse
@@ -1072,7 +1073,7 @@ def offline_sync(request):
                     jir = fiscalize_receipt(receipt, naknadna_dostava=True)
                     if jir:
                         fiscal_result = {'jir': jir, 'zki': receipt.zki}
-                except Exception as e:
+                except ImportError as e:
                     fiscal_result = {'fiscal_warning': str(e)[:100]}
                     logger.warning('Offline sync fiskalizacija failed for %s: %s', offline_id, e)
 
@@ -1086,7 +1087,7 @@ def offline_sync(request):
                     **fiscal_result,
                 })
 
-        except Exception as e:
+        except ImportError as e:
             logger.error('Offline sync error for %s: %s', offline_id, e, exc_info=True)
             results.append({'offline_id': offline_id, 'ok': False, 'error': str(e)[:100]})
 
@@ -1102,7 +1103,7 @@ def offline_sync(request):
                  f'{synced} OK, {failed} failed',
                  terminal=session.terminal,
                  metadata={'results': results})
-        except Exception:
+        except ImportError:
             pass
 
     logger.info('[OFFLINE-SYNC] company=%s session=%s synced=%d failed=%d',
@@ -1237,7 +1238,7 @@ def pocket_mode_activate(request):
                 for m in result['matches'][:3]
             ],
         }
-    except Exception:
+    except ImportError:
         pass
 
     return JsonResponse({

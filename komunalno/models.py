@@ -1,7 +1,8 @@
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from decimal import Decimal
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
 

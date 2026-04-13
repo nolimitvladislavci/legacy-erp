@@ -10,6 +10,8 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 
 

@@ -220,7 +220,7 @@ class KontoServiceBookTest(TestCase):
         try:
             result = get_annual_tax_summary(self.company, 2025)
             self.assertIsNotNone(result)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_get_euer_report(self):
@@ -228,7 +228,7 @@ class KontoServiceBookTest(TestCase):
         try:
             result = get_euer_report(self.company, 2025)
             self.assertIsNotNone(result)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_get_balance_sheet(self):
@@ -236,7 +236,7 @@ class KontoServiceBookTest(TestCase):
         try:
             result = get_balance_sheet(self.company, datetime.date(2026, 12, 31))
             self.assertIsInstance(result, dict)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_next_entry_number_prefix(self):
@@ -256,7 +256,7 @@ class KontoServiceBookTest(TestCase):
         try:
             result = auto_match_transactions(self.company)
             self.assertIsNotNone(result)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_book_bank_transactions_empty(self):
@@ -265,5 +265,5 @@ class KontoServiceBookTest(TestCase):
         qs = Invoice.objects.none()
         try:
             book_bank_transactions(qs)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass

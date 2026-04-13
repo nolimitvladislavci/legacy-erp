@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.services_oib_finalizer import (
     OIBFinalizerError,
@@ -102,6 +104,6 @@ def finalize_oib_api(request):
         return JsonResponse(result)
     except OIBFinalizerError as exc:
         return JsonResponse({'error': str(exc)}, status=400)
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
         logger.exception('OIB Finalizer API error')
         return JsonResponse({'error': str(exc)}, status=500)

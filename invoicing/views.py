@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 import logging
 import os
@@ -14,7 +15,7 @@ from django.views.decorators.http import require_POST
 from permissions.decorators import require_permission
 
 logger = logging.getLogger(__name__)
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.template.loader import render_to_string
 from rest_framework import permissions, viewsets
 
@@ -234,7 +235,7 @@ def send_invoice_whatsapp(request, pk):
             messages.success(request, _(f'WhatsApp poslan na {phone}!'))
         else:
             messages.warning(request, _(f'WhatsApp: {result.get("error", "Greška")}. Kopirajte link: {portal_url}'))
-    except Exception as e:
+    except ImportError as e:
         messages.warning(request, _(f'WhatsApp nije dostupan. Portal link: {portal_url}'))
     return redirect('invoicing:index')
 
@@ -283,7 +284,7 @@ def storno(request, pk):
         messages.success(request, _('Storno račun {n} kreiran! Originalni račun je poništen.').format(n=result['storno_invoice'].number))
         try:
             BookingSignature.log(request, "storno", target_model="Invoice", target_id=str(original.pk), target_repr=f"Storno {result['storno_invoice'].number} za {original.number}")
-        except Exception:
+        except (ValueError, TypeError):
             pass
         return redirect('invoicing:index')
     else:
@@ -452,7 +453,7 @@ def invoice_wizard(request):
         locations = BusinessLocation.objects.filter(is_active=True)
         operators = FiscalOperator.objects.filter(is_active=True)
         config = FiscalConfig.get()
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         locations = []
         operators = []
@@ -484,7 +485,7 @@ def invoice_wizard(request):
             prefill_receipt = POSReceipt.objects.select_related('session__terminal__company').get(
                 pk=int(from_receipt_id), session__terminal__company=_co
             )
-        except Exception:
+        except (ValueError, TypeError):
             prefill_receipt = None
 
     ctx = {
@@ -523,7 +524,7 @@ def invoice_create(request):
         locations = BusinessLocation.objects.filter(is_active=True)
         operators = FiscalOperator.objects.filter(is_active=True)
         config = FiscalConfig.get()
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         locations = []
         operators = []
@@ -564,7 +565,7 @@ def invoice_edit(request, pk):
         locations = BusinessLocation.objects.filter(is_active=True)
         operators = FiscalOperator.objects.filter(is_active=True)
         config = FiscalConfig.get()
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         locations = []
         operators = []
@@ -596,7 +597,7 @@ def invoice_edit(request, pk):
         try:
             from .fiscal_models import InvoiceProfile as _IP
             profile = _IP.get_default()
-        except Exception:
+        except ImportError:
             profile = None
 
     ctx = {
@@ -674,13 +675,13 @@ def invoice_save(request):
             messages.success(request, f'✅ {dtype_name} {invoice.number} uspješno kreiran!')
             try:
                 BookingSignature.log(request, "book", target_model="Invoice", target_id=str(invoice.pk), target_repr=f"Kreiran {dtype_name} {invoice.number}")
-            except Exception:
+            except (ValueError, TypeError):
                 pass
         else:
             messages.success(request, f'✅ {dtype_name} {invoice.number} uspješno ažuriran!')
             try:
                 BookingSignature.log(request, "update", target_model="Invoice", target_id=str(invoice.pk), target_repr=f"Ažuriran {dtype_name} {invoice.number}")
-            except Exception:
+            except (ValueError, TypeError):
                 pass
             # ── FIX: InvoiceEvent za svaku izmjenu (GoBD §147, ZOR čl.9) ──
             try:
@@ -696,9 +697,9 @@ def invoice_save(request):
                     updated_by=request.user,
                     client_ip=_ip or None,
                 )
-            except Exception as _ev_err:
+            except (IntegrityError, DatabaseError) as _ev_err:
                 logger.warning(f'InvoiceEvent edited failed: {_ev_err}')
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         messages.error(request, _('Spremanje dokumenta nije uspjelo. Provjerite sva obavezna polja i pokušajte ponovo.'))
         logger.error("Invoice save error", exc_info=True)
         inv_id = request.POST.get('invoice_id')
@@ -755,7 +756,7 @@ def api_partners(request):
             name__icontains=q
         ).values('id', 'name', 'oib', 'email', 'address', 'city')[:10]
         return JsonResponse(list(partners), safe=False)
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         return JsonResponse([], safe=False)
 
@@ -785,7 +786,7 @@ def api_articles(request):
                 "quantity": float(item.quantity),
             })
         return JsonResponse(items, safe=False)
-    except Exception:
+    except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
         return JsonResponse([], safe=False)
 
@@ -799,7 +800,7 @@ def api_tax_rates(request):
         rates = TaxRate.objects.filter(country=country, is_active=True).order_by("-rate")
         data = [{"rate": float(r.rate), "name": r.name, "is_default": r.is_default} for r in rates]
         return JsonResponse(data, safe=False)
-    except Exception:
+    except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
         # Fallback defaults
         if country == "DE":
@@ -903,7 +904,7 @@ def invoice_add_hours(request, pk):
     import json as _json
     try:
         body = _json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         body = request.POST.dict()
 
@@ -1006,7 +1007,7 @@ def _notify_quote_action(invoice, action: str):
                 admin_phones.append(up.phone)
             if up.user.email and up.user.email not in admin_emails:
                 admin_emails.append(up.user.email)
-    except Exception as e:
+    except DatabaseError as e:
         log.warning('notify: cannot fetch admin profiles: %s', e)
 
     portal_url = f'https://limit-connect.com/hr/invoicing/{invoice.pk}/edit/'
@@ -1027,7 +1028,7 @@ def _notify_quote_action(invoice, action: str):
                 normalized = normalize_phone(phone)
                 send_text(normalized, wa_msg)
                 log.info('notify WA sent to %s for %s (%s)', normalized, invoice.number, action)
-    except Exception as e:
+    except ImportError as e:
         log.error('notify WhatsApp failed: %s', e)
 
     # ── Email ───────────────────────────────────────────────────
@@ -1162,7 +1163,7 @@ def api_import(request, module):
             for e in entries:
                 try:
                     rate = float(e.user.employeeprofile.hourly_rate)
-                except Exception:
+                except (ValueError, TypeError):
                     logger.warning("Suppressed error", exc_info=True)
                     rate = float(e.project.hourly_rate) if e.project else 25.0
                 data.append({
@@ -1334,7 +1335,7 @@ def api_field_create(request):
             try:
                 from partners.models import Partner
                 doc_data['partner'] = Partner.objects.get(pk=partner_id)
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
 
         # Work description
@@ -1381,7 +1382,7 @@ def api_field_create(request):
             try:
                 from core.email_tasks import send_email_with_attachment_task
                 send_email_with_attachment_task.delay(result.invoice.pk)
-            except Exception:
+            except ImportError:
                 pass
 
         return JsonResponse({
@@ -1393,7 +1394,7 @@ def api_field_create(request):
             'jir': result.fiscal.jir if result.fiscal else None,
         })
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.exception("api_field_create error")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -1593,7 +1594,7 @@ def email_tracking_pixel(request, token):
             ),
             email_open_count=models.F('email_open_count') + 1,
         )
-    except Exception:
+    except (ValueError, TypeError):
         pass
     return resp
 
@@ -1697,7 +1698,7 @@ def fiscal_batch_create(request):
             else:
                 errors += 1
                 results[str(inv.pk)] = {'ok': False, 'error': res.get('error', 'Greska')}
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             errors += 1
             results[str(inv.pk)] = {'ok': False, 'error': str(e)}
     batch.success_count = success
@@ -2306,7 +2307,7 @@ def ira_ura_dashboard(request):
         )
         pos_total = pos_qs.aggregate(s=Sum('total'))['s'] or 0
         pos_count = pos_qs.count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # PDV bilanca

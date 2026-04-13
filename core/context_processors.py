@@ -127,7 +127,7 @@ def module_context(request):
             'spec_module_is_active': module_active_map,
         }
 
-    except Exception:
+    except ImportError:
         return {}
 
 

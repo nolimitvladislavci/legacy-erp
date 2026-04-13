@@ -61,7 +61,7 @@ def django_orm(code: str) -> str:
         loc = {}
         exec(code, {'__builtins__': __builtins__}, loc)
         return str(loc.get('output', 'OK'))[:30000]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f'Error: {e}'
 
 
@@ -74,7 +74,7 @@ def read_file(path: str) -> str:
     try:
         content = open(full).read()
         return f'[{content.count(chr(10))} linija]\n{content[:30000]}'
-    except Exception as e:
+    except (FileNotFoundError, IOError) as e:
         return f'Error: {e}'
 
 
@@ -88,7 +88,7 @@ def write_file(path: str, content: str) -> str:
         os.makedirs(os.path.dirname(full), exist_ok=True)
         open(full, 'w').write(content)
         return f'OK: {path} ({len(content)} chars)'
-    except Exception as e:
+    except (FileNotFoundError, IOError) as e:
         return f'Error: {e}'
 
 
@@ -106,7 +106,7 @@ def list_files(path: str = '.', pattern: str = '') -> str:
             if len(result) > 300:
                 break
         return '\n'.join(sorted(result))
-    except Exception as e:
+    except OSError as e:
         return f'Error: {e}'
 
 

@@ -2,6 +2,8 @@
 Patch: Operativna aktivacija — auto-link, admin, check-in, allocation
 """
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect'
 
 
@@ -132,7 +134,7 @@ new_publish_success = """            messages.success(request, f'"{product.name}
                             f'Auto-link: {linked} artikl(a) povezano s jatom "{flock.naziv}" '
                             f'za karencija enforcement na POS-u.'
                         )
-                except Exception:
+                except (ValueError, TypeError):
                     pass"""
 
 content = content.replace(old_publish_success, new_publish_success)
@@ -196,7 +198,7 @@ def booking_check_in(request, pk):
                 allocated.append(f'{incl.description} ({qty_needed} {incl.unit})')
             except ValueError as e:
                 messages.warning(request, f'Zaliha upozorenje za {incl.description}: {e}')
-            except Exception as e:
+            except ImportError as e:
                 import logging
                 logging.getLogger('experiences').error('Check-in allocation error: %s', e)
 
@@ -313,7 +315,7 @@ new_health_success = """        messages.success(request, f'Zdravstveni zapis do
                         f'povezanih artikala u inventaru. Povežite artikle s jatom '
                         f'u Admin → Inventar → Artikl → Izvorno jato.'
                     )
-            except Exception:
+            except DatabaseError:
                 pass
 
         return redirect('udruge:flock_detail', pk=flock.pk)

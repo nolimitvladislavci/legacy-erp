@@ -5,6 +5,8 @@ Pokreni: cd /var/www/fina-connect && source venv/bin/activate && python test_pos
 from playwright.sync_api import sync_playwright
 import time
 import json
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # --- KONFIGURACIJA ---
 BASE_URL = "https://limit-connect.com"
@@ -154,7 +156,7 @@ def run_chaos_test():
         try:
             queue = json.loads(queue_raw)
             queue_count = len(queue)
-        except:
+        except (json.JSONDecodeError, ValueError):
             queue_count = 0
         print(f"    c) Offline queue: {queue_count} prodaja(e)")
         if queue_count > 0:
@@ -189,7 +191,7 @@ def run_chaos_test():
         queue_after = page.evaluate("localStorage.getItem('pos_offline_sales') || '[]'")
         try:
             queue_after_count = len(json.loads(queue_after))
-        except:
+        except (json.JSONDecodeError, ValueError):
             queue_after_count = -1
         print(f"     Queue nakon synca: {queue_after_count} (bilo {queue_count})")
 

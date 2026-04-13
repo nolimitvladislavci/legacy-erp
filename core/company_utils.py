@@ -1,3 +1,4 @@
+from django.db import DatabaseError, IntegrityError
 from core.tenant import get_current_company
 from django.core.exceptions import ObjectDoesNotExist
 import logging
@@ -41,7 +42,7 @@ def get_user_company(request=None):
     if request:
         try:
             return request.user.profile.company
-        except Exception:
+        except AttributeError:
             logger.exception("Profile access failed")
     return None
 
@@ -59,5 +60,5 @@ def get_user_company_from_user(user):
         return None
     try:
         return user.profile.company
-    except Exception:
+    except AttributeError:
         return None

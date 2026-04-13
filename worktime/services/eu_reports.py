@@ -48,7 +48,7 @@ def generate_volunteer_timesheet(company, user, month, year, project_code='', sk
         try:
             from worktime.services.eu_audit_guard import EUAuditGuard
             EUAuditGuard.pre_export_audit(user, year, month, entries_list)
-        except Exception as e:
+        except ImportError as e:
             # Logira ali ne blokira — caller odlučuje da li je fatal
             import logging
             logging.getLogger('eu_audit').warning('EU audit warning: %s', e)

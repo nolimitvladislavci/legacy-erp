@@ -1,7 +1,8 @@
 from django.utils import timezone
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from decimal import Decimal
 from datetime import date, timedelta
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

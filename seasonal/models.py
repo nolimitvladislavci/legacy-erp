@@ -12,9 +12,10 @@ Integracija:
   - core.managers.CompanyManager → multi-tenant izolacija
 """
 from decimal import Decimal
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

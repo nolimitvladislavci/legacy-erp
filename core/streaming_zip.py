@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 """
 LIMIT CONNECT — Globalni Streaming ZIP Servis
 

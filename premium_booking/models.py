@@ -1,7 +1,8 @@
 import uuid
 
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

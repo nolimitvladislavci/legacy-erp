@@ -5,6 +5,8 @@ Usage: locust -f locustfile.py --headless -u 150 -r 10 -t 5m --host http://127.0
 import random
 import re
 from locust import HttpUser, task, between
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class DashboardUser(HttpUser):

@@ -3,6 +3,8 @@ memio_pet/urls.py -- URL routing za memio.pet public views
 """
 from django.urls import path
 from memio_pet import views
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 app_name = "memio_pet"
 

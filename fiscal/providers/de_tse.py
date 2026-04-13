@@ -8,6 +8,8 @@ import json
 import hashlib
 import logging
 from datetime import datetime
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from ..base import BaseFiscalProvider, FiscalResult
 

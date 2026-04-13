@@ -143,7 +143,7 @@ def _send_deadline_notification(deadline, urgency_level):
             if phone:
                 send_whatsapp_message.delay(phone, message)
                 logger.info('Tax deadline WhatsApp sent to %s', company.name)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Failed to send tax deadline WhatsApp for %s: %s', company.name, e)
 
 

@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 path = '/var/www/fina-connect/core/settings.py'
 with open(path, 'r') as f:
     lines = f.readlines()

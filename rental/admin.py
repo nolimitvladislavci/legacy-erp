@@ -1,5 +1,7 @@
 from rental.models import LandlordProfile, AccommodationUnit, Property, Booking, SeasonalPrice, HousekeepingLog, Guest, GuestDocument, RentalInvoice, TrafficRecord
 from django.contrib import admin
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Property, Booking, SeasonalPrice, HousekeepingLog
 
 @admin.register(Property)

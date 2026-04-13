@@ -105,7 +105,7 @@ def send_invoice_email(invoice):
         try:
             from invoicing.services.pdf_service import generate_invoice_pdf
             pdf_bytes, _ = generate_invoice_pdf(invoice)
-        except Exception as pdf_err:
+        except ImportError as pdf_err:
             logger.warning('PDF generation failed for %s: %s', invoice.number, pdf_err)
 
         # Build email

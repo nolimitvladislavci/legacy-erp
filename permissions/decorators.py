@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .engine import get_engine
 
@@ -122,7 +124,7 @@ def require_role(*role_types):
                 try:
                     if request.user.profile.role == 'tenant_admin':
                         return view_func(request, *args, **kwargs)
-                except Exception:
+                except AttributeError:
                     pass
 
             # Check UserRole via RBAC
@@ -138,7 +140,7 @@ def require_role(*role_types):
                     profile_role = request.user.profile.role
                     if profile_role in role_types:
                         return view_func(request, *args, **kwargs)
-                except Exception:
+                except AttributeError:
                     pass
                 messages.error(request, _('Nemate odgovarajucu ulogu'))
                 return HttpResponseForbidden('Insufficient role')

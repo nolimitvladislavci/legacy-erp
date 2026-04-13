@@ -15,7 +15,7 @@ def tax_wizard_widget(context, context_type='general', amount=None):
         from accounts.models import UserProfile
         up = UserProfile.objects.select_related('company').get(user=request.user)
         company = up.company
-    except Exception:
+    except DatabaseError:
         return {'show': False}
 
     today = timezone.now().date()

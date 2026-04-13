@@ -5,6 +5,8 @@ Sadrzi FINA-kompatibilnu analitiku za automatsko generiranje PR-RAS-NPF obrasca.
 Svaki konto ima komentar s pripadajucim AOP brojem iz PR-RAS-NPF obrasca.
 """
 from konto.models import KontoAccount
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 NONPROFIT_CHART = [
     # Klasa 0 — Nefinancijska imovina

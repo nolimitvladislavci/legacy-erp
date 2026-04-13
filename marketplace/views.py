@@ -13,6 +13,7 @@ from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
@@ -362,7 +363,7 @@ def checkout(request):
                 if payment.external_url:
                     request.session['marketplace_cart'] = {}
                     return redirect(payment.external_url)
-            except Exception as e:
+            except ImportError as e:
                 logger.warning(f'Payment creation failed: {e}')
 
         request.session['marketplace_cart'] = {}
@@ -964,7 +965,7 @@ def traceability_view(request, pk):
             if egg.flock.has_active_karenca:
                 karenca_active = True
                 karenca_end = egg.flock.karenca_end_date
-        except Exception:
+        except DatabaseError:
             pass
 
     return render(request, 'marketplace/traceability.html', {

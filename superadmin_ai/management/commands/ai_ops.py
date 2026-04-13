@@ -92,7 +92,7 @@ class Command(BaseCommand):
             status = 'OK' if val == 'ok' else f'FAIL (got {val})'
             style = self.style.SUCCESS if val == 'ok' else self.style.ERROR
             self.stdout.write(f'  Redis/Cache: {style(status)}')
-        except Exception as e:
+        except ImportError as e:
             self.stdout.write(f'  Redis/Cache: {self.style.ERROR(str(e))}')
 
         # Celery
@@ -122,7 +122,7 @@ class Command(BaseCommand):
                     self.stdout.write(f'    {m.strip()}')
             else:
                 self.stdout.write(f'  Migracije:   {self.style.SUCCESS("Sve OK")}')
-        except Exception as e:
+        except ImportError as e:
             self.stdout.write(f'  Migracije:   {self.style.ERROR(str(e))}')
 
         # Disk

@@ -11,6 +11,8 @@ django.setup()
 
 from django.conf import settings
 from django.apps import apps
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 print("="*70)
 print(" FINA-CONNECT CHAOS MONKEY - DIAGNOSTIČKI TEST POUZDANOSTI (FAZA 1)")
@@ -41,7 +43,7 @@ for app_label, model_name in target_models:
         fields = [f.name for f in model._meta.get_fields() if not f.is_relation or f.many_to_one]
         print(f" ✅ Model lociran: {app_label}.{model_name}")
         print(f"    Polja za injekciju: {', '.join(fields)}")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         print(f" ❌ Greška pri učitavanju modela {app_label}.{model_name}: {e}")
 
 # 3. TEST: Logika baze i IMAP Taska
@@ -57,7 +59,7 @@ try:
             print(" ✅ Pronađen transaction.atomic unutar IMAP taska.")
     else:
         print(" ⚠️ Funkcija fetch_invoices_from_email nije pronađena u smart_import.tasks.")
-except Exception as e:
+except (IntegrityError, DatabaseError) as e:
     print(f" ⚠️ Nije moguće analizirati kod IMAP taska: {e}")
 
 print("="*70)

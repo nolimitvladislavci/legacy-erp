@@ -73,7 +73,7 @@ class PermissionEngine:
             if role in ('company_admin', 'tenant_admin'):
                 if company is None or self._user_in_company(user, company):
                     return AccessDecision(True, f'Profile: {role}', 'PROFILE_ROLE', **kw)
-        except Exception:
+        except AttributeError:
             pass
 
         # 5. CompanyMembership

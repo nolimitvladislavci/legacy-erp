@@ -259,7 +259,7 @@ def generate_joppd_xml(payroll_run):
         try:
             profile = user.profile
             user_oib = getattr(profile, 'oib', '') or ''
-        except Exception:
+        except (AttributeError, TypeError):
             pass
 
         SubElement(red, 'RedniBroj').text = str(i)

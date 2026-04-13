@@ -1,4 +1,5 @@
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 from .models import FiscalConfiguration, FiscalLog, FiscalProvider
 from .providers.hr_fina import HRFinaProvider
 from .providers.de_tse import DETseProvider
@@ -78,7 +79,7 @@ def fiscalize_pos_receipt(receipt):
     except ImportError:
         logger.error("fiskalizacija.fisk not available")
         return None
-    except Exception as e:
+    except ImportError as e:
         # Log the failure
         _log_pos_fiscal(receipt, success=False, error=str(e))
         raise
@@ -98,7 +99,7 @@ def fiscalize_pos_receipt(receipt):
                 verification_type='CIS',
                 verification_result={'jir': jir, 'zki': getattr(receipt, 'zki', '')},
             )
-        except Exception:
+        except ImportError:
             pass  # Audit ne smije srusiti fiskalizaciju
 
     return jir
@@ -141,7 +142,7 @@ def fiscalize_invoice(invoice, cert_path=None, cert_password=None, production=Fa
         from invoicing.fiscalization import send_to_cis
         result = send_to_cis(invoice, cert_path=cert_path,
                              cert_password=cert_password, production=production)
-    except Exception as e:
+    except ImportError as e:
         logger.error("Invoice fiscalization error: %s", e)
         result = {'success': False, 'error': str(e)}
 

@@ -2,6 +2,8 @@
 .ics (iCalendar) file generation for appointments.
 """
 from datetime import datetime
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def generate_ics(appointment):

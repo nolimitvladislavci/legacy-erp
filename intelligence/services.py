@@ -86,7 +86,7 @@ def run_intelligence_job(job):
                                 'otkrio_intelligence': True,
                             }
                         )
-                    except Exception:
+                    except DatabaseError:
                         pass
 
                 # Spremi rezultat

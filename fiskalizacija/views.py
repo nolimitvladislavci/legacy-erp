@@ -8,6 +8,8 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from companies.models import Company
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .fisk import ping_fina
 from .models import FiscalConfig

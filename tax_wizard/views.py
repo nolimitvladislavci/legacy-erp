@@ -20,6 +20,8 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from tax_wizard.models import (
@@ -160,7 +162,7 @@ def wizard_start(request, form_type):
             'Wizard started: %s PO-SD %d — prefill %.2f EUR from %s',
             company.name, year, breakdown.total, breakdown.sources,
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('Prefill failed for %s: %s', company.name, e)
         # Wizard radi i bez prefilla — korisnik unosi ručno
 

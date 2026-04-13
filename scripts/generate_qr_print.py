@@ -12,6 +12,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas as rc
 from reportlab.lib.units import cm
 from gastro_menu.models import TableQR, DigitalMenu
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 menu = DigitalMenu.objects.get(slug='korpas-doo-siroki-sor')
 tables = list(TableQR.objects.filter(menu=menu).order_by('table_zone', 'table_number'))

@@ -15,6 +15,8 @@ from boxgram.services.social_import import (
     detect_platform, fetch_oembed, create_social_import
 )
 import uuid
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 def main():
     print("=" * 70)

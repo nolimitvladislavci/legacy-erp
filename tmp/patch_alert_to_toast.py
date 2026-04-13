@@ -5,6 +5,8 @@ Preskoči vendor fajlove (rest_framework, venv).
 """
 import re
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 BASE = '/var/www/fina-connect'
 CHANGED = 0

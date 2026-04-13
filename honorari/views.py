@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
@@ -27,7 +27,7 @@ def _get_company(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     return company
 

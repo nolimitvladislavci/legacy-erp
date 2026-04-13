@@ -2,6 +2,8 @@ import logging
 logger = logging.getLogger(__name__)
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
@@ -20,11 +22,11 @@ def _get_admin_companies(request):
         try:
             if request.user.profile.role == "superadmin":
                 return Company.objects.all()
-        except Exception:
+        except DatabaseError:
             return Company.objects.all()
     try:
         return request.user.profile.get_visible_companies()
-    except Exception:
+    except AttributeError:
         return Company.objects.none()
 
 
@@ -109,10 +111,10 @@ def dashboard_router(request):
                     monthly_fee=plan.price_monthly if plan else 0,
                     is_active=True,
                 )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
             logger.warning("Auto-recovery: kreirana company %s za usera %s", company.name, request.user.username)
-        except Exception as _e:
+        except (IntegrityError, DatabaseError) as _e:
             logger.error("Auto-recovery failed za user %s: %s", request.user.username, _e)
 
     # ── Branch routing: branch users → branch-specific dashboard ──────────
@@ -141,7 +143,7 @@ def dashboard_router(request):
             ws = Workspace.objects.filter(workers=request.user).first()
             if ws:
                 return redirect('workspace_home')
-        except Exception:
+        except DatabaseError:
             pass
         return redirect('worker_dashboard')
 
@@ -211,7 +213,7 @@ def login_view(request):
             login(request, user)
             try:
                 BookingSignature.log(request, 'login', target_model='User', target_id=str(user.pk), target_repr=f'Login: {user.username}')
-            except Exception:
+            except (ValueError, TypeError):
                 pass
             if not remember:
                 request.session.set_expiry(0)
@@ -220,7 +222,7 @@ def login_view(request):
             lang_choice = request.POST.get('language', '').strip()
             try:
                 profile_lang = user.profile.preferred_language
-            except Exception:
+            except AttributeError:
                 profile_lang = 'hr'
             lang = lang_choice or profile_lang or 'hr'
             # Save to profile if changed via form
@@ -228,7 +230,7 @@ def login_view(request):
                 try:
                     user.profile.preferred_language = lang_choice
                     user.profile.save(update_fields=['preferred_language'])
-                except Exception:
+                except AttributeError:
                     pass
 
             # Archive Readonly check — zakonski pristup (ZOR čl. 10, 11 godina)
@@ -252,7 +254,7 @@ def login_view(request):
                             path='/', samesite='Lax',
                         )
                         return resp
-            except Exception:
+            except DatabaseError:
                 pass
 
             host = request.get_host().split(':')[0]
@@ -305,7 +307,7 @@ def logout_view(request):
             BookingSignature.log(request, 'logout', target_model='User',
                 target_id=str(request.user.pk),
                 target_repr=f'Logout: {request.user.username}')
-        except Exception:
+        except (ValueError, TypeError):
             pass
     logout(request)
     host = request.get_host().split(':')[0]
@@ -334,7 +336,7 @@ def superadmin_dashboard(request):
         from companies.models import Company
         total_companies = Company.objects.count()
         recent_companies = Company.objects.order_by('-id')[:5]
-    except Exception:
+    except DatabaseError:
         total_companies = 0
         recent_companies = []
 
@@ -345,7 +347,7 @@ def superadmin_dashboard(request):
         revenue_month = Invoice.objects.unscoped().filter(doctype='R', status='PAID', date_issued__date__gte=month_start).aggregate(s=Sum('total'))['s'] or 0
         unpaid_total  = Invoice.objects.unscoped().filter(doctype='R', status__in=('UNPAID','OVERDUE')).aggregate(s=Sum('total'))['s'] or 0
         recent_invoices = Invoice.objects.unscoped().order_by('-date_issued')[:8]
-    except Exception:
+    except DatabaseError:
         total_invoices = revenue_total = revenue_month = unpaid_total = 0
         recent_invoices = []
 
@@ -353,7 +355,7 @@ def superadmin_dashboard(request):
         from worktime.models import TimeEntry
         total_entries = TimeEntry.objects.count()
         recent_entries = TimeEntry.objects.select_related('user').order_by('-date')[:10]
-    except Exception:
+    except DatabaseError:
         total_entries = 0
         recent_entries = []
 
@@ -361,7 +363,7 @@ def superadmin_dashboard(request):
         from projects.models import Project
         total_projects = Project.objects.count()
         active_projects = Project.objects.exclude(status__in=('completed','cancelled')).count()
-    except Exception:
+    except DatabaseError:
         total_projects = 0
         active_projects = 0
 
@@ -369,13 +371,13 @@ def superadmin_dashboard(request):
         from pos.models import POSSession
         pos_today = POSSession.objects.filter(opened_at__date=today).count()
         pos_open  = POSSession.objects.filter(status='open').count()
-    except Exception:
+    except DatabaseError:
         pos_today = pos_open = 0
 
     try:
         from appointments.models import Appointment
         appts_today = Appointment.objects.filter(start_time__date=today).count()
-    except Exception:
+    except DatabaseError:
         appts_today = 0
 
     context = {
@@ -412,11 +414,11 @@ def superadmin_dashboard(request):
         try:
             from registration.models import PromoCode
             context['promo_codes'] = list(PromoCode.objects.all().order_by('-created_at')[:50])
-        except Exception:
+        except DatabaseError:
             context['promo_codes'] = []
         # Platform owner
         context['platform_owner'] = Company.objects.filter(is_platform_owner=True).first()
-    except Exception as e:
+    except DatabaseError as e:
         context['pending_registrations'] = 0
         context['recent_registrations'] = []
         context['company_subs'] = []
@@ -425,7 +427,7 @@ def superadmin_dashboard(request):
     try:
         from burza.models import ProjectLead
         context['burza_new'] = ProjectLead.objects.filter(status='NOVI_UPIT').count()
-    except Exception:
+    except DatabaseError:
         context['burza_new'] = 0
     try:
         from django.db.models import Sum as _Sum
@@ -434,7 +436,7 @@ def superadmin_dashboard(request):
         context['ai_total_calls']   = AIUsageLog.objects.count()
         context['ai_total_cost']    = AIUsageLog.objects.aggregate(s=_Sum('cost_estimate'))['s'] or 0
         context['ai_conversations'] = Conversation.objects.filter(is_active=True).count()
-    except Exception:
+    except DatabaseError:
         context['ai_total_calls'] = context['ai_total_cost'] = context['ai_conversations'] = 0
 
     # Financijska odstupanja (parcijalne uplate)
@@ -444,7 +446,7 @@ def superadmin_dashboard(request):
         _disc = get_partial_payment_discrepancies(_co) if _co else []
         context['discrepancy_count'] = len(_disc)
         context['discrepancy_gap_total'] = sum(d['gap'] for d in _disc)
-    except Exception:
+    except ImportError:
         context['discrepancy_count'] = 0
         context['discrepancy_gap_total'] = 0
     try:
@@ -457,7 +459,7 @@ def superadmin_dashboard(request):
             .annotate(n=_Count('id'))
             .order_by('-n')[:5]
         )
-    except Exception:
+    except DatabaseError:
         context['ai_pending_count'] = 0
         context['ai_pending_by_module'] = []
 
@@ -521,7 +523,7 @@ def umbrella_dashboard(request):
             ).values('company').annotate(s=Sum('total'))
             .values_list('company', 's')
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     # POS revenue per company — 1 query
@@ -536,7 +538,7 @@ def umbrella_dashboard(request):
             .annotate(s=Sum('total'))
             .values_list('session__terminal__company', 's')
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     # Synesis configs — 1 query
@@ -548,7 +550,7 @@ def umbrella_dashboard(request):
                 'active': cfg.is_active if hasattr(cfg, 'is_active') else True,
                 'last_sync': getattr(cfg, 'last_sync', None) or getattr(cfg, 'updated_at', None),
             }
-    except Exception:
+    except DatabaseError:
         pass
 
     # Subscriptions — 1 query
@@ -559,7 +561,7 @@ def umbrella_dashboard(request):
             company__in=child_ids, is_active=True
         ).order_by('company', '-valid_from').distinct('company'):
             sub_map[sub.company_id] = sub.plan.upper()
-    except Exception:
+    except DatabaseError:
         pass
 
     # Build enriched list — 0 extra queries
@@ -643,7 +645,7 @@ def umbrella_dashboard(request):
                         plan='free',
                         is_active=True,
                     )
-                except Exception:
+                except (IntegrityError, DatabaseError):
                     pass
 
                 messages.success(request, _('Tvrtka {} kreirana i dodana pod umbrella.').format(name))
@@ -698,7 +700,7 @@ def umbrella_dashboard(request):
         available_partners = Partner.objects.filter(
             company=company
         ).exclude(oib='').exclude(oib__in=existing_oibs).order_by('name')
-    except Exception:
+    except DatabaseError:
         available_partners = []
 
     return render(request, 'dashboards/umbrella.html', {
@@ -743,7 +745,7 @@ def umbrella_switch_company(request, company_id):
               ref=str(child.pk),
               detail='Umbrella switch: %s -> %s' % (user_company.name, child.name),
               company=child)
-    except Exception:
+    except ImportError:
         pass
     return redirect('dashboard')
 
@@ -793,7 +795,7 @@ def superadmin_edit_user(request, user_id):
             try:
                 from accounts.password_notify import notify_password_change
                 notify_password_change(target, new_pw, changed_by=request.user)
-            except Exception:
+            except ImportError:
                 pass
 
         # Profile fields
@@ -916,7 +918,7 @@ def company_dashboard(request):
     company = None
     try:
         company = request.user.profile.company
-    except Exception:
+    except AttributeError:
         logger.warning("Suppressed error", exc_info=True)
 
     # Korisnik bez firme — onboarding
@@ -964,7 +966,7 @@ def company_dashboard(request):
         pending_offers = inv_qs.filter(
             doctype='PO', status__in=('DRAFT', 'SENT')
         ).count()
-    except Exception:
+    except DatabaseError:
         total_invoiced = unpaid = paid_month = pending_offers = 0
         recent_invoices = []
 
@@ -975,7 +977,7 @@ def company_dashboard(request):
         hours_week  = te_qs.filter(date__gte=week_start).aggregate(s=Sum('duration'))['s'] or 0
         hours_month = te_qs.filter(date__gte=month_start).aggregate(s=Sum('duration'))['s'] or 0
         recent_entries = te_qs.select_related('project').order_by('-date')[:5]
-    except Exception:
+    except DatabaseError:
         hours_week = hours_month = 0
         recent_entries = []
 
@@ -987,7 +989,7 @@ def company_dashboard(request):
             proj_qs = proj_qs.filter(company=company)
         projects = proj_qs.filter(status__in=('active', 'in_progress', 'open')).order_by('-id')[:5]
         total_projects = proj_qs.exclude(status__in=('completed', 'cancelled')).count()
-    except Exception:
+    except DatabaseError:
         projects = []
         total_projects = 0
 
@@ -998,7 +1000,7 @@ def company_dashboard(request):
         if company:
             part_qs = part_qs.filter(company=company)
         total_partners = part_qs.count()
-    except Exception:
+    except DatabaseError:
         total_partners = 0
 
     # ── Finance ───────────────────────────────────────────────────────────────
@@ -1010,7 +1012,7 @@ def company_dashboard(request):
         income_month  = tx_qs.filter(direction='income',  date__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
         expense_month = tx_qs.filter(direction='expense', date__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
         cashflow_month = income_month - expense_month
-    except Exception:
+    except DatabaseError:
         income_month = expense_month = cashflow_month = 0
 
 
@@ -1039,7 +1041,7 @@ def company_dashboard(request):
             revenue_labels.append(_label)
             revenue_data.append(float(_rev))
             offers_data.append(float(_off))
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # ── Overdue / dospjeli računi ─────────────────────────────────────────────
@@ -1055,7 +1057,7 @@ def company_dashboard(request):
         ).order_by("date_due")[:10]
         overdue_invoices = list(_ov_qs)
         overdue_total = sum(float(i.total) for i in overdue_invoices)
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     context = {
@@ -1088,7 +1090,7 @@ def company_dashboard(request):
             appt_qs = appt_qs.filter(company=company)
         today_appointments = appt_qs.order_by('start_time')[:8]
         total_appointments_month = Appointment.objects.filter(start_time__date__gte=month_start).count()
-    except Exception:
+    except DatabaseError:
         today_appointments = []
         total_appointments_month = 0
 
@@ -1097,7 +1099,7 @@ def company_dashboard(request):
         pos_qs = POSReceipt.objects.unscoped()
         pos_revenue_today = pos_qs.filter(created_at__date=today).aggregate(s=Sum('total_amount'))['s'] or 0
         pos_count_today = pos_qs.filter(created_at__date=today).count()
-    except Exception:
+    except DatabaseError:
         pos_revenue_today = pos_count_today = 0
 
     # ── Worker clock-in status ───────────────────────────────────────────────
@@ -1139,7 +1141,7 @@ def company_dashboard(request):
                 'timer_project': _proj,
                 'hours_week': _hrs_w,
             })
-    except Exception as _wse:
+    except DatabaseError as _wse:
         import logging; logging.getLogger(__name__).warning(f'worker_status: {_wse}')
 
     # ── Pending time entry approvals ─────────────────────────────────────────
@@ -1150,7 +1152,7 @@ def company_dashboard(request):
         _pqs = _TE3.objects.filter(status='PENDING').select_related('user', 'project')
         pending_approvals = _pqs.count()
         pending_entries = list(_pqs.order_by('-date')[:8])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
 
     # ── Active interventions ─────────────────────────────────────────────────
@@ -1163,7 +1165,7 @@ def company_dashboard(request):
         ).select_related('assigned_to').order_by('-created_at')
         active_interventions = _ivqs.count()
         active_iv_list = list(_ivqs[:8])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
 
     context.update({
@@ -1192,7 +1194,7 @@ def company_dashboard(request):
                 # Redirect new users to wizard if onboarding < 60% complete
                 if ob.percent < 60 and not request.GET.get('skip_onboarding'):
                     return redirect('onboarding_wizard')
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['onboarding'] = onboarding
 
@@ -1216,7 +1218,7 @@ def company_dashboard(request):
                 fiscal_stats['cert_valid'] = getattr(cert, 'is_valid', False)
                 fiscal_stats['cert_expiring_soon'] = getattr(cert, 'is_expiring_soon', False)
                 fiscal_stats['days_until_expiry'] = getattr(cert, 'days_until_expiry', None)
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['fiscal_stats'] = fiscal_stats
 
@@ -1231,7 +1233,7 @@ def company_dashboard(request):
             inventory_stats['low_stock_count'] = sum(1 for i in _items if i.is_low_stock)
             inventory_stats['stock_value']     = sum(i.stock_value   for i in _items)
             inventory_stats['selling_value']   = sum(i.selling_value for i in _items)
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['inventory_stats'] = inventory_stats
 
@@ -1248,7 +1250,7 @@ def company_dashboard(request):
             wo_stats['in_progress'] = _all.filter(status='in_progress').count()
             wo_stats['completed']   = _all.filter(status='completed').count()
             wo_stats['today']       = _all.filter(scheduled_date=today).count()
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['wo_stats'] = wo_stats
 
@@ -1259,7 +1261,7 @@ def company_dashboard(request):
         from synesis.models import SynesisConfig
         if company:
             synesis_cfg = SynesisConfig.objects.filter(company=company).first()
-    except Exception:
+    except DatabaseError:
         pass
     context['synesis_cfg'] = synesis_cfg
 
@@ -1276,7 +1278,7 @@ def company_dashboard(request):
         grosmarkt_stats['otkupni_count']    = OtkupniBlok.objects.count()
         grosmarkt_stats['recent_otpremnice'] = list(Otpremnica.objects.order_by('-created_at')[:5])
         grosmarkt_stats['recent_otkupni']   = list(OtkupniBlok.objects.order_by('-created_at')[:5])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['grosmarkt_stats'] = grosmarkt_stats
     # Bank reconciliation stats
@@ -1286,7 +1288,7 @@ def company_dashboard(request):
         _unm = BankTransaction.objects.filter(company=company, status='unmatched', transaction_type='inflow')
         context['unmatched_bank_count'] = _unm.count()
         context['unmatched_bank_amount'] = _unm.aggregate(t=Sum('amount'))['t'] or 0
-    except Exception:
+    except (IntegrityError, DatabaseError):
         context['unmatched_bank_count'] = 0
         context['unmatched_bank_amount'] = 0
 
@@ -1305,7 +1307,7 @@ def company_dashboard(request):
         grosmarkt_stats['otkupni_count']    = OtkupniBlok.objects.count()
         grosmarkt_stats['recent_otpremnice'] = list(Otpremnica.objects.order_by('-created_at')[:5])
         grosmarkt_stats['recent_otkupni']   = list(OtkupniBlok.objects.order_by('-created_at')[:5])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
     context['grosmarkt_stats'] = grosmarkt_stats
 
@@ -1314,7 +1316,7 @@ def company_dashboard(request):
         from limit_connect_ai.proactive_widget import get_dashboard_insights
         if company:
             context['ai_insights'] = get_dashboard_insights(company)
-    except Exception:
+    except ImportError:
         logger.warning("Suppressed error", exc_info=True)
 
     # ── Wizard Funnel — draftovi koje ova firma vodi kao accounting_firm ─────
@@ -1331,7 +1333,7 @@ def company_dashboard(request):
                                .values('id','firma_ime','current_step','completed',
                                        'updated_at','direktor_email','kapital_tip')[:8]),
         }
-    except Exception:
+    except DatabaseError:
         context['wizard_funnel'] = None
 
     # ── Welcome Card (first login detection) ────────────────────────────
@@ -1373,7 +1375,7 @@ def manager_dashboard(request):
         active_projects = Project.objects.filter(status__in=('active','in_progress','open')).order_by('-id')[:8]
         total_hours_week = TimeEntry.objects.filter(date__gte=week_start).aggregate(s=Sum('duration'))['s'] or 0
         total_hours_month = TimeEntry.objects.filter(date__gte=month_start).aggregate(s=Sum('duration'))['s'] or 0
-    except Exception:
+    except DatabaseError:
         team_entries = []; pending_approvals = 0; active_projects = []
         total_hours_week = total_hours_month = 0
 
@@ -1381,7 +1383,7 @@ def manager_dashboard(request):
         from appointments.models import Appointment
         team_appointments_today = Appointment.objects.filter(start_time__date=today).select_related('client','service').order_by('start_time')[:10]
         appts_pending = Appointment.objects.filter(status='scheduled').count()
-    except Exception:
+    except DatabaseError:
         team_appointments_today = []; appts_pending = 0
 
     team_size = User.objects.filter(is_active=True).count()
@@ -1455,7 +1457,7 @@ def worker_dashboard(request):
         ).select_related('project').order_by('-date', '-start_time')[:15]
 
         active_projects = WTProject.objects.filter(status='ACTIVE').order_by('name')
-    except Exception as _e:
+    except (ValueError, TypeError) as _e:
         import logging; logging.getLogger(__name__).warning(f'worker_dashboard worktime: {_e}')
         hours_today = hours_week = hours_month = 0
         earnings_month = pending_count = week_progress = 0
@@ -1474,7 +1476,7 @@ def worker_dashboard(request):
         ).exclude(status__in=['RIJESENO','ESKALIRANO','FAKTURIRANO']).order_by('-created_at')[:5]
         for iv in my_interventions:
             iv.status_color = STATUS_COLORS.get(iv.status, '#888')
-    except Exception:
+    except DatabaseError:
         my_interventions = []
 
     return render(request, 'dashboards/worker.html', {
@@ -1510,7 +1512,7 @@ def investor_dashboard(request):
     company = None
     try:
         company = request.user.profile.company
-    except Exception:
+    except AttributeError:
         logger.warning("Suppressed error", exc_info=True)
     today = timezone.now().date()
     year_start = today.replace(month=1, day=1)
@@ -1526,7 +1528,7 @@ def investor_dashboard(request):
         unpaid = inv_qs.filter(doctype='R', status__in=('UNPAID','OVERDUE')).aggregate(s=Sum('total'))['s'] or 0
         recent_invoices = inv_qs.filter(doctype='R').order_by('-date_issued')[:6]
         total_invoices = inv_qs.filter(doctype='R').count()
-    except Exception:
+    except DatabaseError:
         revenue_ytd = revenue_month = unpaid = total_invoices = 0
         recent_invoices = []
 
@@ -1540,7 +1542,7 @@ def investor_dashboard(request):
         income_month  = tx_qs.filter(direction='income',  date__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
         expense_month = tx_qs.filter(direction='expense', date__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
         profit_ytd   = income_ytd - expense_ytd
-    except Exception:
+    except DatabaseError:
         income_ytd = expense_ytd = income_month = expense_month = profit_ytd = 0
 
     try:
@@ -1551,7 +1553,7 @@ def investor_dashboard(request):
         projects = proj_qs.order_by('-id')[:8]
         active_count = proj_qs.exclude(status__in=('completed','cancelled')).count()
         completed_count = proj_qs.filter(status='completed').count()
-    except Exception:
+    except DatabaseError:
         projects = []; active_count = completed_count = 0
 
     return render(request, 'dashboards/investor.html', {
@@ -1578,7 +1580,7 @@ def partner_dashboard(request):
         from invoicing.models import Invoice
         my_invoices = Invoice.objects.unscoped().filter(client_email=request.user.email).order_by('-date_issued')[:10]
         unpaid_count = my_invoices.filter(status__in=('UNPAID','OVERDUE')).count()
-    except Exception:
+    except DatabaseError:
         my_invoices = []
         unpaid_count = 0
 
@@ -1591,14 +1593,14 @@ def partner_dashboard(request):
             my_appointments = Appointment.objects.filter(client=partner_obj).order_by('-start_time')[:6]
         else:
             my_appointments = []
-    except Exception:
+    except DatabaseError:
         my_appointments = []
 
     # 3. Documents
     try:
         from documents.models import Document
         my_docs = Document.objects.unscoped().filter(client_email=request.user.email).order_by('-created_at')[:5]
-    except Exception:
+    except DatabaseError:
         my_docs = []
 
     # 4. Live Tracking (Burza & Worktime) - MAX SIGURNOST OD CRASHA
@@ -1632,7 +1634,7 @@ def partner_dashboard(request):
             if used_percentage > 100:
                 used_percentage = 100
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         print(f"Partner Dashboard Tracking Error: {e}")
 
     return render(request, 'dashboards/partner.html', {
@@ -1665,7 +1667,7 @@ def health_check(request):
         cache.set("health_check", "1", 10)
         val = cache.get("health_check")
         status["services"]["cache"] = "ok" if val == "1" else "miss"
-    except Exception as e:
+    except ImportError as e:
         status["services"]["cache"] = f"error: {e}"
     # Gunicorn workers
     try:
@@ -1673,7 +1675,7 @@ def health_check(request):
         workers = [p for p in psutil.process_iter(["name", "cmdline"])
                    if "gunicorn" in " ".join(p.info.get("cmdline", []))]
         status["services"]["workers"] = len(workers)
-    except Exception:
+    except KeyError:
         status["services"]["workers"] = "unknown"
     return JsonResponse(status)
 
@@ -1732,7 +1734,7 @@ def start_impersonation(request, company_id):
     is_ta = False
     try:
         is_ta = request.user.profile.role == 'tenant_admin'
-    except Exception:
+    except AttributeError:
         pass
     if not is_su and not is_ta:
         from django.http import HttpResponseForbidden
@@ -1943,7 +1945,7 @@ def superadmin_company_branches(request, company_id):
                         active_modules=modules_raw,
                     )
                     _msg.success(request, f'Podružnica "{name}" kreirana.')
-                except Exception as e:
+                except (IntegrityError, DatabaseError) as e:
                     _msg.error(request, f'Greška: {e}')
 
         elif action == 'toggle':
@@ -2028,7 +2030,7 @@ def superadmin_create_promo(request):
                 is_active=True,
             )
             messages.success(request, _('Promo kod kreiran.'))
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('superadmin_dashboard')
@@ -2092,7 +2094,7 @@ def control_tower_view(request):
                 'plan': 'superadmin',
                 'total_companies': Company.objects.count(),
             }
-        except Exception:
+        except DatabaseError:
             company_data = {'name': 'PLATFORMA', 'plan': 'superadmin'}
 
     # ── Recent activity (last 10 admin actions) ──
@@ -2108,7 +2110,7 @@ def control_tower_view(request):
                 'model': e.content_type.model if e.content_type else '?',
                 'time': e.action_time,
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── System info ──
@@ -2127,7 +2129,7 @@ def control_tower_view(request):
         with connection.cursor() as cursor:
             cursor.execute("SELECT pg_size_pretty(pg_database_size(current_database()))")
             system_info['db_size'] = cursor.fetchone()[0]
-    except Exception:
+    except ImportError:
         system_info['db_size'] = 'N/A'
 
     # Uptime (Linux)
@@ -2137,7 +2139,7 @@ def control_tower_view(request):
             days = int(uptime_seconds // 86400)
             hours = int((uptime_seconds % 86400) // 3600)
             system_info['uptime'] = f'{days}d {hours}h'
-    except Exception:
+    except (ValueError, TypeError):
         system_info['uptime'] = 'N/A'
 
     # Disk usage
@@ -2148,7 +2150,7 @@ def control_tower_view(request):
         system_info['disk_used'] = f'{used // (1024**3)} GB'
         system_info['disk_free'] = f'{free // (1024**3)} GB'
         system_info['disk_pct'] = round(used / total * 100, 1)
-    except Exception:
+    except OSError:
         system_info['disk_pct'] = 0
 
     # ── AI Process Hints ──
@@ -2157,7 +2159,7 @@ def control_tower_view(request):
         try:
             from core.services.ai_hints import generate_hints
             ai_hints = generate_hints(company, user=user)
-        except Exception as e:
+        except ImportError as e:
             import logging
             logging.getLogger(__name__).warning(f'AI hints: {e}')
 
@@ -2179,9 +2181,9 @@ def control_tower_view(request):
                             'url': m['url'],
                             'count': Model.objects.filter(company=company).count(),
                         }
-                    except Exception:
+                    except DatabaseError:
                         pass
-        except Exception:
+        except DatabaseError:
             pass
 
     context = {
@@ -2234,14 +2236,14 @@ def control_tower_api(request):
             superusers=Count('id', filter=Q(is_superuser=True)),
         )
         data['users'] = user_agg
-    except Exception:
+    except DatabaseError:
         data['users'] = {'total': 0, 'active': 0, 'staff': 0, 'superusers': 0}
 
     # ── Companies ────────────────────────────────────────────────────────
     try:
         from companies.models import Company
         data['companies'] = {'total': Company.objects.count()}
-    except Exception:
+    except DatabaseError:
         data['companies'] = {'total': 0}
 
     # ── Invoices ─────────────────────────────────────────────────────────
@@ -2263,7 +2265,7 @@ def control_tower_api(request):
             'draft_count': inv_agg['draft_count'] or 0,
             'overdue_count': inv_agg['overdue_count'] or 0,
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['invoices'] = {'total': 0, 'paid_revenue': 0, 'month_revenue': 0,
                             'unpaid': 0, 'draft_count': 0, 'overdue_count': 0}
 
@@ -2275,7 +2277,7 @@ def control_tower_api(request):
             open_now=Count('id', filter=Q(status='open')),
         )
         data['pos'] = pos_agg
-    except Exception:
+    except DatabaseError:
         data['pos'] = {'today': 0, 'open_now': 0}
 
     # ── Appointments ─────────────────────────────────────────────────────
@@ -2286,7 +2288,7 @@ def control_tower_api(request):
             total=Count('id'),
         )
         data['appointments'] = appt_agg
-    except Exception:
+    except DatabaseError:
         data['appointments'] = {'today': 0, 'total': 0}
 
     # ── Delivery / Logistics ─────────────────────────────────────────────
@@ -2297,7 +2299,7 @@ def control_tower_api(request):
             total=Count('id'),
         )
         data['deliveries'] = del_agg
-    except Exception:
+    except DatabaseError:
         data['deliveries'] = {'in_transit': 0, 'total': 0}
 
     # ── HACCP Incidents (delivery.models.HACCPIncident) ──────────────────
@@ -2309,7 +2311,7 @@ def control_tower_api(request):
             critical=Count('id', filter=Q(is_resolved=False, severity='critical')),
         )
         data['haccp'] = haccp_agg
-    except Exception:
+    except DatabaseError:
         data['haccp'] = {'total': 0, 'unresolved': 0, 'critical': 0}
 
     # ── Inventory — Blind Count / Quarantine ─────────────────────────────
@@ -2329,7 +2331,7 @@ def control_tower_api(request):
             'counts_today': count_today,
             'theft_alerts_month': theft_alerts,
         }
-    except Exception:
+    except DatabaseError:
         data['inventory'] = {'quarantined_batches': 0, 'total_batches': 0,
                              'counts_today': 0, 'theft_alerts_month': 0}
 
@@ -2343,7 +2345,7 @@ def control_tower_api(request):
             compliance_issues=Count('id', filter=~Q(compliance_note='')),
         )
         data['worktime'] = wt_agg
-    except Exception:
+    except DatabaseError:
         data['worktime'] = {'total': 0, 'pending': 0, 'today': 0, 'compliance_issues': 0}
 
     # ── Webshop ──────────────────────────────────────────────────────────
@@ -2357,7 +2359,7 @@ def control_tower_api(request):
         )
         orders_pending = Order.objects.filter(status='pending').count()
         data['webshop'] = {**ws_agg, 'orders_pending': orders_pending}
-    except Exception:
+    except DatabaseError:
         data['webshop'] = {'total': 0, 'active': 0, 'food': 0, 'optics': 0, 'orders_pending': 0}
 
     # ── AI Assistant ─────────────────────────────────────────────────────
@@ -2373,7 +2375,7 @@ def control_tower_api(request):
             'total_cost': float(ai_agg['total_cost'] or 0),
             'active_conversations': ai_convos,
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['ai'] = {'total_calls': 0, 'total_cost': 0, 'active_conversations': 0}
 
     # ── Burza ────────────────────────────────────────────────────────────
@@ -2388,7 +2390,7 @@ def control_tower_api(request):
             'public':    ProjectLead.objects.filter(status='NA_BURZI').count(),
             'latest':    latest,
         }
-    except Exception:
+    except DatabaseError:
         data['burza'] = {'new_leads': 0}
 
     # ── Registration ─────────────────────────────────────────────────────
@@ -2397,7 +2399,7 @@ def control_tower_api(request):
         data['registrations'] = {
             'pending': CompanyRegistration.objects.filter(status='pending').count()
         }
-    except Exception:
+    except DatabaseError:
         data['registrations'] = {'pending': 0}
 
 
@@ -2412,7 +2414,7 @@ def control_tower_api(request):
         try:
             from companies.models import Company as _Comp
             _co = _Comp.objects.first()
-        except Exception:
+        except DatabaseError:
             pass
 
         disc = get_partial_payment_discrepancies(_co) if _co else []
@@ -2490,7 +2492,7 @@ def control_tower_api(request):
             ).count(),
             'unassigned': open_qs.filter(assigned_to__isnull=True).count(),
         }
-    except Exception as e:
+    except DatabaseError as e:
         data['helpdesk'] = {'open ': 0, 'urgent': 0, 'overdue': 0, 'resolved_today': 0, 'unassigned': 0}
 
     data['timestamp'] = now.isoformat()
@@ -2517,7 +2519,7 @@ def control_tower_api(request):
             'year_invoice_total': float(year_invoices),
             'recent': recent_5,
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['arhiva'] = {'total': 0, 'ai_pending': 0, 'year_invoice_total': 0, 'recent': []}
 
     return JsonResponse(data)
@@ -2644,7 +2646,7 @@ def tc_consent(request):
     company = None
     try:
         company = request.user.userprofile.company
-    except Exception:
+    except AttributeError:
         pass
 
     if not company:
@@ -2678,7 +2680,7 @@ def tc_consent(request):
                     'signed_at': tz.now().isoformat(),
                 },
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass  # Audit ne smije blokirati potpis
 
         from django.contrib import messages

@@ -39,7 +39,7 @@ def django_orm(code: str) -> str:
         loc = {}
         exec(code, {'__builtins__': __builtins__}, loc)
         return str(loc.get('output', 'OK'))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return f'Error: {e}'
 
 

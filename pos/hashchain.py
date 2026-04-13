@@ -20,8 +20,9 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone as tz
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('pos_hashchain')
 from core.managers import CompanyManager

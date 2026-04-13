@@ -77,13 +77,13 @@ def fetch_posrednik_inbox(self):
                                     verification_type='FINA',
                                     verification_result={'fina_uuid': str(inv_id), 'issuer_oib': issuer_oib},
                                 )
-                            except Exception:
+                            except ImportError:
                                 pass
                         else:
                             # Duplikat ili parse error — logiramo ali ne pada
                             skipped += 1
                             logger.debug('receive_eracun skip: %s', inbox_result.get('error', ''))
-                    except Exception as e:
+                    except ImportError as e:
                         errors += 1
                         logger.warning('receive_eracun error za %s: %s', inv_number, e)
                 elif xml_string is None:
@@ -227,7 +227,7 @@ def send_eracun_to_fina_async(self, eracun_id):
                     verification_type='FINA',
                     verification_result={'status': 'accepted', 'message': message},
                 )
-            except Exception:
+            except ImportError:
                 pass
             return {'status': 'accepted', 'message': message}
 

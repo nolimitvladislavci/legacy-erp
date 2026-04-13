@@ -19,7 +19,7 @@ def _acquire_lock(batch_id):
         from django.core.cache import cache
         lock_key = f"{LOCK_PREFIX}{batch_id}"
         return cache.add(lock_key, "1", LOCK_TTL)
-    except Exception:
+    except ImportError:
         return True
 
 
@@ -29,7 +29,7 @@ def _release_lock(batch_id):
         from django.core.cache import cache
         lock_key = f"{LOCK_PREFIX}{batch_id}"
         cache.delete(lock_key)
-    except Exception:
+    except ImportError:
         pass
 
 
@@ -552,7 +552,7 @@ def process_staging_batch(self, staging_batch_id):
                             ds = header_data.get('invoice_date', '')
                             if ds and len(ds) >= 8:
                                 inv_date = _dt.strptime(ds[:10], '%Y-%m-%d').date()
-                        except Exception:
+                        except ImportError:
                             pass
 
                         conf = float(header_data.get('confidence', 0))
@@ -703,7 +703,7 @@ def classify_inbox_item(self, item_id):
         item.ai_tip_confidence = 0.9 if tip != 'nepoznato' else 0.4
         item.status = 'ceka' if tip in ('ura', 'nepoznato') else 'arhivirano'
         item.save(update_fields=['tip', 'ai_tip_confidence', 'status'])
-    except Exception as exc:
+    except (IntegrityError, DatabaseError) as exc:
         logger.error('classify_inbox_item %s: %s', item_id, exc)
         item.status = 'ceka'
         item.tip = 'nepoznato'
@@ -749,5 +749,5 @@ def fenix_inbox_digest():
         try:
             from core.whatsapp import send_whatsapp
             send_whatsapp(marija, '\n'.join(lines))
-        except Exception as wa_e:
+        except ImportError as wa_e:
             logger.warning('fenix_inbox_digest WA: %s', wa_e)

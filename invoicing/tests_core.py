@@ -5,6 +5,8 @@ Faza 10B test suite: OIB validacija, VAT validacija, FiscalLog, FiscalBatch, PDV
 """
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class OIBValidationTests(TestCase):

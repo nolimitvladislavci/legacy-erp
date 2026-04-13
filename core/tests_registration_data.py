@@ -3,6 +3,7 @@ import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
@@ -18,7 +19,7 @@ class RegistrationStep1Test(TestCase):
         try:
             resp = self.client.get('/register/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_step1_post_starter(self):
@@ -77,7 +78,7 @@ class RegistrationStep2Test(TestCase):
         try:
             resp = self.client.get('/register/company/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_step2_get_without_step1(self):
@@ -151,7 +152,7 @@ class RegistrationStep3Test(TestCase):
         try:
             resp = self.client.get('/register/account/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_step3_get_without_prior_steps(self):
@@ -213,7 +214,7 @@ class RegistrationStep3Test(TestCase):
                 'password2': 'password123',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_step3_post_missing_first_name(self):
@@ -259,7 +260,7 @@ class RegistrationStep4Test(TestCase):
         try:
             resp = self.client.get('/register/confirm/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_step4_get_without_prior_steps(self):
@@ -296,26 +297,26 @@ class RegistrationAdminTest(TestCase):
         try:
             resp = self.client.get('/register/superadmin/registrations/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_upgrade_required(self):
         try:
             resp = self.client.get('/register/upgrade/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_check_promo(self):
         try:
             resp = self.client.get('/register/api/check-promo/?code=TEST', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_register_success(self):
         try:
             resp = self.client.get('/register/success/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

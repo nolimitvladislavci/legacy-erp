@@ -103,7 +103,7 @@ def verify_memio_api_key(request, company) -> bool:
         )
         # Provjeri da ključ odgovara UUID api_key
         return str(profile.api_key) == provided_key
-    except Exception:
+    except DatabaseError:
         return False
 
 

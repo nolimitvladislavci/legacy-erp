@@ -212,7 +212,7 @@ class TriKeyProfile(models.Model):
             if cert:
                 self.fina_cert_serial = str(cert.serial_number)[:50]
                 self.fina_cert_expires = cert.not_valid_after_utc.date()
-        except Exception:
+        except ImportError:
             pass
 
         self.save(update_fields=[

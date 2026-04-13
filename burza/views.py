@@ -11,6 +11,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import LeadActivity, ProjectLead
 
@@ -18,14 +19,14 @@ from .models import LeadActivity, ProjectLead
 def get_company(request):
     try:
         return request.user.profile.company
-    except Exception:
+    except AttributeError:
         return None
 
 
 def is_superadmin(request):
     try:
         return request.user.profile.role == 'superadmin'
-    except Exception:
+    except AttributeError:
         return False
 
 
@@ -123,7 +124,7 @@ def lead_preuzmi(request, pk):
         sub = company.subscriptions.filter(is_active=True).first()
         if sub and sub.plan not in ('business', 'enterprise'):
             return JsonResponse({'ok': False, 'error': 'Potreban je BUSINESS ili ENTERPRISE plan.'}, status=403)
-    except Exception:
+    except DatabaseError:
         pass
     try:
         with transaction.atomic():
@@ -426,7 +427,7 @@ def bathroom_pdf(request, pk):
         response = HttpResponse(buf.getvalue(), content_type="application/pdf")
         response["Content-Disposition"] = "inline; filename=\"Angebot_" + code + ".pdf\""
         return response
-    except Exception:
+    except ImportError:
         logger.exception("Bathroom PDF failed")
     return HttpResponse("PDF Fehler", status=500)
 

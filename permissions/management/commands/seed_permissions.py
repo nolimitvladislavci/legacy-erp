@@ -136,6 +136,6 @@ class Command(BaseCommand):
                 )
                 if created:
                     assigned += 1
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             self.stdout.write(self.style.WARNING(f'UserRole auto-assign skipped: {e}'))
         self.stdout.write(self.style.SUCCESS(f'UserRoles assigned: {assigned}'))

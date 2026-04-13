@@ -81,7 +81,7 @@ class AppointmentActionsTest(TestCase):
             s = self._make_service()
             resp = self.client.get(f'/appointments/usluge/{s.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_appointment_create_post(self):
@@ -98,7 +98,7 @@ class AppointmentActionsTest(TestCase):
             a = self._make_appointment()
             resp = self.client.get(f'/appointments/{a.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_appointment_delete(self):
@@ -153,7 +153,7 @@ class AppointmentActionsTest(TestCase):
             a = self._make_appointment()
             resp = self.client.get(f'/appointments/booking/ics/{a.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -190,7 +190,7 @@ class AppointmentDossierTest(TestCase):
             p = self._make_partner()
             resp = self.client.get(f'/appointments/kartoni/{p.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_create_get(self):
@@ -198,7 +198,7 @@ class AppointmentDossierTest(TestCase):
             p = self._make_partner()
             resp = self.client.get(f'/appointments/kartoni/{p.pk}/unos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_create_post(self):
@@ -218,7 +218,7 @@ class AppointmentDossierTest(TestCase):
             e = self._make_dossier_entry(p)
             resp = self.client.get(f'/appointments/kartoni/{p.pk}/unos/{e.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_dossier_entry_edit_post(self):
@@ -276,7 +276,7 @@ class PublicBookingTest(TestCase):
             s = self._make_service()
             resp = self.client.get(f'/appointments/booking/{s.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_booking_wizard(self):
@@ -284,7 +284,7 @@ class PublicBookingTest(TestCase):
             s = self._make_service()
             resp = self.client.get(f'/appointments/booking/{s.pk}/wizard/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_api_submit_booking_get(self):

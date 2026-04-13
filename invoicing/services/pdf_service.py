@@ -155,7 +155,7 @@ def generate_qr(invoice):
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         return base64.b64encode(buf.getvalue()).decode()
-    except Exception:
+    except ValueError:
         return ''
 
 
@@ -223,7 +223,7 @@ def _get_lc_brand_qr_b64():
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         return base64.b64encode(buf.getvalue()).decode()
-    except Exception:
+    except ValueError:
         return ''
 
 
@@ -268,7 +268,7 @@ def render_invoice_html(invoice, request=None):
     try:
         s = invoice.company.settings or {}
         contacts = s.get('invoice_contacts', [])
-    except Exception:
+    except AttributeError:
         pass
 
     extra_ctx = {

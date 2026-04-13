@@ -106,7 +106,7 @@ def komitent_dashboard(request):
             stats['partners'] = p.company.partners.count()
             stats['invoices'] = p.company.invoices.count()
             stats['entries'] = p.company.journal_entries.count()
-        except Exception:
+        except DatabaseError:
             stats = {'partners': 0, 'invoices': 0, 'entries': 0}
 
         # Subscription

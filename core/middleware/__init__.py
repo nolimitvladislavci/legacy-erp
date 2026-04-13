@@ -30,12 +30,12 @@ class CompanyMiddleware(MiddlewareMixin):
                 try:
                     request.user.profile.company = mem.company
                     request.user.profile.role = mem.role
-                except Exception:
+                except AttributeError:
                     pass
                 set_current_company(mem.company)
                 request.company = mem.company
                 return None
-            except Exception:
+            except AttributeError:
                 request.session.pop('active_membership_id', None)
 
         company = get_user_company(request)
@@ -107,7 +107,7 @@ class ForcePasswordChangeMiddleware(MiddlewareMixin):
             if getattr(profile, 'must_change_password', False):
                 from django.shortcuts import redirect
                 return redirect('/accounts/password/change/')
-        except Exception:
+        except ImportError:
             pass
         return None
 
@@ -146,7 +146,7 @@ class Force2FAMiddleware:
         # Provjeri samo kriticne uloge
         try:
             profile = request.user.profile
-        except Exception:
+        except AttributeError:
             return self.get_response(request)
 
         if profile.role not in self.ENFORCED_ROLES:
@@ -209,7 +209,7 @@ class ForceTCMiddleware:
         if not company:
             try:
                 company = request.user.profile.company
-            except Exception:
+            except AttributeError:
                 return self.get_response(request)
 
         if not company:
@@ -282,7 +282,7 @@ class UserLanguageMiddleware(MiddlewareMixin):
             return None
         try:
             lang = request.user.profile.preferred_language
-        except Exception:
+        except AttributeError:
             lang = None
 
         # Fallback: Company.ui_language ako user nema explicit preference
@@ -292,7 +292,7 @@ class UserLanguageMiddleware(MiddlewareMixin):
                 company = get_user_company(request)
                 if company:
                     lang = company.ui_language or 'hr'
-            except Exception:
+            except ImportError:
                 pass
 
         if not lang:
@@ -493,7 +493,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
         # Get user's preferred language
         try:
             lang = request.user.profile.preferred_language
-        except Exception:
+        except AttributeError:
             lang = None
 
         if not lang:
@@ -502,7 +502,7 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
                 company = get_user_company(request)
                 if company:
                     lang = company.ui_language
-            except Exception:
+            except ImportError:
                 pass
 
         if lang:
@@ -618,7 +618,7 @@ class GracefulErrorMiddleware:
                 category, request.method, request.path, user, ip,
                 str(exception)[:200]
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('Failed to dispatch error notification: %s', e)
 
     def _audit_log(self, request, exception, category):
@@ -694,6 +694,6 @@ class LicenseCheckMiddleware:
                     elif token.days_until_expiry() < 7:
                         request.license_warning = True
                         request.license_days = token.days_until_expiry()
-            except Exception:
+            except ImportError:
                 pass
         return self.get_response(request)

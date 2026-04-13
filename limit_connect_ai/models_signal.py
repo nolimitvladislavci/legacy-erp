@@ -5,8 +5,9 @@ Svaki signal = korisnik prijavljen problem, bug, zbunjenost ili prijedlog.
 Minimalni MVP: model + view + floating gumb. AI triage u v2.
 """
 import uuid
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class FenixSignal(models.Model):

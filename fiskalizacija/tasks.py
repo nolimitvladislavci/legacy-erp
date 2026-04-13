@@ -21,6 +21,6 @@ def check_supplier_risk_async(self, supplier_oib, company_id):
             supplier_oib, company_id, result.get('risk_level', 'UNKNOWN'),
         )
         return result
-    except Exception as exc:
+    except ImportError as exc:
         logger.warning('Supplier risk check failed: OIB=%s err=%s', supplier_oib, exc)
         raise self.retry(exc=exc)

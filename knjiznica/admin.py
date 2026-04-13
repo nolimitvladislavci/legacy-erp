@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     BookMeta, LibraryMember, BookLoan, BookReservation,
     ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,

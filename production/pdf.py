@@ -40,7 +40,7 @@ def generate_order_pdf(order, request=None):
         logger.info('WeasyPrint not available, returning HTML')
         response = HttpResponse(html, content_type='text/html')
         return response
-    except Exception as e:
+    except ImportError as e:
         logger.error(f'PDF generation error: {e}')
         response = HttpResponse(html, content_type='text/html')
         return response

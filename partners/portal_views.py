@@ -5,6 +5,8 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.db.models import Sum, Count
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Partner
 
 

@@ -6,6 +6,8 @@ import hashlib
 import logging
 import time
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('gov_export.pipeline')
 

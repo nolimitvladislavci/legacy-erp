@@ -8,6 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from companies.models import Company
 from partners.models import Partner
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     WasteStation, WasteCategory, CitizenCard, AnnualQuota,
     WasteDelivery, ScaleReading, OntoExportBatch, WasteQuickButton,

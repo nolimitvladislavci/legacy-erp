@@ -5,6 +5,8 @@ from datetime import date
 from django.core.management.base import BaseCommand
 
 from documents.models import ArhivaEntry
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):

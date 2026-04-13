@@ -45,7 +45,7 @@ def run(name, fn):
         if r is False: failed(name, ms=ms)
         elif isinstance(r,str) and r.startswith('W:'): warn(name, r[2:])
         else: passed(name, str(r) if r and r is not True else '', ms)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         failed(name, str(e)[:100], (time.time()-t0)*1000)
 
 print(f'\n{BOLD}{C}╔══════════════════════════════════════════╗')

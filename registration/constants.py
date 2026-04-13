@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 # Plan definitions and module access control
 
 PLAN_PRICES = {

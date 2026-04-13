@@ -139,7 +139,7 @@ def notify_haccp_incident(self, incident_id):
                 message=body,
                 url=url,
             )
-    except Exception:
+    except ImportError:
         pass  # Ne blokira ako notifikacije ne rade
 
     logger.info('[HACCP] Incident #%d notified: %s', incident_id, ', '.join(notified) or 'nobody')

@@ -212,7 +212,7 @@ class Command(BaseCommand):
                         for k, v in result.items():
                             folder_stats[k] += v
                             total_stats[k] += v
-                except Exception as exc:
+                except (AttributeError, TypeError) as exc:
                     self.stderr.write(self.style.ERROR('  ERROR [%s]: %s' % (itype, exc)))
                     total_stats[itype + '_errors'] = total_stats.get(itype + '_errors', 0) + 1
                     import traceback
@@ -449,7 +449,7 @@ class Command(BaseCommand):
                     created += 1
                 else:
                     updated += 1
-            except Exception:
+            except DatabaseError:
                 errors += 1
 
         dur = time.time() - t0
@@ -1070,7 +1070,7 @@ class Command(BaseCommand):
                 )
                 if was_created:
                     created += 1
-            except Exception:
+            except DatabaseError:
                 pass
 
         dur = time.time() - t0
@@ -1099,7 +1099,7 @@ class Command(BaseCommand):
             self.stdout.write('  Retail: %d new, %d exist, %d err (%.1fs) [%d lines]' % (c, u, e, dur, len(tretail_rows)))
             self._log_sync(company, 'retail', len(retail_rows), c, u, e, fi['folder_name'], dur)
             return {'retail_created': c, 'retail_updated': u, 'retail_errors': e}
-        except Exception as exc:
+        except ImportError as exc:
             dur = time.time() - t0
             self.stderr.write(self.style.ERROR('  Retail error: %s' % exc))
             return {'retail_errors': 1}

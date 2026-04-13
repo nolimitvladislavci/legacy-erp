@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 
@@ -410,7 +411,7 @@ def donacija_create(request):
         try:
             from konto.booking_engine import auto_knjizi_donacija
             auto_knjizi_donacija(donacija)
-        except Exception as _dke:
+        except ImportError as _dke:
             import logging
             logging.getLogger('udruge').warning('donacija auto_knjizi: %s', _dke)
 
@@ -425,7 +426,7 @@ def donacija_create(request):
                 messages.warning(request, _('AML: Donacija oznacena za pregled — %s') % aml_msg)
             else:
                 messages.success(request, _("Donacija %s EUR od %s evidentirana.") % (donacija.amount, donacija.donor_name))
-        except Exception:
+        except ImportError:
             messages.success(request, _("Donacija %s EUR od %s evidentirana.") % (donacija.amount, donacija.donor_name))
         return redirect('udruge:donacija_list')
 
@@ -1031,7 +1032,7 @@ def email_kampanja_create(request):
                 ek.body_html = response.content[0].text.strip()
                 ek.ai_generated = True
                 ek.ai_prompt = ai_prompt
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.error("AI email generate: %s", e)
                 messages.warning(request, _("AI generiranje nije uspjelo: %s") % str(e))
 
@@ -1230,7 +1231,7 @@ def api_member_lookup(request):
         if sub:
             valid_until = sub.end_date.strftime('%d.%m.%Y') if sub.end_date else None
             is_active = sub.end_date >= timezone.now().date() if sub.end_date else True
-    except Exception:
+    except ValueError:
         pass
 
     return JsonResponse({
@@ -3970,7 +3971,7 @@ def flock_health_create(request, flock_pk):
                         f'povezanih artikala u inventaru. Povežite artikle s jatom '
                         f'u Admin → Inventar → Artikl → Izvorno jato.'
                     )
-            except Exception:
+            except DatabaseError:
                 pass
 
         return redirect('udruge:flock_detail', pk=flock.pk)

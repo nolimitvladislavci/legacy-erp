@@ -5,6 +5,8 @@ Centralna PDV/USt logika za HR i DE fakturiranje.
 Podrška: HR (PDV 25%/13%/5%), DE (MwSt 19%/7%), Reverse Charge, Kleinunternehmer §19.
 """
 from decimal import Decimal, ROUND_HALF_UP
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ─── Tax Profiles ────────────────────────────────────────────────────────────
 

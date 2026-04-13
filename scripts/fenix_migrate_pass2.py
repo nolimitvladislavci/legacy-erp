@@ -3,6 +3,8 @@
 FENIX Pass 2 — Migrate var(--*) colors and remaining patterns
 """
 import os, re, glob, sys
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # var() color → utility class
 VAR_COLOR_MAP = {

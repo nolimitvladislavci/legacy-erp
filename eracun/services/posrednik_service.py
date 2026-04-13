@@ -148,7 +148,7 @@ class PosrednikService:
             v_ok, v_err, v_warn = validate_full(xml_content)
             if not v_ok:
                 return {'ok': False, 'error': 'XML validacija: ' + '; '.join(v_err[:3])}
-        except Exception:
+        except ImportError:
             pass  # Graceful — ne blokiraj slanje ako validator crashne
 
         # Update status
@@ -359,7 +359,7 @@ class PosrednikService:
                 if xml_b64:
                     try:
                         return base64.b64decode(xml_b64).decode('utf-8')
-                    except Exception:
+                    except ValueError:
                         return xml_b64  # Možda nije base64
                 return None
 

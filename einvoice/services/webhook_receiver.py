@@ -126,7 +126,7 @@ def process_webhook_payload(payload):
         try:
             from einvoice.services.archive_service import ArchiveService
             ArchiveService().archive_message(message)
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Archive failed after webhook delivery: {e}")
 
     logger.info(f"Webhook processed: {external_id} -> {new_status}")

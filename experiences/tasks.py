@@ -5,6 +5,8 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('experiences')
 
@@ -55,7 +57,7 @@ def send_experience_reminders(self):
                     company_id=str(sched.experience.company_id),
                 )
                 notified += 1
-            except Exception as e:
+            except ImportError as e:
                 logger.warning('Experience reminder %s: %s', booking.pk, e)
 
     return {'notified': notified}

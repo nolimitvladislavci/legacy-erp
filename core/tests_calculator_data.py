@@ -72,21 +72,21 @@ class CalculatorPublicTest(TestCase):
         try:
             resp = self.client.get('/calculator/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_salary_calculator(self):
         try:
             resp = self.client.get('/calculator/salary/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_bathroom_public(self):
         try:
             resp = self.client.get('/calculator/bathroom/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -109,7 +109,7 @@ class CalculatorInternalTest(TestCase):
             proj = _make_project(self.company)
             _make_calculation(proj)
             self.assertIn(self._get('/calculator/internal/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_bathroom_internal(self):
@@ -123,7 +123,7 @@ class CalculatorInternalTest(TestCase):
             proj = _make_project(self.company)
             calc = _make_calculation(proj)
             self.assertIn(self._get(f'/calculator/{calc.pk}/add-item/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_add_item_post_with_normative(self):
@@ -136,7 +136,7 @@ class CalculatorInternalTest(TestCase):
                 'quantity': '25',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_export_pdf(self):

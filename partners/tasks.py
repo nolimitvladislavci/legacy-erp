@@ -442,7 +442,7 @@ def vies_batch_validate(self, batch_size=500):
                         if not partner.zip_code and parsed.get('zip_code'):
                             partner.zip_code = parsed['zip_code']
                             update_fields.append('zip_code')
-                    except Exception:
+                    except KeyError:
                         pass
 
             # Upgrade buyer_type ako je VIES valid
@@ -504,5 +504,5 @@ def _log_vies_audit(partner, vies_valid, vies_name='', vies_address=''):
                 'vies_address': vies_address,
             },
         )
-    except Exception:
+    except ImportError:
         pass

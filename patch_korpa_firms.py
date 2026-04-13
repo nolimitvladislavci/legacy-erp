@@ -140,7 +140,7 @@ with transaction.atomic():
                     profile.company = c
                     profile.save()
                     print(f"     UserProfile → company linkan na {c.name}")
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
         else:
@@ -158,7 +158,7 @@ with transaction.atomic():
             # UserProfile
             try:
                 profile = new_user.profile
-            except Exception:
+            except AttributeError:
                 profile = UserProfile(user=new_user)
 
             profile.company = c

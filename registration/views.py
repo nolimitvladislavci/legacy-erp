@@ -128,7 +128,7 @@ def _seed_demo_data(company, user):
             )
             cashier.set_pin('1234')
             cashier.save(update_fields=['pin_hash'])
-        except Exception as _ce:
+        except DatabaseError as _ce:
             logger.warning("POSCashier seed failed: %s", _ce)
 
         logger.info("Seeded demo data for %s", company.name)
@@ -527,14 +527,14 @@ def register_step4(request):
             try:
                 from django.core.management import call_command
                 call_command("seed_konto_chart", company_id=company.pk)
-            except Exception:
+            except ImportError:
                 pass
 
             # Try assign RBAC role
             try:
                 from permissions.services import PermissionManager
                 PermissionManager.assign_role(user, "company_admin", company)
-            except Exception:
+            except ImportError:
                 pass
 
             # Apply invite code free months + modules
@@ -780,7 +780,7 @@ def _notify_admins_new_registration(reg):
                 reg.name, reg.oib, reg.country, reg.selected_plan.upper(), reg.contact_name, reg.contact_email, reg.contact_phone),
             from_email=None, recipient_list=admin_emails,
         )
-    except Exception:
+    except ImportError:
         logger.exception('Failed to notify admins of new registration')
 
 
@@ -1034,7 +1034,7 @@ def sales_wizard_submit(request):
             else:
                 wa_msg = 'Dobrodosli u LIMIT Connect, %s! Vas racun se aktivira. Pristup: limit-connect.com. Savjetnik: %s' % (lead.contact_name, request.user.get_full_name() or request.user.username)
             send_text(lead.contact_phone, wa_msg)
-        except Exception:
+        except ImportError:
             pass
 
     return JsonResponse({
@@ -1207,7 +1207,7 @@ def _lookup_sudreg(oib):
                     'zip_code': data.get('sjediste_posta', ''),
                     'legal_form': data.get('pravni_oblik', ''),
                 }
-    except Exception as e:
+    except KeyError as e:
         logger.debug('Sudreg lookup failed for OIB %s: %s', oib[:4], e)
 
     # Fallback: try FINA / biznet
@@ -1227,7 +1227,7 @@ def _lookup_sudreg(oib):
                     'zip_code': subj.get('posta', ''),
                     'legal_form': subj.get('oblik', ''),
                 }
-    except Exception as e:
+    except KeyError as e:
         logger.debug('Data.gov.hr lookup failed for OIB %s: %s', oib[:4], e)
 
     return None
@@ -1373,7 +1373,7 @@ def submit_claim(request, company_id):
                 f'\n✅ Odobri: {approve_url}'
             ),
         )
-    except Exception:
+    except ImportError:
         pass
 
     messages.success(request,
@@ -1425,7 +1425,7 @@ def approve_claim(request, claim_id):
         try:
             if request.user.profile.company != claim.company.umbrella_parent:
                 return HttpResponseForbidden('Nemate ovlast.')
-        except Exception:
+        except AttributeError:
             return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -1526,7 +1526,7 @@ def send_company_invite(request, company_id):
             user_co = request.user.profile.company
             if company.umbrella_parent != user_co and company != user_co:
                 return HttpResponseForbidden()
-        except Exception:
+        except AttributeError:
             return HttpResponseForbidden()
 
     claim = CompanyClaimRequest.objects.create(
@@ -1556,7 +1556,7 @@ def send_company_invite(request, company_id):
                     f'Link vrijedi 30 dana.'
                 ),
             )
-        except Exception:
+        except ImportError:
             pass
 
     return JsonResponse({

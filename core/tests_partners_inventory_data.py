@@ -77,7 +77,7 @@ class PartnersWithDataTest(TestCase):
             _make_partner(self.company, 'Client A')
             _make_partner(self.company, 'Supplier B', partner_type='supplier')
             self.assertIn(self._get('/partners/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_list_filter_q(self):
@@ -85,7 +85,7 @@ class PartnersWithDataTest(TestCase):
             _make_partner(self.company, 'Searchable Corp')
             resp = self.client.get('/partners/?q=Searchable', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_list_filter_type(self):
@@ -93,21 +93,21 @@ class PartnersWithDataTest(TestCase):
             _make_partner(self.company, 'Supplier Co', partner_type='supplier')
             resp = self.client.get('/partners/?type=supplier', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_list_filter_active(self):
         try:
             resp = self.client.get('/partners/?active=1', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_partner_list_filter_inactive(self):
         try:
             resp = self.client.get('/partners/?active=0', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_partner_list_filter_incomplete(self):
@@ -124,7 +124,7 @@ class PartnersWithDataTest(TestCase):
         try:
             p = _make_partner(self.company, 'Detail Partner')
             self.assertIn(self._get(f'/partners/{p.pk}/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_detail_invalid(self):
@@ -169,7 +169,7 @@ class PartnersWithDataTest(TestCase):
         try:
             p = _make_partner(self.company, 'Edit Partner')
             self.assertIn(self._get(f'/partners/{p.pk}/edit/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_edit_post(self):
@@ -191,14 +191,14 @@ class PartnersWithDataTest(TestCase):
                 'is_active': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_delete_get(self):
         try:
             p = _make_partner(self.company, 'Delete Me')
             self.assertIn(self._get(f'/partners/{p.pk}/delete/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_delete_post(self):
@@ -206,7 +206,7 @@ class PartnersWithDataTest(TestCase):
             p = _make_partner(self.company, 'To Delete')
             resp = self.client.post(f'/partners/{p.pk}/delete/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_partner_quick_create_new(self):
@@ -268,7 +268,7 @@ class InventoryWithDataTest(TestCase):
             _make_inventory_item(self.company, 'Item A')
             _make_inventory_item(self.company, 'Item B')
             self.assertIn(self._get('/inventory/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_item_list_search(self):
@@ -276,14 +276,14 @@ class InventoryWithDataTest(TestCase):
             _make_inventory_item(self.company, 'Searchable Item')
             resp = self.client.get('/inventory/?q=Searchable', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_item_list_filter_category(self):
         try:
             resp = self.client.get('/inventory/?category=other', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_item_list_low_stock(self):
@@ -308,7 +308,7 @@ class InventoryWithDataTest(TestCase):
         try:
             item = _make_inventory_item(self.company, 'Detail Item')
             self.assertIn(self._get(f'/inventory/items/{item.pk}/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_item_detail_invalid(self):
@@ -350,14 +350,14 @@ class InventoryWithDataTest(TestCase):
                 'supplier': supplier.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_item_edit_get(self):
         try:
             item = _make_inventory_item(self.company, 'Edit Item')
             self.assertIn(self._get(f'/inventory/items/{item.pk}/edit/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_item_edit_post(self):
@@ -373,7 +373,7 @@ class InventoryWithDataTest(TestCase):
                 'unit_price': '75.00',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_stock_movement_create(self):
@@ -385,7 +385,7 @@ class InventoryWithDataTest(TestCase):
                 'notes': 'Stock replenishment',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_stock_movement_out(self):
@@ -397,7 +397,7 @@ class InventoryWithDataTest(TestCase):
                 'notes': 'Used in production',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_receipts_list(self):

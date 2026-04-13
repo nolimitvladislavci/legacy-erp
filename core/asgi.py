@@ -13,6 +13,8 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
 from udruge.routing import websocket_urlpatterns
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

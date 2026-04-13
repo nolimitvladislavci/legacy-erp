@@ -379,6 +379,8 @@ html += f"""
 out = "/tmp/VIS-AN-2026-003_Islamovic_komplett.pdf"
 HTML(string=html).write_pdf(out)
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 print(f"\nPDF: {out} ({os.path.getsize(out)/1024:.0f} KB)")
 print(f"\nNETTO:  {fmt(total_netto)} €")
 print(f"MwSt:   {fmt(mwst_betrag)} €")

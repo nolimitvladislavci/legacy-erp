@@ -231,7 +231,7 @@ class AdaptationRule(models.Model):
             self.executed_by = 'auto'
             self.save(update_fields=['is_executed', 'executed_at', 'executed_by'])
             return True
-        except Exception as e:
+        except ImportError as e:
             self.error_log = str(e)[:500]
             self.save(update_fields=['error_log'])
             return False

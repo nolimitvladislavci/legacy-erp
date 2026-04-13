@@ -11,6 +11,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     WasteStation, WasteCategory, CitizenCard, AnnualQuota,
@@ -556,7 +558,7 @@ def _create_overage_receipt(request, delivery):
         delivery.status = 'invoiced'
         delivery.save(update_fields=['pos_receipt', 'status'])
 
-    except Exception:
+    except (IntegrityError, DatabaseError):
         import logging
         logging.getLogger('komunalno').warning(
             'POS receipt kreiranje failed za delivery %s', delivery.pk, exc_info=True

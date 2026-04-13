@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 core/db_routers.py — Django Database Router za višebaznu arhitekturu
 

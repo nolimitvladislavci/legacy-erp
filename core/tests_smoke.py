@@ -284,7 +284,7 @@ class KontoServicesTest(TestCase):
         try:
             result = get_balance_sheet(self.company, datetime.date(2026, 12, 31))
             self.assertIsInstance(result, dict)
-        except Exception:
+        except AttributeError:
             pass  # May fail without KontoAccount setup
 
     def test_next_entry_number(self):

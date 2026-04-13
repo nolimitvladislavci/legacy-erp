@@ -193,7 +193,7 @@ def barf_create(request):
             )
             messages.success(request, f'BARF ponuda kreirana: {listing}')
             return redirect('memio_pet:barf_listings')
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/barf_create.html', {
         'company': company, 'product_types': RawFoodListing.PRODUCT_CHOICES, 'page_title': 'Nova BARF ponuda',
@@ -457,7 +457,7 @@ def resend_consent(request):
     try:
         import uuid as _u
         bp = BreederProfile.objects.using(db).get(pk=_u.UUID(str(breeder_pk)))
-    except Exception:
+    except DatabaseError:
         return redirect('memio_pet:registracija')
 
     if bp.parental_consent:
@@ -519,7 +519,7 @@ def add_animal(request):
     try:
         import uuid as _u
         breeder = BreederProfile.objects.using(db).get(pk=_u.UUID(str(breeder_pk)))
-    except Exception:
+    except DatabaseError:
         return redirect('memio_pet:registracija')
 
     if request.method == 'POST':
@@ -864,7 +864,7 @@ def memorial_edit(request, chip_or_tag):
                 shelter = BreederProfile.objects.using(db).get(
                     pk=_u.UUID(str(shelter_pk)), account_type='shelter')
                 memorial.donation_target = shelter
-            except Exception:
+            except DatabaseError:
                 pass
         memorial.save(using=db)
         messages.success(request, _('Memorijal azuriran.'))
@@ -911,7 +911,7 @@ def knjiga_sjecanja_pdf(request, chip_or_tag):
             .order_by('date')
         )
         memorial = MemorialProfile.objects.using(db).filter(animal=animal).first()
-    except Exception:
+    except DatabaseError:
         milestones = []
         memorial = None
 
@@ -990,7 +990,7 @@ def knjiga_sjecanja_pdf(request, chip_or_tag):
         response['Cache-Control'] = 'no-cache'
         return response
 
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger(__name__).error(f'knjiga_sjecanja_pdf error: {e}')
         return HttpResponse(f'Greška pri generiranju PDF-a: {e}', status=500, content_type='text/plain')

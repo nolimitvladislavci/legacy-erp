@@ -55,7 +55,7 @@ def auto_book_invoice(sender, instance, created, **kwargs):
                 'Auto-knjiženje: faktura %s → temeljnica %s',
                 instance.number, je.entry_number,
             )
-    except Exception:
+    except ImportError:
         logger.warning(
             'Auto-knjiženje neuspješno za fakturu %s',
             instance.number, exc_info=True,
@@ -90,7 +90,7 @@ def trigger_supplier_risk_check(sender, instance, created, **kwargs):
     try:
         from fiskalizacija.tasks import check_supplier_risk_async
         check_supplier_risk_async.delay(supplier_oib, str(company.id))
-    except Exception:
+    except ImportError:
         logger.debug('SupplierRisk async trigger failed for OIB=%s', supplier_oib, exc_info=True)
 
 

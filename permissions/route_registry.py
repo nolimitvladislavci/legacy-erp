@@ -8,6 +8,8 @@ obje resolveaju u view_name='setup_2fa'. Jedan entry umjesto N.
 """
 import logging
 from enum import Enum, auto
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('fal.route_registry')
 

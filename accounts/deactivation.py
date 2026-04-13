@@ -25,6 +25,7 @@ from django.conf import settings
 from django.shortcuts import redirect, render
 from django.utils import timezone as tz
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
@@ -74,7 +75,7 @@ def request_deactivation(request):
                 reason or '(bez razloga)', expiry),
             company=company,
         )
-    except Exception:
+    except ImportError:
         logger.exception('Audit trail failed for vault request')
 
     # Confirmation email
@@ -168,7 +169,7 @@ def cancel_deactivation(request):
             detail='Deaktivacija poništena. Originalni zahtjev: %s' % old_dt.strftime('%d.%m.%Y %H:%M'),
             company=company,
         )
-    except Exception:
+    except ImportError:
         pass
 
     messages.success(request, _('Zahtjev poništen. Račun je ponovo potpuno aktivan.'))
@@ -221,7 +222,7 @@ def reactivate_company(request, company_id):
             detail='Firma reaktivirana: %s. Svi korisnici ponovo aktivni.' % company.name,
             company=company,
         )
-    except Exception:
+    except ImportError:
         pass
 
     messages.success(request, _('Firma %s reaktivirana! Svi podaci netaknuti.') % company.name)
@@ -306,7 +307,7 @@ def process_vaulting():
                     ) % (company.name, users_disabled),
                     notification_type='system',
                 )
-            except Exception:
+            except ImportError:
                 pass
 
             logger.info('[VAULT] Sealed: %s — %d users disabled, 0 data modified',

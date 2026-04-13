@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 """
 CompanyManager — automatski filtrira QuerySet po aktivnoj tvrtki.
 
@@ -15,7 +16,7 @@ Za cross-company upite (Django admin, reports, seeding):
 """
 import threading
 
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 
 from .tenant import get_current_company
 

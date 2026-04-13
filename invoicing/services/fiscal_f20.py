@@ -3,6 +3,7 @@ invoicing/services/fiscal_f20.py
 Fiskalizacija 2.0 handler — delegira na informacijskog posrednika.
 """
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 from .entry_point import BaseFiscalHandler, FiscalResult
 from django.db import IntegrityError, DatabaseError
 
@@ -24,7 +25,7 @@ class ERacunFiskalizacija20Handler(BaseFiscalHandler):
         if not self._config:
             try:
                 self._config = self.company.eracun_config
-            except Exception:
+            except AttributeError:
                 self._config = None
         return self._config
 

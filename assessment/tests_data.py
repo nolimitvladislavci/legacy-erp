@@ -74,7 +74,7 @@ class AssessmentListTest(TestCase):
         try:
             resp = self.client.get('/assessment/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_data(self):
@@ -84,7 +84,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'OFFER_SENT', 'Ivan Perić')
             resp = self.client.get('/assessment/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status_draft(self):
@@ -93,7 +93,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'optical', 'COMPLETED')
             resp = self.client.get('/assessment/?status=DRAFT', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status_completed(self):
@@ -101,7 +101,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'COMPLETED')
             resp = self.client.get('/assessment/?status=COMPLETED', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status_offer_sent(self):
@@ -109,7 +109,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'OFFER_SENT')
             resp = self.client.get('/assessment/?status=OFFER_SENT', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_type_bathroom(self):
@@ -117,7 +117,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'DRAFT')
             resp = self.client.get('/assessment/?type=bathroom', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_type_optical(self):
@@ -125,7 +125,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'optical', 'COMPLETED')
             resp = self.client.get('/assessment/?type=optical', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_type_mechanic(self):
@@ -133,7 +133,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'mechanic', 'DRAFT')
             resp = self.client.get('/assessment/?type=mechanic', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_search_by_name(self):
@@ -141,7 +141,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'DRAFT', 'Marko Testić')
             resp = self.client.get('/assessment/?q=Marko', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_search_by_phone(self):
@@ -149,7 +149,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'DRAFT')
             resp = self.client.get('/assessment/?q=091000000', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_combined_filters(self):
@@ -157,7 +157,7 @@ class AssessmentListTest(TestCase):
             _make_assessment(self.company, self.user, 'bathroom', 'DRAFT', 'Filip Test')
             resp = self.client.get('/assessment/?status=DRAFT&type=bathroom&q=Filip', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -173,7 +173,7 @@ class AssessmentNewTest(TestCase):
         try:
             resp = self.client.get('/assessment/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -337,14 +337,14 @@ class AssessmentDetailTest(TestCase):
             a = _make_assessment(self.company, self.user)
             resp = self.client.get(f'/assessment/{a.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_detail_invalid_pk(self):
         try:
             resp = self.client.get('/assessment/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_detail_completed_assessment(self):
@@ -352,7 +352,7 @@ class AssessmentDetailTest(TestCase):
             a = _make_assessment(self.company, self.user, status='COMPLETED')
             resp = self.client.get(f'/assessment/{a.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_detail_offer_sent(self):
@@ -360,7 +360,7 @@ class AssessmentDetailTest(TestCase):
             a = _make_assessment(self.company, self.user, status='OFFER_SENT')
             resp = self.client.get(f'/assessment/{a.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -379,7 +379,7 @@ class AssessmentStatusUpdateTest(TestCase):
                 'status': 'COMPLETED',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_status_to_offer_sent(self):
@@ -389,7 +389,7 @@ class AssessmentStatusUpdateTest(TestCase):
                 'status': 'OFFER_SENT',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_status_to_draft(self):
@@ -399,7 +399,7 @@ class AssessmentStatusUpdateTest(TestCase):
                 'status': 'DRAFT',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_status_invalid_value(self):
@@ -410,7 +410,7 @@ class AssessmentStatusUpdateTest(TestCase):
                 'status': 'INVALID_STATUS',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_status_invalid_pk(self):
@@ -469,7 +469,7 @@ class AssessmentPhotoTest(TestCase):
             a = _make_assessment(self.company, self.user)
             resp = self.client.post(f'/assessment/{a.pk}/photos/', {})
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_upload_photo_invalid_pk(self):
@@ -484,5 +484,5 @@ class AssessmentPhotoTest(TestCase):
             a = _make_assessment(self.company, self.user)
             resp = self.client.post(f'/assessment/{a.pk}/photos/99999/delete/')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass

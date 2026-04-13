@@ -56,7 +56,7 @@ def enrich_life_event(event) -> str:
         logger.info(f'Boxgram AI: LifeEvent {event.pk} enriched ({len(generated)} chars)')
         return generated
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning(f'Boxgram AI enrich skip: {e}')
         return ''
 
@@ -91,6 +91,6 @@ def moderate_social_import(import_obj) -> dict:
         approved = result.upper().startswith('PRIKLADNO')
         return {'approved': approved, 'reason': result}
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning(f'AI moderacija error: {e}')
         return {'approved': True, 'reason': f'AI error: {e}'}

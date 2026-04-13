@@ -3,6 +3,8 @@ Pytest fixtures for Grossmarkt tests.
 """
 import pytest
 from django.contrib.auth import get_user_model
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

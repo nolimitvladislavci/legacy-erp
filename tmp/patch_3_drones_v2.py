@@ -94,7 +94,7 @@ new_karenca_block = """            # ── KARENCA HARD BLOCK (LOT-level preciz
                             f'(Zakon o higijeni hrane)'
                         )
                         karenca_blocked = True
-                except Exception:
+                except (ValueError, TypeError):
                     pass
 
             # Provjera 2: Fallback na InventoryItem.source_flock (ako nema LOT sustava)
@@ -106,6 +106,8 @@ new_karenca_block = """            # ── KARENCA HARD BLOCK (LOT-level preciz
                         end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
                         # Provjeri ima li DRUGIH LOT-ova koji NISU pod karencom
                         from inventory.models import StockBatch
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
                         safe_lots = StockBatch.objects.filter(
                             item=inv, quarantine_status='active', quantity__gt=0
                         ).exclude(
@@ -166,7 +168,7 @@ old_autolink = """            # Auto-link source_flock na InventoryItem-e iste k
                             f'Auto-link: {linked} artikl(a) povezano s jatom "{flock.naziv}" '
                             f'za karencija enforcement na POS-u.'
                         )
-                except Exception:
+                except (ValueError, TypeError):
                     pass"""
 
 new_autolink = """            # Auto-link: kreira/ažurira StockBatch s source_flock za LOT slijedivost
@@ -198,7 +200,7 @@ new_autolink = """            # Auto-link: kreira/ažurira StockBatch s source_f
                                 f'LOT {lot_num} kreiran za "{item.name}" — '
                                 f'{batch.quantity} kom, rok: {batch.expiry_date:%d.%m.%Y}.'
                             )
-                except Exception:
+                except (ValueError, TypeError):
                     pass"""
 
 c = c.replace(old_autolink, new_autolink)
@@ -679,7 +681,7 @@ new_noshow = """    def mark_no_show(self):
                         'Storno predujma FAILED za booking #%d: %s',
                         self.pk, storno_result.get('message', ''),
                     )
-            except Exception as e:
+            except ImportError as e:
                 logger.error('Storno predujma ERROR za booking #%d: %s', self.pk, e)
         else:
             logger.warning(

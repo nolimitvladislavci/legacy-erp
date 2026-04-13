@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import WizardDraft
@@ -277,7 +278,7 @@ def wizard_suglasnost_pdf(request):
         resp = HttpResponse(pdf, content_type='application/pdf')
         resp['Content-Disposition'] = f'attachment; filename="{filename}"'
         return resp
-    except Exception as e:
+    except ImportError as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -365,7 +366,7 @@ def _finalize_draft(draft: WizardDraft, user):
             company=draft.pending_company,
             defaults={'profile_completed': False}
         )
-    except Exception:
+    except DatabaseError:
         pass
 
 

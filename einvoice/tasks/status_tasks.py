@@ -41,7 +41,7 @@ def check_delivery_statuses():
             elif new_status != message.status:
                 message.transition_to(new_status, detail=f"Status update: {result.get('raw_status')}")
                 updated += 1
-        except Exception as e:
+        except KeyError as e:
             logger.error(f"Status check failed for {message.external_message_id}: {e}")
 
     posrednik.close()

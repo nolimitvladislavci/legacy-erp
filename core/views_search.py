@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError

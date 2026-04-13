@@ -4,6 +4,8 @@ Inspektorat rada zahtijeva nepromjenjivi trag.
 """
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 TRACKED_FIELDS = [
     'start_time', 'end_time', 'duration', 'date',

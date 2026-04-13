@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 Document Integrity Service — SHA-256 hash za sve dokumente.
 

@@ -67,7 +67,7 @@ def generate_landlord_daily_brief(company) -> str:
             )}],
         )
         return msg.content[0].text
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('AI brief generation failed: %s', e)
         # Fallback: structured text
         lines = [f'Dobro jutro! Danas {today.strftime("%d.%m.%Y")}:']

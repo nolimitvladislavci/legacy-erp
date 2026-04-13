@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .fiscalize import fiscalize_invoice, generate_zki, generate_qr
 from .confirm import confirm_invoice, lock_invoice
 from .storno import create_storno

@@ -15,6 +15,8 @@ from companies.models import Company
 from accounts.models import UserProfile
 from registration.models import CompanySubscription
 from worktime.models import EmployeeProfile
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class PayrollViewTestsFixed(TestCase):

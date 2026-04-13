@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import permissions, viewsets
 
 from partners.models import Partner
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Order, OrderItem, Product
 from .serializers import OrderItemSerializer, OrderSerializer, ProductSerializer
@@ -56,7 +58,7 @@ def product_create(request):
             p.save()
             messages.success(request, f"Proizvod '{p.name}' kreiran.")
             return redirect("webshop:product_list")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, "webshop/product_form.html", {
         "category_choices": Product.CATEGORY_CHOICES,
@@ -82,7 +84,7 @@ def product_edit(request, pk):
             product.save()
             messages.success(request, f"Proizvod '{product.name}' ažuriran.")
             return redirect("webshop:product_list")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, "webshop/product_form.html", {
         "product": product,
@@ -162,13 +164,13 @@ def order_create(request):
                             total_price=item_total,
                         )
                         total += float(item_total)
-                    except Exception:
+                    except ObjectDoesNotExist:
                         pass
             order.total_amount = total
             order.save(update_fields=["total_amount"])
             messages.success(request, f"Narudžba {order_num} kreirana.")
             return redirect("webshop:order_detail", pk=order.pk)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "webshop/order_form.html", {
         "customers": Partner.objects.filter(is_active=True).order_by("name"),
@@ -203,7 +205,7 @@ def order_status_change(request, pk):
                             unit_price=_oitem.unit_price,
                             reason=f'Webshop narudžba #{order.order_number}',
                         )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
         messages.success(request, f"Status narudžbe #{order.order_number} promijenjen.")
     return redirect("webshop:order_detail", pk=pk)
@@ -389,7 +391,7 @@ def public_cart_add(request, company_slug):
         data = _json.loads(request.body)
         pid  = str(int(data.get('product_id', 0)))
         qty  = max(1, int(data.get('qty', 1)))
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid'}, status=400)
     
     product = get_object_or_404(Product, pk=pid, company=company, is_active=True)
@@ -412,7 +414,7 @@ def public_cart_remove(request, company_slug):
         import json as _json
         data = _json.loads(request.body)
         pid = str(int(data.get('product_id', 0)))
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid'}, status=400)
     
     key  = 'cart_' + company_slug
@@ -487,7 +489,7 @@ def public_checkout_submit(request, company_slug):
         payment_method  = data.get('payment_method', 'cash')
         address         = data.get('address', '').strip()
         note            = data.get('note', '').strip()
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     
     if not name or not email:
@@ -545,7 +547,7 @@ def public_checkout_submit(request, company_slug):
                 quantity=qty, unit_price=p.price,
                 total_price=p.price * qty,
             )
-        except Exception:
+        except ObjectDoesNotExist:
             pass
     
     # Očisti košaricu
@@ -563,7 +565,7 @@ def public_checkout_submit(request, company_slug):
                 'Placanje: ' + payment_method + '\n\n' +
                 'Kontaktirat cemo vas uskoro.\n\n' + company.name)
         send_email_task.delay(subject, body, 'noreply@limit-connect.com', [email])
-    except Exception:
+    except ImportError:
         pass
     
     return JsonResponse({

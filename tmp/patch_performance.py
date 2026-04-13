@@ -18,6 +18,8 @@ def operations_dashboard(request):
     \"\"\"Unified operations dashboard — SLA alerts + mini kanbans + AI digest.\"\"\"\n    from interventions.models import HitnaIntervencija
     from work_orders.models import WorkOrder
     from burza.models import ProjectLead
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
     now = timezone.now()
 
@@ -166,7 +168,7 @@ old_signals = """    # AI Digest — FenixSignal last 24h
             'new': signals_24h.filter(status='new').count(),
             'critical': signals_24h.filter(priority__lte=2).count(),
         }
-    except Exception:
+    except DatabaseError:
         pass"""
 
 new_signals = """    # AI Digest — FenixSignal last 24h (cached)
@@ -182,7 +184,7 @@ new_signals = """    # AI Digest — FenixSignal last 24h (cached)
                 'new': signals_24h.filter(status='new').count(),
                 'critical': signals_24h.filter(priority__lte=2).count(),
             }
-        except Exception:
+        except DatabaseError:
             pass
         cache.set('borg_hub_signals', signal_stats, CACHE_TTL)"""
 
@@ -205,7 +207,7 @@ old_exp = """    # ── Experiences — danas ──
         exp_today['revenue'] = today_bookings.filter(
             status__in=['completed', 'checked_in']
         ).aggregate(s=Sum('price_total'))['s'] or 0
-    except Exception:
+    except DatabaseError:
         pass"""
 
 new_exp = """    # ── Experiences — danas (cached) ──
@@ -228,7 +230,7 @@ new_exp = """    # ── Experiences — danas (cached) ──
             exp_today['bookings'] = agg['total'] or 0
             exp_today['no_shows'] = agg['no_shows'] or 0
             exp_today['revenue'] = agg['revenue'] or 0
-        except Exception:
+        except DatabaseError:
             pass
         cache.set('borg_hub_exp_today', exp_today, CACHE_TTL)"""
 
@@ -266,7 +268,7 @@ if 'cache.delete' not in mc:
                 'borg_hub_inv_alerts',
                 'borg_hub_fin_pulse',
             ])
-        except Exception:
+        except ImportError:
             pass"""
     
     # Zamijeni samo prvi match (u transition_to)

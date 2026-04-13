@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 """
 accounts/trikey_views.py — TriKey autentifikacija views
@@ -96,7 +98,7 @@ def trikey_login(request):
                 logger.info(f'TriKey login: {email} via PIN')
                 try:
                     BookingSignature.log(request, "login", target_model="User", target_id=str(user.pk), target_repr=f"PIN login: {user.username}", pin_verified=True)
-                except Exception:
+                except (ValueError, TypeError):
                     pass
                 next_url = request.POST.get('next', request.GET.get('next', '/'))
                 return redirect(next_url or 'dashboard')
@@ -151,7 +153,7 @@ def pin_setup(request):
             pet_name = animal.name or 'tvoj ljubimac'
         elif animal:
             pet_name = animal.name or 'tvoj ljubimac'
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'accounts/pin_setup.html', {

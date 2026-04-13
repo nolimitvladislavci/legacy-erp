@@ -275,7 +275,7 @@ def booking_check_in(request, pk):
                 allocated.append(f'{incl.description} ({qty_needed} {incl.unit})')
             except ValueError as e:
                 messages.warning(request, f'Zaliha upozorenje za {incl.description}: {e}')
-            except Exception as e:
+            except ImportError as e:
                 import logging
                 logging.getLogger('experiences').error('Check-in allocation error: %s', e)
 

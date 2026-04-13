@@ -17,6 +17,8 @@ def upgrade():
     finance_logic = """
                 # --- Automatsko ažuriranje u Financije ---
                 from finance.models import Transaction
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
                 Transaction.objects.update_or_create(
                     description=f'Naplata računa {invoice.number}',
                     defaults={

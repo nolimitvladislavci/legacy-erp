@@ -19,6 +19,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 import chardet
+from django.core.exceptions import ObjectDoesNotExist
 
 from .base import AdapterResult, BaseAdapter, MappingField, register_adapter
 from django.db import IntegrityError, DatabaseError

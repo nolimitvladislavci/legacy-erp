@@ -154,7 +154,7 @@ def notify_appointment_status_change(appointment_id, new_status):
                 getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@fina-connect.hr"),
                 [appt.client.email],
             )
-        except Exception as e:
+        except (AttributeError, TypeError) as e:
             logger.warning(f"Status email failed: {e}")
 
     # WhatsApp
@@ -174,7 +174,7 @@ def notify_appointment_status_change(appointment_id, new_status):
             else:
                 msg = "Termin " + label.lower() + "\n" + service_name + "\n" + dt
             send_whatsapp_text_task.delay(wa, msg)
-        except Exception as e:
+        except (AttributeError, TypeError) as e:
             logger.warning(f"Status WA failed: {e}")
 
     return {"appointment_id": appointment_id, "status": new_status}

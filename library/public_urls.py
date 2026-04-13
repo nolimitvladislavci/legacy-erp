@@ -1,5 +1,7 @@
 """Public library portal URLs — outside i18n, public-facing."""
 from django.urls import path
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .public_views import (
     public_home, public_search, public_book,
     public_reserve, public_member_portal,

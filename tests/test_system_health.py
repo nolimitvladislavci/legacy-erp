@@ -40,7 +40,7 @@ class URLResolutionTest(TestCase):
             except NoReverseMatch as e:
                 if 'arguments' not in str(e) and 'no arguments' not in str(e):
                     broken.append(name)
-            except Exception:
+            except (ValueError, TypeError):
                 pass
         self.assertEqual(broken, [], f"Broken URL names: {broken}")
 
@@ -71,7 +71,7 @@ class TemplateURLTest(TestCase):
             for fpath in files:
                 try:
                     content = open(fpath).read()
-                except Exception:
+                except (FileNotFoundError, IOError):
                     continue
                 for url_name in url_pattern.findall(content):
                     try:
@@ -80,7 +80,7 @@ class TemplateURLTest(TestCase):
                         if 'arguments' not in str(e) and 'no arguments' not in str(e):
                             rel = fpath.replace('/var/www/fina-connect/', '')
                             broken.append(f'{rel}: {url_name}')
-                    except Exception:
+                    except (ValueError, TypeError):
                         pass
         self.assertEqual(broken, [], f"Broken critical template URLs:\n" + "\n".join(broken))
 

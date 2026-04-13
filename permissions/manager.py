@@ -2,8 +2,9 @@
 Permission Manager - Core permission checking logic
 """
 from django.core.cache import cache
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Permission, PermissionOverride, Role, UserRole
 
@@ -21,7 +22,7 @@ class PermissionManager:
         try:
             if user.profile.role in ("tenant_admin", "company_admin"):
                 return set(Permission.objects.filter(is_active=True).values_list("codename", flat=True))
-        except Exception:
+        except DatabaseError:
             pass
         from django.core.cache import cache
         cache_key = f"user_perms_{user.pk}_{company.pk if company else 0}"
@@ -54,7 +55,7 @@ class PermissionManager:
         try:
             if user.profile.role in ("tenant_admin", "company_admin"):
                 return True
-        except Exception:
+        except AttributeError:
             pass
         if "." in permission_codename:
             module, action = permission_codename.split(".", 1)

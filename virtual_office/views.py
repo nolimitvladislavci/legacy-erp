@@ -8,6 +8,8 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 

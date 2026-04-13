@@ -142,7 +142,7 @@ def _build_contextual_system_prompt(user, company):
             query='',  # Query se dodaje u chat_api
         )
         ctx += kb
-    except Exception:
+    except (AttributeError, TypeError):
         pass
 
     return SYSTEM_PROMPT + ctx
@@ -165,7 +165,7 @@ def chat_with_claude(messages, tools=None, system=None, user=None):
 
     try:
         response = client.messages.create(**kwargs)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error("Claude API error: %s", e)
         return {
             "content": f"Greska pri komunikaciji s AI servisom: {e}",

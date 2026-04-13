@@ -2,6 +2,8 @@
 Design System — 5 reusable partials + AI Assist pravila za nove module
 """
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect/templates'
 
 # ══════════════════════════════════════════════════════════════════════

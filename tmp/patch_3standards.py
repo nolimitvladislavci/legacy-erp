@@ -211,7 +211,7 @@ class TouristRegistrationGenerator:
                 ET.SubElement(eg, 'PaxCount').text = str(eb.pax_count)
                 ET.SubElement(eg, 'Experience').text = eb.schedule.experience.name
                 ET.SubElement(eg, 'Date').text = eb.schedule.date.isoformat()
-        except Exception:
+        except DatabaseError:
             ET.SubElement(root, 'ExperienceGuests', count='0')
 
         xml_str = minidom.parseString(ET.tostring(root, encoding='unicode')).toprettyxml(indent='  ')
@@ -398,12 +398,14 @@ def public_validator(request):
                     from signxml import XMLVerifier
                     XMLVerifier().verify(root)
                     result['signature_valid'] = True
-                except Exception as e:
+                except ImportError as e:
                     result['signature_error'] = str(e)[:200]
             
             # Provjeri u bazi postoji li ovaj export
             try:
                 from gov_export.models import GovExport
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
                 export = GovExport.objects.filter(xml_hash=result['sha256']).first()
                 if export:
                     result['registered'] = True
@@ -411,10 +413,10 @@ def public_validator(request):
                     result['status'] = export.get_status_display()
                 else:
                     result['registered'] = False
-            except Exception:
+            except DatabaseError:
                 result['registered'] = False
 
-        except Exception as e:
+        except DatabaseError as e:
             result['parse_error'] = str(e)[:200]
 
     return render(request, 'gov_export/validator.html', {'result': result})

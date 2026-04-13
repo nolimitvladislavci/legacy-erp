@@ -14,8 +14,9 @@ AI_POLICY_VIOLATION se logira i moze triggerirati WhatsApp alarm.
 import uuid
 import logging
 from datetime import timedelta
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('fal.ai_policy')
 
@@ -116,7 +117,7 @@ class AIAccessToken(models.Model):
                     f'Token: {str(self.token_id)[:8]}...'
                 )
             )
-        except Exception:
+        except ImportError:
             pass
 
     def revoke(self, reason: str = 'Manual revoke'):

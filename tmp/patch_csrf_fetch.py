@@ -4,6 +4,8 @@ Injectira getCsrf() helper i X-CSRFToken header u sve fetch(POST) pozive.
 """
 import os
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 BASE = '/var/www/fina-connect/templates'
 

@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import ERacun, ERacunConfig, ERacunLog, ERacunItem, ERacunTaxSummary
 from django.db import IntegrityError, DatabaseError
@@ -126,7 +127,7 @@ def send_eracun(request, pk):
                 }, status=400)
             messages.error(request, f'XSD greška: {xsd_err.errors[0]["message_hr"]}')
             return redirect('eracun:detail', pk=pk)
-        except Exception:
+        except ImportError:
             pass  # XSD nedostupan — nastavi
 
     # ── Async slanje (ako je AJAX) ───────────────────────────────────
@@ -141,7 +142,7 @@ def send_eracun(request, pk):
                 'status': 'queued',
                 'message': 'Uspješno poslano u red čekanja (FINA). Obrada u tijeku...',
             })
-        except Exception as e:
+        except ImportError as e:
             # Fallback na sync ako Celery nije dostupan
             pass
 
@@ -561,7 +562,7 @@ def sukladnost_run(request):
         if is_valid:
             passes += 1
         details['ts03'] = {'status': 'PASS' if is_valid else 'FAIL', 'result': str(result)[:300]}
-    except Exception as e:
+    except ImportError as e:
         run.ts03_validate = False
         details['ts03'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -611,7 +612,7 @@ def sukladnost_run(request):
     except ImportError:
         run.ts05_inbox = False
         details['ts05'] = {'status': 'FAIL', 'error': 'InboxService import failed'}
-    except Exception as e:
+    except ImportError as e:
         run.ts05_inbox = False
         details['ts05'] = {'status': 'FAIL', 'error': str(e)[:200]}
 

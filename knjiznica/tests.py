@@ -13,6 +13,8 @@ from django.utils import timezone
 from companies.models import Company
 from partners.models import Partner
 from inventory.models import InventoryItem
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     BookMeta, LibraryMember, BookLoan, BookReservation,

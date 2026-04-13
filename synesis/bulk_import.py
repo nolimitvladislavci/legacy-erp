@@ -13,7 +13,8 @@ from konto.models import LedgerLine, JournalEntry
 from django.db.models import Sum
 
 # Disable triggers for speed
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 with connection.cursor() as c:
     c.execute("ALTER TABLE konto_ledgerline DISABLE TRIGGER trg_check_journal_balance")
     c.execute("ALTER TABLE konto_journalentry DISABLE TRIGGER trg_period_lock_journal")

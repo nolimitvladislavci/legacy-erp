@@ -2,8 +2,9 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -354,7 +355,7 @@ class TimeEntry(models.Model):
         try:
             from worktime.services.volunteer_guard import VolunteerTaxGuard
             VolunteerTaxGuard.monetize_time_entry(self)
-        except Exception:
+        except ImportError:
             pass
         super().save(*args, **kwargs)
 

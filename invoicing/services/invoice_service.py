@@ -187,7 +187,7 @@ def notify_paid(invoice, requesting_user):
                 url=f'/invoicing/edit/{invoice.pk}/',
                 sender=requesting_user,
             )
-    except Exception:
+    except ImportError:
         pass
 
 
@@ -352,7 +352,7 @@ def save_invoice_from_post(request):
         try:
             from invoicing.tax_logic import check_gobd_pflichtangaben
             invoice._gobd_warnings = check_gobd_pflichtangaben(invoice)
-        except Exception:
+        except ImportError:
             pass
 
     # ── Side effects ──────────────────────────────────────────────────────────

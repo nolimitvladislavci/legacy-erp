@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import viewsets
 
 from partners.models import Partner
+from django.db import DatabaseError, IntegrityError
 
 from .models import InventoryItem, StockMovement
 from .serializers import InventoryItemSerializer, StockMovementSerializer
@@ -74,7 +75,7 @@ def item_create(request):
             try:
                 from decimal import Decimal as _D
                 item.kalo_percent = _D(kalo_str) if kalo_str else _D('0')
-            except Exception:
+            except ImportError:
                 item.kalo_percent = 0
             if 'image' in request.FILES:
                 item.image = request.FILES['image']
@@ -866,7 +867,7 @@ def predictive_dashboard(request):
             if item:
                 weekly = predict_weekly_demand(item)
                 item_data['weekly_prediction'] = weekly
-        except Exception:
+        except KeyError:
             pass
         enhanced_items.append(item_data)
 

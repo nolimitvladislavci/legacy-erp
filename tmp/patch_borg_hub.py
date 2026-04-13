@@ -38,7 +38,7 @@ new_return = """    # ── Experiences — danas ──
         exp_today['revenue'] = today_bookings.filter(
             status__in=['completed', 'checked_in']
         ).aggregate(s=Sum('price_total'))['s'] or 0
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── Inventory alerts ──
@@ -69,7 +69,7 @@ new_return = """    # ── Experiences — danas ──
             expiry_date__lte=week, expiry_date__gte=today,
             quarantine_status='active',
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── Financijski pulse ──
@@ -84,7 +84,7 @@ new_return = """    # ── Experiences — danas ──
         fin_pulse['unpaid'] = Invoice.objects.filter(
             status__in=['CONFIRMED', 'FISCALIZED', 'SENT'],
         ).exclude(total=0).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'borg_ops/operations_dashboard.html', {
@@ -280,6 +280,8 @@ with open(path) as f:
 # Nađi prvi sidebar nav-link i dodaj BORG Hub iznad
 # Tražim pattern za sidebar sekciju
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 # Nađi "Dashboard" link u sidebaru (obično prvi)
 dashboard_pattern = re.search(r'(<a[^>]*href="{% url \'dashboard\' %}"[^>]*>.*?Dashboard.*?</a>)', c, re.DOTALL)
 if dashboard_pattern:

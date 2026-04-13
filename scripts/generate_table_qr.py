@@ -11,6 +11,8 @@ django.setup()
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from gastro_menu.models import TableQR, DigitalMenu
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 DOMAIN = 'https://limit-connect.com'
 OUTPUT_DIR = '/var/www/fina-connect/media/gastro/table_qr'

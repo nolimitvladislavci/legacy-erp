@@ -19,6 +19,8 @@ import logging
 import requests
 from decimal import Decimal
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Payment, PaymentConfig
 
 logger = logging.getLogger(__name__)

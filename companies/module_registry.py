@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 companies/module_registry.py
 Central registry of ALL ERP modules with metadata, pricing tiers, and sidebar config.

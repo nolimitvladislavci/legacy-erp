@@ -1,5 +1,5 @@
-from django.core.exceptions import ValidationError
-from django.db import models
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.translation import gettext_lazy as _
 
 from companies.models import Company

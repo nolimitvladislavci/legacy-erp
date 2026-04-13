@@ -55,7 +55,7 @@ class UniversalCartLockTests(TransactionTestCase):
                     }),
                     content_type='application/json')
                 results.append(resp.status_code)
-            except Exception as e:
+            except ImportError as e:
                 errors.append(str(e))
             finally:
                 connection.close()

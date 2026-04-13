@@ -116,7 +116,7 @@ class POSWithTerminalTest(TestCase):
             t = self._make_terminal()
             resp = self.client.get(f'/pos/terminal/{t.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_open_session(self):
@@ -132,7 +132,7 @@ class POSWithTerminalTest(TestCase):
             t = self._make_terminal()
             resp = self.client.get(f'/pos/quick/{t.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_restaurant_pos(self):
@@ -140,7 +140,7 @@ class POSWithTerminalTest(TestCase):
             t = self._make_terminal()
             resp = self.client.get(f'/pos/restaurant/{t.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_session_detail(self):
@@ -149,7 +149,7 @@ class POSWithTerminalTest(TestCase):
             s = self._make_session(t)
             resp = self.client.get(f'/pos/session/{s.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_session_new_receipt(self):
@@ -176,7 +176,7 @@ class POSWithTerminalTest(TestCase):
             s = self._make_session(t)
             resp = self.client.get(f'/pos/session/{s.pk}/zreport/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_session_deposit(self):
@@ -193,7 +193,7 @@ class POSWithTerminalTest(TestCase):
             t = self._make_terminal()
             resp = self.client.get(f'/pos/?terminal={t.pk}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 
@@ -220,7 +220,7 @@ class POSReceiptTest(TestCase):
             r = self._make_receipt()
             resp = self.client.get(f'/pos/receipt/{r.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_receipt_pdf(self):
@@ -244,7 +244,7 @@ class POSReceiptTest(TestCase):
             r = self._make_receipt()
             resp = self.client.get(f'/pos/receipt/{r.pk}/json/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
 

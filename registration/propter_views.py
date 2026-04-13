@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import PropterTenant, CompanySubscription
 from django.db import IntegrityError, DatabaseError
@@ -138,7 +139,7 @@ def propter_tenant_detail(request, pk):
             company=tenant.company,
             defaults={'is_active': False}
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     # Get e-racun stats from eracun app

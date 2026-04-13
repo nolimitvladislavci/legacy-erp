@@ -161,7 +161,7 @@ def whatsapp_webhook(request):
         if vip:
             reply = f'Pozdrav! Vas tiket {ticket.ticket_number} je primljen s prioritetom HITNO. Odmah se javljamo.'
         send_text(f'+{phone}', reply)
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f'Auto-reply failed for {phone}: {e}')
 
     # Notify admins for VIP tickets

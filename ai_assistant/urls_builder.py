@@ -1,4 +1,6 @@
 from django.urls import path
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .builder import builder_page, builder_api, builder_generate, builder_queue
 
 urlpatterns = [

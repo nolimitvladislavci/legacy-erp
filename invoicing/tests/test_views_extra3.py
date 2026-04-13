@@ -91,7 +91,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user)
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-sent/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_mark_accepted_with_real_invoice(self):
@@ -99,7 +99,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user)
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-accepted/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_mark_rejected_with_real_invoice(self):
@@ -107,7 +107,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user)
             resp = self.client.post(f'/invoicing/{inv.pk}/mark-rejected/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_storno_with_real_invoice(self):
@@ -115,7 +115,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user)
             resp = self.client.post(f'/invoicing/{inv.pk}/storno/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_clone_with_real_invoice(self):
@@ -123,7 +123,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user)
             resp = self.client.post(f'/invoicing/{inv.pk}/clone/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_convert_predracun_with_real_invoice(self):
@@ -131,7 +131,7 @@ class InvoicingWorkflowTest(TestCase):
             inv = _make_invoice(self.company, self.user, doctype='predracun')
             resp = self.client.post(f'/invoicing/{inv.pk}/to-invoice/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -359,7 +359,7 @@ class InvoicingFormsTest(TestCase):
                 'payment_method': 'gotovina',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_client_portal_invalid(self):

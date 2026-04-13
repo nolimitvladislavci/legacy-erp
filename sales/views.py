@@ -15,6 +15,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -22,7 +23,7 @@ from .models import (
     SalesOrder, SalesOrderLine, OpenItem, IOSReport,
 )
 from .ai_services import smart_pricing_suggest, order_predictor, payment_predictor, resolve_price
-from django.db import DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -792,7 +793,7 @@ def ios_send_email(request, pk):
         ios.save(update_fields=['sent_at'])
         messages.success(request, f'IOS poslan na {email}.')
 
-    except Exception as e:
+    except ImportError as e:
         logger.exception('IOS send email error')
         messages.error(request, _('Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovo.'))
 

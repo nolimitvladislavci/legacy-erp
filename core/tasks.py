@@ -83,7 +83,7 @@ def notify_error_to_team(self, user, path, method, exc_class,
                     f'Traceback:\n{traceback}',
             fail_silently=True,
         )
-    except Exception as e:
+    except ImportError as e:
         logger.warning('Email error notification failed: %s', e)
 
 
@@ -115,7 +115,7 @@ def run_system_test_task(self, phone='+491723006985', quick=False):
                 message=f'🔴 FENIX TEST CRASH\n{type(e).__name__}: {e}',
                 session='default'
             )
-        except Exception:
+        except ImportError:
             logger.exception("Failed to import send_text")
     return out.getvalue()
 
@@ -130,7 +130,7 @@ def sonnet_cycle(self):
     try:
         from core.sonnet_agent import run_sonnet_cycle
         run_sonnet_cycle()
-    except Exception as exc:
+    except ImportError as exc:
         import logging
         logging.getLogger('sonnet_agent').error(f'sonnet_cycle crash: {exc}')
         raise self.retry(exc=exc, countdown=300)
@@ -146,7 +146,7 @@ def ai_health_check(self):
     try:
         from core.ai_health import run_ai_health_check
         return run_ai_health_check()
-    except Exception as e:
+    except ImportError as e:
         import logging
         logging.getLogger('ai_health').error(f'Health check crash: {e}')
 
@@ -259,7 +259,7 @@ def _backup_whatsapp(phone, message):
     try:
         from core.whatsapp import send_text
         send_text(phone=phone, message=message)
-    except Exception as e:
+    except ImportError as e:
         logging.getLogger('core.backup').warning(f'WhatsApp backup notif failed: {e}')
 
 

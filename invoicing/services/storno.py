@@ -3,7 +3,8 @@ invoicing/services/storno.py
 Storno (cancellation) logic — creates reverse invoice.
 """
 from django.utils import timezone
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .events import log_invoice_event
 
 

@@ -13,6 +13,8 @@ req = factory.get("/pos/session/9/cashier-report/?format=json")
 req.user = su
 
 from pos.views import cashier_full_report
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 with patch("pos.views.get_user_company", return_value=konjik):
     resp = cashier_full_report(req, 9)
 

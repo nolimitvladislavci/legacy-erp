@@ -5,6 +5,8 @@ from decimal import Decimal
 from datetime import timedelta
 from companies.models import Company
 from delivery.models import SmartBox, SensorReading, HACCPIncident, analyze_readings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

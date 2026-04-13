@@ -128,7 +128,7 @@ def on_barf_listing_created(sender, instance, created, **kwargs):
         try:
             from memio_pet.tasks import notify_barf_breeders
             notify_barf_breeders.delay(instance.pk)
-        except Exception as e:
+        except ImportError as e:
             import logging
             logging.getLogger('memio_pet').warning('BARF signal: %s', e)
 
@@ -180,5 +180,5 @@ def on_animal_status_uginulo(sender, instance, **kwargs):
                 args=[str(instance.pk)],
                 countdown=10 * 24 * 3600,
             )
-        except Exception:
+        except ImportError:
             pass  # Celery možda nije aktivan

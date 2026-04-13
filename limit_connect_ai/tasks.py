@@ -432,7 +432,7 @@ def fetch_and_process_nn_feed(self):
         result = service.process_feed()
         logger.info('[BORG] NN feed završen: %s', result)
         return result
-    except Exception as exc:
+    except ImportError as exc:
         logger.error('[BORG] Kritična greška u NN feed tasku: %s', exc)
         raise self.retry(exc=exc, countdown=60 * 15)
 
@@ -494,7 +494,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
                     'risk': risk['risk_level'],
                     'note': risk.get('note', ''),
                 })
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug('[FENIX] Bonitet check skip za %s: %s', partner.oib, e)
 
     # ── 3. Master Report ─────────────────────────────────────────────
@@ -569,7 +569,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
                 url='/data-migration/',
                 company=company,
             )
-    except Exception as e:
+    except ImportError as e:
         logger.warning('[FENIX] In-app notifikacija failed: %s', e)
 
     # 4c. Superadmin — WhatsApp
@@ -581,7 +581,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
             f'Pronađeno *{opp_count} prilika* ({total_savings:,.2f} EUR) '
             f'i *{risk_count} rizik(a)*.',
         )
-    except Exception as e:
+    except ImportError as e:
         logger.warning('[FENIX] Superadmin notify failed: %s', e)
 
     result = {
@@ -692,12 +692,12 @@ def execute_approved_adaptation(self, rule_id):
             'rule_id': str(rule_id),
         }
 
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
         logger.error('[ADAPT] Execution failed za rule %s: %s', rule_id, exc)
         try:
             rule.error_log = str(exc)[:500]
             rule.save(update_fields=['error_log'])
-        except Exception:
+        except (ValueError, TypeError):
             pass
         raise self.retry(exc=exc, countdown=300)
 
@@ -747,7 +747,7 @@ def fenix_intercept_incoming(self, eracun_id):
                     '[FENIX B2B] RIZIK: %s od %s — %s',
                     racun.invoice_number, racun.issuer_name, risk_data['risk_level'],
                 )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug('[FENIX B2B] Bonitet check skip: %s', e)
 
     # ── 2. Opportunity Trigger — ključne riječi u stavkama ───────────
@@ -771,7 +771,7 @@ def fenix_intercept_incoming(self, eracun_id):
             for keyword, opp_type in opportunity_keywords.items():
                 if keyword in desc_lower:
                     matched_opportunities.add((keyword, opp_type))
-    except Exception:
+    except DatabaseError:
         pass
 
     if matched_opportunities:
@@ -825,7 +825,7 @@ def fenix_intercept_incoming(self, eracun_id):
                 url=f'/eracun/inbox/',
                 company=company,
             )
-    except Exception as e:
+    except ImportError as e:
         logger.warning('[FENIX B2B] In-app notify failed: %s', e)
 
     # Superadmin WhatsApp
@@ -836,7 +836,7 @@ def fenix_intercept_incoming(self, eracun_id):
             f'Ulazni račun za *{company.name}*: {racun.invoice_number} od {racun.issuer_name}\n'
             f'Alertova: {len(alerts)} ({", ".join(a["type"] for a in alerts)})',
         )
-    except Exception:
+    except ImportError:
         pass
 
     logger.info('[FENIX B2B] %s: %d alertova obrađeno', racun.invoice_number, len(alerts))
@@ -1021,7 +1021,7 @@ def growth_patrol(self):
         try:
             from pos.trojstvo_task import trojstvo_rijesi
             trojstvo_rijesi.delay(s.pk)
-        except Exception:
+        except ImportError:
             pass
         
         created += 1

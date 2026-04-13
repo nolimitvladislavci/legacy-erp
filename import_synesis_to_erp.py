@@ -9,6 +9,8 @@ from companies.models import Company
 from partners.models import Partner
 from inventory.models import InventoryItem
 from decimal import Decimal, InvalidOperation
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # Load JSON
 print("Loading synesis_export.json...")

@@ -173,7 +173,7 @@ class CheckoutService:
                 jir = str(jir_result)
                 receipt.refresh_from_db()
                 zki = receipt.zki or ''
-        except Exception as e:
+        except ImportError as e:
             error = str(e)[:100]
             logger.warning('Fiskalizacija bon #%s: %s', receipt.receipt_number, e)
         return zki, jir, error
@@ -248,7 +248,7 @@ class CheckoutService:
             jir = receipt.tse_transaction_number or ''
             logger.info('TSE OK: Bon #%s, TxNr=%s', receipt.receipt_number, jir)
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             error = str(e)[:100]
             # TSE Ausfall — KassenSichV erlaubt Offline mit Klausel
             receipt.tse_error = 'TSE_AUSFALL: %s' % error
@@ -339,7 +339,7 @@ class CheckoutService:
                     f'ZSPNFT NN 108/2017 čl.9: Obaveza prijave URPP-u.\n'
                     f'Kontaktirajte računovođu ODMAH.'
                 ))
-            except Exception:
+            except ImportError:
                 pass
 
         # ── 1b. DE 250 EUR KLEINBETRAGSRECHNUNG LIMIT ──
@@ -379,7 +379,7 @@ class CheckoutService:
                     pass
                 except CheckoutValidationError:
                     raise
-                except Exception:
+                except DatabaseError:
                     pass
 
         # ── 2. VALIDACIJA ──
@@ -525,9 +525,9 @@ class CheckoutService:
                             if batch_pk:
                                 ri.stock_batch_id = batch_pk
                             ri.save(update_fields=['lot_number', 'expiry_date', 'stock_batch_id'])
-                    except Exception:
+                    except DatabaseError:
                         pass
-            except Exception as stock_err:
+            except DatabaseError as stock_err:
                 logger.warning('POS: StockMovement greska za item %s: %s', item_id, stock_err)
 
             # ── CLANARINA AUTO-LINK ──
@@ -595,7 +595,7 @@ class CheckoutService:
                     ok, msg = TipTracker.check_tip_limit(operator, tip_amount)
                     if not ok:
                         logger.warning('TIP LIMIT: %s — %s', operator, msg)
-            except Exception:
+            except ImportError:
                 pass
 
         # ── 6. RECALCULATE (koristi model metodu) ──
@@ -773,7 +773,7 @@ class CheckoutService:
         try:
             from pos.pulse import analyze_receipt
             analyze_receipt(receipt)
-        except Exception:
+        except ImportError:
             pass
 
         # Loyalty points earn (non-blocking)

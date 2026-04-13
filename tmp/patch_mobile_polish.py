@@ -4,6 +4,8 @@ Dodaje responsive CSS na sve dashboarde koji ga nemaju.
 """
 import os
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect/templates'
 
 MOBILE_CSS = """

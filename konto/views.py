@@ -34,7 +34,7 @@ def _get_company(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     # No fallback to Company.objects.first() — prevents cross-company data leakage
     return company  # May be None; callers must guard
@@ -104,7 +104,7 @@ def dashboard(request):
         try:
             from invoicing.gobd_compliance import get_gobd_report
             gobd_report = get_gobd_report(company, year=today.year)
-        except Exception:
+        except ImportError:
             gobd_report = None
 
     fiscal_stats = {
@@ -1482,7 +1482,7 @@ def report_ustva(request):
         try:
             from konto.ustva_export import generate_ustva
             report = generate_ustva(company, year, month)
-        except Exception as exc:
+        except ImportError as exc:
             error = str(exc)
 
     return render(request, 'konto/report_ustva.html', {
@@ -1575,7 +1575,7 @@ def saft_export_view(request):
                 summary=f'SAF-T HR download: {pf} do {pt}',
                 user=request.user,
             )
-        except Exception:
+        except ImportError:
             pass
 
         return response

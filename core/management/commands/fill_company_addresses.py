@@ -87,7 +87,7 @@ class Command(BaseCommand):
                             ))
                         vies_filled += 1
                         continue
-                except Exception as e:
+                except ImportError as e:
                     self.stdout.write(self.style.WARNING(f'  VIES error {company.oib}: {e}'))
 
             failed.append(f'{company.name} ({company.oib})')

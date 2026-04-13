@@ -95,7 +95,7 @@ class HRERacunHandler(BaseFiscalHandler):
                 success=True,
                 message=f'e-Racun {eracun.invoice_number} kreiran',
             )
-        except Exception as e:
+        except ImportError as e:
             return FiscalResult(success=False, message=str(e))
 
 
@@ -118,7 +118,7 @@ class FiscalHandlerRegistry:
                 if cfg.is_active:
                     from invoicing.services.fiscal_f20 import ERacunFiskalizacija20Handler
                     return ERacunFiskalizacija20Handler(company)
-            except Exception:
+            except ImportError:
                 pass
             # Fallback: stara fiskalizacija za gotovinu
             if doctype == 'R':

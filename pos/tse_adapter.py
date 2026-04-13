@@ -18,6 +18,8 @@ from decimal import Decimal
 
 import requests
 from django.utils import timezone as tz
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('pos_tse')
 

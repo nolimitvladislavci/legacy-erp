@@ -348,7 +348,7 @@ def auto_detect_modules(company):
         nkd = getattr(company, 'nkd_code', None)
         if nkd:
             nkd_code_str = getattr(nkd, 'code', '') or ''
-    except Exception:
+    except (AttributeError, TypeError):
         logger.exception("Company operation failed")
 
     for key, mod in MODULE_REGISTRY.items():

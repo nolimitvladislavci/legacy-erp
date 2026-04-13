@@ -2,9 +2,10 @@
 Konto business logic - double-entry bookkeeping, bank reconciliation, reports.
 """
 from decimal import Decimal
-from django.db import transaction
+from django.db import transaction, DatabaseError
 from django.db.models import Sum, Q, F
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_or_fail(company, code):

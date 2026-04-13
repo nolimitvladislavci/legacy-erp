@@ -1,6 +1,7 @@
 """EDIK — e-Porezna status tracking."""
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

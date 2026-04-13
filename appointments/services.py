@@ -6,8 +6,9 @@ Core functions: slot availability, booking creation, reminders.
 import logging
 from datetime import date, datetime, timedelta
 
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import BookingConflictError
 from core.exceptions import ValidationError as BizValidationError
@@ -269,5 +270,5 @@ def _send_status_notification(appointment: "Appointment", new_status: str) -> No
     try:
         from .tasks import notify_appointment_status_change
         notify_appointment_status_change.delay(appointment.pk, new_status)
-    except Exception as e:
+    except ImportError as e:
         logger.warning("Failed to send notification for appt %d: %s", appointment.pk, e)

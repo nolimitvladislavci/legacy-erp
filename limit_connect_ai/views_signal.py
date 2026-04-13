@@ -11,6 +11,8 @@ from django.views.decorators.http import require_POST
 from django.core.cache import cache
 
 from limit_connect_ai.models_signal import FenixSignal
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("borg.signal")
 
@@ -80,7 +82,7 @@ def submit_signal(request):
         try:
             from core.company_utils import get_user_company
             company = get_user_company(request)
-        except Exception:
+        except ImportError:
             pass
 
     signal = FenixSignal.objects.create(
@@ -106,7 +108,7 @@ def submit_signal(request):
     try:
         from limit_connect_ai.tasks_signal import triage_new_signal
         triage_new_signal.delay(str(signal.id))
-    except Exception:
+    except ImportError:
         pass  # Triage failure ne smije blokirati signal
 
     return JsonResponse({

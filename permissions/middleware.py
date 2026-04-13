@@ -1,4 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class RolePermissionMiddleware(MiddlewareMixin):
@@ -54,7 +56,7 @@ class RolePermissionMiddleware(MiddlewareMixin):
                     if ur.is_valid():
                         perms.update(ur.role.get_all_permissions())
                 request.user_permissions = perms
-        except Exception:
+        except DatabaseError:
             request.user_permissions = set()
 
         # UserRole za request
@@ -63,7 +65,7 @@ class RolePermissionMiddleware(MiddlewareMixin):
                 user=user, is_primary=True
             ).select_related('role').first()
             request.user_role = ur.role.role_type if ur else getattr(user.profile, 'role', None)
-        except Exception:
+        except DatabaseError:
             request.user_role = None
 
         return None

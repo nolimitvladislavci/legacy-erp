@@ -85,7 +85,7 @@ class AssessmentWithDataTest(TestCase):
             a = self._make_assessment()
             resp = self.client.get(f'/assessment/{a.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_assessment_pdf(self):
@@ -275,7 +275,7 @@ class WorkOrderWithDataTest(TestCase):
             wo = self._make_wo()
             resp = self.client.get(f'/work-orders/{wo.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass  # Template may crash
 
     def test_work_order_edit(self):
@@ -283,7 +283,7 @@ class WorkOrderWithDataTest(TestCase):
             wo = self._make_wo()
             resp = self.client.get(f'/work-orders/{wo.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_work_order_complete(self):

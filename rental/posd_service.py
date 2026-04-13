@@ -158,7 +158,7 @@ def generate_posd_data(company, year, quarter=None):
                 )
                 rok['hub3a_base64'] = generate_hub3a_base64(hs)
                 rok['hub3a_reference'] = ref
-        except Exception as e:
+        except ImportError as e:
             logger.warning('PO-SD HUB-3A failed: %s', e)
 
     return {

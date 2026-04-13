@@ -13,11 +13,12 @@ django.setup()
 
 import anthropic
 from inventory.models import InventoryItem
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from collections import Counter
 
 # Učitaj API key iz .env
 from dotenv import load_dotenv
+from django.core.exceptions import ObjectDoesNotExist
 load_dotenv('/var/www/fina-connect/.env')
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
@@ -76,7 +77,7 @@ Artikli:
             if r.get('category') not in VALID_CATS:
                 r['category'] = 'other'
         return results
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         print(f'  AI error: {e}')
         return []
 
@@ -130,7 +131,7 @@ def run(dry_run=True, batch_size=50):
                         fiscal_treatment=r['fiscal_treatment'],
                         category=r['category'],
                     )
-                except Exception as e:
+                except DatabaseError as e:
                     errors += 1
 
         print(f'OK ({len(results)} classified)')

@@ -179,7 +179,7 @@ class RentalWithDataTest(TestCase):
             prop = _make_property('Specific Prop')
             resp = self.client.get(f'/rental/bookings/new/{prop.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_booking_status_change_confirm(self):

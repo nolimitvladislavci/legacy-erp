@@ -87,7 +87,7 @@ def trigger_ai_bookkeeper(sender, instance, created, **kwargs):
     try:
         from konto.tasks import ai_bookkeeper_process
         ai_bookkeeper_process.delay(instance.pk, auto_commit=False)
-    except Exception:
+    except ImportError:
         logger.warning(
             "Failed to queue ai_bookkeeper for ArhivaEntry {}".format(instance.pk),
             exc_info=True,

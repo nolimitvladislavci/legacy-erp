@@ -62,9 +62,9 @@ def poll_inbox():
                             body=f"{msg_summary.get('senderName', 'Nepoznat')} — {msg_summary.get('invoiceNumber', '')}",
                             url="/einvoice/inbox/",
                         )
-                    except Exception:
+                    except ImportError:
                         pass
-                except Exception as e:
+                except ImportError as e:
                     logger.error(f"Smart Mailbox failed for {ext_id}: {e}")
                     message.transition_to(MessageStatus.VALIDATION_FAILED, detail=str(e))
 

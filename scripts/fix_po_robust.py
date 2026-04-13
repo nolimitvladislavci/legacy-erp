@@ -5,6 +5,8 @@ Robust PO file fixer:
 3. For technical/API strings, copy msgid as msgstr
 """
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 

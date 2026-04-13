@@ -258,7 +258,7 @@ def _run_bonitet_scan(oib, company_id):
     try:
         from fiskalizacija.fina_bonitet_service import get_supplier_risk
         return get_supplier_risk(oib, company_id)
-    except Exception as exc:
+    except ImportError as exc:
         logger.warning('[OIB-FINALIZER] Bonitet failed for %s: %s', oib, exc)
         return {'risk_level': 'UNKNOWN', 'error': str(exc)}
 

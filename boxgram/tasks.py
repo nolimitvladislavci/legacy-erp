@@ -3,6 +3,7 @@ from django.utils import timezone
 import qrcode
 import io
 from django.core.files.base import ContentFile
+from django.db import DatabaseError, IntegrityError
 from .models import Competition, SocialImport, PetProfile, CompetitionEntry
 import logging
 from django.core.exceptions import ObjectDoesNotExist

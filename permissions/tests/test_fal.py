@@ -13,6 +13,8 @@ from accounts.models import UserProfile, CompanyMembership
 from permissions.models import Permission, Role, UserRole, PermissionOverride
 from permissions.engine import PermissionEngine, AccessDecision
 from permissions.route_registry import RouteRegistry, AccessLevel, ROUTE_REGISTRY
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class FALTestBase(TestCase):

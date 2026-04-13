@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 from django.http import JsonResponse
 from django.db.models import Q, Count, Avg
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Ticket, TicketMessage, TicketTemplate
 from django.db import IntegrityError, DatabaseError

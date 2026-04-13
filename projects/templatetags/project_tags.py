@@ -1,4 +1,6 @@
 from django import template
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -13,7 +15,7 @@ def project_count(context):
         from projects.models import Project
         company = get_user_company(request)
         return Project.objects.filter(company=company).count() if company else 0
-    except Exception:
+    except DatabaseError:
         return 0
 
 
@@ -27,5 +29,5 @@ def active_project_count(context):
         from projects.models import Project
         company = get_user_company(request)
         return Project.objects.filter(company=company, status="active").count() if company else 0
-    except Exception:
+    except DatabaseError:
         return 0

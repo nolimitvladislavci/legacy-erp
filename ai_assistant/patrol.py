@@ -291,7 +291,7 @@ def run_patrol(company):
         )
 
         summary = response.text
-    except Exception as e:
+    except ImportError as e:
         logger.error("Gemini patrol failed for {}: {}".format(company.name, e))
         summary = _fallback_summary(data, company)
 

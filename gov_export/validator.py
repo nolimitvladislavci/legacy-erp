@@ -59,7 +59,7 @@ def public_validator(request):
                     from signxml import XMLVerifier
                     XMLVerifier().verify(root)
                     result['signature_valid'] = True
-                except Exception as e:
+                except ImportError as e:
                     result['signature_error'] = str(e)[:200]
             
             # Provjeri u bazi postoji li ovaj export

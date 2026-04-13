@@ -36,7 +36,7 @@ def _get_plan_info(company):
             elif sub:
                 plan_name = sub.get_plan_display()
                 plan_slug = sub.plan
-        except Exception:
+        except DatabaseError:
             pass
     return plan_name, plan_slug
 
@@ -64,7 +64,7 @@ def subscription_context(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             company = None
 
     # Platform owner bypass - all modules unlocked
@@ -82,7 +82,7 @@ def subscription_context(request):
                     'active_plan_name': plan_name,
                     'active_plan_slug': plan_slug,
                 }
-        except Exception:
+        except DatabaseError:
             pass
 
     modules = set()
@@ -94,7 +94,7 @@ def subscription_context(request):
             sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
             if sub:
                 modules = set(sub.allowed_modules)
-        except Exception:
+        except DatabaseError:
             pass
 
         # 2. UNION with Module Picker (not intersection!)
@@ -105,7 +105,7 @@ def subscription_context(request):
             if config and config.enabled_modules:
                 picker_set = set(config.enabled_modules)
                 modules = modules | picker_set  # UNION, not intersection
-        except Exception:
+        except DatabaseError:
             pass
 
         # 3. Always include core modules
@@ -116,7 +116,7 @@ def subscription_context(request):
     if not is_admin:
         try:
             is_admin = request.user.profile.role in ('superadmin', 'company_admin')
-        except Exception:
+        except AttributeError:
             pass
 
     # Plan info for sidebar pill

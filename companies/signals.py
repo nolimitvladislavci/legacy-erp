@@ -100,7 +100,7 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
                 'fiscal_oib': instance.oib or '',
             },
         )
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[BOOTSTRAP] POSSettings za %s: %s', instance.name, e)
 
     # 2. Default POS Terminal
@@ -139,14 +139,14 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
                 country=country, rate=rate,
                 defaults={'name': name, 'is_default': is_default, 'is_active': True},
             )
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[BOOTSTRAP] TaxRate za %s: %s', instance.name, e)
 
     # 4. Onboarding Progress
     try:
         from companies.models import OnboardingProgress
         OnboardingProgress.objects.get_or_create(company=instance)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[BOOTSTRAP] OnboardingProgress za %s: %s', instance.name, e)
 
     # 5. T&C default (unsigned)

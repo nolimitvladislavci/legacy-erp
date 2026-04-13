@@ -1,7 +1,8 @@
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from decimal import Decimal
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
 
@@ -241,7 +242,7 @@ class BookLoan(FSMMixin, models.Model):
                     f'Knjiga "{self.item.name}" je trebala biti vracena {self.due_date}.\n'
                     f'Kazna: {self.fine_per_day} EUR/dan. Molimo vratite sto prije.'
                 ))
-        except Exception:
+        except ImportError:
             pass
 
     def _notify_fine(self):
@@ -254,7 +255,7 @@ class BookLoan(FSMMixin, models.Model):
                     f'"{self.item.name}" vracena. Kazna za kasnjenje: {self.fine_total} EUR.\n'
                     f'Kaznu mozete platiti u knjiznici.'
                 ))
-        except Exception:
+        except ImportError:
             pass
 
 

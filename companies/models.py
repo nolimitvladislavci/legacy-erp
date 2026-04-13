@@ -1,9 +1,10 @@
 import uuid
 
 from django.conf import settings
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -533,7 +534,7 @@ class CompanyBranch(models.Model):
             sub = self.parent_company.subscriptions.filter(status='active').first()
             if sub:
                 return sub.allowed_modules
-        except Exception:
+        except DatabaseError:
             pass
         return set()
 

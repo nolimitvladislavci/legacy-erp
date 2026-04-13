@@ -16,6 +16,7 @@ from django.db import models
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST, require_GET
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import CardActivity, StatusTimestamp
 from django.db import IntegrityError, DatabaseError
@@ -460,7 +461,7 @@ def update_worker_gps(request):
         profile.save(update_fields=['last_lat', 'last_lng', 'last_gps_update'])
         logger.info('GPS update: user=%s lat=%.4f lng=%.4f', request.user.username, lat, lng)
         return JsonResponse({'ok': True, 'lat': lat, 'lng': lng})
-    except Exception as e:
+    except AttributeError as e:
         logger.error('GPS update failed: %s', e)
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
 
@@ -528,7 +529,7 @@ def borg_hub(request):
     # ── RECENT ACTIVITY ──
     try:
         recent_activity = list(CardActivity.objects.select_related('user').order_by('-created_at')[:20])
-    except Exception:
+    except DatabaseError:
         recent_activity = []
 
     # ── EXPERIENCES ──

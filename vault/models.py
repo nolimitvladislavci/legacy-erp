@@ -31,7 +31,7 @@ def _get_fernet():
         return None
     try:
         return Fernet(key.encode() if isinstance(key, str) else key)
-    except Exception:
+    except (UnicodeDecodeError, ValueError):
         return None
 
 
@@ -138,7 +138,7 @@ class VaultEntry(models.Model):
             raise ValueError('VAULT_KEY nije konfiguriran')
         try:
             decrypted = f.decrypt(bytes(self._content_enc)).decode('utf-8')
-        except Exception:
+        except (UnicodeDecodeError, ValueError):
             raise ValueError('Greška pri dešifriranju — VAULT_KEY možda nije ispravan')
 
         # Audit log

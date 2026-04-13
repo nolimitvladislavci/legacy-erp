@@ -4,6 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db import IntegrityError, DatabaseError
 import json
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('udruge')
 
@@ -34,7 +35,7 @@ def send_expiry_reminders(self):
             result = send_text(phone=phone, message=msg, company_id=str(clan.company.pk))
             if result.get('ok'):
                 sent += 1
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('WA expiry %s: %s', clan, e)
 
     return {'sent': sent}
@@ -155,7 +156,7 @@ def _send_dunning_reminder(sub):
                 ),
                 company_id=str(clan.company.pk),
             )
-        except Exception:
+        except ImportError:
             pass
 
 
@@ -506,7 +507,7 @@ def check_ribolovne_dozvole():
                 )
                 send_text(phone=phone, message=msg, company_id=str(clan.company.pk))
                 notified += 1
-            except Exception as e:
+            except ImportError as e:
                 logger.warning('Ribolovna dozvola WA %s: %s', clan, e)
 
     logger.info('Ribolovne dozvole check: %d expiring in 14 days, %d notified', expiring.count(), notified)

@@ -1,6 +1,6 @@
 import logging
 
-from django.db import transaction, DatabaseError
+from django.db import transaction, DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 import json
@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from rest_framework import permissions, viewsets
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -202,7 +203,7 @@ def appointment_status(request, pk):
             try:
                 from appointments.tasks import notify_appointment_status_change
                 notify_appointment_status_change.delay(appt.id, new_status)
-            except Exception:
+            except ImportError:
                 pass
     return redirect("appointments:list")
 
@@ -577,7 +578,7 @@ def _send_status_wa(appointment, message):
         track_url = 'https://limit-connect.com/appointments/booking/track/%d/' % appointment.pk
         full_msg = '%s\n\nPratite: %s' % (message, track_url)
         send_whatsapp_text_task.delay(phone, full_msg)
-    except Exception:
+    except ImportError:
         pass
 
 
@@ -673,7 +674,7 @@ def api_slots_week(request):
     if week_start_str:
         try:
             week_start = parse_date(week_start_str)
-        except Exception:
+        except ValueError:
             week_start = today - timedelta(days=today.weekday())
     else:
         week_start = today - timedelta(days=today.weekday())
@@ -968,7 +969,7 @@ def api_slots_week(request):
     if week_start_str:
         try:
             week_start = parse_date(week_start_str)
-        except Exception:
+        except ValueError:
             week_start = today - timedelta(days=today.weekday())
     else:
         week_start = today - timedelta(days=today.weekday())
@@ -1363,7 +1364,7 @@ def api_book_double_lock(request):
         if request.user.is_authenticated:
             try:
                 company = request.user.profile.company
-            except Exception:
+            except AttributeError:
                 pass
     if not company:
         company = Company.objects.filter(is_platform_owner=True).first() or Company.objects.first()
@@ -1481,7 +1482,7 @@ def api_double_lock_slots(request):
         if request.user.is_authenticated:
             try:
                 company = request.user.profile.company
-            except Exception:
+            except AttributeError:
                 pass
     if not company:
         company = Company.objects.filter(is_platform_owner=True).first() or Company.objects.first()
@@ -1657,7 +1658,7 @@ def api_booking_guest_register(request):
         </div>
         """
         send_email_task.delay(subject, '', 'noreply@limit-connect.com', [email], html_message=body_html)
-    except Exception as e:
+    except ImportError as e:
         logger.warning('Email send failed: %s', e)
 
     # ── WhatsApp PIN ───────────────────────────────────────────────────────────
@@ -1671,7 +1672,7 @@ def api_booking_guest_register(request):
                 wa_msg = "PIN za rezervaciju\n\nVas PIN: " + str(wa_pin) + "\n\nVrijedi 10 minuta. - " + company_name
                 send_whatsapp_text_task.delay(phone, wa_msg)
                 wa_sent = True
-        except Exception as e:
+        except ImportError as e:
             logger.warning('WA PIN send failed: %s', e)
 
     return JsonResponse({

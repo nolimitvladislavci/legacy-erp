@@ -18,6 +18,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
@@ -429,7 +430,7 @@ def order_action(request, pk, action):
         try:
             from production.konto import book_production_order
             journal_entry = book_production_order(order, user=request.user)
-        except Exception as ke:
+        except ImportError as ke:
             logger.warning(f'Konto booking failed for {order.order_number}: {ke}')
 
         msg = f"Nalog {order.order_number} završen. Ukupni trošak: {order.total_cost:.2f} EUR"

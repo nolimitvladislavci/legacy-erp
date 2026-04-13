@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Sum, Count
+from django.db import DatabaseError, IntegrityError
 from core.company_utils import get_user_company
 from .models import Property, Booking, HousekeepingLog
 from django.core.exceptions import ObjectDoesNotExist
@@ -231,7 +232,7 @@ def check_out(request, pk):
                 )
                 booking.payment_id = payment.id
                 booking.save(update_fields=['payment_id'])
-            except Exception as e:
+            except ImportError as e:
                 logger.warning("Auto-payment on checkout failed: %s", e)
 
         messages.success(request, f'{booking.guest_name} odjavljen iz {booking.rental_property.name}')
@@ -310,7 +311,7 @@ def guest_pay(request, access_qr):
             booking.save(update_fields=['payment_id'])
             if payment.external_url:
                 return redirect(payment.external_url)
-        except Exception as e:
+        except ImportError as e:
             logger.error("Guest payment failed: %s", e)
             messages.error(request, _('Placanje nije uspjelo. Pokusajte ponovo.'))
 
@@ -502,7 +503,7 @@ def guest_ocr_upload(request, pk):
             },
             'confidence': result.get('confidence', 0),
         })
-    except Exception as e:
+    except ImportError as e:
         return JsonResponse({
             'ok': False,
             'guest_id': guest.pk,

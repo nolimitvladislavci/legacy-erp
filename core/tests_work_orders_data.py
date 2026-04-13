@@ -95,7 +95,7 @@ class WorkOrderListTest(TestCase):
         try:
             resp = self.client.get('/work-orders/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_data(self):
@@ -105,7 +105,7 @@ class WorkOrderListTest(TestCase):
             _make_work_order(self.company, self.user, self.partner, 'COMPLETED')
             resp = self.client.get('/work-orders/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status_open(self):
@@ -113,7 +113,7 @@ class WorkOrderListTest(TestCase):
             _make_work_order(self.company, self.user, status='OPEN')
             resp = self.client.get('/work-orders/?status=OPEN', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_status_completed(self):
@@ -121,7 +121,7 @@ class WorkOrderListTest(TestCase):
             _make_work_order(self.company, self.user, status='COMPLETED')
             resp = self.client.get('/work-orders/?status=COMPLETED', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_search(self):
@@ -129,7 +129,7 @@ class WorkOrderListTest(TestCase):
             _make_work_order(self.company, self.user, self.partner)
             resp = self.client.get('/work-orders/?q=WO', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_list_filter_priority(self):
@@ -137,7 +137,7 @@ class WorkOrderListTest(TestCase):
             _make_work_order(self.company, self.user, self.partner)
             resp = self.client.get('/work-orders/?priority=MEDIUM', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -154,7 +154,7 @@ class WorkOrderCreateTest(TestCase):
         try:
             resp = self.client.get('/work-orders/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_create_post_basic(self):
@@ -218,14 +218,14 @@ class WorkOrderDetailTest(TestCase):
             wo = _make_work_order(self.company, self.user, self.partner)
             resp = self.client.get(f'/work-orders/{wo.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_detail_invalid_pk(self):
         try:
             resp = self.client.get('/work-orders/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_edit_get(self):
@@ -233,7 +233,7 @@ class WorkOrderDetailTest(TestCase):
             wo = _make_work_order(self.company, self.user, self.partner)
             resp = self.client.get(f'/work-orders/{wo.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_post(self):
@@ -248,7 +248,7 @@ class WorkOrderDetailTest(TestCase):
                 'status': 'IN_PROGRESS',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_complete_work_order(self):
@@ -259,7 +259,7 @@ class WorkOrderDetailTest(TestCase):
                 'notes': 'Završeno na vrijeme',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_cancel_work_order(self):
@@ -269,7 +269,7 @@ class WorkOrderDetailTest(TestCase):
                 'reason': 'Klijent otkazao',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_to_invoice(self):
@@ -277,7 +277,7 @@ class WorkOrderDetailTest(TestCase):
             wo = _make_work_order(self.company, self.user, self.partner, 'COMPLETED')
             resp = self.client.post(f'/work-orders/{wo.pk}/to-invoice/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -294,7 +294,7 @@ class VehicleCardTest(TestCase):
         try:
             resp = self.client.get('/work-orders/vehicles/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_data(self):
@@ -302,14 +302,14 @@ class VehicleCardTest(TestCase):
             _make_vehicle_card(self.company, self.partner)
             resp = self.client.get('/work-orders/vehicles/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_create_get(self):
         try:
             resp = self.client.get('/work-orders/vehicles/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_create_post(self):
@@ -331,7 +331,7 @@ class VehicleCardTest(TestCase):
             vc = _make_vehicle_card(self.company, self.partner)
             resp = self.client.get(f'/work-orders/vehicles/{vc.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_get(self):
@@ -339,7 +339,7 @@ class VehicleCardTest(TestCase):
             vc = _make_vehicle_card(self.company, self.partner)
             resp = self.client.get(f'/work-orders/vehicles/{vc.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_post(self):
@@ -353,14 +353,14 @@ class VehicleCardTest(TestCase):
                 'vin': 'WBA8A9C58JAA12345',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_detail_invalid(self):
         try:
             resp = self.client.get('/work-orders/vehicles/99999/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_search(self):
@@ -368,7 +368,7 @@ class VehicleCardTest(TestCase):
             _make_vehicle_card(self.company, self.partner)
             resp = self.client.get('/work-orders/vehicles/?q=Toyota', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -385,7 +385,7 @@ class ClientCardTest(TestCase):
         try:
             resp = self.client.get('/work-orders/client-cards/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_list_with_data(self):
@@ -393,14 +393,14 @@ class ClientCardTest(TestCase):
             _make_client_card(self.company, self.partner)
             resp = self.client.get('/work-orders/client-cards/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_create_get(self):
         try:
             resp = self.client.get('/work-orders/client-cards/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_create_post_optical(self):
@@ -439,7 +439,7 @@ class ClientCardTest(TestCase):
             cc = _make_client_card(self.company, self.partner)
             resp = self.client.get(f'/work-orders/client-cards/{cc.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_get(self):
@@ -447,7 +447,7 @@ class ClientCardTest(TestCase):
             cc = _make_client_card(self.company, self.partner)
             resp = self.client.get(f'/work-orders/client-cards/{cc.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_post(self):
@@ -460,5 +460,5 @@ class ClientCardTest(TestCase):
                 'gdpr_consent': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass

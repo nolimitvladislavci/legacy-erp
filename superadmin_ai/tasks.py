@@ -19,6 +19,7 @@ from django.contrib.auth.models import User
 
 from superadmin_ai.models import PendingAIAction
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('superadmin_ai')
 
@@ -97,7 +98,7 @@ def _check_all_services():
         with connection.cursor() as c:
             c.execute('SELECT 1')
         checks['postgresql'] = True
-    except Exception:
+    except ImportError:
         checks['postgresql'] = False
 
     # Redis
@@ -105,7 +106,7 @@ def _check_all_services():
         from django.core.cache import cache
         cache.set('_watchdog', 'ok', 10)
         checks['redis'] = cache.get('_watchdog') == 'ok'
-    except Exception:
+    except ImportError:
         checks['redis'] = False
 
     # Gunicorn (port 8000)

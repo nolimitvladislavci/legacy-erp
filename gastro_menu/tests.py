@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.test import TestCase
 from companies.models import Company
 from gastro_menu.models import DigitalMenu, MenuCategory, MenuItem
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class DigitalMenuTest(TestCase):

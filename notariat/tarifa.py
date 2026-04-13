@@ -4,6 +4,8 @@ Kalkulator biljeznicki pristojbi i dimnjacarski tarifa.
 Zakon o javnobiljeznicki pristojbama (NN 115/12)
 """
 from decimal import Decimal
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 TARIFE = {

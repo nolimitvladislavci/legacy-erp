@@ -10,6 +10,8 @@ import logging
 from boxgram.models import PetProfile, SocialImport, LifeEvent, EventMedia
 from boxgram.services.social_import import fetch_oembed, create_social_import
 from boxgram.serializers import SocialImportSerializer, LifeEventSerializer
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

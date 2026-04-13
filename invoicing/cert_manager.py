@@ -166,7 +166,7 @@ def _attr(subject, oid_dotted: str) -> str:
         for attr in subject:
             if attr.oid.dotted_string == oid_dotted:
                 return attr.value
-    except Exception:
+    except ImportError:
         pass
     return ''
 

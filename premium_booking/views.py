@@ -3,7 +3,7 @@ import json
 import time
 from datetime import datetime, timedelta
 
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, DatabaseError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -177,7 +177,7 @@ def api_submit(request):
                 from core.whatsapp_tasks import send_whatsapp_text_task
                 msg = f"Poštovani {name}, Vaša rezervacija ({booking.booking_number}) je potvrđena."
                 send_whatsapp_text_task.delay(phone, msg)
-            except Exception:
+            except ImportError:
                 pass
 
         return JsonResponse({'status': 'success', 'booking_number': booking.booking_number})

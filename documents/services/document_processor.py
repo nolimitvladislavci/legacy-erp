@@ -99,7 +99,7 @@ class DocumentProcessor:
                     r = {3: 180, 6: 270, 8: 90}.get(exif[k])
                     if r:
                         img = img.rotate(r, expand=True)
-            except Exception:
+            except KeyError:
                 pass
             if max(img.size) > 2048:
                 img.thumbnail((2048, 2048), Image.LANCZOS)
@@ -477,5 +477,5 @@ class DocumentProcessor:
                 url='/hr/documents/arhiva/',
                 company=batch.company,
             )
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Notify failed: %s', e)

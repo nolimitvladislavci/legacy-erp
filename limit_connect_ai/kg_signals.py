@@ -116,10 +116,10 @@ def auto_scan_opportunities(sender, instance, created, **kwargs):
         from limit_connect_ai.tasks import scan_opportunities_task
         scan_opportunities_task.delay()
         logger.info('Triggered opportunity scan from EU_FUND update: %s', instance.title[:60])
-    except Exception:
+    except ImportError:
         # If celery task doesn't exist, run inline
         try:
             from limit_connect_ai.services.kg_seeder import scan_all_companies
             scan_all_companies()
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Could not trigger opportunity scan: %s', e)

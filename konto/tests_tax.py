@@ -269,7 +269,7 @@ class TestTaxDashboard(TestCase):
             UserProfile.objects.update_or_create(
                 user=self.user, defaults={'company': self.company}
             )
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_dashboard_returns_200(self):

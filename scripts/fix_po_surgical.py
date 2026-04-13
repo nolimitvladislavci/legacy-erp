@@ -3,6 +3,8 @@ Surgical fix for known problematic PO entries.
 Uses line-by-line approach to find and fix broken entries.
 """
 import re
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 

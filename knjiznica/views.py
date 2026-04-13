@@ -9,6 +9,8 @@ from django.http import HttpResponse
 from datetime import timedelta
 from decimal import Decimal
 import csv
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import BookMeta, BookLoan, LibraryMember, BookReservation
@@ -298,7 +300,7 @@ def loan_return(request, pk):
                         f'Knjiga "{loan.item.name}" je dostupna!\n'
                         f'Preuzeti do: {reservation.expires_at}'
                     ))
-            except Exception:
+            except ImportError:
                 pass
             messages.info(request,
                 f'Obaviješten je {reservation.member.partner.name} — čekao ovu knjigu.')

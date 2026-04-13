@@ -12,6 +12,8 @@ from xml.dom import minidom
 from decimal import Decimal
 from datetime import date
 import logging
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -220,7 +222,7 @@ def generate_xrechnung(eracun):
         # Remove extra xml declaration from toprettyxml
         if xml_str.count('<?xml') > 1:
             xml_str = xml_str.replace('<?xml version="1.0" ?>\n', '', 1)
-    except Exception:
+    except (UnicodeDecodeError, ValueError):
         pass
 
     return xml_str

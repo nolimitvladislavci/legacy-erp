@@ -19,7 +19,8 @@ Alarmira: WhatsApp + log
 import logging
 from celery import shared_task
 from django.apps import apps
-from django.db import connection
+from django.db import connection, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('borg.sentinel')
 
@@ -108,7 +109,7 @@ def schema_drift_check(self):
                 + '\\n'.join(f'[{d["type"]}] {d["table"]}.{d["column"]}' for d in drifts[:10])
             )
             send_text(phone='385976091655', message=msg, company_id='system')
-        except Exception:
+        except ImportError:
             pass
     else:
         logger.info('Schema Drift Sentinel: %d tablica provjereno — ČISTO', checked)
@@ -192,7 +193,7 @@ def orphan_data_check(self):
                 + '\\n'.join(f'{o["model"]}.{o["fk_field"]}: {o["count"]} siročadi' for o in orphans)
             )
             send_text(phone='385976091655', message=msg, company_id='system')
-        except Exception:
+        except ImportError:
             pass
     else:
         logger.info('Orphan Data Radar: sve FK relacije čiste')

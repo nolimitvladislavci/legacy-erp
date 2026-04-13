@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # URLs that are always allowed even in readonly mode
 EXEMPT_PATHS = (
@@ -55,6 +57,6 @@ class ArchiveReadonlyMiddleware:
             ).order_by('-valid_from').first()
             if sub and sub.plan == 'archive_readonly':
                 return True
-        except Exception:
+        except DatabaseError:
             pass
         return False

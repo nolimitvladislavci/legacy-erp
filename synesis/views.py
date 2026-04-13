@@ -9,6 +9,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
 from core.company_utils import get_user_company
 from django.core.exceptions import ObjectDoesNotExist
 

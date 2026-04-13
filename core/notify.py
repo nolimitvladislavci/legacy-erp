@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 core/notify.py — Koordinatorske notifikacije na WhatsApp
 
@@ -50,6 +52,6 @@ def notify(category: str, message: str, urgent: bool = False):
             from core.whatsapp_tasks import send_whatsapp_text_task
             send_whatsapp_text_task.delay(ADMIN_PHONE, full_msg)
             return {'success': True, 'async': True}
-    except Exception as e:
+    except ImportError as e:
         logger.error('notify() failed: %s', e)
         return {'success': False, 'error': str(e)}

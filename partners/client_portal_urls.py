@@ -1,4 +1,6 @@
 from django.urls import path
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from . import client_portal_views as views
 
 app_name = 'client_portal'

@@ -133,7 +133,7 @@ class WorktimeEntryActionsTest(TestCase):
             e = self._make_entry()
             resp = self.client.get(f'/worktime/edit/{e.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_edit_entry_post(self):

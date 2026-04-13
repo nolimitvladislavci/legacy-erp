@@ -25,7 +25,7 @@ def _get_company(request):
     if not company:
         try:
             company = request.user.profile.company
-        except Exception:
+        except AttributeError:
             pass
     return company
 

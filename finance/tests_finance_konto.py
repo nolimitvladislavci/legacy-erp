@@ -20,6 +20,8 @@ from companies.models import Company
 from partners.models import Partner
 from konto.models import BankAccount, BankTransaction
 from finance.models import Transaction
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # ─── Helpers ────────────────────────────────────────────────────────────────

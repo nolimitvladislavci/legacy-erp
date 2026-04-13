@@ -378,7 +378,7 @@ def generate_datev_bewegungsdaten(payroll_run):
     for ps in payslips:
         try:
             emp_id = ps.user.employeeprofile.employee_id or str(ps.user.pk)
-        except Exception:
+        except (ValueError, TypeError):
             emp_id = str(ps.user.pk)
 
         writer.writerow([

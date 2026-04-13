@@ -79,13 +79,13 @@ class Command(BaseCommand):
                                 body=f'{interv.title} – {interv.address or interv.client_name}',
                                 url=f'/interventions/{interv.pk}/field/',
                             )
-                        except Exception as _pe:
+                        except ImportError as _pe:
                             self.stderr.write(f'  Push error: {_pe}')
                         # WhatsApp notification
                         try:
                             from core.whatsapp_tasks import send_intervention_assignment_whatsapp
                             send_intervention_assignment_whatsapp.delay(interv.pk, available.pk)
-                        except Exception:
+                        except ImportError:
                             pass
                     else:
                         # No available worker – reset to NOVO
@@ -99,7 +99,7 @@ class Command(BaseCommand):
                         )
                     processed += 1
 
-            except Exception as e:
+            except ImportError as e:
                 self.stderr.write(f'  ERROR #{interv.pk}: {e}')
 
         self.stdout.write(f'TTL check: {processed} intervention(s) processed at {timezone.now():%Y-%m-%d %H:%M:%S}')

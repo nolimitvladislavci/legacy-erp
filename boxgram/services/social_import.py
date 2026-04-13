@@ -58,7 +58,7 @@ def detect_platform(url: str) -> Optional[str]:
         parsed = urlparse(url)
         domain = parsed.netloc.replace('www.', '')
         return PLATFORM_MAP.get(domain)
-    except Exception as e:
+    except KeyError as e:
         logger.error(f"Error detecting platform from {url}: {e}")
         return None
 
@@ -197,7 +197,7 @@ def _extract_youtube_id(url: str) -> Optional[str]:
         elif 'youtube.com' in url:
             parsed = urlparse(url)
             return parsed.query.split('v=')[1].split('&')[0] if 'v=' in parsed.query else None
-    except Exception:
+    except (ValueError, AttributeError):
         pass
     return None
 

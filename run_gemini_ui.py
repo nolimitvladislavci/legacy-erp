@@ -6,6 +6,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')
 
 import django; django.setup()
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logging.basicConfig(
     level=logging.INFO,

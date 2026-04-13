@@ -86,7 +86,7 @@ def _require_company_admin(request):
     """Allow company_admin, project_manager, superadmin."""
     try:
         profile = request.user.profile
-    except Exception:
+    except AttributeError:
         return None, None
     if not profile.is_company_admin:
         return None, None
@@ -97,7 +97,7 @@ def _require_strict_admin(request):
     """Only company_admin and superadmin — NOT project_manager."""
     try:
         profile = request.user.profile
-    except Exception:
+    except AttributeError:
         return None, None
     if profile.role not in ('company_admin', 'superadmin', 'tenant_admin') and not profile.user.is_superuser:
         return None, None
@@ -860,7 +860,7 @@ def workspace_home(request):
                 company=client_company,
                 defaults={'role': 'company_admin', 'is_active': True}
             )
-        except Exception:
+        except DatabaseError:
             pass  # Skip if any DB issue
     total_pending = 0
 
@@ -1278,7 +1278,7 @@ def employee_onboard(request, pk=None):
                             'oib': bool(oib), 'iban': bool(iban),
                             'pin': bool(pin), 'workspace': workspace_id,
                         })
-                except Exception:
+                except ImportError:
                     pass
 
             # Cleanup session
@@ -1341,7 +1341,7 @@ def employee_offboard(request, pk):
             target_id=str(ep.pk),
             target_repr=f'Offboarding: {ep.user.get_full_name()} ({reason})',
         )
-    except Exception:
+    except ImportError:
         pass
 
     messages.success(request, _(

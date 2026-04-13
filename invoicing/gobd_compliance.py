@@ -31,7 +31,7 @@ def check_pflichtangaben(invoice) -> list:
     try:
         if not invoice.items.exists():
             warnings.append('Keine Leistungsbeschreibung / Positionen')
-    except Exception:
+    except DatabaseError:
         pass
 
     # USt-IdNr ODER Steuernummer izdavatelja

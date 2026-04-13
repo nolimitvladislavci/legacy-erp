@@ -67,6 +67,8 @@ Fiscal Health template tag — dohvaća status fiskalizacije za trenutnu firmu.
 """
 from django import template
 from django.core.cache import cache
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -130,7 +132,7 @@ def fiscal_health_status(context):
                 result['cert_expired'] = days_left <= 0
                 result['cert_subject'] = cert.subject.rfc4514_string()[:60]
                 result['cert_days'] = days_left
-            except Exception:
+            except (FileNotFoundError, IOError):
                 result['cert_valid'] = False
 
         # Zadnji JIR
@@ -142,7 +144,7 @@ def fiscal_health_status(context):
             if last_fiscal:
                 result['last_jir'] = last_fiscal.jir[:12]
                 result['last_jir_date'] = last_fiscal.fiscal_datetime.strftime('%d.%m. %H:%M') if last_fiscal.fiscal_datetime else ''
-        except Exception:
+        except DatabaseError:
             pass
 
         # POS receipts s JIR
@@ -152,13 +154,13 @@ def fiscal_health_status(context):
             if last_pos and not result['last_jir']:
                 result['last_jir'] = last_pos.jir[:12]
                 result['last_jir_date'] = last_pos.fiscal_datetime.strftime('%d.%m. %H:%M') if last_pos.fiscal_datetime else ''
-        except Exception:
+        except DatabaseError:
             pass
 
         # Healthy = cert valid + (has JIR or config active)
         result['healthy'] = result['cert_valid'] and (bool(result['last_jir']) or config.is_active)
 
-    except Exception:
+    except DatabaseError:
         pass
 
     cache.set(cache_key, result, 60)

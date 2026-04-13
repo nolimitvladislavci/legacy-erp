@@ -14,7 +14,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from inventory.models import InventoryItem
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ─── RULES ────────────────────────────────────────────────────────────
 # (keywords, item_class, fiscal_treatment, new_category)

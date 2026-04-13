@@ -14,6 +14,8 @@ sys.path.insert(0, "/var/www/fina-connect")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
 import anthropic
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 LOCALE = sys.argv[1] if len(sys.argv) > 1 else "en"
 LIMIT = int(sys.argv[2]) if len(sys.argv) > 2 else 99999
@@ -150,7 +152,7 @@ def translate_batch(msgids, target_lang):
             parts = text.split("```")
             text = parts[1].lstrip("json").strip() if len(parts) > 1 else text
         return json.loads(text)
-    except Exception as exc:
+    except (json.JSONDecodeError, ValueError) as exc:
         print(f"  API error: {exc}")
         return {}
 

@@ -11,6 +11,8 @@ import logging
 import os
 from decimal import Decimal
 from lxml import etree
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('eracun.validator')
 
@@ -57,7 +59,7 @@ def validate_xsd(xml_bytes):
             errors = [str(e) for e in schema.error_log]
             return False, errors[:10]  # Max 10 errors
         return True, []
-    except Exception as e:
+    except (UnicodeDecodeError, ValueError) as e:
         return False, [f'XML parse error: {e}']
 
 
@@ -153,7 +155,7 @@ def validate_business_rules(xml_bytes):
 
     try:
         doc = etree.fromstring(xml_bytes if isinstance(xml_bytes, bytes) else xml_bytes.encode())
-    except Exception as e:
+    except (UnicodeDecodeError, ValueError) as e:
         return False, [f'XML parse: {e}'], []
 
     ns = {

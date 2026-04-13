@@ -60,35 +60,35 @@ class CompanySettingsTest(TestCase):
         try:
             resp = self.client.get('/companies/settings/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_info_tab_explicit(self):
         try:
             resp = self.client.get('/companies/settings/?tab=info', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_employees_tab(self):
         try:
             resp = self.client.get('/companies/settings/?tab=employees', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_billing_tab(self):
         try:
             resp = self.client.get('/companies/settings/?tab=billing', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_branches_tab(self):
         try:
             resp = self.client.get('/companies/settings/?tab=branches', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_settings_post_info(self):
@@ -108,7 +108,7 @@ class CompanySettingsTest(TestCase):
                 'currency': 'EUR',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_settings_post_fiscal(self):
@@ -136,7 +136,7 @@ class CompanyEmployeeTest(TestCase):
         try:
             resp = self.client.get('/companies/settings/employee/create/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_employee_create_post(self):
@@ -157,7 +157,7 @@ class CompanyEmployeeTest(TestCase):
         try:
             resp = self.client.get(f'/companies/settings/employee/{self.worker.pk}/edit/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_employee_edit_post(self):
@@ -264,14 +264,14 @@ class CompanyListCreateTest(TestCase):
         try:
             resp = self.client.get('/companies/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_company_create_get(self):
         try:
             resp = self.client.get('/companies/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_company_create_post(self):
@@ -291,7 +291,7 @@ class CompanyListCreateTest(TestCase):
         try:
             resp = self.client.get('/companies/api/nkd-search/?q=test', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_onboarding_dismiss(self):

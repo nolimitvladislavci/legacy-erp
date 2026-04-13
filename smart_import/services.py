@@ -148,7 +148,7 @@ def _extract_pdf_text(file_path):
         from pypdf import PdfReader
         reader = PdfReader(file_path)
         return "\n".join(p.extract_text() or "" for p in reader.pages)
-    except Exception as e:
+    except ImportError as e:
         logger.error("PDF extract failed: %s", e)
         return ""
 
@@ -369,7 +369,7 @@ def _encode_image(file_path):
                         elif val == 8:
                             img = img.rotate(90, expand=True)
                         break
-        except Exception:
+        except ImportError:
             pass
 
         img.thumbnail((2048, 2048), PILImage.LANCZOS)
@@ -414,7 +414,7 @@ def _encode_image_enhanced(file_path):
                         elif val == 8:
                             img = img.rotate(90, expand=True)
                         break
-        except Exception:
+        except ImportError:
             pass
 
         # Higher resolution for OCR
@@ -465,7 +465,7 @@ def _claude_extract_lines(text, source_type="text"):
         _log_gemini_usage(response, "smart_import_text")
 
         return _parse_json_rows(result)
-    except Exception as e:
+    except ImportError as e:
         logger.error("Gemini text parse failed: %s", e)
         return []
 

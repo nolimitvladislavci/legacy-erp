@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 def get_managed_companies(user):
     """
     Vraća queryset firmi kojima korisnik ima pristup kao partner/reseller.
@@ -9,7 +11,7 @@ def get_managed_companies(user):
         user_company = user.company_memberships.filter(
             is_active=True, is_default=True
         ).first().company
-    except Exception:
+    except DatabaseError:
         return Company.objects.none()
 
     # Vlastita firma + aktivno upravljane

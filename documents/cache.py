@@ -1,5 +1,7 @@
 """Stub za documents cache — invalidacija arhiva cachea."""
 from django.core.cache import cache
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def invalidate_arhiva_cache(company_id):

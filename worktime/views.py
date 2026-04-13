@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
 from .serializers import *
@@ -73,7 +75,7 @@ def worker_camera_upload(request):
         if lead_id:
             try:
                 lead = ProjectLead.objects.get(id=lead_id)
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
 
         ProjectPhoto.objects.create(
@@ -122,7 +124,7 @@ def api_quick_create_project(request):
             'name': project.name,
             'message': f'Projekt "{project.name}" dodan!'
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -153,11 +155,11 @@ def _get_worker_company(user):
     """Get company for a worker via profile or direct field."""
     try:
         return user.profile.company
-    except Exception:
+    except AttributeError:
         pass
     try:
         return user.employeeprofile.company
-    except Exception:
+    except AttributeError:
         pass
     return None
 
@@ -507,7 +509,7 @@ def my_hours(request):
         ep = request.user.employeeprofile
         hourly_rate = float(ep.hourly_rate)
         projected_pay = round(hourly_rate * total_hours, 2)
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # Dnevni breakdown za graf
@@ -617,11 +619,11 @@ def my_requests(request):
                     target_model='TimeEntry',
                     target_repr=f'Zahtjev: {req_type} {df}—{dt} ({created} dana)',
                 )
-            except Exception:
+            except ImportError:
                 pass
 
             messages.success(request, f'Zahtjev poslan: {created} dana {req_type}. Čeka odobrenje.')
-        except Exception as e:
+        except ImportError as e:
             messages.error(request, f'Greška: {e}')
 
         return redirect('worktime:my_requests')

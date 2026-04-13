@@ -37,7 +37,7 @@ def daily_landlord_brief(self):
                 if phone:
                     send_text(phone, brief)
                     sent += 1
-            except Exception:
+            except ImportError:
                 pass
             logger.info('Landlord brief sent for %s', company.name)
         except ObjectDoesNotExist as e:
@@ -96,7 +96,7 @@ def annual_limit_check(self):
                     if phone:
                         send_text(phone, result['message'])
                         alerts += 1
-                except Exception:
+                except ImportError:
                     pass
         except ObjectDoesNotExist as e:
             logger.warning('Limit check failed for %s: %s', cid, e)

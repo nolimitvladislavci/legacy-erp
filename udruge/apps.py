@@ -15,10 +15,12 @@ class UdrugeConfig(AppConfig):
                 try:
                     from konto.nonprofit_setup import setup_nonprofit_accounts
                     setup_nonprofit_accounts(instance)
-                except Exception:
+                except ImportError:
                     pass  # Konto app might not be ready yet
 
         post_save.connect(auto_setup_nonprofit, sender=Company,
                          dispatch_uid='udruge_auto_nonprofit_setup')
 
         import udruge.signals  # noqa: F401 — KnjigaPrimitaka + Donacija archival
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist

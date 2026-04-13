@@ -44,7 +44,7 @@ def encrypt_pii(plaintext: str) -> str:
     try:
         token = f.encrypt(plaintext.encode('utf-8'))
         return base64.urlsafe_b64encode(token).decode('ascii')
-    except Exception as e:
+    except ValueError as e:
         logger.warning('PII encrypt failed: %s', e)
         return ''
 

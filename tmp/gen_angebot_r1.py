@@ -8,6 +8,8 @@ django.setup()
 
 from weasyprint import HTML
 from datetime import date
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 # ─── KALKULACIJA ─────────────────────────────────────────────────────────────
 # Cilj: kupac plaća 17.000 EUR brutto (inkl. 19% MwSt.)

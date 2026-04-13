@@ -48,5 +48,5 @@ def track(user, module, action, ref='', detail='', metadata=None, company=None):
 
     try:
         transaction.on_commit(_write)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass  # Outside transaction — silently skip

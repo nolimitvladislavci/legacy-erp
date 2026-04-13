@@ -25,6 +25,8 @@ from django.utils import timezone
 from appointments.models import Appointment, BookingResource, BookingService, WorkingHours
 from appointments.scheduling import SchedulingError, book_slot, check_availability
 from companies.models import Company
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 
@@ -384,7 +386,7 @@ class Test93_ConcurrencyRaceCondition(TransactionTestCase):
                 results.append(('ok', appt.pk))
             except SchedulingError as e:
                 results.append(('conflict', e.code))
-            except Exception as e:
+            except AttributeError as e:
                 errors.append(str(e))
 
         t1 = threading.Thread(target=attempt_booking)

@@ -67,7 +67,7 @@ def notify_barf_breeders(listing_id):
                 send_whatsapp(br.phone, msg)
                 cache.set(cache_key, 1, 86400)
                 notified += 1
-        except Exception:
+        except ImportError:
             pass
 
     logger.info('notify_barf_breeders: %s notifikacija za listing %s', notified, listing_id)

@@ -10,6 +10,7 @@ from django.views.generic import RedirectView
 from django.http import FileResponse, Http404
 import os as _os
 from django.contrib.auth import views as auth_views
+from django.db import DatabaseError, IntegrityError
 from . import views
 from core import steuerberater_views
 from core import intelligence_views

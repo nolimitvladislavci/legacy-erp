@@ -22,9 +22,9 @@ pozivaju iste funkcije.
 """
 import logging
 import re
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.db.models.signals import pre_save
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('validation_engine')
@@ -82,7 +82,7 @@ def _get_country_safe(instance):
         company = getattr(instance, 'company', None)
         if company and hasattr(company, 'country'):
             return getattr(company, 'country', None) or 'HR'
-    except Exception:
+    except (AttributeError, TypeError):
         logger.exception("Company operation failed")
 
     try:
@@ -93,7 +93,7 @@ def _get_country_safe(instance):
                 company = getattr(terminal, 'company', None)
                 if company:
                     return getattr(company, 'country', None) or 'HR'
-    except Exception:
+    except (AttributeError, TypeError):
         logger.exception("Unexpected error in: session = getattr(instance, 'session', None)")
 
     return 'HR'

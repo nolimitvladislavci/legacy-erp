@@ -3,6 +3,7 @@ from boxgram.models import PetProfile
 from companies.models import Company
 import logging
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 

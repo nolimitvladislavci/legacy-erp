@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 invoicing/services/confirm.py
 Invoice confirmation and locking logic.

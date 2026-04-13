@@ -86,7 +86,7 @@ def get_video_info(url: str) -> dict:
                 'uploader': info.get('uploader', ''),
                 'platform': platform,
             }
-    except Exception as e:
+    except KeyError as e:
         return {'success': False, 'error': str(e), 'platform': detect_platform(url)}
 
 

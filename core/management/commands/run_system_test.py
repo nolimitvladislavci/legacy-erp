@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 results['ok'].append('Django system check: čist')
             else:
                 results['warning'].append(f'Django check: {output[:200]}')
-        except Exception as e:
+        except ImportError as e:
             results['critical'].append(f'Django check CRASH: {e}')
 
     def _run_import_test(self, results):
@@ -146,31 +146,31 @@ class Command(BaseCommand):
             from invoicing.models import Invoice
             cnt = Invoice.objects.count()
             results['ok'].append(f'Invoicing: {cnt} faktura dostupno')
-        except Exception as e:
+        except DatabaseError as e:
             results['critical'].append(f'Invoicing model crash: {e}')
 
         try:
             from pos.models import POSTerminal
             cnt = POSTerminal.objects.count()
             results['ok'].append(f'POS: {cnt} terminala')
-        except Exception as e:
+        except DatabaseError as e:
             results['critical'].append(f'POS model crash: {e}')
 
         try:
             from worktime.models import TimeEntry
             cnt = TimeEntry.objects.count()
             results['ok'].append(f'Worktime: {cnt} unosa')
-        except Exception as e:
+        except DatabaseError as e:
             results['critical'].append(f'Worktime model crash: {e}')
 
         try:
             from udruge.models import UdrugaMember
             results['ok'].append('Udruge: modeli OK')
-        except Exception:
+        except ImportError:
             try:
                 from udruge.models import Loviste
                 results['ok'].append('Udruge: modeli OK (Loviste)')
-            except Exception as e:
+            except ImportError as e:
                 results['warning'].append(f'Udruge: {e}')
 
         try:
@@ -178,7 +178,7 @@ class Command(BaseCommand):
             forms = TaxFormTemplate.objects.count()
             deadlines = TaxDeadline.objects.count()
             results['ok'].append(f'Tax Wizard: {forms} obrazaca, {deadlines} deadlineova')
-        except Exception as e:
+        except DatabaseError as e:
             results['warning'].append(f'Tax Wizard: {e}')
 
     def _run_fiscal_check(self, results):
@@ -264,5 +264,5 @@ class Command(BaseCommand):
             from core.whatsapp import send_text as send_whatsapp_text
             send_whatsapp_text(phone=phone, message=message)
             self.stdout.write(self.style.SUCCESS(f'\n📱 WhatsApp poslan na {phone}'))
-        except Exception as e:
+        except ImportError as e:
             self.stdout.write(self.style.ERROR(f'\n⚠️ WhatsApp NIJE poslan: {e}'))

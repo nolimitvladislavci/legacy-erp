@@ -2,6 +2,8 @@
 from django.test import TestCase
 from companies.models import Company
 from fiskalizacija.models import FiscalConfig
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class FiscalConfigTest(TestCase):

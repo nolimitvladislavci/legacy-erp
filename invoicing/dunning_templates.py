@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 invoicing/dunning_templates.py -- Templates za opomene u 3 tona (gentle, firm, legal)
 """

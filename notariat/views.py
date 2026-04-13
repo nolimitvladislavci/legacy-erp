@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import PravniPredmet, DimnjacarskaInspekcija
 
 
@@ -95,7 +97,7 @@ def potvrda_dimnjaka_pdf(request, pk):
                 'ai_summary': f'Dimnjak {insp.broj_dimnjaka}: {insp.get_status_dimnjaka_display()}',
             }
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     return response

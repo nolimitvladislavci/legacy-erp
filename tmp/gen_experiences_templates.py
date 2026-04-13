@@ -1,5 +1,7 @@
 """Generate all 12 experiences templates — premium dark theme."""
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect/templates/experiences'
 os.makedirs(BASE, exist_ok=True)
 

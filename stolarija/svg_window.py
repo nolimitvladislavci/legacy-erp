@@ -1,3 +1,5 @@
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 """
 SVG Window Visualizer — generira vizualni prikaz prozora/vrata za PDF ponude.
 

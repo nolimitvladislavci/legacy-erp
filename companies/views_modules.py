@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 

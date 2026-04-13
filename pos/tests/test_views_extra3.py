@@ -69,7 +69,7 @@ class POSReceiptActionsTest(TestCase):
             self.receipt = _make_receipt(s)
             self.session = s
             self.terminal = t
-        except Exception:
+        except AttributeError:
             self.receipt = None
             self.session = None
             self.terminal = None
@@ -293,7 +293,7 @@ class POSSessionActionsTest(TestCase):
         try:
             self.terminal = _make_terminal(self.company)
             self.session = _make_session(self.terminal, self.user)
-        except Exception:
+        except AttributeError:
             self.terminal = None
             self.session = None
 

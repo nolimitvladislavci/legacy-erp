@@ -60,7 +60,7 @@ class InterventionsKanbanTest(TestCase):
         try:
             resp = self.client.get('/interventions/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_kanban_with_data(self):
@@ -70,7 +70,7 @@ class InterventionsKanbanTest(TestCase):
             _make_intervention(self.company, self.user, 'RIJESENO')
             resp = self.client.get('/interventions/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
 
@@ -86,7 +86,7 @@ class InterventionsNewTest(TestCase):
         try:
             resp = self.client.get('/interventions/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_new_intervention_post_valid(self):
@@ -130,7 +130,7 @@ class InterventionsFieldViewTest(TestCase):
             intv = _make_intervention(self.company, self.user)
             resp = self.client.get(f'/interventions/{intv.pk}/field/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_update_status_dodijeljeno(self):
@@ -140,7 +140,7 @@ class InterventionsFieldViewTest(TestCase):
                 'status': 'DODIJELJENO',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_update_status_na_putu(self):
@@ -150,7 +150,7 @@ class InterventionsFieldViewTest(TestCase):
                 'status': 'NA_PUTU',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_update_status_rijeseno(self):
@@ -161,7 +161,7 @@ class InterventionsFieldViewTest(TestCase):
                 'resolution_notes': 'Cijev zamijenjena.',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_assign_worker(self):
@@ -171,7 +171,7 @@ class InterventionsFieldViewTest(TestCase):
                 'worker_id': self.user.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_escalate(self):
@@ -181,7 +181,7 @@ class InterventionsFieldViewTest(TestCase):
                 'escalation_notes': 'Potrebna veća ekipa.',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_gps_update(self):
@@ -209,14 +209,14 @@ class InterventionsPublicTest(TestCase):
         try:
             resp = self.client.get('/interventions/public/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_sos_get(self):
         try:
             resp = self.client.get('/interventions/sos/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_public_post(self):

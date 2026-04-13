@@ -77,7 +77,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_worker_dashboard_with_date(self):
@@ -86,7 +86,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get(f'/worktime/?date={d}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_add_entry_post_with_project(self):
@@ -146,7 +146,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get(f'/worktime/edit/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_edit_entry_post(self):
@@ -161,7 +161,7 @@ class WorktimeWithProjectTest(TestCase):
                 'description': 'Updated entry',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_delete_entry(self):
@@ -170,7 +170,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.post(f'/worktime/delete/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_duplicate_entry(self):
@@ -179,7 +179,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.post(f'/worktime/duplicate/{entry.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_copy_prev_day_with_entries(self):
@@ -190,7 +190,7 @@ class WorktimeWithProjectTest(TestCase):
                 'date': datetime.date.today().isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_billable_hours_with_entries(self):
@@ -199,7 +199,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/billable/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_billable_hours_with_date(self):
@@ -207,7 +207,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/billable/?month=2026-01', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_note_save(self):
@@ -226,7 +226,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/profile/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_worker_profile_post(self):
@@ -245,7 +245,7 @@ class WorktimeWithProjectTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/timer/status/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_timer_start_with_project(self):
@@ -309,7 +309,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/manager/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_manager_timesheet_filter_user(self):
@@ -317,7 +317,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get(f'/worktime/manager/?user={self.worker.pk}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_manager_timesheet_filter_dates(self):
@@ -327,7 +327,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get(f'/worktime/manager/?from={from_date}&to={to_date}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_manager_timesheet_filter_project(self):
@@ -335,7 +335,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get(f'/worktime/manager/?project={self.project.pk}', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_approve_entries_with_data(self):
@@ -364,7 +364,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/bill/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_bill_entries_post(self):
@@ -400,7 +400,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/analytics/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass
 
     def test_weekly_entry_with_data(self):
@@ -408,5 +408,5 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/weekly/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except KeyError:
             pass

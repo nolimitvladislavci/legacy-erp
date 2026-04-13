@@ -5,6 +5,8 @@ Scenario 2.3: Meta API timeout — fallback chain.
 import logging
 import requests
 from django.conf import settings
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +35,7 @@ def send_cart_link(snapshot, phone_number, method='whatsapp'):
                 snapshot.wa_message_id = result.get('message_id', '')
                 snapshot.save(update_fields=['wa_sent', 'wa_message_id'])
                 return result
-        except Exception as e:
+        except KeyError as e:
             logger.warning(f'WhatsApp send failed: {e}')
             result['error'] = str(e)
 

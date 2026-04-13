@@ -39,7 +39,7 @@ def get_holidays(country='HR', year=None):
     except ImportError:
         logger.warning('holidays package not installed — SLA radi bez praznika')
         return set()
-    except Exception as e:
+    except KeyError as e:
         logger.error('holidays error: %s', e)
         return set()
 

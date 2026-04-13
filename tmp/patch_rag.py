@@ -2,6 +2,8 @@
 RAG AI Chat — Knowledge Base model + seed data + retrieval u system prompt
 """
 import os
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 BASE = '/var/www/fina-connect'
 
 # ══════════════════════════════════════════════════════════════════════
@@ -161,7 +163,7 @@ def retrieve_knowledge(module_context='', query='', limit=5):
             query='',  # Query se dodaje u chat_api
         )
         ctx += kb
-    except Exception:
+    except (AttributeError, TypeError):
         pass
 
     return SYSTEM_PROMPT + ctx"""
@@ -196,7 +198,7 @@ def _get_rag_context(module_context, query):
     try:
         from .claude_client import retrieve_knowledge
         return retrieve_knowledge(module_context=module_context, query=query, limit=3)
-    except Exception:
+    except ImportError:
         return ''
 
 '''

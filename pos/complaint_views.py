@@ -32,6 +32,7 @@ from django.db.models.functions import TruncMonth, TruncWeek
 from django.template.loader import render_to_string
 
 from companies.models import Company
+from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 
@@ -302,21 +303,21 @@ def complaint_api_public(request):
                 f'prigovor_{p.redni_broj}.webm',
                 ContentFile(audio_data), save=True,
             )
-        except Exception:
+        except ValueError:
             pass
 
     # Trigger AI analysis (async Celery)
     try:
         from pos.tasks import ai_analyze_prigovor
         ai_analyze_prigovor.delay(p.pk)
-    except Exception:
+    except ImportError:
         logger.debug('AI analysis task not available')
 
     # Auto-archive PDF (async)
     try:
         from pos.tasks import archive_prigovor_pdf
         archive_prigovor_pdf.delay(p.pk)
-    except Exception:
+    except ImportError:
         logger.debug('Archive task not available')
 
     # Send confirmation via WhatsApp ONLY if opt-in consent given (Dron #3)
@@ -402,7 +403,7 @@ def complaint_respond(request):
     try:
         from pos.tasks import archive_prigovor_pdf
         archive_prigovor_pdf.delay(p.pk)
-    except Exception:
+    except ImportError:
         pass
 
     return JsonResponse({
@@ -1034,7 +1035,7 @@ def _notify_admin_new_complaint(p):
                     f"Odgovorite na: https://limit-connect.com/pos/prigovori/"
                 )
                 send_whatsapp_text_task.delay(profile.phone, msg)
-            except Exception:
+            except ImportError:
                 pass
 
         # In-app notification

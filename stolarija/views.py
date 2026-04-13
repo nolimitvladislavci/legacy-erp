@@ -8,6 +8,8 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     MeasurementSession, Measurement,
@@ -21,7 +23,7 @@ from .voice_parser import parse_voice_input
 def _company(request):
     try:
         return request.user.profile.company
-    except Exception:
+    except AttributeError:
         return None
 
 
@@ -380,7 +382,7 @@ def create_production_order(request, offer_id):
         BookingSignature.log(request, 'create', target_obj=order,
             target_repr=f'Production: {order.order_number}',
             changes={'bom_items': order.bom_items.count(), 'material_cost': str(total_material)})
-    except Exception:
+    except DatabaseError:
         pass
 
     messages.success(request, f'Proizvodni nalog {order.order_number} kreiran s {order.bom_items.count()} BOM stavki.')
@@ -410,7 +412,7 @@ def production_detail(request, order_id):
                 from core.models import BookingSignature
                 BookingSignature.log(request, 'update', target_obj=order,
                     changes={'status': {'old': old_status, 'new': new_status}})
-            except Exception:
+            except ImportError:
                 pass
 
             messages.success(request, f'Status: {order.get_status_display()}')
@@ -476,7 +478,7 @@ def create_installation(request, order_id):
             from core.models import BookingSignature
             BookingSignature.log(request, 'create', target_obj=install,
                 target_repr=f'Installation scheduled: {scheduled}')
-        except Exception:
+        except ImportError:
             pass
 
         messages.success(request, f'Ugradnja zakazana za {scheduled}.')
@@ -582,7 +584,7 @@ def handover(request, install_id):
             from core.models import BookingSignature
             BookingSignature.log(request, 'approve', target_obj=protocol,
                 target_repr=f'Handover: {client_name}, Warranty: {warranty.warranty_number}')
-        except Exception:
+        except ImportError:
             pass
 
         messages.success(request, f'Primopredaja potpisana. Garancija: {warranty.warranty_number}')
@@ -783,7 +785,7 @@ def service_detail(request, visit_id):
                 BookingSignature.log(request, 'update', target_obj=visit,
                     target_repr=f'Service completed: {warranty.warranty_number}',
                     changes={'completed': str(visit.completed), 'technician': str(request.user)})
-            except Exception:
+            except ImportError:
                 pass
 
             messages.success(request, _('Servisni pregled završen. Sljedeći zakazan.'))
@@ -1107,7 +1109,7 @@ def ai_message_detail(request, msg_id):
                 BookingSignature.log(request, 'approve', target_obj=msg,
                     target_repr=f'AI draft approved for {msg.sender_email}',
                     changes={'sentiment': msg.ai_sentiment, 'category': msg.ai_category})
-            except Exception:
+            except ImportError:
                 pass
 
             messages.success(request, _('Poruka odobrena — bit će poslana automatski.'))

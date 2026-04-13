@@ -3,9 +3,10 @@ livestock/models.py
 Evidencija goveda za OPG. Prati: grlo, zdravlje, mlijeko,
 plan ishrane, parcele, usjeve i put prema bio certifikaciji.
 """
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

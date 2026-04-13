@@ -25,7 +25,7 @@ def run_clinic_diagnostics_all(self):
         try:
             run_clinic_diagnostics_single.delay(str(company.id))
             count += 1
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             logger.error("Doktor dispatch greska za %s: %s", company.id, exc)
     logger.info("Claude Doktor: pokrenuto %d dijagnoza", count)
     return f"Dispatched {count} diagnostics"
@@ -276,5 +276,5 @@ def _send_notification_if_needed(company, report, yesterday):
         send_text(phone=phone, message=msg)
         report.notification_sent = True
         report.save(update_fields=["notification_sent"])
-    except Exception as exc:
+    except ImportError as exc:
         logger.warning("Doktor notifikacija greska: %s", exc)

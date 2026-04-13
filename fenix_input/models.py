@@ -5,8 +5,9 @@ Svaki podatak koji uđe u sustav — glasom, SMS-om, emailom,
 Bluetoothom, ručnim unosom — postaje InputMessage.
 AI ga parsira, korisnik potvrdi, podatak ide u ciljni modul.
 """
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class InputMessage(models.Model):

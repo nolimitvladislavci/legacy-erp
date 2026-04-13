@@ -129,7 +129,7 @@ class Command(BaseCommand):
             from django.core.management import call_command
             call_command("seed_pricing_plans", verbosity=0)
             self.stdout.write(self.style.SUCCESS("✅ Pricing planovi kreirani"))
-        except Exception as e:
+        except ImportError as e:
             self.stdout.write(self.style.WARNING(f"⚠  seed_pricing_plans: {e}"))
 
         # ── 6. Enterprise pretplata ───────────────────────────────────────────
@@ -170,7 +170,7 @@ class Command(BaseCommand):
             )
             if created:
                 self.stdout.write(self.style.SUCCESS("✅ Žiro račun: Commerzbank DE10 6034 0071 0803 1213 00"))
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(self.style.WARNING(f"⚠  BankAccount: {e}"))
 
         # ── 8. Kontni plan ────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ class Command(BaseCommand):
             from django.core.management import call_command
             call_command("seed_chart_of_accounts", verbosity=0)
             self.stdout.write(self.style.SUCCESS("✅ Kontni plan kreiran"))
-        except Exception as e:
+        except ImportError as e:
             self.stdout.write(self.style.WARNING(f"⚠  seed_chart_of_accounts: {e}"))
 
         self.stdout.write("\n" + self.style.SUCCESS(

@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from rest_framework import viewsets
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -59,7 +61,7 @@ def project_detail(request, pk):
             work_entries = TimeEntry.objects.filter(project=wt_proj).order_by("-date")[:10]
             total_hours_agg = TimeEntry.objects.filter(project=wt_proj).aggregate(s=Sum("duration"))
             total_hours = total_hours_agg["s"] or 0
-    except Exception:
+    except DatabaseError:
         pass
 
     # Budget usage
@@ -75,11 +77,11 @@ def project_detail(request, pk):
                     try:
                         ep = entry.user.employee_profile
                         rate = float(ep.hourly_rate or wt_proj.hourly_rate or 0)
-                    except Exception:
+                    except (ValueError, TypeError):
                         rate = float(wt_proj.hourly_rate or 0)
                     cost += float(entry.duration or 0) * rate
                 budget_used_pct = min(int(cost / float(project.budget) * 100), 100)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     from django.contrib.auth import get_user_model
@@ -96,7 +98,7 @@ def project_detail(request, pk):
                 company=project.company
             ).values_list('user_id', flat=True)
             workers_qs = workers_qs.filter(pk__in=company_user_ids)
-        except Exception:
+        except DatabaseError:
             pass
     all_workers = workers_qs.order_by('first_name', 'last_name')
 
@@ -142,7 +144,7 @@ def project_create(request):
             if next_url and next_url.startswith("/"):
                 return redirect(next_url)
             return redirect("project_detail", pk=p.pk)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     next_url = request.GET.get("next", "")
     return render(request, "projects/project_form.html", {
@@ -182,7 +184,7 @@ def project_edit(request, pk):
             project.save()
             messages.success(request, f"Projekt {project.name} ažuriran.")
             return redirect("project_detail", pk=project.pk)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "projects/project_form.html", {
         "project": project,
@@ -211,7 +213,7 @@ def upload_photo(request):
             )
             photo.save()
             return JsonResponse({"status": "ok", "id": photo.pk})
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             return JsonResponse({"status": "error", "error": str(e)}, status=400)
     return JsonResponse({"error": "POST only"}, status=405)
 
@@ -229,7 +231,7 @@ def project_update_add(request, pk):
                 is_public="is_public" in request.POST,
             )
             messages.success(request, _("Ažuriranje dodano."))
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
     return redirect("project_detail", pk=pk)
 

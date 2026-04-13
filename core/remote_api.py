@@ -3,6 +3,8 @@ import subprocess, json, os, re, logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 SECRET = os.environ.get('DEV_API_TOKEN', '')
 ALLOWED_IPS = {'127.0.0.1', '::1'}

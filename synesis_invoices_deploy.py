@@ -306,6 +306,8 @@ def _import_invoices(request, company, data_list):
         except Exception as e:
             errors += 1
             import traceback
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
             traceback.print_exc()
 
     # Update config
@@ -385,13 +387,13 @@ def sync_invoices():
                             cursor2.execute(f"SELECT * FROM [{t_table}] WHERE TRANCODE = ?", [trancode])
                             icols = [d[0] for d in cursor2.description]
                             inv['_items'] = [dict(zip(icols, [safe(v) for v in r])) for r in cursor2.fetchall()]
-                        except Exception:
+                        except KeyError:
                             inv['_items'] = []
                     else:
                         inv['_items'] = []
 
                     all_invoices.append(inv)
-            except Exception as e:
+            except KeyError as e:
                 print(f"  Skip {inv_table}: {e}")
 
         conn.close()
@@ -408,7 +410,7 @@ def sync_invoices():
             print(f"  Batch {i//100+1}: {len(batch)} invoices -> {'OK' if ok else 'FAIL'}")
 
         print(f"  Total: {len(all_invoices)} invoices synced")
-    except Exception as e:
+    except OSError as e:
         print(f"  ERROR: {e}")
 
 '''

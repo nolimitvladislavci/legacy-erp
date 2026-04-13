@@ -361,7 +361,7 @@ def _run_system_health_check(params, user, company):
         with connection.cursor() as c:
             c.execute("SELECT 1")
         results["database"] = {"status": "OK", "engine": connection.vendor}
-    except Exception as e:
+    except ImportError as e:
         results["database"] = {"status": "ERROR", "error": str(e)}
 
     # 2. Redis
@@ -370,7 +370,7 @@ def _run_system_health_check(params, user, company):
         cache.set("_health_check", "ok", 5)
         val = cache.get("_health_check")
         results["redis_cache"] = {"status": "OK" if val == "ok" else "DEGRADED"}
-    except Exception as e:
+    except ImportError as e:
         results["redis_cache"] = {"status": "ERROR", "error": str(e)}
 
     # 3. Celery

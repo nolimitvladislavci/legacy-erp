@@ -19,7 +19,7 @@ def _make_user(company, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.get_or_create(
         company=company,

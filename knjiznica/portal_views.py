@@ -13,6 +13,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 from companies.models import Company
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     BookMeta, BookLoan, LibraryMember, BookReservation,
     ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,

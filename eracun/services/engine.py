@@ -367,7 +367,7 @@ def process_eracun(eracun, config=None, user=None):
     if not config:
         try:
             config = eracun.company.eracun_config
-        except Exception:
+        except AttributeError:
             eracun.status = 'error'
             eracun.error_message = 'Nema e-Racun konfiguracije za ovu firmu'
             eracun.save(update_fields=['status', 'error_message'])
@@ -417,7 +417,7 @@ def process_eracun(eracun, config=None, user=None):
         eracun.xml_request = xml_payload.decode('utf-8', errors='replace')
         eracun.save(update_fields=['fina_uuid', 'xml_request'])
 
-    except Exception as e:
+    except ImportError as e:
         eracun.status = 'error'
         eracun.error_message = f'Greska pri potpisivanju: {str(e)}'
         eracun.save(update_fields=['status', 'error_message'])
@@ -598,7 +598,7 @@ def _should_use_posrednik(config):
         from eracun.services.posrednik_service import get_posrednik_config
         pc = get_posrednik_config(config.company)
         return pc is not None and pc.get('enabled', False)
-    except Exception:
+    except ImportError:
         return False
 
 
@@ -610,7 +610,7 @@ def _send_via_posrednik(eracun, config):
     except ImportError:
         logger.warning('posrednik_service not available, falling back to FINA direct')
         return False, {'status': 'error', 'error_message': 'Posrednik servis nije dostupan'}
-    except Exception as e:
+    except ImportError as e:
         logger.error('Posrednik send failed: %s', e)
         return False, {'status': 'error', 'error_message': str(e)}
 

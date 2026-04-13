@@ -113,7 +113,7 @@ def _get_full_context():
             k in l for k in ['OK:', 'Kritično:', 'Upozorenja:', 'REPORT', '✅', '🔴', '🟠']
         )]
         ctx['system_test'] = '\n'.join(lines[:10])
-    except Exception as e:
+    except ImportError as e:
         ctx['system_test'] = f'Greška: {e}'
 
     # Aktivni Gemini taskovi i njihovi rezultati
@@ -149,7 +149,7 @@ def _get_full_context():
         from core.ai_health import run_ai_health_check
         health = run_ai_health_check()
         ctx['ai_health'] = f"{health['ok_count']}/{health['total']} OK | Problemi: {health['problems']}"
-    except Exception as e:
+    except ImportError as e:
         ctx['ai_health'] = f'Greška: {e}'
 
     return ctx
@@ -238,7 +238,7 @@ def _izvrsi_odluke(odluke: dict, timestamp: str):
                     requested_by=f'Sonnet-auto-{timestamp}'
                 )
                 logger.info(f'Pokrenut Gemini task: {task["naziv"]} → {r.id}')
-            except Exception as e:
+            except ImportError as e:
                 logger.error(f'Gemini task greška: {e}')
 
     # WhatsApp Ivanu
@@ -257,7 +257,7 @@ def _izvrsi_odluke(odluke: dict, timestamp: str):
                 poruka += f'\n\n⚠️ TREBA TVOJA ODLUKA:\n{odluke["eskalacija_razlog"]}'
             send_text(phone=IVAN_PHONE, message=poruka)
             logger.info('WhatsApp poslan Ivanu')
-        except Exception as e:
+        except ImportError as e:
             logger.error(f'WhatsApp greška: {e}')
 
     # Ažuriraj FENIX_STATUS s kratkim zapisom

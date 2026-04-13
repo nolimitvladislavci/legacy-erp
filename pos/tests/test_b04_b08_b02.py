@@ -260,7 +260,7 @@ class MixedNonprofitBlockTest(B04Setup):
         # Checkout će pasti na fiskalizaciji (nema cert) ali NE na mixed validation
         try:
             CheckoutService.process_receipt(self.company, self.user, payload)
-        except Exception as e:
+        except AttributeError as e:
             self.assertNotEqual(getattr(e, 'code', ''), 'MIXED_NONPROFIT_COMMERCIAL')
 
     def test_18_pure_nonprofit_passes(self):
@@ -275,7 +275,7 @@ class MixedNonprofitBlockTest(B04Setup):
         }
         try:
             CheckoutService.process_receipt(self.company, self.user, payload)
-        except Exception as e:
+        except AttributeError as e:
             self.assertNotEqual(getattr(e, 'code', ''), 'MIXED_NONPROFIT_COMMERCIAL')
 
     def test_19_mixed_blocked(self):
@@ -310,5 +310,5 @@ class MixedNonprofitBlockTest(B04Setup):
         # Custom items nemaju item_id → preskače mixed check
         try:
             CheckoutService.process_receipt(self.company, self.user, payload)
-        except Exception as e:
+        except AttributeError as e:
             self.assertNotEqual(getattr(e, 'code', ''), 'MIXED_NONPROFIT_COMMERCIAL')

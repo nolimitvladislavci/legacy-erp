@@ -6,6 +6,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from core.oib_validator import (
     validate_oib_hr, validate_hr_iban, validate_iban, validate_mbs,
     validate_jibg, validate_jzb, validate_ueln, validate_chip_iso, validate_nkd,
@@ -25,12 +27,12 @@ def api_validate(request):
         if count > 60:
             return JsonResponse({'error': 'Rate limit — max 60 zahtjeva/min'}, status=429)
         cache.set(key, count + 1, timeout=60)
-    except Exception:
+    except ImportError:
         pass
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     # Sanitize all string inputs — strip HTML/script tags
