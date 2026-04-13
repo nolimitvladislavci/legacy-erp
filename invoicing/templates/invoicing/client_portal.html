@@ -452,7 +452,99 @@ table.items tbody tr:last-child td{border-bottom:none}
     </div>
   </div>
 
-  <!-- ITEMS -->
+  {% if has_split %}
+  <!-- ═══ RADOVI ═══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-label">{% trans "Radovi" %}</div>
+      <div style="font-family:var(--font-c);font-size:.65rem;color:var(--muted);letter-spacing:1px">
+        {{ work_items|length }} {% trans "pozicija" %}
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:0;padding-bottom:0">
+      <div class="tbl-wrap">
+        <table class="items">
+          <thead>
+            <tr>
+              <th style="text-align:left">{% trans "Opis" %}</th>
+              <th style="text-align:right">{% trans "Kol." %}</th>
+              <th style="text-align:right">{% trans "Jed.cij." %}</th>
+              <th style="text-align:right">{% trans "Ukupno" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% with current_section="" %}
+          {% for item in work_items %}
+            {% ifchanged item.section %}
+            <tr><td colspan="4" style="padding:10px 10px 4px;font-family:var(--font-c);font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--gold-border)">{{ item.section }}</td></tr>
+            {% endifchanged %}
+            <tr>
+              <td>{{ item.description }}</td>
+              <td class="num">{{ item.quantity|floatformat:0 }} {{ item.unit }}</td>
+              <td class="num">{{ item.unit_price|floatformat:2 }}</td>
+              <td class="num" style="color:var(--text);font-weight:600">{{ item.total_price|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+          {% endwith %}
+          </tbody>
+        </table>
+      </div>
+      <div class="totals" style="border-top:2px solid var(--gold-border);margin-top:12px;padding-top:10px">
+        <div class="total-row">
+          <span class="lbl" style="font-weight:600">{% trans "Ukupno radovi" %}</span>
+          <span class="val" style="color:var(--gold);font-weight:700">{{ work_total|floatformat:2 }} {{ invoice.currency }}</span>
+        </div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+
+  <!-- ═══ MATERIJAL ═══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-label">{% trans "Materijal" %}</div>
+      <div style="font-family:var(--font-c);font-size:.65rem;color:var(--muted);letter-spacing:1px">
+        {{ material_items|length }} {% trans "pozicija" %}
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:0;padding-bottom:0">
+      <div class="tbl-wrap">
+        <table class="items">
+          <thead>
+            <tr>
+              <th style="text-align:left">{% trans "Opis" %}</th>
+              <th style="text-align:right">{% trans "Kol." %}</th>
+              <th style="text-align:right">{% trans "Jed.cij." %}</th>
+              <th style="text-align:right">{% trans "Ukupno" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in material_items %}
+            {% ifchanged item.section %}
+            <tr><td colspan="4" style="padding:10px 10px 4px;font-family:var(--font-c);font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--gold-border)">{{ item.section }}</td></tr>
+            {% endifchanged %}
+            <tr>
+              <td>{{ item.description }}</td>
+              <td class="num">{{ item.quantity|floatformat:0 }} {{ item.unit }}</td>
+              <td class="num">{{ item.unit_price|floatformat:2 }}</td>
+              <td class="num" style="color:var(--text);font-weight:600">{{ item.total_price|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="totals" style="border-top:2px solid var(--gold-border);margin-top:12px;padding-top:10px">
+        <div class="total-row">
+          <span class="lbl" style="font-weight:600">{% trans "Ukupno materijal" %}</span>
+          <span class="val" style="color:var(--gold);font-weight:700">{{ material_total|floatformat:2 }} {{ invoice.currency }}</span>
+        </div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+
+  {% else %}
+  <!-- FALLBACK: jedna tablica ako nema split-a -->
   <div class="card">
     <div class="card-head">
       <div class="card-head-label">{% trans "Stavke" %}</div>
@@ -473,6 +565,9 @@ table.items tbody tr:last-child td{border-bottom:none}
           </thead>
           <tbody>
           {% for item in items %}
+            {% ifchanged item.section %}
+            {% if item.section %}<tr><td colspan="4" style="padding:10px 10px 4px;font-family:var(--font-c);font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--gold-border)">{{ item.section }}</td></tr>{% endif %}
+            {% endifchanged %}
             <tr>
               <td>{{ item.description }}</td>
               <td class="num">{{ item.quantity }} {{ item.unit }}</td>
@@ -483,23 +578,46 @@ table.items tbody tr:last-child td{border-bottom:none}
           </tbody>
         </table>
       </div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+  {% endif %}
 
-      <div class="totals">
-        <div class="total-row">
-          <span class="lbl">{% trans "Neto iznos" %}</span>
-          <span class="val">{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</span>
-        </div>
-        <div class="total-row">
-          <span class="lbl">{% trans "PDV" %} {{ invoice.tax_percent }}%</span>
-          <span class="val">{{ invoice.tax_amount|floatformat:2 }} {{ invoice.currency }}</span>
-        </div>
-        <div class="total-grand">
-          <span class="lbl">{% trans "Ukupno za platiti" %}</span>
-          <span class="val">{{ invoice.total|floatformat:2 }} {{ invoice.currency }}</span>
-        </div>
+  <!-- ═══ REKAPITULACIJA ═══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-label">{% trans "Rekapitulacija" %}</div>
+    </div>
+    <div class="card-body">
+      {% if has_split %}
+      <div class="total-row">
+        <span class="lbl">{% trans "Radovi" %}</span>
+        <span class="val">{{ work_total|floatformat:2 }} {{ invoice.currency }}</span>
+      </div>
+      <div class="total-row">
+        <span class="lbl">{% trans "Materijal" %}</span>
+        <span class="val">{{ material_total|floatformat:2 }} {{ invoice.currency }}</span>
+      </div>
+      <div class="total-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+        <span class="lbl">{% trans "Neto iznos" %}</span>
+        <span class="val">{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</span>
+      </div>
+      {% else %}
+      <div class="total-row">
+        <span class="lbl">{% trans "Neto iznos" %}</span>
+        <span class="val">{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</span>
+      </div>
+      {% endif %}
+      <div class="total-row">
+        <span class="lbl">{% trans "PDV" %} {{ invoice.tax_percent }}%</span>
+        <span class="val">{{ invoice.tax_amount|floatformat:2 }} {{ invoice.currency }}</span>
+      </div>
+      <div class="total-grand">
+        <span class="lbl">{% trans "Ukupno za platiti" %}</span>
+        <span class="val">{{ invoice.total|floatformat:2 }} {{ invoice.currency }}</span>
       </div>
     </div>
-    <div style="height:20px"></div>
+    <div style="height:12px"></div>
   </div>
 
   <!-- NOTE -->

@@ -1264,14 +1264,27 @@ def client_portal(request, token):
     except Exception:
         sections = [{"name": "", "items": list(invoice.items.all()), "subtotal": invoice.subtotal}]
 
+    # Razdvoji radove i materijal za ponude
+    all_items = invoice.items.all().order_by("section", "sort_order")
+    work_items = all_items.filter(item_type="work")
+    material_items = all_items.filter(item_type="material")
+    work_total = sum(i.total_price for i in work_items)
+    material_total = sum(i.total_price for i in material_items)
+    has_split = work_items.exists() and material_items.exists()
+
     return render(
         request,
         "invoicing/client_portal.html",
         {
             "invoice": invoice,
-            "items": invoice.items.all(),
+            "items": all_items,
             "sections": sections,
             "can_accept": invoice.doctype == "PO" and invoice.status in ("DRAFT", "SENT"),
+            "work_items": work_items,
+            "material_items": material_items,
+            "work_total": work_total,
+            "material_total": material_total,
+            "has_split": has_split,
         },
     )
 
