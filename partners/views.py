@@ -1,4 +1,5 @@
 import logging
+
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,13 @@ def partner_list(request):
     ptype = request.GET.get("type", "")
     active = request.GET.get("active", "")
     company = get_user_company(request)
-    qs = Partner.objects.select_related("company").filter(company=company).order_by("name") if company else Partner.objects.none()
+    qs = (
+        Partner.objects.select_related("company").filter(company=company).order_by("name")
+        if company
+        else Partner.objects.none()
+    )
     if q:
-        qs = qs.filter(Q(name__icontains=q)|Q(email__icontains=q)|Q(oib__icontains=q)|Q(city__icontains=q))
+        qs = qs.filter(Q(name__icontains=q) | Q(email__icontains=q) | Q(oib__icontains=q) | Q(city__icontains=q))
     if ptype:
         qs = qs.filter(partner_type=ptype)
     if active == "1":
@@ -35,13 +40,21 @@ def partner_list(request):
     elif active == "0":
         qs = qs.filter(is_active=False)
     elif active == "incomplete":
-        qs = qs.filter(Q(oib="")|Q(address="")|Q(city="")|Q(email=""))
+        qs = qs.filter(Q(oib="") | Q(address="") | Q(city="") | Q(email=""))
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get("page"))
-    return render(request, "partners/partner_list.html", {
-        "page_obj": page, "q": q, "ptype": ptype, "active": active,
-        "total": qs.count(), "type_choices": Partner.TYPE_CHOICES,
-    })
+    return render(
+        request,
+        "partners/partner_list.html",
+        {
+            "page_obj": page,
+            "q": q,
+            "ptype": ptype,
+            "active": active,
+            "total": qs.count(),
+            "type_choices": Partner.TYPE_CHOICES,
+        },
+    )
 
 
 @login_required
@@ -62,12 +75,16 @@ def partner_detail(request, pk):
         appointments = partner.appointments.order_by("-start_time")[:10]
     except Exception:
         pass
-    return render(request, "partners/partner_detail.html", {
-        "partner": partner,
-        "transactions": transactions,
-        "docs": docs,
-        "appointments": appointments,
-    })
+    return render(
+        request,
+        "partners/partner_detail.html",
+        {
+            "partner": partner,
+            "transactions": transactions,
+            "docs": docs,
+            "appointments": appointments,
+        },
+    )
 
 
 @login_required
@@ -77,8 +94,8 @@ def partner_create(request):
         try:
             company = get_user_company(request)
             if not company:
-                messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
-                return redirect('dashboard')
+                messages.error(request, _("Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika."))
+                return redirect("dashboard")
             p = Partner(
                 company=company,
                 name=request.POST["name"],
@@ -110,10 +127,15 @@ def partner_create(request):
             return redirect("partners:detail", pk=p.pk)
         except (ValueError, TypeError) as e:
             messages.error(request, str(e))
-    return render(request, "partners/partner_form.html", {
-        "companies": companies, "type_choices": Partner.TYPE_CHOICES,
-        "action": "Novi partner",
-    })
+    return render(
+        request,
+        "partners/partner_form.html",
+        {
+            "companies": companies,
+            "type_choices": Partner.TYPE_CHOICES,
+            "action": "Novi partner",
+        },
+    )
 
 
 @login_required
@@ -154,10 +176,16 @@ def partner_edit(request, pk):
             return redirect("partners:detail", pk=partner.pk)
         except (ValueError, TypeError) as e:
             messages.error(request, str(e))
-    return render(request, "partners/partner_form.html", {
-        "partner": partner, "companies": companies,
-        "type_choices": Partner.TYPE_CHOICES, "action": "Uredi partnera",
-    })
+    return render(
+        request,
+        "partners/partner_form.html",
+        {
+            "partner": partner,
+            "companies": companies,
+            "type_choices": Partner.TYPE_CHOICES,
+            "action": "Uredi partnera",
+        },
+    )
 
 
 @login_required
@@ -171,25 +199,25 @@ def partner_delete(request, pk):
     return render(request, "partners/partner_confirm_delete.html", {"partner": partner})
 
 
-
 @login_required
 @require_POST
 def partner_quick_create(request):
     import json
+
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         data = request.POST
 
-    name = (data.get('name') or '').strip()
-    oib  = (data.get('oib') or '').strip()
+    name = (data.get("name") or "").strip()
+    oib = (data.get("oib") or "").strip()
 
     if not name:
-        return JsonResponse({'ok': False, 'error': 'Naziv je obavezan.'}, status=400)
+        return JsonResponse({"ok": False, "error": "Naziv je obavezan."}, status=400)
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'ok': False, 'error': 'Nema aktivne firme.'}, status=403)
+        return JsonResponse({"ok": False, "error": "Nema aktivne firme."}, status=403)
 
     # Duplicate check by OIB first, then name
     existing = None
@@ -199,51 +227,65 @@ def partner_quick_create(request):
         existing = Partner.objects.select_related("company").filter(company=company, name__iexact=name).first()
 
     if existing:
-        return JsonResponse({
-            'ok': True, 'status': 'exists',
-            'id': existing.pk, 'name': existing.name,
-            'oib': existing.oib, 'email': existing.email,
-            'address': existing.address, 'city': existing.city,
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "status": "exists",
+                "id": existing.pk,
+                "name": existing.name,
+                "oib": existing.oib,
+                "email": existing.email,
+                "address": existing.address,
+                "city": existing.city,
+            }
+        )
 
     p = Partner(
         company=company,
         name=name,
         oib=oib,
-        email=(data.get('email') or '').strip(),
-        phone=(data.get('phone') or '').strip(),
-        address=(data.get('address') or '').strip(),
-        city=(data.get('city') or '').strip(),
-        partner_type=(data.get('partner_type') or 'client'),
+        email=(data.get("email") or "").strip(),
+        phone=(data.get("phone") or "").strip(),
+        address=(data.get("address") or "").strip(),
+        city=(data.get("city") or "").strip(),
+        partner_type=(data.get("partner_type") or "client"),
     )
     p.save()
-    return JsonResponse({
-        'ok': True, 'status': 'created',
-        'id': p.pk, 'name': p.name,
-        'oib': p.oib, 'email': p.email,
-        'address': p.address, 'city': p.city,
-    }, status=201)
-
+    return JsonResponse(
+        {
+            "ok": True,
+            "status": "created",
+            "id": p.pk,
+            "name": p.name,
+            "oib": p.oib,
+            "email": p.email,
+            "address": p.address,
+            "city": p.city,
+        },
+        status=201,
+    )
 
 
 @login_required
 def partner_oib_lookup(request):
     """AJAX: Dohvati podatke firme po OIB-u / VAT ID-u — koristi centralni business_lookup servis."""
-    oib = request.GET.get('oib', '').strip()
-    country = request.GET.get('country', 'HR').strip().upper()
+    oib = request.GET.get("oib", "").strip()
+    country = request.GET.get("country", "HR").strip().upper()
     if len(country) > 3:
-        country = 'HR'
+        country = "HR"
 
     if not oib:
-        return JsonResponse({'error': 'OIB je obavezan'}, status=400)
+        return JsonResponse({"error": "OIB je obavezan"}, status=400)
 
     from core.oib_validator import validate_vat_id
+
     if not validate_vat_id(oib, country):
-        return JsonResponse({'error': 'Neispravan OIB/VAT format', 'valid_format': False}, status=400)
+        return JsonResponse({"error": "Neispravan OIB/VAT format", "valid_format": False}, status=400)
 
     company = get_user_company(request)
 
     from core.business_lookup import lookup_business
+
     result = lookup_business(oib, country, company=company)
     return JsonResponse(result.to_dict())
 
@@ -254,6 +296,7 @@ class PartnerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         from core.company_utils import get_user_company
+
         company = get_user_company(self.request)
         return Partner.objects.select_related("company").filter(company=company) if company else Partner.objects.none()
 
@@ -268,43 +311,39 @@ def api_quick_create(request):
 
     from core.company_utils import get_user_company
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST required'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
 
     company = get_user_company(request)
     if not company:
-        return JsonResponse({'error': 'Nema aktivne firme'}, status=400)
+        return JsonResponse({"error": "Nema aktivne firme"}, status=400)
 
     try:
         data = json.loads(request.body)
-        name = data.get('name', '').strip()
+        name = data.get("name", "").strip()
         if not name:
-            return JsonResponse({'error': 'Naziv je obavezan'}, status=400)
+            return JsonResponse({"error": "Naziv je obavezan"}, status=400)
 
         partner = Partner(
             company=company,
             name=name,
-            email=data.get('email', ''),
-            oib=data.get('oib', ''),
-            address=data.get('address', ''),
-            city=data.get('city', ''),
-            phone=data.get('phone', ''),
-            partner_type='client',
+            email=data.get("email", ""),
+            oib=data.get("oib", ""),
+            address=data.get("address", ""),
+            city=data.get("city", ""),
+            phone=data.get("phone", ""),
+            partner_type="client",
         )
         partner.save()
-        return JsonResponse({
-            'ok': True,
-            'id': partner.pk,
-            'name': partner.name,
-            'message': f'Partner "{partner.name}" dodan!'
-        })
+        return JsonResponse(
+            {"ok": True, "id": partner.pk, "name": partner.name, "message": f'Partner "{partner.name}" dodan!'}
+        )
     except (json.JSONDecodeError, ValueError) as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 # ── Buyer Type Verification ───────────────────────────────────────
 import re
-
 
 
 @login_required
@@ -316,42 +355,44 @@ def buyer_type_verify(request):
 
     from companies.models import Company
 
-    qs = Partner.objects.select_related('company').filter(
-        notes__contains='needs_verification'
-    ).order_by('buyer_type', 'name')
+    qs = (
+        Partner.objects.select_related("company")
+        .filter(notes__contains="needs_verification")
+        .order_by("buyer_type", "name")
+    )
 
     # ── POST: potvrdi ili promijeni ──
-    if request.method == 'POST':
+    if request.method == "POST":
         # Single confirm
-        single_id = request.POST.get('confirm_single')
+        single_id = request.POST.get("confirm_single")
         if single_id:
             p = get_object_or_404(Partner, pk=single_id)
-            new_type = request.POST.get(f'new_type_{single_id}', p.buyer_type)
+            new_type = request.POST.get(f"new_type_{single_id}", p.buyer_type)
             _verify_partner(p, new_type)
-            messages.success(request, f'{p.name} verificiran kao {new_type}.')
+            messages.success(request, f"{p.name} verificiran kao {new_type}.")
             return redirect(request.get_full_path())
 
         # Bulk confirm
-        ids = request.POST.getlist('ids')
+        ids = request.POST.getlist("ids")
         if ids:
             partners = Partner.objects.filter(pk__in=ids)
-            if 'bulk_b2c' in request.POST:
+            if "bulk_b2c" in request.POST:
                 for p in partners:
-                    _verify_partner(p, 'b2c')
-                messages.success(request, f'{len(ids)} partnera vraćeno na B2C.')
+                    _verify_partner(p, "b2c")
+                messages.success(request, f"{len(ids)} partnera vraćeno na B2C.")
             else:
                 count = 0
                 for p in partners:
-                    new_type = request.POST.get(f'new_type_{p.pk}', p.buyer_type)
+                    new_type = request.POST.get(f"new_type_{p.pk}", p.buyer_type)
                     _verify_partner(p, new_type)
                     count += 1
-                messages.success(request, f'{count} partnera verificirano.')
+                messages.success(request, f"{count} partnera verificirano.")
             return redirect(request.get_full_path())
 
     # ── GET: filtriranje ──
-    q = request.GET.get('q', '')
-    filter_bt = request.GET.get('buyer_type', '')
-    filter_company = request.GET.get('company', '')
+    q = request.GET.get("q", "")
+    filter_bt = request.GET.get("buyer_type", "")
+    filter_company = request.GET.get("company", "")
 
     if q:
         qs = qs.filter(Q(name__icontains=q) | Q(oib__icontains=q))
@@ -362,62 +403,73 @@ def buyer_type_verify(request):
 
     # Stats
     stats = OrderedDict()
-    for row in qs.values('buyer_type').annotate(cnt=Q(pk__isnull=False)).order_by():
-        stats[row['buyer_type']] = row['cnt']
+    for row in qs.values("buyer_type").annotate(cnt=Q(pk__isnull=False)).order_by():
+        stats[row["buyer_type"]] = row["cnt"]
     # Use actual count
     from django.db.models import Count
-    stats_qs = qs.values('buyer_type').annotate(cnt=Count('id')).order_by('-cnt')
-    stats = OrderedDict((r['buyer_type'], r['cnt']) for r in stats_qs)
+
+    stats_qs = qs.values("buyer_type").annotate(cnt=Count("id")).order_by("-cnt")
+    stats = OrderedDict((r["buyer_type"], r["cnt"]) for r in stats_qs)
 
     total = qs.count()
     verified_today = Partner.objects.filter(
-        notes__contains='VERIFIED',
+        notes__contains="VERIFIED",
         updated_at__date=timezone.now().date(),
     ).count()
 
     # Annotate classify reason from notes
     paginator = Paginator(qs, 50)
-    page = paginator.get_page(request.GET.get('page'))
+    page = paginator.get_page(request.GET.get("page"))
 
     for p in page:
-        match = re.search(r'\[AUTO-CLASSIFY[^\]]*\][^\|]*\|\s*(.+)', p.notes or '')
-        p.classify_reason = match.group(1).strip() if match else ''
+        match = re.search(r"\[AUTO-CLASSIFY[^\]]*\][^\|]*\|\s*(.+)", p.notes or "")
+        p.classify_reason = match.group(1).strip() if match else ""
 
-    companies = Company.objects.all().order_by('name')
+    companies = Company.objects.all().order_by("name")
 
-    return render(request, 'partners/buyer_type_verify.html', {
-        'page_obj': page,
-        'total': total,
-        'verified_today': verified_today,
-        'stats': stats,
-        'q': q,
-        'filter_bt': filter_bt,
-        'filter_company': int(filter_company) if filter_company else '',
-        'companies': companies,
-        'buyer_type_choices': Partner.BUYER_TYPE_CHOICES,
-    })
+    return render(
+        request,
+        "partners/buyer_type_verify.html",
+        {
+            "page_obj": page,
+            "total": total,
+            "verified_today": verified_today,
+            "stats": stats,
+            "q": q,
+            "filter_bt": filter_bt,
+            "filter_company": int(filter_company) if filter_company else "",
+            "companies": companies,
+            "buyer_type_choices": Partner.BUYER_TYPE_CHOICES,
+        },
+    )
 
 
 def _verify_partner(partner, new_type):
     """Potvrdi buyer_type i ukloni needs_verification marker."""
     from django.utils import timezone
+
     valid_types = [c[0] for c in Partner.BUYER_TYPE_CHOICES]
     if new_type not in valid_types:
         new_type = partner.buyer_type
 
     partner.buyer_type = new_type
-    partner.is_budget_user = (new_type == 'b2g')
-    partner.is_nonprofit_no_activity = new_type.startswith('udruga')
+    partner.is_budget_user = new_type == "b2g"
+    partner.is_nonprofit_no_activity = new_type.startswith("udruga")
 
     # Replace needs_verification with VERIFIED marker
-    notes = partner.notes or ''
+    notes = partner.notes or ""
     notes = re.sub(
-        r'\[AUTO-CLASSIFY[^\]]*\] needs_verification=True',
-        f'[VERIFIED {timezone.now():%Y-%m-%d}]',
+        r"\[AUTO-CLASSIFY[^\]]*\] needs_verification=True",
+        f"[VERIFIED {timezone.now():%Y-%m-%d}]",
         notes,
     )
     partner.notes = notes
-    partner.save(update_fields=[
-        'buyer_type', 'is_budget_user', 'is_nonprofit_no_activity',
-        'notes', 'updated_at',
-    ])
+    partner.save(
+        update_fields=[
+            "buyer_type",
+            "is_budget_user",
+            "is_nonprofit_no_activity",
+            "notes",
+            "updated_at",
+        ]
+    )
