@@ -1230,7 +1230,7 @@ msgid "Broj srca"
 msgstr "Tischnummer"
 
 msgid "Kreirano"
-msgstr "Storniert"
+msgstr "Erstellt"
 
 msgid "Ažurirano"
 msgstr "Aktualisiert von"
@@ -1657,7 +1657,7 @@ msgid "PDV:"
 msgstr "MwSt.:"
 
 msgid "Kreirano:"
-msgstr "Storniert"
+msgstr "Erstellt:"
 
 msgid "Stavke"
 msgstr "Streiks"
@@ -2469,7 +2469,7 @@ msgid "Komitent profili"
 msgstr "Korisnički-Profil"
 
 msgid "Kreiran"
-msgstr "Storniert"
+msgstr "Erstellt"
 
 msgid "Aktiviran"
 msgstr "Aktiv"
@@ -2478,7 +2478,7 @@ msgid "Otkaz primljen"
 msgstr "Streiks"
 
 msgid "Arhiviran"
-msgstr "Storniert"
+msgstr "Archiviert"
 
 msgid "Reaktiviran"
 msgstr "Aktiv"
@@ -4016,7 +4016,7 @@ msgid "Napomena"
 msgstr "Hinweis"
 
 msgid "Kreirao"
-msgstr "Storniert"
+msgstr "Erstellt von"
 
 msgid "Jed. mjere"
 msgstr "Maßeinheit"
@@ -4313,7 +4313,7 @@ msgid "Na cekanju"
 msgstr "Ausstehend"
 
 msgid "Ekstrahirano"
-msgstr "Storniert"
+msgstr "Extrahiert"
 
 msgid "XML generiran"
 msgstr "XML generiert"
@@ -5077,7 +5077,7 @@ msgid "Platni račun (IBAN/blagajna)"
 msgstr "Zahlungskonto (IBAN/Kasse)"
 
 msgid "Rekoncilirano"
-msgstr "Storniert"
+msgstr "Abgestimmt"
 
 msgid "Transakcije"
 msgstr "Transaktionen"
@@ -5231,7 +5231,7 @@ msgid "Spremno"
 msgstr "Spremi"
 
 msgid "Servirano"
-msgstr "Storniert"
+msgstr "Serviert"
 
 msgid "Narudžba sa stola"
 msgstr "Standardtarif"
@@ -5379,7 +5379,7 @@ msgid "Završen"
 msgstr "Fertig"
 
 msgid "Poništen"
-msgstr "Storniert"
+msgstr "Annulliert"
 
 msgid "Izvršitelj"
 msgstr "Ausgeführt"
@@ -6182,7 +6182,7 @@ msgid "Brojanje"
 msgstr "Verwaltung"
 
 msgid "Poništeno"
-msgstr "Storniert"
+msgstr "Annulliert"
 
 msgid "Broj popisa"
 msgstr "Inventurnummer"
@@ -6248,7 +6248,7 @@ msgid "Vrijeme brojanja"
 msgstr "Zeit:"
 
 msgid "Skenirano"
-msgstr "Storniert"
+msgstr "Gescannt"
 
 msgid "Je li artikl identificiran barcode skenerom"
 msgstr "Wurde der Artikel mit einem Barcode-Scanner identifiziert"
@@ -6866,7 +6866,7 @@ msgid "🇩🇪 Gutschrift"
 msgstr "🇩🇪 Gutschrift"
 
 msgid "↩ Storno"
-msgstr "Storniert"
+msgstr "↩ Storno"
 
 msgid "🇭🇷 HR"
 msgstr "🇭🇷 HR"
@@ -7069,7 +7069,7 @@ msgid "🔴 Dospijelo"
 msgstr "Fällig"
 
 msgid "Storno"
-msgstr "Storniert"
+msgstr "Storno"
 
 msgid "Primatelj / Kupac"
 msgstr "Empfänger / Kunde"
@@ -8233,7 +8233,7 @@ msgid "Očišćeno"
 msgstr "Gelöscht"
 
 msgid "Verificirano"
-msgstr "Storniert"
+msgstr "Verifiziert"
 
 msgid "Nisko"
 msgstr "Niedrig"
@@ -8368,7 +8368,7 @@ msgid "Pariran"
 msgstr "Geplant"
 
 msgid "Ignoriran"
-msgstr "Storniert"
+msgstr "Ignoriert"
 
 msgid "Platitelj/Primatelj"
 msgstr "Zahler/Empfänger"
@@ -8850,7 +8850,7 @@ msgid "Istekla clanarina"
 msgstr "Kassierername"
 
 msgid "Suspendiran"
-msgstr "Storniert"
+msgstr "Gesperrt"
 
 msgid "Blokiran (dugovanje)"
 msgstr "Geplant"
@@ -10658,7 +10658,7 @@ msgid "Plaćen"
 msgstr "Bezahlt"
 
 msgid "Storniran / Otkazan"
-msgstr "Storniert"
+msgstr "Storniert / Abgesagt"
 
 msgid "Broj bona"
 msgstr "Bonnummer"
@@ -11866,7 +11866,7 @@ msgid "Radne stanice"
 msgstr "Arbeitszeiten"
 
 msgid "Arhivirana"
-msgstr "Storniert"
+msgstr "Archiviert"
 
 msgid "Naziv recepture"
 msgstr "Firmenname"
@@ -12777,7 +12777,7 @@ msgid "Pisanje"
 msgstr "Verwaltung"
 
 msgid "Kreiranje"
-msgstr "Storniert"
+msgstr "Erstellung"
 
 msgid "Izmjene"
 msgstr "Änderungen"
@@ -13826,7 +13826,7 @@ msgid "Gips ploče"
 msgstr "Gipsplatten"
 
 msgid "Kombinirano"
-msgstr "Storniert"
+msgstr "Kombiniert"
 
 msgid "🎯 Procjena stanja (majstor)"
 msgstr "🎯 Zustandsbewertung (Handwerker)"
@@ -14340,7 +14340,7 @@ msgid "Preskoči na sadržaj"
 msgstr "Überspringen, falls bereits vorhanden"
 
 msgid "Skeniraj"
-msgstr "Storniert"
+msgstr "Scannen"
 
 msgid "Tema"
 msgstr "Design"
@@ -14863,7 +14863,7 @@ msgid "Produktivnost %%"
 msgstr "Produktivität %%"
 
 msgid "Kreiraj"
-msgstr "Storniert"
+msgstr "Erstellen"
 
 msgid "Kalkulator"
 msgstr "Rechner"
