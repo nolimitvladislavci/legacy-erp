@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponuda br. VB-2026-04-001 — Višković Bau</title>
+<style>
+  @page { size: A4; margin: 15mm 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.5; background: #fff; padding: 20mm; }
+  
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1a3a5c; padding-bottom: 15px; margin-bottom: 25px; }
+  .logo-area h1 { font-size: 22pt; color: #1a3a5c; font-weight: 800; letter-spacing: 1px; }
+  .logo-area p { font-size: 9pt; color: #666; margin-top: 2px; }
+  .doc-info { text-align: right; font-size: 9pt; color: #555; }
+  .doc-info .ponuda-br { font-size: 14pt; font-weight: 700; color: #1a3a5c; }
+  
+  h2 { font-size: 13pt; color: #1a3a5c; border-left: 4px solid #c9a84c; padding-left: 10px; margin: 25px 0 12px 0; }
+  h3 { font-size: 11pt; color: #333; margin: 15px 0 8px 0; }
+  
+  .parties { display: flex; gap: 40px; margin-bottom: 20px; }
+  .party { flex: 1; background: #f8f9fa; border-radius: 6px; padding: 14px 18px; border: 1px solid #e0e0e0; }
+  .party strong { display: block; font-size: 11pt; color: #1a3a5c; margin-bottom: 6px; }
+  .party span { display: block; font-size: 9.5pt; color: #444; line-height: 1.6; }
+  
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 20px 0; font-size: 10pt; }
+  th { background: #1a3a5c; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  tr:hover { background: #f0f4f8; }
+  .right { text-align: right; }
+  .center { text-align: center; }
+  .bold { font-weight: 700; }
+  
+  .total-row td { background: #1a3a5c !important; color: #fff; font-weight: 700; font-size: 11pt; border: none; }
+  .subtotal-row td { background: #e8eef4; font-weight: 600; border: none; }
+  .pdv-row td { background: #f0f4f8; font-weight: 600; }
+  .grand-total td { background: #c9a84c !important; color: #000; font-weight: 800; font-size: 12pt; border: none; }
+  
+  .note-box { background: #fffbea; border: 1px solid #c9a84c; border-radius: 6px; padding: 14px 18px; margin: 15px 0; font-size: 9.5pt; }
+  .note-box strong { color: #8a6d00; }
+  
+  .warranty-box { background: #e8f5e9; border: 1px solid #4caf50; border-radius: 6px; padding: 14px 18px; margin: 15px 0; font-size: 9.5pt; }
+  .warranty-box strong { color: #2e7d32; }
+  
+  .conditions { font-size: 9.5pt; color: #555; }
+  .conditions li { margin-bottom: 5px; }
+  
+  .signature-area { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; }
+  .sig-block { text-align: center; width: 40%; }
+  .sig-line { border-top: 1px solid #999; margin-top: 50px; padding-top: 5px; font-size: 9pt; color: #666; }
+  
+  .footer { margin-top: 30px; border-top: 2px solid #1a3a5c; padding-top: 10px; font-size: 8pt; color: #888; text-align: center; }
+  
+  .page-break { page-break-before: always; }
+  
+  .timeline { display: flex; gap: 0; margin: 15px 0; }
+  .phase { flex: 1; padding: 10px; text-align: center; font-size: 9pt; border: 1px solid #ddd; }
+  .phase:first-child { border-radius: 6px 0 0 6px; }
+  .phase:last-child { border-radius: 0 6px 6px 0; }
+  .phase .week { font-weight: 700; color: #1a3a5c; font-size: 10pt; display: block; margin-bottom: 3px; }
+  .phase1 { background: #e3f2fd; }
+  .phase2 { background: #fff3e0; }
+  .phase3 { background: #e8f5e9; }
+  .phase4 { background: #fce4ec; }
+  
+  @media print {
+    body { padding: 0; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ STRANICA 1: PONUDA ============ -->
+<div class="header">
+  <div class="logo-area">
+    <h1>VIŠKOVIĆ BAU</h1>
+    <p>Građevinski obrt &bull; OIB: _____________ &bull; Osijek</p>
+    <p>Adresa: _________________________ &bull; Tel: _____________</p>
+    <p>IBAN: HR__ ____ ____ ____ ____ _ &bull; Banka: ___________</p>
+  </div>
+  <div class="doc-info">
+    <div class="ponuda-br">PONUDA br. VB-2026-04-001</div>
+    <p>Datum: 13.04.2026.</p>
+    <p>Vrijedi do: 13.05.2026.</p>
+    <p>Stranica 1/3</p>
+  </div>
+</div>
+
+<div class="parties">
+  <div class="party">
+    <strong>IZVOĐAČ:</strong>
+    <span>Višković Bau</span>
+    <span>OIB: _____________</span>
+    <span>Adresa: _______________, Osijek</span>
+    <span>Odgovorna osoba: _______________</span>
+  </div>
+  <div class="party">
+    <strong>INVESTITOR / NARUČITELJ:</strong>
+    <span>Ime i prezime / Tvrtka: _______________</span>
+    <span>OIB: _____________</span>
+    <span>Adresa objekta: <strong>Palagruška 6, Osijek</strong></span>
+    <span>Kontakt: _______________</span>
+  </div>
+</div>
+
+<h2>1. PREDMET PONUDE</h2>
+<p>Kompletni građevinsko-završni radovi na adresi <strong>Palagruška 6, Osijek</strong> — izvedba <strong>"ključ u ruke"</strong>, uključujući sav rad i materijal prema specifikaciji u nastavku. Radovi obuhvaćaju: pripremu podloge, žbukanje, suhu gradnju (Knauf), armiranje fasadnih zidova, gletanje, ličenje, hidroizolaciju, keramičarske radove, ugradnju stepenica, ugradnju unutarnjih vrata te završno čišćenje.</p>
+
+<h2>2. SPECIFIKACIJA RADOVA</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">R.b.</th>
+      <th style="width:40%">Opis radova</th>
+      <th style="width:10%">Jed. mjere</th>
+      <th style="width:10%" class="right">Količina</th>
+      <th style="width:15%" class="right">Cijena/jed. (€)</th>
+      <th style="width:15%" class="right">Ukupno (€)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- PRIPREMNI RADOVI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">A. PRIPREMNI I ZIDARSKI RADOVI</td></tr>
+    <tr><td>1.</td><td>Šlicevi za instalacije, krpanje, XPS izolacija — komplet</td><td>paušal</td><td class="right">1</td><td class="right">960,00</td><td class="right bold">960,00</td></tr>
+    <tr><td>2.</td><td>Žbukanje zidova (WC + kupaonica) — strojno/ručno</td><td>m²</td><td class="right">30</td><td class="right">28,00</td><td class="right bold">840,00</td></tr>
+    <tr><td>3.</td><td>ALU kutnici na svim vanjskim bridovima</td><td>m¹</td><td class="right">60</td><td class="right">6,50</td><td class="right bold">390,00</td></tr>
+    
+    <!-- SUHA GRADNJA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">B. SUHA GRADNJA (KNAUF)</td></tr>
+    <tr><td>4.</td><td>Knauf strop — spušteni, s podkonstrukcijom, banda, glet</td><td>paušal</td><td class="right">1</td><td class="right">780,00</td><td class="right bold">780,00</td></tr>
+    <tr><td>5.</td><td>Knauf obloge roleta + revizijska vratašca</td><td>paušal</td><td class="right">1</td><td class="right">680,00</td><td class="right bold">680,00</td></tr>
+    
+    <!-- FASADERSKI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">C. FASADERSKO-SOBOSLIKARSKI RADOVI</td></tr>
+    <tr><td>6.</td><td>Armiranje zidova — staklena mrežica + ljepilo (2 sloja)</td><td>m²</td><td class="right">280</td><td class="right">12,00</td><td class="right bold">3.360,00</td></tr>
+    <tr><td>7.</td><td>Gletanje (2× nanošenje + brušenje)</td><td>m²</td><td class="right">280</td><td class="right">10,00</td><td class="right bold">2.800,00</td></tr>
+    <tr><td>8.</td><td>Ličenje — impregnacija + 2× disperzija (po izboru investitora)</td><td>m²</td><td class="right">280</td><td class="right">6,50</td><td class="right bold">1.820,00</td></tr>
+    
+    <!-- HIDROIZOLACIJA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">D. HIDROIZOLACIJA</td></tr>
+    <tr><td>9.</td><td>Hidroizolacija kupaonice i WC-a — premaz (2×) + brtvene trake na spojevima</td><td>m²</td><td class="right">12</td><td class="right">22,00</td><td class="right bold">264,00</td></tr>
+    
+    <!-- KERAMIČARSKI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">E. KERAMIČARSKI RADOVI</td></tr>
+    <tr><td>10.</td><td>Podna keramika — riblja kost (herringbone), rezanje pod 45°, fleksibilno ljepilo, fugiranje</td><td>m²</td><td class="right">100</td><td class="right">38,00</td><td class="right bold">3.800,00</td></tr>
+    <tr><td>11.</td><td>Zidna keramika — kupaonica + WC, ljepilo, fugiranje, silikoniranje</td><td>m²</td><td class="right">36</td><td class="right">32,00</td><td class="right bold">1.152,00</td></tr>
+    <tr><td>12.</td><td>Granitne klupčice (unutarnje prozorske), mjerenje + montaža</td><td>m¹</td><td class="right">8</td><td class="right">45,00</td><td class="right bold">360,00</td></tr>
+    
+    <!-- STOLARIJA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">F. STOLARSKI RADOVI</td></tr>
+    <tr><td>13.</td><td>Stepenice — hrastovina, krojenje, lakiranje (3×), montaža (13 gazišta + podnice)</td><td>komplet</td><td class="right">1</td><td class="right">2.800,00</td><td class="right bold">2.800,00</td></tr>
+    <tr><td>14.</td><td>Ugradnja unutarnjih vrata — obuhvatni štokovi, poravnanje, montaža kvaka</td><td>kom</td><td class="right">7</td><td class="right">85,00</td><td class="right bold">595,00</td></tr>
+    
+    <!-- ZAVRŠNI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">G. ZAVRŠNI RADOVI</td></tr>
+    <tr><td>15.</td><td>Završno čišćenje gradilišta, odvoz otpada, primopredaja</td><td>paušal</td><td class="right">1</td><td class="right">420,00</td><td class="right bold">420,00</td></tr>
+    
+    <!-- SUBTOTAL RADOVI -->
+    <tr class="subtotal-row">
+      <td colspan="5" class="right bold">UKUPNO RADOVI (neto, bez PDV-a):</td>
+      <td class="right bold">21.021,00 €</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3. REKAPITULACIJA</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:60%">Stavka</th>
+      <th style="width:20%" class="right">Iznos (€)</th>
+      <th style="width:20%" class="right">Napomena</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="bold">I. RADOVI — ukupno</td><td class="right bold">21.021,00</td><td class="right">Vidi specifikaciju gore</td></tr>
+    <tr><td class="bold">II. MATERIJAL — ukupno</td><td class="right bold">14.190,00</td><td class="right">Vidi Prilog 1 (str. 2)</td></tr>
+    <tr class="subtotal-row"><td class="bold">OSNOVICA (neto bez PDV-a)</td><td class="right bold">35.211,00</td><td class="right"></td></tr>
+    <tr class="pdv-row"><td>PDV 25%</td><td class="right bold">8.802,75</td><td class="right">Obračun po R1</td></tr>
+    <tr class="grand-total"><td class="bold">SVEUKUPNO S PDV-om</td><td class="right bold">44.013,75 €</td><td class="right bold">ZA UPLATU</td></tr>
+  </tbody>
+</table>
+
+<h2>4. ROK IZVEDBE</h2>
+
+<div class="timeline">
+  <div class="phase phase1"><span class="week">Tjedan 1–2</span>Priprema, šlicevi, žbukanje, Knauf, hidroizolacija</div>
+  <div class="phase phase2"><span class="week">Tjedan 3–4</span>Armiranje, ALU kutnici, gletanje (1. sloj)</div>
+  <div class="phase phase3"><span class="week">Tjedan 5–6</span>Glet (2. sloj), brušenje, keramika pod + zid</div>
+  <div class="phase phase4"><span class="week">Tjedan 7–8</span>Ličenje, stepenice, vrata, klupčice, čišćenje</div>
+</div>
+
+<div class="note-box">
+  <strong>ROK:</strong> Radovi započinju u roku od <strong>7 dana</strong> od potpisa ugovora i uplate avansa. Ukupan rok izvedbe: <strong>2 (dva) kalendarska mjeseca</strong> od dana početka radova (uključujući tehnološke pauze za sušenje). Planirani efektivni rad: <strong>22 radna dana</strong> s ekipom od 5 radnika.
+</div>
+
+<h2>5. GARANCIJA</h2>
+
+<div class="warranty-box">
+  <strong>JAMSTVO ZA IZVEDENE RADOVE:</strong><br><br>
+  Izvođač daje garanciju na kvalitetu izvedenih radova u trajanju od:<br><br>
+  &bull; <strong>2 (dvije) godine</strong> — na sve soboslikarske i ličilačke radove<br>
+  &bull; <strong>5 (pet) godina</strong> — na keramičarske radove, hidroizolaciju i suhu gradnju<br>
+  &bull; <strong>5 (pet) godina</strong> — na stolarske radove (stepenice)<br>
+  &bull; <strong>10 (deset) godina</strong> — na konstrukcijske elemente (armiranje, žbukanje)<br><br>
+  Garancija ne pokriva oštećenja nastala nepravilnim korištenjem, elementarnim nepogodama ili naknadnim radovima trećih strana. Garancijski rok počinje teći od dana potpisanog zapisnika o primopredaji radova.
+</div>
+
+<h2>6. UVJETI PLAĆANJA</h2>
+
+<ol class="conditions">
+  <li><strong>Avans 30%</strong> — 13.204,13 € (s PDV-om) — uplatom na IBAN izvođača, prije početka radova.</li>
+  <li><strong>Druga rata 40%</strong> — 17.605,50 € (s PDV-om) — po završetku faze armiranja i gletanja (cca 4. tjedan).</li>
+  <li><strong>Završna rata 30%</strong> — 13.204,12 € (s PDV-om) — po primopredaji i potpisivanju zapisnika.</li>
+  <li>Za svaku uplatu izdaje se <strong>R1 račun</strong> s obračunatim PDV-om.</li>
+  <li>Valuta plaćanja: <strong>8 dana</strong> od ispostave situacije/računa.</li>
+</ol>
+
+<h2>7. POSEBNE NAPOMENE</h2>
+
+<ol class="conditions">
+  <li>Ponuda uključuje <strong>sav rad i materijal</strong> ("ključ u ruke") prema gornjoj specifikaciji.</li>
+  <li>Keramiku, sanitariju i vrata <strong>bira investitor</strong> — u slučaju odabira artikala iznad predviđenog budžeta, razlika se naplaćuje prema stvarnoj nabavnoj cijeni + 10% marže.</li>
+  <li>Izvođač osigurava gradilište i radnike <strong>policom osiguranja od odgovornosti</strong>.</li>
+  <li>Svi radnici su <strong>prijavljeni na puno radno vrijeme</strong> sukladno Zakonu o radu.</li>
+  <li>Eventualne nepredviđene radove izvođač prijavljuje investitoru <strong>prije izvedbe</strong>, uz pisanu ponudu za dodatne radove.</li>
+  <li>U slučaju kašnjenja neskrivljenog od strane izvođača (nestanak materijala, više sile), rok se proporcionalno produžuje.</li>
+</ol>
+
+<div class="signature-area">
+  <div class="sig-block">
+    <strong>ZA IZVOĐAČA:</strong>
+    <div class="sig-line">Višković Bau — Ime i prezime, potpis i pečat</div>
+  </div>
+  <div class="sig-block">
+    <strong>ZA INVESTITORA:</strong>
+    <div class="sig-line">Ime i prezime, potpis</div>
+  </div>
+</div>
+
+<div class="footer">
+  Višković Bau &bull; OIB: _____________ &bull; Osijek &bull; Ponuda br. VB-2026-04-001 &bull; Stranica 1/3
+</div>
+
+<!-- ============ STRANICA 2: POPIS MATERIJALA ============ -->
+<div class="page-break"></div>
+
+<div class="header">
+  <div class="logo-area">
+    <h1>VIŠKOVIĆ BAU</h1>
+    <p>PRILOG 1 — Popis materijala</p>
+  </div>
+  <div class="doc-info">
+    <div class="ponuda-br">VB-2026-04-001</div>
+    <p>Stranica 2/3</p>
+  </div>
+</div>
+
+<h2>PRILOG 1: DETALJAN POPIS MATERIJALA</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">R.b.</th>
+      <th style="width:35%">Materijal</th>
+      <th style="width:10%">Jed.</th>
+      <th style="width:10%" class="right">Količina</th>
+      <th style="width:15%" class="right">Cijena/jed. (€)</th>
+      <th style="width:15%" class="right">Ukupno (€)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- PRIPREMNI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">A. PRIPREMNI I ZIDARSKI MATERIJAL</td></tr>
+    <tr><td>1.</td><td>XPS izolacijske ploče 3cm</td><td>m²</td><td class="right">15</td><td class="right">5,50</td><td class="right">82,50</td></tr>
+    <tr><td>2.</td><td>Cement (25kg vreća)</td><td>kom</td><td class="right">20</td><td class="right">4,80</td><td class="right">96,00</td></tr>
+    <tr><td>3.</td><td>Strojni žbuk (25kg)</td><td>kom</td><td class="right">40</td><td class="right">7,20</td><td class="right">288,00</td></tr>
+    <tr><td>4.</td><td>ALU kutnici (2,5m)</td><td>kom</td><td class="right">24</td><td class="right">2,10</td><td class="right">50,40</td></tr>
+    <tr><td>5.</td><td>Čavli, vijci, tiple, montažni pribor</td><td>paušal</td><td class="right">1</td><td class="right">120,00</td><td class="right">120,00</td></tr>
+
+    <!-- KNAUF -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">B. SUHA GRADNJA — KNAUF</td></tr>
+    <tr><td>6.</td><td>Knauf ploče 12,5mm</td><td>m²</td><td class="right">25</td><td class="right">5,80</td><td class="right">145,00</td></tr>
+    <tr><td>7.</td><td>CD/UD profili (podkonstrukcija)</td><td>komplet</td><td class="right">1</td><td class="right">180,00</td><td class="right">180,00</td></tr>
+    <tr><td>8.</td><td>Knauf banda + Uniflott glet</td><td>komplet</td><td class="right">1</td><td class="right">55,00</td><td class="right">55,00</td></tr>
+    <tr><td>9.</td><td>Revizijska vratašca 30×30</td><td>kom</td><td class="right">4</td><td class="right">12,00</td><td class="right">48,00</td></tr>
+
+    <!-- FASADERSKI -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">C. FASADERSKO-SOBOSLIKARSKI MATERIJAL</td></tr>
+    <tr><td>10.</td><td>Staklena mrežica 160g/m² (rola 50m²)</td><td>rola</td><td class="right">6</td><td class="right">42,00</td><td class="right">252,00</td></tr>
+    <tr><td>11.</td><td>Ljepilo za armiranje (Baumit, 25kg)</td><td>vreća</td><td class="right">35</td><td class="right">11,50</td><td class="right">402,50</td></tr>
+    <tr><td>12.</td><td>Glet masa (Knauf HP Finish, 25kg)</td><td>vreća</td><td class="right">28</td><td class="right">9,00</td><td class="right">252,00</td></tr>
+    <tr><td>13.</td><td>Brusni papir (garniture za žirafu)</td><td>komplet</td><td class="right">1</td><td class="right">65,00</td><td class="right">65,00</td></tr>
+    <tr><td>14.</td><td>Impregnacija (Jupol grundiranje, 10L)</td><td>kan</td><td class="right">3</td><td class="right">28,00</td><td class="right">84,00</td></tr>
+    <tr><td>15.</td><td>Disperzivna boja (Jupol Classic, 15L)</td><td>kan</td><td class="right">6</td><td class="right">45,00</td><td class="right">270,00</td></tr>
+    <tr><td>16.</td><td>Valjci, kistovi, folije, trake</td><td>paušal</td><td class="right">1</td><td class="right">90,00</td><td class="right">90,00</td></tr>
+
+    <!-- HIDROIZOLACIJA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">D. HIDROIZOLACIJA</td></tr>
+    <tr><td>17.</td><td>Hidroizolacijski premaz (Mapei Mapelastic, 2K)</td><td>kg</td><td class="right">15</td><td class="right">6,50</td><td class="right">97,50</td></tr>
+    <tr><td>18.</td><td>Brtvene trake (kutevi + podne)</td><td>m¹</td><td class="right">12</td><td class="right">3,80</td><td class="right">45,60</td></tr>
+
+    <!-- KERAMIKA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">E. KERAMIČARSKI MATERIJAL</td></tr>
+    <tr><td>19.</td><td>Podna keramika — riblja kost (po izboru investitora, predviđeno do)</td><td>m²</td><td class="right">110</td><td class="right">25,00</td><td class="right">2.750,00</td></tr>
+    <tr><td>20.</td><td>Zidna keramika — kupaonica/WC (po izboru investitora, predviđeno do)</td><td>m²</td><td class="right">40</td><td class="right">22,00</td><td class="right">880,00</td></tr>
+    <tr><td>21.</td><td>Fleksibilno ljepilo (Mapei Keraflex, 25kg)</td><td>vreća</td><td class="right">30</td><td class="right">12,00</td><td class="right">360,00</td></tr>
+    <tr><td>22.</td><td>Fug masa (Mapei Keracolor, razne boje)</td><td>kg</td><td class="right">15</td><td class="right">5,50</td><td class="right">82,50</td></tr>
+    <tr><td>23.</td><td>Sanitarni silikon (Mapei, bijeli/sivi)</td><td>tuba</td><td class="right">6</td><td class="right">8,00</td><td class="right">48,00</td></tr>
+    <tr><td>24.</td><td>Granitne klupčice (po mjeri, 3cm debljina)</td><td>m¹</td><td class="right">8</td><td class="right">42,00</td><td class="right">336,00</td></tr>
+    <tr><td>25.</td><td>PVC lajsne, dilatacijski profili, distanceri</td><td>paušal</td><td class="right">1</td><td class="right">85,00</td><td class="right">85,00</td></tr>
+
+    <!-- STOLARIJA -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">F. STOLARSKI MATERIJAL</td></tr>
+    <tr><td>26.</td><td>Hrastove stepenice — gazišta + podnice (13 kom), radionica + lak 3×</td><td>komplet</td><td class="right">1</td><td class="right">3.800,00</td><td class="right">3.800,00</td></tr>
+    <tr><td>27.</td><td>Unutarnja vrata — obuhvatni štokovi, CPL ili furnir (po izboru)</td><td>kom</td><td class="right">7</td><td class="right">285,00</td><td class="right">1.995,00</td></tr>
+    <tr><td>28.</td><td>Kvake, šarke, brava (komplet po vratima)</td><td>kom</td><td class="right">7</td><td class="right">35,00</td><td class="right">245,00</td></tr>
+
+    <!-- OSTALO -->
+    <tr><td colspan="6" style="background:#e8eef4; font-weight:700; color:#1a3a5c;">G. TRANSPORT I OSTALO</td></tr>
+    <tr><td>29.</td><td>Transport materijala na gradilište</td><td>paušal</td><td class="right">1</td><td class="right">350,00</td><td class="right">350,00</td></tr>
+    <tr><td>30.</td><td>Kontejner za šut + odvoz</td><td>kom</td><td class="right">2</td><td class="right">180,00</td><td class="right">360,00</td></tr>
+
+    <!-- TOTAL MATERIJAL -->
+    <tr class="total-row">
+      <td colspan="5" class="right">UKUPNO MATERIJAL (neto, bez PDV-a):</td>
+      <td class="right">14.184,50 €</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note-box">
+  <strong>NAPOMENA O MATERIJALU:</strong> Stavke 19, 20, 26 i 27 (keramika, stepenice, vrata) — investitor bira konkretan proizvod. Navedene cijene su <strong>predviđeni budžet</strong>. Razlika u cijeni odabranog materijala obračunava se prema stvarnoj nabavnoj cijeni + 10% marže. Količine keramike uključuju 10% rezerve za rezanje.
+</div>
+
+<div class="footer">
+  Višković Bau &bull; Ponuda br. VB-2026-04-001 &bull; PRILOG 1 — Popis materijala &bull; Stranica 2/3
+</div>
+
+<!-- ============ STRANICA 3: DINAMIČKI PLAN ============ -->
+<div class="page-break"></div>
+
+<div class="header">
+  <div class="logo-area">
+    <h1>VIŠKOVIĆ BAU</h1>
+    <p>PRILOG 2 — Dinamički plan izvođenja</p>
+  </div>
+  <div class="doc-info">
+    <div class="ponuda-br">VB-2026-04-001</div>
+    <p>Stranica 3/3</p>
+  </div>
+</div>
+
+<h2>PRILOG 2: DINAMIČKI PLAN RADOVA (8 tjedana)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:12%">Tjedan</th>
+      <th style="width:45%">Radovi</th>
+      <th style="width:18%" class="center">Ekipa</th>
+      <th style="width:15%" class="center">Efektivni sati</th>
+      <th style="width:10%" class="center">Sušenje</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="bold">Tjedan 1</td><td>Zaštita prostora, šlicevi, XPS, grubi popravci, žbukanje WC/kupaonica</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">—</td></tr>
+    <tr><td class="bold">Tjedan 2</td><td>Knauf strop + rolete, hidroizolacija kupaonice, ALU kutnici</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">24h hidro</td></tr>
+    <tr><td class="bold">Tjedan 3</td><td>Armiranje zidova — mrežica + ljepilo (1. sloj, sušenje, 2. sloj)</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">24h ljepilo</td></tr>
+    <tr><td class="bold">Tjedan 4</td><td>Dovršetak armiranja, gletanje 1. sloj</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">24h glet</td></tr>
+    <tr style="background:#fff3e0;"><td class="bold">— Kontrola —</td><td colspan="4"><em>Obilazak gradilišta s investitorom. Potvrda keramike i boja. Uplata 2. rate.</em></td></tr>
+    <tr><td class="bold">Tjedan 5</td><td>Gletanje 2. sloj, brušenje, impregnacija. Početak podne keramike.</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">24h glet</td></tr>
+    <tr><td class="bold">Tjedan 6</td><td>Podna keramika (riblja kost) — nastavak. Zidna keramika WC/kupaonica.</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">48h ljepilo</td></tr>
+    <tr><td class="bold">Tjedan 7</td><td>Fugiranje keramike. Ličenje (2× disperzija). Montaža stepenica.</td><td class="center">5 radnika</td><td class="center">200h</td><td class="center">12h boja</td></tr>
+    <tr><td class="bold">Tjedan 8</td><td>Ugradnja vrata, granitne klupčice, silikoniranje, završno čišćenje, primopredaja.</td><td class="center">5 radnika</td><td class="center">~169h</td><td class="center">—</td></tr>
+  </tbody>
+</table>
+
+<h3>Normativni dokaz:</h3>
+<table>
+  <tbody>
+    <tr><td class="bold" style="width:50%">Ukupno čistih radnih sati po GN normativima:</td><td class="right bold">569 sati</td></tr>
+    <tr><td>Ekipa (4 majstora + 1 polumajstor) × 8h/dan:</td><td class="right">40 sati/dan</td></tr>
+    <tr><td>Čistih radnih dana:</td><td class="right">14,2 dana</td></tr>
+    <tr><td>Tehnološki faktor (sušenje, logistika) × 1.55:</td><td class="right">22 radna dana</td></tr>
+    <tr style="background:#e8f5e9;"><td class="bold">Kalendarski rok (s vikendima + rezervom):</td><td class="right bold">8 tjedana = 2 mjeseca</td></tr>
+  </tbody>
+</table>
+
+<div class="warranty-box">
+  <strong>PRIMOPREDAJA:</strong> Po završetku svih radova sastavlja se <strong>Zapisnik o primopredaji</strong> koji potpisuju obje strane. Investitor ima pravo na pregled radova u trajanju od 3 radna dana. Eventualni nedostaci otklanjaju se u roku od 7 dana. Garancijski rok počinje teći od dana potpisanog zapisnika.
+</div>
+
+<h2>KONTAKT ZA PITANJA</h2>
+<p>Za sva pitanja vezana uz ovu ponudu obratite se na:</p>
+<p><strong>Višković Bau</strong> — Tel: _____________ — Email: _____________</p>
+
+<div class="signature-area">
+  <div class="sig-block">
+    <strong>ZA IZVOĐAČA:</strong>
+    <div class="sig-line">Višković Bau — potpis i pečat</div>
+  </div>
+  <div class="sig-block">
+    <strong>PRIHVAĆAM PONUDU:</strong>
+    <div class="sig-line">Investitor — potpis i datum</div>
+  </div>
+</div>
+
+<div class="footer">
+  Višković Bau &bull; Ponuda br. VB-2026-04-001 &bull; PRILOG 2 — Dinamički plan &bull; Stranica 3/3<br>
+  Dokument generiran: 13.04.2026. &bull; Sva prava pridržana.
+</div>
+
+</body>
+</html>
