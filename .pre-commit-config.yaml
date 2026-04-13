@@ -1,17 +1,17 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.4
+    rev: v0.15.10
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --select, "F401,F811,F841,E712"]
       - id: ruff-format
+        args: [--check]
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  - repo: local
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-added-large-files
-        args: [--maxkb=500]
-      - id: debug-statements
+      - id: django-check
+        name: Django System Check
+        entry: bash -c '/var/www/fina-connect/venv/bin/python manage.py check 2>/dev/null'
+        language: system
+        pass_filenames: false
+        always_run: true

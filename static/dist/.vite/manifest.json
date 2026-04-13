@@ -1,0 +1,185 @@
+{
+  "static/css/base-layout.css": {
+    "file": "assets/base-layout-DeM4lPvD.css",
+    "name": "base-layout",
+    "names": [
+      "base-layout.css"
+    ],
+    "src": "static/css/base-layout.css",
+    "isEntry": true
+  },
+  "static/css/fenix-shell.css": {
+    "file": "assets/fenix-shell-CtQHU3il.css",
+    "name": "fenix-shell",
+    "names": [
+      "fenix-shell.css"
+    ],
+    "src": "static/css/fenix-shell.css",
+    "isEntry": true
+  },
+  "static/css/fenix-tokens.css": {
+    "file": "assets/fenix-tokens-Bm8IFkHz.css",
+    "name": "fenix-tokens",
+    "names": [
+      "fenix-tokens.css"
+    ],
+    "src": "static/css/fenix-tokens.css",
+    "isEntry": true
+  },
+  "static/css/fenix-ui.css": {
+    "file": "assets/fenix-ui-RyVjEDql.css",
+    "name": "fenix-ui",
+    "names": [
+      "fenix-ui.css"
+    ],
+    "src": "static/css/fenix-ui.css",
+    "isEntry": true
+  },
+  "static/css/login.css": {
+    "file": "assets/login-WT29SBy7.css",
+    "name": "login",
+    "names": [
+      "login.css"
+    ],
+    "src": "static/css/login.css",
+    "isEntry": true
+  },
+  "static/css/memio-pet.css": {
+    "file": "assets/memio-pet-BjkhIdM1.css",
+    "name": "memio-pet",
+    "names": [
+      "memio-pet.css"
+    ],
+    "src": "static/css/memio-pet.css",
+    "isEntry": true
+  },
+  "static/css/pos-base.css": {
+    "file": "assets/pos-base-URzkIF6K.css",
+    "name": "pos-base",
+    "names": [
+      "pos-base.css"
+    ],
+    "src": "static/css/pos-base.css",
+    "isEntry": true
+  },
+  "static/css/wcag-a11y.css": {
+    "file": "assets/wcag-a11y-Bi4QxUNQ.css",
+    "name": "wcag-a11y",
+    "names": [
+      "wcag-a11y.css"
+    ],
+    "src": "static/css/wcag-a11y.css",
+    "isEntry": true
+  },
+  "static/css/wizard.css": {
+    "file": "assets/wizard-DI4kv_hG.css",
+    "name": "wizard",
+    "names": [
+      "wizard.css"
+    ],
+    "src": "static/css/wizard.css",
+    "isEntry": true
+  },
+  "static/js/arhiva-convert.js": {
+    "file": "assets/arhiva-convert-CRQex7-l.js",
+    "name": "arhiva-convert",
+    "src": "static/js/arhiva-convert.js",
+    "isEntry": true
+  },
+  "static/js/arhiva-upload.js": {
+    "file": "assets/arhiva-upload-CyIMCsGQ.js",
+    "name": "arhiva-upload",
+    "src": "static/js/arhiva-upload.js",
+    "isEntry": true
+  },
+  "static/js/blind-count.js": {
+    "file": "assets/blind-count-CyeI4hds.js",
+    "name": "blind-count",
+    "src": "static/js/blind-count.js",
+    "isEntry": true
+  },
+  "static/js/core.js": {
+    "file": "assets/core-DZGSDdqn.js",
+    "name": "core",
+    "src": "static/js/core.js",
+    "isEntry": true
+  },
+  "static/js/fenix-camera.js": {
+    "file": "assets/fenix-camera-Ccy4hzDf.js",
+    "name": "fenix-camera",
+    "src": "static/js/fenix-camera.js",
+    "isEntry": true
+  },
+  "static/js/fenix-input.js": {
+    "file": "assets/fenix-input-B8udeG5N.js",
+    "name": "fenix-input",
+    "src": "static/js/fenix-input.js",
+    "isEntry": true
+  },
+  "static/js/fenix-permissions.js": {
+    "file": "assets/fenix-permissions-C0MLrDa4.js",
+    "name": "fenix-permissions",
+    "src": "static/js/fenix-permissions.js",
+    "isEntry": true
+  },
+  "static/js/fenix-scan.js": {
+    "file": "assets/fenix-scan-BwFfe2uQ.js",
+    "name": "fenix-scan",
+    "src": "static/js/fenix-scan.js",
+    "isEntry": true
+  },
+  "static/js/fina-utils.js": {
+    "file": "assets/fina-utils-ddi3kUPH.js",
+    "name": "fina-utils",
+    "src": "static/js/fina-utils.js",
+    "isEntry": true
+  },
+  "static/js/golubar-offline.js": {
+    "file": "assets/golubar-offline-CWekLdEz.js",
+    "name": "golubar-offline",
+    "src": "static/js/golubar-offline.js",
+    "isEntry": true
+  },
+  "static/js/goods-receipt.js": {
+    "file": "assets/goods-receipt-53nOV2Um.js",
+    "name": "goods-receipt",
+    "src": "static/js/goods-receipt.js",
+    "isEntry": true
+  },
+  "static/js/lc-ux.js": {
+    "file": "assets/lc-ux-Dn-cAIFu.js",
+    "name": "lc-ux",
+    "src": "static/js/lc-ux.js",
+    "isEntry": true
+  },
+  "static/js/quick-add.js": {
+    "file": "assets/quick-add-BqLLQjiL.js",
+    "name": "quick-add",
+    "src": "static/js/quick-add.js",
+    "isEntry": true
+  },
+  "static/js/smart-input.js": {
+    "file": "assets/smart-input-CzCL-lSL.js",
+    "name": "smart-input",
+    "src": "static/js/smart-input.js",
+    "isEntry": true
+  },
+  "static/js/smart_import_strict_ui.js": {
+    "file": "assets/smart_import_strict_ui-CZuauri-.js",
+    "name": "smart_import_strict_ui",
+    "src": "static/js/smart_import_strict_ui.js",
+    "isEntry": true
+  },
+  "static/js/sortable_kanban.js": {
+    "file": "assets/sortable_kanban-c9L34xyr.js",
+    "name": "sortable_kanban",
+    "src": "static/js/sortable_kanban.js",
+    "isEntry": true
+  },
+  "static/js/worktime-offline.js": {
+    "file": "assets/worktime-offline-mF2Mmkuk.js",
+    "name": "worktime-offline",
+    "src": "static/js/worktime-offline.js",
+    "isEntry": true
+  }
+}

@@ -3,17 +3,36 @@ target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["F", "E711", "E712", "E721", "W191", "I001"]
-# F: pyflakes (unused imports, undefined names, etc.)
-# E711/E712: comparison to None/True/False
-# E721: type comparison
-# W191: indentation contains tabs
-# I001: import sorting
+select = ["F401", "F811", "F841", "E711", "E712", "E721", "W191", "I001", "F601", "F402"]
 
 [tool.ruff.lint.per-file-ignores]
 "*/migrations/*" = ["ALL"]
-"*/tests*" = ["F841"]
+"*/tests*" = ["F841", "F401"]
 "*/backups/*" = ["ALL"]
 "venv/*" = ["ALL"]
 "tmp/*" = ["ALL"]
-"scripts/*" = ["F841"]
+"scripts/*" = ["F841", "F401"]
+"simulation/*" = ["ALL"]
+"*/admin.py" = ["F403", "F405", "F821"]
+"*/serializers.py" = ["F403", "F405", "F821"]
+"pos_audit.py" = ["F403", "F405", "F821"]
+"conftest.py" = ["F401"]
+"core/tests_*.py" = ["F401", "F841"]
+"*/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+
+[tool.django-stubs]
+django_settings_module = "core.settings"

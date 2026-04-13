@@ -1,0 +1,23 @@
+{
+  "name": "fenix-portal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "terser": "^5.46.1",
+    "vite": "^8.0.8"
+  },
+  "private": true
+}

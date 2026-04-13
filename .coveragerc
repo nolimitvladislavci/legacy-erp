@@ -1,0 +1,21 @@
+[run]
+source = .
+omit =
+    */venv/*
+    */migrations/*
+    */backups/*
+    */tests*
+    manage.py
+    conftest.py
+    tmp/*
+    scripts/*
+    simulation/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__
+    raise NotImplementedError
+show_missing = true
+precision = 1

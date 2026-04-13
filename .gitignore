@@ -28,3 +28,5 @@ CRNA_KUTIJA.md
 *.pid
 ai_analiza.txt
 minio-data/
+node_modules/
+staticfiles/dist/
