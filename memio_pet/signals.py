@@ -171,7 +171,7 @@ def on_animal_status_uginulo(sender, instance, **kwargs):
                     recipient_list=[breeder.email],
                     fail_silently=True,
                 )
-        except Exception:
+        except ImportError:
             pass
         # Celery podsjetnik za zakonsku odjavu (10 dana)
         try:

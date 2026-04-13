@@ -100,7 +100,7 @@ def request_deactivation(request):
             recipient_list=[request.user.email] if request.user.email else [],
             fail_silently=True,
         )
-    except Exception:
+    except (ValueError, TypeError):
         logger.exception('Failed to send deactivation email')
 
     messages.success(

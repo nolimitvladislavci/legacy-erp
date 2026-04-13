@@ -220,7 +220,7 @@ def database_backup(self):
             raise RuntimeError(f'Sumnjivo malo sekcija u dumpu: {section_count}')
         log.info(f'Integritet OK: {section_count} sekcija')
 
-    except Exception as e:
+    except (ValueError, AttributeError) as e:
         log.warning(f'Verifikacija upozorenje: {e}')
         # Ne failamo — backup postoji, samo verifikacija sumnjiva
 

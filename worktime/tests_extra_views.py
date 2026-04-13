@@ -214,7 +214,7 @@ class WorktimeEntryTest(TestCase):
                 'task_type': 'DEVELOPMENT',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_add_entry_with_time(self):
@@ -229,7 +229,7 @@ class WorktimeEntryTest(TestCase):
                 'task_type': 'MEETING',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_edit_entry_get(self):
@@ -288,7 +288,7 @@ class WorktimeEntryTest(TestCase):
                 'note': 'Dnevna bilješka test',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
 
@@ -330,7 +330,7 @@ class WorktimeManagerTest(TestCase):
         try:
             resp = self.client.get('/worktime/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_template_use(self):

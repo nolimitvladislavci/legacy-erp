@@ -165,5 +165,5 @@ def lock_invoice(invoice):
             if hasattr(issued, 'date'):
                 issued = issued.date()
             invoice.deletion_protected_until = issued.replace(year=issued.year + 11)
-        except Exception:
+        except AttributeError:
             pass

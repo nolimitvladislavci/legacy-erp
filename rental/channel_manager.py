@@ -104,7 +104,7 @@ def sync_all_properties(company=None):
             cm = ChannelManagerService(prop)
             avail = cm.sync_availability()
             results.append({'property': prop.name, 'days': len(avail), 'status': 'ok'})
-        except Exception as e:
+        except TypeError as e:
             results.append({'property': prop.name, 'status': 'error', 'error': str(e)})
 
     return results

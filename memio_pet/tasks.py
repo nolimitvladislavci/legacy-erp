@@ -105,6 +105,6 @@ def send_odjava_reminder(animal_pk):
         )
         logger.info("Odjava reminder sent for %s to %s", animal.name, breeder.email)
         return f'sent to {breeder.email}'
-    except Exception as e:
+    except DatabaseError as e:
         logger.error("Odjava reminder error: %s", e)
         return f'error: {e}'

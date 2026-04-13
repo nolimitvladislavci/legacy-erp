@@ -157,7 +157,7 @@ msgid "Lozinka je netočna. Pokušajte ponovo."
 msgstr "Action failed. Please try again."
 
 msgid "Email adresa uspješno verificirana! Vaš račun je sada potpuno aktivan."
-msgstr ""
+msgstr "Email address successfully verified! Your account is now fully active."
 "Email address successfully verified! Your account is now fully active."
 
 msgid ""
@@ -697,7 +697,7 @@ msgid "Odabrani termin:"
 msgstr "Your accounts and appointments"
 
 msgid "Za rezervaciju termina potrebna je prijava ili registracija."
-msgstr ""
+msgstr "Login or registration is required to book an appointment."
 "Login or registration is required to book an appointment.Login or "
 "registration is required to book an appointment.To book an appointment, you "
 "need to log in or register. Your appointment has been saved."
@@ -2507,7 +2507,7 @@ msgid "✅ Integracije spremljene."
 msgstr "Sale price"
 
 msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
-msgstr ""
+msgstr "You do not have permission for this action. Contact your administrator."
 "You do not have permission for this action. Please contact your "
 "administrator.You do not have permission for this action. Contact your "
 "administrator."
@@ -5194,7 +5194,7 @@ msgid "XSD Schema URL"
 msgstr "XSD Schema URL"
 
 msgid "npr. \"20. u mjesecu za prethodni\" ili \"30 dana od kraja kvartala\""
-msgstr ""
+msgstr "npr. \"20. u mjesecu za prethodni\" ili \"30 dana od kraja kvartala\""
 "e.g. \"20th of the month for the previous\" or \"30 days from the end of the"
 " quarter\""
 
@@ -7304,7 +7304,7 @@ msgstr "Wrong code. Try again."
 #| msgid ""
 #| "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro."
-msgstr ""
+msgstr "Thank you! Your confirmation has been recorded. We will contact you soon."
 "Your request has been received. We will contact you as soon as possible."
 
 #| msgid "Pokušajte ponovo. Ako se nastavi, kontaktirajte podršku."
@@ -7312,13 +7312,13 @@ msgid "Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu."
 msgstr "Try again. If it continues, contact support."
 
 msgid "Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti."
-msgstr ""
+msgstr "Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti."
 "Acceptance has been revoked. The offer is active — you can decide again."
 
 #| msgid ""
 #| "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro."
-msgstr ""
+msgstr "Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro."
 "Your request has been received. We will contact you as soon as possible."
 
 #, python-brace-format
@@ -8606,7 +8606,7 @@ msgstr "Transaction"
 
 #| msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
 msgid "Nema aktivne tvrtke. Obratite se administratoru."
-msgstr ""
+msgstr "Nema aktivne tvrtke. Obratite se administratoru."
 "You do not have permission for this action. Contact your administrator."
 
 #| msgid "Neispravan format telefona."
@@ -10116,7 +10116,7 @@ msgid "Proračunski korisnik"
 msgstr "User"
 
 msgid "Škole, bolnice, općine, državna tijela. Uvijek primaju eRačun (B2G)."
-msgstr ""
+msgstr "Škole, bolnice, općine, državna tijela. Uvijek primaju eRačun (B2G)."
 "Schools, hospitals, municipalities, government bodies. Always receive "
 "eInvoice (B2G)."
 
@@ -11424,7 +11424,7 @@ msgstr ""
 "administrator."
 
 msgid "Terminal već ima otvorenu smjenu. Zatvorite je prije otvaranja nove."
-msgstr ""
+msgstr "Terminal već ima otvorenu smjenu. Zatvorite je prije otvaranja nove."
 "Terminal already has an open shift. Close it before opening a new one."
 
 #, python-brace-format
@@ -12116,7 +12116,7 @@ msgstr "Request"
 #| msgid ""
 #| "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h."
-msgstr ""
+msgstr "Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h."
 "Your request has been received. We will contact you as soon as possible."
 
 msgid "Kuca"
@@ -15691,7 +15691,7 @@ msgstr ""
 "or uploading."
 
 msgid "Slikaj ili učitaj račun — AI ga pročita i spremi u arhivu"
-msgstr ""
+msgstr "Slikaj ili učitaj račun — AI ga pročita i spremi u arhivu"
 "Take or upload an invoice — AI will read it and save it to the archive"
 
 msgid "ili povucite sliku ovdje"
@@ -17132,7 +17132,7 @@ msgid "kaucija"
 msgstr "Location"
 
 msgid "Ako ih danas ne predate vozacu, kaucija ce biti naplacena."
-msgstr ""
+msgstr "Ako ih danas ne predate vozacu, kaucija ce biti naplacena."
 "If you don't hand them to the driver today, the deposit will be charged."
 
 msgid "Sljedeci radni dan"
@@ -17800,7 +17800,7 @@ msgid "2. Blagajnik"
 msgstr "POS cashier"
 
 msgid "Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju."
-msgstr ""
+msgstr "Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju."
 "Who will use the cash register? OIB is legally required for fiscalization."
 
 msgid "OIB operatera (11 znamenki)"
@@ -18356,7 +18356,7 @@ msgid "Početna gotovina (€)"
 msgstr "Home"
 
 msgid "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije."
-msgstr ""
+msgstr "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije."
 "If you don't know the exact amount, leave 0 — you can change it later."
 
 msgid "Otvori blagajnu →"
@@ -18703,7 +18703,7 @@ msgstr "Become a distributor"
 
 #, python-format
 msgid "Vaš brand. Vaši klijenti. Naša platforma. 20%% provizija — trajno."
-msgstr ""
+msgstr "Vaš brand. Vaši klijenti. Naša platforma. 20%% provizija — trajno."
 "Your brand. Your clients. Our platform. 20%% commission — permanently."
 
 msgid "Vlastita subdomena"
@@ -20823,7 +20823,7 @@ msgid "★ Istaknuto"
 msgstr "Highlighted"
 
 msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
-msgstr ""
+msgstr "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 "Your request has been received. We will contact you as soon as possible."
 
 msgid "Molimo ispunite sva obavezna polja."

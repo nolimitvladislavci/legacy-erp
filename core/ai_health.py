@@ -233,7 +233,7 @@ def check_celery():
         if worker_ok and beat_ok:
             return True, 'worker=active, beat=active'
         return False, f'worker={r.stdout.strip()}, beat={r2.stdout.strip()}'
-    except Exception as e:
+    except (ValueError, AttributeError) as e:
         return False, str(e)[:100]
 
 

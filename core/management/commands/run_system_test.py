@@ -122,7 +122,7 @@ class Command(BaseCommand):
                     results['warning'].append(f'  {p.strip()}')
             else:
                 results['ok'].append('Migracije: sve primijenjene')
-        except Exception as e:
+        except (ValueError, AttributeError) as e:
             results['warning'].append(f'Migration check error: {e}')
 
     def _run_service_check(self, results):
@@ -137,7 +137,7 @@ class Command(BaseCommand):
                     results['ok'].append(f'{svc}: aktivan')
                 else:
                     results['critical'].append(f'{svc}: {status} — NIJE AKTIVAN')
-            except Exception:
+            except (ValueError, AttributeError):
                 results['warning'].append(f'{svc}: provjera nije moguća')
 
     def _run_business_smoke(self, results):
@@ -223,7 +223,7 @@ class Command(BaseCommand):
                     results['critical'].append(f'  {l}')
         except subprocess.TimeoutExpired:
             results['warning'].append('Django testovi: timeout (>5 min)')
-        except Exception as e:
+        except (ValueError, AttributeError) as e:
             results['warning'].append(f'Django testovi: {e}')
 
     def _send_report(self, phone, results, elapsed, start):

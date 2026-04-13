@@ -111,5 +111,5 @@ class Command(BaseCommand):
                 fail_silently=True,
             )
             self.stdout.write(f'Alert email sent to: {", ".join(admin_emails)}')
-        except Exception as e:
+        except (AttributeError, TypeError) as e:
             self.stdout.write(self.style.WARNING(f'Email alert failed: {e}'))

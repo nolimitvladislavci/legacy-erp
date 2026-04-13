@@ -365,7 +365,7 @@ def grosmarkt_anfrage(request):
                 from_email=None,
                 recipient_list=[email],
             )
-        except Exception:
+        except AttributeError:
             pass
 
         return JsonResponse({

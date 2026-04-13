@@ -25,7 +25,7 @@ def _mdb(mdb_path, table):
         r = subprocess.run(['mdb-export', mdb_path, table], capture_output=True, text=True, timeout=60, env=env)
         if r.returncode != 0: return []
         return list(csv.DictReader(io.StringIO(r.stdout)))
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, TypeError) as e:
         return []
 
 def _dec(val):

@@ -144,7 +144,7 @@ class CalculatorInternalTest(TestCase):
             proj = _make_project(self.company)
             calc = _make_calculation(proj)
             self.assertIn(self._get(f'/calculator/{calc.pk}/pdf/'), ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_export_pdf_invalid(self):

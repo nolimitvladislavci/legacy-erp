@@ -88,7 +88,7 @@ def send_morning_report(mission_id):
                     recipient_list=[target_email],
                 )
                 success = True
-            except Exception as exc:
+            except (ValueError, KeyError) as exc:
                 error_msg += " Email: {}".format(exc)
 
     # Update log

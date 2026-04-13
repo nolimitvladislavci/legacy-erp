@@ -93,7 +93,7 @@ class AssessmentWithDataTest(TestCase):
             a = self._make_assessment()
             resp = self.client.get(f'/assessment/{a.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_assessment_save_post(self):

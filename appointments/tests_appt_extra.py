@@ -151,7 +151,7 @@ class AppointmentListCRUDTest(TestCase):
                 'appointment_type': 'meeting',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_create_post_with_client(self):
@@ -169,7 +169,7 @@ class AppointmentListCRUDTest(TestCase):
                 'total_price': '50.00',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_edit_get(self):
@@ -313,7 +313,7 @@ class AppointmentDossierTest(TestCase):
                 'date': datetime.date.today().isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_dossier_entry_edit(self):

@@ -316,7 +316,7 @@ class POSReceiptActionsTest(TestCase):
         try:
             resp = self.client.get(f'/pos/receipt/{self.receipt.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_barcode_lookup(self):
@@ -467,7 +467,7 @@ class POSGastroTest(TestCase):
                 'quantity': '10',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_expiry_alerts_api(self):

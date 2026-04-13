@@ -94,7 +94,7 @@ class ViewRenderTest(TestCase):
             if hasattr(resp, 'render'):
                 resp.render()
             self.assertIn(resp.status_code, [200, 302])
-        except Exception as e:
+        except AttributeError as e:
             # View may fail due to missing company — that's OK (redirect)
             if '302' in str(e) or 'redirect' in str(e).lower():
                 pass

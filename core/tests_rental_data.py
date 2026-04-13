@@ -171,7 +171,7 @@ class RentalWithDataTest(TestCase):
                 'total_price': '300.00',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_booking_create_for_property(self):

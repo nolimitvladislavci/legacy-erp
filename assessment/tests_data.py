@@ -436,7 +436,7 @@ class AssessmentPDFTest(TestCase):
             a = _make_assessment(self.company, self.user, status='COMPLETED')
             resp = self.client.get(f'/assessment/{a.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_pdf_draft(self):
@@ -444,14 +444,14 @@ class AssessmentPDFTest(TestCase):
             a = _make_assessment(self.company, self.user, status='DRAFT')
             resp = self.client.get(f'/assessment/{a.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_pdf_invalid_pk(self):
         try:
             resp = self.client.get('/assessment/99999/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
 

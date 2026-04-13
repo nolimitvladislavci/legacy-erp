@@ -123,7 +123,7 @@ def send_recall_notifications(self):
             notif.status = 'sent'
             notif.sent_at = timezone.now()
             sent += 1
-        except Exception as e:
+        except ImportError as e:
             notif.status = 'failed'
             notif.error_message = str(e)[:500]
             failed += 1

@@ -373,7 +373,7 @@ class BurzaLeadNewTest(TestCase):
             c.login(username='brz_super9', password='pass123')
             resp = c.get('/burza/lead/new/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
 

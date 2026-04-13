@@ -129,7 +129,7 @@ class Command(BaseCommand):
                                    capture_output=True, text=True, timeout=15)
                 if r.returncode == 0:
                     counts[table.lower()] = max(0, len(r.stdout.strip().split('\n')) - 1)
-            except Exception:
+            except (ValueError, AttributeError):
                 pass
         return counts
 

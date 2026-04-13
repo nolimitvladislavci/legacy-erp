@@ -109,7 +109,7 @@ class ProjectsWithDataTest(TestCase):
                 'budget': '5000',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_project_create_post_with_client(self):

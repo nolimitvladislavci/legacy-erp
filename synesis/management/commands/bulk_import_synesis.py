@@ -115,7 +115,7 @@ def mdb_export(mdb_path, table_name):
         return rows
     except subprocess.TimeoutExpired:
         return []
-    except Exception:
+    except (ValueError, AttributeError):
         return []
 
 
@@ -307,7 +307,7 @@ class Command(BaseCommand):
                             grand_totals[table] += c
                         else:
                             counts[table] = 0
-                    except Exception:
+                    except (ValueError, AttributeError):
                         counts[table] = 0
 
             count_strs = []

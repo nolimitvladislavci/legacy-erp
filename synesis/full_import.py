@@ -38,7 +38,7 @@ def _mdb_export(mdb_path, table_name):
             return []
         reader = csv.DictReader(io.StringIO(result.stdout))
         return list(reader)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error("mdb-export error: %s", e)
         return []
 

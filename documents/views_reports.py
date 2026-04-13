@@ -442,7 +442,7 @@ def _knjiga_pdf(request, book_type, entries, totals, company, date_from, date_to
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="%s_%s.pdf"' % (book_type, period_label.replace('/', '-'))
         return response
-    except Exception as e:
+    except AttributeError as e:
         logger.error('URA/IRA PDF error: %s', e)
         return HttpResponse('PDF error: %s' % str(e)[:100], status=500)
 
@@ -890,7 +890,7 @@ LIMIT Connect ERP — limit-connect.com
                 em.attach(filename, zip_bytes, 'application/zip')
                 em.send()
                 messages.success(request, f'ZIP poslan na {email_to}')
-        except Exception as mail_err:
+        except ImportError as mail_err:
             logger.warning('Revizija email: %s', mail_err)
             messages.warning(request, f'ZIP generiran, ali email slanje nije uspjelo: {mail_err}')
 

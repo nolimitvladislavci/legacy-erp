@@ -107,7 +107,7 @@ def period_close(request, pk):
         messages.success(request, _("Period zatvoren. Ukupno: {:.2f} EUR ({} otpremnica)").format(
             period.total_with_tax, period.otpremnica_count
         ))
-    except Exception as e:
+    except (ValueError, KeyError) as e:
         messages.error(request, str(e))
     return redirect("propter:period_detail", pk=pk)
 

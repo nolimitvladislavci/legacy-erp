@@ -675,7 +675,7 @@ def _import_pos(company, data):
             date_str = str(r.get("Receipt_Date") or "")[:10]
             try:
                 receipt_date = datetime.date.fromisoformat(date_str)
-            except Exception:
+            except (ValueError, KeyError):
                 receipt_date = None
             if receipt_date:
                 if receipt_date == today:
@@ -1585,7 +1585,7 @@ def _scan_synesis_knjige():
                 v = (row.get('ValueString') or '').strip().strip('"')
                 if k: d[k] = v
             return d
-        except Exception:
+        except (ValueError, AttributeError):
             return {}
     def _name_from_dir(d):
         n = re.sub(r'\s*\d{4}.*$', '', d).strip()

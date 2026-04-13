@@ -371,7 +371,7 @@ class Invoice(models.Model):
                 if hasattr(issued, 'date'):
                     issued = issued.date()
                 self.deletion_protected_until = issued.replace(year=issued.year + 11)
-            except Exception:
+            except AttributeError:
                 pass
 
         # ── Auto: SHA-256 archive_hash za integritet dokumenta ──────────

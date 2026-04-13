@@ -250,7 +250,7 @@ def report_pnl_pdf(request):
         resp = HttpResponse(pdf, content_type='application/pdf')
         resp['Content-Disposition'] = 'attachment; filename="RDG_{}-{}.pdf"'.format(df, dt)
         return resp
-    except Exception as e:
+    except (ValueError, KeyError) as e:
         from django.contrib import messages
         messages.error(request, _('PDF greska: {}').format(e))
         return redirect('konto:report_pnl')
@@ -277,7 +277,7 @@ def report_vat_pdf(request, pk):
         resp = HttpResponse(pdf, content_type='application/pdf')
         resp['Content-Disposition'] = 'attachment; filename="PDV_{}.pdf"'.format(period)
         return resp
-    except Exception as e:
+    except (ValueError, KeyError) as e:
         from django.contrib import messages
         messages.error(request, _('PDF greska: {}').format(e))
         return redirect('konto:report_vat')

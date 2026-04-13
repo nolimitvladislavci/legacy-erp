@@ -75,7 +75,7 @@ def _mdb(path, table):
         if r.returncode != 0:
             return []
         return list(csv.DictReader(io.StringIO(r.stdout)))
-    except Exception:
+    except (ValueError, TypeError):
         return []
 
 # ─── DISCOVER MDB FILES ──────────────────────────────

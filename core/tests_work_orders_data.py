@@ -170,7 +170,7 @@ class WorkOrderCreateTest(TestCase):
                 'assigned_to': self.user.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_create_post_minimal(self):
@@ -183,7 +183,7 @@ class WorkOrderCreateTest(TestCase):
                 'priority': 'LOW',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_create_post_with_scheduled_date(self):
@@ -200,7 +200,7 @@ class WorkOrderCreateTest(TestCase):
                 'deadline': (scheduled + datetime.timedelta(days=1)).isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
 

@@ -231,7 +231,7 @@ class WorktimeTimesheetDataTest(TestCase):
                 'task_type': 'DEVELOPMENT',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_edit_entry_with_project(self):
@@ -341,12 +341,12 @@ class WorktimeManagerTimesheetTest(TestCase):
             _make_time_entry(self.worker1, self.company, self.project, 1)
             resp = self.client.get('/worktime/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_timesheet_pdf_with_filters(self):
         try:
             resp = self.client.get(f'/worktime/pdf/?user={self.worker1.pk}&month=2026-03', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass

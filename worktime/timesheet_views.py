@@ -970,7 +970,7 @@ def manager_timesheet(request):
     try:
         date_from = date.fromisoformat(date_from_str)
         date_to = date.fromisoformat(date_to_str)
-    except Exception:
+    except (ValueError, KeyError):
         date_from, date_to = month_start, today
 
     # Filtriraj po firmi prijavljenog usera
@@ -1102,7 +1102,7 @@ def approve_entries(request):
                             url='/worktime/',
                             sender=request.user,
                         )
-                    except Exception:
+                    except TypeError:
                         pass
         return redirect('worktime:ts_manager')
 
@@ -1202,7 +1202,7 @@ def bill_entries(request):
         try:
             df = date.fromisoformat(date_from_str)
             dt = date.fromisoformat(date_to_str)
-        except Exception:
+        except (ValueError, KeyError):
             df, dt = date.today().replace(day=1), date.today()
         qs = qs.filter(user_id__in=worker_ids_b, date__gte=df, date__lte=dt,
                        status='APPROVED', is_billed=False)

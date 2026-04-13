@@ -235,7 +235,7 @@ def _pick_template(invoice, lang):
     try:
         if invoice.company:
             pdf_tmpl = invoice.company.pdf_template or 'viskovic'
-    except Exception:
+    except AttributeError:
         pass
 
     lang_key = 'hr' if lang == 'hr' else 'de'

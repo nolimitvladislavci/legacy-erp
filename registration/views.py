@@ -615,7 +615,7 @@ def register_step4(request):
                     from_email=None,
                     recipient_list=[email],
                 )
-            except Exception:
+            except (ValueError, KeyError):
                 pass
 
             return redirect("registration:register_success")
@@ -792,7 +792,7 @@ def _send_approval_email(reg, username, temp_password):
                 reg.contact_name, reg.name, username, temp_password, reg.selected_plan.upper()),
             from_email=None, recipient_list=[reg.contact_email],
         )
-    except Exception:
+    except (ValueError, KeyError):
         logger.exception('Failed to send approval email')
 
 
@@ -805,7 +805,7 @@ def _send_rejection_email(reg, reason):
                 reg.contact_name, reg.name, reason_text),
             from_email=None, recipient_list=[reg.contact_email],
         )
-    except Exception:
+    except (ValueError, KeyError):
         logger.exception('Failed to send rejection email')
 
 def api_check_promo(request):
@@ -1021,7 +1021,7 @@ def sales_wizard_submit(request):
                 subject = 'Dobrodosli u LIMIT Connect!'
                 body = 'Postovani %s,\n\nVas LIMIT Connect racun se aktivira.\n\nPristup: https://limit-connect.com\nVas savjetnik: %s\n\nZa pitanja: +385 97 609 1655\n\nSrdacan pozdrav,\nLIMIT Connect tim' % (lead.contact_name, request.user.get_full_name() or request.user.username)
             send_mail(subject, body, None, [lead.contact_email], fail_silently=True)
-        except Exception:
+        except ImportError:
             pass
 
     # WhatsApp to client
@@ -1449,7 +1449,7 @@ def approve_claim(request, claim_id):
                     [claim.email],
                     fail_silently=True,
                 )
-            except Exception:
+            except ImportError:
                 pass
 
             messages.success(request,

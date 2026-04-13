@@ -85,7 +85,7 @@ class FitnessWithDataTest(TestCase):
                 'notes': 'New member',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_member_create_post_premium(self):
@@ -132,7 +132,7 @@ class FitnessWithDataTest(TestCase):
                 'membership_expires': (datetime.date.today() + datetime.timedelta(days=60)).isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_member_checkin(self):

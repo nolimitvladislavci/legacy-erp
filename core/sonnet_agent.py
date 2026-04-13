@@ -92,7 +92,7 @@ def _get_full_context():
         r = subprocess.run(['git', 'log', '--oneline', '-20'],
                            cwd='/var/www/fina-connect', capture_output=True, text=True, timeout=10)
         ctx['git_log'] = r.stdout.strip()
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, AttributeError) as e:
         ctx['git_log'] = 'N/A'
 
     # Git diff --stat (zadnji commit)
@@ -100,7 +100,7 @@ def _get_full_context():
         r = subprocess.run(['git', 'diff', '--stat', 'HEAD~1', 'HEAD'],
                            cwd='/var/www/fina-connect', capture_output=True, text=True, timeout=10)
         ctx['git_last_diff'] = r.stdout.strip()[:2000]
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, AttributeError) as e:
         ctx['git_last_diff'] = 'N/A'
 
     # System test
@@ -141,7 +141,7 @@ def _get_full_context():
         )
         pending = [l for l in r.stdout.split('\n') if '[ ]' in l]
         ctx['pending_migracije'] = f'{len(pending)} neprimijenjenih' if pending else '0 neprimijenjenih'
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, AttributeError) as e:
         ctx['pending_migracije'] = 'N/A'
 
     # AI health

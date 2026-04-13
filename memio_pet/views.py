@@ -341,11 +341,11 @@ def registracija(request):
                             recipient_list=[email],
                             fail_silently=True,
                         )
-                    except Exception:
+                    except ImportError:
                         pass
 
                     return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
-                except Exception as e:
+                except ImportError as e:
                     error = f'Greska: {e}'
     return render(request, 'memio_pet/registracija.html', {
         'error': error, 'chip': request.GET.get('chip', ''), 'source': request.GET.get('source', ''),

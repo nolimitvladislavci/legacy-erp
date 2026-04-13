@@ -58,7 +58,7 @@ def notify_password_change(user, new_password, changed_by=None):
                 fail_silently=True,
             )
             sent_via.append('email:%s' % user.email)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('Email password notify failed for %s: %s', user.username, e)
 
     # 3. In-app notifikacija

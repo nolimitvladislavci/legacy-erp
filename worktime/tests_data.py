@@ -100,7 +100,7 @@ class WorktimeWithProjectTest(TestCase):
                 'description': 'WTD test entry',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_add_entry_post_duration_only(self):
@@ -113,7 +113,7 @@ class WorktimeWithProjectTest(TestCase):
                 'description': 'Duration only entry',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_add_entry_post_no_project(self):
@@ -125,7 +125,7 @@ class WorktimeWithProjectTest(TestCase):
                 'end_time': '17:00',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_add_entry_post_invalid_project(self):
@@ -137,7 +137,7 @@ class WorktimeWithProjectTest(TestCase):
                 'duration': '8',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_edit_entry_get(self):
@@ -218,7 +218,7 @@ class WorktimeWithProjectTest(TestCase):
                 'content': 'Test note content',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_worker_profile_get(self):
@@ -384,7 +384,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_timesheet_pdf_with_params(self):
@@ -392,7 +392,7 @@ class WorktimeManagerWithDataTest(TestCase):
             c = self._client()
             resp = c.get('/worktime/pdf/?user=all&month=2026-01', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_analytics_with_data(self):

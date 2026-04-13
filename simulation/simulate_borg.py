@@ -235,7 +235,7 @@ class Command(BaseCommand):
             info("Provjera Company polja")
             assert hasattr(company, 'name'), "Company nema 'name'"
             r.success(f"Company: {company.name}")
-        except Exception as e:
+        except AttributeError as e:
             r.error("Company model greška", e)
 
         try:
@@ -496,7 +496,7 @@ class Command(BaseCommand):
                     r.error(f"Template MISSING: {tpl}")
             if missing:
                 r.warning(f"POTREBNO: CC_TASK_EXPERIENCES_TEMPLATES.md — {len(missing)} templatea nedostaje!")
-        except Exception as e:
+        except TypeError as e:
             r.error("Template provjera greška", e)
 
         return r

@@ -1141,7 +1141,7 @@ def resend_verification(request):
         if user.profile.email_verified:
             messages.info(request, _('Vas email je vec verificiran! Sve je u redu.'))
             return redirect(request.META.get('HTTP_REFERER', '/'))
-    except Exception:
+    except AttributeError:
         pass
 
     # Provjera: postoji li drugi korisnik s istim emailom?

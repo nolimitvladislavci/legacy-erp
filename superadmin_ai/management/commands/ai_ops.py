@@ -59,7 +59,7 @@ class Command(BaseCommand):
                 status = result.stdout.strip()
                 style = self.style.SUCCESS if status == 'active' else self.style.ERROR
                 self.stdout.write(f'  {svc:30s} {style(status)}')
-            except Exception as e:
+            except (ValueError, AttributeError) as e:
                 self.stdout.write(f'  {svc:30s} {self.style.ERROR(str(e))}')
 
         # Ports

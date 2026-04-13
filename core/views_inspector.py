@@ -582,7 +582,7 @@ def panic_button(request):
                         recipient_list=[insp_email],
                         fail_silently=True,
                     )
-                except Exception:
+                except ImportError:
                     logger.exception("Failed to import send_mail")
 
             # Cleanup session
@@ -751,7 +751,7 @@ def inspector_register(request, token):
                     recipient_list=admin_emails[:3],
                     fail_silently=True,
                 )
-        except Exception:
+        except DatabaseError:
             logger.exception("Failed to import send_mail")
 
         return redirect('inspector_dashboard', token=token)

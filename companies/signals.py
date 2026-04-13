@@ -153,7 +153,7 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
     try:
         if not hasattr(instance, 'has_signed_tc_consent'):
             pass  # Field will be False by default
-    except Exception:
+    except AttributeError:
         pass
 
     logger.info('[BOOTSTRAP] Firma "%s" (OIB %s) bootstrapirana.', instance.name, instance.oib)

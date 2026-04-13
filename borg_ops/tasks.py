@@ -522,7 +522,7 @@ def check_domain_expiry():
                 recipient_list=['niksa.viskovic@limit-connect.com'],
                 fail_silently=True,
             )
-        except Exception:
+        except TypeError:
             pass
 
     return f'Checked {DomainRegistry.objects.count()} domains, {len(warnings)} alerts'

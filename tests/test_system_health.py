@@ -95,7 +95,7 @@ class ModelIntegrityTest(TestCase):
                 continue
             try:
                 list(app_config.get_models())
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 failed.append(f'{app_config.label}: {e}')
         self.assertEqual(failed, [], f"Apps with import errors: {failed}")
 

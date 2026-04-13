@@ -433,7 +433,7 @@ def _run_system_health_check(params, user, company):
             "unapplied_count": len(unapplied),
             "unapplied": unapplied[:5] if unapplied else [],
         }
-    except Exception as e:
+    except (ValueError, AttributeError) as e:
         results["migrations"] = {"status": "UNKNOWN", "error": str(e)}
 
     return results

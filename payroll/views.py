@@ -108,7 +108,7 @@ def payroll_run_action(request, pk):
             f'Obračun završen: {len(payslips)} radnika | '
             f'Bruto: {run.total_gross}€ | Neto: {run.total_net}€'
         )
-    except Exception as e:
+    except TypeError as e:
         messages.error(request, _('Obračun nije uspio. Provjerite podatke i pokušajte ponovo.'))
     return redirect('payroll:detail', pk=pk)
 

@@ -153,7 +153,7 @@ def _log_action(instance, action, created=False):
             changes=_get_changes(instance, created) if action != 'delete' else {'deleted': str(instance)[:200]},
             ip_address=get_current_ip(),
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass  # Never let audit logging break the main operation
 
 

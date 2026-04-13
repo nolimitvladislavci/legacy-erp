@@ -1059,7 +1059,7 @@ def _notify_quote_action(invoice, action: str):
                 fail_silently=True,
             )
             log.info('notify email sent to %s for %s (%s)', admin_emails, invoice.number, action)
-    except Exception as e:
+    except ImportError as e:
         log.error('notify email failed: %s', e)
 
 

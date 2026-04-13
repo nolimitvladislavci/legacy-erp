@@ -73,12 +73,12 @@ def ivan_cockpit(request):
     try:
         d = subprocess.check_output(['df','-h','/'],text=True).split('\n')[1].split()
         ctx['disk_used'] = d[4]; ctx['disk_free'] = d[3]
-    except Exception:
+    except (ValueError, AttributeError):
         ctx['disk_used'] = ctx['disk_free'] = 'N/A'
     try:
         m = subprocess.check_output(['free','-h'],text=True).split('\n')[1].split()
         ctx['mem_used'] = m[2]; ctx['mem_total'] = m[1]
-    except Exception:
+    except (ValueError, AttributeError):
         ctx['mem_used'] = ctx['mem_total'] = 'N/A'
     # Feedback
     try:
@@ -90,6 +90,6 @@ def ivan_cockpit(request):
     try:
         lines = subprocess.check_output(['tail','-30','/var/www/fina-connect/logs/django.log'],text=True).split('\n')
         ctx['logs'] = [l for l in lines if any(k in l for k in ['ERROR','WARNING','whatsapp','pos_checkout'])][-6:]
-    except Exception:
+    except (ValueError, AttributeError):
         ctx['logs'] = []
     return render(request, 'dashboards/ivan_cockpit.html', ctx)

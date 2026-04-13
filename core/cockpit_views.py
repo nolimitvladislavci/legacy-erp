@@ -90,14 +90,14 @@ def ivan_cockpit(request):
         disk     = subprocess.check_output(['df', '-h', '/'], text=True).split('\n')[1].split()
         disk_used, disk_free, disk_pct = disk[2], disk[3], disk[4]
         disk_info = f'{disk_pct} ({disk_free} slobodno)'
-    except Exception:
+    except (ValueError, AttributeError):
         disk_used = disk_free = disk_pct = disk_info = 'N/A'
 
     try:
         mem      = subprocess.check_output(['free', '-h'], text=True).split('\n')[1].split()
         mem_used, mem_total = mem[2], mem[1]
         mem_info = f'{mem_used} / {mem_total}'
-    except Exception:
+    except (ValueError, AttributeError):
         mem_used = mem_total = mem_info = 'N/A'
 
     try:
@@ -106,7 +106,7 @@ def ivan_cockpit(request):
         ).strip().split('\n')
         recent_logs = [l for l in logs_raw
                        if any(k in l for k in ('ERROR', 'WARNING', 'INFO whatsapp'))][-8:]
-    except Exception:
+    except (ValueError, AttributeError):
         recent_logs = []
 
     # Izračunate vrijednosti

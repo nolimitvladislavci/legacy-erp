@@ -73,7 +73,7 @@ def check_services():
             r = subprocess.run(['systemctl', 'is-active', svc],
                              capture_output=True, text=True, timeout=5)
             results[svc] = r.stdout.strip()
-        except Exception:
+        except (ValueError, AttributeError):
             results[svc] = 'unknown'
     return results
 

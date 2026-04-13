@@ -174,7 +174,7 @@ class InvoicingActionsTest(TestCase):
             inv = _make_invoice(self.company, self.user, self.partner)
             resp = self.client.get(f'/invoicing/{inv.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except AttributeError:
             pass
 
     def test_invoice_download(self):
@@ -347,7 +347,7 @@ class InvoicingAPITest(TestCase):
                 'date_to': datetime.date.today().isoformat(),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
 
@@ -368,7 +368,7 @@ class InvoicingSaveTest(TestCase):
                 'currency': 'EUR',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_invoice_add_hours(self):

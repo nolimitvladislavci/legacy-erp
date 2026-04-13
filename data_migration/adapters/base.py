@@ -169,6 +169,6 @@ def detect_adapter(file_path: str, file_format: str = "") -> BaseAdapter | None:
         try:
             if adapter.detect_format(file_path, file_format):
                 return adapter
-        except Exception:
+        except (ValueError, KeyError):
             continue
     return None

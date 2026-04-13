@@ -87,7 +87,7 @@ class RegistrationStep2Test(TestCase):
             client = Client(raise_request_exception=False)
             resp = client.get('/register/company/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_step2_post_valid(self):
@@ -160,7 +160,7 @@ class RegistrationStep3Test(TestCase):
             client = Client(raise_request_exception=False)
             resp = client.get('/register/account/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_step3_post_valid(self):
@@ -268,7 +268,7 @@ class RegistrationStep4Test(TestCase):
             client = Client(raise_request_exception=False)
             resp = client.get('/register/confirm/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_step4_post_confirm(self):

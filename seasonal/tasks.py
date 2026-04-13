@@ -62,7 +62,7 @@ def daily_hzmo_check():
         try:
             send_text(phone='+4915771998747', message=msg)
             log.info(f'Seasonal alarm: {len(alerts)} poruka poslano')
-        except Exception as e:
+        except TypeError as e:
             log.error(f'WhatsApp seasonal failed: {e}')
 
     return {'alerts': len(alerts), 'checked': contracts.count()}

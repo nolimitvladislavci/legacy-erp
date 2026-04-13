@@ -46,7 +46,7 @@ def query_db(sql: str) -> str:
                 rows = cur.fetchmany(100)
                 return json.dumps({'columns': cols, 'rows': rows, 'count': len(rows)}, default=str)
             return json.dumps({'affected': cur.rowcount})
-    except Exception as e:
+    except TypeError as e:
         return json.dumps({'error': str(e)})
 
 
@@ -162,7 +162,7 @@ def system_status() -> str:
             'memory': {'used': mem[2], 'total': mem[1]},
             'services': services,
         }, indent=2)
-    except Exception as e:
+    except (ValueError, AttributeError) as e:
         return f'Error: {e}'
 
 

@@ -228,7 +228,7 @@ class POSReceiptTest(TestCase):
             r = self._make_receipt()
             resp = self.client.get(f'/pos/receipt/{r.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (KeyError, AttributeError):
             pass
 
     def test_receipt_cancel(self):

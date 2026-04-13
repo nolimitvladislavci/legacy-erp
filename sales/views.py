@@ -407,7 +407,7 @@ def order_confirm(request, pk):
                     messages.warning(request,
                         f'Upozorenje: {item.name} — nedovoljno zaliha '
                         f'({item.stock_quantity} vs. {line.quantity})')
-        except Exception:
+        except AttributeError:
             pass
 
     messages.success(request, f'Narudžba {order.order_number} potvrđena.')

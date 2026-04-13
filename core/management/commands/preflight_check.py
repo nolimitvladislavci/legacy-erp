@@ -78,7 +78,7 @@ class Command(BaseCommand):
                         f'  DRIFT: {table} missing {len(missing)} DB column(s): {", ".join(missing)}'
                     ))
                     drift_count += len(missing)
-            except Exception:
+            except TypeError:
                 pass
 
         if drift_count:

@@ -105,7 +105,7 @@ class DocumentBasicCRUDTest(TestCase):
                 'is_paid': '',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_document_create_post_no_partner(self):
@@ -118,7 +118,7 @@ class DocumentBasicCRUDTest(TestCase):
                 'is_paid': 'on',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_document_create_post_with_date_due(self):
@@ -131,7 +131,7 @@ class DocumentBasicCRUDTest(TestCase):
                 'total_amount': '750.00',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_document_detail_existing(self):
@@ -184,7 +184,7 @@ class OtpremnicaPostTest(TestCase):
                 'item_vat': ['25', '25'],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_otpremnica_create_post_no_partner(self):
@@ -199,7 +199,7 @@ class OtpremnicaPostTest(TestCase):
                 'item_vat': ['0'],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_otpremnica_create_post_empty_items(self):
@@ -214,7 +214,7 @@ class OtpremnicaPostTest(TestCase):
                 'item_vat': [''],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
 
@@ -242,7 +242,7 @@ class PrimkaPostTest(TestCase):
                 'item_batch': ['BATCH-001', 'BATCH-002'],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_primka_create_post_minimal(self):
@@ -257,7 +257,7 @@ class PrimkaPostTest(TestCase):
                 'item_batch': [''],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
 
@@ -288,7 +288,7 @@ class OtkupniBlokPostTest(TestCase):
                 'item_vat': ['0'],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_otkupni_create_post_cash(self):
@@ -307,7 +307,7 @@ class OtkupniBlokPostTest(TestCase):
                 'item_vat': ['0', ''],
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
 
@@ -338,7 +338,7 @@ class CMRPostTest(TestCase):
                 'partner': self.partner.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
     def test_cmr_create_post_minimal(self):
@@ -351,5 +351,5 @@ class CMRPostTest(TestCase):
                 'place_of_delivery': 'Split',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, KeyError):
             pass

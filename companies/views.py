@@ -321,7 +321,7 @@ def employee_create(request):
             [email],
             fail_silently=True,
         )
-    except Exception:
+    except ImportError:
         pass
 
     # ── EmployeeProfile — kreira se ako je attr_worker ili attr_manager ──
@@ -474,7 +474,7 @@ def branch_toggle_active(request, pk):
 def onboarding_dismiss(request):
     try:
         profile, company = _require_company_admin(request)
-    except Exception:
+    except (ValueError, TypeError):
         return JsonResponse({'ok': False}, status=403)
     if not company:
         return JsonResponse({'ok': False}, status=403)
@@ -1431,7 +1431,7 @@ def compliance_monitor(request):
                         'action_url': None,
                         'action_label': None,
                     })
-        except Exception:
+        except (ValueError, KeyError):
             pass
 
         # UPOZORENJE: prekovremeni > 42h ovaj tjedan (ZOR čl. 96 upozorenje na 42, limit 50)

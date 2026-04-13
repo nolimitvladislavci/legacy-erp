@@ -1148,7 +1148,7 @@ def _quick_pos_legacy(request, terminal_id):
     try:
         role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
         is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
-    except Exception:
+    except AttributeError:
         pass
 
     if not session and not is_bookkeeper:
@@ -1298,7 +1298,7 @@ def pos_joker(request, terminal_id):
     try:
         role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
         is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
-    except Exception:
+    except AttributeError:
         pass
 
     if not session and not is_bookkeeper:
@@ -4499,7 +4499,7 @@ def improvement_list(request):
                         recipient_list=['viskovic.bau@gmail.com'],
                         fail_silently=True,
                     )
-                except Exception:
+                except ImportError:
                     pass
 
             messages.success(request, _('Prijavljeno! Haiku i Gemini analiziraju...'))
