@@ -102,7 +102,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 <div id="offlineSyncBadge" onclick="window.syncOfflineData && window.syncOfflineData()"></div>
 {% endblock %}
 
-{% if request.user.is_authenticated %}{% include "ai_assistant/chat_widget.html" %}{% endif %}
-{% include "includes/_ai_assist.html" %}
-{% include "includes/_borg_signal.html" %}
+{# chat_widget removed — POS needs clean fullscreen #}
+{# _ai_assist removed — POS uses hamburger menu for AI #}
+{# _borg_signal.html removed — POS has own zdModal in hamburger menu #}
 </body></html>
