@@ -90,9 +90,9 @@ def dashboard(request):
         POSTerminal.objects.filter(company=company, is_active=True).prefetch_related(
             models.Prefetch(
                 "sessions",
-                queryset=POSSession.objects.filter(status=POSSession.Status.OPEN).select_related(
-                    "terminal", "operator", "active_cashiers"
-                ),
+                queryset=POSSession.objects.filter(status=POSSession.Status.OPEN)
+                .select_related("terminal", "operator")
+                .prefetch_related("active_cashiers"),
                 to_attr="_open_sessions",
             )
         )
