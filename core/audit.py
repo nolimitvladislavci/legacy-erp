@@ -7,9 +7,7 @@ import threading
 import json
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.db import IntegrityError, DatabaseError
-import logging
 from django.core.exceptions import ObjectDoesNotExist
-logger = logging.getLogger(__name__)
 
 _thread_locals = threading.local()
 
@@ -159,7 +157,7 @@ def _log_action(instance, action, created=False):
             changes=_get_changes(instance, created) if action != 'delete' else {'deleted': str(instance)[:200]},
             ip_address=get_current_ip(),
         )
-    except (IntegrityError, DatabaseError):
+    except Exception:
         pass  # Never let audit logging break the main operation
 
 
@@ -196,4 +194,4 @@ def connect_audit_signals():
             post_save.connect(audit_post_save, sender=model, dispatch_uid=f'audit_post_{model_path}')
             post_delete.connect(audit_post_delete, sender=model, dispatch_uid=f'audit_del_{model_path}')
         except (ValueError, AttributeError):
-            logger.exception("File operation failed")
+            pass
