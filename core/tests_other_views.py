@@ -4,6 +4,7 @@ import json
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules, is_superuser=False):
@@ -19,7 +20,7 @@ def _setup_user(oib, username, modules, is_superuser=False):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     if not is_superuser:
         CompanySubscription.objects.create(
@@ -46,7 +47,7 @@ class AccountsViewsTest(TestCase):
         from accounts.models import UserProfile
         try:
             UserProfile.objects.create(user=self.user2, company=self.company)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.client = Client(raise_request_exception=False)
         self.client.login(username='ov_acc1', password='pass123')

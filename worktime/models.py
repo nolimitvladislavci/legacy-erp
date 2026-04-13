@@ -286,7 +286,7 @@ class TimeEntry(models.Model):
             daily_limit = emp.daily_hours or Decimal('8')
             base_rate = emp.hourly_rate or Decimal('20')
             ot_rate = emp.overtime_rate or Decimal('50')  # ZOR čl.94 st.2: min 50%
-        except Exception:
+        except (ValueError, TypeError):
             daily_limit = Decimal('8')
             base_rate = Decimal('20')
             ot_rate = Decimal('30')

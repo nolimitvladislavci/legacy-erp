@@ -3,6 +3,7 @@ import datetime
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None):
@@ -15,7 +16,7 @@ def _setup_user(oib, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -156,7 +157,7 @@ class FitnessWithDataTest(TestCase):
             MemberCheckIn.objects.create(member=member)
             MemberCheckIn.objects.create(member=member)
             self.assertIn(self._get('/fitness/dashboard/'), ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_api_members_list(self):
@@ -172,5 +173,5 @@ class FitnessWithDataTest(TestCase):
             from fitness.models import MemberCheckIn
             MemberCheckIn.objects.create(member=member)
             self.assertIn(self._get('/fitness/api/checkins/'), ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass

@@ -72,7 +72,7 @@ def steuerberater_upload(request):
         send_text('+385976091655',
             f'\U0001f4c4 Steuerberater Upload: {f.name}\nTyp: {doc_type}\nFirma: {company.name}\nVon: {request.user.get_full_name()}')
     except Exception:
-        pass
+        logger.exception("Failed to import send_text")
 
     logger.info('Steuerberater upload: %s by %s for %s', f.name, request.user, company)
 

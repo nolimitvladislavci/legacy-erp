@@ -57,7 +57,7 @@ def memio_waitlist(request):
 
     try:
         raw = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return _cors(JsonResponse({'error': 'Invalid JSON'}, status=400), origin)
 
     from memio_pet.validators import clean_api_input, validate_no_scripts, validate_no_sql
@@ -218,7 +218,7 @@ def memio_stats(request):
         from memio_world.models import WaitlistEntry as MW_WL
         total_waitlist += MW_WL.objects.using('memio_world').count()
     except Exception:
-        pass
+        logger.exception("Failed to import WaitlistEntry")
 
     data = {
         'ljubimaca': total_pets,
@@ -273,6 +273,6 @@ def memio_push(request):
             'message': f'{pet.name or pet.ear_tag} sinkroniziran na Memio.pet.',
         })
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("memio_push: %s", e)
         return JsonResponse({'error': str(e)[:200]}, status=500)

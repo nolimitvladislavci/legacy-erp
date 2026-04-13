@@ -1,4 +1,6 @@
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 """Invoice business logic — extracted from views.py."""
 import datetime
 from decimal import Decimal, InvalidOperation
@@ -141,9 +143,9 @@ def deduct_inventory(invoice, old_status, user):
                             reason=f'BOM — Račun {invoice.number}',
                             performed_by=user,
                         )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
 
@@ -162,7 +164,7 @@ def mark_worktime_billed(invoice, wt_ids_str):
             TimeEntry.objects.filter(id__in=ids, is_billed=False).update(
                 is_billed=True, invoice=invoice,
             )
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
 
@@ -275,7 +277,7 @@ def save_invoice_from_post(request):
         invoice.date_issued = (
             datetime.datetime.strptime(dt_str, '%Y-%m-%dT%H:%M') if dt_str else tz.now()
         )
-    except Exception:
+    except ValueError:
         invoice.date_issued = tz.now()
 
     for attr, key in [('date_due', 'date_due'), ('date_delivery', 'date_delivery')]:
@@ -338,7 +340,7 @@ def save_invoice_from_post(request):
         op_id = post.get('operator')
         if op_id:
             invoice.operator = FiscalOperator.objects.get(pk=op_id)
-    except Exception:
+    except ObjectDoesNotExist:
         pass
 
     invoice.created_by = request.user
@@ -496,7 +498,7 @@ def _create_otpremnica_for_invoice(invoice):
             otpremnica_count=db_models.F('otpremnica_count') + 1
         )
         return otp
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         import logging
         logging.getLogger('invoicing.services').warning(
             'create_otpremnica failed for %s: %s', invoice.number, e

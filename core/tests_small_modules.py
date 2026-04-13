@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules, is_superuser=False):
@@ -18,7 +19,7 @@ def _setup_user(oib, username, modules, is_superuser=False):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -76,7 +77,7 @@ class FinanceViewsTest(TestCase):
             )
             resp = self.client.post(f'/finance/{t.pk}/delete/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -134,7 +135,7 @@ class InsuranceViewsTest(TestCase):
                 'end_date': '2026-12-31',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -204,7 +205,7 @@ class RentalViewsTest(TestCase):
             self.assertIn(self._get(f'/rental/{p.pk}/'), ALLOWED)
             self.assertIn(self._get(f'/rental/{p.pk}/edit/'), ALLOWED)
             self.assertIn(self._get(f'/rental/bookings/new/{p.pk}/'), ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -270,7 +271,7 @@ class FitnessViewsTest(TestCase):
                 'start_date': '2026-01-01',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -332,7 +333,7 @@ class WebshopViewsTest(TestCase):
                 'is_active': True,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 

@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None):
@@ -15,7 +16,7 @@ def _setup_user(oib, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -190,7 +191,7 @@ class InterventionsFieldViewTest(TestCase):
                 data=json.dumps({'lat': 45.8150, 'lng': 15.9819}),
                 content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_field_view_invalid_pk(self):

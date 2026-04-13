@@ -18,7 +18,7 @@ def _pdf_to_images_b64(file_path, max_pages=4, dpi=150):
             b64 = base64.standard_b64encode(pix.tobytes("png")).decode()
             result.append((b64, "image/png"))
         return result
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("PDF->image failed: %s", e)
         return []
 

@@ -30,6 +30,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -322,7 +323,7 @@ def oib_lookup(oib):
                 }
                 cache.set(cache_key, result, timeout=86400)  # 24h cache
                 return result
-    except Exception as e:
+    except requests.RequestException as e:
         logger.warning(f'Sudski registar API error for OIB {oib}: {e}')
 
     # Fallback: provjera u našoj bazi partnera
@@ -339,7 +340,7 @@ def oib_lookup(oib):
             }
             cache.set(cache_key, result, timeout=3600)
             return result
-    except Exception:
+    except DatabaseError:
         pass
 
     return None

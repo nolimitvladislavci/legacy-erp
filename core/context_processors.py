@@ -1,5 +1,6 @@
 from django.utils.translation import get_language
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 
 def booking_globals(request):
@@ -78,7 +79,7 @@ def company_switcher(request):
                         pseudo.pk = None
                         pseudo._is_virtual = True
                         memberships.append(pseudo)
-            except Exception:
+            except DatabaseError:
                 pass
 
             active_id = request.session.get('active_membership_id')
@@ -87,7 +88,7 @@ def company_switcher(request):
                 'has_multiple_companies': len(memberships) > 1,
                 'active_membership_id': active_id,
             }
-    except Exception:
+    except DatabaseError:
         return {}
 
 
@@ -144,7 +145,7 @@ def failed_imports_badge(request):
             company=company, resolved=False
         ).count()
         return {'failed_imports_count': count}
-    except Exception:
+    except DatabaseError:
         return {'failed_imports_count': 0}
 
 
@@ -163,7 +164,7 @@ def pending_claims_badge(request):
                 status='pending', company__umbrella_parent=user_co,
             ).count()
         return {'pending_claims_count': count}
-    except Exception:
+    except DatabaseError:
         return {'pending_claims_count': 0}
 
 
@@ -205,6 +206,6 @@ def workspace_context(request):
                 'user_workspace': ws,
                 'workspace_clients': ws.clients.all().order_by('name'),
             }
-    except Exception:
+    except DatabaseError:
         pass
     return {}

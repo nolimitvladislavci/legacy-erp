@@ -89,7 +89,7 @@ def parse_camt053(xml_content, bank_account, company):
                 status='unmatched',
             )
             created.append(obj)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning(f'camt053 import error: {e}')
 
     # Update balance
@@ -328,7 +328,7 @@ def parse_mt940(content, bank_account, company):
                 status='unmatched',
             )
             created.append(obj)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning(f'MT940 import error: {e}')
 
     if bank_account:

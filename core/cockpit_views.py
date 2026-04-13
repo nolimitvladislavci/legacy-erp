@@ -16,6 +16,9 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db import IntegrityError, DatabaseError
+import logging
+logger = logging.getLogger(__name__)
 
 # ─── ACCESS CONTROL ────────────────────────────────────────────────────────────
 # Jedino mjesto gdje se definira tko ima pristup cockpitu.
@@ -212,7 +215,7 @@ def cockpit_gemini_task(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
     task_desc = data.get('task', '').strip()
@@ -258,7 +261,7 @@ def cockpit_upload_photo(request):
     try:
         with open(log_path) as f:
             feed = json.load(f)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         feed = []
 
     feed.insert(0, {
@@ -286,7 +289,7 @@ def cockpit_photos(request):
     try:
         with open(log_path) as f:
             feed = json.load(f)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         feed = []
     return JsonResponse({'photos': feed[:20]})
 
@@ -301,7 +304,7 @@ def cockpit_send_whatsapp(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
     phone   = data.get('phone', '').strip()
@@ -324,7 +327,7 @@ def cockpit_send_whatsapp(request):
             payload={'phone': phone, 'seat': seat},
         )
         return JsonResponse({'ok': True})
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return JsonResponse({'ok': False, 'error': str(e)[:100]}, status=500)
 
 
@@ -346,7 +349,7 @@ def tim_chat_send(request):
     """API: Spremi poruku iz tim chata kao ImprovementSuggestion."""
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     desc = data.get('description', '').strip()
@@ -397,7 +400,7 @@ def system_improvement_api(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
     title = (data.get('title') or '')[:200].strip()
@@ -549,7 +552,7 @@ def partner_signup_api(request):
                 ) % str(partner.pk)[:8]
             send_whatsapp_text_task.delay(norm_phone, wa_msg)
     except Exception:
-        pass
+        logger.exception("Failed to import normalize_phone")
 
     # Notifikacija superadminu
     try:
@@ -561,7 +564,7 @@ def partner_signup_api(request):
             notification_type='system',
         )
     except Exception:
-        pass
+        logger.exception("Failed to import _notify_superadmins")
 
     return JsonResponse({'ok': True, 'partner_id': str(partner.pk)[:8]})
 

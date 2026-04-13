@@ -7,6 +7,7 @@ Usage:
 import logging
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('worktime')
 
@@ -42,7 +43,7 @@ def track(user, module, action, ref='', detail='', metadata=None, company=None):
                 detail='[%s] %s' % (module, str(detail)[:200]),
                 metadata={**_meta, 'module': module, 'ref': str(ref)[:50]},
             )
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.warning('ActivityEvent write failed: %s', e)
 
     try:

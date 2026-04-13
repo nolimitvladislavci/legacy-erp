@@ -19,6 +19,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +183,7 @@ def _proposal_from_ai(archive_entry, history, company):
         account_list = "\n".join(
             "{} - {}".format(code, name) for code, name in accounts
         )
-    except Exception:
+    except DatabaseError:
         account_list = "Standardni HR kontni plan (RRiF)"
 
     # Build history context
@@ -272,7 +273,7 @@ def _proposal_from_ai(archive_entry, history, company):
             "source": "ai",
         }
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("AI bookkeeper error: {}".format(e))
         return _fallback_proposal(archive_entry)
 

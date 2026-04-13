@@ -4,6 +4,7 @@ Fiskalizacija 2.0 handler — delegira na informacijskog posrednika.
 """
 import logging
 from .entry_point import BaseFiscalHandler, FiscalResult
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class ERacunFiskalizacija20Handler(BaseFiscalHandler):
                 raw_response={'eracun_id': str(eracun.id)},
             )
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.exception('Fiskalizacija 2.0 error')
             return FiscalResult(success=False, message=str(e))
 

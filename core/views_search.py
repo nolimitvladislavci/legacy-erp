@@ -12,6 +12,7 @@ from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat
 
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 # Enable pg_trgm similarity search
 try:
@@ -60,7 +61,7 @@ def global_search(request):
                 'url': f'/hr/partners/{p.pk}/',
                 'icon': 'users',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 2. ARTIKLI (Inventory)
@@ -81,7 +82,7 @@ def global_search(request):
                 'url': f'/hr/inventory/items/{i.pk}/',
                 'icon': 'package',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 3. FAKTURE
@@ -102,7 +103,7 @@ def global_search(request):
                 'url': f'/hr/invoicing/{inv.pk}/',
                 'icon': 'file-text',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 4. DOKUMENTI
@@ -123,7 +124,7 @@ def global_search(request):
                 'url': f'/hr/documents/{d.pk}/',
                 'icon': 'folder',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 5. KONTO — temeljnice
@@ -143,7 +144,7 @@ def global_search(request):
                 'url': f'/hr/konto/entries/{je.pk}/',
                 'icon': 'book-open',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 6. POS BONOVI
@@ -163,7 +164,7 @@ def global_search(request):
                 'url': f'/hr/pos/receipt/{r.pk}/',
                 'icon': 'shopping-cart',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 7. WEBSHOP PROIZVODI
@@ -181,7 +182,7 @@ def global_search(request):
                 'url': f'/hr/webshop/products/{p.pk}/',
                 'icon': 'shopping-bag',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 8. HELPDESK TICKETI
@@ -201,7 +202,7 @@ def global_search(request):
                 'url': f'/hr/helpdesk/{t.pk}/',
                 'icon': 'help-circle',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     return JsonResponse({'results': results[:MAX_TOTAL], 'query': q})

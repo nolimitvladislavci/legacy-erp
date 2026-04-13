@@ -71,7 +71,7 @@ def generate_zki(invoice, cert_path=None, cert_password=None):
     except ImportError:
         logger.warning("cryptography nije instaliran - demo ZKI")
         return _demo_zki(invoice)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error(f"ZKI greška: {e}")
         return _demo_zki(invoice)
 
@@ -208,7 +208,7 @@ def send_to_cis(invoice, cert_path=None, cert_password=None, production=False):
         zki = _demo_zki(invoice)
         jir = str(uuid.uuid4())
         return {'success': True, 'jir': jir, 'zki': zki, 'demo': True}
-    except Exception as e:
+    except OSError as e:
         logger.error(f"CIS greška: {e}")
         return {'success': False, 'error': str(e)}
 
@@ -267,7 +267,7 @@ def _sign_xml(xml_string, cert_path, cert_password):
         signer = XMLSigner(method=methods.enveloped)
         signed = signer.sign(root, key=key_pem, cert=cert_pem)
         return etree.tostring(signed, encoding='unicode')
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning(f"XML potpisivanje nije uspjelo: {e} - šaljem bez potpisa")
         return xml_string
 
@@ -297,6 +297,6 @@ def _extract_pem(cert_path, cert_password):
         cert_file.close()
 
         return (cert_file.name, key_file.name)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning(f"PEM ekstrakcija nije uspjela: {e}")
         return None

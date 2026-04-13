@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.utils import timezone
 from datetime import timedelta
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +121,7 @@ def _check_eracun_status(company, hints):
             direction=MessageDirection.INBOUND,
             status='DELIVERED'
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
     if unbooked > 0:
         hints.append({

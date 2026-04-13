@@ -1,4 +1,7 @@
 from core.tenant import get_current_company
+from django.core.exceptions import ObjectDoesNotExist
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_user_company(request=None):
@@ -16,7 +19,7 @@ def get_user_company(request=None):
             from companies.models import Company
             try:
                 return Company.objects.get(pk=company_id)
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
     # 2b. Umbrella admin viewing a child company
     if request and request.user.is_authenticated:
@@ -32,14 +35,14 @@ def get_user_company(request=None):
                 else:
                     # Invalid - clear session
                     del request.session['umbrella_as_company']
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
     # 3. Fallback to profile.company
     if request:
         try:
             return request.user.profile.company
         except Exception:
-            pass
+            logger.exception("Profile access failed")
     return None
 
 

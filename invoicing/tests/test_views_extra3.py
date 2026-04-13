@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_invoicing_user(oib, username):
@@ -15,7 +16,7 @@ def _setup_invoicing_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -231,7 +232,7 @@ class InvoicingAPITest(TestCase):
                 'due_date': '2026-03-01',
             }), content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_api_add_item_with_real_invoice(self):
@@ -244,7 +245,7 @@ class InvoicingAPITest(TestCase):
                 'tax_rate': 25,
             }), content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
 

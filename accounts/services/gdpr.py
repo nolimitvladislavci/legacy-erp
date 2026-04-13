@@ -15,6 +15,7 @@ import logging
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,7 @@ class GDPRExportService:
                 {"company": m.company.name, "role": m.role, "is_active": m.is_active, "joined_at": m.joined_at}
                 for m in memberships
             ]
-        except Exception:
+        except DatabaseError:
             pass
 
         # DeviceToken
@@ -90,7 +91,7 @@ class GDPRExportService:
                 {"device_name": t.device_name, "is_active": t.is_active, "created_at": t.created_at, "last_used_at": t.last_used_at, "last_ip": t.last_ip}
                 for t in tokens
             ]
-        except Exception:
+        except DatabaseError:
             pass
 
         # Login pokusaji (zadnjih 100)
@@ -101,7 +102,7 @@ class GDPRExportService:
                 {"time": a.attempted_at, "ip": a.ip_address, "success": a.success, "method": a.method}
                 for a in attempts
             ]
-        except Exception:
+        except DatabaseError:
             pass
 
         return json.dumps(data, cls=DjangoJSONEncoder, indent=2, ensure_ascii=False)
@@ -131,7 +132,7 @@ class GDPRAnonymizationService:
             up.last_login_ip = None
             up.save()
             result["actions"].append("UserProfile anonimizirano")
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         # 2. EmployeeProfile (zadrzavamo OIB/IBAN ako postoje payroll zapisi)
@@ -141,7 +142,7 @@ class GDPRAnonymizationService:
             try:
                 from payroll.models import PayrollRun
                 has_payroll = PayrollRun.objects.filter(company=ep.company).exists()
-            except Exception:
+            except DatabaseError:
                 pass
 
             ep.address = ""
@@ -155,7 +156,7 @@ class GDPRAnonymizationService:
             else:
                 result["actions"].append("EmployeeProfile anonimizirano (OIB/IBAN sacuvani -- payroll)")
             ep.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         # 3. DeviceToken brisanje
@@ -165,7 +166,7 @@ class GDPRAnonymizationService:
             DeviceToken.objects.filter(user=user).delete()
             if count:
                 result["actions"].append(f"{count} DeviceToken obrisano")
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         # 4. User model (ZADNJE)
@@ -198,7 +199,7 @@ class GDPRAnonymizationService:
                 ip_address=None,
             )
             result["actions"].append("SystemAuditLog zapis kreiran")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error("GDPR audit log greska: %s", e)
 
         logger.info("GDPR anonimizacija zavrsena za korisnika %s. Akcije: %s", user.pk, result["actions"])

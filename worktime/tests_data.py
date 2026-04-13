@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_wt_user(oib, username, role='worker'):
@@ -16,7 +17,7 @@ def _setup_wt_user(oib, username, role='worker'):
         p.company = company
         p.role = role
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role=role)
     CompanySubscription.objects.create(
         company=company,
@@ -292,7 +293,7 @@ class WorktimeManagerWithDataTest(TestCase):
         self.worker = User.objects.create_user('wtd_v2_w', password='pass123')
         try:
             UserProfile.objects.create(user=self.worker, company=self.company, role='worker')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.project = _make_project(self.company, '02')
 
@@ -345,7 +346,7 @@ class WorktimeManagerWithDataTest(TestCase):
                 'entry_ids': json.dumps([entry.pk]),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_approve_entries_empty(self):
@@ -375,7 +376,7 @@ class WorktimeManagerWithDataTest(TestCase):
                 'partner_id': '',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_timesheet_pdf_get(self):

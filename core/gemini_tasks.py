@@ -1,6 +1,7 @@
 """Gemini Agent Celery Tasks — autonomno izvršavanje zadataka."""
 import logging
 from celery import shared_task
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('gemini_agent')
 
@@ -37,7 +38,7 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
                 message="Gemini task nije izvrsio nista (0 fajlova). Task: " + task_description[:80] + " | " + requested_by
             )
         except Exception:
-            pass
+            logger.exception("Unexpected error in: send_text(")
 
     # Notificiraj superadmina o završetku
     try:
@@ -53,6 +54,6 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
             notification_type='system',
         )
     except Exception:
-        pass
+        logger.exception("Failed to import _notify_superadmins")
 
     return result

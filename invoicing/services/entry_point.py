@@ -11,6 +11,7 @@ import logging
 
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +181,7 @@ class DocumentEntry:
 
             invoice = Invoice(**doc_data)
             invoice.save()
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error(f'DocumentEntry.create failed: {e}')
             return DocumentResult(errors=[str(e)])
 
@@ -191,7 +192,7 @@ class DocumentEntry:
                 item_data['invoice'] = invoice
                 item_data.setdefault('quantity', Decimal('1'))
                 InvoiceItem.objects.create(**item_data)
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 errors.append(f'Item {idx}: {e}')
 
         # 3. Recalculate totals

@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 
 @login_required
@@ -230,7 +231,7 @@ def _get_module_counters(company):
                 app_label, model_name = cm.split('.')
                 Model = apps.get_model(app_label, model_name)
                 counters[m['id']] = Model.objects.filter(company=company).count()
-            except Exception:
+            except DatabaseError:
                 counters[m['id']] = 0
     return counters
 
@@ -242,13 +243,13 @@ def _ai_recommend(company):
     # Gather signals
     signals = {}
     try:
-        signals['has_invoices'] = apps.get_model('invoicing', 'Invoice').objects.filter(company=company).count() > 0
+        signals['has_invoices'] = apps.get_model('invoicing', 'Invoice').objects.filter(company=company).exists()
         signals['has_partners'] = apps.get_model('partners', 'Partner').objects.filter(company=company).count() > 10
-        signals['has_items'] = apps.get_model('inventory', 'InventoryItem').objects.filter(company=company).count() > 0
-        signals['has_employees'] = apps.get_model('worktime', 'EmployeeProfile').objects.filter(company=company).count() > 0
-        signals['has_konto'] = apps.get_model('konto', 'JournalEntry').objects.filter(company=company).count() > 0
+        signals['has_items'] = apps.get_model('inventory', 'InventoryItem').objects.filter(company=company).exists()
+        signals['has_employees'] = apps.get_model('worktime', 'EmployeeProfile').objects.filter(company=company).exists()
+        signals['has_konto'] = apps.get_model('konto', 'JournalEntry').objects.filter(company=company).exists()
         signals['country'] = getattr(company, 'country', 'HR')
-    except Exception:
+    except DatabaseError:
         pass
 
     recommendations = ['dashboard', 'invoicing', 'partners']  # always

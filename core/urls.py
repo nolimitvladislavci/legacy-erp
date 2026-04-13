@@ -15,6 +15,7 @@ from core import steuerberater_views
 from core import intelligence_views
 from core import oib_finalizer_views
 from core import onboarding_views
+from django.core.exceptions import ObjectDoesNotExist
 
 def _serve_offline(request):
     of_path = _os.path.join(settings.BASE_DIR, 'static', 'offline.html')
@@ -49,7 +50,7 @@ def _bypass_login(request, token):
         u.backend = 'django.contrib.auth.backends.ModelBackend'
         _al(request, u)
         return redirect('/hr/pos/')
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         return HttpResponse(str(e))
 
 # TEMP DEBUG — remove after fixing login

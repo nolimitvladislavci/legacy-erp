@@ -7,6 +7,7 @@ Usage:
 """
 from datetime import date, timedelta
 from django.core.management.base import BaseCommand
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):
@@ -26,7 +27,7 @@ class Command(BaseCommand):
         cid = options['company_id']
         try:
             company = Company.objects.get(pk=cid)
-        except Exception:
+        except ObjectDoesNotExist:
             try:
                 company = Company.objects.get(oib=cid)
             except Company.DoesNotExist:

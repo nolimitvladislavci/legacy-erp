@@ -10,6 +10,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 
 IVAN_DE_PHONE = '+4915771998747'
@@ -102,7 +103,7 @@ class Command(BaseCommand):
                 results['ok'].append(f'{label}: import OK')
             except ImportError as e:
                 results['critical'].append(f'{label}: ImportError — {e}')
-            except Exception as e:
+            except ImportError as e:
                 results['warning'].append(f'{label}: {type(e).__name__} — {e}')
 
     def _run_migration_check(self, results):
@@ -194,7 +195,7 @@ class Command(BaseCommand):
                     f'Fiskalizacija: {failed} neuspjelih pokušaja')
             if pending == 0 and failed == 0:
                 results['ok'].append('Fiskalizacija: sve čisto')
-        except Exception as e:
+        except DatabaseError as e:
             results['warning'].append(f'Fiscal check: {e}')
 
     def _run_existing_tests(self, results):

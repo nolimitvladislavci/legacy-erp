@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules):
@@ -16,7 +17,7 @@ def _setup_user(oib, username, modules):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,

@@ -3,6 +3,7 @@ import json
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_burza_user(oib, username, role='admin'):
@@ -16,7 +17,7 @@ def _setup_burza_user(oib, username, role='admin'):
         p.company = company
         p.role = role
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role=role)
     CompanySubscription.objects.create(
         company=company,
@@ -38,7 +39,7 @@ def _setup_superadmin(username):
         p = user.profile
         p.role = 'superadmin'
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, role='superadmin')
     return user
 
@@ -190,7 +191,7 @@ class BurzaLeadMoveTest(TestCase):
                           data=json.dumps({'status': 'INTERNA_PROCJENA'}),
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_lead_move_to_na_burzi(self):
@@ -201,7 +202,7 @@ class BurzaLeadMoveTest(TestCase):
                           data=json.dumps({'status': 'NA_BURZI'}),
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_lead_move_invalid_status(self):
@@ -212,7 +213,7 @@ class BurzaLeadMoveTest(TestCase):
                           data=json.dumps({'status': 'INVALID_STATUS'}),
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_lead_move_invalid_json(self):
@@ -234,7 +235,7 @@ class BurzaLeadMoveTest(TestCase):
                           data=json.dumps({'status': 'RIJESENO'}),
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_lead_move_superadmin_any_lead(self):
@@ -245,7 +246,7 @@ class BurzaLeadMoveTest(TestCase):
                           data=json.dumps({'status': 'RIJESENO'}),
                           content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
 

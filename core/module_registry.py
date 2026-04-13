@@ -8,6 +8,7 @@ This registry handles domain-specific modules that depend on business_type,
 NKD code, or company name keywords.
 """
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -262,7 +263,7 @@ def get_active_modules(company):
             for m in config.enabled_modules:
                 if m in MODULE_REGISTRY:
                     active.add(m)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("get_active_modules error: %s", e)
 
     return sorted(active)
@@ -348,7 +349,7 @@ def auto_detect_modules(company):
         if nkd:
             nkd_code_str = getattr(nkd, 'code', '') or ''
     except Exception:
-        pass
+        logger.exception("Company operation failed")
 
     for key, mod in MODULE_REGISTRY.items():
         # 1. Auto-activate by business_type

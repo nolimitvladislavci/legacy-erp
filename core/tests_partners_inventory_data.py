@@ -2,6 +2,7 @@
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None):
@@ -14,7 +15,7 @@ def _setup_user(oib, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -116,7 +117,7 @@ class PartnersWithDataTest(TestCase):
             Partner.objects.create(company=self.company, name='Incomplete Partner')
             resp = self.client.get('/partners/?active=incomplete', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_partner_detail_with_data(self):
@@ -215,7 +216,7 @@ class PartnersWithDataTest(TestCase):
                 data=json.dumps({'name': 'Quick Partner', 'oib': '', 'email': 'quick@test.hr'}),
                 content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_partner_quick_create_existing_oib(self):
@@ -226,7 +227,7 @@ class PartnersWithDataTest(TestCase):
                 data=json.dumps({'name': 'Existing OIB', 'oib': '99999999999'}),
                 content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_partner_quick_create_existing_name(self):
@@ -237,7 +238,7 @@ class PartnersWithDataTest(TestCase):
                 data=json.dumps({'name': 'Existing Name Corp', 'oib': ''}),
                 content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_partner_quick_create_no_name(self):
@@ -247,7 +248,7 @@ class PartnersWithDataTest(TestCase):
                 data=json.dumps({'name': '', 'oib': ''}),
                 content_type='application/json')
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
 
@@ -300,7 +301,7 @@ class InventoryWithDataTest(TestCase):
             )
             resp = self.client.get('/inventory/?low_stock=1', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_item_detail_with_data(self):

@@ -2,6 +2,7 @@
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_company_user(oib, username):
@@ -14,7 +15,7 @@ def _setup_company_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -36,7 +37,7 @@ def _make_superuser(username):
     u.save()
     try:
         UserProfile.objects.create(user=u, role='superadmin')
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
     return u
 
@@ -150,7 +151,7 @@ class AccountsUserEditTest(TestCase):
             self.target.save()
             resp = self.client.post(f'/accounts/{self.target.pk}/reset-password/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_user_list_view(self):

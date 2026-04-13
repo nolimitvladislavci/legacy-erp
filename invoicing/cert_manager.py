@@ -79,7 +79,7 @@ def validate_and_save_cert(instance, file_obj, password: str) -> dict:
             }
         }
 
-    except Exception as e:
+    except IOError as e:
         logger.warning("Certifikat nije valjan: %s", e)
         return {'ok': False, 'error': str(e)}
 
@@ -147,7 +147,7 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
             if cert_path and os.path.exists(cert_path):
                 os.unlink(cert_path)
 
-    except Exception as e:
+    except OSError as e:
         logger.warning("CIS test neuspješan: %s", e)
         return {
             'ok': False,

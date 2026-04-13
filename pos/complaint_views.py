@@ -33,6 +33,7 @@ from django.template.loader import render_to_string
 
 from companies.models import Company
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -245,7 +246,7 @@ def complaint_api_public(request):
         try:
             from django.utils.dateparse import parse_datetime
             sig_ts = parse_datetime(data['signature_timestamp']) or timezone.now()
-        except Exception:
+        except ValueError:
             sig_ts = timezone.now()
 
     # Star rating validation
@@ -335,7 +336,7 @@ def complaint_api_public(request):
     # Notify admin about new complaint
     try:
         _notify_admin_new_complaint(p)
-    except Exception:
+    except (ValueError, TypeError):
         logger.debug('Admin notification failed')
 
     type_labels = {
@@ -1047,5 +1048,5 @@ def _notify_admin_new_complaint(p):
                 url='/pos/prigovori/',
                 notification_type='warning',
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass

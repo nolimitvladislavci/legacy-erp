@@ -32,6 +32,7 @@ from typing import Optional
 from xml.etree import ElementTree as ET
 
 import requests
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -290,7 +291,7 @@ def _lookup_vies(country_code: str, vat_number: str, timeout: int = 8) -> Busine
         )
     except requests.Timeout:
         return BusinessLookupResult(found=False, source="vies", error="VIES ne odgovara (timeout).")
-    except Exception as exc:
+    except requests.RequestException as exc:
         logger.warning("VIES error %s%s: %s", country_code, vat_number, exc)
         return BusinessLookupResult(found=False, source="vies", error="Greška pri spajanju na VIES.")
 
@@ -402,7 +403,7 @@ def _lookup_fina(oib: str, api_token: str, timeout: int = 8) -> BusinessLookupRe
                 )
         except requests.Timeout:
             return BusinessLookupResult(found=False, source="fina_infobiz", error="FINA API timeout.")
-        except Exception as exc:
+        except requests.RequestException as exc:
             logger.warning("FINA lookup error OIB %s: %s", oib, exc)
 
     return BusinessLookupResult(found=False, source="fina_infobiz",
@@ -474,7 +475,7 @@ def _get_nkd_name(code: str) -> str:
             if obj:
                 _NKD_CACHE[code] = obj.name_hr
                 return obj.name_hr
-    except Exception as exc:
+    except DatabaseError as exc:
         logger.debug("NKD lookup error %s: %s", code, exc)
     return ""
 
@@ -492,7 +493,7 @@ def _get_wz_name(code: str) -> str:
             name = obj.name_en or obj.name_hr
             _WZ_CACHE[code] = name
             return name
-    except Exception:
+    except DatabaseError:
         pass
     return ""
 
@@ -532,7 +533,7 @@ def get_nkd_choices_for_select(query: str = "", limit: int = 20) -> list[dict]:
             {"code": obj.code, "name": obj.name_hr, "level": obj.level}
             for obj in qs[:limit]
         ]
-    except Exception as exc:
+    except DatabaseError as exc:
         logger.warning("NKD choices error: %s", exc)
         return []
 
@@ -583,7 +584,7 @@ def _lookup_in_database(tax_id: str, country: str, company) -> Optional[Business
                 zip_code=getattr(partner, "zip_code", ""),
                 raw={"partner_id": partner.pk},
             )
-    except Exception:
+    except DatabaseError:
         pass
     return None
 

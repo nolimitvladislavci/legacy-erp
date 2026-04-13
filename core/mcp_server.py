@@ -28,7 +28,7 @@ def query_db(sql: str) -> str:
                 rows = cur.fetchmany(100)
                 return json.dumps({'columns': cols, 'rows': rows, 'count': len(rows)}, default=str)
             return json.dumps({'affected': cur.rowcount})
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         return json.dumps({'error': str(e)})
 
 
@@ -52,7 +52,7 @@ def read_file(path: str) -> str:
     try:
         content = open(full).read()
         return f'[{content.count(chr(10))} linija]\n{content[:30000]}'
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         return f'Error: {e}'
 
 
@@ -66,7 +66,7 @@ def write_file(path: str, content: str) -> str:
         os.makedirs(os.path.dirname(full), exist_ok=True)
         open(full, 'w').write(content)
         return f'OK: {path} ({len(content)} chars)'
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         return f'Error: {e}'
 
 
@@ -84,7 +84,7 @@ def list_files(path: str = '.', pattern: str = '') -> str:
             if len(result) > 300:
                 break
         return '\n'.join(sorted(result))
-    except Exception as e:
+    except OSError as e:
         return f'Error: {e}'
 
 
@@ -140,7 +140,7 @@ def system_status() -> str:
             'memory': {'used': mem[2], 'total': mem[1]},
             'services': services,
         }, indent=2)
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         return f'Error: {e}'
 
 

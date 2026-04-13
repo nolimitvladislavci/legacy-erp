@@ -99,7 +99,7 @@ class FiskalyTSEAdapter:
             resp.raise_for_status()
             self._token = resp.json()['access_token']
             return self._token
-        except Exception as e:
+        except requests.RequestException as e:
             raise TSEError(f'Fiskaly auth failed: {e}') from e
 
     def _headers(self) -> dict:
@@ -126,7 +126,7 @@ class FiskalyTSEAdapter:
             )
             resp.raise_for_status()
             return tx_id
-        except Exception as e:
+        except requests.RequestException as e:
             raise TSEError(f'TSE START_TRANSACTION failed: {e}') from e
 
     def _finish_transaction(self, tx_id: str, receipt, vat_breakdown: list, payments: list) -> dict:
@@ -154,7 +154,7 @@ class FiskalyTSEAdapter:
             )
             resp.raise_for_status()
             return resp.json()
-        except Exception as e:
+        except requests.RequestException as e:
             raise TSEError(f'TSE FINISH_TRANSACTION failed: {e}') from e
 
     # ── Pomoćne metode za izgradnju payloada ─────────────────────────────────

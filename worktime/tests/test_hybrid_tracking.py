@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 import datetime
 
 from companies.models import Company
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -33,7 +34,7 @@ class ArbZGAutoBreakTests(TestCase):
             profile = cls.worker.profile
             profile.company = cls.company
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             UserProfile.objects.create(user=cls.worker, company=cls.company)
 
     def test_10h_shift_deducts_45min(self):
@@ -136,7 +137,7 @@ class GeofenceLockoutTests(TestCase):
             profile = cls.worker.profile
             profile.company = cls.company
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             UserProfile.objects.create(user=cls.worker, company=cls.company)
 
     def test_clock_in_within_radius_allowed(self):
@@ -203,7 +204,7 @@ class InvisibleAuditorTests(TestCase):
                 p = u.profile
                 p.company = cls.company
                 p.save()
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 UserProfile.objects.create(user=u, company=cls.company)
 
     def test_90min_gap_flagged(self):

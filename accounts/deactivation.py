@@ -27,6 +27,7 @@ from django.utils import timezone as tz
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('accounts')
 
@@ -289,7 +290,7 @@ def process_vaulting():
                         ) % (company.name, users_disabled),
                         company=company,
                     )
-            except Exception:
+            except DatabaseError:
                 pass
 
             # 4. Notifikacija superadminu
@@ -312,7 +313,7 @@ def process_vaulting():
                         company.name, users_disabled)
             results['vaulted'] += 1
 
-        except Exception:
+        except DatabaseError:
             logger.exception('[VAULT] Error sealing company pk=%s', company.pk)
             results['errors'] += 1
 

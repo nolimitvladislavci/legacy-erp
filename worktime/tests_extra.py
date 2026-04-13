@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_wt_user(oib, username, role='worker'):
@@ -16,7 +17,7 @@ def _setup_wt_user(oib, username, role='worker'):
         p.company = company
         p.role = role
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role=role)
     CompanySubscription.objects.create(
         company=company,
@@ -181,7 +182,7 @@ class WorktimeManagerTest(TestCase):
         self.worker = User.objects.create_user('wte_v3_w', password='pass123')
         try:
             UserProfile.objects.create(user=self.worker, company=self.company, role='worker')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.client = Client(raise_request_exception=False)
         self.client.login(username='wte_v3', password='pass123')

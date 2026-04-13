@@ -201,13 +201,13 @@ def _get_company_logo_b64(invoice):
                 path = company.logo.path
                 if _os.path.exists(path):
                     return _logo_to_data_uri(path)
-            except Exception:
+            except OSError:
                 pass
         settings = company.settings or {}
         path = settings.get('logo_path', '')
         if path and _os.path.exists(path):
             return _logo_to_data_uri(path)
-    except Exception:
+    except OSError:
         pass
     return ''
 

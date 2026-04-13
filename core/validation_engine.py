@@ -25,6 +25,7 @@ import re
 from django.db import models
 from django.db.models.signals import pre_save
 from django.core.exceptions import ValidationError
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('validation_engine')
 
@@ -82,7 +83,7 @@ def _get_country_safe(instance):
         if company and hasattr(company, 'country'):
             return getattr(company, 'country', None) or 'HR'
     except Exception:
-        pass
+        logger.exception("Company operation failed")
 
     try:
         session = getattr(instance, 'session', None)
@@ -93,7 +94,7 @@ def _get_country_safe(instance):
                 if company:
                     return getattr(company, 'country', None) or 'HR'
     except Exception:
-        pass
+        logger.exception("Unexpected error in: session = getattr(instance, 'session', None)")
 
     return 'HR'
 

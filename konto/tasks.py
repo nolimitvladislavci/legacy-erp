@@ -90,7 +90,7 @@ def generate_saft_export(self, company_id, period_from_str, period_to_str):
         logger.info('SAF-T export completed: %s (%.0f KB)', filename, file_size)
         return {'status': 'completed', 'file': filepath, 'size_kb': file_size}
 
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error('SAF-T export failed for %s: %s', company.name, e)
         return {'status': 'failed', 'error': str(e)}
 

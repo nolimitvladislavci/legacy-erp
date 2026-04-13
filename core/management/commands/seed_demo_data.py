@@ -16,6 +16,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -126,7 +127,7 @@ class Command(BaseCommand):
         try:
             from burza.models import ProjectLead
             ProjectLead.objects.filter(company=company, internal_notes=DEMO_TAG).delete()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     # ── users ──────────────────────────────────────────────────────────────────

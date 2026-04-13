@@ -2,6 +2,7 @@
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_superuser(username):
@@ -11,7 +12,7 @@ def _setup_superuser(username):
     user = User.objects.create_superuser(username, password='pass123', email=f'{username}@test.hr')
     try:
         UserProfile.objects.create(user=user, company=company)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
     return company, user
 
@@ -24,7 +25,7 @@ def _setup_user(oib, username, modules=None):
     user = User.objects.create_user(username, password='pass123')
     try:
         UserProfile.objects.create(user=user, company=company)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
     CompanySubscription.objects.create(
         company=company,

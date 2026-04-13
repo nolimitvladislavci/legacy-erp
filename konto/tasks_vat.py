@@ -72,7 +72,7 @@ def monthly_vat_calculation(self):
                 "pdvs_created": pdvs_report is not None,
             })
 
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             logger.error(
                 "VAT calculation failed for %s: %s", company.name, exc,
                 exc_info=True,
@@ -144,5 +144,5 @@ def _send_pdv_whatsapp_summary(year, month, results, obveznik_count, total_obvez
         send_whatsapp_text_task.delay(MARIJA_PHONE, msg)
         logger.info("WhatsApp PDV summary sent to Marija")
 
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
         logger.error("WhatsApp PDV summary failed: %s", exc)

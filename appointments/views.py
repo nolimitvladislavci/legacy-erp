@@ -1,6 +1,6 @@
 import logging
 
-from django.db import transaction
+from django.db import transaction, DatabaseError
 
 logger = logging.getLogger(__name__)
 import json
@@ -213,7 +213,7 @@ def api_appointments(request, pk=None):
     if request.method in ["POST", "PUT"]:
         try:
             data = json.loads(request.body) if request.content_type == "application/json" else request.POST
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             data = request.POST
         if pk:
             appointment = get_object_or_404(Appointment, pk=pk)
@@ -405,7 +405,7 @@ def api_submit_public_booking(request):
                 [email],
                 # async via celery
             )
-        except Exception:
+        except (ValueError, TypeError):
             pass
         ics_url = f"/appointments/booking/ics/{appointment.id}/"
         # Notify staff about new booking
@@ -421,7 +421,7 @@ def api_submit_public_booking(request):
                 message=f'{service.name} - {start_time.strftime("%d.%m.%Y %H:%M")} ({name})',
                 url='/appointments/',
             )
-        except Exception:
+        except DatabaseError:
             pass
         # WhatsApp potvrda s detaljima + tracking link
         wa_phone = data.get("phone", "") or appointment.whatsapp_number
@@ -446,10 +446,10 @@ def api_submit_public_booking(request):
                 send_whatsapp_text_task.delay(wa_phone, wa_msg)
                 appointment.whatsapp_number = wa_phone
                 appointment.save(update_fields=["whatsapp_number"])
-            except Exception:
+            except (ValueError, TypeError):
                 pass
         return JsonResponse({"status": "success", "booking_id": appointment.id, "total_price": float(appointment.total_price or 0), "ics_url": ics_url})
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -640,7 +640,7 @@ def api_booking_register(request):
             "email": user.email,
             "full_name": user.get_full_name() or user.username
         })
-    except Exception as e:
+    except DatabaseError as e:
         return JsonResponse({"success": False, "error": str(e)})
 
 
@@ -813,7 +813,7 @@ def dossier_entry_create(request, partner_id):
         appt_id    = request.POST.get("appointment_id")
         try:
             structured = _json.loads(sd_raw) if sd_raw else {}
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             structured = {}
         entry = DE(
             dossier=dossier,
@@ -826,7 +826,7 @@ def dossier_entry_create(request, partner_id):
         if appt_id:
             try:
                 entry.appointment_id = int(appt_id)
-            except Exception:
+            except (ValueError, TypeError):
                 pass
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
@@ -864,7 +864,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         sd_raw = request.POST.get("structured_data", "{}")
         try:
             entry.structured_data = _json.loads(sd_raw)
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             pass
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
@@ -1106,7 +1106,7 @@ def dossier_entry_create(request, partner_id):
         appt_id    = request.POST.get("appointment_id")
         try:
             structured = _json.loads(sd_raw) if sd_raw else {}
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             structured = {}
         entry = DE(
             dossier=dossier,
@@ -1119,7 +1119,7 @@ def dossier_entry_create(request, partner_id):
         if appt_id:
             try:
                 entry.appointment_id = int(appt_id)
-            except Exception:
+            except (ValueError, TypeError):
                 pass
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
@@ -1156,7 +1156,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         sd_raw = request.POST.get("structured_data", "{}")
         try:
             entry.structured_data = _json.loads(sd_raw)
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             pass
         if request.FILES.get("file"):
             entry.file = request.FILES["file"]
@@ -1408,7 +1408,7 @@ def api_book_double_lock(request):
             'code': e.code,
             'detail': e.detail,
         }, status=409)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -1570,7 +1570,7 @@ def api_booking_guest_register(request):
         email  = data.get('email', '').strip().lower()
         phone  = data.get('phone', '').strip()
         company_slug = data.get('company_slug', '')
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     if not name or not email:
@@ -1749,7 +1749,7 @@ def api_booking_verify_wa_pin(request):
         data     = json.loads(request.body)
         guest_id = data.get('guest_id', '').strip()
         pin      = data.get('pin', '').strip()
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     if not guest_id or not pin:

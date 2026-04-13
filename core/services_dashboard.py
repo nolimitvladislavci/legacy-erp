@@ -8,6 +8,7 @@ import logging
 from datetime import timedelta
 
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def _invoice_stats(company, month_start) -> dict:
             "recent_invoices": list(qs.filter(doctype="R").select_related("company").order_by("-date_issued")[:8]),
             "pending_offers": qs.filter(doctype="PO", status__in=("DRAFT", "SENT")).count(),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Invoice stats failed: %s", e)
         return {"total_invoiced": 0, "unpaid": 0, "paid_month": 0, "recent_invoices": [], "pending_offers": 0}
 
@@ -78,7 +79,7 @@ def _worktime_stats(user, week_start, month_start) -> dict:
             "hours_month": qs.filter(date__gte=month_start).aggregate(s=Sum("duration"))["s"] or 0,
             "recent_entries": list(qs.select_related("project", "user").order_by("-date")[:5]),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Worktime stats failed: %s", e)
         return {"hours_week": 0, "hours_month": 0, "recent_entries": []}
 
@@ -94,7 +95,7 @@ def _project_stats(company) -> dict:
             "projects": list(qs.filter(status__in=("active", "in_progress", "open")).select_related("company").order_by("-id")[:5]),
             "total_projects": qs.exclude(status__in=("completed", "cancelled")).count(),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Project stats failed: %s", e)
         return {"projects": [], "total_projects": 0}
 
@@ -107,7 +108,7 @@ def _partner_stats(company) -> dict:
         if company:
             qs = qs.filter(company=company)
         return {"total_partners": qs.count()}
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Partner stats failed: %s", e)
         return {"total_partners": 0}
 
@@ -130,7 +131,7 @@ def _finance_stats(company, month_start) -> dict:
             "expense_month": expense,
             "cashflow_month": income - expense,
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Finance stats failed: %s", e)
         return {"income_month": 0, "expense_month": 0, "cashflow_month": 0}
 
@@ -151,7 +152,7 @@ def _appointment_stats(company, today, month_start) -> dict:
             "today_appointments": list(qs.select_related("client", "service", "resource").order_by("start_time")[:8]),
             "total_appointments_month": month_count.count(),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Appointment stats failed: %s", e)
         return {"today_appointments": [], "total_appointments_month": 0}
 
@@ -168,7 +169,7 @@ def _pos_stats(today) -> dict:
             "pos_revenue_today": qs.aggregate(s=Sum("total"))["s"] or 0,
             "pos_count_today": qs.count(),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("POS stats failed: %s", e)
         return {"pos_revenue_today": 0, "pos_count_today": 0}
 
@@ -192,7 +193,7 @@ def get_superadmin_stats() -> dict:
                 .values("id", "name", "oib", "created_at")[:50]
             ),
         }
-    except Exception as e:
+    except DatabaseError as e:
         logger.exception("Superadmin stats failed: %s", e)
         return {"total_users": 0, "total_companies": 0, "active_companies": 0, "companies_list": []}
 

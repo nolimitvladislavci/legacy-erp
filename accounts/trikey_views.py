@@ -222,7 +222,7 @@ def passkey_register_complete(request):
         logger.info(f'Passkey registered for {request.user.username}: {device_name}')
 
         return JsonResponse({'ok': True, 'message': 'Passkey registriran! 🔑'})
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -246,7 +246,7 @@ def business_key_register(request):
             cert_bytes = fina_cert.read()
             fingerprint = trikey.register_fina_cert(cert_bytes)
             registered.append(f'FINA cert (fingerprint: {fingerprint[:12]}...)')
-        except Exception as e:
+        except IOError as e:
             messages.error(request, _('Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo.'))
 
     if api_key:

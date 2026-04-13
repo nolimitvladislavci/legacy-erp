@@ -3,6 +3,8 @@ from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from core.tenant import set_current_company
 from core.company_utils import get_user_company
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -248,7 +250,7 @@ class CompanyBranchMiddleware(MiddlewareMixin):
                 try:
                     from companies.models import CompanyBranch
                     request.active_branch = CompanyBranch.objects.get(pk=branch_id)
-                except Exception:
+                except ObjectDoesNotExist:
                     request.active_branch = None
             else:
                 request.active_branch = None
@@ -637,7 +639,7 @@ class GracefulErrorMiddleware:
                 },
                 ip_address=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip(),
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     @staticmethod

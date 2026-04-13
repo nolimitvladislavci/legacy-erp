@@ -13,6 +13,7 @@ import logging
 from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +142,7 @@ def book_bank_transaction(bank_txn):
             )
             return entry
 
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.exception(f"Failed to book BankTransaction {bank_txn.pk}")
         return None
 
@@ -246,7 +247,7 @@ def auto_knjizi_clanarina(clanarina):
         logger.info('auto_knjizi_clanarina: %s -> %s', entry_tag, entry_number)
         return entry
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logging.getLogger('konto.booking').error('auto_knjizi_clanarina: %s', e)
         return None
 
@@ -334,6 +335,6 @@ def auto_knjizi_donacija(donacija):
         logger.info('auto_knjizi_donacija: %s -> %s', entry_tag, entry_number)
         return entry
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logging.getLogger('konto.booking').error('auto_knjizi_donacija: %s', e)
         return None

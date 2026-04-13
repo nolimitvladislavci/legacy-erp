@@ -16,6 +16,7 @@ import functools
 import logging
 
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def audit_sensitive_access(model_name, description='', get_object_id=None):
                     },
                     ip_address=ip,
                 )
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.debug('Audit access log failed: %s', e)
 
             return response
@@ -121,7 +122,7 @@ def audit_bulk_access(model_name, description=''):
                     },
                     ip_address=ip,
                 )
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.debug('Audit bulk access log failed: %s', e)
 
             return response

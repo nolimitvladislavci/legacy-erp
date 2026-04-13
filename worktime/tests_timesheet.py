@@ -4,6 +4,7 @@ import json
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_wt_user(oib, username, role='worker'):
@@ -17,7 +18,7 @@ def _setup_wt_user(oib, username, role='worker'):
         p.company = company
         p.role = role
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role=role)
     CompanySubscription.objects.create(
         company=company,
@@ -279,11 +280,11 @@ class WorktimeManagerTimesheetTest(TestCase):
         self.worker2 = User.objects.create_user('wttv_wrk2', password='pass123')
         try:
             UserProfile.objects.create(user=self.worker1, company=self.company, role='worker')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         try:
             UserProfile.objects.create(user=self.worker2, company=self.company, role='worker')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.project = _make_wt_project(self.company, '03')
         self.client = Client(raise_request_exception=False)
@@ -332,7 +333,7 @@ class WorktimeManagerTimesheetTest(TestCase):
                 'entry_ids': json.dumps([entry1.pk, entry2.pk]),
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_timesheet_pdf(self):

@@ -1140,7 +1140,7 @@ def calculate_corporate_tax(company, year):
                     'type': m.opportunity.opportunity_type,
                 })
                 relief_total += amt
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     net_tax = max(corporate_tax - relief_total, Decimal('0'))

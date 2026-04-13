@@ -118,7 +118,7 @@ def generate_kassenbuch(company, date_from=None, date_to=None):
             withdrawals = sessions.first().cash_deposits.filter(
                 deposit_type='withdrawal'
             ).aggregate(s=Sum('amount'))['s'] or Decimal('0')
-        except Exception:
+        except (ValueError, TypeError):
             deposits = Decimal('0')
             withdrawals = Decimal('0')
 

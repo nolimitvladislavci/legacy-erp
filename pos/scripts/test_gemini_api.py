@@ -22,7 +22,7 @@ def test(name, fn):
         else:
             failed += 1
             print(f"  FAIL: {name}")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         failed += 1
         print(f"  ERROR: {name} -> {e}")
 

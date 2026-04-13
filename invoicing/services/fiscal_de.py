@@ -9,6 +9,7 @@ Germany requires:
 """
 import logging
 from .entry_point import BaseFiscalHandler, FiscalResult
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ class DEXRechnungHandler(BaseFiscalHandler):
                 raw_response={'eracun_id': str(eracun.id), 'format': 'xrechnung'},
             )
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.exception('DE XRechnung error')
             return FiscalResult(success=False, message=str(e))
 

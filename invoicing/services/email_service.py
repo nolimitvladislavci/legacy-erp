@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ def send_invoice_email(invoice):
         ).first()
         if entry:
             tracking_pixel_url = _generate_tracking_url(entry.pk)
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Tracking pixel setup: %s', e)
 
     # Client portal URL

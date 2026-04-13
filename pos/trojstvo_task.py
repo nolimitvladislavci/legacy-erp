@@ -16,6 +16,7 @@ import os
 from datetime import datetime
 
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('trojstvo')
 
@@ -56,7 +57,7 @@ def trojstvo_rijesi(self, suggestion_id):
             recent_errors = [l.strip() for l in lines[-100:] if 'ERROR' in l or 'Traceback' in l][-20:]
             if recent_errors:
                 problem += "RECENT ERRORS (zadnjih 20):\n" + "\n".join(recent_errors) + "\n\n"
-    except Exception:
+    except (FileNotFoundError, PermissionError, IOError):
         pass
 
     # Dodaj BookingSignature (zadnjih 10 akcija autora)
@@ -71,7 +72,7 @@ def trojstvo_rijesi(self, suggestion_id):
                 for a in recent_actions
             )
             problem += f"KORISNIKOVE AKCIJE (zadnjih 10):\n{actions_str}\n\n"
-    except Exception:
+    except DatabaseError:
         pass
 
     # Dodaj screenshot info
@@ -85,7 +86,7 @@ def trojstvo_rijesi(self, suggestion_id):
             terminals = POSTerminal.objects.filter(company=s.company, is_active=True)
             term_info = ", ".join(f"{t.name} ({t.pos_type})" for t in terminals[:5])
             problem += f"POS TERMINALI: {term_info}\n"
-        except Exception:
+        except DatabaseError:
             pass
 
     def _safe_save(fields):
@@ -261,7 +262,7 @@ def _log_agreed(s, postotak, resolution):
     try:
         with open(AGREED_LOG, 'a', encoding='utf-8') as f:
             f.write(line)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error('Agreed log greška: %s', e)
 
 
@@ -276,7 +277,7 @@ def _log_conflict(s, haiku, gemini):
     try:
         with open(CONFLICT_LOG, 'a', encoding='utf-8') as f:
             f.write(line)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error('Conflict log greška: %s', e)
 
 

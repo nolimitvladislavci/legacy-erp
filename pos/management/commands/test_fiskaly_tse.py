@@ -13,6 +13,7 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -219,7 +220,7 @@ class Command(BaseCommand):
             self.stdout.write('')
             self.stdout.write(self.style.SUCCESS('KassenSichV COMPLIANCE: PASSED'))
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             duration = (timezone.now() - start_time).total_seconds()
             self.stdout.write(self.style.ERROR(
                 '\nFISKALY API GRESKA (%.2fs): %s' % (duration, e)

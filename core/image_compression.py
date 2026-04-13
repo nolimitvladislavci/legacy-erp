@@ -19,6 +19,7 @@ from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
 from PIL import Image, ExifTags
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def compress_image(image_file, max_width=MAX_WIDTH, max_size=MAX_FILE_SIZE,
     """
     try:
         img = Image.open(image_file)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning('compress_image: ne mogu otvoriti sliku: %s', e)
         return None
 
@@ -191,7 +192,7 @@ def get_company_plan(company):
         ).order_by('-valid_from').first()
         if sub:
             return sub.plan
-    except Exception:
+    except DatabaseError:
         pass
     return 'starter'
 
@@ -251,8 +252,8 @@ def get_company_storage_usage(company):
                             # Fajl ne postoji na disku — preskoči
                             pass
                         except Exception:
-                            pass
-        except Exception as e:
+                            logger.exception("File operation failed")
+        except DatabaseError as e:
             logger.debug('get_company_storage_usage: skip %s.%s: %s',
                          model._meta.app_label, model.__name__, e)
             continue

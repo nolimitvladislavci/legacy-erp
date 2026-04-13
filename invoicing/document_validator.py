@@ -230,7 +230,7 @@ class DocumentValidator:
                             field=f'items[{item.pk}].tax_rate',
                             action='Članarine su najčešće PDV exempt'
                         ))
-        except Exception:
+        except (ValueError, TypeError):
             pass
         return issues
 

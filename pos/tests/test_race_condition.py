@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 
 from companies.models import Company
 from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+from django.db import IntegrityError, DatabaseError
 
 
 class POSRaceConditionTest(TransactionTestCase):
@@ -64,7 +65,7 @@ class POSRaceConditionTest(TransactionTestCase):
                         receipt_number=next_num,
                     )
                     results.append(r.receipt_number)
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 errors.append(str(e))
             finally:
                 conn.close()
@@ -114,7 +115,7 @@ class POSRaceConditionTest(TransactionTestCase):
                         session_number=next_num, status='closed',
                     )
                     results.append(s.session_number)
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 errors.append(str(e))
             finally:
                 conn.close()
@@ -159,7 +160,7 @@ class POSRaceConditionTest(TransactionTestCase):
                         session=sess, receipt_number=1,
                     )
                     results.append(r.global_number)
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 errors.append(str(e))
             finally:
                 conn.close()
@@ -236,7 +237,7 @@ class POSSimulationS4Test(TransactionTestCase):
                     )
                     all_receipt_nums.append(r.receipt_number)
                     all_global_nums.append(r.global_number)
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 errors.append(f"T{thread_id}: {e}")
             finally:
                 conn.close()
@@ -298,7 +299,7 @@ class POSSimulationS4Test(TransactionTestCase):
                     r.recalculate()
                     r.status = 'paid'
                     r.save()
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 errors.append(str(e))
             finally:
                 conn.close()

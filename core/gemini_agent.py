@@ -62,7 +62,7 @@ class GeminiAgent:
                 content = f.read(8000)
             self.files_read.append(path)
             return {'content': content, 'path': path}
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             return {'error': str(e)}
 
     def write_file(self, path, content):
@@ -77,7 +77,7 @@ class GeminiAgent:
             self.files_written.append(path)
             logger.info('[GEMINI v2] WRITE: %s (%d znakova)', path, len(content))
             return {'written': path, 'size': len(content)}
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             return {'error': str(e)}
 
     def run_command(self, cmd):

@@ -3,6 +3,7 @@ import datetime
 import io
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_outreach_user(oib, username):
@@ -15,7 +16,7 @@ def _setup_outreach_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -95,7 +96,7 @@ class OutreachDashboardTest(TestCase):
             cc.save()
             resp = self.client.get('/outreach/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -407,7 +408,7 @@ class OutreachInboxTest(TestCase):
             cc.save()
             resp = self.client.get('/outreach/inbox/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_inbox_with_various_categories(self):
@@ -439,7 +440,7 @@ class OutreachInboxTest(TestCase):
             cc3.save()
             resp = self.client.get('/outreach/inbox/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_mark_replied(self):

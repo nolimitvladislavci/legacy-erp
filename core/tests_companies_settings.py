@@ -2,6 +2,7 @@
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_company_admin(oib, username):
@@ -17,7 +18,7 @@ def _setup_company_admin(oib, username):
         p.company = company
         p.role = 'company_admin'
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role='company_admin')
     CompanySubscription.objects.create(
         company=company,
@@ -39,7 +40,7 @@ def _setup_worker(oib, username, company):
         p.company = company
         p.role = 'worker'
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company, role='worker')
     return user
 
@@ -230,7 +231,7 @@ class CompanyBranchTest(TestCase):
                 'city': 'Rijeka',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_branch_toggle(self):
@@ -244,7 +245,7 @@ class CompanyBranchTest(TestCase):
             )
             resp = self.client.post(f'/companies/settings/branch/{branch.pk}/toggle/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 

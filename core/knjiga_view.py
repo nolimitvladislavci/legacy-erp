@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -29,7 +30,7 @@ def knjiga_pristupnih_podataka(request):
             profile = UserProfile.objects.filter(user=u).first()
             company = profile.company.name if profile and profile.company else 'NO COMPANY'
             role = getattr(profile, 'role', '') if profile else ''
-        except Exception:
+        except DatabaseError:
             company = 'ERROR'
             role = ''
         users_data.append({

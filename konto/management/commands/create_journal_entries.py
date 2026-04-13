@@ -15,6 +15,7 @@ from companies.models import Company
 from invoicing.models import Invoice
 from konto.models import JournalEntry, LedgerLine, KontoAccount
 from konto.services_file import _next_entry_number
+from django.db import IntegrityError, DatabaseError
 
 
 # Default konto plan mapping
@@ -172,7 +173,7 @@ class Command(BaseCommand):
 
                         total_created += 1
 
-                except Exception as e:
+                except (IntegrityError, DatabaseError) as e:
                     self.stderr.write(f'  ERROR {inv.number}: {e}')
 
         mode = 'DRY RUN' if dry_run else 'CREATED'

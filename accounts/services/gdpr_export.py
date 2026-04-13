@@ -13,6 +13,7 @@ import logging
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class GDPRExportService:
                     }
                     for m in memberships
                 ]
-        except Exception as e:
+        except DatabaseError as e:
             logger.debug('GDPR: CompanyMembership skip: %s', e)
 
         # ── SystemAuditLog (digitalni trag) ──────────────────────────
@@ -117,7 +118,7 @@ class GDPRExportService:
                         for log in audits
                     ],
                 }
-        except Exception as e:
+        except DatabaseError as e:
             logger.debug('GDPR: AuditLog skip: %s', e)
 
         # ── ImpersonationLog (tko je pristupio kao ovaj korisnik) ────
@@ -137,7 +138,7 @@ class GDPRExportService:
                     }
                     for imp in imps
                 ]
-        except Exception as e:
+        except DatabaseError as e:
             logger.debug('GDPR: ImpersonationLog skip: %s', e)
 
         # ── DeviceTokens ─────────────────────────────────────────────
@@ -153,7 +154,7 @@ class GDPRExportService:
                     }
                     for t in tokens
                 ]
-        except Exception:
+        except DatabaseError:
             pass
 
         # ── Consent records ──────────────────────────────────────────

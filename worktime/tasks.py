@@ -1,5 +1,6 @@
 import logging
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('worktime')
 
@@ -87,7 +88,7 @@ def worktime_anomaly_patrol(self):
                 }]
             )
             ai_summary = response.content[0].text
-    except Exception as ai_err:
+    except (TypeError, ValueError) as ai_err:
         logger.warning('AI patrol failed: %s', ai_err)
 
     # 4. Spremi AnomalyReport zapise
@@ -104,7 +105,7 @@ def worktime_anomaly_patrol(self):
                 ai_confidence=75,
             )
             created += 1
-        except Exception as db_err:
+        except (IntegrityError, DatabaseError) as db_err:
             logger.warning('AnomalyReport create failed: %s', db_err)
 
     # 5. Notifikacija superadminima
@@ -120,7 +121,7 @@ def worktime_anomaly_patrol(self):
                 message=ai_summary,
                 url='/worktime/',
             )
-    except Exception as notif_err:
+    except DatabaseError as notif_err:
         logger.warning('Patrol notify failed: %s', notif_err)
 
     return {'alerts': len(alerts), 'created': created}

@@ -12,6 +12,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django.test import TestCase, Client
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ def setup_company(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
 
     CompanySubscription.objects.create(

@@ -17,6 +17,7 @@ Sigurnosne provjere:
 import logging
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('partners.oib_finalizer')
 
@@ -189,7 +190,7 @@ def _run_vies_check(company, oib):
             'partners_updated': partners_updated,
         }
 
-    except Exception as exc:
+    except DatabaseError as exc:
         logger.exception('[OIB-FINALIZER] VIES failed for %s: %s', oib, exc)
         return {'valid': None, 'error': str(exc)}
 

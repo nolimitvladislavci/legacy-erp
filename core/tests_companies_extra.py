@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None, is_superuser=False):
@@ -18,7 +19,7 @@ def _setup_user(oib, username, modules=None, is_superuser=False):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     if not is_superuser:
         CompanySubscription.objects.create(
@@ -91,11 +92,11 @@ class CompanySettingsAdvancedTest(TestCase):
         self.emp2 = User.objects.create_user('ce_emp2', password='pass123')
         try:
             UserProfile.objects.create(user=self.emp1, company=self.company, role='worker')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         try:
             UserProfile.objects.create(user=self.emp2, company=self.company, role='project_manager')
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.client = Client(raise_request_exception=False)
         self.client.login(username='ce_set1', password='pass123')

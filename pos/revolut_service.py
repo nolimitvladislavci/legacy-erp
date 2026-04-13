@@ -104,7 +104,7 @@ def create_payment_link(receipt, company, callback_url=''):
 
     except requests.Timeout:
         return {'ok': False, 'error': 'Revolut timeout — pokušajte ponovo'}
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error('Revolut exception: %s', e)
         return {'ok': False, 'error': str(e)}
 
@@ -137,7 +137,7 @@ def check_payment_status(payment_id):
                 'currency': data.get('currency', 'EUR'),
             }
         return {'status': 'error', 'error': resp.text[:100]}
-    except Exception as e:
+    except requests.RequestException as e:
         return {'status': 'error', 'error': str(e)}
 
 

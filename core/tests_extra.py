@@ -3,6 +3,7 @@ import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 def _make_company(oib):
@@ -18,7 +19,7 @@ def _make_user(company, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.get_or_create(
         company=company,

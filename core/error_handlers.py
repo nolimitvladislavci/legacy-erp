@@ -3,6 +3,9 @@ core/error_handlers.py — Custom error handlers (404, 500)
 Izdvojeno iz urls.py da se izbjegne circular import pri test DB kreaciji.
 """
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
+logger = logging.getLogger(__name__)
 
 
 def custom_403_handler(request, exception=None):
@@ -26,7 +29,7 @@ def custom_404_handler(request, exception=None):
                 context={'referrer': request.META.get("HTTP_REFERER", ""), 'auto': True},
                 ip_address=request.META.get("REMOTE_ADDR", ""),
             )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
     return render(request, '404.html', status=404)
 
@@ -37,7 +40,7 @@ def custom_500_handler(request):
     try:
         capture_error_for_borg(request)
     except Exception:
-        pass
+        logger.exception("Unexpected error in: capture_error_for_borg(request)")
     
     # Redirect na početnu s error porukom
     from django.shortcuts import redirect
@@ -105,7 +108,7 @@ def capture_error_for_borg(request, exc_info=None):
                 company_id = str(company.pk)
                 company_name = company.name
         except Exception:
-            pass
+            logger.exception("HTTP request failed")
         
         # Sanitize POST data (remove passwords, tokens)
         post_data = {}
@@ -126,7 +129,7 @@ def capture_error_for_borg(request, exc_info=None):
             )
             error_log_tail = result.stdout[-2000:] if result.stdout else ''
         except Exception:
-            pass
+            logger.exception("Failed to import subprocess")
         
         # Error type extraction
         error_type = exc_info[0].__name__ if exc_info[0] else 'Unknown'
@@ -192,7 +195,7 @@ def capture_error_for_borg(request, exc_info=None):
         
         return action
         
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         # NIKADA ne crashaj error handler
         logger.error('BORG ingestion failed: %s', e)
         return None

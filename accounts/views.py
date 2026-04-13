@@ -10,6 +10,7 @@ from django.views.generic import ListView
 
 from .models import UserProfile
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 
 class UserListView(ListView):
@@ -157,7 +158,7 @@ def translation_manager(request, lang_code='de'):
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u cijelom sustavu.')
                 else:
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u modulu: {target_module.upper()}.')
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('accounts:translation_manager', lang_code=lang_code)
 
@@ -333,10 +334,10 @@ def quick_register(request):
                         monthly_fee=plan.price_monthly,
                         is_active=True,
                     )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         # Login
@@ -359,7 +360,7 @@ def quick_register(request):
                 changes={'email': email, 'role': role, 'firm': firm_name},
                 ip_address=request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR',''),
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         return render(request, 'accounts/quick_register.html', {
@@ -603,7 +604,7 @@ def switch_company_get(request, company_id):
                 user=request.user, company=company,
                 role='owner', is_active=True
             )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         mem = CompanyMembership.objects.filter(
             user=request.user, company=company
         ).first()

@@ -6,6 +6,7 @@ Trigger: Invoice status promjena na CONFIRMED/FISCALIZED/SENT/PAID
 import logging
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -172,5 +173,5 @@ def auto_create_otpremnica(sender, instance, created, **kwargs):
         logger.info('Auto OTP-%s iz fakture %s (%s stavki)',
                      otp.number, instance.number, items_with_inv.count())
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('auto_create_otpremnica failed for %s: %s', instance.number, e)

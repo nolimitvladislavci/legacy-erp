@@ -251,7 +251,7 @@ class FiscalConfigAdmin(admin.ModelAdmin):
             days = (cert.not_valid_after_utc - tz.now()).days
             color = '#16a34a' if days > 90 else ('#f59e0b' if days > 30 else '#ef4444')
             return format_html('<span style="color:{}"">✓ Validan — istječe za {} dana</span>', color, days)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             return format_html('<span style="color:#ef4444">❌ Greška: {}</span>', str(e)[:60])
     cert_status.short_description = _('Certifikat')
 
@@ -303,7 +303,7 @@ class FiscalConfigAdmin(admin.ModelAdmin):
                 cert.not_valid_after_utc.strftime('%d.%m.%Y'), days,
                 path,
             )
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             return format_html(
                 '<div style="padding:12px;background:#fef2f2;border-left:4px solid #ef4444;border-radius:4px">'
                 '❌ Greška pri čitanju certifikata: {}<br>'

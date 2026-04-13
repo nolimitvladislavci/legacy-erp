@@ -1,3 +1,4 @@
+from django.db import IntegrityError, DatabaseError
 # Dodaj na kraj core/views.py
 
 @login_required
@@ -43,7 +44,7 @@ def ivan_cockpit(request):
         ctx['pos_week'] = float(POSReceipt.objects.filter(
             created_at__gte=week_ago, status='paid'
         ).aggregate(t=Sum('total'))['t'] or 0)
-    except Exception:
+    except (ValueError, TypeError):
         ctx['pos_promet'] = ctx['pos_bonovi'] = ctx['pos_open'] = ctx['pos_week'] = 0
         ctx['pos_by_company'] = []
     # Fakture
@@ -53,14 +54,14 @@ def ivan_cockpit(request):
             date_issued__date__gte=month_start
         ).aggregate(t=Sum('total'))['t'] or 0)
         ctx['inv_count'] = Invoice.objects.count()
-    except Exception:
+    except (ValueError, TypeError):
         ctx['inv_month'] = ctx['inv_count'] = 0
     # eRacun
     try:
         from eracun.models import ERacun
         ctx['eracun_total'] = ERacun.objects.count()
         ctx['eracun_sent'] = ERacun.objects.filter(status='sent').count()
-    except Exception:
+    except DatabaseError:
         ctx['eracun_total'] = ctx['eracun_sent'] = 0
     # Arhiva
     try:
@@ -83,7 +84,7 @@ def ivan_cockpit(request):
     try:
         from pos.models import ImprovementSuggestion
         ctx['feedback'] = list(ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5])
-    except Exception:
+    except DatabaseError:
         ctx['feedback'] = []
     # Logovi
     try:

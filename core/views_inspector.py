@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from core.models import InspectionToken
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ def _gather_porezna(company, date_from, date_to):
             'number', 'doctype', 'client_name', 'client_oib', 'date_issued',
             'total', 'tax_amount', 'status'
         )[:20])
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         data['error_invoices'] = str(e)
 
     # Konto bilanca
@@ -145,7 +146,7 @@ def _gather_porezna(company, date_from, date_to):
             'payable': float(tp.vat_payable),
             'revenue': float(tp.total_revenue),
         }
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # Saldakonti
@@ -229,10 +230,10 @@ def _gather_pos(company, date_from, date_to):
                     'valid_to': str(cert.valid_to) if cert.valid_to else '',
                     'is_valid': cert.is_valid if hasattr(cert, 'is_valid') else True,
                 }
-        except Exception:
+        except DatabaseError:
             pass
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         data['error'] = str(e)
 
     return data
@@ -301,10 +302,10 @@ def _gather_radna(company, date_from, date_to):
                 date_to__lte=date_to,
             )
             data['travel_orders'] = travels.count()
-        except Exception:
+        except DatabaseError:
             data['travel_orders'] = 0
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         data['error'] = str(e)
 
     # Payroll
@@ -317,7 +318,7 @@ def _gather_radna(company, date_from, date_to):
         data['payroll_runs'] = list(runs.values(
             'year', 'month', 'status', 'total_gross', 'total_net', 'total_tax',
         ))
-    except Exception:
+    except DatabaseError:
         data['payroll_runs'] = []
 
     return data
@@ -354,7 +355,7 @@ def _gather_livestock(company, scope):
         # Polja
         data['fields_count'] = Field.objects.filter(company=company).count()
 
-    except Exception as e:
+    except DatabaseError as e:
         data['error'] = str(e)
 
     return data
@@ -539,7 +540,7 @@ def panic_button(request):
                         'signed_ip': ip,
                     })
             except Exception:
-                pass
+                logger.exception("Failed to import BookingSignature")
 
             # WhatsApp notifikacija vlasniku
             try:
@@ -556,7 +557,7 @@ def panic_button(request):
                         f"Istjece: {tok.expires_at.strftime('%d.%m.%Y %H:%M')}",
                         company_id=str(company.pk))
             except Exception:
-                pass
+                logger.exception("Failed to import send_text")
 
             # Email zapisnika inspektoru (ako ima email)
             insp_email = request.session.get('insp_email', '')
@@ -581,7 +582,7 @@ def panic_button(request):
                         fail_silently=True,
                     )
                 except Exception:
-                    pass
+                    logger.exception("Failed to import send_mail")
 
             # Cleanup session
             for k in list(request.session.keys()):
@@ -712,7 +713,7 @@ def inspector_register(request, token):
                     'ip': ip,
                 })
         except Exception:
-            pass
+            logger.exception("Failed to import BookingSignature")
 
         # Notifikacija vlasniku firme — inspektor se prijavio
         try:
@@ -732,7 +733,7 @@ def inspector_register(request, token):
                 )
                 send_text(owner_phone, msg, company_id=str(tok.company.pk))
         except Exception:
-            pass
+            logger.exception("Failed to import send_text")
 
         # Email notifikacija
         try:
@@ -750,7 +751,7 @@ def inspector_register(request, token):
                     fail_silently=True,
                 )
         except Exception:
-            pass
+            logger.exception("Failed to import send_mail")
 
         return redirect('inspector_dashboard', token=token)
 

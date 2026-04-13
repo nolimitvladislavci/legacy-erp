@@ -5,6 +5,7 @@ import uuid
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None):
@@ -17,7 +18,7 @@ def _setup_user(oib, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -222,7 +223,7 @@ class POSReceiptTest(TestCase):
                 'quantity': '2',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     def test_receipt_cancel(self):

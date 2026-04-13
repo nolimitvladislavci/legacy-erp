@@ -55,7 +55,7 @@ def pickup_order(request, company_slug):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     cart = data.get('items', [])

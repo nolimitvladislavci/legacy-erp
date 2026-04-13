@@ -14,6 +14,7 @@ za funkcionalan sustav:
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -150,7 +151,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS("✅ Enterprise pretplata aktivna"))
             else:
                 self.stdout.write(self.style.WARNING("⚠  Enterprise pricing plan nije pronađen"))
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(self.style.WARNING(f"⚠  Pretplata: {e}"))
 
         # ── 7. Žiro račun (Commerzbank) ────────────────────────────────────────

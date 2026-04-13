@@ -33,7 +33,7 @@ def test(name, fn):
             failed += 1
             errors.append(name)
             print(f"  FAIL: {name}")
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         failed += 1
         errors.append(f"{name}: {e}")
         print(f"  ERROR: {name} -> {e}")

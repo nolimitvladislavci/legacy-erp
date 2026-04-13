@@ -3,6 +3,7 @@ invoicing/services/events.py
 Audit trail za Invoice lifecycle — InvoiceEvent kreiranje.
 """
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -32,5 +33,5 @@ def log_invoice_event(invoice, event_type, title, detail='', metadata=None, acto
             updated_by=actor,
             client_ip=ip_address,
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning(f'InvoiceEvent {event_type} failed: {e}')

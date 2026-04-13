@@ -238,7 +238,7 @@ def send_text(phone, message, company_id=None):
     except requests.Timeout as e:
         logger.error('WAHA gateway timeout: %s', e)
         return {'success': False, 'error': 'Gateway timeout', 'response': None}
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error('WhatsApp send error: %s', e)
         return {'success': False, 'error': str(e), 'response': None}
 
@@ -339,7 +339,7 @@ def send_document(phone, file_path, caption='', filename='', company_id=None):
         # Fallback: multipart upload
         return _send_document_multipart(chat_id, file_path, filename, caption, session_name, headers)
 
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error('WhatsApp send_document error: %s', e)
         return {'success': False, 'error': str(e), 'response': None}
 
@@ -364,7 +364,7 @@ def _send_document_multipart(chat_id, file_path, filename, caption, session_name
             logger.error(error)
             return {'success': False, 'error': error, 'response': None}
 
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error('WhatsApp multipart error: %s', e)
         return {'success': False, 'error': str(e), 'response': None}
 
@@ -437,7 +437,7 @@ def send_image(phone, image_path_or_b64, caption='', company_id=None):
             logger.error(error)
             return {'success': False, 'error': error, 'response': None}
 
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error('WhatsApp send_image error: %s', e)
         return {'success': False, 'error': str(e), 'response': None}
 

@@ -23,6 +23,7 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 from django.template.loader import render_to_string
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def _get_whatsapp_opt_in(company):
             company=company, whatsapp_opt_in=True
         ).first()
         return admin_clan.telefon if admin_clan else None
-    except Exception:
+    except DatabaseError:
         return None
 
 
@@ -91,7 +92,7 @@ def collect_alerts_for_company(company):
                 'urgency': urgency_class,
                 'datum': op.atest_vrijedi_do,
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('digest: skip oprema za %s: %s', company.name, e)
 
     # ── 2. Ribolovne dozvole koje ističu ─────────────────────────
@@ -122,7 +123,7 @@ def collect_alerts_for_company(company):
                 'urgency': urgency_class,
                 'datum': doz.valid_until,
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('digest: skip dozvole za %s: %s', company.name, e)
 
     # ── 3. Košnice koje trebaju tretman ───────────────────────────
@@ -176,7 +177,7 @@ def collect_alerts_for_company(company):
                     'urgency': urgency_class,
                     'datum': zadnji_tretman.datum if zadnji_tretman else None,
                 })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('digest: skip košnice za %s: %s', company.name, e)
 
     # ── 4. Članarine koje kasne ──────────────────────────────────
@@ -211,7 +212,7 @@ def collect_alerts_for_company(company):
                 'urgency': 'warning',
                 'datum': cl.period_end,
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('digest: skip članarine za %s: %s', company.name, e)
 
     # ── 5. Dokumenti koji ističu ─────────────────────────────────
@@ -241,7 +242,7 @@ def collect_alerts_for_company(company):
                 'urgency': urgency_class,
                 'datum': doc.date_due,
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('digest: skip dokumenti za %s: %s', company.name, e)
 
     return dict(alerts)

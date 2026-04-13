@@ -11,6 +11,8 @@ import logging
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from django.db import models, transaction
 from django.utils import timezone as tz
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos_checkout')
 
@@ -110,7 +112,7 @@ class CheckoutService:
                 lot_number = primary_batch.batch_number or None
                 expiry_date = primary_batch.expiry_date
                 batch_id = primary_batch.pk
-        except Exception as e:
+        except DatabaseError as e:
             # StockBatch ne postoji za ovaj artikl ili nema batcheva — OK
             logger.debug('FEFO batch deduction skipped for %s: %s', locked_item.name, e)
 
@@ -133,7 +135,7 @@ class CheckoutService:
                         reason='BOM - POS bon #%d' % receipt_number,
                         performed_by=user,
                     )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             logger.warning('BOM deduction failed for item %s', item.pk, exc_info=True)
 
         return lot_number, expiry_date, batch_id
@@ -212,7 +214,7 @@ class CheckoutService:
             if sub:
                 return sub.plan.discount_percent, clan.full_name
             return Decimal('0'), clan.full_name
-        except Exception:
+        except ObjectDoesNotExist:
             return Decimal('0'), None
 
     @staticmethod
@@ -432,7 +434,7 @@ class CheckoutService:
                     member_discount_applied=member_discount,
                 )
                 break  # Success — exit retry loop
-            except Exception as _dup_err:
+            except (IntegrityError, DatabaseError) as _dup_err:
                 if 'unique' in str(_dup_err).lower() and _attempt < 4:
                     continue
                 raise
@@ -562,7 +564,7 @@ class CheckoutService:
                                 )
                                 logger.info('AUTO-CLANARINA: Clan %s, plan %s, bon #%d -> Clanarina %d',
                                            clan.full_name, mp.name, next_number, cl.pk)
-                except Exception as clan_err:
+                except (IntegrityError, DatabaseError) as clan_err:
                     logger.warning('Clanarina auto-link: %s', clan_err)
 
         # ── 5. NAPOJNICA (zasebna stavka) ──
@@ -610,7 +612,7 @@ class CheckoutService:
                     Decimal('0.01'), rounding=ROUND_HALF_UP
                 )
                 receipt.save(update_fields=['consumption_tax_amount'])
-        except Exception:
+        except (ValueError, TypeError):
             pass  # POSSettings ne postoji ili nema PP
 
         # ── 6b. BLAGAJNICKI MAKSIMUM (cash_register_limit) ──
@@ -663,7 +665,7 @@ class CheckoutService:
                 raise
             except Voucher.DoesNotExist:
                 raise CheckoutValidationError('VOUCHER_NOT_FOUND', 'Vaucer nije pronaden')
-            except Exception as e:
+            except ObjectDoesNotExist as e:
                 raise CheckoutValidationError('VOUCHER_ERROR', 'Greska vaucera: %s' % str(e)[:80])
         elif split_payments:
             # SPLIT PAYMENT — multiple methods
@@ -737,7 +739,7 @@ class CheckoutService:
                 )
                 eracun_id = str(eracun_obj.pk)
                 logger.info(f'B2B auto eRechnung created: {eracun_id} for receipt {receipt.pk}')
-            except Exception as _ee:
+            except (IntegrityError, DatabaseError) as _ee:
                 logger.warning(f'B2B auto eRechnung error: {_ee}')
 
         # ── 10. RESULT ──
@@ -787,7 +789,7 @@ class CheckoutService:
                         points_balance=points,
                     )
                     result['loyalty_earned'] = points
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
         return result

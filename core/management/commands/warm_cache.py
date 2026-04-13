@@ -7,6 +7,7 @@ Korištenje:
 """
 from django.core.management.base import BaseCommand
 from django.core.cache import cache
+from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -38,7 +39,7 @@ class Command(BaseCommand):
                 }, 1800)
                 warmed += 1
             self.stdout.write(f'  POS terminals: {terminals.count()}')
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(f'  POS terminals: skip ({e})')
 
         # 3. Tax rates (globalne, mijenjaju se rijetko)
@@ -50,7 +51,7 @@ class Command(BaseCommand):
                     cache.set(f'tax_rates_{country}', rates, 86400)
                     warmed += 1
             self.stdout.write('  Tax rates: HR/DE/AT/SI')
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(f'  Tax rates: skip ({e})')
 
         # 4. NKD kodovi (statički)
@@ -80,7 +81,7 @@ class Command(BaseCommand):
                 'id', 'name', 'source_type', 'scrape_interval_hours'))
             cache.set('regulatory_sources', sources, 3600)
             warmed += 1
-        except Exception:
+        except DatabaseError:
             pass
 
         self.stdout.write(self.style.SUCCESS(f'\nCache warm complete: {warmed} keys set'))

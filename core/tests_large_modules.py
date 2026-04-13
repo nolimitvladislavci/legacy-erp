@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules, is_superuser=False):
@@ -18,7 +19,7 @@ def _setup_user(oib, username, modules, is_superuser=False):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -126,7 +127,7 @@ class ProjectsViewsTest(TestCase):
                 'user_id': self.user.pk,
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -224,7 +225,7 @@ class InventoryExtraViewsTest(TestCase):
                 'note': 'Restock',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -381,5 +382,5 @@ class WebsiteCMSViewsTest(TestCase):
                 theme='modern',
             )
             self.assertIn(self._get('/website/editor/'), ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass

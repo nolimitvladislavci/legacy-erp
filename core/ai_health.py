@@ -214,7 +214,7 @@ def check_waha():
             active = [s for s in sessions if s.get('status') == 'WORKING']
             return True, f'{len(active)} aktivnih sesija'
         return False, f'HTTP {r.status_code}'
-    except Exception as e:
+    except requests.RequestException as e:
         return False, str(e)[:100]
 
 

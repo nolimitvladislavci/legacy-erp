@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 from core.company_utils import get_user_company
 from inventory.models import InventoryItem, StockMovement
 from pos.models import POSTerminal, POSSession
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos.field_sales')
 
@@ -97,7 +98,7 @@ def field_start(request, terminal_id):
             if cashier:
                 cashier_clock_in(cashier)
                 session.active_cashiers.add(cashier)
-        except Exception:
+        except DatabaseError:
             pass
 
         # Auto-generate otpremnica
@@ -122,7 +123,7 @@ def field_start(request, terminal_id):
                     unit_price=Decimal(li['price']),
                 )
             logger.info('Otpremnica %s created for field session %s', otp.doc_number, session.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('Otpremnica creation failed: %s', e)
 
         messages.success(request, _('Terenska smjena otvorena! Ruta: ') + route)

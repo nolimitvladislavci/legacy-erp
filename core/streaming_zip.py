@@ -29,6 +29,7 @@ Korištenje iz bilo kojeg modula:
 import os
 import zipstream
 from django.http import StreamingHttpResponse
+from django.db import IntegrityError, DatabaseError
 
 
 class StreamingZipResponse:
@@ -131,7 +132,7 @@ def build_audit_package(company, date_from=None, date_to=None):
             w.writerow([item.sku, item.barcode, item.name, item.category, item.unit,
                         item.purchase_price, item.unit_price, item.quantity, item.is_active])
         zr.add_content('artikli/artikli_komplet.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 2. POS Dnevni izvještaji CSV
@@ -148,7 +149,7 @@ def build_audit_package(company, date_from=None, date_to=None):
                         r.cash_total, r.card_total, r.mobile_total, r.voucher_total,
                         r.receipt_count, r.cancelled_count, r.average_ticket, r.cash_difference])
         zr.add_content('pos_izvjestaji/dnevni_izvjestaji.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 3. Knjiga prigovora CSV
@@ -163,7 +164,7 @@ def build_audit_package(company, date_from=None, date_to=None):
             w.writerow([p.redni_broj, p.datum_primitka, p.ime_potrosaca, p.kontakt,
                         p.opis_prigovora, p.datum_odgovora or '', p.odgovor])
         zr.add_content('prigovori/knjiga_prigovora.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 4. Inventure CSV
@@ -181,7 +182,7 @@ def build_audit_package(company, date_from=None, date_to=None):
                             it.unit_price, it.difference_value])
             safe_num = inv.inventura_number.replace('/', '-')
             zr.add_content('inventure/%s.csv' % safe_num, buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 5. Fiskalni logovi CSV
@@ -195,7 +196,7 @@ def build_audit_package(company, date_from=None, date_to=None):
         for log in FiscalLog.objects.filter(invoice__company=company, created_at__date__gte=date_from)[:5000]:
             w.writerow([log.created_at, log.action, log.status, log.message[:200], log.invoice_id])
         zr.add_content('fiskalizacija/fiskalni_logovi.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 6. Receipts CSV (svi POS bonovi)
@@ -212,7 +213,7 @@ def build_audit_package(company, date_from=None, date_to=None):
             w.writerow([r.receipt_number, r.paid_at, r.status, r.total,
                         r.cashier.name if r.cashier else '', r.zki or '', r.jir or '', methods])
         zr.add_content('pos_izvjestaji/svi_bonovi.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 7. StockMovements CSV
@@ -229,7 +230,7 @@ def build_audit_package(company, date_from=None, date_to=None):
                         m.quantity, m.unit_price, m.reason[:100],
                         m.performed_by.username if m.performed_by else ''])
         zr.add_content('skladiste/kretanja_zaliha.csv', buf.getvalue())
-    except Exception:
+    except DatabaseError:
         pass
 
     # 8. README

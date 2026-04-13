@@ -12,6 +12,7 @@ from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500]
 
@@ -28,7 +29,7 @@ def _setup_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,

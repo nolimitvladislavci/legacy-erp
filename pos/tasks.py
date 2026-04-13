@@ -4,6 +4,7 @@ POS Celery Tasks — pozadinski procesi.
 import logging
 from celery import shared_task
 from django.db.models import Q
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos.tasks')
 
@@ -431,7 +432,7 @@ VRATI JSON:
             'escalated': p.is_escalated,
         }
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning('AI prigovor #%d failed: %s', prigovor_id, e)
         return {'error': str(e)}
 
@@ -629,7 +630,7 @@ def check_fiscal_deadline():
                     priority=1,
                     status='new',
                 )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
         logger.warning(
@@ -695,7 +696,7 @@ def auto_escalate_complaints():
             try:
                 from pos.complaint_views import _notify_admin_new_complaint
                 _notify_admin_new_complaint(p)
-            except Exception:
+            except (ValueError, TypeError):
                 pass
 
             logger.warning('Auto-eskalacija prigovor #%d (%s) — %d dana do roka',
@@ -858,7 +859,7 @@ def moderate_prigovor_content(self, prigovor_id):
             if not result.get('safe_for_public', True):
                 issues.append(f'AI: nije sigurno za javni prikaz — {result.get("reason", "")}')
 
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.debug('AI moderation for #%d failed: %s', p.redni_broj, e)
             # If AI unavailable, don't auto-approve — leave for manual review
             issues.append('AI moderacija nedostupna — potrebna ručna provjera')

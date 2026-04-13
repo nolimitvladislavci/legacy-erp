@@ -101,7 +101,7 @@ def remote_read(request):
             all_lines = content.split('\n')
             content = '\n'.join(all_lines[lines[0]-1:lines[1]])
         return JsonResponse({'content': content[:100000], 'path': path})
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         return JsonResponse({'error': str(e)[:100]})
 
 @csrf_exempt
@@ -122,5 +122,5 @@ def remote_write(request):
         with open(full, 'w') as f:
             f.write(content)
         return JsonResponse({'ok': True, 'path': path})
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         return JsonResponse({'error': str(e)[:100]})

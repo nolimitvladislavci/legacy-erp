@@ -14,6 +14,8 @@ from django.test import TestCase, Client, TransactionTestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -221,7 +223,7 @@ class TestCheckoutValidation(POSTestMixin, TestCase):
             r = POSReceipt.objects.get(pk=result['receipt_id'])
             if r.total < 0:
                 self.fail(f'SECURITY: Negativan total {r.total} — sustav dopušta negativne količine!')
-        except Exception:
+        except ObjectDoesNotExist:
             pass  # ValidationError = OK
 
 
@@ -649,7 +651,7 @@ class TestRaceCondition(POSTestMixin, TransactionTestCase):
                     },
                 )
                 results.append(r)
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 errors.append(str(e))
 
         t1 = threading.Thread(target=checkout_thread, args=(1,))

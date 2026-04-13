@@ -14,6 +14,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 from core.exceptions import PaymentError, SessionError
+from django.db import IntegrityError, DatabaseError
 
 if False:  # TYPE_CHECKING
     from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem
@@ -97,7 +98,7 @@ def close_session(session: "POSSession", closing_cash: Decimal = Decimal("0")) -
                 object_repr='Blagajnicki maksimum prekoracen: %.2f / %.2f EUR' % (closing_cash, cash_limit),
                 changes={'closing_cash': str(closing_cash), 'limit': str(cash_limit)},
             )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
     return True
@@ -236,7 +237,7 @@ def quick_pay(session: "POSSession", items_data: list[dict], method: str = "CASH
                 unit_price=Decimal(str(item_data.get("price", 0))),
                 tax_rate=Decimal(str(item_data.get("tax", 25))),
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning("Failed to add item %s: %s", item_data, e)
 
     receipt.refresh_from_db()
@@ -304,7 +305,7 @@ def _deduct_bom(receipt_item: "POSReceiptItem", receipt: "POSReceipt", user: "Us
                 )
                 count += 1
         return count
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning("BOM deduction failed for item %s: %s", receipt_item.pk, e)
         return 0
 

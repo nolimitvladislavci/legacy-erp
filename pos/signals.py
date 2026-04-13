@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from pos.models import POSSession, POSDailyReport
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @receiver(post_save, sender=POSSession)
@@ -17,7 +18,7 @@ def generate_daily_report_on_close(sender, instance, **kwargs):
                 from pos.models import POSSession as _PS, POSDailyReport as _PDR
                 sess = _PS.objects.get(pk=session_pk)
                 _PDR.generate_from_session(sess)
-            except Exception:
+            except ObjectDoesNotExist:
                 import logging
                 logging.getLogger(__name__).warning(
                     'POSDailyReport generiranje neuspješno za sesiju #%s',
@@ -46,7 +47,7 @@ def auto_book_pos_session(sender, instance, **kwargs):
                         'POS auto-knjiženje: sesija #%s → temeljnica %s',
                         session_pk, je.entry_number,
                     )
-            except Exception:
+            except ObjectDoesNotExist:
                 import logging
                 logging.getLogger(__name__).warning(
                     'POS auto-knjiženje neuspješno za sesiju #%s',

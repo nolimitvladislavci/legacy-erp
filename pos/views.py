@@ -7,7 +7,7 @@ from io import BytesIO
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, DatabaseError, IntegrityError
 from django.http import HttpResponse, JsonResponse, Http404
 from django.conf import settings
 from django.db import models
@@ -22,6 +22,7 @@ from core.tenant import get_current_company
 from inventory.models import InventoryItem
 
 from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal, Voucher
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +124,7 @@ def open_session(request, terminal_id):
                 'OIB nije unesen — ne mozete otvoriti smjenu. '
                 'Javite se voditelju. (Zakon o fiskalizaciji cl. 9)')
             return redirect('pos:terminal_detail', terminal_id=terminal_id)
-    except Exception:
+    except DatabaseError:
         pass
 
     # ZOR upozorenje — >50h/tjedan
@@ -139,7 +140,7 @@ def open_session(request, terminal_id):
         if float(_wh) >= 50:
             messages.warning(request,
                 f'Upozorenje: {_wh}h ovaj tjedan (ZOR limit 50h). Nastavak zahtijeva odobrenje voditelja.')
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
@@ -285,7 +286,7 @@ def close_session(request, session_id):
                 'status': session.status,
             }
         )
-    except Exception:
+    except DatabaseError:
         pass
     return redirect('pos:session_detail', session_id=session.pk)
 
@@ -315,7 +316,7 @@ def receipt_detail(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
     items = receipt.items.select_related('inventory_item').all()
     company = receipt.session.terminal.company  # Fix: koristi company iz terminala
-    inventory_items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')[:300] if company else InventoryItem.objects.none()
+    inventory_items = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate').order_by('name')[:300] if company else InventoryItem.objects.none()
 
     # Top 12 najprodavanijih artikala za brze tipke
     from django.db.models import Count
@@ -359,7 +360,7 @@ def add_item(request, receipt_id):
         unit_price = Decimal(request.POST.get('unit_price', '0') or '0')
         tax_rate = Decimal(request.POST.get('tax_rate', '25') or '25')
         discount_pct = Decimal(request.POST.get('discount_percent', '0') or '0')
-    except Exception:
+    except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
         messages.error(request, _('Neispravan broj. Provjerite količinu i cijenu.'))
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
@@ -405,7 +406,7 @@ def add_item(request, receipt_id):
                             f'(Zakon o higijeni hrane)'
                         )
                         karenca_blocked = True
-                except Exception:
+                except (ValueError, TypeError):
                     pass
 
             # Provjera 2: Fallback na InventoryItem.source_flock (ako nema LOT sustava)
@@ -439,7 +440,7 @@ def add_item(request, receipt_id):
                                 f'jata pod karencom (do {end_str}). Prodaja nije dozvoljena.'
                             )
                             karenca_blocked = True
-                except Exception:
+                except DatabaseError:
                     pass
 
             if karenca_blocked:
@@ -472,7 +473,7 @@ def add_item(request, receipt_id):
             # Upozorenje za 0 cijenu
             if kwargs.get('unit_price', 0) == 0:
                 messages.warning(request, _('Cijena za {d} je 0.00 EUR — provjerite je li ispravna.').format(d=desc))
-        except Exception:
+        except ObjectDoesNotExist:
             pass
 
     return redirect('pos:receipt_detail', receipt_id=receipt_id)
@@ -519,7 +520,7 @@ def process_payment(request, receipt_id):
     method = request.POST.get('payment_method', POSPaymentLine.Method.CASH)
     try:
         amount_paid = Decimal(request.POST.get('amount_paid', str(receipt.total)) or str(receipt.total))
-    except Exception:
+    except (ValueError, TypeError):
         logger.warning("Suppressed error", exc_info=True)
         amount_paid = receipt.total
     amount_paid = max(amount_paid, receipt.total)  # never less than total
@@ -560,7 +561,7 @@ def process_payment(request, receipt_id):
                                 reason=f'BOM — POS bon #{receipt.receipt_number}',
                                 performed_by=request.user,
                             )
-                except Exception:
+                except (IntegrityError, DatabaseError):
                     logger.warning("Suppressed error", exc_info=True)
 
     # ── Fiskalizacija (ne blokira plaćanje ako FINA ne odgovori) ──────────────
@@ -676,7 +677,7 @@ def ai_barcode_lookup(request):
 
     try:
         data = json.loads(request.body)
-    except Exception as e:  # BORG: was bare except
+    except (json.JSONDecodeError, ValueError) as e:
         logger.debug("Exception in pos.views:%d: %s", 447, e)  # BORG
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
@@ -776,7 +777,7 @@ def ai_barcode_lookup(request):
             if text.startswith('```'):
                 text = text.split('\n', 1)[1].rsplit('```', 1)[0].strip()
             return JsonResponse(json.loads(text))
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.warning('Claude barcode failed: %s', e)
 
     return JsonResponse({'code': '', 'name': '', 'price': 0, 'category': 'food'})
@@ -939,7 +940,7 @@ def session_zreport(request, session_id):
 
     # Cash deposits/withdrawals
     from .models import CashDeposit
-    deposits = CashDeposit.objects.filter(session=session).order_by('created_at')
+    deposits = CashDeposit.objects.filter(session=session).select_related('session').order_by('created_at')
     total_deposits    = sum(d.amount for d in deposits if d.deposit_type == 'deposit')
     total_withdrawals = sum(d.amount for d in deposits if d.deposit_type == 'withdrawal')
 
@@ -1161,7 +1162,7 @@ def _quick_pos_legacy(request, terminal_id):
                 max_terminals = 1
                 if sub and sub.pricing_plan:
                     max_terminals = sub.pricing_plan.max_locations or 1
-            except Exception:
+            except DatabaseError:
                 max_terminals = 1
 
             open_count = POSSession.objects.filter(
@@ -1194,7 +1195,7 @@ def _quick_pos_legacy(request, terminal_id):
             qs.select_related('tax_rate')
             .order_by('name')[:300]
         )
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
@@ -1206,7 +1207,7 @@ def _quick_pos_legacy(request, terminal_id):
 
     from pos.models import POSCashier
     cashiers = list(
-        POSCashier.objects.filter(company=company, is_active=True).order_by('name')
+        POSCashier.objects.filter(company=company, is_active=True).select_related('user').order_by('name')
     )
 
     try:
@@ -1242,7 +1243,7 @@ def _quick_pos_legacy(request, terminal_id):
                     filler_qs = filler_qs.filter(category__in=cat_list)
             filler = list(filler_qs.select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
             quick_items.extend(filler)
-    except Exception:
+    except DatabaseError:
         pass
 
     # TASK 1: Terminal limit banner za besplatni plan
@@ -1254,7 +1255,7 @@ def _quick_pos_legacy(request, terminal_id):
             active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
             if active_terms > 1:
                 show_upgrade_banner = True
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'pos/quick.html', {
@@ -1311,7 +1312,7 @@ def pos_joker(request, terminal_id):
                 max_terminals = 1
                 if sub and sub.pricing_plan:
                     max_terminals = sub.pricing_plan.max_locations or 1
-            except Exception:
+            except DatabaseError:
                 max_terminals = 1
 
             open_count = POSSession.objects.filter(
@@ -1340,14 +1341,14 @@ def pos_joker(request, terminal_id):
             if cat_list:
                 qs = qs.filter(category__in=cat_list)
         inventory_items = list(qs.select_related('tax_rate').order_by('name')[:300])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
     cats = sorted(set(getattr(i, 'category', '') or 'Ostalo' for i in inventory_items))
 
     from pos.models import POSCashier
-    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).order_by('name'))
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related('user').order_by('name'))
 
     try:
         from django.urls import reverse
@@ -1376,7 +1377,7 @@ def pos_joker(request, terminal_id):
             filler = list(InventoryItem.objects.filter(company=company, is_active=True)
                          .exclude(pk__in=existing).select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
             quick_items.extend(filler)
-    except Exception:
+    except DatabaseError:
         pass
 
     # Upgrade banner
@@ -1388,7 +1389,7 @@ def pos_joker(request, terminal_id):
             active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
             if active_terms > 1:
                 show_upgrade_banner = True
-    except Exception:
+    except DatabaseError:
         pass
 
     ctx = {
@@ -1457,7 +1458,7 @@ def quick_pay(request, session_id):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
     # Inject session_id from URL
@@ -1527,7 +1528,7 @@ def _restaurant_pos_legacy(request, terminal_id):
             .select_related('tax_rate')
             .order_by('name')[:300]
         )
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
@@ -1572,7 +1573,7 @@ def receipt_add_item(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id, status='open')
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
@@ -1619,7 +1620,7 @@ def receipt_add_item(request, receipt_id):
                 tax_rate=pfand_tax,
                 is_pfand_return=False,
             )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning("Auto-pfand failed", exc_info=True)
 
     receipt.recalculate()
@@ -1646,7 +1647,7 @@ def receipt_pay(request, receipt_id):
     receipt = get_object_or_404(POSReceipt, pk=receipt_id, status='open')
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
 
@@ -1690,7 +1691,7 @@ def new_receipt_ajax(request, session_id):
     session = get_object_or_404(POSSession, pk=session_id, status='open')
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         data = {}
 
@@ -1750,7 +1751,7 @@ def pos_settings(request):
     try:
         from companies.models import TaxRate
         tax_rates = list(TaxRate.objects.all().values('id', 'name', 'rate'))
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         tax_rates = []
 
@@ -1763,7 +1764,7 @@ def pos_settings(request):
             .order_by('name')[:200]
         )
         cat_choices = InventoryItem.CATEGORY_CHOICES
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inv_items = []
         cat_choices = []
@@ -1780,7 +1781,7 @@ def pos_settings(request):
             .annotate(total=Sum('total'), count=Count('id'))
             .order_by('day')
         )
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         daily_rev = []
 
@@ -1792,7 +1793,7 @@ def pos_settings(request):
             .annotate(qty=Sum('quantity'), revenue=Sum('total_price'))
             .order_by('-revenue')[:10]
         )
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         top_items = []
 
@@ -1805,7 +1806,7 @@ def pos_settings(request):
             .annotate(revenue=Sum('total'), count=Count('id'))
             .order_by('-revenue')[:10]
         )
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         cashier_rev = []
 
@@ -2085,7 +2086,7 @@ def inventory_csv_import(request):
                     created += 1
                 else:
                     updated += 1
-            except Exception:
+            except (ValueError, TypeError):
                 logger.warning("Suppressed error", exc_info=True)
                 errors += 1
         return JsonResponse({
@@ -2095,7 +2096,7 @@ def inventory_csv_import(request):
             'errors':  errors,
             'message': f'Uvoz završen: {created} novih, {updated} ažuriranih, {errors} grešaka',
         })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.exception("Unexpected error", exc_info=True)
         return JsonResponse({'ok': False, 'error': str(e)})
 
@@ -2442,7 +2443,7 @@ def table_checkout(request, table_id):
                 jir = fiscalize_pos_receipt(r)
                 if jir:
                     cr['jir'] = jir[:12]
-            except Exception as e:
+            except ObjectDoesNotExist as e:
                 import logging
                 logging.getLogger('pos').warning('Fiskalizacija table checkout: %s' % e)
                 cr['jir'] = None
@@ -2601,7 +2602,7 @@ def gastro_qr(request, qr_code):
                     )
                     if payment.external_url:
                         payment_url = payment.external_url
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     import logging
                     logging.getLogger(__name__).warning("Payment init failed: %s", e)
 
@@ -2621,7 +2622,7 @@ def gastro_qr(request, qr_code):
                             for i in order.items.select_related('inventory_item').all()
                         )
                         loyalty.save()
-                except Exception:
+                except (IntegrityError, DatabaseError):
                     pass
             resp_data = {
                 'ok': True,
@@ -2633,7 +2634,7 @@ def gastro_qr(request, qr_code):
             return JsonResponse(resp_data)
         except ValueError as e:
             return JsonResponse({'error': str(e)}, status=400)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             return JsonResponse({'error': str(e)}, status=500)
 
     return render(request, 'pos/gastro/qr_menu.html', {
@@ -2690,7 +2691,7 @@ def expiry_add(request):
         messages.success(request, _('Sarzni rok dodan.'))
         return redirect('pos:expiry_dashboard')
     company = get_user_company(request)
-    items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')
+    items = InventoryItem.objects.filter(company=company, is_active=True).select_related('tax_rate').order_by('name')
     return render(request, 'pos/expiry/add.html', {'items': items})
 
 
@@ -2721,7 +2722,7 @@ def article_quick_create(request):
     from decimal import Decimal, InvalidOperation
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         logger.warning("Suppressed error", exc_info=True)
         data = request.POST
 
@@ -2945,12 +2946,12 @@ def cash_deposit(request, session_id):
                 )
                 label = 'Polog' if dtype == 'deposit' else 'Isplata'
                 messages.success(request, f'{label} {amount:.2f} EUR evidentiran.')
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('pos:session_detail', session_id=session_id)
 
-    deposits = CashDeposit.objects.filter(session=session).order_by('-created_at')
+    deposits = CashDeposit.objects.filter(session=session).select_related('session').order_by('-created_at')
     return render(request, 'pos/cash_deposit.html', {
         'session': session,
         'deposits': deposits,
@@ -3350,7 +3351,7 @@ def voucher_list(request):
             amount = Decimal(amount_str)
             if amount <= 0:
                 raise ValueError('Iznos mora biti > 0')
-        except Exception:
+        except (ValueError, TypeError):
             messages.error(request, _('Nevažeći iznos.'))
             return redirect('pos:voucher_list')
 
@@ -3422,7 +3423,7 @@ def fiscal_room(request):
         status='paid'
     ).filter(Q(jir__isnull=True) | Q(jir=''))
 
-    last_logs = FiscalLog.objects.filter(config__company=company).order_by('-created_at')[:20] if company else FiscalLog.objects.none()
+    last_logs = FiscalLog.objects.filter(config__company=company).select_related('config').order_by('-created_at')[:20] if company else FiscalLog.objects.none()
 
     return render(request, 'fiscal/room.html', {
         'pending_count':  pending_qs.count(),
@@ -3681,7 +3682,7 @@ def kitchen_tablet_action(request, token, order_id):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
 
     new_status = data.get('status', '')
@@ -3719,7 +3720,7 @@ def kitchen_cook_scan(request, token):
 
     try:
         data = _json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
 
     barcode = data.get('barcode_data', '').strip()
@@ -3970,7 +3971,7 @@ def yesterday_manage(request):
                          request.user.pk]
                     )
                     added += 1
-                except Exception as e:
+                except ObjectDoesNotExist as e:
                     messages.error(request, str(e)[:100])
             messages.success(request, _('%d artikala dodano u "Roba od jučer".') % added)
 
@@ -3996,7 +3997,7 @@ def yesterday_manage(request):
     active_items = [dict(zip(cols, row)) for row in cursor.fetchall()]
 
     # All inventory items for adding
-    all_items = InventoryItem.objects.filter(company=company, is_active=True, category='food').order_by('name')
+    all_items = InventoryItem.objects.filter(company=company, is_active=True, category='food').select_related('tax_rate').order_by('name')
 
     return render(request, 'pos/yesterday_manage.html', {
         'active_items': active_items,
@@ -4143,7 +4144,7 @@ def api_quick_add_item(request):
 
     try:
         data = json.loads(request.body)
-    except Exception as e:  # BORG: was bare except
+    except (json.JSONDecodeError, ValueError) as e:
         logger.debug("Exception in pos.views:%d: %s", 3895, e)  # BORG
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
@@ -4161,7 +4162,7 @@ def api_quick_add_item(request):
     try:
         from companies.models import TaxRate
         tax_obj = TaxRate.objects.filter(rate=tax_rate_pct).first()
-    except Exception:
+    except DatabaseError:
         pass
 
     # Generiraj unikatan SKU: POS- + zadnjih 6 znakova barkoda ili random
@@ -4275,7 +4276,7 @@ def kitchen_cook_logout(request, token):
 
     try:
         data = _json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
 
     barcode = data.get('barcode_data', '').strip()
@@ -4764,7 +4765,7 @@ def knjiga_prigovora_pdf(request):
     company = get_user_company(request)
     from .models import KnjigaPrigovora
 
-    all_records = KnjigaPrigovora.objects.filter(company=company).order_by('redni_broj')
+    all_records = KnjigaPrigovora.objects.filter(company=company).select_related('company').order_by('redni_broj')
     prigovori = all_records.filter(record_type__in=['prigovor', 'reklamacija'])
     pohvale = all_records.filter(record_type__in=['pohvala', 'utisak', 'prijedlog'])
 
@@ -5437,7 +5438,7 @@ def pos_qr_open(request, token):
                 "session_id": str(session.pk),
             },
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning("QR open log failed", exc_info=True)
 
     # Store QR context in Django session
@@ -5472,14 +5473,14 @@ def qr_session(request, session_id):
             if cats:
                 qs = qs.filter(category__in=cats)
         inventory_items = list(qs.select_related("tax_rate").order_by("name")[:300])
-    except Exception:
+    except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
         inventory_items = []
 
     cats = sorted(set(getattr(i, "category", "") or "Ostalo" for i in inventory_items))
 
     from pos.models import POSCashier
-    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).order_by("name"))
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).select_related("user").order_by("name"))
 
     try:
         from django.urls import reverse
@@ -5512,7 +5513,7 @@ def qr_session(request, session_id):
                 .order_by("name")[: 12 - len(quick_items)]
             )
             quick_items.extend(filler)
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, "pos/quick.html", {
@@ -5543,7 +5544,7 @@ def qr_quick_pay(request, session_id):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
 
     data["session_id"] = session_id
@@ -5819,7 +5820,7 @@ def api_ai_upsell(request):
     try:
         data = json.loads(request.body)
         item_ids = data.get('items', [])
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'suggestions': []})
 
     suggestions = get_upsell_suggestions(company, item_ids)

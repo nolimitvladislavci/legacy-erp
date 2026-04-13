@@ -2,6 +2,7 @@
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 
@@ -16,7 +17,7 @@ def _setup_user(oib, username, modules):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -145,7 +146,7 @@ class InterventionsViewsTest(TestCase):
                 'category': 'TECHNICAL',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_field_view_invalid(self):

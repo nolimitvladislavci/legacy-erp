@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username):
@@ -16,7 +17,7 @@ def _setup_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -88,7 +89,7 @@ class MarketplaceCatalogTest(TestCase):
             MarketplaceProduct.objects.filter(pk=prod.pk).update(is_organic=True)
             resp = self.client.get('/marketplace/?organic=1', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except DatabaseError:
             pass
 
     def test_catalog_sort_price_asc(self):
@@ -249,7 +250,7 @@ class MarketplaceCheckoutTest(TestCase):
             session.save()
             resp = self.client.get('/marketplace/checkout/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_checkout_post_with_cart(self):
@@ -275,7 +276,7 @@ class MarketplaceCheckoutTest(TestCase):
                 'time_window': 'morning',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 

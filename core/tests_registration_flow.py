@@ -3,6 +3,7 @@ import datetime
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500]
@@ -178,7 +179,7 @@ class RegistrationAdminActionsTest(TestCase):
         self.admin = User.objects.create_superuser('rf_super1', password='pass123', email='rf_super@test.hr')
         try:
             UserProfile.objects.create(user=self.admin, company=self.admin_company)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.client = Client(raise_request_exception=False)
         self.client.login(username='rf_super1', password='pass123')
@@ -195,7 +196,7 @@ class RegistrationAdminActionsTest(TestCase):
                 plan='starter',
                 status='pending',
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return None
 
     def test_admin_list(self):

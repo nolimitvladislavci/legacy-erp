@@ -5,6 +5,7 @@ Auto-generiranje TimeEntry iz POS cashier PIN login/logout.
 import logging
 from decimal import Decimal
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos.worktime')
 
@@ -92,7 +93,7 @@ def cashier_clock_out(cashier, forced=False):
 
         return entry
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f'Failed to create TimeEntry for {cashier.name}: {e}')
         cashier.clock_in_at = None
         cashier.save(update_fields=['clock_in_at'])
@@ -117,7 +118,7 @@ def session_close_all_cashiers(session):
             shift.save(update_fields=['is_active', 'ended_at'])
         if active_shifts.exists():
             logger.info('WaiterShifts closed for session #%s', session.session_number)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('WaiterShift close failed: %s', e)
 
     logger.info(f'All cashiers clocked out for session #{session.session_number}')
@@ -163,7 +164,7 @@ def device_login_start_all(device_token, ip_address=None):
         else:
             result['timelog_id'] = open_log.pk
             result['started'].append('radno_vrijeme_existing')
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('TimeLog creation failed for %s: %s', user.username, e)
 
     # 2. WaiterShift — ako postoji
@@ -181,7 +182,7 @@ def device_login_start_all(device_token, ip_address=None):
         else:
             result['shift_id'] = active_shift.pk
             result['started'].append('waiter_shift_existing')
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('WaiterShift creation failed for %s: %s', user.username, e)
 
     # 3. Cashier clock_in — ako ima profil ili je na tokenu
@@ -197,7 +198,7 @@ def device_login_start_all(device_token, ip_address=None):
             result['started'].append('cashier')
             result['cashier_id'] = cashier.pk
             result['cashier_name'] = cashier.name
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('Cashier clock_in failed for %s: %s', user.username, e)
 
     return result
@@ -223,7 +224,7 @@ def device_logout_stop_all(user, company):
             open_log.save()
             result['stopped'].append('radno_vrijeme')
             logger.info('TimeLog closed for %s', user.username)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('TimeLog close failed: %s', e)
 
     # 2. WaiterShift end
@@ -236,7 +237,7 @@ def device_logout_stop_all(user, company):
             shift.save()
             result['stopped'].append('waiter_shift')
             result['duration'] = shift.duration_display
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('WaiterShift close failed: %s', e)
 
     # 3. Cashier clock out
@@ -245,7 +246,7 @@ def device_logout_stop_all(user, company):
         for cashier in POSCashier.objects.filter(company=company, user=user, clock_in_at__isnull=False):
             cashier_clock_out(cashier)
             result['stopped'].append('cashier')
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('Cashier clock_out failed: %s', e)
 
     return result

@@ -109,7 +109,7 @@ def _ai_suggest(cart_items, available) -> list:
                 })
         return result
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning('AI upsell fallback: %s', e)
         return []
 

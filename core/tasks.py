@@ -116,7 +116,7 @@ def run_system_test_task(self, phone='+491723006985', quick=False):
                 session='default'
             )
         except Exception:
-            pass
+            logger.exception("Failed to import send_text")
     return out.getvalue()
 
 
@@ -203,7 +203,7 @@ def database_backup(self):
 
         log.info(f'Backup OK: {backup_file} ({size_mb}MB)')
 
-    except Exception as e:
+    except OSError as e:
         log.error(f'Backup FAILED: {e}')
         _backup_whatsapp(IVAN_PHONE, f'🔴 BACKUP ALARM\n{DB_NAME}: {e}')
         raise self.retry(exc=e, countdown=600)

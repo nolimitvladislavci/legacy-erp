@@ -3,6 +3,7 @@ import datetime
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 
@@ -17,7 +18,7 @@ def _setup_pos_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -393,7 +394,7 @@ class POSSettingsTest(TestCase):
             )
             resp = self.client.post(f'/pos/settings/cashier/{cashier.pk}/delete/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_inventory_item_save(self):
@@ -492,5 +493,5 @@ class POSGastroTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass

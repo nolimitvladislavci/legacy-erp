@@ -6,6 +6,7 @@ from celery import shared_task
 from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,7 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
                     )
                 except Exception:
                     pass
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             result["error"] = str(e)
             DunningHistory.objects.create(
                 company=company, invoice=invoice, dunning_rule=dunning_rule_obj,
@@ -131,7 +132,7 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
             partner = Partner.objects.filter(company=invoice.company, oib=invoice.client_oib).first()
             if partner:
                 phone = getattr(partner, "contact_phone", "") or getattr(partner, "phone", "")
-        except Exception:
+        except DatabaseError:
             pass
         try:
             from core.whatsapp import send_text as wa_send, is_gateway_healthy

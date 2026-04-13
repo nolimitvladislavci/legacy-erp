@@ -58,7 +58,7 @@ def generate_fina_qr_base64(zki, receipt_date, total_amount):
         buf.seek(0)
         return base64.b64encode(buf.read()).decode()
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error('FINA QR generiranje neuspješno: %s', e)
         return None
 

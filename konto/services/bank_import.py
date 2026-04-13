@@ -7,6 +7,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 from xml.etree import ElementTree as ET
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +235,7 @@ def import_bank_statement(company, bank_account, xml_string, batch_id=None):
             )
             created += 1
 
-        except Exception as e:
+        except ValueError as e:
             errors += 1
             logger.warning(f'Bank import error: {e}')
 
@@ -620,7 +621,7 @@ def import_bank_statement_from_parsed(company, bank_account, data):
                 status='unmatched',
             )
             created += 1
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             errors += 1
             logger.warning(f'Import error: {e}')
 

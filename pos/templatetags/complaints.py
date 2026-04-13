@@ -10,6 +10,7 @@ Korištenje u BILO KOJEM templateu:
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.db import IntegrityError, DatabaseError
 
 register = template.Library()
 
@@ -36,7 +37,7 @@ def complaints_button(context, style='inline', source_module='general'):
                 record_type__in=['prigovor', 'reklamacija'],
                 datum_odgovora__isnull=True,
             ).count()
-        except Exception:
+        except DatabaseError:
             pass
 
     return {
@@ -97,5 +98,5 @@ def complaints_stats(context):
             'avg_rating': qs.filter(star_rating__isnull=False).aggregate(
                 avg=Avg('star_rating'))['avg'],
         }
-    except Exception:
+    except DatabaseError:
         return {}

@@ -3,6 +3,7 @@ import datetime
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user_with_role(oib, username, role, modules=None, is_superuser=False):
@@ -19,7 +20,7 @@ def _setup_user_with_role(oib, username, role, modules=None, is_superuser=False)
         profile.company = company
         profile.role = role
         profile.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         from accounts.models import UserProfile
         UserProfile.objects.create(user=user, company=company, role=role)
     if not is_superuser:

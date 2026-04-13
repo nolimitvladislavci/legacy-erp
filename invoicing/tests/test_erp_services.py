@@ -21,6 +21,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.test import TestCase, RequestFactory
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -42,7 +43,7 @@ def make_user(username, company):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company, plan='pro',

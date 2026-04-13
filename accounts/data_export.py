@@ -14,6 +14,7 @@ from django.utils import timezone as tz
 
 from accounts.models import UserProfile
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('accounts')
 
@@ -167,7 +168,7 @@ def export_company_data(request):
                     'is_vat_registered': p.is_vat_registered,
                 })
             yield ('partners', partners_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export partners')
             yield ('partners', [])
 
@@ -188,7 +189,7 @@ def export_company_data(request):
                     'is_active': getattr(item, 'is_active', True),
                 })
             yield ('inventory_items', items_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export inventory')
             yield ('inventory_items', [])
 
@@ -220,7 +221,7 @@ def export_company_data(request):
                     })
                 invoices_data.append(inv_dict)
             yield ('invoices', invoices_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export invoices')
             yield ('invoices', [])
 
@@ -252,7 +253,7 @@ def export_company_data(request):
                     })
                 receipts_data.append(r_dict)
             yield ('pos_receipts', receipts_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export POS receipts')
             yield ('pos_receipts', [])
 
@@ -272,7 +273,7 @@ def export_company_data(request):
                     'description': getattr(te, 'description', ''),
                 })
             yield ('worktime_entries', entries_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export worktime entries')
             yield ('worktime_entries', [])
 
@@ -290,7 +291,7 @@ def export_company_data(request):
                     'filename': getattr(doc, 'filename', ''),
                 })
             yield ('documents', docs_data)
-        except Exception:
+        except DatabaseError:
             logger.exception('Failed to export documents')
             yield ('documents', [])
 

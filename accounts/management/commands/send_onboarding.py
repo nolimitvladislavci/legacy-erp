@@ -17,6 +17,7 @@ from django.contrib.auth import get_user_model
 
 from companies.models import Company
 from accounts.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 
@@ -62,7 +63,7 @@ class Command(BaseCommand):
             company = Company.objects.get(pk=company_id)
         except Company.DoesNotExist:
             raise CommandError(f'Company with ID "{company_id}" does not exist.')
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             raise CommandError(f"Invalid company ID: {e}")
 
         self.stdout.write(f"\nCompany: {company.name} (ID: {company.pk})")

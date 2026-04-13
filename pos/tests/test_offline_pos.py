@@ -8,6 +8,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -27,7 +28,7 @@ class OfflineSyncEndpointTest(TestCase):
             try:
                 self.user.profile.company = self.company
                 self.user.profile.save()
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
         self.terminal = POSTerminal.objects.create(

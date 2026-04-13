@@ -3,6 +3,7 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules, is_superuser=False):
@@ -18,7 +19,7 @@ def _setup_user(oib, username, modules, is_superuser=False):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -153,7 +154,7 @@ class OutreachViewsTest(TestCase):
                 'email': 'updated@test.hr',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_campaign_new_get(self):
@@ -194,7 +195,7 @@ class OutreachViewsTest(TestCase):
             )
             self.assertIn(self._get(f'/outreach/campaign/{c.pk}/'), ALLOWED)
             self.assertIn(self._get(f'/outreach/campaign/{c.pk}/preview/'), ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_campaign_add_contacts_invalid(self):
@@ -267,7 +268,7 @@ class AssessmentViewsTest(TestCase):
                 'status': 'completed',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -346,7 +347,7 @@ class BurzaViewsTest(TestCase):
             self.assertIn(resp.status_code, ALLOWED)
             resp = self.client.post(f'/burza/lead/{lead.pk}/preuzmi/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -360,7 +361,7 @@ class InterventionsViewsTest(TestCase):
             profile = self.user.profile
             profile.role = 'company_admin'
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
         self.client = Client(raise_request_exception=False)
         self.client.login(username='md_int1', password='pass123')
@@ -439,7 +440,7 @@ class InterventionsViewsTest(TestCase):
             self.assertIn(resp.status_code, ALLOWED)
             resp = self.client.post(f'/interventions/{iv.pk}/escalate/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
 
@@ -563,7 +564,7 @@ class PartnersExtraViewsTest(TestCase):
                 'type': 'supplier',
             }, follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_api_quick_create(self):

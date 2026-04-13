@@ -24,7 +24,7 @@ def setup_extra_tasks(sender, **kwargs):
     for mod in ['core.whatsapp_tasks', 'core.gemini_tasks', 'inventory.prediction_tasks']:
         try:
             importlib.import_module(mod)
-        except Exception:
+        except ImportError:
             pass
 
 

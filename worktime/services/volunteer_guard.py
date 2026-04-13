@@ -128,5 +128,5 @@ class VolunteerTaxGuard:
                 description=description,
                 ai_confidence=Decimal('100.00'),
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('AnomalyReport create failed: %s', e)

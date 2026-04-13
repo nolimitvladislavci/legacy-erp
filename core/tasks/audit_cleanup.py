@@ -13,6 +13,7 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('core.audit_cleanup')
 
@@ -100,7 +101,7 @@ def cleanup_old_audit_logs():
                 company_id='system',
             )
         except Exception:
-            pass
+            logger.exception("Failed to import send_text")
     else:
         logger.info('Audit cleanup: nothing to delete (%d total)', total_remaining)
 

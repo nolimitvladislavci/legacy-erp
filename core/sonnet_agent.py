@@ -77,14 +77,14 @@ def _get_full_context():
     try:
         with open('/var/www/fina-connect/FENIX_STATUS.md') as f:
             ctx['fenix_status'] = f.read()[-8000:]  # zadnjih 8000 znakova
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         ctx['fenix_status'] = f'Greška: {e}'
 
     # CLAUDE.md
     try:
         with open('/var/www/fina-connect/CLAUDE.md') as f:
             ctx['claude_md'] = f.read()[-4000:]
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         ctx['claude_md'] = f'Greška: {e}'
 
     # Git log zadnjih 20 commitova
@@ -122,14 +122,14 @@ def _get_full_context():
         task_files = glob.glob('/var/www/fina-connect/GEMINI_TASK_*.md') + \
                      glob.glob('/var/www/fina-connect/CC_TASK_*.md')
         ctx['aktivni_taskovi'] = '\n'.join(os.path.basename(f) for f in sorted(task_files))
-    except Exception as e:  # BORG: was bare except
+    except OSError as e:
         ctx['aktivni_taskovi'] = 'N/A'
 
     # Sprint cilj (ako postoji)
     try:
         with open('/var/www/fina-connect/SPRINT_CILJ.md') as f:
             ctx['sprint_cilj'] = f.read()
-    except Exception as e:  # BORG: was bare except
+    except (FileNotFoundError, PermissionError, IOError) as e:
         ctx['sprint_cilj'] = 'Nema definiranog sprint cilja.'
 
     # Django check i migracije
@@ -218,7 +218,7 @@ def _parse_response(text: str) -> dict:
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             return json.loads(match.group())
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error(f'JSON parse greška: {e}')
     return {'procjena': text[:500], 'eskalacija_ivan': False}
 
@@ -277,7 +277,7 @@ def _izvrsi_odluke(odluke: dict, timestamp: str):
             entry += '- Kritični: ' + ', '.join(kratki['kritični'][:3]) + '\n'
         with open('/var/www/fina-connect/FENIX_STATUS.md', 'a') as f:
             f.write(entry)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error(f'FENIX_STATUS update greška: {e}')
 
 

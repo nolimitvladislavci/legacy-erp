@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 """
 Register DejaVu Sans fonts for xhtml2pdf PDF generation.
 
@@ -43,7 +45,7 @@ def register_pdf_fonts():
     try:
         pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', bold))
     except Exception:
-        pass
+        logger.exception("Unexpected error in: pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', ")
 
     registerFontFamily(
         'DejaVuSans',

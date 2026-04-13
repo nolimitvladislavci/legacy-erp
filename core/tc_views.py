@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+import logging
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -12,7 +14,7 @@ def tc_accept_view(request):
         try:
             company = request.user.userprofile.company
         except Exception:
-            pass
+            logger.exception("Profile access failed")
         if company:
             company.has_signed_tc_consent = True
             company.tc_consent_signed_at = timezone.now()

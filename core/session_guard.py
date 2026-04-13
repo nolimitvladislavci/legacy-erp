@@ -17,6 +17,7 @@ API:
     # [{'type': 'pos_open', 'msg': 'Smjena #3 je otvorena...', 'action_url': '/pos/...'}]
 """
 from django.utils.translation import gettext as _
+from django.db import IntegrityError, DatabaseError
 
 
 class SessionGuard:
@@ -49,7 +50,7 @@ class SessionGuard:
                     'action_url': f'/hr/pos/session/{s.pk}/close/',
                     'action_label': _('Zatvori smjenu'),
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
         # 2. Active work timer
@@ -70,7 +71,7 @@ class SessionGuard:
                     'action_url': '/hr/worktime/timer/stop/',
                     'action_label': _('Zaustavi timer'),
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
         # 3. Draft invoices (unsent)
@@ -89,7 +90,7 @@ class SessionGuard:
                     'action_url': '/hr/invoicing/?status=DRAFT',
                     'action_label': _('Pregledaj nacrte'),
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
         return warnings

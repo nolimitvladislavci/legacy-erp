@@ -234,7 +234,7 @@ def fenix_scan(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Neispravan JSON"}, status=400)
 
     doc_type = data.get("doc_type", "general").strip()
@@ -278,6 +278,6 @@ def fenix_scan(request):
     except json.JSONDecodeError as e:
         logger.error("scan JSON parse error: %s", e)
         return JsonResponse({"error": "AI nije vratio valjan JSON. Pokušaj ponovo."}, status=502)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error("fenix_scan error [%s]: %s", doc_type, e, exc_info=True)
         return JsonResponse({"error": str(e)[:200]}, status=500)

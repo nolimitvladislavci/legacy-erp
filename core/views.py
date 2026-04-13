@@ -494,7 +494,7 @@ def umbrella_dashboard(request):
         messages.warning(request, _('Vasa tvrtka nije umbrella tvrtka.'))
         return redirect('dashboard')
 
-    children = Company.objects.filter(umbrella_parent=company).order_by('name')
+    children = Company.objects.filter(umbrella_parent=company).select_related('umbrella_parent').order_by('name')
     now = timezone.now()
     month_start = now.date().replace(day=1)
 
@@ -657,7 +657,7 @@ def umbrella_dashboard(request):
     # All umbrellas for superadmin
     all_umbrellas = []
     if request.user.is_superuser:
-        all_umbrellas = Company.objects.filter(is_umbrella=True).order_by('name')
+        all_umbrellas = Company.objects.filter(is_umbrella=True).select_related('umbrella_parent').order_by('name')
 
     subsidiaries = [cd for cd in children_data if cd['company'].umbrella_relation == 'subsidiary']
     clients = [cd for cd in children_data if cd['company'].umbrella_relation != 'subsidiary']
@@ -1912,7 +1912,7 @@ def superadmin_company_branches(request, company_id):
     from companies.models import Company, CompanyBranch
 
     company = get_object_or_404(Company, pk=company_id)
-    branches = CompanyBranch.objects.filter(umbrella_parent=company).order_by('name')
+    branches = CompanyBranch.objects.filter(umbrella_parent=company).select_related('umbrella_parent').order_by('name')
 
     if request.method == 'POST':
         action = request.POST.get('action')

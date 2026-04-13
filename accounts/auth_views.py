@@ -22,6 +22,8 @@ from django.utils.translation import gettext_lazy as _
 from core.email_tasks import send_email_task
 
 from .auth_models import LoginAttempt, MagicToken
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +104,7 @@ def _check_concurrent_login(user, current_ip, current_ua):
             changes={'current_ip': current_ip, 'other_ips': other_ips, 'user_agent': current_ua},
             ip_address=current_ip,
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
 
@@ -408,7 +410,7 @@ def verify_2fa(request):
             else:
                 LoginAttempt.objects.create(email=attempt_key, ip_address=ip, success=False, method='2fa')
                 messages.error(request, _('Pogrešan kod. Pokušajte ponovo.'))
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, _('Greška provjere.'))
             return redirect('login')
 
@@ -531,7 +533,7 @@ def google_callback(request):
         messages.success(request, _(f'Prijavljeni ste putem Google: {email}'))
         return redirect(get_dashboard_url(user))
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f"Google OAuth greška: {e}")
         messages.error(request, _('Greška Google prijave. Pokušajte ponovo.'))
         return redirect('login')
@@ -609,7 +611,7 @@ def microsoft_callback(request):
         messages.success(request, _(f'Prijavljeni ste putem Microsoft: {email}'))
         return redirect(get_dashboard_url(user))
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f"Microsoft OAuth greška: {e}")
         messages.error(request, _('Greška Microsoft prijave.'))
         return redirect('login')
@@ -646,7 +648,7 @@ def api_send_magic_link(request):
         return JsonResponse({'success': True, 'url': magic_url})
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -697,7 +699,7 @@ def smart_logout(request):
             if company:
                 from pos.worktime_bridge import device_logout_stop_all
                 device_logout_stop_all(request.user, company)
-        except Exception:
+        except DatabaseError:
             pass
     logout(request)
     return redirect('login')
@@ -785,7 +787,7 @@ def device_token_detail(request, token_id):
         code128.write(buf, options={'write_text': True, 'module_height': 15, 'font_size': 10})
         buf.seek(0)
         barcode_b64 = base64.b64encode(buf.read()).decode()
-    except Exception:
+    except IOError:
         barcode_b64 = ''
 
     try:
@@ -795,7 +797,7 @@ def device_token_detail(request, token_id):
         qr.save(buf, format='PNG')
         buf.seek(0)
         qr_b64 = base64.b64encode(buf.read()).decode()
-    except Exception:
+    except IOError:
         qr_b64 = ''
 
     return render(request, 'accounts/device_token_detail.html', {
@@ -1008,7 +1010,7 @@ def gdpr_export_view(request):
                 object_repr=f'GDPR export za {request.user.username}',
                 ip_address=request.META.get('REMOTE_ADDR', ''),
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         filename = f'limit_connect_gdpr_{request.user.username}_{timezone.now().strftime("%Y%m%d")}.json'
@@ -1016,7 +1018,7 @@ def gdpr_export_view(request):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         import logging
         logging.getLogger(__name__).error('GDPR export error: %s', e)
         return JsonResponse({

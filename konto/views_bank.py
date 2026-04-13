@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 
 @login_required
@@ -119,7 +120,7 @@ def bank_upload(request):
                     content = raw.decode('utf-8-sig')
                 except UnicodeDecodeError:
                     content = raw.decode('cp1250', errors='replace')
-        except Exception as e:
+        except IOError as e:
             messages.error(request, _('Datoteka se ne može pročitati. Provjerite format i pokušajte ponovo.'))
             return redirect('konto:bank_upload')
 
@@ -171,7 +172,7 @@ def bank_upload(request):
 
         except ValueError as e:
             messages.error(request, _('Neispravan format datoteke. Provjerite strukturu podataka.'))
-        except Exception as e:
+        except DatabaseError as e:
             messages.error(request, _('Uvoz nije uspio. Provjerite format datoteke i pokušajte ponovo.'))
 
         return redirect('konto:bank_dashboard')
