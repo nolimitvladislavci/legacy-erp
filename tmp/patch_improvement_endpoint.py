@@ -15,7 +15,6 @@ NEW_ENDPOINT = '''
 
 # ─── SYSTEM IMPROVEMENT API (bez login-a) ─────────────────────────────────────
 
-@csrf_exempt
 @require_POST
 def system_improvement_api(request):
     """

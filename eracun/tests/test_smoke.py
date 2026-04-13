@@ -7,7 +7,6 @@ Run: python manage.py test eracun.tests.test_smoke --verbosity=2
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from decimal import Decimal
-import uuid
 import datetime
 from django.db import IntegrityError, DatabaseError
 

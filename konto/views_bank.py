@@ -20,14 +20,14 @@ def bank_dashboard(request):
 
     from konto.models import BankAccount, BankTransaction
 
-    accounts = BankAccount.objects.filter(company=company)
-    transactions = BankTransaction.objects.filter(company=company).order_by('-transaction_date')[:50]
+    accounts = BankAccount.objects.filter(company=company).select_related("company", "konto_account")
+    transactions = BankTransaction.objects.filter(company=company).select_related("bank_account", "company", "matched_invoice").order_by('-transaction_date')[:50]
 
     stats = {
         'accounts': accounts.count(),
         'total_balance': sum(a.current_balance for a in accounts),
-        'unmatched': BankTransaction.objects.filter(company=company, status='unmatched').count(),
-        'matched': BankTransaction.objects.filter(company=company, status='matched').count(),
+        'unmatched': BankTransaction.objects.filter(company=company, status='unmatched').select_related("bank_account", "company", "matched_invoice").count(),
+        'matched': BankTransaction.objects.filter(company=company, status='matched').select_related("bank_account", "company", "matched_invoice").count(),
     }
 
     return render(request, 'konto/bank_dashboard.html', {
@@ -107,7 +107,7 @@ def bank_upload(request):
         # Resolve bank account
         account = None
         if account_id:
-            account = BankAccount.objects.filter(pk=account_id, company=company).first()
+            account = BankAccount.objects.filter(pk=account_id, company=company).select_related("company", "konto_account").first()
 
         # Read file content
         try:
@@ -166,7 +166,7 @@ def bank_upload(request):
                 pass  # Non-critical
 
             # Recalculate all account balances
-            for acct in BankAccount.objects.filter(company=company):
+            for acct in BankAccount.objects.filter(company=company).select_related("company", "konto_account"):
                 acct.recalculate_balance()
 
         except ValueError as e:
@@ -177,7 +177,7 @@ def bank_upload(request):
         return redirect('konto:bank_dashboard')
 
     # GET — show upload form
-    accounts = BankAccount.objects.filter(company=company)
+    accounts = BankAccount.objects.filter(company=company).select_related("company", "konto_account")
     return render(request, 'konto/bank_upload.html', {'accounts': accounts})
 
 

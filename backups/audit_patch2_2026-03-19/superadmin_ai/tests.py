@@ -1,8 +1,7 @@
 """Superadmin AI module tests — security, permissions, audit logging."""
 import json
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
-from unittest.mock import patch
 
 User = get_user_model()
 

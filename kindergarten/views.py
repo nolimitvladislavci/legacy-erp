@@ -29,9 +29,9 @@ def dashboard(request):
     company = _company(request)
     today = timezone.now().date()
 
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
-    children_active = Child.objects.filter(company=company, status='active').count()
-    children_waitlist = Child.objects.filter(company=company, status='waitlist').count()
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
+    children_active = Child.objects.filter(company=company, status='active').select_related("company", "group").count()
+    children_waitlist = Child.objects.filter(company=company, status='waitlist').select_related("company", "group").count()
 
     # Danas prisutni
     today_attendance = Attendance.objects.filter(
@@ -79,7 +79,7 @@ def child_list(request):
     if group_filter:
         qs = qs.filter(group_id=group_filter)
 
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
 
     return render(request, 'kindergarten/child_list.html', {
         'children': qs,
@@ -108,7 +108,7 @@ def child_detail(request, pk):
 @login_required
 def child_create(request):
     company = _company(request)
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
 
     if request.method == 'POST':
         d = request.POST
@@ -152,7 +152,7 @@ def attendance_daily(request):
         att_date = timezone.now().date()
 
     group_id = request.GET.get('group', '')
-    children_qs = Child.objects.filter(company=company, status='active')
+    children_qs = Child.objects.filter(company=company, status='active').select_related("company", "group")
     if group_id:
         children_qs = children_qs.filter(group_id=group_id)
 
@@ -161,7 +161,7 @@ def attendance_daily(request):
     # Existing attendance for this date
     existing = {
         a.child_id: a for a in
-        Attendance.objects.filter(child__company=company, date=att_date)
+        Attendance.objects.filter(child__company=company, date=att_date).select_related("child", "recorded_by")
     }
 
     children_data = []
@@ -173,7 +173,7 @@ def attendance_daily(request):
             'status': att.status if att else '',
         })
 
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
 
     return render(request, 'kindergarten/attendance_daily.html', {
         'children_data': children_data,
@@ -195,7 +195,7 @@ def attendance_save(request):
     except ValueError:
         att_date = timezone.now().date()
 
-    children = Child.objects.filter(company=company, status='active')
+    children = Child.objects.filter(company=company, status='active').select_related("company", "group")
     saved = 0
     for child in children:
         status = request.POST.get(f'status_{child.pk}', '')
@@ -244,7 +244,7 @@ def billing_generate(request):
     year = int(request.POST.get('year', timezone.now().year))
     month = int(request.POST.get('month', timezone.now().month))
 
-    children = Child.objects.filter(company=company, status='active', group__isnull=False)
+    children = Child.objects.filter(company=company, status='active', group__isnull=False).select_related("company", "group")
     created = 0
     for child in children.select_related('group'):
         billing, is_new = MonthlyBilling.objects.get_or_create(
@@ -330,7 +330,7 @@ def parent_portal(request, slug):
 @login_required
 def group_list(request):
     company = _company(request)
-    groups = KindergartenGroup.objects.filter(company=company)
+    groups = KindergartenGroup.objects.filter(company=company).select_related("company", "educator")
     return render(request, 'kindergarten/group_list.html', {
         'groups': groups,
     })
@@ -341,7 +341,7 @@ def group_list(request):
 @login_required
 def announcement_create(request):
     company = _company(request)
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
 
     if request.method == 'POST':
         d = request.POST
@@ -366,7 +366,7 @@ def announcement_create(request):
 @login_required
 def daily_report_create(request):
     company = _company(request)
-    groups = KindergartenGroup.objects.filter(company=company, is_active=True)
+    groups = KindergartenGroup.objects.filter(company=company, is_active=True).select_related("company", "educator")
 
     if request.method == 'POST':
         d = request.POST

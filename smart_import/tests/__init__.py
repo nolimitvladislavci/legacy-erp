@@ -703,7 +703,6 @@ class ImageEncodingTest(TestCase):
         self.assertIsNotNone(b64)
         # Decode and check size
         import base64
-        from io import BytesIO
         decoded = base64.standard_b64decode(b64)
         result_img = PILImage.open(BytesIO(decoded))
         self.assertLessEqual(max(result_img.size), 2048)

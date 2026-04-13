@@ -16,7 +16,7 @@ def _get_company(request):
 @login_required
 def helpdesk_dashboard(request):
     company = _get_company(request)
-    qs = Ticket.objects.filter(company=company)
+    qs = Ticket.objects.filter(company=company).select_related("company", "client", "related_invoice")
     now = timezone.now()
     open_tickets = qs.filter(status__in=['open', 'in_progress', 'waiting_client', 'waiting_internal'])
     stats = {
@@ -41,7 +41,7 @@ def helpdesk_dashboard(request):
 @login_required
 def ticket_list(request):
     company = _get_company(request)
-    qs = Ticket.objects.filter(company=company)
+    qs = Ticket.objects.filter(company=company).select_related("company", "client", "related_invoice")
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     category = request.GET.get('category')
@@ -131,7 +131,7 @@ def ticket_detail(request, pk):
     company = _get_company(request)
     ticket = get_object_or_404(Ticket, pk=pk, company=company)
     ticket_messages = ticket.messages.all()
-    templates = TicketTemplate.objects.filter(company=company, is_active=True)
+    templates = TicketTemplate.objects.filter(company=company, is_active=True).select_related("company")
     from django.contrib.auth.models import User
     users = User.objects.filter(is_active=True)
     return render(request, 'helpdesk/detail.html', {
@@ -247,12 +247,12 @@ def vip_list(request):
 
         elif action == 'delete':
             vip_id = request.POST.get('vip_id')
-            VIPContact.objects.filter(id=vip_id).delete()
+            VIPContact.objects.filter(id=vip_id).select_related("auto_assign_to").delete()
             messages.success(request, _('VIP kontakt obrisan.'))
 
         elif action == 'toggle':
             vip_id = request.POST.get('vip_id')
-            vip = VIPContact.objects.filter(id=vip_id).first()
+            vip = VIPContact.objects.filter(id=vip_id).select_related("auto_assign_to").first()
             if vip:
                 vip.is_active = not vip.is_active
                 vip.save(update_fields=['is_active'])
@@ -260,7 +260,7 @@ def vip_list(request):
 
         elif action == 'edit':
             vip_id = request.POST.get('vip_id')
-            vip = VIPContact.objects.filter(id=vip_id).first()
+            vip = VIPContact.objects.filter(id=vip_id).select_related("auto_assign_to").first()
             if vip:
                 vip.phone = request.POST.get('phone', vip.phone).replace('+', '').replace(' ', '').replace('-', '')
                 vip.name = request.POST.get('name', vip.name)
@@ -273,7 +273,7 @@ def vip_list(request):
 
         return redirect('helpdesk:vip_list')
 
-    vips = VIPContact.objects.all()
+    vips = VIPContact.objects.all().select_related("auto_assign_to")
     users = User.objects.filter(is_active=True)
     return render(request, 'helpdesk/vip_list.html', {
         'vips': vips,

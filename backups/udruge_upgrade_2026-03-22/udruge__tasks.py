@@ -46,7 +46,7 @@ def evaluate_subscriptions(self):
     + auto-renew za aktivne planove
     + dunning email za grace period
     """
-    from .models import MemberSubscription, MembershipPlan, Clanarina
+    from .models import MemberSubscription, Clanarina
 
     today = timezone.now().date()
     processed = {'active': 0, 'grace': 0, 'suspended': 0, 'renewed': 0, 'reminded': 0}

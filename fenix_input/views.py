@@ -21,7 +21,6 @@ from django.db import IntegrityError, DatabaseError
 logger = logging.getLogger('fenix_input')
 
 
-@csrf_exempt
 @require_POST
 def voice_input(request):
     """
@@ -76,6 +75,7 @@ def voice_input(request):
     })
 
 
+# CSRF exempt: external webhook — no browser session
 @csrf_exempt
 @require_POST
 def sms_webhook(request):

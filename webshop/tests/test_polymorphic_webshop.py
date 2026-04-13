@@ -17,7 +17,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.utils import timezone
 
 from companies.models import Company
-from webshop.models import Product, CartItem
+from webshop.models import Product
 
 User = get_user_model()
 

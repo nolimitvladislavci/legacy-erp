@@ -2,16 +2,16 @@
 Tests for Kindergarten vertical — forms, billing, attendance, portal, CSV import.
 Target: 15 tests.
 """
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from kindergarten.models import (
     KindergartenGroup, Child, Guardian, ChildGuardian,
-    Attendance, MonthlyBilling, DailyReport, Announcement,
+    Attendance, MonthlyBilling,
 )
 
 User = get_user_model()

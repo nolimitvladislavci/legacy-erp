@@ -7,7 +7,6 @@ Run: python manage.py test limit_connect_ai.tests_borg_extra --verbosity=2
 """
 from decimal import Decimal
 from datetime import timedelta
-from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import User
 from django.test import TestCase

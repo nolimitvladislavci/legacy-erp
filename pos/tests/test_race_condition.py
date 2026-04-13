@@ -6,15 +6,14 @@ pytest pos/tests/test_race_condition.py -v
 """
 import threading
 from decimal import Decimal
-from unittest.mock import patch
 
-from django.db import IntegrityError, connection
-from django.test import TestCase, TransactionTestCase
+from django.db import IntegrityError
+from django.test import TransactionTestCase
 from django.contrib.auth.models import User
 
 from companies.models import Company
 from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class POSRaceConditionTest(TransactionTestCase):

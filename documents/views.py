@@ -121,7 +121,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
         if company:
-            return Document.objects.filter(company=company)
+            return Document.objects.filter(company=company).select_related("company", "partner")
         return Document.objects.none()
 
 

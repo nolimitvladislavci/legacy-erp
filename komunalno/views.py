@@ -25,7 +25,7 @@ def dashboard(request):
     company = request.company
     today = timezone.localdate()
 
-    stations = WasteStation.objects.filter(company=company, is_active=True)
+    stations = WasteStation.objects.filter(company=company, is_active=True).select_related("company", "operator")
 
     # Danas statistika
     today_deliveries = WasteDelivery.objects.filter(
@@ -355,7 +355,7 @@ def api_citizen_lookup(request):
 @login_required
 def onto_dashboard(request):
     """Pregled e-ONTO batcheva."""
-    batches = OntoExportBatch.objects.filter(company=request.company).order_by('-created_at')[:50]
+    batches = OntoExportBatch.objects.filter(company=request.company).select_related("company", "station").order_by('-created_at')[:50]
 
     # Neposlane deliverije
     unsent = WasteDelivery.objects.filter(
@@ -451,7 +451,7 @@ def daily_report(request):
 
 @login_required
 def station_list(request):
-    stations = WasteStation.objects.filter(company=request.company)
+    stations = WasteStation.objects.filter(company=request.company).select_related("company", "operator")
     return render(request, 'komunalno/station_list.html', {'stations': stations})
 
 

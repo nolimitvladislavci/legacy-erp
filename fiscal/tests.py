@@ -1,6 +1,4 @@
 from django.test import TestCase
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .base import FiscalResult
 from .models import FiscalProvider
 

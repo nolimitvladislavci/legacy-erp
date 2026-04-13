@@ -15,7 +15,7 @@ from .serializers import CompanySerializer
 
 @login_required
 def company_list(request):
-    companies = Company.objects.all().order_by("name")
+    companies = Company.objects.all().select_related("nkd_code", "umbrella_parent").order_by("name")
     return render(request, "companies/company_list.html", {"companies": companies})
 
 
@@ -65,7 +65,7 @@ def company_edit(request, pk):
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().select_related("nkd_code", "umbrella_parent")
     serializer_class = CompanySerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -494,7 +494,7 @@ def nkd_search(request):
     level = request.GET.get("level", "")
     if not q or len(q) < 2:
         return JsonResponse([], safe=False)
-    qs = NKDCode.objects.filter(is_active=True).filter(
+    qs = NKDCode.objects.filter(is_active=True).select_related("parent").filter(
         Q(name_hr__icontains=q) | Q(code__icontains=q) | Q(name_en__icontains=q)
     )
     if level:
@@ -615,7 +615,6 @@ def tax_rate_list(request):
 # ── PRETPLATA / SUBSCRIPTION ──────────────────────────────────
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 @login_required
@@ -895,7 +894,7 @@ def workspace_home(request):
 def workspace_switch(request, ws_id):
     """Prebaci se na drugi workspace."""
     from companies.models import Workspace
-    ws = Workspace.objects.filter(id=ws_id, workers=request.user, is_active=True).first()
+    ws = Workspace.objects.filter(id=ws_id, workers=request.user, is_active=True).select_related("company", "workers", "clients").first()
     if ws:
         request.session['active_workspace_id'] = ws.id
     return redirect('companies:workspace_home')
@@ -919,7 +918,7 @@ def workspace_enter_client(request, client_id):
         return HttpResponseForbidden("Nemate pristup ovom klijentu.")
 
     # Osiguraj CompanyMembership
-    company = Company.objects.filter(id=client_id).first()
+    company = Company.objects.filter(id=client_id).select_related("nkd_code", "umbrella_parent").first()
     if not company:
         from django.http import Http404
         raise Http404
@@ -957,7 +956,7 @@ def workspace_admin(request):
 
     # Pronađi maticu
     if request.user.is_superuser:
-        matica = Company.objects.filter(name__icontains='konjik').first()
+        matica = Company.objects.filter(name__icontains='konjik').select_related("nkd_code", "umbrella_parent").first()
         if not matica:
             matica = request.company if hasattr(request, 'company') else None
     else:
@@ -973,7 +972,7 @@ def workspace_admin(request):
         action = data.get('action')
 
         if action == 'add_workspace':
-            count = Workspace.objects.filter(company=matica).count()
+            count = Workspace.objects.filter(company=matica).select_related("company", "workers", "clients").count()
             colors = ['#c9a84c','#22c55e','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#ef4444','#84cc16','#64748b']
             ws = Workspace.objects.create(
                 company=matica,
@@ -1044,7 +1043,7 @@ def workspace_admin(request):
 
     # Svi partneri su dostupni za dodjelu (isti klijent može biti u više workspace-a)
     # Npr. UF radi jedna knjigovođa, financijsko druga
-    slobodni = Company.objects.filter(id__in=partner_ids).order_by('name')
+    slobodni = Company.objects.filter(id__in=partner_ids).select_related("nkd_code", "umbrella_parent").order_by('name')
     # Označi koji su već dodijeljeni (za vizualni indikator u UI)
     for s in slobodni:
         s.already_assigned = s.id in assigned_ids

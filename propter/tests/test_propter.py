@@ -162,7 +162,6 @@ class TestAggregatePipeline(TestCase):
 
     def test_aggregate_creates_eracun(self):
         from propter.services.aggregate import close_period, aggregate_to_eracun
-        from eracun.models import ERacun
         # Treba ERacunConfig za company
         from eracun.models import ERacunConfig
         ERacunConfig.objects.create(

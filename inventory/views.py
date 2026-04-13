@@ -34,7 +34,7 @@ def item_list(request):
     return render(request, "inventory/item_list.html", {
         "page_obj": page, "q": q, "category": category, "low_stock": low_stock,
         "total": len(qs), "category_choices": InventoryItem.CATEGORY_CHOICES,
-        "low_stock_count": sum(1 for item in InventoryItem.objects.all() if item.is_low_stock),
+        "low_stock_count": sum(1 for item in InventoryItem.objects.all().select_related("company", "tax_rate", "livestock_animal") if item.is_low_stock),
     })
 
 
@@ -149,11 +149,11 @@ def stock_movement(request, pk):
 
 
 class InventoryItemViewSet(viewsets.ModelViewSet):
-    queryset = InventoryItem.objects.all()
+    queryset = InventoryItem.objects.all().select_related("company", "tax_rate", "livestock_animal")
     serializer_class = InventoryItemSerializer
 
 class StockMovementViewSet(viewsets.ModelViewSet):
-    queryset = StockMovement.objects.all()
+    queryset = StockMovement.objects.all().select_related("item", "invoice", "production_order")
     serializer_class = StockMovementSerializer
 
 
@@ -471,7 +471,7 @@ def api_ai_predict_item(request):
     if last_barcode and last_barcode.isdigit() and len(last_barcode) == 13:
         next_num = int(last_barcode[:12]) + 1
     else:
-        next_num = 200000000000 + (InventoryItem.objects.filter(company=company).count() + 1)
+        next_num = 200000000000 + (InventoryItem.objects.filter(company=company).select_related("company", "tax_rate", "livestock_animal").count() + 1)
 
     # EAN-13 check digit
     digits = str(next_num).zfill(12)
@@ -537,7 +537,7 @@ def api_smart_create(request):
     import re
     clean = re.sub(r'[^A-Z0-9]', '', name.upper()[:8])
     from inventory.models import InventoryItem
-    count = InventoryItem.objects.filter(company=company).count() + 1
+    count = InventoryItem.objects.filter(company=company).select_related("company", "tax_rate", "livestock_animal").count() + 1
     sku = f'{clean}-{count}'
 
     # Detect: should we track stock?
@@ -948,7 +948,7 @@ def stock_card(request, item_id):
     date_from = request.GET.get('from', '')
     date_to = request.GET.get('to', '')
 
-    movements = StockMovement.objects.filter(item=item).order_by('created_at')
+    movements = StockMovement.objects.filter(item=item).select_related("item", "invoice", "production_order").order_by('created_at')
     if date_from:
         movements = movements.filter(created_at__date__gte=date_from)
     if date_to:
@@ -1010,7 +1010,7 @@ def warehouse_list(request):
     """Popis skladista firme."""
     company = get_current_company()
     from inventory.models import Warehouse
-    warehouses = Warehouse.objects.filter(company=company, is_active=True)
+    warehouses = Warehouse.objects.filter(company=company, is_active=True).select_related("company")
     return render(request, 'inventory/warehouse_list.html', {'warehouses': warehouses})
 
 
@@ -1038,7 +1038,7 @@ def transfer_create(request):
     from inventory.models import Warehouse, WarehouseTransfer, WarehouseTransferItem
     from datetime import date as _date
 
-    warehouses = Warehouse.objects.filter(company=company, is_active=True)
+    warehouses = Warehouse.objects.filter(company=company, is_active=True).select_related("company")
 
     if request.method == 'POST':
         src_id = request.POST.get('source_warehouse')
@@ -1092,7 +1092,7 @@ def transfer_create(request):
         messages.success(request, _('Medjuskladisnica %s kreirana (%d stavki).') % (transfer_number, items_added))
         return redirect('inventory:transfer_detail', pk=transfer.pk)
 
-    items = InventoryItem.objects.filter(company=company, is_active=True).order_by('name')
+    items = InventoryItem.objects.filter(company=company, is_active=True).select_related("company", "tax_rate", "livestock_animal").order_by('name')
     return render(request, 'inventory/transfer_create.html', {
         'warehouses': warehouses,
         'items': items,
@@ -1136,7 +1136,7 @@ def inventura_list(request):
     """Lista svih inventura za tvrtku."""
     company = get_user_company(request)
     from .models import Inventura
-    qs = Inventura.objects.filter(company=company) if company else Inventura.objects.none()
+    qs = Inventura.objects.filter(company=company).select_related("company", "warehouse", "created_by") if company else Inventura.objects.none()
     status_filter = request.GET.get('status', '')
     if status_filter:
         qs = qs.filter(status=status_filter)
@@ -1167,7 +1167,7 @@ def inventura_create(request):
             inventura_type=request.POST.get('inventura_type', 'annual'),
             date_started=date.today(),
             reference_date=ref_date,
-            warehouse=Warehouse.objects.filter(pk=wh_id, company=company).first() if wh_id else None,
+            warehouse=Warehouse.objects.filter(pk=wh_id, company=company).select_related("company").first() if wh_id else None,
             category_filter=request.POST.get('category_filter', ''),
             notes=request.POST.get('notes', ''),
             created_by=request.user,
@@ -1191,7 +1191,7 @@ def inventura_create(request):
         messages.success(request, _('Inventura %s pokrenuta — %d artikala.') % (inv.inventura_number, inv.total_items))
         return redirect('inventory:inventura_detail', pk=inv.pk)
 
-    warehouses = Warehouse.objects.filter(company=company) if company else Warehouse.objects.none()
+    warehouses = Warehouse.objects.filter(company=company).select_related("company") if company else Warehouse.objects.none()
     from django.contrib.auth.models import User as AuthUser
     # Filtriraj usere po firmi — komisija vidi samo zaposlenike svoje firme
     if company:

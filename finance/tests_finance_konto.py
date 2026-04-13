@@ -13,15 +13,12 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase, Client, override_settings
-from django.utils import timezone
 
 from accounts.models import UserProfile
 from companies.models import Company
 from partners.models import Partner
 from konto.models import BankAccount, BankTransaction
 from finance.models import Transaction
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # ─── Helpers ────────────────────────────────────────────────────────────────

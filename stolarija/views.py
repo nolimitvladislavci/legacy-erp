@@ -31,8 +31,8 @@ def _company(request):
 @login_required
 def dashboard(request):
     company = _company(request)
-    sessions = MeasurementSession.objects.filter(company=company).order_by('-created_at')[:20]
-    offers   = WindowOffer.objects.filter(company=company).order_by('-created_at')[:10]
+    sessions = MeasurementSession.objects.filter(company=company).select_related("company", "work_order", "created_by").order_by('-created_at')[:20]
+    offers   = WindowOffer.objects.filter(company=company).select_related("company", "session").order_by('-created_at')[:10]
     return render(request, 'stolarija/dashboard.html', {
         'sessions': sessions,
         'offers': offers,
@@ -81,8 +81,8 @@ def session_new(request):
 def measure(request, session_id):
     company = _company(request)
     session = get_object_or_404(MeasurementSession, pk=session_id, company=company)
-    profiles = WindowProfile.objects.filter(company=company, is_active=True)
-    glasses  = GlassType.objects.filter(company=company, is_active=True)
+    profiles = WindowProfile.objects.filter(company=company, is_active=True).select_related("company")
+    glasses  = GlassType.objects.filter(company=company, is_active=True).select_related("company")
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -1057,20 +1057,20 @@ def ai_inbox(request):
 
     tab = request.GET.get('tab', 'pending')
     if tab == 'escalated':
-        msgs = ServiceMessage.objects.filter(company=company, status='escalated')
+        msgs = ServiceMessage.objects.filter(company=company, status='escalated').select_related("warranty", "company", "approved_by")
     elif tab == 'sent':
-        msgs = ServiceMessage.objects.filter(company=company, status='sent')
+        msgs = ServiceMessage.objects.filter(company=company, status='sent').select_related("warranty", "company", "approved_by")
     elif tab == 'all':
-        msgs = ServiceMessage.objects.filter(company=company)
+        msgs = ServiceMessage.objects.filter(company=company).select_related("warranty", "company", "approved_by")
     else:
-        msgs = ServiceMessage.objects.filter(company=company, status='ai_draft')
+        msgs = ServiceMessage.objects.filter(company=company, status='ai_draft').select_related("warranty", "company", "approved_by")
 
     msgs = msgs.select_related('warranty', 'approved_by').order_by('-created_at')
 
     stats = {
-        'pending': ServiceMessage.objects.filter(company=company, status='ai_draft').count(),
-        'escalated': ServiceMessage.objects.filter(company=company, status='escalated').count(),
-        'sent': ServiceMessage.objects.filter(company=company, status='sent').count(),
+        'pending': ServiceMessage.objects.filter(company=company, status='ai_draft').select_related("warranty", "company", "approved_by").count(),
+        'escalated': ServiceMessage.objects.filter(company=company, status='escalated').select_related("warranty", "company", "approved_by").count(),
+        'sent': ServiceMessage.objects.filter(company=company, status='sent').select_related("warranty", "company", "approved_by").count(),
     }
 
     return render(request, 'stolarija/ai_inbox.html', {
@@ -1150,7 +1150,7 @@ def ai_simulate_inbound(request):
 
     warranty = None
     if warranty_id:
-        warranty = WindowWarranty.objects.filter(pk=warranty_id, session__company=company).first()
+        warranty = WindowWarranty.objects.filter(pk=warranty_id, session__company=company).select_related("session").first()
 
     msg = ServiceMessage.objects.create(
         company=company,

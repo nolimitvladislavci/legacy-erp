@@ -29,7 +29,6 @@ def _get_company(request):
     company = getattr(request, "company", None)
     if not company:
         try:
-            from companies.models import Company
             company = request.user.profile.company if hasattr(request.user, "profile") else None
         except Exception:
             pass

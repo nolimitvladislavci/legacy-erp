@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from companies.models import Company
-from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine, POSDailyReport
+from pos.models import POSTerminal, POSSession, POSReceipt, POSPaymentLine
 
 User = get_user_model()
 

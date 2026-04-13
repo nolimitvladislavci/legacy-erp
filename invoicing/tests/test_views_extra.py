@@ -2,7 +2,6 @@
 import datetime
 import json
 import uuid
-from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone

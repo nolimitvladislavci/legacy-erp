@@ -3,8 +3,6 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import PaymentError, SessionError
 from pos.services import (

@@ -89,7 +89,6 @@ class OutreachDashboardTest(TestCase):
             campaign = _make_campaign('Campaign 1')
             contact = _make_contact('c4@test.hr', status='neu')
             cc = _make_campaign_contact(campaign, contact)
-            from outreach.models import CampaignContact
             from django.utils import timezone
             cc.status = 'replied'
             cc.replied_at = timezone.now()
@@ -400,7 +399,6 @@ class OutreachInboxTest(TestCase):
             contact = _make_contact('inbox1@test.hr', status='geantwortet')
             campaign = _make_campaign('Inbox Campaign')
             cc = _make_campaign_contact(campaign, contact)
-            from outreach.models import CampaignContact
             from django.utils import timezone
             cc.status = 'replied'
             cc.replied_at = timezone.now()
@@ -415,7 +413,6 @@ class OutreachInboxTest(TestCase):
         """Covers the _categorize() function for different reply texts."""
         try:
             campaign = _make_campaign('Categorize Campaign')
-            from outreach.models import CampaignContact
             from django.utils import timezone
             # hitno category
             c1 = _make_contact('cat1@test.hr', status='neu')

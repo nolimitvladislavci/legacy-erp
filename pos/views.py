@@ -77,11 +77,11 @@ def dashboard(request):
         if open_sess:
             return redirect('pos:pos_joker', terminal_id=open_sess.terminal_id)
         # Inače prvi aktivni terminal
-        t = POSTerminal.objects.filter(company=company, is_active=True).order_by('id').first()
+        t = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").order_by('id').first()
         if t:
             return redirect('pos:pos_joker', terminal_id=t.pk)
     terminals = POSTerminal.objects.filter(company=company, is_active=True).prefetch_related(
-        models.Prefetch('sessions', queryset=POSSession.objects.filter(status=POSSession.Status.OPEN), to_attr='_open_sessions')
+        models.Prefetch('sessions', queryset=POSSession.objects.filter(status=POSSession.Status.OPEN).select_related("terminal", "operator", "active_cashiers"), to_attr='_open_sessions')
     ) if company else POSTerminal.objects.none()
     for t in terminals:
         t.active_session = t._open_sessions[0] if t._open_sessions else None
@@ -111,7 +111,7 @@ def open_session(request, terminal_id):
     if err: return err
     # POSSettings guard — ne dopusti otvaranje smjene bez konfiguracije
     from .models import POSSettings
-    if not POSSettings.objects.filter(company=company).exists():
+    if not POSSettings.objects.filter(company=company).select_related("company").exists():
         messages.error(request, _('POS sustav nije konfiguriran. Otvorite Postavke → POS ili kontaktirajte administratora.'))
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
     # OIB Hard-Stop — blagajnik BEZ OIB-a ne smije otvoriti smjenu
@@ -511,7 +511,7 @@ def process_payment(request, receipt_id):
     if cashier_id and not receipt.cashier_id:
         from pos.models import POSCashier
         company = receipt.session.terminal.company
-        cashier_obj = POSCashier.objects.filter(id=cashier_id, company=company, is_active=True).first()
+        cashier_obj = POSCashier.objects.filter(id=cashier_id, company=company, is_active=True).select_related("company", "user").first()
         if cashier_obj:
             receipt.cashier = cashier_obj
             receipt.save(update_fields=['cashier'])
@@ -599,7 +599,7 @@ def cancel_receipt(request, receipt_id):
     from .models import POSCashier
     pin = request.POST.get('pin', '').strip()
     company = receipt.session.terminal.company
-    cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True)
+    cashiers_with_void = POSCashier.objects.filter(company=company, is_active=True, can_void=True).select_related("company", "user")
     if cashiers_with_void.exists():
         if not pin:
             messages.error(request, _('PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika.'))
@@ -832,7 +832,7 @@ def new_terminal(request):
         type_labels = {'quick': 'Brza blagajna', 'retail': 'Maloprodaja', 'restaurant': 'Restoran',
                       'field': 'Terenska', 'service': 'Usluge', 'reception': 'Recepcija'}
         terminal_code = f'{pos_type[:3].upper()}{secrets.token_hex(2).upper()}'
-        count = POSTerminal.objects.filter(company=company).count() + 1
+        count = POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").count() + 1
         terminal = POSTerminal.objects.create(
             company=company,
             name=f'{type_labels.get(pos_type, "Blagajna")} {count}',
@@ -1059,19 +1059,11 @@ def receipt_pdf(request, receipt_id):
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, f'PDF greška: {e}')
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
-import json
-from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.conf import settings
-from django.db import models
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 # ── QUICK POS ─────────────────────────────────────────────────────────────────
 
@@ -1139,7 +1131,7 @@ def _quick_pos_legacy(request, terminal_id):
     """Original quick_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company = terminal.company
-    session  = POSSession.objects.filter(terminal=terminal, status='open').first()
+    session  = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
 
     # ── STROGA PROVJERA: samo 1 aktivan POS (besplatni plan) ──
     # Knjigovođa (role=bookkeeper/superadmin) može svugdje bez limita
@@ -1251,7 +1243,7 @@ def _quick_pos_legacy(request, terminal_id):
         from registration.models import CompanySubscription
         sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
         if sub and sub.plan in ('starter', 'micro'):
-            active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
+            active_terms = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").count()
             if active_terms > 1:
                 show_upgrade_banner = True
     except DatabaseError:
@@ -1289,7 +1281,7 @@ def pos_joker(request, terminal_id):
     """
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company = terminal.company
-    session = POSSession.objects.filter(terminal=terminal, status='open').first()
+    session = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
     is_gastro = terminal.pos_type == 'restaurant'
 
     # ── STROGA PROVJERA: samo N aktivnih POS-ova po planu ──
@@ -1385,7 +1377,7 @@ def pos_joker(request, terminal_id):
         from registration.models import CompanySubscription
         sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
         if sub and sub.plan in ('starter', 'micro'):
-            active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
+            active_terms = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").count()
             if active_terms > 1:
                 show_upgrade_banner = True
     except DatabaseError:
@@ -1490,7 +1482,7 @@ def restaurant_pos(request, terminal_id):
 def _restaurant_pos_legacy(request, terminal_id):
     """Original restaurant_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
-    session  = POSSession.objects.filter(terminal=terminal, status='open').first()
+    session  = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
 
     open_receipts = []
     if session:
@@ -2204,7 +2196,7 @@ def reports_export(request):
 def gastro_dashboard(request):
     """Table grid + active orders. Annotates tables with active order for colour coding."""
     from .models import GastroOrder, Table
-    tables = list(Table.objects.filter(is_active=True).order_by('floor', 'name'))
+    tables = list(Table.objects.filter(is_active=True).select_related("company", "branch").order_by('floor', 'name'))
     active_orders = list(
         GastroOrder.objects.filter(
             status__in=['new', 'confirmed', 'preparing', 'ready', 'delivering']
@@ -2364,10 +2356,10 @@ def table_checkout(request, table_id):
             return JsonResponse({'error': 'Nema računa za kreiranje'}, status=400)
 
         # Nađi aktivan terminal i sesiju
-        terminal = POSTerminal.objects.filter(company=company, is_active=True).first()
+        terminal = POSTerminal.objects.filter(company=company, is_active=True).select_related("company", "workspace", "business_location").first()
         if not terminal:
             return JsonResponse({'error': 'Nema aktivnog terminala'}, status=400)
-        session = POSSession.objects.filter(terminal=terminal, status='open').first()
+        session = POSSession.objects.filter(terminal=terminal, status='open').select_related("terminal", "operator", "active_cashiers").first()
         if not session:
             return JsonResponse({'error': 'Nema otvorene smjene'}, status=400)
 
@@ -2608,7 +2600,7 @@ def gastro_qr(request, qr_code):
             if guest_email:
                 try:
                     from .models import LoyaltyProgram, GuestLoyalty
-                    programs = LoyaltyProgram.objects.filter(company=table.company, is_active=True, category__in=["food","drink","dessert","special"])
+                    programs = LoyaltyProgram.objects.filter(company=table.company, is_active=True, category__in=["food","drink","dessert","special"]).select_related("company")
                     for prog in programs:
                         loyalty, _ = GuestLoyalty.objects.get_or_create(
                             company=table.company, program=prog, guest_email=guest_email,
@@ -3200,7 +3192,7 @@ def pfand_return(request):
     if not pfand_item:
         return JsonResponse({'error': 'Pfand artikl ne postoji'}, status=404)
 
-    session = POSSession.objects.filter(pk=session_id, status='open').first()
+    session = POSSession.objects.filter(pk=session_id, status='open').select_related("terminal", "operator", "active_cashiers").first()
     if not session:
         return JsonResponse({'error': 'Nema otvorene smjene'}, status=400)
 
@@ -3374,7 +3366,7 @@ def voucher_list(request):
         messages.success(request, f'Vaučer {code} kreiran ({amount:.2f} EUR).')
         return redirect('pos:voucher_list')
 
-    vouchers = Voucher.objects.filter(company=company).order_by('-created_at')
+    vouchers = Voucher.objects.filter(company=company).select_related("company", "sold_receipt", "created_by").order_by('-created_at')
     return render(request, 'pos/vouchers.html', {'vouchers': vouchers})
 
 
@@ -3499,7 +3491,7 @@ def waiter_app(request):
 
     # Tables for QR display
     from .models import Table
-    tables = Table.objects.filter(company=company, is_active=True).order_by('floor', 'name')
+    tables = Table.objects.filter(company=company, is_active=True).select_related("company", "branch").order_by('floor', 'name')
 
     return render(request, 'pos/waiter/app.html', {
         'active_shift': active_shift,
@@ -3521,7 +3513,7 @@ def waiter_shift_toggle(request):
     if not company:
         return JsonResponse({'error': 'Nema tvrtke'}, status=400)
 
-    active = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).first()
+    active = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).select_related("user", "company").first()
     if active:
         active.is_active = False
         active.ended_at = timezone.now()
@@ -3542,7 +3534,7 @@ def waiter_heartbeat(request):
     if not company:
         return JsonResponse({'ok': False}, status=400)
 
-    shift = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).first()
+    shift = WaiterShift.objects.filter(user=request.user, company=company, is_active=True).select_related("user", "company").first()
     if shift:
         shift.last_heartbeat = timezone.now()
         shift.heartbeat_count += 1
@@ -3660,6 +3652,7 @@ def kitchen_tablet_api(request, token):
     return JsonResponse({'ok': True, 'orders': data})
 
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 def kitchen_tablet_action(request, token, order_id):
     """Kitchen tablet changes order status (confirm/ready) — no login."""
@@ -3671,7 +3664,7 @@ def kitchen_tablet_action(request, token, order_id):
     if not company:
         return JsonResponse({'error': 'Invalid'}, status=404)
 
-    order = GastroOrder.objects.filter(pk=order_id, company=company).first()
+    order = GastroOrder.objects.filter(pk=order_id, company=company).select_related("company", "table", "receipt").first()
     if not order:
         return JsonResponse({'error': 'Not found'}, status=404)
 
@@ -3788,7 +3781,7 @@ def gastro_reviews_public(request, company_id):
     from django.db.models import Avg
 
     company = get_object_or_404(Company, pk=company_id)
-    reviews = GastroReview.objects.filter(company=company, is_published=True)
+    reviews = GastroReview.objects.filter(company=company, is_published=True).select_related("company", "order")
 
     stats = reviews.aggregate(
         avg_rating=Avg('rating'),
@@ -3831,7 +3824,7 @@ def cashier_pin_verify(request):
         return JsonResponse({'ok': False, 'error': 'Previše pokušaja. Pričekajte 60 sekundi.'}, status=429)
 
     company = get_user_company(request)
-    cashiers = POSCashier.objects.filter(company=company, is_active=True)
+    cashiers = POSCashier.objects.filter(company=company, is_active=True).select_related("company", "user")
 
     for cashier in cashiers:
         if cashier.check_pin(pin):
@@ -3841,7 +3834,7 @@ def cashier_pin_verify(request):
             # Track cashier in session
             if session_id:
                 from pos.models import POSSession
-                session = POSSession.objects.filter(id=session_id, status='open').first()
+                session = POSSession.objects.filter(id=session_id, status='open').select_related("terminal", "operator", "active_cashiers").first()
                 if session:
                     session.active_cashiers.add(cashier)
 
@@ -4234,7 +4227,7 @@ def daily_reports_list(request):
     reports = qs.order_by('-date')[:100]
 
     monthly = (
-        POSDailyReport.objects.filter(company=company)
+        POSDailyReport.objects.filter(company=company).select_related("company", "terminal", "session")
         .extra(select={'month': "to_char(date, 'YYYY-MM')"})
         .values('month')
         .annotate(
@@ -4428,7 +4421,7 @@ def _zlatno_dugme_notify_user(suggestion):
 def improvement_list(request):
     from pos.models import ImprovementSuggestion
     company = get_user_company(request)
-    suggestions = ImprovementSuggestion.objects.filter(company=company)
+    suggestions = ImprovementSuggestion.objects.filter(company=company).select_related("company", "author")
 
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
@@ -4549,7 +4542,7 @@ def onboarding_wizard(request):
         },
         {
             'name': 'POS terminal',
-            'done': POSTerminal.objects.filter(company=company).exists(),
+            'done': POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").exists(),
             'url': '/hr/pos/terminal/new/',
             'desc': 'Kreirajte prvi POS terminal (blagajna)',
         },
@@ -4561,13 +4554,13 @@ def onboarding_wizard(request):
         },
         {
             'name': 'Blagajnik',
-            'done': POSCashier.objects.filter(company=company).exists(),
+            'done': POSCashier.objects.filter(company=company).select_related("company", "user").exists(),
             'url': '/hr/pos/cashier/setup/',
             'desc': 'Dodajte blagajnika s PIN-om i OIB-om (zakonska obaveza)',
         },
         {
             'name': 'Fiskalizacija',
-            'done': bool(getattr(POSSettings.objects.filter(company=company).first(), 'fiscal_active', False)),
+            'done': bool(getattr(POSSettings.objects.filter(company=company).select_related("company").first(), 'fiscal_active', False)),
             'url': '/hr/pos/settings/',
             'desc': 'Postavite FINA certifikat za fiskalizaciju',
         },
@@ -4637,7 +4630,7 @@ def prigovori_list(request):
     """Knjiga boljitaka — HTML prikaz + modal za unos."""
     company = get_user_company(request)
     from .models import KnjigaPrigovora
-    prigovori = KnjigaPrigovora.objects.filter(company=company)
+    prigovori = KnjigaPrigovora.objects.filter(company=company).select_related("company", "responded_by", "archive_blob")
     return render(request, 'pos/prigovori.html', {'prigovori': prigovori, 'company': company})
 
 
@@ -4649,7 +4642,7 @@ def prigovori_api(request):
 
     if request.method == 'GET':
         data = []
-        for p in KnjigaPrigovora.objects.filter(company=company):
+        for p in KnjigaPrigovora.objects.filter(company=company).select_related("company", "responded_by", "archive_blob"):
             data.append({
                 'id': p.pk,
                 'redni_broj': p.redni_broj,
@@ -5400,7 +5393,7 @@ def pos_qr_open(request, token):
     )
 
     # Find open session or create new one
-    session = POSSession.objects.filter(terminal=terminal, status="open").first()
+    session = POSSession.objects.filter(terminal=terminal, status="open").select_related("terminal", "operator", "active_cashiers").first()
     if not session:
         last = terminal.sessions.order_by("-session_number").first()
         next_num = (last.session_number + 1) if last else 1

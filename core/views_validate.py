@@ -13,6 +13,7 @@ from core.oib_validator import (
 )
 
 
+# CSRF exempt: external data import API — token auth
 @csrf_exempt
 @require_POST
 def api_validate(request):

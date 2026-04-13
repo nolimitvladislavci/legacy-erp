@@ -335,6 +335,7 @@ def tracking_view(request, tracking_token):
     return render(request, 'interventions/tracking.html', {'interv': interv, 'step_data': step_data})
 
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 def public_intervention(request):
     """Public (no login) form to submit a new Hitna Intervencija."""

@@ -1,6 +1,5 @@
 """Extra worktime tests — manager views, entry actions, PDF, approve, bill."""
 import datetime
-import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError

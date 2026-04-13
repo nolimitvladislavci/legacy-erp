@@ -1,9 +1,7 @@
 """Registration views tests covering registration wizard steps."""
-import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]

@@ -47,6 +47,7 @@ def _check_rate_limit(request):
 def api_submit(request):
     """
     Public booking API — secured:
+    # CSRF exempt: public booking endpoint — uses BookingSignature
     - CSRF via Django middleware (no @csrf_exempt)
     - Rate limiting: 5 bookings/IP/hour
     - select_for_update on overlap check (race-safe)

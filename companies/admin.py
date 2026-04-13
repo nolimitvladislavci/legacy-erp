@@ -62,7 +62,7 @@ class TaxRateAdmin(admin.ModelAdmin):
     ordering      = ('country', '-rate')
 
 
-from .models import BusinessProfile, ServiceTemplate, CompanyPartnership
+from .models import BusinessProfile, ServiceTemplate
 
 
 @admin.register(BusinessProfile)

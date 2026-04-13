@@ -4,7 +4,6 @@ Tests for AnomalyReport model, UniversalTracker, and patrol task.
 """
 from decimal import Decimal
 from datetime import timedelta
-import os
 from unittest.mock import patch, MagicMock
 
 from django.test import TestCase, TransactionTestCase

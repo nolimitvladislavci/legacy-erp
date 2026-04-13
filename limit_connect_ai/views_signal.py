@@ -6,7 +6,6 @@ Rate-limited: max 10 signala po korisniku/IP u 5 minuta.
 import json
 import logging
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.cache import cache
 
@@ -30,7 +29,6 @@ def _get_ip(request):
     return xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR", "")
 
 
-@csrf_exempt
 @require_POST
 def submit_signal(request):
     """

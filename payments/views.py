@@ -153,6 +153,7 @@ def payment_status_api(request, payment_id):
     })
 
 
+# CSRF exempt: external webhook — no browser session
 @csrf_exempt
 @require_POST
 def stripe_webhook(request):

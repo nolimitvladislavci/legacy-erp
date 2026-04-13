@@ -3,8 +3,6 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from companies.models import Company
 from helpdesk.models import Ticket, TicketMessage
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

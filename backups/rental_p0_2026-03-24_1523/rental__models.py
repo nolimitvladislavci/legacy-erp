@@ -227,7 +227,6 @@ class Booking(models.Model):
 
     def calculate_price(self):
         """Calculate total price including tax and fees."""
-        from datetime import timedelta
         nights = (self.check_out - self.check_in).days
         if nights < 1:
             nights = 1

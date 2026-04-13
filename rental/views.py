@@ -22,7 +22,7 @@ def dashboard(request):
     if not company:
         return redirect('/')
 
-    properties = Property.objects.filter(company=company, is_active=True)
+    properties = Property.objects.filter(company=company, is_active=True).select_related("company", "owner")
     today = timezone.now().date()
 
     # Stats
@@ -78,7 +78,7 @@ def property_list(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    properties = Property.objects.filter(company=company).order_by('floor', 'name')
+    properties = Property.objects.filter(company=company).select_related("company", "owner").order_by('floor', 'name')
     return render(request, 'rental/property_list.html', {'properties': properties})
 
 
@@ -136,7 +136,7 @@ def booking_form(request, pk=None):
         return redirect('/')
 
     booking = get_object_or_404(Booking, pk=pk, company=company) if pk else None
-    properties = Property.objects.filter(company=company, is_active=True)
+    properties = Property.objects.filter(company=company, is_active=True).select_related("company", "owner")
 
     if request.method == 'POST':
         if not booking:
@@ -356,7 +356,7 @@ def calendar_view(request):
     start = today - timedelta(days=today.weekday())  # Monday
     end = start + timedelta(days=27)  # 4 weeks
 
-    properties = Property.objects.filter(company=company, is_active=True).order_by('floor', 'name')
+    properties = Property.objects.filter(company=company, is_active=True).select_related("company", "owner").order_by('floor', 'name')
     bookings = Booking.objects.filter(
         company=company,
         check_out__gte=start,
@@ -562,7 +562,7 @@ def rental_accountant_dashboard(request):
     for cid in company_ids:
         try:
             company = Company.objects.get(pk=cid)
-            props = Property.objects.filter(company=company, is_active=True)
+            props = Property.objects.filter(company=company, is_active=True).select_related("company", "owner")
             limit = check_annual_limit_warning(company)
 
             clients.append({

@@ -14,7 +14,6 @@ BORG pravilo: 1803 tihe greske = 1803 potencijalnih katastrofa.
 """
 import ast
 import sys
-import os
 import re
 from pathlib import Path
 
@@ -179,7 +178,7 @@ def main():
     results.sort(key=lambda x: -x[1])
 
     print(f"\n{'='*60}")
-    print(f"BORG SCAN: bare except: blokovi")
+    print("BORG SCAN: bare except: blokovi")
     print(f"{'='*60}")
     print(f"Ukupno fajlova s bare except: {len(results)}")
     print(f"Ukupno bare except blokova:   {total_hits}")
@@ -196,7 +195,7 @@ def main():
 
     if args.fix:
         print(f"\n{'='*60}")
-        print(f"FIXING...")
+        print("FIXING...")
         print(f"{'='*60}\n")
 
         fixed_total = 0

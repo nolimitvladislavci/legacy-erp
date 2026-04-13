@@ -38,6 +38,7 @@ def pocni(request):
     })
 
 
+# CSRF exempt: public detection endpoint
 @csrf_exempt
 @require_POST
 def api_detect_email(request):

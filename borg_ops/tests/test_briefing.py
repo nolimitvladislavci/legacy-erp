@@ -1,7 +1,6 @@
 """
 Tests for BORG Morning Briefing — aggregation, ranking, formatting.
 """
-from unittest.mock import patch, MagicMock
 from datetime import timedelta
 from decimal import Decimal
 from django.test import TestCase

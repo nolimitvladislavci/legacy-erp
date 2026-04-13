@@ -4,7 +4,7 @@ Min 30 testova za sve segmente.
 """
 from decimal import Decimal
 from datetime import date, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model

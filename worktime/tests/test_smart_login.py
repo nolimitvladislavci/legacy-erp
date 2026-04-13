@@ -14,7 +14,6 @@ Scenariji:
 10. Concurrent sessions (isti user, dva tokena)
 """
 import hashlib
-import uuid
 from decimal import Decimal
 from datetime import timedelta
 
@@ -270,7 +269,7 @@ class ForgottenPhoneScenarioTest(SmartLoginSetup):
 class CashierSafeguardTest(SmartLoginSetup):
     def test_18_cashier_16h_guard(self):
         """Cashier clock_out sa >16h trajanjem → limitira na 16h."""
-        from pos.worktime_bridge import cashier_clock_in, cashier_clock_out
+        from pos.worktime_bridge import cashier_clock_out
         from pos.models import POSCashier
         cashier = POSCashier.objects.create(
             company=self.company, name='Long Shift',
@@ -285,7 +284,7 @@ class CashierSafeguardTest(SmartLoginSetup):
 
     def test_19_cashier_very_short_shift_ignored(self):
         """Smjena < 1 min se ne broji (slučajni scan)."""
-        from pos.worktime_bridge import cashier_clock_in, cashier_clock_out
+        from pos.worktime_bridge import cashier_clock_out
         from pos.models import POSCashier
         from worktime.models import TimeEntry
         cashier = POSCashier.objects.create(

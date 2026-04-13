@@ -8,15 +8,11 @@ FRISKO PEKARNICA fest setup:
 - 22 artikala
 """
 import json
-import time
 from decimal import Decimal
-from datetime import date, timedelta
-from unittest.mock import patch, MagicMock
-from concurrent.futures import ThreadPoolExecutor
+from unittest.mock import patch
 
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.utils import timezone
 
 User = get_user_model()

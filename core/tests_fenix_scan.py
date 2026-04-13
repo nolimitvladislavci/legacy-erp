@@ -668,7 +668,7 @@ class TestScanMarketplaceBridge(ScanTestMixin, TestCase):
 
     def test_83_no_karenca_allows_publish(self):
         """Jato bez karence — publish prolazi."""
-        from udruge.models import Flock, EggRecord
+        from udruge.models import Flock
 
         flock = Flock.objects.create(
             company=self.company, naziv='Zdrave nesiljke',
@@ -713,7 +713,6 @@ class TestScanAuctionIntegration(ScanTestMixin, TestCase):
     def test_90_golub_publish_creates_auction(self):
         """Sealed golub objava na burzi kreira auction listing."""
         from udruge.models import Golubinjak, Golub
-        from marketplace.models import MarketplaceProduct
 
         gj = Golubinjak.objects.create(
             company=self.company, naziv='Test loft',

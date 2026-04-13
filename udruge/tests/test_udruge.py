@@ -1,12 +1,10 @@
 """Udruge modul testovi — 12 testova."""
-from decimal import Decimal
 from datetime import date, timedelta
 from unittest.mock import patch, MagicMock
 
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.utils import timezone
 
 User = get_user_model()
 _n = [0]

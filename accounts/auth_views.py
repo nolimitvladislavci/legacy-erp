@@ -811,6 +811,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST as _require_POST
 
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 @_require_POST
 def device_token_login(request):

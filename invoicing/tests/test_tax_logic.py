@@ -11,8 +11,6 @@ from invoicing.tax_logic import (
     get_tax_statuses,
     get_applicable_rate,
     get_pdv_footer_note,
-    TAX_PROFILES,
-    TAX_STATUS_CHOICES,
 )
 
 

@@ -355,7 +355,6 @@ class BurzaViewsTest(TestCase):
 class InterventionsViewsTest(TestCase):
     def setUp(self):
         self.company, self.user = _setup_user('61000000005', 'md_int1', ['interventions', 'invoicing'])
-        from accounts.models import UserProfile
         # Add role to make user company admin
         try:
             profile = self.user.profile

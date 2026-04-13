@@ -6,7 +6,6 @@ OIB/VAT logika, unique_together, CompanyManager scope.
 """
 from decimal import Decimal
 from django.test import TestCase
-from django.contrib.auth.models import User
 
 from companies.models import Company
 from partners.models import Partner

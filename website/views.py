@@ -242,6 +242,7 @@ import json as _json
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST as _require_POST
 
+# CSRF exempt: external data import API — token auth
 @csrf_exempt
 @_require_POST
 def grosmarkt_anfrage(request):
@@ -486,9 +487,6 @@ def pricing_ai_advisor(request):
 
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from core.company_utils import get_user_company
 
 @login_required
@@ -565,8 +563,6 @@ def digitalni_posrednik(request):
     return render(request, 'website/digitalni_posrednik.html')
 
 
-import json as _json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 KRULJAC_WA = "+385913912621"

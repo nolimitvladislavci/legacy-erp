@@ -21,18 +21,15 @@ import io
 import hashlib
 import uuid
 from datetime import date
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import TestCase
 from django.contrib.auth.models import User
-from django.contrib.sessions.backends.db import SessionStore
 from django.utils import timezone
 from django.conf import settings
 
 from documents.models import ArhivaEntry, DocumentBlob, StorageConfig
 from documents.storage_backends import (
     store_document, retrieve_document, compress_image,
-    LocalStorageBackend, DatabaseStorageBackend, CloudStorageBackend,
-    get_file_hash, generate_storage_path, migrate_existing_files,
-    IMAGE_TARGET_SIZE, DB_MAX_SIZE,
+    LocalStorageBackend, DatabaseStorageBackend, get_file_hash, generate_storage_path, IMAGE_TARGET_SIZE, DB_MAX_SIZE,
 )
 from companies.models import Company
 

@@ -29,7 +29,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return Invoice.objects.filter(company=company) if company else Invoice.objects.none()
+        return Invoice.objects.filter(company=company).select_related("storno_of", "business_location", "operator") if company else Invoice.objects.none()
 
 class InvoiceItemViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceItemSerializer
@@ -38,7 +38,7 @@ class InvoiceItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return InvoiceItem.objects.filter(invoice__company=company) if company else InvoiceItem.objects.none()
+        return InvoiceItem.objects.filter(invoice__company=company).select_related("invoice", "tax_rate_obj", "inventory_item") if company else InvoiceItem.objects.none()
 
 
 # ── LISTA RAČUNA
@@ -87,7 +87,7 @@ def index(request):
     sort_field = allowed_sorts.get(sort_by, '-date_issued')
     invoices = invoices.order_by(sort_field)
     from django.db.models import Sum
-    all_inv = Invoice.objects.filter(company=company) if company else Invoice.objects.none()
+    all_inv = Invoice.objects.filter(company=company).select_related("storno_of", "business_location", "operator") if company else Invoice.objects.none()
     totals = {
         'total':   all_inv.aggregate(s=Sum('total'))['s'] or 0,
         'unpaid':  all_inv.filter(status__in=['UNPAID','OVERDUE']).aggregate(s=Sum('total'))['s'] or 0,
@@ -446,8 +446,8 @@ def invoice_wizard(request):
     from .models import Invoice
     try:
         from .fiscal_models import BusinessLocation, FiscalConfig, FiscalOperator, InvoiceProfile
-        locations = BusinessLocation.objects.filter(is_active=True)
-        operators = FiscalOperator.objects.filter(is_active=True)
+        locations = BusinessLocation.objects.filter(is_active=True).select_related("company", "branch")
+        operators = FiscalOperator.objects.filter(is_active=True).select_related("user", "default_location")
         config = FiscalConfig.get()
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
@@ -460,7 +460,7 @@ def invoice_wizard(request):
     # Invoice profiles (filtered by company)
     from core.company_utils import get_user_company as _guc
     _co = _guc(request)
-    profiles = InvoiceProfile.objects.filter(is_active=True, company=_co) if _co else InvoiceProfile.objects.filter(is_active=True)
+    profiles = InvoiceProfile.objects.filter(is_active=True, company=_co).select_related("default_tax_rate", "company", "branch") if _co else InvoiceProfile.objects.filter(is_active=True)
     default_profile = profiles.filter(is_default=True).first() or profiles.first()
 
     # Next number from default profile or fallback
@@ -517,8 +517,8 @@ def invoice_create(request):
     from .models import Invoice
     try:
         from .fiscal_models import BusinessLocation, FiscalConfig, FiscalOperator
-        locations = BusinessLocation.objects.filter(is_active=True)
-        operators = FiscalOperator.objects.filter(is_active=True)
+        locations = BusinessLocation.objects.filter(is_active=True).select_related("company", "branch")
+        operators = FiscalOperator.objects.filter(is_active=True).select_related("user", "default_location")
         config = FiscalConfig.get()
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
@@ -558,8 +558,8 @@ def invoice_edit(request, pk):
         return redirect('invoicing:index')
     try:
         from .fiscal_models import BusinessLocation, FiscalConfig, FiscalOperator
-        locations = BusinessLocation.objects.filter(is_active=True)
-        operators = FiscalOperator.objects.filter(is_active=True)
+        locations = BusinessLocation.objects.filter(is_active=True).select_related("company", "branch")
+        operators = FiscalOperator.objects.filter(is_active=True).select_related("user", "default_location")
         config = FiscalConfig.get()
     except DatabaseError:
         logger.warning("Suppressed error", exc_info=True)
@@ -710,7 +710,7 @@ def invoice_save(request):
 @login_required
 def api_invoice_profiles(request):
     from .fiscal_models import InvoiceProfile
-    profiles = InvoiceProfile.objects.filter(is_active=True)
+    profiles = InvoiceProfile.objects.filter(is_active=True).select_related("default_tax_rate", "company", "branch")
     data = []
     for p in profiles:
         data.append({
@@ -1241,10 +1241,10 @@ def invoice_office_wizard(request):
     from .fiscal_models import BusinessLocation, FiscalOperator, InvoiceProfile
     from core.company_utils import get_user_company as _guc2
     _co2 = _guc2(request)
-    profiles = InvoiceProfile.objects.filter(is_active=True, company=_co2).order_by('-is_default', 'company_name') if _co2 else InvoiceProfile.objects.filter(is_active=True).order_by('-is_default', 'company_name')
+    profiles = InvoiceProfile.objects.filter(is_active=True, company=_co2).select_related("default_tax_rate", "company", "branch").order_by('-is_default', 'company_name') if _co2 else InvoiceProfile.objects.filter(is_active=True).order_by('-is_default', 'company_name')
     default_profile = InvoiceProfile.get_default()
-    locations = BusinessLocation.objects.filter(company=_co2) if _co2 else BusinessLocation.objects.none()
-    operators = FiscalOperator.objects.all()  # FiscalOperator has no company FK — global
+    locations = BusinessLocation.objects.filter(company=_co2).select_related("company", "branch") if _co2 else BusinessLocation.objects.none()
+    operators = FiscalOperator.objects.all().select_related("user", "default_location")  # FiscalOperator has no company FK — global
     country = 'HR'
     if default_profile:
         country = default_profile.country or 'HR'
@@ -1517,7 +1517,7 @@ def api_partner_hint(request):
     company = get_user_company(request)
     from django.db.models import Avg, Count
 
-    qs = Invoice.objects.filter(company=company, client_oib=oib)
+    qs = Invoice.objects.filter(company=company, client_oib=oib).select_related("storno_of", "business_location", "operator")
 
     if not qs.exists():
         return JsonResponse({'hint': None, 'msg': 'Novi partner — nema povijesti'})
@@ -1650,7 +1650,7 @@ def fiscal_batch_view(request):
         unfiscalized = list(Invoice.objects.filter(
             company=company, doctype='R', status__in=['SENT', 'PAID'], is_fiscalized=False,
         ).order_by('-date_issued')[:200])
-        batches = FiscalBatch.objects.filter(company=company).order_by('-created_at')[:50]
+        batches = FiscalBatch.objects.filter(company=company).select_related("company", "created_by", "invoices").order_by('-created_at')[:50]
     return render(request, 'invoicing/fiscal_batch.html', {
         'unfiscalized': unfiscalized, 'batches': batches,
     })
@@ -1674,7 +1674,7 @@ def fiscal_batch_create(request):
     if not invoice_ids:
         _msg.warning(request, 'Nisu odabrani racuni za fiskalizaciju.')
         return redirect('invoicing:fiscal_batch')
-    invoices = list(Invoice.objects.filter(pk__in=invoice_ids, company=company, is_fiscalized=False))
+    invoices = list(Invoice.objects.filter(pk__in=invoice_ids, company=company, is_fiscalized=False).select_related("storno_of", "business_location", "operator"))
     already_done = len(invoice_ids) - len(invoices)
     if not invoices:
         _msg.warning(request, 'Svi odabrani racuni su vec fiskalizirani.')
@@ -1715,7 +1715,7 @@ def fiscal_batch_create(request):
 def fiscal_certificates(request):
     from invoicing.fiscal_models import FiscalCertificate
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
-    certs = FiscalCertificate.objects.filter(company=company) if company else []
+    certs = FiscalCertificate.objects.filter(company=company).select_related("company", "location") if company else []
     return render(request, 'invoicing/fiscal_certificates.html', {'certs': certs, 'company': company})
 
 
@@ -1924,7 +1924,7 @@ def api_invoice_timeline(request, pk):
     """Get timeline events for an invoice."""
     from .models import InvoiceEvent
     invoice = get_object_or_404(Invoice, pk=pk)
-    events = InvoiceEvent.objects.filter(invoice=invoice).order_by('created_at')
+    events = InvoiceEvent.objects.filter(invoice=invoice).select_related("invoice", "actor", "updated_by").order_by('created_at')
     return JsonResponse({
         'events': [e.to_dict() for e in events],
         'invoice_pk': pk,
@@ -2003,7 +2003,7 @@ def transaction_canvas(request):
     default_profile = None
     if company:
         from core.company_utils import get_user_company as _guca; _coa = _guca(request)
-        profiles = list(InvoiceProfile.objects.filter(is_active=True, company=_coa).values(
+        profiles = list(InvoiceProfile.objects.filter(is_active=True, company=_coa).select_related("default_tax_rate", "company", "branch").values(
             'id', 'name', 'country', 'currency', 'language', 'iban', 'swift',
             'company_name', 'oib', 'vat_id', 'address', 'city', 'zip_code',
             'email', 'phone', 'default_due_days', 'default_payment_method',
@@ -2065,7 +2065,7 @@ def invoice_profiles_list(request):
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
-    profiles = InvoiceProfile.objects.filter(company=company, is_active=True).order_by('-is_default', 'name')
+    profiles = InvoiceProfile.objects.filter(company=company, is_active=True).select_related("default_tax_rate", "company", "branch").order_by('-is_default', 'name')
     return render(request, 'invoicing/profiles_list.html', {
         'profiles': profiles,
         'company': company,
@@ -2238,7 +2238,7 @@ def dunning_dashboard(request):
     ).select_related("invoice", "dunning_rule")[:50]
 
     # Dunning rules
-    rules = DunningRule.objects.filter(company=company).order_by("step")
+    rules = DunningRule.objects.filter(company=company).select_related("company").order_by("step")
 
     return render(request, "invoicing/dunning_dashboard.html", {
         "invoice_data": invoice_data,
@@ -2266,7 +2266,7 @@ def ira_ura_dashboard(request):
     year = int(request.GET.get('year', today.year))
     month = int(request.GET.get('month', today.month))
 
-    base_qs = Invoice.objects.filter(company=company)
+    base_qs = Invoice.objects.filter(company=company).select_related("storno_of", "business_location", "operator")
 
     # IRA (izdani računi) — doctype R, FA, RN, A
     ira_qs = base_qs.filter(doctype__in=('R', 'FA', 'RN', 'A'))

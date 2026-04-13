@@ -1,6 +1,5 @@
 """POS views tests with real POSTerminal/Session/Receipt data."""
 import datetime
-import json
 import uuid
 from decimal import Decimal
 from django.test import TestCase, Client

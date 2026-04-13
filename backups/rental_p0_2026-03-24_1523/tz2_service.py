@@ -28,7 +28,7 @@ def generate_tz2_data(company, year=None):
 
     Returns dict s svim podacima ili raises ValueError ako fali nešto.
     """
-    from rental.models import Property, AccommodationUnit, LandlordProfile
+    from rental.models import Property, LandlordProfile
 
     if year is None:
         year = timezone.now().year

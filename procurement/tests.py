@@ -3,8 +3,6 @@ from decimal import Decimal
 from django.test import TestCase
 from companies.models import Company
 from procurement.models import PurchaseOrder, PurchaseOrderItem
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class PurchaseOrderTest(TestCase):

@@ -26,7 +26,7 @@ def clan_list(request):
     q = request.GET.get('q', '')
     status = request.GET.get('status', '')
 
-    qs = Clan.objects.filter(company=company)
+    qs = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     if q:
         qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) |
                        Q(oib__icontains=q) | Q(phone__icontains=q))
@@ -36,15 +36,15 @@ def clan_list(request):
     today = timezone.now().date()
     from datetime import timedelta
     stats = {
-        'ukupno': Clan.objects.filter(company=company).count(),
-        'aktivni': Clan.objects.filter(company=company, status='aktivan').count(),
+        'ukupno': Clan.objects.filter(company=company).select_related("company", "paying_sponsor").count(),
+        'aktivni': Clan.objects.filter(company=company, status='aktivan').select_related("company", "paying_sponsor").count(),
         'istice_7': Clan.objects.filter(
             company=company, status='aktivan',
             membership_expires__gte=today,
             membership_expires__lte=today + timedelta(days=7)
         ).count(),
-        'ima_opg': Clan.objects.filter(company=company, has_opg=True).count(),
-        'wa_optin': Clan.objects.filter(company=company, whatsapp_opt_in=True).count(),
+        'ima_opg': Clan.objects.filter(company=company, has_opg=True).select_related("company", "paying_sponsor").count(),
+        'wa_optin': Clan.objects.filter(company=company, whatsapp_opt_in=True).select_related("company", "paying_sponsor").count(),
     }
 
     paginator = Paginator(qs, 30)
@@ -291,7 +291,7 @@ def clanarina_pay(request, pk):
 
     # Auto-zapis u Knjigu primitaka
     from .models import KnjigaPrimitaka
-    last = KnjigaPrimitaka.objects.filter(company=company).order_by('-redni_broj').first()
+    last = KnjigaPrimitaka.objects.filter(company=company).select_related("company", "clanarina", "donacija").order_by('-redni_broj').first()
     rb = (last.redni_broj + 1) if last else 1
     KnjigaPrimitaka.objects.create(
         company=company,
@@ -325,7 +325,7 @@ def clanarina_bulk_create(request):
 
     from decimal import Decimal
     amount = Decimal(amount)
-    aktivni = Clan.objects.filter(company=company, status='aktivan')
+    aktivni = Clan.objects.filter(company=company, status='aktivan').select_related("company", "paying_sponsor")
     created = 0
     for clan in aktivni:
         if not Clanarina.objects.filter(
@@ -353,7 +353,7 @@ def donacija_list(request):
 
     from .models import Donacija
     from django.db.models import Sum
-    qs = Donacija.objects.filter(company=company)
+    qs = Donacija.objects.filter(company=company).select_related("company")
 
     year = request.GET.get('year', str(timezone.now().year))
     qs = qs.filter(date__year=year)
@@ -392,7 +392,7 @@ def donacija_create(request):
         )
 
         # Auto-zapis u Knjigu primitaka
-        last = KnjigaPrimitaka.objects.filter(company=company).order_by('-redni_broj').first()
+        last = KnjigaPrimitaka.objects.filter(company=company).select_related("company", "clanarina", "donacija").order_by('-redni_broj').first()
         rb = (last.redni_broj + 1) if last else 1
         KnjigaPrimitaka.objects.create(
             company=company,
@@ -446,7 +446,7 @@ def knjiga_primitaka(request):
     from django.db.models import Sum
 
     year = request.GET.get('year', str(timezone.now().year))
-    qs = KnjigaPrimitaka.objects.filter(company=company, datum__year=year)
+    qs = KnjigaPrimitaka.objects.filter(company=company, datum__year=year).select_related("company", "clanarina", "donacija")
 
     primici = qs.filter(vrsta='primitak').aggregate(s=Sum('iznos'))['s'] or 0
     izdaci = qs.filter(vrsta='izdatak').aggregate(s=Sum('iznos'))['s'] or 0
@@ -470,7 +470,7 @@ def knjiga_primitaka_create(request):
 
     if request.method == 'POST':
         from decimal import Decimal
-        last = KnjigaPrimitaka.objects.filter(company=company).order_by('-redni_broj').first()
+        last = KnjigaPrimitaka.objects.filter(company=company).select_related("company", "clanarina", "donacija").order_by('-redni_broj').first()
         rb = (last.redni_broj + 1) if last else 1
 
         KnjigaPrimitaka.objects.create(
@@ -749,7 +749,7 @@ def dogadjaj_list(request):
     status_f = request.GET.get("status", "")
     type_f = request.GET.get("event_type", "")
 
-    qs = Dogadjaj.objects.filter(company=company)
+    qs = Dogadjaj.objects.filter(company=company).select_related("company", "organizer", "kampanja")
     if status_f:
         qs = qs.filter(status=status_f)
     if type_f:
@@ -757,9 +757,9 @@ def dogadjaj_list(request):
 
     today = timezone.now()
     stats = {
-        "ukupno": Dogadjaj.objects.filter(company=company).count(),
-        "predstojeci": Dogadjaj.objects.filter(company=company, start_date__gte=today).exclude(status="cancelled").count(),
-        "zavrseni": Dogadjaj.objects.filter(company=company, status="completed").count(),
+        "ukupno": Dogadjaj.objects.filter(company=company).select_related("company", "organizer", "kampanja").count(),
+        "predstojeci": Dogadjaj.objects.filter(company=company, start_date__gte=today).select_related("company", "organizer", "kampanja").exclude(status="cancelled").count(),
+        "zavrseni": Dogadjaj.objects.filter(company=company, status="completed").select_related("company", "organizer", "kampanja").count(),
     }
 
     paginator = Paginator(qs, 12)
@@ -812,7 +812,7 @@ def dogadjaj_create(request):
         messages.success(request, _("Dogadjaj '%s' kreiran.") % dogadjaj.name)
         return redirect("udruge:dogadjaj_detail", pk=dogadjaj.pk)
 
-    kampanje = Kampanja.objects.filter(company=company, status__in=["draft", "active"])
+    kampanje = Kampanja.objects.filter(company=company, status__in=["draft", "active"]).select_related("company", "responsible")
     return render(request, "udruge/dogadjaj_form.html", {
         "type_choices": Dogadjaj.TYPE_CHOICES,
         "status_choices": Dogadjaj.STATUS_CHOICES,
@@ -828,7 +828,7 @@ def dogadjaj_detail(request, pk):
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
     prijave = dogadjaj.prijave.select_related("clan").all()
 
-    user_clan = Clan.objects.filter(company=company, email=request.user.email).first()
+    user_clan = Clan.objects.filter(company=company, email=request.user.email).select_related("company", "paying_sponsor").first()
     user_registered = False
     if user_clan:
         user_registered = prijave.filter(clan=user_clan).exists()
@@ -849,7 +849,7 @@ def dogadjaj_register(request, pk):
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
 
-    clan = Clan.objects.filter(company=company, email=request.user.email).first()
+    clan = Clan.objects.filter(company=company, email=request.user.email).select_related("company", "paying_sponsor").first()
     if not clan:
         messages.error(request, _("Nemate clan profil u ovoj udruzi."))
         return redirect("udruge:dogadjaj_detail", pk=pk)
@@ -885,7 +885,7 @@ def kampanja_list(request):
     type_f = request.GET.get("type", "")
     status_f = request.GET.get("status", "")
 
-    qs = Kampanja.objects.filter(company=company)
+    qs = Kampanja.objects.filter(company=company).select_related("company", "responsible")
     if type_f:
         qs = qs.filter(campaign_type=type_f)
     if status_f:
@@ -893,9 +893,9 @@ def kampanja_list(request):
 
     from django.db.models import Sum
     stats = {
-        "ukupno": Kampanja.objects.filter(company=company).count(),
-        "aktivne": Kampanja.objects.filter(company=company, status="active").count(),
-        "prikupljeno": Kampanja.objects.filter(company=company).aggregate(s=Sum("raised_amount"))["s"] or 0,
+        "ukupno": Kampanja.objects.filter(company=company).select_related("company", "responsible").count(),
+        "aktivne": Kampanja.objects.filter(company=company, status="active").select_related("company", "responsible").count(),
+        "prikupljeno": Kampanja.objects.filter(company=company).select_related("company", "responsible").aggregate(s=Sum("raised_amount"))["s"] or 0,
     }
 
     paginator = Paginator(qs, 12)
@@ -955,7 +955,7 @@ def kampanja_detail(request, pk):
     kampanja = get_object_or_404(Kampanja, pk=pk, company=company)
     events = kampanja.dogadjaji.all()
 
-    donacije = Donacija.objects.filter(company=company)
+    donacije = Donacija.objects.filter(company=company).select_related("company")
     if kampanja.start_date and kampanja.end_date:
         donacije = donacije.filter(date__gte=kampanja.start_date, date__lte=kampanja.end_date)
     else:
@@ -980,7 +980,7 @@ def email_kampanja_list(request):
         return redirect("dashboard")
 
     from .models import EmailKampanja
-    qs = EmailKampanja.objects.filter(company=company)
+    qs = EmailKampanja.objects.filter(company=company).select_related("company", "target_kampanja", "target_dogadjaj")
 
     paginator = Paginator(qs, 20)
     page = paginator.get_page(request.GET.get("page"))
@@ -1044,9 +1044,9 @@ def email_kampanja_create(request):
         messages.success(request, _("Email kampanja '%s' kreirana.") % ek.name)
         return redirect("udruge:email_kampanja_list")
 
-    kampanje = Kampanja.objects.filter(company=company)
-    dogadjaji = Dogadjaj.objects.filter(company=company)
-    member_count = Clan.objects.filter(company=company, status="aktivan").exclude(email="").count()
+    kampanje = Kampanja.objects.filter(company=company).select_related("company", "responsible")
+    dogadjaji = Dogadjaj.objects.filter(company=company).select_related("company", "organizer", "kampanja")
+    member_count = Clan.objects.filter(company=company, status="aktivan").select_related("company", "paying_sponsor").exclude(email="").count()
 
     return render(request, "udruge/email_kampanja_create.html", {
         "type_choices": EmailKampanja.TYPE_CHOICES,
@@ -1170,11 +1170,11 @@ def volunteer_create(request):
         messages.success(request, _('Volonterska aktivnost evidentirana.'))
         return redirect('udruge:volunteer_list')
     return render(request, 'udruge/volunteer_form.html', {
-        'clanovi': Clan.objects.filter(company=company, status='aktivan'),
+        'clanovi': Clan.objects.filter(company=company, status='aktivan').select_related("company", "paying_sponsor"),
         'category_choices': VolunteerActivity.CATEGORY_CHOICES,
         'status_choices': VolunteerActivity.STATUS_CHOICES,
-        'dogadjaji': Dogadjaj.objects.filter(company=company)[:20],
-        'kampanje': Kampanja.objects.filter(company=company)[:20],
+        'dogadjaji': Dogadjaj.objects.filter(company=company).select_related("company", "organizer", "kampanja")[:20],
+        'kampanje': Kampanja.objects.filter(company=company).select_related("company", "responsible")[:20],
     })
 
 
@@ -1209,7 +1209,7 @@ def api_member_lookup(request):
     company = get_user_company(request)
 
     # Traži po card_number, oib, ili imenu
-    member = Clan.objects.filter(company=company).filter(
+    member = Clan.objects.filter(company=company).select_related("company", "paying_sponsor").filter(
         Q(card_number=code) |
         Q(oib=code) |
         Q(first_name__icontains=code) |
@@ -1254,7 +1254,7 @@ def sekcija_list(request):
     if not company:
         return redirect('/')
     from .models import Sekcija
-    sekcije = Sekcija.objects.filter(company=company)
+    sekcije = Sekcija.objects.filter(company=company).select_related("company", "leader")
     return render(request, 'udruge/sekcija_list.html', {'sekcije': sekcije})
 
 
@@ -1265,7 +1265,7 @@ def sekcija_detail(request, pk):
     sekcija = get_object_or_404(Sekcija, pk=pk, company=company)
     members = sekcija.members.select_related('clan').all()
     from .models import Clan
-    available_clans = Clan.objects.filter(company=company, status='aktivan').exclude(
+    available_clans = Clan.objects.filter(company=company, status='aktivan').select_related("company", "paying_sponsor").exclude(
         pk__in=members.values_list('clan_id', flat=True)
     )
     return render(request, 'udruge/sekcija_detail.html', {
@@ -1316,7 +1316,7 @@ def clan_dokumenti(request, pk):
     company = get_user_company(request)
     from .models import Clan, ClanskiDokument
     clan = get_object_or_404(Clan, pk=pk, company=company)
-    docs = ClanskiDokument.objects.filter(clan=clan)
+    docs = ClanskiDokument.objects.filter(clan=clan).select_related("clan")
 
     if request.method == 'POST':
         ClanskiDokument.objects.create(
@@ -1375,11 +1375,11 @@ def dvd_dashboard(request):
     from datetime import timedelta
 
     today = timezone.now().date()
-    oprema = VatrogasnaOprema.objects.filter(company=company)
-    vozila = VatrogasnoVozilo.objects.filter(company=company)
-    intervencije = Intervencija.objects.filter(company=company)
-    vjezbe = Vjezba.objects.filter(company=company)
-    zvanja = VatrogasnoZvanje.objects.filter(company=company)
+    oprema = VatrogasnaOprema.objects.filter(company=company).select_related("company")
+    vozila = VatrogasnoVozilo.objects.filter(company=company).select_related("company")
+    intervencije = Intervencija.objects.filter(company=company).select_related("company", "voditelj", "created_by")
+    vjezbe = Vjezba.objects.filter(company=company).select_related("company", "voditelj", "sudionici")
+    zvanja = VatrogasnoZvanje.objects.filter(company=company).select_related("clan")
 
     ctx = {
         'oprema_total': oprema.count(),
@@ -1405,7 +1405,7 @@ def vatrogasna_oprema_list(request):
     if not company:
         return redirect('/')
     from .models import VatrogasnaOprema
-    qs = VatrogasnaOprema.objects.filter(company=company)
+    qs = VatrogasnaOprema.objects.filter(company=company).select_related("company")
     kat = request.GET.get('kategorija', '')
     status = request.GET.get('status', '')
     if kat:
@@ -1466,7 +1466,7 @@ def vatrogasno_vozilo_list(request):
     if not company:
         return redirect('/')
     from .models import VatrogasnoVozilo
-    qs = VatrogasnoVozilo.objects.filter(company=company)
+    qs = VatrogasnoVozilo.objects.filter(company=company).select_related("company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/vatrogasno_vozilo_list.html', {'page_obj': page})
@@ -1555,7 +1555,7 @@ def intervencija_create(request):
         )
         messages.success(request, _('Intervencija evidentirana.'))
         return redirect('udruge:intervencija_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/intervencija_form.html', {
         'tipovi': Intervencija.TIP_CHOICES, 'clanovi': clanovi,
     })
@@ -1602,7 +1602,7 @@ def vjezba_create(request):
         )
         messages.success(request, _('Vježba evidentirana.'))
         return redirect('udruge:vjezba_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/vjezba_form.html', {
         'tipovi': Vjezba.TIP_CHOICES, 'clanovi': clanovi,
     })
@@ -1647,7 +1647,7 @@ def vatrogasno_zvanje_create(request):
         )
         messages.success(request, _('Zvanje dodano.'))
         return redirect('udruge:vatrogasno_zvanje_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/vatrogasno_zvanje_form.html', {'clanovi': clanovi})
 
 
@@ -1672,10 +1672,10 @@ def kud_dashboard(request):
     from django.db.models import Sum
 
     today = timezone.now().date()
-    repertoar = Repertoar.objects.filter(company=company)
-    probe = ProbaLog.objects.filter(company=company)
-    kostimi = Kostim.objects.filter(company=company)
-    nastupi = NastupPlan.objects.filter(dogadjaj__company=company)
+    repertoar = Repertoar.objects.filter(company=company).select_related("company", "sekcija")
+    probe = ProbaLog.objects.filter(company=company).select_related("company", "sekcija", "voditelj")
+    kostimi = Kostim.objects.filter(company=company).select_related("company", "sekcija", "dodijeljen_clanu")
+    nastupi = NastupPlan.objects.filter(dogadjaj__company=company).select_related("dogadjaj")
 
     ctx = {
         'repertoar_total': repertoar.count(),
@@ -1700,7 +1700,7 @@ def repertoar_list(request):
     if not company:
         return redirect('/')
     from .models import Repertoar
-    qs = Repertoar.objects.filter(company=company)
+    qs = Repertoar.objects.filter(company=company).select_related("company", "sekcija")
     tip = request.GET.get('tip', '')
     if tip:
         qs = qs.filter(tip=tip)
@@ -1733,7 +1733,7 @@ def repertoar_create(request):
         )
         messages.success(request, _('Repertoar dodan.'))
         return redirect('udruge:repertoar_list')
-    sekcije = Sekcija.objects.filter(company=company)
+    sekcije = Sekcija.objects.filter(company=company).select_related("company", "leader")
     return render(request, 'udruge/repertoar_form.html', {
         'tipovi': Repertoar.TIP_CHOICES, 'sekcije': sekcije,
     })
@@ -1778,8 +1778,8 @@ def proba_create(request):
         )
         messages.success(request, _('Proba evidentirana.'))
         return redirect('udruge:proba_list')
-    sekcije = Sekcija.objects.filter(company=company)
-    clanovi = Clan.objects.filter(company=company)
+    sekcije = Sekcija.objects.filter(company=company).select_related("company", "leader")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/proba_form.html', {'sekcije': sekcije, 'clanovi': clanovi})
 
 
@@ -1833,8 +1833,8 @@ def kostim_create(request):
         )
         messages.success(request, _('Kostim dodan.'))
         return redirect('udruge:kostim_list')
-    sekcije = Sekcija.objects.filter(company=company)
-    clanovi = Clan.objects.filter(company=company)
+    sekcije = Sekcija.objects.filter(company=company).select_related("company", "leader")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/kostim_form.html', {
         'stanja': Kostim.STANJE_CHOICES, 'sekcije': sekcije, 'clanovi': clanovi,
     })
@@ -1880,7 +1880,7 @@ def nastup_plan_create(request):
         )
         messages.success(request, _('Plan nastupa kreiran.'))
         return redirect('udruge:nastup_plan_list')
-    dogadjaji = Dogadjaj.objects.filter(company=company)
+    dogadjaji = Dogadjaj.objects.filter(company=company).select_related("company", "organizer", "kampanja")
     return render(request, 'udruge/nastup_plan_form.html', {'dogadjaji': dogadjaji})
 
 
@@ -1905,11 +1905,11 @@ def ribari_dashboard(request):
     from django.db.models import Sum
 
     today = timezone.now().date()
-    reviri = Revir.objects.filter(company=company)
-    dozvole = RibolovnaDozvola.objects.filter(company=company)
-    ulovi = UlovEvidencija.objects.filter(revir__company=company)
-    poribljavanje = Poribljavanje.objects.filter(revir__company=company)
-    straze = CuvarskaStraza.objects.filter(company=company)
+    reviri = Revir.objects.filter(company=company).select_related("company")
+    dozvole = RibolovnaDozvola.objects.filter(company=company).select_related("company", "clan", "reviri")
+    ulovi = UlovEvidencija.objects.filter(revir__company=company).select_related("company", "clan", "revir")
+    poribljavanje = Poribljavanje.objects.filter(revir__company=company).select_related("company", "revir")
+    straze = CuvarskaStraza.objects.filter(company=company).select_related("company", "cuvar", "revir")
 
     ctx = {
         'reviri_total': reviri.count(),
@@ -1935,7 +1935,7 @@ def revir_list(request):
     if not company:
         return redirect('/')
     from .models import Revir
-    qs = Revir.objects.filter(company=company)
+    qs = Revir.objects.filter(company=company).select_related("company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/revir_list.html', {'page_obj': page})
@@ -2008,8 +2008,8 @@ def ribolovna_dozvola_create(request):
         )
         messages.success(request, _('Dozvola izdana.'))
         return redirect('udruge:ribolovna_dozvola_list')
-    clanovi = Clan.objects.filter(company=company)
-    reviri = Revir.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
+    reviri = Revir.objects.filter(company=company, is_active=True).select_related("company")
     return render(request, 'udruge/ribolovna_dozvola_form.html', {
         'kategorije': RibolovnaDozvola.KATEGORIJA_CHOICES, 'clanovi': clanovi, 'reviri': reviri,
     })
@@ -2056,8 +2056,8 @@ def ulov_create(request):
         )
         messages.success(request, _('Ulov evidentiran.'))
         return redirect('udruge:ulov_list')
-    reviri = Revir.objects.filter(company=company, is_active=True)
-    clanovi = Clan.objects.filter(company=company)
+    reviri = Revir.objects.filter(company=company, is_active=True).select_related("company")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/ulov_form.html', {'reviri': reviri, 'clanovi': clanovi})
 
 
@@ -2102,7 +2102,7 @@ def poribljavanje_create(request):
         )
         messages.success(request, _('Poribljavanje evidentirano.'))
         return redirect('udruge:poribljavanje_list')
-    reviri = Revir.objects.filter(company=company, is_active=True)
+    reviri = Revir.objects.filter(company=company, is_active=True).select_related("company")
     return render(request, 'udruge/poribljavanje_form.html', {'reviri': reviri})
 
 
@@ -2145,8 +2145,8 @@ def cuvarska_straza_create(request):
         )
         messages.success(request, _('Čuvarska straža evidentirana.'))
         return redirect('udruge:cuvarska_straza_list')
-    clanovi = Clan.objects.filter(company=company)
-    reviri = Revir.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
+    reviri = Revir.objects.filter(company=company, is_active=True).select_related("company")
     return render(request, 'udruge/cuvarska_straza_form.html', {'clanovi': clanovi, 'reviri': reviri})
 
 
@@ -2171,11 +2171,11 @@ def pcelari_dashboard(request):
     from django.db.models import Sum
 
     today = timezone.now().date()
-    pcelinjaci = Pcelinjak.objects.filter(company=company)
-    kosnice = Kosnica.objects.filter(pcelinjak__company=company)
-    tretmani = TretmanKosnice.objects.filter(kosnica__pcelinjak__company=company)
-    med = MedProizvodnja.objects.filter(pcelinjak__company=company)
-    selidbe = SelidbaLog.objects.filter(pcelinjak__company=company)
+    pcelinjaci = Pcelinjak.objects.filter(company=company).select_related("company", "vlasnik")
+    kosnice = Kosnica.objects.filter(pcelinjak__company=company).select_related("pcelinjak")
+    tretmani = TretmanKosnice.objects.filter(kosnica__pcelinjak__company=company).select_related("kosnica")
+    med = MedProizvodnja.objects.filter(pcelinjak__company=company).select_related("pcelinjak")
+    selidbe = SelidbaLog.objects.filter(pcelinjak__company=company).select_related("pcelinjak")
 
     ctx = {
         'pcelinjaci_total': pcelinjaci.count(),
@@ -2224,7 +2224,7 @@ def pcelinjak_create(request):
         )
         messages.success(request, _('Pčelinjak dodan.'))
         return redirect('udruge:pcelinjak_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/pcelinjak_form.html', {'clanovi': clanovi})
 
 
@@ -2273,7 +2273,7 @@ def kosnica_create(request):
         )
         messages.success(request, _('Košnica dodana.'))
         return redirect('udruge:kosnica_list')
-    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    pcelinjaci = Pcelinjak.objects.filter(company=company).select_related("company", "vlasnik")
     return render(request, 'udruge/kosnica_form.html', {
         'pcelinjaci': pcelinjaci, 'tipovi': Kosnica.TIP_CHOICES, 'statusi': Kosnica.STATUS_CHOICES,
     })
@@ -2368,7 +2368,7 @@ def med_proizvodnja_create(request):
         )
         messages.success(request, _('Proizvodnja meda evidentirana.'))
         return redirect('udruge:med_proizvodnja_list')
-    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    pcelinjaci = Pcelinjak.objects.filter(company=company).select_related("company", "vlasnik")
     return render(request, 'udruge/med_proizvodnja_form.html', {
         'pcelinjaci': pcelinjaci, 'vrste': MedProizvodnja.VRSTA_CHOICES,
     })
@@ -2413,7 +2413,7 @@ def selidba_create(request):
         )
         messages.success(request, _('Selidba evidentirana.'))
         return redirect('udruge:selidba_list')
-    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    pcelinjaci = Pcelinjak.objects.filter(company=company).select_related("company", "vlasnik")
     return render(request, 'udruge/selidba_form.html', {'pcelinjaci': pcelinjaci})
 
 
@@ -2438,10 +2438,10 @@ def rakija_dashboard(request):
     from django.db.models import Sum
 
     today = timezone.now().date()
-    kotlovi = DestilacijaKotao.objects.filter(company=company)
-    destilacije = DestilacijaLog.objects.filter(kotao__company=company)
-    rakije = RakijaProizvodnja.objects.filter(company=company)
-    trosarine = TrosarinaPrijava.objects.filter(company=company)
+    kotlovi = DestilacijaKotao.objects.filter(company=company).select_related("company", "vlasnik")
+    destilacije = DestilacijaLog.objects.filter(kotao__company=company).select_related("kotao")
+    rakije = RakijaProizvodnja.objects.filter(company=company).select_related("destilacija", "company")
+    trosarine = TrosarinaPrijava.objects.filter(company=company).select_related("company")
 
     ctx = {
         'kotlovi_total': kotlovi.count(),
@@ -2490,7 +2490,7 @@ def destilacija_kotao_create(request):
         )
         messages.success(request, _('Kotao registriran.'))
         return redirect('udruge:destilacija_kotao_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/destilacija_kotao_form.html', {'clanovi': clanovi})
 
 
@@ -2536,7 +2536,7 @@ def destilacija_log_create(request):
         )
         messages.success(request, _('Destilacija evidentirana.'))
         return redirect('udruge:destilacija_log_list')
-    kotlovi = DestilacijaKotao.objects.filter(company=company, is_active=True)
+    kotlovi = DestilacijaKotao.objects.filter(company=company, is_active=True).select_related("company", "vlasnik")
     return render(request, 'udruge/destilacija_log_form.html', {
         'kotlovi': kotlovi, 'sirovine': DestilacijaLog.SIROVINA_CHOICES,
     })
@@ -2556,7 +2556,7 @@ def rakija_proizvodnja_list(request):
     if not company:
         return redirect('/')
     from .models import RakijaProizvodnja
-    qs = RakijaProizvodnja.objects.filter(company=company)
+    qs = RakijaProizvodnja.objects.filter(company=company).select_related("destilacija", "company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/rakija_proizvodnja_list.html', {'page_obj': page})
@@ -2585,7 +2585,7 @@ def rakija_proizvodnja_create(request):
         )
         messages.success(request, _('Rakija evidentirana.'))
         return redirect('udruge:rakija_proizvodnja_list')
-    destilacije = DestilacijaLog.objects.filter(kotao__company=company)[:50]
+    destilacije = DestilacijaLog.objects.filter(kotao__company=company).select_related("kotao")[:50]
     today = timezone.now().date()
     return render(request, 'udruge/rakija_proizvodnja_form.html', {'destilacije': destilacije})
 
@@ -2604,7 +2604,7 @@ def trosarina_list(request):
     if not company:
         return redirect('/')
     from .models import TrosarinaPrijava
-    qs = TrosarinaPrijava.objects.filter(company=company)
+    qs = TrosarinaPrijava.objects.filter(company=company).select_related("company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/trosarina_list.html', {'page_obj': page})
@@ -2657,9 +2657,9 @@ def vocari_dashboard(request):
     from django.db.models import Sum, Count
 
     today = timezone.now().date()
-    vocnjaci = Vocnjak.objects.filter(company=company)
-    berbe = BerbaLog.objects.filter(vocnjak__company=company)
-    tretmani = TretmanVocnjaka.objects.filter(vocnjak__company=company)
+    vocnjaci = Vocnjak.objects.filter(company=company).select_related("company", "vlasnik", "field")
+    berbe = BerbaLog.objects.filter(vocnjak__company=company).select_related("vocnjak")
+    tretmani = TretmanVocnjaka.objects.filter(vocnjak__company=company).select_related("vocnjak")
 
     ctx = {
         'vocnjaci_total': vocnjaci.count(),
@@ -2719,7 +2719,7 @@ def vocnjak_create(request):
         )
         messages.success(request, _('Voćnjak dodan.'))
         return redirect('udruge:vocnjak_list')
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/vocnjak_form.html', {
         'vrste': Vocnjak.VRSTA_CHOICES, 'sustavi': Vocnjak.SUSTAV_CHOICES, 'clanovi': clanovi,
     })
@@ -2771,7 +2771,7 @@ def berba_create(request):
         )
         messages.success(request, _('Berba evidentirana.'))
         return redirect('udruge:berba_list')
-    vocnjaci = Vocnjak.objects.filter(company=company)
+    vocnjaci = Vocnjak.objects.filter(company=company).select_related("company", "vlasnik", "field")
     return render(request, 'udruge/berba_form.html', {'vocnjaci': vocnjaci})
 
 
@@ -2817,7 +2817,7 @@ def tretman_vocnjaka_create(request):
         )
         messages.success(request, _('Tretman evidentiran.'))
         return redirect('udruge:tretman_vocnjaka_list')
-    vocnjaci = Vocnjak.objects.filter(company=company)
+    vocnjaci = Vocnjak.objects.filter(company=company).select_related("company", "vlasnik", "field")
     return render(request, 'udruge/tretman_vocnjaka_form.html', {
         'vocnjaci': vocnjaci, 'tipovi': TretmanVocnjaka.TIP_CHOICES,
     })
@@ -2894,7 +2894,7 @@ def intervencija_edit(request, pk):
         obj.save()
         messages.success(request, _('Intervencija azurirana.'))
         return redirect('udruge:intervencija_detail', pk=obj.pk)
-    clanovi = Clan.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/intervencija_form.html', {
         'intervencija': obj, 'edit': True,
         'tipovi': Intervencija.TIP_CHOICES, 'clanovi': clanovi,
@@ -2925,8 +2925,8 @@ def kostim_edit(request, pk):
         obj.save()
         messages.success(request, _('Kostim azuriran.'))
         return redirect('udruge:kostim_list')
-    sekcije = Sekcija.objects.filter(company=company)
-    clanovi = Clan.objects.filter(company=company)
+    sekcije = Sekcija.objects.filter(company=company).select_related("company", "leader")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/kostim_form.html', {
         'kostim': obj, 'edit': True,
         'stanja': Kostim.STANJE_CHOICES, 'sekcije': sekcije, 'clanovi': clanovi,
@@ -3006,14 +3006,14 @@ def lov_dashboard(request):
     if not company:
         return redirect('/')
     from .models import LovackaIskaznica, ZapisnikLova, Trofej, Loviste
-    iskaznice = LovackaIskaznica.objects.filter(company=company)
+    iskaznice = LovackaIskaznica.objects.filter(company=company).select_related("company", "clan")
     stats = {
         'lovaca': iskaznice.count(),
         'aktivne_iskaznice': sum(1 for i in iskaznice if i.je_aktivna),
         'treba_markicu': sum(1 for i in iskaznice if i.treba_markicu),
-        'odstrjel_ukupno': ZapisnikLova.objects.filter(company=company).count(),
-        'trofeji_medalja': Trofej.objects.filter(company=company).exclude(medalja='').count(),
-        'lovista': Loviste.objects.filter(company=company, is_active=True).count(),
+        'odstrjel_ukupno': ZapisnikLova.objects.filter(company=company).select_related("company", "dopustenje", "loviste").count(),
+        'trofeji_medalja': Trofej.objects.filter(company=company).select_related("company", "zapisnik", "clan").exclude(medalja='').count(),
+        'lovista': Loviste.objects.filter(company=company, is_active=True).select_related("company").count(),
     }
     zapisnici = ZapisnikLova.objects.filter(company=company).select_related('clan', 'loviste')[:10]
     return render(request, 'udruge/lov_dashboard.html', {'stats': stats, 'zapisnici': zapisnici})
@@ -3063,8 +3063,8 @@ def lov_dopustenje_create(request):
         )
         messages.success(request, _('Dopuštenje kreirano.'))
         return redirect('udruge:lov_dopustenja_list')
-    lovista = Loviste.objects.filter(company=company, is_active=True)
-    clanovi = Clan.objects.filter(company=company)
+    lovista = Loviste.objects.filter(company=company, is_active=True).select_related("company")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/lov_dopustenje_form.html', {'lovista': lovista, 'clanovi': clanovi})
 
 
@@ -3104,9 +3104,9 @@ def lov_zapisnik_create(request):
         messages.success(request, _('Zapisnik kreiran.'))
         return redirect('udruge:lov_zapisnici_list')
     from .models import DopustenjeLova
-    lovista = Loviste.objects.filter(company=company, is_active=True)
-    clanovi = Clan.objects.filter(company=company)
-    dopustenja = DopustenjeLova.objects.filter(company=company).order_by('-datum_lova')[:20]
+    lovista = Loviste.objects.filter(company=company, is_active=True).select_related("company")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
+    dopustenja = DopustenjeLova.objects.filter(company=company).select_related("company", "loviste", "clan").order_by('-datum_lova')[:20]
     return render(request, 'udruge/lov_zapisnik_form.html', {
         'lovista': lovista, 'clanovi': clanovi, 'dopustenja': dopustenja,
         'nacin_choices': ZapisnikLova.NACIN_LOVA,
@@ -3175,8 +3175,8 @@ def lov_dopustenje_edit(request, pk):
         obj.save()
         messages.success(request, _('Dopuštenje ažurirano.'))
         return redirect('udruge:lov_dopustenja_list')
-    lovista = Loviste.objects.filter(company=company, is_active=True)
-    clanovi = Clan.objects.filter(company=company)
+    lovista = Loviste.objects.filter(company=company, is_active=True).select_related("company")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
     return render(request, 'udruge/lov_dopustenje_form.html', {
         'obj': obj, 'edit': True, 'lovista': lovista, 'clanovi': clanovi,
     })
@@ -3202,9 +3202,9 @@ def lov_zapisnik_edit(request, pk):
         obj.save()
         messages.success(request, _('Zapisnik ažuriran.'))
         return redirect('udruge:lov_zapisnici_list')
-    lovista = Loviste.objects.filter(company=company, is_active=True)
-    clanovi = Clan.objects.filter(company=company)
-    dopustenja = DopustenjeLova.objects.filter(company=company).order_by('-datum_lova')[:20]
+    lovista = Loviste.objects.filter(company=company, is_active=True).select_related("company")
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
+    dopustenja = DopustenjeLova.objects.filter(company=company).select_related("company", "loviste", "clan").order_by('-datum_lova')[:20]
     return render(request, 'udruge/lov_zapisnik_form.html', {
         'obj': obj, 'edit': True, 'lovista': lovista, 'clanovi': clanovi,
         'dopustenja': dopustenja, 'nacin_choices': ZapisnikLova.NACIN_LOVA,
@@ -3217,7 +3217,7 @@ def loviste_list(request):
     if not company:
         return redirect('/')
     from .models import Loviste
-    qs = Loviste.objects.filter(company=company)
+    qs = Loviste.objects.filter(company=company).select_related("company")
     return render(request, 'udruge/loviste_list.html', {'lovista': qs})
 
 
@@ -3295,8 +3295,8 @@ def trofej_create(request):
         )
         messages.success(request, _('Trofej dodan.'))
         return redirect('udruge:lov_trofeji_list')
-    clanovi = Clan.objects.filter(company=company)
-    zapisnici = ZapisnikLova.objects.filter(company=company).order_by('-datum')[:30]
+    clanovi = Clan.objects.filter(company=company).select_related("company", "paying_sponsor")
+    zapisnici = ZapisnikLova.objects.filter(company=company).select_related("company", "dopustenje", "loviste").order_by('-datum')[:30]
     return render(request, 'udruge/trofej_form.html', {
         'clanovi': clanovi, 'zapisnici': zapisnici,
         'vrsta_choices': Trofej.VRSTA_TROFEJA,
@@ -3315,9 +3315,9 @@ def zadruge_dashboard(request):
         return redirect('/')
     from .models import Zadrugar, ZadruznRevizija
     from django.db.models import Sum
-    zadrugari = Zadrugar.objects.filter(company=company, status='aktivan')
+    zadrugari = Zadrugar.objects.filter(company=company, status='aktivan').select_related("company")
     ukupni_ulozi = zadrugari.aggregate(s=Sum('clanski_ulog_eur'))['s'] or 0
-    zadnja_revizija = ZadruznRevizija.objects.filter(company=company).first()
+    zadnja_revizija = ZadruznRevizija.objects.filter(company=company).select_related("company").first()
     stats = {
         'ukupno': zadrugari.count(),
         'osnivaci': zadrugari.filter(uloga='osnivac').count(),
@@ -3394,14 +3394,14 @@ def golubar_dashboard(request):
         return redirect('/')
     from .models import Golubinjak, Golub, ParGolubova, Utrka, ZdravstveniZapisGolub
     stats = {
-        'golubinjaka': Golubinjak.objects.filter(company=company).count(),
-        'golubova': Golub.objects.filter(company=company).count(),
-        'aktivnih': Golub.objects.filter(company=company, aktivan=True).count(),
-        'parova': ParGolubova.objects.filter(company=company).count(),
-        'utrka': Utrka.objects.filter(company=company).count(),
-        'zdravstvenih_zapisa': ZdravstveniZapisGolub.objects.filter(golub__company=company).count(),
+        'golubinjaka': Golubinjak.objects.filter(company=company).select_related("company").count(),
+        'golubova': Golub.objects.filter(company=company).select_related("company", "golubinjak", "otac").count(),
+        'aktivnih': Golub.objects.filter(company=company, aktivan=True).select_related("company", "golubinjak", "otac").count(),
+        'parova': ParGolubova.objects.filter(company=company).select_related("company", "golubinjak", "muzjak").count(),
+        'utrka': Utrka.objects.filter(company=company).select_related("company").count(),
+        'zdravstvenih_zapisa': ZdravstveniZapisGolub.objects.filter(golub__company=company).select_related("golub").count(),
     }
-    utrke = Utrka.objects.filter(company=company)[:10]
+    utrke = Utrka.objects.filter(company=company).select_related("company")[:10]
     return render(request, 'udruge/golubar_dashboard.html', {'stats': stats, 'utrke': utrke})
 
 
@@ -3411,7 +3411,7 @@ def golubinjak_list(request):
     if not company:
         return redirect('/')
     from .models import Golubinjak
-    qs = Golubinjak.objects.filter(company=company)
+    qs = Golubinjak.objects.filter(company=company).select_related("company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/golubar_golubinjak_list.html', {'page_obj': page})
@@ -3496,8 +3496,8 @@ def golub_create(request):
             golub.save()
         messages.success(request, _('Golub %s kreiran.') % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
-    golubinjaci = Golubinjak.objects.filter(company=company)
-    golubovi = Golub.objects.filter(company=company)
+    golubinjaci = Golubinjak.objects.filter(company=company).select_related("company")
+    golubovi = Golub.objects.filter(company=company).select_related("company", "golubinjak", "otac")
     return render(request, 'udruge/golubar_golub_form.html', {
         'golubinjaci': golubinjaci,
         'muzjaci': golubovi.filter(spol='M'),
@@ -3555,8 +3555,8 @@ def golub_edit(request, pk):
         golub.save()
         messages.success(request, _('Golub %s azuriran.') % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
-    golubinjaci = Golubinjak.objects.filter(company=company)
-    golubovi = Golub.objects.filter(company=company).exclude(pk=golub.pk)
+    golubinjaci = Golubinjak.objects.filter(company=company).select_related("company")
+    golubovi = Golub.objects.filter(company=company).select_related("company", "golubinjak", "otac").exclude(pk=golub.pk)
     return render(request, 'udruge/golubar_golub_form.html', {
         'golub': golub,
         'golubinjaci': golubinjaci,
@@ -3601,8 +3601,8 @@ def par_create(request):
         )
         messages.success(request, _('Par kreiran.'))
         return redirect('udruge:par_list')
-    muzjaci = Golub.objects.filter(company=company, spol='M', aktivan=True)
-    zenke = Golub.objects.filter(company=company, spol='F', aktivan=True)
+    muzjaci = Golub.objects.filter(company=company, spol='M', aktivan=True).select_related("company", "golubinjak", "otac")
+    zenke = Golub.objects.filter(company=company, spol='F', aktivan=True).select_related("company", "golubinjak", "otac")
     return render(request, 'udruge/golubar_par_form.html', {
         'muzjaci': muzjaci,
         'zenke': zenke,
@@ -3629,7 +3629,7 @@ def leglo_create(request, par_pk):
         )
         messages.success(request, _('Leglo evidentirano.'))
         return redirect('udruge:par_list')
-    golubovi = Golub.objects.filter(company=company)
+    golubovi = Golub.objects.filter(company=company).select_related("company", "golubinjak", "otac")
     return render(request, 'udruge/golubar_leglo_form.html', {
         'par': par, 'golubovi': golubovi,
     })
@@ -3667,7 +3667,7 @@ def utrka_list(request):
     if not company:
         return redirect('/')
     from .models import Utrka
-    qs = Utrka.objects.filter(company=company)
+    qs = Utrka.objects.filter(company=company).select_related("company")
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/golubar_utrka_list.html', {'page_obj': page})
@@ -3733,7 +3733,7 @@ def rezultat_create(request, utrka_pk):
         )
         messages.success(request, _('Rezultat dodan.'))
         return redirect('udruge:utrka_detail', pk=utrka.pk)
-    golubovi = Golub.objects.filter(company=company, aktivan=True)
+    golubovi = Golub.objects.filter(company=company, aktivan=True).select_related("company", "golubinjak", "otac")
     return render(request, 'udruge/golubar_rezultat_form.html', {
         'utrka': utrka, 'golubovi': golubovi,
     })
@@ -3765,7 +3765,7 @@ def flock_list(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    qs = Flock.objects.filter(company=company)
+    qs = Flock.objects.filter(company=company).select_related("company")
 
     # Search
     q = request.GET.get('q', '')
@@ -4267,7 +4267,7 @@ def glazbena_skola_dashboard(request):
     except GlazbenaSkola.DoesNotExist:
         skola = GlazbenaSkola.objects.create(company=company)
 
-    ucenici = GlazbeniUcenik.objects.filter(company=company, je_aktivan=True)
+    ucenici = GlazbeniUcenik.objects.filter(company=company, je_aktivan=True).select_related("company", "clan", "child")
     sati_ovaj_tjedan = SatGlazbene.objects.filter(
         company=company,
         datum__gte=today - timezone.timedelta(days=7),
@@ -4462,7 +4462,7 @@ def azil_dashboard(request):
     if not company:
         return redirect('company_setup')
 
-    qs = Zivotinja.objects.filter(company=company)
+    qs = Zivotinja.objects.filter(company=company).select_related("company")
     ctx = {
         'ukupno': qs.count(),
         'karantena': qs.filter(status='karantena').count(),
@@ -4473,7 +4473,7 @@ def azil_dashboard(request):
             updated_at__year=timezone.now().year).count(),
         'zivotinje': qs.filter(status__in=['karantena', 'slobodan', 'rezerviran'])
                        .select_related().order_by('datum_karantena_kraj')[:20],
-        'intervencije': AzilIntervencija.objects.filter(company=company)
+        'intervencije': AzilIntervencija.objects.filter(company=company).select_related("company", "djelatnik", "zivotinje")
                                                 .order_by('-datum_vrijeme')[:5],
     }
     return render(request, 'udruge/azil/dashboard.html', ctx)
@@ -4628,7 +4628,7 @@ def azil_izvjestaj(request):
     if not company:
         return redirect('company_setup')
 
-    izvjestaji = MjesecniIzvjestajAzil.objects.filter(company=company)[:12]
+    izvjestaji = MjesecniIzvjestajAzil.objects.filter(company=company).select_related("company")[:12]
     return render(request, 'udruge/azil/izvjestaj.html', {
         'izvjestaji': izvjestaji,
         'company': company,
@@ -4646,7 +4646,7 @@ def azil_chip_lookup(request):
         return JsonResponse({'error': 'Neispravan chip broj (15 znamenki)'}, status=400)
 
     # Lokalna baza
-    lokalno = Zivotinja.objects.filter(mikrocip=chip).first()
+    lokalno = Zivotinja.objects.filter(mikrocip=chip).select_related("company").first()
     if lokalno:
         return JsonResponse({
             'found': True,

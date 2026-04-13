@@ -6,18 +6,17 @@ Usage:
     python manage.py test pos.tests_pos_suite --verbosity=2
 """
 import time
-import uuid as uuid_mod
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.contrib.auth.models import User
 from django.utils import timezone
 
 from companies.models import Company
 from pos.models import (
     POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSPaymentLine, Voucher,
+    Voucher,
 )
 from pos.services.checkout import CheckoutService, CheckoutValidationError
 from inventory.models import InventoryItem

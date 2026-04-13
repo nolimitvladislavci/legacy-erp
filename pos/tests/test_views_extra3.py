@@ -3,7 +3,6 @@ import datetime
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 

@@ -4,7 +4,7 @@ Udruge QR kod i Viral code generatori.
 QR za clanske iskaznice, donatorske potvrde, event ulaznice.
 Viral code za referral link.
 """
-import base64, hashlib, logging
+import base64, hashlib
 from io import BytesIO
 
 logger = logging.getLogger('udruge')

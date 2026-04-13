@@ -4,7 +4,6 @@ Covers all critical financial models with post_save and post_delete.
 Uses threading.local() to get current user from middleware.
 """
 import threading
-import json
 from django.db.models.signals import post_save, post_delete, pre_save
 
 _thread_locals = threading.local()

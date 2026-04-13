@@ -82,7 +82,7 @@ class PartnerPortalTest(TestCase):
             token = self.partner.portal_token
             # Create a sample invoice for this partner
             inv = Invoice.objects.create(
-                number=f'PP-001',
+                number='PP-001',
                 date_issued=datetime.datetime.now(),
                 date_due=datetime.date.today() + datetime.timedelta(days=30),
                 client_name=self.partner.name,

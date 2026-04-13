@@ -11,7 +11,6 @@ Run:
 """
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, override_settings
-from django.utils import timezone
 
 User = get_user_model()
 NO_HTTPS = override_settings(SECURE_SSL_REDIRECT=False)
@@ -102,8 +101,7 @@ class CompanyWebsiteModelTest(TestCase):
     def test_related_models_created(self):
         """WebsiteService, GalleryImage, Review, ContactMessage can be created."""
         from website.models import (
-            CompanyWebsite, WebsiteService, WebsiteGalleryImage,
-            WebsiteReview, WebsiteContactMessage,
+            WebsiteService, WebsiteReview, WebsiteContactMessage,
         )
         site = make_site(self.company, slug="related-test")
         WebsiteService.objects.create(website=site, title="Servis 1")

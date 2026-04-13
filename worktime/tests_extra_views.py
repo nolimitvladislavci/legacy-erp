@@ -1,6 +1,5 @@
 """Worktime timesheet views extra tests."""
 import datetime
-import json
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User

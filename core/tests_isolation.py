@@ -2,7 +2,7 @@
 Company Isolation Tests — firma A ne smije vidjeti podatke firme B.
 Pokretanje: python manage.py test core.tests_isolation --verbosity=2
 """
-from django.test import TestCase, Client, override_settings
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from accounts.models import UserProfile
 

@@ -1,14 +1,11 @@
-import json
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
-from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q, Sum, Count
+from django.db.models import Sum
 from core.company_utils import get_user_company
 from .models import Property, Booking, HousekeepingLog
 

@@ -1,6 +1,5 @@
 """More view tests — burza, website, webshop, calculator."""
 import datetime
-import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError

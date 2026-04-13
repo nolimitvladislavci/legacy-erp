@@ -3,11 +3,8 @@ from datetime import date
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from companies.models import Company
-from partners.models import Partner
 from documents.models import Document
 from accounts.models import UserProfile
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def _make_company(name, oib):

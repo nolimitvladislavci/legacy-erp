@@ -9,6 +9,7 @@ import hashlib
 from django.db import DatabaseError
 
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 def public_validator(request):
     """GET: forma za upload. POST: provjera XML-a."""

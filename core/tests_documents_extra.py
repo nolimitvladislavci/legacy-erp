@@ -65,7 +65,7 @@ class DocumentBasicCRUDTest(TestCase):
     def test_document_list_with_filter_q(self):
         try:
             self._make_document()
-            resp = self.client.get(f'/documents/?q=DOC', follow=True)
+            resp = self.client.get('/documents/?q=DOC', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
         except KeyError:
             pass

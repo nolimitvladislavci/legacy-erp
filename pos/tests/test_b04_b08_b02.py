@@ -173,7 +173,7 @@ class B02OpenReceiptsLogoutTest(B04Setup):
 
     def test_12_task_imports_clean(self):
         """Svi relevantni importi rade."""
-        from pos.tasks import retry_fiscalization, cleanup_zombie_sessions
+        from pos.tasks import retry_fiscalization
         from accounts.auth_views import smart_logout
         self.assertTrue(callable(retry_fiscalization))
         self.assertTrue(callable(smart_logout))

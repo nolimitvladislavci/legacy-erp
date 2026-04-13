@@ -32,7 +32,7 @@ def experience_list(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    qs = Experience.objects.filter(company=company)
+    qs = Experience.objects.filter(company=company).select_related("company", "guide")
     q = request.GET.get('q', '')
     if q:
         qs = qs.filter(models.Q(name__icontains=q) | models.Q(description__icontains=q))
@@ -355,7 +355,7 @@ def package_list(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    qs = AgroPackage.objects.filter(company=company)
+    qs = AgroPackage.objects.filter(company=company).select_related("company")
     return render(request, 'experiences/package_list.html', {'packages': qs})
 
 
@@ -421,7 +421,7 @@ def recall_list(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    qs = RecallEvent.objects.filter(company=company)
+    qs = RecallEvent.objects.filter(company=company).select_related("company", "created_by")
     return render(request, 'experiences/recall_list.html', {'recalls': qs})
 
 

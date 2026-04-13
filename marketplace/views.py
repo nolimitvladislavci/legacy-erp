@@ -48,7 +48,7 @@ def catalog(request):
 
     paginator = Paginator(qs, 24)
     page = paginator.get_page(request.GET.get('page'))
-    categories = MarketplaceCategory.objects.filter(is_active=True, parent__isnull=True).order_by('sort_order')
+    categories = MarketplaceCategory.objects.filter(is_active=True, parent__isnull=True).select_related("parent").order_by('sort_order')
     cart = request.session.get('marketplace_cart', {})
     cart_count = sum(item.get('qty', 0) for item in cart.values())
 
@@ -76,7 +76,7 @@ def catalog(request):
 @login_required
 def product_detail(request, slug):
     product = get_object_or_404(MarketplaceProduct, slug=slug, is_available=True)
-    related = MarketplaceProduct.objects.filter(category=product.category, is_available=True).exclude(pk=product.pk)[:4]
+    related = MarketplaceProduct.objects.filter(category=product.category, is_available=True).select_related("seller_company", "inventory_item", "category").exclude(pk=product.pk)[:4]
     company = get_user_company(request)
     discount = get_discount_for_item(product, company) if company else None
 
@@ -489,7 +489,7 @@ def reorder(request, pk):
 @login_required
 def my_orders(request):
     company = get_user_company(request)
-    orders = MarketplaceOrder.objects.filter(buyer_company=company).order_by('-created_at') if company else MarketplaceOrder.objects.none()
+    orders = MarketplaceOrder.objects.filter(buyer_company=company).select_related("buyer_company", "buyer_user", "assigned_driver").order_by('-created_at') if company else MarketplaceOrder.objects.none()
     return render(request, 'marketplace/my_orders.html', {'orders': orders})
 
 
@@ -511,11 +511,11 @@ def seller_dashboard(request):
     if not company:
         messages.error(request, _('Nemate aktivnu firmu.'))
         return redirect('/')
-    products = MarketplaceProduct.objects.filter(seller_company=company)
+    products = MarketplaceProduct.objects.filter(seller_company=company).select_related("seller_company", "inventory_item", "category")
     all_sub_orders = SellerSubOrder.objects.filter(
         seller_company=company
     ).select_related('marketplace_order__buyer_company').order_by('-created_at')
-    partner_count = PartnerDiscount.objects.filter(seller_company=company, is_active=True).count()
+    partner_count = PartnerDiscount.objects.filter(seller_company=company, is_active=True).select_related("seller_company", "buyer_company").count()
     stats = {
         'total_products': products.count(),
         'active_products': products.filter(is_available=True).count(),
@@ -565,7 +565,7 @@ def seller_product_edit(request, pk=None):
         product.save()
         messages.success(request, f'Proizvod "{product.name}" spremljen.')
         return redirect('marketplace:seller_dashboard')
-    categories = MarketplaceCategory.objects.filter(is_active=True)
+    categories = MarketplaceCategory.objects.filter(is_active=True).select_related("parent")
     return render(request, 'marketplace/seller_product_form.html', {'product': product, 'categories': categories})
 
 

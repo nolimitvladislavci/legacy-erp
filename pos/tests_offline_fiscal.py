@@ -10,14 +10,13 @@ from decimal import Decimal
 from datetime import timedelta
 from unittest.mock import patch, MagicMock
 
-from django.test import TestCase, TransactionTestCase, RequestFactory
+from django.test import TestCase
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.template.loader import render_to_string
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine,
+    POSTerminal, POSSession, POSReceipt,
 )
 
 

@@ -2,12 +2,9 @@
 Offline POS testovi — zakonska obveza 48h fiskalizacije (čl. 11).
 """
 import json
-from datetime import timedelta
-from decimal import Decimal
 
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()

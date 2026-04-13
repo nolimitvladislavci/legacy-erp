@@ -8,7 +8,7 @@ Sigurnosni slojevi:
   3. CircuitBreaker — greška = fallback dict, ne crash
   4. Input trim     — max 8000 znakova
 """
-import os, json, hashlib, logging
+import os, json, hashlib
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)

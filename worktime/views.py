@@ -1,7 +1,6 @@
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -15,7 +14,7 @@ class WorkGroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return WorkGroup.objects.filter(company=company) if company else WorkGroup.objects.none()
+        return WorkGroup.objects.filter(company=company).select_related("company", "manager", "members") if company else WorkGroup.objects.none()
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
@@ -23,7 +22,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return Project.objects.filter(company=company) if company else Project.objects.none()
+        return Project.objects.filter(company=company).select_related("company", "work_group", "members") if company else Project.objects.none()
 
 class EmployeeProfileViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeProfileSerializer
@@ -31,7 +30,7 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return EmployeeProfile.objects.filter(company=company) if company else EmployeeProfile.objects.none()
+        return EmployeeProfile.objects.filter(company=company).select_related("company", "user", "work_group") if company else EmployeeProfile.objects.none()
 
 class TimeEntryViewSet(viewsets.ModelViewSet):
     serializer_class = TimeEntrySerializer
@@ -39,7 +38,7 @@ class TimeEntryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return TimeEntry.objects.filter(company=company) if company else TimeEntry.objects.none()
+        return TimeEntry.objects.filter(company=company).select_related("company", "user", "project") if company else TimeEntry.objects.none()
 
 @login_required
 def index(request):

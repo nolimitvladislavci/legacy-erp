@@ -6,8 +6,6 @@ from django.contrib.auth.models import User
 from companies.models import Company
 from accounts.models import UserProfile
 from invoicing.models import Invoice
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class OPZStatTestCase(TestCase):

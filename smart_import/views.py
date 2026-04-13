@@ -518,6 +518,7 @@ from django.http import HttpResponse
 from companies.models import Company
 
 
+# CSRF exempt: external webhook — no browser session
 @csrf_exempt
 @require_POST
 def inbound_email_webhook(request, secret):

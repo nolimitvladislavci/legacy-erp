@@ -43,6 +43,7 @@ def public_menu(request, slug):
 
 # ── Public Order ──────────────────────────────────────────────────
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 @require_POST
 def public_order(request, slug):

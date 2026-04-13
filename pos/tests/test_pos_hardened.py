@@ -8,11 +8,9 @@ Pokreni:
 import json
 import threading
 from decimal import Decimal
-from datetime import timedelta
 
 from django.test import TestCase, Client, TransactionTestCase, override_settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, DatabaseError

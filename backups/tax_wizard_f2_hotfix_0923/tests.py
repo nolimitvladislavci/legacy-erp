@@ -10,13 +10,12 @@ tax_wizard/tests.py — Test suite za Porezni Savjetnik
   F. Views (12) — wizard flow, AJAX save, permissions
   G. Security (8) — cross-tenant, CSRF, injection
 """
-from datetime import date, datetime, timedelta
+from datetime import date
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 # ═══════════════════════════════════════════════════════════════
 #  A. MODEL TESTS (15)
@@ -634,7 +633,6 @@ class WizardViewTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_finalize_creates_xml(self):
-        import json
         # Moramo prvo popuniti sesiju
         self.session.form_data = {
             'oib': '11111111111', 'ime_prezime': 'Test User',

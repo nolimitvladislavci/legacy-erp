@@ -187,7 +187,6 @@ class TransportOrderTests(TestCase):
 
     # T15 — Status flow: draft → planned → in_transit
     def test_15_status_progression(self):
-        from delivery.models import TransportOrder
         order = self._order()
         self.assertEqual(order.status, 'draft')
         order.status = 'planned'

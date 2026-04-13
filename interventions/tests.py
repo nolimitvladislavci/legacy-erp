@@ -13,7 +13,6 @@ Run:
 """
 import json
 import uuid
-from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, override_settings

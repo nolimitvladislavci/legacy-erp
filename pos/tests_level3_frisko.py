@@ -27,8 +27,7 @@ Kategorije:
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.test import TestCase, TransactionTestCase
-from django.db import transaction
+from django.test import TestCase
 
 
 # ════════════════════════════════════════════════════════════════
@@ -531,7 +530,6 @@ class TestDeductInventory(FriskoTestBase):
     def test_multi_item_receipt_deducts_all(self):
         from pos.models import POSReceiptItem
         from pos.services import _deduct_inventory
-        from inventory.models import StockMovement
 
         POSReceiptItem.objects.create(
             receipt=self.receipt, inventory_item=self.kruh,

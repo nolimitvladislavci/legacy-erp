@@ -9,8 +9,7 @@ ai_assistant/tests.py — Tests for AI assistant module.
 Run:
     python manage.py test ai_assistant --verbosity=2
 """
-from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, override_settings
@@ -212,7 +211,7 @@ class ChatAPITest(TestCase):
 
     def test_conversation_persisted(self):
         """After a chat call, Conversation + 2 Messages are saved in DB."""
-        from ai_assistant.models import Conversation, Message
+        from ai_assistant.models import Conversation
         with self._mock_all("Bok!"):
             self.c.post(self.url,
                         data='{"message":"Zdravo!"}',

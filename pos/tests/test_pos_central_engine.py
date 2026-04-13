@@ -11,9 +11,9 @@ Testira 4 scenarija komunikacije POS-a s periferijom:
 Koristimo CheckoutService.process_receipt() — jedini entry point za naplatu.
 """
 import logging
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.utils import timezone
@@ -21,9 +21,9 @@ from django.contrib.auth.models import User
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine,
+    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
 )
-from pos.services.checkout import CheckoutService, CheckoutValidationError
+from pos.services.checkout import CheckoutService
 
 logger = logging.getLogger("propter.pos.tests.central_engine")
 

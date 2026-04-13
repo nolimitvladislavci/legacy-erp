@@ -24,7 +24,7 @@ def dashboard(request):
     if not company:
         return redirect('/')
 
-    eracuni = ERacun.objects.filter(company=company)
+    eracuni = ERacun.objects.filter(company=company).select_related("company", "invoice", "source_receipt")
     stats = eracuni.aggregate(
         total_count=Count('id'),
         accepted=Count('id', filter=Q(status='accepted')),
@@ -37,7 +37,7 @@ def dashboard(request):
 
     recent = eracuni[:20]
 
-    config = ERacunConfig.objects.filter(company=company).first()
+    config = ERacunConfig.objects.filter(company=company).select_related("company").first()
 
     return render(request, 'eracun/dashboard.html', {
         'stats': stats,
@@ -242,6 +242,7 @@ def _api_auth(request):
         return None, JsonResponse({'error': 'Invalid API key'}, status=403)
 
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 @require_POST
 def api_create(request):
@@ -361,7 +362,7 @@ def api_list(request):
     if error:
         return error
 
-    qs = ERacun.objects.filter(company=config.company)
+    qs = ERacun.objects.filter(company=config.company).select_related("company", "invoice", "source_receipt")
 
     status = request.GET.get('status')
     if status:
@@ -455,7 +456,7 @@ def sukladnost_dashboard(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    runs = SukladnostTestRun.objects.filter(company=company)[:10]
+    runs = SukladnostTestRun.objects.filter(company=company).select_related("company", "run_by")[:10]
     last_run = runs.first() if runs else None
 
     return render(request, 'eracun/sukladnost_dashboard.html', {
@@ -482,7 +483,7 @@ def sukladnost_run(request):
 
     # ── TS-01: Certifikat ──
     try:
-        config = ERacunConfig.objects.filter(company=company).first()
+        config = ERacunConfig.objects.filter(company=company).select_related("company").first()
         if config and config.cert_path:
             import os
             if os.path.exists(config.cert_path):
@@ -511,7 +512,7 @@ def sukladnost_run(request):
     # ── TS-02: UBL 2.1 Generacija ──
     try:
         from .models import ERacun
-        eracun = ERacun.objects.filter(company=company).order_by('-created_at').first()
+        eracun = ERacun.objects.filter(company=company).select_related("company", "invoice", "source_receipt").order_by('-created_at').first()
         if not eracun:
             # Kreiraj test eRačun
             from datetime import date, timedelta

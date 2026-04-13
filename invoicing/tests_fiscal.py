@@ -4,10 +4,8 @@ Tests for fiscal views: certificate list/upload/delete/test, batch list/create, 
 All tests use Client(raise_request_exception=False) and check status codes in ALLOWED.
 """
 import datetime
-import io
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import unittest
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -175,7 +173,6 @@ class FiscalCertDeleteTest(TestCase):
 
     def test_delete_own_cert(self):
         """POST delete own cert → 302 redirect, cert removed."""
-        from invoicing.fiscal_models import FiscalCertificate
         cert = _make_cert(self.company)
         pk = cert.pk
         resp = self.client.post(f'/invoicing/fiscal/certificates/{pk}/delete/', follow=True)
@@ -216,7 +213,6 @@ class FiscalCertTestTest(TestCase):
         cert = _make_cert(self.company)
         resp = self.client.post(f'/invoicing/fiscal/certificates/{cert.pk}/test/', follow=True)
         self.assertIn(resp.status_code, ALLOWED)
-        from invoicing.fiscal_models import FiscalCertificate
         cert.refresh_from_db()
         self.assertIsNotNone(cert.last_test)
         self.assertTrue(cert.last_test_result)

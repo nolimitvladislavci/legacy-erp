@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 def synesis_export_api(request, token):
     """

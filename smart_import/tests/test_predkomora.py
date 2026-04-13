@@ -246,7 +246,7 @@ class TestProcessStagingBatch(TestCase):
     @patch('smart_import.services.match_items')
     def test_header_error_no_crash(self, mock_match, mock_parse, mock_header):
         """Test 8: header extraction error does not crash the task."""
-        from smart_import.models import StagingFile, StagingFileHeader, ImportBatch
+        from smart_import.models import StagingFileHeader, ImportBatch
 
         mock_parse.return_value = [{'vendor_name': 'ABC', 'quantity': 1, 'purchase_price': 5}]
         mock_header.side_effect = Exception('Header boom')

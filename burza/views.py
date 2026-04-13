@@ -41,10 +41,10 @@ def kanban_board(request):
         preuzeto= ProjectLead.objects.filter(status='PREUZETO').select_related('taken_by')
         rijeseno= ProjectLead.objects.filter(status='RIJESENO').select_related('taken_by')
     else:
-        own    = ProjectLead.objects.filter(company=company)
+        own    = ProjectLead.objects.filter(company=company).select_related("company", "assigned_to", "taken_by")
         novi    = own.filter(status='NOVI_UPIT')
         interna = own.filter(status='INTERNA_PROCJENA')
-        burza   = ProjectLead.objects.filter(status='NA_BURZI', is_public=True)
+        burza   = ProjectLead.objects.filter(status='NA_BURZI', is_public=True).select_related("company", "assigned_to", "taken_by")
         preuzeto= own.filter(status='PREUZETO')
         rijeseno= own.filter(status='RIJESENO')
 
@@ -443,9 +443,9 @@ def kanban_col(request, status):
     if sa:
         leads = ProjectLead.objects.filter(status=status).select_related('company', 'taken_by')
     elif status == 'NA_BURZI':
-        leads = ProjectLead.objects.filter(status='NA_BURZI', is_public=True)
+        leads = ProjectLead.objects.filter(status='NA_BURZI', is_public=True).select_related("company", "assigned_to", "taken_by")
     else:
-        leads = ProjectLead.objects.filter(company=company, status=status)
+        leads = ProjectLead.objects.filter(company=company, status=status).select_related("company", "assigned_to", "taken_by")
 
     return render(request, 'burza/partials/kanban_col.html', {
         'leads': leads.order_by('-created_at')[:30],

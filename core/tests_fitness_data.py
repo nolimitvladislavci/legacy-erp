@@ -1,6 +1,5 @@
 """Fitness views tests with real Member data."""
 import datetime
-import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError
@@ -153,7 +152,6 @@ class FitnessWithDataTest(TestCase):
         try:
             member = _make_member('Checkin', 'Dashboard')
             from fitness.models import MemberCheckIn
-            from django.utils import timezone
             MemberCheckIn.objects.create(member=member)
             MemberCheckIn.objects.create(member=member)
             self.assertIn(self._get('/fitness/dashboard/'), ALLOWED)

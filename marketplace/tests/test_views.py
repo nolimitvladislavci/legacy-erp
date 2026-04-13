@@ -5,8 +5,6 @@ from django.contrib.auth.models import User
 from accounts.models import UserProfile
 from companies.models import Company
 from marketplace.models import MarketplaceCategory, MarketplaceProduct
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def _company(name, oib):

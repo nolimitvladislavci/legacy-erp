@@ -22,9 +22,9 @@ def dashboard(request):
     company = _company(request)
     today = timezone.now().date()
 
-    residents_active = Resident.objects.filter(company=company, status="active").count()
-    residents_waitlist = Resident.objects.filter(company=company, status="waitlist").count()
-    rooms = Room.objects.filter(company=company)
+    residents_active = Resident.objects.filter(company=company, status="active").select_related("company", "room").count()
+    residents_waitlist = Resident.objects.filter(company=company, status="waitlist").select_related("company", "room").count()
+    rooms = Room.objects.filter(company=company).select_related("company")
     rooms_available = rooms.filter(is_available=True).count()
 
     unpaid = MonthlyCharge.objects.filter(
@@ -82,7 +82,7 @@ def resident_detail(request, pk):
 @login_required
 def resident_create(request):
     company = _company(request)
-    rooms = Room.objects.filter(company=company, is_available=True)
+    rooms = Room.objects.filter(company=company, is_available=True).select_related("company")
 
     if request.method == "POST":
         d = request.POST
@@ -118,7 +118,7 @@ def resident_create(request):
 @login_required
 def room_list(request):
     company = _company(request)
-    rooms = Room.objects.filter(company=company).annotate(
+    rooms = Room.objects.filter(company=company).select_related("company").annotate(
         occupants=Count("residents", filter=Q(residents__status="active")),
     )
     return render(request, "eldercare/room_list.html", {"rooms": rooms})
@@ -187,7 +187,7 @@ def billing_generate(request):
     year = int(request.POST.get("year", timezone.now().year))
     month = int(request.POST.get("month", timezone.now().month))
 
-    residents = Resident.objects.filter(company=company, status="active", room__isnull=False)
+    residents = Resident.objects.filter(company=company, status="active", room__isnull=False).select_related("company", "room")
     created = 0
     for r in residents.select_related("room"):
         charge, is_new = MonthlyCharge.objects.get_or_create(

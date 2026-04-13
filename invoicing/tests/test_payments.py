@@ -11,7 +11,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
-from payments.models import Payment, PaymentConfig
+from payments.models import Payment
 from payments.services import (
     get_config, create_payment, complete_payment, check_btcpay_status,
 )

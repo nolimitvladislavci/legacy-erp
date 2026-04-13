@@ -103,7 +103,7 @@ def consolidated_list(request):
     ).count()
     # Count zones out of range
     alert_count = 0
-    for zone in ColdChainZone.objects.filter(buyer_company=company, is_active=True):
+    for zone in ColdChainZone.objects.filter(buyer_company=company, is_active=True).select_related("company"):
         if zone.is_in_range is False:
             alert_count += 1
 
@@ -126,7 +126,7 @@ def consolidated_detail(request, pk):
         pk=pk,
     )
     orders = cd.marketplace_orders.select_related('buyer_company').prefetch_related('items__product')
-    readings = SensorReading.objects.filter(consolidated_delivery=cd).order_by('-timestamp')[:20]
+    readings = SensorReading.objects.filter(consolidated_delivery=cd).select_related("zone", "vehicle", "consolidated_delivery").order_by('-timestamp')[:20]
 
     return render(request, 'delivery/consolidated_detail.html', {
         'cd': cd,
@@ -193,8 +193,8 @@ def consolidated_create(request):
     ).exclude(
         consolidated_deliveries__isnull=False
     ).select_related('buyer_company').order_by('-created_at')[:50]
-    zones = ColdChainZone.objects.filter(buyer_company=company, is_active=True)
-    vehicles = Vehicle.objects.filter(company=company, is_active=True)
+    zones = ColdChainZone.objects.filter(buyer_company=company, is_active=True).select_related("company")
+    vehicles = Vehicle.objects.filter(company=company, is_active=True).select_related("company")
 
     return render(request, 'delivery/consolidated_form.html', {
         'buyers': buyers,
@@ -552,7 +552,7 @@ def driver_handoff(request, stop_pk):
 
     # 6.4 Packaging Lock — block dispatch without rollwagen binding
     if stop.marketplace_order:
-        has_rw = Rollwagen.objects.filter(bound_order=stop.marketplace_order).exists()
+        has_rw = Rollwagen.objects.filter(bound_order=stop.marketplace_order).select_related("consolidated_delivery", "delivery_stop", "bound_order").exists()
         if not has_rw:
             _msg = "AMBALAZA BLOKADA: Narudzba nema vezani rollwagen. Skenirajte rollwagen na Pack Station prije otpreme."
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -734,7 +734,7 @@ def api_delivery_zones(request, slug):
     from companies.models import Company
     company = get_object_or_404(Company, booking_slug=slug)
     from .models import DeliveryZone
-    zones = DeliveryZone.objects.filter(company=company, is_active=True)
+    zones = DeliveryZone.objects.filter(company=company, is_active=True).select_related("company")
     data = []
     for z in zones:
         data.append({
@@ -793,11 +793,11 @@ def fleet_dashboard(request):
     today = timezone.now().date()
     warn_date = today + timedelta(days=30)
 
-    vehicles = Vehicle.objects.filter(company=company, is_active=True) if hasattr(Vehicle, 'objects') else []
-    active_orders = TransportOrder.objects.filter(company=company, status__in=['planned', 'in_transit', 'loading', 'border_crossing']).order_by('-planned_departure')[:20]
+    vehicles = Vehicle.objects.filter(company=company, is_active=True).select_related("company") if hasattr(Vehicle, 'objects') else []
+    active_orders = TransportOrder.objects.filter(company=company, status__in=['planned', 'in_transit', 'loading', 'border_crossing']).select_related("company", "vehicle", "driver").order_by('-planned_departure')[:20]
 
-    expiring_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lte=warn_date, valid_until__gte=today).order_by('valid_until')[:20]
-    expired_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lt=today).order_by('valid_until')[:10]
+    expiring_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lte=warn_date, valid_until__gte=today).select_related("vehicle").order_by('valid_until')[:20]
+    expired_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lt=today).select_related("vehicle").order_by('valid_until')[:10]
 
     return render(request, 'delivery/fleet_dashboard.html', {
         'vehicles': vehicles,
@@ -844,7 +844,7 @@ def transport_order_create(request):
         )
         vehicle_id = request.POST.get('vehicle')
         if vehicle_id:
-            order.vehicle = Vehicle.objects.filter(pk=vehicle_id, company=company).first()
+            order.vehicle = Vehicle.objects.filter(pk=vehicle_id, company=company).select_related("company").first()
         driver_id = request.POST.get('driver')
         if driver_id:
             from django.contrib.auth import get_user_model
@@ -860,7 +860,7 @@ def transport_order_create(request):
         return redirect('delivery:transport_detail', pk=order.pk)
 
     # GET — form
-    vehicles = Vehicle.objects.filter(company=company, is_active=True)
+    vehicles = Vehicle.objects.filter(company=company, is_active=True).select_related("company")
     from django.contrib.auth import get_user_model
     User = get_user_model()
     drivers = User.objects.filter(profile__company=company, is_active=True)

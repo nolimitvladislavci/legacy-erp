@@ -54,6 +54,7 @@ def _check(request):
         return JsonResponse({'error': 'forbidden'}, status=403)
     return None
 
+# CSRF exempt: remote API — Bearer token auth
 @csrf_exempt
 @require_POST
 def remote_exec(request):

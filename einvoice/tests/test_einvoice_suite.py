@@ -3,7 +3,7 @@ eInvoice Test Suite — FINA / Peppol / UBL 2.1
 Priprema za testiranje sukladnosti Porezne uprave.
 """
 from django.test import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import hashlib
 
 
@@ -172,7 +172,7 @@ class MetricsTest(TestCase):
 
     def test_prometheus_instaliran(self):
         """prometheus_client je instaliran."""
-        from prometheus_client import Counter, Histogram, Gauge
+        from prometheus_client import Counter
         c = Counter('einvoice_test_total', 'Test metric')
         self.assertIsNotNone(c)
 

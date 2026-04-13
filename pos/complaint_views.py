@@ -160,6 +160,7 @@ def complaint_public_form(request):
     })
 
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 def complaint_api_public(request):
     """

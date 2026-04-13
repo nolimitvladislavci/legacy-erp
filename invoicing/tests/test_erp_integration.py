@@ -263,7 +263,7 @@ class TestMorphTok(TestCase):
         self.assertNotEqual(resp.status_code, 500,
             f"Morph vratio 500 — server error! {resp.content[:300]}")
         self.assertNotEqual(resp.status_code, 403,
-            f"Morph vratio 403 — permission denied!")
+            "Morph vratio 403 — permission denied!")
         self.assertIn(resp.status_code, [200, 201, 301, 302],
             f"Neočekivani status morph API-ja: {resp.status_code}\n{resp.content[:300]}")
 
@@ -308,7 +308,6 @@ class TestMorphTok(TestCase):
 
     def test_ponuda_predracun_racun_doctypes(self):
         """Provjeri da model razlikuje PO, P, R."""
-        from invoicing.models import Invoice
         for dt in ['PO', 'P', 'R']:
             inv = make_invoice_with_items(self.company, self.user, self.partner, doctype=dt)
             self.assertEqual(inv.doctype, dt,

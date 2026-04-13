@@ -1,7 +1,6 @@
 """Invoicing views extra tests — wizard, edit, clone, API endpoints."""
 import datetime
 import json
-from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.db import IntegrityError, DatabaseError

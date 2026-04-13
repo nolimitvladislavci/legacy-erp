@@ -376,7 +376,6 @@ def tim_chat_send(request):
 
 # ─── SYSTEM IMPROVEMENT API (bez login-a) ─────────────────────────────────────
 
-@csrf_exempt
 @require_POST
 def system_improvement_api(request):
     """
@@ -445,6 +444,7 @@ def system_improvement_api(request):
 
 # ─── PARTNER SIGNUP API ───────────────────────────────────────────────────────
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 def partner_signup_api(request):
     """

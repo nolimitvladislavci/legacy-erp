@@ -191,7 +191,7 @@ def arhiva_list(request):
             if label_id:
                 try:
                     label = ArhivaLabel.objects.get(pk=label_id, company=company)
-                    entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company)
+                    entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company).select_related("company", "archived_by", "partner")
                     for entry in entries:
                         entry.labels.add(label)
                     if request.headers.get('HX-Request'):
@@ -209,7 +209,7 @@ def arhiva_list(request):
             return redirect(f'/hr/documents/arhiva/bulk-download/?ids={ids_str}')
 
         elif action == 'bulk_book' and entry_ids:
-            entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company)
+            entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company).select_related("company", "archived_by", "partner")
             count = entries.update(is_booked=True)
             if request.headers.get('HX-Request'):
                 return JsonResponse({'ok': True, 'message': f'{count} zapisa proknjizeno.'})
@@ -256,7 +256,7 @@ def arhiva_list(request):
             ).exists()
             if has_access:
                 company = Company.objects.filter(pk=override_id).first() or company
-        qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0).order_by('-doc_date', '-archived_at')
+        qs = ArhivaEntry.objects.filter(company=company).select_related("company", "archived_by", "partner").exclude(amount=0).order_by('-doc_date', '-archived_at')
         company_filter = ''
         companies = []
         year_filter = request.GET.get('year', '')
@@ -335,7 +335,7 @@ def arhiva_list(request):
 
     # Labels for current company
     user_company = get_user_company(request)
-    labels = ArhivaLabel.objects.filter(company=user_company).order_by('name') if user_company else ArhivaLabel.objects.none()
+    labels = ArhivaLabel.objects.filter(company=user_company).select_related("company").order_by('name') if user_company else ArhivaLabel.objects.none()
 
     # Prefetch labels for entries on this page
     entry_labels = {}
@@ -534,7 +534,7 @@ def arhiva_export(request):
         company = get_user_company(request)
         if not company:
             return HttpResponse('No company', status=400)
-        qs = ArhivaEntry.objects.filter(company=company)
+        qs = ArhivaEntry.objects.filter(company=company).select_related("company", "archived_by", "partner")
 
     # Apply same filters as list view
     source_type = request.GET.get('source_type', '')
@@ -619,10 +619,10 @@ def arhiva_bulk_download(request):
 
     is_superadmin = request.user.is_superuser
     if is_superadmin:
-        entries = ArhivaEntry.objects.filter(id__in=ids)
+        entries = ArhivaEntry.objects.filter(id__in=ids).select_related("company", "archived_by", "partner")
     else:
         company = get_user_company(request)
-        entries = ArhivaEntry.objects.filter(id__in=ids, company=company)
+        entries = ArhivaEntry.objects.filter(id__in=ids, company=company).select_related("company", "archived_by", "partner")
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
@@ -792,7 +792,7 @@ def arhiva_detail_ajax(request, pk):
     result['download_url'] = f'/hr/documents/arhiva/{entry.pk}/download/'
 
     # Bookmark status
-    result['bookmarked'] = ArhivaBookmark.objects.filter(user=request.user, entry=entry).exists()
+    result['bookmarked'] = ArhivaBookmark.objects.filter(user=request.user, entry=entry).select_related("user", "entry").exists()
 
     return JsonResponse(result)
 
@@ -1175,9 +1175,9 @@ def arhiva_autocomplete(request):
 
     company = get_user_company(request)
     if request.user.is_superuser:
-        qs = ArhivaEntry.objects.all()
+        qs = ArhivaEntry.objects.all().select_related("company", "archived_by", "partner")
     elif company:
-        qs = ArhivaEntry.objects.filter(company=company)
+        qs = ArhivaEntry.objects.filter(company=company).select_related("company", "archived_by", "partner")
     else:
         return JsonResponse({'results': []})
 
@@ -1269,7 +1269,7 @@ def arhiva_list_json(request):
         if company_filter:
             qs = qs.filter(company_id=company_filter)
     elif company:
-        qs = ArhivaEntry.objects.filter(company=company)
+        qs = ArhivaEntry.objects.filter(company=company).select_related("company", "archived_by", "partner")
     else:
         return JsonResponse({'entries': [], 'has_next': False})
 
@@ -1396,7 +1396,7 @@ def arhiva_save_to_disk(request):
     month = request.GET.get('month', '')
     source_type = request.GET.get('source_type', '')
 
-    qs = ArhivaEntry.objects.filter(company=company).order_by('doc_date', 'partner_name')
+    qs = ArhivaEntry.objects.filter(company=company).select_related("company", "archived_by", "partner").order_by('doc_date', 'partner_name')
 
     if year:
         qs = qs.filter(doc_date__year=int(year))
@@ -1550,7 +1550,7 @@ def moji_komitenti(request):
     total_entries = 0
     pending_entries = 0
     for k in komitenti_qs:
-        stats = ArhivaEntry.objects.filter(company=k).aggregate(
+        stats = ArhivaEntry.objects.filter(company=k).select_related("company", "archived_by", "partner").aggregate(
             entry_count=Count('id'),
             pending_count=Count('id', filter=Q(is_booked=False) & ~Q(ai_proposal__isnull=True) & ~Q(ai_proposal={}))
         )

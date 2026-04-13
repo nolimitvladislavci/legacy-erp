@@ -9,6 +9,7 @@ from einvoice.services.webhook_receiver import verify_webhook_signature, process
 logger = logging.getLogger("propter.einvoice.webhook")
 
 
+# CSRF exempt: external webhook — no browser session
 @csrf_exempt
 @require_POST
 def posrednik_webhook(request):

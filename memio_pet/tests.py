@@ -3,7 +3,6 @@ memio_pet/tests.py — Funkcionalni testovi za memio.pet views
 Pokrivenost: HTTP status codes, .using("memio_pets") korekcija, 404 logika
 """
 from django.test import TestCase, Client
-from django.urls import reverse
 import uuid
 
 

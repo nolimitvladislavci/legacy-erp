@@ -41,6 +41,7 @@ def pickup_menu(request, company_slug):
     })
 
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 def pickup_order(request, company_slug):
     """POST: kreiraj pickup narudzbu."""

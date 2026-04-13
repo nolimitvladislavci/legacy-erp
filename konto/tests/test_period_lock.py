@@ -8,8 +8,6 @@ from companies.models import Company
 from accounts.models import UserProfile
 from konto.models import AccountingPeriod, JournalEntry
 from invoicing.models import Invoice
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)

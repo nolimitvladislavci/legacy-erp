@@ -18,7 +18,7 @@ Pokriva poslovnu logiku u invoicing/services/invoice_service.py:
 import datetime
 from decimal import Decimal, ROUND_HALF_UP
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, DatabaseError
@@ -288,7 +288,6 @@ class TestSaveItems(TestCase):
 
     def test_osnovna_stavka(self):
         from invoicing.services.invoice_service import save_items
-        from invoicing.models import InvoiceItem
 
         inv = make_invoice(self.company, self.user)
         post = self._post({

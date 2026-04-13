@@ -60,7 +60,6 @@ def fiscalize_pos_receipt(receipt):
     from .models import FiscalLog
 
     # IDEMPOTENCY GUARD — ne salji isti racun dvaput FINA-i
-    from .models import FiscalLog
     existing = FiscalLog.objects.filter(
         receipt_type='pos_receipt', receipt_id=receipt.pk, status='success'
     ).first()

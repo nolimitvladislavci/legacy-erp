@@ -1091,7 +1091,7 @@ class POSDailyReport(models.Model):
     def generate_from_session(cls, session):
         """Generiraj dnevni izvještaj iz zatvorene sesije."""
         from decimal import Decimal
-        from django.db.models import Sum, Count, Q
+        from django.db.models import Sum
 
         receipts = session.receipts.filter(status='paid')
         cancelled = session.receipts.filter(status='cancelled').count()
@@ -1271,7 +1271,6 @@ class KnjigaPrigovora(models.Model):
         if self.datum_odgovora:
             return False
         from django.utils import timezone
-        from datetime import timedelta
         return (timezone.now().date() - self.datum_primitka).days > 15
 
     @property

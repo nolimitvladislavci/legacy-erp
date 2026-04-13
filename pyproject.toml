@@ -3,18 +3,17 @@ target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["F", "E9", "W"]
-# F: Pyflakes (unused imports, undefined names, etc.)
-# E9: Runtime errors (syntax errors, etc.)
-# W: Warnings
-# NOT including E (style) yet — too many hits for first pass
+select = ["F", "E711", "E712", "E721", "W191", "I001"]
+# F: pyflakes (unused imports, undefined names, etc.)
+# E711/E712: comparison to None/True/False
+# E721: type comparison
+# W191: indentation contains tabs
+# I001: import sorting
 
 [tool.ruff.lint.per-file-ignores]
 "*/migrations/*" = ["ALL"]
-"*/tests*" = ["ALL"]
-"backups/*" = ["ALL"]
-"tmp/*" = ["ALL"]
-"simulation/*" = ["ALL"]
-"TASK_ARCHIVE/*" = ["ALL"]
-"tools/*" = ["ALL"]
+"*/tests*" = ["F841"]
+"*/backups/*" = ["ALL"]
 "venv/*" = ["ALL"]
+"tmp/*" = ["ALL"]
+"scripts/*" = ["F841"]

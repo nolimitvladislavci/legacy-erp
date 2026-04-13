@@ -1,11 +1,10 @@
-import uuid
 import random
 """
 Testovi za branitelji + lov module.
 Pokretanje: venv/bin/python manage.py test udruge.tests.test_branitelji_lov -v2
 """
 from decimal import Decimal
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from unittest.mock import patch

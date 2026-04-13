@@ -1,5 +1,4 @@
 """Tests for registration multi-step flow — exercises POST handlers."""
-import datetime
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User

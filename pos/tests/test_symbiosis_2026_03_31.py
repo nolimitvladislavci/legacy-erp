@@ -15,21 +15,19 @@ Testira sve fixeve i integracije iz sesije 2026-03-31:
 """
 import json
 import logging
-from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch
 
 from django.test import TestCase, RequestFactory, Client
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
 
 from companies.models import Company, TaxRate
 from inventory.models import InventoryItem
 from pos.models import (
     POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSPaymentLine, POSCashier, POSPulseEvent,
+    POSCashier, POSPulseEvent,
 )
 from pos.services.checkout import CheckoutService, CheckoutValidationError
 

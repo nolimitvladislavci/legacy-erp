@@ -264,7 +264,6 @@ class UdrugeAPITestSuite(TestCase):
         if resp.status_code in [200, 302]:
             cl.refresh_from_db()
             self.assertEqual(cl.status, 'placena')
-        from udruge.models import KnjigaPrimitaka
         # KP auto-entry not created due to i18n redirect
 
     def test_t13_clanarina_bulk_create(self):
@@ -404,7 +403,6 @@ class UdrugeAPITestSuite(TestCase):
                 'purpose': 'Test', 'date': str(date.today()),
             })
         self.assertIn(resp.status_code, [200, 301, 302])
-        from udruge.models import KnjigaPrimitaka
         # Auto-entry may not exist if POST was redirected by i18n
         pass  # verified in T12 where clanarina pay works
 
@@ -621,7 +619,6 @@ class UdrugeAPITestSuite(TestCase):
                 'target_all_members': 'on',
             })
         self.assertIn(resp.status_code, [200, 301, 302])
-        from udruge.models import EmailKampanja
         # POST may not reach view due to i18n redirect
 
     def test_t40_email_kampanja_ai_generate(self):
@@ -688,7 +685,6 @@ class UdrugeAPITestSuite(TestCase):
                 'inkind_rate_eur': '20.00',
             })
         self.assertIn(resp.status_code, [200, 301, 302])
-        from udruge.models import VolunteerActivity
         # POST may not reach view due to i18n redirect
 
     def test_t44_volunteer_inkind_value(self):

@@ -502,7 +502,6 @@ def download_gpriznpf(request):
 @login_required
 def download_donatorska_potvrda(request, pk):
     from django.http import HttpResponse
-    from django.template.loader import render_to_string
     company = get_user_company(request)
 
     from .models import Donacija
@@ -756,7 +755,7 @@ def dogadjaj_create(request):
 @login_required
 def dogadjaj_detail(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, EventPrijava, Clan
+    from .models import Dogadjaj, Clan
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
     prijave = dogadjaj.prijave.select_related("clan").all()

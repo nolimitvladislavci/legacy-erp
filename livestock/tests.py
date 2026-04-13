@@ -7,7 +7,7 @@ Pokretanje:
     venv/bin/python manage.py test livestock --verbosity=2
 """
 import json
-from datetime import date, timedelta
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -17,8 +17,6 @@ from django.utils import timezone
 from accounts.models import UserProfile
 from companies.models import Company
 from livestock.models import (
-    CropPlan,
-    Field,
     HealthRecord,
     InstitutionalAccessLog,
     InstitutionalAccessToken,
@@ -469,7 +467,7 @@ class VetQuickEntryTest(TestCase):
         self.today  = timezone.now().date()
 
     def test_get_valid_token(self):
-        resp = self.client.get(f'/livestock/vet/test-farma-333/')
+        resp = self.client.get('/livestock/vet/test-farma-333/')
         self.assertEqual(resp.status_code, 200)
 
     def test_get_invalid_token(self):
@@ -478,7 +476,7 @@ class VetQuickEntryTest(TestCase):
 
     def test_post_creates_health_record(self):
         with patch('core.whatsapp.send_text') as mock_wa:
-            resp = self.client.post(f'/livestock/vet/test-farma-333/', {
+            resp = self.client.post('/livestock/vet/test-farma-333/', {
                 'ear_tag':     self.animal.ear_tag,
                 'datum':       str(self.today),
                 'tip':         'tretman',
@@ -495,7 +493,7 @@ class VetQuickEntryTest(TestCase):
         self.assertEqual(hr.karencija_do, self.today + timedelta(days=7))
 
     def test_post_invalid_ear_tag(self):
-        resp = self.client.post(f'/livestock/vet/test-farma-333/', {
+        resp = self.client.post('/livestock/vet/test-farma-333/', {
             'ear_tag': 'NEPOSTOJI',
             'datum':   str(self.today),
             'tip':     'pregled',
@@ -506,7 +504,7 @@ class VetQuickEntryTest(TestCase):
 
     def test_whatsapp_notify_called(self):
         with patch('core.whatsapp.send_text') as mock_wa:
-            self.client.post(f'/livestock/vet/test-farma-333/', {
+            self.client.post('/livestock/vet/test-farma-333/', {
                 'ear_tag':   self.animal.ear_tag,
                 'datum':     str(self.today),
                 'tip':       'tretman',

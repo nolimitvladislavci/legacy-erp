@@ -17,7 +17,6 @@ import uuid
 from decimal import Decimal
 
 from django.test import TestCase, SimpleTestCase, override_settings
-from django.utils import timezone
 
 
 # ══════════════════════════════════════════════════════════════════════════════

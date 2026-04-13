@@ -1,9 +1,7 @@
 """Smoke tests for assessment, outreach, calculator, burza, inventory, documents views."""
 import datetime
-from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 

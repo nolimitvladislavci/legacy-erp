@@ -7,18 +7,13 @@ import json
 import os
 import uuid
 from decimal import Decimal, ROUND_HALF_UP
-from unittest.mock import patch, MagicMock
 
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import TestCase
 from django.contrib.auth.models import User
-from django.urls import reverse
-from django.utils import timezone
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSPaymentLine, POSSettings, POSCashier, Table, GastroOrder,
-    ExpiryBatch,
+    POSTerminal, POSSession, POSReceipt, POSCashier, Table, GastroOrder,
 )
 
 # Default VAT rate used by add_receipt_item

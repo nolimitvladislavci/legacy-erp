@@ -165,6 +165,7 @@ def inbox_book(request, pk):
 
 # === API ENDPOINT — for external systems to send e-invoices ===
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 @require_POST
 def api_receive(request):

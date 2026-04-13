@@ -19,7 +19,7 @@ from core.company_utils import get_user_company
 from core.tenant import get_current_company
 from inventory.models import InventoryItem
 
-from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal, Voucher
+from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 logger = logging.getLogger(__name__)
 
@@ -766,19 +766,12 @@ def receipt_pdf(request, receipt_id):
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, f'PDF greška: {e}')
         return redirect('pos:receipt_detail', receipt_id=receipt_id)
-import json
-from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.conf import settings
-from django.db import models
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 # ── QUICK POS ─────────────────────────────────────────────────────────────────
 
@@ -2684,7 +2677,6 @@ def pfand_return(request):
 def tip_report(request):
     """Izvještaj napojnica po konobaru/blagajniku."""
     company = get_user_company(request)
-    from django.db.models import Sum, Count
     from datetime import date, timedelta
 
     date_from = request.GET.get('from', '')
@@ -3049,7 +3041,6 @@ def kitchen_tablet(request, token):
     URL: /pos/gastro/kds/<company_token>/
     Always-on tablet screen showing orders."""
     from companies.models import Company
-    from .models import Table
     company = Company.objects.filter(id=token).first()
     if not company:
         return render(request, 'pos/waiter/kds.html', {'error': 'Nepoznat token'})
@@ -3320,7 +3311,7 @@ def webshop_public(request, slug):
     ).order_by('category', 'name')
 
     # Roba od jučer
-    from datetime import date, timedelta
+    from datetime import date
     today = date.today()
     from django.db import connection as _conn
     cursor = _conn.cursor()
@@ -3521,8 +3512,6 @@ def cashier_report_html(request, session_id):
 
     def fmt(dt):
         if not dt: return '-'
-        import pytz
-        from django.utils import timezone as tz
         if hasattr(dt, 'astimezone'):
             dt = dt.astimezone()
         return dt.strftime('%H:%M')
@@ -4590,7 +4579,7 @@ def dsfinvk_export(request):
 def kassenbuch_download(request):
     """Blagajnicki dnevnik / Kassenbuch XLSX download."""
     from django.http import HttpResponse
-    from datetime import date, timedelta
+    from datetime import date
     company = get_user_company(request)
     if not company:
         return JsonResponse({'error': 'Nema firme'}, status=400)

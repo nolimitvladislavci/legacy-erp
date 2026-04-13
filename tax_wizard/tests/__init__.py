@@ -19,7 +19,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import activate
-from django.utils.translation import activate
 
 # ═══════════════════════════════════════════════════════════════
 #  A. MODEL TESTS (15)
@@ -548,7 +547,6 @@ class WizardViewTest(TestCase):
 
     def _url(self, name, *args):
         """Generiraj URL s /hr/ prefiksom za i18n patterns."""
-        from django.urls import reverse
         url = reverse(name, args=args)
         if not url.startswith('/hr/'):
             url = '/hr' + url
@@ -715,7 +713,6 @@ class SecurityTest(TestCase):
 
     def _url(self, name, *args):
         """Generiraj URL s /hr/ prefiksom za i18n patterns."""
-        from django.urls import reverse
         url = reverse(name, args=args)
         if not url.startswith('/hr/'):
             url = '/hr' + url

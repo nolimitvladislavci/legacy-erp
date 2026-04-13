@@ -7,19 +7,16 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
 from partners.models import Partner
 from inventory.models import InventoryItem
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     BookMeta, LibraryMember, BookLoan, BookReservation,
     ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
-    MediaContent, FamilyChallenge,
 )
 
 
@@ -299,7 +296,7 @@ class PortalLoginTests(KnjiznicaTestBase):
 
     def test_valid_pin_login(self):
         response = self.client.post(
-            f'/knjiznica/portal/cepin-knjiznica/prijava/',
+            '/knjiznica/portal/cepin-knjiznica/prijava/',
             {'member_number': 'CK-0001', 'pin': '1234'},
         )
         self.assertEqual(response.status_code, 302)
@@ -307,7 +304,7 @@ class PortalLoginTests(KnjiznicaTestBase):
 
     def test_invalid_pin_rejected(self):
         response = self.client.post(
-            f'/knjiznica/portal/cepin-knjiznica/prijava/',
+            '/knjiznica/portal/cepin-knjiznica/prijava/',
             {'member_number': 'CK-0001', 'pin': '9999'},
         )
         self.assertEqual(response.status_code, 200)
@@ -315,7 +312,7 @@ class PortalLoginTests(KnjiznicaTestBase):
 
     def test_nonexistent_member_rejected(self):
         response = self.client.post(
-            f'/knjiznica/portal/cepin-knjiznica/prijava/',
+            '/knjiznica/portal/cepin-knjiznica/prijava/',
             {'member_number': 'FAKE-999', 'pin': '1234'},
         )
         self.assertEqual(response.status_code, 200)
@@ -336,7 +333,6 @@ class NSKExportTests(KnjiznicaTestBase):
         )
         self.client.force_login(self.user)
         # Dodaj user→company vezu
-        from django.contrib.sessions.backends.db import SessionStore
         response = self.client.get(
             '/knjiznica/statistika/nsk-export/',
             {'year': timezone.localdate().year},

@@ -233,6 +233,7 @@ def tenant_settings(request):
 # API endpointi (Synesis + vanjski)
 # ─────────────────────────────────────────────────────────────
 
+# CSRF exempt: external data import API — token auth
 @csrf_exempt
 def api_create_otpremnica(request):
     """POST -- API key autentikacija. Kreira otpremnicu iz vanjskog sustava."""

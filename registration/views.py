@@ -657,13 +657,13 @@ def is_superadmin(user):
 @user_passes_test(is_superadmin)
 def admin_registration_list(request):
     status_filter = request.GET.get('status', 'pending')
-    registrations = CompanyRegistration.objects.all()
+    registrations = CompanyRegistration.objects.all().select_related("reviewed_by")
     if status_filter in ('pending', 'approved', 'rejected'):
         registrations = registrations.filter(status=status_filter)
     counts = {
-        'pending': CompanyRegistration.objects.filter(status='pending').count(),
-        'approved': CompanyRegistration.objects.filter(status='approved').count(),
-        'rejected': CompanyRegistration.objects.filter(status='rejected').count(),
+        'pending': CompanyRegistration.objects.filter(status='pending').select_related("reviewed_by").count(),
+        'approved': CompanyRegistration.objects.filter(status='approved').select_related("reviewed_by").count(),
+        'rejected': CompanyRegistration.objects.filter(status='rejected').select_related("reviewed_by").count(),
     }
     return render(request, 'registration/admin_list.html', {
         'registrations': registrations,
@@ -875,7 +875,7 @@ def umbrella_invite_manage(request):
             msg.info(request, 'Kod deaktiviran.')
         return redirect('registration:umbrella_invites')
 
-    codes = UmbrellaInviteCode.objects.filter(umbrella_company=company)
+    codes = UmbrellaInviteCode.objects.filter(umbrella_company=company).select_related("umbrella_company", "created_by")
     return render(request, 'registration/umbrella_invites.html', {
         'codes': codes,
         'company': company,
@@ -889,7 +889,7 @@ def sales_wizard(request):
     """Sales wizard — step-by-step client onboarding."""
     lang = request.GET.get('lang', 'hr')
     from registration.models import SalesLead
-    leads = SalesLead.objects.filter(agent=request.user).order_by('-created_at')[:10]
+    leads = SalesLead.objects.filter(agent=request.user).select_related("agent").order_by('-created_at')[:10]
 
     plans = {
         'micro': {'name': 'Micro', 'price': 8, 'users': 1},
@@ -936,10 +936,9 @@ def sales_wizard_submit(request):
         errors.append('Steuernummer ist zu kurz')
 
     # Duplicate check
-    from registration.models import SalesLead
-    if oib and SalesLead.objects.filter(oib=oib, status__in=['signed', 'active']).exists():
+    if oib and SalesLead.objects.filter(oib=oib, status__in=['signed', 'active']).select_related("agent").exists():
         errors.append('Klijent s ovim OIB-om vec postoji' if country != 'DE' else 'Kunde mit dieser Steuernummer existiert bereits')
-    if company_name and SalesLead.objects.filter(company_name__iexact=company_name, status__in=['signed', 'active']).exists():
+    if company_name and SalesLead.objects.filter(company_name__iexact=company_name, status__in=['signed', 'active']).select_related("agent").exists():
         errors.append('Tvrtka s ovim imenom vec postoji' if country != 'DE' else 'Firma mit diesem Namen existiert bereits')
 
     if errors:
@@ -1095,7 +1094,7 @@ def agent_dashboard(request):
     )
 
     # Ambassador detection
-    is_ambassador = leads.filter(is_disability_ambassador=True).exists() or                     SalesLead.objects.filter(agent=request.user, is_disability_ambassador=True).exists()
+    is_ambassador = leads.filter(is_disability_ambassador=True).exists() or                     SalesLead.objects.filter(agent=request.user, is_disability_ambassador=True).select_related("agent").exists()
 
     return render(request, 'registration/agent_dashboard_v2.html', {
         'leads': leads[:30],
@@ -1290,7 +1289,7 @@ def claim_company_form(request, company_id):
         messages.warning(request, _('Ova firma već ima aktivnog administratora.'))
         return redirect('home')
 
-    pending = CompanyClaimRequest.objects.filter(company=company, status='pending').exists()
+    pending = CompanyClaimRequest.objects.filter(company=company, status='pending').select_related("company", "reviewed_by", "created_user").exists()
 
     # Statistika za prikaz
     stats = {
@@ -1343,7 +1342,7 @@ def submit_claim(request, company_id):
         messages.error(request, _('Email i ime su obavezni.'))
         return redirect('claim_company', company_id=company_id)
 
-    if CompanyClaimRequest.objects.filter(email=email, company=company, status='pending').exists():
+    if CompanyClaimRequest.objects.filter(email=email, company=company, status='pending').select_related("company", "reviewed_by", "created_user").exists():
         messages.info(request, _('Vaš zahtjev je već poslan. Čekajte odobrenje.'))
         return redirect('claim_company', company_id=company_id)
 

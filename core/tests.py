@@ -324,7 +324,6 @@ class EmployeeCreateTest(TestCase):
 
     def test_create_employee_ok(self):
         """POST valid data → JSON ok=True, user created, must_change_password=True."""
-        from accounts.models import UserProfile
         r = self.c.post(self.url, {
             "email":      "new.employee@core-test.de",
             "first_name": "Novi",

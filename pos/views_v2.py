@@ -547,7 +547,7 @@ def split_bill(request, receipt_id):
         if results:
             from django.db.models import Sum as _Sum
             split_ids = [r['receipt_id'] for r in results]
-            split_sum = POSReceipt.objects.filter(pk__in=split_ids).aggregate(
+            split_sum = POSReceipt.objects.filter(pk__in=split_ids).select_related("session", "invoice", "parent_receipt").aggregate(
                 s=_Sum('total'))['s'] or Decimal('0')
             original_total = receipt.total
             diff = original_total - split_sum
@@ -1210,7 +1210,7 @@ def pocket_mode_activate(request):
         ])
 
     # Auto-create terminal if none exists
-    terminal = POSTerminal.objects.filter(company=company).first()
+    terminal = POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").first()
     if not terminal:
         import secrets
         terminal = POSTerminal.objects.create(
@@ -1266,10 +1266,10 @@ def pocket_mode_status(request):
         return JsonResponse({'ok': False, 'error': 'Nema tvrtke'}, status=400)
 
     from pos.models import POSSettings
-    settings = POSSettings.objects.filter(company=company).first()
+    settings = POSSettings.objects.filter(company=company).select_related("company").first()
 
     is_pocket = settings.pocket_mode if settings else False
-    terminal = POSTerminal.objects.filter(company=company).first()
+    terminal = POSTerminal.objects.filter(company=company).select_related("company", "workspace", "business_location").first()
 
     return JsonResponse({
         'ok': True,
@@ -1297,7 +1297,7 @@ def chain_verify(request):
     anchor = daily_anchor_hash(company)
 
     # Zadnjih 10 karika
-    recent = ChainLink.objects.filter(company=company).order_by('-sequence')[:10]
+    recent = ChainLink.objects.filter(company=company).select_related("company", "receipt").order_by('-sequence')[:10]
 
     return JsonResponse({
         'ok': True,

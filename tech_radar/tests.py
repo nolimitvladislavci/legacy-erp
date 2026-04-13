@@ -1,5 +1,4 @@
 """Tech Radar — 8+ testova za model, threshold, task."""
-import json
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model

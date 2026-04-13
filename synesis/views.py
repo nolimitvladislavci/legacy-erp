@@ -41,7 +41,7 @@ def synesis_settings(request):
         return redirect("dashboard")
     cfg = _get_config(company)
     from .models import SynesisLog
-    logs = SynesisLog.objects.filter(company=company).order_by("-synced_at")[:20]
+    logs = SynesisLog.objects.filter(company=company).select_related("company").order_by("-synced_at")[:20]
 
     if request.method == "POST":
         cfg.storage_db_path = request.POST.get("storage_db_path", "").strip()
@@ -577,6 +577,7 @@ def _build_script(cfg, company):
 
 # ── import API ─────────────────────────────────────────────────────────────────
 
+# CSRF exempt: token-authenticated API endpoint
 @csrf_exempt
 def synesis_import_api(request):
     if request.method != "POST":
@@ -1199,7 +1200,7 @@ def _import_invoices(request, company, data_list):
     # Update config
     # Update year config
     from .models import SynesisConfig, SynesisYearConfig
-    cfg = SynesisConfig.objects.filter(company=company).first()
+    cfg = SynesisConfig.objects.filter(company=company).select_related("company").first()
     if cfg:
         year = timezone.now().year
         yc, _ = SynesisYearConfig.objects.get_or_create(config=cfg, year=year)
@@ -1440,10 +1441,7 @@ def _import_retail(company, retail_rows, tretail_rows):
 #  SYNESIS MDB ONLINE IMPORT
 # ═══════════════════════════════════════════════════
 import os
-import json
 import tempfile
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 

@@ -1,5 +1,4 @@
 """Tests for invoicing/gobd_compliance.py — GoBD compliance checks."""
-from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 

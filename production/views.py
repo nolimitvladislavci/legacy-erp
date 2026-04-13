@@ -108,7 +108,7 @@ def dashboard(request):
         yield_avg = Decimal('0')
 
     # Workstation utilization (active orders / total active workstations)
-    active_ws = Workstation.objects.filter(company=company, status='active').count()
+    active_ws = Workstation.objects.filter(company=company, status='active').select_related("company").count()
     busy_ws = orders.filter(status='in_progress', workstation__isnull=False).values('workstation').distinct().count()
     ws_utilization = round(busy_ws / active_ws * 100) if active_ws else 0
 
@@ -595,7 +595,7 @@ def workstation_list(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('home')
 
-    workstations = Workstation.objects.filter(company=company)
+    workstations = Workstation.objects.filter(company=company).select_related("company")
     return render(request, 'production/workstation_list.html', {
         'workstations': workstations,
     })

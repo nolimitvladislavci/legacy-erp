@@ -10,13 +10,12 @@ Pokriva:
 6. Knowledge Graph — CRUD regulatornih promjena
 7. NN Feed — LLM ekstrakcija (mock)
 """
-import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import User
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.utils import timezone
 
 

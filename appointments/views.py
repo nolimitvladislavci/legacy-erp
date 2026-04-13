@@ -34,7 +34,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         from core.company_utils import get_user_company
         company = get_user_company(self.request)
-        return Appointment.objects.filter(company=company) if company else Appointment.objects.none()
+        return Appointment.objects.filter(company=company).select_related("company", "client", "employee") if company else Appointment.objects.none()
 
 
 # ── INTERNI KALENDAR ────────────────────────────────────────
@@ -43,8 +43,8 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 def calendar_view(request):
     company = get_user_company(request)
     clients = Partner.objects.filter(company=company, is_active=True).order_by("name") if company else Partner.objects.none()
-    resources = BookingResource.objects.filter(company=company, is_active=True).order_by("name") if company else BookingResource.objects.none()
-    services = BookingService.objects.filter(is_active=True, company=company).order_by("name") if company else BookingService.objects.none()
+    resources = BookingResource.objects.filter(company=company, is_active=True).select_related("company").order_by("name") if company else BookingResource.objects.none()
+    services = BookingService.objects.filter(is_active=True, company=company).select_related("company").order_by("name") if company else BookingService.objects.none()
     users = __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True)
     return render(request, "appointments/calendar.html", {
         "clients": clients,
@@ -145,8 +145,8 @@ def appointment_create(request):
     return render(request, "appointments/appointment_form.html", {
         "form": form,
         "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
-        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request)),
-        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request)),
+        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
+        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
         "users": __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True),
         "status_choices": Appointment.STATUS_CHOICES,
         "type_choices": Appointment.TYPE_CHOICES,
@@ -171,8 +171,8 @@ def appointment_edit(request, pk):
         "form": form,
         "appt": appt,
         "clients": Partner.objects.filter(is_active=True, company=get_user_company(request)).order_by("name"),
-        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request)),
-        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request)),
+        "resources": BookingResource.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
+        "services": BookingService.objects.filter(is_active=True, company=get_user_company(request).select_related("company")),
         "users": __import__("django.contrib.auth", fromlist=["get_user_model"]).get_user_model().objects.filter(is_active=True),
         "status_choices": Appointment.STATUS_CHOICES,
         "type_choices": Appointment.TYPE_CHOICES,
@@ -238,7 +238,7 @@ def api_appointments(request, pk=None):
 def public_booking_index(request):
     from companies.models import Company
     platform_company = Company.objects.filter(is_platform_owner=True).first()
-    services = BookingService.objects.filter(is_active=True, company=platform_company) if platform_company else BookingService.objects.none()
+    services = BookingService.objects.filter(is_active=True, company=platform_company).select_related("company") if platform_company else BookingService.objects.none()
     return render(request, "appointments/public/index.html", {"services": services})
 
 
@@ -258,12 +258,12 @@ def api_available_slots(request):
         return JsonResponse({"available": [], "unavailable": [], "slots": []})
     service = get_object_or_404(BookingService, id=service_id)
     weekday = target_date.weekday()
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company)
+    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
     available_slots = set()
     unavailable_slots = set()
     service_duration = service.duration.total_seconds() / 60
     for resource in resources:
-        wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).first()
+        wh = WorkingHours.objects.filter(resource=resource, day_of_week=weekday, is_day_off=False).select_related("resource").first()
         if not wh:
             continue
         start_dt = datetime.combine(target_date, wh.start_time)
@@ -291,6 +291,7 @@ def api_available_slots(request):
     return JsonResponse({"available": avail, "unavailable": unavail, "slots": avail})
 
 
+# CSRF exempt: public booking endpoint — uses BookingSignature
 @csrf_exempt
 @transaction.atomic
 def api_submit_public_booking(request):
@@ -358,7 +359,7 @@ def api_submit_public_booking(request):
                 oib=placeholder_oib,
             )
             client.save()
-        resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=booking_company)
+        resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=booking_company).select_related("company")
         assigned_resource = None
         for resource in resources:
             if not Appointment.objects.filter(
@@ -679,7 +680,7 @@ def api_slots_week(request):
         week_start = today - timedelta(days=today.weekday())
     DAYS_HR = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
     DAYS_FULL = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"]
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company)
+    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
     days_data = []
     for day_offset in range(7):
         target_date = week_start + timedelta(days=day_offset)
@@ -776,7 +777,7 @@ def dossier_detail(request, partner_id):
         defaults={"created_by": request.user}
     )
     entries = dossier.entries.select_related("appointment", "created_by").all()
-    recent_appointments = Appointment.objects.filter(client=client).order_by("-start_time")[:10]
+    recent_appointments = Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:10]
     entry_type_filter = request.GET.get("type", "")
     if entry_type_filter:
         entries = entries.filter(entry_type=entry_type_filter)
@@ -841,7 +842,7 @@ def dossier_entry_create(request, partner_id):
         "entry_type_icons": DE.ENTRY_ICONS,
         "prefill_type":   prefill_type,
         "appointment_id": appointment_id,
-        "appointments":   Appointment.objects.filter(client=client).order_by("-start_time")[:20],
+        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
     })
 
 
@@ -879,7 +880,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         "entry_type_icons": DE.ENTRY_ICONS,
         "prefill_type":   entry.entry_type,
         "sd_json":        _json.dumps(entry.structured_data, ensure_ascii=False),
-        "appointments":   Appointment.objects.filter(client=client).order_by("-start_time")[:20],
+        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
     })
 
 
@@ -902,7 +903,7 @@ def dossier_entry_delete(request, partner_id, entry_id):
 def service_list(request):
     company = get_user_company(request)
     if company:
-        services = BookingService.objects.filter(is_active=True, company=company).order_by("branch_type", "name")
+        services = BookingService.objects.filter(is_active=True, company=company).select_related("company").order_by("branch_type", "name")
     else:
         services = BookingService.objects.none()
     return render(request, "appointments/service_list.html", {
@@ -974,7 +975,7 @@ def api_slots_week(request):
         week_start = today - timedelta(days=today.weekday())
     DAYS_HR = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
     DAYS_FULL = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"]
-    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company)
+    resources = BookingResource.objects.filter(resource_type=service.resource_type, is_active=True, company=service.company).select_related("company")
     days_data = []
     for day_offset in range(7):
         target_date = week_start + timedelta(days=day_offset)
@@ -1070,7 +1071,7 @@ def dossier_detail(request, partner_id):
         defaults={"created_by": request.user}
     )
     entries = dossier.entries.select_related("appointment", "created_by").all()
-    recent_appointments = Appointment.objects.filter(client=client).order_by("-start_time")[:10]
+    recent_appointments = Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:10]
     entry_type_filter = request.GET.get("type", "")
     if entry_type_filter:
         entries = entries.filter(entry_type=entry_type_filter)
@@ -1134,7 +1135,7 @@ def dossier_entry_create(request, partner_id):
         "entry_type_icons": DE.ENTRY_ICONS,
         "prefill_type":   prefill_type,
         "appointment_id": appointment_id,
-        "appointments":   Appointment.objects.filter(client=client).order_by("-start_time")[:20],
+        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
     })
 
 
@@ -1171,7 +1172,7 @@ def dossier_entry_edit(request, partner_id, entry_id):
         "entry_type_icons": DE.ENTRY_ICONS,
         "prefill_type":   entry.entry_type,
         "sd_json":        _json.dumps(entry.structured_data, ensure_ascii=False),
-        "appointments":   Appointment.objects.filter(client=client).order_by("-start_time")[:20],
+        "appointments":   Appointment.objects.filter(client=client).select_related("company", "client", "employee").order_by("-start_time")[:20],
     })
 
 
@@ -1192,7 +1193,7 @@ def dossier_entry_delete(request, partner_id, entry_id):
 @login_required
 def service_list(request):
     company = get_user_company(request)
-    services = BookingService.objects.filter(company=company).order_by("branch_type", "name") if company else BookingService.objects.none()
+    services = BookingService.objects.filter(company=company).select_related("company").order_by("branch_type", "name") if company else BookingService.objects.none()
     return render(request, "appointments/service_list.html", {
         "services": services,
         "branch_types": dict(__import__("appointments.models", fromlist=["BRANCH_TYPES"]).BRANCH_TYPES),
@@ -1245,7 +1246,7 @@ def public_booking_by_slug(request, company_slug):
     from companies.models import Company
     company = get_object_or_404(Company, booking_slug=company_slug)
     # Filter services by company FK (ORM migration applied)
-    services = BookingService.objects.filter(company=company, is_active=True)
+    services = BookingService.objects.filter(company=company, is_active=True).select_related("company")
     return render(request, "appointments/public/index.html", {
         "services":        services,
         "company":         company,
@@ -1542,7 +1543,7 @@ def booking_calendar_view(request):
     """Internal booking calendar with Double-Lock slot visualization."""
     from core.company_utils import get_user_company
     company = get_user_company(request)
-    services = BookingService.objects.filter(is_active=True, company=company) if company else BookingService.objects.none()
+    services = BookingService.objects.filter(is_active=True, company=company).select_related("company") if company else BookingService.objects.none()
     return render(request, "appointments/booking_calendar.html", {
         "services": services,
     })

@@ -1,6 +1,6 @@
 """EU Audit Guard — testovi za 3 nagazne mine."""
 import sys
-from datetime import time, timedelta
+from datetime import time
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model

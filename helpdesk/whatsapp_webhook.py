@@ -46,6 +46,7 @@ def _find_partner(phone):
     return None
 
 
+# CSRF exempt: external webhook — no browser session
 @csrf_exempt
 @require_POST
 def whatsapp_webhook(request):

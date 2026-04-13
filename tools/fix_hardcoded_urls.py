@@ -9,7 +9,6 @@ Pokretanje:
   python3 tools/fix_hardcoded_urls.py --scan       # samo izvjestaj
   python3 tools/fix_hardcoded_urls.py --fix         # popravi sve
 """
-import os
 import re
 import sys
 from pathlib import Path
@@ -152,7 +151,7 @@ def main():
     sorted_urls = sorted(results.items(), key=lambda x: -len(x[1]))
 
     print(f"\n{'='*60}")
-    print(f"BORG SCAN: Hardcoded URLs in templates")
+    print("BORG SCAN: Hardcoded URLs in templates")
     print(f"{'='*60}")
     print(f"Ukupno hardkodiranih URL-ova: {total_hits}")
     print(f"Ukupno fajlova:               {len(files_with_hits)}")
@@ -170,7 +169,7 @@ def main():
 
     if args.fix:
         print(f"\n{'='*60}")
-        print(f"FIXING known URLs...")
+        print("FIXING known URLs...")
         print(f"{'='*60}\n")
 
         fixed_total = 0

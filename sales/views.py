@@ -46,7 +46,7 @@ def price_list_dashboard(request):
     active_count = price_lists.filter(is_active=True).count()
     ai_count = price_lists.filter(ai_suggested=True).count()
     partner_count = price_lists.exclude(partner=None).values('partner').distinct().count()
-    rabat_groups = RabatGroup.objects.filter(company=company)
+    rabat_groups = RabatGroup.objects.filter(company=company).select_related("company")
 
     return render(request, 'sales/price_list_dashboard.html', {
         'price_lists': price_lists,
@@ -118,7 +118,7 @@ def price_list_create(request, pk=None):
 
     partners = Partner.objects.filter(company=company).order_by('name')
     items = InventoryItem.objects.filter(company=company).order_by('name')
-    rabat_groups = RabatGroup.objects.filter(company=company)
+    rabat_groups = RabatGroup.objects.filter(company=company).select_related("company")
     lines = obj.lines.all() if obj else []
 
     return render(request, 'sales/price_list_form.html', {
@@ -295,7 +295,7 @@ def order_create(request):
 
         # Generiraj broj narudžbe
         now = timezone.now()
-        count = SalesOrder.objects.filter(company=company, order_date__year=now.year).count() + 1
+        count = SalesOrder.objects.filter(company=company, order_date__year=now.year).select_related("company", "partner", "otpremnica").count() + 1
         order.order_number = f'NAR-{now.year}-{count:04d}'
 
         partner_id = request.POST.get('partner')
@@ -310,7 +310,7 @@ def order_create(request):
 
         price_list_id = request.POST.get('price_list')
         if price_list_id:
-            order.price_list = CustomerPriceList.objects.filter(pk=price_list_id, company=company).first()
+            order.price_list = CustomerPriceList.objects.filter(pk=price_list_id, company=company).select_related("company", "partner").first()
 
         warehouse_id = request.POST.get('warehouse')
         if warehouse_id:
@@ -350,7 +350,7 @@ def order_create(request):
 
     partners = Partner.objects.filter(company=company).order_by('name')
     items = InventoryItem.objects.filter(company=company).order_by('name')
-    price_lists = CustomerPriceList.objects.filter(company=company, is_active=True)
+    price_lists = CustomerPriceList.objects.filter(company=company, is_active=True).select_related("company", "partner")
     try:
         from inventory.models import Warehouse
         warehouses = Warehouse.objects.filter(company=company)
@@ -607,7 +607,7 @@ def saldakonti_dashboard(request):
     if not company:
         return redirect('home')
 
-    qs = OpenItem.objects.filter(company=company, is_closed=False)
+    qs = OpenItem.objects.filter(company=company, is_closed=False).select_related("company", "partner", "invoice")
     today = timezone.now().date()
 
     receivables = qs.filter(direction='receivable')
@@ -653,7 +653,7 @@ def partner_open_items(request, partner_id):
     from partners.models import Partner
     partner = get_object_or_404(Partner, pk=partner_id, company=company)
 
-    qs = OpenItem.objects.filter(company=company, partner=partner)
+    qs = OpenItem.objects.filter(company=company, partner=partner).select_related("company", "partner", "invoice")
     direction = request.GET.get('direction')
     show_closed = request.GET.get('show_closed') == '1'
 

@@ -1,9 +1,7 @@
 """Tests for work_orders — models + views."""
 import datetime
-from decimal import Decimal
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 
 def _make_company(oib):

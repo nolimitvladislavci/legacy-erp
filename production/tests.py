@@ -20,21 +20,20 @@ the correct field name to validate the business rules.
 """
 
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
 
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from django.test import TestCase, RequestFactory, Client
+from django.test import TestCase, Client
 from django.urls import reverse
 
 from companies.models import Company
 from inventory.models import InventoryItem
 from production.models import (
     Workstation, BillOfMaterials, BOMLine,
-    ProductionOrder, ProductionStep, QualityCheck, ProductionLog,
+    ProductionOrder, ProductionStep, ProductionLog,
 )
 from production.services import (
-    check_availability, consume_materials, produce_output, calculate_costs,
+    check_availability, calculate_costs,
 )
 
 User = get_user_model()

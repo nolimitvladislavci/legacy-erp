@@ -4,8 +4,6 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from companies.models import Company
 from accounts.models import UserProfile
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

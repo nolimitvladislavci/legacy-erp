@@ -1,8 +1,6 @@
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models import TrackingStatus, TrackedItem, TrackingEvent
 
 

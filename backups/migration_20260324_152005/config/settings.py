@@ -657,7 +657,7 @@ if SENTRY_DSN and not DEBUG:
         traces_sample_rate=0.2,       # 20% transakcija za performance monitoring
         send_default_pii=True,         # Šalje user ID za kontekst greške
         environment='production',
-        release=f'limit-connect@2026.03.18',
+        release='limit-connect@2026.03.18',
     )
 
 # --- CI/CD TEST OVERRIDE ---

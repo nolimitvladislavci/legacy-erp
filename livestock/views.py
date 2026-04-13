@@ -10,7 +10,7 @@ from django.db import IntegrityError, DatabaseError
 @login_required
 def livestock_list(request):
     company = get_user_company(request)
-    animals = Livestock.objects.filter(company=company)
+    animals = Livestock.objects.filter(company=company).select_related("company", "jibg_farm")
 
     vrsta = request.GET.get('vrsta')
     status = request.GET.get('status')
@@ -84,7 +84,7 @@ def livestock_create(request):
 @login_required
 def field_list(request):
     company = get_user_company(request)
-    fields = Field.objects.filter(company=company)
+    fields = Field.objects.filter(company=company).select_related("company")
     return render(request, 'livestock/field_list.html', {
         'fields': fields,
     })
@@ -93,7 +93,7 @@ def field_list(request):
 @login_required
 def crop_list(request):
     company = get_user_company(request)
-    crops = CropPlan.objects.filter(company=company)
+    crops = CropPlan.objects.filter(company=company).select_related("company", "parcela")
     return render(request, 'livestock/crop_list.html', {
         'crops': crops,
     })
@@ -115,11 +115,11 @@ def vet_quick_entry(request, farm_token):
     if not company:
         return render(request, 'livestock/vet_404.html')
 
-    animals = Livestock.objects.filter(company=company, status='aktivno').order_by('ear_tag')
+    animals = Livestock.objects.filter(company=company, status='aktivno').select_related("company", "jibg_farm").order_by('ear_tag')
 
     if request.method == 'POST':
         ear_tag = request.POST.get('ear_tag')
-        animal = Livestock.objects.filter(company=company, ear_tag=ear_tag).first()
+        animal = Livestock.objects.filter(company=company, ear_tag=ear_tag).select_related("company", "jibg_farm").first()
         if not animal:
             messages.error(request, _('Grlo nije pronadjeno: %s') % ear_tag)
             return redirect('livestock:vet_quick_entry', farm_token=farm_token)
@@ -187,7 +187,7 @@ def vet_dashboard(request):
     memberships = CompanyMembership.objects.filter(user=request.user, is_active=True)
     companies = [m.company for m in memberships]
 
-    all_animals = Livestock.objects.filter(company__in=companies, status='aktivno')
+    all_animals = Livestock.objects.filter(company__in=companies, status='aktivno').select_related("company", "jibg_farm")
     recent_records = HealthRecord.objects.filter(
         animal__company__in=companies
     ).select_related('animal', 'animal__company').order_by('-datum')[:20]
@@ -351,7 +351,7 @@ def institutional_api(request, scope):
 
     elif scope == 'jrdz':
         # Kretanje zivotinja
-        animals = Livestock.objects.filter(company=company).order_by('ear_tag')
+        animals = Livestock.objects.filter(company=company).select_related("company", "jibg_farm").order_by('ear_tag')
         data = [{
             'ear_tag':       a.ear_tag,
             'species_code':  'GVD',   # Govedo — JRDZ kod
@@ -429,17 +429,17 @@ def token_management(request):
             messages.success(request, _('Token kreiran!'))
         elif action == 'revoke':
             pk = request.POST.get('token_id')
-            InstitutionalAccessToken.objects.filter(pk=pk, company=company).update(is_active=False)
+            InstitutionalAccessToken.objects.filter(pk=pk, company=company).select_related("company", "created_by").update(is_active=False)
             messages.success(request, _('Token opozvan.'))
         elif action == 'regenerate':
             pk = request.POST.get('token_id')
-            t = InstitutionalAccessToken.objects.filter(pk=pk, company=company).first()
+            t = InstitutionalAccessToken.objects.filter(pk=pk, company=company).select_related("company", "created_by").first()
             if t:
                 t.regenerate()
                 messages.success(request, _('Novi token generiran.'))
         return redirect('livestock:token_management')
 
-    tokens = InstitutionalAccessToken.objects.filter(company=company).order_by('-created_at')
+    tokens = InstitutionalAccessToken.objects.filter(company=company).select_related("company", "created_by").order_by('-created_at')
     return render(request, 'livestock/token_management.html', {
         'tokens': tokens, 'company': company,
     })
@@ -469,7 +469,7 @@ def inspector_live_view(request, scope, token):
     company = tok.company
     today = timezone.now().date()
 
-    animals = Livestock.objects.filter(company=company, status='aktivno').order_by('ear_tag')
+    animals = Livestock.objects.filter(company=company, status='aktivno').select_related("company", "jibg_farm").order_by('ear_tag')
     blocked = HealthRecord.objects.filter(
         animal__company=company, karencija_do__gte=today,
     ).select_related('animal').order_by('-karencija_do')
@@ -544,7 +544,7 @@ def generate_inspection_pdf(request):
     today = timezone.now().date()
     scope = request.GET.get('scope', 'sanitarna')
 
-    animals = Livestock.objects.filter(company=company).order_by('ear_tag')
+    animals = Livestock.objects.filter(company=company).select_related("company", "jibg_farm").order_by('ear_tag')
     records = HealthRecord.objects.filter(
         animal__company=company,
     ).select_related('animal').order_by('animal__ear_tag', '-datum')
@@ -596,9 +596,6 @@ def generate_inspection_pdf(request):
 # ═══════════════════════════════════════════════════════════════════════════
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.http import JsonResponse
 
 @login_required
 def farm_register(request):
@@ -621,7 +618,7 @@ def farm_register(request):
         if not jibg_result['valid']:
             errors.append(jibg_result['error'])
 
-        if FarmIdentification.objects.filter(jibg=jibg).exists():
+        if FarmIdentification.objects.filter(jibg=jibg).select_related("company", "created_by").exists():
             errors.append(f'Gospodarstvo {jibg} je vec registrirano u sustavu.')
 
         if errors:
@@ -671,7 +668,7 @@ def farm_register(request):
         return redirect('livestock:farm_list')
 
     # GET
-    existing = FarmIdentification.objects.filter(company=company)
+    existing = FarmIdentification.objects.filter(company=company).select_related("company", "created_by")
     return render(request, 'livestock/farm_register.html', {
         'company': company,
         'existing': existing,
@@ -686,7 +683,7 @@ def farm_list(request):
     from .models import FarmIdentification
     from core.company_utils import get_user_company
     company = get_user_company(request)
-    farms = FarmIdentification.objects.filter(company=company)
+    farms = FarmIdentification.objects.filter(company=company).select_related("company", "created_by")
     return render(request, 'livestock/farm_list.html', {
         'farms': farms,
         'page_title': 'Gospodarstva',

@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
 import json
-import traceback
 import sys
 import time
 from datetime import date, timedelta
@@ -163,7 +162,7 @@ class Command(BaseCommand):
                 except (IntegrityError, DatabaseError) as e:
                     if "__ROLLBACK__" not in str(e):
                         r = SimResult(module)
-                        r.error(f"Neočekivana greška u modulu", e)
+                        r.error("Neočekivana greška u modulu", e)
                         r.done()
                         results.append(r.to_dict())
             else:
@@ -204,7 +203,7 @@ class Command(BaseCommand):
 
     def _print_summary(self, results):
         print(f"\n{BOLD}{'═'*60}")
-        print(f"  SUMMARY")
+        print("  SUMMARY")
         print(f"{'═'*60}{RESET}")
         total_pass = sum(r['passed'] for r in results)
         total_fail = sum(r['failed'] for r in results)
@@ -240,7 +239,6 @@ class Command(BaseCommand):
 
         try:
             info("Provjera korisnika kompanije")
-            from core.company_utils import get_user_company
             # Simuliramo request objekt
             class FakeRequest:
                 def __init__(self, u, c):
@@ -678,7 +676,7 @@ class Command(BaseCommand):
             assert hasattr(CardActivity, 'is_system_generated'), "is_system_generated polje ne postoji!"
             public_count = CardActivity.objects.filter(is_public_facing=True).count()
             r.success(f"CardActivity.is_public_facing: OK. Javnih zapisa: {public_count}")
-            r.success(f"CardActivity.is_system_generated: OK")
+            r.success("CardActivity.is_system_generated: OK")
         except AssertionError as e:
             r.error(str(e))
         except DatabaseError as e:
@@ -703,7 +701,7 @@ class Command(BaseCommand):
             url = reverse('borg_ops:borg_hub')
             r.success(f"BORG Hub URL: {url}")
         except ImportError as e:
-            r.warning(f"BORG Hub URL ne postoji još — CC_TASK_BORG_HUB.md potreban")
+            r.warning("BORG Hub URL ne postoji još — CC_TASK_BORG_HUB.md potreban")
 
         return r
 

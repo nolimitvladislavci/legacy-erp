@@ -28,7 +28,7 @@ class FeedPagination(PageNumberPagination):
 
 
 class PetProfileViewSet(viewsets.ModelViewSet):
-    queryset = PetProfile.objects.all()
+    queryset = PetProfile.objects.all().select_related("tenant", "owner", "company")
     serializer_class = PetProfileSerializer
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -37,7 +37,7 @@ class PetProfileViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        qs = PetProfile.objects.all()
+        qs = PetProfile.objects.all().select_related("tenant", "owner", "company")
 
         if self.action == 'feed':
             qs = qs.filter(is_public=True)
@@ -97,7 +97,7 @@ class PetProfileViewSet(viewsets.ModelViewSet):
 
 
 class LifeEventViewSet(viewsets.ModelViewSet):
-    queryset = LifeEvent.objects.all()
+    queryset = LifeEvent.objects.all().select_related("pet")
     serializer_class = LifeEventSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description', 'location']
@@ -105,7 +105,7 @@ class LifeEventViewSet(viewsets.ModelViewSet):
 
 
 class CompetitionViewSet(viewsets.ModelViewSet):
-    queryset = Competition.objects.all()
+    queryset = Competition.objects.all().select_related("tenant", "winner")
     serializer_class = CompetitionSerializer
     filter_backends = [filters.OrderingFilter]
     ordering = ['-start_date']
@@ -147,7 +147,7 @@ class CompetitionViewSet(viewsets.ModelViewSet):
 
 
 class SocialImportViewSet(viewsets.ModelViewSet):
-    queryset = SocialImport.objects.all()
+    queryset = SocialImport.objects.all().select_related("pet", "mapped_to")
     serializer_class = SocialImportSerializer
     throttle_classes = [ImportRateThrottle]
 
@@ -203,7 +203,7 @@ def public_profile(request, slug):
 def public_feed(request):
     """Public feed with all pets, filterable by species."""
     species = request.GET.get('species', '')
-    qs = PetProfile.objects.filter(is_public=True).order_by('-updated_at')
+    qs = PetProfile.objects.filter(is_public=True).select_related("tenant", "owner", "company").order_by('-updated_at')
 
     if species:
         qs = qs.filter(species=species)
@@ -258,7 +258,7 @@ def competition_vote_web(request, competition_id):
     if ',' in ip:
         ip = ip.split(',')[0].strip()
 
-    if CompetitionVote.objects.filter(entry=entry, voter_ip=ip).exists():
+    if CompetitionVote.objects.filter(entry=entry, voter_ip=ip).select_related("entry", "voter_user").exists():
         return JsonResponse({'success': False, 'error': 'Već ste glasali.'})
 
     CompetitionVote.objects.create(
@@ -325,8 +325,8 @@ def add_event_web(request, slug):
 
 def boxgram_landing(request):
     """Boxgram landing page — digitalni život tvog ljubimca."""
-    recent_pets = PetProfile.objects.filter(is_public=True).order_by('-updated_at')[:6]
-    total_pets = PetProfile.objects.filter(is_public=True).count()
+    recent_pets = PetProfile.objects.filter(is_public=True).select_related("tenant", "owner", "company").order_by('-updated_at')[:6]
+    total_pets = PetProfile.objects.filter(is_public=True).select_related("tenant", "owner", "company").count()
     context = {
         'recent_pets': recent_pets,
         'total_pets': total_pets,

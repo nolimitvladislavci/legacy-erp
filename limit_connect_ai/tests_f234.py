@@ -6,12 +6,9 @@ anomaly detector, predictions, self-heal, quick actions, signal triage.
 Run: python manage.py test limit_connect_ai.tests_f234 --verbosity=2
 """
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
-from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
-from django.test.utils import override_settings
 import django.db
 from django.utils import timezone
 

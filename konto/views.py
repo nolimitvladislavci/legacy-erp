@@ -54,7 +54,7 @@ def dashboard(request):
     year_start = datetime.date(today.year, 1, 1)
 
     # Bank balances
-    bank_accounts = BankAccount.objects.filter(company=company, is_active=True)
+    bank_accounts = BankAccount.objects.filter(company=company, is_active=True).select_related("company", "konto_account")
     total_bank = bank_accounts.aggregate(t=Sum('current_balance'))['t'] or Decimal('0')
 
     # Transaction stats this month
@@ -142,7 +142,7 @@ def chart_of_accounts(request):
     acct_type = request.GET.get('type', '')
     q = request.GET.get('q', '')
 
-    accounts = KontoAccount.objects.filter(company=company)
+    accounts = KontoAccount.objects.filter(company=company).select_related("company", "parent")
     if acct_type:
         accounts = accounts.filter(account_type=acct_type)
     if q:
@@ -240,7 +240,7 @@ def account_save(request):
 def bank_accounts(request):
     """List bank accounts."""
     company = _get_company(request)
-    accounts = BankAccount.objects.filter(company=company)
+    accounts = BankAccount.objects.filter(company=company).select_related("company", "konto_account")
     for ba in accounts:
         ba.recalculate_balance()
     ctx = {'bank_accounts': accounts}
@@ -332,7 +332,7 @@ def transactions(request):
     total_in = qs.filter(transaction_type='inflow').aggregate(t=Sum('amount'))['t'] or 0
     total_out = qs.filter(transaction_type='outflow').aggregate(t=Sum('amount'))['t'] or 0
 
-    banks = BankAccount.objects.filter(company=company, is_active=True)
+    banks = BankAccount.objects.filter(company=company, is_active=True).select_related("company", "konto_account")
 
     ctx = {
         'transactions': qs[:500],
@@ -405,7 +405,7 @@ def journal_entry_create(request):
         company = _get_company(request)
         if not company:
             return redirect('dashboard')
-        accounts = KontoAccount.objects.filter(company=company, is_active=True)
+        accounts = KontoAccount.objects.filter(company=company, is_active=True).select_related("company", "parent")
         ctx = {'accounts': accounts}
         return render(request, 'konto/journal_entry_form.html', ctx)
 
@@ -460,7 +460,7 @@ def journal_entry_create(request):
     except IntegrityError as e:
         from .services import parse_integrity_error
         error_msg = parse_integrity_error(e)
-        accounts = KontoAccount.objects.filter(company=company, is_active=True)
+        accounts = KontoAccount.objects.filter(company=company, is_active=True).select_related("company", "parent")
         return render(request, 'konto/journal_entry_form.html', {
             'accounts': accounts,
             'error': error_msg,
@@ -613,7 +613,7 @@ def api_book_transactions(request):
     company = _get_company(request)
     data = json.loads(request.body)
     ids = data.get('transaction_ids', [])
-    qs = BankTransaction.objects.filter(pk__in=ids, is_booked=False, company=company)
+    qs = BankTransaction.objects.filter(pk__in=ids, is_booked=False, company=company).select_related("bank_account", "company", "matched_invoice")
     try:
         entries = services.book_bank_transactions(qs, request.user)
     except IntegrityError as e:
@@ -691,7 +691,7 @@ def api_chart_data(request):
     company = _get_company(request)
     acct_type = request.GET.get('type', '')
 
-    accounts = KontoAccount.objects.filter(company=company, is_active=True)
+    accounts = KontoAccount.objects.filter(company=company, is_active=True).select_related("company", "parent")
     if acct_type:
         accounts = accounts.filter(account_type=acct_type)
 
@@ -758,7 +758,7 @@ def tax_dashboard(request):
 
     for c in companies:
         # Latest TaxPeriod
-        latest = TaxPeriod.objects.filter(company=c).order_by('-year', '-month').first()
+        latest = TaxPeriod.objects.filter(company=c).select_related("company").order_by('-year', '-month').first()
 
         # Risk alerts count
         alert_count = SupplierRiskAlert.objects.filter(
@@ -816,7 +816,7 @@ def report_vat(request):
             error = str(exc)
 
     # History
-    history = TaxPeriod.objects.filter(company=company).order_by('-year', '-month', '-quarter')[:24]
+    history = TaxPeriod.objects.filter(company=company).select_related("company").order_by('-year', '-month', '-quarter')[:24]
 
     months  = list(range(1, 13))
     years   = list(range(today.year - 3, today.year + 1))
@@ -1589,7 +1589,7 @@ def cost_centers(request):
     """Lista profitnih centara s budžetom i troškovima."""
     company = _get_company(request)
     from .models import CostCenter
-    centers = CostCenter.objects.filter(company=company)
+    centers = CostCenter.objects.filter(company=company).select_related("company", "parent", "manager")
     data = []
     for cc in centers:
         data.append({
@@ -1646,6 +1646,6 @@ def cost_center_save(request):
     except (InvalidOperation, ValueError):
         cc.budget_annual = Decimal('0')
     parent_id = request.POST.get('parent')
-    cc.parent = CostCenter.objects.filter(pk=parent_id, company=company).first() if parent_id else None
+    cc.parent = CostCenter.objects.filter(pk=parent_id, company=company).select_related("company", "parent", "manager").first() if parent_id else None
     cc.save()
     return redirect('konto:cost_centers')

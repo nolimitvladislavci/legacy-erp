@@ -643,7 +643,7 @@ class CompanyModuleConfig(models.Model):
         return module_id in self.enabled_modules
 
     def get_sidebar_modules(self):
-        from companies.module_registry import MODULES, get_module
+        from companies.module_registry import get_module
         result = []
         order = self.sidebar_order or self.enabled_modules
         for mid in order:

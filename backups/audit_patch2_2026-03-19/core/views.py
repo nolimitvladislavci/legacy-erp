@@ -319,9 +319,8 @@ def umbrella_dashboard(request):
     from companies.models import Company
     from core.company_utils import get_user_company
     from django.contrib.auth import get_user_model
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     from django.utils import timezone
-    from datetime import timedelta
     User = get_user_model()
 
     company = get_user_company(request)
@@ -675,7 +674,6 @@ def superadmin_users(request):
     users_page = paginator.get_page(page)
 
     # Companies for filter dropdown
-    from companies.models import Company
     companies = _get_admin_companies(request).order_by('name')
 
     # Handle POST actions (toggle active, toggle staff)
@@ -714,7 +712,6 @@ def superadmin_users(request):
 
 @login_required
 def company_dashboard(request):
-    import datetime
 
     from django.db.models import Sum
     from django.utils import timezone
@@ -1806,7 +1803,6 @@ def datenschutz(request):
 def control_tower_view(request):
     """Renders the Control Tower dashboard page with full context."""
     from django.utils import timezone
-    import datetime
 
     user = request.user
     now = timezone.now()
@@ -1964,7 +1960,6 @@ def control_tower_api(request):
     from django.db.models import Count, Sum, Q
     from django.utils import timezone
     from django.http import JsonResponse
-    import datetime
 
     now = timezone.now()
     today = now.date()
@@ -2152,7 +2147,7 @@ def control_tower_api(request):
 
     # ── Financial Radar (V3) ─────────────────────────────────────────────
     try:
-        from konto.models import BankAccount, BankTransaction
+        from konto.models import BankAccount
         from invoicing.models import Invoice
         from finance.bank_parsers import get_partial_payment_discrepancies
         import datetime as _dt
@@ -2224,7 +2219,6 @@ def control_tower_api(request):
     # ── HelpDesk ─────────────────────────────────────────────────────────
     try:
         from helpdesk.models import Ticket
-        from django.utils import timezone as tz
         hd_qs = Ticket.objects.all()
         open_statuses = ['open ', 'in_progress', 'waiting_client', 'waiting_internal']
         closed_statuses = ['resolved', 'closed']
