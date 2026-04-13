@@ -126,6 +126,10 @@ def dashboard_router(request):
     # Route by role
     role = profile.role
 
+    # Umbrella admins → umbrella dashboard (not POS)
+    if role in ('company_admin', 'tenant_admin') and profile.company and profile.company.is_umbrella:
+        return redirect('umbrella_dashboard')
+
     if role in ('company_admin', 'project_manager'):
         return redirect('pos:dashboard')
     elif role == 'investor' or role == 'partner':
@@ -488,10 +492,6 @@ def umbrella_dashboard(request):
 
     if not company.is_umbrella and not request.user.is_superuser:
         messages.warning(request, _('Vasa tvrtka nije umbrella tvrtka.'))
-        # Anti-loop: ne redirectaj na dashboard ako smo vec dosli odatle
-        referer = request.META.get('HTTP_REFERER', '')
-        if 'dashboard' in referer or 'umbrella' in referer:
-            return render(request, 'dashboards/company_admin.html', {'company': company})
         return redirect('dashboard')
 
     children = Company.objects.filter(umbrella_parent=company).order_by('name')
@@ -913,14 +913,10 @@ def company_dashboard(request):
 
     # Umbrella companies go to umbrella dashboard
     if company and company.is_umbrella:
-        # Anti-loop guard
-        referer = request.META.get('HTTP_REFERER', '')
-        if 'umbrella' not in referer:
+        # Session-based anti-loop guard (referer is unreliable)
+        if not request.GET.get('stay'):
             return redirect("umbrella_dashboard")
-        # Ako smo vec redirectani iz umbrella → renderaj company dashboard
 
-
-    today = timezone.now().date()
     today = timezone.now().date()
     month_start = today.replace(day=1)
 
