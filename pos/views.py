@@ -1383,7 +1383,8 @@ def _quick_pos_legacy(request, terminal_id):
     company = terminal.company
     session = (
         POSSession.objects.filter(terminal=terminal, status="open")
-        .select_related("terminal", "operator", "active_cashiers")
+        .select_related("terminal", "operator")
+        .prefetch_related("active_cashiers")
         .first()
     )
 
@@ -1549,7 +1550,8 @@ def pos_joker(request, terminal_id):
     company = terminal.company
     session = (
         POSSession.objects.filter(terminal=terminal, status="open")
-        .select_related("terminal", "operator", "active_cashiers")
+        .select_related("terminal", "operator")
+        .prefetch_related("active_cashiers")
         .first()
     )
     is_gastro = terminal.pos_type == "restaurant"
@@ -1776,7 +1778,8 @@ def _restaurant_pos_legacy(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     session = (
         POSSession.objects.filter(terminal=terminal, status="open")
-        .select_related("terminal", "operator", "active_cashiers")
+        .select_related("terminal", "operator")
+        .prefetch_related("active_cashiers")
         .first()
     )
 
@@ -2752,7 +2755,8 @@ def table_checkout(request, table_id):
             return JsonResponse({"error": "Nema aktivnog terminala"}, status=400)
         session = (
             POSSession.objects.filter(terminal=terminal, status="open")
-            .select_related("terminal", "operator", "active_cashiers")
+            .select_related("terminal", "operator")
+            .prefetch_related("active_cashiers")
             .first()
         )
         if not session:
@@ -3685,7 +3689,8 @@ def pfand_return(request):
 
     session = (
         POSSession.objects.filter(pk=session_id, status="open")
-        .select_related("terminal", "operator", "active_cashiers")
+        .select_related("terminal", "operator")
+        .prefetch_related("active_cashiers")
         .first()
     )
     if not session:
@@ -4435,7 +4440,8 @@ def cashier_pin_verify(request):
 
                 session = (
                     POSSession.objects.filter(id=session_id, status="open")
-                    .select_related("terminal", "operator", "active_cashiers")
+                    .select_related("terminal", "operator")
+                    .prefetch_related("active_cashiers")
                     .first()
                 )
                 if session:
@@ -6190,7 +6196,8 @@ def pos_qr_open(request, token):
     # Find open session or create new one
     session = (
         POSSession.objects.filter(terminal=terminal, status="open")
-        .select_related("terminal", "operator", "active_cashiers")
+        .select_related("terminal", "operator")
+        .prefetch_related("active_cashiers")
         .first()
     )
     if not session:
