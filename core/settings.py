@@ -1351,6 +1351,10 @@ INSTAGRAM_OEMBED_TOKEN = os.environ.get("INSTAGRAM_OEMBED_TOKEN", "")
 # ── Stolarija Service Reminders ────────────────────────────────────
 CELERY_BEAT_SCHEDULE.update(
     {
+        "photo-ai-tagging": {
+            "task": "documents.tasks.ai_tag_photos",
+            "schedule": 1800,  # every 30 min
+        },
         "stolarija-service-reminders-daily": {
             "task": "stolarija.tasks.check_service_reminders",
             "schedule": 86400.0,  # 1x dnevno

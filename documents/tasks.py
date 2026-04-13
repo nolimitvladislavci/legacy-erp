@@ -977,3 +977,125 @@ def gmail_ura_import(self):
     # 5. Batch WhatsApp digest: "10 novih URA importirano, pregledaj na /documents/ai-inbox/"
     logger.info("Gmail OAuth configured but import not yet implemented.")
     return {"status": "pending_setup"}
+
+
+# ═══════════════════════════════════════════════════════════════
+# AI Image Tagging — auto-tag photos with Claude Haiku
+# ═══════════════════════════════════════════════════════════════
+
+
+@shared_task(bind=True, max_retries=2, retry_backoff=True)
+def ai_tag_photos(self):
+    """
+    Process untagged photo ArhivaEntries — call Claude Haiku for auto-tagging.
+    Runs every 30 min via celery beat. Batch of 5 per run.
+    """
+    import base64
+    import json
+    import os
+
+    from django.conf import settings as django_settings
+
+    from documents.models import ArhivaEntry
+
+    logger = logging.getLogger("documents.tasks")
+
+    api_key = getattr(django_settings, "ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return {"status": "skipped", "reason": "no_api_key"}
+
+    # Find photos without tags
+    entries = list(
+        ArhivaEntry.objects.filter(
+            content_category="photo",
+            has_image=True,
+            tags=[],
+        )
+        .exclude(file_path="")
+        .order_by("archived_at")[:5]
+    )
+
+    if not entries:
+        return {"status": "ok", "tagged": 0}
+
+    tagged = 0
+    for entry in entries:
+        abs_path = os.path.join(django_settings.MEDIA_ROOT, entry.file_path)
+        if not os.path.exists(abs_path):
+            # Mark with error tag so we don't retry
+            entry.tags = ["_file_missing"]
+            entry.save(update_fields=["tags"])
+            continue
+
+        # Read and encode image
+        try:
+            with open(abs_path, "rb") as f:
+                img_bytes = f.read()
+            if len(img_bytes) > 5_000_000:
+                entry.tags = ["_too_large"]
+                entry.save(update_fields=["tags"])
+                continue
+            b64 = base64.b64encode(img_bytes).decode()
+        except OSError:
+            continue
+
+        # Detect media type
+        ext = os.path.splitext(entry.file_path)[1].lower()
+        media_type = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+        }.get(ext, "image/jpeg")
+
+        # Call Claude Haiku
+        try:
+            import anthropic
+
+            client = anthropic.Anthropic(api_key=api_key)
+            response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=200,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image",
+                                "source": {"type": "base64", "media_type": media_type, "data": b64},
+                            },
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Analiziraj sliku i vrati JSON array tagova na hrvatskom jeziku. "
+                                    "Max 5 tagova. Primjeri: prozor, vrata, fasada, gradiliste, "
+                                    "ostecenje, ugradnja, prije, poslije, interijer, eksterijer, "
+                                    "dostava, potpis, racun, dokument, zivotinja, kuca, stan, "
+                                    "ured, skladiste, alat, materijal. "
+                                    'Odgovori SAMO JSON array, npr: ["prozor", "ugradnja", "poslije"]'
+                                ),
+                            },
+                        ],
+                    }
+                ],
+            )
+
+            text = response.content[0].text.strip()
+            # Parse JSON array
+            if text.startswith("["):
+                tags = json.loads(text)
+                if isinstance(tags, list) and all(isinstance(t, str) for t in tags):
+                    # Merge with existing tags (preserve source tags)
+                    existing = entry.tags or []
+                    merged = list(set(existing + [t.lower().strip() for t in tags[:5]]))
+                    entry.tags = merged
+                    entry.save(update_fields=["tags"])
+                    tagged += 1
+                    logger.info("ai_tag: %s → %s", entry.archive_number, merged)
+
+        except Exception as e:
+            logger.warning("ai_tag failed for %s: %s", entry.pk, e)
+
+    logger.info("ai_tag_photos: tagged %d/%d", tagged, len(entries))
+    return {"tagged": tagged, "total": len(entries)}

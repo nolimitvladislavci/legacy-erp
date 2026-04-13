@@ -151,6 +151,21 @@ def archive_photo(
         archived_by=captured_by,
     )
 
+    # Auto-match partner by address
+    if address and company:
+        try:
+            from partners.models import Partner
+
+            partner = Partner.objects.filter(
+                company=company,
+                address__icontains=address[:30],
+            ).first()
+            if partner:
+                entry.partner = partner
+                entry.partner_name = str(partner)[:200]
+        except Exception:
+            pass
+
     try:
         entry.save()
         logger.info(

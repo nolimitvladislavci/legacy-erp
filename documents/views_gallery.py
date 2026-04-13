@@ -88,6 +88,10 @@ def _base_qs(request):
     if date_to:
         qs = qs.filter(archived_at__date__lte=date_to)
 
+    partner = request.GET.get("partner", "")
+    if partner:
+        qs = qs.filter(partner_name__icontains=partner)
+
     return qs
 
 

@@ -25,6 +25,8 @@
     {% include "includes/_panel_link.html" with href=nav_dash icon="fa-home" label="Dashboard" %}
     {% include "includes/_panel_link.html" with href=nav_pos icon="fa-cash-register" label="POS Kasa" %}
     {% include "includes/_panel_link.html" with href=nav_arh icon="fa-archive" label="Arhiva" %}
+    {% url 'documents:gallery_dashboard' as nav_gallery %}
+    {% include "includes/_panel_link.html" with href=nav_gallery icon="fa-images" label="Galerija" %}
     {% include "includes/_panel_link.html" with href=nav_inv icon="fa-file-invoice-dollar" label="Fakture" %}
     {% include "includes/_panel_link.html" with href=nav_kon icon="fa-book" label="Konto" %}
     {% include "includes/_panel_link.html" with href=nav_par icon="fa-users" label="Partneri" %}
