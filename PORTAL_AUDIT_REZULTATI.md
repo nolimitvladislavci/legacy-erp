@@ -93,3 +93,36 @@
 2. **Employee OIB fill** — contact Marija/Ivan to collect missing OIBs
 3. **Negative stock cleanup** — UVIJEK FRIŠKO needs stock adjustment entry
 4. **DRAFT companies** — review and either complete or deactivate
+
+---
+
+## Compliance Autofix — 13.04.2026 08:36 UTC
+
+### Task A: OIB radnika
+- Pronađeno radnika bez OIB-a: **8**
+- OIB pronađen u bazi (predložen, ne upisan): **5**
+  - Ljubica → OIB iz tvrtke "Firma korisnika Ljubica" (17785640404)
+  - Ivan Brtan → OIB iz tvrtke "Petar Brtan — Golubar" (75513441588)
+  - Marija Brtan → OIB iz Synesis partnera "BRTAN MARIJA" (SYN-30249)
+  - Petar Brtan → OIB iz partnera "PETAR BRTAN" (75513441588)
+  - Brunoslav Horvat → OIB iz partnera "BRUNOSLAV HORVAT" (06557714293)
+- OIB nije pronađen (firma mora unijeti ručno): **3**
+  - Ilija Šošić (Viskovic Bau)
+  - Shevqet Temaj (UVIJEK FRIŠKO)
+  - Nikša Visković (BEZ FIRME — treba dodijeliti!)
+- ImprovementSuggestion kreiran za svih 8: ✅
+- WhatsApp: ⏳ čeka 20-22h prozor (Trojstvo šalje)
+
+### Task B: Negativne zalihe
+- Pronađeno artikala s negativnom zalihom: **13** (10 unique)
+- Firme pogođene:
+  - UVIJEK FRIŠKO: 8 artikala (pekarnica — peciva, buhtle, Coca-Cola)
+  - Konjik d.o.o.: 3 artikla (adapteri, Ray-Ban okviri)
+- S otvorenom primkom: 0
+- ImprovementSuggestion kreiran: 10
+- Preporučena akcija: inventura + primka za razliku
+
+### Trojstvo
+- Analiza pokrenuta za: **18 sugestija**
+- Rezultati dostupni u: /admin/pos/improvementsuggestion/
+- WhatsApp obavijesti: automatski u 20-22h prozoru
