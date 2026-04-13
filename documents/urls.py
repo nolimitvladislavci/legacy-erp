@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views, views_arhiva
+from . import views, views_arhiva, views_gallery
 
 router = DefaultRouter()
 router.register(r"api", views.DocumentViewSet, basename="document")
@@ -86,5 +86,11 @@ urlpatterns = [
     path("cmr/<uuid:pk>/", views.cmr_detail, name="cmr_detail"),
     path("cmr/<uuid:pk>/pdf/", views.cmr_pdf, name="cmr_pdf"),
     path("cmr/<uuid:pk>/confirm/", views.doc_confirm, name="cmr_confirm"),
+    # Photo Gallery / Baustela
+    path("gallery/", views_gallery.gallery_dashboard, name="gallery_dashboard"),
+    path("gallery/map/", views_gallery.gallery_map, name="gallery_map"),
+    path("gallery/timeline/", views_gallery.gallery_timeline, name="gallery_timeline"),
+    path("gallery/api/", views_gallery.gallery_api, name="gallery_api"),
+    path("gallery/upload/", views_gallery.gallery_upload, name="gallery_upload"),
     path("", include(router.urls)),
 ]

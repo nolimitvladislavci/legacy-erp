@@ -295,6 +295,21 @@ class ArhivaEntry(models.Model):
         ("cmr", _("CMR")),
         ("pos_receipt", _("POS račun")),
         ("email_in", _("Ulazni email (URA auto-import)")),
+        # Photo registry (Sprint 5 — Baustela)
+        ("site_photo", _("Fotografija s terena")),
+        ("before_photo", _("Stanje prije")),
+        ("after_photo", _("Stanje poslije")),
+        ("delivery_proof", _("Dokaz dostave")),
+        ("transport_photo", _("Transport")),
+        ("return_photo", _("Povrat")),
+        ("qc_photo", _("Kontrola kvalitete")),
+        ("receipt_scan", _("Sken racuna")),
+        ("document_scan", _("Sken dokumenta")),
+        ("complaint_photo", _("Reklamacija")),
+        ("inventory_photo", _("Inventura")),
+        ("meter_reading", _("Ocitanje brojila")),
+        ("animal_photo", _("Zivotinja")),
+        ("profile_photo", _("Profilna slika")),
     ]
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE, verbose_name=_("Tvrtka"))
@@ -322,6 +337,42 @@ class ArhivaEntry(models.Model):
     has_xml = models.BooleanField(default=False, verbose_name=_("Ima XML"))
     has_pdf = models.BooleanField(default=False, verbose_name=_("Ima PDF"))
     has_image = models.BooleanField(default=False, verbose_name=_("Ima sliku"))
+
+    # Photo registry — GPS / Lokacija
+    CONTENT_CATEGORIES = [
+        ("document", _("Dokument")),
+        ("photo", _("Fotografija")),
+        ("scan", _("Sken")),
+        ("signature", _("Potpis")),
+        ("certificate", _("Certifikat")),
+        ("receipt", _("Racun")),
+    ]
+    latitude = models.FloatField(null=True, blank=True, verbose_name=_("GPS lat"))
+    longitude = models.FloatField(null=True, blank=True, verbose_name=_("GPS lng"))
+    address = models.CharField(max_length=500, blank=True, default="", verbose_name=_("Adresa"))
+    source_app = models.CharField(
+        max_length=50, blank=True, default="", db_index=True, verbose_name=_("Izvorna aplikacija")
+    )
+    source_model = models.CharField(max_length=100, blank=True, default="", verbose_name=_("Izvorni model"))
+    source_object_id = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("ID izvornog objekta (FK)"))
+    tags = models.JSONField(default=list, blank=True, verbose_name=_("Oznake"))
+    thumbnail_path = models.CharField(max_length=500, blank=True, default="", verbose_name=_("Putanja thumbnila"))
+    captured_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Vrijeme snimanja"))
+    captured_by = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="captured_photos",
+        verbose_name=_("Snimio"),
+    )
+    content_category = models.CharField(
+        max_length=30,
+        choices=CONTENT_CATEGORIES,
+        default="document",
+        blank=True,
+        verbose_name=_("Kategorija sadrzaja"),
+    )
 
     # Audit
     archived_by = models.ForeignKey(
@@ -541,6 +592,12 @@ class ArhivaEntry(models.Model):
         "ai_proposal",
         "barcode",
         "partner_id",
+        "latitude",
+        "longitude",
+        "address",
+        "source_app",
+        "content_category",
+        "tags",
     ]
 
     @classmethod

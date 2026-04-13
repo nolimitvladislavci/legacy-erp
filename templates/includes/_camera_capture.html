@@ -1,0 +1,99 @@
+{% comment %}
+Reusable camera capture widget with GPS auto-tag.
+
+Usage:
+  {% include "includes/_camera_capture.html" with upload_url="/documents/gallery/upload/" source_app="stolarija" source_type="site_photo" %}
+
+Variables:
+  upload_url  — POST endpoint (default: gallery_upload)
+  source_app  — app label for archive
+  source_type — ArhivaEntry source_type
+  field_name  — form field name (default: "photo")
+  show_preview — "1" to show inline preview (default: "1")
+  tags        — comma-separated tags (default: "")
+  csrf_token  — required
+{% endcomment %}
+
+<div class="camera-widget" id="cameraWidget_{{ field_name|default:'photo' }}">
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+
+    <!-- Camera button -->
+    <label class="btn-gold" style="cursor:pointer;padding:8px 16px;font-size:.85rem;margin:0;display:inline-flex;align-items:center;gap:6px">
+      <i class="fas fa-camera"></i> Slikaj
+      <input type="file" name="{{ field_name|default:'photo' }}" accept="image/*" capture="environment"
+             class="d-none" onchange="cameraWidget.onFile(this, '{{ field_name|default:'photo' }}')">
+    </label>
+
+    <!-- GPS status -->
+    <span class="fx-text-muted" style="font-size:.72rem" id="cw_gps_{{ field_name|default:'photo' }}">
+      <i class="fas fa-spinner fa-spin"></i> GPS...
+    </span>
+
+    <!-- Preview -->
+    {% if show_preview != "0" %}
+    <img id="cw_preview_{{ field_name|default:'photo' }}" class="d-none"
+         style="height:50px;border-radius:6px;border:1px solid var(--border)">
+    {% endif %}
+
+    <!-- Upload status -->
+    <span id="cw_status_{{ field_name|default:'photo' }}" class="fx-text-muted" style="font-size:.75rem"></span>
+  </div>
+
+  <!-- Hidden GPS fields -->
+  <input type="hidden" name="latitude" id="cw_lat_{{ field_name|default:'photo' }}">
+  <input type="hidden" name="longitude" id="cw_lng_{{ field_name|default:'photo' }}">
+  <input type="hidden" name="address" id="cw_addr_{{ field_name|default:'photo' }}">
+</div>
+
+<script>
+var cameraWidget = cameraWidget || {
+  gpsReady: false,
+  lat: null,
+  lng: null,
+
+  init: function(fieldName) {
+    var self = this;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          self.lat = pos.coords.latitude;
+          self.lng = pos.coords.longitude;
+          self.gpsReady = true;
+          var el = document.getElementById('cw_gps_' + fieldName);
+          if (el) el.innerHTML = '<i class="fas fa-map-pin" style="color:#22c55e"></i> GPS OK';
+          document.getElementById('cw_lat_' + fieldName).value = self.lat;
+          document.getElementById('cw_lng_' + fieldName).value = self.lng;
+        },
+        function() {
+          var el = document.getElementById('cw_gps_' + fieldName);
+          if (el) el.innerHTML = '<i class="fas fa-times" style="color:#94a3b8"></i> Bez GPS-a';
+        },
+        {enableHighAccuracy: true, timeout: 8000, maximumAge: 60000}
+      );
+    }
+  },
+
+  onFile: function(input, fieldName) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+
+    // Preview
+    var preview = document.getElementById('cw_preview_' + fieldName);
+    if (preview) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.classList.remove('d-none');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Status
+    var status = document.getElementById('cw_status_' + fieldName);
+    if (status) status.textContent = file.name + ' (' + Math.round(file.size/1024) + 'KB)';
+  }
+};
+
+// Auto-init GPS
+cameraWidget.init('{{ field_name|default:"photo" }}');
+</script>

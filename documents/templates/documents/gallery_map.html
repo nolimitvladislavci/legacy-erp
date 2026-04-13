@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Mapa — Galerija{% endblock %}
+{% block page_title %}Mapa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+#map { height: calc(100vh - 220px); min-height: 400px; border-radius: 12px; border: 1px solid var(--border); }
+.gallery-tabs a {
+  padding: 8px 16px; text-decoration: none; color: var(--text-muted);
+  border-bottom: 2px solid transparent; font-size: .85rem;
+}
+.gallery-tabs a.active { color: var(--gold); border-bottom-color: var(--gold); }
+.stat-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  background: rgba(201,168,76,.08); font-size: .82rem; color: var(--gold); font-weight: 700;
+}
+.leaflet-popup-content img { max-width: 150px; border-radius: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <div class="gallery-tabs d-flex gap-1 fx-mb-3" style="border-bottom:1px solid var(--border)">
+    <a href="{% url 'documents:gallery_dashboard' %}"><i class="fas fa-th me-1"></i> Galerija</a>
+    <a href="{% url 'documents:gallery_map' %}" class="active"><i class="fas fa-map-marked-alt me-1"></i> Mapa</a>
+    <a href="{% url 'documents:gallery_timeline' %}"><i class="fas fa-stream me-1"></i> Timeline</a>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap fx-mb-3">
+    <span class="stat-pill"><i class="fas fa-images"></i> {{ total }} slika</span>
+    <span class="stat-pill"><i class="fas fa-map-pin"></i> {{ with_gps }} na mapi</span>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map('map').setView([45.1, 16.5], 7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap',
+  maxZoom: 19,
+}).addTo(map);
+
+var points = {{ map_points_json|safe }};
+var bounds = [];
+var goldIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:14px;height:14px;background:#c9a84c;border:2px solid #0a0f1e;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+points.forEach(function(p) {
+  if (!p.latitude || !p.longitude) return;
+  var thumb = p.thumbnail_path ? '<img src="/media/' + p.thumbnail_path + '"><br>' : '';
+  var popup = thumb +
+    '<strong>' + (p.source_app || '') + '</strong><br>' +
+    '<small>' + (p.address || '') + '</small><br>' +
+    '<small style="color:#888">' + (p.archived_at || '').substring(0,10) + '</small>';
+  L.marker([p.latitude, p.longitude], {icon: goldIcon})
+    .bindPopup(popup)
+    .addTo(map);
+  bounds.push([p.latitude, p.longitude]);
+});
+
+if (bounds.length > 0) {
+  map.fitBounds(bounds, {padding: [30, 30], maxZoom: 14});
+}
+</script>
+{% endblock %}

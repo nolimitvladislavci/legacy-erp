@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Galerija — LIMIT Connect{% endblock %}
+{% block page_title %}Galerija{% endblock %}
+
+{% block extra_css %}
+<style>
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.gallery-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform .15s;
+}
+.gallery-card:hover { transform: scale(1.03); }
+.gallery-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.gallery-card .badge-app {
+  position: absolute; top: 6px; left: 6px;
+  font-size: .65rem; padding: 2px 6px;
+  background: rgba(10,15,30,.7);
+  color: var(--gold);
+  border-radius: 4px;
+}
+.gallery-card .badge-tags {
+  position: absolute; bottom: 6px; left: 6px; right: 6px;
+  font-size: .6rem; color: #cbd5e1;
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.gallery-tabs a {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  font-size: .85rem;
+}
+.gallery-tabs a.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.stat-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  background: rgba(201,168,76,.08);
+  font-size: .82rem; color: var(--gold);
+  font-weight: 700;
+}
+/* Lightbox */
+.lightbox-overlay {
+  display: none; position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,.9); z-index: 9999;
+  align-items: center; justify-content: center;
+}
+.lightbox-overlay.active { display: flex; }
+.lightbox-overlay img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
+.lightbox-close {
+  position: absolute; top: 20px; right: 20px;
+  color: white; font-size: 2rem; cursor: pointer;
+  background: none; border: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-3">
+
+  <!-- Tab nav -->
+  <div class="gallery-tabs d-flex gap-1 fx-mb-3" style="border-bottom:1px solid var(--border)">
+    <a href="{% url 'documents:gallery_dashboard' %}" class="{% if tab == 'dashboard' %}active{% endif %}">
+      <i class="fas fa-th me-1"></i> Galerija
+    </a>
+    <a href="{% url 'documents:gallery_map' %}" class="{% if tab == 'map' %}active{% endif %}">
+      <i class="fas fa-map-marked-alt me-1"></i> Mapa
+    </a>
+    <a href="{% url 'documents:gallery_timeline' %}" class="{% if tab == 'timeline' %}active{% endif %}">
+      <i class="fas fa-stream me-1"></i> Timeline
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="d-flex gap-2 flex-wrap fx-mb-3">
+    <span class="stat-pill"><i class="fas fa-images"></i> {{ total }} slika</span>
+    <span class="stat-pill"><i class="fas fa-map-pin"></i> {{ with_gps }} s GPS-om</span>
+    {% for app_key, count in app_stats.items %}
+    <span class="stat-pill" style="font-size:.72rem">{{ app_key }}: {{ count }}</span>
+    {% endfor %}
+  </div>
+
+  <!-- Filters -->
+  <div class="fx-card fx-mb-3">
+    <div class="fx-card-body" style="padding:10px 14px">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="fx-label" style="font-size:.72rem">App</label>
+          <select name="app" class="fx-input" style="font-size:.82rem">
+            <option value="">Svi</option>
+            {% for val, label in active_apps %}
+            <option value="{{ val }}" {% if filters.app == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="fx-label" style="font-size:.72rem">Tip</label>
+          <select name="type" class="fx-input" style="font-size:.82rem">
+            <option value="">Svi</option>
+            {% for t in active_types %}
+            <option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="fx-label" style="font-size:.72rem">Adresa</label>
+          <input name="address" class="fx-input" style="font-size:.82rem" value="{{ filters.address }}" placeholder="Pretrazi...">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="fx-label" style="font-size:.72rem">Od</label>
+          <input type="date" name="from" class="fx-input" style="font-size:.82rem" value="{{ filters.from }}">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="fx-label" style="font-size:.72rem">Do</label>
+          <input type="date" name="to" class="fx-input" style="font-size:.82rem" value="{{ filters.to }}">
+        </div>
+        <div class="col-6 col-md-2">
+          <button type="submit" class="btn-gold w-100" style="font-size:.82rem;padding:8px">
+            <i class="fas fa-search me-1"></i> Filtiraj
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Gallery grid -->
+  {% if page %}
+  <div class="gallery-grid fx-mb-3">
+    {% for entry in page %}
+    <div class="gallery-card" onclick="openLightbox('{{ entry.file_path }}')">
+      {% if entry.thumbnail_path %}
+      <img src="/media/{{ entry.thumbnail_path }}" alt="" loading="lazy">
+      {% elif entry.file_path %}
+      <img src="/media/{{ entry.file_path }}" alt="" loading="lazy">
+      {% else %}
+      <div class="d-flex align-items-center justify-content-center h-100 fx-text-muted">
+        <i class="fas fa-image fa-2x"></i>
+      </div>
+      {% endif %}
+      <span class="badge-app">{{ entry.source_app }}</span>
+      {% if entry.tags %}
+      <span class="badge-tags">{{ entry.tags|join:", " }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page.has_other_pages %}
+  <div class="d-flex justify-content-center gap-2 fx-mb-3">
+    {% if page.has_previous %}
+    <a href="?page={{ page.previous_page_number }}&{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-secondary">&laquo;</a>
+    {% endif %}
+    <span class="btn btn-sm btn-outline-secondary disabled">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+    <a href="?page={{ page.next_page_number }}&{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-secondary">&raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="fx-card">
+    <div class="fx-card-body text-center fx-text-muted fx-py-5">
+      <i class="fas fa-camera fa-3x fx-text-gold opacity-25 d-block mb-3"></i>
+      Nema slika u galeriji. Slike se automatski dodaju kad ih uploadate u bilo koji modul.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Upload button (mobile) -->
+  <div class="text-center fx-mt-4">
+    <label class="btn-gold" style="cursor:pointer;padding:12px 24px;font-size:1rem">
+      <i class="fas fa-camera me-2"></i> Slikaj na terenu
+      <input type="file" accept="image/*" capture="environment" class="d-none"
+             onchange="uploadPhoto(this)">
+    </label>
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+function openLightbox(path) {
+  document.getElementById('lightboxImg').src = '/media/' + path;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+function uploadPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var form = new FormData();
+  form.append('photo', input.files[0]);
+  form.append('source_app', 'manual');
+  form.append('source_type', 'site_photo');
+
+  // GPS
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      form.append('latitude', pos.coords.latitude);
+      form.append('longitude', pos.coords.longitude);
+      _doUpload(form);
+    }, function() { _doUpload(form); }, {timeout: 5000});
+  } else {
+    _doUpload(form);
+  }
+}
+
+function _doUpload(form) {
+  fetch("{% url 'documents:gallery_upload' %}", {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    body: form
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) { location.reload(); }
+    else { alert(d.error || 'Upload failed'); }
+  });
+}
+</script>
+{% endblock %}

@@ -8,3 +8,6 @@ class DocumentsConfig(AppConfig):
 
     def ready(self):
         import documents.signals  # noqa: F401
+        from documents.signals_photo import connect_photo_signals
+
+        connect_photo_signals()
