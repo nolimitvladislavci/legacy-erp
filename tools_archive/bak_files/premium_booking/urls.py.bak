@@ -1,4 +1,0 @@
-from django.urls import path
-from . import views
-app_name='premium_booking'
-urlpatterns=[path('', views.index, name='index'), path('<int:resource_id>/', views.detail, name='detail'), path('api/submit/', views.api_submit, name='api_submit'),]
