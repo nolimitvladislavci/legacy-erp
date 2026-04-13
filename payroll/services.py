@@ -34,10 +34,12 @@ from django.db import transaction
 from django.utils import timezone
 from django.db.models import Sum
 
+from payroll.hr_calculator import OSOBNI_ODBITAK_BASE
+
 
 # ── HR Porezni Engine ─────────────────────────────────────────────────────────
 
-def hr_calculate_net(gross, personal_allowance=Decimal('560.00'),
+def hr_calculate_net(gross, personal_allowance=OSOBNI_ODBITAK_BASE,
                      city_surtax_rate=Decimal('0.12')):
     """
     Hrvatska bruto→neto kalkulacija (NN 114/23 stope za 2024+).
@@ -154,7 +156,7 @@ def calculate_payslip(payroll_run, user):
         base_rate = Decimal('20')
         ot_rate   = Decimal('30')
         emp_iban  = ''
-        personal_allowance = Decimal('560.00')
+        personal_allowance = OSOBNI_ODBITAK_BASE
 
     # Noćni bonus: +25% na baznu satnicu
     night_bonus_rate = base_rate * Decimal('0.25')
